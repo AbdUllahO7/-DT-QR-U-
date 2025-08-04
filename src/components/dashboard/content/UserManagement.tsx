@@ -1,0 +1,1769 @@
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  UserPlus, 
+  MoreVertical, 
+  Shield, 
+  User, 
+  Search,
+  Filter,
+  Grid,
+  List,
+  Users,
+  Crown,
+  Star,
+  UserCheck,
+  UserX,
+  Phone,
+  Mail,
+  Calendar,
+  Building,
+  MapPin,
+  ChevronDown
+} from 'lucide-react';
+import { useClickOutside } from '../../../hooks';
+import { useLanguage } from '../../../contexts/LanguageContext';
+import { userService } from '../../../services/userService';
+import { logger } from '../../../utils/logger';
+import type { UserData, CreateRoleDto, PermissionOption, Role, CreateUserDto } from '../../../types/api';
+
+type ViewMode = 'grid' | 'list';
+type FilterMode = 'all' | 'RestaurantOwner' | 'BranchManager' | 'Staff' | 'active' | 'inactive';
+type TabMode = 'users' | 'roles';
+
+// Mock permissions data - Gerçek ortamda API'den gelecek
+const mockPermissions: PermissionOption[] = [
+  { id: 1, name: 'user.read', description: 'Kullanıcıları Görüntüleme', category: 'User Management' },
+  { id: 2, name: 'user.write', description: 'Kullanıcı Ekleme/Düzenleme', category: 'User Management' },
+  { id: 3, name: 'user.delete', description: 'Kullanıcı Silme', category: 'User Management' },
+  { id: 4, name: 'restaurant.read', description: 'Restoran Bilgilerini Görüntüleme', category: 'Restaurant Management' },
+  { id: 5, name: 'restaurant.write', description: 'Restoran Bilgilerini Düzenleme', category: 'Restaurant Management' },
+  { id: 6, name: 'branch.read', description: 'Şube Bilgilerini Görüntüleme', category: 'Branch Management' },
+  { id: 7, name: 'branch.write', description: 'Şube Bilgilerini Düzenleme', category: 'Branch Management' },
+  { id: 8, name: 'order.read', description: 'Siparişleri Görüntüleme', category: 'Order Management' },
+  { id: 9, name: 'order.write', description: 'Sipariş İşlemleri', category: 'Order Management' },
+  { id: 10, name: 'product.read', description: 'Ürünleri Görüntüleme', category: 'Product Management' },
+  { id: 11, name: 'product.write', description: 'Ürün Ekleme/Düzenleme', category: 'Product Management' },
+  { id: 12, name: 'analytics.read', description: 'Raporları Görüntüleme', category: 'Analytics' }
+];
+
+const UserManagement: React.FC = () => {
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  const [activeTab, setActiveTab] = useState<TabMode>('users');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterMode, setFilterMode] = useState<FilterMode>('all');
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+  const [isCreatingRole, setIsCreatingRole] = useState(false);
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
+
+  // Menü dışında tıklamaları yakalamak için referans ve hook kullanımı
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  useClickOutside(dropdownRef, () => {
+    setActiveDropdown(null);
+  });
+
+  // Kullanıcıları ve rolleri API'den getir
+  useEffect(() => {
+    fetchUsers();
+    fetchRoles();
+  }, []);
+
+  // Kullanıcı filtreleme ve arama - useMemo ile optimize edildi
+  const filteredUsers = useMemo(() => {
+    // users'ın array olduğundan emin ol
+    if (!Array.isArray(users)) {
+      return [];
+    }
+    
+    let filtered = users;
+
+    // Kategori filtresi
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(user => {
+        if (selectedCategory === 'active' || selectedCategory === 'inactive') {
+          return selectedCategory === 'active' ? user.isActive : !user.isActive;
+        }
+        return user.roles.includes(selectedCategory);
+      });
+    }
+
+    // Arama filtresi
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(user =>
+        user.fullName.toLowerCase().includes(searchLower) ||
+        user.email.toLowerCase().includes(searchLower) ||
+        user.phoneNumber.includes(searchTerm) ||
+        user.restaurantName.toLowerCase().includes(searchLower)
+      );
+    }
+
+    return filtered;
+  }, [users, selectedCategory, searchTerm]);
+
+  // Rol filtreleme ve arama - useMemo ile optimize edildi
+  const filteredRoles = useMemo(() => {
+    // roles'ın array olduğundan emin ol
+    if (!Array.isArray(roles)) {
+      return [];
+    }
+    
+    let filtered = roles;
+
+    // Kategori filtresi
+    if (selectedCategory !== 'all') {
+      if (selectedCategory === 'active' || selectedCategory === 'inactive') {
+        filtered = filtered.filter(role => 
+          selectedCategory === 'active' ? role.isActive : !role.isActive
+        );
+      } else {
+        filtered = filtered.filter(role => 
+          role.category.toLowerCase().includes(selectedCategory.toLowerCase())
+        );
+      }
+    }
+
+    // Arama filtresi
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(role =>
+        role.name.toLowerCase().includes(searchLower) ||
+        (role.description?.toLowerCase().includes(searchLower)) ||
+        role.category.toLowerCase().includes(searchLower) ||
+        role.restaurantName.toLowerCase().includes(searchLower)
+      );
+    }
+
+    return filtered;
+  }, [roles, selectedCategory, searchTerm]);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await userService.getAllUsers();
+      
+      if (response.success && response.data) {
+        // API'den dönen verinin array olduğundan emin ol
+        const usersData = Array.isArray(response.data) ? response.data : [];
+        setUsers(usersData);
+        logger.info('Kullanıcılar başarıyla yüklendi', usersData, { prefix: 'UserManagement' });
+      } else {
+        throw new Error(t('userManagement.error.loadFailed'));
+      }
+    } catch (err: any) {
+      logger.error('Kullanıcılar yüklenirken hata', err, { prefix: 'UserManagement' });
+      setError(err.message || t('userManagement.error.loadFailed'));
+      // Hata durumunda boş array set et
+      setUsers([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const fetchRoles = useCallback(async () => {
+    try {
+      const response = await userService.getRoles();
+      
+      if (response.success && response.data) {
+        // API'den dönen verinin array olduğundan emin ol
+        const rolesData = Array.isArray(response.data) ? response.data : [];
+        setRoles(rolesData);
+        logger.info('Roller başarıyla yüklendi', rolesData, { prefix: 'UserManagement' });
+      } else {
+        throw new Error(t('userManagement.error.rolesLoadFailed'));
+      }
+    } catch (err: any) {
+      logger.error('Roller yüklenirken hata', err, { prefix: 'UserManagement' });
+      // Rol yüklenememesi users sayfasını etkilemez, sadece log atıyoruz
+      // Hata durumunda boş array set et
+      setRoles([]);
+    }
+  }, []);
+
+  const handleCreateRole = useCallback(async (roleData: CreateRoleDto) => {
+    try {
+      setIsCreatingRole(true);
+      
+      const response = await userService.createRole(roleData);
+      
+      if (response.success) {
+        logger.info('Rol başarıyla oluşturuldu', response.data, { prefix: 'UserManagement' });
+        setIsRoleModalOpen(false);
+        // Rolleri yeniden yükle
+        await fetchRoles();
+      } else {
+        throw new Error('Rol oluşturulamadı');
+      }
+    } catch (err: any) {
+      logger.error('Rol oluşturulurken hata', err, { prefix: 'UserManagement' });
+      // Hata mesajı gösterebiliriz
+    } finally {
+      setIsCreatingRole(false);
+    }
+  }, [fetchRoles]);
+
+  const handleCreateUser = useCallback(async (userData: CreateUserDto) => {
+    try {
+      setIsCreatingUser(true);
+      
+      const response = await userService.createUser(userData);
+      
+      if (response.success) {
+        logger.info('Kullanıcı başarıyla oluşturuldu', response.data, { prefix: 'UserManagement' });
+        setIsUserModalOpen(false);
+        // Kullanıcıları yeniden yükle
+        await fetchUsers();
+      } else {
+        throw new Error('Kullanıcı oluşturulamadı');
+      }
+    } catch (err: any) {
+      logger.error('Kullanıcı oluşturulurken hata', err, { prefix: 'UserManagement' });
+      // Hata mesajı gösterebiliriz
+    } finally {
+      setIsCreatingUser(false);
+    }
+  }, [fetchUsers]);
+
+  // Utility functions with useCallback for performance
+  const getStatusColor = useCallback((isActive: boolean) => {
+    return isActive
+      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+  }, []);
+
+  const getRoleColor = useCallback((role: string) => {
+    switch (role) {
+      case 'RestaurantOwner':
+        return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
+      case 'BranchManager':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+      case 'Staff':
+        return 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-400';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
+    }
+  }, []);
+
+  const getRoleIcon = useCallback((role: string) => {
+    switch (role) {
+      case 'RestaurantOwner':
+        return <Crown className="h-3 w-3" />;
+      case 'BranchManager':
+        return <Star className="h-3 w-3" />;
+      case 'Staff':
+        return <User className="h-3 w-3" />;
+      default:
+        return <User className="h-3 w-3" />;
+    }
+  }, []);
+
+  const formatDate = useCallback((dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('tr-TR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).format(date);
+  }, []);
+
+  // User statistics with memoization for performance
+  const userStats = useMemo(() => {
+    // users'ın array olduğundan emin ol
+    if (!Array.isArray(users)) {
+      return { total: 0, active: 0, owners: 0, managers: 0, staff: 0 };
+    }
+    
+    const total = users.length;
+    const active = users.filter(u => u.isActive).length;
+    const owners = users.filter(u => u.roles.includes('RestaurantOwner')).length;
+    const managers = users.filter(u => u.roles.includes('BranchManager')).length;
+    const staff = users.filter(u => u.roles.includes('Staff')).length;
+
+    return { total, active, owners, managers, staff };
+  }, [users]);
+
+  // Role statistics with memoization for performance
+  const roleStats = useMemo(() => {
+    // roles'ın array olduğundan emin ol
+    if (!Array.isArray(roles)) {
+      return { total: 0, active: 0, system: 0, custom: 0, totalUsers: 0 };
+    }
+    
+    const total = roles.length;
+    const active = roles.filter(r => r.isActive).length;
+    const system = roles.filter(r => r.isSystemRole).length;
+    const custom = roles.filter(r => !r.isSystemRole).length;
+    const totalUsers = roles.reduce((sum, role) => sum + role.userCount, 0);
+
+    return { total, active, system, custom, totalUsers };
+  }, [roles]);
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="text-gray-600 dark:text-gray-400">{t('dashboard.users.loading')}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-96">
+        <div className="text-center">
+          <div className="bg-red-100 dark:bg-red-900/30 rounded-lg p-6">
+            <h3 className="text-red-800 dark:text-red-400 font-semibold mb-2">Hata</h3>
+            <p className="text-red-600 dark:text-red-500 mb-4">{error}</p>
+            <button
+              onClick={fetchUsers}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Tekrar Dene
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+      {/* Header with Stats */}
+      <div className={`flex flex-col lg:flex-row lg:items-center ${isRTL ? 'lg:justify-between' : 'lg:justify-between'} gap-4`}>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dashboard.users.title')}</h2>
+          <div className={`flex items-center ${isRTL ? 'gap-4' : 'gap-4'} mt-2 text-sm text-gray-500 dark:text-gray-400`}>
+            <span className={`flex items-center ${isRTL ? 'gap-1' : 'gap-1'}`}>
+              <Users className="h-4 w-4" />
+              {t('dashboard.users.stats.total')} {activeTab === 'users' ? userStats.total : roleStats.total} {activeTab === 'users' ? t('dashboard.users.stats.users') : t('dashboard.users.stats.roles')}
+            </span>
+            <span className={`flex items-center ${isRTL ? 'gap-1' : 'gap-1'}`}>
+              <UserCheck className="h-4 w-4" />
+              {activeTab === 'users' ? userStats.active : roleStats.active} {t('dashboard.users.stats.active')}
+            </span>
+          </div>
+        </div>
+        
+        {/* Stats Cards */}
+        {activeTab === 'users' ? (
+          <div className={`flex ${isRTL ? 'gap-3' : 'gap-3'}`}>
+            <div className="bg-purple-100 dark:bg-purple-900/30 rounded-lg p-3 min-w-0">
+              <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
+                <Crown className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                <div>
+                  <p className="text-xs text-purple-600 dark:text-purple-400">Sahip</p>
+                  <p className="font-semibold text-purple-800 dark:text-purple-300">{userStats.owners}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-3 min-w-0">
+              <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
+                <Star className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <div>
+                  <p className="text-xs text-blue-600 dark:text-blue-400">Müdür</p>
+                  <p className="font-semibold text-blue-800 dark:text-blue-300">{userStats.managers}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-indigo-100 dark:bg-indigo-900/30 rounded-lg p-3 min-w-0">
+              <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
+                <User className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                <div>
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400">Personel</p>
+                  <p className="font-semibold text-indigo-800 dark:text-indigo-300">{userStats.staff}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className={`flex ${isRTL ? 'gap-3' : 'gap-3'}`}>
+            <div className="bg-emerald-100 dark:bg-emerald-900/30 rounded-lg p-3 min-w-0">
+              <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
+                <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <div>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">{t('dashboard.users.stats.system')}</p>
+                  <p className="font-semibold text-emerald-800 dark:text-emerald-300">{roleStats.system}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-3 min-w-0">
+              <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
+                <Star className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <div>
+                  <p className="text-xs text-blue-600 dark:text-blue-400">{t('dashboard.users.stats.custom')}</p>
+                  <p className="font-semibold text-blue-800 dark:text-blue-300">{roleStats.custom}</p>
+                </div>
+              </div>
+            </div>
+            <div className="bg-indigo-100 dark:bg-indigo-900/30 rounded-lg p-3 min-w-0">
+              <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
+                <Users className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+                <div>
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400">{t('dashboard.users.stats.totalUsers')}</p>
+                  <p className="font-semibold text-indigo-800 dark:text-indigo-300">{roleStats.totalUsers}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Tabs */}
+      <div className="border-b border-gray-200 dark:border-gray-700">
+        <nav className={`-mb-px flex ${isRTL ? 'space-x-reverse space-x-8' : 'space-x-8'}`}>
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+              activeTab === 'users'
+                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
+              <Users className="h-4 w-4" />
+              {t('dashboard.users.tabs.users')}
+              <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                {userStats.total}
+              </span>
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('roles')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+              activeTab === 'roles'
+                ? 'border-purple-500 text-purple-600 dark:text-purple-400'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+            }`}
+          >
+            <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
+              <Shield className="h-4 w-4" />
+              {t('dashboard.users.tabs.roles')}
+              <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs">
+                {roleStats.total}
+              </span>
+            </div>
+          </button>
+        </nav>
+      </div>
+
+      {/* Controls */}
+      <div className={`flex flex-col sm:flex-row gap-4 items-center ${isRTL ? 'justify-between' : 'justify-between'}`}>
+        <div className={`flex flex-1 ${isRTL ? 'gap-4' : 'gap-4'} w-full sm:w-auto`}>
+          {/* Search */}
+          <div className="relative flex-1 max-w-md">
+            <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
+            <input
+              type="text"
+              placeholder="Kullanıcı, email veya telefon ara..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+            />
+          </div>
+
+          {/* Category Filter */}
+          <div className="relative">
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className={`appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 ${isRTL ? 'pl-8 pr-4' : 'pr-8'} text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+            >
+              <option value="all">Tüm Kategoriler</option>
+              <option value="RestaurantOwner">Restoran Sahibi</option>
+              <option value="BranchManager">Şube Müdürü</option>
+              <option value="Staff">Personel</option>
+              <option value="active">Aktif Kullanıcılar</option>
+              <option value="inactive">Pasif Kullanıcılar</option>
+            </select>
+            <ChevronDown className={`absolute ${isRTL ? 'left-2' : 'right-2'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none`} />
+          </div>
+        </div>
+
+        <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
+          {/* Add User Button - only show on users tab */}
+          {activeTab === 'users' && (
+            <button
+              onClick={() => setIsUserModalOpen(true)}
+              className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+            >
+              <UserPlus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+              Kullanıcı Ekle
+            </button>
+          )}
+
+          {/* Add Role Button - only show on roles tab */}
+          {activeTab === 'roles' && (
+            <button
+              onClick={() => setIsRoleModalOpen(true)}
+              className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+            >
+              <Shield className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+              Rol Ekle
+            </button>
+          )}
+
+          {/* View Mode Toggle */}
+          <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'grid'
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+              }`}
+            >
+              <Grid className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded-md transition-colors ${
+                viewMode === 'list'
+                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+              }`}
+            >
+              <List className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'users' ? (
+        <>
+          {/* No Results - Users */}
+          {filteredUsers.length === 0 && !isLoading && (
+            <div className="text-center py-12">
+              <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                Kullanıcı Bulunamadı
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400">
+                {searchTerm || selectedCategory !== 'all' 
+                  ? 'Arama kriterlerinize uygun kullanıcı bulunamadı.'
+                  : 'Henüz kullanıcı eklenmemiş.'}
+              </p>
+            </div>
+          )}
+
+          {/* Grid View - Users */}
+          {viewMode === 'grid' && filteredUsers.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <AnimatePresence>
+            {filteredUsers.map((user) => (
+              <motion.div
+                key={user.id}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.2 }}
+                className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
+              >
+                {/* User Avatar & Name */}
+                <div className="flex items-center mb-4">
+                  <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg">
+                    {user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                  </div>
+                  <div className="ml-3 flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                      {user.fullName}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                      {user.email}
+                    </p>
+                  </div>
+                  <div className="relative" ref={dropdownRef}>
+                    <button
+                      onClick={() => setActiveDropdown(activeDropdown === user.id ? null : user.id)}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      <MoreVertical className="h-5 w-5" />
+                    </button>
+                    {activeDropdown === user.id && (
+                      <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10">
+                        <div className="py-1">
+                          <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                            Detayları Görüntüle
+                          </button>
+                          <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                            Düzenle
+                          </button>
+                          <button className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">
+                            {user.isActive ? 'Devre Dışı Bırak' : 'Aktifleştir'}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* User Info */}
+                <div className="space-y-3">
+                  <div className="flex items-center text-sm">
+                    <Phone className="h-4 w-4 text-gray-400 mr-2" />
+                    <span className="text-gray-600 dark:text-gray-300">{user.phoneNumber}</span>
+                  </div>
+                  <div className="flex items-center text-sm">
+                    <Building className="h-4 w-4 text-gray-400 mr-2" />
+                    <span className="text-gray-600 dark:text-gray-300 truncate">{user.restaurantName}</span>
+                  </div>
+                  {user.branchName && (
+                    <div className="flex items-center text-sm">
+                      <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                      <span className="text-gray-600 dark:text-gray-300 truncate">{user.branchName}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center text-sm">
+                    <Calendar className="h-4 w-4 text-gray-400 mr-2" />
+                    <span className="text-gray-600 dark:text-gray-300">{formatDate(user.createdDate)}</span>
+                  </div>
+                </div>
+
+                {/* Roles & Status */}
+                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {user.roles.map((role, index) => (
+                      <span
+                        key={index}
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(role)}`}
+                      >
+                        {getRoleIcon(role)}
+                        {role === 'RestaurantOwner' ? 'Sahip' : 
+                         role === 'BranchManager' ? 'Müdür' : 
+                         role === 'Staff' ? 'Personel' : role}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.isActive)}`}>
+                      {user.isActive ? <UserCheck className="h-3 w-3" /> : <UserX className="h-3 w-3" />}
+                      {user.isActive ? 'Aktif' : 'Pasif'}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* List View */}
+      {viewMode === 'list' && filteredUsers.length > 0 && (
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-700/50">
+                <tr>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Kullanıcı
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    İletişim
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Roller
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Restoran/Şube
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Durum
+                  </th>
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Kayıt Tarihi
+                  </th>
+                  <th scope="col" className="relative px-6 py-3">
+                    <span className="sr-only">İşlemler</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <AnimatePresence>
+                  {filteredUsers.map((user) => (
+                    <motion.tr
+                      key={user.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
+                            {user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                              {user.fullName}
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {user.userName}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-white">{user.email}</div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400">{user.phoneNumber}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex flex-wrap gap-1">
+                          {user.roles.map((role, index) => (
+                            <span
+                              key={index}
+                              className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(role)}`}
+                            >
+                              {getRoleIcon(role)}
+                              {role === 'RestaurantOwner' ? 'Sahip' : 
+                               role === 'BranchManager' ? 'Müdür' : 
+                               role === 'Staff' ? 'Personel' : role}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-white">{user.restaurantName}</div>
+                        {user.branchName && (
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{user.branchName}</div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.isActive)}`}>
+                          {user.isActive ? <UserCheck className="h-3 w-3" /> : <UserX className="h-3 w-3" />}
+                          {user.isActive ? 'Aktif' : 'Pasif'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {formatDate(user.createdDate)}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="relative" ref={dropdownRef}>
+                          <button
+                            onClick={() => setActiveDropdown(activeDropdown === user.id ? null : user.id)}
+                            className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                          >
+                            <MoreVertical className="h-5 w-5" />
+                          </button>
+                          {activeDropdown === user.id && (
+                            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10">
+                              <div className="py-1">
+                                <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                  Detayları Görüntüle
+                                </button>
+                                <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                  Düzenle
+                                </button>
+                                <button className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                  {user.isActive ? 'Devre Dışı Bırak' : 'Aktifleştir'}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </AnimatePresence>
+              </tbody>
+            </table>
+                      </div>
+          </div>
+        )}
+        </>
+      ) : (
+        /* Roles Tab Content */
+        <>
+          {/* No Results - Roles */}
+          {filteredRoles.length === 0 && !isLoading && (
+            <div className="text-center py-12">
+              <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                Rol Bulunamadı
+              </h3>
+              <p className="text-gray-500 dark:text-gray-400">
+                {searchTerm || selectedCategory !== 'all' 
+                  ? 'Arama kriterlerinize uygun rol bulunamadı.'
+                  : 'Henüz rol eklenmemiş.'}
+              </p>
+            </div>
+          )}
+
+          {/* Roles Grid View */}
+          {viewMode === 'grid' && filteredRoles.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <AnimatePresence>
+                {filteredRoles.map((role) => (
+                  <motion.div
+                    key={role.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.2 }}
+                    className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
+                  >
+                    {/* Role Header */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                          <Shield className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
+                            {role.name}
+                          </h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
+                            {role.category}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="relative" ref={dropdownRef}>
+                        <button
+                          onClick={() => setActiveDropdown(activeDropdown === role.id ? null : role.id)}
+                          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        >
+                          <MoreVertical className="h-5 w-5" />
+                        </button>
+                        {activeDropdown === role.id && (
+                          <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10">
+                            <div className="py-1">
+                              <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                Detayları Görüntüle
+                              </button>
+                              <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                Düzenle
+                              </button>
+                              <button className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                {role.isActive ? 'Devre Dışı Bırak' : 'Aktifleştir'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Role Description */}
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
+                      {role.description || 'Açıklama bulunmuyor'}
+                    </p>
+
+                    {/* Role Stats */}
+                    <div className="space-y-3 mb-4">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500 dark:text-gray-400">Kullanıcı Sayısı</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{role.userCount}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500 dark:text-gray-400">İzin Sayısı</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{role.permissionCount}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="text-gray-500 dark:text-gray-400">Restoran</span>
+                        <span className="font-medium text-gray-900 dark:text-white truncate max-w-32" title={role.restaurantName}>
+                          {role.restaurantName}
+                        </span>
+                      </div>
+                      {role.branchName && (
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-500 dark:text-gray-400">Şube</span>
+                          <span className="font-medium text-gray-900 dark:text-white truncate max-w-32" title={role.branchName}>
+                            {role.branchName}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Role Badges */}
+                    <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                        role.isActive 
+                          ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                          : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                      }`}>
+                        {role.isActive ? <UserCheck className="h-3 w-3" /> : <UserX className="h-3 w-3" />}
+                        {role.isActive ? 'Aktif' : 'Pasif'}
+                      </span>
+                      {role.isSystemRole && (
+                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                          <Star className="h-3 w-3" />
+                          Sistem Rolü
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* Roles List View */}
+          {viewMode === 'list' && filteredRoles.length > 0 && (
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-gray-50 dark:bg-gray-700/50">
+                    <tr>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Rol
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Açıklama
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        İstatistikler
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Konum
+                      </th>
+                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        Durum
+                      </th>
+                      <th scope="col" className="relative px-6 py-3">
+                        <span className="sr-only">İşlemler</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                    <AnimatePresence>
+                      {filteredRoles.map((role) => (
+                        <motion.tr
+                          key={role.id}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                                <Shield className="h-5 w-5 text-white" />
+                              </div>
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                  {role.name}
+                                </div>
+                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                  {role.category}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900 dark:text-white max-w-xs truncate">
+                              {role.description || 'Açıklama bulunmuyor'}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 dark:text-white">
+                              {role.userCount} kullanıcı
+                            </div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                              {role.permissionCount} izin
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-900 dark:text-white">
+                              {role.restaurantName}
+                            </div>
+                            {role.branchName && (
+                              <div className="text-sm text-gray-500 dark:text-gray-400">
+                                {role.branchName}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex flex-wrap gap-1">
+                              <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                                role.isActive 
+                                  ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
+                                  : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
+                              }`}>
+                                {role.isActive ? <UserCheck className="h-3 w-3" /> : <UserX className="h-3 w-3" />}
+                                {role.isActive ? 'Aktif' : 'Pasif'}
+                              </span>
+                              {role.isSystemRole && (
+                                <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                                  <Star className="h-3 w-3" />
+                                  Sistem
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div className="relative" ref={dropdownRef}>
+                              <button
+                                onClick={() => setActiveDropdown(activeDropdown === role.id ? null : role.id)}
+                                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                              >
+                                <MoreVertical className="h-5 w-5" />
+                              </button>
+                              {activeDropdown === role.id && (
+                                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10">
+                                  <div className="py-1">
+                                    <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                      Detayları Görüntüle
+                                    </button>
+                                    <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                      Düzenle
+                                    </button>
+                                    <button className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                      {role.isActive ? 'Devre Dışı Bırak' : 'Aktifleştir'}
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </motion.tr>
+                      ))}
+                    </AnimatePresence>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+        {/* Create Role Modal */}
+        {isRoleModalOpen && (
+          <CreateRoleModal
+            isOpen={isRoleModalOpen}
+            onClose={() => setIsRoleModalOpen(false)}
+            onSubmit={handleCreateRole}
+            permissions={mockPermissions}
+            isLoading={isCreatingRole}
+          />
+        )}
+
+        {/* Create User Modal */}
+        {isUserModalOpen && (
+          <CreateUserModal
+            isOpen={isUserModalOpen}
+            onClose={() => setIsUserModalOpen(false)}
+            onSubmit={handleCreateUser}
+            roles={roles}
+            isLoading={isCreatingUser}
+          />
+        )}
+      </div>
+    );
+  };
+
+  // Create Role Modal Component
+  interface CreateRoleModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSubmit: (roleData: CreateRoleDto) => void;
+    permissions: PermissionOption[];
+    isLoading: boolean;
+  }
+
+  const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
+    isOpen,
+    onClose,
+    onSubmit,
+    permissions,
+    isLoading
+  }) => {
+    const [formData, setFormData] = useState<CreateRoleDto>({
+      name: '',
+      description: '',
+      restaurantId: null,
+      branchId: null,
+      category: '',
+      isActive: true,
+      permissionIds: []
+    });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
+
+    const validateForm = (): boolean => {
+      const newErrors: Record<string, string> = {};
+
+      if (!formData.name || formData.name.length < 3) {
+        newErrors.name = 'Rol adı en az 3 karakter olmalıdır';
+      } else if (formData.name.length > 50) {
+        newErrors.name = 'Rol adı en fazla 50 karakter olabilir';
+      }
+
+      if (formData.description && formData.description.length > 200) {
+        newErrors.description = 'Açıklama en fazla 200 karakter olabilir';
+      }
+
+      if (formData.category && formData.category.length > 50) {
+        newErrors.category = 'Kategori en fazla 50 karakter olabilir';
+      }
+
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      
+      if (!validateForm()) return;
+
+      const submitData: CreateRoleDto = {
+        ...formData,
+        permissionIds: selectedPermissions.length > 0 ? selectedPermissions : null,
+        description: formData.description || null,
+        restaurantId: formData.restaurantId || null,
+        branchId: formData.branchId || null,
+        category: formData.category || null
+      };
+
+      onSubmit(submitData);
+    };
+
+    const handlePermissionToggle = (permissionId: number) => {
+      setSelectedPermissions(prev => 
+        prev.includes(permissionId)
+          ? prev.filter(id => id !== permissionId)
+          : [...prev, permissionId]
+      );
+    };
+
+    const groupedPermissions = permissions.reduce((acc, permission) => {
+      if (!acc[permission.category]) {
+        acc[permission.category] = [];
+      }
+      acc[permission.category].push(permission);
+      return acc;
+    }, {} as Record<string, PermissionOption[]>);
+
+    if (!isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="flex min-h-screen items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose}></div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="relative w-full max-w-2xl rounded-xl bg-white dark:bg-gray-800 shadow-2xl"
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Shield className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                Yeni Rol Oluştur
+              </h3>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {/* Basic Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Rol Adı <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="name"
+                    required
+                    maxLength={50}
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                      errors.name 
+                        ? 'border-red-500 dark:border-red-400' 
+                        : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                    placeholder="Örn: Şube Müdürü"
+                  />
+                  {errors.name && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name}</p>}
+                </div>
+
+                <div>
+                  <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Kategori
+                  </label>
+                                      <input
+                      type="text"
+                      id="category"
+                      maxLength={50}
+                      value={formData.category || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                      className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                        errors.category 
+                          ? 'border-red-500 dark:border-red-400' 
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                      placeholder="Örn: Yönetim"
+                    />
+                  {errors.category && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.category}</p>}
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Açıklama
+                </label>
+                                  <textarea
+                    id="description"
+                    rows={3}
+                    maxLength={200}
+                    value={formData.description || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                    className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                      errors.description 
+                        ? 'border-red-500 dark:border-red-400' 
+                        : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                    placeholder="Rolün görev ve sorumluluklarını açıklayın..."
+                  />
+                  <div className="flex justify-between items-center mt-1">
+                    {errors.description && <p className="text-sm text-red-600 dark:text-red-400">{errors.description}</p>}
+                    <p className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
+                      {(formData.description || '').length}/200
+                    </p>
+                  </div>
+              </div>
+
+              {/* Numeric IDs */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="restaurantId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Restoran ID
+                  </label>
+                  <input
+                    type="number"
+                    id="restaurantId"
+                    min="0"
+                    value={formData.restaurantId || ''}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      restaurantId: e.target.value ? parseInt(e.target.value) : null 
+                    }))}
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Varsayılan: Mevcut restoran"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="branchId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Şube ID
+                  </label>
+                  <input
+                    type="number"
+                    id="branchId"
+                    min="0"
+                    value={formData.branchId || ''}
+                    onChange={(e) => setFormData(prev => ({ 
+                      ...prev, 
+                      branchId: e.target.value ? parseInt(e.target.value) : null 
+                    }))}
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="Boş: Tüm şubeler"
+                  />
+                </div>
+              </div>
+
+              {/* Status */}
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  checked={formData.isActive}
+                  onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                  className="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                />
+                <label htmlFor="isActive" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  Rol aktif olsun
+                </label>
+              </div>
+
+              {/* Permissions */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  İzinler ({selectedPermissions.length} seçildi)
+                </label>
+                <div className="max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50">
+                  {Object.entries(groupedPermissions).map(([category, categoryPermissions]) => (
+                    <div key={category} className="mb-4 last:mb-0">
+                      <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2 text-sm">
+                        {category}
+                      </h4>
+                      <div className="space-y-2">
+                        {categoryPermissions.map((permission) => (
+                          <label
+                            key={permission.id}
+                            className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedPermissions.includes(permission.id)}
+                              onChange={() => handlePermissionToggle(permission.id)}
+                              className="mt-0.5 h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm text-gray-900 dark:text-white">
+                                {permission.name}
+                              </div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {permission.description}
+                              </div>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isLoading}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none disabled:opacity-50"
+                >
+                  İptal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="px-6 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isLoading && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
+                  {isLoading ? 'Oluşturuluyor...' : 'Rol Oluştur'}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      </div>
+    );
+  };
+
+  // Create User Modal Component
+  interface CreateUserModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSubmit: (userData: CreateUserDto) => void;
+    roles: Role[];
+    isLoading: boolean;
+  }
+
+  const CreateUserModal: React.FC<CreateUserModalProps> = ({
+    isOpen,
+    onClose,
+    onSubmit,
+    roles,
+    isLoading
+  }) => {
+    const [formData, setFormData] = useState<CreateUserDto>({
+      name: '',
+      surname: '',
+      email: '',
+      userName: '',
+      phoneNumber: '',
+      password: '',
+      restaurantId: null,
+      branchId: null,
+      roleIds: [],
+      profileImage: '',
+      isActive: true
+    });
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+    const [showPassword, setShowPassword] = useState(false);
+
+    const validateForm = (): boolean => {
+      const newErrors: Record<string, string> = {};
+
+      // Name validation
+      if (!formData.name || formData.name.length === 0) {
+        newErrors.name = 'Ad alanı zorunludur';
+      } else if (formData.name.length > 50) {
+        newErrors.name = 'Ad en fazla 50 karakter olabilir';
+      }
+
+      // Surname validation
+      if (!formData.surname || formData.surname.length === 0) {
+        newErrors.surname = 'Soyad alanı zorunludur';
+      } else if (formData.surname.length > 50) {
+        newErrors.surname = 'Soyad en fazla 50 karakter olabilir';
+      }
+
+      // Email validation
+      if (!formData.email || formData.email.length === 0) {
+        newErrors.email = 'Email alanı zorunludur';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        newErrors.email = 'Geçerli bir email adresi giriniz';
+      }
+
+      // Username validation
+      if (!formData.userName || formData.userName.length < 3) {
+        newErrors.userName = 'Kullanıcı adı en az 3 karakter olmalıdır';
+      } else if (formData.userName.length > 50) {
+        newErrors.userName = 'Kullanıcı adı en fazla 50 karakter olabilir';
+      }
+
+      // Password validation
+      if (!formData.password || formData.password.length < 6) {
+        newErrors.password = 'Şifre en az 6 karakter olmalıdır';
+      } else if (formData.password.length > 100) {
+        newErrors.password = 'Şifre en fazla 100 karakter olabilir';
+      }
+
+      setErrors(newErrors);
+      return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      
+      if (!validateForm()) return;
+
+      const submitData: CreateUserDto = {
+        ...formData,
+        phoneNumber: formData.phoneNumber || null,
+        restaurantId: formData.restaurantId || null,
+        branchId: formData.branchId || null,
+        roleIds: selectedRoles.length > 0 ? selectedRoles : null,
+        profileImage: formData.profileImage || null
+      };
+
+      onSubmit(submitData);
+    };
+
+    const handleRoleToggle = (roleId: string) => {
+      setSelectedRoles(prev => 
+        prev.includes(roleId)
+          ? prev.filter(id => id !== roleId)
+          : [...prev, roleId]
+      );
+    };
+
+    if (!isOpen) return null;
+
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="flex min-h-screen items-center justify-center p-4">
+          <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={onClose}></div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="relative w-full max-w-3xl rounded-xl bg-white dark:bg-gray-800 shadow-2xl"
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <UserPlus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                Yeni Kullanıcı Oluştur
+              </h3>
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {/* Personal Info */}
+              <div>
+                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Kişisel Bilgiler</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Ad <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      required
+                      maxLength={50}
+                      value={formData.name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.name 
+                          ? 'border-red-500 dark:border-red-400' 
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                      placeholder="Örn: Ahmet"
+                    />
+                    {errors.name && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name}</p>}
+                  </div>
+
+                  <div>
+                    <label htmlFor="surname" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Soyad <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="surname"
+                      required
+                      maxLength={50}
+                      value={formData.surname}
+                      onChange={(e) => setFormData(prev => ({ ...prev, surname: e.target.value }))}
+                      className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.surname 
+                          ? 'border-red-500 dark:border-red-400' 
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                      placeholder="Örn: Yılmaz"
+                    />
+                    {errors.surname && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.surname}</p>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Account Info */}
+              <div>
+                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Hesap Bilgileri</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                      className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.email 
+                          ? 'border-red-500 dark:border-red-400' 
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                      placeholder="ahmet@example.com"
+                    />
+                    {errors.email && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>}
+                  </div>
+
+                  <div>
+                    <label htmlFor="userName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Kullanıcı Adı <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      id="userName"
+                      required
+                      maxLength={50}
+                      minLength={3}
+                      value={formData.userName}
+                      onChange={(e) => setFormData(prev => ({ ...prev, userName: e.target.value }))}
+                      className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.userName 
+                          ? 'border-red-500 dark:border-red-400' 
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                      placeholder="ahmet.yilmaz"
+                    />
+                    {errors.userName && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.userName}</p>}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Telefon
+                    </label>
+                    <input
+                      type="tel"
+                      id="phoneNumber"
+                      value={formData.phoneNumber || ''}
+                      onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="+90 555 123 4567"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Şifre <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        id="password"
+                        required
+                        maxLength={100}
+                        minLength={6}
+                        value={formData.password}
+                        onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
+                        className={`w-full rounded-lg border px-4 py-2 pr-10 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          errors.password 
+                            ? 'border-red-500 dark:border-red-400' 
+                            : 'border-gray-300 dark:border-gray-600'
+                        }`}
+                        placeholder="En az 6 karakter"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      >
+                        {showPassword ? '👁️' : '🔒'}
+                      </button>
+                    </div>
+                    {errors.password && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Location & Profile */}
+              <div>
+                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Konum ve Profil</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="restaurantId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Restoran ID
+                    </label>
+                    <input
+                      type="number"
+                      id="restaurantId"
+                      min="0"
+                      value={formData.restaurantId || ''}
+                      onChange={(e) => setFormData(prev => ({ 
+                        ...prev, 
+                        restaurantId: e.target.value ? parseInt(e.target.value) : null 
+                      }))}
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Varsayılan: Mevcut restoran"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="branchId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      Şube ID
+                    </label>
+                    <input
+                      type="number"
+                      id="branchId"
+                      min="0"
+                      value={formData.branchId || ''}
+                      onChange={(e) => setFormData(prev => ({ 
+                        ...prev, 
+                        branchId: e.target.value ? parseInt(e.target.value) : null 
+                      }))}
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Boş: Tüm şubeler"
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-4">
+                  <label htmlFor="profileImage" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Profil Resmi URL
+                  </label>
+                  <input
+                    type="url"
+                    id="profileImage"
+                    value={formData.profileImage || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, profileImage: e.target.value }))}
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="https://example.com/avatar.jpg"
+                  />
+                </div>
+              </div>
+
+              {/* Status */}
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isActive"
+                  checked={formData.isActive}
+                  onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
+                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label htmlFor="isActive" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                  Kullanıcı aktif olsun
+                </label>
+              </div>
+
+              {/* Roles */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Roller ({selectedRoles.length} seçildi)
+                </label>
+                <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50">
+                  {roles.length === 0 ? (
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">Henüz rol tanımlanmamış</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {roles.filter(role => role.isActive).map((role) => (
+                        <label
+                          key={role.id}
+                          className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={selectedRoles.includes(role.id)}
+                            onChange={() => handleRoleToggle(role.id)}
+                            className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm text-gray-900 dark:text-white">
+                              {role.name}
+                            </div>
+                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                              {role.description} • {role.userCount} kullanıcı
+                            </div>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  disabled={isLoading}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none disabled:opacity-50"
+                >
+                  İptal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isLoading && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
+                  {isLoading ? 'Oluşturuluyor...' : 'Kullanıcı Oluştur'}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      </div>
+    );
+  };
+  
+  export default UserManagement; 

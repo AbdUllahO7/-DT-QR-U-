@@ -1,0 +1,29 @@
+import { useEffect, useState } from 'react';
+
+export const useScrollSpy = (sectionIds: string[], offset: number = 100): string => {
+  const [activeSection, setActiveSection] = useState<string>('');
+
+  useEffect(() => {
+    const handleScroll = (): void => {
+      const scrollPosition = window.scrollY + offset;
+
+      for (const sectionId of sectionIds) {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          const { offsetTop, offsetHeight } = element;
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            setActiveSection(sectionId);
+            break;
+          }
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Call once to set initial state
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [sectionIds, offset]);
+
+  return activeSection;
+}; 
