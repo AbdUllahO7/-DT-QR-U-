@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.DEV ? 'https://localhost:7001/api' : 'https://localhost:7001/api',
+  BASE_URL: import.meta.env.DEV ? 'http://localhost:7001/api' : 'http://localhost:7001/api',
   ENDPOINTS: {
     AUTH: {
       REGISTER: '/Auth/Register',

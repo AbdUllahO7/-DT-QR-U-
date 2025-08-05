@@ -25,7 +25,6 @@ const BranchManagement: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [branchToDelete, setBranchToDelete] = useState<BranchInfo | null>(null);
-  const [branchIsOpenFilter, setBranchIsOpenFilter] = useState<boolean | undefined>(undefined);
 
   const defaultWorkingHours: CreateBranchWorkingHourCoreDto[] = [
     { dayOfWeek: 1, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Pazartesi
@@ -95,11 +94,6 @@ const BranchManagement: React.FC = () => {
   }, []); // branchIsOpenFilter kaldırıldı
 
   const fetchBranches = async () => {
-    // Eğer zaten loading ise, yeni istek yapma
-    if (isLoading) {
-      return;
-    }
-
     setIsLoading(true);
     setError('');
     
@@ -333,7 +327,7 @@ const BranchManagement: React.FC = () => {
   };
 
   return (
-    <div className={`min-h-screen bg-gray-50 ${isRTL ? 'rtl' : 'ltr'}`}>
+    <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -343,18 +337,6 @@ const BranchManagement: React.FC = () => {
             {t('branchManagement.description')}
           </p>
         </div>
-
-        {/* Debug bilgileri - sadece development'ta göster */}
-        {import.meta.env.DEV && (
-          <div className="mb-4 p-4 bg-yellow-100 border border-yellow-400 rounded">
-            <h3 className="font-bold text-yellow-800">Debug Bilgileri:</h3>
-            <p>Loading: {isLoading.toString()}</p>
-            <p>Error: {error || 'Yok'}</p>
-            <p>Branches Count: {branches.length}</p>
-            <p>Token: {localStorage.getItem('token') ? 'Var' : 'Yok'}</p>
-            <p>Restaurant ID: {getRestaurantIdFromToken() || 'Bulunamadı'}</p>
-          </div>
-        )}
 
         {/* Error mesajı */}
         {error && (

@@ -147,14 +147,13 @@ const Login: React.FC = () => {
       }
     } catch (error: any) {
       logError(error, 'Login error');
-      
+
       // Kullanıcı dostu hata mesajını al
       const userFriendlyMessage = getUserFriendlyErrorMessage(error);
       setErrors({
         general: userFriendlyMessage
       });
       setIsSubmitting(false);
-      return;
       
       // Başarılı yanıt ama hata mesajı varsa
       if (error.message === 'Sunucudan geçersiz yanıt alındı' && error.response?.status === 200) {

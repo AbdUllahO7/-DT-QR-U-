@@ -13,7 +13,7 @@ import UserManagement from '../components/dashboard/content/UserManagement';
 import Profile from '../components/dashboard/content/Profile';
 import Settings from '../components/dashboard/content/Settings';
 import Subscription from '../components/dashboard/content/Subscription';
-import ProductsContent from '../components/dashboard/ProductsContent';
+import ProductsContent from '../components/dashboard/Porducts/ProductsContent';
 import RestaurantManagement from '../components/dashboard/content/RestaurantManagement';
 import NetworkStatus from '../components/NetworkStatus';
 import { RestaurantManagementInfo, RestaurantBranchDropdownItem } from '../types/api';
@@ -34,6 +34,8 @@ const Dashboard: React.FC = () => {
     const path = location.pathname.split('/')[2] || 'overview';
     return path;
   });
+
+  console.log("activeTab",activeTab)
   
   // URL değiştikçe sekme güncelle
   useEffect(() => {
@@ -146,10 +148,10 @@ const Dashboard: React.FC = () => {
           {activeTab === 'overview' && <Overview />}
           {activeTab === 'orders' && <Orders />}
           {activeTab === 'products' && <ProductsContent />}
-          {activeTab === 'branch-management' && <BranchManagement />}
-          {activeTab === 'table-management' && <TableManagement selectedBranch={selectedBranch} />}
+          {activeTab === 'branches' && <BranchManagement />}
+          {activeTab === 'tables' && <TableManagement selectedBranch={selectedBranch} />}
           {activeTab === 'restaurant-management' && <RestaurantManagement />}
-          {activeTab === 'user-management' && <UserManagement />}
+          {activeTab === 'users' && <UserManagement />}
           {activeTab === 'profile' && <Profile />}
           {activeTab === 'settings' && <Settings />}
           {activeTab === 'subscription' && <Subscription />}

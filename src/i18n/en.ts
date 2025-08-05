@@ -839,7 +839,9 @@ export const en = {
       email: 'Email',
       workingHours: 'Working Hours',
       logo: 'Logo'
-    }
+    },
+    title : "Branches",
+    description : "Manage Your Branches"
   },
 
   // Table Management

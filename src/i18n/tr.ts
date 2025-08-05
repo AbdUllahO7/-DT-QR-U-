@@ -843,7 +843,9 @@ export const tr = {
       email: 'E-posta',
       workingHours: 'Çalışma Saatleri',
       logo: 'Logo'
-    }
+    },
+    title : "Şubeler",
+    description : "Şubelerinizi Yönetin"
   },
 
   // Table Management

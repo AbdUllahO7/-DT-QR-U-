@@ -838,7 +838,9 @@ export const ar = {
       email: 'البريد الإلكتروني',
       workingHours: 'ساعات العمل',
       logo: 'الشعار'
-    }
+    },
+    title : "الفروع",
+    description : "إدارة فروعك"
   },
 
   // Table Management
