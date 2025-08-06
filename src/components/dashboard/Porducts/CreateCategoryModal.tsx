@@ -14,14 +14,12 @@ interface CreateCategoryModalProps {
 interface CreateCategoryFormData {
   categoryName: string;
   status: boolean;
-  displayOrder: number;
 }
 
 const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState<CreateCategoryFormData>({
     categoryName: '',
     status: true,
-    displayOrder: 0,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -34,9 +32,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
       newErrors.categoryName = 'Kategori adı gereklidir';
     }
     
-    if (formData.displayOrder < 0) {
-      newErrors.displayOrder = 'Görüntüleme sırası 0 veya daha büyük olmalıdır';
-    }
+
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -67,7 +63,6 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
       const payload = {
         categoryName: formData.categoryName.trim(),
         status: formData.status,
-        displayOrder: formData.displayOrder
       };
       
       logger.info('Kategori ekleme isteği gönderiliyor', { payload });
@@ -83,7 +78,6 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
       setFormData({
         categoryName: '',
         status: true,
-        displayOrder: 0,
       });
       setErrors({});
       onClose();
@@ -224,31 +218,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
                   )}
                 </div>
 
-                {/* Display Order */}
-                <div>
-                  <label htmlFor="displayOrder" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Görüntüleme Sırası
-                  </label>
-                  <input
-                    type="number"
-                    id="displayOrder"
-                    value={formData.displayOrder}
-                    onChange={(e) => handleChange('displayOrder', parseInt(e.target.value) || 0)}
-                    className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 ${
-                      errors.displayOrder
-                        ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
-                        : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                    } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-                    placeholder="0"
-                    min="0"
-                  />
-                  {errors.displayOrder && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.displayOrder}</p>
-                  )}
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Düşük sayılar önce görüntülenir
-                  </p>
-                </div>
+              
 
                 {/* Status */}
                 <div>
