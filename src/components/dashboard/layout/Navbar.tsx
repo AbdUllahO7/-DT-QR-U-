@@ -95,7 +95,7 @@ const Navbar: React.FC<NavbarProps> = ({
         ? 'left-0 right-0 lg:left-0 lg:right-64' 
         : 'left-0 right-0 lg:left-64 lg:right-0'
     }`}>
-      <nav className="w-full px-4 lg:px-8 py-4" dir={isRTL ? 'rtl' : 'ltr'}>
+      <nav className="w-full px-4 lg:px-8 py-4">
         <div className="flex items-center justify-between">
           {/* Sol - Menü ve başlık */}
           <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
@@ -154,4 +154,4 @@ const Navbar: React.FC<NavbarProps> = ({
   );
 };
 
-export default Navbar; 
+export default Navbar;

@@ -34,7 +34,13 @@ export const en = {
     lastMonth: 'Last Month',
     retry: 'Retry'
   },
-
+  restaurantManagement : {
+    tabs : {
+      general : "General",
+       legal : "Legal",
+        about : "About",
+    }
+  },
   // Navigation
   nav: {
     home: 'Home',
@@ -230,9 +236,14 @@ export const en = {
         restaurantName: 'Enter restaurant name',
         aboutStory: 'Our restaurant story',
         aboutDetails: 'Provide detailed information about your restaurant...'
-      }
+      },
+  
+
+
     },
+
     sidebar: {
+      title : "QR Menu",
       logout: 'Logout',
       branch: 'Branch'
     }
@@ -974,5 +985,213 @@ export const en = {
       editProduct: 'Edit Product',
       deleteProduct: 'Delete Product'
     }
+  },
+  branchSelector: {
+  status: {
+    loading: 'Loading...',
+    error: 'Could not fetch branch list'
+  },
+  empty: 'No options found',
+  actions: {
+    changeBranchRestaurant: 'Change Branch/Restaurant'
+  },
+  labels: {
+    mainRestaurant: 'Main Restaurant',
+    branches: 'Branches'
   }
+},
+popularProducts: {
+  title: 'Popular Products',
+  empty: 'Product sales will appear here',
+  labels: {
+    orders: 'orders',
+    percentage: '%'
+  },
+  tooltip: {
+    ordersFormat: (value: any, percentage: any) => `${value} orders (${percentage}%)`,
+    noData: 'No data available'
+  }
+},
+weeklyActivity: {
+  title: 'Haftalık Aktivite',
+  empty: {
+    primary: 'Henüz aktivite verisi bulunmuyor',
+    secondary: 'Veriler yakında burada görünecek'
+  },
+  labels: {
+    views: 'Görüntülenme',
+    qrScans: 'QR Tarama'
+  },
+  legend: {
+    views: 'Görüntülenme',
+    qrScans: 'QR Tarama'
+  }
+},
+monthlyRevenue: {
+  QuickStats: "Quick Stats",
+  title: 'Monthly Revenue Trend',
+  empty: {
+    primary: 'No revenue data available yet',
+    secondary: 'Revenue data will appear here'
+  },
+  labels: {
+    total: 'Total:',
+    revenue: 'Revenue'
+  },
+  currency: {
+    symbol: '$',
+    format: (value: { toLocaleString: (arg0: string) => any; }) => `$${value.toLocaleString('en-US')}`
+  }
+},
+branchCard: {
+  status: {
+    temporaryClosed: 'Temporarily Closed',
+    open: 'Open',
+    closed: 'Closed',
+    active: 'Active',
+    inactive: 'Inactive',
+    hidden: 'Hidden'
+  },
+  actions: {
+    edit: 'Edit',
+    delete: 'Delete'
+  },
+  labels: {
+    customerVisibility: 'Customer Visibility',
+    apiBranchOpen: 'API BranchIsOpen:'
+  },
+  alt: {
+    logo: 'logo'
+  }
+},
+addBranchCard: {
+  title: 'Add New Branch',
+  description: 'Click to add a new branch'
+},
+branchModal: {
+  title: {
+    add: 'Add New Branch',
+    edit: 'Edit Branch'
+  },
+  subtitle: 'You can enter branch information step by step',
+  steps: {
+    basic: 'Basic Information',
+    address: 'Address Information', 
+    contact: 'Contact & Working Hours'
+  },
+  sections: {
+    basicInfo: 'Basic Information',
+    addressInfo: 'Address Information',
+    contactInfo: 'Contact Information',
+    workingHours: 'Working Hours'
+  },
+  fields: {
+    branchName: {
+      label: 'Branch Name *',
+      placeholder: 'Enter branch name'
+    },
+    whatsappNumber: {
+      label: 'WhatsApp Order Number *',
+      placeholder: 'Enter WhatsApp order number'
+    },
+    branchLogo: {
+      label: 'Branch Logo (Optional)',
+      select: 'Select Logo',
+      uploading: 'Uploading...',
+      success: '✓ Logo uploaded successfully',
+      preview: 'Branch logo preview',
+      supportText: 'PNG, JPG, GIF formats are supported. Maximum file size: 5MB'
+    },
+    country: {
+      label: 'Country *',
+      placeholder: 'Enter country name'
+    },
+    city: {
+      label: 'City *',
+      placeholder: 'Enter city name'
+    },
+    street: {
+      label: 'Street *',
+      placeholder: 'Enter street name'
+    },
+    zipCode: {
+      label: 'Zip Code *',
+      placeholder: 'Enter zip code'
+    },
+    addressLine1: {
+      label: 'Address Line 1 *',
+      placeholder: 'Enter detailed address information'
+    },
+    addressLine2: {
+      label: 'Address Line 2 (Optional)',
+      placeholder: 'Enter additional address information (optional)'
+    },
+    phone: {
+      label: 'Phone Number *',
+      placeholder: 'Enter phone number'
+    },
+    email: {
+      label: 'Email Address *',
+      placeholder: 'Enter email address'
+    },
+    location: {
+      label: 'Location Information *',
+      placeholder: 'Enter location information (e.g., 40.9795,28.7225)'
+    },
+    contactHeader: {
+      label: 'Contact Header (Optional)',
+      placeholder: 'Enter contact header (optional)'
+    },
+    footerTitle: {
+      label: 'Footer Title (Optional)',
+      placeholder: 'Enter footer title (optional)'
+    },
+    footerDescription: {
+      label: 'Footer Description (Optional)',
+      placeholder: 'Enter footer description (optional)'
+    },
+    openTitle: {
+      label: 'Working Hours Title (Optional)',
+      placeholder: 'Enter working hours title (optional)'
+    },
+    openDays: {
+      label: 'Open Days (Optional)',
+      placeholder: 'Enter open days (optional)'
+    },
+    openHours: {
+      label: 'Open Hours (Optional)',
+      placeholder: 'Enter open hours (optional)'
+    }
+  },
+  workingHours: {
+    description: 'Set your business working hours',
+    days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    open: 'Open',
+    closed: 'Closed',
+    openTime: 'Open',
+    closeTime: 'Close',
+    canOrder: '✓ Customers can place orders on this day',
+    infoTitle: 'About Working Hours',
+    infoText: 'The hours you set here determine when customers can place orders through your QR menu. No orders are taken on closed days.'
+  },
+  errors: {
+    branchName: 'Branch name is required',
+    whatsappNumber: 'WhatsApp order number is required',
+    country: 'Country is required',
+    city: 'City is required',
+    street: 'Street is required',
+    zipCode: 'Zip code is required',
+    addressLine1: 'Address line 1 is required',
+    phone: 'Phone number is required',
+    email: 'Email address is required',
+    location: 'Location information is required'
+  },
+  buttons: {
+    cancel: 'Cancel',
+    back: 'Back',
+    next: 'Next',
+    save: 'Save',
+    saving: 'Saving...'
+  }
+},
 }; 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, TrendingUp, Users, Star } from 'lucide-react';
+import { useLanguage } from '../../../../contexts/LanguageContext';
 
 interface QuickStatItem {
   icon: typeof Calendar | typeof TrendingUp | typeof Users | typeof Star;
@@ -19,6 +20,7 @@ interface QuickStatsProps {
 }
 
 export const QuickStats: React.FC<QuickStatsProps> = ({ stats }) => {
+  const {t} = useLanguage()
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -26,7 +28,7 @@ export const QuickStats: React.FC<QuickStatsProps> = ({ stats }) => {
       transition={{ delay: 0.8 }}
       className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
     >
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Hızlı İstatistikler</h3>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">{t('monthlyRevenue.QuickStats')}</h3>
       <div className="space-y-4">
         {stats.map((stat, index) => {
           const Icon = stat.icon;

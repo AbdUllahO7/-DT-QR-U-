@@ -12,6 +12,7 @@ import {
   Legend
 } from 'recharts';
 import { useTheme } from '../../../../contexts/ThemeContext';
+import { useLanguage } from '../../../../contexts/LanguageContext';
 
 interface WeeklyActivityData {
   day: string;
@@ -25,6 +26,8 @@ interface WeeklyActivityChartProps {
 
 export const WeeklyActivityChart: React.FC<WeeklyActivityChartProps> = ({ data }) => {
   const { isDark } = useTheme();
+  const { t, language } = useLanguage();
+  const isRTL = language === 'ar';
 
   if (data.length === 0) {
     return (
@@ -38,8 +41,12 @@ export const WeeklyActivityChart: React.FC<WeeklyActivityChartProps> = ({ data }
           <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
             <BarChart3 className="h-8 w-8 text-gray-400" />
           </div>
-          <p className="text-gray-500 dark:text-gray-400 font-medium">Henüz aktivite verisi bulunmuyor</p>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Veriler yakında burada görünecek</p>
+          <p className="text-gray-500 dark:text-gray-400 font-medium">
+            {t('weeklyActivity.empty.primary')}
+          </p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+            {t('weeklyActivity.empty.secondary')}
+          </p>
         </div>
       </motion.div>
     );
@@ -53,15 +60,21 @@ export const WeeklyActivityChart: React.FC<WeeklyActivityChartProps> = ({ data }
       className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
     >
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Haftalık Aktivite</h3>
-        <div className="flex items-center space-x-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          {t('weeklyActivity.title')}
+        </h3>
+        <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
           <div className="flex items-center">
-            <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-            <span className="text-sm text-gray-600 dark:text-gray-400">Görüntülenme</span>
+            <div className={`w-3 h-3 bg-blue-500 rounded-full ${isRTL ? 'ml-2' : 'mr-2'}`}></div>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {t('weeklyActivity.labels.views')}
+            </span>
           </div>
           <div className="flex items-center">
-            <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-            <span className="text-sm text-gray-600 dark:text-gray-400">QR Tarama</span>
+            <div className={`w-3 h-3 bg-green-500 rounded-full ${isRTL ? 'ml-2' : 'mr-2'}`}></div>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {t('weeklyActivity.labels.qrScans')}
+            </span>
           </div>
         </div>
       </div>
@@ -105,7 +118,7 @@ export const WeeklyActivityChart: React.FC<WeeklyActivityChartProps> = ({ data }
             }}
             formatter={(value: number, name: string) => [
               value,
-              name === 'views' ? 'Görüntülenme' : 'QR Tarama'
+              name === 'views' ? t('weeklyActivity.labels.views') : t('weeklyActivity.labels.qrScans')
             ]}
           />
           <Area
@@ -114,7 +127,7 @@ export const WeeklyActivityChart: React.FC<WeeklyActivityChartProps> = ({ data }
             stroke="#3B82F6"
             strokeWidth={2}
             fill="url(#colorViews)"
-            name="Görüntülenme"
+            name={t('weeklyActivity.legend.views')}
             dot={{ fill: '#3B82F6', strokeWidth: 2, r: 4 }}
             activeDot={{ r: 6, stroke: '#3B82F6', strokeWidth: 2 }}
           />
@@ -124,18 +137,18 @@ export const WeeklyActivityChart: React.FC<WeeklyActivityChartProps> = ({ data }
             stroke="#10B981"
             strokeWidth={2}
             fill="url(#colorScans)"
-            name="QR Tarama"
+            name={t('weeklyActivity.legend.qrScans')}
             dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
             activeDot={{ r: 6, stroke: '#10B981', strokeWidth: 2 }}
           />
           <Legend
             verticalAlign="top"
-            align="right"
+            align={isRTL ? "left" : "right"}
             height={36}
             iconType="circle"
             formatter={(value: string) => (
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                {value === 'views' ? 'Görüntülenme' : 'QR Tarama'}
+                {value}
               </span>
             )}
           />
@@ -143,4 +156,4 @@ export const WeeklyActivityChart: React.FC<WeeklyActivityChartProps> = ({ data }
       </ResponsiveContainer>
     </motion.div>
   );
-}; 
+};

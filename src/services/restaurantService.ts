@@ -193,7 +193,7 @@ class RestaurantService {
 
       logger.info('API\'ye gönderilen format:', updateRequest);
 
-      const response = await httpClient.put<RestaurantManagementInfo>(`${this.baseUrl}/UpdateRestaurantManagementInfo`, updateRequest);
+      const response = await httpClient.put<RestaurantManagementInfo>(`${this.baseUrl}/management-info`, updateRequest);
 
       logger.info('Restaurant yönetim bilgileri güncellendi:', response.data);
       return response.data;

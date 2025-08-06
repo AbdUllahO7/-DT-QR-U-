@@ -9,10 +9,32 @@ import BranchModal from './branch-management/BranchModal';
 import AddBranchCard from './branch-management/AddBranchCard';
 import { logger } from '../../../utils/logger';
 
-interface BranchFormData extends CreateBranchWithDetailsDto {
+interface BranchFormData  {
+  branchName: string | null,
+  restaurantId: number,
+  whatsappOrderNumber: string | null;
+  branchLogoPath: string | null;
+  createAddressDto: {
+    country: string | null;
+    city: string | null;
+    street: string | null;
+    zipCode: string | null;
+    addressLine1: string | null;
+    addressLine2: string | null;
+  };
+  createContactDto: {
+    phone: string| null;
+    mail: string| null;
+    location: string| null;
+    contactHeader: string| null;
+    footerTitle: string| null;
+    footerDescription: string| null;
+    openTitle: string| null;
+    openDays: string| null;
+    openHours: string| null;
+  };
   createBranchWorkingHourCoreDto: CreateBranchWorkingHourCoreDto[];
 }
-
 const BranchManagement: React.FC = () => {
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
@@ -152,6 +174,7 @@ const BranchManagement: React.FC = () => {
   };
 
   const handleSubmit = async (data: CreateBranchWithDetailsDto) => {
+    console.log("submit")
     setIsSubmitting(true);
     try {
       // RestaurantId kontrolü
@@ -212,52 +235,60 @@ const BranchManagement: React.FC = () => {
     }
   };
 
-  const handleEditBranch = async (branch: BranchInfo) => {
-    try {
-      // Branch detaylarını API'den al
-      const branchDetail = await branchService.getBranchById(branch.branchId);
-      if (branchDetail) {
-        setEditingBranch(branchDetail);
-        setFormData({
-          branchName: branchDetail.branchName,
-          whatsappOrderNumber: branchDetail.whatsappOrderNumber || null,
-          restaurantId: branchDetail.restaurantId,
-          branchLogoPath: branchDetail.branchLogoPath || null,
-          createAddressDto: branchDetail.address ? {
-            country: branchDetail.address.country || null,
-            city: branchDetail.address.city || null,
-            street: branchDetail.address.street || null,
-            zipCode: branchDetail.address.zipCode || null,
-            addressLine1: branchDetail.address.addressLine1 || null,
-            addressLine2: branchDetail.address.addressLine2 || null,
-          } : getEmptyFormData().createAddressDto,
-          createContactDto: branchDetail.contact ? {
-            phone: branchDetail.contact.phone || null,
-            mail: branchDetail.contact.mail || null,
-            location: branchDetail.contact.location || null,
-            contactHeader: branchDetail.contact.contactHeader || null,
-            footerTitle: branchDetail.contact.footerTitle || null,
-            footerDescription: branchDetail.contact.footerDescription || null,
-            openTitle: branchDetail.contact.openTitle || null,
-            openDays: branchDetail.contact.openDays || null,
-            openHours: branchDetail.contact.openHours || null,
-          } : getEmptyFormData().createContactDto,
-          createBranchWorkingHourCoreDto: branchDetail.workingHours?.map(wh => ({
-            dayOfWeek: wh.dayOfWeek as any,
-            openTime: wh.openTime,
-            closeTime: wh.closeTime,
-            isWorkingDay: wh.isWorkingDay
-          })) || defaultWorkingHours,
-        });
-        setIsEditMode(true);
-        setIsModalOpen(true);
-        setHasChanges(false);
-      }
-    } catch (err) {
+const handleEditBranch = async (branch: BranchInfo) => {
+  try {
+    logger.info(`Fetching branch details for branchId: ${branch.branchId}`, null, { prefix: 'BranchManagement' });
+    const branchDetail = await branchService.getBranchById(branch.branchId);
+    logger.info('Branch details fetched', branchDetail, { prefix: 'BranchManagement' });
+
+    if (branchDetail) {
+      setEditingBranch(branchDetail);
+      setFormData({
+        branchName: branchDetail.branchName || '',
+        whatsappOrderNumber: branchDetail.whatsappOrderNumber || '',
+        restaurantId: branchDetail.restaurantId || getRestaurantIdFromToken() || 0,
+        branchLogoPath: branchDetail.branchLogoPath || null,
+        createAddressDto: {
+          country: branchDetail.address?.country || '',
+          city: branchDetail.address?.city || '',
+          street: branchDetail.address?.street || '',
+          zipCode: branchDetail.address?.zipCode || '',
+          addressLine1: branchDetail.address?.addressLine1 || '',
+          addressLine2: branchDetail.address?.addressLine2 || '',
+        },
+        createContactDto: {
+          phone: branchDetail.contact?.phone || '',
+          mail: branchDetail.contact?.mail || '',
+          location: branchDetail.contact?.location || '',
+          contactHeader: branchDetail.contact?.contactHeader || '',
+          footerTitle: branchDetail.contact?.footerTitle || '',
+          footerDescription: branchDetail.contact?.footerDescription || '',
+          openTitle: branchDetail.contact?.openTitle || '',
+          openDays: branchDetail.contact?.openDays || '',
+          openHours: branchDetail.contact?.openHours || '',
+        },
+        createBranchWorkingHourCoreDto: branchDetail.workingHours?.length
+          ? branchDetail.workingHours.map(wh => ({
+              dayOfWeek: wh.dayOfWeek,
+              openTime: wh.openTime || '08:00:00',
+              closeTime: wh.closeTime || '22:00:00',
+              isWorkingDay: wh.isWorkingDay ?? true,
+            }))
+          : defaultWorkingHours,
+      });
+      setIsEditMode(true);
+      setIsModalOpen(true);
+      setHasChanges(false);
+    } else {
+      logger.error('No branch details returned', null, { prefix: 'BranchManagement' });
       setError(t('dashboard.branches.error.detailsLoadFailed'));
-      console.error('Error loading branch details:', err);
     }
-  };
+  } catch (err) {
+    logger.error('Error loading branch details', err, { prefix: 'BranchManagement' });
+    setError(t('dashboard.branches.error.detailsLoadFailed'));
+    console.error('Error loading branch details:', err);
+  }
+};
 
   const handleDeleteBranch = (branch: BranchInfo) => {
     setBranchToDelete(branch);
@@ -398,11 +429,12 @@ const BranchManagement: React.FC = () => {
       </div>
 
       {/* Modal */}
-      <BranchModal
+     <BranchModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleSubmit}
-        editingBranch={editingBranch}
+        formData={formData}
+        setFormData={setFormData}
         isSubmitting={isSubmitting}
         hasChanges={hasChanges}
         onInputChange={handleInputChange}
