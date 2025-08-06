@@ -232,6 +232,7 @@ export const ar = {
       }
     },
     sidebar: {
+      title : "قائمة QR",
       logout: 'تسجيل الخروج',
       branch: 'فرع'
     }
@@ -973,5 +974,214 @@ export const ar = {
       editProduct: 'تعديل المنتج',
       deleteProduct: 'حذف المنتج'
     }
+  },
+  branchSelector: {
+  status: {
+    loading: 'جاري التحميل...',
+    error: 'تعذر جلب قائمة الفروع'
+  },
+  empty: 'لم يتم العثور على خيارات',
+  actions: {
+    changeBranchRestaurant: 'تغيير الفرع/المطعم'
+  },
+  labels: {
+    mainRestaurant: 'المطعم الرئيسي',
+    branches: 'الفروع'
   }
+},
+popularProducts: {
+  title: 'المنتجات الأكثر شيوعاً',
+  empty: 'ستظهر مبيعات المنتجات هنا',
+  labels: {
+    orders: 'طلبات',
+    percentage: '%'
+  },
+  tooltip: {
+    ordersFormat: (value: any, percentage: any) => `${value} طلبات (${percentage}%)`,
+    noData: 'لا توجد بيانات متاحة'
+  }
+},
+weeklyActivity: {
+  title: 'النشاط الأسبوعي',
+  empty: {
+    primary: 'لا توجد بيانات نشاط متاحة بعد',
+    secondary: 'ستظهر البيانات هنا قريباً'
+  },
+  labels: {
+    views: 'المشاهدات',
+    qrScans: 'مسح رمز QR'
+  },
+  legend: {
+    views: 'المشاهدات',
+    qrScans: 'مسح رمز QR'
+  }
+},
+monthlyRevenue: {
+    QuickStats : "إحصائيات سريعة",
+  title: 'اتجاه الإيرادات الشهرية',
+  empty: {
+    primary: 'لا توجد بيانات إيرادات متاحة بعد',
+    secondary: 'ستظهر بيانات الإيرادات هنا'
+  },
+  labels: {
+    total: 'المجموع:',
+    revenue: 'الإيرادات'
+    
+  },
+  currency: {
+    symbol: '₺',
+    format: (value: { toLocaleString: (arg0: string) => any; }) => `${value.toLocaleString('ar-SA')} ₺`
+  }
+},
+branchCard: {
+  status: {
+    temporaryClosed: 'مغلق مؤقتاً',
+    open: 'مفتوح',
+    closed: 'مغلق',
+    active: 'نشط',
+    inactive: 'غير نشط',
+    hidden: 'مخفي'
+  },
+  actions: {
+    edit: 'تعديل',
+    delete: 'حذف'
+  },
+  labels: {
+    customerVisibility: 'الظهور للعملاء',
+    apiBranchOpen: 'API BranchIsOpen:'
+  },
+  alt: {
+    logo: 'الشعار'
+  }
+},
+addBranchCard: {
+  title: 'إضافة فرع جديد',
+  description: 'انقر لإضافة فرع جديد'
+},
+branchModal: {
+  title: {
+    add: 'إضافة فرع جديد',
+    edit: 'تعديل الفرع'
+  },
+  subtitle: 'يمكنك إدخال معلومات الفرع خطوة بخطوة',
+  steps: {
+    basic: 'المعلومات الأساسية',
+    address: 'معلومات العنوان', 
+    contact: 'الاتصال وساعات العمل'
+  },
+  sections: {
+    basicInfo: 'المعلومات الأساسية',
+    addressInfo: 'معلومات العنوان',
+    contactInfo: 'معلومات الاتصال',
+    workingHours: 'ساعات العمل'
+  },
+  fields: {
+    branchName: {
+      label: 'اسم الفرع *',
+      placeholder: 'أدخل اسم الفرع'
+    },
+    whatsappNumber: {
+      label: 'رقم الطلبات واتساب *',
+      placeholder: 'أدخل رقم الطلبات واتساب'
+    },
+    branchLogo: {
+      label: 'شعار الفرع (اختياري)',
+      select: 'اختر الشعار',
+      uploading: 'جاري الرفع...',
+      success: '✓ تم رفع الشعار بنجاح',
+      preview: 'معاينة شعار الفرع',
+      supportText: 'تدعم صيغ PNG، JPG، GIF. الحد الأقصى لحجم الملف: 5 ميجابايت'
+    },
+    country: {
+      label: 'البلد *',
+      placeholder: 'أدخل اسم البلد'
+    },
+    city: {
+      label: 'المدينة *',
+      placeholder: 'أدخل اسم المدينة'
+    },
+    street: {
+      label: 'الشارع *',
+      placeholder: 'أدخل اسم الشارع'
+    },
+    zipCode: {
+      label: 'الرمز البريدي *',
+      placeholder: 'أدخل الرمز البريدي'
+    },
+    addressLine1: {
+      label: 'سطر العنوان 1 *',
+      placeholder: 'أدخل معلومات العنوان التفصيلية'
+    },
+    addressLine2: {
+      label: 'سطر العنوان 2 (اختياري)',
+      placeholder: 'أدخل معلومات العنوان الإضافية (اختياري)'
+    },
+    phone: {
+      label: 'رقم الهاتف *',
+      placeholder: 'أدخل رقم الهاتف'
+    },
+    email: {
+      label: 'عنوان البريد الإلكتروني *',
+      placeholder: 'أدخل عنوان البريد الإلكتروني'
+    },
+    location: {
+      label: 'معلومات الموقع *',
+      placeholder: 'أدخل معلومات الموقع (مثال: 40.9795,28.7225)'
+    },
+    contactHeader: {
+      label: 'عنوان الاتصال (اختياري)',
+      placeholder: 'أدخل عنوان الاتصال (اختياري)'
+    },
+    footerTitle: {
+      label: 'عنوان التذييل (اختياري)',
+      placeholder: 'أدخل عنوان التذييل (اختياري)'
+    },
+    footerDescription: {
+      label: 'وصف التذييل (اختياري)',
+      placeholder: 'أدخل وصف التذييل (اختياري)'
+    },
+    openTitle: {
+      label: 'عنوان ساعات العمل (اختياري)',
+      placeholder: 'أدخل عنوان ساعات العمل (اختياري)'
+    },
+    openDays: {
+      label: 'أيام العمل (اختياري)',
+      placeholder: 'أدخل أيام العمل (اختياري)'
+    },
+    openHours: {
+      label: 'ساعات العمل (اختياري)',
+      placeholder: 'أدخل ساعات العمل (اختياري)'
+    }
+  },
+  workingHours: {
+    description: 'حدد ساعات عمل مؤسستك',
+    days: ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'],
+    open: 'مفتوح',
+    closed: 'مغلق',
+    openTime: 'الفتح',
+    closeTime: 'الإغلاق',
+    canOrder: '✓ يمكن للعملاء تقديم الطلبات في هذا اليوم',
+    infoTitle: 'حول ساعات العمل',
+    infoText: 'الساعات التي تحددها هنا تحدد متى يمكن للعملاء تقديم الطلبات من خلال قائمة QR الخاصة بك. لا يتم أخذ الطلبات في الأيام المغلقة.'
+  },
+  errors: {
+    branchName: 'اسم الفرع مطلوب',
+    whatsappNumber: 'رقم الطلبات واتساب مطلوب',
+    country: 'البلد مطلوب',
+    city: 'المدينة مطلوبة',
+    street: 'الشارع مطلوب',
+    zipCode: 'الرمز البريدي مطلوب',
+    addressLine1: 'سطر العنوان 1 مطلوب',
+    phone: 'رقم الهاتف مطلوب',
+    email: 'عنوان البريد الإلكتروني مطلوب',
+    location: 'معلومات الموقع مطلوبة'
+  },
+  buttons: {
+    cancel: 'إلغاء',
+    back: 'رجوع',
+    next: 'التالي',
+    save: 'حفظ',
+    saving: 'جاري الحفظ...'
+  }
+},
 }; 

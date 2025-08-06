@@ -35,7 +35,6 @@ const Dashboard: React.FC = () => {
     return path;
   });
 
-  console.log("activeTab",activeTab)
   
   // URL değiştikçe sekme güncelle
   useEffect(() => {
@@ -116,7 +115,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-900" >
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}

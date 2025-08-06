@@ -47,7 +47,7 @@ const SearchBox: React.FC<SearchBoxProps> = ({ onSearch, onResultClick }) => {
       <div className="relative">
         <input
           type="text"
-          placeholder={t('search.placeholder')}
+          placeholder={t('common.search')}
           value={searchQuery}
           onChange={handleSearchChange}
           className={`w-64 py-2 text-sm bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${

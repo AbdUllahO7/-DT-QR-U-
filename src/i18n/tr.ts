@@ -233,6 +233,7 @@ export const tr = {
       }
     },
     sidebar: {
+       title : "QR Menü",
       logout: 'Çıkış Yap',
       branch: 'Şube'
     }
@@ -978,5 +979,214 @@ export const tr = {
       editProduct: 'Ürün Düzenle',
       deleteProduct: 'Ürün Sil'
     }
+  },
+  branchSelector: {
+  status: {
+    loading: 'Yükleniyor...',
+    error: 'Şube listesi alınamadı'
+  },
+  empty: 'Seçenek bulunamadı',
+  actions: {
+    changeBranchRestaurant: 'Şube/Restoran Değiştir'
+  },
+  labels: {
+    mainRestaurant: 'Ana Restorant',
+    branches: 'Şubeler'
   }
+  
+  },
+popularProducts: {
+  title: 'Popüler Ürünler',
+  empty: 'Ürün satışları burada görünecek',
+  labels: {
+    orders: 'sipariş',
+    percentage: '%'
+  },
+  tooltip: {
+    ordersFormat: (value: any, percentage: any) => `${value} sipariş (${percentage}%)`,
+    noData: 'Veri bulunamadı'
+  }
+ },
+ weeklyActivity: {
+  title: 'Haftalık Aktivite',
+  empty: {
+    primary: 'Henüz aktivite verisi bulunmuyor',
+    secondary: 'Veriler yakında burada görünecek'
+  },
+  labels: {
+    views: 'Görüntülenme',
+    qrScans: 'QR Tarama'
+  },
+  legend: {
+    views: 'Görüntülenme',
+    qrScans: 'QR Tarama'
+  }
+},
+monthlyRevenue: {
+  QuickStats : "Hızlı İstatistikler",
+  title: 'Aylık Gelir Trendi',
+  empty: {
+    primary: 'Henüz gelir verisi bulunmuyor',
+    secondary: 'Gelir verileri burada görünecek'
+  },
+  labels: {
+    total: 'Toplam:',
+    revenue: 'Gelir'
+  },
+  currency: {
+    symbol: '₺',
+    format: (value: { toLocaleString: (arg0: string) => any; }) => `₺${value.toLocaleString('tr-TR')}`
+  }
+},
+branchCard: {
+  status: {
+    temporaryClosed: 'Geçici Kapalı',
+    open: 'Açık',
+    closed: 'Kapalı',
+    active: 'Aktif',
+    inactive: 'Pasif',
+    hidden: 'Gizli'
+  },
+  actions: {
+    edit: 'Düzenle',
+    delete: 'Sil'
+  },
+  labels: {
+    customerVisibility: 'Müşteriye Açık/Kapalı',
+    apiBranchOpen: 'API BranchIsOpen:'
+  },
+  alt: {
+    logo: 'logo'
+  }
+},
+addBranchCard: {
+  title: 'Add New Branch',
+  description: 'Click to add a new branch'
+},
+branchModal: {
+  title: {
+    add: 'Yeni Şube Ekle',
+    edit: 'Şube Düzenle'
+  },
+  subtitle: 'Şube bilgilerini adım adım girebilirsiniz',
+  steps: {
+    basic: 'Temel Bilgiler',
+    address: 'Adres Bilgileri', 
+    contact: 'İletişim & Çalışma Saatleri'
+  },
+  sections: {
+    basicInfo: 'Temel Bilgiler',
+    addressInfo: 'Adres Bilgileri',
+    contactInfo: 'İletişim Bilgileri',
+    workingHours: 'Çalışma Saatleri'
+  },
+  fields: {
+    branchName: {
+      label: 'Şube Adı *',
+      placeholder: 'Şube adını girin'
+    },
+    whatsappNumber: {
+      label: 'WhatsApp Sipariş Numarası *',
+      placeholder: 'WhatsApp sipariş numarasını girin'
+    },
+    branchLogo: {
+      label: 'Şube Logosu (Opsiyonel)',
+      select: 'Logo Seç',
+      uploading: 'Yükleniyor...',
+      success: '✓ Logo başarıyla yüklendi',
+      preview: 'Şube logosu önizleme',
+      supportText: 'PNG, JPG, GIF formatları desteklenir. Maksimum dosya boyutu: 5MB'
+    },
+    country: {
+      label: 'Ülke *',
+      placeholder: 'Ülke adını girin'
+    },
+    city: {
+      label: 'Şehir *',
+      placeholder: 'Şehir adını girin'
+    },
+    street: {
+      label: 'Sokak *',
+      placeholder: 'Sokak adını girin'
+    },
+    zipCode: {
+      label: 'Posta Kodu *',
+      placeholder: 'Posta kodunu girin'
+    },
+    addressLine1: {
+      label: 'Adres Satırı 1 *',
+      placeholder: 'Detaylı adres bilgisi girin'
+    },
+    addressLine2: {
+      label: 'Adres Satırı 2 (Opsiyonel)',
+      placeholder: 'Ek adres bilgisi girin (opsiyonel)'
+    },
+    phone: {
+      label: 'Telefon Numarası *',
+      placeholder: 'Telefon numarasını girin'
+    },
+    email: {
+      label: 'E-posta Adresi *',
+      placeholder: 'E-posta adresini girin'
+    },
+    location: {
+      label: 'Konum Bilgisi *',
+      placeholder: 'Konum bilgisini girin (Örn: 40.9795,28.7225)'
+    },
+    contactHeader: {
+      label: 'İletişim Başlığı (Opsiyonel)',
+      placeholder: 'İletişim başlığını girin (opsiyonel)'
+    },
+    footerTitle: {
+      label: 'Footer Başlığı (Opsiyonel)',
+      placeholder: 'Footer başlığını girin (opsiyonel)'
+    },
+    footerDescription: {
+      label: 'Footer Açıklaması (Opsiyonel)',
+      placeholder: 'Footer açıklamasını girin (opsiyonel)'
+    },
+    openTitle: {
+      label: 'Çalışma Saatleri Başlığı (Opsiyonel)',
+      placeholder: 'Çalışma saatleri başlığını girin (opsiyonel)'
+    },
+    openDays: {
+      label: 'Açık Günler (Opsiyonel)',
+      placeholder: 'Açık günleri girin (opsiyonel)'
+    },
+    openHours: {
+      label: 'Açık Saatler (Opsiyonel)',
+      placeholder: 'Açık saatleri girin (opsiyonel)'
+    }
+  },
+  workingHours: {
+    description: 'İşletmenizin çalışma saatlerini belirleyin',
+    days: ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'],
+    open: 'Açık',
+    closed: 'Kapalı',
+    openTime: 'Açılış',
+    closeTime: 'Kapanış',
+    canOrder: '✓ Bu gün müşteriler sipariş verebilecek',
+    infoTitle: 'Çalışma Saatleri Hakkında',
+    infoText: 'Burada belirlediğiniz saatler, müşterilerin QR menünüz üzerinden sipariş verebileceği zamanları belirler. Kapalı günlerde sipariş alınmaz.'
+  },
+  errors: {
+    branchName: 'Şube adı gereklidir',
+    whatsappNumber: 'WhatsApp sipariş numarası gereklidir',
+    country: 'Ülke gereklidir',
+    city: 'Şehir gereklidir',
+    street: 'Sokak gereklidir',
+    zipCode: 'Posta kodu gereklidir',
+    addressLine1: 'Adres satırı 1 gereklidir',
+    phone: 'Telefon numarası gereklidir',
+    email: 'E-posta adresi gereklidir',
+    location: 'Konum bilgisi gereklidir'
+  },
+  buttons: {
+    cancel: 'İptal',
+    back: 'Geri',
+    next: 'İleri',
+    save: 'Kaydet',
+    saving: 'Kaydediliyor...'
+  }
+},
 }; 

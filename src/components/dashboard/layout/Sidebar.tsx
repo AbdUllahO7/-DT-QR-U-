@@ -78,7 +78,6 @@ const Sidebar: React.FC<SidebarProps> = ({
         className={`fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-30 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'
         }`}
-        dir={isRTL ? 'rtl' : 'ltr'}
       >
         <div className="h-full flex flex-col">
           {/* Logo */}
@@ -88,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               className="flex items-center hover:opacity-80 transition-opacity duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 rounded-lg p-1"
             >
               <Building2 className="h-8 w-8 text-primary-600 dark:text-primary-400" />
-              <span className={`${isRTL ? 'mr-3' : 'ml-3'} text-xl font-bold text-gray-900 dark:text-white`}>QR Menü</span>
+              <span className={`${isRTL ? 'mr-3' : 'ml-3'} text-xl font-bold text-gray-900 dark:text-white`}>{t('dashboard.sidebar.title')}</span>
             </button>
             <button
               onClick={onClose}
@@ -104,11 +103,11 @@ const Sidebar: React.FC<SidebarProps> = ({
               {restaurantName}
             </h2>
             {branchName && (
-              <div className={`mt-1 flex items-center ${isRTL ? 'space-x-reverse' : ''}`}>
+              <div className={`mt-1 flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2`}>
                 <span className="text-sm text-primary-600 dark:text-primary-400 font-medium">
                   {branchName}
                 </span>
-                <span className={`${isRTL ? 'mr-2' : 'ml-2'} px-2 py-0.5 text-xs rounded-full bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-300`}>
+                <span className={`px-2 py-0.5 text-xs rounded-full bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-300`}>
                   {t('dashboard.sidebar.branch')}
                 </span>
               </div>
@@ -251,4 +250,4 @@ const Sidebar: React.FC<SidebarProps> = ({
   );
 };
 
-export default Sidebar; 
+export default Sidebar;

@@ -3,6 +3,7 @@ import { ChevronDown, Check, Store, Building2 } from 'lucide-react';
 import { useClickOutside } from '../../../hooks';
 import { RestaurantBranchDropdownItem } from '../../../types/api';
 import { restaurantService } from '../../../services/restaurantService';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface BranchSelectorProps {
   restaurantName: string;
@@ -22,6 +23,7 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const {t} = useLanguage();
 
   useClickOutside(dropdownRef, () => setIsOpen(false));
 
@@ -34,12 +36,12 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
       const response = await restaurantService.getRestaurantBranchesDropdown();
       setItems(response);
     } catch (err) {
-      console.error('Şube listesi alınamadı:', err);
-      setError('Şube listesi alınamadı');
+      console.error('Branch list could not be fetched:', err);
+      setError(t('branchSelector.status.error'));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const handleToggle = () => {
     if (!isOpen) {
@@ -54,7 +56,7 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
         onClick={handleToggle}
         className="flex items-center justify-between w-full px-3 py-2 text-xs text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors duration-200"
       >
-        <span>Şube/Restoran Değiştir</span>
+        <span>{t('branchSelector.actions.changeBranchRestaurant')}</span>
         <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'transform rotate-180' : ''}`} />
       </button>
 
@@ -63,7 +65,7 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
           {isLoading ? (
             <div className="px-4 py-3 text-center">
               <div className="inline-block animate-spin rounded-full h-4 w-4 border-2 border-gray-300 dark:border-gray-600 border-t-primary-600"></div>
-              <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">Yükleniyor...</span>
+              <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">{t('branchSelector.status.loading')}</span>
             </div>
           ) : error ? (
             <div className="px-4 py-3 text-center">
@@ -71,13 +73,13 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
             </div>
           ) : items.length === 0 ? (
             <div className="px-4 py-3 text-center">
-              <span className="text-xs text-gray-500 dark:text-gray-400">Seçenek bulunamadı</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">{t('branchSelector.empty')}</span>
             </div>
           ) : (
             <>
-              {/* Ana Restoran Seçeneği */}
+              {/* Main Restaurant Option */}
               <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-750">
-                Ana Restorant
+                {t('branchSelector.labels.mainRestaurant')}
               </div>
               <button
                 onClick={() => {
@@ -93,12 +95,12 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
                 )}
               </button>
 
-              {/* Şubeler Başlığı */}
+              {/* Branches Header */}
               <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-750 mt-1">
-                Şubeler
+                {t('branchSelector.labels.branches')}
               </div>
 
-              {/* Şubeler Listesi */}
+              {/* Branches List */}
               {items.map(item => (
                 <button
                   key={`branch-${item.id}`}
@@ -123,4 +125,4 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
   );
 };
 
-export default BranchSelector; 
+export default BranchSelector;
