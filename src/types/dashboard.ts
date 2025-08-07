@@ -75,4 +75,17 @@ export interface Order {
   items: number;
   orderTime: string; // ISO date string
   table: string;
-} 
+}
+export interface CategoryReorderRequest {
+  categoryOrders: Array<{
+    categoryId: number;
+    newDisplayOrder: number;
+  }>;
+}
+
+export interface ProductReorderRequest {
+  productOrders: Array<{
+    productId: number;
+    newDisplayOrder: number;
+  }>;
+}
