@@ -746,6 +746,8 @@ const SortableProduct: React.FC<{
 };
 
 // SortableCategory Component
+// Update your SortableCategory component interface and implementation
+
 const SortableCategory: React.FC<{
   category: Category;
   isDark: boolean;
@@ -756,7 +758,19 @@ const SortableCategory: React.FC<{
   onDeleteCategory: (categoryId: number) => void;
   activeId: number | null;
   allCategories: Category[];
-}> = ({ category, isDark, onToggle, onEditProduct, onDeleteProduct, onEditCategory, onDeleteCategory, activeId, allCategories }) => {
+  isReorderingProducts?: boolean; // Add this prop
+}> = ({ 
+  category, 
+  isDark, 
+  onToggle, 
+  onEditProduct, 
+  onDeleteProduct, 
+  onEditCategory, 
+  onDeleteCategory, 
+  activeId, 
+  allCategories,
+  isReorderingProducts = false // Add this prop with default value
+}) => {
   const { t } = useLanguage();
   const {
     attributes,
@@ -792,7 +806,13 @@ const SortableCategory: React.FC<{
               <GripVertical className="h-5 w-5" />
             </button>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{category.categoryName}</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{category.categoryName}</h3>
+                {/* Show loading indicator when products in this category are being reordered */}
+                {isReorderingProducts && (
+                  <Loader2 className="w-4 h-4 animate-spin text-primary-600" />
+                )}
+              </div>
               {category.description && (
                 <p className="text-sm text-gray-600 dark:text-gray-400">{category.description}</p>
               )}
@@ -807,6 +827,7 @@ const SortableCategory: React.FC<{
                 onClick={() => onEditCategory(category.categoryId)}
                 className="p-1.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
                 title={t('Kategoriyi düzenle')}
+                disabled={isReorderingProducts} // Disable during reordering
               >
                 <Edit2 className="h-4 w-4" />
               </button>
@@ -814,6 +835,7 @@ const SortableCategory: React.FC<{
                 onClick={() => onDeleteCategory(category.categoryId)}
                 className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200"
                 title={t('Kategoriyi sil')}
+                disabled={isReorderingProducts} // Disable during reordering
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -821,6 +843,7 @@ const SortableCategory: React.FC<{
             <button
               onClick={() => onToggle(category.categoryId)}
               className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
+              disabled={isReorderingProducts} // Disable during reordering
             >
               {category.isExpanded ? (
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -834,12 +857,19 @@ const SortableCategory: React.FC<{
             </button>
           </div>
         </div>
+        
+        {/* Show reordering status message */}
+        {isReorderingProducts && (
+          <div className="mt-2 text-sm text-primary-600 dark:text-primary-400 flex items-center gap-2">
+            <span>{t('Ürün sıralaması kaydediliyor...')}</span>
+          </div>
+        )}
       </div>
 
       {category.isExpanded && (
         <div className="p-4">
           <SortableContext items={category.products.map(p => p.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-3">
+            <div className={`space-y-3 ${isReorderingProducts ? 'opacity-70' : ''}`}>
               {category.products.map((product) => (
                 <SortableProduct
                   key={product.id}
@@ -877,6 +907,10 @@ const ProductsContent: React.FC = () => {
   const [isEditCategoryModalOpen, setIsEditCategoryModalOpen] = useState(false);
   const [isEditProductModalOpen, setIsEditProductModalOpen] = useState(false);
   const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
+  const [isReorderingCategories, setIsReorderingCategories] = useState(false);
+  const [isReorderingProducts, setIsReorderingProducts] = useState(false);
+  const [reorderingCategoryId, setReorderingCategoryId] = useState<number | null>(null);
+
   const [deleteConfig, setDeleteConfig] = useState<{
     type: 'product' | 'category';
     id: number;
@@ -1081,51 +1115,241 @@ const ProductsContent: React.FC = () => {
     }
   };
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActiveId(null);
 
-    if (!over) return;
 
-    const activeId = active.id as number;
-    const overId = over.id as number;
 
-    if (activeId === overId) return;
+ const handleDragEnd = async (event: DragEndEvent) => {
+  const { active, over } = event;
+  setActiveId(null);
 
-    const activeCategory = categories.find(cat => cat.categoryId === activeId);
-    const overCategory = categories.find(cat => cat.categoryId === overId);
+  console.log('🚀 === DRAG END STARTED ===');
+  console.log('Active ID:', active.id, typeof active.id);
+  console.log('Over ID:', over?.id, typeof over?.id);
 
-    if (activeCategory && overCategory) {
-      setCategories(prev => {
-        const oldIndex = prev.findIndex(cat => cat.categoryId === activeId);
-        const newIndex = prev.findIndex(cat => cat.categoryId === overId);
-        return arrayMove(prev, oldIndex, newIndex);
-      });
+  if (!over || active.id === over.id) return;
+
+  const activeId = active.id as number;
+  const overId = over.id as number;
+
+  // Identify what we're dealing with
+  const activeCategory = categories.find(cat => cat.categoryId === activeId);
+  const overCategory = categories.find(cat => cat.categoryId === overId);
+  const activeProduct = categories.flatMap(cat => cat.products).find(product => product.id === activeId);
+  const overProduct = categories.flatMap(cat => cat.products).find(product => product.id === overId);
+
+  console.log('🔍 IDENTIFICATION RESULTS:');
+  console.log('- Active Category:', activeCategory?.categoryName || 'NONE');
+  console.log('- Over Category:', overCategory?.categoryName || 'NONE');
+  console.log('- Active Product:', activeProduct?.name || 'NONE');
+  console.log('- Over Product:', overProduct?.name || 'NONE');
+
+  // CASE 3: Product to Category - Move product to different category
+  if (activeProduct && overCategory) {
+    console.log('📦➡️📂 CASE 3: Product to Category Move Detected');
+    console.log(`Moving "${activeProduct.name}" to "${overCategory.categoryName}"`);
+    console.log('Active product category ID:', activeProduct.categoryId);
+    console.log('Target category ID:', overCategory.categoryId);
+    
+    // Skip if same category
+    if (activeProduct.categoryId === overCategory.categoryId) {
+      console.log('❌ Same category, skipping');
       return;
     }
 
-    const activeProduct = categories
-      .flatMap(cat => cat.products)
-      .find(product => product.id === activeId);
-    const overProduct = categories
-      .flatMap(cat => cat.products)
-      .find(product => product.id === overId);
+    console.log('✅ Different category detected, proceeding with move...');
+    
+    setIsReorderingProducts(true);
+    setReorderingCategoryId(overCategory.categoryId);
 
-    if (activeProduct && overProduct && activeProduct.categoryId === overProduct.categoryId) {
-      setCategories(prev => {
-        const newCategories = [...prev];
-        const category = newCategories.find(cat => cat.categoryId === activeProduct.categoryId);
+    try {
+      // Check if updateProduct method exists
+      console.log('🔍 Checking productService.updateProduct method...');
+      console.log('Method exists:', typeof productService.updateProduct === 'function');
+      
+      if (typeof productService.updateProduct !== 'function') {
+        throw new Error('updateProduct method does not exist in productService');
+      }
 
-        if (category) {
-          const oldIndex = category.products.findIndex(product => product.id === activeId);
-          const newIndex = category.products.findIndex(product => product.id === overId);
-          category.products = arrayMove(category.products, oldIndex, newIndex);
-        }
-
-        return newCategories;
-      });
+      // Prepare payload
+      const payload = { categoryId: overCategory.categoryId };
+      console.log('📤 API Payload:', payload);
+      console.log('📤 Product ID:', activeProduct.id);
+      
+      console.log('🌐 Making API call to updateProduct...');
+      
+      // Make the API call
+      const result = await productService.updateProduct(activeProduct.id, payload);
+      console.log('📥 API Response:', result);
+      
+      console.log('✅ Product moved to new category successfully');
+      
+      // Reload categories to get updated data from server
+      console.log('🔄 Reloading categories...');
+      await loadCategories();
+      console.log('✅ Categories reloaded');
+      
+    } catch (error: any) {
+      console.error('❌ Product category move failed:');
+      console.error('Error type:', typeof error);
+      console.error('Error message:', error.message);
+      console.error('Full error:', error);
+      
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
+      }
+      
+      alert(t('Ürün kategori değişikliği kaydedilirken bir hata oluştu: ' + error.message));
+    } finally {
+      setIsReorderingProducts(false);
+      setReorderingCategoryId(null);
+      console.log('🏁 Case 3 completed');
     }
-  };
+    return;
+  }
+
+  // CASE 4: Product to Product (Different Categories)
+  if (activeProduct && overProduct && activeProduct.categoryId !== overProduct.categoryId) {
+    console.log('📦↔️📦 CASE 4: Cross-Category Product Move Detected');
+    console.log(`Moving "${activeProduct.name}" to "${overProduct.name}"'s category`);
+    
+    const targetCategoryId = overProduct.categoryId;
+    setIsReorderingProducts(true);
+    setReorderingCategoryId(targetCategoryId);
+
+    try {
+      console.log('🔍 Checking productService.updateProduct method...');
+      console.log('Method exists:', typeof productService.updateProduct === 'function');
+      
+      if (typeof productService.updateProduct !== 'function') {
+        throw new Error('updateProduct method does not exist in productService');
+      }
+
+      const payload = { categoryId: targetCategoryId };
+      console.log('📤 API Payload:', payload);
+      
+      console.log('🌐 Making API call to updateProduct...');
+      const result = await productService.updateProduct(activeProduct.id, payload);
+      console.log('📥 API Response:', result);
+      
+      console.log('✅ Product moved to target category');
+      
+      // Reload categories
+      console.log('🔄 Reloading categories...');
+      const updatedCategories = await productService.getCategories();
+      setCategories(updatedCategories);
+      console.log('✅ Categories reloaded');
+      
+    } catch (error: any) {
+      console.error('❌ Cross-category product move failed:');
+      console.error('Error:', error);
+      loadCategories();
+      alert(t('Ürün taşıma işlemi kaydedilirken bir hata oluştu: ' + error.message));
+    } finally {
+      setIsReorderingProducts(false);
+      setReorderingCategoryId(null);
+      console.log('🏁 Case 4 completed');
+    }
+    return;
+  }
+
+  // CASE 2: Product to Product (Same Category) - Reorder products
+  if (activeProduct && overProduct && activeProduct.categoryId === overProduct.categoryId) {
+    console.log('📦↔️📦 CASE 2: Product Reordering (Same Category)');
+    
+    const categoryId = activeProduct.categoryId;
+    const categoryIndex = categories.findIndex(cat => cat.categoryId === categoryId);
+    const category = categories[categoryIndex];
+    
+    const oldIndex = category.products.findIndex(product => product.id === activeId);
+    const newIndex = category.products.findIndex(product => product.id === overId);
+
+    console.log('Reorder details:', { categoryId, oldIndex, newIndex });
+
+    // Update local state
+    const newCategories = [...categories];
+    const newProducts = arrayMove(category.products, oldIndex, newIndex);
+    newCategories[categoryIndex] = { ...category, products: newProducts };
+    
+    setCategories(newCategories);
+    setIsReorderingProducts(true);
+    setReorderingCategoryId(categoryId);
+
+    try {
+      console.log('🔍 Checking productService.reorderProducts method...');
+      console.log('Method exists:', typeof productService.reorderProducts === 'function');
+      
+      if (typeof productService.reorderProducts !== 'function') {
+        throw new Error('reorderProducts method does not exist in productService');
+      }
+
+      const productOrders = newProducts.map((product, index) => ({
+        productId: product.id,
+        newDisplayOrder: index + 1
+      }));
+
+      console.log('📤 Reorder API Payload:', productOrders);
+      
+      console.log('🌐 Making API call to reorderProducts...');
+      await productService.reorderProducts(productOrders);
+      console.log('✅ Product reordering successful');
+      
+    } catch (error: any) {
+      console.error('❌ Product reordering failed:', error);
+      setCategories(categories); // Revert
+      alert(t('Ürün sıralaması kaydedilirken bir hata oluştu: ' + error.message));
+    } finally {
+      setIsReorderingProducts(false);
+      setReorderingCategoryId(null);
+      console.log('🏁 Case 2 completed');
+    }
+    return;
+  }
+
+  // CASE 1: Category to Category - Reorder categories
+  if (activeCategory && overCategory) {
+    console.log('📂↔️📂 CASE 1: Category Reordering');
+    
+    const oldIndex = categories.findIndex(cat => cat.categoryId === activeId);
+    const newIndex = categories.findIndex(cat => cat.categoryId === overId);
+    
+    const newCategories = arrayMove(categories, oldIndex, newIndex);
+    setCategories(newCategories);
+    setIsReorderingCategories(true);
+
+    try {
+      console.log('🔍 Checking productService.reorderCategories method...');
+      console.log('Method exists:', typeof productService.reorderCategories === 'function');
+
+      const categoryOrders = newCategories.map((category, index) => ({
+        categoryId: category.categoryId,
+        newDisplayOrder: index + 1
+      }));
+
+      console.log('📤 Category reorder API Payload:', categoryOrders);
+      
+      await productService.reorderCategories(categoryOrders);
+      console.log('✅ Category reordering successful');
+      
+    } catch (error: any) {
+      console.error('❌ Category reordering failed:', error);
+      setCategories(categories); // Revert
+      alert(t('Kategori sıralaması kaydedilirken bir hata oluştu: ' + error.message));
+    } finally {
+      setIsReorderingCategories(false);
+      console.log('🏁 Case 1 completed');
+    }
+    return;
+  }
+
+  // If we get here, no case was matched
+  console.log('❌ NO CASE MATCHED');
+  console.log('This should not happen. Combination:', {
+    activeType: activeCategory ? 'category' : activeProduct ? 'product' : 'unknown',
+    overType: overCategory ? 'category' : overProduct ? 'product' : 'unknown'
+  });
+  console.log('🚀 === DRAG END FINISHED ===');
+};
 
   const filteredCategories = categories.map(category => ({
     ...category,
@@ -1244,6 +1468,20 @@ const ProductsContent: React.FC = () => {
       onDragEnd={handleDragEnd}
     >
       <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+         {(isReorderingCategories || isReorderingProducts) && (
+        <div className="fixed top-4 right-4 z-50 bg-primary-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          <span className="text-sm">
+            {isReorderingCategories 
+              ? t('Kategori sıralaması kaydediliyor...') 
+              : reorderingCategoryId 
+                ? t('Ürün taşınıyor...')
+                : t('Ürün sıralaması kaydediliyor...')
+            }
+          </span>
+        </div>
+      )}
+
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="relative flex-1 max-w-md">
@@ -1311,36 +1549,26 @@ const ProductsContent: React.FC = () => {
           </div>
         </div>
 
-        <SortableContext items={filteredCategories.map(cat => cat.categoryId)} strategy={verticalListSortingStrategy}>
-          <div className="space-y-4">
-            {filteredCategories.map((category) => (
-              <SortableCategory
-                key={category.categoryId}
-                category={category}
-                isDark={isDark}
-                onToggle={toggleCategory}
-                onEditProduct={handleEditProduct}
-                onDeleteProduct={handleDeleteProduct}
-                onEditCategory={handleEditCategory}
-                onDeleteCategory={handleDeleteCategory}
-                activeId={activeId}
-                allCategories={categories}
-              />
-            ))}
-
-            {filteredCategories.length === 0 && searchQuery && (
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
-                <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  {t('Arama sonucu bulunamadı')}
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400">
-                  {t('"{0}" araması için ürün bulunamadı. Farklı bir arama terimi deneyin.')}
-                </p>
-              </div>
-            )}
-          </div>
-        </SortableContext>
+      <SortableContext items={filteredCategories.map(cat => cat.categoryId)} strategy={verticalListSortingStrategy}>
+        <div className="space-y-4">
+          {filteredCategories.map((category) => (
+            <SortableCategory
+              key={category.categoryId}
+              category={category}
+              isDark={isDark}
+              onToggle={toggleCategory}
+              onEditProduct={handleEditProduct}
+              onDeleteProduct={handleDeleteProduct}
+              onEditCategory={handleEditCategory}
+              onDeleteCategory={handleDeleteCategory}
+              activeId={activeId}
+              allCategories={categories}
+              // Show loading state for the category being modified
+              isReorderingProducts={isReorderingProducts && reorderingCategoryId === category.categoryId}
+            />
+          ))}
+        </div>
+      </SortableContext>
 
         <DragOverlay>
           {activeId ? (

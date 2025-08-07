@@ -1015,16 +1015,16 @@ popularProducts: {
 weeklyActivity: {
   title: 'Haftalık Aktivite',
   empty: {
-    primary: 'Henüz aktivite verisi bulunmuyor',
-    secondary: 'Veriler yakında burada görünecek'
+    primary: 'No activity data yet',
+    secondary: 'Data will appear here soon'
   },
   labels: {
-    views: 'Görüntülenme',
-    qrScans: 'QR Tarama'
+    views: 'Views',
+    qrScans: 'QR Scan'
   },
   legend: {
-    views: 'Görüntülenme',
-    qrScans: 'QR Tarama'
+    views: 'Views',
+    qrScans: 'QR Scan'
   }
 },
 monthlyRevenue: {

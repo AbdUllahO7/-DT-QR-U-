@@ -1,6 +1,6 @@
 import { httpClient } from '../utils/http';
 import { logger } from '../utils/logger';
-import type { Category, Product } from '../types/dashboard';
+import type { Category, CategoryReorderRequest, Product, ProductReorderRequest } from '../types/dashboard';
 
 // API Response interfaces (what the backend actually returns)
 interface APIProduct {
@@ -334,6 +334,73 @@ class ProductService {
       throw error;
     }
   }
+
+  async reorderCategories(categoryOrders: Array<{
+    categoryId: number;
+    newDisplayOrder: number;
+  }>): Promise<void> {
+    try {
+      const payload: CategoryReorderRequest = {
+        categoryOrders: categoryOrders
+      };
+
+      logger.info('Kategori sıralama isteği gönderiliyor', { 
+        payload,
+        totalCategories: categoryOrders.length 
+      });
+      
+      const response = await httpClient.post(`${this.baseUrl}/Categories/reorder`, payload);
+      
+      logger.info('Kategori sıralaması başarıyla güncellendi', { 
+        updatedCategories: categoryOrders.length,
+        response: response.status 
+      });
+    } catch (error: any) {
+      logger.error('❌ Kategori sıralaması güncellenirken hata:', error);
+      
+      // Re-throw with more specific error message if needed
+      if (error.response?.status === 400) {
+        throw new Error('Geçersiz kategori sıralama verisi');
+      } else if (error.response?.status === 404) {
+        throw new Error('Bir veya daha fazla kategori bulunamadı');
+      } else {
+        throw new Error('Kategori sıralaması kaydedilirken bir hata oluştu');
+      }
+    }
+  }
+  async reorderProducts(productOrders: Array<{
+      productId: number;
+      newDisplayOrder: number;
+    }>): Promise<void> {
+      try {
+        const payload: ProductReorderRequest = {
+          productOrders: productOrders
+        };
+
+        logger.info('Ürün sıralama isteği gönderiliyor', { 
+          payload,
+          totalProducts: productOrders.length 
+        });
+        
+        const response = await httpClient.post(`${this.baseUrl}/Products/reorder`, payload);
+        
+        logger.info('Ürün sıralaması başarıyla güncellendi', { 
+          updatedProducts: productOrders.length,
+          response: response.status 
+        });
+      } catch (error: any) {
+        logger.error('❌ Ürün sıralaması güncellenirken hata:', error);
+        
+        // Re-throw with more specific error message if needed
+        if (error.response?.status === 400) {
+          throw new Error('Geçersiz ürün sıralama verisi');
+        } else if (error.response?.status === 404) {
+          throw new Error('Bir veya daha fazla ürün bulunamadı');
+        } else {
+          throw new Error('Ürün sıralaması kaydedilirken bir hata oluştu');
+        }
+      }
+    }
 }
 
 export const productService = new ProductService();
