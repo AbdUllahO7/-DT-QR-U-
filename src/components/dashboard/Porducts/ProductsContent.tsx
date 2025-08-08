@@ -33,6 +33,7 @@ import { EditProductModal } from './EditProductModal';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import ProductIngredientSelectionModal from './ProductIngredientSelectionModal';
 import ProductIngredientUpdateModal from './ProductIngredientUpdateModal';
+import ProductAddonsModal from './ProductAddonsModal';
 
 // Add custom styles for line clamping
 const customStyles = `
@@ -75,8 +76,38 @@ const ProductsContent: React.FC = () => {
     productName: string;
   } | null>(null);
 
-  console.log("selectedProductForIngredientUpdate",selectedProductForIngredientUpdate)
-  
+ const [isAddonsModalOpen, setIsAddonsModalOpen] = useState(false);
+  const [selectedProductForAddons, setSelectedProductForAddons] = useState<{
+    productId: number;
+    productName: string;
+  } | null>(null);
+  const handleOpenAddonsManagement = (productId: number, productName: string) => {
+    console.log('🔍 handleOpenAddonsManagement called with:', {
+      productId,
+      productName,
+      productIdType: typeof productId,
+      isValidId: productId && productId !== 0 && !isNaN(productId)
+    });
+    
+    if (!productId || productId === 0 || isNaN(productId)) {
+      console.error('❌ Invalid productId provided:', productId);
+      alert('Geçersiz ürün ID - eklenti yönetimi açılamıyor');
+      return;
+    }
+    
+    if (!productName || productName.trim() === '') {
+      console.error('❌ Invalid productName provided:', productName);
+      alert('Geçersiz ürün adı - eklenti yönetimi açılamıyor');
+      return;
+    }
+    
+    console.log('✅ Setting addons state with valid data');
+    setSelectedProductForAddons({ 
+      productId: productId, 
+      productName: productName 
+    });
+    setIsAddonsModalOpen(true);
+  };  
   const [deleteConfig, setDeleteConfig] = useState<{
     type: 'product' | 'category';
     id: number;
@@ -138,6 +169,7 @@ const ProductsContent: React.FC = () => {
       setLoading(true);
       const fetchedCategories = await productService.getCategories();
       setCategories(fetchedCategories);
+      
     } catch (error) {
       logger.error('Kategori verileri alınamadı:', error);
     } finally {
@@ -737,8 +769,8 @@ const ProductsContent: React.FC = () => {
               onEditCategory={handleEditCategory}
               onDeleteCategory={handleDeleteCategory}
               activeId={activeId}
+              onOpenAddonsManagement={handleOpenAddonsManagement}
               allCategories={categories}
-              // Show loading state for the category being modified
               isReorderingProducts={isReorderingProducts && reorderingCategoryId === category.categoryId}
             />
           ))}
@@ -871,6 +903,18 @@ const ProductsContent: React.FC = () => {
           title={deleteConfig.title}
           message={deleteConfig.message}
           isSubmitting={isDeleting}
+        />
+      )}
+      {isAddonsModalOpen && selectedProductForAddons && (
+        <ProductAddonsModal
+          isOpen={isAddonsModalOpen}
+          onClose={() => {
+            setIsAddonsModalOpen(false);
+            setSelectedProductForAddons(null);
+          }}
+          onSuccess={loadCategories}
+          productId={selectedProductForAddons.productId}
+          productName={selectedProductForAddons.productName}
         />
       )}
       {isIngredientSelectionModalOpen && selectedProductForIngredients && (

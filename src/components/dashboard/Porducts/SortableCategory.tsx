@@ -5,7 +5,6 @@ import { CSS } from "@dnd-kit/utilities";
 import { Edit2, GripVertical, Loader2, Package, Trash2 } from "lucide-react";
 import { SortableProduct } from "./SortableProduct";
 
-
 export const SortableCategory: React.FC<{
   category: Category;
   isDark: boolean;
@@ -16,7 +15,8 @@ export const SortableCategory: React.FC<{
   onDeleteCategory: (categoryId: number) => void;
   activeId: number | null;
   allCategories: Category[];
-  isReorderingProducts?: boolean; // Add this prop
+  isReorderingProducts?: boolean;
+  onOpenAddonsManagement?: (productId: number, productName: string) => void; // New prop
 }> = ({ 
   category, 
   isDark, 
@@ -25,9 +25,8 @@ export const SortableCategory: React.FC<{
   onDeleteProduct, 
   onEditCategory, 
   onDeleteCategory, 
-  activeId, 
-  allCategories,
-  isReorderingProducts = false // Add this prop with default value
+  isReorderingProducts = false,
+  onOpenAddonsManagement // New prop
 }) => {
   const { t } = useLanguage();
   const {
@@ -135,6 +134,7 @@ export const SortableCategory: React.FC<{
                   isDark={isDark}
                   onEdit={onEditProduct}
                   onDelete={onDeleteProduct}
+                  onOpenAddonsManagement={onOpenAddonsManagement}
                 />
               ))}
               {category.products.length === 0 && (
