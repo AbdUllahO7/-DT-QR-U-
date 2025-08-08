@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useTheme } from '../contexts/ThemeContext';
 import Navbar from '../components/dashboard/layout/Navbar';
 import Sidebar from '../components/dashboard/layout/Sidebar';
 import Overview from '../components/dashboard/content/Overview';
@@ -21,6 +20,7 @@ import { restaurantService } from '../services/restaurantService';
 import { decodeToken } from '../utils/http';
 import { sanitizePlaceholder } from '../utils/sanitize';
 import { logger } from '../utils/logger';
+import IngredientsContent from '../components/dashboard/Ingredients/Ingredients';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();
@@ -147,6 +147,7 @@ const Dashboard: React.FC = () => {
           {activeTab === 'overview' && <Overview />}
           {activeTab === 'orders' && <Orders />}
           {activeTab === 'products' && <ProductsContent />}
+          {activeTab === 'ingredients' && <IngredientsContent />}
           {activeTab === 'branches' && <BranchManagement />}
           {activeTab === 'tables' && <TableManagement selectedBranch={selectedBranch} />}
           {activeTab === 'restaurant-management' && <RestaurantManagement />}

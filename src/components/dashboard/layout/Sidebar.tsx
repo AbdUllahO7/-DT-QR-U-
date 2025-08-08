@@ -12,7 +12,8 @@ import {
   X,
   Eye,
   ChevronDown,
-  Check
+  Check,
+  FolderPlus
 } from 'lucide-react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -175,6 +176,17 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <ShoppingCart className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.products.title')}</span>
+            </button>
+              <button
+              onClick={() => handleNavigate('ingredients', 'ingredients')}
+              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
+                activeTab === 'ingredients'
+                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+              } ${isRTL ? 'text-right' : 'text-left'}`}
+            >
+              <FolderPlus className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+              <span>{t('dashboard.ingredients.title')}</span>
             </button>
 
             <button
