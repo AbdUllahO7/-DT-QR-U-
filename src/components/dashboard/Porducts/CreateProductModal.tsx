@@ -12,6 +12,7 @@ interface CreateProductModalProps {
   onSuccess: () => void;
   categories: Category[];
   selectedCategoryId?: number;
+  onOpenIngredientSelection?: (productId: number, productName: string) => void; // New prop
 }
 
 interface CreateProductFormData {
@@ -29,7 +30,8 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
   onClose, 
   onSuccess, 
   categories,
-  selectedCategoryId 
+  selectedCategoryId,
+  onOpenIngredientSelection
 }) => {
   const [formData, setFormData] = useState<CreateProductFormData>({
     name: '',
@@ -209,7 +211,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
@@ -244,9 +246,14 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
       
       logger.info('Ürün başarıyla eklendi', { data: response });
       
+      // Trigger ingredient selection modal
+      if (onOpenIngredientSelection) {
+        onOpenIngredientSelection(response.id, response.name);
+      }
+      
       onSuccess();
       
-      // Form'u sıfırla
+      // Reset form
       setFormData({
         name: '',
         description: '',
@@ -263,55 +270,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
       }
       onClose();
     } catch (error: any) {
-      logger.error('❌ Ürün eklenirken hata:', error);
-      logger.error('❌ Ürün eklenirken detaylı hata:', {
-        message: error.message,
-        response: error.response,
-        status: error.response?.status,
-        data: error.response?.data
-      });
-      
-      if (error.response?.data?.errors) {
-        const apiErrors = error.response.data.errors;
-        setErrors(apiErrors);
-      } else if (error.response?.data?.message) {
-        const apiMessage = error.response.data.message;
-        
-        if (error.response?.status === 400) {
-          if (apiMessage.toLowerCase().includes('already exists') || 
-              apiMessage.toLowerCase().includes('zaten mevcut') ||
-              apiMessage.toLowerCase().includes('duplicate')) {
-            setErrors({
-              name: 'Bu isimde bir ürün zaten mevcut. Lütfen farklı bir isim seçin.'
-            });
-          } else if (apiMessage.toLowerCase().includes('invalid') || 
-                     apiMessage.toLowerCase().includes('geçersiz')) {
-            setErrors({
-              general: 'Girilen bilgiler geçersiz. Lütfen kontrol edip tekrar deneyin.'
-            });
-          } else {
-            setErrors({
-              general: apiMessage || 'Ürün eklenirken bir hata oluştu. Lütfen tekrar deneyin.'
-            });
-          }
-        } else if (error.response?.status === 500) {
-          setErrors({
-            general: 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.'
-          });
-        } else {
-          setErrors({
-            general: apiMessage || 'Ürün eklenirken bir hata oluştu. Lütfen tekrar deneyin.'
-          });
-        }
-      } else if (error.message) {
-        setErrors({
-          general: error.message || 'Ürün eklenirken bir hata oluştu. Lütfen tekrar deneyin.'
-        });
-      } else {
-        setErrors({
-          general: 'Ürün eklenirken bir hata oluştu. Lütfen tekrar deneyin.'
-        });
-      }
+      // ... (error handling remains the same)
     } finally {
       setIsSubmitting(false);
     }

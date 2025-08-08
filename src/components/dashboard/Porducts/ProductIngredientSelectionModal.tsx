@@ -21,13 +21,11 @@ interface AllergenDetail {
   note: string;
 }
 
-interface Allergen {
-  id: number;
-  code: string;
-  name: string;
-  icon: string;
-  displayOrder: number;
-  description: string;
+// New interface for ingredient selection with quantity and unit
+interface SelectedIngredient {
+  ingredientId: number;
+  quantity: number;
+  unit: string;
 }
 
 interface ProductIngredientSelectionModalProps {
@@ -50,12 +48,15 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
 
   // State
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  const [selectedIngredientIds, setSelectedIngredientIds] = useState<number[]>([]);
-  const [currentProductIngredients, setCurrentProductIngredients] = useState<number[]>([]);
+  const [selectedIngredients, setSelectedIngredients] = useState<SelectedIngredient[]>([]);
+  const [currentProductIngredients, setCurrentProductIngredients] = useState<SelectedIngredient[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Predefined units for selection
+  const unitOptions = ['g', 'ml', 'piece', 'tbsp', 'tsp'];
 
   // Load ingredients and current product ingredients
   const loadData = async () => {
@@ -72,19 +73,23 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
       // Load current product ingredients if editing
       try {
         const currentIngredients = await productService.getProductIngredients(productId);
-        const currentIds = currentIngredients.map((ing: any) => ing.ingredientId || ing.id);
-        setCurrentProductIngredients(currentIds);
-        setSelectedIngredientIds([...currentIds]);
+        // Assuming the API returns ingredients with quantity and unit
+        const current = currentIngredients.map((ing: any) => ({
+          ingredientId: ing.ingredientId || ing.id,
+          quantity: ing.quantity || 0,
+          unit: ing.unit || 'piece'
+        }));
+        setCurrentProductIngredients(current);
+        setSelectedIngredients([...current]);
         
         logger.info('Mevcut ürün malzemeleri yüklendi', { 
           productId, 
-          currentIngredients: currentIds 
+          currentIngredients: current 
         });
       } catch (ingredientError) {
-        // Product might not have ingredients yet, that's okay
         logger.info('Ürün malzemeleri bulunamadı (yeni ürün olabilir)', { productId });
         setCurrentProductIngredients([]);
-        setSelectedIngredientIds([]);
+        setSelectedIngredients([]);
       }
 
       logger.info('Malzeme verileri yüklendi', { 
@@ -108,26 +113,133 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
 
   // Handle ingredient selection
   const toggleIngredient = (ingredientId: number) => {
-    setSelectedIngredientIds(prev => {
-      if (prev.includes(ingredientId)) {
-        return prev.filter(id => id !== ingredientId);
+    setSelectedIngredients(prev => {
+      if (prev.some(ing => ing.ingredientId === ingredientId)) {
+        return prev.filter(ing => ing.ingredientId !== ingredientId);
       } else {
-        return [...prev, ingredientId];
+        return [...prev, { ingredientId, quantity: 1, unit: 'piece' }]; // Default values
       }
     });
   };
 
-  // Save ingredient selection
+  // Handle quantity and unit changes
+  const updateIngredient = (ingredientId: number, field: 'quantity' | 'unit', value: string | number) => {
+    setSelectedIngredients(prev =>
+      prev.map(ing =>
+        ing.ingredientId === ingredientId
+          ? { ...ing, [field]: field === 'quantity' ? parseFloat(value as string) || 0 : value }
+          : ing
+      )
+    );
+  };
+
+  // Save ingredient selection using remove approach
   const handleSave = async () => {
     setSaving(true);
     setError(null);
 
+    // Validate inputs for selected ingredients
+    for (const ing of selectedIngredients) {
+      if (ing.quantity <= 0) {
+        setError(t('Tüm malzemeler için miktar 0\'dan büyük olmalıdır.'));
+        setSaving(false);
+        return;
+      }
+      if (!ing.unit) {
+        setError(t('Tüm malzemeler için birim seçilmelidir.'));
+        setSaving(false);
+        return;
+      }
+    }
+
     try {
-      await productService.updateProductIngredients(productId, selectedIngredientIds);
+      // Step 1: Remove ingredients that are no longer selected
+      const currentIngredientIds = currentProductIngredients.map(ing => ing.ingredientId);
+      const selectedIngredientIds = selectedIngredients.map(ing => ing.ingredientId);
+      const ingredientsToRemove = currentIngredientIds.filter(id => !selectedIngredientIds.includes(id));
+
+      logger.info('Silinecek malzemeler', { 
+        productId, 
+        ingredientsToRemove,
+        currentCount: currentIngredientIds.length,
+        selectedCount: selectedIngredientIds.length
+      });
+
+      // Remove ingredients one by one
+      for (const ingredientId of ingredientsToRemove) {
+        try {
+          await productService.removeIngredientFromProduct(productId, ingredientId);
+          logger.info('Malzeme başarıyla silindi', { productId, ingredientId });
+        } catch (removeError: any) {
+          logger.error('Malzeme silinirken hata:', { productId, ingredientId, error: removeError });
+          // Continue with other removals even if one fails
+        }
+      }
+
+      // Step 2: Add new ingredients that were selected
+      const newIngredients = selectedIngredients.filter(selected => 
+        !currentIngredientIds.includes(selected.ingredientId)
+      );
+
+      logger.info('Eklenecek yeni malzemeler', { 
+        productId, 
+        newIngredients: newIngredients.map(ing => ing.ingredientId),
+        count: newIngredients.length
+      });
+
+      if (newIngredients.length > 0) {
+        await productService.addIngredientsToProduct(productId, newIngredients);
+        logger.info('Yeni malzemeler başarıyla eklendi', { 
+          productId, 
+          addedCount: newIngredients.length 
+        });
+      }
+
+      // Step 3: Update existing ingredients that have quantity/unit changes
+      const existingIngredients = selectedIngredients.filter(selected => 
+        currentIngredientIds.includes(selected.ingredientId)
+      );
+
+      for (const updatedIngredient of existingIngredients) {
+        const currentIngredient = currentProductIngredients.find(
+          curr => curr.ingredientId === updatedIngredient.ingredientId
+        );
+        
+        // Check if quantity or unit changed
+        if (currentIngredient && 
+            (currentIngredient.quantity !== updatedIngredient.quantity || 
+             currentIngredient.unit !== updatedIngredient.unit)) {
+          
+          try {
+            // Remove the old ingredient
+            await productService.removeIngredientFromProduct(productId, updatedIngredient.ingredientId);
+            // Add it back with new values
+            await productService.addIngredientsToProduct(productId, [updatedIngredient]);
+            
+            logger.info('Malzeme miktarı/birimi güncellendi', { 
+              productId, 
+              ingredientId: updatedIngredient.ingredientId,
+              oldQuantity: currentIngredient.quantity,
+              newQuantity: updatedIngredient.quantity,
+              oldUnit: currentIngredient.unit,
+              newUnit: updatedIngredient.unit
+            });
+          } catch (updateError: any) {
+            logger.error('Malzeme güncellenirken hata:', { 
+              productId, 
+              ingredientId: updatedIngredient.ingredientId, 
+              error: updateError 
+            });
+          }
+        }
+      }
       
       logger.info('Ürün malzemeleri başarıyla kaydedildi', { 
         productId, 
-        ingredientCount: selectedIngredientIds.length 
+        totalSelected: selectedIngredients.length,
+        removed: ingredientsToRemove.length,
+        added: newIngredients.length,
+        updated: existingIngredients.length
       });
       
       onSuccess();
@@ -205,9 +317,9 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
           <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                {t('Seçilen malzemeler')}: <strong>{selectedIngredientIds.length}</strong>
+                {t('Seçilen malzemeler')}: <strong>{selectedIngredients.length}</strong>
               </span>
-              {selectedIngredientIds.length !== currentProductIngredients.length && (
+              {JSON.stringify(selectedIngredients) !== JSON.stringify(currentProductIngredients) && (
                 <span className="text-xs text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-2 py-1 rounded">
                   {t('Değişiklik var')}
                 </span>
@@ -232,13 +344,13 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {filteredIngredients.map((ingredient) => {
-                  const isSelected = selectedIngredientIds.includes(ingredient.id);
-                  const wasOriginallySelected = currentProductIngredients.includes(ingredient.id);
+                  const isSelected = selectedIngredients.some(ing => ing.ingredientId === ingredient.id);
+                  const wasOriginallySelected = currentProductIngredients.some(ing => ing.ingredientId === ingredient.id);
+                  const selectedIngredient = selectedIngredients.find(ing => ing.ingredientId === ingredient.id);
 
                   return (
                     <div
                       key={ingredient.id}
-                      onClick={() => toggleIngredient(ingredient.id)}
                       className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                         isSelected
                           ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 shadow-sm'
@@ -248,6 +360,13 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
+                            <input
+                            title='isSelected'
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleIngredient(ingredient.id)}
+                              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                            />
                             <h4 className="font-medium text-gray-900 dark:text-white truncate">
                               {ingredient.name}
                             </h4>
@@ -263,8 +382,39 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
                             )}
                           </div>
 
+                          {/* Quantity and Unit Inputs */}
+                          {isSelected && (
+                            <div className="grid grid-cols-2 gap-2 mt-2">
+                              <div>
+                                <label className="text-xs text-gray-600 dark:text-gray-400">{t('Miktar')}</label>
+                                <input
+                                  type="number"
+                                  value={selectedIngredient?.quantity || 1}
+                                  onChange={(e) => updateIngredient(ingredient.id, 'quantity', e.target.value)}
+                                  min="0"
+                                  step="0.1"
+                                  className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                  placeholder="Miktar"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-xs text-gray-600 dark:text-gray-400">{t('Birim')}</label>
+                                <select
+                                  title='piece'
+                                  value={selectedIngredient?.unit || 'piece'}
+                                  onChange={(e) => updateIngredient(ingredient.id, 'unit', e.target.value)}
+                                  className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                >
+                                  {unitOptions.map(unit => (
+                                    <option key={unit} value={unit}>{unit}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+                          )}
+
                           {/* Availability Status */}
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center gap-2 mt-2">
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                               ingredient.isAvailable
                                 ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
@@ -282,7 +432,7 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
 
                           {/* Allergen Information */}
                           {ingredient.isAllergenic && ingredient.allergenIds?.length > 0 && (
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
+                            <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                               {getAllergenInfo(ingredient.allergenIds)}
                             </div>
                           )}
@@ -317,6 +467,14 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
               className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
             >
               {t('İptal')}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={saving}
+              className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+            >
+              {t('Atla')}
             </button>
             <button
               type="button"

@@ -23,7 +23,15 @@ interface APICategory {
   products: APIProduct[];
   description?: string; // May or may not be included
 }
-
+interface ProductIngredient {
+  ingredientId: number;
+  quantity: number;
+  unit: string;
+}
+interface UpdateIngredientsPayload {
+  productId: number;
+  ingredients: ProductIngredient[];
+}
 class ProductService {
   private baseUrl = '/api';
 
@@ -400,21 +408,21 @@ class ProductService {
           throw new Error('Ürün sıralaması kaydedilirken bir hata oluştu');
         }
       }
-    }
-     async addIngredientsToProduct(productId: number, ingredientIds: number[]): Promise<void> {
+  }
+  async addIngredientsToProduct(productId: number, ingredients: ProductIngredient[]): Promise<void> {
     try {
       const payload = {
         productId: productId,
-        ingredientIds: ingredientIds
+        ingredients: ingredients // Send the full ingredient objects with quantity and unit
       };
 
-      logger.info('Ürüne malzemeler ekleniyor', { productId, ingredientIds, payload });
+      logger.info('Ürüne malzemeler ekleniyor', { productId, ingredients, payload });
       
       const response = await httpClient.post(`${this.baseUrl}/Products/ingredients/batch`, payload);
       
       logger.info('Ürün malzemeleri başarıyla eklendi', { 
         productId, 
-        ingredientCount: ingredientIds.length,
+        ingredientCount: ingredients.length,
         response: response.status 
       });
     } catch (error: any) {
@@ -423,7 +431,7 @@ class ProductService {
     }
   }
 
-   async removeIngredientFromProduct(productId: number, ingredientId: number): Promise<void> {
+ async removeIngredientFromProduct(productId: number, ingredientId: number): Promise<void> {
     try {
       logger.info('Ürün malzemesi siliniyor', { productId, ingredientId });
       
@@ -454,36 +462,7 @@ class ProductService {
     }
   }
 
-  async updateProductIngredients(productId: number, newIngredientIds: number[]): Promise<void> {
-    try {
-      logger.info('Ürün malzemeleri güncelleniyor', { productId, newIngredientIds });
 
-      // First get current ingredients
-      const currentIngredients = await this.getProductIngredients(productId);
-      const currentIngredientIds = currentIngredients.map((ing: any) => ing.ingredientId || ing.id);
-
-      // Remove ingredients that are no longer selected
-      const ingredientsToRemove = currentIngredientIds.filter((id: number) => !newIngredientIds.includes(id));
-      for (const ingredientId of ingredientsToRemove) {
-        await this.removeIngredientFromProduct(productId, ingredientId);
-      }
-
-      // Add new ingredients
-      const ingredientsToAdd = newIngredientIds.filter(id => !currentIngredientIds.includes(id));
-      if (ingredientsToAdd.length > 0) {
-        await this.addIngredientsToProduct(productId, ingredientsToAdd);
-      }
-
-      logger.info('Ürün malzemeleri başarıyla güncellendi', { 
-        productId, 
-        removed: ingredientsToRemove.length,
-        added: ingredientsToAdd.length
-      });
-    } catch (error: any) {
-      logger.error('❌ Ürün malzemeleri güncellenirken hata:', error);
-      throw error;
-    }
-  }
 }
 
 export const productService = new ProductService();

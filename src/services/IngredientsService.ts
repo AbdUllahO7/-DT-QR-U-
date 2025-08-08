@@ -44,48 +44,48 @@ class IngredientsService {
     }
   }
 
-  // Malzeme güncelleme (PUT)
-    async updateIngredient(ingredientData: UpdateIngredientData): Promise<Ingredient> {
-    try {
-        const payload = {
-        ingredientId: ingredientData.id, // ← ADDED: Include ingredientId in payload
-        name: ingredientData.name,
-        isAllergenic: ingredientData.isAllergenic,
-        isAvailable: ingredientData.isAvailable,
-        allergenIds: ingredientData.allergenIds,
-        allergenDetails: ingredientData.allergenDetails,
-        };
-        
-        logger.info('Malzeme güncelleme isteği gönderiliyor', { 
-        id: ingredientData.id, 
-        payload 
-        });
-        
-        const response = await httpClient.put<APIIngredient>(`${this.baseUrl}/Ingredients`, payload);
-        
-        logger.info('Malzeme başarıyla güncellendi', { data: response.data });
-        
-        // Transform API response to internal format
-        const transformedIngredient: Ingredient = {
-        id: response.data.ingredientId,
-        name: response.data.name,
-        isAllergenic: response.data.isAllergenic,
-        isAvailable: response.data.isAvailable,
-        // Transform allergens array to allergenIds and allergenDetails
-        allergenIds: response.data.allergens?.map((allergen: any) => allergen.id) || [],
-        allergenDetails: response.data.allergens?.map((allergen: any) => ({
-            allergenId: allergen.id,
-            containsAllergen: allergen.containsAllergen !== null ? allergen.containsAllergen : true,
-            note: allergen.note || ''
-        })) || []
-        };
-        
-        return transformedIngredient;
-    } catch (error: any) {
-        logger.error('❌ Malzeme güncellenirken hata:', error);
-        throw error;
-    }
-    }
+    // Malzeme güncelleme (PUT)
+      async updateIngredient(ingredientData: UpdateIngredientData): Promise<Ingredient> {
+      try {
+          const payload = {
+          ingredientId: ingredientData.id, // ← ADDED: Include ingredientId in payload
+          name: ingredientData.name,
+          isAllergenic: ingredientData.isAllergenic,
+          isAvailable: ingredientData.isAvailable,
+          allergenIds: ingredientData.allergenIds,
+          allergenDetails: ingredientData.allergenDetails,
+          };
+          
+          logger.info('Malzeme güncelleme isteği gönderiliyor', { 
+          id: ingredientData.id, 
+          payload 
+          });
+          
+          const response = await httpClient.put<APIIngredient>(`${this.baseUrl}/Ingredients`, payload);
+          
+          logger.info('Malzeme başarıyla güncellendi', { data: response.data });
+          
+          // Transform API response to internal format
+          const transformedIngredient: Ingredient = {
+          id: response.data.ingredientId,
+          name: response.data.name,
+          isAllergenic: response.data.isAllergenic,
+          isAvailable: response.data.isAvailable,
+          // Transform allergens array to allergenIds and allergenDetails
+          allergenIds: response.data.allergens?.map((allergen: any) => allergen.id) || [],
+          allergenDetails: response.data.allergens?.map((allergen: any) => ({
+              allergenId: allergen.id,
+              containsAllergen: allergen.containsAllergen !== null ? allergen.containsAllergen : true,
+              note: allergen.note || ''
+          })) || []
+          };
+          
+          return transformedIngredient;
+      } catch (error: any) {
+          logger.error('❌ Malzeme güncellenirken hata:', error);
+          throw error;
+      }
+      }
 
   // Tüm malzemeleri getir (GET) - FIXED
   async getIngredients(): Promise<Ingredient[]> {
