@@ -178,6 +178,9 @@ export const en = {
       title: 'Products',
       description: 'View and manage your products.'
     },
+    ingredients : {
+      title : "Ingredients"
+    },
     tables: {
       title: 'Table Management',
       description: 'Table management operations.',

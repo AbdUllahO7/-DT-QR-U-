@@ -171,6 +171,9 @@ export const ar = {
       title: 'المنتجات',
       description: 'عرض وإدارة منتجاتك.'
     },
+    ingredients : {
+      title : "المكونات"
+    },
     tables: {
       title: 'إدارة الطاولات',
       description: 'عمليات إدارة الطاولات.',

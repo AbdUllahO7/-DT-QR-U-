@@ -172,6 +172,9 @@ export const tr = {
       title: 'Ürünler',
       description: 'Ürünlerinizi görüntüleyin ve yönetin.'
     },
+    ingredients : {
+      title : "İçerik"
+    },
     tables: {
       title: 'Masa Yönetimi',
       description: 'Masa yönetimi işlemleri.',

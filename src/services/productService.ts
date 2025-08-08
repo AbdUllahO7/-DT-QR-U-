@@ -401,6 +401,89 @@ class ProductService {
         }
       }
     }
+     async addIngredientsToProduct(productId: number, ingredientIds: number[]): Promise<void> {
+    try {
+      const payload = {
+        productId: productId,
+        ingredientIds: ingredientIds
+      };
+
+      logger.info('Ürüne malzemeler ekleniyor', { productId, ingredientIds, payload });
+      
+      const response = await httpClient.post(`${this.baseUrl}/Products/ingredients/batch`, payload);
+      
+      logger.info('Ürün malzemeleri başarıyla eklendi', { 
+        productId, 
+        ingredientCount: ingredientIds.length,
+        response: response.status 
+      });
+    } catch (error: any) {
+      logger.error('❌ Ürün malzemeleri eklenirken hata:', error);
+      throw error;
+    }
+  }
+
+   async removeIngredientFromProduct(productId: number, ingredientId: number): Promise<void> {
+    try {
+      logger.info('Ürün malzemesi siliniyor', { productId, ingredientId });
+      
+      await httpClient.delete(`${this.baseUrl}/Products/${productId}/ingredients/${ingredientId}`);
+      
+      logger.info('Ürün malzemesi başarıyla silindi', { productId, ingredientId });
+    } catch (error: any) {
+      logger.error('❌ Ürün malzemesi silinirken hata:', error);
+      throw error;
+    }
+  }
+  
+  async getProductIngredients(productId: number): Promise<any[]> {
+    try {
+      logger.info('Ürün malzemeleri getiriliyor', { productId });
+      
+      const response = await httpClient.get(`${this.baseUrl}/Products/${productId}/ingredients`);
+      
+      logger.info('Ürün malzemeleri başarıyla getirildi', { 
+        productId, 
+        ingredientCount: response.data?.length || 0 
+      });
+      
+      return response.data || [];
+    } catch (error: any) {
+      logger.error('❌ Ürün malzemeleri getirilirken hata:', error);
+      throw error;
+    }
+  }
+
+  async updateProductIngredients(productId: number, newIngredientIds: number[]): Promise<void> {
+    try {
+      logger.info('Ürün malzemeleri güncelleniyor', { productId, newIngredientIds });
+
+      // First get current ingredients
+      const currentIngredients = await this.getProductIngredients(productId);
+      const currentIngredientIds = currentIngredients.map((ing: any) => ing.ingredientId || ing.id);
+
+      // Remove ingredients that are no longer selected
+      const ingredientsToRemove = currentIngredientIds.filter((id: number) => !newIngredientIds.includes(id));
+      for (const ingredientId of ingredientsToRemove) {
+        await this.removeIngredientFromProduct(productId, ingredientId);
+      }
+
+      // Add new ingredients
+      const ingredientsToAdd = newIngredientIds.filter(id => !currentIngredientIds.includes(id));
+      if (ingredientsToAdd.length > 0) {
+        await this.addIngredientsToProduct(productId, ingredientsToAdd);
+      }
+
+      logger.info('Ürün malzemeleri başarıyla güncellendi', { 
+        productId, 
+        removed: ingredientsToRemove.length,
+        added: ingredientsToAdd.length
+      });
+    } catch (error: any) {
+      logger.error('❌ Ürün malzemeleri güncellenirken hata:', error);
+      throw error;
+    }
+  }
 }
 
 export const productService = new ProductService();
