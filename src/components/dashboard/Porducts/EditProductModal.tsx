@@ -1,4 +1,4 @@
-// EditProductModal Component
+// EditProductModal Component - Updated with ingredient selection trigger
 
 import { ImageIcon, Loader2, X } from "lucide-react";
 import { logger } from "../../../utils/logger";
@@ -8,14 +8,16 @@ import { Category, Product } from "../../../types/dashboard";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import { useEffect, useRef, useState } from "react";
 
-// EditProductModal Component - Updated with image upload functionality
+// EditProductModal Component - Updated with ingredient selection functionality
 export const EditProductModal: React.FC<{
-  isOpen: boolean;
+    isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
   product: Product;
   categories: Category[];
-}> = ({ isOpen, onClose, onSuccess, product, categories }) => {
+  onOpenIngredientUpdate?: (productId: number, productName: string) => void; // Changed prop name
+}> = ({ isOpen, onClose, onSuccess, product, categories, onOpenIngredientUpdate }) => {
+  console.log("product 21312",product)
   const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: product.name,
@@ -126,68 +128,100 @@ export const EditProductModal: React.FC<{
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-    setErrors({});
+// Update your handleSubmit function in EditProductModal with this debugging:
 
-    try {
-      // Handle image upload if a new file was selected
-      let finalImageUrl = formData.imageUrl;
-      if (formData.imageFile) {
-        const uploadedUrl = await uploadImage();
-        if (!uploadedUrl) {
-          // Image upload failed, don't proceed
-          return;
-        }
-        finalImageUrl = uploadedUrl;
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setIsSubmitting(true);
+  setError(null);
+  setErrors({});
+
+  try {
+    // Handle image upload if a new file was selected
+    let finalImageUrl = formData.imageUrl;
+    if (formData.imageFile) {
+      const uploadedUrl = await uploadImage();
+      if (!uploadedUrl) {
+        // Image upload failed, don't proceed
+        return;
       }
+      finalImageUrl = uploadedUrl;
+    }
 
-      const payload = {
-        name: formData.name,
-        description: formData.description,
-        price: formData.price,
-        categoryId: formData.categoryId,
-        isAvailable: formData.isAvailable,
-        imageUrl: finalImageUrl
-      };
+    const payload = {
+      name: formData.name,
+      description: formData.description,
+      price: formData.price,
+      categoryId: formData.categoryId,
+      isAvailable: formData.isAvailable,
+      imageUrl: finalImageUrl
+    };
 
-      logger.info('Ürün güncelleme isteği gönderiliyor', { payload, productId: product.id });
+    console.log('🔍 Updating product with payload:', { payload, originalProductId: product.id });
 
-      await productService.updateProduct(product.id, payload);
-      logger.info('Ürün başarıyla güncellendi', { productId: product.id });
-      onSuccess();
-      onClose();
-    } catch (err: any) {
-      logger.error('Ürün güncelleme hatası:', err);
+    const updatedProduct = await productService.updateProduct(product.id, payload);
+    
+    console.log('🔍 Product updated successfully:', {
+      originalProductId: product.id,
+      updatedProduct: updatedProduct,
+      updatedProductId: updatedProduct.id,
+      updatedProductName: updatedProduct.name,
+      updatedProductIdType: typeof updatedProduct.id,
+      isValidUpdatedId: updatedProduct.id && updatedProduct.id !== 0 && !isNaN(updatedProduct.id)
+    });
+    
+    logger.info('Ürün başarıyla güncellendi', { 
+      productId: product.id,
+      updatedProductId: updatedProduct.id 
+    });
+    
+    // Check if callback exists and call it with debug logging
+    if (onOpenIngredientUpdate) {
+      console.log('🔍 Calling onOpenIngredientUpdate with:', {
+        productId: product.id,
+        productName: product.name,
+        productIdType: typeof product.id,
+        callbackExists: typeof onOpenIngredientUpdate === 'function'
+      });
       
-      // API'den gelen spesifik hataları işle
-      if (err.response?.data?.errors) {
-        setErrors(err.response.data.errors);
-      } else if (err.response?.data?.message) {
-        const apiMessage = err.response.data.message;
-        
-        if (err.response?.status === 400) {
-          if (apiMessage.toLowerCase().includes('already exists') || 
-              apiMessage.toLowerCase().includes('zaten mevcut') ||
-              apiMessage.toLowerCase().includes('duplicate')) {
-            setErrors({
-              name: 'Bu isimde bir ürün zaten mevcut. Lütfen farklı bir isim seçin.'
-            });
-          } else {
-            setError(apiMessage || 'Ürün güncellenirken bir hata oluştu. Lütfen tekrar deneyin.');
-          }
+      onOpenIngredientUpdate(product.id, product.name);
+    } else {
+      console.log('❌ onOpenIngredientUpdate callback not provided');
+    }
+    
+    onSuccess();
+    onClose();
+  } catch (err: any) {
+    console.error('❌ Error updating product:', err);
+    logger.error('Ürün güncelleme hatası:', err);
+    
+    // API'den gelen spesifik hataları işle
+    if (err.response?.data?.errors) {
+      setErrors(err.response.data.errors);
+    } else if (err.response?.data?.message) {
+      const apiMessage = err.response.data.message;
+      
+      if (err.response?.status === 400) {
+        if (apiMessage.toLowerCase().includes('already exists') || 
+            apiMessage.toLowerCase().includes('zaten mevcut') ||
+            apiMessage.toLowerCase().includes('duplicate')) {
+          setErrors({
+            name: 'Bu isimde bir ürün zaten mevcut. Lütfen farklı bir isim seçin.'
+          });
         } else {
           setError(apiMessage || 'Ürün güncellenirken bir hata oluştu. Lütfen tekrar deneyin.');
         }
       } else {
-        setError('Ürün güncellenirken bir hata oluştu. Lütfen tekrar deneyin.');
+        setError(apiMessage || 'Ürün güncellenirken bir hata oluştu. Lütfen tekrar deneyin.');
       }
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      setError('Ürün güncellenirken bir hata oluştu. Lütfen tekrar deneyin.');
     }
-  };
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   if (!isOpen) return null;
 

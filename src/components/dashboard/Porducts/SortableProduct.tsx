@@ -1,9 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react"; // Add useEffect
 import { useLanguage } from "../../../contexts/LanguageContext";
 import { Product } from "../../../types/dashboard";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Edit2, EyeOff, GripVertical, Package, Trash2 } from "lucide-react";
+import { Edit2, EyeOff, GripVertical, Package, Trash2, AlertCircle, Loader2 } from "lucide-react";
+import { productService } from "../../../services/productService";
+import { logger } from "../../../utils/logger";
+
+// Define Ingredient type (copied from ProductIngredientSelectionModal for consistency)
+interface Ingredient {
+  id: number;
+  name: string;
+  isAllergenic: boolean;
+  isAvailable: boolean;
+  allergenIds: number[];
+  allergenDetails: AllergenDetail[];
+}
+
+interface AllergenDetail {
+  allergenId: number;
+  containsAllergen: boolean;
+  note: string;
+}
 
 // SortableProduct Component
 export const SortableProduct: React.FC<{
@@ -14,6 +32,10 @@ export const SortableProduct: React.FC<{
 }> = ({ product, isDark, onEdit, onDelete }) => {
   const { t } = useLanguage();
   const [imageError, setImageError] = useState(false);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([]);
+  const [isLoadingIngredients, setIsLoadingIngredients] = useState(false);
+  const [ingredientError, setIngredientError] = useState<string | null>(null);
+
   const {
     attributes,
     listeners,
@@ -30,6 +52,26 @@ export const SortableProduct: React.FC<{
   };
 
   const hasValidImage = product.imageUrl && product.imageUrl !== 'string' && product.imageUrl.trim() !== '' && !imageError;
+
+  // Fetch ingredients when component mounts or product.id changes
+  useEffect(() => {
+    const loadIngredients = async () => {
+      setIsLoadingIngredients(true);
+      setIngredientError(null);
+      try {
+        const fetchedIngredients = await productService.getProductIngredients(product.id);
+        setIngredients(fetchedIngredients);
+        logger.info('Ürün malzemeleri yüklendi', { productId: product.id, ingredientCount: fetchedIngredients.length });
+      } catch (error: any) {
+        logger.error('Malzemeler yüklenirken hata:', error);
+        setIngredientError(t('Malzemeler yüklenirken bir hata oluştu.'));
+      } finally {
+        setIsLoadingIngredients(false);
+      }
+    };
+
+    loadIngredients();
+  }, [product.id, t]);
 
   return (
     <div
@@ -77,6 +119,33 @@ export const SortableProduct: React.FC<{
               </div>
               {product.description && (
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">{product.description}</p>
+              )}
+              {/* Ingredients Display */}
+              {isLoadingIngredients ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('Malzemeler yükleniyor...')}
+                </p>
+              ) : ingredientError ? (
+                <p className="text-sm text-red-600 dark:text-red-400 mb-2 flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4" />
+                  {ingredientError}
+                </p>
+              ) : ingredients.length > 0 ? (
+                <div className="text-sm text-gray-600 dark:text-gray-400 mb-2 flex flex-wrap gap-1">
+                  <span>{t('Malzemeler')}:</span>
+                  {ingredients.map((ingredient, index) => (
+                    <span key={ingredient.id} className="inline-flex items-center">
+                      {ingredient.name}
+                      {ingredient.isAllergenic && (
+                        <AlertCircle className="h-3 w-3 ml-1 text-yellow-500"  />
+                      )}
+                      {index < ingredients.length - 1 && <span>,</span>}
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{t('Malzeme eklenmemiş')}</p>
               )}
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">

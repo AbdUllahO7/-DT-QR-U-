@@ -31,6 +31,8 @@ import { SortableCategory } from './SortableCategory';
 import { EditCategoryModal } from './EditCategoryModal';
 import { EditProductModal } from './EditProductModal';
 import { ConfirmDeleteModal } from './ConfirmDeleteModal';
+import ProductIngredientSelectionModal from './ProductIngredientSelectionModal';
+import ProductIngredientUpdateModal from './ProductIngredientUpdateModal';
 
 // Add custom styles for line clamping
 const customStyles = `
@@ -67,7 +69,14 @@ const ProductsContent: React.FC = () => {
   const [isReorderingCategories, setIsReorderingCategories] = useState(false);
   const [isReorderingProducts, setIsReorderingProducts] = useState(false);
   const [reorderingCategoryId, setReorderingCategoryId] = useState<number | null>(null);
+  const [isIngredientUpdateModalOpen, setIsIngredientUpdateModalOpen] = useState(false);
+  const [selectedProductForIngredientUpdate, setSelectedProductForIngredientUpdate] = useState<{
+    productId: number;
+    productName: string;
+  } | null>(null);
 
+  console.log("selectedProductForIngredientUpdate",selectedProductForIngredientUpdate)
+  
   const [deleteConfig, setDeleteConfig] = useState<{
     type: 'product' | 'category';
     id: number;
@@ -80,7 +89,50 @@ const ProductsContent: React.FC = () => {
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isIngredientSelectionModalOpen, setIsIngredientSelectionModalOpen] = useState(false);
+  const [selectedProductForIngredients, setSelectedProductForIngredients] = useState<{
+    productId: number;
+    productName: string;
+  } | null>(null);
 
+  const handleOpenIngredientSelection = (productId: number, productName: string) => {
+      setSelectedProductForIngredients({ productId: productId, productName: productName });
+      setIsIngredientSelectionModalOpen(true);
+    };
+
+  const handleOpenIngredientUpdate = (productId: number, productName: string) => {
+  console.log('🔍 handleOpenIngredientUpdate called with:', {
+    productId,
+    productName,
+    productIdType: typeof productId,
+    isValidId: productId && productId !== 0 && !isNaN(productId)
+  });
+  
+  // Add validation
+  if (!productId || productId === 0 || isNaN(productId)) {
+    console.error('❌ Invalid productId provided:', productId);
+    alert('Geçersiz ürün ID - malzeme güncelleme açılamıyor');
+    return;
+  }
+  
+  if (!productName || productName.trim() === '') {
+    console.error('❌ Invalid productName provided:', productName);
+    alert('Geçersiz ürün adı - malzeme güncelleme açılamıyor');
+    return;
+  }
+  
+  console.log('✅ Setting state with valid data');
+  setSelectedProductForIngredientUpdate({ 
+    productId: productId, 
+    productName: productName 
+  });
+  setIsIngredientUpdateModalOpen(true);
+  
+  // Use setTimeout to see the updated state (for debugging)
+  setTimeout(() => {
+    console.log('🔍 State after update:', selectedProductForIngredientUpdate);
+  }, 100);
+};
   const loadCategories = async () => {
     try {
       setLoading(true);
@@ -150,6 +202,8 @@ const ProductsContent: React.FC = () => {
       alert(t('Ürün bulunamadı. Lütfen sayfayı yenileyin ve tekrar deneyin.'));
     }
   };
+
+  console.log("selectedProductForIngredientUpdate.productId",selectedProductForIngredientUpdate?.productId)
 
   const handleDeleteCategory = (categoryId: number) => {
     const category = categories.find(cat => cat.categoryId === categoryId);
@@ -656,16 +710,16 @@ const ProductsContent: React.FC = () => {
                 <span className="hidden sm:inline">{t('Yeni Kategori')}</span>
               </button>
 
-              <button 
-                onClick={() => {
-                  setSelectedCategoryForProduct(''); 
-                  setIsCreateProductModalOpen(true);
-                }}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200"
-              >
-                <Plus className="h-4 w-4" />
-                <span>{t('Yeni Ürün')}</span>
-              </button>
+             <button 
+              onClick={() => {
+                setSelectedCategoryForProduct(''); 
+                setIsCreateProductModalOpen(true);
+              }}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200"
+            >
+              <Plus className="h-4 w-4" />
+              <span>{t('Yeni Ürün')}</span>
+            </button>
             </div>
           </div>
         </div>
@@ -744,14 +798,15 @@ const ProductsContent: React.FC = () => {
       />
       
       <CreateProductModal
-        isOpen={isCreateProductModalOpen}
-        onClose={() => {
-          setIsCreateProductModalOpen(false);
-          setSelectedCategoryForProduct('');
-        }}
-        onSuccess={loadCategories}
-        categories={categories}
-      />
+          isOpen={isCreateProductModalOpen}
+          onClose={() => {
+            setIsCreateProductModalOpen(false);
+            setSelectedCategoryForProduct('');
+          }}
+          onSuccess={loadCategories}
+          categories={categories}
+          onOpenIngredientSelection={handleOpenIngredientSelection} // Keep original for creation
+        />
 
       {isEditCategoryModalOpen && selectedCategoryForEdit && (
         <EditCategoryModal
@@ -765,7 +820,7 @@ const ProductsContent: React.FC = () => {
         />
       )}
 
-      {isEditProductModalOpen && selectedProductForEdit && (
+       {isEditProductModalOpen && selectedProductForEdit && (
         <EditProductModal
           isOpen={isEditProductModalOpen}
           onClose={() => {
@@ -775,9 +830,36 @@ const ProductsContent: React.FC = () => {
           onSuccess={loadCategories}
           product={selectedProductForEdit}
           categories={categories}
+          onOpenIngredientUpdate={handleOpenIngredientUpdate} // New prop name
         />
       )}
 
+     {isIngredientUpdateModalOpen && selectedProductForIngredientUpdate && (
+  <>
+    {/* Debug logging */}
+    {console.log('🔍 Rendering modal with:', {
+      modalOpen: isIngredientUpdateModalOpen,
+      selectedProduct: selectedProductForIngredientUpdate,
+      productId: selectedProductForIngredientUpdate.productId,
+      productName: selectedProductForIngredientUpdate.productName,
+      productIdType: typeof selectedProductForIngredientUpdate.productId,
+      isValidProductId: selectedProductForIngredientUpdate.productId && 
+                       selectedProductForIngredientUpdate.productId !== 0 && 
+                       !isNaN(selectedProductForIngredientUpdate.productId)
+    })}
+    
+    <ProductIngredientUpdateModal
+      isOpen={isIngredientUpdateModalOpen}
+      onClose={() => {
+        setIsIngredientUpdateModalOpen(false);
+        setSelectedProductForIngredientUpdate(null);
+      }}
+      onSuccess={loadCategories}
+      productId={selectedProductForIngredientUpdate.productId}
+      productName={selectedProductForIngredientUpdate.productName}
+    />
+  </>
+)}
       {isConfirmDeleteModalOpen && deleteConfig && (
         <ConfirmDeleteModal
           isOpen={isConfirmDeleteModalOpen}
@@ -791,6 +873,19 @@ const ProductsContent: React.FC = () => {
           isSubmitting={isDeleting}
         />
       )}
+      {isIngredientSelectionModalOpen && selectedProductForIngredients && (
+      <ProductIngredientSelectionModal
+        isOpen={isIngredientSelectionModalOpen}
+        onClose={() => {
+          setIsIngredientSelectionModalOpen(false);
+          setSelectedProductForIngredients(null);
+        }}
+        onSuccess={loadCategories}
+        productId={selectedProductForIngredients.productId}
+        productName={selectedProductForIngredients.productName}
+      />
+    )}
+
     </DndContext>
   );
 };
