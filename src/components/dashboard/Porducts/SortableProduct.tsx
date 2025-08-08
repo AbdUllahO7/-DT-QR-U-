@@ -3,9 +3,10 @@ import { useLanguage } from "../../../contexts/LanguageContext";
 import { Product } from "../../../types/dashboard";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Edit2, EyeOff, GripVertical, Package, Trash2, AlertCircle, Loader2 } from "lucide-react";
+import { Edit2, EyeOff, GripVertical, Package, Trash2, AlertCircle, Loader2, Plus } from "lucide-react";
 import { productService } from "../../../services/productService";
 import { logger } from "../../../utils/logger";
+import { productAddonsService } from "../../../services/ProductAddonsService";
 
 // Define Ingredient type (copied from ProductIngredientSelectionModal for consistency)
 interface Ingredient {
@@ -23,18 +24,40 @@ interface AllergenDetail {
   note: string;
 }
 
+// Define Addon type
+interface ProductAddon {
+  id: number;
+  productId: number;
+  addonProductId: number;
+  displayOrder: number;
+  isRecommended: boolean;
+  marketingText: string;
+  addonProduct?: {
+    id: number;
+    name: string;
+    price: number;
+    imageUrl?: string;
+    description?: string;
+    isAvailable: boolean;
+  };
+}
+
 // SortableProduct Component
 export const SortableProduct: React.FC<{
   product: Product;
   isDark: boolean;
   onEdit: (productId: number) => void;
   onDelete: (productId: number) => void;
-}> = ({ product, isDark, onEdit, onDelete }) => {
+  onOpenAddonsManagement?: (productId: number, productName: string) => void; 
+}> = ({ product, isDark, onEdit, onDelete, onOpenAddonsManagement }) => {
   const { t } = useLanguage();
   const [imageError, setImageError] = useState(false);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [isLoadingIngredients, setIsLoadingIngredients] = useState(false);
   const [ingredientError, setIngredientError] = useState<string | null>(null);
+  const [addons, setAddons] = useState<ProductAddon[]>([]);
+  const [isLoadingAddons, setIsLoadingAddons] = useState(false);
+  const [addonError, setAddonError] = useState<string | null>(null);
 
   const {
     attributes,
@@ -53,12 +76,16 @@ export const SortableProduct: React.FC<{
 
   const hasValidImage = product.imageUrl && product.imageUrl !== 'string' && product.imageUrl.trim() !== '' && !imageError;
 
-  // Fetch ingredients when component mounts or product.id changes
+  // Fetch ingredients and addons when component mounts or product.id changes
   useEffect(() => {
-    const loadIngredients = async () => {
+    const loadProductData = async () => {
       setIsLoadingIngredients(true);
+      setIsLoadingAddons(true);
       setIngredientError(null);
+      setAddonError(null);
+      
       try {
+        // Load ingredients
         const fetchedIngredients = await productService.getProductIngredients(product.id);
         setIngredients(fetchedIngredients);
         logger.info('Ürün malzemeleri yüklendi', { productId: product.id, ingredientCount: fetchedIngredients.length });
@@ -68,9 +95,21 @@ export const SortableProduct: React.FC<{
       } finally {
         setIsLoadingIngredients(false);
       }
+
+      try {
+        // Load addons
+        const fetchedAddons = await productAddonsService.getProductAddons(product.id);
+        setAddons(fetchedAddons);
+        logger.info('Ürün eklentileri yüklendi', { productId: product.id, addonCount: fetchedAddons.length });
+      } catch (error: any) {
+        logger.error('Eklentiler yüklenirken hata:', error);
+        setAddonError(t('Eklentiler yüklenirken bir hata oluştu.'));
+      } finally {
+        setIsLoadingAddons(false);
+      }
     };
 
-    loadIngredients();
+    loadProductData();
   }, [product.id, t]);
 
   return (
@@ -120,6 +159,7 @@ export const SortableProduct: React.FC<{
               {product.description && (
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">{product.description}</p>
               )}
+              
               {/* Ingredients Display */}
               {isLoadingIngredients ? (
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1">
@@ -147,11 +187,64 @@ export const SortableProduct: React.FC<{
               ) : (
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">{t('Malzeme eklenmemiş')}</p>
               )}
+
+              {/* Addons Display */}
+              {isLoadingAddons ? (
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {t('Eklentiler yükleniyor...')}
+                </p>
+              ) : addonError ? (
+                <p className="text-sm text-red-600 dark:text-red-400 mb-2 flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4" />
+                  {addonError}
+                </p>
+              ) : addons.length > 0 ? (
+                <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  <span className="flex items-center gap-1">
+                    <Plus className="h-3 w-3" />
+                    {t('Eklentiler')} ({addons.length}):
+                  </span>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {addons.map((addon, index) => (
+                      <span key={addon.id} className="inline-flex items-center text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 px-2 py-1 rounded">
+                        {addon.addonProduct?.name || `Product ${addon.addonProductId}`}
+                        {addon.isRecommended && <span className="ml-1">⭐</span>}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 flex items-center gap-1">
+                  <Plus className="h-3 w-3" />
+                  {t('Eklenti eklenmemiş')}
+                </p>
+              )}
+
               <div className="flex items-center justify-between">
                 <span className="text-sm font-semibold text-gray-900 dark:text-white">
                   {product.price.toFixed(2)} ₺
                 </span>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  {/* Addons Management Button */}
+                  <button
+                    onClick={() => {
+                      console.log('🔍 Addons button clicked for product:', {
+                        productId: product.id,
+                        productName: product.name,
+                        hasCallback: !onOpenAddonsManagement
+                      });
+                      
+                      if (onOpenAddonsManagement) {
+                        onOpenAddonsManagement(product.id, product.name);
+                      } 
+                    }}
+                    className="p-1 text-gray-400 hover:text-green-600 dark:hover:text-green-400 transition-colors duration-200"
+                    title={t('Eklentileri yönet')}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </button>
+                  
                   <button
                     onClick={() => onEdit(product.id)}
                     className="p-1 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
