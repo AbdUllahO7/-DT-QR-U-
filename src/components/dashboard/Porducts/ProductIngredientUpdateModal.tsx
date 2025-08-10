@@ -42,7 +42,6 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
   const [error, setError] = useState<string | null>(null);
 
 
-  console.log("productId 234 ", productId)
 
   useEffect(() => {
     if (isOpen) {

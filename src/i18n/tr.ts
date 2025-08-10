@@ -342,10 +342,6 @@ export const tr = {
     markAllAsRead: 'Tümünü okundu işaretle'
   },
 
-
-
-
-
   // Brand
   brand: {
     name: 'QR Menu',
@@ -813,8 +809,6 @@ export const tr = {
     }
   },
 
-
-
   // Table Management
   tableManagement: {
     loading: 'Masalar yükleniyor...',
@@ -961,201 +955,201 @@ export const tr = {
   }
   
   },
-popularProducts: {
-  title: 'Popüler Ürünler',
-  empty: 'Ürün satışları burada görünecek',
-  labels: {
-    orders: 'sipariş',
-    percentage: '%'
-  },
-  tooltip: {
-    ordersFormat: (value: any, percentage: any) => `${value} sipariş (${percentage}%)`,
-    noData: 'Veri bulunamadı'
-  }
- },
- weeklyActivity: {
-  title: 'Haftalık Aktivite',
-  empty: {
-    primary: 'Henüz aktivite verisi bulunmuyor',
-    secondary: 'Veriler yakında burada görünecek'
-  },
-  labels: {
-    views: 'Görüntülenme',
-    qrScans: 'QR Tarama'
-  },
-  legend: {
-    views: 'Görüntülenme',
-    qrScans: 'QR Tarama'
-  }
-},
-monthlyRevenue: {
-  QuickStats : "Hızlı İstatistikler",
-  title: 'Aylık Gelir Trendi',
-  empty: {
-    primary: 'Henüz gelir verisi bulunmuyor',
-    secondary: 'Gelir verileri burada görünecek'
-  },
-  labels: {
-    total: 'Toplam:',
-    revenue: 'Gelir'
-  },
-  currency: {
-    symbol: '₺',
-    format: (value: { toLocaleString: (arg0: string) => any; }) => `₺${value.toLocaleString('tr-TR')}`
-  }
-},
-branchCard: {
-  status: {
-    temporaryClosed: 'Geçici Kapalı',
-    open: 'Açık',
-    closed: 'Kapalı',
-    active: 'Aktif',
-    inactive: 'Pasif',
-    hidden: 'Gizli'
-  },
-  actions: {
-    edit: 'Düzenle',
-    delete: 'Sil'
-  },
-  labels: {
-    customerVisibility: 'Müşteriye Açık/Kapalı',
-    apiBranchOpen: 'API BranchIsOpen:'
-  },
-  alt: {
-    logo: 'logo'
-  }
-},
-addBranchCard: {
-  title: 'Add New Branch',
-  description: 'Click to add a new branch'
-},
-branchModal: {
-  title: {
-    add: 'Yeni Şube Ekle',
-    edit: 'Şube Düzenle'
-  },
-  subtitle: 'Şube bilgilerini adım adım girebilirsiniz',
-  steps: {
-    basic: 'Temel Bilgiler',
-    address: 'Adres Bilgileri', 
-    contact: 'İletişim & Çalışma Saatleri'
-  },
-  sections: {
-    basicInfo: 'Temel Bilgiler',
-    addressInfo: 'Adres Bilgileri',
-    contactInfo: 'İletişim Bilgileri',
-    workingHours: 'Çalışma Saatleri'
-  },
-  fields: {
-    branchName: {
-      label: 'Şube Adı *',
-      placeholder: 'Şube adını girin'
+  popularProducts: {
+    title: 'Popüler Ürünler',
+    empty: 'Ürün satışları burada görünecek',
+    labels: {
+      orders: 'sipariş',
+      percentage: '%'
     },
-    whatsappNumber: {
-      label: 'WhatsApp Sipariş Numarası *',
-      placeholder: 'WhatsApp sipariş numarasını girin'
-    },
-    branchLogo: {
-      label: 'Şube Logosu (Opsiyonel)',
-      select: 'Logo Seç',
-      uploading: 'Yükleniyor...',
-      success: '✓ Logo başarıyla yüklendi',
-      preview: 'Şube logosu önizleme',
-      supportText: 'PNG, JPG, GIF formatları desteklenir. Maksimum dosya boyutu: 5MB'
-    },
-    country: {
-      label: 'Ülke *',
-      placeholder: 'Ülke adını girin'
-    },
-    city: {
-      label: 'Şehir *',
-      placeholder: 'Şehir adını girin'
-    },
-    street: {
-      label: 'Sokak *',
-      placeholder: 'Sokak adını girin'
-    },
-    zipCode: {
-      label: 'Posta Kodu *',
-      placeholder: 'Posta kodunu girin'
-    },
-    addressLine1: {
-      label: 'Adres Satırı 1 *',
-      placeholder: 'Detaylı adres bilgisi girin'
-    },
-    addressLine2: {
-      label: 'Adres Satırı 2 (Opsiyonel)',
-      placeholder: 'Ek adres bilgisi girin (opsiyonel)'
-    },
-    phone: {
-      label: 'Telefon Numarası *',
-      placeholder: 'Telefon numarasını girin'
-    },
-    email: {
-      label: 'E-posta Adresi *',
-      placeholder: 'E-posta adresini girin'
-    },
-    location: {
-      label: 'Konum Bilgisi *',
-      placeholder: 'Konum bilgisini girin (Örn: 40.9795,28.7225)'
-    },
-    contactHeader: {
-      label: 'İletişim Başlığı (Opsiyonel)',
-      placeholder: 'İletişim başlığını girin (opsiyonel)'
-    },
-    footerTitle: {
-      label: 'Footer Başlığı (Opsiyonel)',
-      placeholder: 'Footer başlığını girin (opsiyonel)'
-    },
-    footerDescription: {
-      label: 'Footer Açıklaması (Opsiyonel)',
-      placeholder: 'Footer açıklamasını girin (opsiyonel)'
-    },
-    openTitle: {
-      label: 'Çalışma Saatleri Başlığı (Opsiyonel)',
-      placeholder: 'Çalışma saatleri başlığını girin (opsiyonel)'
-    },
-    openDays: {
-      label: 'Açık Günler (Opsiyonel)',
-      placeholder: 'Açık günleri girin (opsiyonel)'
-    },
-    openHours: {
-      label: 'Açık Saatler (Opsiyonel)',
-      placeholder: 'Açık saatleri girin (opsiyonel)'
+    tooltip: {
+      ordersFormat: (value: any, percentage: any) => `${value} sipariş (${percentage}%)`,
+      noData: 'Veri bulunamadı'
     }
   },
-  workingHours: {
-    description: 'İşletmenizin çalışma saatlerini belirleyin',
-    days: ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'],
-    open: 'Açık',
-    closed: 'Kapalı',
-    openTime: 'Açılış',
-    closeTime: 'Kapanış',
-    canOrder: '✓ Bu gün müşteriler sipariş verebilecek',
-    infoTitle: 'Çalışma Saatleri Hakkında',
-    infoText: 'Burada belirlediğiniz saatler, müşterilerin QR menünüz üzerinden sipariş verebileceği zamanları belirler. Kapalı günlerde sipariş alınmaz.'
+  weeklyActivity: {
+    title: 'Haftalık Aktivite',
+    empty: {
+      primary: 'Henüz aktivite verisi bulunmuyor',
+      secondary: 'Veriler yakında burada görünecek'
+    },
+    labels: {
+      views: 'Görüntülenme',
+      qrScans: 'QR Tarama'
+    },
+    legend: {
+      views: 'Görüntülenme',
+      qrScans: 'QR Tarama'
+    }
   },
-  errors: {
-    branchName: 'Şube adı gereklidir',
-    whatsappNumber: 'WhatsApp sipariş numarası gereklidir',
-    country: 'Ülke gereklidir',
-    city: 'Şehir gereklidir',
-    street: 'Sokak gereklidir',
-    zipCode: 'Posta kodu gereklidir',
-    addressLine1: 'Adres satırı 1 gereklidir',
-    phone: 'Telefon numarası gereklidir',
-    email: 'E-posta adresi gereklidir',
-    location: 'Konum bilgisi gereklidir'
+  monthlyRevenue: {
+    QuickStats : "Hızlı İstatistikler",
+    title: 'Aylık Gelir Trendi',
+    empty: {
+      primary: 'Henüz gelir verisi bulunmuyor',
+      secondary: 'Gelir verileri burada görünecek'
+    },
+    labels: {
+      total: 'Toplam:',
+      revenue: 'Gelir'
+    },
+    currency: {
+      symbol: '₺',
+      format: (value: { toLocaleString: (arg0: string) => any; }) => `₺${value.toLocaleString('tr-TR')}`
+    }
   },
-  buttons: {
-    cancel: 'İptal',
-    back: 'Geri',
-    next: 'İleri',
-    save: 'Kaydet',
-    saving: 'Kaydediliyor...'
-  }
-},
- branchManagement: {
+  branchCard: {
+    status: {
+      temporaryClosed: 'Geçici Kapalı',
+      open: 'Açık',
+      closed: 'Kapalı',
+      active: 'Aktif',
+      inactive: 'Pasif',
+      hidden: 'Gizli'
+    },
+    actions: {
+      edit: 'Düzenle',
+      delete: 'Sil'
+    },
+    labels: {
+      customerVisibility: 'Müşteriye Açık/Kapalı',
+      apiBranchOpen: 'API BranchIsOpen:'
+    },
+    alt: {
+      logo: 'logo'
+    }
+  },
+  addBranchCard: {
+    title: 'Add New Branch',
+    description: 'Click to add a new branch'
+  },
+  branchModal: {
+    title: {
+      add: 'Yeni Şube Ekle',
+      edit: 'Şube Düzenle'
+    },
+    subtitle: 'Şube bilgilerini adım adım girebilirsiniz',
+    steps: {
+      basic: 'Temel Bilgiler',
+      address: 'Adres Bilgileri', 
+      contact: 'İletişim & Çalışma Saatleri'
+    },
+    sections: {
+      basicInfo: 'Temel Bilgiler',
+      addressInfo: 'Adres Bilgileri',
+      contactInfo: 'İletişim Bilgileri',
+      workingHours: 'Çalışma Saatleri'
+    },
+    fields: {
+      branchName: {
+        label: 'Şube Adı *',
+        placeholder: 'Şube adını girin'
+      },
+      whatsappNumber: {
+        label: 'WhatsApp Sipariş Numarası *',
+        placeholder: 'WhatsApp sipariş numarasını girin'
+      },
+      branchLogo: {
+        label: 'Şube Logosu (Opsiyonel)',
+        select: 'Logo Seç',
+        uploading: 'Yükleniyor...',
+        success: '✓ Logo başarıyla yüklendi',
+        preview: 'Şube logosu önizleme',
+        supportText: 'PNG, JPG, GIF formatları desteklenir. Maksimum dosya boyutu: 5MB'
+      },
+      country: {
+        label: 'Ülke *',
+        placeholder: 'Ülke adını girin'
+      },
+      city: {
+        label: 'Şehir *',
+        placeholder: 'Şehir adını girin'
+      },
+      street: {
+        label: 'Sokak *',
+        placeholder: 'Sokak adını girin'
+      },
+      zipCode: {
+        label: 'Posta Kodu *',
+        placeholder: 'Posta kodunu girin'
+      },
+      addressLine1: {
+        label: 'Adres Satırı 1 *',
+        placeholder: 'Detaylı adres bilgisi girin'
+      },
+      addressLine2: {
+        label: 'Adres Satırı 2 (Opsiyonel)',
+        placeholder: 'Ek adres bilgisi girin (opsiyonel)'
+      },
+      phone: {
+        label: 'Telefon Numarası *',
+        placeholder: 'Telefon numarasını girin'
+      },
+      email: {
+        label: 'E-posta Adresi *',
+        placeholder: 'E-posta adresini girin'
+      },
+      location: {
+        label: 'Konum Bilgisi *',
+        placeholder: 'Konum bilgisini girin (Örn: 40.9795,28.7225)'
+      },
+      contactHeader: {
+        label: 'İletişim Başlığı (Opsiyonel)',
+        placeholder: 'İletişim başlığını girin (opsiyonel)'
+      },
+      footerTitle: {
+        label: 'Footer Başlığı (Opsiyonel)',
+        placeholder: 'Footer başlığını girin (opsiyonel)'
+      },
+      footerDescription: {
+        label: 'Footer Açıklaması (Opsiyonel)',
+        placeholder: 'Footer açıklamasını girin (opsiyonel)'
+      },
+      openTitle: {
+        label: 'Çalışma Saatleri Başlığı (Opsiyonel)',
+        placeholder: 'Çalışma saatleri başlığını girin (opsiyonel)'
+      },
+      openDays: {
+        label: 'Açık Günler (Opsiyonel)',
+        placeholder: 'Açık günleri girin (opsiyonel)'
+      },
+      openHours: {
+        label: 'Açık Saatler (Opsiyonel)',
+        placeholder: 'Açık saatleri girin (opsiyonel)'
+      }
+    },
+    workingHours: {
+      description: 'İşletmenizin çalışma saatlerini belirleyin',
+      days: ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'],
+      open: 'Açık',
+      closed: 'Kapalı',
+      openTime: 'Açılış',
+      closeTime: 'Kapanış',
+      canOrder: '✓ Bu gün müşteriler sipariş verebilecek',
+      infoTitle: 'Çalışma Saatleri Hakkında',
+      infoText: 'Burada belirlediğiniz saatler, müşterilerin QR menünüz üzerinden sipariş verebileceği zamanları belirler. Kapalı günlerde sipariş alınmaz.'
+    },
+    errors: {
+      branchName: 'Şube adı gereklidir',
+      whatsappNumber: 'WhatsApp sipariş numarası gereklidir',
+      country: 'Ülke gereklidir',
+      city: 'Şehir gereklidir',
+      street: 'Sokak gereklidir',
+      zipCode: 'Posta kodu gereklidir',
+      addressLine1: 'Adres satırı 1 gereklidir',
+      phone: 'Telefon numarası gereklidir',
+      email: 'E-posta adresi gereklidir',
+      location: 'Konum bilgisi gereklidir'
+    },
+    buttons: {
+      cancel: 'İptal',
+      back: 'Geri',
+      next: 'İleri',
+      save: 'Kaydet',
+      saving: 'Kaydediliyor...'
+    }
+  },
+  branchManagement: {
     title: 'Şube Yönetimi',
     description: 'Restoran şubelerini yönetin ve bilgilerini güncelleyin',
     loading: 'Şubeler yükleniyor...',
@@ -1298,8 +1292,6 @@ branchModal: {
       }
     }
   },
-
-  // Common translations
   commonBranch: {
     cancel: 'İptal',
     delete: 'Sil',
@@ -1315,5 +1307,847 @@ branchModal: {
     info: 'Bilgi',
     required: 'Gerekli',
     optional: 'Opsiyonel'
+  },
+  productsContent: {
+  title: 'Ürün Yönetimi',
+  description: 'Menü kategorileri ve ürünlerini yönetin',
+  
+  // Search and filters
+  search: {
+    placeholder: 'Menü öğelerini ara...',
+    filter: 'Filtrele',
+    sort: 'Sırala',
+    noResults: 'Ürün bulunamadı'
+  },
+
+  // View modes
+  viewMode: {
+    list: 'Liste görünümü',
+    grid: 'Izgara görünümü'
+  },
+
+  // Buttons and actions
+  actions: {
+    addFirstCategory: 'İlk Kategori Ekle',
+    addCategory: 'Yeni Kategori',
+    newCategory: 'Yeni Kategori',
+    addProduct: 'Yeni Ürün',
+    newProduct: 'Yeni Ürün',
+    editCategory: 'Kategoriyi Düzenle',
+    deleteCategory: 'Kategoriyi Sil',
+    editProduct: 'Ürünü Düzenle',
+    deleteProduct: 'Ürünü Sil',
+    manageIngredients: 'Malzemeleri Yönet',
+    updateIngredients: 'Malzemeleri Güncelle',
+    manageAddons: 'Eklentileri Yönet',
+    importSampleMenu: 'Örnek Menü İçe Aktar',
+    addFirstCategoryTitle: 'İlk Kategoriyi Ekle'
+  },
+
+  // Empty states
+  emptyState: {
+    noCategories: {
+      title: 'Henüz menü kategoriniz bulunmuyor',
+      description: 'Restoranınızın menüsünü oluşturmaya başlamak için ilk kategoriyi ekleyin. Örneğin "Ana Yemekler", "İçecekler" veya "Tatlılar" gibi.',
+      addFirstCategory: 'İlk Kategoriyi Ekle'
+    }
+  },
+
+  // Loading states
+  loading: {
+    categories: 'Kategoriler yükleniyor...',
+    products: 'Ürünler yükleniyor...',
+    savingOrder: 'Sıralama kaydediliyor...',
+    savingCategoryOrder: 'Kategori sıralaması kaydediliyor...',
+    savingProductOrder: 'Ürün sıralaması kaydediliyor...',
+    movingProduct: 'Ürün taşınıyor...',
+    deleting: 'Siliniyor...'
+  },
+
+  // Drag and drop
+  dragDrop: {
+    categoryReordering: 'Kategori sıralaması kaydediliyor...',
+    productReordering: 'Ürün sıralaması kaydediliyor...',
+    productMoving: 'Ürün taşınıyor...',
+    categoryOrderSaveError: 'Kategori sıralaması kaydedilirken bir hata oluştu.',
+    productOrderSaveError: 'Ürün sıralaması kaydedilirken bir hata oluştu.',
+    productMoveError: 'Ürün taşıma işlemi kaydedilirken bir hata oluştu.'
+  },
+
+  // Delete confirmations
+  delete: {
+    product: {
+      title: 'Ürünü Sil',
+      message: '"{{productName}}" adlı ürünü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+      success: 'Ürün başarıyla silindi'
+    },
+    category: {
+      title: 'Kategoriyi Sil',
+      messageWithProducts: '"{{categoryName}}" kategorisinde {{productCount}} ürün bulunuyor. Bu kategoriyi silmek tüm ürünleri de silecektir. Devam etmek istediğinizden emin misiniz?',
+      messageEmpty: '"{{categoryName}}" kategorisini silmek istediğinizden emin misiniz?',
+      success: 'Kategori başarıyla silindi'
+    }
+  },
+
+  // Error messages
+  error: {
+    loadFailed: 'Veriler yüklenemedi',
+    categoryNotFound: 'Kategori bulunamadı',
+    productNotFound: 'Ürün bulunamadı',
+    deleteFailed: 'Silme işlemi başarısız',
+    updateFailed: 'Güncelleme başarısız',
+    createFailed: 'Oluşturma başarısız',
+    reorderFailed: 'Sıralama başarısız',
+    invalidData: 'Geçersiz veri',
+    networkError: 'Ağ bağlantı hatası',
+    refreshPage: 'Lütfen sayfayı yenileyin ve tekrar deneyin.'
+  },
+
+  // Success messages
+  success: {
+    categoryCreated: 'Kategori başarıyla oluşturuldu',
+    categoryUpdated: 'Kategori başarıyla güncellendi',
+    categoryDeleted: 'Kategori başarıyla silindi',
+    productCreated: 'Ürün başarıyla oluşturuldu',
+    productUpdated: 'Ürün başarıyla güncellendi',
+    productDeleted: 'Ürün başarıyla silindi',
+    orderSaved: 'Sıralama başarıyla kaydedildi',
+    ingredientsUpdated: 'Malzemeler başarıyla güncellendi',
+    addonsUpdated: 'Eklentiler başarıyla güncellendi'
+  },
+
+  // Categories
+  category: {
+    products: 'ürün',
+    productCount: 'ürün',
+    noProducts: 'Bu kategoride ürün bulunmuyor',
+    expand: 'Genişlet',
+    collapse: 'Daralt'
+  },
+
+  // Products
+  product: {
+    price: 'Fiyat',
+    description: 'Açıklama',
+    ingredients: 'Malzemeler',
+    addons: 'Eklentiler',
+    category: 'Kategori',
+    image: 'Resim',
+    status: 'Durum',
+    available: 'Mevcut',
+    unavailable: 'Mevcut değil'
+  },
+
+  // Currency
+  currency: {
+    symbol: '₺',
+    format: '{{amount}} ₺'
+  },
+
+  // Status indicators
+  status: {
+    active: 'Aktif',
+    inactive: 'Pasif',
+    available: 'Mevcut',
+    unavailable: 'Mevcut değil'
+  },
+
+  // Tooltips
+  tooltips: {
+    dragToReorder: 'Sıralamak için sürükleyin',
+    dragToMoveCategory: 'Ürünü başka kategoriye taşımak için sürükleyin',
+    expandCategory: 'Kategoriyi genişlet',
+    collapseCategory: 'Kategoriyi daralt',
+    editCategory: 'Kategoriyi düzenle',
+    deleteCategory: 'Kategoriyi sil',
+    editProduct: 'Ürünü düzenle',
+    deleteProduct: 'Ürünü sil',
+    manageIngredients: 'Ürün malzemelerini yönet',
+    manageAddons: 'Ürün eklentilerini yönet'
   }
+  },
+  createCategoryModal: {
+  // Header
+  title: 'Yeni Kategori Ekle',
+  subtitle: 'Menü kategorisi oluşturun',
+  close: 'Kapat',
+
+  // Form fields
+  form: {
+    categoryName: {
+      label: 'Kategori Adı *',
+      placeholder: 'Örn: Ana Yemekler, İçecekler, Tatlılar',
+      required: 'Kategori adı gereklidir'
+    },
+    status: {
+      label: 'Kategoriyi aktif et',
+      description: 'Aktif kategoriler menüde görünür'
+    }
+  },
+
+  // Buttons
+  buttons: {
+    cancel: 'İptal',
+    create: 'Kategori Ekle',
+    creating: 'Ekleniyor...'
+  },
+
+  // Error messages
+  errors: {
+    general: 'Kategori eklenirken bir hata oluştu. Lütfen tekrar deneyin.',
+    categoryExists: 'Bu isimde bir kategori zaten mevcut. Lütfen farklı bir isim seçin.',
+    invalidData: 'Girilen bilgiler geçersiz. Lütfen kontrol edip tekrar deneyin.',
+    serverError: 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.',
+    networkError: 'Ağ bağlantı hatası. Bağlantınızı kontrol edin ve tekrar deneyin.',
+    unknownError: 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
+    errorLabel: 'Hata:'
+  },
+
+  // Success messages
+  success: {
+    categoryCreated: 'Kategori başarıyla oluşturuldu',
+    categoryAdded: 'Kategori başarıyla menüye eklendi'
+  },
+
+  // Validation messages
+  validation: {
+    nameRequired: 'Kategori adı gereklidir',
+    nameMinLength: 'Kategori adı 2 karakterden fazla olmalıdır',
+    nameMaxLength: 'Kategori adı 50 karakterden az olmalıdır',
+    invalidCharacters: 'Kategori adı geçersiz karakterler içeriyor'
+  },
+
+  // Accessibility
+  accessibility: {
+    closeModal: 'Kategori ekleme modalını kapat',
+    formTitle: 'Yeni kategori ekleme formu',
+    requiredField: 'Zorunlu alan',
+    optionalField: 'İsteğe bağlı alan'
+  }
+  },
+  createProductModal: {
+  // Header
+  title: 'Yeni Ürün Ekle',
+  subtitle: 'Menünüze ürün ekleyin',
+  close: 'Kapat',
+
+  // Form fields
+  form: {
+    productImage: {
+      label: 'Ürün Görseli',
+      dragActive: 'Dosyayı buraya bırakın',
+      uploadText: 'Görsel yükleyin',
+      supportedFormats: 'PNG, JPG, GIF (5MB max)',
+      removeImage: 'Görseli kaldır'
+    },
+    productName: {
+      label: 'Ürün Adı',
+      placeholder: 'Örn: Margherita Pizza',
+      required: 'Ürün adı gereklidir'
+    },
+    price: {
+      label: 'Fiyat (₺)',
+      placeholder: '0',
+      required: 'Fiyat gereklidir',
+      mustBePositive: 'Fiyat 0\'dan büyük olmalıdır',
+      currency: '₺'
+    },
+    category: {
+      label: 'Kategori',
+      placeholder: 'Kategori seçin',
+      required: 'Kategori seçimi gereklidir',
+      invalidCategory: 'Seçilen kategori geçersiz. Mevcut kategoriler: {{categories}}'
+    },
+    description: {
+      label: 'Açıklama',
+      placeholder: 'Ürün açıklaması...',
+      required: 'Ürün açıklaması gereklidir'
+    },
+    status: {
+      label: 'Ürünü aktif et',
+      description: 'Menüde görüntülenir',
+      active: 'Aktif',
+      inactive: 'Pasif'
+    }
+  },
+
+  // Buttons
+  buttons: {
+    cancel: 'İptal',
+    create: 'Ürün Ekle',
+    creating: 'Ekleniyor...',
+    uploading: 'Yükleniyor...'
+  },
+
+  // Image upload
+  imageUpload: {
+    dragToUpload: 'Görseli buraya sürükleyin veya yüklemek için tıklayın',
+    clickToUpload: 'Görsel yüklemek için tıklayın',
+    dragActive: 'Dosyayı buraya bırakın',
+    supportedFormats: 'PNG, JPG, GIF',
+    maxSize: '5MB max',
+    preview: 'Görsel önizleme',
+    remove: 'Kaldır'
+  },
+
+  // Error messages
+  errors: {
+    general: 'Ürün eklenirken bir hata oluştu. Lütfen tekrar deneyin.',
+    nameRequired: 'Ürün adı gereklidir',
+    descriptionRequired: 'Ürün açıklaması gereklidir',
+    priceRequired: 'Fiyat gereklidir',
+    priceMustBePositive: 'Fiyat 0\'dan büyük olmalıdır',
+    categoryRequired: 'Kategori seçimi gereklidir',
+    categoryInvalid: 'Seçilen kategori geçersiz',
+    imageInvalid: 'Lütfen geçerli bir görsel dosyası seçin',
+    imageTooLarge: 'Görsel dosyası 5MB\'dan küçük olmalıdır',
+    imageUploadFailed: 'Görsel yüklenirken bir hata oluştu',
+    networkError: 'Ağ bağlantı hatası. Bağlantınızı kontrol edin ve tekrar deneyin.',
+    serverError: 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.',
+    unknownError: 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
+    errorLabel: 'Hata:'
+  },
+
+  // Success messages
+  success: {
+    productCreated: 'Ürün başarıyla oluşturuldu',
+    productAdded: 'Ürün başarıyla menüye eklendi'
+  },
+
+  // Validation messages
+  validation: {
+    nameMinLength: 'Ürün adı 2 karakterden fazla olmalıdır',
+    nameMaxLength: 'Ürün adı 100 karakterden az olmalıdır',
+    descriptionMinLength: 'Açıklama 5 karakterden fazla olmalıdır',
+    descriptionMaxLength: 'Açıklama 500 karakterden az olmalıdır',
+    priceMin: 'Fiyat 0\'dan büyük olmalıdır',
+    priceMax: 'Fiyat 10000\'den küçük olmalıdır'
+  },
+
+  // Accessibility
+  accessibility: {
+    closeModal: 'Ürün ekleme modalını kapat',
+    formTitle: 'Yeni ürün ekleme formu',
+    requiredField: 'Zorunlu alan',
+    optionalField: 'İsteğe bağlı alan',
+    imageUpload: 'Ürün görseli yükle',
+    removeImage: 'Ürün görselini kaldır',
+    priceInput: 'Ürün fiyatını girin',
+    categorySelect: 'Ürün kategorisi seçin',
+    statusToggle: 'Ürün durumunu değiştir'
+  }
+  },
+    productAddonsModal: {
+      // Header
+      title: 'Ürün Eklentileri',
+      subtitle: 'için eklenti ürünleri yönetin',
+      close: 'Kapat',
+
+      // Panel titles
+      panels: {
+        currentAddons: {
+          title: 'Mevcut Eklentiler',
+          count: '({{count}})',
+          dragInstruction: 'Sürükleyerek sıralayabilirsiniz',
+          emptyState: {
+            title: 'Henüz eklenti eklenmemiş.',
+            subtitle: 'Sağ panelden ürün seçin.'
+          }
+        },
+        availableProducts: {
+          title: 'Eklenti Olarak Eklenebilir Ürünler',
+          searchPlaceholder: 'Ürün ara...',
+          emptyState: {
+            noResults: 'Arama kriterlerine uygun ürün bulunamadı.',
+            noProducts: 'Eklenebilir ürün bulunamadı.'
+          }
+        }
+      },
+
+      // Addon item actions
+      actions: {
+        edit: 'Düzenle',
+        save: 'Kaydet',
+        cancel: 'İptal',
+        remove: 'Kaldır',
+        recommended: 'Önerilen'
+      },
+
+      // Form fields
+      form: {
+        marketingText: {
+          placeholder: 'Pazarlama metni...',
+          label: 'Pazarlama Metni'
+        },
+        isRecommended: {
+          label: 'Önerilen eklenti olarak işaretle',
+          badge: 'Önerilen'
+        }
+      },
+
+      // Product status
+      status: {
+        outOfStock: 'Stokta Yok',
+        available: 'Mevcut',
+        unavailable: 'Mevcut Değil'
+      },
+
+      // Loading states
+      loading: {
+        addons: 'Eklentiler yükleniyor...',
+        products: 'Ürünler yükleniyor...',
+        saving: 'Kaydediliyor...'
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'İptal',
+        saveAddons: 'Eklentileri Kaydet',
+        saving: 'Kaydediliyor...'
+      },
+
+      // Counter texts
+      counters: {
+        selectedProducts: '{{count}} ürün seçili',
+        availableProducts: '{{count}} mevcut ürün'
+      },
+
+      // Error messages
+      errors: {
+        loadingData: 'Eklenti verileri yüklenirken bir hata oluştu.',
+        updatingAddon: 'Eklenti güncellenirken bir hata oluştu.',
+        deletingAddon: 'Eklenti silinirken bir hata oluştu.',
+        savingOrder: 'Eklenti sıralaması kaydedilirken bir hata oluştu.',
+        savingAddons: 'Eklentiler kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.',
+        general: 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
+        networkError: 'Ağ bağlantı hatası. Bağlantınızı kontrol edin ve tekrar deneyin.'
+      },
+
+      // Success messages
+      success: {
+        addonsSaved: 'Ürün eklentileri başarıyla kaydedildi',
+        orderUpdated: 'Eklenti sıralaması başarıyla güncellendi',
+        addonUpdated: 'Eklenti başarıyla güncellendi',
+        addonRemoved: 'Eklenti başarıyla kaldırıldı'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'Ürün eklentileri modalını kapat',
+        dragHandle: 'Eklenti sırasını değiştirmek için sürükle',
+        editAddon: 'Eklenti detaylarını düzenle',
+        removeAddon: 'Eklentiyi üründen kaldır',
+        selectProduct: 'Ürünü eklenti olarak seç',
+        productImage: 'Ürün resmi',
+        toggleRecommended: 'Önerilen durumunu değiştir'
+      }
+    },
+      editCategoryModal: {
+      // Header
+      title: 'Kategori Düzenle',
+      subtitle: 'Kategori bilgilerini güncelle',
+      close: 'Kapat',
+
+      // Form fields
+      form: {
+        categoryName: {
+          label: 'Kategori Adı',
+          placeholder: 'Kategori adını girin...',
+          required: 'Kategori adı gereklidir',
+          minLength: 'Kategori adı en az 2 karakter olmalıdır',
+          maxLength: 'Kategori adı 100 karakterden az olmalıdır'
+        },
+        description: {
+          label: 'Açıklama',
+          placeholder: 'Kategori açıklamasını girin...',
+          optional: 'Opsiyonel',
+          maxLength: 'Açıklama 500 karakterden az olmalıdır'
+        },
+        status: {
+          label: 'Aktif',
+          description: 'Aktif olduğunda kategori menüde görünür',
+          active: 'Aktif',
+          inactive: 'Pasif'
+        }
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'İptal',
+        save: 'Kaydet',
+        saving: 'Kaydediliyor...',
+        update: 'Kategoriyi Güncelle',
+        updating: 'Güncelleniyor...'
+      },
+
+      // Error messages
+      errors: {
+        updateFailed: 'Kategori güncellenirken bir hata oluştu. Lütfen tekrar deneyin.',
+        nameRequired: 'Kategori adı gereklidir',
+        nameMinLength: 'Kategori adı en az 2 karakter olmalıdır',
+        nameMaxLength: 'Kategori adı 100 karakterden az olmalıdır',
+        descriptionMaxLength: 'Açıklama 500 karakterden az olmalıdır',
+        general: 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
+        networkError: 'Ağ bağlantı hatası. Bağlantınızı kontrol edin ve tekrar deneyin.',
+        serverError: 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.'
+      },
+
+      // Success messages
+      success: {
+        categoryUpdated: 'Kategori başarıyla güncellendi',
+        changesSaved: 'Değişiklikler başarıyla kaydedildi'
+      },
+
+      // Validation messages
+      validation: {
+        nameRequired: 'Lütfen bir kategori adı girin',
+        nameMinLength: 'Kategori adı çok kısa',
+        nameMaxLength: 'Kategori adı çok uzun',
+        descriptionMaxLength: 'Açıklama çok uzun'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'Kategori düzenleme modalını kapat',
+        formTitle: 'Kategori düzenleme formu',
+        requiredField: 'Zorunlu alan',
+        optionalField: 'Opsiyonel alan',
+        statusToggle: 'Kategori durumunu değiştir',
+        nameInput: 'Kategori adı girişi',
+        descriptionInput: 'Kategori açıklama girişi'
+      }
+    },
+     confirmDeleteModal: {
+      // Common titles (can be overridden by props)
+      defaultTitle: 'Silmeyi Onayla',
+      deleteTitle: 'Öğeyi Sil',
+      
+      // Warning message
+      warning: 'Bu işlem geri alınamaz. Öğe kalıcı olarak silinecektir.',
+      
+      // Item types
+      itemTypes: {
+        category: 'Kategori',
+        product: 'Ürün',
+        addon: 'Eklenti',
+        user: 'Kullanıcı',
+        order: 'Sipariş',
+        coupon: 'Kupon',
+        discount: 'İndirim',
+        promotion: 'Promosyon',
+        review: 'Değerlendirme',
+        comment: 'Yorum',
+        image: 'Resim',
+        file: 'Dosya',
+        item: 'Öğe'
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'İptal',
+        delete: 'Sil',
+        deleting: 'Siliniyor...',
+        confirm: 'Onayla',
+        confirming: 'Onaylanıyor...'
+      },
+
+      // Pre-built messages for common scenarios
+      messages: {
+        category: 'Bu kategoriyi silmek istediğinizden emin misiniz? Bu kategorideki tüm ürünler de etkilenecektir.',
+        product: 'Bu ürünü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+        addon: 'Bu eklentiyi silmek istediğinizden emin misiniz? Tüm ilişkili ürünlerden kaldırılacaktır.',
+        user: 'Bu kullanıcıyı silmek istediğinizden emin misiniz? Tüm verileri kalıcı olarak kaldırılacaktır.',
+        general: 'Bu öğeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'
+      },
+
+      // Error messages
+      errors: {
+        deleteFailed: 'Silme işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.',
+        networkError: 'Ağ bağlantı hatası. Lütfen bağlantınızı kontrol edin ve tekrar deneyin.',
+        serverError: 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.',
+        permissionError: 'Bu öğeyi silme yetkiniz bulunmamaktadır.',
+        notFound: 'Silinecek öğe bulunamadı.',
+        hasRelations: 'Bu öğe ilişkili veriler içerdiği için silinemez.',
+        general: 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.'
+      },
+
+      // Success messages
+      success: {
+        deleted: 'Öğe başarıyla silindi',
+        categoryDeleted: 'Kategori başarıyla silindi',
+        productDeleted: 'Ürün başarıyla silindi',
+        addonDeleted: 'Eklenti başarıyla silindi'
+      },
+
+      // Confirmation prompts
+      confirmations: {
+        typeToConfirm: 'Onaylamak için "SİL" yazın',
+        enterName: 'Silmeyi onaylamak için adını girin',
+        areYouSure: 'Kesinlikle emin misiniz?',
+        lastChance: 'İptal etmek için son şansınız.'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'Silme onay modalını kapat',
+        deleteDialog: 'Silme onay diyaloğu',
+        warningIcon: 'Uyarı ikonu',
+        deleteButton: 'Silmeyi onayla',
+        cancelButton: 'Silmeyi iptal et',
+        errorAlert: 'Hata mesajı'
+      }
+    },
+     editProductModal: {
+      // Header
+      title: 'Ürün Düzenle',
+      subtitle: 'Ürün bilgilerini güncelle',
+      close: 'Kapat',
+
+      // Form fields
+      form: {
+        productImage: {
+          label: 'Ürün Görseli',
+          optional: 'Opsiyonel'
+        },
+        productName: {
+          label: 'Ürün Adı',
+          placeholder: 'örn: Margherita Pizza',
+          required: 'Ürün adı gereklidir'
+        },
+        description: {
+          label: 'Açıklama',
+          placeholder: 'Ürün açıklaması...',
+          optional: 'Opsiyonel'
+        },
+        price: {
+          label: 'Fiyat (₺)',
+          placeholder: '0',
+          required: 'Fiyat gereklidir',
+          currency: '₺'
+        },
+        category: {
+          label: 'Kategori',
+          placeholder: 'Kategori seçin',
+          required: 'Kategori seçimi gereklidir'
+        },
+        status: {
+          label: 'Stokta Var',
+          description: 'Mevcut olduğunda ürün menüde görünür',
+          available: 'Mevcut',
+          unavailable: 'Mevcut Değil'
+        }
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'İptal',
+        update: 'Ürünü Güncelle',
+        updating: 'Güncelleniyor...',
+        save: 'Değişiklikleri Kaydet',
+        saving: 'Kaydediliyor...',
+        uploading: 'Görsel Yükleniyor...'
+      },
+
+      // Image upload
+      imageUpload: {
+        clickToUpload: 'Görsel yüklemek için tıklayın',
+        dragToUpload: 'Görseli buraya sürükleyin veya tıklayın',
+        dragActive: 'Dosyayı buraya bırakın',
+        supportedFormats: 'PNG, JPG, GIF',
+        maxSize: 'maksimum 5MB',
+        preview: 'Görsel önizleme',
+        remove: 'Görseli kaldır',
+        changeImage: 'Görseli değiştir'
+      },
+
+      // Error messages
+      errors: {
+        errorLabel: 'Hata:',
+        updateFailed: 'Ürün güncellenirken bir hata oluştu. Lütfen tekrar deneyin.',
+        nameRequired: 'Ürün adı gereklidir',
+        nameAlreadyExists: 'Bu isimde bir ürün zaten mevcut. Lütfen farklı bir isim seçin.',
+        descriptionRequired: 'Ürün açıklaması gereklidir',
+        priceRequired: 'Fiyat gereklidir',
+        priceMustBePositive: 'Fiyat 0\'dan büyük olmalıdır',
+        categoryRequired: 'Kategori seçimi gereklidir',
+        imageInvalid: 'Lütfen geçerli bir görsel dosyası seçin',
+        imageTooLarge: 'Görsel dosyası 5MB\'dan küçük olmalıdır',
+        imageUploadFailed: 'Görsel yüklenirken bir hata oluştu',
+        productNotFound: 'Ürün bulunamadı',
+        permissionDenied: 'Bu ürünü güncelleme yetkiniz bulunmamaktadır',
+        networkError: 'Ağ bağlantı hatası. Bağlantınızı kontrol edin ve tekrar deneyin.',
+        serverError: 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.',
+        unknownError: 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.'
+      },
+
+      // Success messages
+      success: {
+        productUpdated: 'Ürün başarıyla güncellendi',
+        changesSaved: 'Değişiklikler başarıyla kaydedildi',
+        imageUploaded: 'Görsel başarıyla yüklendi'
+      },
+
+      // Validation messages
+      validation: {
+        nameMinLength: 'Ürün adı 2 karakterden fazla olmalıdır',
+        nameMaxLength: 'Ürün adı 100 karakterden az olmalıdır',
+        descriptionMaxLength: 'Açıklama 500 karakterden az olmalıdır',
+        priceMin: 'Fiyat 0\'dan büyük olmalıdır',
+        priceMax: 'Fiyat 10000\'den az olmalıdır',
+        imageSize: 'Görsel 5MB\'dan küçük olmalıdır',
+        imageType: 'Sadece görsel dosyalarına izin verilir'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'Ürün düzenleme modalını kapat',
+        formTitle: 'Ürün düzenleme formu',
+        requiredField: 'Zorunlu alan',
+        optionalField: 'Opsiyonel alan',
+        imageUpload: 'Ürün görseli yükle',
+        removeImage: 'Ürün görselini kaldır',
+        priceInput: 'Ürün fiyatını girin',
+        categorySelect: 'Ürün kategorisi seçin',
+        statusToggle: 'Ürün durumunu değiştir',
+        imagePreview: 'Ürün görseli önizleme'
+      }
+    },
+     productIngredientModal: {
+      // Header
+      title: 'Ürün Malzemeleri',
+      subtitle: 'için malzemeleri seçin',
+      close: 'Kapat',
+
+      // Search
+      search: {
+        placeholder: 'Malzemeleri ara...',
+        label: 'Malzeme ara',
+        noResults: 'Malzeme bulunamadı'
+      },
+
+      // Summary section
+      summary: {
+        selectedCount: 'Seçilen malzemeler',
+        hasChanges: 'Değişiklik var',
+        noChanges: 'Değişiklik yok'
+      },
+
+      // Form fields
+      form: {
+        quantity: {
+          label: 'Miktar',
+          placeholder: 'Miktar',
+          required: 'Miktar gereklidir'
+        },
+        unit: {
+          label: 'Birim',
+          placeholder: 'Birim seçin',
+          required: 'Birim gereklidir'
+        }
+      },
+
+      // Measurement units
+      units: {
+        grams: 'gr',
+        milliliters: 'ml',
+        pieces: 'adet',
+        tablespoons: 'yemek kaşığı',
+        teaspoons: 'çay kaşığı',
+        cups: 'su bardağı',
+        kilograms: 'kg',
+        liters: 'lt'
+      },
+
+      // Status indicators
+      status: {
+        available: 'Kullanılabilir',
+        unavailable: 'Kullanılamaz',
+        containsAllergens: 'Alerjen İçerir',
+        toBeAdded: 'Eklenecek',
+        toBeRemoved: 'Kaldırılacak',
+        selected: 'Seçili',
+        unselected: 'Seçili değil'
+      },
+
+      // Allergen information
+      allergenInfo: {
+        count: '{{count}} alerjen',
+        count_plural: '{{count}} alerjen',
+        details: 'Alerjen detayları',
+        warning: 'Bu malzeme alerjen içerir'
+      },
+
+      // Loading states
+      loading: {
+        ingredients: 'Malzemeler yükleniyor...',
+        saving: 'Malzemeler kaydediliyor...',
+        data: 'Veriler yükleniyor...'
+      },
+
+      // Empty states
+      emptyState: {
+        noIngredients: 'Henüz malzeme eklenmemiş.',
+        noSearchResults: 'Arama kriterlerine uygun malzeme bulunamadı.',
+        noAvailableIngredients: 'Kullanılabilir malzeme bulunamadı.'
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'İptal',
+        skip: 'Atla',
+        save: 'Kaydet',
+        saveIngredients: 'Malzemeleri Kaydet',
+        saving: 'Kaydediliyor...',
+        add: 'Malzeme Ekle',
+        update: 'Malzemeleri Güncelle'
+      },
+
+      // Footer
+      footer: {
+        totalCount: 'Toplam: {{count}} malzeme',
+        selectedInfo: '{{total}} malzemeden {{selected}} tanesi seçili'
+      },
+
+      // Error messages
+      errors: {
+        loadingData: 'Malzeme verileri yüklenirken bir hata oluştu.',
+        savingIngredients: 'Malzemeler kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.',
+        quantityRequired: 'Tüm malzemeler için miktar 0\'dan büyük olmalıdır.',
+        unitRequired: 'Tüm malzemeler için birim seçilmelidir.',
+        networkError: 'Ağ bağlantı hatası. Bağlantınızı kontrol edin ve tekrar deneyin.',
+        serverError: 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.',
+        general: 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.',
+        invalidQuantity: 'Lütfen geçerli bir miktar girin',
+        ingredientNotFound: 'Malzeme bulunamadı',
+        permissionDenied: 'Malzemeleri değiştirme yetkiniz bulunmamaktadır'
+      },
+
+      // Success messages
+      success: {
+        ingredientsSaved: 'Malzemeler başarıyla kaydedildi',
+        ingredientsUpdated: 'Malzemeler başarıyla güncellendi',
+        ingredientAdded: 'Malzeme başarıyla eklendi',
+        ingredientRemoved: 'Malzeme başarıyla kaldırıldı'
+      },
+
+      // Validation messages
+      validation: {
+        quantityMin: 'Miktar 0\'dan büyük olmalıdır',
+        quantityMax: 'Miktar 1000\'den az olmalıdır',
+        unitRequired: 'Lütfen bir birim seçin',
+        ingredientRequired: 'Lütfen en az bir malzeme seçin'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'Malzeme seçim modalını kapat',
+        searchInput: 'Malzeme ara',
+        quantityInput: 'Malzeme miktarını girin',
+        unitSelect: 'Ölçü birimini seçin',
+        ingredientCheckbox: 'Malzeme seç',
+        selectedIndicator: 'Malzeme seçildi',
+        allergenWarning: 'Alerjen içerir',
+        availabilityStatus: 'Kullanılabilirlik durumu'
+      }
+    }
 }; 

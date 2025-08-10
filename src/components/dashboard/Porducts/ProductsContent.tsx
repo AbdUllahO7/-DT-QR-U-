@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Search, Plus, Filter, ArrowUp, List, Grid3X3,Package, Utensils,   Loader2,
+  Search, Plus, Filter, ArrowUp, List, Grid3X3, Package, Utensils, Loader2,
 } from 'lucide-react';
 import {
   DndContext,
@@ -52,12 +52,10 @@ if (typeof document !== 'undefined') {
   document.head.appendChild(styleElement);
 }
 
-
 // Main ProductsContent Component
 const ProductsContent: React.FC = () => {
   const { isDark } = useTheme();
-  const { t, language } = useLanguage();
-  const isRTL = language === 'ar';
+  const { t, isRTL } = useLanguage();
   const [categories, setCategories] = useState<Category[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
@@ -76,11 +74,12 @@ const ProductsContent: React.FC = () => {
     productName: string;
   } | null>(null);
 
- const [isAddonsModalOpen, setIsAddonsModalOpen] = useState(false);
+  const [isAddonsModalOpen, setIsAddonsModalOpen] = useState(false);
   const [selectedProductForAddons, setSelectedProductForAddons] = useState<{
     productId: number;
     productName: string;
   } | null>(null);
+  
   const handleOpenAddonsManagement = (productId: number, productName: string) => {
     console.log('🔍 handleOpenAddonsManagement called with:', {
       productId,
@@ -91,13 +90,13 @@ const ProductsContent: React.FC = () => {
     
     if (!productId || productId === 0 || isNaN(productId)) {
       console.error('❌ Invalid productId provided:', productId);
-      alert('Geçersiz ürün ID - eklenti yönetimi açılamıyor');
+      alert(t('productsContent.error.invalidData'));
       return;
     }
     
     if (!productName || productName.trim() === '') {
       console.error('❌ Invalid productName provided:', productName);
-      alert('Geçersiz ürün adı - eklenti yönetimi açılamıyor');
+      alert(t('productsContent.error.invalidData'));
       return;
     }
     
@@ -108,6 +107,7 @@ const ProductsContent: React.FC = () => {
     });
     setIsAddonsModalOpen(true);
   };  
+  
   const [deleteConfig, setDeleteConfig] = useState<{
     type: 'product' | 'category';
     id: number;
@@ -127,43 +127,44 @@ const ProductsContent: React.FC = () => {
   } | null>(null);
 
   const handleOpenIngredientSelection = (productId: number, productName: string) => {
-      setSelectedProductForIngredients({ productId: productId, productName: productName });
-      setIsIngredientSelectionModalOpen(true);
-    };
+    setSelectedProductForIngredients({ productId: productId, productName: productName });
+    setIsIngredientSelectionModalOpen(true);
+  };
 
   const handleOpenIngredientUpdate = (productId: number, productName: string) => {
-  console.log('🔍 handleOpenIngredientUpdate called with:', {
-    productId,
-    productName,
-    productIdType: typeof productId,
-    isValidId: productId && productId !== 0 && !isNaN(productId)
-  });
+    console.log('🔍 handleOpenIngredientUpdate called with:', {
+      productId,
+      productName,
+      productIdType: typeof productId,
+      isValidId: productId && productId !== 0 && !isNaN(productId)
+    });
+    
+    // Add validation
+    if (!productId || productId === 0 || isNaN(productId)) {
+      console.error('❌ Invalid productId provided:', productId);
+      alert(t('productsContent.error.invalidData'));
+      return;
+    }
+    
+    if (!productName || productName.trim() === '') {
+      console.error('❌ Invalid productName provided:', productName);
+      alert(t('productsContent.error.invalidData'));
+      return;
+    }
+    
+    console.log('✅ Setting state with valid data');
+    setSelectedProductForIngredientUpdate({ 
+      productId: productId, 
+      productName: productName 
+    });
+    setIsIngredientUpdateModalOpen(true);
+    
+    // Use setTimeout to see the updated state (for debugging)
+    setTimeout(() => {
+      console.log('🔍 State after update:', selectedProductForIngredientUpdate);
+    }, 100);
+  };
   
-  // Add validation
-  if (!productId || productId === 0 || isNaN(productId)) {
-    console.error('❌ Invalid productId provided:', productId);
-    alert('Geçersiz ürün ID - malzeme güncelleme açılamıyor');
-    return;
-  }
-  
-  if (!productName || productName.trim() === '') {
-    console.error('❌ Invalid productName provided:', productName);
-    alert('Geçersiz ürün adı - malzeme güncelleme açılamıyor');
-    return;
-  }
-  
-  console.log('✅ Setting state with valid data');
-  setSelectedProductForIngredientUpdate({ 
-    productId: productId, 
-    productName: productName 
-  });
-  setIsIngredientUpdateModalOpen(true);
-  
-  // Use setTimeout to see the updated state (for debugging)
-  setTimeout(() => {
-    console.log('🔍 State after update:', selectedProductForIngredientUpdate);
-  }, 100);
-};
   const loadCategories = async () => {
     try {
       setLoading(true);
@@ -202,8 +203,8 @@ const ProductsContent: React.FC = () => {
     setDeleteConfig({
       type: 'product',
       id: productId,
-      title: t('Ürünü Sil'),
-      message: t(`"${product.name}" adlı ürünü silmek istediğinizden emin misiniz?`),
+      title: t('productsContent.delete.product.title'),
+      message: t('productsContent.delete.product.message', { productName: product.name }),
       onConfirm: async () => {
         setIsDeleting(true);
         try {
@@ -231,27 +232,30 @@ const ProductsContent: React.FC = () => {
       setIsEditProductModalOpen(true);
     } else {
       logger.error('Düzenlenecek ürün bulunamadı:', { productId });
-      alert(t('Ürün bulunamadı. Lütfen sayfayı yenileyin ve tekrar deneyin.'));
+      alert(t('productsContent.error.productNotFound') + ' ' + t('productsContent.error.refreshPage'));
     }
   };
 
-  console.log("selectedProductForIngredientUpdate.productId",selectedProductForIngredientUpdate?.productId)
+  console.log("selectedProductForIngredientUpdate.productId", selectedProductForIngredientUpdate?.productId);
 
   const handleDeleteCategory = (categoryId: number) => {
     const category = categories.find(cat => cat.categoryId === categoryId);
     
     if (!category) {
-      alert(t('Kategori bulunamadı.'));
+      alert(t('productsContent.error.categoryNotFound'));
       return;
     }
 
     setDeleteConfig({
       type: 'category',
       id: categoryId,
-      title: t('Kategoriyi Sil'),
+      title: t('productsContent.delete.category.title'),
       message: category.products.length > 0
-        ? t(`"${category.categoryName}" kategorisinde ${category.products.length} ürün bulunuyor. Bu kategoriyi silmek tüm ürünleri de silecektir. Devam etmek istediğinizden emin misiniz?`)
-        : t(`"${category.categoryName}" kategorisini silmek istediğinizden emin misiniz?`),
+        ? t('products.delete.category.messageWithProducts', { 
+            categoryName: category.categoryName, 
+            productCount: category.products.length 
+          })
+        : t('productsContent.delete.category.messageEmpty', { categoryName: category.categoryName }),
       onConfirm: async () => {
         setIsDeleting(true);
         try {
@@ -274,7 +278,7 @@ const ProductsContent: React.FC = () => {
       setIsEditCategoryModalOpen(true);
     } else {
       logger.error('Düzenlenecek kategori bulunamadı:', { categoryId });
-      alert(t('Kategori bulunamadı. Lütfen sayfayı yenileyin ve tekrar deneyin.'));
+      alert(t('productsContent.error.categoryNotFound') + ' ' + t('productsContent.error.refreshPage'));
     }
   };
 
@@ -403,7 +407,7 @@ const ProductsContent: React.FC = () => {
       } catch (error: any) {
         console.error('❌ Category reordering failed:', error);
         setCategories(categories); // Revert
-        alert(t('Kategori sıralaması kaydedilirken bir hata oluştu.'));
+        alert(t('productsContent.dragDrop.categoryOrderSaveError'));
       } finally {
         setIsReorderingCategories(false);
       }
@@ -442,7 +446,7 @@ const ProductsContent: React.FC = () => {
       } catch (error: any) {
         console.error('❌ Product reordering failed:', error);
         setCategories(categories); // Revert
-        alert(t('Ürün sıralaması kaydedilirken bir hata oluştu.'));
+        alert(t('productsContent.dragDrop.productOrderSaveError'));
       } finally {
         setIsReorderingProducts(false);
         setReorderingCategoryId(null);
@@ -477,7 +481,7 @@ const ProductsContent: React.FC = () => {
         
       } catch (error: any) {
         console.error('❌ Product category move failed:', error);
-        alert(t('Ürün kategori değişikliği kaydedilirken bir hata oluştu.'));
+        alert(t('productsContent.dragDrop.productMoveError'));
       } finally {
         setIsReorderingProducts(false);
         setReorderingCategoryId(null);
@@ -543,7 +547,7 @@ const ProductsContent: React.FC = () => {
         console.error('❌ Cross-category product move failed:', error);
         // Reload to ensure consistent state
         loadCategories();
-        alert(t('Ürün taşıma işlemi kaydedilirken bir hata oluştu.'));
+        alert(t('productsContent.dragDrop.productMoveError'));
       } finally {
         setIsReorderingProducts(false);
         setReorderingCategoryId(null);
@@ -598,13 +602,13 @@ const ProductsContent: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
               <input
                 type="text"
-                placeholder={t('Menü öğelerini ara...')}
+                placeholder={t('productsContent.search.placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
                 disabled
               />
             </div>
@@ -615,7 +619,7 @@ const ProductsContent: React.FC = () => {
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70 transition-colors duration-200"
               >
                 <Plus className="h-4 w-4" />
-                <span>{t('İlk Kategori Ekle')}</span>
+                <span>{t('productsContent.actions.addFirstCategory')}</span>
               </button>
             </div>
           </div>
@@ -634,11 +638,11 @@ const ProductsContent: React.FC = () => {
           </div>
           
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-            {t('Henüz menü kategoriniz bulunmuyor')}
+            {t('productsContent.emptyState.noCategories.title')}
           </h3>
           
           <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-            {t('Restoranınızın menüsünü oluşturmaya başlamak için ilk kategoriyi ekleyin. Örneğin "Ana Yemekler", "İçecekler" veya "Tatlılar" gibi.')}
+            {t('productsContent.emptyState.noCategories.description')}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -647,12 +651,12 @@ const ProductsContent: React.FC = () => {
               className="flex items-center gap-2 px-6 py-3 text-white bg-primary-600 hover:bg-primary-700 rounded-lg font-medium transition-colors duration-200"
             >
               <Plus className="h-5 w-5" />
-              {t('İlk Kategoriyi Ekle')}
+              {t('productsContent.emptyState.noCategories.addFirstCategory')}
             </button>
             
             <button className="flex items-center gap-2 px-6 py-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors duration-200">
               <Package className="h-5 w-5" />
-              {t('Örnek Menü İçe Aktar')}
+              {t('productsContent.actions.importSampleMenu')}
             </button>
           </div>
         </div>
@@ -675,34 +679,34 @@ const ProductsContent: React.FC = () => {
       onDragEnd={handleDragEnd}
     >
       <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
-         {(isReorderingCategories || isReorderingProducts) && (
-        <div className="fixed top-4 right-4 z-50 bg-primary-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          <span className="text-sm">
-            {isReorderingCategories 
-              ? t('Kategori sıralaması kaydediliyor...') 
-              : reorderingCategoryId 
-                ? t('Ürün taşınıyor...')
-                : t('Ürün sıralaması kaydediliyor...')
-            }
-          </span>
-        </div>
-      )}
+        {(isReorderingCategories || isReorderingProducts) && (
+          <div className={`fixed top-4 ${isRTL ? 'left-4' : 'right-4'} z-50 bg-primary-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2`}>
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-sm">
+              {isReorderingCategories 
+                ? t('productsContent.dragDrop.categoryReordering') 
+                : reorderingCategoryId 
+                  ? t('productsContent.dragDrop.productMoving')
+                  : t('productsContent.dragDrop.productReordering')
+              }
+            </span>
+          </div>
+        )}
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
               <input
                 type="text"
-                placeholder={t('Menü öğelerini ara...')}
+                placeholder={t('productsContent.search.placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
               />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                 <button
                   onClick={() => setViewMode('list')}
@@ -710,6 +714,7 @@ const ProductsContent: React.FC = () => {
                     ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
+                  title={t('productsContent.viewMode.list')}
                 >
                   <List className="h-4 w-4" />
                 </button>
@@ -719,19 +724,26 @@ const ProductsContent: React.FC = () => {
                     ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
                     : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
                     }`}
+                  title={t('productsContent.viewMode.grid')}
                 >
                   <Grid3X3 className="h-4 w-4" />
                 </button>
               </div>
 
-              <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200">
+              <button 
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
+                title={t('productsContent.search.filter')}
+              >
                 <Filter className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('Filtrele')}</span>
+                <span className="hidden sm:inline">{t('productsContent.search.filter')}</span>
               </button>
 
-              <button className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200">
+              <button 
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
+                title={t('productsContent.search.sort')}
+              >
                 <ArrowUp className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('Sırala')}</span>
+                <span className="hidden sm:inline">{t('productsContent.search.sort')}</span>
               </button>
 
               <button
@@ -739,43 +751,43 @@ const ProductsContent: React.FC = () => {
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70 transition-colors duration-200"
               >
                 <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('Yeni Kategori')}</span>
+                <span className="hidden sm:inline">{t('productsContent.actions.newCategory')}</span>
               </button>
 
-             <button 
-              onClick={() => {
-                setSelectedCategoryForProduct(''); 
-                setIsCreateProductModalOpen(true);
-              }}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200"
-            >
-              <Plus className="h-4 w-4" />
-              <span>{t('Yeni Ürün')}</span>
-            </button>
+              <button 
+                onClick={() => {
+                  setSelectedCategoryForProduct(''); 
+                  setIsCreateProductModalOpen(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200"
+              >
+                <Plus className="h-4 w-4" />
+                <span>{t('productsContent.actions.newProduct')}</span>
+              </button>
             </div>
           </div>
         </div>
 
-    <SortableContext items={filteredCategories.map(cat => cat.categoryId)} strategy={verticalListSortingStrategy}>
-        <div className="space-y-4">
-          {filteredCategories.map((category) => (
-            <SortableCategory
-              key={category.categoryId}
-              category={category}
-              isDark={isDark}
-              onToggle={toggleCategory}
-              onEditProduct={handleEditProduct}
-              onDeleteProduct={handleDeleteProduct}
-              onEditCategory={handleEditCategory}
-              onDeleteCategory={handleDeleteCategory}
-              activeId={activeId}
-              onOpenAddonsManagement={handleOpenAddonsManagement}
-              allCategories={categories}
-              isReorderingProducts={isReorderingProducts && reorderingCategoryId === category.categoryId}
-            />
-          ))}
-        </div>
-      </SortableContext>
+        <SortableContext items={filteredCategories.map(cat => cat.categoryId)} strategy={verticalListSortingStrategy}>
+          <div className="space-y-4">
+            {filteredCategories.map((category) => (
+              <SortableCategory
+                key={category.categoryId}
+                category={category}
+                isDark={isDark}
+                onToggle={toggleCategory}
+                onEditProduct={handleEditProduct}
+                onDeleteProduct={handleDeleteProduct}
+                onEditCategory={handleEditCategory}
+                onDeleteCategory={handleDeleteCategory}
+                activeId={activeId}
+                onOpenAddonsManagement={handleOpenAddonsManagement}
+                allCategories={categories}
+                isReorderingProducts={isReorderingProducts && reorderingCategoryId === category.categoryId}
+              />
+            ))}
+          </div>
+        </SortableContext>
 
         <DragOverlay>
           {activeId ? (
@@ -796,7 +808,7 @@ const ProductsContent: React.FC = () => {
                 const hasValidImage = activeProduct.imageUrl && activeProduct.imageUrl !== 'string' && activeProduct.imageUrl.trim() !== '';
                 return (
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-lg border border-gray-200 dark:border-gray-600 rotate-3 scale-105">
-                    <div className="flex items-start gap-3">
+                    <div className={`flex items-start gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       {hasValidImage ? (
                         <img
                           src={activeProduct.imageUrl}
@@ -811,7 +823,9 @@ const ProductsContent: React.FC = () => {
                       <div className="min-w-0">
                         <h4 className="font-medium text-gray-900 dark:text-white">{activeProduct.name}</h4>
                         <p className="text-sm text-gray-600 dark:text-gray-400 truncate">{activeProduct.description}</p>
-                        <span className="text-sm font-semibold text-gray-900 dark:text-white">{activeProduct.price.toFixed(2)} ₺</span>
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                          {t('productsContent.currency.format', { amount: activeProduct.price.toFixed(2) })}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -830,15 +844,15 @@ const ProductsContent: React.FC = () => {
       />
       
       <CreateProductModal
-          isOpen={isCreateProductModalOpen}
-          onClose={() => {
-            setIsCreateProductModalOpen(false);
-            setSelectedCategoryForProduct('');
-          }}
-          onSuccess={loadCategories}
-          categories={categories}
-          onOpenIngredientSelection={handleOpenIngredientSelection} // Keep original for creation
-        />
+        isOpen={isCreateProductModalOpen}
+        onClose={() => {
+          setIsCreateProductModalOpen(false);
+          setSelectedCategoryForProduct('');
+        }}
+        onSuccess={loadCategories}
+        categories={categories}
+        onOpenIngredientSelection={handleOpenIngredientSelection} // Keep original for creation
+      />
 
       {isEditCategoryModalOpen && selectedCategoryForEdit && (
         <EditCategoryModal
@@ -852,7 +866,7 @@ const ProductsContent: React.FC = () => {
         />
       )}
 
-       {isEditProductModalOpen && selectedProductForEdit && (
+      {isEditProductModalOpen && selectedProductForEdit && (
         <EditProductModal
           isOpen={isEditProductModalOpen}
           onClose={() => {
@@ -866,32 +880,33 @@ const ProductsContent: React.FC = () => {
         />
       )}
 
-     {isIngredientUpdateModalOpen && selectedProductForIngredientUpdate && (
-  <>
-    {/* Debug logging */}
-    {console.log('🔍 Rendering modal with:', {
-      modalOpen: isIngredientUpdateModalOpen,
-      selectedProduct: selectedProductForIngredientUpdate,
-      productId: selectedProductForIngredientUpdate.productId,
-      productName: selectedProductForIngredientUpdate.productName,
-      productIdType: typeof selectedProductForIngredientUpdate.productId,
-      isValidProductId: selectedProductForIngredientUpdate.productId && 
-                       selectedProductForIngredientUpdate.productId !== 0 && 
-                       !isNaN(selectedProductForIngredientUpdate.productId)
-    })}
-    
-    <ProductIngredientUpdateModal
-      isOpen={isIngredientUpdateModalOpen}
-      onClose={() => {
-        setIsIngredientUpdateModalOpen(false);
-        setSelectedProductForIngredientUpdate(null);
-      }}
-      onSuccess={loadCategories}
-      productId={selectedProductForIngredientUpdate.productId}
-      productName={selectedProductForIngredientUpdate.productName}
-    />
-  </>
-)}
+      {isIngredientUpdateModalOpen && selectedProductForIngredientUpdate && (
+        <>
+          {/* Debug logging */}
+          {console.log('🔍 Rendering modal with:', {
+            modalOpen: isIngredientUpdateModalOpen,
+            selectedProduct: selectedProductForIngredientUpdate,
+            productId: selectedProductForIngredientUpdate.productId,
+            productName: selectedProductForIngredientUpdate.productName,
+            productIdType: typeof selectedProductForIngredientUpdate.productId,
+            isValidProductId: selectedProductForIngredientUpdate.productId && 
+                           selectedProductForIngredientUpdate.productId !== 0 && 
+                           !isNaN(selectedProductForIngredientUpdate.productId)
+          })}
+          
+          <ProductIngredientUpdateModal
+            isOpen={isIngredientUpdateModalOpen}
+            onClose={() => {
+              setIsIngredientUpdateModalOpen(false);
+              setSelectedProductForIngredientUpdate(null);
+            }}
+            onSuccess={loadCategories}
+            productId={selectedProductForIngredientUpdate.productId}
+            productName={selectedProductForIngredientUpdate.productName}
+          />
+        </>
+      )}
+
       {isConfirmDeleteModalOpen && deleteConfig && (
         <ConfirmDeleteModal
           isOpen={isConfirmDeleteModalOpen}
@@ -905,6 +920,7 @@ const ProductsContent: React.FC = () => {
           isSubmitting={isDeleting}
         />
       )}
+
       {isAddonsModalOpen && selectedProductForAddons && (
         <ProductAddonsModal
           isOpen={isAddonsModalOpen}
@@ -917,19 +933,19 @@ const ProductsContent: React.FC = () => {
           productName={selectedProductForAddons.productName}
         />
       )}
-      {isIngredientSelectionModalOpen && selectedProductForIngredients && (
-      <ProductIngredientSelectionModal
-        isOpen={isIngredientSelectionModalOpen}
-        onClose={() => {
-          setIsIngredientSelectionModalOpen(false);
-          setSelectedProductForIngredients(null);
-        }}
-        onSuccess={loadCategories}
-        productId={selectedProductForIngredients.productId}
-        productName={selectedProductForIngredients.productName}
-      />
-    )}
 
+      {isIngredientSelectionModalOpen && selectedProductForIngredients && (
+        <ProductIngredientSelectionModal
+          isOpen={isIngredientSelectionModalOpen}
+          onClose={() => {
+            setIsIngredientSelectionModalOpen(false);
+            setSelectedProductForIngredients(null);
+          }}
+          onSuccess={loadCategories}
+          productId={selectedProductForIngredients.productId}
+          productName={selectedProductForIngredients.productName}
+        />
+      )}
     </DndContext>
   );
 };

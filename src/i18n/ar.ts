@@ -167,10 +167,6 @@ export const ar = {
         avgOrderValue: 'متوسط قيمة الطلب'
       }
     },
-    products: {
-      title: 'المنتجات',
-      description: 'عرض وإدارة منتجاتك.'
-    },
     ingredients : {
       title : "المكونات"
     },
@@ -808,8 +804,6 @@ export const ar = {
     }
   },
 
-
-
   // Table Management
   tableManagement: {
     loading: 'جاري تحميل الطاولات...',
@@ -954,202 +948,202 @@ export const ar = {
     mainRestaurant: 'المطعم الرئيسي',
     branches: 'الفروع'
   }
-},
-popularProducts: {
-  title: 'المنتجات الأكثر شيوعاً',
-  empty: 'ستظهر مبيعات المنتجات هنا',
-  labels: {
-    orders: 'طلبات',
-    percentage: '%'
   },
-  tooltip: {
-    ordersFormat: (value: any, percentage: any) => `${value} طلبات (${percentage}%)`,
-    noData: 'لا توجد بيانات متاحة'
-  }
-},
-weeklyActivity: {
-  title: 'النشاط الأسبوعي',
-  empty: {
-    primary: 'لا توجد بيانات نشاط متاحة بعد',
-    secondary: 'ستظهر البيانات هنا قريباً'
-  },
-  labels: {
-    views: 'المشاهدات',
-    qrScans: 'مسح رمز QR'
-  },
-  legend: {
-    views: 'المشاهدات',
-    qrScans: 'مسح رمز QR'
-  }
-},
-monthlyRevenue: {
-    QuickStats : "إحصائيات سريعة",
-  title: 'اتجاه الإيرادات الشهرية',
-  empty: {
-    primary: 'لا توجد بيانات إيرادات متاحة بعد',
-    secondary: 'ستظهر بيانات الإيرادات هنا'
-  },
-  labels: {
-    total: 'المجموع:',
-    revenue: 'الإيرادات'
-    
-  },
-  currency: {
-    symbol: '₺',
-    format: (value: { toLocaleString: (arg0: string) => any; }) => `${value.toLocaleString('ar-SA')} ₺`
-  }
-},
-branchCard: {
-  status: {
-    temporaryClosed: 'مغلق مؤقتاً',
-    open: 'مفتوح',
-    closed: 'مغلق',
-    active: 'نشط',
-    inactive: 'غير نشط',
-    hidden: 'مخفي'
-  },
-  actions: {
-    edit: 'تعديل',
-    delete: 'حذف'
-  },
-  labels: {
-    customerVisibility: 'الظهور للعملاء',
-    apiBranchOpen: 'API BranchIsOpen:'
-  },
-  alt: {
-    logo: 'الشعار'
-  }
-},
-addBranchCard: {
-  title: 'إضافة فرع جديد',
-  description: 'انقر لإضافة فرع جديد'
-},
-branchModal: {
-  title: {
-    add: 'إضافة فرع جديد',
-    edit: 'تعديل الفرع'
-  },
-  subtitle: 'يمكنك إدخال معلومات الفرع خطوة بخطوة',
-  steps: {
-    basic: 'المعلومات الأساسية',
-    address: 'معلومات العنوان', 
-    contact: 'الاتصال وساعات العمل'
-  },
-  sections: {
-    basicInfo: 'المعلومات الأساسية',
-    addressInfo: 'معلومات العنوان',
-    contactInfo: 'معلومات الاتصال',
-    workingHours: 'ساعات العمل'
-  },
-  fields: {
-    branchName: {
-      label: 'اسم الفرع *',
-      placeholder: 'أدخل اسم الفرع'
+  popularProducts: {
+    title: 'المنتجات الأكثر شيوعاً',
+    empty: 'ستظهر مبيعات المنتجات هنا',
+    labels: {
+      orders: 'طلبات',
+      percentage: '%'
     },
-    whatsappNumber: {
-      label: 'رقم الطلبات واتساب *',
-      placeholder: 'أدخل رقم الطلبات واتساب'
-    },
-    branchLogo: {
-      label: 'شعار الفرع (اختياري)',
-      select: 'اختر الشعار',
-      uploading: 'جاري الرفع...',
-      success: '✓ تم رفع الشعار بنجاح',
-      preview: 'معاينة شعار الفرع',
-      supportText: 'تدعم صيغ PNG، JPG، GIF. الحد الأقصى لحجم الملف: 5 ميجابايت'
-    },
-    country: {
-      label: 'البلد *',
-      placeholder: 'أدخل اسم البلد'
-    },
-    city: {
-      label: 'المدينة *',
-      placeholder: 'أدخل اسم المدينة'
-    },
-    street: {
-      label: 'الشارع *',
-      placeholder: 'أدخل اسم الشارع'
-    },
-    zipCode: {
-      label: 'الرمز البريدي *',
-      placeholder: 'أدخل الرمز البريدي'
-    },
-    addressLine1: {
-      label: 'سطر العنوان 1 *',
-      placeholder: 'أدخل معلومات العنوان التفصيلية'
-    },
-    addressLine2: {
-      label: 'سطر العنوان 2 (اختياري)',
-      placeholder: 'أدخل معلومات العنوان الإضافية (اختياري)'
-    },
-    phone: {
-      label: 'رقم الهاتف *',
-      placeholder: 'أدخل رقم الهاتف'
-    },
-    email: {
-      label: 'عنوان البريد الإلكتروني *',
-      placeholder: 'أدخل عنوان البريد الإلكتروني'
-    },
-    location: {
-      label: 'معلومات الموقع *',
-      placeholder: 'أدخل معلومات الموقع (مثال: 40.9795,28.7225)'
-    },
-    contactHeader: {
-      label: 'عنوان الاتصال (اختياري)',
-      placeholder: 'أدخل عنوان الاتصال (اختياري)'
-    },
-    footerTitle: {
-      label: 'عنوان التذييل (اختياري)',
-      placeholder: 'أدخل عنوان التذييل (اختياري)'
-    },
-    footerDescription: {
-      label: 'وصف التذييل (اختياري)',
-      placeholder: 'أدخل وصف التذييل (اختياري)'
-    },
-    openTitle: {
-      label: 'عنوان ساعات العمل (اختياري)',
-      placeholder: 'أدخل عنوان ساعات العمل (اختياري)'
-    },
-    openDays: {
-      label: 'أيام العمل (اختياري)',
-      placeholder: 'أدخل أيام العمل (اختياري)'
-    },
-    openHours: {
-      label: 'ساعات العمل (اختياري)',
-      placeholder: 'أدخل ساعات العمل (اختياري)'
+    tooltip: {
+      ordersFormat: (value: any, percentage: any) => `${value} طلبات (${percentage}%)`,
+      noData: 'لا توجد بيانات متاحة'
     }
   },
-  workingHours: {
-    description: 'حدد ساعات عمل مؤسستك',
-    days: ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'],
-    open: 'مفتوح',
-    closed: 'مغلق',
-    openTime: 'الفتح',
-    closeTime: 'الإغلاق',
-    canOrder: '✓ يمكن للعملاء تقديم الطلبات في هذا اليوم',
-    infoTitle: 'حول ساعات العمل',
-    infoText: 'الساعات التي تحددها هنا تحدد متى يمكن للعملاء تقديم الطلبات من خلال قائمة QR الخاصة بك. لا يتم أخذ الطلبات في الأيام المغلقة.'
+  weeklyActivity: {
+    title: 'النشاط الأسبوعي',
+    empty: {
+      primary: 'لا توجد بيانات نشاط متاحة بعد',
+      secondary: 'ستظهر البيانات هنا قريباً'
+    },
+    labels: {
+      views: 'المشاهدات',
+      qrScans: 'مسح رمز QR'
+    },
+    legend: {
+      views: 'المشاهدات',
+      qrScans: 'مسح رمز QR'
+    }
   },
-  errors: {
-    branchName: 'اسم الفرع مطلوب',
-    whatsappNumber: 'رقم الطلبات واتساب مطلوب',
-    country: 'البلد مطلوب',
-    city: 'المدينة مطلوبة',
-    street: 'الشارع مطلوب',
-    zipCode: 'الرمز البريدي مطلوب',
-    addressLine1: 'سطر العنوان 1 مطلوب',
-    phone: 'رقم الهاتف مطلوب',
-    email: 'عنوان البريد الإلكتروني مطلوب',
-    location: 'معلومات الموقع مطلوبة'
+  monthlyRevenue: {
+      QuickStats : "إحصائيات سريعة",
+    title: 'اتجاه الإيرادات الشهرية',
+    empty: {
+      primary: 'لا توجد بيانات إيرادات متاحة بعد',
+      secondary: 'ستظهر بيانات الإيرادات هنا'
+    },
+    labels: {
+      total: 'المجموع:',
+      revenue: 'الإيرادات'
+      
+    },
+    currency: {
+      symbol: '₺',
+      format: (value: { toLocaleString: (arg0: string) => any; }) => `${value.toLocaleString('ar-SA')} ₺`
+    }
   },
-  buttons: {
-    cancel: 'إلغاء',
-    back: 'رجوع',
-    next: 'التالي',
-    save: 'حفظ',
-    saving: 'جاري الحفظ...'
-  }
-},
+  branchCard: {
+    status: {
+      temporaryClosed: 'مغلق مؤقتاً',
+      open: 'مفتوح',
+      closed: 'مغلق',
+      active: 'نشط',
+      inactive: 'غير نشط',
+      hidden: 'مخفي'
+    },
+    actions: {
+      edit: 'تعديل',
+      delete: 'حذف'
+    },
+    labels: {
+      customerVisibility: 'الظهور للعملاء',
+      apiBranchOpen: 'API BranchIsOpen:'
+    },
+    alt: {
+      logo: 'الشعار'
+    }
+  },
+  addBranchCard: {
+    title: 'إضافة فرع جديد',
+    description: 'انقر لإضافة فرع جديد'
+  },
+  branchModal: {
+    title: {
+      add: 'إضافة فرع جديد',
+      edit: 'تعديل الفرع'
+    },
+    subtitle: 'يمكنك إدخال معلومات الفرع خطوة بخطوة',
+    steps: {
+      basic: 'المعلومات الأساسية',
+      address: 'معلومات العنوان', 
+      contact: 'الاتصال وساعات العمل'
+    },
+    sections: {
+      basicInfo: 'المعلومات الأساسية',
+      addressInfo: 'معلومات العنوان',
+      contactInfo: 'معلومات الاتصال',
+      workingHours: 'ساعات العمل'
+    },
+    fields: {
+      branchName: {
+        label: 'اسم الفرع *',
+        placeholder: 'أدخل اسم الفرع'
+      },
+      whatsappNumber: {
+        label: 'رقم الطلبات واتساب *',
+        placeholder: 'أدخل رقم الطلبات واتساب'
+      },
+      branchLogo: {
+        label: 'شعار الفرع (اختياري)',
+        select: 'اختر الشعار',
+        uploading: 'جاري الرفع...',
+        success: '✓ تم رفع الشعار بنجاح',
+        preview: 'معاينة شعار الفرع',
+        supportText: 'تدعم صيغ PNG، JPG، GIF. الحد الأقصى لحجم الملف: 5 ميجابايت'
+      },
+      country: {
+        label: 'البلد *',
+        placeholder: 'أدخل اسم البلد'
+      },
+      city: {
+        label: 'المدينة *',
+        placeholder: 'أدخل اسم المدينة'
+      },
+      street: {
+        label: 'الشارع *',
+        placeholder: 'أدخل اسم الشارع'
+      },
+      zipCode: {
+        label: 'الرمز البريدي *',
+        placeholder: 'أدخل الرمز البريدي'
+      },
+      addressLine1: {
+        label: 'سطر العنوان 1 *',
+        placeholder: 'أدخل معلومات العنوان التفصيلية'
+      },
+      addressLine2: {
+        label: 'سطر العنوان 2 (اختياري)',
+        placeholder: 'أدخل معلومات العنوان الإضافية (اختياري)'
+      },
+      phone: {
+        label: 'رقم الهاتف *',
+        placeholder: 'أدخل رقم الهاتف'
+      },
+      email: {
+        label: 'عنوان البريد الإلكتروني *',
+        placeholder: 'أدخل عنوان البريد الإلكتروني'
+      },
+      location: {
+        label: 'معلومات الموقع *',
+        placeholder: 'أدخل معلومات الموقع (مثال: 40.9795,28.7225)'
+      },
+      contactHeader: {
+        label: 'عنوان الاتصال (اختياري)',
+        placeholder: 'أدخل عنوان الاتصال (اختياري)'
+      },
+      footerTitle: {
+        label: 'عنوان التذييل (اختياري)',
+        placeholder: 'أدخل عنوان التذييل (اختياري)'
+      },
+      footerDescription: {
+        label: 'وصف التذييل (اختياري)',
+        placeholder: 'أدخل وصف التذييل (اختياري)'
+      },
+      openTitle: {
+        label: 'عنوان ساعات العمل (اختياري)',
+        placeholder: 'أدخل عنوان ساعات العمل (اختياري)'
+      },
+      openDays: {
+        label: 'أيام العمل (اختياري)',
+        placeholder: 'أدخل أيام العمل (اختياري)'
+      },
+      openHours: {
+        label: 'ساعات العمل (اختياري)',
+        placeholder: 'أدخل ساعات العمل (اختياري)'
+      }
+    },
+    workingHours: {
+      description: 'حدد ساعات عمل مؤسستك',
+      days: ['الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد'],
+      open: 'مفتوح',
+      closed: 'مغلق',
+      openTime: 'الفتح',
+      closeTime: 'الإغلاق',
+      canOrder: '✓ يمكن للعملاء تقديم الطلبات في هذا اليوم',
+      infoTitle: 'حول ساعات العمل',
+      infoText: 'الساعات التي تحددها هنا تحدد متى يمكن للعملاء تقديم الطلبات من خلال قائمة QR الخاصة بك. لا يتم أخذ الطلبات في الأيام المغلقة.'
+    },
+    errors: {
+      branchName: 'اسم الفرع مطلوب',
+      whatsappNumber: 'رقم الطلبات واتساب مطلوب',
+      country: 'البلد مطلوب',
+      city: 'المدينة مطلوبة',
+      street: 'الشارع مطلوب',
+      zipCode: 'الرمز البريدي مطلوب',
+      addressLine1: 'سطر العنوان 1 مطلوب',
+      phone: 'رقم الهاتف مطلوب',
+      email: 'عنوان البريد الإلكتروني مطلوب',
+      location: 'معلومات الموقع مطلوبة'
+    },
+    buttons: {
+      cancel: 'إلغاء',
+      back: 'رجوع',
+      next: 'التالي',
+      save: 'حفظ',
+      saving: 'جاري الحفظ...'
+    }
+  },
 
   branchManagement: {
     title: 'إدارة الفروع',
@@ -1294,8 +1288,6 @@ branchModal: {
       }
     }
   },
-
-  // Common translations
   commonBranch: {
     cancel: 'إلغاء',
     delete: 'حذف',
@@ -1311,5 +1303,848 @@ branchModal: {
     info: 'معلومات',
     required: 'مطلوب',
     optional: 'اختياري'
+  },
+  productsContent: {
+  title: 'إدارة المنتجات',
+  description: 'إدارة فئات ومنتجات القائمة',
+  
+  // Search and filters
+  search: {
+    placeholder: 'البحث في عناصر القائمة...',
+    filter: 'تصفية',
+    sort: 'ترتيب',
+    noResults: 'لم يتم العثور على منتجات'
+  },
+
+  // View modes
+  viewMode: {
+    list: 'عرض قائمة',
+    grid: 'عرض شبكة'
+  },
+
+  // Buttons and actions
+  actions: {
+    addFirstCategory: 'إضافة أول فئة',
+    addCategory: 'فئة جديدة',
+    newCategory: 'فئة جديدة',
+    addProduct: 'منتج جديد',
+    newProduct: 'منتج جديد',
+    editCategory: 'تعديل الفئة',
+    deleteCategory: 'حذف الفئة',
+    editProduct: 'تعديل المنتج',
+    deleteProduct: 'حذف المنتج',
+    manageIngredients: 'إدارة المكونات',
+    updateIngredients: 'تحديث المكونات',
+    manageAddons: 'إدارة الإضافات',
+    importSampleMenu: 'استيراد قائمة نموذجية',
+    addFirstCategoryTitle: 'إضافة الفئة الأولى'
+  },
+
+  // Empty states
+  emptyState: {
+    noCategories: {
+      title: 'لا توجد فئات قائمة بعد',
+      description: 'ابدأ في إنشاء قائمة مطعمك عن طريق إضافة الفئة الأولى. على سبيل المثال "الأطباق الرئيسية"، "المشروبات" أو "الحلويات".',
+      addFirstCategory: 'إضافة الفئة الأولى'
+    }
+  },
+
+  // Loading states
+  loading: {
+    categories: 'جاري تحميل الفئات...',
+    products: 'جاري تحميل المنتجات...',
+    savingOrder: 'جاري حفظ الترتيب...',
+    savingCategoryOrder: 'جاري حفظ ترتيب الفئات...',
+    savingProductOrder: 'جاري حفظ ترتيب المنتجات...',
+    movingProduct: 'جاري نقل المنتج...',
+    deleting: 'جاري الحذف...'
+  },
+
+  // Drag and drop
+  dragDrop: {
+    categoryReordering: 'جاري حفظ ترتيب الفئات...',
+    productReordering: 'جاري حفظ ترتيب المنتجات...',
+    productMoving: 'جاري نقل المنتج...',
+    categoryOrderSaveError: 'حدث خطأ أثناء حفظ ترتيب الفئات.',
+    productOrderSaveError: 'حدث خطأ أثناء حفظ ترتيب المنتجات.',
+    productMoveError: 'حدث خطأ أثناء نقل المنتج.'
+  },
+
+  // Delete confirmations
+  delete: {
+    product: {
+      title: 'حذف المنتج',
+      message: 'هل أنت متأكد من رغبتك في حذف "{{productName}}"؟ لا يمكن التراجع عن هذا الإجراء.',
+      success: 'تم حذف المنتج بنجاح'
+    },
+    category: {
+      title: 'حذف الفئة',
+      messageWithProducts: 'تحتوي فئة "{{categoryName}}" على {{productCount}} منتج. حذف هذه الفئة سيحذف جميع المنتجات أيضاً. هل أنت متأكد من رغبتك في المتابعة؟',
+      messageEmpty: 'هل أنت متأكد من رغبتك في حذف فئة "{{categoryName}}"؟',
+      success: 'تم حذف الفئة بنجاح'
+    }
+  },
+
+  // Error messages
+  error: {
+    loadFailed: 'فشل في تحميل البيانات',
+    categoryNotFound: 'الفئة غير موجودة',
+    productNotFound: 'المنتج غير موجود',
+    deleteFailed: 'فشل في الحذف',
+    updateFailed: 'فشل في التحديث',
+    createFailed: 'فشل في الإنشاء',
+    reorderFailed: 'فشل في إعادة الترتيب',
+    invalidData: 'بيانات غير صالحة',
+    networkError: 'خطأ في الاتصال بالشبكة',
+    refreshPage: 'يرجى تحديث الصفحة والمحاولة مرة أخرى.'
+  },
+
+  // Success messages
+  success: {
+    categoryCreated: 'تم إنشاء الفئة بنجاح',
+    categoryUpdated: 'تم تحديث الفئة بنجاح',
+    categoryDeleted: 'تم حذف الفئة بنجاح',
+    productCreated: 'تم إنشاء المنتج بنجاح',
+    productUpdated: 'تم تحديث المنتج بنجاح',
+    productDeleted: 'تم حذف المنتج بنجاح',
+    orderSaved: 'تم حفظ الترتيب بنجاح',
+    ingredientsUpdated: 'تم تحديث المكونات بنجاح',
+    addonsUpdated: 'تم تحديث الإضافات بنجاح'
+  },
+
+  // Categories
+  category: {
+    products: 'منتجات',
+    productCount: 'منتج',
+    noProducts: 'لا توجد منتجات في هذه الفئة',
+    expand: 'توسيع',
+    collapse: 'طي'
+  },
+
+  // Products
+  product: {
+    price: 'السعر',
+    description: 'الوصف',
+    ingredients: 'المكونات',
+    addons: 'الإضافات',
+    category: 'الفئة',
+    image: 'الصورة',
+    status: 'الحالة',
+    available: 'متاح',
+    unavailable: 'غير متاح'
+  },
+
+  // Currency
+  currency: {
+    symbol: '₺',
+    format: '{{amount}} ₺'
+  },
+
+  // Status indicators
+  status: {
+    active: 'نشط',
+    inactive: 'غير نشط',
+    available: 'متاح',
+    unavailable: 'غير متاح'
+  },
+
+  // Tooltips
+  tooltips: {
+    dragToReorder: 'اسحب لإعادة الترتيب',
+    dragToMoveCategory: 'اسحب لنقل المنتج إلى فئة أخرى',
+    expandCategory: 'توسيع الفئة',
+    collapseCategory: 'طي الفئة',
+    editCategory: 'تعديل الفئة',
+    deleteCategory: 'حذف الفئة',
+    editProduct: 'تعديل المنتج',
+    deleteProduct: 'حذف المنتج',
+    manageIngredients: 'إدارة مكونات المنتج',
+    manageAddons: 'إدارة إضافات المنتج'
   }
+  },
+  createCategoryModal: {
+    // Header
+    title: 'إضافة فئة جديدة',
+    subtitle: 'إنشاء فئة قائمة',
+    close: 'إغلاق',
+
+    // Form fields
+    form: {
+      categoryName: {
+        label: 'اسم الفئة *',
+        placeholder: 'مثال: الأطباق الرئيسية، المشروبات، الحلويات',
+        required: 'اسم الفئة مطلوب'
+      },
+      status: {
+        label: 'تفعيل الفئة',
+        description: 'الفئات النشطة تظهر في القائمة'
+      }
+    },
+
+    // Buttons
+    buttons: {
+      cancel: 'إلغاء',
+      create: 'إضافة فئة',
+      creating: 'جاري الإضافة...'
+    },
+
+    // Error messages
+    errors: {
+      general: 'حدث خطأ أثناء إضافة الفئة. يرجى المحاولة مرة أخرى.',
+      categoryExists: 'توجد فئة بهذا الاسم بالفعل. يرجى اختيار اسم مختلف.',
+      invalidData: 'البيانات المدخلة غير صالحة. يرجى التحقق والمحاولة مرة أخرى.',
+      serverError: 'حدث خطأ في الخادم. يرجى المحاولة لاحقاً.',
+      networkError: 'خطأ في الاتصال بالشبكة. تحقق من الاتصال وحاول مرة أخرى.',
+      unknownError: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
+      errorLabel: 'خطأ:'
+    },
+
+    // Success messages
+    success: {
+      categoryCreated: 'تم إنشاء الفئة بنجاح',
+      categoryAdded: 'تمت إضافة الفئة بنجاح إلى القائمة'
+    },
+
+    // Validation messages
+    validation: {
+      nameRequired: 'اسم الفئة مطلوب',
+      nameMinLength: 'يجب أن يكون اسم الفئة أكثر من حرفين',
+      nameMaxLength: 'يجب أن يكون اسم الفئة أقل من 50 حرف',
+      invalidCharacters: 'اسم الفئة يحتوي على حروف غير صالحة'
+    },
+
+    // Accessibility
+    accessibility: {
+      closeModal: 'إغلاق نافذة إضافة الفئة',
+      formTitle: 'نموذج إضافة فئة جديدة',
+      requiredField: 'حقل مطلوب',
+      optionalField: 'حقل اختياري'
+    }
+  },
+  createProductModal: {
+  // Header
+  title: 'إضافة منتج جديد',
+  subtitle: 'أضف منتجاً إلى قائمتك',
+  close: 'إغلاق',
+
+  // Form fields
+  form: {
+    productImage: {
+      label: 'صورة المنتج',
+      dragActive: 'اسقط الملف هنا',
+      uploadText: 'رفع صورة',
+      supportedFormats: 'PNG، JPG، GIF (حد أقصى 5 ميجابايت)',
+      removeImage: 'إزالة الصورة'
+    },
+    productName: {
+      label: 'اسم المنتج',
+      placeholder: 'مثال: بيتزا مارجريتا',
+      required: 'اسم المنتج مطلوب'
+    },
+    price: {
+      label: 'السعر (₺)',
+      placeholder: '0',
+      required: 'السعر مطلوب',
+      mustBePositive: 'السعر يجب أن يكون أكبر من 0',
+      currency: '₺'
+    },
+    category: {
+      label: 'الفئة',
+      placeholder: 'اختر فئة',
+      required: 'اختيار الفئة مطلوب',
+      invalidCategory: 'الفئة المختارة غير صالحة. الفئات المتاحة: {{categories}}'
+    },
+    description: {
+      label: 'الوصف',
+      placeholder: 'وصف المنتج...',
+      required: 'وصف المنتج مطلوب'
+    },
+    status: {
+      label: 'تفعيل المنتج',
+      description: 'يظهر في القائمة',
+      active: 'نشط',
+      inactive: 'غير نشط'
+    }
+  },
+
+  // Buttons
+  buttons: {
+    cancel: 'إلغاء',
+    create: 'إضافة منتج',
+    creating: 'جاري الإضافة...',
+    uploading: 'جاري الرفع...'
+  },
+
+  // Image upload
+  imageUpload: {
+    dragToUpload: 'اسحب الصورة هنا أو انقر للرفع',
+    clickToUpload: 'انقر لرفع صورة',
+    dragActive: 'اسقط الملف هنا',
+    supportedFormats: 'PNG، JPG، GIF',
+    maxSize: 'حد أقصى 5 ميجابايت',
+    preview: 'معاينة الصورة',
+    remove: 'إزالة'
+  },
+
+  // Error messages
+  errors: {
+    general: 'حدث خطأ أثناء إضافة المنتج. يرجى المحاولة مرة أخرى.',
+    nameRequired: 'اسم المنتج مطلوب',
+    descriptionRequired: 'وصف المنتج مطلوب',
+    priceRequired: 'السعر مطلوب',
+    priceMustBePositive: 'السعر يجب أن يكون أكبر من 0',
+    categoryRequired: 'اختيار الفئة مطلوب',
+    categoryInvalid: 'الفئة المختارة غير صالحة',
+    imageInvalid: 'يرجى اختيار ملف صورة صالح',
+    imageTooLarge: 'حجم ملف الصورة يجب أن يكون أقل من 5 ميجابايت',
+    imageUploadFailed: 'فشل في رفع الصورة',
+    networkError: 'خطأ في الاتصال بالشبكة. تحقق من الاتصال وحاول مرة أخرى.',
+    serverError: 'حدث خطأ في الخادم. يرجى المحاولة لاحقاً.',
+    unknownError: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
+    errorLabel: 'خطأ:'
+  },
+
+  // Success messages
+  success: {
+    productCreated: 'تم إنشاء المنتج بنجاح',
+    productAdded: 'تمت إضافة المنتج بنجاح إلى القائمة'
+  },
+
+  // Validation messages
+  validation: {
+    nameMinLength: 'يجب أن يكون اسم المنتج أكثر من حرفين',
+    nameMaxLength: 'يجب أن يكون اسم المنتج أقل من 100 حرف',
+    descriptionMinLength: 'يجب أن يكون الوصف أكثر من 5 أحرف',
+    descriptionMaxLength: 'يجب أن يكون الوصف أقل من 500 حرف',
+    priceMin: 'السعر يجب أن يكون أكبر من 0',
+    priceMax: 'السعر يجب أن يكون أقل من 10000'
+  },
+
+  // Accessibility
+  accessibility: {
+    closeModal: 'إغلاق نافذة إضافة المنتج',
+    formTitle: 'نموذج إضافة منتج جديد',
+    requiredField: 'حقل مطلوب',
+    optionalField: 'حقل اختياري',
+    imageUpload: 'رفع صورة المنتج',
+    removeImage: 'إزالة صورة المنتج',
+    priceInput: 'إدخال سعر المنتج',
+    categorySelect: 'اختيار فئة المنتج',
+    statusToggle: 'تبديل حالة المنتج'
+  }
+  },
+   productAddonsModal: {
+      // Header
+      title: 'إضافات المنتج',
+      subtitle: 'إدارة منتجات الإضافات لـ',
+      close: 'إغلاق',
+
+      // Panel titles
+      panels: {
+        currentAddons: {
+          title: 'الإضافات الحالية',
+          count: '({{count}})',
+          dragInstruction: 'يمكنك إعادة الترتيب بالسحب',
+          emptyState: {
+            title: 'لم يتم إضافة أي إضافات بعد.',
+            subtitle: 'اختر المنتجات من اللوحة اليمنى.'
+          }
+        },
+        availableProducts: {
+          title: 'المنتجات المتاحة كإضافات',
+          searchPlaceholder: 'البحث عن المنتجات...',
+          emptyState: {
+            noResults: 'لم يتم العثور على منتجات تطابق معايير البحث.',
+            noProducts: 'لم يتم العثور على منتجات قابلة للإضافة.'
+          }
+        }
+      },
+
+      // Addon item actions
+      actions: {
+        edit: 'تحرير',
+        save: 'حفظ',
+        cancel: 'إلغاء',
+        remove: 'إزالة',
+        recommended: 'مُوصى به'
+      },
+
+      // Form fields
+      form: {
+        marketingText: {
+          placeholder: 'نص تسويقي...',
+          label: 'النص التسويقي'
+        },
+        isRecommended: {
+          label: 'وضع علامة كإضافة موصى بها',
+          badge: 'مُوصى به'
+        }
+      },
+
+      // Product status
+      status: {
+        outOfStock: 'نفد من المخزون',
+        available: 'متوفر',
+        unavailable: 'غير متوفر'
+      },
+
+      // Loading states
+      loading: {
+        addons: 'جاري تحميل الإضافات...',
+        products: 'جاري تحميل المنتجات...',
+        saving: 'جاري الحفظ...'
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'إلغاء',
+        saveAddons: 'حفظ الإضافات',
+        saving: 'جاري الحفظ...'
+      },
+
+      // Counter texts
+      counters: {
+        selectedProducts: '{{count}} منتج محدد',
+        availableProducts: '{{count}} منتج متوفر'
+      },
+
+      // Error messages
+      errors: {
+        loadingData: 'حدث خطأ أثناء تحميل بيانات الإضافات.',
+        updatingAddon: 'حدث خطأ أثناء تحديث الإضافة.',
+        deletingAddon: 'حدث خطأ أثناء حذف الإضافة.',
+        savingOrder: 'حدث خطأ أثناء حفظ ترتيب الإضافات.',
+        savingAddons: 'حدث خطأ أثناء حفظ الإضافات. يرجى المحاولة مرة أخرى.',
+        general: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
+        networkError: 'خطأ في الاتصال بالشبكة. تحقق من اتصالك وحاول مرة أخرى.'
+      },
+
+      // Success messages
+      success: {
+        addonsSaved: 'تم حفظ إضافات المنتج بنجاح',
+        orderUpdated: 'تم تحديث ترتيب الإضافات بنجاح',
+        addonUpdated: 'تم تحديث الإضافة بنجاح',
+        addonRemoved: 'تم إزالة الإضافة بنجاح'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'إغلاق نافذة إضافات المنتج',
+        dragHandle: 'اسحب لإعادة ترتيب الإضافة',
+        editAddon: 'تحرير تفاصيل الإضافة',
+        removeAddon: 'إزالة الإضافة من المنتج',
+        selectProduct: 'اختيار المنتج كإضافة',
+        productImage: 'صورة المنتج',
+        toggleRecommended: 'تبديل حالة التوصية'
+      }
+    },
+      editCategoryModal: {
+      // Header
+      title: 'تحرير الفئة',
+      subtitle: 'تحديث معلومات الفئة',
+      close: 'إغلاق',
+
+      // Form fields
+      form: {
+        categoryName: {
+          label: 'اسم الفئة',
+          placeholder: 'أدخل اسم الفئة...',
+          required: 'اسم الفئة مطلوب',
+          minLength: 'يجب أن يكون اسم الفئة على الأقل 2 أحرف',
+          maxLength: 'يجب أن يكون اسم الفئة أقل من 100 حرف'
+        },
+        description: {
+          label: 'الوصف',
+          placeholder: 'أدخل وصف الفئة...',
+          optional: 'اختياري',
+          maxLength: 'يجب أن يكون الوصف أقل من 500 حرف'
+        },
+        status: {
+          label: 'نشط',
+          description: 'ستكون الفئة مرئية في القائمة عندما تكون نشطة',
+          active: 'نشط',
+          inactive: 'غير نشط'
+        }
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'إلغاء',
+        save: 'حفظ',
+        saving: 'جاري الحفظ...',
+        update: 'تحديث الفئة',
+        updating: 'جاري التحديث...'
+      },
+
+      // Error messages
+      errors: {
+        updateFailed: 'حدث خطأ أثناء تحديث الفئة. يرجى المحاولة مرة أخرى.',
+        nameRequired: 'اسم الفئة مطلوب',
+        nameMinLength: 'يجب أن يكون اسم الفئة على الأقل 2 أحرف',
+        nameMaxLength: 'يجب أن يكون اسم الفئة أقل من 100 حرف',
+        descriptionMaxLength: 'يجب أن يكون الوصف أقل من 500 حرف',
+        general: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
+        networkError: 'خطأ في الاتصال بالشبكة. تحقق من اتصالك وحاول مرة أخرى.',
+        serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.'
+      },
+
+      // Success messages
+      success: {
+        categoryUpdated: 'تم تحديث الفئة بنجاح',
+        changesSaved: 'تم حفظ التغييرات بنجاح'
+      },
+
+      // Validation messages
+      validation: {
+        nameRequired: 'يرجى إدخال اسم الفئة',
+        nameMinLength: 'اسم الفئة قصير جداً',
+        nameMaxLength: 'اسم الفئة طويل جداً',
+        descriptionMaxLength: 'الوصف طويل جداً'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'إغلاق نافذة تحرير الفئة',
+        formTitle: 'نموذج تحرير الفئة',
+        requiredField: 'حقل مطلوب',
+        optionalField: 'حقل اختياري',
+        statusToggle: 'تبديل حالة الفئة',
+        nameInput: 'إدخال اسم الفئة',
+        descriptionInput: 'إدخال وصف الفئة'
+      }
+    },
+     confirmDeleteModal: {
+      // Common titles (can be overridden by props)
+      defaultTitle: 'تأكيد الحذف',
+      deleteTitle: 'حذف العنصر',
+      
+      // Warning message
+      warning: 'لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصر نهائياً.',
+      
+      // Item types
+      itemTypes: {
+        category: 'الفئة',
+        product: 'المنتج',
+        addon: 'الإضافة',
+        user: 'المستخدم',
+        order: 'الطلب',
+        coupon: 'القسيمة',
+        discount: 'الخصم',
+        promotion: 'الترويج',
+        review: 'التقييم',
+        comment: 'التعليق',
+        image: 'الصورة',
+        file: 'الملف',
+        item: 'العنصر'
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'إلغاء',
+        delete: 'حذف',
+        deleting: 'جاري الحذف...',
+        confirm: 'تأكيد',
+        confirming: 'جاري التأكيد...'
+      },
+
+      // Pre-built messages for common scenarios
+      messages: {
+        category: 'هل أنت متأكد من حذف هذه الفئة؟ ستتأثر جميع المنتجات في هذه الفئة أيضاً.',
+        product: 'هل أنت متأكد من حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء.',
+        addon: 'هل أنت متأكد من حذف هذه الإضافة؟ ستتم إزالتها من جميع المنتجات المرتبطة.',
+        user: 'هل أنت متأكد من حذف هذا المستخدم؟ ستتم إزالة جميع بياناته نهائياً.',
+        general: 'هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.'
+      },
+
+      // Error messages
+      errors: {
+        deleteFailed: 'حدث خطأ أثناء الحذف. يرجى المحاولة مرة أخرى.',
+        networkError: 'خطأ في الاتصال بالشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.',
+        serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.',
+        permissionError: 'ليس لديك صلاحية حذف هذا العنصر.',
+        notFound: 'لم يتم العثور على العنصر المراد حذفه.',
+        hasRelations: 'لا يمكن حذف هذا العنصر لأنه يحتوي على بيانات مرتبطة.',
+        general: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.'
+      },
+
+      // Success messages
+      success: {
+        deleted: 'تم حذف العنصر بنجاح',
+        categoryDeleted: 'تم حذف الفئة بنجاح',
+        productDeleted: 'تم حذف المنتج بنجاح',
+        addonDeleted: 'تم حذف الإضافة بنجاح'
+      },
+
+      // Confirmation prompts
+      confirmations: {
+        typeToConfirm: 'اكتب "حذف" للتأكيد',
+        enterName: 'أدخل الاسم لتأكيد الحذف',
+        areYouSure: 'هل أنت متأكد تماماً؟',
+        lastChance: 'هذه فرصتك الأخيرة للإلغاء.'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'إغلاق نافذة تأكيد الحذف',
+        deleteDialog: 'حوار تأكيد الحذف',
+        warningIcon: 'أيقونة التحذير',
+        deleteButton: 'تأكيد الحذف',
+        cancelButton: 'إلغاء الحذف',
+        errorAlert: 'رسالة خطأ'
+      }
+    },
+        editProductModal: {
+      // Header
+      title: 'تحرير المنتج',
+      subtitle: 'تحديث معلومات المنتج',
+      close: 'إغلاق',
+
+      // Form fields
+      form: {
+        productImage: {
+          label: 'صورة المنتج',
+          optional: 'اختياري'
+        },
+        productName: {
+          label: 'اسم المنتج',
+          placeholder: 'مثال: بيتزا مارغريتا',
+          required: 'اسم المنتج مطلوب'
+        },
+        description: {
+          label: 'الوصف',
+          placeholder: 'وصف المنتج...',
+          optional: 'اختياري'
+        },
+        price: {
+          label: 'السعر (₺)',
+          placeholder: '0',
+          required: 'السعر مطلوب',
+          currency: '₺'
+        },
+        category: {
+          label: 'الفئة',
+          placeholder: 'اختر الفئة',
+          required: 'اختيار الفئة مطلوب'
+        },
+        status: {
+          label: 'متوفر في المخزون',
+          description: 'سيكون المنتج مرئياً في القائمة عندما يكون متوفراً',
+          available: 'متوفر',
+          unavailable: 'غير متوفر'
+        }
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'إلغاء',
+        update: 'تحديث المنتج',
+        updating: 'جاري التحديث...',
+        save: 'حفظ التغييرات',
+        saving: 'جاري الحفظ...',
+        uploading: 'جاري تحميل الصورة...'
+      },
+
+      // Image upload
+      imageUpload: {
+        clickToUpload: 'انقر لتحميل الصورة',
+        dragToUpload: 'اسحب الصورة هنا أو انقر للتحميل',
+        dragActive: 'أسقط الملف هنا',
+        supportedFormats: 'PNG, JPG, GIF',
+        maxSize: 'حد أقصى 5 ميجابايت',
+        preview: 'معاينة الصورة',
+        remove: 'إزالة الصورة',
+        changeImage: 'تغيير الصورة'
+      },
+
+      // Error messages
+      errors: {
+        errorLabel: 'خطأ:',
+        updateFailed: 'حدث خطأ أثناء تحديث المنتج. يرجى المحاولة مرة أخرى.',
+        nameRequired: 'اسم المنتج مطلوب',
+        nameAlreadyExists: 'يوجد منتج بهذا الاسم بالفعل. يرجى اختيار اسم مختلف.',
+        descriptionRequired: 'وصف المنتج مطلوب',
+        priceRequired: 'السعر مطلوب',
+        priceMustBePositive: 'يجب أن يكون السعر أكبر من 0',
+        categoryRequired: 'اختيار الفئة مطلوب',
+        imageInvalid: 'يرجى اختيار ملف صورة صحيح',
+        imageTooLarge: 'يجب أن يكون حجم ملف الصورة أقل من 5 ميجابايت',
+        imageUploadFailed: 'فشل في تحميل الصورة',
+        productNotFound: 'لم يتم العثور على المنتج',
+        permissionDenied: 'ليس لديك صلاحية لتحديث هذا المنتج',
+        networkError: 'خطأ في الاتصال بالشبكة. تحقق من اتصالك وحاول مرة أخرى.',
+        serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.',
+        unknownError: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.'
+      },
+
+      // Success messages
+      success: {
+        productUpdated: 'تم تحديث المنتج بنجاح',
+        changesSaved: 'تم حفظ التغييرات بنجاح',
+        imageUploaded: 'تم تحميل الصورة بنجاح'
+      },
+
+      // Validation messages
+      validation: {
+        nameMinLength: 'يجب أن يكون اسم المنتج أكثر من حرفين',
+        nameMaxLength: 'يجب أن يكون اسم المنتج أقل من 100 حرف',
+        descriptionMaxLength: 'يجب أن يكون الوصف أقل من 500 حرف',
+        priceMin: 'يجب أن يكون السعر أكبر من 0',
+        priceMax: 'يجب أن يكون السعر أقل من 10000',
+        imageSize: 'يجب أن تكون الصورة أقل من 5 ميجابايت',
+        imageType: 'مسموح بملفات الصور فقط'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'إغلاق نافذة تحرير المنتج',
+        formTitle: 'نموذج تحرير المنتج',
+        requiredField: 'حقل مطلوب',
+        optionalField: 'حقل اختياري',
+        imageUpload: 'تحميل صورة المنتج',
+        removeImage: 'إزالة صورة المنتج',
+        priceInput: 'إدخال سعر المنتج',
+        categorySelect: 'اختيار فئة المنتج',
+        statusToggle: 'تبديل حالة توفر المنتج',
+        imagePreview: 'معاينة صورة المنتج'
+      }
+    },
+     productIngredientModal: {
+      // Header
+      title: 'مكونات المنتج',
+      subtitle: 'اختر المكونات لـ',
+      close: 'إغلاق',
+
+      // Search
+      search: {
+        placeholder: 'البحث عن المكونات...',
+        label: 'البحث عن المكونات',
+        noResults: 'لم يتم العثور على مكونات'
+      },
+
+      // Summary section
+      summary: {
+        selectedCount: 'المكونات المحددة',
+        hasChanges: 'يوجد تغييرات',
+        noChanges: 'لا توجد تغييرات'
+      },
+
+      // Form fields
+      form: {
+        quantity: {
+          label: 'الكمية',
+          placeholder: 'الكمية',
+          required: 'الكمية مطلوبة'
+        },
+        unit: {
+          label: 'الوحدة',
+          placeholder: 'اختر الوحدة',
+          required: 'الوحدة مطلوبة'
+        }
+      },
+
+      // Measurement units
+      units: {
+        grams: 'جرام',
+        milliliters: 'مل',
+        pieces: 'قطعة',
+        tablespoons: 'ملعقة كبيرة',
+        teaspoons: 'ملعقة صغيرة',
+        cups: 'كوب',
+        kilograms: 'كيلوجرام',
+        liters: 'لتر'
+      },
+
+      // Status indicators
+      status: {
+        available: 'متوفر',
+        unavailable: 'غير متوفر',
+        containsAllergens: 'يحتوي على مسببات الحساسية',
+        toBeAdded: 'ستتم الإضافة',
+        toBeRemoved: 'ستتم الإزالة',
+        selected: 'محدد',
+        unselected: 'غير محدد'
+      },
+
+      // Allergen information
+      allergenInfo: {
+        count: '{{count}} مسبب حساسية',
+        count_plural: '{{count}} مسببات حساسية',
+        details: 'تفاصيل مسببات الحساسية',
+        warning: 'هذا المكون يحتوي على مسببات الحساسية'
+      },
+
+      // Loading states
+      loading: {
+        ingredients: 'جاري تحميل المكونات...',
+        saving: 'جاري حفظ المكونات...',
+        data: 'جاري تحميل البيانات...'
+      },
+
+      // Empty states
+      emptyState: {
+        noIngredients: 'لم يتم إضافة أي مكونات بعد.',
+        noSearchResults: 'لم يتم العثور على مكونات تطابق معايير البحث.',
+        noAvailableIngredients: 'لم يتم العثور على مكونات متاحة.'
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'إلغاء',
+        skip: 'تخطي',
+        save: 'حفظ',
+        saveIngredients: 'حفظ المكونات',
+        saving: 'جاري الحفظ...',
+        add: 'إضافة مكونات',
+        update: 'تحديث المكونات'
+      },
+
+      // Footer
+      footer: {
+        totalCount: 'المجموع: {{count}} مكون',
+        selectedInfo: 'تم تحديد {{selected}} من {{total}}'
+      },
+
+      // Error messages
+      errors: {
+        loadingData: 'حدث خطأ أثناء تحميل بيانات المكونات.',
+        savingIngredients: 'حدث خطأ أثناء حفظ المكونات. يرجى المحاولة مرة أخرى.',
+        quantityRequired: 'يجب أن تكون جميع المكونات لها كمية أكبر من 0.',
+        unitRequired: 'يجب تحديد وحدة لجميع المكونات.',
+        networkError: 'خطأ في الاتصال بالشبكة. تحقق من اتصالك وحاول مرة أخرى.',
+        serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.',
+        general: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
+        invalidQuantity: 'يرجى إدخال كمية صحيحة',
+        ingredientNotFound: 'لم يتم العثور على المكون',
+        permissionDenied: 'ليس لديك صلاحية لتعديل المكونات'
+      },
+
+      // Success messages
+      success: {
+        ingredientsSaved: 'تم حفظ المكونات بنجاح',
+        ingredientsUpdated: 'تم تحديث المكونات بنجاح',
+        ingredientAdded: 'تم إضافة المكون بنجاح',
+        ingredientRemoved: 'تم إزالة المكون بنجاح'
+      },
+
+      // Validation messages
+      validation: {
+        quantityMin: 'يجب أن تكون الكمية أكبر من 0',
+        quantityMax: 'يجب أن تكون الكمية أقل من 1000',
+        unitRequired: 'يرجى اختيار وحدة',
+        ingredientRequired: 'يرجى اختيار مكون واحد على الأقل'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'إغلاق نافذة اختيار المكونات',
+        searchInput: 'البحث عن المكونات',
+        quantityInput: 'أدخل كمية المكون',
+        unitSelect: 'اختر وحدة القياس',
+        ingredientCheckbox: 'اختر المكون',
+        selectedIndicator: 'تم تحديد المكون',
+        allergenWarning: 'يحتوي على مسببات الحساسية',
+        availabilityStatus: 'حالة التوفر'
+      }
+    },
+
 }; 
