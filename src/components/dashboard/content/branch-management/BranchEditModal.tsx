@@ -26,8 +26,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
   branchDetail,
   isSubmitting,
 }) => {
-  const { t, language } = useLanguage();
-  const isRTL = language === 'ar';
+  const { t, isRTL } = useLanguage();
   
   const [formData, setFormData] = useState<BranchEditFormData>({
     branchName: '',
@@ -75,9 +74,10 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     { dayOfWeek: 0, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }
   ];
 
-  const dayNames = [
-    'Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'
-  ];
+  // Get day name from translations
+  const getDayName = (dayOfWeek: number): string => {
+    return t(`branchManagement.form.dayNames.${dayOfWeek}`);
+  };
 
   // Initialize form data when branch detail changes
   useEffect(() => {
@@ -132,13 +132,13 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     const errors: Record<string, string> = {};
 
     if (!formData.branchName?.trim()) {
-      errors.branchName = 'Şube adı gereklidir';
+      errors.branchName = t('branchManagement.form.branchNameRequired');
     }
 
     // Check if at least one working day is selected
     const hasWorkingDay = formData.createBranchWorkingHourCoreDto?.some(day => day.isWorkingDay);
     if (!hasWorkingDay) {
-      errors.workingHours = 'En az bir çalışma günü seçmelisiniz';
+      errors.workingHours = t('branchManagement.form.workingHoursRequired');
     }
 
     setValidationErrors(errors);
@@ -201,13 +201,13 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      setUploadError('Lütfen geçerli bir resim dosyası seçin');
+      setUploadError(t('branchManagement.modal.errors.invalidFileType'));
       return;
     }
 
     // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
-      setUploadError('Dosya boyutu 5MB\'dan küçük olmalıdır');
+      setUploadError(t('branchManagement.modal.errors.fileSizeError'));
       return;
     }
 
@@ -236,7 +236,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
       
     } catch (error) {
       logger.error('Image upload failed', error, { prefix: 'BranchEditModal' });
-      setUploadError('Resim yüklenirken hata oluştu. Lütfen tekrar deneyin.');
+      setUploadError(t('branchManagement.modal.errors.imageUploadError'));
       // Reset preview on error
       setImagePreview(formData.branchLogoPath);
     } finally {
@@ -260,123 +260,123 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
       logger.info('Image removed successfully', null, { prefix: 'BranchEditModal' });
     } catch (error) {
       logger.error('Image removal failed', error, { prefix: 'BranchEditModal' });
-      setUploadError('Resim silinirken hata oluştu.');
+      setUploadError(t('branchManagement.modal.errors.imageRemoveError'));
     }
   };
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  
-  if (!validateForm()) {
-    // Switch to the tab with the first error
-    if (validationErrors.branchName) setActiveTab('general');
-    if (validationErrors.workingHours) setActiveTab('workingHours');
-    return;
-  }
-
-  setUploadError(null);
-
-  try {
-    // Convert form data to API format
-    const submitData: CreateBranchWithDetailsDto = {
-      branchName: formData.branchName?.trim() || null,
-      whatsappOrderNumber: formData.whatsappOrderNumber?.trim() || null,
-      restaurantId: formData.restaurantId,
-      branchLogoPath: formData.branchLogoPath || null,
-      createAddressDto: {
-        country: formData.createAddressDto.country?.trim() || null,
-        city: formData.createAddressDto.city?.trim() || null,
-        street: formData.createAddressDto.street?.trim() || null,
-        zipCode: formData.createAddressDto.zipCode?.trim() || null,
-        addressLine1: formData.createAddressDto.addressLine1?.trim() || null,
-        addressLine2: formData.createAddressDto.addressLine2?.trim() || null,
-      },
-      createContactDto: {
-        phone: formData.createContactDto.phone?.trim() || null,
-        mail: formData.createContactDto.mail?.trim() || null,
-        location: formData.createContactDto.location?.trim() || null,
-        contactHeader: formData.createContactDto.contactHeader?.trim() || null,
-        footerTitle: formData.createContactDto.footerTitle?.trim() || null,
-        footerDescription: formData.createContactDto.footerDescription?.trim() || null,
-        openTitle: formData.createContactDto.openTitle?.trim() || null,
-        openDays: formData.createContactDto.openDays?.trim() || null,
-        openHours: formData.createContactDto.openHours?.trim() || null,
-      },
-      createBranchWorkingHourCoreDto: formData.createBranchWorkingHourCoreDto?.map(hour => ({
-        dayOfWeek: hour.dayOfWeek,
-        openTime: hour.openTime,
-        closeTime: hour.closeTime,
-        isWorkingDay: hour.isWorkingDay
-      })) || []
-    };
-
-    logger.info('Submitting branch update data', submitData, { prefix: 'BranchEditModal' });
-
-    await onSubmit(submitData);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    // If successful, the parent component will handle closing the modal and refreshing data
-    logger.info('Branch update successful', null, { prefix: 'BranchEditModal' });
-    
-  } catch (error: any) {
-    logger.error('Branch update failed', error, { prefix: 'BranchEditModal' });
-    
-    // Handle specific error types
-    if (error?.response?.status === 400) {
-      const errorData = error?.response?.data;
-      if (errorData?.errors) {
-        // Handle validation errors from API
-        const apiErrors: Record<string, string> = {};
-        
-        // Map API validation errors to form fields
-        Object.entries(errorData.errors).forEach(([field, messages]) => {
-          if (Array.isArray(messages) && messages.length > 0) {
-            // Convert API field names to form field names
-            const formField = field.toLowerCase();
-            if (formField.includes('branchname')) {
-              apiErrors.branchName = messages[0];
-            } else if (formField.includes('address')) {
-              apiErrors.address = messages[0];
-              setActiveTab('address');
-            } else if (formField.includes('contact')) {
-              apiErrors.contact = messages[0];
-              setActiveTab('contact');
-            } else if (formField.includes('workinghour')) {
-              apiErrors.workingHours = messages[0];
-              setActiveTab('workingHours');
-            } else {
-              apiErrors[field] = messages[0];
-            }
-          }
-        });
-        
-        setValidationErrors(apiErrors);
-        setUploadError('Lütfen formdaki hataları düzeltin ve tekrar deneyin.');
-      } else {
-        setUploadError('Güncelleme sırasında bir hata oluştu. Lütfen girdiğiniz bilgileri kontrol edin.');
-      }
-    } else if (error?.response?.status === 401) {
-      setUploadError('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
-      // Optionally redirect to login
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 2000);
-    } else if (error?.response?.status === 403) {
-      setUploadError('Bu işlem için yetkiniz bulunmuyor.');
-    } else if (error?.response?.status === 404) {
-      setUploadError('Şube bulunamadı. Sayfa yenilenecek.');
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
-    } else if (error?.response?.status === 0 || !navigator.onLine) {
-      setUploadError('İnternet bağlantınızı kontrol edin ve tekrar deneyin.');
-    } else {
-      setUploadError(
-        error?.message || 
-        'Şube güncellenirken beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.'
-      );
+    if (!validateForm()) {
+      // Switch to the tab with the first error
+      if (validationErrors.branchName) setActiveTab('general');
+      if (validationErrors.workingHours) setActiveTab('workingHours');
+      return;
     }
-  } 
-};
+
+    setUploadError(null);
+
+    try {
+      // Convert form data to API format
+      const submitData: CreateBranchWithDetailsDto = {
+        branchName: formData.branchName?.trim() || null,
+        whatsappOrderNumber: formData.whatsappOrderNumber?.trim() || null,
+        restaurantId: formData.restaurantId,
+        branchLogoPath: formData.branchLogoPath || null,
+        createAddressDto: {
+          country: formData.createAddressDto.country?.trim() || null,
+          city: formData.createAddressDto.city?.trim() || null,
+          street: formData.createAddressDto.street?.trim() || null,
+          zipCode: formData.createAddressDto.zipCode?.trim() || null,
+          addressLine1: formData.createAddressDto.addressLine1?.trim() || null,
+          addressLine2: formData.createAddressDto.addressLine2?.trim() || null,
+        },
+        createContactDto: {
+          phone: formData.createContactDto.phone?.trim() || null,
+          mail: formData.createContactDto.mail?.trim() || null,
+          location: formData.createContactDto.location?.trim() || null,
+          contactHeader: formData.createContactDto.contactHeader?.trim() || null,
+          footerTitle: formData.createContactDto.footerTitle?.trim() || null,
+          footerDescription: formData.createContactDto.footerDescription?.trim() || null,
+          openTitle: formData.createContactDto.openTitle?.trim() || null,
+          openDays: formData.createContactDto.openDays?.trim() || null,
+          openHours: formData.createContactDto.openHours?.trim() || null,
+        },
+        createBranchWorkingHourCoreDto: formData.createBranchWorkingHourCoreDto?.map(hour => ({
+          dayOfWeek: hour.dayOfWeek,
+          openTime: hour.openTime,
+          closeTime: hour.closeTime,
+          isWorkingDay: hour.isWorkingDay
+        })) || []
+      };
+
+      logger.info('Submitting branch update data', submitData, { prefix: 'BranchEditModal' });
+
+      await onSubmit(submitData);
+      
+      // If successful, the parent component will handle closing the modal and refreshing data
+      logger.info('Branch update successful', null, { prefix: 'BranchEditModal' });
+      
+    } catch (error: any) {
+      logger.error('Branch update failed', error, { prefix: 'BranchEditModal' });
+      
+      // Handle specific error types
+      if (error?.response?.status === 400) {
+        const errorData = error?.response?.data;
+        if (errorData?.errors) {
+          // Handle validation errors from API
+          const apiErrors: Record<string, string> = {};
+          
+          // Map API validation errors to form fields
+          Object.entries(errorData.errors).forEach(([field, messages]) => {
+            if (Array.isArray(messages) && messages.length > 0) {
+              // Convert API field names to form field names
+              const formField = field.toLowerCase();
+              if (formField.includes('branchname')) {
+                apiErrors.branchName = messages[0];
+              } else if (formField.includes('address')) {
+                apiErrors.address = messages[0];
+                setActiveTab('address');
+              } else if (formField.includes('contact')) {
+                apiErrors.contact = messages[0];
+                setActiveTab('contact');
+              } else if (formField.includes('workinghour')) {
+                apiErrors.workingHours = messages[0];
+                setActiveTab('workingHours');
+              } else {
+                apiErrors[field] = messages[0];
+              }
+            }
+          });
+          
+          setValidationErrors(apiErrors);
+          setUploadError(t('branchManagement.modal.errors.validationFailed'));
+        } else {
+          setUploadError(t('branchManagement.modal.errors.dataValidationError'));
+        }
+      } else if (error?.response?.status === 401) {
+        setUploadError(t('branchManagement.error.sessionExpired'));
+        // Optionally redirect to login
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 2000);
+      } else if (error?.response?.status === 403) {
+        setUploadError(t('branchManagement.error.noPermission'));
+      } else if (error?.response?.status === 404) {
+        setUploadError(t('branchManagement.error.branchNotFound'));
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else if (error?.response?.status === 0 || !navigator.onLine) {
+        setUploadError(t('branchManagement.error.connectionError'));
+      } else {
+        setUploadError(
+          error?.message || 
+          t('branchManagement.error.unknownError')
+        );
+      }
+    } 
+  };
 
   if (!isOpen) return null;
 
@@ -387,20 +387,20 @@ const handleSubmit = async (e: React.FormEvent) => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="relative top-4 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white m-4"
+          className={`relative top-4 mx-auto p-5 border w-full max-w-4xl shadow-lg rounded-md bg-white m-4 ${isRTL ? 'rtl' : 'ltr'}`}
         >
           {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center space-x-3">
+          <div className={`flex justify-between items-center mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
               <div className="p-2 bg-blue-100 rounded-lg">
                 <Building2 className="h-6 w-6 text-blue-600" />
               </div>
               <div>
                 <h3 className="text-xl font-medium text-gray-900">
-                  Şube Düzenle - {branchDetail.branchName}
+                  {t('branchManagement.modal.editTitle', { branchName: branchDetail.branchName })}
                 </h3>
                 <p className="text-sm text-gray-500">
-                  Şube bilgilerini düzenleyin
+                  {t('branchManagement.modal.editDescription')}
                 </p>
               </div>
             </div>
@@ -412,31 +412,52 @@ const handleSubmit = async (e: React.FormEvent) => {
             </button>
           </div>
 
+          {/* Error Display */}
+          {uploadError && (
+            <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className={`${isRTL ? 'mr-3' : 'ml-3'}`}>
+                  <h3 className="text-sm font-medium text-red-800">
+                    {t('branchManagement.modal.errors.updateError')}
+                  </h3>
+                  <p className="mt-1 text-sm text-red-700">
+                    {uploadError}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Tab Navigation */}
           <div className="border-b border-gray-200 mb-6">
-            <nav className="-mb-px flex space-x-8">
+            <nav className={`-mb-px flex ${isRTL ? 'space-x-reverse space-x-8' : 'space-x-8'}`}>
               {[
                 { 
                   id: 'general', 
-                  label: 'Genel Bilgiler', 
+                  label: t('branchManagement.modal.tabs.general'), 
                   icon: <Building2 className="w-4 h-4" />,
                   hasError: !!validationErrors.branchName
                 },
                 { 
                   id: 'address', 
-                  label: 'Adres', 
+                  label: t('branchManagement.modal.tabs.address'), 
                   icon: <MapPin className="w-4 h-4" />,
                   hasError: false
                 },
                 { 
                   id: 'contact', 
-                  label: 'İletişim', 
+                  label: t('branchManagement.modal.tabs.contact'), 
                   icon: <Phone className="w-4 h-4" />,
                   hasError: false
                 },
                 { 
                   id: 'workingHours', 
-                  label: 'Çalışma Saatleri', 
+                  label: t('branchManagement.modal.tabs.workingHours'), 
                   icon: <Clock className="w-4 h-4" />,
                   hasError: !!validationErrors.workingHours
                 }
@@ -444,7 +465,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors ${
+                  className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} transition-colors ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
                       : tab.hasError
@@ -468,7 +489,7 @@ const handleSubmit = async (e: React.FormEvent) => {
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Şube Adı *
+                    {t('branchManagement.form.branchName')} *
                   </label>
                   <input
                     type="text"
@@ -480,7 +501,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                         ? 'border-red-300 focus:ring-red-500' 
                         : 'border-gray-300 focus:ring-blue-500'
                     }`}
-                    placeholder="Şube adını girin"
+                    placeholder={t('branchManagement.form.branchNamePlaceholder')}
                   />
                   {validationErrors.branchName && (
                     <p className="mt-1 text-sm text-red-600">{validationErrors.branchName}</p>
@@ -489,7 +510,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    WhatsApp Sipariş Numarası
+                    {t('branchManagement.form.whatsappNumber')}
                   </label>
                   <input
                     type="text"
@@ -497,14 +518,14 @@ const handleSubmit = async (e: React.FormEvent) => {
                     value={formData.whatsappOrderNumber || ''}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="WhatsApp numarasını girin"
+                    placeholder={t('branchManagement.form.whatsappPlaceholder')}
                   />
                 </div>
 
                 {/* Logo Upload Section */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Şube Logosu
+                    {t('branchManagement.form.branchLogo')}
                   </label>
                   
                   {/* Current Logo Display */}
@@ -513,7 +534,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                       <div className="relative inline-block">
                         <img
                           src={imagePreview}
-                          alt="Şube logosu"
+                          alt={t('branchManagement.form.branchLogo')}
                           className="w-32 h-32 object-cover rounded-lg border-2 border-gray-300 shadow-sm"
                         />
                         {!isUploadingImage && (
@@ -521,7 +542,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                             type="button"
                             onClick={handleRemoveImage}
                             className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-                            title="Logoyu kaldır"
+                            title={t('branchManagement.form.logoRemove')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -537,7 +558,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
                   {/* Upload Controls */}
                   <div className="space-y-3">
-                    <div className="flex items-center space-x-4">
+                    <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
                       <input
                         type="file"
                         id="logoUpload"
@@ -554,33 +575,27 @@ const handleSubmit = async (e: React.FormEvent) => {
                       >
                         {isUploadingImage ? (
                           <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 mr-2"></div>
-                            Yükleniyor...
+                            <div className={`animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 ${isRTL ? 'ml-2' : 'mr-2'}`}></div>
+                            {t('branchManagement.modal.errors.uploadingImage')}
                           </>
                         ) : (
                           <>
-                            <Upload className="h-4 w-4 mr-2" />
-                            {imagePreview ? 'Logo Değiştir' : 'Logo Yükle'}
+                            <Upload className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                            {imagePreview ? t('branchManagement.form.logoChange') : t('branchManagement.form.logoUpload')}
                           </>
                         )}
                       </label>
                       
                       {!imagePreview && !isUploadingImage && (
-                        <div className="flex items-center text-gray-400">
-                          <ImageIcon className="h-5 w-5 mr-2" />
-                          <span className="text-sm">Logo seçilmedi</span>
+                        <div className={`flex items-center text-gray-400 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+                          <ImageIcon className="h-5 w-5" />
+                          <span className="text-sm">{t('branchManagement.form.logoNotSelected')}</span>
                         </div>
                       )}
                     </div>
 
-                    {uploadError && (
-                      <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-3">
-                        {uploadError}
-                      </div>
-                    )}
-
                     <p className="text-sm text-gray-500">
-                      JPG, PNG veya GIF formatında, maksimum 5MB boyutunda dosya yükleyebilirsiniz.
+                      {t('branchManagement.form.logoInstructions')}
                     </p>
                   </div>
                 </div>
@@ -593,7 +608,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Ülke
+                      {t('branchManagement.form.country')}
                     </label>
                     <input
                       type="text"
@@ -601,13 +616,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                       value={formData.createAddressDto.country || ''}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Ülke adını girin"
+                      placeholder={t('branchManagement.form.countryPlaceholder')}
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Şehir
+                      {t('branchManagement.form.city')}
                     </label>
                     <input
                       type="text"
@@ -615,14 +630,14 @@ const handleSubmit = async (e: React.FormEvent) => {
                       value={formData.createAddressDto.city || ''}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Şehir adını girin"
+                      placeholder={t('branchManagement.form.cityPlaceholder')}
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Sokak
+                    {t('branchManagement.form.street')}
                   </label>
                   <input
                     type="text"
@@ -630,14 +645,14 @@ const handleSubmit = async (e: React.FormEvent) => {
                     value={formData.createAddressDto.street || ''}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Sokak adını girin"
+                    placeholder={t('branchManagement.form.streetPlaceholder')}
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Posta Kodu
+                      {t('branchManagement.form.zipCode')}
                     </label>
                     <input
                       type="text"
@@ -645,13 +660,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                       value={formData.createAddressDto.zipCode || ''}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Posta kodunu girin"
+                      placeholder={t('branchManagement.form.zipCodePlaceholder')}
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Adres Satırı 1
+                      {t('branchManagement.form.addressLine1')}
                     </label>
                     <input
                       type="text"
@@ -659,14 +674,14 @@ const handleSubmit = async (e: React.FormEvent) => {
                       value={formData.createAddressDto.addressLine1 || ''}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Adres detayını girin"
+                      placeholder={t('branchManagement.form.addressLine1Placeholder')}
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Adres Satırı 2
+                    {t('branchManagement.form.addressLine2')}
                   </label>
                   <input
                     type="text"
@@ -674,7 +689,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                     value={formData.createAddressDto.addressLine2 || ''}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Ek adres bilgisi (opsiyonel)"
+                    placeholder={t('branchManagement.form.addressLine2Placeholder')}
                   />
                 </div>
               </div>
@@ -686,7 +701,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Telefon
+                      {t('branchManagement.form.phone')}
                     </label>
                     <input
                       type="tel"
@@ -694,13 +709,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                       value={formData.createContactDto.phone || ''}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Telefon numarasını girin"
+                      placeholder={t('branchManagement.form.phonePlaceholder')}
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      E-posta
+                      {t('branchManagement.form.email')}
                     </label>
                     <input
                       type="email"
@@ -708,14 +723,14 @@ const handleSubmit = async (e: React.FormEvent) => {
                       value={formData.createContactDto.mail || ''}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="E-posta adresini girin"
+                      placeholder={t('branchManagement.form.emailPlaceholder')}
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Konum
+                    {t('branchManagement.form.location')}
                   </label>
                   <input
                     type="text"
@@ -723,13 +738,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                     value={formData.createContactDto.location || ''}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Konum bilgisini girin"
+                    placeholder={t('branchManagement.form.locationPlaceholder')}
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    İletişim Başlığı
+                    {t('branchManagement.form.contactHeader')}
                   </label>
                   <input
                     type="text"
@@ -737,14 +752,14 @@ const handleSubmit = async (e: React.FormEvent) => {
                     value={formData.createContactDto.contactHeader || ''}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="İletişim başlığını girin"
+                    placeholder={t('branchManagement.form.contactHeaderPlaceholder')}
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Footer Başlığı
+                      {t('branchManagement.form.footerTitle')}
                     </label>
                     <input
                       type="text"
@@ -752,13 +767,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                       value={formData.createContactDto.footerTitle || ''}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Footer başlığını girin"
+                      placeholder={t('branchManagement.form.footerTitlePlaceholder')}
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Açık Başlığı
+                      {t('branchManagement.form.openTitle')}
                     </label>
                     <input
                       type="text"
@@ -766,14 +781,14 @@ const handleSubmit = async (e: React.FormEvent) => {
                       value={formData.createContactDto.openTitle || ''}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Açık başlığını girin"
+                      placeholder={t('branchManagement.form.openTitlePlaceholder')}
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Footer Açıklaması
+                    {t('branchManagement.form.footerDescription')}
                   </label>
                   <textarea
                     name="createContactDto.footerDescription"
@@ -781,14 +796,14 @@ const handleSubmit = async (e: React.FormEvent) => {
                     onChange={handleInputChange}
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Footer açıklamasını girin"
+                    placeholder={t('branchManagement.form.footerDescriptionPlaceholder')}
                   />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Açık Günler
+                      {t('branchManagement.form.openDays')}
                     </label>
                     <input
                       type="text"
@@ -796,13 +811,13 @@ const handleSubmit = async (e: React.FormEvent) => {
                       value={formData.createContactDto.openDays || ''}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Açık günleri girin"
+                      placeholder={t('branchManagement.form.openDaysPlaceholder')}
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Açık Saatler
+                      {t('branchManagement.form.openHours')}
                     </label>
                     <input
                       type="text"
@@ -810,7 +825,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                       value={formData.createContactDto.openHours || ''}
                       onChange={handleInputChange}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Açık saatleri girin"
+                      placeholder={t('branchManagement.form.openHoursPlaceholder')}
                     />
                   </div>
                 </div>
@@ -820,9 +835,11 @@ const handleSubmit = async (e: React.FormEvent) => {
             {/* Working Hours Tab */}
             {activeTab === 'workingHours' && (
               <div className="space-y-4">
-                <div className="flex items-center space-x-2 mb-4">
+                <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} mb-4`}>
                   <Clock className="h-6 w-6 text-blue-600" />
-                  <h4 className="text-lg font-medium text-gray-900">Çalışma Saatleri</h4>
+                  <h4 className="text-lg font-medium text-gray-900">
+                    {t('branchManagement.form.workingHours')}
+                  </h4>
                 </div>
                 
                 {validationErrors.workingHours && (
@@ -832,29 +849,31 @@ const handleSubmit = async (e: React.FormEvent) => {
                 )}
                 
                 {formData.createBranchWorkingHourCoreDto.map((hours, index) => (
-                  <div key={index} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-md">
+                  <div key={index} className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'} p-4 border border-gray-200 rounded-md`}>
                     <div className="w-24">
                       <span className="text-sm font-medium text-gray-700">
-                        {dayNames[hours.dayOfWeek]}
+                        {getDayName(hours.dayOfWeek)}
                       </span>
                     </div>
                     
-                    <div className="flex items-center space-x-2">
+                    <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
                       <input
-                         title='isWorkingDay'
+                        title="isWorkingDay"
                         type="checkbox"
                         checked={hours.isWorkingDay}
                         onChange={(e) => handleWorkingHourChange(index, 'isWorkingDay', e.target.checked)}
                         className="h-4 w-4 text-blue-600 border-gray-300 rounded"
                       />
-                      <span className="text-sm text-gray-600">Açık</span>
+                      <span className="text-sm text-gray-600">
+                        {t('branchManagement.form.isOpen')}
+                      </span>
                     </div>
 
                     {hours.isWorkingDay && (
                       <>
                         <div>
                           <input
-                            title='time'
+                            title="time"
                             type="time"
                             value={hours.openTime}
                             onChange={(e) => handleWorkingHourChange(index, 'openTime', e.target.value)}
@@ -864,7 +883,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                         <span className="text-gray-500">-</span>
                         <div>
                           <input
-                            title='time'
+                            title="time"
                             type="time"
                             value={hours.closeTime}
                             onChange={(e) => handleWorkingHourChange(index, 'closeTime', e.target.value)}
@@ -879,20 +898,20 @@ const handleSubmit = async (e: React.FormEvent) => {
             )}
 
             {/* Form Actions */}
-            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+            <div className={`flex justify-end ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} pt-6 border-t border-gray-200`}>
               <button
                 type="button"
                 onClick={onClose}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
               >
-                İptal
+                {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || !hasChanges || isUploadingImage}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isSubmitting ? 'Güncelleniyor...' : 'Güncelle'}
+                {isSubmitting ? t('branchManagement.modal.buttons.updating') : t('branchManagement.modal.buttons.update')}
               </button>
             </div>
           </form>
