@@ -813,44 +813,7 @@ export const tr = {
     }
   },
 
-  // Branch Management
-  branchManagement: {
-    loading: 'Şubeler yükleniyor...',
-    error: {
-      loadFailed: 'Şube listesi yüklenirken bir hata oluştu.',
-      updateFailed: 'Şube güncellenirken bir hata oluştu.',
-      createFailed: 'Şube eklenirken bir hata oluştu.',
-      deleteFailed: 'Şube silinirken bir hata oluştu.',
-      restaurantIdNotFound: 'Restaurant ID bulunamadı. Lütfen tekrar giriş yapın.',
-      noBranchesFound: 'Şube bulunamadı'
-    },
-    actions: {
-      addBranch: 'Şube Ekle',
-      editBranch: 'Şube Düzenle',
-      deleteBranch: 'Şube Sil',
-      selectBranch: 'Şube Seçin',
-      save: 'Kaydet',
-      cancel: 'İptal',
-      close: 'Kapat'
-    },
-    confirmation: {
-      deleteTitle: 'Şubeyi Sil',
-      deleteMessage: 'Bu şubeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
-      deleteConfirm: 'Evet, Sil',
-      deleteCancel: 'İptal'
-    },
-    form: {
-      branchName: 'Şube Adı',
-      whatsappNumber: 'WhatsApp Numarası',
-      address: 'Adres',
-      phone: 'Telefon',
-      email: 'E-posta',
-      workingHours: 'Çalışma Saatleri',
-      logo: 'Logo'
-    },
-    title : "Şubeler",
-    description : "Şubelerinizi Yönetin"
-  },
+
 
   // Table Management
   tableManagement: {
@@ -1192,4 +1155,165 @@ branchModal: {
     saving: 'Kaydediliyor...'
   }
 },
+ branchManagement: {
+    title: 'Şube Yönetimi',
+    description: 'Restoran şubelerini yönetin ve bilgilerini güncelleyin',
+    loading: 'Şubeler yükleniyor...',
+    addBranch: 'Yeni Şube Ekle',
+    
+    // Error messages
+    error: {
+      loadFailed: 'Şubeler yüklenemedi',
+      createFailed: 'Şube oluşturulamadı',
+      updateFailed: 'Şube güncellenemedi',
+      deleteFailed: 'Şube silinemedi',
+      restaurantIdNotFound: 'Restoran ID bulunamadı',
+      detailsLoadFailed: 'Şube detayları yüklenemedi',
+      statusUpdateFailed: 'Şube durumu güncellenemedi',
+      sessionExpired: 'Oturum süresi doldu. Lütfen tekrar giriş yapın.',
+      noPermission: 'Bu işlem için yetkiniz bulunmuyor.',
+      branchNotFound: 'Şube bulunamadı.',
+      connectionError: 'İnternet bağlantınızı kontrol edin.',
+      unknownError: 'Beklenmeyen bir hata oluştu'
+    },
+
+    // No branches state
+    noBranches: {
+      title: 'Henüz şube yok',
+      description: 'Restoranınızın ilk şubesini eklemeye başlayın'
+    },
+
+    // Delete confirmation
+    deleteConfirm: {
+      title: 'Şube Silme Onayı',
+      description: '"{{branchName}}" şubesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'
+    },
+
+    // Form labels and fields
+    form: {
+      branchName: 'Şube Adı',
+      branchNamePlaceholder: 'Şube adını girin',
+      branchNameRequired: 'Şube adı gereklidir',
+      whatsappNumber: 'WhatsApp Sipariş Numarası',
+      whatsappPlaceholder: 'WhatsApp numarasını girin',
+      branchLogo: 'Şube Logosu',
+      logoUpload: 'Logo Yükle',
+      logoChange: 'Logo Değiştir',
+      logoRemove: 'Logoyu Kaldır',
+      logoNotSelected: 'Logo seçilmedi',
+      logoInstructions: 'JPG, PNG veya GIF formatında, maksimum 5MB boyutunda dosya yükleyebilirsiniz.',
+
+      // Address fields
+      country: 'Ülke',
+      countryPlaceholder: 'Ülke adını girin',
+      city: 'Şehir',
+      cityPlaceholder: 'Şehir adını girin',
+      street: 'Sokak',
+      streetPlaceholder: 'Sokak adını girin',
+      zipCode: 'Posta Kodu',
+      zipCodePlaceholder: 'Posta kodunu girin',
+      addressLine1: 'Adres Satırı 1',
+      addressLine1Placeholder: 'Adres detayını girin',
+      addressLine2: 'Adres Satırı 2',
+      addressLine2Placeholder: 'Ek adres bilgisi (opsiyonel)',
+
+      // Contact fields
+      phone: 'Telefon',
+      phonePlaceholder: 'Telefon numarasını girin',
+      email: 'E-posta',
+      emailPlaceholder: 'E-posta adresini girin',
+      location: 'Konum',
+      locationPlaceholder: 'Konum bilgisini girin',
+      contactHeader: 'İletişim Başlığı',
+      contactHeaderPlaceholder: 'İletişim başlığını girin',
+      footerTitle: 'Footer Başlığı',
+      footerTitlePlaceholder: 'Footer başlığını girin',
+      footerDescription: 'Footer Açıklaması',
+      footerDescriptionPlaceholder: 'Footer açıklamasını girin',
+      openTitle: 'Açılış Saatleri Başlığı',
+      openTitlePlaceholder: 'Açılış saatleri başlığını girin',
+      openDays: 'Açık Günler',
+      openDaysPlaceholder: 'Açık günleri girin',
+      openHours: 'Açık Saatler',
+      openHoursPlaceholder: 'Açık saatleri girin',
+
+      // Working hours
+      workingHours: 'Çalışma Saatleri',
+      workingHoursRequired: 'En az bir çalışma günü seçmelisiniz',
+      isOpen: 'Açık',
+      dayNames: {
+        0: 'Pazar',
+        1: 'Pazartesi',
+        2: 'Salı',
+        3: 'Çarşamba',
+        4: 'Perşembe',
+        5: 'Cuma',
+        6: 'Cumartesi'
+      }
+    },
+
+    // Modal titles and tabs
+    modal: {
+      createTitle: 'Yeni Şube Ekle',
+      createDescription: 'Yeni şube bilgilerini girin',
+      editTitle: 'Şube Düzenle - {{branchName}}',
+      editDescription: 'Şube bilgilerini düzenleyin',
+      
+      tabs: {
+        general: 'Genel Bilgiler',
+        address: 'Adres',
+        contact: 'İletişim',
+        workingHours: 'Çalışma Saatleri'
+      },
+
+      buttons: {
+        creating: 'Oluşturuluyor...',
+        updating: 'Güncelleniyor...',
+        create: 'Şube Oluştur',
+        update: 'Şubeyi Güncelle'
+      },
+
+      errors: {
+        updateError: 'Güncelleme Hatası',
+        validationFailed: 'Lütfen formdaki hataları düzeltin ve tekrar deneyin.',
+        dataValidationError: 'Güncelleme sırasında bir hata oluştu. Lütfen girdiğiniz verileri kontrol edin.',
+        imageUploadError: 'Resim yüklenirken hata oluştu. Lütfen tekrar deneyin.',
+        imageRemoveError: 'Resim silinirken hata oluştu.',
+        uploadingImage: 'Resim yükleniyor...',
+        invalidFileType: 'Lütfen geçerli bir resim dosyası seçin',
+        fileSizeError: 'Dosya boyutu 5MB\'dan küçük olmalıdır'
+      }
+    },
+
+    // Branch card actions
+    card: {
+      edit: 'Düzenle',
+      delete: 'Sil',
+      temporaryClose: 'Geçici Kapat',
+      temporaryOpen: 'Geçici Aç',
+      status: {
+        open: 'Açık',
+        closed: 'Kapalı',
+        temporarilyClosed: 'Geçici Kapalı'
+      }
+    }
+  },
+
+  // Common translations
+  commonBranch: {
+    cancel: 'İptal',
+    delete: 'Sil',
+    save: 'Kaydet',
+    edit: 'Düzenle',
+    create: 'Oluştur',
+    update: 'Güncelle',
+    close: 'Kapat',
+    loading: 'Yükleniyor...',
+    error: 'Hata',
+    success: 'Başarılı',
+    warning: 'Uyarı',
+    info: 'Bilgi',
+    required: 'Gerekli',
+    optional: 'Opsiyonel'
+  }
 }; 

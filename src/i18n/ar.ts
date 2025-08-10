@@ -808,44 +808,7 @@ export const ar = {
     }
   },
 
-  // Branch Management
-  branchManagement: {
-    loading: 'جاري تحميل الفروع...',
-    error: {
-      loadFailed: 'حدث خطأ أثناء تحميل قائمة الفروع.',
-      updateFailed: 'حدث خطأ أثناء تحديث الفرع.',
-      createFailed: 'حدث خطأ أثناء إنشاء الفرع.',
-      deleteFailed: 'حدث خطأ أثناء حذف الفرع.',
-      restaurantIdNotFound: 'معرف المطعم غير موجود. يرجى تسجيل الدخول مرة أخرى.',
-      noBranchesFound: 'لم يتم العثور على فروع'
-    },
-    actions: {
-      addBranch: 'إضافة فرع',
-      editBranch: 'تعديل الفرع',
-      deleteBranch: 'حذف الفرع',
-      selectBranch: 'اختر الفرع',
-      save: 'حفظ',
-      cancel: 'إلغاء',
-      close: 'إغلاق'
-    },
-    confirmation: {
-      deleteTitle: 'حذف الفرع',
-      deleteMessage: 'هل أنت متأكد من أنك تريد حذف هذا الفرع؟ لا يمكن التراجع عن هذا الإجراء.',
-      deleteConfirm: 'نعم، احذف',
-      deleteCancel: 'إلغاء'
-    },
-    form: {
-      branchName: 'اسم الفرع',
-      whatsappNumber: 'رقم الواتساب',
-      address: 'العنوان',
-      phone: 'الهاتف',
-      email: 'البريد الإلكتروني',
-      workingHours: 'ساعات العمل',
-      logo: 'الشعار'
-    },
-    title : "الفروع",
-    description : "إدارة فروعك"
-  },
+
 
   // Table Management
   tableManagement: {
@@ -1187,4 +1150,166 @@ branchModal: {
     saving: 'جاري الحفظ...'
   }
 },
+
+  branchManagement: {
+    title: 'إدارة الفروع',
+    description: 'إدارة فروع المطعم وتحديث معلوماتها',
+    loading: 'جاري تحميل الفروع...',
+    addBranch: 'إضافة فرع جديد',
+    
+    // Error messages
+    error: {
+      loadFailed: 'فشل في تحميل الفروع',
+      createFailed: 'فشل في إنشاء الفرع',
+      updateFailed: 'فشل في تحديث الفرع',
+      deleteFailed: 'فشل في حذف الفرع',
+      restaurantIdNotFound: 'معرف المطعم غير موجود',
+      detailsLoadFailed: 'فشل في تحميل تفاصيل الفرع',
+      statusUpdateFailed: 'فشل في تحديث حالة الفرع',
+      sessionExpired: 'انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.',
+      noPermission: 'ليس لديك صلاحية لهذه العملية.',
+      branchNotFound: 'الفرع غير موجود.',
+      connectionError: 'تحقق من اتصال الإنترنت.',
+      unknownError: 'حدث خطأ غير متوقع'
+    },
+
+    // No branches state
+    noBranches: {
+      title: 'لا توجد فروع بعد',
+      description: 'ابدأ بإضافة الفرع الأول لمطعمك'
+    },
+
+    // Delete confirmation
+    deleteConfirm: {
+      title: 'تأكيد حذف الفرع',
+      description: 'هل أنت متأكد من حذف فرع "{{branchName}}"؟ لا يمكن التراجع عن هذا الإجراء.'
+    },
+
+    // Form labels and fields
+    form: {
+      branchName: 'اسم الفرع',
+      branchNamePlaceholder: 'أدخل اسم الفرع',
+      branchNameRequired: 'اسم الفرع مطلوب',
+      whatsappNumber: 'رقم واتساب للطلبات',
+      whatsappPlaceholder: 'أدخل رقم الواتساب',
+      branchLogo: 'شعار الفرع',
+      logoUpload: 'رفع الشعار',
+      logoChange: 'تغيير الشعار',
+      logoRemove: 'إزالة الشعار',
+      logoNotSelected: 'لم يتم اختيار شعار',
+      logoInstructions: 'يمكنك رفع ملف بصيغة JPG، PNG أو GIF، بحد أقصى 5 ميجابايت.',
+
+      // Address fields
+      country: 'البلد',
+      countryPlaceholder: 'أدخل اسم البلد',
+      city: 'المدينة',
+      cityPlaceholder: 'أدخل اسم المدينة',
+      street: 'الشارع',
+      streetPlaceholder: 'أدخل اسم الشارع',
+      zipCode: 'الرمز البريدي',
+      zipCodePlaceholder: 'أدخل الرمز البريدي',
+      addressLine1: 'العنوان الأول',
+      addressLine1Placeholder: 'أدخل تفاصيل العنوان',
+      addressLine2: 'العنوان الثاني',
+      addressLine2Placeholder: 'معلومات عنوان إضافية (اختياري)',
+
+      // Contact fields
+      phone: 'الهاتف',
+      phonePlaceholder: 'أدخل رقم الهاتف',
+      email: 'البريد الإلكتروني',
+      emailPlaceholder: 'أدخل عنوان البريد الإلكتروني',
+      location: 'الموقع',
+      locationPlaceholder: 'أدخل معلومات الموقع',
+      contactHeader: 'عنوان الاتصال',
+      contactHeaderPlaceholder: 'أدخل عنوان الاتصال',
+      footerTitle: 'عنوان التذييل',
+      footerTitlePlaceholder: 'أدخل عنوان التذييل',
+      footerDescription: 'وصف التذييل',
+      footerDescriptionPlaceholder: 'أدخل وصف التذييل',
+      openTitle: 'عنوان أوقات العمل',
+      openTitlePlaceholder: 'أدخل عنوان أوقات العمل',
+      openDays: 'أيام العمل',
+      openDaysPlaceholder: 'أدخل أيام العمل',
+      openHours: 'ساعات العمل',
+      openHoursPlaceholder: 'أدخل ساعات العمل',
+
+      // Working hours
+      workingHours: 'ساعات العمل',
+      workingHoursRequired: 'يجب اختيار يوم عمل واحد على الأقل',
+      isOpen: 'مفتوح',
+      dayNames: {
+        0: 'الأحد',
+        1: 'الإثنين',
+        2: 'الثلاثاء',
+        3: 'الأربعاء',
+        4: 'الخميس',
+        5: 'الجمعة',
+        6: 'السبت'
+      }
+    },
+
+    // Modal titles and tabs
+    modal: {
+      createTitle: 'إضافة فرع جديد',
+      createDescription: 'أدخل معلومات الفرع الجديد',
+      editTitle: 'تعديل الفرع - {{branchName}}',
+      editDescription: 'تعديل معلومات الفرع',
+      
+      tabs: {
+        general: 'المعلومات العامة',
+        address: 'العنوان',
+        contact: 'الاتصال',
+        workingHours: 'ساعات العمل'
+      },
+
+      buttons: {
+        creating: 'جاري الإنشاء...',
+        updating: 'جاري التحديث...',
+        create: 'إنشاء الفرع',
+        update: 'تحديث الفرع'
+      },
+
+      errors: {
+        updateError: 'خطأ في التحديث',
+        validationFailed: 'يرجى تصحيح الأخطاء في النموذج والمحاولة مرة أخرى.',
+        dataValidationError: 'حدث خطأ أثناء التحديث. يرجى التحقق من البيانات المدخلة.',
+        imageUploadError: 'فشل في رفع الصورة. يرجى المحاولة مرة أخرى.',
+        imageRemoveError: 'فشل في حذف الصورة.',
+        uploadingImage: 'جاري رفع الصورة...',
+        invalidFileType: 'يرجى اختيار ملف صورة صحيح',
+        fileSizeError: 'يجب أن يكون حجم الملف أقل من 5 ميجابايت'
+      }
+    },
+
+    // Branch card actions
+    card: {
+      edit: 'تعديل',
+      delete: 'حذف',
+      temporaryClose: 'إغلاق مؤقت',
+      temporaryOpen: 'فتح مؤقت',
+      status: {
+        open: 'مفتوح',
+        closed: 'مغلق',
+        temporarilyClosed: 'مغلق مؤقتاً'
+      }
+    }
+  },
+
+  // Common translations
+  commonBranch: {
+    cancel: 'إلغاء',
+    delete: 'حذف',
+    save: 'حفظ',
+    edit: 'تعديل',
+    create: 'إنشاء',
+    update: 'تحديث',
+    close: 'إغلاق',
+    loading: 'جاري التحميل...',
+    error: 'خطأ',
+    success: 'نجح',
+    warning: 'تحذير',
+    info: 'معلومات',
+    required: 'مطلوب',
+    optional: 'اختياري'
+  }
 }; 

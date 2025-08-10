@@ -819,44 +819,7 @@ export const en = {
     }
   },
 
-  // Branch Management
-  branchManagement: {
-    loading: 'Loading branches...',
-    error: {
-      loadFailed: 'An error occurred while loading branch list.',
-      updateFailed: 'An error occurred while updating branch.',
-      createFailed: 'An error occurred while creating branch.',
-      deleteFailed: 'An error occurred while deleting branch.',
-      restaurantIdNotFound: 'Restaurant ID not found. Please login again.',
-      noBranchesFound: 'No branches found'
-    },
-    actions: {
-      addBranch: 'Add Branch',
-      editBranch: 'Edit Branch',
-      deleteBranch: 'Delete Branch',
-      selectBranch: 'Select Branch',
-      save: 'Save',
-      cancel: 'Cancel',
-      close: 'Close'
-    },
-    confirmation: {
-      deleteTitle: 'Delete Branch',
-      deleteMessage: 'Are you sure you want to delete this branch? This action cannot be undone.',
-      deleteConfirm: 'Yes, Delete',
-      deleteCancel: 'Cancel'
-    },
-    form: {
-      branchName: 'Branch Name',
-      whatsappNumber: 'WhatsApp Number',
-      address: 'Address',
-      phone: 'Phone',
-      email: 'Email',
-      workingHours: 'Working Hours',
-      logo: 'Logo'
-    },
-    title : "Branches",
-    description : "Manage Your Branches"
-  },
+
 
   // Table Management
   tableManagement: {
@@ -1197,4 +1160,165 @@ branchModal: {
     saving: 'Saving...'
   }
 },
+branchManagement: {
+    title: 'Branch Management',
+    description: 'Manage restaurant branches and update their information',
+    loading: 'Loading branches...',
+    addBranch: 'Add New Branch',
+    
+    // Error messages
+    error: {
+      loadFailed: 'Failed to load branches',
+      createFailed: 'Failed to create branch',
+      updateFailed: 'Failed to update branch',
+      deleteFailed: 'Failed to delete branch',
+      restaurantIdNotFound: 'Restaurant ID not found',
+      detailsLoadFailed: 'Failed to load branch details',
+      statusUpdateFailed: 'Failed to update branch status',
+      sessionExpired: 'Session expired. Please log in again.',
+      noPermission: 'You do not have permission for this operation.',
+      branchNotFound: 'Branch not found.',
+      connectionError: 'Check your internet connection.',
+      unknownError: 'An unexpected error occurred'
+    },
+
+    // No branches state
+    noBranches: {
+      title: 'No branches yet',
+      description: 'Start by adding your first restaurant branch'
+    },
+
+    // Delete confirmation
+    deleteConfirm: {
+      title: 'Confirm Branch Deletion',
+      description: 'Are you sure you want to delete the branch "{{branchName}}"? This action cannot be undone.'
+    },
+
+    // Form labels and fields
+    form: {
+      branchName: 'Branch Name',
+      branchNamePlaceholder: 'Enter branch name',
+      branchNameRequired: 'Branch name is required',
+      whatsappNumber: 'WhatsApp Order Number',
+      whatsappPlaceholder: 'Enter WhatsApp number',
+      branchLogo: 'Branch Logo',
+      logoUpload: 'Upload Logo',
+      logoChange: 'Change Logo',
+      logoRemove: 'Remove Logo',
+      logoNotSelected: 'No logo selected',
+      logoInstructions: 'You can upload JPG, PNG or GIF files, maximum 5MB size.',
+
+      // Address fields
+      country: 'Country',
+      countryPlaceholder: 'Enter country name',
+      city: 'City',
+      cityPlaceholder: 'Enter city name',
+      street: 'Street',
+      streetPlaceholder: 'Enter street name',
+      zipCode: 'Zip Code',
+      zipCodePlaceholder: 'Enter zip code',
+      addressLine1: 'Address Line 1',
+      addressLine1Placeholder: 'Enter address details',
+      addressLine2: 'Address Line 2',
+      addressLine2Placeholder: 'Additional address information (optional)',
+
+      // Contact fields
+      phone: 'Phone',
+      phonePlaceholder: 'Enter phone number',
+      email: 'Email',
+      emailPlaceholder: 'Enter email address',
+      location: 'Location',
+      locationPlaceholder: 'Enter location information',
+      contactHeader: 'Contact Header',
+      contactHeaderPlaceholder: 'Enter contact header',
+      footerTitle: 'Footer Title',
+      footerTitlePlaceholder: 'Enter footer title',
+      footerDescription: 'Footer Description',
+      footerDescriptionPlaceholder: 'Enter footer description',
+      openTitle: 'Opening Hours Title',
+      openTitlePlaceholder: 'Enter opening hours title',
+      openDays: 'Open Days',
+      openDaysPlaceholder: 'Enter open days',
+      openHours: 'Open Hours',
+      openHoursPlaceholder: 'Enter open hours',
+
+      // Working hours
+      workingHours: 'Working Hours',
+      workingHoursRequired: 'At least one working day must be selected',
+      isOpen: 'Open',
+      dayNames: {
+        0: 'Sunday',
+        1: 'Monday',
+        2: 'Tuesday',
+        3: 'Wednesday',
+        4: 'Thursday',
+        5: 'Friday',
+        6: 'Saturday'
+      }
+    },
+
+    // Modal titles and tabs
+    modal: {
+      createTitle: 'Add New Branch',
+      createDescription: 'Enter new branch information',
+      editTitle: 'Edit Branch - {{branchName}}',
+      editDescription: 'Edit branch information',
+      
+      tabs: {
+        general: 'General Information',
+        address: 'Address',
+        contact: 'Contact',
+        workingHours: 'Working Hours'
+      },
+
+      buttons: {
+        creating: 'Creating...',
+        updating: 'Updating...',
+        create: 'Create Branch',
+        update: 'Update Branch'
+      },
+
+      errors: {
+        updateError: 'Update Error',
+        validationFailed: 'Please fix the errors in the form and try again.',
+        dataValidationError: 'An error occurred during update. Please check the entered data.',
+        imageUploadError: 'Failed to upload image. Please try again.',
+        imageRemoveError: 'Failed to remove image.',
+        uploadingImage: 'Uploading image...',
+        invalidFileType: 'Please select a valid image file',
+        fileSizeError: 'File size must be less than 5MB'
+      }
+    },
+
+    // Branch card actions
+    card: {
+      edit: 'Edit',
+      delete: 'Delete',
+      temporaryClose: 'Temporary Close',
+      temporaryOpen: 'Temporary Open',
+      status: {
+        open: 'Open',
+        closed: 'Closed',
+        temporarilyClosed: 'Temporarily Closed'
+      }
+    }
+  },
+
+  // Common translations
+  commonBranch: {
+    cancel: 'Cancel',
+    delete: 'Delete',
+    save: 'Save',
+    edit: 'Edit',
+    create: 'Create',
+    update: 'Update',
+    close: 'Close',
+    loading: 'Loading...',
+    error: 'Error',
+    success: 'Success',
+    warning: 'Warning',
+    info: 'Information',
+    required: 'Required',
+    optional: 'Optional'
+  }
 }; 

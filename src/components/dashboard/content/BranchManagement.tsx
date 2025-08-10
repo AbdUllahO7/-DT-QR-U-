@@ -18,8 +18,7 @@ import AddBranchCard from './branch-management/AddBranchCard';
 import { logger } from '../../../utils/logger';
 
 const BranchManagement: React.FC = () => {
-  const { t, language } = useLanguage();
-  const isRTL = language === 'ar';
+  const { t, isRTL } = useLanguage();
   const [branches, setBranches] = useState<BranchInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,13 +30,13 @@ const BranchManagement: React.FC = () => {
   const [branchToDelete, setBranchToDelete] = useState<BranchInfo | null>(null);
 
   const defaultWorkingHours: CreateBranchWorkingHourCoreDto[] = [
-    { dayOfWeek: 1, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Pazartesi
-    { dayOfWeek: 2, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Salı
-    { dayOfWeek: 3, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Çarşamba
-    { dayOfWeek: 4, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Perşembe
-    { dayOfWeek: 5, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Cuma
-    { dayOfWeek: 6, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Cumartesi
-    { dayOfWeek: 0, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }  // Pazar
+    { dayOfWeek: 1, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Monday
+    { dayOfWeek: 2, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Tuesday
+    { dayOfWeek: 3, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Wednesday
+    { dayOfWeek: 4, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Thursday
+    { dayOfWeek: 5, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Friday
+    { dayOfWeek: 6, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Saturday
+    { dayOfWeek: 0, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }  // Sunday
   ];
 
   const getEmptyFormData = (): CreateBranchWithDetailsDto => {
@@ -80,7 +79,7 @@ const BranchManagement: React.FC = () => {
     const token = localStorage.getItem('token');
     if (!token) {
       logger.error('Token bulunamadı', null, { prefix: 'BranchManagement' });
-      setError('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+      setError(t('branchManagement.error.sessionExpired'));
       return;
     }
     
@@ -88,13 +87,13 @@ const BranchManagement: React.FC = () => {
     const restaurantId = getRestaurantIdFromToken();
     if (!restaurantId) {
       logger.error('Restaurant ID bulunamadı', null, { prefix: 'BranchManagement' });
-      setError('Restaurant bilgisi bulunamadı.');
+      setError(t('branchManagement.error.restaurantIdNotFound'));
       return;
     }
     
     logger.info(`Restaurant ID: ${restaurantId} ile şube listesi isteniyor`, null, { prefix: 'BranchManagement' });
     fetchBranches();
-  }, []);
+  }, [t]);
 
   const fetchBranches = async () => {
     setIsLoading(true);
@@ -107,14 +106,26 @@ const BranchManagement: React.FC = () => {
       setBranches(branchesData);
     } catch (err: any) {
       logger.error('Şube listesi alınırken hata', err, { prefix: 'BranchManagement' });
-      const errorMessage = err?.message || t('branchManagement.error.loadFailed');
-      setError(errorMessage);
       
-      if (err?.message?.includes('Oturum')) {
+      let errorMessage = t('branchManagement.error.loadFailed');
+      
+      // Handle specific error types
+      if (err?.response?.status === 401) {
+        errorMessage = t('branchManagement.error.sessionExpired');
         setTimeout(() => {
           window.location.href = '/login';
         }, 3000);
+      } else if (err?.response?.status === 403) {
+        errorMessage = t('branchManagement.error.noPermission');
+      } else if (err?.response?.status === 404) {
+        errorMessage = t('branchManagement.error.branchNotFound');
+      } else if (err?.response?.status === 0 || !navigator.onLine) {
+        errorMessage = t('branchManagement.error.connectionError');
+      } else if (err?.message) {
+        errorMessage = err.message;
       }
+      
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -203,9 +214,27 @@ const BranchManagement: React.FC = () => {
       
       await fetchBranches();
       handleCloseModal();
-    } catch (err) {
-      setError(isEditMode ? t('branchManagement.error.updateFailed') : t('branchManagement.error.createFailed'));
-      console.error('Error submitting branch:', err);
+    } catch (err: any) {
+      logger.error('Error submitting branch:', err, { prefix: 'BranchManagement' });
+      
+      let errorMessage = isEditMode 
+        ? t('branchManagement.error.updateFailed') 
+        : t('branchManagement.error.createFailed');
+      
+      // Handle specific error types
+      if (err?.response?.status === 401) {
+        errorMessage = t('branchManagement.error.sessionExpired');
+      } else if (err?.response?.status === 403) {
+        errorMessage = t('branchManagement.error.noPermission');
+      } else if (err?.response?.status === 404) {
+        errorMessage = t('branchManagement.error.branchNotFound');
+      } else if (err?.response?.status === 0 || !navigator.onLine) {
+        errorMessage = t('branchManagement.error.connectionError');
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -228,12 +257,22 @@ const BranchManagement: React.FC = () => {
         logger.info('Edit mode activated for branch', { branchId: branchDetail.branchId, branchName: branchDetail.branchName }, { prefix: 'BranchManagement' });
       } else {
         logger.error('No branch details returned', null, { prefix: 'BranchManagement' });
-        setError(t('dashboard.branches.error.detailsLoadFailed'));
+        setError(t('branchManagement.error.detailsLoadFailed'));
       }
-    } catch (err) {
+    } catch (err: any) {
       logger.error('Error loading branch details', err, { prefix: 'BranchManagement' });
-      setError(t('dashboard.branches.error.detailsLoadFailed'));
-      console.error('Error loading branch details:', err);
+      
+      let errorMessage = t('branchManagement.error.detailsLoadFailed');
+      
+      if (err?.response?.status === 401) {
+        errorMessage = t('branchManagement.error.sessionExpired');
+      } else if (err?.response?.status === 403) {
+        errorMessage = t('branchManagement.error.noPermission');
+      } else if (err?.response?.status === 404) {
+        errorMessage = t('branchManagement.error.branchNotFound');
+      }
+      
+      setError(errorMessage);
     }
   };
 
@@ -249,9 +288,20 @@ const BranchManagement: React.FC = () => {
       await fetchBranches();
       setShowDeleteConfirm(false);
       setBranchToDelete(null);
-    } catch (err) {
-      setError(t('dashboard.branches.error.deleteFailed'));
-      console.error('Error deleting branch:', err);
+    } catch (err: any) {
+      logger.error('Error deleting branch:', err, { prefix: 'BranchManagement' });
+      
+      let errorMessage = t('branchManagement.error.deleteFailed');
+      
+      if (err?.response?.status === 401) {
+        errorMessage = t('branchManagement.error.sessionExpired');
+      } else if (err?.response?.status === 403) {
+        errorMessage = t('branchManagement.error.noPermission');
+      } else if (err?.response?.status === 404) {
+        errorMessage = t('branchManagement.error.branchNotFound');
+      }
+      
+      setError(errorMessage);
     }
   };
 
@@ -292,7 +342,18 @@ const BranchManagement: React.FC = () => {
           : branch
       ));
       
-      const errorMessage = err?.message || t('dashboard.branches.error.statusUpdateFailed');
+      let errorMessage = t('branchManagement.error.statusUpdateFailed');
+      
+      if (err?.response?.status === 401) {
+        errorMessage = t('branchManagement.error.sessionExpired');
+      } else if (err?.response?.status === 403) {
+        errorMessage = t('branchManagement.error.noPermission');
+      } else if (err?.response?.status === 404) {
+        errorMessage = t('branchManagement.error.branchNotFound');
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+      
       setError(errorMessage);
       setTimeout(() => setError(''), 3000);
     }
@@ -310,23 +371,25 @@ const BranchManagement: React.FC = () => {
           </p>
         </div>
 
-        {/* Error mesajı */}
+        {/* Error message */}
         {error && (
           <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            <p className="font-semibold">Hata:</p>
+            <p className="font-semibold">{t('commonBranch.error')}:</p>
             <p>{error}</p>
           </div>
         )}
 
-        {/* Loading durumu */}
+        {/* Loading state */}
         {isLoading && (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <span className="ml-3 text-gray-600">Şubeler yükleniyor...</span>
+            <span className={`${isRTL ? 'mr-3' : 'ml-3'} text-gray-600`}>
+              {t('branchManagement.loading')}
+            </span>
           </div>
         )}
 
-        {/* Şube listesi */}
+        {/* Branch list */}
         {!isLoading && !error && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <AddBranchCard onClick={handleAddBranch} />
@@ -343,7 +406,7 @@ const BranchManagement: React.FC = () => {
           </div>
         )}
 
-        {/* Şube yoksa mesaj */}
+        {/* No branches message */}
         {!isLoading && !error && branches.length === 0 && (
           <div className="text-center py-12">
             <div className="text-gray-400 mb-4">
@@ -394,7 +457,7 @@ const BranchManagement: React.FC = () => {
         </>
       )}
 
-      {/* Silme onay modalı */}
+      {/* Delete confirmation modal */}
       {showDeleteConfirm && branchToDelete && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
           <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
@@ -410,13 +473,13 @@ const BranchManagement: React.FC = () => {
                   onClick={() => setShowDeleteConfirm(false)}
                   className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
                 >
-                  {t('common.cancel')}
+                  {t('commonBranch.cancel')}
                 </button>
                 <button
                   onClick={confirmDelete}
                   className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                 >
-                  {t('common.delete')}
+                  {t('commonBranch.delete')}
                 </button>
               </div>
             </div>
