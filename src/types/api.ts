@@ -646,3 +646,40 @@ export function convertBranchDetailToFormData(
       : defaultWorkingHours,
   };
 }
+
+export interface BatchUpdateAddressDto {
+  country?: string | null;
+  city?: string | null;
+  street?: string | null;
+  adressLine1?: string | null;  // Note: API uses single 'd' in 'adressLine'
+  adressLine2?: string | null;  // Note: API uses single 'd' in 'adressLine'
+  zipCode?: string | null;
+}
+
+export interface BatchUpdateContactDto {
+  contactHeader?: string | null;
+  location?: string | null;
+  phone?: string | null;
+  mail?: string | null;
+  footerTitle?: string | null;
+  footerDescription?: string | null;
+  openTitle?: string | null;
+  openDays?: string | null;
+  openHours?: string | null;
+}
+
+export interface BatchUpdateBranchWorkingHourDto {
+  dayOfWeek: number;
+  openTime: string;
+  closeTime: string;
+  isWorkingDay: boolean;
+}
+
+export interface BatchUpdateBranchDto {
+  branchName?: string | null;
+  whatsappOrderNumber?: string | null;
+  branchLogoPath?: string | null;
+  batchUpdateAddressDto?: BatchUpdateAddressDto;
+  batchUpdateContactDto?: BatchUpdateContactDto;
+  batchUpdateBranchWorkingHourDto?: BatchUpdateBranchWorkingHourDto[];
+}

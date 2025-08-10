@@ -9,7 +9,8 @@ import type {
   Branch,
   BranchDropdownItem,
   TableData,
-  TableCategory
+  TableCategory,
+  BatchUpdateBranchDto
 } from '../types/api';
 
 // Table management için yeni tipler
@@ -86,14 +87,67 @@ class BranchService {
     }
   }
 
-  async updateBranch(id: number, data: Partial<CreateBranchWithDetailsDto>): Promise<BranchData> {
+ async updateBranch(id: number, data: Partial<CreateBranchWithDetailsDto>): Promise<BranchData> {
     try {
       logger.info('Branch güncelleme isteği gönderiliyor', { id, data }, { prefix: 'BranchService' });
-      const response = await httpClient.put<any>(`${this.baseUrl}/${id}`, data);
+      
+      // Transform the data to match the API's expected format
+      const batchUpdateData: BatchUpdateBranchDto = {
+        branchName: data.branchName?.trim() || null,
+        whatsappOrderNumber: data.whatsappOrderNumber?.trim() || null,
+        branchLogoPath: data.branchLogoPath || null,
+      };
+
+      // Transform address data if provided
+      if (data.createAddressDto) {
+        batchUpdateData.batchUpdateAddressDto = {
+          country: data.createAddressDto.country?.trim() || null,
+          city: data.createAddressDto.city?.trim() || null,
+          street: data.createAddressDto.street?.trim() || null,
+          adressLine1: data.createAddressDto.addressLine1?.trim() || null, // Note the field name mapping
+          adressLine2: data.createAddressDto.addressLine2?.trim() || null, // Note the field name mapping
+          zipCode: data.createAddressDto.zipCode?.trim() || null,
+        };
+      }
+
+      // Transform contact data if provided
+      if (data.createContactDto) {
+        batchUpdateData.batchUpdateContactDto = {
+          contactHeader: data.createContactDto.contactHeader?.trim() || null,
+          location: data.createContactDto.location?.trim() || null,
+          phone: data.createContactDto.phone?.trim() || null,
+          mail: data.createContactDto.mail?.trim() || null,
+          footerTitle: data.createContactDto.footerTitle?.trim() || null,
+          footerDescription: data.createContactDto.footerDescription?.trim() || null,
+          openTitle: data.createContactDto.openTitle?.trim() || null,
+          openDays: data.createContactDto.openDays?.trim() || null,
+          openHours: data.createContactDto.openHours?.trim() || null,
+        };
+      }
+
+      // Transform working hours data if provided
+      if (data.createBranchWorkingHourCoreDto && data.createBranchWorkingHourCoreDto.length > 0) {
+        batchUpdateData.batchUpdateBranchWorkingHourDto = data.createBranchWorkingHourCoreDto.map(hour => ({
+          dayOfWeek: hour.dayOfWeek,
+          openTime: hour.openTime,
+          closeTime: hour.closeTime,
+          isWorkingDay: hour.isWorkingDay
+        }));
+      }
+
+      logger.info('Transformed batch update data', batchUpdateData, { prefix: 'BranchService' });
+
+      const response = await httpClient.put<any>(`${this.baseUrl}/${id}/batch-update`, batchUpdateData);
       logger.info('Branch Update API Response alındı', response.data, { prefix: 'BranchService' });
       return response.data.data!;
     } catch (error: any) {
       logger.error('Branch güncelleme hatası', error, { prefix: 'BranchService' });
+      
+      // Enhanced error handling
+      if (error.response?.data?.errors) {
+        logger.error('API Validation Hataları:', error.response.data.errors, { prefix: 'BranchService' });
+      }
+      
       throw error;
     }
   }
@@ -114,166 +168,167 @@ class BranchService {
     return response.data.data || [];
   }
 
-async getBranchById(id: number): Promise<BranchDetailResponse | null> {
-  try {
-    logger.info('Branch detayları API çağrısı başlatılıyor', { id }, { prefix: 'BranchService' });
-    
-    // Include query parameters for address, contact, and workingHours
-    const includes = ['address', 'contact', 'workingHours'].join('%2C');
-    const url = `${this.baseUrl}?branchId=${id}&include=${includes}`;
-    
-    logger.info('API URL:', url, { prefix: 'BranchService' });
-    
-    const response = await httpClient.get<any>(url);
-    
-    logger.info('Branch API Response alındı', response.data, { prefix: 'BranchService' });
-
-    // API response formatını kontrol et
-    if (response.data && response.data.data) {
-      const branchData = response.data.data;
+  async getBranchById(id: number): Promise<BranchDetailResponse | null> {
+    try {
+      logger.info('Branch detayları API çağrısı başlatılıyor', { id }, { prefix: 'BranchService' });
       
-      // Ensure branchId is set for compatibility
-      if (branchData.id && !branchData.branchId) {
-        branchData.branchId = branchData.id;
-      }
+      // Include query parameters for address, contact, and workingHours
+      const includes = ['address', 'contact', 'workingHours'].join('%2C');
+      const url = `${this.baseUrl}?branchId=${id}&include=${includes}`;
       
-      return branchData as BranchDetailResponse;
-    }
+      logger.info('API URL:', url, { prefix: 'BranchService' });
+      
+      const response = await httpClient.get<any>(url);
+      
+      logger.info('Branch API Response alındı', response.data, { prefix: 'BranchService' });
 
-    // Alternatif format kontrolü (direkt data)
-    if (response.data && !response.data.data && typeof response.data === 'object') {
-      const directData = response.data as any;
-      if (directData.id && directData.branchName) {
-        logger.info('API yanıtı direkt branch formatında', null, { prefix: 'BranchService' });
+      // API response formatını kontrol et
+      if (response.data && response.data.data) {
+        const branchData = response.data.data;
         
         // Ensure branchId is set for compatibility
-        if (directData.id && !directData.branchId) {
-          directData.branchId = directData.id;
+        if (branchData.id && !branchData.branchId) {
+          branchData.branchId = branchData.id;
         }
         
-        return directData as BranchDetailResponse;
+        return branchData as BranchDetailResponse;
+      }
+
+      // Alternatif format kontrolü (direkt data)
+      if (response.data && !response.data.data && typeof response.data === 'object') {
+        const directData = response.data as any;
+        if (directData.id && directData.branchName) {
+          logger.info('API yanıtı direkt branch formatında', null, { prefix: 'BranchService' });
+          
+          // Ensure branchId is set for compatibility
+          if (directData.id && !directData.branchId) {
+            directData.branchId = directData.id;
+          }
+          
+          return directData as BranchDetailResponse;
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      logger.error('Branch detayları çekilirken hata', error, { prefix: 'BranchService' });
+      
+      if ((error as any).status === 404) {
+        logger.warn('Branch bulunamadı (404)', null, { prefix: 'BranchService' });
+        return null;
+      }
+      throw error;
+    }
+  }
+
+    async getBranches(): Promise<BranchData[]> {
+    try {
+      logger.info('Branch listesi API çağrısı başlatılıyor...', null, { prefix: 'BranchService' });
+      
+      // Token kontrolü
+      const token = localStorage.getItem('token');
+      if (!token) {
+        logger.error('Token bulunamadı', null, { prefix: 'BranchService' });
+        throw new Error('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+      }
+
+      // Restaurant ID kontrolü
+      const restaurantId = getRestaurantIdFromToken();
+      if (!restaurantId) {
+        logger.error('Restaurant ID bulunamadı', null, { prefix: 'BranchService' });
+        throw new Error('Restaurant bilgisi bulunamadı.');
+      }
+
+      logger.info(`Restaurant ID: ${restaurantId} ile şube listesi isteniyor`, null, { prefix: 'BranchService' });
+      
+      // Include query parameters for richer data
+      const includes = ['address', 'contact', 'workingHours'].join('%2C');
+      
+      // İlk endpoint'i dene
+      let url = `/api/Restaurants/branches?include=BranchIsOpen%2C${includes}`;
+      let response;
+      
+      try {
+        response = await httpClient.get<any[]>(url);
+        logger.info('İlk endpoint başarılı', response, { prefix: 'BranchService' });
+      } catch (firstError: any) {
+        logger.warn('İlk endpoint başarısız, alternatif deneniyor', firstError, { prefix: 'BranchService' });
+        
+        // Alternatif endpoint'i dene
+        url = `/api/Branches?restaurantId=${restaurantId}&include=BranchIsOpen%2C${includes}`;
+        response = await httpClient.get<any[]>(url);
+        logger.info('Alternatif endpoint başarılı', response, { prefix: 'BranchService' });
+      }
+
+      logger.info('Branch listesi API Response alındı', response, { prefix: 'BranchService' });
+
+      // Response formatını kontrol et
+      if (!response.data) {
+        logger.warn('API response.data boş', null, { prefix: 'BranchService' });
+        return [];
+      }
+
+      // Eğer response.data bir array değilse
+      if (!Array.isArray(response.data)) {
+        logger.warn('API response.data array değil, formatı:', response.data, { prefix: 'BranchService' });
+        return [];
+      }
+
+      // API her bir öğede { branch: { ... } } yapısı döndürüyor
+      const mapped = response.data.map((item: any, index: number): BranchData => {
+        logger.debug(`İşlenen item ${index}`, item, { prefix: 'BranchService' });
+        
+        const b = item.branch || item; // Güvenlik için fallback
+
+        logger.debug(`Branch data ${index}`, b, { prefix: 'BranchService' });
+
+        return {
+          // Hem id hem branchId alanlarını dolduruyoruz
+          id: b.branchId || b.id,
+          branchId: b.branchId || b.id,
+          branchName: b.branchName,
+          whatsappOrderNumber: b.whatsappOrderNumber ?? null,
+          email: b.email ?? null,
+          branchStatus: b.branchStatus ?? true,
+          restaurantId: b.restaurantId ?? 0,
+          branchLogoPath: b.branchLogoPath ?? null,
+          isOpenNow: b.isOpenNow ?? false,
+          isTemporarilyClosed: b.isTemporarilyClosed ?? false,
+          BranchIsOpen: b.BranchIsOpen,
+          createAddressDto: {
+            country: b.address?.country ?? null,
+            city: b.address?.city ?? null,
+            street: b.address?.street ?? null,
+            zipCode: b.address?.zipCode ?? null,
+            addressLine1: b.address?.addressLine1 ?? null,
+          },
+          workingHours: b.workingHours ?? [],
+          // Store the full objects for future use
+          address: b.address,
+          contact: b.contact,
+        } as BranchData;
+      });
+
+      logger.info(`Branch listesi başarıyla işlendi, toplam: ${mapped.length}`, mapped, { prefix: 'BranchService' });
+
+      return mapped;
+    } catch (error: any) {
+      logger.error('Branch listesi alınırken hata', error, { prefix: 'BranchService' });
+      
+      // Detaylı hata mesajı
+      if (error?.status === 401) {
+        throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+      } else if (error?.status === 403) {
+        throw new Error('Bu işlem için yetkiniz bulunmuyor.');
+      } else if (error?.status === 404) {
+        throw new Error('Şube listesi bulunamadı.');
+      } else if (error?.status === 0 || !navigator.onLine) {
+        throw new Error('İnternet bağlantınızı kontrol edin.');
+      } else {
+        throw new Error(`Şube listesi alınırken hata oluştu: ${error?.message || 'Bilinmeyen hata'}`);
       }
     }
-    
-    return null;
-  } catch (error) {
-    logger.error('Branch detayları çekilirken hata', error, { prefix: 'BranchService' });
-    
-    if ((error as any).status === 404) {
-      logger.warn('Branch bulunamadı (404)', null, { prefix: 'BranchService' });
-      return null;
-    }
-    throw error;
   }
-}
-  async getBranches(): Promise<BranchData[]> {
-  try {
-    logger.info('Branch listesi API çağrısı başlatılıyor...', null, { prefix: 'BranchService' });
-    
-    // Token kontrolü
-    const token = localStorage.getItem('token');
-    if (!token) {
-      logger.error('Token bulunamadı', null, { prefix: 'BranchService' });
-      throw new Error('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
-    }
-
-    // Restaurant ID kontrolü
-    const restaurantId = getRestaurantIdFromToken();
-    if (!restaurantId) {
-      logger.error('Restaurant ID bulunamadı', null, { prefix: 'BranchService' });
-      throw new Error('Restaurant bilgisi bulunamadı.');
-    }
-
-    logger.info(`Restaurant ID: ${restaurantId} ile şube listesi isteniyor`, null, { prefix: 'BranchService' });
-    
-    // Include query parameters for richer data
-    const includes = ['address', 'contact', 'workingHours'].join('%2C');
-    
-    // İlk endpoint'i dene
-    let url = `/api/Restaurants/branches?include=BranchIsOpen%2C${includes}`;
-    let response;
-    
-    try {
-      response = await httpClient.get<any[]>(url);
-      logger.info('İlk endpoint başarılı', response, { prefix: 'BranchService' });
-    } catch (firstError: any) {
-      logger.warn('İlk endpoint başarısız, alternatif deneniyor', firstError, { prefix: 'BranchService' });
-      
-      // Alternatif endpoint'i dene
-      url = `/api/Branches?restaurantId=${restaurantId}&include=BranchIsOpen%2C${includes}`;
-      response = await httpClient.get<any[]>(url);
-      logger.info('Alternatif endpoint başarılı', response, { prefix: 'BranchService' });
-    }
-
-    logger.info('Branch listesi API Response alındı', response, { prefix: 'BranchService' });
-
-    // Response formatını kontrol et
-    if (!response.data) {
-      logger.warn('API response.data boş', null, { prefix: 'BranchService' });
-      return [];
-    }
-
-    // Eğer response.data bir array değilse
-    if (!Array.isArray(response.data)) {
-      logger.warn('API response.data array değil, formatı:', response.data, { prefix: 'BranchService' });
-      return [];
-    }
-
-    // API her bir öğede { branch: { ... } } yapısı döndürüyor
-    const mapped = response.data.map((item: any, index: number): BranchData => {
-      logger.debug(`İşlenen item ${index}`, item, { prefix: 'BranchService' });
-      
-      const b = item.branch || item; // Güvenlik için fallback
-
-      logger.debug(`Branch data ${index}`, b, { prefix: 'BranchService' });
-
-      return {
-        // Hem id hem branchId alanlarını dolduruyoruz
-        id: b.branchId || b.id,
-        branchId: b.branchId || b.id,
-        branchName: b.branchName,
-        whatsappOrderNumber: b.whatsappOrderNumber ?? null,
-        email: b.email ?? null,
-        branchStatus: b.branchStatus ?? true,
-        restaurantId: b.restaurantId ?? 0,
-        branchLogoPath: b.branchLogoPath ?? null,
-        isOpenNow: b.isOpenNow ?? false,
-        isTemporarilyClosed: b.isTemporarilyClosed ?? false,
-        BranchIsOpen: b.BranchIsOpen,
-        createAddressDto: {
-          country: b.address?.country ?? null,
-          city: b.address?.city ?? null,
-          street: b.address?.street ?? null,
-          zipCode: b.address?.zipCode ?? null,
-          addressLine1: b.address?.addressLine1 ?? null,
-        },
-        workingHours: b.workingHours ?? [],
-        // Store the full objects for future use
-        address: b.address,
-        contact: b.contact,
-      } as BranchData;
-    });
-
-    logger.info(`Branch listesi başarıyla işlendi, toplam: ${mapped.length}`, mapped, { prefix: 'BranchService' });
-
-    return mapped;
-  } catch (error: any) {
-    logger.error('Branch listesi alınırken hata', error, { prefix: 'BranchService' });
-    
-    // Detaylı hata mesajı
-    if (error?.status === 401) {
-      throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
-    } else if (error?.status === 403) {
-      throw new Error('Bu işlem için yetkiniz bulunmuyor.');
-    } else if (error?.status === 404) {
-      throw new Error('Şube listesi bulunamadı.');
-    } else if (error?.status === 0 || !navigator.onLine) {
-      throw new Error('İnternet bağlantınızı kontrol edin.');
-    } else {
-      throw new Error(`Şube listesi alınırken hata oluştu: ${error?.message || 'Bilinmeyen hata'}`);
-    }
-  }
-}
 
   async toggleTemporaryClose(branchId: number, isTemporarilyClosed: boolean, isOpenNow: boolean): Promise<void> {
     try {

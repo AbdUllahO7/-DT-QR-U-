@@ -38,7 +38,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
   formData,
   setFormData,
   isSubmitting,
-  hasChanges,
   onInputChange,
   onWorkingHourChange
 }) => {
