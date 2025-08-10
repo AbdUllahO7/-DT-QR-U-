@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLanguage } from "../../../contexts/LanguageContext";
 import { logger } from "../../../utils/logger";
 import { httpClient } from "../../../utils/http";
 import { AnimatePresence, motion } from 'framer-motion';
@@ -17,6 +18,7 @@ interface CreateCategoryFormData {
 }
 
 const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClose, onSuccess }) => {
+  const { t, isRTL } = useLanguage();
   const [formData, setFormData] = useState<CreateCategoryFormData>({
     categoryName: '',
     status: true,
@@ -29,10 +31,12 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
     const newErrors: Record<string, string> = {};
     
     if (!formData.categoryName.trim()) {
-      newErrors.categoryName = 'Kategori adı gereklidir';
+      newErrors.categoryName = t('createCategoryModal.form.categoryName.required');
+    } else if (formData.categoryName.trim().length < 2) {
+      newErrors.categoryName = t('createCategoryModal.validation.nameMinLength');
+    } else if (formData.categoryName.trim().length > 50) {
+      newErrors.categoryName = t('createCategoryModal.validation.nameMaxLength');
     }
-    
-
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -81,7 +85,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
       });
       setErrors({});
       onClose();
-     } catch (error: any) {
+    } catch (error: any) {
       logger.error('❌ Kategori eklenirken hata:', error);
       logger.error('❌ Kategori eklenirken detaylı hata:', {
         message: error.message,
@@ -99,40 +103,40 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
         // API'den gelen genel hata mesajı
         const apiMessage = error.response.data.message;
         
-        // Özel hata durumları için Türkçe mesajlar
+        // Özel hata durumları için lokalize mesajlar
         if (error.response?.status === 400) {
           if (apiMessage.toLowerCase().includes('already exists') || 
               apiMessage.toLowerCase().includes('zaten mevcut') ||
               apiMessage.toLowerCase().includes('duplicate')) {
             setErrors({
-              categoryName: 'Bu isimde bir kategori zaten mevcut. Lütfen farklı bir isim seçin.'
+              categoryName: t('createCategoryModal.errors.categoryExists')
             });
           } else if (apiMessage.toLowerCase().includes('invalid') || 
                      apiMessage.toLowerCase().includes('geçersiz')) {
             setErrors({
-              general: 'Girilen bilgiler geçersiz. Lütfen kontrol edip tekrar deneyin.'
+              general: t('createCategoryModal.errors.invalidData')
             });
           } else {
             setErrors({
-              general: apiMessage || 'Kategori eklenirken bir hata oluştu. Lütfen tekrar deneyin.'
+              general: apiMessage || t('createCategoryModal.errors.general')
             });
           }
         } else if (error.response?.status === 500) {
           setErrors({
-            general: 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.'
+            general: t('createCategoryModal.errors.serverError')
           });
         } else {
           setErrors({
-            general: apiMessage || 'Kategori eklenirken bir hata oluştu. Lütfen tekrar deneyin.'
+            general: apiMessage || t('createCategoryModal.errors.general')
           });
         }
-      } else if (error.message) {
+      } else if (error.message?.includes('network') || error.message?.includes('Network')) {
         setErrors({
-          general: error.message || 'Kategori eklenirken bir hata oluştu. Lütfen tekrar deneyin.'
+          general: t('createCategoryModal.errors.networkError')
         });
       } else {
         setErrors({
-          general: 'Kategori eklenirken bir hata oluştu. Lütfen tekrar deneyin.'
+          general: t('createCategoryModal.errors.unknownError')
         });
       }
     } finally {
@@ -143,7 +147,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="fixed inset-0 z-50 overflow-y-auto" dir={isRTL ? 'rtl' : 'ltr'}>
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -164,42 +168,51 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
             >
               {/* Header */}
               <div className="relative bg-gradient-to-r from-primary-500 to-primary-600 p-6 text-white">
-                <div className="absolute   bg-gradient-to-br from-white/10 to-transparent" />
+                <div className="absolute bg-gradient-to-br from-white/10 to-transparent" />
                 <button
                   onClick={onClose}
-                    type="button"
-                  className="absolute top-4 z-50 right-4 p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
+                  type="button"
+                  className={`absolute top-4 z-50 ${isRTL ? 'left-4' : 'right-4'} p-2 hover:bg-white/20 rounded-full transition-colors duration-200`}
+                  aria-label={t('createCategoryModal.accessibility.closeModal')}
                 >
                   <X className="w-5 h-5" />
                 </button>
               
-                
-                <div className="flex items-center gap-3 relative">
+                <div className={`flex items-center gap-3 relative ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className="p-3 bg-white/20 rounded-2xl">
                     <Sparkles className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold">Yeni Kategori Ekle</h3>
-                    <p className="text-primary-100 text-sm">Menü kategorisi oluşturun</p>
+                    <h3 className="text-xl font-bold">{t('createCategoryModal.title')}</h3>
+                    <p className="text-primary-100 text-sm">{t('createCategoryModal.subtitle')}</p>
                   </div>
                 </div>
               </div>
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              <form 
+                onSubmit={handleSubmit} 
+                className="p-6 space-y-6"
+                aria-label={t('createCategoryModal.accessibility.formTitle')}
+              >
                 
                 {/* General Error */}
                 {errors.general && (
                   <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                    <p className="text-red-600 dark:text-red-400 text-sm font-medium">Hata:</p>
+                    <p className="text-red-600 dark:text-red-400 text-sm font-medium">
+                      {t('createCategoryModal.errors.errorLabel')}
+                    </p>
                     <p className="text-red-600 dark:text-red-400 text-sm mt-1">{errors.general}</p>
                   </div>
                 )}
 
                 {/* Category Name */}
                 <div>
-                  <label htmlFor="categoryName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Kategori Adı *
+                  <label 
+                    htmlFor="categoryName" 
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                  >
+                    {t('createCategoryModal.form.categoryName.label')}
                   </label>
                   <input
                     type="text"
@@ -211,48 +224,63 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
                         ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
                         : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
                     } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-                    placeholder="Örn: Ana Yemekler, İçecekler, Tatlılar"
+                    placeholder={t('createCategoryModal.form.categoryName.placeholder')}
+                    aria-describedby={errors.categoryName ? 'categoryName-error' : undefined}
+                    aria-required="true"
                   />
                   {errors.categoryName && (
-                    <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.categoryName}</p>
+                    <p 
+                      id="categoryName-error" 
+                      className="mt-1 text-sm text-red-600 dark:text-red-400"
+                      role="alert"
+                    >
+                      {errors.categoryName}
+                    </p>
                   )}
                 </div>
 
-              
-
                 {/* Status */}
                 <div>
-                  <label className="flex items-center gap-3 cursor-pointer">
+                  <label className={`flex items-center gap-3 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <input
                       type="checkbox"
                       checked={formData.status}
                       onChange={(e) => handleChange('status', e.target.checked)}
                       className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                      aria-describedby="status-description"
                     />
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                      Kategoriyi aktif et
+                      {t('createCategoryModal.form.status.label')}
                     </span>
                   </label>
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Aktif kategoriler menüde görünür
+                  <p 
+                    id="status-description" 
+                    className={`mt-1 text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                  >
+                    {t('createCategoryModal.form.status.description')}
                   </p>
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-3 pt-4">
+                <div className={`flex gap-3 pt-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <button
                     type="button"
                     onClick={onClose}
                     className="flex-1 px-4 py-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors duration-200"
                   >
-                    İptal
+                    {t('createCategoryModal.buttons.cancel')}
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
                     className="flex-1 px-4 py-3 text-white bg-primary-600 hover:bg-primary-700 disabled:bg-primary-400 disabled:cursor-not-allowed rounded-lg font-medium transition-colors duration-200"
+                    aria-describedby={isSubmitting ? 'submit-loading' : undefined}
                   >
-                    {isSubmitting ? 'Ekleniyor...' : 'Kategori Ekle'}
+                    {isSubmitting ? (
+                      <span id="submit-loading">{t('createCategoryModal.buttons.creating')}</span>
+                    ) : (
+                      t('createCategoryModal.buttons.create')
+                    )}
                   </button>
                 </div>
               </form>
@@ -264,5 +292,4 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
   );
 };
 
-
-export default CreateCategoryModal
+export default CreateCategoryModal;

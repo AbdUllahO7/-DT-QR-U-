@@ -43,8 +43,7 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
   productId,
   productName
 }) => {
-  const { t, language } = useLanguage();
-  const isRTL = language === 'ar';
+  const { t, isRTL } = useLanguage();
 
   // State
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -55,8 +54,17 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Predefined units for selection
-  const unitOptions = ['g', 'ml', 'piece', 'tbsp', 'tsp'];
+  // Predefined units for selection - now using translation keys
+  const getUnitOptions = () => [
+    { value: 'g', label: t('productIngredientModal.units.grams') },
+    { value: 'ml', label: t('productIngredientModal.units.milliliters') },
+    { value: 'piece', label: t('productIngredientModal.units.pieces') },
+    { value: 'tbsp', label: t('productIngredientModal.units.tablespoons') },
+    { value: 'tsp', label: t('productIngredientModal.units.teaspoons') },
+    { value: 'cup', label: t('productIngredientModal.units.cups') },
+    { value: 'kg', label: t('productIngredientModal.units.kilograms') },
+    { value: 'l', label: t('productIngredientModal.units.liters') }
+  ];
 
   // Load ingredients and current product ingredients
   const loadData = async () => {
@@ -98,7 +106,7 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
 
     } catch (err: any) {
       logger.error('Malzeme verileri yüklenirken hata:', err);
-      setError(t('Malzeme verileri yüklenirken bir hata oluştu.'));
+      setError(t('productIngredientModal.errors.loadingData'));
     } finally {
       setLoading(false);
     }
@@ -141,12 +149,12 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
     // Validate inputs for selected ingredients
     for (const ing of selectedIngredients) {
       if (ing.quantity <= 0) {
-        setError(t('Tüm malzemeler için miktar 0\'dan büyük olmalıdır.'));
+        setError(t('productIngredientModal.errors.quantityRequired'));
         setSaving(false);
         return;
       }
       if (!ing.unit) {
-        setError(t('Tüm malzemeler için birim seçilmelidir.'));
+        setError(t('productIngredientModal.errors.unitRequired'));
         setSaving(false);
         return;
       }
@@ -246,7 +254,7 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
       onClose();
     } catch (err: any) {
       logger.error('Malzemeler kaydedilirken hata:', err);
-      setError(t('Malzemeler kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.'));
+      setError(t('productIngredientModal.errors.savingIngredients'));
     } finally {
       setSaving(false);
     }
@@ -259,37 +267,54 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
 
   // Get allergen info for display
   const getAllergenInfo = (allergenIds: number[]) => {
-    return allergenIds?.length > 0 ? `${allergenIds.length} alerjen` : '';
+    if (!allergenIds?.length) return '';
+    return t('productIngredientModal.allergenInfo.count', { count: allergenIds.length });
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+    <div 
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="ingredient-modal-title"
+    >
+      <div 
+        className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden"
+        dir={isRTL ? 'rtl' : 'ltr'}
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div>
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-              {t('Ürün Malzemeleri')}
+            <h2 
+              id="ingredient-modal-title"
+              className="text-xl font-semibold text-gray-800 dark:text-white"
+            >
+              {t('productIngredientModal.title')}
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              <strong>{productName}</strong> {t('için malzemeleri seçin')}
+              <strong>{productName}</strong> {t('productIngredientModal.subtitle')}
             </p>
           </div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+            aria-label={t('productIngredientModal.accessibility.closeModal')}
           >
             <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* Content */}
-        <div className={`p-6 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="p-6">
           {/* Error Alert */}
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 flex items-center gap-2">
+            <div 
+              className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 flex items-center gap-2"
+              role="alert"
+              aria-live="polite"
+            >
               <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
               <span className="text-red-700 dark:text-red-400">{error}</span>
             </div>
@@ -303,12 +328,13 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
               }`} />
               <input
                 type="text"
-                placeholder={t('Malzemeleri ara...')}
+                placeholder={t('productIngredientModal.search.placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={`w-full py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${
                   isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'
                 }`}
+                aria-label={t('productIngredientModal.accessibility.searchInput')}
               />
             </div>
           </div>
@@ -317,11 +343,11 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
           <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600 dark:text-gray-400">
-                {t('Seçilen malzemeler')}: <strong>{selectedIngredients.length}</strong>
+                {t('productIngredientModal.summary.selectedCount')}: <strong>{selectedIngredients.length}</strong>
               </span>
               {JSON.stringify(selectedIngredients) !== JSON.stringify(currentProductIngredients) && (
                 <span className="text-xs text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/30 px-2 py-1 rounded">
-                  {t('Değişiklik var')}
+                  {t('productIngredientModal.summary.hasChanges')}
                 </span>
               )}
             </div>
@@ -333,13 +359,18 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
                 <span className="ml-2 text-gray-600 dark:text-gray-400">
-                  {t('Malzemeler yükleniyor...')}
+                  {t('productIngredientModal.loading.ingredients')}
                 </span>
               </div>
             ) : filteredIngredients.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-8 text-gray-500 dark:text-gray-400">
                 <Package className="w-8 h-8 mb-2 opacity-50" />
-                <p>{searchQuery ? t('Arama kriterlerine uygun malzeme bulunamadı.') : t('Henüz malzeme eklenmemiş.')}</p>
+                <p>
+                  {searchQuery 
+                    ? t('productIngredientModal.emptyState.noSearchResults') 
+                    : t('productIngredientModal.emptyState.noIngredients')
+                  }
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -366,18 +397,19 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
                               checked={isSelected}
                               onChange={() => toggleIngredient(ingredient.id)}
                               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+                              aria-describedby={`ingredient-${ingredient.id}-status`}
                             />
                             <h4 className="font-medium text-gray-900 dark:text-white truncate">
                               {ingredient.name}
                             </h4>
                             {wasOriginallySelected && !isSelected && (
                               <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-1 rounded">
-                                {t('Kaldırılacak')}
+                                {t('productIngredientModal.status.toBeRemoved')}
                               </span>
                             )}
                             {!wasOriginallySelected && isSelected && (
                               <span className="text-xs bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 px-2 py-1 rounded">
-                                {t('Eklenecek')}
+                                {t('productIngredientModal.status.toBeAdded')}
                               </span>
                             )}
                           </div>
@@ -386,27 +418,42 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
                           {isSelected && (
                             <div className="grid grid-cols-2 gap-2 mt-2">
                               <div>
-                                <label className="text-xs text-gray-600 dark:text-gray-400">{t('Miktar')}</label>
+                                <label 
+                                  htmlFor={`quantity-${ingredient.id}`}
+                                  className="text-xs text-gray-600 dark:text-gray-400 block mb-1"
+                                >
+                                  {t('productIngredientModal.form.quantity.label')}
+                                </label>
                                 <input
+                                  id={`quantity-${ingredient.id}`}
                                   type="number"
                                   value={selectedIngredient?.quantity || 1}
                                   onChange={(e) => updateIngredient(ingredient.id, 'quantity', e.target.value)}
                                   min="0"
                                   step="0.1"
                                   className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                  placeholder="Miktar"
+                                  placeholder={t('productIngredientModal.form.quantity.placeholder')}
+                                  aria-label={t('productIngredientModal.accessibility.quantityInput')}
                                 />
                               </div>
                               <div>
-                                <label className="text-xs text-gray-600 dark:text-gray-400">{t('Birim')}</label>
+                                <label 
+                                  htmlFor={`unit-${ingredient.id}`}
+                                  className="text-xs text-gray-600 dark:text-gray-400 block mb-1"
+                                >
+                                  {t('productIngredientModal.form.unit.label')}
+                                </label>
                                 <select
-                                  title='piece'
+                                  id={`unit-${ingredient.id}`}
                                   value={selectedIngredient?.unit || 'piece'}
                                   onChange={(e) => updateIngredient(ingredient.id, 'unit', e.target.value)}
                                   className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                  aria-label={t('productIngredientModal.accessibility.unitSelect')}
                                 >
-                                  {unitOptions.map(unit => (
-                                    <option key={unit} value={unit}>{unit}</option>
+                                  {getUnitOptions().map(option => (
+                                    <option key={option.value} value={option.value}>
+                                      {option.label}
+                                    </option>
                                   ))}
                                 </select>
                               </div>
@@ -414,18 +461,24 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
                           )}
 
                           {/* Availability Status */}
-                          <div className="flex items-center gap-2 mt-2">
+                          <div 
+                            id={`ingredient-${ingredient.id}-status`}
+                            className="flex items-center gap-2 mt-2"
+                          >
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                               ingredient.isAvailable
                                 ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                                 : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                             }`}>
-                              {ingredient.isAvailable ? t('Kullanılabilir') : t('Kullanılamaz')}
+                              {ingredient.isAvailable 
+                                ? t('productIngredientModal.status.available') 
+                                : t('productIngredientModal.status.unavailable')
+                              }
                             </span>
 
                             {ingredient.isAllergenic && (
                               <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
-                                {t('Alerjen İçerir')}
+                                {t('productIngredientModal.status.containsAllergens')}
                               </span>
                             )}
                           </div>
@@ -456,17 +509,19 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
         {/* Footer */}
         <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700">
           <div className="text-sm text-gray-600 dark:text-gray-400">
-            {t('Toplam')}: {filteredIngredients.length} {t('malzeme')}
+            {t('productIngredientModal.footer.totalCount', { 
+              count: filteredIngredients.length 
+            })}
           </div>
           
-          <div className={`flex gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <div className="flex gap-3">
             <button
               type="button"
               onClick={onClose}
               disabled={saving}
               className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
             >
-              {t('İptal')}
+              {t('productIngredientModal.buttons.cancel')}
             </button>
             <button
               type="button"
@@ -474,7 +529,7 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
               disabled={saving}
               className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
             >
-              {t('Atla')}
+              {t('productIngredientModal.buttons.skip')}
             </button>
             <button
               type="button"
@@ -485,12 +540,12 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
               {saving ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  {t('Kaydediliyor...')}
+                  {t('productIngredientModal.buttons.saving')}
                 </>
               ) : (
                 <>
                   <Plus className="w-4 h-4" />
-                  {t('Malzemeleri Kaydet')}
+                  {t('productIngredientModal.buttons.saveIngredients')}
                 </>
               )}
             </button>

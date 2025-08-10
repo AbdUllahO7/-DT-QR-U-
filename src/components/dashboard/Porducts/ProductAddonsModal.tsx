@@ -18,7 +18,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
 
-import { productService } from '../../../services/productService'; // Add this import
+import { productService } from '../../../services/productService';
 import { AvailableAddonProduct, ProductAddon, productAddonsService } from '../../../services/ProductAddonsService';
 
 interface ProductAddonsModalProps {
@@ -77,6 +77,7 @@ const SortableAddonItem: React.FC<{
           {...attributes}
           {...listeners}
           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing mt-2"
+          aria-label={t('productAddonsModal.accessibility.dragHandle')}
         >
           <GripVertical className="h-4 w-4" />
         </button>
@@ -112,7 +113,7 @@ const SortableAddonItem: React.FC<{
                 {addon.isRecommended && (
                   <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
                     <Star className="h-3 w-3 mr-1" />
-                    {t('Önerilen')}
+                    {t('productAddonsModal.form.isRecommended.badge')}
                   </span>
                 )}
               </div>
@@ -125,14 +126,16 @@ const SortableAddonItem: React.FC<{
                   <button
                     onClick={() => onSaveEdit(addon.id)}
                     className="p-1.5 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
-                    title={t('Kaydet')}
+                    title={t('productAddonsModal.actions.save')}
+                    aria-label={t('productAddonsModal.actions.save')}
                   >
                     <Save className="h-4 w-4" />
                   </button>
                   <button
                     onClick={onCancelEdit}
                     className="p-1.5 text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                    title={t('İptal')}
+                    title={t('productAddonsModal.actions.cancel')}
+                    aria-label={t('productAddonsModal.actions.cancel')}
                   >
                     <XCircle className="h-4 w-4" />
                   </button>
@@ -142,14 +145,16 @@ const SortableAddonItem: React.FC<{
                   <button
                     onClick={() => onEdit(addon.id)}
                     className="p-1.5 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                    title={t('Düzenle')}
+                    title={t('productAddonsModal.actions.edit')}
+                    aria-label={t('productAddonsModal.accessibility.editAddon')}
                   >
                     <Edit3 className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => onRemove(addon.id)}
                     className="p-1.5 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                    title={t('Kaldır')}
+                    title={t('productAddonsModal.actions.remove')}
+                    aria-label={t('productAddonsModal.accessibility.removeAddon')}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -165,7 +170,7 @@ const SortableAddonItem: React.FC<{
                 <textarea
                   value={editingData.marketingText}
                   onChange={(e) => onEditingDataChange('marketingText', e.target.value)}
-                  placeholder={t('Pazarlama metni...')}
+                  placeholder={t('productAddonsModal.form.marketingText.placeholder')}
                   className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
                   rows={2}
                 />
@@ -175,9 +180,10 @@ const SortableAddonItem: React.FC<{
                     checked={editingData.isRecommended}
                     onChange={(e) => onEditingDataChange('isRecommended', e.target.checked)}
                     className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                    aria-label={t('productAddonsModal.accessibility.toggleRecommended')}
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {t('Önerilen eklenti olarak işaretle')}
+                    {t('productAddonsModal.form.isRecommended.label')}
                   </span>
                 </label>
               </div>
@@ -209,8 +215,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
   productId,
   productName
 }) => {
-  const { t, language } = useLanguage();
-  const isRTL = language === 'ar';
+  const { t, isRTL } = useLanguage();
 
   // State
   const [currentAddons, setCurrentAddons] = useState<ProductAddon[]>([]);
@@ -279,7 +284,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
 
     } catch (err: any) {
       logger.error('Eklenti verileri yüklenirken hata:', err);
-      setError(t('Eklenti verileri yüklenirken bir hata oluştu.'));
+      setError(t('productAddonsModal.errors.loadingData'));
     } finally {
       setLoading(false);
     }
@@ -320,7 +325,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
       );
     } catch (error: any) {
       logger.error('Eklenti güncellenirken hata:', error);
-      setError(t('Eklenti güncellenirken bir hata oluştu.'));
+      setError(t('productAddonsModal.errors.updatingAddon'));
     }
   };
 
@@ -341,7 +346,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
       });
     } catch (error: any) {
       logger.error('Eklenti silinirken hata:', error);
-      setError(t('Eklenti silinirken bir hata oluştu.'));
+      setError(t('productAddonsModal.errors.deletingAddon'));
     }
   };
 
@@ -367,7 +372,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
       await productAddonsService.reorderProductAddons(productId, addonOrders);
     } catch (error: any) {
       logger.error('Eklenti sıralaması kaydedilirken hata:', error);
-      setError(t('Eklenti sıralaması kaydedilirken bir hata oluştu.'));
+      setError(t('productAddonsModal.errors.savingOrder'));
       // Revert the reorder
       loadData();
     }
@@ -438,7 +443,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
       onClose();
     } catch (err: any) {
       logger.error('Eklentiler kaydedilirken hata:', err);
-      setError(t('Eklentiler kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.'));
+      setError(t('productAddonsModal.errors.savingAddons'));
     } finally {
       setSaving(false);
     }
@@ -469,20 +474,22 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           className="bg-white dark:bg-gray-800 rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col"
+          dir={isRTL ? 'rtl' : 'ltr'}
         >
           {/* Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
             <div>
               <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-                {t('Ürün Eklentileri')}
+                {t('productAddonsModal.title')}
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                <strong>{productName}</strong> {t('için eklenti ürünleri yönetin')}
+                <strong>{productName}</strong> {t('productAddonsModal.subtitle')}
               </p>
             </div>
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              aria-label={t('productAddonsModal.accessibility.closeModal')}
             >
               <X className="w-6 h-6" />
             </button>
@@ -494,11 +501,11 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
             <div className="w-1/2 border-r border-gray-200 dark:border-gray-700 flex flex-col">
               <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 className="font-medium text-gray-900 dark:text-white mb-2">
-                  {t('Mevcut Eklentiler')} ({currentAddons.length})
+                  {t('productAddonsModal.panels.currentAddons.title')} ({currentAddons.length})
                 </h3>
                 {currentAddons.length > 0 && (
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {t('Sürükleyerek sıralayabilirsiniz')}
+                    {t('productAddonsModal.panels.currentAddons.dragInstruction')}
                   </p>
                 )}
               </div>
@@ -508,14 +515,14 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
                     <span className="ml-2 text-gray-600 dark:text-gray-400">
-                      {t('Eklentiler yükleniyor...')}
+                      {t('productAddonsModal.loading.addons')}
                     </span>
                   </div>
                 ) : addonsWithProductDetails.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-8 text-gray-500 dark:text-gray-400">
                     <Package className="w-8 h-8 mb-2 opacity-50" />
-                    <p className="text-center">{t('Henüz eklenti eklenmemiş.')}</p>
-                    <p className="text-sm text-center mt-1">{t('Sağ panelden ürün seçin.')}</p>
+                    <p className="text-center">{t('productAddonsModal.panels.currentAddons.emptyState.title')}</p>
+                    <p className="text-sm text-center mt-1">{t('productAddonsModal.panels.currentAddons.emptyState.subtitle')}</p>
                   </div>
                 ) : (
                   <DndContext
@@ -553,18 +560,18 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
             <div className="w-1/2 flex flex-col">
               <div className="p-4 border-b border-gray-200 dark:border-gray-700">
                 <h3 className="font-medium text-gray-900 dark:text-white mb-3">
-                  {t('Eklenti Olarak Eklenebilir Ürünler')}
+                  {t('productAddonsModal.panels.availableProducts.title')}
                 </h3>
                 
                 {/* Search */}
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Search className={`absolute top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 ${isRTL ? 'right-3' : 'left-3'}`} />
                   <input
                     type="text"
-                    placeholder={t('Ürün ara...')}
+                    placeholder={t('productAddonsModal.panels.availableProducts.searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className={`w-full py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'}`}
                   />
                 </div>
               </div>
@@ -573,11 +580,19 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                 {loading ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
+                    <span className="ml-2 text-gray-600 dark:text-gray-400">
+                      {t('productAddonsModal.loading.products')}
+                    </span>
                   </div>
                 ) : filteredProducts.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-8 text-gray-500 dark:text-gray-400">
                     <Package className="w-8 h-8 mb-2 opacity-50" />
-                    <p>{searchQuery ? t('Arama kriterlerine uygun ürün bulunamadı.') : t('Eklenebilir ürün bulunamadı.')}</p>
+                    <p>
+                      {searchQuery 
+                        ? t('productAddonsModal.panels.availableProducts.emptyState.noResults') 
+                        : t('productAddonsModal.panels.availableProducts.emptyState.noProducts')
+                      }
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -645,7 +660,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                               
                               {!product.isAvailable && (
                                 <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 mt-2">
-                                  {t('Stokta Yok')}
+                                  {t('productAddonsModal.status.outOfStock')}
                                 </span>
                               )}
                             </div>
@@ -670,7 +685,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
           {/* Footer */}
           <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700">
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              {selectedProductIds.size} {t('ürün seçili')} • {filteredProducts.length} {t('mevcut ürün')}
+              {t('productAddonsModal.counters.selectedProducts', { count: selectedProductIds.size })} • {t('productAddonsModal.counters.availableProducts', { count: filteredProducts.length })}
             </div>
             
             <div className="flex gap-3">
@@ -680,7 +695,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                 disabled={saving}
                 className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
               >
-                {t('İptal')}
+                {t('productAddonsModal.buttons.cancel')}
               </button>
               <button
                 type="button"
@@ -691,12 +706,12 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                 {saving ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    {t('Kaydediliyor...')}
+                    {t('productAddonsModal.loading.saving')}
                   </>
                 ) : (
                   <>
                     <Plus className="w-4 w-4" />
-                    {t('Eklentileri Kaydet')}
+                    {t('productAddonsModal.buttons.saveAddons')}
                   </>
                 )}
               </button>
