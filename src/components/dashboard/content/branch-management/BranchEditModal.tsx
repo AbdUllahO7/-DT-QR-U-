@@ -24,7 +24,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
   onClose,
   onSubmit,
   branchDetail,
-  isSubmitting
+  isSubmitting,
 }) => {
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
@@ -264,16 +264,19 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      // Switch to the tab with the first error
-      if (validationErrors.branchName) setActiveTab('general');
-      if (validationErrors.workingHours) setActiveTab('workingHours');
-      return;
-    }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  
+  if (!validateForm()) {
+    // Switch to the tab with the first error
+    if (validationErrors.branchName) setActiveTab('general');
+    if (validationErrors.workingHours) setActiveTab('workingHours');
+    return;
+  }
 
+  setUploadError(null);
+
+  try {
     // Convert form data to API format
     const submitData: CreateBranchWithDetailsDto = {
       branchName: formData.branchName?.trim() || null,
@@ -299,11 +302,81 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
         openDays: formData.createContactDto.openDays?.trim() || null,
         openHours: formData.createContactDto.openHours?.trim() || null,
       },
-      createBranchWorkingHourCoreDto: formData.createBranchWorkingHourCoreDto
+      createBranchWorkingHourCoreDto: formData.createBranchWorkingHourCoreDto?.map(hour => ({
+        dayOfWeek: hour.dayOfWeek,
+        openTime: hour.openTime,
+        closeTime: hour.closeTime,
+        isWorkingDay: hour.isWorkingDay
+      })) || []
     };
 
+    logger.info('Submitting branch update data', submitData, { prefix: 'BranchEditModal' });
+
     await onSubmit(submitData);
-  };
+    
+    // If successful, the parent component will handle closing the modal and refreshing data
+    logger.info('Branch update successful', null, { prefix: 'BranchEditModal' });
+    
+  } catch (error: any) {
+    logger.error('Branch update failed', error, { prefix: 'BranchEditModal' });
+    
+    // Handle specific error types
+    if (error?.response?.status === 400) {
+      const errorData = error?.response?.data;
+      if (errorData?.errors) {
+        // Handle validation errors from API
+        const apiErrors: Record<string, string> = {};
+        
+        // Map API validation errors to form fields
+        Object.entries(errorData.errors).forEach(([field, messages]) => {
+          if (Array.isArray(messages) && messages.length > 0) {
+            // Convert API field names to form field names
+            const formField = field.toLowerCase();
+            if (formField.includes('branchname')) {
+              apiErrors.branchName = messages[0];
+            } else if (formField.includes('address')) {
+              apiErrors.address = messages[0];
+              setActiveTab('address');
+            } else if (formField.includes('contact')) {
+              apiErrors.contact = messages[0];
+              setActiveTab('contact');
+            } else if (formField.includes('workinghour')) {
+              apiErrors.workingHours = messages[0];
+              setActiveTab('workingHours');
+            } else {
+              apiErrors[field] = messages[0];
+            }
+          }
+        });
+        
+        setValidationErrors(apiErrors);
+        setUploadError('Lütfen formdaki hataları düzeltin ve tekrar deneyin.');
+      } else {
+        setUploadError('Güncelleme sırasında bir hata oluştu. Lütfen girdiğiniz bilgileri kontrol edin.');
+      }
+    } else if (error?.response?.status === 401) {
+      setUploadError('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+      // Optionally redirect to login
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
+    } else if (error?.response?.status === 403) {
+      setUploadError('Bu işlem için yetkiniz bulunmuyor.');
+    } else if (error?.response?.status === 404) {
+      setUploadError('Şube bulunamadı. Sayfa yenilenecek.');
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+    } else if (error?.response?.status === 0 || !navigator.onLine) {
+      setUploadError('İnternet bağlantınızı kontrol edin ve tekrar deneyin.');
+    } else {
+      setUploadError(
+        error?.message || 
+        'Şube güncellenirken beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.'
+      );
+    }
+  } 
+};
 
   if (!isOpen) return null;
 
