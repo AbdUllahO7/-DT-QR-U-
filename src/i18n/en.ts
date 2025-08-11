@@ -2155,4 +2155,312 @@ export const en = {
         availabilityStatus: 'Availability status'
       }
     },
+
+    ProductIngredientUpdateModal: {
+  title: 'Update Ingredients',
+  searchPlaceholder: 'Search ingredients...',
+  selectedCount: 'ingredients selected',
+  loadingIngredients: 'Loading ingredients...',
+  noIngredientsFound: 'No ingredients found',
+  noIngredientsFoundSearch: 'No ingredients found matching search criteria',
+  unit: 'Unit:',
+  price: 'Price:',
+  quantity: 'Quantity',
+  cancel: 'Cancel',
+  save: 'Save',
+  saving: 'Saving...',
+  errors: {
+    loadingIngredients: 'An error occurred while loading ingredients',
+    savingIngredients: 'An error occurred while saving ingredients'
+  },
+  accessibility: {
+    closeModal: 'Close update ingredients modal',
+    formTitle: 'Update product ingredients form',
+    searchInput: 'Search for ingredients',
+    ingredientToggle: 'Toggle ingredient selection',
+    quantityInput: 'Enter ingredient quantity',
+    selectedIndicator: 'Ingredient selected',
+    unselectedIndicator: 'Ingredient not selected',
+    ingredientCard: 'Ingredient selection card',
+    saveButton: 'Save ingredient changes',
+    cancelButton: 'Cancel ingredient update'
+  }
+},
+SortableCategory: {
+  product: 'product',
+  products: 'products', 
+  editCategory: 'Edit category',
+  deleteCategory: 'Delete category',
+  reorderingProducts: 'Saving product order...',
+  noCategoryProducts: 'No products in this category yet.',
+  expandCategory: 'Expand category',
+  collapseCategory: 'Collapse category',
+  dragCategory: 'Drag to reorder category',
+  accessibility: {
+    categoryActions: 'Category actions',
+    productCount: 'Product count',
+    expandToggle: 'Toggle category expansion',
+    editCategoryButton: 'Edit category',
+    deleteCategoryButton: 'Delete category',
+    dragHandle: 'Drag handle to reorder category',
+    categoryCard: 'Category card',
+    emptyCategory: 'Empty category',
+    reorderingStatus: 'Category is being reordered'
+  }
+},
+SortableProduct: {
+  outOfStock: 'Out of Stock',
+  loadingIngredients: 'Loading ingredients...',
+  ingredients: 'Ingredients',
+  noIngredients: 'No ingredients added',
+  loadingAddons: 'Loading addons...',
+  addons: 'Addons',
+  noAddons: 'No addons added',
+  manageAddons: 'Manage addons',
+  editProduct: 'Edit product',
+  deleteProduct: 'Delete product',
+  dragProduct: 'Drag to reorder product',
+  allergenic: 'Contains allergens',
+  recommended: 'Recommended',
+  price: 'Price',
+  errors: {
+    loadingIngredients: 'An error occurred while loading ingredients.',
+    loadingAddons: 'An error occurred while loading addons.'
+  },
+  accessibility: {
+    productImage: 'Product image',
+    productCard: 'Product card',
+    productActions: 'Product actions',
+    dragHandle: 'Drag handle to reorder product',
+    outOfStockBadge: 'Product is out of stock',
+    ingredientsList: 'Product ingredients list',
+    addonsList: 'Product addons list',
+    allergenWarning: 'Contains allergens',
+    recommendedAddon: 'Recommended addon',
+    editButton: 'Edit product',
+    deleteButton: 'Delete product',
+    addonsButton: 'Manage product addons'
+  }
+},
+IngredientsContent: {
+  // Search and filters
+  searchPlaceholder: 'Search ingredients...',
+  filter: 'Filter',
+  sort: 'Sort',
+  newIngredient: 'New Ingredient',
+  
+  // Table headers
+  ingredientName: 'Ingredient Name',
+  status: 'Status',
+  allergenInfo: 'Allergen Information',
+  actions: 'Actions',
+  
+  // Status labels
+  available: 'Available',
+  unavailable: 'Unavailable',
+  containsAllergens: 'Contains Allergens',
+  noAllergens: 'No Allergens',
+  
+  // Actions
+  edit: 'Edit',
+  delete: 'Delete',
+  
+  // Empty states
+  noIngredientsFound: 'No ingredients found matching search criteria.',
+  noIngredientsYet: 'No ingredients added yet.',
+  
+  // Delete modal
+  deleteIngredient: 'Delete Ingredient',
+  deleteConfirmMessage: 'Are you sure you want to delete "{name}" ingredient?',
+  deleteError: 'An error occurred during deletion. Please try again.',
+  cancel: 'Cancel',
+  deleting: 'Deleting...',
+  
+  // Form modal
+  editIngredient: 'Edit Ingredient',
+  addNewIngredient: 'Add New Ingredient',
+  basicInfo: 'Basic Information',
+  ingredientNameRequired: 'Ingredient name is required',
+  enterIngredientName: 'Enter ingredient name',
+  containsAllergensCheckbox: 'Contains Allergens',
+  availableForUse: 'Available for Use',
+  allergenInfoContent: 'Allergen Information',
+  selectAllergensMessage: 'Select allergens contained in this ingredient:',
+  enableAllergenMessage: 'Check "Contains Allergens" first to select allergens.',
+  allergenDetails: 'Allergen Details',
+  containsThisAllergen: 'Contains this allergen',
+  additionalNotes: 'Additional notes (optional)',
+  updateError: 'An error occurred while updating ingredient.',
+  createError: 'An error occurred while adding ingredient.',
+  updating: 'Updating...',
+  adding: 'Adding...',
+  update: 'Update',
+  add: 'Add',
+  
+  accessibility: {
+    ingredientsTable: 'Ingredients management table',
+    searchInput: 'Search ingredients',
+    filterButton: 'Filter ingredients',
+    sortButton: 'Sort ingredients',
+    addButton: 'Add new ingredient',
+    editButton: 'Edit ingredient',
+    deleteButton: 'Delete ingredient',
+    ingredientCard: 'Ingredient information card',
+    allergenSelection: 'Allergen selection',
+    formModal: 'Ingredient form modal',
+    deleteModal: 'Delete confirmation modal',
+    statusBadge: 'Ingredient status',
+    allergenBadge: 'Allergen information',
+    closeModal: 'Close modal',
+    dragToReorder: 'Drag to reorder'
+  }
+},
+TableCard: {
+  active: 'Active',
+  inactive: 'Inactive',
+  occupied: 'Occupied',
+  empty: 'Empty',
+  capacity: 'Person',
+  capacityPlural: 'People',
+  edit: 'Edit',
+  downloadQR: 'Download QR Code',
+  disable: 'Disable',
+  enable: 'Activate',
+  delete: 'Delete',
+  viewQRCode: 'View QR Code',
+  moreOptions: 'More options',
+  accessibility: {
+    tableCard: 'Table information card',
+    statusBadge: 'Table status',
+    occupancyBadge: 'Table occupancy status',
+    actionsMenu: 'Table actions menu',
+    qrCodePreview: 'QR code preview',
+    editButton: 'Edit table',
+    downloadButton: 'Download QR code',
+    toggleButton: 'Toggle table status',
+    deleteButton: 'Delete table'
+  }
+},
+QRCodeModal: {
+  // Step selection
+  tableAddOption: 'Table Adding Option',
+  howToAddTables: 'How would you like to add tables?',
+  singleTable: 'Add Single Table',
+  bulkTable: 'Add Multiple Tables',
+  createSingleTable: 'Create a single table',
+  createMultipleTables: 'Create multiple tables',
+  
+  // Branch selection
+  branchSelection: 'Branch Selection',
+  selectBranch: 'Select Branch',
+  branchRequired: 'Required',
+  loadingBranches: 'Loading branches...',
+  
+  // Single table form
+  editTable: 'Edit Table',
+  addSingleTable: 'Add Single Table',
+  tableName: 'Table Name',
+  tableNamePlaceholder: 'e.g. Table 1',
+  autoNameNote: 'Automatic name will be given if left empty',
+  tableCategory: 'Table Category',
+  selectCategory: 'Select Category',
+  loadingCategories: 'Loading categories...',
+  noCategories: 'No categories found',
+  capacity: 'Capacity',
+  capacityPlaceholder: 'Number of people',
+  displayOrder: 'Display Order',
+  displayOrderPlaceholder: 'Number for ordering',
+  autoOrderNote: 'Automatic ordering will be applied if left empty',
+  tableActive: 'Table should be active',
+  
+  // Bulk table form
+  addBulkTables: 'Add Multiple Tables',
+  categoryQuantities: 'Category-based Table Quantities',
+  addCategory: 'Add Category',
+  category: 'Category',
+  tableCount: 'Table Count',
+  allTablesActive: 'All tables should be active',
+  tableSummary: 'Tables to be Created Summary:',
+  total: 'Total',
+  tables: 'tables',
+  
+  // Actions
+  cancel: 'Cancel',
+  adding: 'Adding...',
+  addTable: 'Add Table',
+  update: 'Update',
+  updating: 'Updating...',
+  creating: 'Creating... ({count} tables)',
+  createTables: '{count} Create Tables',
+  
+  // Validation
+  branchRequiredValidation: 'Branch selection is required',
+  categoryRequired: 'At least one category is required',
+  
+  accessibility: {
+    modal: 'Table creation modal',
+    stepSelection: 'Table creation method selection',
+    branchSelector: 'Branch selection dropdown',
+    categorySelector: 'Table category selection',
+    tableForm: 'Table creation form',
+    bulkForm: 'Bulk table creation form',
+    backButton: 'Go back to previous step',
+    closeButton: 'Close modal'
+  }
+},
+
+TableCategoryModal: {
+  title: 'Add Table Category',
+  subtitle: 'Create a new table category',
+  categoryName: 'Category Name',
+  categoryNamePlaceholder: 'e.g. VIP Tables, Garden Tables',
+  description: 'Description (Optional)',
+  descriptionPlaceholder: 'Brief description about the category...',
+  colorSelection: 'Color Selection',
+  customColor: 'Custom color',
+  iconSelection: 'Icon Selection',
+  branchSelection: 'Branch Selection',
+  cancel: 'Cancel',
+  addCategory: 'Add Category',
+  saving: 'Saving...',
+  
+  // Icons
+  table: 'Table',
+  chair: 'Chair',
+  service: 'Service',
+  label: 'Label',
+  layer: 'Layer',
+  
+  // Validation errors
+  categoryNameRequired: 'Category name is required',
+  iconRequired: 'You must select an icon',
+  branchRequired: 'Branch selection is required',
+  invalidData: 'Invalid data sent',
+  unauthorized: 'You are not authorized. Please log in again.',
+  forbidden: 'You do not have permission for this operation.',
+  branchNotFound: 'Selected branch not found.',
+  serverError: 'Server error occurred. Please try again later.',
+  unexpectedError: 'An unexpected error occurred while adding category',
+  
+  accessibility: {
+    modal: 'Table category creation modal',
+    colorPalette: 'Color selection palette',
+    colorPreset: 'Preset color option',
+    customColorPicker: 'Custom color picker',
+    iconGrid: 'Icon selection grid',
+    iconOption: 'Icon selection option',
+    branchDropdown: 'Branch selection dropdown',
+    form: 'Category creation form'
+  }
+},
+
+  AddQRCodeCard: {
+    title: 'Add New Table',
+    subtitle: 'Click to add a new table',
+    accessibility: {
+      addButton: 'Add new table button',
+      addCard: 'Add new table card'
+    }
+  }
+
 }; 

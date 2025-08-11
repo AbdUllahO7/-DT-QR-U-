@@ -27,8 +27,7 @@ interface GroupedTables {
 // TableManagement: Masa yönetimi ve SignalR ile gerçek zamanlı güncelleme
 // SignalR entegrasyonu: useSignalR ile tablo değişiklikleri anlık işlenir
 const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
-  const { t, language } = useLanguage();
-  const isRTL = language === 'ar';
+  const { t, isRTL } = useLanguage();
   const [branches, setBranches] = useState<BranchDropdownItem[]>([]);
   const [selectedBranchForTables, setSelectedBranchForTables] = useState<BranchDropdownItem | null>(null);
   const [tables, setTables] = useState<TableData[]>([]);
@@ -45,6 +44,8 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
 
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setIsBranchDropdownOpen(false));
+
+  console.log("groupedTables", groupedTables);
 
   const token = localStorage.getItem('token') || '';
 
@@ -96,12 +97,12 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         }
       } catch (error) {
         logger.error('Şube listesi yüklenirken hata:', error);
-        setError(t('tableManagement.error.loadFailed'));
+        setError(t('TableManagement.error.loadFailed'));
       }
     };
 
     fetchBranches();
-  }, []);
+  }, [t]);
 
   // Seçilen şube değiştiğinde tabloları ve kategorileri yükle
   useEffect(() => {
@@ -138,7 +139,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
       });
     } catch (error) {
       logger.error('Masalar ve kategoriler yüklenirken hata:', error);
-      setError(t('tableManagement.error.dataLoadFailed'));
+      setError(t('TableManagement.error.dataLoadFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -177,7 +178,14 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   };
 
   const handleEditTable = (table: TableData) => {
-    setEditingTable(table);
+    // Find the category name for the table
+    const tableCategory = categories.find(cat => cat.id === table.menuTableCategoryId);
+    const enrichedTable = {
+      ...table,
+      categoryName: tableCategory?.categoryName || null
+    };
+    
+    setEditingTable(enrichedTable);
     setIsModalOpen(true);
   };
 
@@ -194,30 +202,42 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     }, 1000);
   };
 
-  const handleDeleteTable = (id: number) => {
-    // API call to delete table
-    logger.info('Delete Table:', id);
-    // Tabloları yeniden yükle
-    fetchTablesAndCategories();
+  const handleDeleteTable = async (id: number) => {
+    try {
+      await branchService.deleteTable(id);
+      logger.info('Table deleted:', id);
+      // Tabloları yeniden yükle
+      fetchTablesAndCategories();
+    } catch (error) {
+      logger.error('Table deletion error:', error);
+      setError(t('TableManagement.error.deleteFailed'));
+    }
   };
 
   const handleToggleStatus = async (id: number) => {
+    // Find the current table to get its current status
+    const currentTable = tables.find(table => table.id === id);
+    if (!currentTable) return;
+
+    const newStatus = !currentTable.isActive; // Toggle isActive, not isOccupied
+    
     // Optimistic UI: Önce UI'da güncelle
-    let newStatus = false;
     setTables(prev => prev.map(table => {
       if (table.id === id) {
-        newStatus = !table.isOccupied;
-        return { ...table, isOccupied: newStatus };
+        return { ...table, isActive: newStatus };
       }
       return table;
     }));
+
     try {
       await branchService.toggleTableStatus(id, selectedBranchForTables?.branchId ?? 0, newStatus);
+      logger.info('Table status updated:', { id, newStatus });
     } catch (error) {
       logger.error('Masa durumu güncellenirken hata:', error);
+      setError(t('TableManagement.error.statusUpdateFailed'));
       // Hata olursa eski haline döndür
       setTables(prev => prev.map(table =>
-        table.id === id ? { ...table, isOccupied: !newStatus } : table
+        table.id === id ? { ...table, isActive: !newStatus } : table
       ));
     }
   };
@@ -230,16 +250,28 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     logger.info('Download QR:', table);
   };
 
+  // Create a QRCodeData object for the modal that includes necessary branch information
+  const getModalTableData = () => {
+    if (!editingTable) return {};
+    
+    return {
+      ...editingTable,
+      // Ensure we have the branch information for the modal
+      branchId: selectedBranchForTables?.branchId,
+      branchName: selectedBranchForTables?.branchName
+    };
+  };
+
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className={`flex items-center justify-center min-h-[400px] ${isRTL ? 'text-right' : 'text-left'}`}>
         <div className="text-center">
           <p className="text-red-600 dark:text-red-400 mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            {t('common.refresh')}
+            {t('tableManagement.refresh')}
           </button>
         </div>
       </div>
@@ -247,43 +279,46 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   }
 
   return (
-    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className={`space-y-6 ${isRTL ? 'text-right' : 'text-left'}`}>
       {/* Header */}
       <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
+        <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4 flex-row-reverse' : 'space-x-4'}`}>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {t('dashboard.tables.title')}
+            {t('tableManagement.title')}
           </h2>
           
           {/* Şube Seçici Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
-              className="flex items-center justify-between min-w-[200px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className={`flex items-center justify-between min-w-[200px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRTL ? 'flex-row-reverse' : ''}`}
+              aria-label={t('tableManagement.accessibility.branchSelector')}
+              aria-expanded={isBranchDropdownOpen}
+              aria-haspopup="true"
             >
-              <span className="flex items-center">
-                <Users className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-400" />
-                {selectedBranchForTables ? selectedBranchForTables.branchName : t('branchManagement.actions.selectBranch')}
+              <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                {selectedBranchForTables ? selectedBranchForTables.branchName : t('tableManagement.selectBranch')}
               </span>
-              <ChevronDown className={`h-4 w-4 ml-2 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''}`} />
+              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
             </button>
 
             {isBranchDropdownOpen && (
-              <div className="absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto">
+              <div className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'}`}>
                 {branches.length === 0 ? (
                   <div className="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
-                    {t('branchManagement.error.noBranchesFound')}
+                    {t('tableManagement.error.loadFailed')}
                   </div>
                 ) : (
                   branches.map(branch => (
                     <button
                       key={branch.branchId}
                       onClick={() => handleBranchSelect(branch)}
-                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                      className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
                         selectedBranchForTables?.branchId === branch.branchId
                           ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
                           : 'text-gray-700 dark:text-gray-200'
-                      }`}
+                      } ${isRTL ? 'text-right' : 'text-left'}`}
                     >
                       {branch.branchName}
                     </button>
@@ -296,9 +331,10 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
 
         <button
           onClick={() => setIsCategoryModalOpen(true)}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRTL ? 'flex-row-reverse' : ''}`}
+          aria-label={t('tableManagement.accessibility.addCategoryButton')}
         >
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
           {t('tableManagement.categories.addCategory')}
         </button>
       </div>
@@ -309,7 +345,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
           <div className="text-center">
             <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
             <p className="text-gray-500 dark:text-gray-400">
-              {t('dashboard.tables.selectBranch')}
+              {t('tableManagement.selectBranch')}
             </p>
           </div>
         </div>
@@ -317,7 +353,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-gray-300 dark:border-gray-600 border-t-blue-600 mb-4"></div>
-            <p className="text-gray-500 dark:text-gray-400">{t('dashboard.tables.loading')}</p>
+            <p className="text-gray-500 dark:text-gray-400">{t('tableManagement.loading')}</p>
           </div>
         </div>
       ) : (
@@ -326,22 +362,22 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
             <div className="text-center py-12">
               <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
               <p className="text-gray-500 dark:text-gray-400 mb-4">
-                {t('dashboard.tables.noCategories')}
+                {t('tableManagement.noCategories')}
               </p>
               <button
                 onClick={() => setIsCategoryModalOpen(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+                className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 ${isRTL ? 'flex-row-reverse' : ''}`}
               >
-                <Plus className="h-4 w-4 mr-2" />
-                İlk Kategoriyi Oluştur
+                <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                {t('tableManagement.createFirstCategory')}
               </button>
             </div>
           ) : (
             Object.entries(groupedTables).map(([categoryId, { category, tables }]) => (
-              <div key={categoryId} className="space-y-4">
+              <div key={categoryId} className="space-y-4" role="region" aria-label={t('tableManagement.accessibility.categorySection')}>
                 {/* Kategori Başlığı */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
+                <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
                     <div 
                       className="w-4 h-4 rounded-full"
                       style={{ backgroundColor: category.colorCode || '#3B82F6' }}
@@ -350,19 +386,24 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
                       {category.categoryName}
                     </h3>
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-                      {tables.length} {t('dashboard.tables.tableCount')}
+                      {tables.length} 
                     </span>
                   </div>
                 </div>
 
                 {/* Masalar Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div 
+                  className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"
+                  role="grid"
+                  aria-label={t('tableManagement.accessibility.tablesGrid')}
+                >
                   {tables.map((table, index) => (
                     <motion.div
                       key={table.id}
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
+                      role="gridcell"
                     >
                       <TableCard
                         table={table}
@@ -379,6 +420,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: tables.length * 0.1 }}
+                    role="gridcell"
                   >
                     <AddQRCodeCard onClick={handleCreateTable} />
                   </motion.div>
@@ -396,7 +438,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
           setIsModalOpen(false);
           setEditingTable(null);
         }}
-        qrData={editingTable || {}}
+        qrData={getModalTableData()}
         onChange={(field, value) => {
           if (editingTable) {
             setEditingTable({ ...editingTable, [field]: value });
@@ -405,6 +447,8 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         onSubmit={handleUpdateTable}
         isSubmitting={isSubmitting}
         isEditMode={!!editingTable}
+        selectedBranchForEdit={selectedBranchForTables}
+        categories={categories}
         onSuccess={() => {
           // Masa oluşturulduktan sonra verileri yenile
           fetchTablesAndCategories();
@@ -423,4 +467,4 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   );
 };
 
-export default TableManagement; 
+export default TableManagement;

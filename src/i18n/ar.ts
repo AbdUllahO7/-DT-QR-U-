@@ -170,6 +170,10 @@ export const ar = {
     ingredients : {
       title : "المكونات"
     },
+    products : {
+      title : "المنتجات",
+      description: 'عرض وإدارة المنتجات.',
+    },
     tables: {
       title: 'إدارة الطاولات',
       description: 'عمليات إدارة الطاولات.',
@@ -2146,5 +2150,309 @@ export const ar = {
         availabilityStatus: 'حالة التوفر'
       }
     },
+    ProductIngredientUpdateModal: {
+  title: 'تحديث المكونات',
+  searchPlaceholder: 'البحث عن المكونات...',
+  selectedCount: 'مكونات محددة',
+  loadingIngredients: 'جاري تحميل المكونات...',
+  noIngredientsFound: 'لم يتم العثور على مكونات',
+  noIngredientsFoundSearch: 'لم يتم العثور على مكونات تطابق معايير البحث',
+  unit: 'الوحدة:',
+  price: 'السعر:',
+  quantity: 'الكمية',
+  cancel: 'إلغاء',
+  save: 'حفظ',
+  saving: 'جاري الحفظ...',
+  errors: {
+    loadingIngredients: 'حدث خطأ أثناء تحميل المكونات',
+    savingIngredients: 'حدث خطأ أثناء حفظ المكونات'
+  },
+  accessibility: {
+    closeModal: 'إغلاق نافذة تحديث المكونات',
+    formTitle: 'نموذج تحديث مكونات المنتج',
+    searchInput: 'البحث عن المكونات',
+    ingredientToggle: 'تبديل تحديد المكون',
+    quantityInput: 'أدخل كمية المكون',
+    selectedIndicator: 'المكون محدد',
+    unselectedIndicator: 'المكون غير محدد',
+    ingredientCard: 'بطاقة تحديد المكون',
+    saveButton: 'حفظ تغييرات المكونات',
+    cancelButton: 'إلغاء تحديث المكونات'
+  }
+},
+SortableCategory: {
+  product: 'منتج',
+  products: 'منتجات',
+  editCategory: 'تعديل التصنيف',
+  deleteCategory: 'حذف التصنيف',
+  reorderingProducts: 'جاري حفظ ترتيب المنتجات...',
+  noCategoryProducts: 'لا توجد منتجات في هذا التصنيف بعد.',
+  expandCategory: 'توسيع التصنيف',
+  collapseCategory: 'طي التصنيف',
+  dragCategory: 'اسحب لإعادة ترتيب التصنيف',
+  accessibility: {
+    categoryActions: 'إجراءات التصنيف',
+    productCount: 'عدد المنتجات',
+    expandToggle: 'تبديل توسيع التصنيف',
+    editCategoryButton: 'تعديل التصنيف',
+    deleteCategoryButton: 'حذف التصنيف',
+    dragHandle: 'مقبض السحب لإعادة ترتيب التصنيف',
+    categoryCard: 'بطاقة التصنيف',
+    emptyCategory: 'تصنيف فارغ',
+    reorderingStatus: 'جاري إعادة ترتيب التصنيف'
+  }
+},
+SortableProduct: {
+  outOfStock: 'نفد المخزون',
+  loadingIngredients: 'جاري تحميل المكونات...',
+  ingredients: 'المكونات',
+  noIngredients: 'لم تتم إضافة مكونات',
+  loadingAddons: 'جاري تحميل الإضافات...',
+  addons: 'الإضافات',
+  noAddons: 'لم تتم إضافة إضافات',
+  manageAddons: 'إدارة الإضافات',
+  editProduct: 'تعديل المنتج',
+  deleteProduct: 'حذف المنتج',
+  dragProduct: 'اسحب لإعادة ترتيب المنتج',
+  allergenic: 'يحتوي على مسببات الحساسية',
+  recommended: 'موصى به',
+  price: 'السعر',
+  errors: {
+    loadingIngredients: 'حدث خطأ أثناء تحميل المكونات.',
+    loadingAddons: 'حدث خطأ أثناء تحميل الإضافات.'
+  },
+  accessibility: {
+    productImage: 'صورة المنتج',
+    productCard: 'بطاقة المنتج',
+    productActions: 'إجراءات المنتج',
+    dragHandle: 'مقبض السحب لإعادة ترتيب المنتج',
+    outOfStockBadge: 'المنتج نفد من المخزون',
+    ingredientsList: 'قائمة مكونات المنتج',
+    addonsList: 'قائمة إضافات المنتج',
+    allergenWarning: 'يحتوي على مسببات الحساسية',
+    recommendedAddon: 'إضافة موصى بها',
+    editButton: 'تعديل المنتج',
+    deleteButton: 'حذف المنتج',
+    addonsButton: 'إدارة إضافات المنتج'
+  }
+},
+IngredientsContent: {
+  // Search and filters
+  searchPlaceholder: 'البحث عن المكونات...',
+  filter: 'تصفية',
+  sort: 'ترتيب',
+  newIngredient: 'مكون جديد',
+  
+  // Table headers
+  ingredientName: 'اسم المكون',
+  status: 'الحالة',
+  allergenInfo: 'معلومات مسببات الحساسية',
+  actions: 'الإجراءات',
+  
+  // Status labels
+  available: 'متاح',
+  unavailable: 'غير متاح',
+  containsAllergens: 'يحتوي على مسببات الحساسية',
+  noAllergens: 'لا يحتوي على مسببات الحساسية',
+  
+  // Actions
+  edit: 'تعديل',
+  delete: 'حذف',
+  
+  // Empty states
+  noIngredientsFound: 'لم يتم العثور على مكونات تطابق معايير البحث.',
+  noIngredientsYet: 'لم تتم إضافة مكونات بعد.',
+  
+  // Delete modal
+  deleteIngredient: 'حذف المكون',
+  deleteConfirmMessage: 'هل أنت متأكد من أنك تريد حذف المكون "{name}"؟',
+  deleteError: 'حدث خطأ أثناء الحذف. يرجى المحاولة مرة أخرى.',
+  cancel: 'إلغاء',
+  deleting: 'جاري الحذف...',
+  
+  // Form modal
+  editIngredient: 'تعديل المكون',
+  addNewIngredient: 'إضافة مكون جديد',
+  basicInfo: 'المعلومات الأساسية',
+  ingredientNameRequired: 'اسم المكون مطلوب',
+  enterIngredientName: 'أدخل اسم المكون',
+  containsAllergensCheckbox: 'يحتوي على مسببات الحساسية',
+  availableForUse: 'متاح للاستخدام',
+  allergenInfoContent: 'معلومات مسببات الحساسية',
+  selectAllergensMessage: 'حدد مسببات الحساسية الموجودة في هذا المكون:',
+  enableAllergenMessage: 'قم بتفعيل "يحتوي على مسببات الحساسية" أولاً لتحديد المسببات.',
+  allergenDetails: 'تفاصيل مسببات الحساسية',
+  containsThisAllergen: 'يحتوي على هذا المسبب للحساسية',
+  additionalNotes: 'ملاحظات إضافية (اختيارية)',
+  updateError: 'حدث خطأ أثناء تحديث المكون.',
+  createError: 'حدث خطأ أثناء إضافة المكون.',
+  updating: 'جاري التحديث...',
+  adding: 'جاري الإضافة...',
+  update: 'تحديث',
+  add: 'إضافة',
+  
+  accessibility: {
+    ingredientsTable: 'جدول إدارة المكونات',
+    searchInput: 'البحث عن المكونات',
+    filterButton: 'تصفية المكونات',
+    sortButton: 'ترتيب المكونات',
+    addButton: 'إضافة مكون جديد',
+    editButton: 'تعديل المكون',
+    deleteButton: 'حذف المكون',
+    ingredientCard: 'بطاقة معلومات المكون',
+    allergenSelection: 'تحديد مسببات الحساسية',
+    formModal: 'نافذة نموذج المكون',
+    deleteModal: 'نافذة تأكيد الحذف',
+    statusBadge: 'حالة المكون',
+    allergenBadge: 'معلومات مسببات الحساسية',
+    closeModal: 'إغلاق النافذة',
+    dragToReorder: 'اسحب لإعادة الترتيب'
+  }
+},
+TableCard: {
+  active: 'نشط',
+  inactive: 'غير نشط',
+  occupied: 'مشغول',
+  empty: 'فارغ',
+  capacity: 'شخص',
+  capacityPlural: 'أشخاص',
+  edit: 'تعديل',
+  downloadQR: 'تحميل رمز QR',
+  disable: 'إلغاء التفعيل',
+  enable: 'تفعيل',
+  delete: 'حذف',
+  viewQRCode: 'عرض رمز QR',
+  moreOptions: 'المزيد من الخيارات',
+  accessibility: {
+    tableCard: 'بطاقة معلومات الطاولة',
+    statusBadge: 'حالة الطاولة',
+    occupancyBadge: 'حالة إشغال الطاولة',
+    actionsMenu: 'قائمة إجراءات الطاولة',
+    qrCodePreview: 'معاينة رمز QR',
+    editButton: 'تعديل الطاولة',
+    downloadButton: 'تحميل رمز QR',
+    toggleButton: 'تبديل حالة الطاولة',
+    deleteButton: 'حذف الطاولة'
+  }
+},
+QRCodeModal: {
+  // Step selection
+  tableAddOption: 'خيار إضافة الطاولة',
+  howToAddTables: 'كيف تريد إضافة الطاولات؟',
+  singleTable: 'إضافة طاولة واحدة',
+  bulkTable: 'إضافة طاولات متعددة',
+  createSingleTable: 'إنشاء طاولة واحدة',
+  createMultipleTables: 'إنشاء طاولات متعددة',
+  
+  // Branch selection
+  branchSelection: 'اختيار الفرع',
+  selectBranch: 'اختر الفرع',
+  branchRequired: 'مطلوب',
+  loadingBranches: 'جاري تحميل الفروع...',
+  
+  // Single table form
+  editTable: 'تعديل الطاولة',
+  addSingleTable: 'إضافة طاولة واحدة',
+  tableName: 'اسم الطاولة',
+  tableNamePlaceholder: 'مثال: طاولة 1',
+  autoNameNote: 'سيتم إعطاء اسم تلقائي إذا تُرك فارغاً',
+  tableCategory: 'فئة الطاولة',
+  selectCategory: 'اختر الفئة',
+  loadingCategories: 'جاري تحميل الفئات...',
+  noCategories: 'لم يتم العثور على فئات',
+  capacity: 'السعة',
+  capacityPlaceholder: 'عدد الأشخاص',
+  displayOrder: 'ترتيب العرض',
+  displayOrderPlaceholder: 'رقم للترتيب',
+  autoOrderNote: 'سيتم تطبيق ترتيب تلقائي إذا تُرك فارغاً',
+  tableActive: 'يجب أن تكون الطاولة نشطة',
+  
+  // Bulk table form
+  addBulkTables: 'إضافة طاولات متعددة',
+  categoryQuantities: 'كميات الطاولات حسب الفئة',
+  addCategory: 'إضافة فئة',
+  category: 'الفئة',
+  tableCount: 'عدد الطاولات',
+  allTablesActive: 'جميع الطاولات يجب أن تكون نشطة',
+  tableSummary: 'ملخص الطاولات المراد إنشاؤها:',
+  total: 'الإجمالي',
+  tables: 'طاولات',
+  
+  // Actions
+  cancel: 'إلغاء',
+  adding: 'جاري الإضافة...',
+  addTable: 'إضافة طاولة',
+  update: 'تحديث',
+  updating: 'جاري التحديث...',
+  creating: 'جاري الإنشاء... ({count} طاولة)',
+  createTables: 'إنشاء {count} طاولة',
+  
+  // Validation
+  branchRequiredValidation: 'اختيار الفرع مطلوب',
+  categoryRequired: 'مطلوب فئة واحدة على الأقل',
+  
+  accessibility: {
+    modal: 'نافذة إنشاء الطاولة',
+    stepSelection: 'اختيار طريقة إنشاء الطاولة',
+    branchSelector: 'قائمة اختيار الفرع',
+    categorySelector: 'اختيار فئة الطاولة',
+    tableForm: 'نموذج إنشاء الطاولة',
+    bulkForm: 'نموذج إنشاء طاولات متعددة',
+    backButton: 'العودة للخطوة السابقة',
+    closeButton: 'إغلاق النافذة'
+  }
+},
+TableCategoryModal: {
+  title: 'إضافة فئة طاولة',
+  subtitle: 'إنشاء فئة طاولة جديدة',
+  categoryName: 'اسم الفئة',
+  categoryNamePlaceholder: 'مثال: طاولات VIP، طاولات الحديقة',
+  description: 'الوصف (اختياري)',
+  descriptionPlaceholder: 'وصف قصير عن الفئة...',
+  colorSelection: 'اختيار اللون',
+  customColor: 'لون مخصص',
+  iconSelection: 'اختيار الأيقونة',
+  branchSelection: 'اختيار الفرع',
+  cancel: 'إلغاء',
+  addCategory: 'إضافة فئة',
+  saving: 'جاري الحفظ...',
+  
+  // Icons
+  table: 'طاولة',
+  chair: 'كرسي',
+  service: 'خدمة',
+  label: 'تسمية',
+  layer: 'طبقة',
+  
+  // Validation errors
+  categoryNameRequired: 'اسم الفئة مطلوب',
+  iconRequired: 'يجب اختيار أيقونة',
+  branchRequired: 'اختيار الفرع مطلوب',
+  invalidData: 'تم إرسال بيانات غير صحيحة',
+  unauthorized: 'غير مخول. يرجى تسجيل الدخول مرة أخرى.',
+  forbidden: 'ليس لديك صلاحية لهذه العملية.',
+  branchNotFound: 'الفرع المحدد غير موجود.',
+  serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.',
+  unexpectedError: 'حدث خطأ غير متوقع أثناء إضافة الفئة',
+  
+  accessibility: {
+    modal: 'نافذة إنشاء فئة الطاولة',
+    colorPalette: 'لوحة اختيار الألوان',
+    colorPreset: 'خيار لون جاهز',
+    customColorPicker: 'منتقي الألوان المخصص',
+    iconGrid: 'شبكة اختيار الأيقونات',
+    iconOption: 'خيار الأيقونة',
+    branchDropdown: 'قائمة اختيار الفرع',
+    form: 'نموذج إنشاء الفئة'
+  }
+},
+AddQRCodeCard: {
+  title: 'إضافة طاولة جديدة',
+  subtitle: 'انقر لإضافة طاولة جديدة',
+  accessibility: {
+    addButton: 'زر إضافة طاولة جديدة',
+    addCard: 'بطاقة إضافة طاولة جديدة'
+  }
+}
 
 }; 

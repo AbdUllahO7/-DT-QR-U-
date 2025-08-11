@@ -17,6 +17,7 @@ import { httpClient } from '../../../../utils/http';
 import { restaurantService } from '../../../../services/restaurantService';
 import { logger } from '../../../../utils/logger';
 import { RestaurantBranchDropdownItem } from '../../../../types/api';
+import { useLanguage } from '../../../../contexts/LanguageContext';
 
 interface Props {
   isOpen: boolean;
@@ -36,11 +37,11 @@ interface TableCategoryPayload {
 }
 
 const iconOptions = [
-  { value: 'table', label: 'Masa', icon: Table },
-  { value: 'chair', label: 'Sandalye', icon: Armchair },
-  { value: 'utensils', label: 'Servis', icon: Utensils },
-  { value: 'tag', label: 'Etiket', icon: Tag },
-  { value: 'layers', label: 'Katman', icon: Layers },
+  { value: 'table', label: 'TableCategoryModal.table', icon: Table },
+  { value: 'chair', label: 'TableCategoryModal.chair', icon: Armchair },
+  { value: 'utensils', label: 'TableCategoryModal.service', icon: Utensils },
+  { value: 'tag', label: 'TableCategoryModal.label', icon: Tag },
+  { value: 'layers', label: 'TableCategoryModal.layer', icon: Layers },
 ];
 
 const colorPresets = [
@@ -61,6 +62,7 @@ interface TableCategoryFormData {
 }
 
 const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, onSuccess }) => {
+  const { t, isRTL } = useLanguage();
   const [formData, setFormData] = useState<TableCategoryFormData>({
     categoryName: '',
     description: '',
@@ -79,10 +81,10 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
     const newErrors: Record<string, string> = {};
     
     if (!formData.categoryName.trim()) {
-      newErrors.categoryName = 'Kategori adı gereklidir';
+      newErrors.categoryName = t('TableCategoryModal.categoryNameRequired');
     }
     if (!formData.iconClass) {
-      newErrors.iconClass = 'Bir icon seçmelisiniz';
+      newErrors.iconClass = t('TableCategoryModal.iconRequired');
     }
     
     setErrors(newErrors);
@@ -138,7 +140,7 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
     
     // BranchId kontrolü
     if (!branchId) {
-      setErrors({ general: 'Şube seçimi gereklidir' });
+      setErrors({ general: t('TableCategoryModal.branchRequired') });
       return;
     }
     
@@ -164,7 +166,7 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
       
       // BranchId'yi query parameter olarak kullan
       const response = await httpClient.post(`/api/branches/table-categories?branchId=${branchId}`, payload);
-              logger.info('Kategori başarıyla eklendi', { data: response.data });
+      logger.info('Kategori başarıyla eklendi', { data: response.data });
       
       // Success callback'i çağır
       onSuccess && onSuccess();
@@ -174,8 +176,8 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
         try {
           await httpClient.get(`/api/branches/table-categories?branchId=${branchId}`);
           logger.info('Kategoriler yeniden yüklendi');
-                  } catch (error) {
-            logger.error('Kategoriler yeniden yüklenirken hata', error);
+        } catch (error) {
+          logger.error('Kategoriler yeniden yüklenirken hata', error);
         }
       }
       
@@ -203,29 +205,29 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
           Object.keys(apiErrors).forEach(key => {
             const fieldName = key.toLowerCase();
             if (fieldName.includes('categoryname')) {
-              fieldErrors.categoryName = apiErrors[key][0] || 'Kategori adı geçersiz';
+              fieldErrors.categoryName = apiErrors[key][0] || t('TableCategoryModal.categoryNameRequired');
             } else if (fieldName.includes('colorcode')) {
-              fieldErrors.general = 'Renk kodu geçersiz';
+              fieldErrors.general = t('TableCategoryModal.invalidData');
             } else if (fieldName.includes('iconclass')) {
-              fieldErrors.iconClass = 'Seçilen icon geçersiz';
+              fieldErrors.iconClass = t('TableCategoryModal.iconRequired');
             } else {
-              fieldErrors.general = apiErrors[key][0] || 'Geçersiz veri';
+              fieldErrors.general = apiErrors[key][0] || t('TableCategoryModal.invalidData');
             }
           });
           setErrors(fieldErrors);
         } else {
-          setErrors({ general: error.response?.data?.message || 'Geçersiz veri gönderildi' });
+          setErrors({ general: error.response?.data?.message || t('TableCategoryModal.invalidData') });
         }
       } else if (error.response?.status === 401) {
-        setErrors({ general: 'Yetkiniz bulunmuyor. Lütfen tekrar giriş yapın.' });
+        setErrors({ general: t('TableCategoryModal.unauthorized') });
       } else if (error.response?.status === 403) {
-        setErrors({ general: 'Bu işlem için yetkiniz bulunmuyor.' });
+        setErrors({ general: t('TableCategoryModal.forbidden') });
       } else if (error.response?.status === 404) {
-        setErrors({ general: 'Seçilen şube bulunamadı.' });
+        setErrors({ general: t('TableCategoryModal.branchNotFound') });
       } else if (error.response?.status >= 500) {
-        setErrors({ general: 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.' });
+        setErrors({ general: t('TableCategoryModal.serverError') });
       } else {
-        setErrors({ general: 'Kategori eklenirken beklenmeyen bir hata oluştu' });
+        setErrors({ general: t('TableCategoryModal.unexpectedError') });
       }
     } finally {
       setIsSubmitting(false);
@@ -235,7 +237,7 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
+        <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('TableCategoryModal.accessibility.modal')}>
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -252,31 +254,32 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2 }}
-              className="relative w-full max-w-md bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 overflow-hidden"
+              className={`relative w-full max-w-md bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 overflow-hidden ${isRTL ? 'text-right' : 'text-left'}`}
             >
               {/* Header */}
               <div className="relative bg-gradient-to-r from-primary-500 to-primary-600 p-6 text-white">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
                 <button
                   onClick={onClose}
-                  className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
+                  className={`absolute top-4 p-2 hover:bg-white/20 rounded-full transition-colors duration-200 ${isRTL ? 'left-4' : 'right-4'}`}
+                  aria-label={t('TableCategoryModal.accessibility.modal')}
                 >
                   <X className="w-5 h-5" />
                 </button>
                 
-                <div className="flex items-center gap-3 relative">
+                <div className={`flex items-center gap-3 relative ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className="p-3 bg-white/20 rounded-2xl">
                     <Sparkles className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold">Masa Kategorisi Ekle</h3>
-                    <p className="text-primary-100 text-sm">Yeni masa kategorisi oluşturun</p>
+                    <h3 className="text-xl font-bold">{t('TableCategoryModal.title')}</h3>
+                    <p className="text-primary-100 text-sm">{t('TableCategoryModal.subtitle')}</p>
                   </div>
                 </div>
               </div>
 
               {/* Form */}
-              <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              <form onSubmit={handleSubmit} className="p-6 space-y-6" role="form" aria-label={t('TableCategoryModal.accessibility.form')}>
                 {/* General Error */}
                 {errors.general && (
                   <motion.div
@@ -290,9 +293,9 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
 
                 {/* Category Name */}
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <Tag className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                    Kategori Adı
+                    {t('TableCategoryModal.categoryName')}
                   </label>
                   <div className="relative">
                     <input
@@ -300,7 +303,7 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                       name="categoryName"
                       value={formData.categoryName}
                       onChange={handleChange}
-                      placeholder="Örn: VIP Masalar, Bahçe Masaları"
+                      placeholder={t('TableCategoryModal.categoryNamePlaceholder')}
                       className={`
                         w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-2 rounded-xl
                         transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500
@@ -311,10 +314,11 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                           : 'border-gray-200 dark:border-gray-600'
                         }
                       `}
+                      aria-describedby={errors.categoryName ? 'category-name-error' : undefined}
                     />
                   </div>
                   {errors.categoryName && (
-                    <p className="text-red-500 text-xs flex items-center gap-1">
+                    <p id="category-name-error" className="text-red-500 text-xs flex items-center gap-1">
                       {errors.categoryName}
                     </p>
                   )}
@@ -322,29 +326,33 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
 
                 {/* Description */}
                 <div className="space-y-2">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <FileText className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                    Açıklama (Opsiyonel)
+                    {t('TableCategoryModal.description')}
                   </label>
                   <textarea
                     name="description"
                     value={formData.description}
                     onChange={handleChange}
                     rows={3}
-                    placeholder="Kategori hakkında kısa açıklama..."
+                    placeholder={t('TableCategoryModal.descriptionPlaceholder')}
                     className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-2 border-gray-200 dark:border-gray-600 rounded-xl transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 hover:border-gray-300 dark:hover:border-gray-600 resize-none"
                   />
                 </div>
 
                 {/* Color Selection */}
                 <div className="space-y-3">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <Palette className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                    Renk Seçimi
+                    {t('TableCategoryModal.colorSelection')}
                   </label>
                   
                   {/* Color Presets */}
-                  <div className="grid grid-cols-8 gap-2">
+                  <div 
+                    className="grid grid-cols-8 gap-2"
+                    role="group"
+                    aria-label={t('TableCategoryModal.accessibility.colorPalette')}
+                  >
                     {colorPresets.map((color) => (
                       <button
                         key={color}
@@ -358,12 +366,13 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                           }
                         `}
                         style={{ backgroundColor: color }}
+                        aria-label={`${t('TableCategoryModal.accessibility.colorPreset')} ${color}`}
                       />
                     ))}
                   </div>
 
                   {/* Custom Color Picker */}
-                  <div className="flex items-center gap-3 pt-2">
+                  <div className={`flex items-center gap-3 pt-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div
                       className="w-10 h-10 rounded-xl border-2 border-gray-300 dark:border-gray-600 overflow-hidden"
                       style={{ backgroundColor: formData.colorCode }}
@@ -374,6 +383,7 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                       value={formData.colorCode}
                       onChange={handleChange}
                       className="w-10 h-10 border-0 bg-transparent cursor-pointer rounded-lg"
+                      aria-label={t('TableCategoryModal.accessibility.customColorPicker')}
                     />
                     <span className="text-sm text-gray-600 dark:text-gray-400 font-mono">
                       {formData.colorCode}
@@ -383,11 +393,15 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
 
                 {/* Icon Selection */}
                 <div className="space-y-3">
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <Building2 className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                    Icon Seçimi
+                    {t('TableCategoryModal.iconSelection')}
                   </label>
-                  <div className="grid grid-cols-5 gap-2">
+                  <div 
+                    className="grid grid-cols-5 gap-2"
+                    role="group"
+                    aria-label={t('TableCategoryModal.accessibility.iconGrid')}
+                  >
                     {iconOptions.map((option) => (
                       <button
                         key={option.value}
@@ -401,9 +415,10 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                             : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
                           }
                         `}
+                        aria-label={`${t('TableCategoryModal.accessibility.iconOption')} ${t(option.label)}`}
                       >
                         <option.icon className="w-5 h-5" />
-                        <span className="text-xs font-medium">{option.label}</span>
+                        <span className="text-xs font-medium">{t(option.label)}</span>
                       </button>
                     ))}
                   </div>
@@ -417,14 +432,15 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                 {/* Branch Selection (if needed) */}
                 {!selectedBranch && branches.length > 0 && (
                   <div className="space-y-2">
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <Users className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                      Şube Seçimi
+                      {t('TableCategoryModal.branchSelection')}
                     </label>
                     <select
                       value={branchId ?? ''}
                       onChange={(e) => setBranchId(Number(e.target.value))}
                       className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-2 border-gray-200 dark:border-gray-600 rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 hover:border-gray-300 dark:hover:border-gray-600"
+                      aria-label={t('TableCategoryModal.accessibility.branchDropdown')}
                     >
                       {branches.map(branch => (
                         <option key={branch.id} value={branch.id}>
@@ -436,13 +452,13 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                 )}
 
                 {/* Action Buttons */}
-                <div className="flex gap-3 pt-4">
+                <div className={`flex gap-3 pt-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <button
                     type="button"
                     onClick={onClose}
                     className="flex-1 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-all duration-200 hover:scale-[1.02]"
                   >
-                    İptal
+                    {t('TableCategoryModal.cancel')}
                   </button>
                   <button
                     type="submit"
@@ -450,12 +466,12 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                     className="flex-1 px-4 py-3 text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 rounded-xl transition-all duration-200 hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-primary-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                   >
                     {isSubmitting ? (
-                      <div className="flex items-center justify-center gap-2">
+                      <div className={`flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Kaydediliyor...
+                        {t('TableCategoryModal.saving')}
                       </div>
                     ) : (
-                      'Kategori Ekle'
+                      t('TableCategoryModal.addCategory')
                     )}
                   </button>
                 </div>
@@ -468,4 +484,4 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
   );
 };
 
-export default TableCategoryModal; 
+export default TableCategoryModal;
