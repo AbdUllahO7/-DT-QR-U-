@@ -818,6 +818,8 @@ export const tr = {
       loadFailed: 'Şube listesi yüklenemedi',
       dataLoadFailed: 'Veriler yüklenirken bir hata oluştu'
     },
+      deleteModal :{ title : "Öğeyi silmek istediğinizden emin misiniz? " },
+
     actions: {
       addTable: 'Masa Ekle',
       addQRCode: 'QR Kod Ekle',

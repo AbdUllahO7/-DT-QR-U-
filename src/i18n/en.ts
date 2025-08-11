@@ -828,6 +828,7 @@ export const en = {
       loadFailed: 'Failed to load branch list',
       dataLoadFailed: 'An error occurred while loading data'
     },
+      deleteModal :{ title : "Are You Sure you want delete the item ? " },
     actions: {
       addTable: 'Add Table',
       addQRCode: 'Add QR Code',

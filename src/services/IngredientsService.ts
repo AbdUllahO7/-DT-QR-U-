@@ -98,7 +98,6 @@ class IngredientsService {
         }
       });
 
-      console.log("Raw service response:", response.data);
       
       logger.info('Malzeme listesi başarıyla getirildi', { 
         count: response.data.length 
@@ -106,7 +105,6 @@ class IngredientsService {
       
       // FIXED: Transform API response to internal format correctly
       const transformedIngredients: Ingredient[] = response.data.map((apiIngredient: any) => {
-        console.log("Transforming ingredient:", apiIngredient);
         
         return {
           id: apiIngredient.ingredientId,
@@ -124,7 +122,6 @@ class IngredientsService {
         };
       });
       
-      console.log("Service transformed ingredients:", transformedIngredients);
       return transformedIngredients;
     } catch (error: any) {
       logger.error('❌ Malzeme listesi getirilirken hata:', error);

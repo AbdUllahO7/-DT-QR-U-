@@ -30,10 +30,10 @@ import CreateProductModal from './CreateProductModal';
 import { SortableCategory } from './SortableCategory';
 import { EditCategoryModal } from './EditCategoryModal';
 import { EditProductModal } from './EditProductModal';
-import { ConfirmDeleteModal } from './ConfirmDeleteModal';
 import ProductIngredientSelectionModal from './ProductIngredientSelectionModal';
 import ProductIngredientUpdateModal from './ProductIngredientUpdateModal';
 import ProductAddonsModal from './ProductAddonsModal';
+import { ConfirmDeleteModal } from '../../ConfirmDeleteModal';
 
 // Add custom styles for line clamping
 const customStyles = `
@@ -81,12 +81,7 @@ const ProductsContent: React.FC = () => {
   } | null>(null);
   
   const handleOpenAddonsManagement = (productId: number, productName: string) => {
-    console.log('🔍 handleOpenAddonsManagement called with:', {
-      productId,
-      productName,
-      productIdType: typeof productId,
-      isValidId: productId && productId !== 0 && !isNaN(productId)
-    });
+
     
     if (!productId || productId === 0 || isNaN(productId)) {
       console.error('❌ Invalid productId provided:', productId);
@@ -100,11 +95,7 @@ const ProductsContent: React.FC = () => {
       return;
     }
     
-    console.log('✅ Setting addons state with valid data');
-    setSelectedProductForAddons({ 
-      productId: productId, 
-      productName: productName 
-    });
+ 
     setIsAddonsModalOpen(true);
   };  
   
@@ -132,12 +123,7 @@ const ProductsContent: React.FC = () => {
   };
 
   const handleOpenIngredientUpdate = (productId: number, productName: string) => {
-    console.log('🔍 handleOpenIngredientUpdate called with:', {
-      productId,
-      productName,
-      productIdType: typeof productId,
-      isValidId: productId && productId !== 0 && !isNaN(productId)
-    });
+
     
     // Add validation
     if (!productId || productId === 0 || isNaN(productId)) {
@@ -152,17 +138,13 @@ const ProductsContent: React.FC = () => {
       return;
     }
     
-    console.log('✅ Setting state with valid data');
     setSelectedProductForIngredientUpdate({ 
       productId: productId, 
       productName: productName 
     });
     setIsIngredientUpdateModalOpen(true);
     
-    // Use setTimeout to see the updated state (for debugging)
-    setTimeout(() => {
-      console.log('🔍 State after update:', selectedProductForIngredientUpdate);
-    }, 100);
+
   };
   
   const loadCategories = async () => {
@@ -236,7 +218,6 @@ const ProductsContent: React.FC = () => {
     }
   };
 
-  console.log("selectedProductForIngredientUpdate.productId", selectedProductForIngredientUpdate?.productId);
 
   const handleDeleteCategory = (categoryId: number) => {
     const category = categories.find(cat => cat.categoryId === categoryId);
@@ -377,16 +358,9 @@ const ProductsContent: React.FC = () => {
     const activeProduct = categories.flatMap(cat => cat.products).find(product => product.id === activeId);
     const overProduct = categories.flatMap(cat => cat.products).find(product => product.id === overId);
 
-    console.log('🔄 Drag & Drop:', {
-      activeType: activeCategory ? 'category' : activeProduct ? 'product' : 'unknown',
-      overType: overCategory ? 'category' : overProduct ? 'product' : 'unknown',
-      activeItem: activeCategory?.categoryName || activeProduct?.name || 'unknown',
-      overItem: overCategory?.categoryName || overProduct?.name || 'unknown'
-    });
-
+ 
     // CASE 1: Category to Category - Reorder categories
     if (activeCategory && overCategory) {
-      console.log('📂↔️📂 Category Reordering');
       
       const oldIndex = categories.findIndex(cat => cat.categoryId === activeId);
       const newIndex = categories.findIndex(cat => cat.categoryId === overId);
@@ -402,7 +376,6 @@ const ProductsContent: React.FC = () => {
         }));
 
         await productService.reorderCategories(categoryOrders);
-        console.log('✅ Category reordering successful');
         
       } catch (error: any) {
         console.error('❌ Category reordering failed:', error);
@@ -416,7 +389,6 @@ const ProductsContent: React.FC = () => {
 
     // CASE 2: Product to Product (Same Category) - Reorder products
     if (activeProduct && overProduct && activeProduct.categoryId === overProduct.categoryId) {
-      console.log('📦↔️📦 Product Reordering (Same Category)');
       
       const categoryId = activeProduct.categoryId;
       const categoryIndex = categories.findIndex(cat => cat.categoryId === categoryId);
@@ -441,7 +413,6 @@ const ProductsContent: React.FC = () => {
         }));
 
         await productService.reorderProducts(productOrders);
-        console.log('✅ Product reordering successful');
         
       } catch (error: any) {
         console.error('❌ Product reordering failed:', error);
@@ -456,8 +427,6 @@ const ProductsContent: React.FC = () => {
 
     // CASE 3: Product to Category - Move product to different category
     if (activeProduct && overCategory) {
-      console.log('📦➡️📂 Product to Category Move');
-      console.log(`Moving "${activeProduct.name}" to "${overCategory.categoryName}"`);
       
       // Skip if same category
       if (activeProduct.categoryId === overCategory.categoryId) {
@@ -474,7 +443,6 @@ const ProductsContent: React.FC = () => {
           categoryId: overCategory.categoryId
         });
         
-        console.log('✅ Product moved to new category successfully');
         
         // Reload categories to get updated data from server
         await loadCategories();
@@ -491,8 +459,7 @@ const ProductsContent: React.FC = () => {
 
     // CASE 4: Product to Product (Different Categories) - Move to different category at specific position
     if (activeProduct && overProduct && activeProduct.categoryId !== overProduct.categoryId) {
-      console.log('📦↔️📦 Cross-Category Product Move');
-      console.log(`Moving "${activeProduct.name}" to "${overProduct.name}"'s category`);
+
       
       const targetCategoryId = overProduct.categoryId;
       setIsReorderingProducts(true);
@@ -504,7 +471,6 @@ const ProductsContent: React.FC = () => {
           categoryId: targetCategoryId
         });
         
-        console.log('✅ Product moved to target category');
         
         // Reload categories to get updated data
         const updatedCategories = await productService.getCategories();
@@ -538,7 +504,6 @@ const ProductsContent: React.FC = () => {
               }));
               
               await productService.reorderProducts(productOrders);
-              console.log('✅ Products reordered in target category');
             }
           }
         }
@@ -555,11 +520,7 @@ const ProductsContent: React.FC = () => {
       return;
     }
 
-    // If we get here, it's an unsupported combination
-    console.log('❌ Unsupported drag combination:', {
-      activeType: activeCategory ? 'category' : activeProduct ? 'product' : 'unknown',
-      overType: overCategory ? 'category' : overProduct ? 'product' : 'unknown'
-    });
+
   };
 
   const filteredCategories = categories.map(category => ({
@@ -883,17 +844,7 @@ const ProductsContent: React.FC = () => {
       {isIngredientUpdateModalOpen && selectedProductForIngredientUpdate && (
         <>
           {/* Debug logging */}
-          {console.log('🔍 Rendering modal with:', {
-            modalOpen: isIngredientUpdateModalOpen,
-            selectedProduct: selectedProductForIngredientUpdate,
-            productId: selectedProductForIngredientUpdate.productId,
-            productName: selectedProductForIngredientUpdate.productName,
-            productIdType: typeof selectedProductForIngredientUpdate.productId,
-            isValidProductId: selectedProductForIngredientUpdate.productId && 
-                           selectedProductForIngredientUpdate.productId !== 0 && 
-                           !isNaN(selectedProductForIngredientUpdate.productId)
-          })}
-          
+        
           <ProductIngredientUpdateModal
             isOpen={isIngredientUpdateModalOpen}
             onClose={() => {

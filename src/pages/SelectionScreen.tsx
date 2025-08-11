@@ -183,7 +183,6 @@ const SelectionScreen: React.FC = () => {
       </div>
     );
   }
-    console.log("data",data)
 
   // Hata durumu
   if (error) {

@@ -130,7 +130,7 @@ const TableCard: React.FC<TableCardProps> = ({ table, onEdit, onDelete, onToggle
 
           {showDropdown && (
             <div 
-              className={`absolute mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10 ${isRTL ? 'left-0' : 'right-0'}`}
+              className={`absolute mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10 `}
               role="menu"
               aria-label={t('TableCard.accessibility.actionsMenu')}
             >

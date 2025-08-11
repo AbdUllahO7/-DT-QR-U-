@@ -271,12 +271,7 @@ export const SortableProduct: React.FC<{
                   {/* Addons Management Button */}
                   <button
                     onClick={() => {
-                      console.log('🔍 Addons button clicked for product:', {
-                        productId: product.id,
-                        productName: product.name,
-                        hasCallback: !!onOpenAddonsManagement
-                      });
-                      
+              
                       if (onOpenAddonsManagement) {
                         onOpenAddonsManagement(product.id, product.name);
                       } 

@@ -89,7 +89,6 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
   const fetchAllIngredients = async (): Promise<Ingredient[]> => {
     try {
       const response = await ingredientsService.getIngredients();
-      console.log("response update", response);
 
       // Transform API response to match Ingredient interface
       return response.map((item: any) => ({
