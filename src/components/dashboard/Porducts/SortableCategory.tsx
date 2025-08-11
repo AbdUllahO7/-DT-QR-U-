@@ -16,7 +16,7 @@ export const SortableCategory: React.FC<{
   activeId: number | null;
   allCategories: Category[];
   isReorderingProducts?: boolean;
-  onOpenAddonsManagement?: (productId: number, productName: string) => void; // New prop
+  onOpenAddonsManagement?: (productId: number, productName: string) => void;
 }> = ({ 
   category, 
   isDark, 
@@ -26,9 +26,9 @@ export const SortableCategory: React.FC<{
   onEditCategory, 
   onDeleteCategory, 
   isReorderingProducts = false,
-  onOpenAddonsManagement // New prop
+  onOpenAddonsManagement
 }) => {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const {
     attributes,
     listeners,
@@ -44,55 +44,79 @@ export const SortableCategory: React.FC<{
     opacity: isDragging ? 0.5 : 1
   };
 
+  // Helper function for product count pluralization
+  const getProductCountText = (count: number) => {
+    if (count === 1) {
+      return `${count} ${t('SortableCategory.product')}`;
+    }
+    return `${count} ${t('SortableCategory.products')}`;
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style}
       className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 ${
         isDragging ? 'shadow-lg ring-2 ring-primary-500' : ''
-      }`}
+      } ${isRTL ? 'text-right' : 'text-left'}`}
+      role="article"
+      aria-label={t('SortableCategory.accessibility.categoryCard')}
     >
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <button
               {...attributes}
               {...listeners}
               className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing"
+              aria-label={t('SortableCategory.accessibility.dragHandle')}
+              title={t('SortableCategory.dragCategory')}
             >
               <GripVertical className="h-5 w-5" />
             </button>
             <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{category.categoryName}</h3>
+              <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  {category.categoryName}
+                </h3>
                 {/* Show loading indicator when products in this category are being reordered */}
                 {isReorderingProducts && (
-                  <Loader2 className="w-4 h-4 animate-spin text-primary-600" />
+                  <Loader2 
+                    className="w-4 h-4 animate-spin text-primary-600" 
+                    aria-label={t('SortableCategory.accessibility.reorderingStatus')}
+                  />
                 )}
               </div>
               {category.description && (
-                <p className="text-sm text-gray-600 dark:text-gray-400">{category.description}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {category.description}
+                </p>
               )}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              {category.products.length} {t('ürün')}
+          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <span 
+              className="text-sm text-gray-500 dark:text-gray-400"
+              aria-label={t('SortableCategory.accessibility.productCount')}
+            >
+              {getProductCountText(category.products.length)}
             </span>
-            <div className="flex items-center gap-1">
+            <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`} role="group" aria-label={t('SortableCategory.accessibility.categoryActions')}>
               <button
                 onClick={() => onEditCategory(category.categoryId)}
                 className="p-1.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
-                title={t('Kategoriyi düzenle')}
-                disabled={isReorderingProducts} // Disable during reordering
+                title={t('SortableCategory.editCategory')}
+                aria-label={t('SortableCategory.accessibility.editCategoryButton')}
+                disabled={isReorderingProducts}
               >
                 <Edit2 className="h-4 w-4" />
               </button>
               <button
                 onClick={() => onDeleteCategory(category.categoryId)}
                 className="p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200"
-                title={t('Kategoriyi sil')}
-                disabled={isReorderingProducts} // Disable during reordering
+                title={t('SortableCategory.deleteCategory')}
+                aria-label={t('SortableCategory.accessibility.deleteCategoryButton')}
+                disabled={isReorderingProducts}
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -100,14 +124,16 @@ export const SortableCategory: React.FC<{
             <button
               onClick={() => onToggle(category.categoryId)}
               className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
-              disabled={isReorderingProducts} // Disable during reordering
+              aria-label={t('SortableCategory.accessibility.expandToggle')}
+              title={category.isExpanded ? t('SortableCategory.collapseCategory') : t('SortableCategory.expandCategory')}
+              disabled={isReorderingProducts}
             >
               {category.isExpanded ? (
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
                 </svg>
               ) : (
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               )}
@@ -117,8 +143,8 @@ export const SortableCategory: React.FC<{
         
         {/* Show reordering status message */}
         {isReorderingProducts && (
-          <div className="mt-2 text-sm text-primary-600 dark:text-primary-400 flex items-center gap-2">
-            <span>{t('Ürün sıralaması kaydediliyor...')}</span>
+          <div className={`mt-2 text-sm text-primary-600 dark:text-primary-400 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <span>{t('SortableCategory.reorderingProducts')}</span>
           </div>
         )}
       </div>
@@ -138,9 +164,13 @@ export const SortableCategory: React.FC<{
                 />
               ))}
               {category.products.length === 0 && (
-                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                <div 
+                  className="text-center py-8 text-gray-500 dark:text-gray-400"
+                  role="status"
+                  aria-label={t('SortableCategory.accessibility.emptyCategory')}
+                >
                   <Package className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">{t('Bu kategoride henüz ürün yok.')}</p>
+                  <p className="text-sm">{t('SortableCategory.noCategoryProducts')}</p>
                 </div>
               )}
             </div>

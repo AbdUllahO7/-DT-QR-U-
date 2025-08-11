@@ -359,6 +359,7 @@ export interface TableData {
   isActive: boolean;
   activeSessionId: number | null;
   branchId: number;
+  rowVersion : string
 }
 
 export interface TableCategory {

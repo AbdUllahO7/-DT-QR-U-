@@ -21,6 +21,15 @@ interface CreateMenuTableDto {
   displayOrder: number | null;
   isActive: boolean;
 }
+interface UpdateMenuTableDto {
+  id: number;
+  menuTableName: string | null;
+  menuTableCategoryId: number;
+  capacity: number;
+  isActive: boolean;
+  isOccupied: boolean;
+  rowVersion: string;
+}
 
 interface BatchCreateMenuTableItemDto {
   categoryId: number;
@@ -221,7 +230,7 @@ class BranchService {
     }
   }
 
-    async getBranches(): Promise<BranchData[]> {
+  async getBranches(): Promise<BranchData[]> {
     try {
       logger.info('Branch listesi API çağrısı başlatılıyor...', null, { prefix: 'BranchService' });
       
@@ -468,14 +477,65 @@ class BranchService {
     }
   }
 
-  async toggleTableStatus(tableId: number, branchId: number, isOccupied: boolean): Promise<void> {
+
+  async updateTable(tableId: number, data: UpdateMenuTableDto): Promise<any> {
     try {
-      await httpClient.patch(`/api/branches/tables/${tableId}/status?branchId=${branchId}`, {
-        isOccupied
+      logger.info('Masa güncelleme API çağrısı başlatılıyor', { tableId, data }, { prefix: 'BranchService' });
+      
+      const response = await httpClient.put(`/api/branches/tables/${tableId}`, data);
+      
+      logger.info('Masa başarıyla güncellendi', response.data, { prefix: 'BranchService' });
+      
+      return response.data;
+    } catch (error) {
+      logger.error('Masa güncellenirken hata oluştu', error, { prefix: 'BranchService' });
+      throw error;
+    }
+  }
+
+  // Delete a table
+  async deleteTable(tableId: number): Promise<void> {
+    try {
+      logger.info('Masa silme API çağrısı başlatılıyor', { tableId }, { prefix: 'BranchService' });
+      
+      await httpClient.delete(`/api/branches/tables/${tableId}`);
+      
+      logger.info('Masa başarıyla silindi', { tableId }, { prefix: 'BranchService' });
+    } catch (error) {
+      logger.error('Masa silinirken hata oluştu', error, { prefix: 'BranchService' });
+      throw error;
+    }
+  }
+
+  // Fix the existing toggleTableStatus method (it should toggle isActive, not isOccupied for status changes)
+  async toggleTableStatus(tableId: number, branchId: number, isActive: boolean): Promise<void> {
+    try {
+      logger.info('Masa durumu güncelleme isteği', { tableId, branchId, isActive }, { prefix: 'BranchService' });
+      
+      // You might need to adjust this endpoint based on your actual API
+      await httpClient.patch(`/api/branches/tables/${tableId}/toggle-status?branchId=${branchId}`, {
+        isActive
       });
-      logger.info('Masa durumu başarıyla güncellendi', { tableId, branchId, isOccupied }, { prefix: 'BranchService' });
+      
+      logger.info('Masa durumu başarıyla güncellendi', { tableId, isActive }, { prefix: 'BranchService' });
     } catch (error) {
       logger.error('Masa durumu güncellenirken hata oluştu', error, { prefix: 'BranchService' });
+      throw error;
+    }
+  }
+
+  // Toggle table occupation status (for when customers sit/leave)
+  async toggleTableOccupation(tableId: number, branchId: number, isOccupied: boolean): Promise<void> {
+    try {
+      logger.info('Masa doluluk durumu güncelleme isteği', { tableId, branchId, isOccupied }, { prefix: 'BranchService' });
+      
+      await httpClient.patch(`/api/branches/tables/${tableId}/occupation?branchId=${branchId}`, {
+        isOccupied
+      });
+      
+      logger.info('Masa doluluk durumu başarıyla güncellendi', { tableId, isOccupied }, { prefix: 'BranchService' });
+    } catch (error) {
+      logger.error('Masa doluluk durumu güncellenirken hata oluştu', error, { prefix: 'BranchService' });
       throw error;
     }
   }

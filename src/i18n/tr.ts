@@ -2149,5 +2149,309 @@ export const tr = {
         allergenWarning: 'Alerjen içerir',
         availabilityStatus: 'Kullanılabilirlik durumu'
       }
-    }
+    },
+    ProductIngredientUpdateModal: {
+  title: 'Malzemeleri Güncelle',
+  searchPlaceholder: 'Malzeme ara...',
+  selectedCount: 'malzeme seçili',
+  loadingIngredients: 'Malzemeler yükleniyor...',
+  noIngredientsFound: 'Malzeme bulunamadı',
+  noIngredientsFoundSearch: 'Arama kriterlerine uygun malzeme bulunamadı',
+  unit: 'Birim:',
+  price: 'Fiyat:',
+  quantity: 'Miktar',
+  cancel: 'İptal',
+  save: 'Kaydet',
+  saving: 'Kaydediliyor...',
+  errors: {
+    loadingIngredients: 'Malzemeler yüklenirken bir hata oluştu',
+    savingIngredients: 'Malzemeler kaydedilirken bir hata oluştu'
+  },
+  accessibility: {
+    closeModal: 'Malzeme güncelleme modalını kapat',
+    formTitle: 'Ürün malzemeleri güncelleme formu',
+    searchInput: 'Malzeme ara',
+    ingredientToggle: 'Malzeme seçimini değiştir',
+    quantityInput: 'Malzeme miktarını gir',
+    selectedIndicator: 'Malzeme seçili',
+    unselectedIndicator: 'Malzeme seçili değil',
+    ingredientCard: 'Malzeme seçim kartı',
+    saveButton: 'Malzeme değişikliklerini kaydet',
+    cancelButton: 'Malzeme güncellemesini iptal et'
+  }
+},
+SortableCategory: {
+  product: 'ürün',
+  products: 'ürün',
+  editCategory: 'Kategoriyi düzenle',
+  deleteCategory: 'Kategoriyi sil', 
+  reorderingProducts: 'Ürün sıralaması kaydediliyor...',
+  noCategoryProducts: 'Bu kategoride henüz ürün yok.',
+  expandCategory: 'Kategoriyi genişlet',
+  collapseCategory: 'Kategoriyi daralt',
+  dragCategory: 'Kategori sırasını değiştirmek için sürükle',
+  accessibility: {
+    categoryActions: 'Kategori işlemleri',
+    productCount: 'Ürün sayısı',
+    expandToggle: 'Kategori genişletme durumunu değiştir',
+    editCategoryButton: 'Kategoriyi düzenle',
+    deleteCategoryButton: 'Kategoriyi sil',
+    dragHandle: 'Kategori sırasını değiştirmek için sürükleme kolu',
+    categoryCard: 'Kategori kartı',
+    emptyCategory: 'Boş kategori',
+    reorderingStatus: 'Kategori yeniden sıralanıyor'
+  }
+},
+SortableProduct: {
+  outOfStock: 'Stokta Yok',
+  loadingIngredients: 'Malzemeler yükleniyor...',
+  ingredients: 'Malzemeler',
+  noIngredients: 'Malzeme eklenmemiş',
+  loadingAddons: 'Eklentiler yükleniyor...',
+  addons: 'Eklentiler',
+  noAddons: 'Eklenti eklenmemiş',
+  manageAddons: 'Eklentileri yönet',
+  editProduct: 'Ürünü düzenle',
+  deleteProduct: 'Ürünü sil',
+  dragProduct: 'Ürün sırasını değiştirmek için sürükle',
+  allergenic: 'Alerjen içerir',
+  recommended: 'Önerilen',
+  price: 'Fiyat',
+  errors: {
+    loadingIngredients: 'Malzemeler yüklenirken bir hata oluştu.',
+    loadingAddons: 'Eklentiler yüklenirken bir hata oluştu.'
+  },
+  accessibility: {
+    productImage: 'Ürün resmi',
+    productCard: 'Ürün kartı',
+    productActions: 'Ürün işlemleri',
+    dragHandle: 'Ürün sırasını değiştirmek için sürükleme kolu',
+    outOfStockBadge: 'Ürün stokta yok',
+    ingredientsList: 'Ürün malzemeleri listesi',
+    addonsList: 'Ürün eklentileri listesi',
+    allergenWarning: 'Alerjen içerir',
+    recommendedAddon: 'Önerilen eklenti',
+    editButton: 'Ürünü düzenle',
+    deleteButton: 'Ürünü sil',
+    addonsButton: 'Ürün eklentilerini yönet'
+  }
+},
+IngredientsContent: {
+  // Search and filters
+  searchPlaceholder: 'Malzemeleri ara...',
+  filter: 'Filtrele',
+  sort: 'Sırala',
+  newIngredient: 'Yeni Malzeme',
+  
+  // Table headers
+  ingredientName: 'Malzeme Adı',
+  status: 'Durum',
+  allergenInfo: 'Alerjen Bilgisi',
+  actions: 'İşlemler',
+  
+  // Status labels
+  available: 'Kullanılabilir',
+  unavailable: 'Kullanılamaz',
+  containsAllergens: 'Alerjen İçerir',
+  noAllergens: 'Alerjen İçermez',
+  
+  // Actions
+  edit: 'Düzenle',
+  delete: 'Sil',
+  
+  // Empty states
+  noIngredientsFound: 'Arama kriterlerine uygun malzeme bulunamadı.',
+  noIngredientsYet: 'Henüz malzeme eklenmemiş.',
+  
+  // Delete modal
+  deleteIngredient: 'Malzeme Sil',
+  deleteConfirmMessage: '"{name}" malzemesini silmek istediğinizden emin misiniz?',
+  deleteError: 'Silme işlemi sırasında bir hata oluştu. Lütfen tekrar deneyin.',
+  cancel: 'İptal',
+  deleting: 'Siliniyor...',
+  
+  // Form modal
+  editIngredient: 'Malzeme Düzenle',
+  addNewIngredient: 'Yeni Malzeme Ekle',
+  basicInfo: 'Temel Bilgiler',
+  ingredientNameRequired: 'Malzeme adı gereklidir',
+  enterIngredientName: 'Malzeme adını girin',
+  containsAllergensCheckbox: 'Alerjen İçerir',
+  availableForUse: 'Kullanım İçin Uygun',
+  allergenInfoContent: 'Alerjen Bilgileri',
+  selectAllergensMessage: 'Bu malzemenin içerdiği alerjenleri seçin:',
+  enableAllergenMessage: 'Alerjen seçmek için önce "Alerjen İçerir" seçeneğini işaretleyin.',
+  allergenDetails: 'Alerjen Detayları',
+  containsThisAllergen: 'Bu alerjeni içerir',
+  additionalNotes: 'Ek notlar (isteğe bağlı)',
+  updateError: 'Malzeme güncellenirken bir hata oluştu.',
+  createError: 'Malzeme eklenirken bir hata oluştu.',
+  updating: 'Güncelleniyor...',
+  adding: 'Ekleniyor...',
+  update: 'Güncelle',
+  add: 'Ekle',
+  
+  accessibility: {
+    ingredientsTable: 'Malzeme yönetimi tablosu',
+    searchInput: 'Malzeme ara',
+    filterButton: 'Malzemeleri filtrele',
+    sortButton: 'Malzemeleri sırala',
+    addButton: 'Yeni malzeme ekle',
+    editButton: 'Malzemeyi düzenle',
+    deleteButton: 'Malzemeyi sil',
+    ingredientCard: 'Malzeme bilgi kartı',
+    allergenSelection: 'Alerjen seçimi',
+    formModal: 'Malzeme formu modalı',
+    deleteModal: 'Silme onay modalı',
+    statusBadge: 'Malzeme durumu',
+    allergenBadge: 'Alerjen bilgisi',
+    closeModal: 'Modalı kapat',
+    dragToReorder: 'Yeniden sıralamak için sürükle'
+  }
+},
+TableCard: {
+  active: 'Aktif',
+  inactive: 'Pasif',
+  occupied: 'Dolu',
+  empty: 'Boş',
+  capacity: 'Kişi',
+  capacityPlural: 'Kişi',
+  edit: 'Düzenle',
+  downloadQR: 'QR Kodu İndir',
+  disable: 'Devre Dışı Bırak',
+  enable: 'Aktifleştir',
+  delete: 'Sil',
+  viewQRCode: 'QR Kodunu Görüntüle',
+  moreOptions: 'Daha fazla seçenek',
+  accessibility: {
+    tableCard: 'Masa bilgi kartı',
+    statusBadge: 'Masa durumu',
+    occupancyBadge: 'Masa doluluk durumu',
+    actionsMenu: 'Masa işlemleri menüsü',
+    qrCodePreview: 'QR kod önizlemesi',
+    editButton: 'Masayı düzenle',
+    downloadButton: 'QR kodu indir',
+    toggleButton: 'Masa durumunu değiştir',
+    deleteButton: 'Masayı sil'
+  }
+},
+QRCodeModal: {
+  // Step selection
+  tableAddOption: 'Masa Ekleme Seçeneği',
+  howToAddTables: 'Nasıl masa eklemek istiyorsunuz?',
+  singleTable: 'Tek Masa Ekle',
+  bulkTable: 'Toplu Masa Ekle',
+  createSingleTable: 'Tek bir masa oluştur',
+  createMultipleTables: 'Birden fazla masa oluştur',
+  
+  // Branch selection
+  branchSelection: 'Şube Seçimi',
+  selectBranch: 'Şube Seçin',
+  branchRequired: 'Gerekli',
+  loadingBranches: 'Şubeler yükleniyor...',
+  
+  // Single table form
+  editTable: 'Masayı Düzenle',
+  addSingleTable: 'Tek Masa Ekle',
+  tableName: 'Masa Adı',
+  tableNamePlaceholder: 'Örn: Masa 1',
+  autoNameNote: 'Boş bırakılırsa otomatik isim verilir',
+  tableCategory: 'Masa Kategorisi',
+  selectCategory: 'Kategori Seçin',
+  loadingCategories: 'Kategoriler yükleniyor...',
+  noCategories: 'Kategori bulunamadı',
+  capacity: 'Kapasite',
+  capacityPlaceholder: 'Kişi sayısı',
+  displayOrder: 'Görünüm Sırası',
+  displayOrderPlaceholder: 'Sıralama için numara',
+  autoOrderNote: 'Boş bırakılırsa otomatik sıralama yapılır',
+  tableActive: 'Masa aktif olsun',
+  
+  // Bulk table form
+  addBulkTables: 'Toplu Masa Ekle',
+  categoryQuantities: 'Kategori Bazında Masa Miktarları',
+  addCategory: 'Kategori Ekle',
+  category: 'Kategori',
+  tableCount: 'Masa Sayısı',
+  allTablesActive: 'Tüm masalar aktif olsun',
+  tableSummary: 'Oluşturulacak Masalar Özeti:',
+  total: 'Toplam',
+  tables: 'masa',
+  
+  // Actions
+  cancel: 'İptal',
+  adding: 'Ekleniyor...',
+  addTable: 'Masa Ekle',
+  update: 'Güncelle',
+  updating: 'Güncelleniyor...',
+  creating: 'Oluşturuluyor... ({count} masa)',
+  createTables: '{count} Masa Oluştur',
+  
+  // Validation
+  branchRequiredValidation: 'Şube seçimi gereklidir',
+  categoryRequired: 'En az bir kategori gereklidir',
+  
+  accessibility: {
+    modal: 'Masa oluşturma modalı',
+    stepSelection: 'Masa oluşturma yöntemi seçimi',
+    branchSelector: 'Şube seçimi dropdown',
+    categorySelector: 'Masa kategorisi seçimi',
+    tableForm: 'Masa oluşturma formu',
+    bulkForm: 'Toplu masa oluşturma formu',
+    backButton: 'Önceki adıma dön',
+    closeButton: 'Modalı kapat'
+  }
+},
+TableCategoryModal: {
+  title: 'Masa Kategorisi Ekle',
+  subtitle: 'Yeni masa kategorisi oluşturun',
+  categoryName: 'Kategori Adı',
+  categoryNamePlaceholder: 'Örn: VIP Masalar, Bahçe Masaları',
+  description: 'Açıklama (Opsiyonel)',
+  descriptionPlaceholder: 'Kategori hakkında kısa açıklama...',
+  colorSelection: 'Renk Seçimi',
+  customColor: 'Özel renk',
+  iconSelection: 'Icon Seçimi',
+  branchSelection: 'Şube Seçimi',
+  cancel: 'İptal',
+  addCategory: 'Kategori Ekle',
+  saving: 'Kaydediliyor...',
+  
+  // Icons
+  table: 'Masa',
+  chair: 'Sandalye',
+  service: 'Servis',
+  label: 'Etiket',
+  layer: 'Katman',
+  
+  // Validation errors
+  categoryNameRequired: 'Kategori adı gereklidir',
+  iconRequired: 'Bir icon seçmelisiniz',
+  branchRequired: 'Şube seçimi gereklidir',
+  invalidData: 'Geçersiz veri gönderildi',
+  unauthorized: 'Yetkiniz bulunmuyor. Lütfen tekrar giriş yapın.',
+  forbidden: 'Bu işlem için yetkiniz bulunmuyor.',
+  branchNotFound: 'Seçilen şube bulunamadı.',
+  serverError: 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.',
+  unexpectedError: 'Kategori eklenirken beklenmeyen bir hata oluştu',
+  
+  accessibility: {
+    modal: 'Masa kategorisi oluşturma modalı',
+    colorPalette: 'Renk seçimi paleti',
+    colorPreset: 'Hazır renk seçeneği',
+    customColorPicker: 'Özel renk seçici',
+    iconGrid: 'Icon seçimi grid',
+    iconOption: 'Icon seçeneği',
+    branchDropdown: 'Şube seçimi dropdown',
+    form: 'Kategori oluşturma formu'
+  }
+},
+AddQRCodeCard: {
+  title: 'Yeni Masa Ekle',
+  subtitle: 'Yeni masa eklemek için tıklayın',
+  accessibility: {
+    addButton: 'Yeni masa ekle butonu',
+    addCard: 'Yeni masa ekle kartı'
+  }
+}
 }; 
