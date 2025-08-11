@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Building2, AlertTriangle, Plus } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { 
   BranchInfo, 
   CreateBranchWithDetailsDto, 
   CreateBranchWorkingHourCoreDto,
   BranchDetailResponse,
-  BranchEditFormData,
-  convertBranchDetailToFormData
 } from '../../../types/api';
 import { branchService } from '../../../services/branchService';
 import { getRestaurantIdFromToken } from '../../../utils/http';
@@ -16,6 +15,7 @@ import BranchModal from './branch-management/BranchModal';
 import BranchEditModal from './branch-management/BranchEditModal';
 import AddBranchCard from './branch-management/AddBranchCard';
 import { logger } from '../../../utils/logger';
+import { ConfirmDeleteModal } from '../../ConfirmDeleteModal';
 
 const BranchManagement: React.FC = () => {
   const { t, isRTL } = useLanguage();
@@ -26,8 +26,11 @@ const BranchManagement: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingBranch, setEditingBranch] = useState<BranchDetailResponse | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Delete confirmation modal states
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [branchToDelete, setBranchToDelete] = useState<BranchInfo | null>(null);
+  const [isDeletingBranch, setIsDeletingBranch] = useState(false);
 
   const defaultWorkingHours: CreateBranchWorkingHourCoreDto[] = [
     { dayOfWeek: 1, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Monday
@@ -276,20 +279,42 @@ const BranchManagement: React.FC = () => {
     }
   };
 
+  // Updated delete handler to use confirmation modal
   const handleDeleteBranch = (branch: BranchInfo) => {
     setBranchToDelete(branch);
-    setShowDeleteConfirm(true);
+    setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = async () => {
-    if (!branchToDelete) return;
+  // Actual delete operation called by the confirmation modal
+  const performDeleteBranch = async () => {
+    if (!branchToDelete) {
+      throw new Error(t('branchManagement.error.branchNotFound'));
+    }
+
+    setIsDeletingBranch(true);
+
+    // Store branch backup for potential revert
+    const branchBackup = branchToDelete;
+
+    // Optimistic UI update: Remove branch from UI immediately
+    setBranches(prev => prev.filter(branch => branch.branchId !== branchToDelete.branchId));
+
     try {
       await branchService.deleteBranch(branchToDelete.branchId);
-      await fetchBranches();
-      setShowDeleteConfirm(false);
+      logger.info('Branch deleted successfully', { branchId: branchToDelete.branchId }, { prefix: 'BranchManagement' });
+      
+      // Reset modal states
       setBranchToDelete(null);
+      setIsDeleteModalOpen(false);
+
+      // Refresh the list to ensure consistency
+      await fetchBranches();
+
     } catch (err: any) {
       logger.error('Error deleting branch:', err, { prefix: 'BranchManagement' });
+      
+      // Revert optimistic update on error
+      setBranches(prev => [...prev, branchBackup].sort((a, b) => a.branchId - b.branchId));
       
       let errorMessage = t('branchManagement.error.deleteFailed');
       
@@ -299,10 +324,28 @@ const BranchManagement: React.FC = () => {
         errorMessage = t('branchManagement.error.noPermission');
       } else if (err?.response?.status === 404) {
         errorMessage = t('branchManagement.error.branchNotFound');
+      } else if (err?.response?.status === 409) {
+        errorMessage = t('branchManagement.error.branchInUse');
+      } else if (err?.message) {
+        errorMessage = err.message;
       }
       
       setError(errorMessage);
+      
+      // Clear error after 5 seconds
+      setTimeout(() => setError(null), 5000);
+      
+      // Re-throw error to be handled by the modal
+      throw new Error(errorMessage);
+    } finally {
+      setIsDeletingBranch(false);
     }
+  };
+
+  // Close delete modal handler
+  const handleDeleteModalClose = () => {
+    setIsDeleteModalOpen(false);
+    setBranchToDelete(null);
   };
 
   const handleAddBranch = () => {
@@ -355,35 +398,63 @@ const BranchManagement: React.FC = () => {
       }
       
       setError(errorMessage);
-      setTimeout(() => setError(''), 3000);
+      setTimeout(() => setError(null), 3000);
     }
   };
 
+  const dismissError = () => {
+    setError(null);
+  };
+
   return (
-    <div className={`min-h-screen ${isRTL ? 'rtl' : 'ltr'}`}>
+    <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             {t('branchManagement.title')}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             {t('branchManagement.description')}
           </p>
         </div>
 
         {/* Error message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-            <p className="font-semibold">{t('commonBranch.error')}:</p>
-            <p>{error}</p>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+          >
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <AlertTriangle className="h-5 w-5 text-red-400 dark:text-red-500" />
+              </div>
+              <div className={`${isRTL ? 'mr-3' : 'ml-3'} flex-1`}>
+                <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+                  {t('branchManagement.error.title')}
+                </h3>
+                <p className="mt-1 text-sm text-red-700 dark:text-red-300">
+                  {error}
+                </p>
+              </div>
+              <button
+                onClick={dismissError}
+                className={`${isRTL ? 'mr-auto' : 'ml-auto'} flex-shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors`}
+                aria-label={t('common.dismiss')}
+              >
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </motion.div>
         )}
 
         {/* Loading state */}
         {isLoading && (
           <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-            <span className={`${isRTL ? 'mr-3' : 'ml-3'} text-gray-600`}>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-400"></div>
+            <span className={`${isRTL ? 'mr-3' : 'ml-3'} text-gray-600 dark:text-gray-400`}>
               {t('branchManagement.loading')}
             </span>
           </div>
@@ -392,41 +463,56 @@ const BranchManagement: React.FC = () => {
         {/* Branch list */}
         {!isLoading && !error && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <AddBranchCard onClick={handleAddBranch} />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <AddBranchCard onClick={handleAddBranch} />
+            </motion.div>
             
-            {branches.map((branch) => (
-              <BranchCard
+            {branches.map((branch, index) => (
+              <motion.div
                 key={branch.branchId}
-                branch={branch}
-                onEdit={handleEditBranch}
-                onDelete={handleDeleteBranch}
-                onToggleTemporaryClose={handleToggleTemporaryClose}
-              />
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: (index + 1) * 0.1 }}
+              >
+                <BranchCard
+                  branch={branch}
+                  onEdit={handleEditBranch}
+                  onDelete={() => handleDeleteBranch(branch)}
+                  onToggleTemporaryClose={handleToggleTemporaryClose}
+                />
+              </motion.div>
             ))}
           </div>
         )}
 
         {/* No branches message */}
         {!isLoading && !error && branches.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
-              <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="text-center py-12"
+          >
+            <div className="text-gray-400 dark:text-gray-500 mb-4">
+              <Building2 className="mx-auto h-16 w-16" />
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               {t('branchManagement.noBranches.title')}
             </h3>
-            <p className="text-gray-500 mb-4">
+            <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
               {t('branchManagement.noBranches.description')}
             </p>
             <button
               onClick={handleAddBranch}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
+              <Plus className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
               {t('branchManagement.addBranch')}
             </button>
-          </div>
+          </motion.div>
         )}
       </div>
 
@@ -457,35 +543,17 @@ const BranchManagement: React.FC = () => {
         </>
       )}
 
-      {/* Delete confirmation modal */}
-      {showDeleteConfirm && branchToDelete && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3 text-center">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                {t('branchManagement.deleteConfirm.title')}
-              </h3>
-              <p className="text-sm text-gray-500 mb-6">
-                {t('branchManagement.deleteConfirm.description', { branchName: branchToDelete.branchName })}
-              </p>
-              <div className="flex justify-center space-x-4">
-                <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                >
-                  {t('commonBranch.cancel')}
-                </button>
-                <button
-                  onClick={confirmDelete}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                >
-                  {t('commonBranch.delete')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteModalClose}
+        onConfirm={performDeleteBranch}
+        title={t('branchManagement.deleteConfirm.title')}
+        message={t('branchManagement.deleteConfirm.description')}
+        isSubmitting={isDeletingBranch}
+        itemType="branch"
+        itemName={branchToDelete?.branchName || ''}
+      />
     </div>
   );
 };

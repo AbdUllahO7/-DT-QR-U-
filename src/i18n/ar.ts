@@ -1,3 +1,5 @@
+import { title } from "process";
+
 export const ar = {
   // Common
   common: {
@@ -824,6 +826,9 @@ export const ar = {
       downloadQR: 'تحميل رمز QR',
       editTable: 'تعديل الطاولة',
       deleteTable: 'حذف الطاولة'
+    },
+    deleteModal :{
+      title : "تأكيد الحذف"
     },
     categories: {
       title: 'إدارة الفئات',

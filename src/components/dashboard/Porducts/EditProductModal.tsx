@@ -17,7 +17,6 @@ export const EditProductModal: React.FC<{
   categories: Category[];
   onOpenIngredientUpdate?: (productId: number, productName: string) => void;
 }> = ({ isOpen, onClose, onSuccess, product, categories, onOpenIngredientUpdate }) => {
-  console.log("product 21312", product);
   const { t, isRTL } = useLanguage();
   const [formData, setFormData] = useState({
     name: product.name,
@@ -155,18 +154,10 @@ export const EditProductModal: React.FC<{
         imageUrl: finalImageUrl
       };
 
-      console.log('🔍 Updating product with payload:', { payload, originalProductId: product.id });
 
       const updatedProduct = await productService.updateProduct(product.id, payload);
       
-      console.log('🔍 Product updated successfully:', {
-        originalProductId: product.id,
-        updatedProduct: updatedProduct,
-        updatedProductId: updatedProduct.id,
-        updatedProductName: updatedProduct.name,
-        updatedProductIdType: typeof updatedProduct.id,
-        isValidUpdatedId: updatedProduct.id && updatedProduct.id !== 0 && !isNaN(updatedProduct.id)
-      });
+   
       
       logger.info('Ürün başarıyla güncellendi', { 
         productId: product.id,
@@ -175,12 +166,7 @@ export const EditProductModal: React.FC<{
       
       // Check if callback exists and call it with debug logging
       if (onOpenIngredientUpdate) {
-        console.log('🔍 Calling onOpenIngredientUpdate with:', {
-          productId: product.id,
-          productName: product.name,
-          productIdType: typeof product.id,
-          callbackExists: typeof onOpenIngredientUpdate === 'function'
-        });
+  
         
         onOpenIngredientUpdate(product.id, product.name);
       } else {

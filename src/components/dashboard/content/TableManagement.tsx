@@ -12,6 +12,7 @@ import { branchService } from '../../../services/branchService';
 import { useClickOutside } from '../../../hooks';
 import { useSignalR } from '../../../hooks/useSignalR';
 import { SignalRCallbacks } from '../../../types/signalR';
+import { ConfirmDeleteModal } from '../../ConfirmDeleteModal';
 
 interface Props {
   selectedBranch: RestaurantBranchDropdownItem | null;
@@ -41,6 +42,11 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   const [editingTable, setEditingTable] = useState<TableData | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+
+  // Delete confirmation modal states
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [tableToDelete, setTableToDelete] = useState<TableData | null>(null);
+  const [isDeletingTable, setIsDeletingTable] = useState(false);
 
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setIsBranchDropdownOpen(false));
@@ -189,44 +195,40 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     setIsModalOpen(true);
   };
 
-  // Fixed: Remove the conflicting handleUpdateTable function since the modal handles updates
-  // The modal will call onSuccess when the operation completes successfully
+  // Updated handleDeleteTable to use the confirmation modal
+  const handleDeleteTable = (table: TableData) => {
+    setTableToDelete(table);
+    setIsDeleteModalOpen(true);
+  };
 
-  const handleDeleteTable = async (id: number) => {
-    if (!window.confirm(t('TableManagement.confirmDelete'))) {
-      return;
+  // Actual delete operation called by the confirmation modal
+  const performDeleteTable = async () => {
+    if (!tableToDelete || !selectedBranchForTables?.branchId) {
+      throw new Error(t('TableManagement.error.branchRequired'));
     }
 
-    if (!selectedBranchForTables?.branchId) {
-      setError(t('TableManagement.error.branchRequired'));
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    // Store the table to revert if needed
-    const tableToDelete = tables.find((table) => table.id === id);
-    if (!tableToDelete) {
-      setIsLoading(false);
-      return;
-    }
+    setIsDeletingTable(true);
 
     // Optimistic UI update: Remove table from UI immediately
-    setTables((prev) => prev.filter((table) => table.id !== id));
+    const tableBackup = tableToDelete;
+    setTables((prev) => prev.filter((table) => table.id !== tableToDelete.id));
 
     try {
-      // Pass branch ID to ensure proper branch context
-      await branchService.deleteTable(id, selectedBranchForTables.branchId);
-      logger.info('Table deleted successfully:', { id, branchId: selectedBranchForTables.branchId });
+      await branchService.deleteTable(tableToDelete.id, selectedBranchForTables.branchId);
+      logger.info('Table deleted successfully:', { 
+        id: tableToDelete.id, 
+        branchId: selectedBranchForTables.branchId 
+      });
       
-      // Optionally refresh data to ensure consistency
-      // fetchTablesAndCategories();
+      // Reset delete modal state
+      setTableToDelete(null);
+      setIsDeleteModalOpen(false);
+
     } catch (error: any) {
       logger.error('Table deletion error:', error);
       
       // Revert optimistic update on error
-      setTables((prev) => [...prev, tableToDelete].sort((a, b) => a.id - b.id));
+      setTables((prev) => [...prev, tableBackup].sort((a, b) => a.id - b.id));
       
       // Set user-friendly error message based on the actual API response
       let errorMessage = t('TableManagement.error.deleteFailed');
@@ -250,9 +252,18 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
       
       // Clear error after 5 seconds
       setTimeout(() => setError(null), 5000);
+      
+      // Re-throw error to be handled by the modal
+      throw new Error(errorMessage);
     } finally {
-      setIsLoading(false);
+      setIsDeletingTable(false);
     }
+  };
+
+  // Close delete modal handler
+  const handleDeleteModalClose = () => {
+    setIsDeleteModalOpen(false);
+    setTableToDelete(null);
   };
 
   const handleToggleStatus = async (id: number) => {
@@ -501,7 +512,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
                       <TableCard
                         table={table}
                         onEdit={handleEditTable}
-                        onDelete={handleDeleteTable}
+                        onDelete={() => handleDeleteTable(table)} // Pass the entire table object
                         onToggleStatus={handleToggleStatus}
                         onDownload={downloadQR}
                       />
@@ -549,6 +560,18 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         onSuccess={() => {
           fetchTablesAndCategories();
         }}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteModalClose}
+        onConfirm={performDeleteTable}
+        title={t('tableManagement.deleteModal.title')}
+        message={t('tableManagement.deleteModal.message')}
+        isSubmitting={isDeletingTable}
+        itemType="table"
+        itemName={tableToDelete?.menuTableName || ''}
       />
     </div>
   );

@@ -70,12 +70,10 @@ class ProductService {
         }
       });
       
-      console.log("API response.data", response.data);
       
       // Transform the API response to match component expectations
       const transformedData = this.transformAPIDataToComponentData(response.data);
       
-      console.log("Transformed data", transformedData);
       return transformedData;
     } catch (error: any) {
       logger.error('Kategori verileri getirilirken hata:', error);

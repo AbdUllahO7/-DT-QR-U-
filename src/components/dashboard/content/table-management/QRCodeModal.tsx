@@ -74,7 +74,6 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
   onClose,
   qrData,
   onChange,
-  onSubmit, // Keep for compatibility
   isSubmitting: externalIsSubmitting,
   isEditMode = false,
   onSuccess,
@@ -86,9 +85,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  console.log("qrData", qrData);
-  console.log("selectedBranchForEdit", selectedBranchForEdit);
-  console.log("passedCategories", passedCategories);
+
   
   // Branch and category data
   const [branches, setBranches] = useState<BranchDropdownItem[]>([]);

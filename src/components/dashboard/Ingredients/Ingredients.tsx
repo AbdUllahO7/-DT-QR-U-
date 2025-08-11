@@ -545,7 +545,6 @@ const { isDark } = useTheme();
       setAllergens(fetchedAllergens);
       
       const transformedIngredients = await ingredientsService.getIngredients();
-      console.log("Final transformed ingredients:", transformedIngredients);
       
       setIngredients(transformedIngredients);
       setFilteredIngredients(transformedIngredients);

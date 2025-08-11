@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useLanguage } from "../../../contexts/LanguageContext";
-import { logger } from "../../../utils/logger";
 import { X, AlertTriangle, Trash2 } from "lucide-react";
+import { useLanguage } from "../contexts/LanguageContext";
+import { logger } from "../utils/logger";
 
 // ConfirmDeleteModal Component
 export const ConfirmDeleteModal: React.FC<{
@@ -11,8 +11,8 @@ export const ConfirmDeleteModal: React.FC<{
   title: string;
   message: string;
   isSubmitting?: boolean;
-  itemType?: string; // e.g., 'category', 'product', 'addon'
-  itemName?: string; // Name of the item being deleted
+  itemType?: string; 
+  itemName?: string; 
 }> = ({ 
   isOpen, 
   onClose, 
@@ -77,21 +77,7 @@ export const ConfirmDeleteModal: React.FC<{
           {/* Message */}
           <div className="space-y-2">
             
-            
-            {/* Item details if provided */}
-            {itemName && (
-              <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3 border border-gray-200 dark:border-gray-600">
-                <p className="text-sm text-gray-700 dark:text-gray-300">
-                  <span className="font-medium">
-                    {itemType && t(`confirmDeleteModal.itemTypes.${itemType}`)}:
-                  </span>{' '}
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {itemName}
-                  </span>
-                </p>
-              </div>
-            )}
-
+           
             {/* Warning message */}
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
               <p className="text-sm text-red-700 dark:text-red-300 flex items-center gap-2">
