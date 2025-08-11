@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Users, QrCode, Minus } from 'lucide-react';
 import { QRCodeData } from './QRCodeCard';
 import { logger } from '../../../../utils/logger';
-import { branchService } from '../../../../services/branchService';
+import { branchService, UpdateMenuTableDto } from '../../../../services/branchService';
 import { httpClient } from '../../../../utils/http';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 
@@ -59,7 +59,7 @@ interface QRCodeModalProps {
   onClose: () => void;
   qrData: Partial<QRCodeData>;
   onChange: (field: keyof QRCodeData, value: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onSubmit: (e: React.FormEvent) => void; // Keep for compatibility but not used
   isSubmitting: boolean;
   isEditMode?: boolean;
   onSuccess?: () => void;
@@ -74,8 +74,8 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
   onClose,
   qrData,
   onChange,
-  onSubmit,
-  isSubmitting,
+  onSubmit, // Keep for compatibility
+  isSubmitting: externalIsSubmitting,
   isEditMode = false,
   onSuccess,
   selectedBranchForEdit,
@@ -83,6 +83,9 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
 }) => {
   const { t, isRTL } = useLanguage();
   const [currentStep, setCurrentStep] = useState<ModalStep>('selection');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
   console.log("qrData", qrData);
   console.log("selectedBranchForEdit", selectedBranchForEdit);
   console.log("passedCategories", passedCategories);
@@ -106,6 +109,13 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
   // Bulk table form data
   const [categoryQuantities, setCategoryQuantities] = useState<CategoryQuantityItem[]>([]);
   const [bulkIsActive, setBulkIsActive] = useState(true);
+
+  // Clear error when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setError(null);
+    }
+  }, [isOpen]);
 
   // Fetch branches on modal open
   useEffect(() => {
@@ -166,6 +176,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
       logger.info('Şubeler başarıyla yüklendi:', data);
     } catch (error) {
       logger.error('Şubeler yüklenemedi:', error);
+      setError(t('QRCodeModal.error.branchLoadFailed'));
     } finally {
       setIsLoadingBranches(false);
     }
@@ -195,6 +206,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
     } catch (error) {
       logger.error('Kategori fetch hatası', error);
       setTableCategories([]);
+      setError(t('QRCodeModal.error.categoryLoadFailed'));
     } finally {
       logger.info('fetchTableCategories tamamlandı');
       setIsLoadingCategories(false);
@@ -214,59 +226,108 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
       isActive: true,
     });
     setBulkIsActive(true);
+    setError(null);
+    setIsSubmitting(false);
     onClose();
   };
 
   const handleSingleTableSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Determine which branch ID to use
+    setIsSubmitting(true);
+    setError(null);
+
     const branchIdToUse = isEditMode ? selectedBranchForEdit?.branchId : selectedBranchId;
-    
     if (!branchIdToUse) {
-      logger.error('Şube seçimi gerekli');
+      setError(t('QRCodeModal.error.branchRequired'));
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (singleTableData.menuTableCategoryId === 0) {
+      setError(t('QRCodeModal.error.categoryRequired'));
+      setIsSubmitting(false);
       return;
     }
 
     try {
-      const tableData: CreateMenuTableDto = {
-        menuTableName: singleTableData.menuTableName,
-        menuTableCategoryId: singleTableData.menuTableCategoryId,
-        capacity: singleTableData.capacity,
-        displayOrder: singleTableData.displayOrder,
-        isActive: singleTableData.isActive
-      };
-      
       if (isEditMode) {
-        // For edit mode, call the parent's onSubmit handler
-        logger.info('Edit mode: Calling parent onSubmit handler', { tableData });
-        onSubmit(e);
-        return;
-      } else {
-        // For create mode
-        await branchService.createTable(tableData, branchIdToUse);
-        logger.info('Masa başarıyla oluşturuldu');
-        
-        try {
-          await httpClient.get(`/api/branches/tables?branchId=${branchIdToUse}`);
-          logger.info('Masalar yeniden yüklendi');
-        } catch (error) {
-          logger.error('Masalar yeniden yüklenirken hata', error);
+        // Update existing table
+        if (!qrData.id) {
+          throw new Error('Table ID is required for update');
         }
+
+        const updateData: UpdateMenuTableDto = {
+          id: qrData.id,
+          menuTableName: singleTableData.menuTableName || null,
+          menuTableCategoryId: singleTableData.menuTableCategoryId,
+          capacity: singleTableData.capacity,
+          isActive: singleTableData.isActive,
+          isOccupied: qrData.isOccupied || false,
+          rowVersion: qrData.rowVersion || "",
+        };
+
+        // Pass branch ID to update method to ensure proper branch context
+        await branchService.updateTable(qrData.id, updateData, branchIdToUse);
+        logger.info('Table updated successfully', { tableId: qrData.id, updateData, branchId: branchIdToUse });
+      } else {
+        // Create new table
+        const createData: CreateMenuTableDto = {
+          menuTableName: singleTableData.menuTableName || null,
+          menuTableCategoryId: singleTableData.menuTableCategoryId,
+          capacity: singleTableData.capacity,
+          displayOrder: singleTableData.displayOrder,
+          isActive: singleTableData.isActive,
+        };
+
+        await branchService.createTable(createData, branchIdToUse);
+        logger.info('Table created successfully', { createData, branchId: branchIdToUse });
+      }
+
+      // Success callback
+      if (onSuccess) {
+        onSuccess();
       }
       
-      onSuccess && onSuccess();
       handleClose();
-    } catch (error) {
-      logger.error('Masa oluşturma/güncelleme hatası:', error);
+    } catch (error: any) {
+      logger.error('Table operation failed:', error);
+      
+      // Set user-friendly error message based on the actual API response
+      let errorMessage = t('QRCodeModal.error.operationFailed');
+      
+      if (error.response?.status === 400) {
+        // Check if it's the specific branch error
+        if (error.response?.data?.message?.includes('Branch information')) {
+          errorMessage = 'Branch information could not be determined. Please refresh and try again.';
+        } else {
+          errorMessage = t('QRCodeModal.error.invalidData');
+        }
+      } else if (error.response?.status === 404) {
+        errorMessage = t('QRCodeModal.error.tableNotFound');
+      } else if (error.response?.status === 409) {
+        errorMessage = t('QRCodeModal.error.concurrencyIssue');
+      } else if (error.response?.status === 401) {
+        errorMessage = t('QRCodeModal.error.unauthorized');
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleBulkTableSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    setIsSubmitting(true);
+    setError(null);
+    
     if (!selectedBranchId || categoryQuantities.length === 0) {
-      logger.error('Şube seçimi ve en az bir kategori gerekli');
+      setError(t('QRCodeModal.error.bulkDataRequired'));
+      setIsSubmitting(false);
       return;
     }
 
@@ -296,7 +357,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
       
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => {
-          reject(new Error('İşlem zaman aşımına uğradı. Lütfen tekrar deneyin.'));
+          reject(new Error(t('QRCodeModal.error.timeout')));
         }, 120000);
       });
       
@@ -309,28 +370,34 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
         totalTables: totalTableCount
       }, { prefix: 'QRCodeModal' });
       
-      onSuccess && onSuccess();
+      if (onSuccess) {
+        onSuccess();
+      }
+      
       handleClose();
     } catch (error: any) {
       logger.error('Toplu masa oluşturma hatası:', error, { prefix: 'QRCodeModal' });
       
-      let errorMessage = 'Toplu masa oluşturma sırasında bir hata oluştu.';
+      let errorMessage = t('QRCodeModal.error.batchCreateFailed');
       
       if (error.message?.includes('timeout') || error.message?.includes('zaman aşımı')) {
-        errorMessage = 'İşlem zaman aşımına uğradı. Lütfen daha az masa ile tekrar deneyin.';
+        errorMessage = t('QRCodeModal.error.timeoutAdvice');
         logger.warn('Batch işlem timeout hatası', { totalTables: totalTableCount }, { prefix: 'QRCodeModal' });
       } else if (error.response?.status === 400) {
-        errorMessage = 'Geçersiz veri formatı. Lütfen girdiğiniz bilgileri kontrol edin.';
+        errorMessage = t('QRCodeModal.error.invalidBatchData');
         logger.warn('Batch işlem validation hatası', error.response.data, { prefix: 'QRCodeModal' });
       } else if (error.response?.status === 500) {
-        errorMessage = 'Sunucu hatası. Lütfen daha sonra tekrar deneyin.';
+        errorMessage = t('QRCodeModal.error.serverError');
         logger.error('Batch işlem server hatası', error.response.data, { prefix: 'QRCodeModal' });
       } else if (error.response?.status === 401) {
-        errorMessage = 'Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.';
+        errorMessage = t('QRCodeModal.error.sessionExpired');
         logger.warn('Batch işlem authentication hatası', { prefix: 'QRCodeModal' });
       }
       
+      setError(errorMessage);
       console.error('❌ Toplu masa oluşturma hatası:', errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -364,6 +431,37 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
 
   const getTotalQuantity = () => {
     return categoryQuantities.reduce((sum, item) => sum + item.quantity, 0);
+  };
+
+  // Error display component
+  const renderError = () => {
+    if (!error) return null;
+    
+    return (
+      <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+        <div className="flex items-center">
+          <div className="flex-shrink-0">
+            <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+          </div>
+          <div className="ml-auto pl-3">
+            <button
+              onClick={() => setError(null)}
+              className="inline-flex text-red-400 hover:text-red-600 dark:hover:text-red-300"
+            >
+              <span className="sr-only">Dismiss</span>
+              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   if (!isOpen) return null;
@@ -405,6 +503,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
         </p>
       </div>
 
+      {renderError()}
       {renderBranchSelector()}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -468,6 +567,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
         </h2>
       </div>
 
+      {renderError()}
       {!isEditMode && renderBranchSelector()}
 
       <form onSubmit={handleSingleTableSubmit} className="space-y-4" role="form" aria-label={t('QRCodeModal.accessibility.tableForm')}>
@@ -571,30 +671,32 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
           />
         </div>
 
-        <div>
-          <label htmlFor="displayOrder" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-            {t('QRCodeModal.displayOrder')}
-          </label>
-          <input
-            type="number"
-            id="displayOrder"
-            min="0"
-            value={singleTableData.displayOrder || ''}
-            onChange={(e) => {
-              const newDisplayOrder = e.target.value ? parseInt(e.target.value) : null;
-              setSingleTableData({ ...singleTableData, displayOrder: newDisplayOrder });
-              // Also call the parent onChange if provided
-              if (onChange) {
-                onChange('displayOrder' as keyof QRCodeData, e.target.value);
-              }
-            }}
-            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
-            placeholder={t('QRCodeModal.displayOrderPlaceholder')}
-          />
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-            {t('QRCodeModal.autoOrderNote')}
-          </p>
-        </div>
+        {!isEditMode && (
+          <div>
+            <label htmlFor="displayOrder" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {t('QRCodeModal.displayOrder')}
+            </label>
+            <input
+              type="number"
+              id="displayOrder"
+              min="0"
+              value={singleTableData.displayOrder || ''}
+              onChange={(e) => {
+                const newDisplayOrder = e.target.value ? parseInt(e.target.value) : null;
+                setSingleTableData({ ...singleTableData, displayOrder: newDisplayOrder });
+                // Also call the parent onChange if provided
+                if (onChange) {
+                  onChange('displayOrder' as keyof QRCodeData, e.target.value);
+                }
+              }}
+              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+              placeholder={t('QRCodeModal.displayOrderPlaceholder')}
+            />
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              {t('QRCodeModal.autoOrderNote')}
+            </p>
+          </div>
+        )}
 
         <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
           <input
@@ -619,7 +721,8 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
           <button
             type="button"
             onClick={handleClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none"
+            disabled={isSubmitting}
+            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none disabled:opacity-50"
             aria-label={t('QRCodeModal.cancel')}
           >
             {t('QRCodeModal.cancel')}
@@ -627,9 +730,17 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
           <button
             type="submit"
             disabled={isSubmitting || (!isEditMode && !selectedBranchId) || singleTableData.menuTableCategoryId === 0}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
           >
-            {isSubmitting ? t('QRCodeModal.adding') : isEditMode ? t('QRCodeModal.update') : t('QRCodeModal.addTable')}
+            {isSubmitting && (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            )}
+            <span>
+              {isSubmitting 
+                ? (isEditMode ? t('QRCodeModal.updating') : t('QRCodeModal.adding'))
+                : (isEditMode ? t('QRCodeModal.update') : t('QRCodeModal.addTable'))
+              }
+            </span>
           </button>
         </div>
       </form>
@@ -641,7 +752,8 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
       <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
         <button
           onClick={() => setCurrentStep('selection')}
-          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+          disabled={isSubmitting}
+          className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 disabled:opacity-50"
           aria-label={t('QRCodeModal.accessibility.backButton')}
         >
           {isRTL ? '→' : '←'}
@@ -651,6 +763,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
         </h2>
       </div>
 
+      {renderError()}
       {renderBranchSelector()}
 
       <form onSubmit={handleBulkTableSubmit} className="space-y-6" role="form" aria-label={t('QRCodeModal.accessibility.bulkForm')}>
@@ -663,7 +776,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
             <button
               type="button"
               onClick={addCategoryQuantity}
-              disabled={tableCategories.length === 0 || categoryQuantities.length >= tableCategories.length}
+              disabled={tableCategories.length === 0 || categoryQuantities.length >= tableCategories.length || isSubmitting}
               className={`inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed ${isRTL ? 'flex-row-reverse' : ''}`}
             >
               <Plus className={`h-3 w-3 ${isRTL ? 'ml-1' : 'mr-1'}`} />
@@ -681,7 +794,8 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
                   <button
                     type="button"
                     onClick={() => removeCategoryQuantity(index)}
-                    className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                    disabled={isSubmitting}
+                    className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 disabled:opacity-50"
                   >
                     <Minus className="h-4 w-4" />
                   </button>
@@ -697,7 +811,8 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
                       value={item.categoryId}
                       onChange={(e) => updateCategoryQuantity(index, 'categoryId', parseInt(e.target.value))}
                       required
-                      className="w-full text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1.5 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                      disabled={isSubmitting}
+                      className="w-full text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1.5 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
                     >
                       {tableCategories
                         .filter(cat => cat.id === item.categoryId || !categoryQuantities.find(cq => cq.categoryId === cat.id))
@@ -721,7 +836,8 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
                       value={item.quantity}
                       onChange={(e) => updateCategoryQuantity(index, 'quantity', parseInt(e.target.value) || 1)}
                       required
-                      className="w-full text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1.5 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                      disabled={isSubmitting}
+                      className="w-full text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1.5 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
                     />
                   </div>
 
@@ -737,7 +853,8 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
                       value={item.capacity}
                       onChange={(e) => updateCategoryQuantity(index, 'capacity', parseInt(e.target.value) || 1)}
                       required
-                      className="w-full text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1.5 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                      disabled={isSubmitting}
+                      className="w-full text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1.5 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
                     />
                   </div>
 
@@ -751,7 +868,8 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
                       min="0"
                       value={item.displayOrder || ''}
                       onChange={(e) => updateCategoryQuantity(index, 'displayOrder', e.target.value ? parseInt(e.target.value) : null)}
-                      className="w-full text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1.5 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
+                      disabled={isSubmitting}
+                      className="w-full text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1.5 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
                     />
                   </div>
                 </div>
@@ -772,7 +890,8 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
             id="bulkIsActive"
             checked={bulkIsActive}
             onChange={(e) => setBulkIsActive(e.target.checked)}
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            disabled={isSubmitting}
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded disabled:opacity-50"
           />
           <label htmlFor="bulkIsActive" className={`block text-sm text-gray-700 dark:text-gray-300 ${isRTL ? 'mr-2' : 'ml-2'}`}>
             {t('QRCodeModal.allTablesActive')}
@@ -804,7 +923,8 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
           <button
             type="button"
             onClick={handleClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none"
+            disabled={isSubmitting}
+            className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none disabled:opacity-50"
           >
             {t('QRCodeModal.cancel')}
           </button>
@@ -830,7 +950,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('QRCodeModal.accessibility.modal')}>
       <div className="flex min-h-screen items-center justify-center p-4">
-        <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={handleClose}></div>
+        <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={!isSubmitting ? handleClose : undefined}></div>
         
         <div className={`relative w-full max-w-4xl rounded-xl bg-white dark:bg-gray-800 p-6 shadow-lg max-h-[90vh] overflow-y-auto ${isRTL ? 'text-right' : 'text-left'}`}>
           {/* Header */}
@@ -838,7 +958,8 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
             <div></div>
             <button
               onClick={handleClose}
-              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors"
+              disabled={isSubmitting}
+              className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors disabled:opacity-50"
               aria-label={t('QRCodeModal.accessibility.closeButton')}
             >
               <QrCode className="h-6 w-6" />

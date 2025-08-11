@@ -189,28 +189,69 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     setIsModalOpen(true);
   };
 
-  const handleUpdateTable = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    // API call to update table
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsModalOpen(false);
-      setEditingTable(null);
-      // Tabloları yeniden yükle
-      fetchTablesAndCategories();
-    }, 1000);
-  };
+  // Fixed: Remove the conflicting handleUpdateTable function since the modal handles updates
+  // The modal will call onSuccess when the operation completes successfully
 
   const handleDeleteTable = async (id: number) => {
+    if (!window.confirm(t('TableManagement.confirmDelete'))) {
+      return;
+    }
+
+    if (!selectedBranchForTables?.branchId) {
+      setError(t('TableManagement.error.branchRequired'));
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    // Store the table to revert if needed
+    const tableToDelete = tables.find((table) => table.id === id);
+    if (!tableToDelete) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Optimistic UI update: Remove table from UI immediately
+    setTables((prev) => prev.filter((table) => table.id !== id));
+
     try {
-      await branchService.deleteTable(id);
-      logger.info('Table deleted:', id);
-      // Tabloları yeniden yükle
-      fetchTablesAndCategories();
-    } catch (error) {
+      // Pass branch ID to ensure proper branch context
+      await branchService.deleteTable(id, selectedBranchForTables.branchId);
+      logger.info('Table deleted successfully:', { id, branchId: selectedBranchForTables.branchId });
+      
+      // Optionally refresh data to ensure consistency
+      // fetchTablesAndCategories();
+    } catch (error: any) {
       logger.error('Table deletion error:', error);
-      setError(t('TableManagement.error.deleteFailed'));
+      
+      // Revert optimistic update on error
+      setTables((prev) => [...prev, tableToDelete].sort((a, b) => a.id - b.id));
+      
+      // Set user-friendly error message based on the actual API response
+      let errorMessage = t('TableManagement.error.deleteFailed');
+      
+      if (error.response?.status === 400) {
+        // Check if it's the specific branch error
+        if (error.response?.data?.message?.includes('Branch information')) {
+          errorMessage = 'Branch information could not be determined. Please refresh and try again.';
+        } else {
+          errorMessage = t('TableManagement.error.invalidRequest');
+        }
+      } else if (error.response?.status === 404) {
+        errorMessage = t('TableManagement.error.tableNotFound');
+      } else if (error.response?.status === 409) {
+        errorMessage = t('TableManagement.error.tableInUse');
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setError(errorMessage);
+      
+      // Clear error after 5 seconds
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -235,10 +276,14 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     } catch (error) {
       logger.error('Masa durumu güncellenirken hata:', error);
       setError(t('TableManagement.error.statusUpdateFailed'));
+      
       // Hata olursa eski haline döndür
       setTables(prev => prev.map(table =>
         table.id === id ? { ...table, isActive: !newStatus } : table
       ));
+      
+      // Clear error after 5 seconds
+      setTimeout(() => setError(null), 5000);
     }
   };
 
@@ -262,7 +307,52 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     };
   };
 
-  if (error) {
+  const handleModalSuccess = () => {
+    // Called when modal operations (create/update) succeed
+    fetchTablesAndCategories();
+    setIsModalOpen(false);
+    setEditingTable(null);
+    setError(null);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setEditingTable(null);
+    setError(null);
+  };
+
+  // Display error messages
+  const renderError = () => {
+    if (!error) return null;
+    
+    return (
+      <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+        <div className="flex items-center">
+          <div className="flex-shrink-0">
+            <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="ml-3">
+            <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+          </div>
+          <div className="ml-auto pl-3">
+            <button
+              onClick={() => setError(null)}
+              className="inline-flex text-red-400 hover:text-red-600 dark:hover:text-red-300"
+            >
+              <span className="sr-only">Dismiss</span>
+              <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  if (error && !tables.length) {
     return (
       <div className={`flex items-center justify-center min-h-[400px] ${isRTL ? 'text-right' : 'text-left'}`}>
         <div className="text-center">
@@ -338,6 +428,9 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
           {t('tableManagement.categories.addCategory')}
         </button>
       </div>
+
+      {/* Error Display */}
+      {renderError()}
 
       {/* İçerik */}
       {!selectedBranchForTables ? (
@@ -434,25 +527,19 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
       {/* QR Code Modal */}
       <QRCodeModal
         isOpen={isModalOpen}
-        onClose={() => {
-          setIsModalOpen(false);
-          setEditingTable(null);
-        }}
+        onClose={handleModalClose}
         qrData={getModalTableData()}
         onChange={(field, value) => {
           if (editingTable) {
             setEditingTable({ ...editingTable, [field]: value });
           }
         }}
-        onSubmit={handleUpdateTable}
+        onSubmit={() => {}} // Remove this since modal handles its own submit
         isSubmitting={isSubmitting}
         isEditMode={!!editingTable}
         selectedBranchForEdit={selectedBranchForTables}
         categories={categories}
-        onSuccess={() => {
-          // Masa oluşturulduktan sonra verileri yenile
-          fetchTablesAndCategories();
-        }}
+        onSuccess={handleModalSuccess}
       />
 
       <TableCategoryModal

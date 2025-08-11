@@ -21,7 +21,7 @@ interface CreateMenuTableDto {
   displayOrder: number | null;
   isActive: boolean;
 }
-interface UpdateMenuTableDto {
+export interface UpdateMenuTableDto {
   id: number;
   menuTableName: string | null;
   menuTableCategoryId: number;
@@ -494,18 +494,19 @@ class BranchService {
   }
 
   // Delete a table
-  async deleteTable(tableId: number): Promise<void> {
-    try {
-      logger.info('Masa silme API çağrısı başlatılıyor', { tableId }, { prefix: 'BranchService' });
-      
-      await httpClient.delete(`/api/branches/tables/${tableId}`);
-      
-      logger.info('Masa başarıyla silindi', { tableId }, { prefix: 'BranchService' });
-    } catch (error) {
-      logger.error('Masa silinirken hata oluştu', error, { prefix: 'BranchService' });
-      throw error;
-    }
+async deleteTable(tableId: number, branchId: number): Promise<void> {
+  try {
+    logger.info('Masa silme API çağrısı başlatılıyor', { tableId, branchId }, { prefix: 'BranchService' });
+    
+    // Include branchId as query parameter
+    await httpClient.delete(`/api/branches/tables/${tableId}?branchId=${branchId}`);
+    
+    logger.info('Masa başarıyla silindi', { tableId, branchId }, { prefix: 'BranchService' });
+  } catch (error) {
+    logger.error('Masa silinirken hata oluştu', error, { prefix: 'BranchService' });
+    throw error;
   }
+}
 
   // Fix the existing toggleTableStatus method (it should toggle isActive, not isOccupied for status changes)
   async toggleTableStatus(tableId: number, branchId: number, isActive: boolean): Promise<void> {
