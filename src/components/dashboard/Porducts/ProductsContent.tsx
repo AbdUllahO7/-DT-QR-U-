@@ -69,6 +69,7 @@ const ProductsContent: React.FC = () => {
   const [isReorderingProducts, setIsReorderingProducts] = useState(false);
   const [reorderingCategoryId, setReorderingCategoryId] = useState<number | null>(null);
   const [isIngredientUpdateModalOpen, setIsIngredientUpdateModalOpen] = useState(false);
+
   const [selectedProductForIngredientUpdate, setSelectedProductForIngredientUpdate] = useState<{
     productId: number;
     productName: string;
@@ -81,23 +82,29 @@ const ProductsContent: React.FC = () => {
   } | null>(null);
   
   const handleOpenAddonsManagement = (productId: number, productName: string) => {
-
-    
-    if (!productId || productId === 0 || isNaN(productId)) {
-      console.error('❌ Invalid productId provided:', productId);
-      alert(t('productsContent.error.invalidData'));
-      return;
-    }
-    
-    if (!productName || productName.trim() === '') {
-      console.error('❌ Invalid productName provided:', productName);
-      alert(t('productsContent.error.invalidData'));
-      return;
-    }
-    
- 
-    setIsAddonsModalOpen(true);
-  };  
+  
+  if (!productId || productId === 0 || isNaN(productId)) {
+    console.error('❌ Invalid productId provided:', productId);
+    alert(t('productsContent.error.invalidData'));
+    return;
+  }
+  
+  if (!productName || productName.trim() === '') {
+    console.error('❌ Invalid productName provided:', productName);
+    alert(t('productsContent.error.invalidData'));
+    return;
+  }
+  
+  // THIS WAS MISSING - Set the selected product for addons
+  setSelectedProductForAddons({ 
+    productId: productId, 
+    productName: productName 
+  });
+  
+  // Then open the modal
+  setIsAddonsModalOpen(true);
+  
+};
   
   const [deleteConfig, setDeleteConfig] = useState<{
     type: 'product' | 'category';
@@ -106,6 +113,7 @@ const ProductsContent: React.FC = () => {
     message: string;
     onConfirm: () => Promise<void>;
   } | null>(null);
+
   const [selectedCategoryForProduct, setSelectedCategoryForProduct] = useState<string>('');
   const [selectedCategoryForEdit, setSelectedCategoryForEdit] = useState<Category | null>(null);
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<Product | null>(null);
@@ -205,9 +213,12 @@ const ProductsContent: React.FC = () => {
   };
 
   const handleEditProduct = (productId: number) => {
+    console.log("onEditProduct" , productId)
     const productToEdit = categories
       .flatMap(cat => cat.products)
       .find(product => product.id === productId);
+
+      console.log("productToEdit",productToEdit)
     
     if (productToEdit) {
       setSelectedProductForEdit(productToEdit);
