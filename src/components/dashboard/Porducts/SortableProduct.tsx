@@ -49,7 +49,7 @@ export const SortableProduct: React.FC<{
   onEdit: (productId: number) => void;
   onDelete: (productId: number) => void;
   onOpenAddonsManagement?: (productId: number, productName: string) => void; 
-}> = ({ product, isDark, onEdit, onDelete, onOpenAddonsManagement }) => {
+}> = ({ product,  onEdit, onDelete, onOpenAddonsManagement }) => {
   const { t, isRTL } = useLanguage();
   const [imageError, setImageError] = useState(false);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -67,6 +67,7 @@ export const SortableProduct: React.FC<{
     transition,
     isDragging
   } = useSortable({ id: product.id });
+
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -196,7 +197,6 @@ export const SortableProduct: React.FC<{
                           <AlertCircle 
                             className={`h-3 w-3 text-yellow-500 ${isRTL ? 'mr-1' : 'ml-1'}`}
                             aria-label={t('SortableProduct.accessibility.allergenWarning')}
-                            title={t('SortableProduct.allergenic')}
                           />
                         )}
                         {index < ingredients.length - 1 && <span className={isRTL ? 'mr-1' : 'ml-1'}>,</span>}
@@ -271,7 +271,6 @@ export const SortableProduct: React.FC<{
                   {/* Addons Management Button */}
                   <button
                     onClick={() => {
-              
                       if (onOpenAddonsManagement) {
                         onOpenAddonsManagement(product.id, product.name);
                       } 
@@ -284,7 +283,9 @@ export const SortableProduct: React.FC<{
                   </button>
                   
                   <button
-                    onClick={() => onEdit(product.id)}
+                    onClick={(e) => {
+                      onEdit(product.id)
+                    }}
                     className="p-1 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
                     title={t('SortableProduct.editProduct')}
                     aria-label={t('SortableProduct.accessibility.editButton')}

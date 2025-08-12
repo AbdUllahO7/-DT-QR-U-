@@ -1,6 +1,7 @@
 import { httpClient } from '../utils/http';
 import { logger } from '../utils/logger';
 import type { Category, CategoryReorderRequest, Product, ProductReorderRequest } from '../types/dashboard';
+import { productAddonsService } from './ProductAddonsService';
 
 // API Response interfaces (what the backend actually returns)
 interface APIProduct {
@@ -242,28 +243,84 @@ class ProductService {
   }
 
   // Ürün silme (malzemeler dahil)
-  async deleteProduct(productId: number): Promise<void> {
+// Debug version to identify the exact constraint issue
+async deleteProduct(productId: number): Promise<void> {
+  try {
+    logger.info('🔍 Starting product deletion debug process', { productId });
+    
+    // Step 1: Check what related data exists
     try {
-      logger.info('Ürün silme isteği gönderiliyor', { productId });
+      const ingredients = await this.getProductIngredients(productId);
+      logger.info('📊 Product ingredients found', { 
+        productId, 
+        ingredientCount: ingredients.length,
+        ingredients: ingredients.map(i => ({ id: i.id, name: i.name }))
+      });
       
-      // First, try to delete product ingredients (ingredientId = 0 for now)
-      try {
-        await this.deleteProductIngredient(productId, 0);
-        logger.info('Ürün malzemeleri silindi', { productId });
-      } catch (ingredientError) {
-        // If ingredient deletion fails, log it but continue with product deletion
-        logger.warn('Ürün malzemesi silinemedi, ürün silinmeye devam ediliyor:', ingredientError);
-      }
+      // Try to get addons
+      const addons = await productAddonsService.getProductAddons(productId);
+      logger.info('📊 Product addons found', { 
+        productId, 
+        addonCount: addons.length,
+        addons: addons.map(a => ({ id: a.id, addonProductId: a.addonProductId }))
+      });
       
-      // Then delete the product itself
-      const numericId = productId;
-      await httpClient.delete(`${this.baseUrl}/products/${numericId}`);
-      logger.info('Ürün başarıyla silindi', { productId });
-    } catch (error: any) {
-      logger.error('❌ Ürün silinirken hata:', error);
-      throw error;
+      // Log the product itself
+      const allCategories = await this.getCategories();
+      const product = allCategories.flatMap(cat => cat.products).find(p => p.id === productId);
+      logger.info('📊 Product details', { productId, product });
+      
+    } catch (checkError: any) {
+      logger.error('🔍 Error checking related data:', checkError);
     }
+    
+    // Step 2: Try minimal delete first (just ingredients)
+    try {
+      logger.info('🧹 Attempting to clean ingredients only');
+      const ingredients = await this.getProductIngredients(productId);
+      
+      for (const ingredient of ingredients) {
+        const ingredientId = ingredient.ingredientId || ingredient.id;
+        await this.removeIngredientFromProduct(productId, ingredientId);
+        logger.info('✅ Ingredient deleted', { productId, ingredientId });
+      }
+    } catch (ingredientError: any) {
+      logger.error('❌ Ingredient deletion failed:', {
+        productId,
+        error: ingredientError.message,
+        response: ingredientError.response?.data
+      });
+    }
+    
+    // Step 3: Try to delete the product and capture the exact error
+    logger.info('🗑️ Attempting product deletion');
+    
+    const deleteResponse = await httpClient.delete(`${this.baseUrl}/products/${productId}`)
+      .catch(error => {
+        logger.error('❌ Product deletion failed with detailed error:', {
+          productId,
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          errorData: error.response?.data,
+          errorMessage: error.message,
+          stack: error.stack
+        });
+        throw error;
+      });
+    
+    logger.info('✅ Product successfully deleted', { productId });
+    
+  } catch (error: any) {
+    logger.error('💥 Complete deletion process failed:', {
+      productId,
+      errorType: error.constructor.name,
+      message: error.message,
+      response: error.response?.data,
+      stack: error.stack
+    });
+    throw error;
   }
+}
 
   // Kategori silme
   async deleteCategory(categoryId: number): Promise<void> {
