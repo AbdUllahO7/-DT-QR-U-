@@ -34,7 +34,15 @@ export const tr = {
     lastMonth: 'Geçen Ay',
     retry: 'Tekrar Dene'
   },
+  restaurantManagement : {
+    tabs : {
+      general : "Genel",
+       legal : "Yasal",
+        about : "Hakkında",
+    },
+    GenelBilgiler : "Genel Bilgiler"
 
+  },
   // Navigation
   nav: {
     home: 'Ana Sayfa',
@@ -2455,5 +2463,240 @@ AddQRCodeCard: {
     addButton: 'Yeni masa ekle butonu',
     addCard: 'Yeni masa ekle kartı'
   }
-}
+},
+  userManagementPage: {
+    // Page header and navigation
+    title: 'Kullanıcı Yönetimi',
+    loading: 'Yükleniyor...',
+    error: {
+      title: 'Hata',
+      loadFailed: 'Kullanıcılar yüklenirken hata oluştu',
+      rolesLoadFailed: 'Roller yüklenirken hata oluştu',
+      retry: 'Tekrar Dene',
+      createUserFailed: 'Kullanıcı oluşturulamadı',
+      createRoleFailed: 'Rol oluşturulamadı'
+    },
+
+    // Statistics
+    stats: {
+      total: 'Toplam',
+      active: 'Aktif',
+      users: 'kullanıcı',
+      roles: 'rol',
+      system: 'Sistem',
+      custom: 'Özel',
+      totalUsers: 'Toplam Kullanıcı',
+      owner: 'Sahip',
+      manager: 'Müdür', 
+      staff: 'Personel'
+    },
+
+    // Tabs
+    tabs: {
+      users: 'Kullanıcılar',
+      roles: 'Roller'
+    },
+
+    // Controls and filters
+    controls: {
+      search: 'Kullanıcı, email veya telefon ara...',
+      searchRoles: 'Rol, açıklama veya kategori ara...',
+      filterAll: 'Tüm Kategoriler',
+      filterOwner: 'Restoran Sahibi',
+      filterManager: 'Şube Müdürü',
+      filterStaff: 'Personel',
+      filterActive: 'Aktif Kullanıcılar',
+      filterInactive: 'Pasif Kullanıcılar',
+      addUser: 'Kullanıcı Ekle',
+      addRole: 'Rol Ekle'
+    },
+
+    // Table headers
+    table: {
+      user: 'Kullanıcı',
+      contact: 'İletişim',
+      roles: 'Roller',
+      location: 'Restoran/Şube',
+      status: 'Durum',
+      registrationDate: 'Kayıt Tarihi',
+      actions: 'İşlemler',
+      role: 'Rol',
+      description: 'Açıklama',
+      statistics: 'İstatistikler',
+      position: 'Konum'
+    },
+
+    // Status indicators
+    status: {
+      active: 'Aktif',
+      inactive: 'Pasif',
+      enabled: 'Etkin',
+      disabled: 'Devre Dışı',
+      systemRole: 'Sistem Rolü'
+    },
+
+    // Role types
+    roleTypes: {
+      RestaurantOwner: 'Sahip',
+      BranchManager: 'Müdür',
+      Staff: 'Personel'
+    },
+
+    // Actions menu
+    actions: {
+      viewDetails: 'Detayları Görüntüle',
+      edit: 'Düzenle',
+      activate: 'Aktifleştir',
+      deactivate: 'Devre Dışı Bırak'
+    },
+
+    // No results messages
+    noResults: {
+      usersNotFound: 'Kullanıcı Bulunamadı',
+      rolesNotFound: 'Rol Bulunamadı',
+      usersEmpty: 'Henüz kullanıcı eklenmemiş.',
+      rolesEmpty: 'Henüz rol eklenmemiş.',
+      searchEmpty: 'Arama kriterlerinize uygun kullanıcı bulunamadı.',
+      searchEmptyRoles: 'Arama kriterlerinize uygun rol bulunamadı.'
+    },
+
+    // Create Role Modal
+    createRole: {
+      title: 'Yeni Rol Oluştur',
+      basicInfo: 'Temel Bilgiler',
+      roleName: 'Rol Adı',
+      roleNamePlaceholder: 'Örn: Şube Müdürü',
+      category: 'Kategori',
+      categoryPlaceholder: 'Örn: Yönetim',
+      description: 'Açıklama',
+      descriptionPlaceholder: 'Rolün görev ve sorumluluklarını açıklayın...',
+      restaurantId: 'Restoran ID',
+      restaurantIdPlaceholder: 'Varsayılan: Mevcut restoran',
+      branchId: 'Şube ID',
+      branchIdPlaceholder: 'Boş: Tüm şubeler',
+      isActive: 'Rol aktif olsun',
+      permissions: 'İzinler',
+      permissionsSelected: 'seçildi',
+      cancel: 'İptal',
+      create: 'Rol Oluştur',
+      creating: 'Oluşturuluyor...',
+      validation: {
+        nameRequired: 'Rol adı en az 3 karakter olmalıdır',
+        nameMaxLength: 'Rol adı en fazla 50 karakter olabilir',
+        descriptionMaxLength: 'Açıklama en fazla 200 karakter olabilir',
+        categoryMaxLength: 'Kategori en fazla 50 karakter olabilir'
+      }
+    },
+
+    // Create User Modal
+    createUser: {
+      title: 'Yeni Kullanıcı Oluştur',
+      personalInfo: 'Kişisel Bilgiler',
+      contactInfo: 'İletişim Bilgileri',
+      passwordInfo: 'Şifre Bilgileri',
+      locationInfo: 'Konum Bilgileri',
+      roleAssignment: 'Yetki ve Rol Ataması',
+      
+      // Form fields
+      firstName: 'Ad',
+      firstNamePlaceholder: 'Örn: Ahmet',
+      lastName: 'Soyad',
+      lastNamePlaceholder: 'Örn: Yılmaz',
+      userName: 'Kullanıcı Adı',
+      userNamePlaceholder: 'Otomatik oluşturulacak',
+      userNameHint: 'Boş bırakılırsa otomatik olarak ad.soyad formatında oluşturulacak',
+      email: 'Email',
+      emailPlaceholder: 'ahmet@example.com',
+      phone: 'Telefon',
+      phonePlaceholder: '+90 555 123 4567',
+      password: 'Şifre',
+      passwordPlaceholder: 'En az 6 karakter',
+      passwordConfirm: 'Şifre Tekrarı',
+      passwordConfirmPlaceholder: 'Şifrenizi tekrar giriniz',
+      
+      // Location
+      locationType: 'Konum Türü',
+      restaurant: 'Restoran',
+      branch: 'Şube',
+      restaurantId: 'Restoran ID',
+      restaurantIdPlaceholder: 'Örn: 123',
+      branchId: 'Şube ID',
+      branchIdPlaceholder: 'Örn: 456',
+      profileImage: 'Profil Resmi URL',
+      profileImagePlaceholder: 'https://example.com/avatar.jpg',
+      userCreatorId: 'Oluşturan Kullanıcı ID',
+      userCreatorIdPlaceholder: 'Mevcut kullanıcı ID',
+      
+      // Role assignment
+      assignmentType: 'Atama Türü',
+      rolesSelection: 'Mevcut Rollerden Seçim (Önerilen)',
+      permissionsSelection: 'Doğrudan İzin Seçimi (Şu anda desteklenmiyor)',
+      apiWarning: '⚠️ API sadece rol tabanlı kullanıcı oluşturmayı destekliyor. Önce rol oluşturup, sonra kullanıcıya atayın.',
+      rolesLabel: 'Roller',
+      rolesSelected: 'seçildi',
+      
+      // No roles state
+      noRoles: {
+        title: 'Henüz rol tanımlanmamış',
+        description: 'Kullanıcı oluşturmadan önce roller sekmesinden rol oluşturun',
+        tip: '💡 İpucu: Önce "Roller" sekmesine geçerek gerekli rolleri oluşturun',
+        warning: 'Rol Gerekli',
+        warningDescription: 'Kullanıcı oluşturmak için en az bir rol tanımlanmalı. "Roller" sekmesinden yeni rol oluşturabilirsiniz.'
+      },
+      
+      isActive: 'Kullanıcı aktif olsun',
+      cancel: 'İptal',
+      create: 'Kullanıcı Oluştur',
+      creating: 'Oluşturuluyor...',
+      createRoleFirst: 'Önce Rol Oluşturun',
+      
+      // Validation messages
+      validation: {
+        nameRequired: 'Ad alanı zorunludur',
+        nameMaxLength: 'Ad en fazla 50 karakter olabilir',
+        surnameRequired: 'Soyad alanı zorunludur',
+        surnameMaxLength: 'Soyad en fazla 50 karakter olabilir',
+        emailRequired: 'Email alanı zorunludur',
+        emailInvalid: 'Geçerli bir email adresi giriniz',
+        passwordRequired: 'Şifre en az 6 karakter olmalıdır',
+        passwordMaxLength: 'Şifre en fazla 100 karakter olabilir',
+        passwordConfirmRequired: 'Şifre tekrarı zorunludur',
+        passwordMismatch: 'Şifreler eşleşmiyor',
+        phoneRequired: 'Telefon numarası zorunludur',
+        restaurantIdRequired: 'Geçerli bir restoran ID giriniz',
+        branchIdRequired: 'Geçerli bir şube ID giriniz',
+        rolesRequired: 'En az bir rol seçmelisiniz',
+        permissionsNotSupported: 'API sadece rol tabanlı kullanıcı oluşturmayı destekliyor. Lütfen mevcut rollerden birini seçin.'
+      }
+    },
+
+    // Role details
+    roleDetails: {
+      userCount: 'Kullanıcı Sayısı',
+      permissionCount: 'İzin Sayısı',
+      restaurant: 'Restoran',
+      branch: 'Şube',
+      noDescription: 'Açıklama bulunmuyor',
+      users: 'kullanıcı',
+      permissions: 'izin'
+    },
+
+    // Permission categories
+    permissionCategories: {
+      'User Management': 'Kullanıcı Yönetimi',
+      'Restaurant Management': 'Restoran Yönetimi', 
+      'Branch Management': 'Şube Yönetimi',
+      'Order Management': 'Sipariş Yönetimi',
+      'Product Management': 'Ürün Yönetimi',
+      'Analytics': 'Analitik'
+    },
+
+    // Success messages
+    success: {
+      userCreated: 'Kullanıcı başarıyla oluşturuldu',
+      roleCreated: 'Rol başarıyla oluşturuldu',
+      userUpdated: 'Kullanıcı başarıyla güncellendi',
+      roleUpdated: 'Rol başarıyla güncellendi'
+    }
+  }
 }; 

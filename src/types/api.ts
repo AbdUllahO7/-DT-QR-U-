@@ -425,16 +425,19 @@ export interface CreateRoleResponse {
 // User Creation Types
 export interface CreateUserDto {
   name: string;
-  surname: string;
+  surName: string;
   email: string;
   userName: string;
   phoneNumber?: string | null;
   password: string;
   restaurantId?: number | null;
+  passwordConfirm:string,
   branchId?: number | null;
   roleIds?: string[] | null;
   profileImage?: string | null;
   isActive: boolean;
+  userCreatorId:string,
+  roleIdsList:string[],
 }
 
 export interface CreateUserResponse {

@@ -21,6 +21,7 @@ import { decodeToken } from '../utils/http';
 import { sanitizePlaceholder } from '../utils/sanitize';
 import { logger } from '../utils/logger';
 import IngredientsContent from '../components/dashboard/Ingredients/Ingredients';
+import SetupSidebar from '../components/dashboard/layout/SetupSidebar';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();
@@ -35,7 +36,6 @@ const Dashboard: React.FC = () => {
     return path;
   });
 
-  
   // URL değiştikçe sekme güncelle
   useEffect(() => {
     const path = location.pathname.split('/')[2] || 'overview';
@@ -77,11 +77,14 @@ const Dashboard: React.FC = () => {
       if (tokenName) return tokenName;
     }
 
-    return ''; // Son çare boş string
+    return ''; 
   })();
 
   const branchName = selectedBranch?.name ?? null;
   const isBranchOnly = false;
+
+  // Determine which sidebar to show
+  const hasRestaurantInfo = !infoLoading && !infoError && restaurantInfo !== null;
 
   const handleLogout = () => {
     // Authentication durumunu temizle (token, localStorage vb.)
@@ -114,20 +117,55 @@ const Dashboard: React.FC = () => {
     setSelectedBranch(null);
   };
 
+  // Handle restaurant setup completion
+  const handleRestaurantSetup = () => {
+    // Refetch restaurant info after setup
+    setInfoLoading(true);
+    restaurantService
+      .getRestaurantManagementInfo()
+      .then(data => {
+        setRestaurantInfo(data);
+        setInfoLoading(false);
+        setInfoError(null);
+        // Navigate to overview after successful setup
+        navigate('/dashboard/overview');
+      })
+      .catch(err => {
+        logger.error('Restaurant bilgileri alınırken hata', err);
+        setInfoError('Restaurant bilgileri alınamadı');
+        setInfoLoading(false);
+      });
+  };
+
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-gray-900" >
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        restaurantName={resolvedRestaurantName}
-        branchName={branchName}
-        isBranchOnly={isBranchOnly}
-        onLogout={handleLogout}
-        onSelectBranch={handleSelectBranch}
-        onBackToMain={handleBackToMain}
-      />
+    <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
+      {/* Conditional Sidebar Rendering */}
+      {hasRestaurantInfo ? (
+        <Sidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          restaurantName={resolvedRestaurantName}
+          branchName={branchName}
+          isBranchOnly={isBranchOnly}
+          onLogout={handleLogout}
+          onSelectBranch={handleSelectBranch}
+          onBackToMain={handleBackToMain}
+        />
+      ) : (
+        <SetupSidebar
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
+          isLoading={infoLoading}
+          error={infoError}
+          onLogout={handleLogout}
+          onRetry={handleRestaurantSetup}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+        />
+      )}
+      
       <div className={`flex-1 flex flex-col overflow-hidden ${isRTL ? 'lg:mr-64' : 'lg:ml-64'}`}>
         <Navbar
           toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -144,21 +182,37 @@ const Dashboard: React.FC = () => {
           <NetworkStatus showAlways={false} />
           
           {/* Content */}
-          {activeTab === 'overview' && <Overview />}
-          {activeTab === 'orders' && <Orders />}
-          {activeTab === 'products' && <ProductsContent />}
-          {activeTab === 'ingredients' && <IngredientsContent />}
-          {activeTab === 'branches' && <BranchManagement />}
-          {activeTab === 'tables' && <TableManagement selectedBranch={selectedBranch} />}
-          {activeTab === 'restaurant-management' && <RestaurantManagement />}
-          {activeTab === 'users' && <UserManagement />}
-          {activeTab === 'profile' && <Profile />}
-          {activeTab === 'settings' && <Settings />}
-          {activeTab === 'subscription' && <Subscription />}
+          {hasRestaurantInfo ? (
+            <>
+              {activeTab === 'overview' && <Overview />}
+              {activeTab === 'orders' && <Orders />}
+              {activeTab === 'products' && <ProductsContent />}
+              {activeTab === 'ingredients' && <IngredientsContent />}
+              {activeTab === 'branches' && <BranchManagement />}
+              {activeTab === 'tables' && <TableManagement selectedBranch={selectedBranch} />}
+              {activeTab === 'restaurant-management' && <RestaurantManagement />}
+              {activeTab === 'users' && <UserManagement />}
+              {activeTab === 'profile' && <Profile />}
+              {activeTab === 'settings' && <Settings />}
+              {activeTab === 'subscription' && <Subscription />}
+            </>
+          ) : (
+            <>
+              {/* Limited content when restaurant info is not available */}
+              {activeTab === 'restaurant-management' && <RestaurantManagement />}
+              {activeTab === 'profile' && <Profile />}
+              {activeTab === 'settings' && <Settings />}
+              {activeTab === 'subscription' && <Subscription />}
+              {/* Default to restaurant management if no valid tab */}
+              {!['restaurant-management', 'profile', 'settings', 'subscription'].includes(activeTab) && (
+                <RestaurantManagement />
+              )}
+            </>
+          )}
         </main>
       </div>
     </div>
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

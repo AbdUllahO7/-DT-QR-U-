@@ -39,7 +39,9 @@ export const en = {
       general : "General",
        legal : "Legal",
         about : "About",
-    }
+    },
+    GeneralInformation: "General Information",
+    restaurantLogo : ""
   },
   // Navigation
   nav: {
@@ -2462,6 +2464,241 @@ TableCategoryModal: {
       addButton: 'Add new table button',
       addCard: 'Add new table card'
     }
-  }
+  },
+  // translations/en/userManagement.ts
+userManagementPage: {
+  // Page header and navigation
+  title: 'User Management',
+  loading: 'Loading...',
+  error: {
+    title: 'Error',
+    loadFailed: 'Failed to load users',
+    rolesLoadFailed: 'Failed to load roles',
+    retry: 'Try Again',
+    createUserFailed: 'Failed to create user',
+    createRoleFailed: 'Failed to create role'
+  },
 
+  // Statistics
+  stats: {
+    total: 'Total',
+    active: 'Active',
+    users: 'users',
+    roles: 'roles',
+    system: 'System',
+    custom: 'Custom',
+    totalUsers: 'Total Users',
+    owner: 'Owner',
+    manager: 'Manager',
+    staff: 'Staff'
+  },
+
+  // Tabs
+  tabs: {
+    users: 'Users',
+    roles: 'Roles'
+  },
+
+  // Controls and filters
+  controls: {
+    search: 'Search user, email or phone...',
+    searchRoles: 'Search role, description or category...',
+    filterAll: 'All Categories',
+    filterOwner: 'Restaurant Owner',
+    filterManager: 'Branch Manager',
+    filterStaff: 'Staff',
+    filterActive: 'Active Users',
+    filterInactive: 'Inactive Users',
+    addUser: 'Add User',
+    addRole: 'Add Role'
+  },
+
+  // Table headers
+  table: {
+    user: 'User',
+    contact: 'Contact',
+    roles: 'Roles',
+    location: 'Restaurant/Branch',
+    status: 'Status',
+    registrationDate: 'Registration Date',
+    actions: 'Actions',
+    role: 'Role',
+    description: 'Description',
+    statistics: 'Statistics',
+    position: 'Location'
+  },
+
+  // Status indicators
+  status: {
+    active: 'Active',
+    inactive: 'Inactive',
+    enabled: 'Enabled',
+    disabled: 'Disabled',
+    systemRole: 'System Role'
+  },
+
+  // Role types
+  roleTypes: {
+    RestaurantOwner: 'Owner',
+    BranchManager: 'Manager',
+    Staff: 'Staff'
+  },
+
+  // Actions menu
+  actions: {
+    viewDetails: 'View Details',
+    edit: 'Edit',
+    activate: 'Activate',
+    deactivate: 'Deactivate'
+  },
+
+  // No results messages
+  noResults: {
+    usersNotFound: 'No Users Found',
+    rolesNotFound: 'No Roles Found',
+    usersEmpty: 'No users have been added yet.',
+    rolesEmpty: 'No roles have been added yet.',
+    searchEmpty: 'No users found matching your search criteria.',
+    searchEmptyRoles: 'No roles found matching your search criteria.'
+  },
+
+  // Create Role Modal
+  createRole: {
+    title: 'Create New Role',
+    basicInfo: 'Basic Information',
+    roleName: 'Role Name',
+    roleNamePlaceholder: 'e.g.: Branch Manager',
+    category: 'Category',
+    categoryPlaceholder: 'e.g.: Management',
+    description: 'Description',
+    descriptionPlaceholder: 'Describe the role duties and responsibilities...',
+    restaurantId: 'Restaurant ID',
+    restaurantIdPlaceholder: 'Default: Current restaurant',
+    branchId: 'Branch ID',
+    branchIdPlaceholder: 'Empty: All branches',
+    isActive: 'Role should be active',
+    permissions: 'Permissions',
+    permissionsSelected: 'selected',
+    cancel: 'Cancel',
+    create: 'Create Role',
+    creating: 'Creating...',
+    validation: {
+      nameRequired: 'Role name must be at least 3 characters',
+      nameMaxLength: 'Role name can be maximum 50 characters',
+      descriptionMaxLength: 'Description can be maximum 200 characters',
+      categoryMaxLength: 'Category can be maximum 50 characters'
+    }
+  },
+
+  // Create User Modal
+  createUser: {
+    title: 'Create New User',
+    personalInfo: 'Personal Information',
+    contactInfo: 'Contact Information',
+    passwordInfo: 'Password Information',
+    locationInfo: 'Location Information',
+    roleAssignment: 'Authority and Role Assignment',
+    
+    // Form fields
+    firstName: 'First Name',
+    firstNamePlaceholder: 'e.g.: John',
+    lastName: 'Last Name',
+    lastNamePlaceholder: 'e.g.: Doe',
+    userName: 'Username',
+    userNamePlaceholder: 'Will be auto-generated',
+    userNameHint: 'If left empty, it will be automatically created in firstname.lastname format',
+    email: 'Email',
+    emailPlaceholder: 'john@example.com',
+    phone: 'Phone',
+    phonePlaceholder: '+1 555 123 4567',
+    password: 'Password',
+    passwordPlaceholder: 'At least 6 characters',
+    passwordConfirm: 'Confirm Password',
+    passwordConfirmPlaceholder: 'Re-enter your password',
+    
+    // Location
+    locationType: 'Location Type',
+    restaurant: 'Restaurant',
+    branch: 'Branch',
+    restaurantId: 'Restaurant ID',
+    restaurantIdPlaceholder: 'e.g.: 123',
+    branchId: 'Branch ID',
+    branchIdPlaceholder: 'e.g.: 456',
+    profileImage: 'Profile Image URL',
+    profileImagePlaceholder: 'https://example.com/avatar.jpg',
+    userCreatorId: 'Creator User ID',
+    userCreatorIdPlaceholder: 'Current user ID',
+    
+    // Role assignment
+    assignmentType: 'Assignment Type',
+    rolesSelection: 'Select from Existing Roles (Recommended)',
+    permissionsSelection: 'Direct Permission Selection (Currently not supported)',
+    apiWarning: '⚠️ API only supports role-based user creation. Create roles first, then assign them to users.',
+    rolesLabel: 'Roles',
+    rolesSelected: 'selected',
+    
+    // No roles state
+    noRoles: {
+      title: 'No roles defined yet',
+      description: 'Create roles from the roles tab before creating users',
+      tip: '💡 Tip: Switch to "Roles" tab first to create necessary roles',
+      warning: 'Role Required',
+      warningDescription: 'At least one role must be defined to create a user. You can create new roles from the "Roles" tab.'
+    },
+    
+    isActive: 'User should be active',
+    cancel: 'Cancel',
+    create: 'Create User',
+    creating: 'Creating...',
+    createRoleFirst: 'Create Role First',
+    
+    // Validation messages
+    validation: {
+      nameRequired: 'First name is required',
+      nameMaxLength: 'First name can be maximum 50 characters',
+      surnameRequired: 'Last name is required',
+      surnameMaxLength: 'Last name can be maximum 50 characters',
+      emailRequired: 'Email is required',
+      emailInvalid: 'Please enter a valid email address',
+      passwordRequired: 'Password must be at least 6 characters',
+      passwordMaxLength: 'Password can be maximum 100 characters',
+      passwordConfirmRequired: 'Password confirmation is required',
+      passwordMismatch: 'Passwords do not match',
+      phoneRequired: 'Phone number is required',
+      restaurantIdRequired: 'Please enter a valid restaurant ID',
+      branchIdRequired: 'Please enter a valid branch ID',
+      rolesRequired: 'You must select at least one role',
+      permissionsNotSupported: 'API only supports role-based user creation. Please select from existing roles.'
+    }
+  },
+
+  // Role details
+  roleDetails: {
+    userCount: 'User Count',
+    permissionCount: 'Permission Count',
+    restaurant: 'Restaurant',
+    branch: 'Branch',
+    noDescription: 'No description available',
+    users: 'users',
+    permissions: 'permissions'
+  },
+
+  // Permission categories
+  permissionCategories: {
+    'User Management': 'User Management',
+    'Restaurant Management': 'Restaurant Management', 
+    'Branch Management': 'Branch Management',
+    'Order Management': 'Order Management',
+    'Product Management': 'Product Management',
+    'Analytics': 'Analytics'
+  },
+
+  // Success messages
+  success: {
+    userCreated: 'User created successfully',
+    roleCreated: 'Role created successfully',
+    userUpdated: 'User updated successfully',
+    roleUpdated: 'Role updated successfully'
+  }
+}
 }; 
