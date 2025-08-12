@@ -48,8 +48,7 @@ const mockPermissions: PermissionOption[] = [
 ];
 
 const UserManagement: React.FC = () => {
-  const { t, language } = useLanguage();
-  const isRTL = language === 'ar';
+  const { t, isRTL } = useLanguage();
   const [users, setUsers] = useState<UserData[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -159,17 +158,17 @@ const UserManagement: React.FC = () => {
         setUsers(usersData);
         logger.info('Kullanıcılar başarıyla yüklendi', usersData, { prefix: 'UserManagement' });
       } else {
-        throw new Error(t('userManagement.error.loadFailed'));
+        throw new Error(t('userManagementPage.error.loadFailed'));
       }
     } catch (err: any) {
       logger.error('Kullanıcılar yüklenirken hata', err, { prefix: 'UserManagement' });
-      setError(err.message || t('userManagement.error.loadFailed'));
+      setError(err.message || t('userManagementPage.error.loadFailed'));
       // Hata durumunda boş array set et
       setUsers([]);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   const fetchRoles = useCallback(async () => {
     try {
@@ -181,7 +180,7 @@ const UserManagement: React.FC = () => {
         setRoles(rolesData);
         logger.info('Roller başarıyla yüklendi', rolesData, { prefix: 'UserManagement' });
       } else {
-        throw new Error(t('userManagement.error.rolesLoadFailed'));
+        throw new Error(t('userManagementPage.error.rolesLoadFailed'));
       }
     } catch (err: any) {
       logger.error('Roller yüklenirken hata', err, { prefix: 'UserManagement' });
@@ -189,7 +188,7 @@ const UserManagement: React.FC = () => {
       // Hata durumunda boş array set et
       setRoles([]);
     }
-  }, []);
+  }, [t]);
 
   const handleCreateRole = useCallback(async (roleData: CreateRoleDto) => {
     try {
@@ -203,7 +202,7 @@ const UserManagement: React.FC = () => {
         // Rolleri yeniden yükle
         await fetchRoles();
       } else {
-        throw new Error('Rol oluşturulamadı');
+        throw new Error(t('userManagementPage.error.createRoleFailed'));
       }
     } catch (err: any) {
       logger.error('Rol oluşturulurken hata', err, { prefix: 'UserManagement' });
@@ -211,7 +210,7 @@ const UserManagement: React.FC = () => {
     } finally {
       setIsCreatingRole(false);
     }
-  }, [fetchRoles]);
+  }, [fetchRoles, t]);
 
   const handleCreateUser = useCallback(async (userData: CreateUserDto) => {
     try {
@@ -225,7 +224,7 @@ const UserManagement: React.FC = () => {
         // Kullanıcıları yeniden yükle
         await fetchUsers();
       } else {
-        throw new Error('Kullanıcı oluşturulamadı');
+        throw new Error(t('userManagementPage.error.createUserFailed'));
       }
     } catch (err: any) {
       logger.error('Kullanıcı oluşturulurken hata', err, { prefix: 'UserManagement' });
@@ -233,7 +232,7 @@ const UserManagement: React.FC = () => {
     } finally {
       setIsCreatingUser(false);
     }
-  }, [fetchUsers]);
+  }, [fetchUsers, t]);
 
   // Utility functions with useCallback for performance
   const getStatusColor = useCallback((isActive: boolean) => {
@@ -270,12 +269,12 @@ const UserManagement: React.FC = () => {
 
   const formatDate = useCallback((dateString: string) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('tr-TR', {
+    return new Intl.DateTimeFormat(isRTL ? 'ar-SA' : 'tr-TR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
     }).format(date);
-  }, []);
+  }, [isRTL]);
 
   // User statistics with memoization for performance
   const userStats = useMemo(() => {
@@ -315,7 +314,7 @@ const UserManagement: React.FC = () => {
       <div className="flex items-center justify-center min-h-96">
         <div className="flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="text-gray-600 dark:text-gray-400">{t('dashboard.users.loading')}</p>
+          <p className="text-gray-600 dark:text-gray-400">{t('userManagementPage.loading')}</p>
         </div>
       </div>
     );
@@ -327,13 +326,13 @@ const UserManagement: React.FC = () => {
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
           <div className="bg-red-100 dark:bg-red-900/30 rounded-lg p-6">
-            <h3 className="text-red-800 dark:text-red-400 font-semibold mb-2">Hata</h3>
+            <h3 className="text-red-800 dark:text-red-400 font-semibold mb-2">{t('userManagementPage.error.title')}</h3>
             <p className="text-red-600 dark:text-red-500 mb-4">{error}</p>
             <button
               onClick={fetchUsers}
               className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
-              Tekrar Dene
+              {t('userManagementPage.error.retry')}
             </button>
           </div>
         </div>
@@ -346,15 +345,15 @@ const UserManagement: React.FC = () => {
       {/* Header with Stats */}
       <div className={`flex flex-col lg:flex-row lg:items-center ${isRTL ? 'lg:justify-between' : 'lg:justify-between'} gap-4`}>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dashboard.users.title')}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('userManagementPage.title')}</h2>
           <div className={`flex items-center ${isRTL ? 'gap-4' : 'gap-4'} mt-2 text-sm text-gray-500 dark:text-gray-400`}>
             <span className={`flex items-center ${isRTL ? 'gap-1' : 'gap-1'}`}>
               <Users className="h-4 w-4" />
-              {t('dashboard.users.stats.total')} {activeTab === 'users' ? userStats.total : roleStats.total} {activeTab === 'users' ? t('dashboard.users.stats.users') : t('dashboard.users.stats.roles')}
+              {t('userManagementPage.stats.total')} {activeTab === 'users' ? userStats.total : roleStats.total} {activeTab === 'users' ? t('userManagementPage.stats.users') : t('userManagementPage.stats.roles')}
             </span>
             <span className={`flex items-center ${isRTL ? 'gap-1' : 'gap-1'}`}>
               <UserCheck className="h-4 w-4" />
-              {activeTab === 'users' ? userStats.active : roleStats.active} {t('dashboard.users.stats.active')}
+              {activeTab === 'users' ? userStats.active : roleStats.active} {t('userManagementPage.stats.active')}
             </span>
           </div>
         </div>
@@ -366,7 +365,7 @@ const UserManagement: React.FC = () => {
               <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
                 <Crown className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                 <div>
-                  <p className="text-xs text-purple-600 dark:text-purple-400">Sahip</p>
+                  <p className="text-xs text-purple-600 dark:text-purple-400">{t('userManagementPage.stats.owner')}</p>
                   <p className="font-semibold text-purple-800 dark:text-purple-300">{userStats.owners}</p>
                 </div>
               </div>
@@ -375,7 +374,7 @@ const UserManagement: React.FC = () => {
               <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
                 <Star className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 <div>
-                  <p className="text-xs text-blue-600 dark:text-blue-400">Müdür</p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400">{t('userManagementPage.stats.manager')}</p>
                   <p className="font-semibold text-blue-800 dark:text-blue-300">{userStats.managers}</p>
                 </div>
               </div>
@@ -384,7 +383,7 @@ const UserManagement: React.FC = () => {
               <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
                 <User className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                 <div>
-                  <p className="text-xs text-indigo-600 dark:text-indigo-400">Personel</p>
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400">{t('userManagementPage.stats.staff')}</p>
                   <p className="font-semibold text-indigo-800 dark:text-indigo-300">{userStats.staff}</p>
                 </div>
               </div>
@@ -396,7 +395,7 @@ const UserManagement: React.FC = () => {
               <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
                 <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 <div>
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400">{t('dashboard.users.stats.system')}</p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">{t('userManagementPage.stats.system')}</p>
                   <p className="font-semibold text-emerald-800 dark:text-emerald-300">{roleStats.system}</p>
                 </div>
               </div>
@@ -405,7 +404,7 @@ const UserManagement: React.FC = () => {
               <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
                 <Star className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 <div>
-                  <p className="text-xs text-blue-600 dark:text-blue-400">{t('dashboard.users.stats.custom')}</p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400">{t('userManagementPage.stats.custom')}</p>
                   <p className="font-semibold text-blue-800 dark:text-blue-300">{roleStats.custom}</p>
                 </div>
               </div>
@@ -414,7 +413,7 @@ const UserManagement: React.FC = () => {
               <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
                 <Users className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                 <div>
-                  <p className="text-xs text-indigo-600 dark:text-indigo-400">{t('dashboard.users.stats.totalUsers')}</p>
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400">{t('userManagementPage.stats.totalUsers')}</p>
                   <p className="font-semibold text-indigo-800 dark:text-indigo-300">{roleStats.totalUsers}</p>
                 </div>
               </div>
@@ -436,7 +435,7 @@ const UserManagement: React.FC = () => {
           >
             <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
               <Users className="h-4 w-4" />
-              {t('dashboard.users.tabs.users')}
+              {t('userManagementPage.tabs.users')}
               <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs">
                 {userStats.total}
               </span>
@@ -452,7 +451,7 @@ const UserManagement: React.FC = () => {
           >
             <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
               <Shield className="h-4 w-4" />
-              {t('dashboard.users.tabs.roles')}
+              {t('userManagementPage.tabs.roles')}
               <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs">
                 {roleStats.total}
               </span>
@@ -469,7 +468,7 @@ const UserManagement: React.FC = () => {
             <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
             <input
               type="text"
-              placeholder="Kullanıcı, email veya telefon ara..."
+              placeholder={activeTab === 'users' ? t('userManagementPage.controls.search') : t('userManagementPage.controls.searchRoles')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
@@ -479,16 +478,17 @@ const UserManagement: React.FC = () => {
           {/* Category Filter */}
           <div className="relative">
             <select
+            title='selectedCategory'
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
               className={`appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 ${isRTL ? 'pl-8 pr-4' : 'pr-8'} text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
             >
-              <option value="all">Tüm Kategoriler</option>
-              <option value="RestaurantOwner">Restoran Sahibi</option>
-              <option value="BranchManager">Şube Müdürü</option>
-              <option value="Staff">Personel</option>
-              <option value="active">Aktif Kullanıcılar</option>
-              <option value="inactive">Pasif Kullanıcılar</option>
+              <option value="all">{t('userManagementPage.controls.filterAll')}</option>
+              <option value="RestaurantOwner">{t('userManagementPage.controls.filterOwner')}</option>
+              <option value="BranchManager">{t('userManagementPage.controls.filterManager')}</option>
+              <option value="Staff">{t('userManagementPage.controls.filterStaff')}</option>
+              <option value="active">{t('userManagementPage.controls.filterActive')}</option>
+              <option value="inactive">{t('userManagementPage.controls.filterInactive')}</option>
             </select>
             <ChevronDown className={`absolute ${isRTL ? 'left-2' : 'right-2'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none`} />
           </div>
@@ -502,7 +502,7 @@ const UserManagement: React.FC = () => {
               className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
             >
               <UserPlus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-              Kullanıcı Ekle
+              {t('userManagementPage.controls.addUser')}
             </button>
           )}
 
@@ -513,7 +513,7 @@ const UserManagement: React.FC = () => {
               className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
             >
               <Shield className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-              Rol Ekle
+              {t('userManagementPage.controls.addRole')}
             </button>
           )}
 
@@ -551,12 +551,12 @@ const UserManagement: React.FC = () => {
             <div className="text-center py-12">
               <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                Kullanıcı Bulunamadı
+                {t('userManagementPage.noResults.usersNotFound')}
               </h3>
               <p className="text-gray-500 dark:text-gray-400">
                 {searchTerm || selectedCategory !== 'all' 
-                  ? 'Arama kriterlerinize uygun kullanıcı bulunamadı.'
-                  : 'Henüz kullanıcı eklenmemiş.'}
+                  ? t('userManagementPage.noResults.searchEmpty')
+                  : t('userManagementPage.noResults.usersEmpty')}
               </p>
             </div>
           )}
@@ -579,7 +579,7 @@ const UserManagement: React.FC = () => {
                   <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg">
                     {user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2)}
                   </div>
-                  <div className="ml-3 flex-1 min-w-0">
+                  <div className={`${isRTL ? 'mr-3' : 'ml-3'} flex-1 min-w-0`}>
                     <h3 className="font-semibold text-gray-900 dark:text-white truncate">
                       {user.fullName}
                     </h3>
@@ -595,16 +595,16 @@ const UserManagement: React.FC = () => {
                       <MoreVertical className="h-5 w-5" />
                     </button>
                     {activeDropdown === user.id && (
-                      <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10">
+                      <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10`}>
                         <div className="py-1">
                           <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
-                            Detayları Görüntüle
+                            {t('userManagementPage.actions.viewDetails')}
                           </button>
                           <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
-                            Düzenle
+                            {t('userManagementPage.actions.edit')}
                           </button>
                           <button className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">
-                            {user.isActive ? 'Devre Dışı Bırak' : 'Aktifleştir'}
+                            {user.isActive ? t('userManagementPage.actions.deactivate') : t('userManagementPage.actions.activate')}
                           </button>
                         </div>
                       </div>
@@ -615,21 +615,21 @@ const UserManagement: React.FC = () => {
                 {/* User Info */}
                 <div className="space-y-3">
                   <div className="flex items-center text-sm">
-                    <Phone className="h-4 w-4 text-gray-400 mr-2" />
+                    <Phone className={`h-4 w-4 text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     <span className="text-gray-600 dark:text-gray-300">{user.phoneNumber}</span>
                   </div>
                   <div className="flex items-center text-sm">
-                    <Building className="h-4 w-4 text-gray-400 mr-2" />
+                    <Building className={`h-4 w-4 text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     <span className="text-gray-600 dark:text-gray-300 truncate">{user.restaurantName}</span>
                   </div>
                   {user.branchName && (
                     <div className="flex items-center text-sm">
-                      <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                      <MapPin className={`h-4 w-4 text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                       <span className="text-gray-600 dark:text-gray-300 truncate">{user.branchName}</span>
                     </div>
                   )}
                   <div className="flex items-center text-sm">
-                    <Calendar className="h-4 w-4 text-gray-400 mr-2" />
+                    <Calendar className={`h-4 w-4 text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     <span className="text-gray-600 dark:text-gray-300">{formatDate(user.createdDate)}</span>
                   </div>
                 </div>
@@ -643,16 +643,14 @@ const UserManagement: React.FC = () => {
                         className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(role)}`}
                       >
                         {getRoleIcon(role)}
-                        {role === 'RestaurantOwner' ? 'Sahip' : 
-                         role === 'BranchManager' ? 'Müdür' : 
-                         role === 'Staff' ? 'Personel' : role}
+                        {t(`userManagementPage.roleTypes.${role}`)}
                       </span>
                     ))}
                   </div>
                   <div className="flex items-center justify-between">
                     <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.isActive)}`}>
                       {user.isActive ? <UserCheck className="h-3 w-3" /> : <UserX className="h-3 w-3" />}
-                      {user.isActive ? 'Aktif' : 'Pasif'}
+                      {user.isActive ? t('userManagementPage.status.active') : t('userManagementPage.status.inactive')}
                     </span>
                   </div>
                 </div>
@@ -662,33 +660,33 @@ const UserManagement: React.FC = () => {
         </div>
       )}
 
-      {/* List View */}
+      {/* List View - Users */}
       {viewMode === 'list' && filteredUsers.length > 0 && (
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
               <thead className="bg-gray-50 dark:bg-gray-700/50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Kullanıcı
+                  <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
+                    {t('userManagementPage.table.user')}
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    İletişim
+                  <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
+                    {t('userManagementPage.table.contact')}
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Roller
+                  <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
+                    {t('userManagementPage.table.roles')}
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Restoran/Şube
+                  <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
+                    {t('userManagementPage.table.location')}
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Durum
+                  <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
+                    {t('userManagementPage.table.status')}
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Kayıt Tarihi
+                  <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
+                    {t('userManagementPage.table.registrationDate')}
                   </th>
                   <th scope="col" className="relative px-6 py-3">
-                    <span className="sr-only">İşlemler</span>
+                    <span className="sr-only">{t('userManagementPage.table.actions')}</span>
                   </th>
                 </tr>
               </thead>
@@ -707,7 +705,7 @@ const UserManagement: React.FC = () => {
                           <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
                             {user.fullName.split(' ').map(n => n[0]).join('').slice(0, 2)}
                           </div>
-                          <div className="ml-4">
+                          <div className={`${isRTL ? 'mr-4' : 'ml-4'}`}>
                             <div className="text-sm font-medium text-gray-900 dark:text-white">
                               {user.fullName}
                             </div>
@@ -729,9 +727,7 @@ const UserManagement: React.FC = () => {
                               className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(role)}`}
                             >
                               {getRoleIcon(role)}
-                              {role === 'RestaurantOwner' ? 'Sahip' : 
-                               role === 'BranchManager' ? 'Müdür' : 
-                               role === 'Staff' ? 'Personel' : role}
+                              {t(`userManagementPage.roleTypes.${role}`)}
                             </span>
                           ))}
                         </div>
@@ -745,7 +741,7 @@ const UserManagement: React.FC = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.isActive)}`}>
                           {user.isActive ? <UserCheck className="h-3 w-3" /> : <UserX className="h-3 w-3" />}
-                          {user.isActive ? 'Aktif' : 'Pasif'}
+                          {user.isActive ? t('userManagementPage.status.active') : t('userManagementPage.status.inactive')}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -760,16 +756,16 @@ const UserManagement: React.FC = () => {
                             <MoreVertical className="h-5 w-5" />
                           </button>
                           {activeDropdown === user.id && (
-                            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10">
+                            <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10`}>
                               <div className="py-1">
                                 <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                  Detayları Görüntüle
+                                  {t('userManagementPage.actions.viewDetails')}
                                 </button>
                                 <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                  Düzenle
+                                  {t('userManagementPage.actions.edit')}
                                 </button>
                                 <button className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                  {user.isActive ? 'Devre Dışı Bırak' : 'Aktifleştir'}
+                                  {user.isActive ? t('userManagementPage.actions.deactivate') : t('userManagementPage.actions.activate')}
                                 </button>
                               </div>
                             </div>
@@ -781,9 +777,9 @@ const UserManagement: React.FC = () => {
                 </AnimatePresence>
               </tbody>
             </table>
-                      </div>
           </div>
-        )}
+        </div>
+      )}
         </>
       ) : (
         /* Roles Tab Content */
@@ -793,12 +789,12 @@ const UserManagement: React.FC = () => {
             <div className="text-center py-12">
               <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                Rol Bulunamadı
+                {t('userManagementPage.noResults.rolesNotFound')}
               </h3>
               <p className="text-gray-500 dark:text-gray-400">
                 {searchTerm || selectedCategory !== 'all' 
-                  ? 'Arama kriterlerinize uygun rol bulunamadı.'
-                  : 'Henüz rol eklenmemiş.'}
+                  ? t('userManagementPage.noResults.searchEmptyRoles')
+                  : t('userManagementPage.noResults.rolesEmpty')}
               </p>
             </div>
           )}
@@ -839,16 +835,16 @@ const UserManagement: React.FC = () => {
                           <MoreVertical className="h-5 w-5" />
                         </button>
                         {activeDropdown === role.id && (
-                          <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10">
+                          <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10`}>
                             <div className="py-1">
                               <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                Detayları Görüntüle
+                                {t('userManagementPage.actions.viewDetails')}
                               </button>
                               <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                Düzenle
+                                {t('userManagementPage.actions.edit')}
                               </button>
                               <button className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                {role.isActive ? 'Devre Dışı Bırak' : 'Aktifleştir'}
+                                {role.isActive ? t('userManagementPage.actions.deactivate') : t('userManagementPage.actions.activate')}
                               </button>
                             </div>
                           </div>
@@ -858,28 +854,28 @@ const UserManagement: React.FC = () => {
 
                     {/* Role Description */}
                     <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
-                      {role.description || 'Açıklama bulunmuyor'}
+                      {role.description || t('userManagementPage.roleDetails.noDescription')}
                     </p>
 
                     {/* Role Stats */}
                     <div className="space-y-3 mb-4">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">Kullanıcı Sayısı</span>
+                        <span className="text-gray-500 dark:text-gray-400">{t('userManagementPage.roleDetails.userCount')}</span>
                         <span className="font-medium text-gray-900 dark:text-white">{role.userCount}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">İzin Sayısı</span>
+                        <span className="text-gray-500 dark:text-gray-400">{t('userManagementPage.roleDetails.permissionCount')}</span>
                         <span className="font-medium text-gray-900 dark:text-white">{role.permissionCount}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">Restoran</span>
+                        <span className="text-gray-500 dark:text-gray-400">{t('userManagementPage.roleDetails.restaurant')}</span>
                         <span className="font-medium text-gray-900 dark:text-white truncate max-w-32" title={role.restaurantName}>
                           {role.restaurantName}
                         </span>
                       </div>
                       {role.branchName && (
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-500 dark:text-gray-400">Şube</span>
+                          <span className="text-gray-500 dark:text-gray-400">{t('userManagementPage.roleDetails.branch')}</span>
                           <span className="font-medium text-gray-900 dark:text-white truncate max-w-32" title={role.branchName}>
                             {role.branchName}
                           </span>
@@ -895,12 +891,12 @@ const UserManagement: React.FC = () => {
                           : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                       }`}>
                         {role.isActive ? <UserCheck className="h-3 w-3" /> : <UserX className="h-3 w-3" />}
-                        {role.isActive ? 'Aktif' : 'Pasif'}
+                        {role.isActive ? t('userManagementPage.status.active') : t('userManagementPage.status.inactive')}
                       </span>
                       {role.isSystemRole && (
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
                           <Star className="h-3 w-3" />
-                          Sistem Rolü
+                          {t('userManagementPage.status.systemRole')}
                         </span>
                       )}
                     </div>
@@ -917,23 +913,23 @@ const UserManagement: React.FC = () => {
                 <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                   <thead className="bg-gray-50 dark:bg-gray-700/50">
                     <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Rol
+                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
+                        {t('userManagementPage.table.role')}
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Açıklama
+                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
+                        {t('userManagementPage.table.description')}
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        İstatistikler
+                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
+                        {t('userManagementPage.table.statistics')}
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Konum
+                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
+                        {t('userManagementPage.table.position')}
                       </th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Durum
+                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
+                        {t('userManagementPage.table.status')}
                       </th>
                       <th scope="col" className="relative px-6 py-3">
-                        <span className="sr-only">İşlemler</span>
+                        <span className="sr-only">{t('userManagementPage.table.actions')}</span>
                       </th>
                     </tr>
                   </thead>
@@ -952,7 +948,7 @@ const UserManagement: React.FC = () => {
                               <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
                                 <Shield className="h-5 w-5 text-white" />
                               </div>
-                              <div className="ml-4">
+                              <div className={`${isRTL ? 'mr-4' : 'ml-4'}`}>
                                 <div className="text-sm font-medium text-gray-900 dark:text-white">
                                   {role.name}
                                 </div>
@@ -964,15 +960,15 @@ const UserManagement: React.FC = () => {
                           </td>
                           <td className="px-6 py-4">
                             <div className="text-sm text-gray-900 dark:text-white max-w-xs truncate">
-                              {role.description || 'Açıklama bulunmuyor'}
+                              {role.description || t('userManagementPage.roleDetails.noDescription')}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="text-sm text-gray-900 dark:text-white">
-                              {role.userCount} kullanıcı
+                              {role.userCount} {t('userManagementPage.roleDetails.users')}
                             </div>
                             <div className="text-sm text-gray-500 dark:text-gray-400">
-                              {role.permissionCount} izin
+                              {role.permissionCount} {t('userManagementPage.roleDetails.permissions')}
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -993,12 +989,12 @@ const UserManagement: React.FC = () => {
                                   : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
                               }`}>
                                 {role.isActive ? <UserCheck className="h-3 w-3" /> : <UserX className="h-3 w-3" />}
-                                {role.isActive ? 'Aktif' : 'Pasif'}
+                                {role.isActive ? t('userManagementPage.status.active') : t('userManagementPage.status.inactive')}
                               </span>
                               {role.isSystemRole && (
                                 <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
                                   <Star className="h-3 w-3" />
-                                  Sistem
+                                  {t('userManagementPage.status.systemRole')}
                                 </span>
                               )}
                             </div>
@@ -1012,16 +1008,16 @@ const UserManagement: React.FC = () => {
                                 <MoreVertical className="h-5 w-5" />
                               </button>
                               {activeDropdown === role.id && (
-                                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10">
+                                <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10`}>
                                   <div className="py-1">
                                     <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                      Detayları Görüntüle
+                                      {t('userManagementPage.actions.viewDetails')}
                                     </button>
                                     <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                      Düzenle
+                                      {t('userManagementPage.actions.edit')}
                                     </button>
                                     <button className="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600">
-                                      {role.isActive ? 'Devre Dışı Bırak' : 'Aktifleştir'}
+                                      {role.isActive ? t('userManagementPage.actions.deactivate') : t('userManagementPage.actions.activate')}
                                     </button>
                                   </div>
                                 </div>
@@ -1080,6 +1076,7 @@ const UserManagement: React.FC = () => {
     permissions,
     isLoading
   }) => {
+    const { t, isRTL } = useLanguage();
     const [formData, setFormData] = useState<CreateRoleDto>({
       name: '',
       description: '',
@@ -1096,17 +1093,17 @@ const UserManagement: React.FC = () => {
       const newErrors: Record<string, string> = {};
 
       if (!formData.name || formData.name.length < 3) {
-        newErrors.name = 'Rol adı en az 3 karakter olmalıdır';
+        newErrors.name = t('userManagementPage.createRole.validation.nameRequired');
       } else if (formData.name.length > 50) {
-        newErrors.name = 'Rol adı en fazla 50 karakter olabilir';
+        newErrors.name = t('userManagementPage.createRole.validation.nameMaxLength');
       }
 
       if (formData.description && formData.description.length > 200) {
-        newErrors.description = 'Açıklama en fazla 200 karakter olabilir';
+        newErrors.description = t('userManagementPage.createRole.validation.descriptionMaxLength');
       }
 
       if (formData.category && formData.category.length > 50) {
-        newErrors.category = 'Kategori en fazla 50 karakter olabilir';
+        newErrors.category = t('userManagementPage.createRole.validation.categoryMaxLength');
       }
 
       setErrors(newErrors);
@@ -1163,7 +1160,7 @@ const UserManagement: React.FC = () => {
             <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <Shield className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-                Yeni Rol Oluştur
+                {t('userManagementPage.createRole.title')}
               </h3>
               <button
                 onClick={onClose}
@@ -1179,7 +1176,7 @@ const UserManagement: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Rol Adı <span className="text-red-500">*</span>
+                    {t('userManagementPage.createRole.roleName')} <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -1193,62 +1190,62 @@ const UserManagement: React.FC = () => {
                         ? 'border-red-500 dark:border-red-400' 
                         : 'border-gray-300 dark:border-gray-600'
                     }`}
-                    placeholder="Örn: Şube Müdürü"
+                    placeholder={t('userManagementPage.createRole.roleNamePlaceholder')}
                   />
                   {errors.name && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name}</p>}
                 </div>
 
                 <div>
                   <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Kategori
+                    {t('userManagementPage.createRole.category')}
                   </label>
-                                      <input
-                      type="text"
-                      id="category"
-                      maxLength={50}
-                      value={formData.category || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                      className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                        errors.category 
-                          ? 'border-red-500 dark:border-red-400' 
-                          : 'border-gray-300 dark:border-gray-600'
-                      }`}
-                      placeholder="Örn: Yönetim"
-                    />
+                  <input
+                    type="text"
+                    id="category"
+                    maxLength={50}
+                    value={formData.category || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                    className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                      errors.category 
+                        ? 'border-red-500 dark:border-red-400' 
+                        : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                    placeholder={t('userManagementPage.createRole.categoryPlaceholder')}
+                  />
                   {errors.category && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.category}</p>}
                 </div>
               </div>
 
               <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Açıklama
+                  {t('userManagementPage.createRole.description')}
                 </label>
-                                  <textarea
-                    id="description"
-                    rows={3}
-                    maxLength={200}
-                    value={formData.description || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
-                      errors.description 
-                        ? 'border-red-500 dark:border-red-400' 
-                        : 'border-gray-300 dark:border-gray-600'
-                    }`}
-                    placeholder="Rolün görev ve sorumluluklarını açıklayın..."
-                  />
-                  <div className="flex justify-between items-center mt-1">
-                    {errors.description && <p className="text-sm text-red-600 dark:text-red-400">{errors.description}</p>}
-                    <p className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
-                      {(formData.description || '').length}/200
-                    </p>
-                  </div>
+                <textarea
+                  id="description"
+                  rows={3}
+                  maxLength={200}
+                  value={formData.description || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                    errors.description 
+                      ? 'border-red-500 dark:border-red-400' 
+                      : 'border-gray-300 dark:border-gray-600'
+                  }`}
+                  placeholder={t('userManagementPage.createRole.descriptionPlaceholder')}
+                />
+                <div className="flex justify-between items-center mt-1">
+                  {errors.description && <p className="text-sm text-red-600 dark:text-red-400">{errors.description}</p>}
+                  <p className="text-xs text-gray-500 dark:text-gray-400 ml-auto">
+                    {(formData.description || '').length}/200
+                  </p>
+                </div>
               </div>
 
               {/* Numeric IDs */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="restaurantId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Restoran ID
+                    {t('userManagementPage.createRole.restaurantId')}
                   </label>
                   <input
                     type="number"
@@ -1260,13 +1257,13 @@ const UserManagement: React.FC = () => {
                       restaurantId: e.target.value ? parseInt(e.target.value) : null 
                     }))}
                     className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="Varsayılan: Mevcut restoran"
+                    placeholder={t('userManagementPage.createRole.restaurantIdPlaceholder')}
                   />
                 </div>
 
                 <div>
                   <label htmlFor="branchId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Şube ID
+                    {t('userManagementPage.createRole.branchId')}
                   </label>
                   <input
                     type="number"
@@ -1278,7 +1275,7 @@ const UserManagement: React.FC = () => {
                       branchId: e.target.value ? parseInt(e.target.value) : null 
                     }))}
                     className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="Boş: Tüm şubeler"
+                    placeholder={t('userManagementPage.createRole.branchIdPlaceholder')}
                   />
                 </div>
               </div>
@@ -1292,21 +1289,21 @@ const UserManagement: React.FC = () => {
                   onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
                   className="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                 />
-                <label htmlFor="isActive" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                  Rol aktif olsun
+                <label htmlFor="isActive" className={`${isRTL ? 'mr-2' : 'ml-2'} text-sm text-gray-700 dark:text-gray-300`}>
+                  {t('userManagementPage.createRole.isActive')}
                 </label>
               </div>
 
               {/* Permissions */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  İzinler ({selectedPermissions.length} seçildi)
+                  {t('userManagementPage.createRole.permissions')} ({selectedPermissions.length} {t('userManagementPage.createRole.permissionsSelected')})
                 </label>
                 <div className="max-h-64 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50">
                   {Object.entries(groupedPermissions).map(([category, categoryPermissions]) => (
                     <div key={category} className="mb-4 last:mb-0">
                       <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2 text-sm">
-                        {category}
+                        {t(`userManagementPage.permissionCategories.${category}`) || category}
                       </h4>
                       <div className="space-y-2">
                         {categoryPermissions.map((permission) => (
@@ -1344,7 +1341,7 @@ const UserManagement: React.FC = () => {
                   disabled={isLoading}
                   className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none disabled:opacity-50"
                 >
-                  İptal
+                  {t('userManagementPage.createRole.cancel')}
                 </button>
                 <button
                   type="submit"
@@ -1352,7 +1349,7 @@ const UserManagement: React.FC = () => {
                   className="px-6 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isLoading && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
-                  {isLoading ? 'Oluşturuluyor...' : 'Rol Oluştur'}
+                  {isLoading ? t('userManagementPage.createRole.creating') : t('userManagementPage.createRole.create')}
                 </button>
               </div>
             </form>
@@ -1378,59 +1375,91 @@ const UserManagement: React.FC = () => {
     roles,
     isLoading
   }) => {
+    const { t, isRTL } = useLanguage();
     const [formData, setFormData] = useState<CreateUserDto>({
       name: '',
-      surname: '',
-      email: '',
+      surName: '',
       userName: '',
-      phoneNumber: '',
+      email: '',
       password: '',
+      passwordConfirm: '',
+      phoneNumber: '',
       restaurantId: null,
       branchId: null,
-      roleIds: [],
       profileImage: '',
+      userCreatorId: '',
+      roleIdsList: [],
       isActive: true
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
     const [showPassword, setShowPassword] = useState(false);
+    const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+    const [locationType, setLocationType] = useState<'restaurant' | 'branch'>('restaurant');
 
     const validateForm = (): boolean => {
       const newErrors: Record<string, string> = {};
 
       // Name validation
       if (!formData.name || formData.name.length === 0) {
-        newErrors.name = 'Ad alanı zorunludur';
+        newErrors.name = t('userManagementPage.createUser.validation.nameRequired');
       } else if (formData.name.length > 50) {
-        newErrors.name = 'Ad en fazla 50 karakter olabilir';
+        newErrors.name = t('userManagementPage.createUser.validation.nameMaxLength');
       }
 
       // Surname validation
-      if (!formData.surname || formData.surname.length === 0) {
-        newErrors.surname = 'Soyad alanı zorunludur';
-      } else if (formData.surname.length > 50) {
-        newErrors.surname = 'Soyad en fazla 50 karakter olabilir';
+      if (!formData.surName || formData.surName.length === 0) {
+        newErrors.surName = t('userManagementPage.createUser.validation.surnameRequired');
+      } else if (formData.surName.length > 50) {
+        newErrors.surName = t('userManagementPage.createUser.validation.surnameMaxLength');
+      }
+
+      // Username validation - auto generate if empty
+      if (!formData.userName) {
+        const autoUsername = `${formData.name.toLowerCase()}.${formData.surName.toLowerCase()}`.replace(/[^a-z.]/g, '');
+        setFormData(prev => ({ ...prev, userName: autoUsername }));
       }
 
       // Email validation
       if (!formData.email || formData.email.length === 0) {
-        newErrors.email = 'Email alanı zorunludur';
+        newErrors.email = t('userManagementPage.createUser.validation.emailRequired');
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-        newErrors.email = 'Geçerli bir email adresi giriniz';
-      }
-
-      // Username validation
-      if (!formData.userName || formData.userName.length < 3) {
-        newErrors.userName = 'Kullanıcı adı en az 3 karakter olmalıdır';
-      } else if (formData.userName.length > 50) {
-        newErrors.userName = 'Kullanıcı adı en fazla 50 karakter olabilir';
+        newErrors.email = t('userManagementPage.createUser.validation.emailInvalid');
       }
 
       // Password validation
       if (!formData.password || formData.password.length < 6) {
-        newErrors.password = 'Şifre en az 6 karakter olmalıdır';
+        newErrors.password = t('userManagementPage.createUser.validation.passwordRequired');
       } else if (formData.password.length > 100) {
-        newErrors.password = 'Şifre en fazla 100 karakter olabilir';
+        newErrors.password = t('userManagementPage.createUser.validation.passwordMaxLength');
+      }
+
+      // Password confirmation validation
+      if (!formData.passwordConfirm || formData.passwordConfirm.length === 0) {
+        newErrors.passwordConfirm = t('userManagementPage.createUser.validation.passwordConfirmRequired');
+      } else if (formData.password !== formData.passwordConfirm) {
+        newErrors.passwordConfirm = t('userManagementPage.createUser.validation.passwordMismatch');
+      }
+
+      // Phone number validation
+      if (!formData.phoneNumber || formData.phoneNumber.length === 0) {
+        newErrors.phoneNumber = t('userManagementPage.createUser.validation.phoneRequired');
+      }
+
+      // Location validation
+      if (locationType === 'restaurant') {
+        if (!formData.restaurantId || formData.restaurantId <= 0) {
+          newErrors.restaurantId = t('userManagementPage.createUser.validation.restaurantIdRequired');
+        }
+      } else {
+        if (!formData.branchId || formData.branchId <= 0) {
+          newErrors.branchId = t('userManagementPage.createUser.validation.branchIdRequired');
+        }
+      }
+
+      // Role validation
+      if (selectedRoles.length === 0) {
+        newErrors.roles = t('userManagementPage.createUser.validation.rolesRequired');
       }
 
       setErrors(newErrors);
@@ -1442,13 +1471,28 @@ const UserManagement: React.FC = () => {
       
       if (!validateForm()) return;
 
+      // Get current user ID from JWT token if available
+      const getCurrentUserId = () => {
+        try {
+          const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+          if (token) {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            return payload.user_id || payload.sub || '';
+          }
+          return '';
+        } catch (error) {
+          return '';
+        }
+      };
+
       const submitData: CreateUserDto = {
         ...formData,
-        phoneNumber: formData.phoneNumber || null,
-        restaurantId: formData.restaurantId || null,
-        branchId: formData.branchId || null,
-        roleIds: selectedRoles.length > 0 ? selectedRoles : null,
-        profileImage: formData.profileImage || null
+        userName: formData.userName || `${formData.name.toLowerCase()}.${formData.surName.toLowerCase()}`.replace(/[^a-z.]/g, ''),
+        restaurantId: locationType === 'restaurant' ? formData.restaurantId : null,
+        branchId: locationType === 'branch' ? formData.branchId : null,
+        profileImage: formData.profileImage || '',
+        userCreatorId: formData.userCreatorId || getCurrentUserId(),
+        roleIdsList: selectedRoles,
       };
 
       onSubmit(submitData);
@@ -1462,6 +1506,24 @@ const UserManagement: React.FC = () => {
       );
     };
 
+    // Handle location type change
+    const handleLocationTypeChange = (type: 'restaurant' | 'branch') => {
+      setLocationType(type);
+      // Reset the other field when switching
+      if (type === 'restaurant') {
+        setFormData(prev => ({ ...prev, branchId: null }));
+      } else {
+        setFormData(prev => ({ ...prev, restaurantId: null }));
+      }
+      // Clear related errors
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors.restaurantId;
+        delete newErrors.branchId;
+        return newErrors;
+      });
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -1473,13 +1535,13 @@ const UserManagement: React.FC = () => {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="relative w-full max-w-3xl rounded-xl bg-white dark:bg-gray-800 shadow-2xl"
+            className="relative w-full max-w-4xl rounded-xl bg-white dark:bg-gray-800 shadow-2xl max-h-[90vh] overflow-y-auto"
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
+            <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4 sticky top-0 bg-white dark:bg-gray-800">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <UserPlus className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                Yeni Kullanıcı Oluştur
+                {t('userManagementPage.createUser.title')}
               </h3>
               <button
                 onClick={onClose}
@@ -1493,11 +1555,11 @@ const UserManagement: React.FC = () => {
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               {/* Personal Info */}
               <div>
-                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Kişisel Bilgiler</h4>
+                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">{t('userManagementPage.createUser.personalInfo')}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Ad <span className="text-red-500">*</span>
+                      {t('userManagementPage.createUser.firstName')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -1511,41 +1573,59 @@ const UserManagement: React.FC = () => {
                           ? 'border-red-500 dark:border-red-400' 
                           : 'border-gray-300 dark:border-gray-600'
                       }`}
-                      placeholder="Örn: Ahmet"
+                      placeholder={t('userManagementPage.createUser.firstNamePlaceholder')}
                     />
                     {errors.name && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name}</p>}
                   </div>
 
                   <div>
-                    <label htmlFor="surname" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Soyad <span className="text-red-500">*</span>
+                    <label htmlFor="surName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t('userManagementPage.createUser.lastName')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      id="surname"
+                      id="surName"
                       required
                       maxLength={50}
-                      value={formData.surname}
-                      onChange={(e) => setFormData(prev => ({ ...prev, surname: e.target.value }))}
+                      value={formData.surName}
+                      onChange={(e) => setFormData(prev => ({ ...prev, surName: e.target.value }))}
                       className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.surname 
+                        errors.surName 
                           ? 'border-red-500 dark:border-red-400' 
                           : 'border-gray-300 dark:border-gray-600'
                       }`}
-                      placeholder="Örn: Yılmaz"
+                      placeholder={t('userManagementPage.createUser.lastNamePlaceholder')}
                     />
-                    {errors.surname && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.surname}</p>}
+                    {errors.surName && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.surName}</p>}
                   </div>
+                </div>
+
+                {/* Username field - auto-generated but editable */}
+                <div className="mt-4">
+                  <label htmlFor="userName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t('userManagementPage.createUser.userName')}
+                  </label>
+                  <input
+                    type="text"
+                    id="userName"
+                    value={formData.userName}
+                    onChange={(e) => setFormData(prev => ({ ...prev, userName: e.target.value }))}
+                    className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder={t('userManagementPage.createUser.userNamePlaceholder')}
+                  />
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    {t('userManagementPage.createUser.userNameHint')}
+                  </p>
                 </div>
               </div>
 
-              {/* Account Info */}
+              {/* Contact Info */}
               <div>
-                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Hesap Bilgileri</h4>
+                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">{t('userManagementPage.createUser.contactInfo')}</h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Email <span className="text-red-500">*</span>
+                      {t('userManagementPage.createUser.email')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="email"
@@ -1558,52 +1638,40 @@ const UserManagement: React.FC = () => {
                           ? 'border-red-500 dark:border-red-400' 
                           : 'border-gray-300 dark:border-gray-600'
                       }`}
-                      placeholder="ahmet@example.com"
+                      placeholder={t('userManagementPage.createUser.emailPlaceholder')}
                     />
                     {errors.email && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email}</p>}
                   </div>
 
                   <div>
-                    <label htmlFor="userName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Kullanıcı Adı <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      id="userName"
-                      required
-                      maxLength={50}
-                      minLength={3}
-                      value={formData.userName}
-                      onChange={(e) => setFormData(prev => ({ ...prev, userName: e.target.value }))}
-                      className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.userName 
-                          ? 'border-red-500 dark:border-red-400' 
-                          : 'border-gray-300 dark:border-gray-600'
-                      }`}
-                      placeholder="ahmet.yilmaz"
-                    />
-                    {errors.userName && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.userName}</p>}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                  <div>
                     <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Telefon
+                      {t('userManagementPage.createUser.phone')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="tel"
                       id="phoneNumber"
-                      value={formData.phoneNumber || ''}
+                      required
+                      value={formData.phoneNumber}
                       onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="+90 555 123 4567"
+                      className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.phoneNumber 
+                          ? 'border-red-500 dark:border-red-400' 
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                      placeholder={t('userManagementPage.createUser.phonePlaceholder')}
                     />
+                    {errors.phoneNumber && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.phoneNumber}</p>}
                   </div>
+                </div>
+              </div>
 
+              {/* Password Info */}
+              <div>
+                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">{t('userManagementPage.createUser.passwordInfo')}</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Şifre <span className="text-red-500">*</span>
+                      {t('userManagementPage.createUser.password')} <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <input
@@ -1614,79 +1682,250 @@ const UserManagement: React.FC = () => {
                         minLength={6}
                         value={formData.password}
                         onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
-                        className={`w-full rounded-lg border px-4 py-2 pr-10 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        className={`w-full rounded-lg border px-4 py-2 ${isRTL ? 'pl-10' : 'pr-10'} text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                           errors.password 
                             ? 'border-red-500 dark:border-red-400' 
                             : 'border-gray-300 dark:border-gray-600'
                         }`}
-                        placeholder="En az 6 karakter"
+                        placeholder={t('userManagementPage.createUser.passwordPlaceholder')}
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300`}
                       >
                         {showPassword ? '👁️' : '🔒'}
                       </button>
                     </div>
                     {errors.password && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>}
                   </div>
+
+                  <div>
+                    <label htmlFor="passwordConfirm" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t('userManagementPage.createUser.passwordConfirm')} <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type={showPasswordConfirm ? "text" : "password"}
+                        id="passwordConfirm"
+                        required
+                        maxLength={100}
+                        minLength={6}
+                        value={formData.passwordConfirm}
+                        onChange={(e) => setFormData(prev => ({ ...prev, passwordConfirm: e.target.value }))}
+                        className={`w-full rounded-lg border px-4 py-2 ${isRTL ? 'pl-10' : 'pr-10'} text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          errors.passwordConfirm 
+                            ? 'border-red-500 dark:border-red-400' 
+                            : 'border-gray-300 dark:border-gray-600'
+                        }`}
+                        placeholder={t('userManagementPage.createUser.passwordConfirmPlaceholder')}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                        className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300`}
+                      >
+                        {showPasswordConfirm ? '👁️' : '🔒'}
+                      </button>
+                    </div>
+                    {errors.passwordConfirm && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.passwordConfirm}</p>}
+                  </div>
                 </div>
               </div>
 
-              {/* Location & Profile */}
+              {/* Location Selection */}
               <div>
-                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">Konum ve Profil</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="restaurantId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Restoran ID
+                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">{t('userManagementPage.createUser.locationInfo')}</h4>
+                
+                {/* Location Type Selector */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {t('userManagementPage.createUser.locationType')} <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="locationType"
+                        value="restaurant"
+                        checked={locationType === 'restaurant'}
+                        onChange={(e) => handleLocationTypeChange('restaurant')}
+                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-sm text-gray-700 dark:text-gray-300`}>{t('userManagementPage.createUser.restaurant')}</span>
                     </label>
-                    <input
-                      type="number"
-                      id="restaurantId"
-                      min="0"
-                      value={formData.restaurantId || ''}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        restaurantId: e.target.value ? parseInt(e.target.value) : null 
-                      }))}
-                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Varsayılan: Mevcut restoran"
-                    />
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="locationType"
+                        value="branch"
+                        checked={locationType === 'branch'}
+                        onChange={(e) => handleLocationTypeChange('branch')}
+                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-sm text-gray-700 dark:text-gray-300`}>{t('userManagementPage.createUser.branch')}</span>
+                    </label>
                   </div>
+                </div>
+
+                {/* Conditional Input Based on Location Type */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {locationType === 'restaurant' ? (
+                    <div>
+                      <label htmlFor="restaurantId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {t('userManagementPage.createUser.restaurantId')} <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        id="restaurantId"
+                        min="1"
+                        required
+                        value={formData.restaurantId || ''}
+                        onChange={(e) => setFormData(prev => ({ 
+                          ...prev, 
+                          restaurantId: e.target.value ? parseInt(e.target.value) : null 
+                        }))}
+                        className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          errors.restaurantId 
+                            ? 'border-red-500 dark:border-red-400' 
+                            : 'border-gray-300 dark:border-gray-600'
+                        }`}
+                        placeholder={t('userManagementPage.createUser.restaurantIdPlaceholder')}
+                      />
+                      {errors.restaurantId && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.restaurantId}</p>}
+                    </div>
+                  ) : (
+                    <div>
+                      <label htmlFor="branchId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {t('userManagementPage.createUser.branchId')} <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="number"
+                        id="branchId"
+                        min="1"
+                        required
+                        value={formData.branchId || ''}
+                        onChange={(e) => setFormData(prev => ({ 
+                          ...prev, 
+                          branchId: e.target.value ? parseInt(e.target.value) : null 
+                        }))}
+                        className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          errors.branchId 
+                            ? 'border-red-500 dark:border-red-400' 
+                            : 'border-gray-300 dark:border-gray-600'
+                        }`}
+                        placeholder={t('userManagementPage.createUser.branchIdPlaceholder')}
+                      />
+                      {errors.branchId && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.branchId}</p>}
+                    </div>
+                  )}
 
                   <div>
-                    <label htmlFor="branchId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Şube ID
+                    <label htmlFor="profileImage" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t('userManagementPage.createUser.profileImage')}
                     </label>
                     <input
-                      type="number"
-                      id="branchId"
-                      min="0"
-                      value={formData.branchId || ''}
-                      onChange={(e) => setFormData(prev => ({ 
-                        ...prev, 
-                        branchId: e.target.value ? parseInt(e.target.value) : null 
-                      }))}
+                      type="url"
+                      id="profileImage"
+                      value={formData.profileImage}
+                      onChange={(e) => setFormData(prev => ({ ...prev, profileImage: e.target.value }))}
                       className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Boş: Tüm şubeler"
+                      placeholder={t('userManagementPage.createUser.profileImagePlaceholder')}
                     />
                   </div>
                 </div>
 
                 <div className="mt-4">
-                  <label htmlFor="profileImage" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Profil Resmi URL
+                  <label htmlFor="userCreatorId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t('userManagementPage.createUser.userCreatorId')}
                   </label>
                   <input
-                    type="url"
-                    id="profileImage"
-                    value={formData.profileImage || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, profileImage: e.target.value }))}
+                    type="text"
+                    id="userCreatorId"
+                    value={formData.userCreatorId}
+                    onChange={(e) => setFormData(prev => ({ ...prev, userCreatorId: e.target.value }))}
                     className="w-full rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="https://example.com/avatar.jpg"
+                    placeholder={t('userManagementPage.createUser.userCreatorIdPlaceholder')}
                   />
+                </div>
+              </div>
+
+              {/* Role Selection */}
+              <div>
+                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">{t('userManagementPage.createUser.roleAssignment')}</h4>
+                
+                <div className="mb-4">
+                  <p className="text-xs text-amber-600 dark:text-amber-400 mb-3">
+                    {t('userManagementPage.createUser.apiWarning')}
+                  </p>
+                </div>
+
+                {/* Role Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                    {t('userManagementPage.createUser.rolesLabel')} ({selectedRoles.length} {t('userManagementPage.createUser.rolesSelected')}) <span className="text-red-500">*</span>
+                  </label>
+                  <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50">
+                    {roles.length === 0 ? (
+                      <div className="text-center py-6">
+                        <Shield className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">{t('userManagementPage.createUser.noRoles.title')}</p>
+                        <p className="text-gray-400 dark:text-gray-500 text-xs">
+                          {t('userManagementPage.createUser.noRoles.description')}
+                        </p>
+                        <div className="mt-3 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                          <p className="text-xs text-blue-600 dark:text-blue-400">
+                            {t('userManagementPage.createUser.noRoles.tip')}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {roles.filter(role => role.isActive).map((role) => (
+                          <label
+                            key={role.id}
+                            className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 cursor-pointer"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedRoles.includes(role.id)}
+                              onChange={() => handleRoleToggle(role.id)}
+                              className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <div className="font-medium text-sm text-gray-900 dark:text-white">
+                                {role.name}
+                              </div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {role.description} • {role.userCount} {t('userManagementPage.roleDetails.users')} • {role.permissionCount} {t('userManagementPage.roleDetails.permissions')}
+                              </div>
+                              <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                                {role.restaurantName}{role.branchName ? ` - ${role.branchName}` : ''}
+                              </div>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {errors.roles && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.roles}</p>}
+                  
+                  {/* Quick Role Creation Suggestion */}
+                  {roles.length === 0 && (
+                    <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg">
+                      <div className="flex items-start gap-2">
+                        <div className="text-yellow-600 dark:text-yellow-400">⚠️</div>
+                        <div>
+                          <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                            {t('userManagementPage.createUser.noRoles.warning')}
+                          </p>
+                          <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                            {t('userManagementPage.createUser.noRoles.warningDescription')}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -1699,64 +1938,29 @@ const UserManagement: React.FC = () => {
                   onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
                   className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
-                <label htmlFor="isActive" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                  Kullanıcı aktif olsun
+                <label htmlFor="isActive" className={`${isRTL ? 'mr-2' : 'ml-2'} text-sm text-gray-700 dark:text-gray-300`}>
+                  {t('userManagementPage.createUser.isActive')}
                 </label>
-              </div>
-
-              {/* Roles */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Roller ({selectedRoles.length} seçildi)
-                </label>
-                <div className="max-h-48 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50">
-                  {roles.length === 0 ? (
-                    <p className="text-gray-500 dark:text-gray-400 text-sm">Henüz rol tanımlanmamış</p>
-                  ) : (
-                    <div className="space-y-2">
-                      {roles.filter(role => role.isActive).map((role) => (
-                        <label
-                          key={role.id}
-                          className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 cursor-pointer"
-                        >
-                          <input
-                            type="checkbox"
-                            checked={selectedRoles.includes(role.id)}
-                            onChange={() => handleRoleToggle(role.id)}
-                            className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm text-gray-900 dark:text-white">
-                              {role.name}
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {role.description} • {role.userCount} kullanıcı
-                            </div>
-                          </div>
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
               </div>
 
               {/* Modal Footer */}
-              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700 sticky bottom-0 bg-white dark:bg-gray-800">
                 <button
                   type="button"
                   onClick={onClose}
                   disabled={isLoading}
                   className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none disabled:opacity-50"
                 >
-                  İptal
+                  {t('userManagementPage.createUser.cancel')}
                 </button>
                 <button
                   type="submit"
-                  disabled={isLoading}
+                  disabled={isLoading || roles.length === 0}
                   className="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isLoading && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
-                  {isLoading ? 'Oluşturuluyor...' : 'Kullanıcı Oluştur'}
+                  {isLoading ? t('userManagementPage.createUser.creating') : 
+                   roles.length === 0 ? t('userManagementPage.createUser.createRoleFirst') : t('userManagementPage.createUser.create')}
                 </button>
               </div>
             </form>
@@ -1766,4 +1970,4 @@ const UserManagement: React.FC = () => {
     );
   };
   
-  export default UserManagement; 
+  export default UserManagement;
