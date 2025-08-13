@@ -22,6 +22,7 @@ import { sanitizePlaceholder } from '../utils/sanitize';
 import { logger } from '../utils/logger';
 import IngredientsContent from '../components/dashboard/Ingredients/Ingredients';
 import SetupSidebar from '../components/dashboard/layout/SetupSidebar';
+import BranchProducts from '../components/dashboard/Branch/Products/BranchProducts';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();
@@ -181,12 +182,12 @@ const Dashboard: React.FC = () => {
           {/* Network Status Bileşeni */}
           <NetworkStatus showAlways={false} />
           
-          {/* Content */}
-          {hasRestaurantInfo ? (
-            <>
+        
+         
               {activeTab === 'overview' && <Overview />}
               {activeTab === 'orders' && <Orders />}
               {activeTab === 'products' && <ProductsContent />}
+              {activeTab === 'branchProducts' && <BranchProducts />}
               {activeTab === 'ingredients' && <IngredientsContent />}
               {activeTab === 'branches' && <BranchManagement />}
               {activeTab === 'tables' && <TableManagement selectedBranch={selectedBranch} />}
@@ -195,20 +196,9 @@ const Dashboard: React.FC = () => {
               {activeTab === 'profile' && <Profile />}
               {activeTab === 'settings' && <Settings />}
               {activeTab === 'subscription' && <Subscription />}
-            </>
-          ) : (
-            <>
-              {/* Limited content when restaurant info is not available */}
-              {activeTab === 'restaurant-management' && <RestaurantManagement />}
-              {activeTab === 'profile' && <Profile />}
-              {activeTab === 'settings' && <Settings />}
-              {activeTab === 'subscription' && <Subscription />}
-              {/* Default to restaurant management if no valid tab */}
-              {!['restaurant-management', 'profile', 'settings', 'subscription'].includes(activeTab) && (
-                <RestaurantManagement />
-              )}
-            </>
-          )}
+     
+        
+      
         </main>
       </div>
     </div>
