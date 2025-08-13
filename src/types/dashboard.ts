@@ -9,7 +9,8 @@ export interface Product {
   isAvailable: boolean;
   imageUrl : string;
   status : boolean;
-  displayOrder : number
+  displayOrder : number;
+  branchProductId?:number
 }
 
 export interface Category {

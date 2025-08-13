@@ -34,6 +34,41 @@ export const en = {
     lastMonth: 'Last Month',
     retry: 'Retry'
   },
+  filter: {
+      "status": "Status",
+      "all": "All",
+      "active": "Active", 
+      "inactive": "Inactive",
+      "categories": "Categories",
+      "price": {
+        "range": "Price Range",
+        "min": "Min Price",
+        "max": "Max Price"
+      }
+    },
+    sort: {
+      "title": "Sort By",
+      "name": {
+        "asc": "Name (A-Z)",
+        "desc": "Name (Z-A)"
+      },
+      "price": {
+        "asc": "Price (Low to High)",
+        "desc": "Price (High to Low)"
+      },
+      "order": {
+        "asc": "Display Order (First to Last)",
+        "desc": "Display Order (Last to First)"
+      },
+      "created": {
+        "asc": "Date Created (Oldest First)",
+        "desc": "Date Created (Newest First)"
+      }
+    },
+    clear: {
+      "filters": "Clear Filters",
+      "all": "Clear All"
+    },
   restaurantManagement : {
     tabs : {
       general : "General",
@@ -826,6 +861,8 @@ export const en = {
     loading: 'Loading tables...',
     title: 'Table Management',
     description: 'Manage your QR codes and tables',
+            noCategories :"Not Found Categories",
+    createFirstCategory: "Create First Category",
     error: {
       loadFailed: 'Failed to load branch list',
       dataLoadFailed: 'An error occurred while loading data'

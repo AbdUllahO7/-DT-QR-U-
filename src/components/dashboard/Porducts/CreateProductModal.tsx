@@ -103,20 +103,24 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
       newErrors.price = t('createProductModal.validation.priceMax');
     }
     
-    if (!formData.categoryId) {
+    // Fixed validation: convert categoryId to number if it's a string
+    const categoryIdToCheck = typeof formData.categoryId === 'string' ? parseInt(formData.categoryId) : formData.categoryId;
+    
+    if (!categoryIdToCheck || categoryIdToCheck === 0) {
       newErrors.categoryId = t('createProductModal.errors.categoryRequired');
     } else {
-      const categoryExists = categories.find(cat => cat.categoryId === formData.categoryId);
+      const categoryExists = categories.find(cat => cat.categoryId === categoryIdToCheck);
       logger.info('Kategori validasyonu', { 
-        selectedCategoryId: formData.categoryId,
-        availableCategories: categories.map(cat => ({ id: cat.categoryId, name: cat.categoryName })),
+        selectedCategoryId: categoryIdToCheck,
+        selectedCategoryIdType: typeof categoryIdToCheck,
+        availableCategories: categories.map(cat => ({ id: cat.categoryId, name: cat.categoryName, type: typeof cat.categoryId })),
         categoryExists: !!categoryExists
       });
       
       if (!categoryExists) {
         newErrors.categoryId = t('createProductModal.form.category.invalidCategory', {
           categories: categories.map(c => c.categoryName).join(', ')
-        });
+        }) || `Selected category is invalid. Available categories: (${categories.map(c => c.categoryName).join(', ')})`;
       }
     }
     
@@ -241,11 +245,14 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
         imageUrl = uploadedUrl;
       }
 
+      // Ensure categoryId is a number
+      const categoryId = typeof formData.categoryId === 'string' ? parseInt(formData.categoryId) : formData.categoryId;
+
       const payload = {
         name: formData.name.trim() as string,
         description: formData.description.trim() as string,
         price: formData.price as number,
-        categoryId: formData.categoryId, 
+        categoryId: categoryId, 
         isAvailable: formData.isAvailable,
         imageUrl: imageUrl,
       };
@@ -579,7 +586,13 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
                         id="categoryId"
                         value={formData.categoryId}
                         onChange={(e) => {
-                          const newCategoryId = e.target.value;
+                          // Convert string value to number
+                          const newCategoryId = parseInt(e.target.value) || 0;
+                          logger.info('Category selection changed', { 
+                            rawValue: e.target.value, 
+                            parsedValue: newCategoryId,
+                            type: typeof newCategoryId 
+                          });
                           handleChange('categoryId', newCategoryId);
                         }}
                         className={`w-full px-3 py-2.5 border-2 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 ${
@@ -591,7 +604,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
                         aria-required="true"
                         aria-label={t('createProductModal.accessibility.categorySelect')}
                       >
-                        <option value="">{t('createProductModal.form.category.placeholder')}</option>
+                        <option value="0">{t('createProductModal.form.category.placeholder')}</option>
                         {categories.map((category) => (
                           <option key={category.categoryId} value={category.categoryId}>
                             {category.categoryName}

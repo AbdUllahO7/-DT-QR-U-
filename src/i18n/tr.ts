@@ -34,6 +34,41 @@ export const tr = {
     lastMonth: 'Geçen Ay',
     retry: 'Tekrar Dene'
   },
+    filter: {
+      "status": "Durum",
+      "all": "Tümü",
+      "active": "Aktif",
+      "inactive": "Pasif", 
+      "categories": "Kategoriler",
+      "price": {
+        "range": "Fiyat Aralığı",
+        "min": "Min Fiyat",
+        "max": "Max Fiyat"
+      }
+    },
+    sort: {
+      "title": "Sırala",
+      "name": {
+        "asc": "İsim (A-Z)",
+        "desc": "İsim (Z-A)"
+      },
+      "price": {
+        "asc": "Fiyat (Düşükten Yükseğe)",
+        "desc": "Fiyat (Yüksekten Düşüğe)"
+      },
+      "order": {
+        "asc": "Görüntü Sırası (İlkten Sona)",
+        "desc": "Görüntü Sırası (Sondan İlke)"
+      },
+      "created": {
+        "asc": "Oluşturulma Tarihi (En Eskiden)",
+        "desc": "Oluşturulma Tarihi (En Yeniden)"
+      }
+    },
+    clear: {
+      "filters": "Filtreleri Temizle",
+      "all": "Tümünü Temizle"
+    },
   restaurantManagement : {
     tabs : {
       general : "Genel",
@@ -822,6 +857,8 @@ export const tr = {
     loading: 'Masalar yükleniyor...',
     title: 'Masa Yönetimi',
     description: 'QR kodlarınızı ve masalarınızı yönetin',
+        noCategories :"Kategoriler Bulunmadı",
+    createFirstCategory: "Birinci Kategori Oluştur",
     error: {
       loadFailed: 'Şube listesi yüklenemedi',
       dataLoadFailed: 'Veriler yüklenirken bir hata oluştu'

@@ -34,7 +34,41 @@ export const ar = {
     thisMonth: 'هذا الشهر',
     lastMonth: 'الشهر الماضي'
   },
-
+  filter: {
+      "status": "الحالة",
+      "all": "الكل",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "categories": "الفئات",
+      "price": {
+        "range": "نطاق السعر",
+        "min": "أقل سعر",
+        "max": "أعلى سعر"
+      }
+    },
+    sort: {
+      "title": "ترتيب حسب",
+      "name": {
+        "asc": "الاسم (أ-ي)",
+        "desc": "الاسم (ي-أ)"
+      },
+      "price": {
+        "asc": "السعر (من الأقل إلى الأعلى)",
+        "desc": "السعر (من الأعلى إلى الأقل)"
+      },
+      "order": {
+        "asc": "ترتيب العرض (الأول إلى الأخير)",
+        "desc": "ترتيب العرض (الأخير إلى الأول)"
+      },
+      "created": {
+        "asc": "تاريخ الإنشاء (الأقدم أولاً)",
+        "desc": "تاريخ الإنشاء (الأحدث أولاً)"
+      }
+    },
+    clear: {
+      "filters": "مسح المرشحات",
+      "all": "مسح الكل"
+    },
   restaurantManagement : {
     tabs : {
       general : "عام",
@@ -824,6 +858,8 @@ export const ar = {
     loading: 'جاري تحميل الطاولات...',
     title: 'إدارة الطاولات',
     description: 'إدارة رموز QR والطاولات الخاصة بك',
+    noCategories :"لايوجد فئات",
+    createFirstCategory: "أنشئ اول فئة",
     error: {
       loadFailed: 'فشل في تحميل قائمة الفروع',
       dataLoadFailed: 'حدث خطأ أثناء تحميل البيانات'
