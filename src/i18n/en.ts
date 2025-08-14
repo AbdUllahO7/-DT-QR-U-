@@ -40,6 +40,11 @@ export const en = {
       "active": "Active", 
       "inactive": "Inactive",
       "categories": "Categories",
+      allergenic:"allergenic",
+      nonallergenic:"non-allergenic",
+      specific:{
+        allergens : "allergens"
+      },
       "price": {
         "range": "Price Range",
         "min": "Min Price",
@@ -2736,6 +2741,88 @@ userManagementPage: {
     roleCreated: 'Role created successfully',
     userUpdated: 'User updated successfully',
     roleUpdated: 'Role updated successfully'
+  },
+
+},
+  BranchtableManagement: {
+    title: "Table Management",
+    subtitle: "Manage your restaurant tables and categories", 
+    tabs: {
+      tables: "Tables",
+      categories: "Categories",
+      statistics: "Statistics",
+      batchCreate: "Batch Create"
+    },
+    buttons: {
+      addTable: "Add Table",
+      addCategory: "Add Category", 
+      batchCreate: "Batch Create",
+      edit: "Edit",
+      delete: "Delete",
+      save: "Save",
+      cancel: "Cancel",
+      refresh: "Refresh",
+      selectAll: "Select All",
+      clearSelection: "Clear Selection",
+      export: "Export",
+      import: "Import"
+    },
+    labels: {
+      tableName: "Table Name",
+      category: "Category",
+      capacity: "Capacity",
+      status: "Status",
+      occupation: "Occupation",
+      displayOrder: "Display Order",
+      search: "Search tables...",
+      filterByCategory: "Filter by Category",
+      viewMode: "View Mode",
+      totalTables: "Total Tables",
+      activeTables: "Active Tables", 
+      occupiedTables: "Occupied Tables",
+      availableTables: "Available Tables"
+    },
+    status: {
+      active: "Active",
+      inactive: "Inactive",
+      occupied: "Occupied",
+      available: "Available",
+      outOfService: "Out of Service"
+    },
+    actions: {
+      markOccupied: "Mark as Occupied",
+      markAvailable: "Mark as Available",
+      activate: "Activate", 
+      deactivate: "Deactivate",
+      viewDetails: "View Details"
+    },
+    messages: {
+      tableCreated: "Table created successfully",
+      tableUpdated: "Table updated successfully",
+      tableDeleted: "Table deleted successfully", 
+      statusUpdated: "Status updated successfully",
+      error: "An error occurred",
+      noTables: "No tables found",
+      confirmDelete: "Are you sure you want to delete this table?",
+      loading: "Loading...",
+      saving: "Saving...",
+      deleting: "Deleting..."
+    },
+    statistics: {
+      title: "Table Statistics",
+      occupancyRate: "Occupancy Rate",
+      averageCapacity: "Average Capacity",
+      categoryBreakdown: "Category Breakdown",
+      dailyOccupancy: "Daily Occupancy", 
+      peakHours: "Peak Hours"
+    },
+    forms: {
+      createTable: "Create New Table",
+      editTable: "Edit Table",
+      batchCreateTables: "Create Multiple Tables",
+      quantity: "Quantity",
+      namePrefix: "Name Prefix",
+      startingNumber: "Starting Number"
+    }
   }
-}
 }; 

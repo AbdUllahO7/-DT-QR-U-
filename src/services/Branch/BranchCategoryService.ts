@@ -47,10 +47,11 @@ interface APIBranchCategory {
   displayOrder: number;
   restaurantId: number;
   products: APIProduct[];
-  description?: string;
+  description: string;
   branchCategoryId?: number; // For operations that return this
   isActive?: boolean; // For operations that return this
   displayName?: string; // For operations that return this
+  isExpanded:boolean
 }
 
 class BranchCategoryService {
@@ -66,7 +67,7 @@ class BranchCategoryService {
       displayOrder: apiCategory.displayOrder,
       restaurantId: apiCategory.restaurantId,
       isExpanded: true,
-      products: apiCategory.products.map(apiProduct => ({
+      products: apiCategory?.products?.map(apiProduct => ({
         id: apiProduct.productId,
         name: apiProduct.name,
         description: apiProduct.description || '',
@@ -79,44 +80,44 @@ class BranchCategoryService {
       }))
     }));
   }
+// Get available categories for a specific branch
+ async getAvailableCategoriesForBranch(): Promise<Category[]> {
+  try {
+    const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/available-categories`);
+    
+    logger.info('Available categories for branch retrieved successfully', { 
+      count: response // Fixed: should be response.data.length
+    });
+    
+    const transformedData = this.transformAPIDataToComponentData(response.data);
+        console.log("transformedData",response.data)
+
+    return transformedData;
+  } catch (error: any) {
+    logger.error('Error retrieving available categories for branch:', error);
+    return [];
+  }
+}
 
   // Get all branch categories
   async getBranchCategories(): Promise<Category[]> {
     try {
-      const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}`);
+      const response = await httpClient.get(`${this.baseUrl}`);
       
       logger.info('Branch categories retrieved successfully', { 
-        count: response.data.length 
+        count: response.data 
       });
       
-      // Transform the API response to match component expectations
-      const transformedData = this.transformAPIDataToComponentData(response.data);
       
-      return transformedData;
+      // Transform the API response to match component expectations
+      return response.data ;
     } catch (error: any) {
       logger.error('Error retrieving branch categories:', error);
       return [];
     }
   }
 
-  // Get available categories for a specific branch
-  async getAvailableCategoriesForBranch(branchId: number): Promise<Category[]> {
-    try {
-      const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/${branchId}/available-categories`);
-      
-      logger.info('Available categories for branch retrieved successfully', { 
-        branchId,
-        count: response.data.length 
-      });
-      
-      const transformedData = this.transformAPIDataToComponentData(response.data);
-      
-      return transformedData;
-    } catch (error: any) {
-      logger.error('Error retrieving available categories for branch:', error);
-      return [];
-    }
-  }
+ 
 
   // Get public categories for a specific branch
   async getPublicCategoriesForBranch(branchId: number): Promise<Category[]> {
@@ -138,11 +139,11 @@ class BranchCategoryService {
   }
 
   // Get specific branch category
-  async getBranchCategory(branchId: number, categoryId: number): Promise<Category | null> {
+  async getBranchCategory(categoryId: number): Promise<Category | null> {
     try {
-      const response = await httpClient.get<APIBranchCategory>(`${this.baseUrl}/${branchId}/category/${categoryId}`);
+      const response = await httpClient.get<APIBranchCategory>(`${this.baseUrl}/category/${categoryId}`);
       
-      logger.info('Branch category retrieved successfully', { branchId, categoryId });
+      logger.info('Branch category retrieved successfully', {  categoryId });
       
       // Transform single category response
       const transformedCategory: Category = {
@@ -174,7 +175,7 @@ class BranchCategoryService {
   }
 
   // Create branch category
-  async createBranchCategory(branchId: number, categoryData: {
+  async createBranchCategory( categoryData: {
     categoryId: number;
     isActive: boolean;
     displayName: string;
@@ -183,11 +184,11 @@ class BranchCategoryService {
     try {
       const payload: CreateBranchCategoryRequest = categoryData;
       
-      logger.info('Creating branch category', { branchId, payload });
+      logger.info('Creating branch category', {  payload });
       
       try {
-        const response = await httpClient.post<APIBranchCategory>(`${this.baseUrl}/${branchId}`, payload);
-        logger.info('Branch category created successfully', { branchId, data: response.data });
+        const response = await httpClient.post<APIBranchCategory>(`${this.baseUrl}`, payload);
+        logger.info('Branch category created successfully', { data: response.data });
         
         // Transform single category response
         const transformedCategory: Category = {
@@ -209,8 +210,8 @@ class BranchCategoryService {
           const wrappedPayload = {
             createBranchCategoryDto: categoryData
           };
-          const response = await httpClient.post<APIBranchCategory>(`${this.baseUrl}/${branchId}`, wrappedPayload);
-          logger.info('Branch category created successfully (with DTO wrapper)', { branchId, data: response.data });
+          const response = await httpClient.post<APIBranchCategory>(`${this.baseUrl}`, wrappedPayload);
+          logger.info('Branch category created successfully (with DTO wrapper)', {  data: response.data });
           
           const transformedCategory: Category = {
             categoryId: response.data.categoryId,
@@ -285,7 +286,11 @@ class BranchCategoryService {
   async deleteBranchCategory(id: number): Promise<void> {
     try {
       logger.info('Deleting branch category', { id });
-      await httpClient.delete(`${this.baseUrl}/${id}`);
+      await httpClient.delete(`${this.baseUrl}` , {
+        params : {
+          id : id
+        }
+      });
       logger.info('Branch category deleted successfully', { id });
     } catch (error: any) {
       logger.error('❌ Error deleting branch category:', error);
