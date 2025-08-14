@@ -23,6 +23,7 @@ import { logger } from '../utils/logger';
 import IngredientsContent from '../components/dashboard/Ingredients/Ingredients';
 import SetupSidebar from '../components/dashboard/layout/SetupSidebar';
 import BranchProducts from '../components/dashboard/Branch/Products/BranchProducts';
+import BranchTableManagement from '../components/dashboard/Branch/Table/BranchTables';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();
@@ -187,7 +188,6 @@ const Dashboard: React.FC = () => {
               {activeTab === 'overview' && <Overview />}
               {activeTab === 'orders' && <Orders />}
               {activeTab === 'products' && <ProductsContent />}
-              {activeTab === 'branchProducts' && <BranchProducts />}
               {activeTab === 'ingredients' && <IngredientsContent />}
               {activeTab === 'branches' && <BranchManagement />}
               {activeTab === 'tables' && <TableManagement selectedBranch={selectedBranch} />}
@@ -196,8 +196,11 @@ const Dashboard: React.FC = () => {
               {activeTab === 'profile' && <Profile />}
               {activeTab === 'settings' && <Settings />}
               {activeTab === 'subscription' && <Subscription />}
-     
-        
+
+            {/* branch */}
+            {activeTab === 'branchProducts' && <BranchProducts />}
+              {activeTab === 'TableManagement' && <BranchTableManagement />}
+
       
         </main>
       </div>

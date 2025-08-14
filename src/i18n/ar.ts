@@ -40,6 +40,11 @@ export const ar = {
       "active": "نشط",
       "inactive": "غير نشط",
       "categories": "الفئات",
+      allergenic:"مسببات الحساسية",
+      nonallergenic:"غير مسبب للحساسية",
+      specific:{
+        allergens : "مسببات الحساسية"
+      },
       "price": {
         "range": "نطاق السعر",
         "min": "أقل سعر",
@@ -2740,6 +2745,88 @@ userManagementPage: {
     roleCreated: 'تم إنشاء الدور بنجاح',
     userUpdated: 'تم تحديث المستخدم بنجاح',
     roleUpdated: 'تم تحديث الدور بنجاح'
+  },
+  
+},
+  BranchtableManagement: {
+  title: "إدارة الطاولات",
+  subtitle: "إدارة طاولات المطعم والفئات",
+  tabs: {
+    tables: "الطاولات",
+    categories: "الفئات",
+    statistics: "الإحصائيات",
+    batchCreate: "إنشاء متعدد"
+  },
+  buttons: {
+    addTable: "إضافة طاولة",
+    addCategory: "إضافة فئة",
+    batchCreate: "إنشاء متعدد",
+    edit: "تعديل",
+    delete: "حذف",
+    save: "حفظ",
+    cancel: "إلغاء",
+    refresh: "تحديث",
+    selectAll: "تحديد الكل",
+    clearSelection: "إلغاء التحديد",
+    export: "تصدير",
+    import: "استيراد"
+  },
+  labels: {
+    tableName: "اسم الطاولة",
+    category: "الفئة",
+    capacity: "السعة",
+    status: "الحالة",
+    occupation: "الإشغال",
+    displayOrder: "ترتيب العرض",
+    search: "البحث في الطاولات...",
+    filterByCategory: "تصفية حسب الفئة",
+    viewMode: "وضع العرض",
+    totalTables: "إجمالي الطاولات",
+    activeTables: "الطاولات النشطة",
+    occupiedTables: "الطاولات المشغولة",
+    availableTables: "الطاولات المتاحة"
+  },
+  status: {
+    active: "نشط",
+    inactive: "غير نشط",
+    occupied: "مشغول",
+    available: "متاح",
+    outOfService: "خارج الخدمة"
+  },
+  actions: {
+    markOccupied: "تحديد كمشغول",
+    markAvailable: "تحديد كمتاح",
+    activate: "تفعيل",
+    deactivate: "إلغاء التفعيل",
+    viewDetails: "عرض التفاصيل"
+  },
+  messages: {
+    tableCreated: "تم إنشاء الطاولة بنجاح",
+    tableUpdated: "تم تحديث الطاولة بنجاح",
+    tableDeleted: "تم حذف الطاولة بنجاح",
+    statusUpdated: "تم تحديث الحالة بنجاح",
+    error: "حدث خطأ",
+    noTables: "لم يتم العثور على طاولات",
+    confirmDelete: "هل أنت متأكد من حذف هذه الطاولة؟",
+    loading: "جاري التحميل...",
+    saving: "جاري الحفظ...",
+    deleting: "جاري الحذف..."
+  },
+  statistics: {
+    title: "إحصائيات الطاولات",
+    occupancyRate: "معدل الإشغال",
+    averageCapacity: "متوسط السعة",
+    categoryBreakdown: "توزيع الفئات",
+    dailyOccupancy: "الإشغال اليومي",
+    peakHours: "ساعات الذروة"
+  },
+  forms: {
+    createTable: "إنشاء طاولة جديدة",
+    editTable: "تعديل الطاولة",
+    batchCreateTables: "إنشاء عدة طاولات",
+    quantity: "الكمية",
+    namePrefix: "بادئة الاسم",
+    startingNumber: "الرقم البادئ"
   }
 }
 

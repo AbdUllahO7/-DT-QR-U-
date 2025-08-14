@@ -40,6 +40,11 @@ export const tr = {
       "active": "Aktif",
       "inactive": "Pasif", 
       "categories": "Kategoriler",
+       allergenic:"alerjenik",
+      nonallergenic:"alerjenik olmayan",
+      specific:{
+        allergens : "alerjenler"
+      },
       "price": {
         "range": "Fiyat Aralığı",
         "min": "Min Fiyat",
@@ -63,7 +68,8 @@ export const tr = {
       "created": {
         "asc": "Oluşturulma Tarihi (En Eskiden)",
         "desc": "Oluşturulma Tarihi (En Yeniden)"
-      }
+      },
+
     },
     clear: {
       "filters": "Filtreleri Temizle",
@@ -2735,5 +2741,86 @@ AddQRCodeCard: {
       userUpdated: 'Kullanıcı başarıyla güncellendi',
       roleUpdated: 'Rol başarıyla güncellendi'
     }
+  },
+  BranchtableManagement: {
+  title: "Masa Yönetimi",
+  subtitle: "Restoran masalarınızı ve kategorilerinizi yönetin",
+  tabs: {
+    tables: "Masalar",
+    categories: "Kategoriler", 
+    statistics: "İstatistikler",
+    batchCreate: "Toplu Oluştur"
+  },
+  buttons: {
+    addTable: "Masa Ekle",
+    addCategory: "Kategori Ekle",
+    batchCreate: "Toplu Oluştur",
+    edit: "Düzenle",
+    delete: "Sil",
+    save: "Kaydet",
+    cancel: "İptal",
+    refresh: "Yenile",
+    selectAll: "Tümünü Seç",
+    clearSelection: "Seçimi Temizle",
+    export: "Dışa Aktar",
+    import: "İçe Aktar"
+  },
+  labels: {
+    tableName: "Masa Adı",
+    category: "Kategori",
+    capacity: "Kapasite",
+    status: "Durum",
+    occupation: "Doluluk",
+    displayOrder: "Görüntüleme Sırası",
+    search: "Masalarda ara...",
+    filterByCategory: "Kategoriye Göre Filtrele",
+    viewMode: "Görünüm Modu",
+    totalTables: "Toplam Masa",
+    activeTables: "Aktif Masalar",
+    occupiedTables: "Dolu Masalar", 
+    availableTables: "Boş Masalar"
+  },
+  status: {
+    active: "Aktif",
+    inactive: "Pasif",
+    occupied: "Dolu",
+    available: "Boş",
+    outOfService: "Hizmet Dışı"
+  },
+  actions: {
+    markOccupied: "Dolu Olarak İşaretle",
+    markAvailable: "Boş Olarak İşaretle", 
+    activate: "Aktifleştir",
+    deactivate: "Pasifleştir",
+    viewDetails: "Detayları Görüntüle"
+  },
+  messages: {
+    tableCreated: "Masa başarıyla oluşturuldu",
+    tableUpdated: "Masa başarıyla güncellendi",
+    tableDeleted: "Masa başarıyla silindi",
+    statusUpdated: "Durum başarıyla güncellendi", 
+    error: "Bir hata oluştu",
+    noTables: "Masa bulunamadı",
+    confirmDelete: "Bu masayı silmek istediğinizden emin misiniz?",
+    loading: "Yükleniyor...",
+    saving: "Kaydediliyor...",
+    deleting: "Siliniyor..."
+  },
+  statistics: {
+    title: "Masa İstatistikleri",
+    occupancyRate: "Doluluk Oranı",
+    averageCapacity: "Ortalama Kapasite",
+    categoryBreakdown: "Kategori Dağılımı",
+    dailyOccupancy: "Günlük Doluluk",
+    peakHours: "Yoğun Saatler"
+  },
+  forms: {
+    createTable: "Yeni Masa Oluştur",
+    editTable: "Masayı Düzenle", 
+    batchCreateTables: "Birden Fazla Masa Oluştur",
+    quantity: "Miktar",
+    namePrefix: "Ad Öneki",
+    startingNumber: "Başlangıç Numarası"
   }
+}
 }; 
