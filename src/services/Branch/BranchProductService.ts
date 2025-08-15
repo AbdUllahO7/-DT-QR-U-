@@ -84,13 +84,12 @@ class BranchProductService {
       const response = await httpClient.get<APIBranchProduct[]>(`${this.baseUrl}`);
       
       logger.info('Branch products retrieved successfully', { 
-        count: response.data.length 
+        count: response.data 
       });
       
-      // Transform the API response to match component expectations
-      const transformedData = this.transformAPIDataToComponentData(response.data);
+     
       
-      return transformedData;
+      return response.data;
     } catch (error: any) {
       logger.error('Error retrieving branch products:', error);
       return [];

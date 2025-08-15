@@ -14,6 +14,9 @@ export interface Product {
 }
 
 export interface Category {
+  [x: string]: any;
+  productId: any;
+  name: any;
   categoryId: number;
   categoryName: string;
   description: string;
