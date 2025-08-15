@@ -24,6 +24,7 @@ import IngredientsContent from '../components/dashboard/Ingredients/Ingredients'
 import SetupSidebar from '../components/dashboard/layout/SetupSidebar';
 import BranchProducts from '../components/dashboard/Branch/Products/BranchProducts';
 import BranchTableManagement from '../components/dashboard/Branch/Table/BranchTables';
+import BranchManagementBranch from '../components/dashboard/Branch/BranchManagement/BranchManagement';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();
@@ -200,6 +201,7 @@ const Dashboard: React.FC = () => {
             {/* branch */}
             {activeTab === 'branchProducts' && <BranchProducts />}
               {activeTab === 'TableManagement' && <BranchTableManagement />}
+              {activeTab === 'BranchManagement' && <BranchManagementBranch />}
 
       
         </main>

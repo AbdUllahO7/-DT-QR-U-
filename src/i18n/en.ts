@@ -286,7 +286,7 @@ export const en = {
 
 
     },
-
+    branchManagementTitle: "Branch Management" ,
     sidebar: {
       title : "QR Menu",
       logout: 'Logout',
@@ -3082,6 +3082,86 @@ export const en = {
       updateTableStatusFailed: "Failed to update table status",
       updateTableOccupationFailed: "Failed to update table occupation",
       refreshFailed: "Failed to refresh data"
+    }
+  },
+   branchManagementBranch: {
+    title: 'Branch Management',
+    description: 'Manage your branch information and settings.',
+    loading: 'Loading branch information...',
+    noBranchFound: 'No branch found',
+    
+    status: {
+      open: 'Open',
+      closed: 'Closed',
+      temporarilyClosed: 'Temporarily Closed',
+      reopenBranch: 'Reopen Branch',
+      temporaryClose: 'Temporary Close'
+    },
+    
+    actions: {
+      edit: 'Edit',
+      save: 'Save',
+      cancel: 'Cancel',
+      delete: 'Delete',
+      deleting: 'Deleting...',
+      confirmDelete: 'Confirm Delete',
+      deleteWarning: 'Are you sure you want to delete this branch? This action cannot be undone.',
+    },
+    
+    basicInfo: {
+      title: 'Basic Information',
+      branchName: 'Branch Name',
+      whatsappNumber: 'WhatsApp Number',
+      email: 'Email',
+      notSpecified: 'Not specified'
+    },
+    
+    addressInfo: {
+      title: 'Address Information',
+      country: 'Country',
+      city: 'City',
+      street: 'Street',
+      postalCode: 'Postal Code',
+      region: 'Region'
+    },
+    
+    workingHours: {
+      title: 'Working Hours',
+      workingDay: 'Working day',
+      openTime: 'Open Time',
+      closeTime: 'Close Time',
+      noWorkingHours: 'No working hours specified',
+      days: {
+        0: 'Sunday',
+        1: 'Monday',
+        2: 'Tuesday',
+        3: 'Wednesday',
+        4: 'Thursday',
+        5: 'Friday',
+        6: 'Saturday'
+      }
+    },
+    
+    messages: {
+      updateSuccess: 'Branch information updated successfully',
+      deleteSuccess: 'Branch deleted successfully',
+      temporaryCloseSuccess: 'Branch temporarily closed',
+      reopenSuccess: 'Branch reopened',
+      updateError: 'Error occurred during update',
+      deleteError: 'Error occurred during deletion',
+      statusChangeError: 'Error occurred while changing status',
+      loadError: 'Error occurred while loading branch information'
+    },
+    
+    placeholders: {
+      branchName: 'Enter branch name',
+      whatsappNumber: 'Enter WhatsApp number',
+      email: 'Enter email address',
+      country: 'Enter country',
+      city: 'Enter city',
+      street: 'Enter street',
+      postalCode: 'Enter postal code',
+      region: 'Enter region'
     }
   }
 }; 

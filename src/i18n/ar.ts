@@ -288,7 +288,8 @@ export const ar = {
       title : "قائمة QR",
       logout: 'تسجيل الخروج',
       branch: 'فرع'
-    }
+    },
+    branchManagementTitle: "إدارة الفروع" 
   },
 
   // Theme
@@ -3016,76 +3017,155 @@ export const ar = {
         clear: 'مسح'
       }
   },
-BranchTableManagement: {
-    header: "إدارة الفئات والطاولات",
-    subheader: "إدارة فئات المطعم والطاولات مع عرض الأكورديون",
-    totalCategories: "إجمالي الفئات",
-    totalTables: "إجمالي الطاولات",
-    occupiedTables: "الطاولات المحجوزة",
-    availableTables: "الطاولات المتاحة",
-    searchPlaceholder: "ابحث عن الفئات...",
-    refresh: "تحديث",
-    addCategory: "إضافة فئة",
-    addCategoryTitle: "إضافة فئة جديدة",
-    categoryNameLabel: "اسم الفئة",
-    categoryNamePlaceholder: "أدخل اسم الفئة",
-    colorLabel: "اللون",
-    iconLabel: "الأيقونة",
-    save: "حفظ",
-    cancel: "إلغاء",
-    noCategories: "لم يتم العثور على فئات",
-    addFirstCategory: "إضافة فئتك الأولى",
-    tablesCount: "طاولات",
-    status: "الحالة",
-    active: "نشط",
-    inactive: "غير نشط",
-    occupation: "الإشغال",
-    occupied: "محجوز",
-    available: "متاح",
-    addTable: "إضافة طاولة",
-    tableNamePlaceholder: "اسم الطاولة",
-    capacityPlaceholder: "السعة",
-    noTables: "لا توجد طاولات في هذه الفئة",
-    qrCodeTitle: "رمز QR - {tableName}",
-    qrCodeDescription: "امسح رمز QR هذا للوصول إلى قائمة الطاولة",
-    downloadQR: "تنزيل رمز QR",
-    downloading: "جاري التنزيل...",
-    copyQRUrl: "نسخ رابط QR",
-    copied: "تم النسخ!",
-    success: {
-      categoryAdded: "تم إضافة الفئة بنجاح",
-      categoryUpdated: "تم تحديث الفئة بنجاح",
-      categoryDeleted: "تم حذف الفئة بنجاح",
-      tableAdded: "تم إضافة الطاولة بنجاح",
-      tableUpdated: "تم تحديث الطاولة بنجاح",
-      tableDeleted: "تم حذف الطاولة بنجاح",
-      categoryActivated: "تم تفعيل الفئة بنجاح",
-      categoryDeactivated: "تم إلغاء تفعيل الفئة بنجاح",
-      tableActivated: "تم تفعيل الطاولة بنجاح",
-      tableDeactivated: "تم إلغاء تفعيل الطاولة بنجاح",
-      tableOccupied: "تم وضع علامة على الطاولة كمحجوزة",
-      tableAvailable: "تم وضع علامة على الطاولة كمتاحة",
-      dataRefreshed: "تم تحديث البيانات بنجاح"
+  BranchTableManagement: {
+      header: "إدارة الفئات والطاولات",
+      subheader: "إدارة فئات المطعم والطاولات مع عرض الأكورديون",
+      totalCategories: "إجمالي الفئات",
+      totalTables: "إجمالي الطاولات",
+      occupiedTables: "الطاولات المحجوزة",
+      availableTables: "الطاولات المتاحة",
+      searchPlaceholder: "ابحث عن الفئات...",
+      refresh: "تحديث",
+      addCategory: "إضافة فئة",
+      addCategoryTitle: "إضافة فئة جديدة",
+      categoryNameLabel: "اسم الفئة",
+      categoryNamePlaceholder: "أدخل اسم الفئة",
+      colorLabel: "اللون",
+      iconLabel: "الأيقونة",
+      save: "حفظ",
+      cancel: "إلغاء",
+      noCategories: "لم يتم العثور على فئات",
+      addFirstCategory: "إضافة فئتك الأولى",
+      tablesCount: "طاولات",
+      status: "الحالة",
+      active: "نشط",
+      inactive: "غير نشط",
+      occupation: "الإشغال",
+      occupied: "محجوز",
+      available: "متاح",
+      addTable: "إضافة طاولة",
+      tableNamePlaceholder: "اسم الطاولة",
+      capacityPlaceholder: "السعة",
+      noTables: "لا توجد طاولات في هذه الفئة",
+      qrCodeTitle: "رمز QR - {tableName}",
+      qrCodeDescription: "امسح رمز QR هذا للوصول إلى قائمة الطاولة",
+      downloadQR: "تنزيل رمز QR",
+      downloading: "جاري التنزيل...",
+      copyQRUrl: "نسخ رابط QR",
+      copied: "تم النسخ!",
+      success: {
+        categoryAdded: "تم إضافة الفئة بنجاح",
+        categoryUpdated: "تم تحديث الفئة بنجاح",
+        categoryDeleted: "تم حذف الفئة بنجاح",
+        tableAdded: "تم إضافة الطاولة بنجاح",
+        tableUpdated: "تم تحديث الطاولة بنجاح",
+        tableDeleted: "تم حذف الطاولة بنجاح",
+        categoryActivated: "تم تفعيل الفئة بنجاح",
+        categoryDeactivated: "تم إلغاء تفعيل الفئة بنجاح",
+        tableActivated: "تم تفعيل الطاولة بنجاح",
+        tableDeactivated: "تم إلغاء تفعيل الطاولة بنجاح",
+        tableOccupied: "تم وضع علامة على الطاولة كمحجوزة",
+        tableAvailable: "تم وضع علامة على الطاولة كمتاحة",
+        dataRefreshed: "تم تحديث البيانات بنجاح"
+      },
+      error: {
+        fetchCategoriesFailed: "فشل في جلب الفئات",
+        fetchTablesFailed: "فشل في جلب الطاولات",
+        categoryNameRequired: "اسم الفئة مطلوب",
+        addCategoryFailed: "فشل في إضافة الفئة",
+        updateCategoryFailed: "فشل في تحديث الفئة",
+        deleteCategoryFailed: "فشل في حذف الفئة",
+        categoryHasTables: "لا يمكن حذف الفئة التي تحتوي على طاولات",
+        categoryNotFound: "الفئة غير موجودة",
+        addTableFailed: "فشل في إضافة الطاولة",
+        updateTableFailed: "فشل في تحديث الطاولة",
+        deleteTableFailed: "فشل في حذف الطاولة",
+        tableNameRequired: "اسم الطاولة مطلوب",
+        tableNotFound: "الطاولة غير موجودة",
+        updateCategoryStatusFailed: "فشل في تحديث حالة الفئة",
+        updateTableStatusFailed: "فشل في تحديث حالة الطاولة",
+        updateTableOccupationFailed: "فشل في تحديث حالة إشغال الطاولة",
+        refreshFailed: "فشل في تحديث البيانات"
+      }
+  },
+  branchManagementBranch: {
+    title: 'إدارة الفروع',
+    description: 'إدارة معلومات وإعدادات فرعك.',
+    loading: 'جاري تحميل معلومات الفرع...',
+    noBranchFound: 'لم يتم العثور على أي فرع',
+    
+    status: {
+      open: 'مفتوح',
+      closed: 'مغلق',
+      temporarilyClosed: 'مغلق مؤقتاً',
+      reopenBranch: 'إعادة فتح الفرع',
+      temporaryClose: 'إغلاق مؤقت'
     },
-    error: {
-      fetchCategoriesFailed: "فشل في جلب الفئات",
-      fetchTablesFailed: "فشل في جلب الطاولات",
-      categoryNameRequired: "اسم الفئة مطلوب",
-      addCategoryFailed: "فشل في إضافة الفئة",
-      updateCategoryFailed: "فشل في تحديث الفئة",
-      deleteCategoryFailed: "فشل في حذف الفئة",
-      categoryHasTables: "لا يمكن حذف الفئة التي تحتوي على طاولات",
-      categoryNotFound: "الفئة غير موجودة",
-      addTableFailed: "فشل في إضافة الطاولة",
-      updateTableFailed: "فشل في تحديث الطاولة",
-      deleteTableFailed: "فشل في حذف الطاولة",
-      tableNameRequired: "اسم الطاولة مطلوب",
-      tableNotFound: "الطاولة غير موجودة",
-      updateCategoryStatusFailed: "فشل في تحديث حالة الفئة",
-      updateTableStatusFailed: "فشل في تحديث حالة الطاولة",
-      updateTableOccupationFailed: "فشل في تحديث حالة إشغال الطاولة",
-      refreshFailed: "فشل في تحديث البيانات"
+    
+    actions: {
+      edit: 'تعديل',
+      save: 'حفظ',
+      cancel: 'إلغاء',
+      delete: 'حذف',
+      deleting: 'جاري الحذف...',
+      confirmDelete: 'تأكيد الحذف',
+      deleteWarning: 'هل أنت متأكد من أنك تريد حذف هذا الفرع؟ لا يمكن التراجع عن هذا الإجراء.',
+    },
+    
+    basicInfo: {
+      title: 'المعلومات الأساسية',
+      branchName: 'اسم الفرع',
+      whatsappNumber: 'رقم الواتساب',
+      email: 'البريد الإلكتروني',
+      notSpecified: 'غير محدد'
+    },
+    
+    addressInfo: {
+      title: 'معلومات العنوان',
+      country: 'الدولة',
+      city: 'المدينة',
+      street: 'الشارع',
+      postalCode: 'الرمز البريدي',
+      region: 'المنطقة'
+    },
+    
+    workingHours: {
+      title: 'ساعات العمل',
+      workingDay: 'يوم عمل',
+      openTime: 'وقت الفتح',
+      closeTime: 'وقت الإغلاق',
+      noWorkingHours: 'لم يتم تحديد ساعات العمل',
+      days: {
+        0: 'الأحد',
+        1: 'الاثنين',
+        2: 'الثلاثاء',
+        3: 'الأربعاء',
+        4: 'الخميس',
+        5: 'الجمعة',
+        6: 'السبت'
+      }
+    },
+    
+    messages: {
+      updateSuccess: 'تم تحديث معلومات الفرع بنجاح',
+      deleteSuccess: 'تم حذف الفرع بنجاح',
+      temporaryCloseSuccess: 'تم إغلاق الفرع مؤقتاً',
+      reopenSuccess: 'تم إعادة فتح الفرع',
+      updateError: 'حدث خطأ أثناء التحديث',
+      deleteError: 'حدث خطأ أثناء الحذف',
+      statusChangeError: 'حدث خطأ أثناء تغيير الحالة',
+      loadError: 'حدث خطأ أثناء تحميل معلومات الفرع'
+    },
+    
+    placeholders: {
+      branchName: 'أدخل اسم الفرع',
+      whatsappNumber: 'أدخل رقم الواتساب',
+      email: 'أدخل عنوان البريد الإلكتروني',
+      country: 'أدخل الدولة',
+      city: 'أدخل المدينة',
+      street: 'أدخل الشارع',
+      postalCode: 'أدخل الرمز البريدي',
+      region: 'أدخل المنطقة'
     }
   }
-
 }; 
