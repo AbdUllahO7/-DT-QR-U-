@@ -2822,5 +2822,193 @@ AddQRCodeCard: {
     namePrefix: "Ad Öneki",
     startingNumber: "Başlangıç Numarası"
   }
-}
+},
+branchCategories: {
+    title: 'Şube Kategorileri',
+    subtitle: 'Şube {branchId} için kategorileri ve ürünleri yönetin',
+    lastUpdated: 'Son güncelleme: Bugün',
+    
+    // Stats cards
+    stats: {
+      availableCategories: 'Mevcut Kategoriler',
+      readyToAdd: 'Eklenmeye hazır',
+      activeCategories: 'Aktif Kategoriler',
+      currentlyInBranch: 'Şu anda şubede',
+      selectedCategories: 'Seçilen Kategoriler',
+      toBeAdded: 'Eklenecek',
+      selectedProducts: 'Seçilen Ürünler',
+      fromCategories: 'Kategorilerden'
+    },
+    
+    // Tab navigation
+    tabs: {
+      addNew: 'Yeni Kategori Ekle',
+      manageExisting: 'Mevcut Olanları Yönet'
+    },
+    
+    // Step progress
+    steps: {
+      chooseCategories: 'Kategori Seç',
+      selectProducts: 'Ürün Seç',
+      reviewAdd: 'İncele ve Ekle',
+      finalStep: 'Son adım',
+      selected: 'seçildi',
+      back: 'Geri'
+    },
+    
+    // Category selection
+    categorySelection: {
+      title: 'Kategori Seç',
+      subtitle: 'Bu şubeye eklemek istediğiniz kategorileri seçin',
+      searchPlaceholder: 'Kategorilerde ara...',
+      refresh: 'Yenile',
+      noCategories: 'Kategori Bulunamadı',
+      allCategoriesAdded: 'Tüm kategoriler zaten bu şubeye eklenmiş',
+      products: 'ürün',
+      active: 'Aktif',
+      inactive: 'Pasif',
+      categoriesSelected: 'kategori seçildi',
+      clearSelection: 'Seçimi Temizle',
+      nextSelectProducts: 'Sonraki: Ürün Seç'
+    },
+    
+    // Product selection
+    productSelection: {
+      title: 'Ürün Seç',
+      subtitle: 'Seçilen kategorilerden belirli ürünleri seçin (isteğe bağlı)',
+      searchPlaceholder: 'Ürünlerde ara...',
+      selectAll: 'Tümünü Seç',
+      clearAll: 'Tümünü Temizle',
+      loadingProducts: 'Ürünler yükleniyor...',
+      noProductsFound: 'Ürün Bulunamadı',
+      selectedCategoriesNoProducts: 'Seçilen kategorilerde hiç ürün yok',
+      available: 'Mevcut',
+      unavailable: 'Mevcut değil',
+      selectedText: 'seçildi',
+      productsSelectedFrom: 'ürün seçildi, toplam',
+      categories: 'kategori',
+      reviewSelection: 'Seçimi İncele'
+    },
+    
+    // Review section
+    review: {
+      title: 'Seçiminizi İnceleyin',
+      subtitle: 'Eklenecek kategorileri ve ürünleri inceleyin ve onaylayın',
+      of: '/',
+      productsSelected: 'ürün seçildi',
+      allProducts: 'Tüm',
+      productsWillBeAdded: 'ürün eklenecek',
+      totalValue: 'Toplam değer',
+      selectedProducts: 'Seçilen Ürünler:',
+      readyToAdd: 'Eklenmek üzere',
+      categories: 'kategori',
+      with: 'ile',
+      products: 'ürün',
+      availableInBranch: 'Bu onları Şube',
+      startOver: 'Baştan Başla',
+      adding: 'Ekleniyor...',
+      addToBranch: 'Şubeye Ekle'
+    },
+    
+    // Manage existing
+    manage: {
+      title: 'Mevcut Kategorileri Yönet',
+      subtitle: 'Bu şubede bulunan kategorileri yeniden sırala ve yönet',
+      saving: 'Kaydediliyor...',
+      saveOrder: 'Sırayı Kaydet',
+      exitReorder: 'Sıralamadan Çık',
+      reorder: 'Yeniden Sırala',
+      loadingCategoriesProducts: 'Kategoriler ve ürünler yükleniyor...',
+      noCategoriesAdded: 'Kategori Eklenmemiş',
+      noCategoriesYet: 'Bu şubede henüz hiç kategori yok',
+      addCategories: 'Kategori Ekle',
+      original: 'Orijinal:',
+      added: 'eklendi',
+      available: 'mevcut',
+      total: 'Toplam:',
+      productsInCategory: 'Bu kategorideki ürünler:',
+      addedLabel: 'Eklendi',
+      availableLabel: 'Mevcut',
+      removeFromBranch: 'Şubeden kaldır',
+      addToBranch: 'Şubeye ekle',
+      productsAddedToBranch: 'ürün şubeye eklendi',
+      moreAvailableToAdd: 'daha eklenebilir',
+      products: 'ürün'
+    },
+    
+    // Delete modal
+    delete: {
+      title: 'Kategoriyi Sil',
+      confirmMessage: '"{categoryName}" kategorisini bu şubeden kaldırmak istediğinizden emin misiniz?',
+      category: 'kategori',
+      deleting: 'Siliniyor...'
+    },
+    
+    // Loading states
+    loading: {
+      categories: 'Kategoriler yükleniyor...',
+      products: 'Ürünler yükleniyor...',
+      saving: 'Kaydediliyor...',
+      default: 'Yükleniyor...'
+    },
+    
+    // Success messages
+    success: {
+      categoryAdded: '"{name}" şubeye başarıyla eklendi!',
+      categoryRemoved: '"{name}" başarıyla kaldırıldı!',
+      productAdded: '"{name}" kategoriye başarıyla eklendi!',
+      productRemoved: '"{name}" kategoriden başarıyla kaldırıldı!',
+      orderSaved: 'Kategori sırası başarıyla kaydedildi!',
+      categoriesAdded: '{count} kategori {branchId} şubesine başarıyla eklendi!',
+      categoriesAndProductsAdded: '{categoryCount} kategori ve {productCount} ürün başarıyla eklendi!',
+      someProductsFailed: 'Not: {count} ürün eklenemedi.'
+    },
+    
+    // Error messages
+    error: {
+      loadCategories: 'Mevcut kategoriler yüklenemedi',
+      loadBranchCategories: 'Şube kategorileri yüklenemedi',
+      loadProducts: 'Seçilen kategoriler için ürünler yüklenemedi',
+      branchIdRequired: 'Kategorileri kaydetmek için şube ID\'si gerekli',
+      selectCategory: 'Lütfen önce en az bir kategori seçin',
+      selectAtLeastOne: 'Lütfen en az bir kategori seçin',
+      createCategory: 'Kategori oluşturulamadı: {name}',
+      addProduct: 'Ürün kategoriye eklenemedi',
+      removeProduct: 'Ürün kategoriden kaldırılamadı',
+      productNotFound: 'Ürün bulunamadı',
+      saveOrder: 'Kategori sırası kaydedilemedi. Lütfen tekrar deneyin.',
+      deleteCategory: '"{name}" kaldırılamadı. Lütfen tekrar deneyin.',
+      categoryNotFound: '"{name}" kategorisi bulunamadı. Zaten silinmiş olabilir.',
+      noPermission: '"{name}" kategorisini silme yetkiniz yok.',
+      categoryInUse: '"{name}" şu anda kullanıldığı için silinemiyor.'
+    },
+    
+    // Common
+    common: {
+      category: 'kategori',
+      categories: 'kategoriler',
+      product: 'ürün',
+      products: 'ürünler',
+      active: 'Aktif',
+      inactive: 'Pasif',
+      available: 'Mevcut',
+      unavailable: 'Mevcut değil',
+      selected: 'Seçildi',
+      loading: 'Yükleniyor',
+      search: 'Ara',
+      save: 'Kaydet',
+      cancel: 'İptal',
+      delete: 'Sil',
+      add: 'Ekle',
+      remove: 'Kaldır',
+      edit: 'Düzenle',
+      view: 'Görüntüle',
+      close: 'Kapat',
+      confirm: 'Onayla',
+      back: 'Geri',
+      next: 'İleri',
+      done: 'Tamam',
+      clear: 'Temizle'
+    }
+  }
 }; 

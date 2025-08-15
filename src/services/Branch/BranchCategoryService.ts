@@ -28,7 +28,13 @@ interface BatchUpdateRequest {
   categoryIds: number[];
 }
 
-// API Response interfaces (what the backend actually returns)
+
+interface GetAvailableProductsRequest {
+  categoryId?: number; 
+  onlyActive?: boolean; 
+  includes?: string; 
+}
+
 interface APIProduct {
   productId: number;
   name: string;
@@ -48,10 +54,10 @@ interface APIBranchCategory {
   restaurantId: number;
   products: APIProduct[];
   description: string;
-  branchCategoryId?: number; // For operations that return this
-  isActive?: boolean; // For operations that return this
-  displayName?: string; // For operations that return this
-  isExpanded:boolean
+  branchCategoryId?: number;
+  isActive?: boolean;
+  displayName?: string;
+  isExpanded?: boolean;
 }
 
 class BranchCategoryService {
@@ -66,7 +72,7 @@ class BranchCategoryService {
       status: apiCategory.status,
       displayOrder: apiCategory.displayOrder,
       restaurantId: apiCategory.restaurantId,
-      isExpanded: true,
+      isExpanded: apiCategory.isExpanded ?? true,
       products: apiCategory?.products?.map(apiProduct => ({
         id: apiProduct.productId,
         name: apiProduct.name,
@@ -77,29 +83,54 @@ class BranchCategoryService {
         status: apiProduct.status,
         displayOrder: apiProduct.displayOrder,
         categoryId: apiCategory.categoryId,
-      }))
+      })) || []
     }));
   }
-// Get available categories for a specific branch
- async getAvailableCategoriesForBranch(): Promise<Category[]> {
-  try {
-    const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/available-categories`);
-    
-    logger.info('Available categories for branch retrieved successfully', { 
-      count: response // Fixed: should be response.data.length
-    });
-    
-    const transformedData = this.transformAPIDataToComponentData(response.data);
-        console.log("transformedData",response.data)
 
-    return transformedData;
-  } catch (error: any) {
-    logger.error('Error retrieving available categories for branch:', error);
-    return [];
+
+  async getAvailableProductsForBranch(params: GetAvailableProductsRequest): Promise<Category[]> {
+    try {
+      const { categoryId, onlyActive, includes } = params;
+      const queryParams = new URLSearchParams();
+      if (categoryId) queryParams.append('categoryId', categoryId.toString());
+      if (onlyActive !== undefined) queryParams.append('onlyActive', onlyActive.toString());
+      if (includes) queryParams.append('includes', includes);
+
+      const response = await httpClient.get<APIBranchCategory[]>(`/api/BranchProducts/branch/available-products?${queryParams.toString()}`);
+
+      logger.info('Available products for branch retrieved successfully', {
+        categoryId,
+        onlyActive,
+        includes,
+        count: response.data.length
+      });
+
+  
+
+      return response.data;
+    } catch (error: any) {
+      logger.error('Error retrieving available products for branch:', error);
+      return [];
+    }
   }
-}
 
-  // Get all branch categories
+  async getAvailableCategoriesForBranch(): Promise<Category[]> {
+    try {
+      const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/available-categories`);
+      
+      logger.info('Available categories for branch retrieved successfully', { 
+        count: response.data.length
+      });
+      
+      const transformedData = this.transformAPIDataToComponentData(response.data);
+
+      return transformedData;
+    } catch (error: any) {
+      logger.error('Error retrieving available categories for branch:', error);
+      return [];
+    }
+  }
+
   async getBranchCategories(): Promise<Category[]> {
     try {
       const response = await httpClient.get(`${this.baseUrl}`);
@@ -108,18 +139,13 @@ class BranchCategoryService {
         count: response.data 
       });
       
-      
-      // Transform the API response to match component expectations
-      return response.data ;
+      return response.data;
     } catch (error: any) {
       logger.error('Error retrieving branch categories:', error);
       return [];
     }
   }
 
- 
-
-  // Get public categories for a specific branch
   async getPublicCategoriesForBranch(branchId: number): Promise<Category[]> {
     try {
       const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/${branchId}/public-categories`);
@@ -138,14 +164,12 @@ class BranchCategoryService {
     }
   }
 
-  // Get specific branch category
   async getBranchCategory(categoryId: number): Promise<Category | null> {
     try {
       const response = await httpClient.get<APIBranchCategory>(`${this.baseUrl}/category/${categoryId}`);
       
-      logger.info('Branch category retrieved successfully', {  categoryId });
+      logger.info('Branch category retrieved successfully', { categoryId });
       
-      // Transform single category response
       const transformedCategory: Category = {
         categoryId: response.data.categoryId,
         categoryName: response.data.categoryName,
@@ -174,8 +198,7 @@ class BranchCategoryService {
     }
   }
 
-  // Create branch category
-  async createBranchCategory( categoryData: {
+  async createBranchCategory(categoryData: {
     categoryId: number;
     isActive: boolean;
     displayName: string;
@@ -184,13 +207,12 @@ class BranchCategoryService {
     try {
       const payload: CreateBranchCategoryRequest = categoryData;
       
-      logger.info('Creating branch category', {  payload });
+      logger.info('Creating branch category', { payload });
       
       try {
         const response = await httpClient.post<APIBranchCategory>(`${this.baseUrl}`, payload);
         logger.info('Branch category created successfully', { data: response.data });
         
-        // Transform single category response
         const transformedCategory: Category = {
           categoryId: response.data.categoryId,
           categoryName: response.data.categoryName,
@@ -201,17 +223,16 @@ class BranchCategoryService {
           isExpanded: true,
           products: []
         };
-        
-        return transformedCategory;
+        console.log("response.data",response.data)
+        return response.data;
       } catch (error: any) {
-        // Handle potential DTO wrapper requirements similar to ProductService
         if (error.response?.data?.errors && error.response.data.errors.createBranchCategoryDto) {
           logger.info('DTO wrapper required, retrying...');
           const wrappedPayload = {
             createBranchCategoryDto: categoryData
           };
           const response = await httpClient.post<APIBranchCategory>(`${this.baseUrl}`, wrappedPayload);
-          logger.info('Branch category created successfully (with DTO wrapper)', {  data: response.data });
+          logger.info('Branch category created successfully (with DTO wrapper)', { data: response.data });
           
           const transformedCategory: Category = {
             categoryId: response.data.categoryId,
@@ -234,7 +255,6 @@ class BranchCategoryService {
     }
   }
 
-  // Update branch category
   async updateBranchCategory(branchId: number, branchCategoryData: {
     branchCategoryId: number;
     isActive?: boolean;
@@ -253,7 +273,6 @@ class BranchCategoryService {
       const response = await httpClient.put<APIBranchCategory>(`${this.baseUrl}/${branchId}`, payload);
       logger.info('Branch category updated successfully', { branchId, data: response.data });
 
-      // Transform single category response
       const transformedCategory: Category = {
         categoryId: response.data.categoryId,
         categoryName: response.data.categoryName,
@@ -282,14 +301,11 @@ class BranchCategoryService {
     }
   }
 
-  // Delete branch category
   async deleteBranchCategory(id: number): Promise<void> {
     try {
       logger.info('Deleting branch category', { id });
-      await httpClient.delete(`${this.baseUrl}` , {
-        params : {
-          id : id
-        }
+      await httpClient.delete(`${this.baseUrl}`, {
+        params: { id }
       });
       logger.info('Branch category deleted successfully', { id });
     } catch (error: any) {
@@ -298,7 +314,6 @@ class BranchCategoryService {
     }
   }
 
-  // Reorder branch categories
   async reorderBranchCategories(categoryOrders: Array<{
     branchCategoryId: number;
     newDisplayOrder: number;
@@ -322,7 +337,6 @@ class BranchCategoryService {
     } catch (error: any) {
       logger.error('❌ Error reordering branch categories:', error);
       
-      // Re-throw with more specific error message if needed
       if (error.response?.status === 400) {
         throw new Error('Invalid branch category reorder data');
       } else if (error.response?.status === 404) {
@@ -333,7 +347,6 @@ class BranchCategoryService {
     }
   }
 
-  // Batch update branch categories
   async batchUpdateBranchCategories(categoryIds: number[]): Promise<void> {
     try {
       const payload: BatchUpdateRequest = {
@@ -354,7 +367,6 @@ class BranchCategoryService {
     } catch (error: any) {
       logger.error('❌ Error batch updating branch categories:', error);
       
-      // Re-throw with more specific error message if needed
       if (error.response?.status === 400) {
         throw new Error('Invalid batch update data');
       } else if (error.response?.status === 404) {

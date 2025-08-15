@@ -590,12 +590,14 @@ const BranchTableManagement: React.FC = () => {
                 </label>
                 <div className="flex gap-2">
                   <input
+                  title='color'
                     type="color"
                     value={newCategory.colorCode}
                     onChange={(e) => setNewCategory(prev => ({ ...prev, colorCode: e.target.value }))}
                     className="w-12 h-10 border border-gray-300 dark:border-gray-600 rounded-lg"
                   />
                   <input
+                  title='colorCode'
                     type="text"
                     value={newCategory.colorCode}
                     onChange={(e) => setNewCategory(prev => ({ ...prev, colorCode: e.target.value }))}
@@ -609,6 +611,7 @@ const BranchTableManagement: React.FC = () => {
                   Icon
                 </label>
                 <select
+                title='iconClass'
                   value={newCategory.iconClass}
                   onChange={(e) => setNewCategory(prev => ({ ...prev, iconClass: e.target.value }))}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -687,6 +690,7 @@ const BranchTableManagement: React.FC = () => {
                         {isEditing ? (
                           <div className="flex items-center gap-3">
                             <input
+                            title='text'
                               type="text"
                               value={category.categoryName}
                               onChange={(e) => {
@@ -698,6 +702,7 @@ const BranchTableManagement: React.FC = () => {
                               onClick={(e) => e.stopPropagation()}
                             />
                             <input
+                            title='colorCode'
                               type="color"
                               value={category.colorCode}
                               onChange={(e) => {
@@ -861,6 +866,7 @@ const BranchTableManagement: React.FC = () => {
                                     {isTableEditing ? (
                                       <div className="flex-1 mr-2">
                                         <input
+                                        title='menuTableName'
                                           type="text"
                                           value={table.menuTableName}
                                           onChange={(e) => {
@@ -871,6 +877,7 @@ const BranchTableManagement: React.FC = () => {
                                           className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
                                         />
                                         <input
+                                        title='number'
                                           type="number"
                                           value={table.capacity}
                                           onChange={(e) => {

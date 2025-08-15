@@ -50,34 +50,34 @@ export const ar = {
         "min": "أقل سعر",
         "max": "أعلى سعر"
       }
+  },
+  sort: {
+    "title": "ترتيب حسب",
+    "name": {
+      "asc": "الاسم (أ-ي)",
+      "desc": "الاسم (ي-أ)"
     },
-    sort: {
-      "title": "ترتيب حسب",
-      "name": {
-        "asc": "الاسم (أ-ي)",
-        "desc": "الاسم (ي-أ)"
-      },
-      "price": {
-        "asc": "السعر (من الأقل إلى الأعلى)",
-        "desc": "السعر (من الأعلى إلى الأقل)"
-      },
-      "order": {
-        "asc": "ترتيب العرض (الأول إلى الأخير)",
-        "desc": "ترتيب العرض (الأخير إلى الأول)"
-      },
-      "created": {
-        "asc": "تاريخ الإنشاء (الأقدم أولاً)",
-        "desc": "تاريخ الإنشاء (الأحدث أولاً)"
-      }
+    "price": {
+      "asc": "السعر (من الأقل إلى الأعلى)",
+      "desc": "السعر (من الأعلى إلى الأقل)"
     },
-    clear: {
-      "filters": "مسح المرشحات",
-      "all": "مسح الكل"
+    "order": {
+      "asc": "ترتيب العرض (الأول إلى الأخير)",
+      "desc": "ترتيب العرض (الأخير إلى الأول)"
     },
+    "created": {
+      "asc": "تاريخ الإنشاء (الأقدم أولاً)",
+      "desc": "تاريخ الإنشاء (الأحدث أولاً)"
+    }
+  },
+  clear: {
+    "filters": "مسح المرشحات",
+    "all": "مسح الكل"
+  },
   restaurantManagement : {
     tabs : {
       general : "عام",
-       legal : "قانوني",
+      legal : "قانوني",
         about : "حول",
     },
         GeneralInformation: "معلومات عامة"
@@ -1692,267 +1692,267 @@ export const ar = {
     statusToggle: 'تبديل حالة المنتج'
   }
   },
-   productAddonsModal: {
-      // Header
-      title: 'إضافات المنتج',
-      subtitle: 'إدارة منتجات الإضافات لـ',
-      close: 'إغلاق',
+  productAddonsModal: {
+    // Header
+    title: 'إضافات المنتج',
+    subtitle: 'إدارة منتجات الإضافات لـ',
+    close: 'إغلاق',
 
-      // Panel titles
-      panels: {
-        currentAddons: {
-          title: 'الإضافات الحالية',
-          count: '({{count}})',
-          dragInstruction: 'يمكنك إعادة الترتيب بالسحب',
-          emptyState: {
-            title: 'لم يتم إضافة أي إضافات بعد.',
-            subtitle: 'اختر المنتجات من اللوحة اليمنى.'
-          }
-        },
-        availableProducts: {
-          title: 'المنتجات المتاحة كإضافات',
-          searchPlaceholder: 'البحث عن المنتجات...',
-          emptyState: {
-            noResults: 'لم يتم العثور على منتجات تطابق معايير البحث.',
-            noProducts: 'لم يتم العثور على منتجات قابلة للإضافة.'
-          }
+    // Panel titles
+    panels: {
+      currentAddons: {
+        title: 'الإضافات الحالية',
+        count: '({{count}})',
+        dragInstruction: 'يمكنك إعادة الترتيب بالسحب',
+        emptyState: {
+          title: 'لم يتم إضافة أي إضافات بعد.',
+          subtitle: 'اختر المنتجات من اللوحة اليمنى.'
         }
       },
-
-      // Addon item actions
-      actions: {
-        edit: 'تحرير',
-        save: 'حفظ',
-        cancel: 'إلغاء',
-        remove: 'إزالة',
-        recommended: 'مُوصى به'
-      },
-
-      // Form fields
-      form: {
-        marketingText: {
-          placeholder: 'نص تسويقي...',
-          label: 'النص التسويقي'
-        },
-        isRecommended: {
-          label: 'وضع علامة كإضافة موصى بها',
-          badge: 'مُوصى به'
+      availableProducts: {
+        title: 'المنتجات المتاحة كإضافات',
+        searchPlaceholder: 'البحث عن المنتجات...',
+        emptyState: {
+          noResults: 'لم يتم العثور على منتجات تطابق معايير البحث.',
+          noProducts: 'لم يتم العثور على منتجات قابلة للإضافة.'
         }
-      },
+      }
+    },
 
-      // Product status
+    // Addon item actions
+    actions: {
+      edit: 'تحرير',
+      save: 'حفظ',
+      cancel: 'إلغاء',
+      remove: 'إزالة',
+      recommended: 'مُوصى به'
+    },
+
+    // Form fields
+    form: {
+      marketingText: {
+        placeholder: 'نص تسويقي...',
+        label: 'النص التسويقي'
+      },
+      isRecommended: {
+        label: 'وضع علامة كإضافة موصى بها',
+        badge: 'مُوصى به'
+      }
+    },
+
+    // Product status
+    status: {
+      outOfStock: 'نفد من المخزون',
+      available: 'متوفر',
+      unavailable: 'غير متوفر'
+    },
+
+    // Loading states
+    loading: {
+      addons: 'جاري تحميل الإضافات...',
+      products: 'جاري تحميل المنتجات...',
+      saving: 'جاري الحفظ...'
+    },
+
+    // Buttons
+    buttons: {
+      cancel: 'إلغاء',
+      saveAddons: 'حفظ الإضافات',
+      saving: 'جاري الحفظ...'
+    },
+
+    // Counter texts
+    counters: {
+      selectedProducts: '{{count}} منتج محدد',
+      availableProducts: '{{count}} منتج متوفر'
+    },
+
+    // Error messages
+    errors: {
+      loadingData: 'حدث خطأ أثناء تحميل بيانات الإضافات.',
+      updatingAddon: 'حدث خطأ أثناء تحديث الإضافة.',
+      deletingAddon: 'حدث خطأ أثناء حذف الإضافة.',
+      savingOrder: 'حدث خطأ أثناء حفظ ترتيب الإضافات.',
+      savingAddons: 'حدث خطأ أثناء حفظ الإضافات. يرجى المحاولة مرة أخرى.',
+      general: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
+      networkError: 'خطأ في الاتصال بالشبكة. تحقق من اتصالك وحاول مرة أخرى.'
+    },
+
+    // Success messages
+    success: {
+      addonsSaved: 'تم حفظ إضافات المنتج بنجاح',
+      orderUpdated: 'تم تحديث ترتيب الإضافات بنجاح',
+      addonUpdated: 'تم تحديث الإضافة بنجاح',
+      addonRemoved: 'تم إزالة الإضافة بنجاح'
+    },
+
+    // Accessibility
+    accessibility: {
+      closeModal: 'إغلاق نافذة إضافات المنتج',
+      dragHandle: 'اسحب لإعادة ترتيب الإضافة',
+      editAddon: 'تحرير تفاصيل الإضافة',
+      removeAddon: 'إزالة الإضافة من المنتج',
+      selectProduct: 'اختيار المنتج كإضافة',
+      productImage: 'صورة المنتج',
+      toggleRecommended: 'تبديل حالة التوصية'
+    }
+  },
+  editCategoryModal: {
+    // Header
+    title: 'تحرير الفئة',
+    subtitle: 'تحديث معلومات الفئة',
+    close: 'إغلاق',
+
+    // Form fields
+    form: {
+      categoryName: {
+        label: 'اسم الفئة',
+        placeholder: 'أدخل اسم الفئة...',
+        required: 'اسم الفئة مطلوب',
+        minLength: 'يجب أن يكون اسم الفئة على الأقل 2 أحرف',
+        maxLength: 'يجب أن يكون اسم الفئة أقل من 100 حرف'
+      },
+      description: {
+        label: 'الوصف',
+        placeholder: 'أدخل وصف الفئة...',
+        optional: 'اختياري',
+        maxLength: 'يجب أن يكون الوصف أقل من 500 حرف'
+      },
       status: {
-        outOfStock: 'نفد من المخزون',
-        available: 'متوفر',
-        unavailable: 'غير متوفر'
-      },
-
-      // Loading states
-      loading: {
-        addons: 'جاري تحميل الإضافات...',
-        products: 'جاري تحميل المنتجات...',
-        saving: 'جاري الحفظ...'
-      },
-
-      // Buttons
-      buttons: {
-        cancel: 'إلغاء',
-        saveAddons: 'حفظ الإضافات',
-        saving: 'جاري الحفظ...'
-      },
-
-      // Counter texts
-      counters: {
-        selectedProducts: '{{count}} منتج محدد',
-        availableProducts: '{{count}} منتج متوفر'
-      },
-
-      // Error messages
-      errors: {
-        loadingData: 'حدث خطأ أثناء تحميل بيانات الإضافات.',
-        updatingAddon: 'حدث خطأ أثناء تحديث الإضافة.',
-        deletingAddon: 'حدث خطأ أثناء حذف الإضافة.',
-        savingOrder: 'حدث خطأ أثناء حفظ ترتيب الإضافات.',
-        savingAddons: 'حدث خطأ أثناء حفظ الإضافات. يرجى المحاولة مرة أخرى.',
-        general: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
-        networkError: 'خطأ في الاتصال بالشبكة. تحقق من اتصالك وحاول مرة أخرى.'
-      },
-
-      // Success messages
-      success: {
-        addonsSaved: 'تم حفظ إضافات المنتج بنجاح',
-        orderUpdated: 'تم تحديث ترتيب الإضافات بنجاح',
-        addonUpdated: 'تم تحديث الإضافة بنجاح',
-        addonRemoved: 'تم إزالة الإضافة بنجاح'
-      },
-
-      // Accessibility
-      accessibility: {
-        closeModal: 'إغلاق نافذة إضافات المنتج',
-        dragHandle: 'اسحب لإعادة ترتيب الإضافة',
-        editAddon: 'تحرير تفاصيل الإضافة',
-        removeAddon: 'إزالة الإضافة من المنتج',
-        selectProduct: 'اختيار المنتج كإضافة',
-        productImage: 'صورة المنتج',
-        toggleRecommended: 'تبديل حالة التوصية'
+        label: 'نشط',
+        description: 'ستكون الفئة مرئية في القائمة عندما تكون نشطة',
+        active: 'نشط',
+        inactive: 'غير نشط'
       }
     },
-      editCategoryModal: {
-      // Header
-      title: 'تحرير الفئة',
-      subtitle: 'تحديث معلومات الفئة',
-      close: 'إغلاق',
 
-      // Form fields
-      form: {
-        categoryName: {
-          label: 'اسم الفئة',
-          placeholder: 'أدخل اسم الفئة...',
-          required: 'اسم الفئة مطلوب',
-          minLength: 'يجب أن يكون اسم الفئة على الأقل 2 أحرف',
-          maxLength: 'يجب أن يكون اسم الفئة أقل من 100 حرف'
-        },
-        description: {
-          label: 'الوصف',
-          placeholder: 'أدخل وصف الفئة...',
-          optional: 'اختياري',
-          maxLength: 'يجب أن يكون الوصف أقل من 500 حرف'
-        },
-        status: {
-          label: 'نشط',
-          description: 'ستكون الفئة مرئية في القائمة عندما تكون نشطة',
-          active: 'نشط',
-          inactive: 'غير نشط'
-        }
-      },
-
-      // Buttons
-      buttons: {
-        cancel: 'إلغاء',
-        save: 'حفظ',
-        saving: 'جاري الحفظ...',
-        update: 'تحديث الفئة',
-        updating: 'جاري التحديث...'
-      },
-
-      // Error messages
-      errors: {
-        updateFailed: 'حدث خطأ أثناء تحديث الفئة. يرجى المحاولة مرة أخرى.',
-        nameRequired: 'اسم الفئة مطلوب',
-        nameMinLength: 'يجب أن يكون اسم الفئة على الأقل 2 أحرف',
-        nameMaxLength: 'يجب أن يكون اسم الفئة أقل من 100 حرف',
-        descriptionMaxLength: 'يجب أن يكون الوصف أقل من 500 حرف',
-        general: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
-        networkError: 'خطأ في الاتصال بالشبكة. تحقق من اتصالك وحاول مرة أخرى.',
-        serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.'
-      },
-
-      // Success messages
-      success: {
-        categoryUpdated: 'تم تحديث الفئة بنجاح',
-        changesSaved: 'تم حفظ التغييرات بنجاح'
-      },
-
-      // Validation messages
-      validation: {
-        nameRequired: 'يرجى إدخال اسم الفئة',
-        nameMinLength: 'اسم الفئة قصير جداً',
-        nameMaxLength: 'اسم الفئة طويل جداً',
-        descriptionMaxLength: 'الوصف طويل جداً'
-      },
-
-      // Accessibility
-      accessibility: {
-        closeModal: 'إغلاق نافذة تحرير الفئة',
-        formTitle: 'نموذج تحرير الفئة',
-        requiredField: 'حقل مطلوب',
-        optionalField: 'حقل اختياري',
-        statusToggle: 'تبديل حالة الفئة',
-        nameInput: 'إدخال اسم الفئة',
-        descriptionInput: 'إدخال وصف الفئة'
-      }
+    // Buttons
+    buttons: {
+      cancel: 'إلغاء',
+      save: 'حفظ',
+      saving: 'جاري الحفظ...',
+      update: 'تحديث الفئة',
+      updating: 'جاري التحديث...'
     },
-     confirmDeleteModal: {
-      // Common titles (can be overridden by props)
-      defaultTitle: 'تأكيد الحذف',
-      deleteTitle: 'حذف العنصر',
-      
-      // Warning message
-      warning: 'لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصر نهائياً.',
-      
-      // Item types
-      itemTypes: {
-        category: 'الفئة',
-        product: 'المنتج',
-        addon: 'الإضافة',
-        user: 'المستخدم',
-        order: 'الطلب',
-        coupon: 'القسيمة',
-        discount: 'الخصم',
-        promotion: 'الترويج',
-        review: 'التقييم',
-        comment: 'التعليق',
-        image: 'الصورة',
-        file: 'الملف',
-        item: 'العنصر'
-      },
 
-      // Buttons
-      buttons: {
-        cancel: 'إلغاء',
-        delete: 'حذف',
-        deleting: 'جاري الحذف...',
-        confirm: 'تأكيد',
-        confirming: 'جاري التأكيد...'
-      },
-
-      // Pre-built messages for common scenarios
-      messages: {
-        category: 'هل أنت متأكد من حذف هذه الفئة؟ ستتأثر جميع المنتجات في هذه الفئة أيضاً.',
-        product: 'هل أنت متأكد من حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء.',
-        addon: 'هل أنت متأكد من حذف هذه الإضافة؟ ستتم إزالتها من جميع المنتجات المرتبطة.',
-        user: 'هل أنت متأكد من حذف هذا المستخدم؟ ستتم إزالة جميع بياناته نهائياً.',
-        general: 'هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.'
-      },
-
-      // Error messages
-      errors: {
-        deleteFailed: 'حدث خطأ أثناء الحذف. يرجى المحاولة مرة أخرى.',
-        networkError: 'خطأ في الاتصال بالشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.',
-        serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.',
-        permissionError: 'ليس لديك صلاحية حذف هذا العنصر.',
-        notFound: 'لم يتم العثور على العنصر المراد حذفه.',
-        hasRelations: 'لا يمكن حذف هذا العنصر لأنه يحتوي على بيانات مرتبطة.',
-        general: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.'
-      },
-
-      // Success messages
-      success: {
-        deleted: 'تم حذف العنصر بنجاح',
-        categoryDeleted: 'تم حذف الفئة بنجاح',
-        productDeleted: 'تم حذف المنتج بنجاح',
-        addonDeleted: 'تم حذف الإضافة بنجاح'
-      },
-
-      // Confirmation prompts
-      confirmations: {
-        typeToConfirm: 'اكتب "حذف" للتأكيد',
-        enterName: 'أدخل الاسم لتأكيد الحذف',
-        areYouSure: 'هل أنت متأكد تماماً؟',
-        lastChance: 'هذه فرصتك الأخيرة للإلغاء.'
-      },
-
-      // Accessibility
-      accessibility: {
-        closeModal: 'إغلاق نافذة تأكيد الحذف',
-        deleteDialog: 'حوار تأكيد الحذف',
-        warningIcon: 'أيقونة التحذير',
-        deleteButton: 'تأكيد الحذف',
-        cancelButton: 'إلغاء الحذف',
-        errorAlert: 'رسالة خطأ'
-      }
+    // Error messages
+    errors: {
+      updateFailed: 'حدث خطأ أثناء تحديث الفئة. يرجى المحاولة مرة أخرى.',
+      nameRequired: 'اسم الفئة مطلوب',
+      nameMinLength: 'يجب أن يكون اسم الفئة على الأقل 2 أحرف',
+      nameMaxLength: 'يجب أن يكون اسم الفئة أقل من 100 حرف',
+      descriptionMaxLength: 'يجب أن يكون الوصف أقل من 500 حرف',
+      general: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
+      networkError: 'خطأ في الاتصال بالشبكة. تحقق من اتصالك وحاول مرة أخرى.',
+      serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.'
     },
-        editProductModal: {
+
+    // Success messages
+    success: {
+      categoryUpdated: 'تم تحديث الفئة بنجاح',
+      changesSaved: 'تم حفظ التغييرات بنجاح'
+    },
+
+    // Validation messages
+    validation: {
+      nameRequired: 'يرجى إدخال اسم الفئة',
+      nameMinLength: 'اسم الفئة قصير جداً',
+      nameMaxLength: 'اسم الفئة طويل جداً',
+      descriptionMaxLength: 'الوصف طويل جداً'
+    },
+
+    // Accessibility
+    accessibility: {
+      closeModal: 'إغلاق نافذة تحرير الفئة',
+      formTitle: 'نموذج تحرير الفئة',
+      requiredField: 'حقل مطلوب',
+      optionalField: 'حقل اختياري',
+      statusToggle: 'تبديل حالة الفئة',
+      nameInput: 'إدخال اسم الفئة',
+      descriptionInput: 'إدخال وصف الفئة'
+    }
+  },
+  confirmDeleteModal: {
+    // Common titles (can be overridden by props)
+    defaultTitle: 'تأكيد الحذف',
+    deleteTitle: 'حذف العنصر',
+    
+    // Warning message
+    warning: 'لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصر نهائياً.',
+    
+    // Item types
+    itemTypes: {
+      category: 'الفئة',
+      product: 'المنتج',
+      addon: 'الإضافة',
+      user: 'المستخدم',
+      order: 'الطلب',
+      coupon: 'القسيمة',
+      discount: 'الخصم',
+      promotion: 'الترويج',
+      review: 'التقييم',
+      comment: 'التعليق',
+      image: 'الصورة',
+      file: 'الملف',
+      item: 'العنصر'
+    },
+
+    // Buttons
+    buttons: {
+      cancel: 'إلغاء',
+      delete: 'حذف',
+      deleting: 'جاري الحذف...',
+      confirm: 'تأكيد',
+      confirming: 'جاري التأكيد...'
+    },
+
+    // Pre-built messages for common scenarios
+    messages: {
+      category: 'هل أنت متأكد من حذف هذه الفئة؟ ستتأثر جميع المنتجات في هذه الفئة أيضاً.',
+      product: 'هل أنت متأكد من حذف هذا المنتج؟ لا يمكن التراجع عن هذا الإجراء.',
+      addon: 'هل أنت متأكد من حذف هذه الإضافة؟ ستتم إزالتها من جميع المنتجات المرتبطة.',
+      user: 'هل أنت متأكد من حذف هذا المستخدم؟ ستتم إزالة جميع بياناته نهائياً.',
+      general: 'هل أنت متأكد من حذف هذا العنصر؟ لا يمكن التراجع عن هذا الإجراء.'
+    },
+
+    // Error messages
+    errors: {
+      deleteFailed: 'حدث خطأ أثناء الحذف. يرجى المحاولة مرة أخرى.',
+      networkError: 'خطأ في الاتصال بالشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.',
+      serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.',
+      permissionError: 'ليس لديك صلاحية حذف هذا العنصر.',
+      notFound: 'لم يتم العثور على العنصر المراد حذفه.',
+      hasRelations: 'لا يمكن حذف هذا العنصر لأنه يحتوي على بيانات مرتبطة.',
+      general: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.'
+    },
+
+    // Success messages
+    success: {
+      deleted: 'تم حذف العنصر بنجاح',
+      categoryDeleted: 'تم حذف الفئة بنجاح',
+      productDeleted: 'تم حذف المنتج بنجاح',
+      addonDeleted: 'تم حذف الإضافة بنجاح'
+    },
+
+    // Confirmation prompts
+    confirmations: {
+      typeToConfirm: 'اكتب "حذف" للتأكيد',
+      enterName: 'أدخل الاسم لتأكيد الحذف',
+      areYouSure: 'هل أنت متأكد تماماً؟',
+      lastChance: 'هذه فرصتك الأخيرة للإلغاء.'
+    },
+
+    // Accessibility
+    accessibility: {
+      closeModal: 'إغلاق نافذة تأكيد الحذف',
+      deleteDialog: 'حوار تأكيد الحذف',
+      warningIcon: 'أيقونة التحذير',
+      deleteButton: 'تأكيد الحذف',
+      cancelButton: 'إلغاء الحذف',
+      errorAlert: 'رسالة خطأ'
+    }
+  },
+  editProductModal: {
       // Header
       title: 'تحرير المنتج',
       subtitle: 'تحديث معلومات المنتج',
@@ -2066,8 +2066,8 @@ export const ar = {
         statusToggle: 'تبديل حالة توفر المنتج',
         imagePreview: 'معاينة صورة المنتج'
       }
-    },
-     productIngredientModal: {
+  },
+  productIngredientModal: {
       // Header
       title: 'مكونات المنتج',
       subtitle: 'اختر المكونات لـ',
@@ -2204,8 +2204,8 @@ export const ar = {
         allergenWarning: 'يحتوي على مسببات الحساسية',
         availabilityStatus: 'حالة التوفر'
       }
-    },
-    ProductIngredientUpdateModal: {
+  },
+  ProductIngredientUpdateModal: {
   title: 'تحديث المكونات',
   searchPlaceholder: 'البحث عن المكونات...',
   selectedCount: 'مكونات محددة',
@@ -2234,520 +2234,519 @@ export const ar = {
     saveButton: 'حفظ تغييرات المكونات',
     cancelButton: 'إلغاء تحديث المكونات'
   }
-},
-SortableCategory: {
-  product: 'منتج',
-  products: 'منتجات',
-  editCategory: 'تعديل التصنيف',
-  deleteCategory: 'حذف التصنيف',
-  reorderingProducts: 'جاري حفظ ترتيب المنتجات...',
-  noCategoryProducts: 'لا توجد منتجات في هذا التصنيف بعد.',
-  expandCategory: 'توسيع التصنيف',
-  collapseCategory: 'طي التصنيف',
-  dragCategory: 'اسحب لإعادة ترتيب التصنيف',
-  accessibility: {
-    categoryActions: 'إجراءات التصنيف',
-    productCount: 'عدد المنتجات',
-    expandToggle: 'تبديل توسيع التصنيف',
-    editCategoryButton: 'تعديل التصنيف',
-    deleteCategoryButton: 'حذف التصنيف',
-    dragHandle: 'مقبض السحب لإعادة ترتيب التصنيف',
-    categoryCard: 'بطاقة التصنيف',
-    emptyCategory: 'تصنيف فارغ',
-    reorderingStatus: 'جاري إعادة ترتيب التصنيف'
-  }
-},
-SortableProduct: {
-  outOfStock: 'نفد المخزون',
-  loadingIngredients: 'جاري تحميل المكونات...',
-  ingredients: 'المكونات',
-  noIngredients: 'لم تتم إضافة مكونات',
-  loadingAddons: 'جاري تحميل الإضافات...',
-  addons: 'الإضافات',
-  noAddons: 'لم تتم إضافة إضافات',
-  manageAddons: 'إدارة الإضافات',
-  editProduct: 'تعديل المنتج',
-  deleteProduct: 'حذف المنتج',
-  dragProduct: 'اسحب لإعادة ترتيب المنتج',
-  allergenic: 'يحتوي على مسببات الحساسية',
-  recommended: 'موصى به',
-  price: 'السعر',
-  errors: {
-    loadingIngredients: 'حدث خطأ أثناء تحميل المكونات.',
-    loadingAddons: 'حدث خطأ أثناء تحميل الإضافات.'
   },
-  accessibility: {
-    productImage: 'صورة المنتج',
-    productCard: 'بطاقة المنتج',
-    productActions: 'إجراءات المنتج',
-    dragHandle: 'مقبض السحب لإعادة ترتيب المنتج',
-    outOfStockBadge: 'المنتج نفد من المخزون',
-    ingredientsList: 'قائمة مكونات المنتج',
-    addonsList: 'قائمة إضافات المنتج',
-    allergenWarning: 'يحتوي على مسببات الحساسية',
-    recommendedAddon: 'إضافة موصى بها',
-    editButton: 'تعديل المنتج',
-    deleteButton: 'حذف المنتج',
-    addonsButton: 'إدارة إضافات المنتج'
-  }
-},
-IngredientsContent: {
-  // Search and filters
-  searchPlaceholder: 'البحث عن المكونات...',
-  filter: 'تصفية',
-  sort: 'ترتيب',
-  newIngredient: 'مكون جديد',
-  
-  // Table headers
-  ingredientName: 'اسم المكون',
-  status: 'الحالة',
-  allergenInfo: 'معلومات مسببات الحساسية',
-  actions: 'الإجراءات',
-  
-  // Status labels
-  available: 'متاح',
-  unavailable: 'غير متاح',
-  containsAllergens: 'يحتوي على مسببات الحساسية',
-  noAllergens: 'لا يحتوي على مسببات الحساسية',
-  
-  // Actions
-  edit: 'تعديل',
-  delete: 'حذف',
-  
-  // Empty states
-  noIngredientsFound: 'لم يتم العثور على مكونات تطابق معايير البحث.',
-  noIngredientsYet: 'لم تتم إضافة مكونات بعد.',
-  
-  // Delete modal
-  deleteIngredient: 'حذف المكون',
-  deleteConfirmMessage: 'هل أنت متأكد من أنك تريد حذف المكون "{name}"؟',
-  deleteError: 'حدث خطأ أثناء الحذف. يرجى المحاولة مرة أخرى.',
-  cancel: 'إلغاء',
-  deleting: 'جاري الحذف...',
-  
-  // Form modal
-  editIngredient: 'تعديل المكون',
-  addNewIngredient: 'إضافة مكون جديد',
-  basicInfo: 'المعلومات الأساسية',
-  ingredientNameRequired: 'اسم المكون مطلوب',
-  enterIngredientName: 'أدخل اسم المكون',
-  containsAllergensCheckbox: 'يحتوي على مسببات الحساسية',
-  availableForUse: 'متاح للاستخدام',
-  allergenInfoContent: 'معلومات مسببات الحساسية',
-  selectAllergensMessage: 'حدد مسببات الحساسية الموجودة في هذا المكون:',
-  enableAllergenMessage: 'قم بتفعيل "يحتوي على مسببات الحساسية" أولاً لتحديد المسببات.',
-  allergenDetails: 'تفاصيل مسببات الحساسية',
-  containsThisAllergen: 'يحتوي على هذا المسبب للحساسية',
-  additionalNotes: 'ملاحظات إضافية (اختيارية)',
-  updateError: 'حدث خطأ أثناء تحديث المكون.',
-  createError: 'حدث خطأ أثناء إضافة المكون.',
-  updating: 'جاري التحديث...',
-  adding: 'جاري الإضافة...',
-  update: 'تحديث',
-  add: 'إضافة',
-  
-  accessibility: {
-    ingredientsTable: 'جدول إدارة المكونات',
-    searchInput: 'البحث عن المكونات',
-    filterButton: 'تصفية المكونات',
-    sortButton: 'ترتيب المكونات',
-    addButton: 'إضافة مكون جديد',
-    editButton: 'تعديل المكون',
-    deleteButton: 'حذف المكون',
-    ingredientCard: 'بطاقة معلومات المكون',
-    allergenSelection: 'تحديد مسببات الحساسية',
-    formModal: 'نافذة نموذج المكون',
-    deleteModal: 'نافذة تأكيد الحذف',
-    statusBadge: 'حالة المكون',
-    allergenBadge: 'معلومات مسببات الحساسية',
-    closeModal: 'إغلاق النافذة',
-    dragToReorder: 'اسحب لإعادة الترتيب'
-  }
-},
-TableCard: {
-  active: 'نشط',
-  inactive: 'غير نشط',
-  occupied: 'مشغول',
-  empty: 'فارغ',
-  capacity: 'شخص',
-  capacityPlural: 'أشخاص',
-  edit: 'تعديل',
-  downloadQR: 'تحميل رمز QR',
-  disable: 'إلغاء التفعيل',
-  enable: 'تفعيل',
-  delete: 'حذف',
-  viewQRCode: 'عرض رمز QR',
-  moreOptions: 'المزيد من الخيارات',
-  accessibility: {
-    tableCard: 'بطاقة معلومات الطاولة',
-    statusBadge: 'حالة الطاولة',
-    occupancyBadge: 'حالة إشغال الطاولة',
-    actionsMenu: 'قائمة إجراءات الطاولة',
-    qrCodePreview: 'معاينة رمز QR',
-    editButton: 'تعديل الطاولة',
-    downloadButton: 'تحميل رمز QR',
-    toggleButton: 'تبديل حالة الطاولة',
-    deleteButton: 'حذف الطاولة'
-  }
-},
-QRCodeModal: {
-  // Step selection
-  tableAddOption: 'خيار إضافة الطاولة',
-  howToAddTables: 'كيف تريد إضافة الطاولات؟',
-  singleTable: 'إضافة طاولة واحدة',
-  bulkTable: 'إضافة طاولات متعددة',
-  createSingleTable: 'إنشاء طاولة واحدة',
-  createMultipleTables: 'إنشاء طاولات متعددة',
-  
-  // Branch selection
-  branchSelection: 'اختيار الفرع',
-  selectBranch: 'اختر الفرع',
-  branchRequired: 'مطلوب',
-  loadingBranches: 'جاري تحميل الفروع...',
-  
-  // Single table form
-  editTable: 'تعديل الطاولة',
-  addSingleTable: 'إضافة طاولة واحدة',
-  tableName: 'اسم الطاولة',
-  tableNamePlaceholder: 'مثال: طاولة 1',
-  autoNameNote: 'سيتم إعطاء اسم تلقائي إذا تُرك فارغاً',
-  tableCategory: 'فئة الطاولة',
-  selectCategory: 'اختر الفئة',
-  loadingCategories: 'جاري تحميل الفئات...',
-  noCategories: 'لم يتم العثور على فئات',
-  capacity: 'السعة',
-  capacityPlaceholder: 'عدد الأشخاص',
-  displayOrder: 'ترتيب العرض',
-  displayOrderPlaceholder: 'رقم للترتيب',
-  autoOrderNote: 'سيتم تطبيق ترتيب تلقائي إذا تُرك فارغاً',
-  tableActive: 'يجب أن تكون الطاولة نشطة',
-  
-  // Bulk table form
-  addBulkTables: 'إضافة طاولات متعددة',
-  categoryQuantities: 'كميات الطاولات حسب الفئة',
-  addCategory: 'إضافة فئة',
-  category: 'الفئة',
-  tableCount: 'عدد الطاولات',
-  allTablesActive: 'جميع الطاولات يجب أن تكون نشطة',
-  tableSummary: 'ملخص الطاولات المراد إنشاؤها:',
-  total: 'الإجمالي',
-  tables: 'طاولات',
-  
-  // Actions
-  cancel: 'إلغاء',
-  adding: 'جاري الإضافة...',
-  addTable: 'إضافة طاولة',
-  update: 'تحديث',
-  updating: 'جاري التحديث...',
-  creating: 'جاري الإنشاء... ({count} طاولة)',
-  createTables: 'إنشاء {count} طاولة',
-  
-  // Validation
-  branchRequiredValidation: 'اختيار الفرع مطلوب',
-  categoryRequired: 'مطلوب فئة واحدة على الأقل',
-  
-  accessibility: {
-    modal: 'نافذة إنشاء الطاولة',
-    stepSelection: 'اختيار طريقة إنشاء الطاولة',
-    branchSelector: 'قائمة اختيار الفرع',
-    categorySelector: 'اختيار فئة الطاولة',
-    tableForm: 'نموذج إنشاء الطاولة',
-    bulkForm: 'نموذج إنشاء طاولات متعددة',
-    backButton: 'العودة للخطوة السابقة',
-    closeButton: 'إغلاق النافذة'
-  }
-},
-TableCategoryModal: {
-  title: 'إضافة فئة طاولة',
-  subtitle: 'إنشاء فئة طاولة جديدة',
-  categoryName: 'اسم الفئة',
-  categoryNamePlaceholder: 'مثال: طاولات VIP، طاولات الحديقة',
-  description: 'الوصف (اختياري)',
-  descriptionPlaceholder: 'وصف قصير عن الفئة...',
-  colorSelection: 'اختيار اللون',
-  customColor: 'لون مخصص',
-  iconSelection: 'اختيار الأيقونة',
-  branchSelection: 'اختيار الفرع',
-  cancel: 'إلغاء',
-  addCategory: 'إضافة فئة',
-  saving: 'جاري الحفظ...',
-  
-  // Icons
-  table: 'طاولة',
-  chair: 'كرسي',
-  service: 'خدمة',
-  label: 'تسمية',
-  layer: 'طبقة',
-  
-  // Validation errors
-  categoryNameRequired: 'اسم الفئة مطلوب',
-  iconRequired: 'يجب اختيار أيقونة',
-  branchRequired: 'اختيار الفرع مطلوب',
-  invalidData: 'تم إرسال بيانات غير صحيحة',
-  unauthorized: 'غير مخول. يرجى تسجيل الدخول مرة أخرى.',
-  forbidden: 'ليس لديك صلاحية لهذه العملية.',
-  branchNotFound: 'الفرع المحدد غير موجود.',
-  serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.',
-  unexpectedError: 'حدث خطأ غير متوقع أثناء إضافة الفئة',
-  
-  accessibility: {
-    modal: 'نافذة إنشاء فئة الطاولة',
-    colorPalette: 'لوحة اختيار الألوان',
-    colorPreset: 'خيار لون جاهز',
-    customColorPicker: 'منتقي الألوان المخصص',
-    iconGrid: 'شبكة اختيار الأيقونات',
-    iconOption: 'خيار الأيقونة',
-    branchDropdown: 'قائمة اختيار الفرع',
-    form: 'نموذج إنشاء الفئة'
-  }
-},
-AddQRCodeCard: {
-  title: 'إضافة طاولة جديدة',
-  subtitle: 'انقر لإضافة طاولة جديدة',
-  accessibility: {
-    addButton: 'زر إضافة طاولة جديدة',
-    addCard: 'بطاقة إضافة طاولة جديدة'
-  }
-},
-userManagementPage: {
-  // Page header and navigation
-  title: 'إدارة المستخدمين',
-  loading: 'جاري التحميل...',
-  error: {
-    title: 'خطأ',
-    loadFailed: 'فشل في تحميل المستخدمين',
-    rolesLoadFailed: 'فشل في تحميل الأدوار',
-    retry: 'حاول مرة أخرى',
-    createUserFailed: 'فشل في إنشاء المستخدم',
-    createRoleFailed: 'فشل في إنشاء الدور'
+  SortableCategory: {
+    product: 'منتج',
+    products: 'منتجات',
+    editCategory: 'تعديل التصنيف',
+    deleteCategory: 'حذف التصنيف',
+    reorderingProducts: 'جاري حفظ ترتيب المنتجات...',
+    noCategoryProducts: 'لا توجد منتجات في هذا التصنيف بعد.',
+    expandCategory: 'توسيع التصنيف',
+    collapseCategory: 'طي التصنيف',
+    dragCategory: 'اسحب لإعادة ترتيب التصنيف',
+    accessibility: {
+      categoryActions: 'إجراءات التصنيف',
+      productCount: 'عدد المنتجات',
+      expandToggle: 'تبديل توسيع التصنيف',
+      editCategoryButton: 'تعديل التصنيف',
+      deleteCategoryButton: 'حذف التصنيف',
+      dragHandle: 'مقبض السحب لإعادة ترتيب التصنيف',
+      categoryCard: 'بطاقة التصنيف',
+      emptyCategory: 'تصنيف فارغ',
+      reorderingStatus: 'جاري إعادة ترتيب التصنيف'
+    }
   },
-
-  // Statistics
-  stats: {
-    total: 'الإجمالي',
-    active: 'نشط',
-    users: 'مستخدمين',
-    roles: 'أدوار',
-    system: 'النظام',
-    custom: 'مخصص',
-    totalUsers: 'إجمالي المستخدمين',
-    owner: 'مالك',
-    manager: 'مدير',
-    staff: 'موظف'
+  SortableProduct: {
+    outOfStock: 'نفد المخزون',
+    loadingIngredients: 'جاري تحميل المكونات...',
+    ingredients: 'المكونات',
+    noIngredients: 'لم تتم إضافة مكونات',
+    loadingAddons: 'جاري تحميل الإضافات...',
+    addons: 'الإضافات',
+    noAddons: 'لم تتم إضافة إضافات',
+    manageAddons: 'إدارة الإضافات',
+    editProduct: 'تعديل المنتج',
+    deleteProduct: 'حذف المنتج',
+    dragProduct: 'اسحب لإعادة ترتيب المنتج',
+    allergenic: 'يحتوي على مسببات الحساسية',
+    recommended: 'موصى به',
+    price: 'السعر',
+    errors: {
+      loadingIngredients: 'حدث خطأ أثناء تحميل المكونات.',
+      loadingAddons: 'حدث خطأ أثناء تحميل الإضافات.'
+    },
+    accessibility: {
+      productImage: 'صورة المنتج',
+      productCard: 'بطاقة المنتج',
+      productActions: 'إجراءات المنتج',
+      dragHandle: 'مقبض السحب لإعادة ترتيب المنتج',
+      outOfStockBadge: 'المنتج نفد من المخزون',
+      ingredientsList: 'قائمة مكونات المنتج',
+      addonsList: 'قائمة إضافات المنتج',
+      allergenWarning: 'يحتوي على مسببات الحساسية',
+      recommendedAddon: 'إضافة موصى بها',
+      editButton: 'تعديل المنتج',
+      deleteButton: 'حذف المنتج',
+      addonsButton: 'إدارة إضافات المنتج'
+    }
   },
-
-  // Tabs
-  tabs: {
-    users: 'المستخدمون',
-    roles: 'الأدوار'
-  },
-
-  // Controls and filters
-  controls: {
-    search: 'البحث عن مستخدم أو بريد إلكتروني أو هاتف...',
-    searchRoles: 'البحث عن دور أو وصف أو فئة...',
-    filterAll: 'جميع الفئات',
-    filterOwner: 'مالك المطعم',
-    filterManager: 'مدير الفرع',
-    filterStaff: 'موظف',
-    filterActive: 'المستخدمون النشطون',
-    filterInactive: 'المستخدمون غير النشطين',
-    addUser: 'إضافة مستخدم',
-    addRole: 'إضافة دور'
-  },
-
-  // Table headers
-  table: {
-    user: 'المستخدم',
-    contact: 'التواصل',
-    roles: 'الأدوار',
-    location: 'المطعم/الفرع',
+  IngredientsContent: {
+    // Search and filters
+    searchPlaceholder: 'البحث عن المكونات...',
+    filter: 'تصفية',
+    sort: 'ترتيب',
+    newIngredient: 'مكون جديد',
+    
+    // Table headers
+    ingredientName: 'اسم المكون',
     status: 'الحالة',
-    registrationDate: 'تاريخ التسجيل',
+    allergenInfo: 'معلومات مسببات الحساسية',
     actions: 'الإجراءات',
-    role: 'الدور',
-    description: 'الوصف',
-    statistics: 'الإحصائيات',
-    position: 'الموقع'
+    
+    // Status labels
+    available: 'متاح',
+    unavailable: 'غير متاح',
+    containsAllergens: 'يحتوي على مسببات الحساسية',
+    noAllergens: 'لا يحتوي على مسببات الحساسية',
+    
+    // Actions
+    edit: 'تعديل',
+    delete: 'حذف',
+    
+    // Empty states
+    noIngredientsFound: 'لم يتم العثور على مكونات تطابق معايير البحث.',
+    noIngredientsYet: 'لم تتم إضافة مكونات بعد.',
+    
+    // Delete modal
+    deleteIngredient: 'حذف المكون',
+    deleteConfirmMessage: 'هل أنت متأكد من أنك تريد حذف المكون "{name}"؟',
+    deleteError: 'حدث خطأ أثناء الحذف. يرجى المحاولة مرة أخرى.',
+    cancel: 'إلغاء',
+    deleting: 'جاري الحذف...',
+    
+    // Form modal
+    editIngredient: 'تعديل المكون',
+    addNewIngredient: 'إضافة مكون جديد',
+    basicInfo: 'المعلومات الأساسية',
+    ingredientNameRequired: 'اسم المكون مطلوب',
+    enterIngredientName: 'أدخل اسم المكون',
+    containsAllergensCheckbox: 'يحتوي على مسببات الحساسية',
+    availableForUse: 'متاح للاستخدام',
+    allergenInfoContent: 'معلومات مسببات الحساسية',
+    selectAllergensMessage: 'حدد مسببات الحساسية الموجودة في هذا المكون:',
+    enableAllergenMessage: 'قم بتفعيل "يحتوي على مسببات الحساسية" أولاً لتحديد المسببات.',
+    allergenDetails: 'تفاصيل مسببات الحساسية',
+    containsThisAllergen: 'يحتوي على هذا المسبب للحساسية',
+    additionalNotes: 'ملاحظات إضافية (اختيارية)',
+    updateError: 'حدث خطأ أثناء تحديث المكون.',
+    createError: 'حدث خطأ أثناء إضافة المكون.',
+    updating: 'جاري التحديث...',
+    adding: 'جاري الإضافة...',
+    update: 'تحديث',
+    add: 'إضافة',
+    
+    accessibility: {
+      ingredientsTable: 'جدول إدارة المكونات',
+      searchInput: 'البحث عن المكونات',
+      filterButton: 'تصفية المكونات',
+      sortButton: 'ترتيب المكونات',
+      addButton: 'إضافة مكون جديد',
+      editButton: 'تعديل المكون',
+      deleteButton: 'حذف المكون',
+      ingredientCard: 'بطاقة معلومات المكون',
+      allergenSelection: 'تحديد مسببات الحساسية',
+      formModal: 'نافذة نموذج المكون',
+      deleteModal: 'نافذة تأكيد الحذف',
+      statusBadge: 'حالة المكون',
+      allergenBadge: 'معلومات مسببات الحساسية',
+      closeModal: 'إغلاق النافذة',
+      dragToReorder: 'اسحب لإعادة الترتيب'
+    }
   },
-
-  // Status indicators
-  status: {
+  TableCard: {
     active: 'نشط',
     inactive: 'غير نشط',
-    enabled: 'مُفعل',
-    disabled: 'معطل',
-    systemRole: 'دور النظام'
-  },
-
-  // Role types
-  roleTypes: {
-    RestaurantOwner: 'مالك',
-    BranchManager: 'مدير',
-    Staff: 'موظف'
-  },
-
-  // Actions menu
-  actions: {
-    viewDetails: 'عرض التفاصيل',
+    occupied: 'مشغول',
+    empty: 'فارغ',
+    capacity: 'شخص',
+    capacityPlural: 'أشخاص',
     edit: 'تعديل',
-    activate: 'تفعيل',
-    deactivate: 'إلغاء التفعيل'
+    downloadQR: 'تحميل رمز QR',
+    disable: 'إلغاء التفعيل',
+    enable: 'تفعيل',
+    delete: 'حذف',
+    viewQRCode: 'عرض رمز QR',
+    moreOptions: 'المزيد من الخيارات',
+    accessibility: {
+      tableCard: 'بطاقة معلومات الطاولة',
+      statusBadge: 'حالة الطاولة',
+      occupancyBadge: 'حالة إشغال الطاولة',
+      actionsMenu: 'قائمة إجراءات الطاولة',
+      qrCodePreview: 'معاينة رمز QR',
+      editButton: 'تعديل الطاولة',
+      downloadButton: 'تحميل رمز QR',
+      toggleButton: 'تبديل حالة الطاولة',
+      deleteButton: 'حذف الطاولة'
+    }
   },
-
-  // No results messages
-  noResults: {
-    usersNotFound: 'لم يتم العثور على مستخدمين',
-    rolesNotFound: 'لم يتم العثور على أدوار',
-    usersEmpty: 'لم يتم إضافة أي مستخدمين بعد.',
-    rolesEmpty: 'لم يتم إضافة أي أدوار بعد.',
-    searchEmpty: 'لم يتم العثور على مستخدمين يطابقون معايير البحث.',
-    searchEmptyRoles: 'لم يتم العثور على أدوار تطابق معايير البحث.'
-  },
-
-  // Create Role Modal
-  createRole: {
-    title: 'إنشاء دور جديد',
-    basicInfo: 'المعلومات الأساسية',
-    roleName: 'اسم الدور',
-    roleNamePlaceholder: 'مثال: مدير الفرع',
+  QRCodeModal: {
+    // Step selection
+    tableAddOption: 'خيار إضافة الطاولة',
+    howToAddTables: 'كيف تريد إضافة الطاولات؟',
+    singleTable: 'إضافة طاولة واحدة',
+    bulkTable: 'إضافة طاولات متعددة',
+    createSingleTable: 'إنشاء طاولة واحدة',
+    createMultipleTables: 'إنشاء طاولات متعددة',
+    
+    // Branch selection
+    branchSelection: 'اختيار الفرع',
+    selectBranch: 'اختر الفرع',
+    branchRequired: 'مطلوب',
+    loadingBranches: 'جاري تحميل الفروع...',
+    
+    // Single table form
+    editTable: 'تعديل الطاولة',
+    addSingleTable: 'إضافة طاولة واحدة',
+    tableName: 'اسم الطاولة',
+    tableNamePlaceholder: 'مثال: طاولة 1',
+    autoNameNote: 'سيتم إعطاء اسم تلقائي إذا تُرك فارغاً',
+    tableCategory: 'فئة الطاولة',
+    selectCategory: 'اختر الفئة',
+    loadingCategories: 'جاري تحميل الفئات...',
+    noCategories: 'لم يتم العثور على فئات',
+    capacity: 'السعة',
+    capacityPlaceholder: 'عدد الأشخاص',
+    displayOrder: 'ترتيب العرض',
+    displayOrderPlaceholder: 'رقم للترتيب',
+    autoOrderNote: 'سيتم تطبيق ترتيب تلقائي إذا تُرك فارغاً',
+    tableActive: 'يجب أن تكون الطاولة نشطة',
+    
+    // Bulk table form
+    addBulkTables: 'إضافة طاولات متعددة',
+    categoryQuantities: 'كميات الطاولات حسب الفئة',
+    addCategory: 'إضافة فئة',
     category: 'الفئة',
-    categoryPlaceholder: 'مثال: الإدارة',
-    description: 'الوصف',
-    descriptionPlaceholder: 'وصف مهام ومسؤوليات الدور...',
-    restaurantId: 'رقم المطعم',
-    restaurantIdPlaceholder: 'الافتراضي: المطعم الحالي',
-    branchId: 'رقم الفرع',
-    branchIdPlaceholder: 'فارغ: جميع الفروع',
-    isActive: 'الدور يجب أن يكون نشطاً',
-    permissions: 'الصلاحيات',
-    permissionsSelected: 'مُحدد',
+    tableCount: 'عدد الطاولات',
+    allTablesActive: 'جميع الطاولات يجب أن تكون نشطة',
+    tableSummary: 'ملخص الطاولات المراد إنشاؤها:',
+    total: 'الإجمالي',
+    tables: 'طاولات',
+    
+    // Actions
     cancel: 'إلغاء',
-    create: 'إنشاء الدور',
-    creating: 'جاري الإنشاء...',
-    validation: {
-      nameRequired: 'اسم الدور يجب أن يكون على الأقل 3 أحرف',
-      nameMaxLength: 'اسم الدور يمكن أن يكون 50 حرفاً كحد أقصى',
-      descriptionMaxLength: 'الوصف يمكن أن يكون 200 حرف كحد أقصى',
-      categoryMaxLength: 'الفئة يمكن أن تكون 50 حرفاً كحد أقصى'
+    adding: 'جاري الإضافة...',
+    addTable: 'إضافة طاولة',
+    update: 'تحديث',
+    updating: 'جاري التحديث...',
+    creating: 'جاري الإنشاء... ({count} طاولة)',
+    createTables: 'إنشاء {count} طاولة',
+    
+    // Validation
+    branchRequiredValidation: 'اختيار الفرع مطلوب',
+    categoryRequired: 'مطلوب فئة واحدة على الأقل',
+    
+    accessibility: {
+      modal: 'نافذة إنشاء الطاولة',
+      stepSelection: 'اختيار طريقة إنشاء الطاولة',
+      branchSelector: 'قائمة اختيار الفرع',
+      categorySelector: 'اختيار فئة الطاولة',
+      tableForm: 'نموذج إنشاء الطاولة',
+      bulkForm: 'نموذج إنشاء طاولات متعددة',
+      backButton: 'العودة للخطوة السابقة',
+      closeButton: 'إغلاق النافذة'
     }
   },
-
-  // Create User Modal
-  createUser: {
-    title: 'إنشاء مستخدم جديد',
-    personalInfo: 'المعلومات الشخصية',
-    contactInfo: 'معلومات التواصل',
-    passwordInfo: 'معلومات كلمة المرور',
-    locationInfo: 'معلومات الموقع',
-    roleAssignment: 'تعيين السلطة والدور',
+  TableCategoryModal: {
+    title: 'إضافة فئة طاولة',
+    subtitle: 'إنشاء فئة طاولة جديدة',
+    categoryName: 'اسم الفئة',
+    categoryNamePlaceholder: 'مثال: طاولات VIP، طاولات الحديقة',
+    description: 'الوصف (اختياري)',
+    descriptionPlaceholder: 'وصف قصير عن الفئة...',
+    colorSelection: 'اختيار اللون',
+    customColor: 'لون مخصص',
+    iconSelection: 'اختيار الأيقونة',
+    branchSelection: 'اختيار الفرع',
+    cancel: 'إلغاء',
+    addCategory: 'إضافة فئة',
+    saving: 'جاري الحفظ...',
     
-    // Form fields
-    firstName: 'الاسم الأول',
-    firstNamePlaceholder: 'مثال: أحمد',
-    lastName: 'اسم العائلة',
-    firstName: 'الاسم الأول',
-    firstNamePlaceholder: 'مثال: أحمد',
-    lastName: 'اسم العائلة',
-    lastNamePlaceholder: 'مثال: محمد',
-    userName: 'اسم المستخدم',
-    userNamePlaceholder: 'سيتم إنشاؤه تلقائياً',
-    userNameHint: 'إذا تُرك فارغاً، سيتم إنشاؤه تلقائياً بصيغة الاسم.العائلة',
-    email: 'البريد الإلكتروني',
-    emailPlaceholder: 'ahmed@example.com',
-    phone: 'الهاتف',
-    phonePlaceholder: '+966 55 123 4567',
-    password: 'كلمة المرور',
-    passwordPlaceholder: 'على الأقل 6 أحرف',
-    passwordConfirm: 'تأكيد كلمة المرور',
-    passwordConfirmPlaceholder: 'أعد إدخال كلمة المرور',
+    // Icons
+    table: 'طاولة',
+    chair: 'كرسي',
+    service: 'خدمة',
+    label: 'تسمية',
+    layer: 'طبقة',
     
-    // Location
-    locationType: 'نوع الموقع',
-    restaurant: 'مطعم',
-    branch: 'فرع',
-    restaurantId: 'رقم المطعم',
-    restaurantIdPlaceholder: 'مثال: 123',
-    branchId: 'رقم الفرع',
-    branchIdPlaceholder: 'مثال: 456',
-    profileImage: 'رابط صورة الملف الشخصي',
-    profileImagePlaceholder: 'https://example.com/avatar.jpg',
-    userCreatorId: 'رقم منشئ المستخدم',
-    userCreatorIdPlaceholder: 'رقم المستخدم الحالي',
+    // Validation errors
+    categoryNameRequired: 'اسم الفئة مطلوب',
+    iconRequired: 'يجب اختيار أيقونة',
+    branchRequired: 'اختيار الفرع مطلوب',
+    invalidData: 'تم إرسال بيانات غير صحيحة',
+    unauthorized: 'غير مخول. يرجى تسجيل الدخول مرة أخرى.',
+    forbidden: 'ليس لديك صلاحية لهذه العملية.',
+    branchNotFound: 'الفرع المحدد غير موجود.',
+    serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.',
+    unexpectedError: 'حدث خطأ غير متوقع أثناء إضافة الفئة',
     
-    // Role assignment
-    assignmentType: 'نوع التعيين',
-    rolesSelection: 'اختيار من الأدوار الموجودة (مُستحسن)',
-    permissionsSelection: 'اختيار الصلاحيات المباشر (غير مدعوم حالياً)',
-    apiWarning: '⚠️ واجهة البرمجة تدعم فقط إنشاء المستخدمين القائم على الأدوار. أنشئ الأدوار أولاً، ثم اربطها بالمستخدمين.',
-    rolesLabel: 'الأدوار',
-    rolesSelected: 'مُحدد',
-    
-    // No roles state
-    noRoles: {
-      title: 'لم يتم تعريف أي أدوار بعد',
-      description: 'أنشئ الأدوار من تبويب الأدوار قبل إنشاء المستخدمين',
-      tip: '💡 نصيحة: انتقل إلى تبويب "الأدوار" أولاً لإنشاء الأدوار المطلوبة',
-      warning: 'دور مطلوب',
-      warningDescription: 'يجب تعريف دور واحد على الأقل لإنشاء مستخدم. يمكنك إنشاء أدوار جديدة من تبويب "الأدوار".'
+    accessibility: {
+      modal: 'نافذة إنشاء فئة الطاولة',
+      colorPalette: 'لوحة اختيار الألوان',
+      colorPreset: 'خيار لون جاهز',
+      customColorPicker: 'منتقي الألوان المخصص',
+      iconGrid: 'شبكة اختيار الأيقونات',
+      iconOption: 'خيار الأيقونة',
+      branchDropdown: 'قائمة اختيار الفرع',
+      form: 'نموذج إنشاء الفئة'
+    }
+  },
+  AddQRCodeCard: {
+    title: 'إضافة طاولة جديدة',
+    subtitle: 'انقر لإضافة طاولة جديدة',
+    accessibility: {
+      addButton: 'زر إضافة طاولة جديدة',
+      addCard: 'بطاقة إضافة طاولة جديدة'
+    }
+  },
+  userManagementPage: {
+    // Page header and navigation
+    title: 'إدارة المستخدمين',
+    loading: 'جاري التحميل...',
+    error: {
+      title: 'خطأ',
+      loadFailed: 'فشل في تحميل المستخدمين',
+      rolesLoadFailed: 'فشل في تحميل الأدوار',
+      retry: 'حاول مرة أخرى',
+      createUserFailed: 'فشل في إنشاء المستخدم',
+      createRoleFailed: 'فشل في إنشاء الدور'
     },
-    
-    isActive: 'المستخدم يجب أن يكون نشطاً',
-    cancel: 'إلغاء',
-    create: 'إنشاء مستخدم',
-    creating: 'جاري الإنشاء...',
-    createRoleFirst: 'أنشئ دوراً أولاً',
-    
-    // Validation messages
-    validation: {
-      nameRequired: 'الاسم الأول مطلوب',
-      nameMaxLength: 'الاسم الأول يمكن أن يكون 50 حرفاً كحد أقصى',
-      surnameRequired: 'اسم العائلة مطلوب',
-      surnameMaxLength: 'اسم العائلة يمكن أن يكون 50 حرفاً كحد أقصى',
-      emailRequired: 'البريد الإلكتروني مطلوب',
-      emailInvalid: 'يرجى إدخال عنوان بريد إلكتروني صحيح',
-      passwordRequired: 'كلمة المرور يجب أن تكون على الأقل 6 أحرف',
-      passwordMaxLength: 'كلمة المرور يمكن أن تكون 100 حرف كحد أقصى',
-      passwordConfirmRequired: 'تأكيد كلمة المرور مطلوب',
-      passwordMismatch: 'كلمات المرور غير متطابقة',
-      phoneRequired: 'رقم الهاتف مطلوب',
-      restaurantIdRequired: 'يرجى إدخال رقم مطعم صحيح',
-      branchIdRequired: 'يرجى إدخال رقم فرع صحيح',
-      rolesRequired: 'يجب اختيار دور واحد على الأقل',
-      permissionsNotSupported: 'واجهة البرمجة تدعم فقط إنشاء المستخدمين القائم على الأدوار. يرجى الاختيار من الأدوار الموجودة.'
-    }
-  },
 
-  // Role details
-  roleDetails: {
-    userCount: 'عدد المستخدمين',
-    permissionCount: 'عدد الصلاحيات',
-    restaurant: 'المطعم',
-    branch: 'الفرع',
-    noDescription: 'لا يوجد وصف متاح',
-    users: 'مستخدمين',
-    permissions: 'صلاحيات'
-  },
+    // Statistics
+    stats: {
+      total: 'الإجمالي',
+      active: 'نشط',
+      users: 'مستخدمين',
+      roles: 'أدوار',
+      system: 'النظام',
+      custom: 'مخصص',
+      totalUsers: 'إجمالي المستخدمين',
+      owner: 'مالك',
+      manager: 'مدير',
+      staff: 'موظف'
+    },
 
-  // Permission categories
-  permissionCategories: {
-    'User Management': 'إدارة المستخدمين',
-    'Restaurant Management': 'إدارة المطاعم', 
-    'Branch Management': 'إدارة الفروع',
-    'Order Management': 'إدارة الطلبات',
-    'Product Management': 'إدارة المنتجات',
-    'Analytics': 'التحليلات'
-  },
+    // Tabs
+    tabs: {
+      users: 'المستخدمون',
+      roles: 'الأدوار'
+    },
 
-  // Success messages
-  success: {
-    userCreated: 'تم إنشاء المستخدم بنجاح',
-    roleCreated: 'تم إنشاء الدور بنجاح',
-    userUpdated: 'تم تحديث المستخدم بنجاح',
-    roleUpdated: 'تم تحديث الدور بنجاح'
+    // Controls and filters
+    controls: {
+      search: 'البحث عن مستخدم أو بريد إلكتروني أو هاتف...',
+      searchRoles: 'البحث عن دور أو وصف أو فئة...',
+      filterAll: 'جميع الفئات',
+      filterOwner: 'مالك المطعم',
+      filterManager: 'مدير الفرع',
+      filterStaff: 'موظف',
+      filterActive: 'المستخدمون النشطون',
+      filterInactive: 'المستخدمون غير النشطين',
+      addUser: 'إضافة مستخدم',
+      addRole: 'إضافة دور'
+    },
+
+    // Table headers
+    table: {
+      user: 'المستخدم',
+      contact: 'التواصل',
+      roles: 'الأدوار',
+      location: 'المطعم/الفرع',
+      status: 'الحالة',
+      registrationDate: 'تاريخ التسجيل',
+      actions: 'الإجراءات',
+      role: 'الدور',
+      description: 'الوصف',
+      statistics: 'الإحصائيات',
+      position: 'الموقع'
+    },
+
+    // Status indicators
+    status: {
+      active: 'نشط',
+      inactive: 'غير نشط',
+      enabled: 'مُفعل',
+      disabled: 'معطل',
+      systemRole: 'دور النظام'
+    },
+
+    // Role types
+    roleTypes: {
+      RestaurantOwner: 'مالك',
+      BranchManager: 'مدير',
+      Staff: 'موظف'
+    },
+
+    // Actions menu
+    actions: {
+      viewDetails: 'عرض التفاصيل',
+      edit: 'تعديل',
+      activate: 'تفعيل',
+      deactivate: 'إلغاء التفعيل'
+    },
+
+    // No results messages
+    noResults: {
+      usersNotFound: 'لم يتم العثور على مستخدمين',
+      rolesNotFound: 'لم يتم العثور على أدوار',
+      usersEmpty: 'لم يتم إضافة أي مستخدمين بعد.',
+      rolesEmpty: 'لم يتم إضافة أي أدوار بعد.',
+      searchEmpty: 'لم يتم العثور على مستخدمين يطابقون معايير البحث.',
+      searchEmptyRoles: 'لم يتم العثور على أدوار تطابق معايير البحث.'
+    },
+
+    // Create Role Modal
+    createRole: {
+      title: 'إنشاء دور جديد',
+      basicInfo: 'المعلومات الأساسية',
+      roleName: 'اسم الدور',
+      roleNamePlaceholder: 'مثال: مدير الفرع',
+      category: 'الفئة',
+      categoryPlaceholder: 'مثال: الإدارة',
+      description: 'الوصف',
+      descriptionPlaceholder: 'وصف مهام ومسؤوليات الدور...',
+      restaurantId: 'رقم المطعم',
+      restaurantIdPlaceholder: 'الافتراضي: المطعم الحالي',
+      branchId: 'رقم الفرع',
+      branchIdPlaceholder: 'فارغ: جميع الفروع',
+      isActive: 'الدور يجب أن يكون نشطاً',
+      permissions: 'الصلاحيات',
+      permissionsSelected: 'مُحدد',
+      cancel: 'إلغاء',
+      create: 'إنشاء الدور',
+      creating: 'جاري الإنشاء...',
+      validation: {
+        nameRequired: 'اسم الدور يجب أن يكون على الأقل 3 أحرف',
+        nameMaxLength: 'اسم الدور يمكن أن يكون 50 حرفاً كحد أقصى',
+        descriptionMaxLength: 'الوصف يمكن أن يكون 200 حرف كحد أقصى',
+        categoryMaxLength: 'الفئة يمكن أن تكون 50 حرفاً كحد أقصى'
+      }
+    },
+
+    // Create User Modal
+    createUser: {
+      title: 'إنشاء مستخدم جديد',
+      personalInfo: 'المعلومات الشخصية',
+      contactInfo: 'معلومات التواصل',
+      passwordInfo: 'معلومات كلمة المرور',
+      locationInfo: 'معلومات الموقع',
+      roleAssignment: 'تعيين السلطة والدور',
+      
+      // Form fields
+      firstName: 'الاسم الأول',
+      firstNamePlaceholder: 'مثال: أحمد',
+      lastName: 'اسم العائلة',
+      firstName: 'الاسم الأول',
+      firstNamePlaceholder: 'مثال: أحمد',
+      lastName: 'اسم العائلة',
+      lastNamePlaceholder: 'مثال: محمد',
+      userName: 'اسم المستخدم',
+      userNamePlaceholder: 'سيتم إنشاؤه تلقائياً',
+      userNameHint: 'إذا تُرك فارغاً، سيتم إنشاؤه تلقائياً بصيغة الاسم.العائلة',
+      email: 'البريد الإلكتروني',
+      emailPlaceholder: 'ahmed@example.com',
+      phone: 'الهاتف',
+      phonePlaceholder: '+966 55 123 4567',
+      password: 'كلمة المرور',
+      passwordPlaceholder: 'على الأقل 6 أحرف',
+      passwordConfirm: 'تأكيد كلمة المرور',
+      passwordConfirmPlaceholder: 'أعد إدخال كلمة المرور',
+      
+      // Location
+      locationType: 'نوع الموقع',
+      restaurant: 'مطعم',
+      branch: 'فرع',
+      restaurantId: 'رقم المطعم',
+      restaurantIdPlaceholder: 'مثال: 123',
+      branchId: 'رقم الفرع',
+      branchIdPlaceholder: 'مثال: 456',
+      profileImage: 'رابط صورة الملف الشخصي',
+      profileImagePlaceholder: 'https://example.com/avatar.jpg',
+      userCreatorId: 'رقم منشئ المستخدم',
+      userCreatorIdPlaceholder: 'رقم المستخدم الحالي',
+      
+      // Role assignment
+      assignmentType: 'نوع التعيين',
+      rolesSelection: 'اختيار من الأدوار الموجودة (مُستحسن)',
+      permissionsSelection: 'اختيار الصلاحيات المباشر (غير مدعوم حالياً)',
+      apiWarning: '⚠️ واجهة البرمجة تدعم فقط إنشاء المستخدمين القائم على الأدوار. أنشئ الأدوار أولاً، ثم اربطها بالمستخدمين.',
+      rolesLabel: 'الأدوار',
+      rolesSelected: 'مُحدد',
+      
+      // No roles state
+      noRoles: {
+        title: 'لم يتم تعريف أي أدوار بعد',
+        description: 'أنشئ الأدوار من تبويب الأدوار قبل إنشاء المستخدمين',
+        tip: '💡 نصيحة: انتقل إلى تبويب "الأدوار" أولاً لإنشاء الأدوار المطلوبة',
+        warning: 'دور مطلوب',
+        warningDescription: 'يجب تعريف دور واحد على الأقل لإنشاء مستخدم. يمكنك إنشاء أدوار جديدة من تبويب "الأدوار".'
+      },
+      
+      isActive: 'المستخدم يجب أن يكون نشطاً',
+      cancel: 'إلغاء',
+      create: 'إنشاء مستخدم',
+      creating: 'جاري الإنشاء...',
+      createRoleFirst: 'أنشئ دوراً أولاً',
+      
+      // Validation messages
+      validation: {
+        nameRequired: 'الاسم الأول مطلوب',
+        nameMaxLength: 'الاسم الأول يمكن أن يكون 50 حرفاً كحد أقصى',
+        surnameRequired: 'اسم العائلة مطلوب',
+        surnameMaxLength: 'اسم العائلة يمكن أن يكون 50 حرفاً كحد أقصى',
+        emailRequired: 'البريد الإلكتروني مطلوب',
+        emailInvalid: 'يرجى إدخال عنوان بريد إلكتروني صحيح',
+        passwordRequired: 'كلمة المرور يجب أن تكون على الأقل 6 أحرف',
+        passwordMaxLength: 'كلمة المرور يمكن أن تكون 100 حرف كحد أقصى',
+        passwordConfirmRequired: 'تأكيد كلمة المرور مطلوب',
+        passwordMismatch: 'كلمات المرور غير متطابقة',
+        phoneRequired: 'رقم الهاتف مطلوب',
+        restaurantIdRequired: 'يرجى إدخال رقم مطعم صحيح',
+        branchIdRequired: 'يرجى إدخال رقم فرع صحيح',
+        rolesRequired: 'يجب اختيار دور واحد على الأقل',
+        permissionsNotSupported: 'واجهة البرمجة تدعم فقط إنشاء المستخدمين القائم على الأدوار. يرجى الاختيار من الأدوار الموجودة.'
+      }
+    },
+
+    // Role details
+    roleDetails: {
+      userCount: 'عدد المستخدمين',
+      permissionCount: 'عدد الصلاحيات',
+      restaurant: 'المطعم',
+      branch: 'الفرع',
+      noDescription: 'لا يوجد وصف متاح',
+      users: 'مستخدمين',
+      permissions: 'صلاحيات'
+    },
+
+    // Permission categories
+    permissionCategories: {
+      'User Management': 'إدارة المستخدمين',
+      'Restaurant Management': 'إدارة المطاعم', 
+      'Branch Management': 'إدارة الفروع',
+      'Order Management': 'إدارة الطلبات',
+      'Product Management': 'إدارة المنتجات',
+      'Analytics': 'التحليلات'
+    },
+
+    // Success messages
+    success: {
+      userCreated: 'تم إنشاء المستخدم بنجاح',
+      roleCreated: 'تم إنشاء الدور بنجاح',
+      userUpdated: 'تم تحديث المستخدم بنجاح',
+      roleUpdated: 'تم تحديث الدور بنجاح'
+    },
   },
-  
-},
   BranchtableManagement: {
   title: "إدارة الطاولات",
   subtitle: "إدارة طاولات المطعم والفئات",
@@ -2828,6 +2827,195 @@ userManagementPage: {
     namePrefix: "بادئة الاسم",
     startingNumber: "الرقم البادئ"
   }
-}
+  },
+  branchCategories: {
+      title: 'فئات الفرع',
+      subtitle: 'إدارة الفئات والمنتجات للفرع {branchId}',
+      lastUpdated: 'آخر تحديث: اليوم',
+      
+      // Stats cards
+      stats: {
+        availableCategories: 'الفئات المتاحة',
+        readyToAdd: 'جاهزة للإضافة',
+        activeCategories: 'الفئات النشطة',
+        currentlyInBranch: 'حالياً في الفرع',
+        selectedCategories: 'الفئات المحددة',
+        toBeAdded: 'سيتم إضافتها',
+        selectedProducts: 'المنتجات المحددة',
+        fromCategories: 'من الفئات'
+      },
+      
+      // Tab navigation
+      tabs: {
+        addNew: 'إضافة فئات جديدة',
+        manageExisting: 'إدارة الموجود'
+      },
+      
+      // Step progress
+      steps: {
+        chooseCategories: 'اختيار الفئات',
+        selectProducts: 'تحديد المنتجات',
+        reviewAdd: 'مراجعة وإضافة',
+        finalStep: 'الخطوة الأخيرة',
+        selected: 'محددة',
+        back: 'رجوع'
+      },
+      
+      // Category selection
+      categorySelection: {
+        title: 'اختيار الفئات',
+        subtitle: 'حدد الفئات التي تريد إضافتها لهذا الفرع',
+        searchPlaceholder: 'البحث في الفئات...',
+        refresh: 'تحديث',
+        noCategories: 'لا توجد فئات متاحة',
+        allCategoriesAdded: 'جميع الفئات مضافة بالفعل لهذا الفرع',
+        products: 'منتجات',
+        active: 'نشط',
+        inactive: 'غير نشط',
+        categoriesSelected: 'فئات محددة',
+        clearSelection: 'مسح التحديد',
+        nextSelectProducts: 'التالي: تحديد المنتجات'
+      },
+      
+      // Product selection
+      productSelection: {
+        title: 'تحديد المنتجات',
+        subtitle: 'اختر منتجات محددة من الفئات المحددة (اختياري)',
+        searchPlaceholder: 'البحث في المنتجات...',
+        selectAll: 'تحديد الكل',
+        clearAll: 'مسح الكل',
+        loadingProducts: 'جاري تحميل المنتجات...',
+        noProductsFound: 'لم يتم العثور على منتجات',
+        selectedCategoriesNoProducts: 'الفئات المحددة لا تحتوي على أي منتجات',
+        available: 'متاح',
+        unavailable: 'غير متاح',
+        selectedText: 'محددة',
+        productsSelectedFrom: 'منتجات محددة من',
+        categories: 'فئات',
+        reviewSelection: 'مراجعة التحديد'
+      },
+      
+      // Review section
+      review: {
+        title: 'مراجعة اختيارك',
+        subtitle: 'راجع وأكد الفئات والمنتجات المراد إضافتها',
+        of: 'من',
+        productsSelected: 'منتجات محددة',
+        allProducts: 'جميع',
+        productsWillBeAdded: 'المنتجات سيتم إضافتها',
+        totalValue: 'القيمة الإجمالية',
+        selectedProducts: 'المنتجات المحددة:',
+        readyToAdd: 'جاهز لإضافة',
+        categories: 'فئات',
+        with: 'مع',
+        products: 'منتجات',
+        availableInBranch: 'هذا سيجعلها متاحة في الفرع',
+        startOver: 'البدء من جديد',
+        adding: 'جاري الإضافة...',
+        addToBranch: 'إضافة للفرع'
+      },
+      
+      // Manage existing
+      manage: {
+        title: 'إدارة الفئات الموجودة',
+        subtitle: 'إعادة ترتيب وإدارة الفئات الموجودة حالياً في هذا الفرع',
+        saving: 'جاري الحفظ...',
+        saveOrder: 'حفظ الترتيب',
+        exitReorder: 'إنهاء إعادة الترتيب',
+        reorder: 'إعادة ترتيب',
+        loadingCategoriesProducts: 'جاري تحميل الفئات والمنتجات...',
+        noCategoriesAdded: 'لم تتم إضافة فئات',
+        noCategoriesYet: 'هذا الفرع لا يحتوي على أي فئات بعد',
+        addCategories: 'إضافة فئات',
+        original: 'الأصلي:',
+        added: 'مضافة',
+        available: 'متاحة',
+        total: 'المجموع:',
+        productsInCategory: 'المنتجات في هذه الفئة:',
+        addedLabel: 'مضافة',
+        availableLabel: 'متاحة',
+        removeFromBranch: 'إزالة من الفرع',
+        addToBranch: 'إضافة للفرع',
+        productsAddedToBranch: 'منتجات مضافة للفرع',
+        moreAvailableToAdd: 'المزيد متاح للإضافة',
+        products: 'منتجات'
+      },
+      
+      // Delete modal
+      delete: {
+        title: 'حذف الفئة',
+        confirmMessage: 'هل أنت متأكد من أنك تريد إزالة "{categoryName}" من هذا الفرع؟',
+        category: 'فئة',
+        deleting: 'جاري الحذف...'
+      },
+      
+      // Loading states
+      loading: {
+        categories: 'جاري تحميل الفئات...',
+        products: 'جاري تحميل المنتجات...',
+        saving: 'جاري الحفظ...',
+        default: 'جاري التحميل...'
+      },
+      
+      // Success messages
+      success: {
+        categoryAdded: 'تمت إضافة "{name}" للفرع بنجاح!',
+        categoryRemoved: 'تمت إزالة "{name}" بنجاح!',
+        productAdded: 'تمت إضافة "{name}" للفئة بنجاح!',
+        productRemoved: 'تمت إزالة "{name}" من الفئة بنجاح!',
+        orderSaved: 'تم حفظ ترتيب الفئات بنجاح!',
+        categoriesAdded: 'تمت إضافة {count} فئة للفرع {branchId} بنجاح!',
+        categoriesAndProductsAdded: 'تمت إضافة {categoryCount} فئة مع {productCount} منتج بنجاح!',
+        someProductsFailed: 'ملاحظة: لم يتم إضافة {count} منتج.'
+      },
+      
+      // Error messages
+      error: {
+        loadCategories: 'فشل في تحميل الفئات المتاحة',
+        loadBranchCategories: 'فشل في تحميل فئات الفرع',
+        loadProducts: 'فشل في تحميل المنتجات للفئات المحددة',
+        branchIdRequired: 'معرف الفرع مطلوب لحفظ الفئات',
+        selectCategory: 'يرجى تحديد فئة واحدة على الأقل أولاً',
+        selectAtLeastOne: 'يرجى تحديد فئة واحدة على الأقل',
+        createCategory: 'فشل في إنشاء الفئة: {name}',
+        addProduct: 'فشل في إضافة المنتج للفئة',
+        removeProduct: 'فشل في إزالة المنتج من الفئة',
+        productNotFound: 'المنتج غير موجود',
+        saveOrder: 'فشل في حفظ ترتيب الفئات. يرجى المحاولة مرة أخرى.',
+        deleteCategory: 'فشل في إزالة "{name}". يرجى المحاولة مرة أخرى.',
+        categoryNotFound: 'الفئة "{name}" غير موجودة. ربما تم حذفها بالفعل.',
+        noPermission: 'ليس لديك صلاحية لحذف "{name}".',
+        categoryInUse: 'لا يمكن حذف "{name}" لأنها قيد الاستخدام حالياً.'
+      },
+      
+      // Common
+      common: {
+        category: 'فئة',
+        categories: 'فئات',
+        product: 'منتج',
+        products: 'منتجات',
+        active: 'نشط',
+        inactive: 'غير نشط',
+        available: 'متاح',
+        unavailable: 'غير متاح',
+        selected: 'محدد',
+        loading: 'جاري التحميل',
+        search: 'بحث',
+        save: 'حفظ',
+        cancel: 'إلغاء',
+        delete: 'حذف',
+        add: 'إضافة',
+        remove: 'إزالة',
+        edit: 'تعديل',
+        view: 'عرض',
+        close: 'إغلاق',
+        confirm: 'تأكيد',
+        back: 'رجوع',
+        next: 'التالي',
+        done: 'تم',
+        clear: 'مسح'
+      }
+  }
+
 
 }; 
