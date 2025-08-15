@@ -524,7 +524,7 @@ const BranchTableManagement: React.FC = () => {
 
       const updateDto: UpdateMenuTableDto = {
         id: tableId,
-        menuTableName: updatedData.menuTableName || currentTable.menuTableName,
+        menuTableName :  updatedData.menuTableName || currentTable.menuTableName,
         menuTableCategoryId: updatedData.menuTableCategoryId || currentTable.menuTableCategoryId,
         capacity: updatedData.capacity || currentTable.capacity,
         isActive: updatedData.isActive !== undefined ? updatedData.isActive : currentTable.isActive,

@@ -284,6 +284,8 @@ export const tr = {
         aboutDetails: 'Restoranınız hakkında detaylı bilgi verin...'
       }
     },
+        branchManagementTitle: "Şube Yönetimi" ,
+
     sidebar: {
        title : "QR Menü",
       logout: 'Çıkış Yap',
@@ -3080,6 +3082,86 @@ branchCategories: {
       updateTableStatusFailed: "Failed to update table status",
       updateTableOccupationFailed: "Failed to update table occupation",
       refreshFailed: "Failed to refresh data"
+    }
+  },
+    branchManagementBranch: {
+    title: 'Şube Yönetimi',
+    description: 'Şube bilgilerinizi ve ayarlarınızı yönetin.',
+    loading: 'Şube bilgileri yükleniyor...',
+    noBranchFound: 'Herhangi bir şube bulunamadı',
+    
+    status: {
+      open: 'Açık',
+      closed: 'Kapalı',
+      temporarilyClosed: 'Geçici Kapalı',
+      reopenBranch: 'Şubeyi Aç',
+      temporaryClose: 'Geçici Kapat'
+    },
+    
+    actions: {
+      edit: 'Düzenle',
+      save: 'Kaydet',
+      cancel: 'İptal',
+      delete: 'Sil',
+      deleting: 'Siliniyor...',
+      confirmDelete: 'Silmeyi Onayla',
+      deleteWarning: 'Bu şubeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+    },
+    
+    basicInfo: {
+      title: 'Temel Bilgiler',
+      branchName: 'Şube Adı',
+      whatsappNumber: 'WhatsApp Numarası',
+      email: 'E-posta',
+      notSpecified: 'Belirtilmemiş'
+    },
+    
+    addressInfo: {
+      title: 'Adres Bilgileri',
+      country: 'Ülke',
+      city: 'Şehir',
+      street: 'Sokak',
+      postalCode: 'Posta Kodu',
+      region: 'Bölge'
+    },
+    
+    workingHours: {
+      title: 'Çalışma Saatleri',
+      workingDay: 'Çalışma günü',
+      openTime: 'Açılış Saati',
+      closeTime: 'Kapanış Saati',
+      noWorkingHours: 'Çalışma saatleri belirtilmemiş',
+      days: {
+        0: 'Pazar',
+        1: 'Pazartesi',
+        2: 'Salı',
+        3: 'Çarşamba',
+        4: 'Perşembe',
+        5: 'Cuma',
+        6: 'Cumartesi'
+      }
+    },
+    
+    messages: {
+      updateSuccess: 'Şube bilgileri başarıyla güncellendi',
+      deleteSuccess: 'Şube başarıyla silindi',
+      temporaryCloseSuccess: 'Şube geçici olarak kapatıldı',
+      reopenSuccess: 'Şube tekrar açıldı',
+      updateError: 'Güncelleme sırasında hata oluştu',
+      deleteError: 'Silme işlemi sırasında hata oluştu',
+      statusChangeError: 'Durum değiştirme sırasında hata oluştu',
+      loadError: 'Şube bilgileri yüklenirken hata oluştu'
+    },
+    
+    placeholders: {
+      branchName: 'Şube adını girin',
+      whatsappNumber: 'WhatsApp numarasını girin',
+      email: 'E-posta adresini girin',
+      country: 'Ülke adını girin',
+      city: 'Şehir adını girin',
+      street: 'Sokak adını girin',
+      postalCode: 'Posta kodunu girin',
+      region: 'Bölge adını girin'
     }
   }
 }; 
