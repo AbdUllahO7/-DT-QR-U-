@@ -428,7 +428,7 @@ class TableService {
       
       const payload: TableStatusToggleDto = { isActive };
       
-      await httpClient.patch(`${this.baseUrl}/tables/${tableId}/toggle-status`, payload);
+      await httpClient.patch(`${this.baseUrl}/tables/${tableId}/status`, payload);
       
       logger.info('Masa durumu başarıyla güncellendi', { tableId, isActive }, { prefix: 'TableService' });
     } catch (error) {

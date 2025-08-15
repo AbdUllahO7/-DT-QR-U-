@@ -275,6 +275,7 @@ const BranchTableManagement: React.FC = () => {
         ...table,
         qrCodeUrl: generateQRCodeUrl(table)
       }));
+      console.log("tablesData",tablesData)
       setTables(tablesWithQR);
     } catch (err: any) {
       console.error('Error fetching tables:', err);
