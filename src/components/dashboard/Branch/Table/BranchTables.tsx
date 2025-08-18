@@ -2,30 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { 
   Plus,
   Search,
-  Edit,
-  Trash2,
-  Eye,
-  Users,
-  ToggleLeft,
-  ToggleRight,
-  Settings,
+  Building,
+  Grid,
+  UserX,
+  UserCheck,
+  RefreshCw,
   AlertCircle,
   CheckCircle,
   Loader2,
   X,
-  RefreshCw,
-  UserX,
-  UserCheck,
-  Building,
-  ChevronDown,
-  ChevronRight,
   Save,
   XCircle,
-  Grid,
-  QrCode,
-  Download,
-  Share2,
-  Copy
+  Settings,
+  Users
 } from 'lucide-react';
 import { 
   CreateMenuTableDto, 
@@ -35,30 +24,7 @@ import {
   tableService 
 } from '../../../../services/Branch/branchTableService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
-
-// Interfaces for API data - matching the service types
-interface CategoryData {
-  id: number;
-  categoryName: string;
-  colorCode: string;
-  iconClass: string;
-  displayOrder: number;
-  isActive: boolean;
-  branchId: number;
-  tableCount?: number;
-}
-
-interface TableData {
-  id: number;
-  menuTableName: string;
-  menuTableCategoryId: number;
-  capacity: number;
-  isActive: boolean;
-  isOccupied: boolean;
-  displayOrder: number;
-  rowVersion?: string;
-  qrCodeUrl?: string;
-}
+import CategorySection from './CategorySection';
 
 // QR Code Modal Component
 const QRCodeModal: React.FC<{
@@ -144,7 +110,7 @@ const QRCodeModal: React.FC<{
             {isDownloading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
-              <Download className="h-4 w-4" />
+              <Grid className="h-4 w-4" />
             )}
             {isDownloading ? t('BranchTableManagement.downloading') : t('BranchTableManagement.downloadQR')}
           </button>
@@ -160,7 +126,7 @@ const QRCodeModal: React.FC<{
               </>
             ) : (
               <>
-                <Copy className="h-4 w-4" />
+                <Grid className="h-4 w-4" />
                 {t('BranchTableManagement.copyQRUrl')}
               </>
             )}
@@ -171,9 +137,34 @@ const QRCodeModal: React.FC<{
   );
 };
 
+// Interfaces
+interface CategoryData {
+  id: number;
+  categoryName: string;
+  colorCode: string;
+  iconClass: string;
+  displayOrder: number;
+  isActive: boolean;
+  branchId: number;
+  tableCount?: number;
+}
+
+interface TableData {
+  id: number;
+  menuTableName: string;
+  menuTableCategoryId: number;
+  capacity: number;
+  isActive: boolean;
+  isOccupied: boolean;
+  displayOrder: number;
+  rowVersion?: string;
+  qrCodeUrl?: string;
+}
+
 const BranchTableManagement: React.FC = () => {
   const { t, isRTL } = useLanguage();
   
+  // State management
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [tables, setTables] = useState<TableData[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
@@ -227,6 +218,7 @@ const BranchTableManagement: React.FC = () => {
 
   const iconOptions: string[] = ['table', 'users', 'grid', 'building', 'settings'];
 
+  // Effects
   useEffect(() => {
     fetchCategories();
     fetchTables();
@@ -242,12 +234,22 @@ const BranchTableManagement: React.FC = () => {
     }
   }, [successMessage, error]);
 
+  // Utility functions
   const generateQRCodeUrl = (table: TableData): string => {
     const baseUrl = window.location.origin;
     const tableUrl = `${baseUrl}/menu/table/${table.id}`;
     return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(tableUrl)}`;
   };
 
+  const getTablesForCategory = (categoryId: number): TableData[] => {
+    return tables.filter(table => table.menuTableCategoryId === categoryId);
+  };
+
+  const filteredCategories = categories.filter(category => 
+    category.categoryName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // API functions
   const fetchCategories = async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
@@ -275,23 +277,10 @@ const BranchTableManagement: React.FC = () => {
         ...table,
         qrCodeUrl: generateQRCodeUrl(table)
       }));
-      console.log("tablesData",tablesData)
       setTables(tablesWithQR);
     } catch (err: any) {
       console.error('Error fetching tables:', err);
       setError(t('BranchTableManagement.error.fetchTablesFailed'));
-    }
-  };
-
-  const loadData = (categoriesData: CategoryData[], tablesData: TableData[]): void => {
-    setCategories(categoriesData);
-    const tablesWithQR = tablesData.map(table => ({
-      ...table,
-      qrCodeUrl: generateQRCodeUrl(table)
-    }));
-    setTables(tablesWithQR);
-    if (categoriesData.length > 0) {
-      setExpandedCategories(new Set([categoriesData[0].id]));
     }
   };
 
@@ -307,6 +296,7 @@ const BranchTableManagement: React.FC = () => {
     }
   };
 
+  // Event handlers
   const toggleCategory = (categoryId: number): void => {
     const newExpanded = new Set(expandedCategories);
     if (newExpanded.has(categoryId)) {
@@ -317,21 +307,12 @@ const BranchTableManagement: React.FC = () => {
     setExpandedCategories(newExpanded);
   };
 
-  const getTablesForCategory = (categoryId: number): TableData[] => {
-    return tables.filter(table => table.menuTableCategoryId === categoryId);
-  };
-
-  const filteredCategories = categories.filter(category => 
-    category.categoryName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   const handleToggleCategoryStatus = async (categoryId: number, newStatus: boolean): Promise<void> => {
     setToggleLoading(prev => ({
       ...prev,
       categories: new Set(prev.categories).add(categoryId)
     }));
 
-    // Find the current category to get its current data
     const currentCategory = categories.find(cat => cat.id === categoryId);
     if (!currentCategory) {
       console.error('Category not found for status toggle:', { categoryId });
@@ -349,17 +330,15 @@ const BranchTableManagement: React.FC = () => {
     ));
 
     try {
-      // Prepare the update data with all required fields, only changing isActive
       const updateData: UpdateTableCategoryDto = {
         id: currentCategory.id,
         categoryName: currentCategory.categoryName,
         colorCode: currentCategory.colorCode,
         iconClass: currentCategory.iconClass,
-        isActive: newStatus, // Only this field changes
-        rowVersion: (currentCategory as any).rowVersion || '' // Include rowVersion for concurrency control
+        isActive: newStatus,
+        rowVersion: (currentCategory as any).rowVersion || ''
       };
 
-      // Use updateCategory instead of toggleCategoryStatus
       await tableService.updateCategory(categoryId, updateData);
       setSuccessMessage(t(`BranchTableManagement.success.category${newStatus ? 'Activated' : 'Deactivated'}`));
     } catch (err: any) {
@@ -375,54 +354,48 @@ const BranchTableManagement: React.FC = () => {
     }
   };
 
-const handleToggleTableStatus = async (tableId: number, newStatus: boolean): Promise<void> => {
-  setToggleLoading(prev => ({
-    ...prev,
-    tables: new Set(prev.tables).add(tableId)
-  }));
+  const handleToggleTableStatus = async (tableId: number, newStatus: boolean): Promise<void> => {
+    setToggleLoading(prev => ({
+      ...prev,
+      tables: new Set(prev.tables).add(tableId)
+    }));
 
-  // Find the current table to get its current data
-  const currentTable = tables.find(table => table.id === tableId);
-  if (!currentTable) {
-    console.error('Table not found for status toggle:', { tableId });
-    setToggleLoading(prev => {
-      const newSet = new Set(prev.tables);
-      newSet.delete(tableId);
-      return { ...prev, tables: newSet };
-    });
-    return;
-  }
+    const currentTable = tables.find(table => table.id === tableId);
+    if (!currentTable) {
+      console.error('Table not found for status toggle:', { tableId });
+      setToggleLoading(prev => {
+        const newSet = new Set(prev.tables);
+        newSet.delete(tableId);
+        return { ...prev, tables: newSet };
+      });
+      return;
+    }
 
-  try {
-    // Prepare the update data with all required fields, only changing isActive
-    const updateData: UpdateMenuTableDto = {
-      id: currentTable.id,
-      menuTableName: currentTable.menuTableName,
-      menuTableCategoryId: currentTable.menuTableCategoryId,
-      capacity: currentTable.capacity,
-      isActive: newStatus, // Only this field changes
-      isOccupied: currentTable.isOccupied, // Keep current occupation status
-      rowVersion: currentTable.rowVersion || '' // Include rowVersion for concurrency control
-    };
+    try {
+      const updateData: UpdateMenuTableDto = {
+        id: currentTable.id,
+        menuTableName: currentTable.menuTableName,
+        menuTableCategoryId: currentTable.menuTableCategoryId,
+        capacity: currentTable.capacity,
+        isActive: newStatus,
+        isOccupied: currentTable.isOccupied,
+        rowVersion: currentTable.rowVersion || ''
+      };
 
-    // Use updateTable instead of toggleTableStatus
-    await tableService.updateTable(tableId, updateData);
-    
-    // Refresh the table data to get the updated rowVersion and ensure consistency
-    await fetchTables();
-    
-    setSuccessMessage(t(`BranchTableManagement.success.table${newStatus ? 'Activated' : 'Deactivated'}`));
-  } catch (err: any) {
-    console.error('Error updating table status:', err);
-    setError(t('BranchTableManagement.error.updateTableStatusFailed'));
-  } finally {
-    setToggleLoading(prev => {
-      const newSet = new Set(prev.tables);
-      newSet.delete(tableId);
-      return { ...prev, tables: newSet };
-    });
-  }
-};
+      await tableService.updateTable(tableId, updateData);
+      await fetchTables();
+      setSuccessMessage(t(`BranchTableManagement.success.table${newStatus ? 'Activated' : 'Deactivated'}`));
+    } catch (err: any) {
+      console.error('Error updating table status:', err);
+      setError(t('BranchTableManagement.error.updateTableStatusFailed'));
+    } finally {
+      setToggleLoading(prev => {
+        const newSet = new Set(prev.tables);
+        newSet.delete(tableId);
+        return { ...prev, tables: newSet };
+      });
+    }
+  };
 
   const handleToggleTableOccupation = async (tableId: number, isOccupied: boolean): Promise<void> => {
     setToggleLoading(prev => ({
@@ -570,7 +543,7 @@ const handleToggleTableStatus = async (tableId: number, newStatus: boolean): Pro
 
       const updateDto: UpdateMenuTableDto = {
         id: tableId,
-        menuTableName :  updatedData.menuTableName || currentTable.menuTableName,
+        menuTableName: updatedData.menuTableName || currentTable.menuTableName,
         menuTableCategoryId: updatedData.menuTableCategoryId || currentTable.menuTableCategoryId,
         capacity: updatedData.capacity || currentTable.capacity,
         isActive: updatedData.isActive !== undefined ? updatedData.isActive : currentTable.isActive,
@@ -614,21 +587,10 @@ const handleToggleTableStatus = async (tableId: number, newStatus: boolean): Pro
     });
   };
 
-  const getIconComponent = (iconClass: string): JSX.Element => {
-    const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-      table: Grid,
-      users: Users,
-      grid: Building,
-      building: Building,
-      settings: Settings
-    };
-    const IconComponent = iconMap[iconClass] || Grid;
-    return <IconComponent className="h-4 w-4" />;
-  };
-
   return (
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             {t('BranchTableManagement.header')}
@@ -638,6 +600,7 @@ const handleToggleTableStatus = async (tableId: number, newStatus: boolean): Pro
           </p>
         </div>
 
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -700,6 +663,7 @@ const handleToggleTableStatus = async (tableId: number, newStatus: boolean): Pro
           </div>
         </div>
 
+        {/* Search and Actions */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className={`flex flex-col lg:flex-row gap-4 justify-between ${isRTL ? 'lg:flex-row-reverse' : ''}`}>
             <div className="flex-1">
@@ -736,6 +700,7 @@ const handleToggleTableStatus = async (tableId: number, newStatus: boolean): Pro
           </div>
         </div>
 
+        {/* Error and Success Messages */}
         {error && (
           <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -764,6 +729,7 @@ const handleToggleTableStatus = async (tableId: number, newStatus: boolean): Pro
           </div>
         )}
 
+        {/* Add Category Form */}
         {showAddCategory && (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -789,15 +755,15 @@ const handleToggleTableStatus = async (tableId: number, newStatus: boolean): Pro
                 </label>
                 <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <input
-                    title='color'
                     type="color"
+                    title='colorCode'
                     value={newCategory.colorCode}
                     onChange={(e) => setNewCategory(prev => ({ ...prev, colorCode: e.target.value }))}
                     className="w-12 h-10 border border-gray-300 dark:border-gray-600 rounded-lg"
                   />
                   <input
-                    title='colorCode'
                     type="text"
+                    title='colorCode'
                     value={newCategory.colorCode}
                     onChange={(e) => setNewCategory(prev => ({ ...prev, colorCode: e.target.value }))}
                     className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -847,6 +813,7 @@ const handleToggleTableStatus = async (tableId: number, newStatus: boolean): Pro
           </div>
         )}
 
+        {/* Main Content */}
         {isLoading ? (
           <div className="text-center py-12">
             <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-600 dark:text-blue-400 mb-4" />
@@ -854,349 +821,51 @@ const handleToggleTableStatus = async (tableId: number, newStatus: boolean): Pro
           </div>
         ) : (
           <div className="space-y-4">
-            {filteredCategories.map((category) => {
-              const isExpanded = expandedCategories.has(category.id);
-              const categoryTables = getTablesForCategory(category.id);
-              const isEditing = editingCategory === category.id;
-              const isCategoryToggling = toggleLoading.categories.has(category.id);
-
-              return (
-                <div
-                  key={category.id}
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
-                >
-                  <div 
-                    className="p-6 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
-                    onClick={() => !isEditing && toggleCategory(category.id)}
-                  >
-                    <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          {isExpanded ? (
-                            <ChevronDown className="h-5 w-5 text-gray-500" />
-                          ) : (
-                            <ChevronRight className="h-5 w-5 text-gray-500" />
-                          )}
-                          <div 
-                            className="p-2 rounded-lg flex items-center justify-center"
-                            style={{ backgroundColor: `${category.colorCode}20`, color: category.colorCode }}
-                          >
-                            {getIconComponent(category.iconClass)}
-                          </div>
-                        </div>
-
-                        {isEditing ? (
-                          <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <input
-                              title='text'
-                              type="text"
-                              value={category.categoryName}
-                              onChange={(e) => {
-                                setCategories(prev => prev.map(cat => 
-                                  cat.id === category.id ? { ...cat, categoryName: e.target.value } : cat
-                                ));
-                              }}
-                              className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                            <input
-                              title='colorCode'
-                              type="color"
-                              value={category.colorCode}
-                              onChange={(e) => {
-                                setCategories(prev => prev.map(cat => 
-                                  cat.id === category.id ? { ...cat, colorCode: e.target.value } : cat
-                                ));
-                              }}
-                              className="w-8 h-8 border border-gray-300 dark:border-gray-600 rounded"
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          </div>
-                        ) : (
-                          <div>
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                              {category.categoryName}
-                            </h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">
-                              {categoryTables.length} {t('BranchTableManagement.tablesCount')}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-
-                      <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleToggleCategoryStatus(category.id, !category.isActive);
-                          }}
-                          disabled={isCategoryToggling}
-                          className="flex items-center gap-1"
-                        >
-                          {isCategoryToggling ? (
-                            <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-                          ) : category.isActive ? (
-                            <ToggleRight className="h-5 w-5 text-green-500" />
-                          ) : (
-                            <ToggleLeft className="h-5 w-5 text-gray-400" />
-                          )}
-                        </button>
-
-                        {isEditing ? (
-                          <div className={`flex gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleUpdateCategory(category.id, category);
-                              }}
-                              className="p-1 text-green-600 hover:text-green-800"
-                            >
-                              <Save className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingCategory(null);
-                              }}
-                              className="p-1 text-gray-600 hover:text-gray-800"
-                            >
-                              <XCircle className="h-4 w-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <div className={`flex gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingCategory(category.id);
-                              }}
-                              className="p-1 text-yellow-600 hover:text-yellow-800"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteCategory(category.id);
-                              }}
-                              className="p-1 text-red-600 hover:text-red-800"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {isExpanded && (
-                    <div className="border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
-                      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                        <button
-                          onClick={() => setShowAddTable(category.id)}
-                          className={`px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}
-                        >
-                          <Plus className="h-4 w-4" />
-                          {t('BranchTableManagement.addTable')}
-                        </button>
-                      </div>
-
-                      {showAddTable === category.id && (
-                        <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                              <input
-                                type="text"
-                                value={newTable.menuTableName}
-                                onChange={(e) => setNewTable(prev => ({ ...prev, menuTableName: e.target.value }))}
-                                placeholder={t('BranchTableManagement.tableNamePlaceholder')}
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                              />
-                            </div>
-                            <div>
-                              <input
-                                type="number"
-                                value={newTable.capacity}
-                                onChange={(e) => setNewTable(prev => ({ ...prev, capacity: parseInt(e.target.value) || 1 }))}
-                                placeholder={t('BranchTableManagement.capacityPlaceholder')}
-                                min="1"
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                              />
-                            </div>
-                            <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                              <button
-                                onClick={() => handleAddTable(category.id)}
-                                className={`px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-                              >
-                                <Save className="h-4 w-4" />
-                                {t('BranchTableManagement.save')}
-                              </button>
-                              <button
-                                onClick={() => setShowAddTable(null)}
-                                className={`px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-                              >
-                                <XCircle className="h-4 w-4" />
-                                {t('BranchTableManagement.cancel')}
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="p-4">
-                        {categoryTables.length === 0 ? (
-                          <div className="text-center py-8">
-                            <Grid className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                            <p className="text-gray-500 dark:text-gray-400">{t('BranchTableManagement.noTables')}</p>
-                          </div>
-                        ) : (
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            {categoryTables.map((table) => {
-                              const isTableEditing = editingTable === table.id;
-                              const isTableToggling = toggleLoading.tables.has(table.id);
-
-                              return (
-                                <div
-                                  key={table.id}
-                                  className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
-                                >
-                                  <div className={`flex items-start justify-between mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                    {isTableEditing ? (
-                                      <div className={`flex-1 ${isRTL ? 'ml-2' : 'mr-2'}`}>
-                                        <input
-                                          title='menuTableName'
-                                          type="text"
-                                          value={table.menuTableName}
-                                          onChange={(e) => {
-                                            setTables(prev => prev.map(t => 
-                                              t.id === table.id ? { ...t, menuTableName: e.target.value } : t
-                                            ));
-                                          }}
-                                          className="w-full px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                                        />
-                                        <input
-                                          title='number'
-                                          type="number"
-                                          value={table.capacity}
-                                          onChange={(e) => {
-                                            setTables(prev => prev.map(t => 
-                                              t.id === table.id ? { ...t, capacity: parseInt(e.target.value) || 1 } : t
-                                            ));
-                                          }}
-                                          min="1"
-                                          className="w-full mt-1 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm"
-                                        />
-                                      </div>
-                                    ) : (
-                                      <div>
-                                        <h4 className="font-medium text-gray-900 dark:text-white">
-                                          {table.menuTableName}
-                                        </h4>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                                          {t('BranchTableManagement.capacityPlaceholder')}: {table.capacity}
-                                        </p>
-                                      </div>
-                                    )}
-
-                                    <div className={`flex gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                      {isTableEditing ? (
-                                        <>
-                                          <button
-                                            onClick={() => handleUpdateTable(table.id, table)}
-                                            className="p-1 text-green-600 hover:text-green-800"
-                                          >
-                                            <Save className="h-3 w-3" />
-                                          </button>
-                                          <button
-                                            onClick={() => setEditingTable(null)}
-                                            className="p-1 text-gray-600 hover:text-gray-800"
-                                          >
-                                            <XCircle className="h-3 w-3" />
-                                          </button>
-                                        </>
-                                      ) : (
-                                        <>
-                                          <button
-                                            onClick={() => handleShowQRCode(table)}
-                                            className="p-1 text-blue-600 hover:text-blue-800"
-                                            title={t('BranchTableManagement.showQRCode')}
-                                          >
-                                            <QrCode className="h-3 w-3" />
-                                          </button>
-                                          <button
-                                            onClick={() => setEditingTable(table.id)}
-                                            className="p-1 text-yellow-600 hover:text-yellow-800"
-                                          >
-                                            <Edit className="h-3 w-3" />
-                                          </button>
-                                          <button
-                                            onClick={() => handleDeleteTable(table.id)}
-                                            className="p-1 text-red-600 hover:text-red-800"
-                                          >
-                                            <Trash2 className="h-3 w-3" />
-                                          </button>
-                                        </>
-                                      )}
-                                    </div>
-                                  </div>
-
-                                  <div className="space-y-2">
-                                    <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                      <span className="text-xs text-gray-500 dark:text-gray-400">{t('BranchTableManagement.status')}</span>
-                                      <button
-                                        onClick={() => handleToggleTableStatus(table.id, !table.isActive)}
-                                        disabled={isTableToggling}
-                                        className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}
-                                      >
-                                        {isTableToggling ? (
-                                          <Loader2 className="h-3 w-3 animate-spin text-gray-400" />
-                                        ) : table.isActive ? (
-                                          <ToggleRight className="h-4 w-4 text-green-500" />
-                                        ) : (
-                                          <ToggleLeft className="h-4 w-4 text-gray-400" />
-                                        )}
-                                        <span className={`text-xs ${
-                                          table.isActive ? 'text-green-600' : 'text-gray-500'
-                                        }`}>
-                                          {table.isActive ? t('BranchTableManagement.active') : t('BranchTableManagement.inactive')}
-                                        </span>
-                                      </button>
-                                    </div>
-
-                                    <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                      <span className="text-xs text-gray-500 dark:text-gray-400">{t('BranchTableManagement.occupation')}</span>
-                                      <button
-                                        onClick={() => handleToggleTableOccupation(table.id, !table.isOccupied)}
-                                        disabled={!table.isActive || isTableToggling}
-                                        className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}
-                                      >
-                                        {table.isOccupied ? (
-                                          <UserX className="h-4 w-4 text-red-500" />
-                                        ) : (
-                                          <UserCheck className="h-4 w-4 text-green-500" />
-                                        )}
-                                        <span className={`text-xs ${
-                                          table.isOccupied ? 'text-red-600' : 'text-green-600'
-                                        }`}>
-                                          {table.isOccupied ? t('BranchTableManagement.occupied') : t('BranchTableManagement.available')}
-                                        </span>
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            {filteredCategories.map((category) => (
+              <CategorySection
+                key={category.id}
+                category={category}
+                tables={getTablesForCategory(category.id)}
+                isExpanded={expandedCategories.has(category.id)}
+                isEditing={editingCategory === category.id}
+                isToggling={toggleLoading.categories.has(category.id)}
+                editingTable={editingTable}
+                showAddTable={showAddTable}
+                toggleLoading={toggleLoading}
+                onToggleExpansion={toggleCategory}
+                onStartEditing={setEditingCategory}
+                onCancelEditing={() => setEditingCategory(null)}
+                onUpdateCategory={handleUpdateCategory}
+                onDeleteCategory={handleDeleteCategory}
+                onToggleCategoryStatus={handleToggleCategoryStatus}
+                onCategoryChange={(categoryId, updatedData) => {
+                  setCategories(prev => prev.map(cat => 
+                    cat.id === categoryId ? { ...cat, ...updatedData } : cat
+                  ));
+                }}
+                onShowAddTable={setShowAddTable}
+                onHideAddTable={() => setShowAddTable(null)}
+                onAddTable={handleAddTable}
+                onStartTableEdit={setEditingTable}
+                onCancelTableEdit={() => setEditingTable(null)}
+                onUpdateTable={handleUpdateTable}
+                onDeleteTable={handleDeleteTable}
+                onToggleTableStatus={handleToggleTableStatus}
+                onToggleTableOccupation={handleToggleTableOccupation}
+                onShowQRCode={handleShowQRCode}
+                onTableChange={(tableId, updatedData) => {
+                  setTables(prev => prev.map(t => 
+                    t.id === tableId ? { ...t, ...updatedData } : t
+                  ));
+                }}
+                newTable={newTable}
+                onNewTableChange={(updatedData) => setNewTable(prev => ({ ...prev, ...updatedData }))}
+              />
+            ))}
           </div>
         )}
 
+        {/* Empty State */}
         {!isLoading && filteredCategories.length === 0 && (
           <div className="text-center py-12">
             <Building className="h-12 w-12 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
@@ -1212,6 +881,7 @@ const handleToggleTableStatus = async (tableId: number, newStatus: boolean): Pro
           </div>
         )}
 
+        {/* QR Code Modal */}
         {qrModal.table && (
           <QRCodeModal
             isOpen={qrModal.isOpen}

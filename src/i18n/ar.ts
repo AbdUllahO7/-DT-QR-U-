@@ -2829,194 +2829,7 @@ export const ar = {
     startingNumber: "الرقم البادئ"
   }
   },
-  branchCategories: {
-      title: 'فئات الفرع',
-      subtitle: 'إدارة الفئات والمنتجات للفرع {branchId}',
-      lastUpdated: 'آخر تحديث: اليوم',
-      
-      // Stats cards
-      stats: {
-        availableCategories: 'الفئات المتاحة',
-        readyToAdd: 'جاهزة للإضافة',
-        activeCategories: 'الفئات النشطة',
-        currentlyInBranch: 'حالياً في الفرع',
-        selectedCategories: 'الفئات المحددة',
-        toBeAdded: 'سيتم إضافتها',
-        selectedProducts: 'المنتجات المحددة',
-        fromCategories: 'من الفئات'
-      },
-      
-      // Tab navigation
-      tabs: {
-        addNew: 'إضافة فئات جديدة',
-        manageExisting: 'إدارة الموجود'
-      },
-      
-      // Step progress
-      steps: {
-        chooseCategories: 'اختيار الفئات',
-        selectProducts: 'تحديد المنتجات',
-        reviewAdd: 'مراجعة وإضافة',
-        finalStep: 'الخطوة الأخيرة',
-        selected: 'محددة',
-        back: 'رجوع'
-      },
-      
-      // Category selection
-      categorySelection: {
-        title: 'اختيار الفئات',
-        subtitle: 'حدد الفئات التي تريد إضافتها لهذا الفرع',
-        searchPlaceholder: 'البحث في الفئات...',
-        refresh: 'تحديث',
-        noCategories: 'لا توجد فئات متاحة',
-        allCategoriesAdded: 'جميع الفئات مضافة بالفعل لهذا الفرع',
-        products: 'منتجات',
-        active: 'نشط',
-        inactive: 'غير نشط',
-        categoriesSelected: 'فئات محددة',
-        clearSelection: 'مسح التحديد',
-        nextSelectProducts: 'التالي: تحديد المنتجات'
-      },
-      
-      // Product selection
-      productSelection: {
-        title: 'تحديد المنتجات',
-        subtitle: 'اختر منتجات محددة من الفئات المحددة (اختياري)',
-        searchPlaceholder: 'البحث في المنتجات...',
-        selectAll: 'تحديد الكل',
-        clearAll: 'مسح الكل',
-        loadingProducts: 'جاري تحميل المنتجات...',
-        noProductsFound: 'لم يتم العثور على منتجات',
-        selectedCategoriesNoProducts: 'الفئات المحددة لا تحتوي على أي منتجات',
-        available: 'متاح',
-        unavailable: 'غير متاح',
-        selectedText: 'محددة',
-        productsSelectedFrom: 'منتجات محددة من',
-        categories: 'فئات',
-        reviewSelection: 'مراجعة التحديد'
-      },
-      
-      // Review section
-      review: {
-        title: 'مراجعة اختيارك',
-        subtitle: 'راجع وأكد الفئات والمنتجات المراد إضافتها',
-        of: 'من',
-        productsSelected: 'منتجات محددة',
-        allProducts: 'جميع',
-        productsWillBeAdded: 'المنتجات سيتم إضافتها',
-        totalValue: 'القيمة الإجمالية',
-        selectedProducts: 'المنتجات المحددة:',
-        readyToAdd: 'جاهز لإضافة',
-        categories: 'فئات',
-        with: 'مع',
-        products: 'منتجات',
-        availableInBranch: 'هذا سيجعلها متاحة في الفرع',
-        startOver: 'البدء من جديد',
-        adding: 'جاري الإضافة...',
-        addToBranch: 'إضافة للفرع'
-      },
-      
-      // Manage existing
-      manage: {
-        title: 'إدارة الفئات الموجودة',
-        subtitle: 'إعادة ترتيب وإدارة الفئات الموجودة حالياً في هذا الفرع',
-        saving: 'جاري الحفظ...',
-        saveOrder: 'حفظ الترتيب',
-        exitReorder: 'إنهاء إعادة الترتيب',
-        reorder: 'إعادة ترتيب',
-        loadingCategoriesProducts: 'جاري تحميل الفئات والمنتجات...',
-        noCategoriesAdded: 'لم تتم إضافة فئات',
-        noCategoriesYet: 'هذا الفرع لا يحتوي على أي فئات بعد',
-        addCategories: 'إضافة فئات',
-        original: 'الأصلي:',
-        added: 'مضافة',
-        available: 'متاحة',
-        total: 'المجموع:',
-        productsInCategory: 'المنتجات في هذه الفئة:',
-        addedLabel: 'مضافة',
-        availableLabel: 'متاحة',
-        removeFromBranch: 'إزالة من الفرع',
-        addToBranch: 'إضافة للفرع',
-        productsAddedToBranch: 'منتجات مضافة للفرع',
-        moreAvailableToAdd: 'المزيد متاح للإضافة',
-        products: 'منتجات'
-      },
-      
-      // Delete modal
-      delete: {
-        title: 'حذف الفئة',
-        confirmMessage: 'هل أنت متأكد من أنك تريد إزالة "{categoryName}" من هذا الفرع؟',
-        category: 'فئة',
-        deleting: 'جاري الحذف...'
-      },
-      
-      // Loading states
-      loading: {
-        categories: 'جاري تحميل الفئات...',
-        products: 'جاري تحميل المنتجات...',
-        saving: 'جاري الحفظ...',
-        default: 'جاري التحميل...'
-      },
-      
-      // Success messages
-      success: {
-        categoryAdded: 'تمت إضافة "{name}" للفرع بنجاح!',
-        categoryRemoved: 'تمت إزالة "{name}" بنجاح!',
-        productAdded: 'تمت إضافة "{name}" للفئة بنجاح!',
-        productRemoved: 'تمت إزالة "{name}" من الفئة بنجاح!',
-        orderSaved: 'تم حفظ ترتيب الفئات بنجاح!',
-        categoriesAdded: 'تمت إضافة {count} فئة للفرع {branchId} بنجاح!',
-        categoriesAndProductsAdded: 'تمت إضافة {categoryCount} فئة مع {productCount} منتج بنجاح!',
-        someProductsFailed: 'ملاحظة: لم يتم إضافة {count} منتج.'
-      },
-      
-      // Error messages
-      error: {
-        loadCategories: 'فشل في تحميل الفئات المتاحة',
-        loadBranchCategories: 'فشل في تحميل فئات الفرع',
-        loadProducts: 'فشل في تحميل المنتجات للفئات المحددة',
-        branchIdRequired: 'معرف الفرع مطلوب لحفظ الفئات',
-        selectCategory: 'يرجى تحديد فئة واحدة على الأقل أولاً',
-        selectAtLeastOne: 'يرجى تحديد فئة واحدة على الأقل',
-        createCategory: 'فشل في إنشاء الفئة: {name}',
-        addProduct: 'فشل في إضافة المنتج للفئة',
-        removeProduct: 'فشل في إزالة المنتج من الفئة',
-        productNotFound: 'المنتج غير موجود',
-        saveOrder: 'فشل في حفظ ترتيب الفئات. يرجى المحاولة مرة أخرى.',
-        deleteCategory: 'فشل في إزالة "{name}". يرجى المحاولة مرة أخرى.',
-        categoryNotFound: 'الفئة "{name}" غير موجودة. ربما تم حذفها بالفعل.',
-        noPermission: 'ليس لديك صلاحية لحذف "{name}".',
-        categoryInUse: 'لا يمكن حذف "{name}" لأنها قيد الاستخدام حالياً.'
-      },
-      
-      // Common
-      common: {
-        category: 'فئة',
-        categories: 'فئات',
-        product: 'منتج',
-        products: 'منتجات',
-        active: 'نشط',
-        inactive: 'غير نشط',
-        available: 'متاح',
-        unavailable: 'غير متاح',
-        selected: 'محدد',
-        loading: 'جاري التحميل',
-        search: 'بحث',
-        save: 'حفظ',
-        cancel: 'إلغاء',
-        delete: 'حذف',
-        add: 'إضافة',
-        remove: 'إزالة',
-        edit: 'تعديل',
-        view: 'عرض',
-        close: 'إغلاق',
-        confirm: 'تأكيد',
-        back: 'رجوع',
-        next: 'التالي',
-        done: 'تم',
-        clear: 'مسح'
-      }
-  },
+
   BranchTableManagement: {
       header: "إدارة الفئات والطاولات",
       subheader: "إدارة فئات المطعم والطاولات مع عرض الأكورديون",
@@ -3166,6 +2979,201 @@ export const ar = {
       street: 'أدخل الشارع',
       postalCode: 'أدخل الرمز البريدي',
       region: 'أدخل المنطقة'
+    }
+  },
+   branchCategories: {
+    // Header and Stats
+    header: 'إدارة فئات الفرع',
+    subheader: 'إدارة الفئات والمنتجات للفرع {branchId}',
+    lastUpdated: 'آخر تحديث',
+    
+    stats: {
+      availableCategories: 'الفئات المتاحة',
+      readyToAdd: 'جاهزة للإضافة',
+      activeCategories: 'الفئات النشطة',
+      currentlyInBranch: 'موجودة حالياً في الفرع',
+      selectedCategories: 'الفئات المحددة',
+      toBeAdded: 'ستتم إضافتها',
+      selectedProducts: 'المنتجات المحددة',
+      fromCategories: 'من الفئات'
+    },
+
+    // Tab Navigation
+    tabs: {
+      addNew: 'إضافة جديد',
+      manageExisting: 'إدارة الموجود'
+    },
+
+    // Step Progress
+    steps: {
+      chooseCategories: 'اختيار الفئات',
+      selectProducts: 'اختيار المنتجات',
+      reviewAdd: 'مراجعة وإضافة',
+      finalStep: 'الخطوة الأخيرة',
+      selected: 'محدد',
+      back: 'رجوع'
+    },
+
+    // Add New Categories
+    addCategories: {
+      title: 'اختيار الفئات',
+      subtitle: 'حدد الفئات التي تريد إضافتها إلى فرعك',
+      noAvailable: 'لا توجد فئات متاحة',
+      allAdded: 'تم إضافة جميع الفئات المتاحة إلى هذا الفرع',
+      categoriesSelected: 'فئات محددة',
+      clearSelection: 'مسح التحديد',
+      nextSelectProducts: 'التالي: اختيار المنتجات'
+    },
+
+    // Select Products
+    selectProducts: {
+      title: 'اختيار المنتجات',
+      subtitle: 'اختر المنتجات من الفئات المحددة',
+      selectAll: 'اختيار الكل',
+      clearAll: 'مسح الكل',
+      noProducts: 'لم يتم العثور على منتجات',
+      noProductsInCategories: 'الفئات المحددة لا تحتوي على أي منتجات',
+      available: 'متاح',
+      productsSelectedFrom: 'منتجات محددة من',
+      categories: 'فئات',
+      reviewSelection: 'مراجعة التحديد'
+    },
+
+    // Review and Add
+    review: {
+      title: 'مراجعة وإضافة',
+      subtitle: 'راجع اختيارك قبل الإضافة إلى الفرع',
+      of: 'من',
+      productsSelected: 'منتجات محددة',
+      all: 'جميع',
+      productsWillBeAdded: 'المنتجات ستتم إضافتها',
+      totalValue: 'القيمة الإجمالية',
+      selectedProducts: 'المنتجات المحددة',
+      readyToAdd: 'جاهز لإضافة',
+      with: 'مع',
+      availableInBranch: 'متاح في الفرع',
+      startOver: 'البدء من جديد',
+      adding: 'جاري الإضافة...',
+      addToBranch: 'إضافة إلى الفرع'
+    },
+
+    // Manage Existing
+    manage: {
+      title: 'إدارة الفئات الموجودة',
+      subtitle: 'إدارة الفئات والمنتجات في فرعك',
+      saving: 'جاري الحفظ...',
+      saveOrder: 'حفظ الترتيب',
+      exitReorder: 'إنهاء إعادة الترتيب',
+      reorder: 'إعادة ترتيب',
+      noCategoriesAdded: 'لم يتم إضافة فئات',
+      noCategoriesAddedDesc: 'لم يتم إضافة أي فئات إلى هذا الفرع بعد',
+      addCategories: 'إضافة فئات',
+      original: 'الأصلي:',
+      added: 'مضاف',
+      available: 'متاح',
+      total: 'الإجمالي',
+      active: 'نشط',
+      inactive: 'غير نشط',
+      protected: 'محمي'
+    },
+
+    // Products Section
+    products: {
+      inCategory: 'المنتجات في الفئة',
+      added: 'مضاف',
+      available: 'متاح',
+      ingredients: 'مكونات',
+      allergens: 'مسببات الحساسية',
+      viewDetails: 'عرض التفاصيل',
+      removeFromBranch: 'إزالة من الفرع',
+      addToBranch: 'إضافة إلى الفرع',
+      addedToBranch: 'منتجات مضافة إلى الفرع',
+      moreAvailableToAdd: 'المزيد متاح للإضافة',
+      withDetailedInfo: 'بمعلومات مفصلة',
+      products: 'منتجات'
+    },
+
+    // Product Details Modal
+    productDetails: {
+      addedToBranch: 'مضاف إلى الفرع',
+      allergens: 'مسببات الحساسية',
+      contains: 'يحتوي على',
+      mayContain: 'قد يحتوي على',
+      ingredients: 'المكونات',
+      allergenic: 'مسبب للحساسية',
+      available: 'متاح',
+      unavailable: 'غير متاح',
+      quantity: 'الكمية:',
+      ingredientId: 'معرف المكون:',
+      allergenInformation: 'معلومات مسببات الحساسية:',
+      additionalInformation: 'معلومات إضافية',
+      originalProduct: 'المنتج الأصلي',
+      originalPrice: 'السعر الأصلي:',
+      originalStatus: 'الحالة الأصلية:',
+      originalDisplayOrder: 'ترتيب العرض الأصلي:',
+      orderDetails: 'تفاصيل الطلب',
+      lastUpdated: 'آخر تحديث:',
+      close: 'إغلاق'
+    },
+
+    // Common Actions
+    actions: {
+      refresh: 'تحديث',
+      delete: 'حذف',
+      edit: 'تعديل',
+      save: 'حفظ',
+      cancel: 'إلغاء',
+      confirm: 'تأكيد',
+      loading: 'جاري التحميل...'
+    },
+
+    // Search and Filters
+    search: {
+      categories: 'البحث في الفئات...',
+      products: 'البحث في المنتجات...'
+    },
+
+    // Status
+    status: {
+      active: 'نشط',
+      inactive: 'غير نشط',
+      available: 'متاح',
+      unavailable: 'غير متاح'
+    },
+
+    // Messages
+    messages: {
+      success: {
+        categoryAdded: 'تم إضافة الفئة بنجاح',
+        categoryDeleted: 'تم حذف الفئة بنجاح',
+        productAdded: 'تم إضافة المنتج {name} بنجاح',
+        productRemoved: 'تم إزالة المنتج {name} بنجاح',
+        orderSaved: 'تم حفظ ترتيب الفئات بنجاح'
+      },
+      error: {
+        cannotDelete: 'لا يمكن حذف الفئة "{name}" لأنها تحتوي على {count} منتجات. يرجى إزالة جميع المنتجات أولاً.',
+        cannotDeleteTooltip: 'لا يمكن الحذف: الفئة تحتوي على {count} منتجات. أزل جميع المنتجات أولاً.',
+        productNotFound: 'المنتج غير موجود',
+        addingProduct: 'خطأ في إضافة المنتج',
+        removingProduct: 'خطأ في إزالة المنتج',
+        savingOrder: 'خطأ في حفظ الترتيب',
+        loadingCategories: 'خطأ في تحميل الفئات',
+        loadingProducts: 'خطأ في تحميل المنتجات'
+      }
+    },
+
+    // Delete Modal
+    deleteModal: {
+      title: 'حذف الفئة',
+      message: 'هل أنت متأكد من حذف الفئة "{name}"؟ لا يمكن التراجع عن هذا الإجراء.',
+      confirm: 'حذف',
+      cancel: 'إلغاء'
+    },
+
+    // Placeholders
+    placeholders: {
+      searchCategories: 'البحث في الفئات...',
+      searchProducts: 'البحث في المنتجات...'
     }
   }
 }; 
