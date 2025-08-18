@@ -24,34 +24,10 @@ import {
   Info
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { Category } from '../../../../types/dashboard';
+import { BranchCategory } from './BranchProducts';
 
 // Enhanced interfaces
-interface APIAllergen {
-  id?: number;
-  allergenId: number;
-  code: string;
-  allergenCode?: string;
-  name: string;
-  icon: string;
-  description?: string | null;
-  productCount?: number;
-  containsAllergen?: boolean;
-  presence?: number;
-  note: string;
-}
-
-interface APIIngredient {
-  id: number;
-  productId: number;
-  ingredientId: number;
-  ingredientName: string;
-  quantity: number;
-  unit: string;
-  isAllergenic: boolean;
-  isAvailable: boolean;
-  allergenIds: number[];
-  allergens: APIAllergen[];
-}
 
 interface DetailedProduct {
   productId: number;
@@ -70,34 +46,7 @@ interface DetailedProduct {
   isSelected?: boolean;
 }
 
-interface Category {
-  categoryId: number;
-  categoryName: string;
-  description?: string;
-  status: boolean;
-  displayOrder: number;
-  restaurantId: number;
-  products: DetailedProduct[];
-}
 
-interface BranchCategory {
-  branchCategoryId: number;
-  branchId: number;
-  categoryId: number;
-  category: {
-    categoryId: number;
-    categoryName: string;
-    status: boolean;
-    displayOrder: number;
-    restaurantId: number;
-  };
-  isActive: boolean;
-  displayName: string;
-  displayOrder: number;
-  products?: DetailedProduct[]; 
-  selectedProductsCount?: number;
-  unselectedProductsCount?: number;
-}
 
 // Step enum for the multi-step process
 enum AdditionStep {
@@ -198,7 +147,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   setActiveTab
 }) => {
   const { t, isRTL } = useLanguage();
-
+  console.log("categoriesWithProducts",categoriesWithProducts)
   // Helper functions
   const toggleCategoryExpansion = (categoryId: number) => {
     const newExpanded = new Set(expandedCategories);
@@ -388,7 +337,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
           {branchCategory.products.map((product) => {
             const isSelected = product.isSelected;
             const hasDetailedInfo = product.ingredients || product.allergens;
-            
+            console.log("branchCategory",branchCategory)
             return (
               <div 
                 key={product.productId} 

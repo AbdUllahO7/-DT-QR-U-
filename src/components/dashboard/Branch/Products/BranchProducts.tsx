@@ -7,7 +7,6 @@ import {
   AlertCircle,
   CheckCircle,
   Calendar,
-  DollarSign,
   Package
 } from 'lucide-react';
 import { branchCategoryService } from '../../../../services/Branch/BranchCategoryService';
@@ -19,32 +18,7 @@ import ProductDetailsModal from './ProductDetailsModal';
 import CategoriesContent from './CategoriesContent';
 
 // Enhanced interfaces for detailed product information
-interface APIAllergen {
-  id?: number;
-  allergenId: number;
-  code: string;
-  allergenCode?: string;
-  name: string;
-  icon: string;
-  description?: string | null;
-  productCount?: number;
-  containsAllergen?: boolean;
-  presence?: number;
-  note: string;
-}
-
-interface APIIngredient {
-  id: number;
-  productId: number;
-  ingredientId: number;
-  ingredientName: string;
-  quantity: number;
-  unit: string;
-  isAllergenic: boolean;
-  isAvailable: boolean;
-  allergenIds: number[];
-  allergens: APIAllergen[];
-}
+import type { APIIngredient, APIAllergen } from '../../../../types/dashboard';
 
 interface APIProduct {
   productId: number;
@@ -55,7 +29,7 @@ interface APIProduct {
   displayOrder: number;
 }
 
-interface DetailedProduct extends Product {
+export interface DetailedProduct extends Product {
   branchProductId?: number;
   originalProductId?: number;
   product?: APIProduct;
@@ -66,7 +40,7 @@ interface DetailedProduct extends Product {
   isSelected?: boolean;
 }
 
-interface BranchCategory {
+export interface BranchCategory {
   branchCategoryId: number;
   branchId: number;
   categoryId: number;
@@ -235,22 +209,72 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
               const matches = branchProduct.branchCategory?.categoryId === branchCategory.categoryId;
               return matches;
             });
-
+              console.log("selectedProducts",selectedProducts)
             // Transform selected branch products to expected format with full details
             const transformedSelectedProducts: DetailedProduct[] = selectedProducts.map(branchProduct => {
               const transformed: DetailedProduct = {
                 productId: branchProduct.productId,
                 isAvailable: branchProduct.status,
-                branchProductId: branchProduct.branchProductId, // Branch product ID for deletion
+                branchProductId: branchProduct.branchProductId, 
                 originalProductId: branchProduct.productId || branchProduct.productId,
                 name: branchProduct.name,
                 description: branchProduct?.description,
-                price: branchProduct.price, // Use branch-specific price
+                price: branchProduct.price, 
                 imageUrl: branchProduct?.imageUrl,
                 status: branchProduct.status,
                 displayOrder: branchProduct.displayOrder,
                 categoryId: branchCategory.categoryId,
                 isSelected: true,
+                allergens: branchProduct.allergens
+                  ? branchProduct.allergens.map((a: any, idx: number) => ({
+                      id: a.id ?? a.allergenId ?? idx + 1,
+                      allergenId: a.allergenId ?? idx + 1,
+                      allergenCode: a.code ?? '',
+                      code: typeof a.code === 'string' ? a.code : a.code ?? '',
+                      name: a.name ?? '',
+                      icon: a.icon ?? '',
+                      note: a.note ?? '',
+                      description: a.description ?? null,
+                      productCount: a.productCount ?? 0,
+                      containsAllergen: a.containsAllergen ?? false,
+                      presence: a.presence ?? '',
+                      // Add any other required fields with default values if needed
+                    }))
+                  : [],
+                ingredients: branchProduct.ingredients
+                  ? branchProduct.ingredients.map((i: any, idx: number) => ({
+                      id: i.id ?? idx + 1,
+                      ingredientId: i.ingredientId ?? 0,
+                      name: i.ingredientName ?? '',
+                      ingredientName: i.ingredientName ?? '',
+                      productId: i.productId ?? branchProduct.productId,
+                      quantity: i.quantity ?? 0,
+                      unit: i.unit ?? '',
+                      isAllergenic: i.isAllergenic ?? false,
+                      isAvailable: i.isAvailable ?? true,
+                      allergenIds: i.allergenIds ?? [],
+                      allergens: i.allergens
+                        ? i.allergens.map((a: any, aidx: number) => ({
+                            id: a.id ?? a.allergenId ?? aidx + 1,
+                            allergenId: a.allergenId ?? aidx + 1,
+                            allergenCode: a.code ?? '',
+                            code: typeof a.code === 'string' ? a.code : a.code ?? '',
+                            name: a.name ?? '',
+                            icon: a.icon ?? '',
+                            note: a.note ?? '',
+                            description: a.description ?? null,
+                            productCount: a.productCount ?? 0,
+                            containsAllergen: a.containsAllergen ?? false,
+                            presence: a.presence ?? '',
+                          }))
+                        : [],
+                      restaurantId: i.restaurantId ?? 0,
+                      products: i.products ?? [],
+                      productIngredients: i.productIngredients ?? [],
+                      // Add any other required fields with default values if needed
+                    }))
+                  : [],
+                
               };
               return transformed;
             });
@@ -261,13 +285,12 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
               onlyActive: true,
               includes: 'category,ingredients,allergens,addons'
             });
-
             // Transform available products to expected format
-            const transformedAvailableProducts: DetailedProduct[] = allAvailableProducts.map(product => ({
+           const transformedAvailableProducts: DetailedProduct[] = allAvailableProducts.map(product => ({
               id: product.productId,
               productId: product.productId,
               name: product.name,
-              description: product.description ,
+              description: product.description,
               price: product.price,
               imageUrl: product.imageUrl,
               isAvailable: product.status,
@@ -335,7 +358,21 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
       setIsLoadingBranchProducts(false);
     }
   };
-
+    const transformAllergens = (allergens: string[]): APIAllergen[] => {
+      return allergens?.map((allergenName, index) => ({
+        id: index + 1, // Temporary unique ID
+        allergenId: index + 1,
+        allergenCode: allergenName.toLowerCase().replace(/\s+/g, '_'),
+        code: allergenName.toLowerCase().replace(/\s+/g, '_'),
+        name: allergenName,
+        icon: '🔸', // Default icon
+        note: '',
+        description: null,
+        productCount: 0,
+        containsAllergen: false,
+        presence: 0,
+      })) || [];
+    };
   const fetchProductsForSelectedCategories = async () => {
     if (selectedCategories.size === 0) return;
     
@@ -351,7 +388,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
           onlyActive: true,
           includes: 'category,ingredients,allergens,addons'
         });
-        
         if (productsData.length > 0) {
           allProducts.push(...productsData);
         }
@@ -907,9 +943,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     category?.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const availableCategoriesNotInBranch = filteredCategories.filter(category => 
-    !branchCategories.some(bc => bc.categoryId === category.categoryId)
-  );
+
 
   return (
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}>

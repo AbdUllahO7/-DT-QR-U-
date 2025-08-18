@@ -7,66 +7,15 @@ import {
   Package
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { DetailedProduct } from './BranchProducts';
 
-// Enhanced interfaces for detailed product information
-interface APIAllergen {
-  id?: number;
-  allergenId: number;
-  code: string;
-  allergenCode?: string;
-  name: string;
-  icon: string;
-  description?: string | null;
-  productCount?: number;
-  containsAllergen?: boolean;
-  presence?: number;
-  note: string;
-}
 
-interface APIIngredient {
-  id: number;
-  productId: number;
-  ingredientId: number;
-  ingredientName: string;
-  quantity: number;
-  unit: string;
-  isAllergenic: boolean;
-  isAvailable: boolean;
-  allergenIds: number[];
-  allergens: APIAllergen[];
-}
 
-interface APIProduct {
-  productId: number;
-  name: string;
-  price: number;
-  imageUrl?: string;
-  status: boolean;
-  displayOrder: number;
-}
-
-interface DetailedProduct {
-  productId: number;
-  name: string;
-  description?: string;
-  price: number;
-  imageUrl?: string;
-  status: boolean;
-  displayOrder?: number;
-  categoryId?: number;
-  branchProductId?: number;
-  originalProductId?: number;
-  product?: APIProduct;
-  ingredients?: APIIngredient[];
-  allergens?: APIAllergen[];
-  orderDetails?: any;
-  isSelected?: boolean;
-}
 
 interface ProductDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  product: DetailedProduct | null;
+  product: DetailedProduct;
 }
 
 const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ 
@@ -83,6 +32,8 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
       onClose();
     }
   };
+
+  console.log("product",product)
 
   return (
     <div 

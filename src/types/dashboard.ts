@@ -12,6 +12,8 @@ export interface Product {
   displayOrder : number;
   branchProductId?:number
   branchCategory?:Category
+   ingredients?: APIIngredient[];
+  allergens?: APIAllergen[];
 }
 
 export interface Category {
@@ -116,16 +118,20 @@ export interface APIAllergen {
   productCount: number;
   containsAllergen: boolean | null;
   note: string | null;
+  presence:number,
 }
 
 // FIXED: API Ingredient type (matches actual API response)
 export interface APIIngredient {
+  id :number,
   ingredientId: number;
-  name: string;
+  ingredientName: string;
   isAllergenic: boolean;
   isAvailable: boolean;
   restaurantId: number;
   products: any[];
+  quantity?:number,
+  unit?:number,
   productIngredients: any[];
   allergens: APIAllergen[]; // ← FIXED: This matches the actual API response
 }
