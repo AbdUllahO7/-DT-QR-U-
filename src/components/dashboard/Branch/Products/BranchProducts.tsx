@@ -7,7 +7,10 @@ import {
   AlertCircle,
   CheckCircle,
   Calendar,
-  Package
+  Package,
+  Edit3,
+  Save,
+  DollarSign
 } from 'lucide-react';
 import { branchCategoryService } from '../../../../services/Branch/BranchCategoryService';
 import { ConfirmDeleteModal } from '../../../ConfirmDeleteModal';
@@ -63,11 +66,23 @@ interface BranchCategoriesProps {
   branchId?: number;
 }
 
-// Step enum for the multi-step process
 enum AdditionStep {
   SELECT_CATEGORIES = 'select_categories',
   SELECT_PRODUCTS = 'select_products',
   REVIEW_SELECTION = 'review_selection'
+}
+
+// New interfaces for tracking edited values
+interface EditedProductPrice {
+  productId: number;
+  originalPrice: number;
+  newPrice: number;
+}
+
+interface EditedCategoryName {
+  categoryId: number;
+  originalName: string;
+  newName: string;
 }
 
 const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => {
@@ -86,6 +101,12 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
   const [currentStep, setCurrentStep] = useState<AdditionStep>(AdditionStep.SELECT_CATEGORIES);
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
   const [expandedBranchCategories, setExpandedBranchCategories] = useState<Set<number>>(new Set());
+  
+  // New state for tracking edited values
+  const [editedProductPrices, setEditedProductPrices] = useState<Map<number, EditedProductPrice>>(new Map());
+  const [editedCategoryNames, setEditedCategoryNames] = useState<Map<number, EditedCategoryName>>(new Map());
+  const [editingProductId, setEditingProductId] = useState<number | null>(null);
+  const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null);
   
   // Product details modal state
   const [selectedProductForDetails, setSelectedProductForDetails] = useState<DetailedProduct | null>(null);
@@ -115,6 +136,288 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
   const [isLoadingBranchProducts, setIsLoadingBranchProducts] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Price editing functions
+  const handleProductPriceEdit = (productId: number, originalPrice: number) => {
+    console.log('Starting product price edit:', { productId, originalPrice, activeTab });
+    setEditingProductId(productId);
+    
+    const newEditedPrices = new Map(editedProductPrices);
+    
+    // For existing branch products, use the current branch product price as starting point
+    let currentPrice = originalPrice;
+    if (activeTab === 'manage') {
+      for (const branchCategory of branchCategories) {
+        const product = branchCategory.products?.find(p => p.productId === productId && p.isSelected);
+        if (product) {
+          currentPrice = product.price;
+          break;
+        }
+      }
+    }
+    
+    console.log('Setting initial price edit state:', { productId, originalPrice, currentPrice });
+    
+    newEditedPrices.set(productId, {
+      productId,
+      originalPrice,
+      newPrice: currentPrice
+    });
+    setEditedProductPrices(newEditedPrices);
+  };
+
+  const handleProductPriceChange = (productId: number, newPrice: string) => {
+    const priceValue = parseFloat(newPrice) || 0;
+    console.log('Product price changing:', { productId, newPrice, priceValue });
+    const newEditedPrices = new Map(editedProductPrices);
+    const existing = newEditedPrices.get(productId);
+    if (existing) {
+      newEditedPrices.set(productId, {
+        ...existing,
+        newPrice: priceValue
+      });
+      setEditedProductPrices(newEditedPrices);
+      console.log('Updated product price state:', newEditedPrices.get(productId));
+    } else {
+      console.warn('No existing edit state found for product:', productId);
+    }
+  };
+
+const handleProductPriceSave = async (productId: number) => {
+  if (activeTab === 'manage') {
+    // For manage tab: save immediately to API
+    const editedPrice = editedProductPrices.get(productId);
+    if (editedPrice && Math.abs(editedPrice.newPrice - editedPrice.originalPrice) > 0.001) {
+      await saveBranchProductPrice(productId, editedPrice.newPrice);
+    }
+  }
+  setEditingProductId(null);
+  // For add tab: the edited price is already saved in state, will be used when saving the final form
+};
+
+  const handleProductPriceCancel = (productId: number) => {
+    setEditingProductId(null);
+    const newEditedPrices = new Map(editedProductPrices);
+    const existing = newEditedPrices.get(productId);
+    if (existing) {
+      newEditedPrices.set(productId, {
+        ...existing,
+        newPrice: existing.originalPrice
+      });
+      setEditedProductPrices(newEditedPrices);
+    }
+  };
+
+  // Category name editing functions
+  const handleCategoryNameEdit = (categoryId: number, originalName: string) => {
+    console.log('Starting category name edit:', { categoryId, originalName, activeTab });
+    setEditingCategoryId(categoryId);
+    
+    const newEditedNames = new Map(editedCategoryNames);
+    
+    // For existing branch categories, use the current display name as the starting point
+    const currentName = activeTab === 'manage' 
+      ? branchCategories.find(bc => bc.categoryId === categoryId)?.displayName || originalName
+      : originalName;
+    
+    console.log('Setting initial edit state:', { categoryId, originalName, currentName });
+    
+    newEditedNames.set(categoryId, {
+      categoryId,
+      originalName,
+      newName: currentName
+    });
+    setEditedCategoryNames(newEditedNames);
+  };
+
+  const handleCategoryNameChange = (categoryId: number, newName: string) => {
+    console.log('Category name changing:', { categoryId, newName });
+    const newEditedNames = new Map(editedCategoryNames);
+    const existing = newEditedNames.get(categoryId);
+    if (existing) {
+      newEditedNames.set(categoryId, {
+        ...existing,
+        newName: newName // Don't trim while typing, only trim on save
+      });
+      setEditedCategoryNames(newEditedNames);
+      console.log('Updated category name state:', newEditedNames.get(categoryId));
+    } else {
+      console.warn('No existing edit state found for category:', categoryId);
+    }
+  };
+
+  const handleCategoryNameSave = async (categoryId: number) => {
+  if (activeTab === 'manage') {
+    // For manage tab: save immediately to API
+    const editedName = editedCategoryNames.get(categoryId);
+    if (editedName && editedName.newName.trim() !== editedName.originalName) {
+      await saveBranchCategoryName(categoryId, editedName.newName.trim());
+    }
+  }
+  setEditingCategoryId(null);
+  // For add tab: the edited name is already saved in state, will be used when saving the final form
+};
+
+  const handleCategoryNameCancel = (categoryId: number) => {
+    setEditingCategoryId(null);
+    const newEditedNames = new Map(editedCategoryNames);
+    const existing = newEditedNames.get(categoryId);
+    if (existing) {
+      newEditedNames.set(categoryId, {
+        ...existing,
+        newName: existing.originalName
+      });
+      setEditedCategoryNames(newEditedNames);
+    }
+  };
+
+  // Helper function to get edited price or original price
+  const getProductPrice = (productId: number, originalPrice: number): number => {
+    const editedPrice = editedProductPrices.get(productId);
+    if (editedPrice) {
+      return editedPrice.newPrice;
+    }
+    
+    // For existing branch products in manage tab, use the current price
+    if (activeTab === 'manage') {
+      for (const branchCategory of branchCategories) {
+        const product = branchCategory.products?.find(p => p.productId === productId && p.isSelected);
+        if (product) {
+          return product.price;
+        }
+      }
+    }
+    
+    return originalPrice;
+  };
+
+  // Helper function to get edited category name or original name
+  const getCategoryName = (categoryId: number, originalName: string): string => {
+    const editedName = editedCategoryNames.get(categoryId);
+    if (editedName) {
+      return editedName.newName;
+    }
+    
+    // For existing branch categories in manage tab, use the current display name
+    if (activeTab === 'manage') {
+      const branchCategory = branchCategories.find(bc => bc.categoryId === categoryId);
+      return branchCategory?.displayName || originalName;
+    }
+    
+    return originalName;
+  };
+
+  // Save functions for existing branch items
+ const saveBranchCategoryName = async (categoryId: number, newName: string) => {
+  try {
+    // Find the branch category
+    const branchCategory = branchCategories.find(bc => bc.categoryId === categoryId);
+    if (!branchCategory) {
+      setError('Branch category not found');
+      return;
+    }
+
+    setIsLoading(true);
+    
+    // Update the branch category name using the branchCategoryId (not categoryId)
+    await branchCategoryService.updateBranchCategory(branchCategory.branchCategoryId, {
+      displayName: newName
+    });
+
+    // Update local state
+    setBranchCategories(prev => 
+      prev.map(bc => 
+        bc.categoryId === categoryId 
+          ? { ...bc, displayName: newName }
+          : bc
+      )
+    );
+
+    setSuccessMessage(`Category name updated to "${newName}"`);
+    
+    // Clear the edited state
+    const newEditedNames = new Map(editedCategoryNames);
+    newEditedNames.delete(categoryId);
+    setEditedCategoryNames(newEditedNames);
+
+  } catch (err: any) {
+    console.error('Error updating category name:', err);
+    setError('Failed to update category name');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+
+  const saveBranchProductPrice = async (productId: number, newPrice: number) => {
+    try {
+      // Find the branch product and its associated data
+      let branchProductId: number | null = null;
+      let categoryIndex = -1;
+      let isActive: boolean | undefined = undefined;
+      let displayOrder: number | undefined = undefined;
+      let branchCategoryId: number | undefined = undefined;
+
+      for (let i = 0; i < branchCategories.length; i++) {
+        const product = branchCategories[i].products?.find(p => p.productId === productId && p.isSelected);
+        if (product && product.branchProductId) {
+          branchProductId = product.branchProductId;
+          categoryIndex = i;
+          isActive = product.status; // Assuming `status` represents `isActive`
+          displayOrder = product.displayOrder; // Assuming `displayOrder` is available in product
+          branchCategoryId = branchCategories[i].branchCategoryId; // Get from branch category
+          break;
+        }
+      }
+
+      if (!branchProductId || branchCategoryId === undefined) {
+        setError('Branch product or category not found');
+        return;
+      }
+
+      setIsLoading(true);
+
+      // Prepare the payload with all required fields
+      const productData = {
+        branchProductId: branchProductId,
+        price: newPrice,
+        isActive: isActive ?? true, // Default to true if not found
+        displayOrder: displayOrder ?? 0, // Default to 0 if not found
+        branchCategoryId: branchCategoryId, // Required field
+      };
+
+      // Update the branch product price with all fields
+      await branchProductService.updateBranchProduct(branchProductId, productData);
+
+      // Update local state
+      setBranchCategories(prev => {
+        const updated = [...prev];
+        if (categoryIndex >= 0 && updated[categoryIndex].products) {
+          updated[categoryIndex] = {
+            ...updated[categoryIndex],
+            products: updated[categoryIndex].products!.map(product =>
+              product.productId === productId
+                ? { ...product, price: newPrice }
+                : product
+            ),
+          };
+        }
+        return updated;
+      });
+
+      setSuccessMessage(`Product price updated to $${newPrice.toFixed(2)}`);
+
+      // Clear the edited state
+      const newEditedPrices = new Map(editedProductPrices);
+      newEditedPrices.delete(productId);
+      setEditedProductPrices(newEditedPrices);
+    } catch (err: any) {
+      console.error('Error updating product price:', err);
+      setError('Failed to update product price');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Product details modal functions
   const handleShowProductDetails = (product: DetailedProduct) => {
@@ -209,7 +512,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
               const matches = branchProduct.branchCategory?.categoryId === branchCategory.categoryId;
               return matches;
             });
-              console.log("selectedProducts",selectedProducts)
+
             // Transform selected branch products to expected format with full details
             const transformedSelectedProducts: DetailedProduct[] = selectedProducts.map(branchProduct => {
               const transformed: DetailedProduct = {
@@ -238,7 +541,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
                       productCount: a.productCount ?? 0,
                       containsAllergen: a.containsAllergen ?? false,
                       presence: a.presence ?? '',
-                      // Add any other required fields with default values if needed
                     }))
                   : [],
                 ingredients: branchProduct.ingredients
@@ -271,10 +573,8 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
                       restaurantId: i.restaurantId ?? 0,
                       products: i.products ?? [],
                       productIngredients: i.productIngredients ?? [],
-                      // Add any other required fields with default values if needed
                     }))
                   : [],
-                
               };
               return transformed;
             });
@@ -285,8 +585,9 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
               onlyActive: true,
               includes: 'category,ingredients,allergens,addons'
             });
+            
             // Transform available products to expected format
-           const transformedAvailableProducts: DetailedProduct[] = allAvailableProducts.map(product => ({
+            const transformedAvailableProducts: DetailedProduct[] = allAvailableProducts.map(product => ({
               id: product.productId,
               productId: product.productId,
               name: product.name,
@@ -358,21 +659,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
       setIsLoadingBranchProducts(false);
     }
   };
-    const transformAllergens = (allergens: string[]): APIAllergen[] => {
-      return allergens?.map((allergenName, index) => ({
-        id: index + 1, // Temporary unique ID
-        allergenId: index + 1,
-        allergenCode: allergenName.toLowerCase().replace(/\s+/g, '_'),
-        code: allergenName.toLowerCase().replace(/\s+/g, '_'),
-        name: allergenName,
-        icon: '🔸', // Default icon
-        note: '',
-        description: null,
-        productCount: 0,
-        containsAllergen: false,
-        presence: 0,
-      })) || [];
-    };
+
   const fetchProductsForSelectedCategories = async () => {
     if (selectedCategories.size === 0) return;
     
@@ -465,6 +752,9 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     setSelectedProducts(new Set());
     setCategoriesWithProducts([]);
     setSearchTerm('');
+    // Reset edited values when going back
+    setEditedProductPrices(new Map());
+    setEditedCategoryNames(new Map());
   };
 
   const backToProductSelection = () => {
@@ -493,6 +783,10 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     
     if (newSelectedProducts.has(productId)) {
       newSelectedProducts.delete(productId);
+      // Remove edited price when deselecting product
+      const newEditedPrices = new Map(editedProductPrices);
+      newEditedPrices.delete(productId);
+      setEditedProductPrices(newEditedPrices);
     } else {
       newSelectedProducts.add(productId);
     }
@@ -509,6 +803,8 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
 
   const handleClearAllProducts = () => {
     setSelectedProducts(new Set());
+    // Clear all edited prices when clearing selection
+    setEditedProductPrices(new Map());
   };
 
   // Delete functions
@@ -576,7 +872,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
       let createdCount = 0;
       const createdBranchCategories = new Map();
       
-      // Step 1: Create branch categories and capture their IDs
+      // Step 1: Create branch categories with edited names and capture their IDs
       for (const categoryId of selectedCategories) {
         const category = categories.find(cat => cat.categoryId === categoryId);
         
@@ -585,9 +881,10 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
         }
 
         try {
+          const editedName = getCategoryName(categoryId, category.categoryName);
           const categoryData = {
             categoryId: category.categoryId,
-            displayName: category.categoryName,
+            displayName: editedName, // Use edited name if available
             isActive: true,
             displayOrder: branchCategories.length + createdCount + 1
           };
@@ -606,7 +903,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
         }
       }
       
-      // Step 2: Create branch products for selected products
+      // Step 2: Create branch products with edited prices for selected products
       let createdProductsCount = 0;
       
       if (selectedProducts.size > 0) {
@@ -634,8 +931,9 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
           }
           
           try {
+            const editedPrice = getProductPrice(productId, productToCreate.price);
             const productData = {
-              price: productToCreate.price,
+              price: editedPrice, // Use edited price if available
               isActive: true,
               productId: productToCreate.productId,
               branchCategoryId: branchCategoryId
@@ -661,10 +959,12 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
       
       setSuccessMessage(successMsg);
       
-      // Reset form
+      // Reset form and edited values
       setSelectedCategories(new Set());
       setSelectedProducts(new Set());
       setCategoriesWithProducts([]);
+      setEditedProductPrices(new Map());
+      setEditedCategoryNames(new Map());
       setCurrentStep(AdditionStep.SELECT_CATEGORIES);
       
       // Wait a bit for backend to persist the data
@@ -943,8 +1243,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     category?.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-
-
   return (
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -1087,6 +1385,8 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
           setExpandedCategories={setExpandedCategories}
           setExpandedBranchCategories={setExpandedBranchCategories}
           setIsReorderMode={setIsReorderMode}
+          setEditingProductId={setEditingProductId}
+          setEditingCategoryId={setEditingCategoryId}
           handleShowProductDetails={handleShowProductDetails}
           onCategorySelect={handleCategorySelect}
           onProductSelect={handleProductSelect}
@@ -1105,6 +1405,21 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
           onDeleteCategory={openDeleteModal}
           onRefresh={fetchAvailableCategories}
           setActiveTab={setActiveTab}
+          // New props for editing functionality
+          editedProductPrices={editedProductPrices}
+          editedCategoryNames={editedCategoryNames}
+          editingProductId={editingProductId}
+          editingCategoryId={editingCategoryId}
+          onProductPriceEdit={handleProductPriceEdit}
+          onProductPriceChange={handleProductPriceChange}
+          onProductPriceSave={handleProductPriceSave}
+          onProductPriceCancel={handleProductPriceCancel}
+          onCategoryNameEdit={handleCategoryNameEdit}
+          onCategoryNameChange={handleCategoryNameChange}
+          onCategoryNameSave={handleCategoryNameSave}
+          onCategoryNameCancel={handleCategoryNameCancel}
+          getProductPrice={getProductPrice}
+          getCategoryName={getCategoryName}
         />
 
         {/* Delete Confirmation Modal */}
