@@ -932,24 +932,7 @@ export const tr = {
     }
   },
 
-  // Profile
-  profile: {
-    title: 'Profil',
-    description: 'Kişisel bilgilerinizi görüntüleyin ve düzenleyin',
-    error: {
-      loadFailed: 'Profil verisi alınamadı'
-    },
-    personalInfo: 'Kişisel Bilgiler',
-    accountSettings: 'Hesap Ayarları',
-    security: 'Güvenlik',
-    preferences: 'Tercihler',
-    actions: {
-      save: 'Kaydet',
-      cancel: 'İptal',
-      changePassword: 'Şifre Değiştir',
-      updateProfile: 'Profili Güncelle'
-    }
-  },
+
 
   // Subscription
   subscription: {
@@ -3170,5 +3153,99 @@ SortableProduct: {
       searchCategories: 'Kategorilerde ara...',
       searchProducts: 'Ürünlerde ara...'
     }
-  }
+  },
+ profile: {
+      title: 'Profil',
+      personalInfo: 'Kişisel Bilgiler',
+      editProfile: 'Profili Düzenle',
+      accountStatus: {
+        active: 'Aktif Hesap',
+        inactive: 'Pasif Hesap',
+        status: 'Hesap Durumu'
+      },
+      fields: {
+        firstName: 'Ad',
+        lastName: 'Soyad',
+        username: 'Kullanıcı Adı',
+        email: 'E-posta',
+        registrationDate: 'Kayıt Tarihi',
+        restaurantName: 'Restoran Adı',
+        status: 'Durum'
+      },
+      restaurant: {
+        info: 'Restoran Bilgileri',
+        name: 'Restoran Adı',
+        status: {
+          active: 'Aktif',
+          inactive: 'Pasif'
+        }
+      },
+      permissions: {
+        summary: 'Yetki Özeti',
+        totalCategories: 'Toplam Kategori',
+        totalPermissions: 'Toplam İzin',
+        rolesAndPermissions: 'Kategoriler ve İzinler',
+        systemRole: 'Sistem Rolü'
+      },
+      categories: {
+        'Category': 'Kategori Yönetimi',
+        'BranchCategory': 'Şube Kategori Yönetimi',
+        'Product': 'Ürün Yönetimi',
+        'BranchProduct': 'Şube Ürün Yönetimi',
+        'BranchQRCode': 'QR Kod Yönetimi',
+        'Order': 'Sipariş Yönetimi',
+        'Restaurant': 'Restoran Yönetimi',
+        'Branch': 'Şube Yönetimi',
+        'Admin': 'Yönetici İşlemleri'
+      },
+      permissionNames: {
+        'category.create': 'Kategori Oluşturma',
+        'category.delete': 'Kategori Silme',
+        'category.update': 'Kategori Güncelleme',
+        'category.read': 'Kategori Görüntüleme',
+        'branch.category.create': 'Şube Kategorisi Oluşturma',
+        'branch.category.delete': 'Şube Kategorisi Silme',
+        'branch.category.update': 'Şube Kategorisi Güncelleme',
+        'branch.category.read': 'Şube Kategorisi Görüntüleme',
+        'product.create': 'Ürün Oluşturma',
+        'product.delete': 'Ürün Silme',
+        'product.update': 'Ürün Güncelleme',
+        'product.read': 'Ürün Görüntüleme',
+        'product.edit': 'Ürün Düzenleme',
+        'branch.product.create': 'Şube Ürünü Oluşturma',
+        'branch.product.delete': 'Şube Ürünü Silme',
+        'branch.product.update': 'Şube Ürünü Güncelleme',
+        'branch.product.read': 'Şube Ürünü Görüntüleme',
+        'branch.qrcode.create': 'QR Kodu Oluşturma',
+        'branch.qrcode.delete': 'QR Kodu Silme',
+        'branch.qrcode.update': 'QR Kodu Güncelleme',
+        'branch.qrcode.read': 'QR Kodu Görüntüleme',
+        'order.create': 'Sipariş Oluşturma',
+        'order.delete': 'Sipariş Silme',
+        'order.update': 'Sipariş Güncelleme',
+        'order.read': 'Sipariş Görüntüleme',
+        'order.view': 'Sipariş Detay Görüntüleme',
+        'order.cancel': 'Sipariş İptal Etme',
+        'restaurant.create': 'Restoran Oluşturma',
+        'restaurant.delete': 'Restoran Silme',
+        'restaurant.update': 'Restoran Güncelleme',
+        'restaurant.read': 'Restoran Görüntüleme',
+        'restaurant.user.create': 'Restoran Kullanıcısı Oluşturma',
+        'restaurant.user.delete': 'Restoran Kullanıcısı Silme',
+        'restaurant.user.update': 'Restoran Kullanıcısı Güncelleme',
+        'restaurant.user.read': 'Restoran Kullanıcısı Görüntüleme',
+        'branch.create': 'Şube Oluşturma',
+        'branch.delete': 'Şube Silme',
+        'branch.update': 'Şube Güncelleme',
+        'branch.read': 'Şube Görüntüleme',
+        'branch.user.create': 'Şube Kullanıcısı Oluşturma',
+        'branch.user.delete': 'Şube Kullanıcısı Silme',
+        'branch.user.update': 'Şube Kullanıcısı Güncelleme',
+        'branch.user.read': 'Şube Kullanıcısı Görüntüleme',
+        'admin.api.control': 'API Kontrolü'
+      },
+      error: {
+        loadFailed: 'Profil verisi alınamadı'
+      }
+    }
 }; 
