@@ -2826,6 +2826,7 @@ export const en = {
     }
   },
   branchCategories: {
+    
     title: 'Branch Categories',
     subtitle: 'Manage categories and products for Branch {branchId}',
     lastUpdated: 'Last updated: Today',

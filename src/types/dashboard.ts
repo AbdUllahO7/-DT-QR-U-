@@ -1,7 +1,7 @@
 // Dashboard bileşenleri için type tanımları
 
 export interface Product {
-  id: number;
+  productId: number;
   categoryId: number;
   name: string;
   description: string;
@@ -11,6 +11,7 @@ export interface Product {
   status : boolean;
   displayOrder : number;
   branchProductId?:number
+  branchCategory?:Category
 }
 
 export interface Category {

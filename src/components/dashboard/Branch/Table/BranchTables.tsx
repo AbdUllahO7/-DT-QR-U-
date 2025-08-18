@@ -331,13 +331,36 @@ const BranchTableManagement: React.FC = () => {
       categories: new Set(prev.categories).add(categoryId)
     }));
 
+    // Find the current category to get its current data
+    const currentCategory = categories.find(cat => cat.id === categoryId);
+    if (!currentCategory) {
+      console.error('Category not found for status toggle:', { categoryId });
+      setToggleLoading(prev => {
+        const newSet = new Set(prev.categories);
+        newSet.delete(categoryId);
+        return { ...prev, categories: newSet };
+      });
+      return;
+    }
+
     const previousCategories = [...categories];
     setCategories(prev => prev.map(cat => 
       cat.id === categoryId ? { ...cat, isActive: newStatus } : cat
     ));
 
     try {
-      await tableService.toggleCategoryStatus(categoryId, newStatus);
+      // Prepare the update data with all required fields, only changing isActive
+      const updateData: UpdateTableCategoryDto = {
+        id: currentCategory.id,
+        categoryName: currentCategory.categoryName,
+        colorCode: currentCategory.colorCode,
+        iconClass: currentCategory.iconClass,
+        isActive: newStatus, // Only this field changes
+        rowVersion: (currentCategory as any).rowVersion || '' // Include rowVersion for concurrency control
+      };
+
+      // Use updateCategory instead of toggleCategoryStatus
+      await tableService.updateCategory(categoryId, updateData);
       setSuccessMessage(t(`BranchTableManagement.success.category${newStatus ? 'Activated' : 'Deactivated'}`));
     } catch (err: any) {
       console.error('Error updating category status:', err);
@@ -352,32 +375,54 @@ const BranchTableManagement: React.FC = () => {
     }
   };
 
-  const handleToggleTableStatus = async (tableId: number, newStatus: boolean): Promise<void> => {
-    setToggleLoading(prev => ({
-      ...prev,
-      tables: new Set(prev.tables).add(tableId)
-    }));
+const handleToggleTableStatus = async (tableId: number, newStatus: boolean): Promise<void> => {
+  setToggleLoading(prev => ({
+    ...prev,
+    tables: new Set(prev.tables).add(tableId)
+  }));
 
-    const previousTables = [...tables];
-    setTables(prev => prev.map(table => 
-      table.id === tableId ? { ...table, isActive: newStatus } : table
-    ));
+  // Find the current table to get its current data
+  const currentTable = tables.find(table => table.id === tableId);
+  if (!currentTable) {
+    console.error('Table not found for status toggle:', { tableId });
+    setToggleLoading(prev => {
+      const newSet = new Set(prev.tables);
+      newSet.delete(tableId);
+      return { ...prev, tables: newSet };
+    });
+    return;
+  }
 
-    try {
-      await tableService.toggleTableStatus(tableId, newStatus);
-      setSuccessMessage(t(`BranchTableManagement.success.table${newStatus ? 'Activated' : 'Deactivated'}`));
-    } catch (err: any) {
-      console.error('Error updating table status:', err);
-      setTables(previousTables);
-      setError(t('BranchTableManagement.error.updateTableStatusFailed'));
-    } finally {
-      setToggleLoading(prev => {
-        const newSet = new Set(prev.tables);
-        newSet.delete(tableId);
-        return { ...prev, tables: newSet };
-      });
-    }
-  };
+  try {
+    // Prepare the update data with all required fields, only changing isActive
+    const updateData: UpdateMenuTableDto = {
+      id: currentTable.id,
+      menuTableName: currentTable.menuTableName,
+      menuTableCategoryId: currentTable.menuTableCategoryId,
+      capacity: currentTable.capacity,
+      isActive: newStatus, // Only this field changes
+      isOccupied: currentTable.isOccupied, // Keep current occupation status
+      rowVersion: currentTable.rowVersion || '' // Include rowVersion for concurrency control
+    };
+
+    // Use updateTable instead of toggleTableStatus
+    await tableService.updateTable(tableId, updateData);
+    
+    // Refresh the table data to get the updated rowVersion and ensure consistency
+    await fetchTables();
+    
+    setSuccessMessage(t(`BranchTableManagement.success.table${newStatus ? 'Activated' : 'Deactivated'}`));
+  } catch (err: any) {
+    console.error('Error updating table status:', err);
+    setError(t('BranchTableManagement.error.updateTableStatusFailed'));
+  } finally {
+    setToggleLoading(prev => {
+      const newSet = new Set(prev.tables);
+      newSet.delete(tableId);
+      return { ...prev, tables: newSet };
+    });
+  }
+};
 
   const handleToggleTableOccupation = async (tableId: number, isOccupied: boolean): Promise<void> => {
     setToggleLoading(prev => ({
