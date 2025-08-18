@@ -2825,195 +2825,7 @@ export const en = {
       startingNumber: "Starting Number"
     }
   },
-  branchCategories: {
-    
-    title: 'Branch Categories',
-    subtitle: 'Manage categories and products for Branch {branchId}',
-    lastUpdated: 'Last updated: Today',
-    
-    // Stats cards
-    stats: {
-      availableCategories: 'Available Categories',
-      readyToAdd: 'Ready to add',
-      activeCategories: 'Active Categories',
-      currentlyInBranch: 'Currently in branch',
-      selectedCategories: 'Selected Categories',
-      toBeAdded: 'To be added',
-      selectedProducts: 'Selected Products',
-      fromCategories: 'From categories'
-    },
-    
-    // Tab navigation
-    tabs: {
-      addNew: 'Add New Categories',
-      manageExisting: 'Manage Existing'
-    },
-    
-    // Step progress
-    steps: {
-      chooseCategories: 'Choose Categories',
-      selectProducts: 'Select Products',
-      reviewAdd: 'Review & Add',
-      finalStep: 'Final step',
-      selected: 'selected',
-      back: 'Back'
-    },
-    
-    // Category selection
-    categorySelection: {
-      title: 'Choose Categories',
-      subtitle: 'Select categories you want to add to this branch',
-      searchPlaceholder: 'Search categories...',
-      refresh: 'Refresh',
-      noCategories: 'No Categories Available',
-      allCategoriesAdded: 'All categories are already added to this branch',
-      products: 'products',
-      active: 'Active',
-      inactive: 'Inactive',
-      categoriesSelected: 'categories selected',
-      clearSelection: 'Clear Selection',
-      nextSelectProducts: 'Next: Select Products'
-    },
-    
-    // Product selection
-    productSelection: {
-      title: 'Select Products',
-      subtitle: 'Choose specific products from selected categories (optional)',
-      searchPlaceholder: 'Search products...',
-      selectAll: 'Select All',
-      clearAll: 'Clear All',
-      loadingProducts: 'Loading products...',
-      noProductsFound: 'No Products Found',
-      selectedCategoriesNoProducts: 'Selected categories don\'t have any products',
-      available: 'Available',
-      unavailable: 'Unavailable',
-      selectedText: 'selected',
-      productsSelectedFrom: 'products selected from',
-      categories: 'categories',
-      reviewSelection: 'Review Selection'
-    },
-    
-    // Review section
-    review: {
-      title: 'Review Your Selection',
-      subtitle: 'Review and confirm categories and products to add',
-      of: 'of',
-      productsSelected: 'products selected',
-      allProducts: 'All',
-      productsWillBeAdded: 'products will be added',
-      totalValue: 'Total value',
-      selectedProducts: 'Selected Products:',
-      readyToAdd: 'Ready to add',
-      categories: 'categories',
-      with: 'with',
-      products: 'products',
-      availableInBranch: 'This will make them available in Branch',
-      startOver: 'Start Over',
-      adding: 'Adding...',
-      addToBranch: 'Add to Branch'
-    },
-    
-    // Manage existing
-    manage: {
-      title: 'Manage Existing Categories',
-      subtitle: 'Reorder and manage categories currently in this branch',
-      saving: 'Saving...',
-      saveOrder: 'Save Order',
-      exitReorder: 'Exit Reorder',
-      reorder: 'Reorder',
-      loadingCategoriesProducts: 'Loading categories and products...',
-      noCategoriesAdded: 'No Categories Added',
-      noCategoriesYet: 'This branch doesn\'t have any categories yet',
-      addCategories: 'Add Categories',
-      original: 'Original:',
-      added: 'added',
-      available: 'available',
-      total: 'Total:',
-      productsInCategory: 'Products in this category:',
-      addedLabel: 'Added',
-      availableLabel: 'Available',
-      removeFromBranch: 'Remove from branch',
-      addToBranch: 'Add to branch',
-      productsAddedToBranch: 'products added to branch',
-      moreAvailableToAdd: 'more available to add',
-      products: 'products'
-    },
-    
-    // Delete modal
-    delete: {
-      title: 'Delete Category',
-      confirmMessage: 'Are you sure you want to remove "{categoryName}" from this branch?',
-      category: 'category',
-      deleting: 'Deleting...'
-    },
-    
-    // Loading states
-    loading: {
-      categories: 'Loading categories...',
-      products: 'Loading products...',
-      saving: 'Saving...',
-      default: 'Loading...'
-    },
-    
-    // Success messages
-    success: {
-      categoryAdded: '"{name}" added to branch successfully!',
-      categoryRemoved: '"{name}" removed successfully!',
-      productAdded: '"{name}" added to category successfully!',
-      productRemoved: '"{name}" removed from category successfully!',
-      orderSaved: 'Category order saved successfully!',
-      categoriesAdded: 'Successfully added {count} categories to branch {branchId}!',
-      categoriesAndProductsAdded: 'Successfully added {categoryCount} categories with {productCount} products!',
-      someProductsFailed: 'Note: {count} product(s) could not be added.'
-    },
-    
-    // Error messages
-    error: {
-      loadCategories: 'Failed to load available categories',
-      loadBranchCategories: 'Failed to load branch categories',
-      loadProducts: 'Failed to load products for selected categories',
-      branchIdRequired: 'Branch ID is required to save categories',
-      selectCategory: 'Please select at least one category first',
-      selectAtLeastOne: 'Please select at least one category',
-      createCategory: 'Failed to create category: {name}',
-      addProduct: 'Failed to add product to category',
-      removeProduct: 'Failed to remove product from category',
-      productNotFound: 'Product not found',
-      saveOrder: 'Failed to save category order. Please try again.',
-      deleteCategory: 'Failed to remove "{name}". Please try again.',
-      categoryNotFound: 'Category "{name}" not found. It may have already been deleted.',
-      noPermission: 'You don\'t have permission to delete "{name}".',
-      categoryInUse: 'Cannot delete "{name}" because it\'s currently in use.'
-    },
-    
-    // Common
-    common: {
-      category: 'category',
-      categories: 'categories',
-      product: 'product',
-      products: 'products',
-      active: 'Active',
-      inactive: 'Inactive',
-      available: 'Available',
-      unavailable: 'Unavailable',
-      selected: 'Selected',
-      loading: 'Loading',
-      search: 'Search',
-      save: 'Save',
-      cancel: 'Cancel',
-      delete: 'Delete',
-      add: 'Add',
-      remove: 'Remove',
-      edit: 'Edit',
-      view: 'View',
-      close: 'Close',
-      confirm: 'Confirm',
-      back: 'Back',
-      next: 'Next',
-      done: 'Done',
-      clear: 'Clear'
-    }
-  },
+
   BranchTableManagement: {
     header: "Category & Table Management",
     subheader: "Manage restaurant categories and tables with accordion view",
@@ -3163,6 +2975,201 @@ export const en = {
       street: 'Enter street',
       postalCode: 'Enter postal code',
       region: 'Enter region'
+    }
+  },
+  branchCategories: {
+    // Header and Stats
+    header: 'Branch Categories Management',
+    subheader: 'Manage categories and products for Branch {branchId}',
+    lastUpdated: 'Last Updated',
+    
+    stats: {
+      availableCategories: 'Available Categories',
+      readyToAdd: 'Ready to add',
+      activeCategories: 'Active Categories',
+      currentlyInBranch: 'Currently in branch',
+      selectedCategories: 'Selected Categories',
+      toBeAdded: 'To be added',
+      selectedProducts: 'Selected Products',
+      fromCategories: 'From categories'
+    },
+
+    // Tab Navigation
+    tabs: {
+      addNew: 'Add New',
+      manageExisting: 'Manage Existing'
+    },
+
+    // Step Progress
+    steps: {
+      chooseCategories: 'Choose Categories',
+      selectProducts: 'Select Products',
+      reviewAdd: 'Review & Add',
+      finalStep: 'Final step',
+      selected: 'selected',
+      back: 'Back'
+    },
+
+    // Add New Categories
+    addCategories: {
+      title: 'Choose Categories',
+      subtitle: 'Select categories to add to your branch',
+      noAvailable: 'No categories available',
+      allAdded: 'All available categories have been added to this branch',
+      categoriesSelected: 'categories selected',
+      clearSelection: 'Clear Selection',
+      nextSelectProducts: 'Next: Select Products'
+    },
+
+    // Select Products
+    selectProducts: {
+      title: 'Select Products',
+      subtitle: 'Choose products from selected categories',
+      selectAll: 'Select All',
+      clearAll: 'Clear All',
+      noProducts: 'No products found',
+      noProductsInCategories: 'Selected categories don\'t have any products',
+      available: 'available',
+      productsSelectedFrom: 'products selected from',
+      categories: 'categories',
+      reviewSelection: 'Review Selection'
+    },
+
+    // Review and Add
+    review: {
+      title: 'Review & Add',
+      subtitle: 'Review your selection before adding to branch',
+      of: 'of',
+      productsSelected: 'products selected',
+      all: 'All',
+      productsWillBeAdded: 'products will be added',
+      totalValue: 'Total value',
+      selectedProducts: 'Selected Products',
+      readyToAdd: 'Ready to add',
+      with: 'with',
+      availableInBranch: 'Available in Branch',
+      startOver: 'Start Over',
+      adding: 'Adding...',
+      addToBranch: 'Add to Branch'
+    },
+
+    // Manage Existing
+    manage: {
+      title: 'Manage Existing Categories',
+      subtitle: 'Manage categories and products in your branch',
+      saving: 'Saving...',
+      saveOrder: 'Save Order',
+      exitReorder: 'Exit Reorder',
+      reorder: 'Reorder',
+      noCategoriesAdded: 'No categories added',
+      noCategoriesAddedDesc: 'No categories have been added to this branch yet',
+      addCategories: 'Add Categories',
+      original: 'Original:',
+      added: 'added',
+      available: 'available',
+      total: 'Total',
+      active: 'Active',
+      inactive: 'Inactive',
+      protected: 'Protected'
+    },
+
+    // Products Section
+    products: {
+      inCategory: 'Products in Category',
+      added: 'Added',
+      available: 'Available',
+      ingredients: 'ingredients',
+      allergens: 'allergens',
+      viewDetails: 'View Details',
+      removeFromBranch: 'Remove from Branch',
+      addToBranch: 'Add to Branch',
+      addedToBranch: 'products added to branch',
+      moreAvailableToAdd: 'more available to add',
+      withDetailedInfo: 'with detailed info',
+      products: 'products'
+    },
+
+    // Product Details Modal
+    productDetails: {
+      addedToBranch: 'Added to Branch',
+      allergens: 'Allergens',
+      contains: 'Contains',
+      mayContain: 'May Contain',
+      ingredients: 'Ingredients',
+      allergenic: 'Allergenic',
+      available: 'Available',
+      unavailable: 'Unavailable',
+      quantity: 'Quantity:',
+      ingredientId: 'Ingredient ID:',
+      allergenInformation: 'Allergen Information:',
+      additionalInformation: 'Additional Information',
+      originalProduct: 'Original Product',
+      originalPrice: 'Original Price:',
+      originalStatus: 'Original Status:',
+      originalDisplayOrder: 'Original Display Order:',
+      orderDetails: 'Order Details',
+      lastUpdated: 'Last Updated:',
+      close: 'Close'
+    },
+
+    // Common Actions
+    actions: {
+      refresh: 'Refresh',
+      delete: 'Delete',
+      edit: 'Edit',
+      save: 'Save',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      loading: 'Loading...'
+    },
+
+    // Search and Filters
+    search: {
+      categories: 'Search categories...',
+      products: 'Search products...'
+    },
+
+    // Status
+    status: {
+      active: 'Active',
+      inactive: 'Inactive',
+      available: 'Available',
+      unavailable: 'Unavailable'
+    },
+
+    // Messages
+    messages: {
+      success: {
+        categoryAdded: 'Category added successfully',
+        categoryDeleted: 'Category deleted successfully',
+        productAdded: 'Product {name} added successfully',
+        productRemoved: 'Product {name} removed successfully',
+        orderSaved: 'Category order saved successfully'
+      },
+      error: {
+        cannotDelete: 'Cannot delete category "{name}" because it contains {count} products. Please remove all products first.',
+        cannotDeleteTooltip: 'Cannot delete: Category contains {count} products. Remove all products first.',
+        productNotFound: 'Product not found',
+        addingProduct: 'Error adding product',
+        removingProduct: 'Error removing product',
+        savingOrder: 'Error saving category order',
+        loadingCategories: 'Error loading categories',
+        loadingProducts: 'Error loading products'
+      }
+    },
+
+    // Delete Modal
+    deleteModal: {
+      title: 'Delete Category',
+      message: 'Are you sure you want to delete the category "{name}"? This action cannot be undone.',
+      confirm: 'Delete',
+      cancel: 'Cancel'
+    },
+
+    // Placeholders
+    placeholders: {
+      searchCategories: 'Search categories...',
+      searchProducts: 'Search products...'
     }
   }
 }; 
