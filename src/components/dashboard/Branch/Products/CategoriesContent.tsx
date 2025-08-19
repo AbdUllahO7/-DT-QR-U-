@@ -191,9 +191,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
 }) => {
   const { t, isRTL } = useLanguage();
 
-  // Local state for inline editing
   const [editingCategoryName, setEditingCategoryName] = useState('');
-  console.log("editingCategoryName",editingCategoryName)
   // Helper functions
   const toggleCategoryExpansion = (categoryId: number) => {
     const newExpanded = new Set(expandedCategories);
@@ -279,7 +277,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
     onChange: (value: string) => void;
     currentPrice: number;
     showEditButton?: boolean;
-  }> = ({ productId, originalPrice, isEditing, onEdit, onSave, onCancel, onChange, currentPrice, showEditButton = true }) => {
+  }> = ({ originalPrice, isEditing, onEdit, onSave, onCancel, onChange, currentPrice, showEditButton = true }) => {
     const hasChanged = Math.abs(currentPrice - originalPrice) > 0.001;
     
     if (isEditing) {
@@ -341,7 +339,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
     );
   };
 
-  // Category name display/edit component
   const CategoryNameDisplay: React.FC<{
     categoryId: number;
     originalName: string;
@@ -824,6 +821,8 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                                   categoryId={category.categoryId}
                                   originalName={category.categoryName}
                                   currentDisplayName={currentName}
+                                                                showEditButton = {false}
+
                                 />
                                 {category.description && (
                                   <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 mt-2">

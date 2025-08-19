@@ -373,9 +373,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
 
   // Save functions for existing branch items
  const saveBranchCategoryName = async (categoryId: number, newName: string) => {
-  console.log("newName",newName)
   try {
-    console.log("saveBranchCategoryName")
     // Find the branch category
     const branchCategory = branchCategories.find(bc => bc.categoryId === categoryId);
     if (!branchCategory) {
@@ -1304,16 +1302,11 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     }
   };
 
-  // Get categories that are not already in branch
-  const filteredCategories = categories.filter(category => 
-    category?.categoryName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    category?.description?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
 
   return (
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Header */}
         <div className="mb-8">
           <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
             <div>
