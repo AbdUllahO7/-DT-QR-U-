@@ -25,8 +25,6 @@ interface GroupedTables {
   };
 }
 
-// TableManagement: Masa yönetimi ve SignalR ile gerçek zamanlı güncelleme
-// SignalR entegrasyonu: useSignalR ile tablo değişiklikleri anlık işlenir
 const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   const { t, isRTL } = useLanguage();
   const [branches, setBranches] = useState<BranchDropdownItem[]>([]);

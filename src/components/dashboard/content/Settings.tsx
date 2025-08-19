@@ -175,7 +175,7 @@ const Settings: React.FC = () => {
               : 'bg-gray-200 dark:bg-gray-600'
         }`}>
           <div className={`w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform duration-200 ${
-            checked ? 'translate-x-5' : 'translate-x-0.5'
+            checked ? (isRTL ? '-translate-x-5' : 'translate-x-5') : (isRTL ? '-translate-x-0.5' : 'translate-x-0.5')
           }`} />
         </div>
       </label>
@@ -597,10 +597,10 @@ const Settings: React.FC = () => {
                   whileTap={{ scale: 0.98 }}
                 >
                   <Download className="h-5 w-5 text-primary-600 dark:text-primary-400" />
-                                      <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.data.download')}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">{t('settings.data.downloadDesc')}</p>
-                    </div>
+                  <div className={isRTL ? 'text-right' : 'text-left'}>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.data.download')}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{t('settings.data.downloadDesc')}</p>
+                  </div>
                 </motion.button>
 
                 <motion.button
@@ -609,10 +609,10 @@ const Settings: React.FC = () => {
                   whileTap={{ scale: 0.98 }}
                 >
                   <Upload className="h-5 w-5 text-primary-600 dark:text-primary-400" />
-                                      <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.data.upload')}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">{t('settings.data.uploadDesc')}</p>
-                    </div>
+                  <div className={isRTL ? 'text-right' : 'text-left'}>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.data.upload')}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{t('settings.data.uploadDesc')}</p>
+                  </div>
                 </motion.button>
 
                 <motion.button
@@ -621,10 +621,10 @@ const Settings: React.FC = () => {
                   whileTap={{ scale: 0.98 }}
                 >
                   <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
-                                      <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <p className="text-sm font-medium text-red-600 dark:text-red-400">{t('settings.data.delete')}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">{t('settings.data.deleteDesc')}</p>
-                    </div>
+                  <div className={isRTL ? 'text-right' : 'text-left'}>
+                    <p className="text-sm font-medium text-red-600 dark:text-red-400">{t('settings.data.delete')}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{t('settings.data.deleteDesc')}</p>
+                  </div>
                 </motion.button>
 
                 <motion.button
@@ -633,10 +633,10 @@ const Settings: React.FC = () => {
                   whileTap={{ scale: 0.98 }}
                 >
                   <HardDrive className="h-5 w-5 text-primary-600 dark:text-primary-400" />
-                                      <div className={isRTL ? 'text-right' : 'text-left'}>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.data.storage')}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400">{t('settings.data.storageDesc')}</p>
-                    </div>
+                  <div className={isRTL ? 'text-right' : 'text-left'}>
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.data.storage')}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{t('settings.data.storageDesc')}</p>
+                  </div>
                 </motion.button>
               </div>
             </div>
@@ -647,4 +647,4 @@ const Settings: React.FC = () => {
   );
 };
 
-export default Settings; 
+export default Settings;
