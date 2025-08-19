@@ -185,7 +185,7 @@ const BranchTableManagement: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showAddCategory, setShowAddCategory] = useState<boolean>(false);
   const [showAddTable, setShowAddTable] = useState<number | null>(null);
-  
+  console.log("tables",tables)
   const [qrModal, setQrModal] = useState<{
     isOpen: boolean;
     table: TableData | null;
