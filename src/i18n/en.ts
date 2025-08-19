@@ -34,7 +34,55 @@ export const en = {
     lastMonth: 'Last Month',
     retry: 'Retry'
   },
-
+  filter: {
+      "status": "Status",
+      "all": "All",
+      "active": "Active", 
+      "inactive": "Inactive",
+      "categories": "Categories",
+      allergenic:"allergenic",
+      nonallergenic:"non-allergenic",
+      specific:{
+        allergens : "allergens"
+      },
+      "price": {
+        "range": "Price Range",
+        "min": "Min Price",
+        "max": "Max Price"
+      }
+  },
+  sort: {
+    "title": "Sort By",
+    "name": {
+      "asc": "Name (A-Z)",
+      "desc": "Name (Z-A)"
+    },
+    "price": {
+      "asc": "Price (Low to High)",
+      "desc": "Price (High to Low)"
+    },
+    "order": {
+      "asc": "Display Order (First to Last)",
+      "desc": "Display Order (Last to First)"
+    },
+    "created": {
+      "asc": "Date Created (Oldest First)",
+      "desc": "Date Created (Newest First)"
+    }
+  },
+  clear: {
+    "filters": "Clear Filters",
+    "all": "Clear All"
+  },
+  restaurantManagement : {
+    tabs : {
+      general : "General",
+       legal : "Legal",
+        about : "About",
+    },
+    GeneralInformation: "General Information",
+    restaurantLogo : ""
+  },
   // Navigation
   nav: {
     home: 'Home',
@@ -172,6 +220,9 @@ export const en = {
       title: 'Products',
       description: 'View and manage your products.'
     },
+    ingredients : {
+      title : "Ingredients"
+    },
     tables: {
       title: 'Table Management',
       description: 'Table management operations.',
@@ -230,9 +281,14 @@ export const en = {
         restaurantName: 'Enter restaurant name',
         aboutStory: 'Our restaurant story',
         aboutDetails: 'Provide detailed information about your restaurant...'
-      }
+      },
+  
+
+
     },
+    branchManagementTitle: "Branch Management" ,
     sidebar: {
+      title : "QR Menu",
       logout: 'Logout',
       branch: 'Branch'
     }
@@ -805,52 +861,18 @@ export const en = {
     }
   },
 
-  // Branch Management
-  branchManagement: {
-    loading: 'Loading branches...',
-    error: {
-      loadFailed: 'An error occurred while loading branch list.',
-      updateFailed: 'An error occurred while updating branch.',
-      createFailed: 'An error occurred while creating branch.',
-      deleteFailed: 'An error occurred while deleting branch.',
-      restaurantIdNotFound: 'Restaurant ID not found. Please login again.',
-      noBranchesFound: 'No branches found'
-    },
-    actions: {
-      addBranch: 'Add Branch',
-      editBranch: 'Edit Branch',
-      deleteBranch: 'Delete Branch',
-      selectBranch: 'Select Branch',
-      save: 'Save',
-      cancel: 'Cancel',
-      close: 'Close'
-    },
-    confirmation: {
-      deleteTitle: 'Delete Branch',
-      deleteMessage: 'Are you sure you want to delete this branch? This action cannot be undone.',
-      deleteConfirm: 'Yes, Delete',
-      deleteCancel: 'Cancel'
-    },
-    form: {
-      branchName: 'Branch Name',
-      whatsappNumber: 'WhatsApp Number',
-      address: 'Address',
-      phone: 'Phone',
-      email: 'Email',
-      workingHours: 'Working Hours',
-      logo: 'Logo'
-    }
-  },
-
   // Table Management
   tableManagement: {
     loading: 'Loading tables...',
     title: 'Table Management',
     description: 'Manage your QR codes and tables',
+            noCategories :"Not Found Categories",
+    createFirstCategory: "Create First Category",
     error: {
       loadFailed: 'Failed to load branch list',
       dataLoadFailed: 'An error occurred while loading data'
     },
+      deleteModal :{ title : "Are You Sure you want delete the item ? " },
     actions: {
       addTable: 'Add Table',
       addQRCode: 'Add QR Code',
@@ -877,7 +899,6 @@ export const en = {
       inactive: 'Inactive'
     }
   },
-
   // User Management
   userManagement: {
     loading: 'Loading users...',
@@ -910,25 +931,6 @@ export const en = {
     }
   },
 
-  // Profile
-  profile: {
-    title: 'Profile',
-    description: 'View and edit your personal information',
-    error: {
-      loadFailed: 'Failed to load profile data'
-    },
-    personalInfo: 'Personal Information',
-    accountSettings: 'Account Settings',
-    security: 'Security',
-    preferences: 'Preferences',
-    actions: {
-      save: 'Save',
-      cancel: 'Cancel',
-      changePassword: 'Change Password',
-      updateProfile: 'Update Profile'
-    }
-  },
-
   // Subscription
   subscription: {
     title: 'Subscription',
@@ -955,8 +957,6 @@ export const en = {
       settings: 'Settings'
     }
   },
-
-  // Products
   products: {
     status: {
       outOfStock: 'Out of Stock',
@@ -972,5 +972,2281 @@ export const en = {
       editProduct: 'Edit Product',
       deleteProduct: 'Delete Product'
     }
+  },
+  branchSelector: {
+  status: {
+    loading: 'Loading...',
+    error: 'Could not fetch branch list'
+  },
+  empty: 'No options found',
+  actions: {
+    changeBranchRestaurant: 'Change Branch/Restaurant'
+  },
+  labels: {
+    mainRestaurant: 'Main Restaurant',
+    branches: 'Branches'
   }
+  },
+  popularProducts: {
+    title: 'Popular Products',
+    empty: 'Product sales will appear here',
+    labels: {
+      orders: 'orders',
+      percentage: '%'
+    },
+    tooltip: {
+      ordersFormat: (value: any, percentage: any) => `${value} orders (${percentage}%)`,
+      noData: 'No data available'
+    }
+  },
+  weeklyActivity: {
+    title: 'Haftalık Aktivite',
+    empty: {
+      primary: 'No activity data yet',
+      secondary: 'Data will appear here soon'
+    },
+    labels: {
+      views: 'Views',
+      qrScans: 'QR Scan'
+    },
+    legend: {
+      views: 'Views',
+      qrScans: 'QR Scan'
+    }
+  },
+  monthlyRevenue: {
+    QuickStats: "Quick Stats",
+    title: 'Monthly Revenue Trend',
+    empty: {
+      primary: 'No revenue data available yet',
+      secondary: 'Revenue data will appear here'
+    },
+    labels: {
+      total: 'Total:',
+      revenue: 'Revenue'
+    },
+    currency: {
+      symbol: '$',
+      format: (value: { toLocaleString: (arg0: string) => any; }) => `$${value.toLocaleString('en-US')}`
+    }
+  },
+  branchCard: {
+    status: {
+      temporaryClosed: 'Temporarily Closed',
+      open: 'Open',
+      closed: 'Closed',
+      active: 'Active',
+      inactive: 'Inactive',
+      hidden: 'Hidden'
+    },
+    actions: {
+      edit: 'Edit',
+      delete: 'Delete'
+    },
+    labels: {
+      customerVisibility: 'Customer Visibility',
+      apiBranchOpen: 'API BranchIsOpen:'
+    },
+    alt: {
+      logo: 'logo'
+    }
+  },
+  addBranchCard: {
+    title: 'Add New Branch',
+    description: 'Click to add a new branch'
+  },
+  branchModal: {
+    title: {
+      add: 'Add New Branch',
+      edit: 'Edit Branch'
+    },
+    subtitle: 'You can enter branch information step by step',
+    steps: {
+      basic: 'Basic Information',
+      address: 'Address Information', 
+      contact: 'Contact & Working Hours'
+    },
+    sections: {
+      basicInfo: 'Basic Information',
+      addressInfo: 'Address Information',
+      contactInfo: 'Contact Information',
+      workingHours: 'Working Hours'
+    },
+    fields: {
+      branchName: {
+        label: 'Branch Name *',
+        placeholder: 'Enter branch name'
+      },
+      whatsappNumber: {
+        label: 'WhatsApp Order Number *',
+        placeholder: 'Enter WhatsApp order number'
+      },
+      branchLogo: {
+        label: 'Branch Logo (Optional)',
+        select: 'Select Logo',
+        uploading: 'Uploading...',
+        success: '✓ Logo uploaded successfully',
+        preview: 'Branch logo preview',
+        supportText: 'PNG, JPG, GIF formats are supported. Maximum file size: 5MB'
+      },
+      country: {
+        label: 'Country *',
+        placeholder: 'Enter country name'
+      },
+      city: {
+        label: 'City *',
+        placeholder: 'Enter city name'
+      },
+      street: {
+        label: 'Street *',
+        placeholder: 'Enter street name'
+      },
+      zipCode: {
+        label: 'Zip Code *',
+        placeholder: 'Enter zip code'
+      },
+      addressLine1: {
+        label: 'Address Line 1 *',
+        placeholder: 'Enter detailed address information'
+      },
+      addressLine2: {
+        label: 'Address Line 2 (Optional)',
+        placeholder: 'Enter additional address information (optional)'
+      },
+      phone: {
+        label: 'Phone Number *',
+        placeholder: 'Enter phone number'
+      },
+      email: {
+        label: 'Email Address *',
+        placeholder: 'Enter email address'
+      },
+      location: {
+        label: 'Location Information *',
+        placeholder: 'Enter location information (e.g., 40.9795,28.7225)'
+      },
+      contactHeader: {
+        label: 'Contact Header (Optional)',
+        placeholder: 'Enter contact header (optional)'
+      },
+      footerTitle: {
+        label: 'Footer Title (Optional)',
+        placeholder: 'Enter footer title (optional)'
+      },
+      footerDescription: {
+        label: 'Footer Description (Optional)',
+        placeholder: 'Enter footer description (optional)'
+      },
+      openTitle: {
+        label: 'Working Hours Title (Optional)',
+        placeholder: 'Enter working hours title (optional)'
+      },
+      openDays: {
+        label: 'Open Days (Optional)',
+        placeholder: 'Enter open days (optional)'
+      },
+      openHours: {
+        label: 'Open Hours (Optional)',
+        placeholder: 'Enter open hours (optional)'
+      }
+    },
+    workingHours: {
+      description: 'Set your business working hours',
+      days: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+      open: 'Open',
+      closed: 'Closed',
+      openTime: 'Open',
+      closeTime: 'Close',
+      canOrder: '✓ Customers can place orders on this day',
+      infoTitle: 'About Working Hours',
+      infoText: 'The hours you set here determine when customers can place orders through your QR menu. No orders are taken on closed days.'
+    },
+    errors: {
+      branchName: 'Branch name is required',
+      whatsappNumber: 'WhatsApp order number is required',
+      country: 'Country is required',
+      city: 'City is required',
+      street: 'Street is required',
+      zipCode: 'Zip code is required',
+      addressLine1: 'Address line 1 is required',
+      phone: 'Phone number is required',
+      email: 'Email address is required',
+      location: 'Location information is required'
+    },
+    buttons: {
+      cancel: 'Cancel',
+      back: 'Back',
+      next: 'Next',
+      save: 'Save',
+      saving: 'Saving...'
+    }
+  },
+  branchManagement: {
+      title: 'Branch Management',
+      description: 'Manage restaurant branches and update their information',
+      loading: 'Loading branches...',
+      addBranch: 'Add New Branch',
+      
+      // Error messages
+      error: {
+        loadFailed: 'Failed to load branches',
+        createFailed: 'Failed to create branch',
+        updateFailed: 'Failed to update branch',
+        deleteFailed: 'Failed to delete branch',
+        restaurantIdNotFound: 'Restaurant ID not found',
+        detailsLoadFailed: 'Failed to load branch details',
+        statusUpdateFailed: 'Failed to update branch status',
+        sessionExpired: 'Session expired. Please log in again.',
+        noPermission: 'You do not have permission for this operation.',
+        branchNotFound: 'Branch not found.',
+        connectionError: 'Check your internet connection.',
+        unknownError: 'An unexpected error occurred'
+      },
+
+      // No branches state
+      noBranches: {
+        title: 'No branches yet',
+        description: 'Start by adding your first restaurant branch'
+      },
+
+      // Delete confirmation
+      deleteConfirm: {
+        title: 'Confirm Branch Deletion',
+        description: 'Are you sure you want to delete the branch "{{branchName}}"? This action cannot be undone.'
+      },
+
+      // Form labels and fields
+      form: {
+        branchName: 'Branch Name',
+        branchNamePlaceholder: 'Enter branch name',
+        branchNameRequired: 'Branch name is required',
+        whatsappNumber: 'WhatsApp Order Number',
+        whatsappPlaceholder: 'Enter WhatsApp number',
+        branchLogo: 'Branch Logo',
+        logoUpload: 'Upload Logo',
+        logoChange: 'Change Logo',
+        logoRemove: 'Remove Logo',
+        logoNotSelected: 'No logo selected',
+        logoInstructions: 'You can upload JPG, PNG or GIF files, maximum 5MB size.',
+
+        // Address fields
+        country: 'Country',
+        countryPlaceholder: 'Enter country name',
+        city: 'City',
+        cityPlaceholder: 'Enter city name',
+        street: 'Street',
+        streetPlaceholder: 'Enter street name',
+        zipCode: 'Zip Code',
+        zipCodePlaceholder: 'Enter zip code',
+        addressLine1: 'Address Line 1',
+        addressLine1Placeholder: 'Enter address details',
+        addressLine2: 'Address Line 2',
+        addressLine2Placeholder: 'Additional address information (optional)',
+
+        // Contact fields
+        phone: 'Phone',
+        phonePlaceholder: 'Enter phone number',
+        email: 'Email',
+        emailPlaceholder: 'Enter email address',
+        location: 'Location',
+        locationPlaceholder: 'Enter location information',
+        contactHeader: 'Contact Header',
+        contactHeaderPlaceholder: 'Enter contact header',
+        footerTitle: 'Footer Title',
+        footerTitlePlaceholder: 'Enter footer title',
+        footerDescription: 'Footer Description',
+        footerDescriptionPlaceholder: 'Enter footer description',
+        openTitle: 'Opening Hours Title',
+        openTitlePlaceholder: 'Enter opening hours title',
+        openDays: 'Open Days',
+        openDaysPlaceholder: 'Enter open days',
+        openHours: 'Open Hours',
+        openHoursPlaceholder: 'Enter open hours',
+
+        // Working hours
+        workingHours: 'Working Hours',
+        workingHoursRequired: 'At least one working day must be selected',
+        isOpen: 'Open',
+        dayNames: {
+          0: 'Sunday',
+          1: 'Monday',
+          2: 'Tuesday',
+          3: 'Wednesday',
+          4: 'Thursday',
+          5: 'Friday',
+          6: 'Saturday'
+        }
+      },
+
+      // Modal titles and tabs
+      modal: {
+        createTitle: 'Add New Branch',
+        createDescription: 'Enter new branch information',
+        editTitle: 'Edit Branch - {{branchName}}',
+        editDescription: 'Edit branch information',
+        
+        tabs: {
+          general: 'General Information',
+          address: 'Address',
+          contact: 'Contact',
+          workingHours: 'Working Hours'
+        },
+
+        buttons: {
+          creating: 'Creating...',
+          updating: 'Updating...',
+          create: 'Create Branch',
+          update: 'Update Branch'
+        },
+
+        errors: {
+          updateError: 'Update Error',
+          validationFailed: 'Please fix the errors in the form and try again.',
+          dataValidationError: 'An error occurred during update. Please check the entered data.',
+          imageUploadError: 'Failed to upload image. Please try again.',
+          imageRemoveError: 'Failed to remove image.',
+          uploadingImage: 'Uploading image...',
+          invalidFileType: 'Please select a valid image file',
+          fileSizeError: 'File size must be less than 5MB'
+        }
+      },
+
+      // Branch card actions
+      card: {
+        edit: 'Edit',
+        delete: 'Delete',
+        temporaryClose: 'Temporary Close',
+        temporaryOpen: 'Temporary Open',
+        status: {
+          open: 'Open',
+          closed: 'Closed',
+          temporarilyClosed: 'Temporarily Closed'
+        }
+      }
+  },
+  // Common translations
+  commonBranch: {
+    cancel: 'Cancel',
+    delete: 'Delete',
+    save: 'Save',
+    edit: 'Edit',
+    create: 'Create',
+    update: 'Update',
+    close: 'Close',
+    loading: 'Loading...',
+    error: 'Error',
+    success: 'Success',
+    warning: 'Warning',
+    info: 'Information',
+    required: 'Required',
+    optional: 'Optional'
+  },
+  productsContent: {
+  title: 'Products Management',
+  description: 'Manage menu categories and products',
+  
+  // Search and filters
+  search: {
+    placeholder: 'Search menu items...',
+    filter: 'Filter',
+    sort: 'Sort',
+    noResults: 'No products found'
+  },
+
+  // View modes
+  viewMode: {
+    list: 'List view',
+    grid: 'Grid view'
+  },
+
+  // Buttons and actions
+  actions: {
+    addFirstCategory: 'Add First Category',
+    addCategory: 'New Category',
+    newCategory: 'New Category',
+    addProduct: 'New Product',
+    newProduct: 'New Product',
+    editCategory: 'Edit Category',
+    deleteCategory: 'Delete Category',
+    editProduct: 'Edit Product',
+    deleteProduct: 'Delete Product',
+    manageIngredients: 'Manage Ingredients',
+    updateIngredients: 'Update Ingredients',
+    manageAddons: 'Manage Add-ons',
+    importSampleMenu: 'Import Sample Menu',
+    addFirstCategoryTitle: 'Add First Category'
+  },
+
+  // Empty states
+  emptyState: {
+    noCategories: {
+      title: 'No menu categories yet',
+      description: 'Start creating your restaurant menu by adding the first category. For example "Main Dishes", "Beverages" or "Desserts".',
+      addFirstCategory: 'Add First Category'
+    }
+  },
+
+  // Loading states
+  loading: {
+    categories: 'Loading categories...',
+    products: 'Loading products...',
+    savingOrder: 'Saving order...',
+    savingCategoryOrder: 'Saving category order...',
+    savingProductOrder: 'Saving product order...',
+    movingProduct: 'Moving product...',
+    deleting: 'Deleting...'
+  },
+
+  // Drag and drop
+  dragDrop: {
+    categoryReordering: 'Saving category order...',
+    productReordering: 'Saving product order...',
+    productMoving: 'Moving product...',
+    categoryOrderSaveError: 'An error occurred while saving category order.',
+    productOrderSaveError: 'An error occurred while saving product order.',
+    productMoveError: 'An error occurred while moving the product.'
+  },
+
+  // Delete confirmations
+  delete: {
+    product: {
+      title: 'Delete Product',
+      message: 'Are you sure you want to delete "{{productName}}"? This action cannot be undone.',
+      success: 'Product deleted successfully'
+    },
+    category: {
+      title: 'Delete Category',
+      messageWithProducts: 'Category "{{categoryName}}" contains {{productCount}} products. Deleting this category will also delete all products. Are you sure you want to continue?',
+      messageEmpty: 'Are you sure you want to delete category "{{categoryName}}"?',
+      success: 'Category deleted successfully'
+    }
+  },
+
+  // Error messages
+  error: {
+    loadFailed: 'Failed to load data',
+    categoryNotFound: 'Category not found',
+    productNotFound: 'Product not found',
+    deleteFailed: 'Failed to delete',
+    updateFailed: 'Failed to update',
+    createFailed: 'Failed to create',
+    reorderFailed: 'Failed to reorder',
+    invalidData: 'Invalid data',
+    networkError: 'Network connection error',
+    refreshPage: 'Please refresh the page and try again.'
+  },
+
+  // Success messages
+  success: {
+    categoryCreated: 'Category created successfully',
+    categoryUpdated: 'Category updated successfully',
+    categoryDeleted: 'Category deleted successfully',
+    productCreated: 'Product created successfully',
+    productUpdated: 'Product updated successfully',
+    productDeleted: 'Product deleted successfully',
+    orderSaved: 'Order saved successfully',
+    ingredientsUpdated: 'Ingredients updated successfully',
+    addonsUpdated: 'Add-ons updated successfully'
+  },
+
+  // Categories
+  category: {
+    products: 'products',
+    productCount: 'product',
+    noProducts: 'No products in this category',
+    expand: 'Expand',
+    collapse: 'Collapse'
+  },
+
+  // Products
+  product: {
+    price: 'Price',
+    description: 'Description',
+    ingredients: 'Ingredients',
+    addons: 'Add-ons',
+    category: 'Category',
+    image: 'Image',
+    status: 'Status',
+    available: 'Available',
+    unavailable: 'Unavailable'
+  },
+
+  // Currency
+  currency: {
+    symbol: '₺',
+    format: '{{amount}} ₺'
+  },
+
+  // Status indicators
+  status: {
+    active: 'Active',
+    inactive: 'Inactive',
+    available: 'Available',
+    unavailable: 'Unavailable'
+  },
+
+  // Tooltips
+  tooltips: {
+    dragToReorder: 'Drag to reorder',
+    dragToMoveCategory: 'Drag to move product to another category',
+    expandCategory: 'Expand category',
+    collapseCategory: 'Collapse category',
+    editCategory: 'Edit category',
+    deleteCategory: 'Delete category',
+    editProduct: 'Edit product',
+    deleteProduct: 'Delete product',
+    manageIngredients: 'Manage product ingredients',
+    manageAddons: 'Manage product add-ons'
+  }
+  },
+  createCategoryModal: {
+  // Header
+  title: 'Add New Category',
+  subtitle: 'Create menu category',
+  close: 'Close',
+
+  // Form fields
+  form: {
+    categoryName: {
+      label: 'Category Name *',
+      placeholder: 'e.g: Main Dishes, Beverages, Desserts',
+      required: 'Category name is required'
+    },
+    status: {
+      label: 'Activate category',
+      description: 'Active categories appear in the menu'
+    }
+  },
+
+  // Buttons
+  buttons: {
+    cancel: 'Cancel',
+    create: 'Add Category',
+    creating: 'Adding...'
+  },
+
+  // Error messages
+  errors: {
+    general: 'An error occurred while adding the category. Please try again.',
+    categoryExists: 'A category with this name already exists. Please choose a different name.',
+    invalidData: 'The entered data is invalid. Please check and try again.',
+    serverError: 'A server error occurred. Please try again later.',
+    networkError: 'Network connection error. Check your connection and try again.',
+    unknownError: 'An unexpected error occurred. Please try again.',
+    errorLabel: 'Error:'
+  },
+
+  // Success messages
+  success: {
+    categoryCreated: 'Category created successfully',
+    categoryAdded: 'Category successfully added to the menu'
+  },
+
+  // Validation messages
+  validation: {
+    nameRequired: 'Category name is required',
+    nameMinLength: 'Category name must be more than 2 characters',
+    nameMaxLength: 'Category name must be less than 50 characters',
+    invalidCharacters: 'Category name contains invalid characters'
+  },
+
+  // Accessibility
+  accessibility: {
+    closeModal: 'Close add category modal',
+    formTitle: 'Add new category form',
+    requiredField: 'Required field',
+    optionalField: 'Optional field'
+  }
+  },
+  createProductModal: {
+  // Header
+  title: 'Add New Product',
+  subtitle: 'Add product to your menu',
+  close: 'Close',
+
+  // Form fields
+  form: {
+    productImage: {
+      label: 'Product Image',
+      dragActive: 'Drop file here',
+      uploadText: 'Upload image',
+      supportedFormats: 'PNG, JPG, GIF (5MB max)',
+      removeImage: 'Remove image'
+    },
+    productName: {
+      label: 'Product Name',
+      placeholder: 'e.g: Margherita Pizza',
+      required: 'Product name is required'
+    },
+    price: {
+      label: 'Price (₺)',
+      placeholder: '0',
+      required: 'Price is required',
+      mustBePositive: 'Price must be greater than 0',
+      currency: '₺'
+    },
+    category: {
+      label: 'Category',
+      placeholder: 'Select category',
+      required: 'Category selection is required',
+      invalidCategory: 'Selected category is invalid. Available categories: {{categories}}'
+    },
+    description: {
+      label: 'Description',
+      placeholder: 'Product description...',
+      required: 'Product description is required'
+    },
+    status: {
+      label: 'Activate product',
+      description: 'Displays in menu',
+      active: 'Active',
+      inactive: 'Inactive'
+    }
+  },
+
+  // Buttons
+  buttons: {
+    cancel: 'Cancel',
+    create: 'Add Product',
+    creating: 'Adding...',
+    uploading: 'Uploading...'
+  },
+
+  // Image upload
+  imageUpload: {
+    dragToUpload: 'Drag image here or click to upload',
+    clickToUpload: 'Click to upload image',
+    dragActive: 'Drop file here',
+    supportedFormats: 'PNG, JPG, GIF',
+    maxSize: '5MB max',
+    preview: 'Image preview',
+    remove: 'Remove'
+  },
+
+  // Error messages
+  errors: {
+    general: 'An error occurred while adding the product. Please try again.',
+    nameRequired: 'Product name is required',
+    descriptionRequired: 'Product description is required',
+    priceRequired: 'Price is required',
+    priceMustBePositive: 'Price must be greater than 0',
+    categoryRequired: 'Category selection is required',
+    categoryInvalid: 'Selected category is invalid',
+    imageInvalid: 'Please select a valid image file',
+    imageTooLarge: 'Image file size must be less than 5MB',
+    imageUploadFailed: 'Failed to upload image',
+    networkError: 'Network connection error. Check your connection and try again.',
+    serverError: 'A server error occurred. Please try again later.',
+    unknownError: 'An unexpected error occurred. Please try again.',
+    errorLabel: 'Error:'
+  },
+
+  // Success messages
+  success: {
+    productCreated: 'Product created successfully',
+    productAdded: 'Product successfully added to the menu'
+  },
+
+  // Validation messages
+  validation: {
+    nameMinLength: 'Product name must be more than 2 characters',
+    nameMaxLength: 'Product name must be less than 100 characters',
+    descriptionMinLength: 'Description must be more than 5 characters',
+    descriptionMaxLength: 'Description must be less than 500 characters',
+    priceMin: 'Price must be greater than 0',
+    priceMax: 'Price must be less than 10000'
+  },
+
+  // Accessibility
+  accessibility: {
+    closeModal: 'Close add product modal',
+    formTitle: 'Add new product form',
+    requiredField: 'Required field',
+    optionalField: 'Optional field',
+    imageUpload: 'Upload product image',
+    removeImage: 'Remove product image',
+    priceInput: 'Enter product price',
+    categorySelect: 'Select product category',
+    statusToggle: 'Toggle product status'
+  }
+  },
+  productAddonsModal: {
+      // Header
+      title: 'Product Addons',
+      subtitle: 'manage addon products for',
+      close: 'Close',
+
+      // Panel titles
+      panels: {
+        currentAddons: {
+          title: 'Current Addons',
+          count: '({{count}})',
+          dragInstruction: 'You can reorder by dragging',
+          emptyState: {
+            title: 'No addons added yet.',
+            subtitle: 'Select products from the right panel.'
+          }
+        },
+        availableProducts: {
+          title: 'Products Available as Addons',
+          searchPlaceholder: 'Search products...',
+          emptyState: {
+            noResults: 'No products found matching search criteria.',
+            noProducts: 'No addable products found.'
+          }
+        }
+      },
+
+      // Addon item actions
+      actions: {
+        edit: 'Edit',
+        save: 'Save',
+        cancel: 'Cancel',
+        remove: 'Remove',
+        recommended: 'Recommended'
+      },
+
+      // Form fields
+      form: {
+        marketingText: {
+          placeholder: 'Marketing text...',
+          label: 'Marketing Text'
+        },
+        isRecommended: {
+          label: 'Mark as recommended addon',
+          badge: 'Recommended'
+        }
+      },
+
+      // Product status
+      status: {
+        outOfStock: 'Out of Stock',
+        available: 'Available',
+        unavailable: 'Unavailable'
+      },
+
+      // Loading states
+      loading: {
+        addons: 'Loading addons...',
+        products: 'Loading products...',
+        saving: 'Saving...'
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'Cancel',
+        saveAddons: 'Save Addons',
+        saving: 'Saving...'
+      },
+
+      // Counter texts
+      counters: {
+        selectedProducts: '{{count}} products selected',
+        availableProducts: '{{count}} available products'
+      },
+
+      // Error messages
+      errors: {
+        loadingData: 'An error occurred while loading addon data.',
+        updatingAddon: 'An error occurred while updating addon.',
+        deletingAddon: 'An error occurred while deleting addon.',
+        savingOrder: 'An error occurred while saving addon order.',
+        savingAddons: 'An error occurred while saving addons. Please try again.',
+        general: 'An unexpected error occurred. Please try again.',
+        networkError: 'Network connection error. Check your connection and try again.'
+      },
+
+      // Success messages
+      success: {
+        addonsSaved: 'Product addons saved successfully',
+        orderUpdated: 'Addon order updated successfully',
+        addonUpdated: 'Addon updated successfully',
+        addonRemoved: 'Addon removed successfully'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'Close product addons modal',
+        dragHandle: 'Drag to reorder addon',
+        editAddon: 'Edit addon details',
+        removeAddon: 'Remove addon from product',
+        selectProduct: 'Select product as addon',
+        productImage: 'Product image',
+        toggleRecommended: 'Toggle recommended status'
+      }
+  },
+  editCategoryModal: {
+      // Header
+      title: 'Edit Category',
+      subtitle: 'Update category information',
+      close: 'Close',
+
+      // Form fields
+      form: {
+        categoryName: {
+          label: 'Category Name',
+          placeholder: 'Enter category name...',
+          required: 'Category name is required',
+          minLength: 'Category name must be at least 2 characters',
+          maxLength: 'Category name must be less than 100 characters'
+        },
+        description: {
+          label: 'Description',
+          placeholder: 'Enter category description...',
+          optional: 'Optional',
+          maxLength: 'Description must be less than 500 characters'
+        },
+        status: {
+          label: 'Active',
+          description: 'Category will be visible in the menu when active',
+          active: 'Active',
+          inactive: 'Inactive'
+        }
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'Cancel',
+        save: 'Save',
+        saving: 'Saving...',
+        update: 'Update Category',
+        updating: 'Updating...'
+      },
+
+      // Error messages
+      errors: {
+        updateFailed: 'An error occurred while updating the category. Please try again.',
+        nameRequired: 'Category name is required',
+        nameMinLength: 'Category name must be at least 2 characters',
+        nameMaxLength: 'Category name must be less than 100 characters',
+        descriptionMaxLength: 'Description must be less than 500 characters',
+        general: 'An unexpected error occurred. Please try again.',
+        networkError: 'Network connection error. Check your connection and try again.',
+        serverError: 'A server error occurred. Please try again later.'
+      },
+
+      // Success messages
+      success: {
+        categoryUpdated: 'Category updated successfully',
+        changesSaved: 'Changes saved successfully'
+      },
+
+      // Validation messages
+      validation: {
+        nameRequired: 'Please enter a category name',
+        nameMinLength: 'Category name is too short',
+        nameMaxLength: 'Category name is too long',
+        descriptionMaxLength: 'Description is too long'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'Close edit category modal',
+        formTitle: 'Edit category form',
+        requiredField: 'Required field',
+        optionalField: 'Optional field',
+        statusToggle: 'Toggle category status',
+        nameInput: 'Category name input',
+        descriptionInput: 'Category description input'
+      }
+  },
+  confirmDeleteModal: {
+      // Common titles (can be overridden by props)
+      defaultTitle: 'Confirm Deletion',
+      deleteTitle: 'Delete Item',
+      
+      // Warning message
+      warning: 'This action cannot be undone. The item will be permanently deleted.',
+      
+      // Item types
+      itemTypes: {
+        category: 'Category',
+        product: 'Product',
+        addon: 'Addon',
+        user: 'User',
+        order: 'Order',
+        coupon: 'Coupon',
+        discount: 'Discount',
+        promotion: 'Promotion',
+        review: 'Review',
+        comment: 'Comment',
+        image: 'Image',
+        file: 'File',
+        item: 'Item'
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'Cancel',
+        delete: 'Delete',
+        deleting: 'Deleting...',
+        confirm: 'Confirm',
+        confirming: 'Confirming...'
+      },
+
+      // Pre-built messages for common scenarios
+      messages: {
+        category: 'Are you sure you want to delete this category? All products in this category will also be affected.',
+        product: 'Are you sure you want to delete this product? This action cannot be undone.',
+        addon: 'Are you sure you want to delete this addon? It will be removed from all associated products.',
+        user: 'Are you sure you want to delete this user? All their data will be permanently removed.',
+        general: 'Are you sure you want to delete this item? This action cannot be undone.'
+      },
+
+      // Error messages
+      errors: {
+        deleteFailed: 'An error occurred during deletion. Please try again.',
+        networkError: 'Network connection error. Please check your connection and try again.',
+        serverError: 'A server error occurred. Please try again later.',
+        permissionError: 'You do not have permission to delete this item.',
+        notFound: 'The item to delete was not found.',
+        hasRelations: 'Cannot delete this item because it has related data.',
+        general: 'An unexpected error occurred. Please try again.'
+      },
+
+      // Success messages
+      success: {
+        deleted: 'Item deleted successfully',
+        categoryDeleted: 'Category deleted successfully',
+        productDeleted: 'Product deleted successfully',
+        addonDeleted: 'Addon deleted successfully'
+      },
+
+      // Confirmation prompts
+      confirmations: {
+        typeToConfirm: 'Type "DELETE" to confirm',
+        enterName: 'Enter the name to confirm deletion',
+        areYouSure: 'Are you absolutely sure?',
+        lastChance: 'This is your last chance to cancel.'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'Close delete confirmation modal',
+        deleteDialog: 'Delete confirmation dialog',
+        warningIcon: 'Warning icon',
+        deleteButton: 'Confirm deletion',
+        cancelButton: 'Cancel deletion',
+        errorAlert: 'Error message'
+      }
+  },
+  editProductModal: {
+      // Header
+      title: 'Edit Product',
+      subtitle: 'Update product information',
+      close: 'Close',
+
+      // Form fields
+      form: {
+        productImage: {
+          label: 'Product Image',
+          optional: 'Optional'
+        },
+        productName: {
+          label: 'Product Name',
+          placeholder: 'e.g: Margherita Pizza',
+          required: 'Product name is required'
+        },
+        description: {
+          label: 'Description',
+          placeholder: 'Product description...',
+          optional: 'Optional'
+        },
+        price: {
+          label: 'Price (₺)',
+          placeholder: '0',
+          required: 'Price is required',
+          currency: '₺'
+        },
+        category: {
+          label: 'Category',
+          placeholder: 'Select category',
+          required: 'Category selection is required'
+        },
+        status: {
+          label: 'Available in Stock',
+          description: 'Product will be visible in menu when available',
+          available: 'Available',
+          unavailable: 'Unavailable'
+        }
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'Cancel',
+        update: 'Update Product',
+        updating: 'Updating...',
+        save: 'Save Changes',
+        saving: 'Saving...',
+        uploading: 'Uploading Image...'
+      },
+
+      // Image upload
+      imageUpload: {
+        clickToUpload: 'Click to upload image',
+        dragToUpload: 'Drag image here or click to upload',
+        dragActive: 'Drop file here',
+        supportedFormats: 'PNG, JPG, GIF',
+        maxSize: '5MB max',
+        preview: 'Image preview',
+        remove: 'Remove image',
+        changeImage: 'Change image'
+      },
+
+      // Error messages
+      errors: {
+        errorLabel: 'Error:',
+        updateFailed: 'An error occurred while updating the product. Please try again.',
+        nameRequired: 'Product name is required',
+        nameAlreadyExists: 'A product with this name already exists. Please choose a different name.',
+        descriptionRequired: 'Product description is required',
+        priceRequired: 'Price is required',
+        priceMustBePositive: 'Price must be greater than 0',
+        categoryRequired: 'Category selection is required',
+        imageInvalid: 'Please select a valid image file',
+        imageTooLarge: 'Image file size must be less than 5MB',
+        imageUploadFailed: 'Failed to upload image',
+        productNotFound: 'Product not found',
+        permissionDenied: 'You do not have permission to update this product',
+        networkError: 'Network connection error. Check your connection and try again.',
+        serverError: 'A server error occurred. Please try again later.',
+        unknownError: 'An unexpected error occurred. Please try again.'
+      },
+
+      // Success messages
+      success: {
+        productUpdated: 'Product updated successfully',
+        changesSaved: 'Changes saved successfully',
+        imageUploaded: 'Image uploaded successfully'
+      },
+
+      // Validation messages
+      validation: {
+        nameMinLength: 'Product name must be more than 2 characters',
+        nameMaxLength: 'Product name must be less than 100 characters',
+        descriptionMaxLength: 'Description must be less than 500 characters',
+        priceMin: 'Price must be greater than 0',
+        priceMax: 'Price must be less than 10000',
+        imageSize: 'Image must be less than 5MB',
+        imageType: 'Only image files are allowed'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'Close edit product modal',
+        formTitle: 'Edit product form',
+        requiredField: 'Required field',
+        optionalField: 'Optional field',
+        imageUpload: 'Upload product image',
+        removeImage: 'Remove product image',
+        priceInput: 'Enter product price',
+        categorySelect: 'Select product category',
+        statusToggle: 'Toggle product availability',
+        imagePreview: 'Product image preview'
+      }
+  },
+  productIngredientModal: {
+      // Header
+      title: 'Product Ingredients',
+      subtitle: 'select ingredients for',
+      close: 'Close',
+
+      // Search
+      search: {
+        placeholder: 'Search ingredients...',
+        label: 'Search ingredients',
+        noResults: 'No ingredients found'
+      },
+
+      // Summary section
+      summary: {
+        selectedCount: 'Selected ingredients',
+        hasChanges: 'Has changes',
+        noChanges: 'No changes'
+      },
+
+      // Form fields
+      form: {
+        quantity: {
+          label: 'Quantity',
+          placeholder: 'Amount',
+          required: 'Quantity is required'
+        },
+        unit: {
+          label: 'Unit',
+          placeholder: 'Select unit',
+          required: 'Unit is required'
+        }
+      },
+
+      // Measurement units
+      units: {
+        grams: 'g',
+        milliliters: 'ml',
+        pieces: 'piece',
+        tablespoons: 'tbsp',
+        teaspoons: 'tsp',
+        cups: 'cup',
+        kilograms: 'kg',
+        liters: 'l'
+      },
+
+      // Status indicators
+      status: {
+        available: 'Available',
+        unavailable: 'Unavailable',
+        containsAllergens: 'Contains Allergens',
+        toBeAdded: 'To be added',
+        toBeRemoved: 'To be removed',
+        selected: 'Selected',
+        unselected: 'Unselected'
+      },
+
+      // Allergen information
+      allergenInfo: {
+        count: '{{count}} allergen',
+        count_plural: '{{count}} allergens',
+        details: 'Allergen details',
+        warning: 'This ingredient contains allergens'
+      },
+
+      // Loading states
+      loading: {
+        ingredients: 'Loading ingredients...',
+        saving: 'Saving ingredients...',
+        data: 'Loading data...'
+      },
+
+      // Empty states
+      emptyState: {
+        noIngredients: 'No ingredients added yet.',
+        noSearchResults: 'No ingredients found matching search criteria.',
+        noAvailableIngredients: 'No available ingredients found.'
+      },
+
+      // Buttons
+      buttons: {
+        cancel: 'Cancel',
+        skip: 'Skip',
+        save: 'Save',
+        saveIngredients: 'Save Ingredients',
+        saving: 'Saving...',
+        add: 'Add Ingredients',
+        update: 'Update Ingredients'
+      },
+
+      // Footer
+      footer: {
+        totalCount: 'Total: {{count}} ingredients',
+        selectedInfo: '{{selected}} of {{total}} selected'
+      },
+
+      // Error messages
+      errors: {
+        loadingData: 'An error occurred while loading ingredient data.',
+        savingIngredients: 'An error occurred while saving ingredients. Please try again.',
+        quantityRequired: 'All ingredients must have a quantity greater than 0.',
+        unitRequired: 'All ingredients must have a unit selected.',
+        networkError: 'Network connection error. Check your connection and try again.',
+        serverError: 'A server error occurred. Please try again later.',
+        general: 'An unexpected error occurred. Please try again.',
+        invalidQuantity: 'Please enter a valid quantity',
+        ingredientNotFound: 'Ingredient not found',
+        permissionDenied: 'You do not have permission to modify ingredients'
+      },
+
+      // Success messages
+      success: {
+        ingredientsSaved: 'Ingredients saved successfully',
+        ingredientsUpdated: 'Ingredients updated successfully',
+        ingredientAdded: 'Ingredient added successfully',
+        ingredientRemoved: 'Ingredient removed successfully'
+      },
+
+      // Validation messages
+      validation: {
+        quantityMin: 'Quantity must be greater than 0',
+        quantityMax: 'Quantity must be less than 1000',
+        unitRequired: 'Please select a unit',
+        ingredientRequired: 'Please select at least one ingredient'
+      },
+
+      // Accessibility
+      accessibility: {
+        closeModal: 'Close ingredient selection modal',
+        searchInput: 'Search for ingredients',
+        quantityInput: 'Enter ingredient quantity',
+        unitSelect: 'Select measurement unit',
+        ingredientCheckbox: 'Select ingredient',
+        selectedIndicator: 'Ingredient selected',
+        allergenWarning: 'Contains allergens',
+        availabilityStatus: 'Availability status'
+      }
+  },
+
+  ProductIngredientUpdateModal: {
+  title: 'Update Ingredients',
+  searchPlaceholder: 'Search ingredients...',
+  selectedCount: 'ingredients selected',
+  loadingIngredients: 'Loading ingredients...',
+  noIngredientsFound: 'No ingredients found',
+  noIngredientsFoundSearch: 'No ingredients found matching search criteria',
+  unit: 'Unit:',
+  price: 'Price:',
+  quantity: 'Quantity',
+  cancel: 'Cancel',
+  save: 'Save',
+  saving: 'Saving...',
+  errors: {
+    loadingIngredients: 'An error occurred while loading ingredients',
+    savingIngredients: 'An error occurred while saving ingredients'
+  },
+  accessibility: {
+    closeModal: 'Close update ingredients modal',
+    formTitle: 'Update product ingredients form',
+    searchInput: 'Search for ingredients',
+    ingredientToggle: 'Toggle ingredient selection',
+    quantityInput: 'Enter ingredient quantity',
+    selectedIndicator: 'Ingredient selected',
+    unselectedIndicator: 'Ingredient not selected',
+    ingredientCard: 'Ingredient selection card',
+    saveButton: 'Save ingredient changes',
+    cancelButton: 'Cancel ingredient update'
+  }
+  },
+  SortableCategory: {
+    product: 'product',
+    products: 'products', 
+    editCategory: 'Edit category',
+    deleteCategory: 'Delete category',
+    reorderingProducts: 'Saving product order...',
+    noCategoryProducts: 'No products in this category yet.',
+    expandCategory: 'Expand category',
+    collapseCategory: 'Collapse category',
+    dragCategory: 'Drag to reorder category',
+    accessibility: {
+      categoryActions: 'Category actions',
+      productCount: 'Product count',
+      expandToggle: 'Toggle category expansion',
+      editCategoryButton: 'Edit category',
+      deleteCategoryButton: 'Delete category',
+      dragHandle: 'Drag handle to reorder category',
+      categoryCard: 'Category card',
+      emptyCategory: 'Empty category',
+      reorderingStatus: 'Category is being reordered'
+    }
+  },
+  SortableProduct: {
+    outOfStock: 'Out of Stock',
+    loadingIngredients: 'Loading ingredients...',
+    ingredients: 'Ingredients',
+    noIngredients: 'No ingredients added',
+    loadingAddons: 'Loading addons...',
+    addons: 'Addons',
+    noAddons: 'No addons added',
+    manageAddons: 'Manage addons',
+    editProduct: 'Edit product',
+    deleteProduct: 'Delete product',
+    dragProduct: 'Drag to reorder product',
+    allergenic: 'Contains allergens',
+    recommended: 'Recommended',
+    price: 'Price',
+    errors: {
+      loadingIngredients: 'An error occurred while loading ingredients.',
+      loadingAddons: 'An error occurred while loading addons.'
+    },
+    accessibility: {
+      productImage: 'Product image',
+      productCard: 'Product card',
+      productActions: 'Product actions',
+      dragHandle: 'Drag handle to reorder product',
+      outOfStockBadge: 'Product is out of stock',
+      ingredientsList: 'Product ingredients list',
+      addonsList: 'Product addons list',
+      allergenWarning: 'Contains allergens',
+      recommendedAddon: 'Recommended addon',
+      editButton: 'Edit product',
+      deleteButton: 'Delete product',
+      addonsButton: 'Manage product addons'
+    }
+  },
+  IngredientsContent: {
+    // Search and filters
+    searchPlaceholder: 'Search ingredients...',
+    filter: 'Filter',
+    sort: 'Sort',
+    newIngredient: 'New Ingredient',
+    
+    // Table headers
+    ingredientName: 'Ingredient Name',
+    status: 'Status',
+    allergenInfo: 'Allergen Information',
+    actions: 'Actions',
+    
+    // Status labels
+    available: 'Available',
+    unavailable: 'Unavailable',
+    containsAllergens: 'Contains Allergens',
+    noAllergens: 'No Allergens',
+    
+    // Actions
+    edit: 'Edit',
+    delete: 'Delete',
+    
+    // Empty states
+    noIngredientsFound: 'No ingredients found matching search criteria.',
+    noIngredientsYet: 'No ingredients added yet.',
+    
+    // Delete modal
+    deleteIngredient: 'Delete Ingredient',
+    deleteConfirmMessage: 'Are you sure you want to delete "{name}" ingredient?',
+    deleteError: 'An error occurred during deletion. Please try again.',
+    cancel: 'Cancel',
+    deleting: 'Deleting...',
+    
+    // Form modal
+    editIngredient: 'Edit Ingredient',
+    addNewIngredient: 'Add New Ingredient',
+    basicInfo: 'Basic Information',
+    ingredientNameRequired: 'Ingredient name is required',
+    enterIngredientName: 'Enter ingredient name',
+    containsAllergensCheckbox: 'Contains Allergens',
+    availableForUse: 'Available for Use',
+    allergenInfoContent: 'Allergen Information',
+    selectAllergensMessage: 'Select allergens contained in this ingredient:',
+    enableAllergenMessage: 'Check "Contains Allergens" first to select allergens.',
+    allergenDetails: 'Allergen Details',
+    containsThisAllergen: 'Contains this allergen',
+    additionalNotes: 'Additional notes (optional)',
+    updateError: 'An error occurred while updating ingredient.',
+    createError: 'An error occurred while adding ingredient.',
+    updating: 'Updating...',
+    adding: 'Adding...',
+    update: 'Update',
+    add: 'Add',
+    
+    accessibility: {
+      ingredientsTable: 'Ingredients management table',
+      searchInput: 'Search ingredients',
+      filterButton: 'Filter ingredients',
+      sortButton: 'Sort ingredients',
+      addButton: 'Add new ingredient',
+      editButton: 'Edit ingredient',
+      deleteButton: 'Delete ingredient',
+      ingredientCard: 'Ingredient information card',
+      allergenSelection: 'Allergen selection',
+      formModal: 'Ingredient form modal',
+      deleteModal: 'Delete confirmation modal',
+      statusBadge: 'Ingredient status',
+      allergenBadge: 'Allergen information',
+      closeModal: 'Close modal',
+      dragToReorder: 'Drag to reorder'
+    }
+  },
+  TableCard: {
+    active: 'Active',
+    inactive: 'Inactive',
+    occupied: 'Occupied',
+    empty: 'Empty',
+    capacity: 'Person',
+    capacityPlural: 'People',
+    edit: 'Edit',
+    downloadQR: 'Download QR Code',
+    disable: 'Disable',
+    enable: 'Activate',
+    delete: 'Delete',
+    viewQRCode: 'View QR Code',
+    moreOptions: 'More options',
+    accessibility: {
+      tableCard: 'Table information card',
+      statusBadge: 'Table status',
+      occupancyBadge: 'Table occupancy status',
+      actionsMenu: 'Table actions menu',
+      qrCodePreview: 'QR code preview',
+      editButton: 'Edit table',
+      downloadButton: 'Download QR code',
+      toggleButton: 'Toggle table status',
+      deleteButton: 'Delete table'
+    }
+  },
+  QRCodeModal: {
+    // Step selection
+    tableAddOption: 'Table Adding Option',
+    howToAddTables: 'How would you like to add tables?',
+    singleTable: 'Add Single Table',
+    bulkTable: 'Add Multiple Tables',
+    createSingleTable: 'Create a single table',
+    createMultipleTables: 'Create multiple tables',
+    
+    // Branch selection
+    branchSelection: 'Branch Selection',
+    selectBranch: 'Select Branch',
+    branchRequired: 'Required',
+    loadingBranches: 'Loading branches...',
+    
+    // Single table form
+    editTable: 'Edit Table',
+    addSingleTable: 'Add Single Table',
+    tableName: 'Table Name',
+    tableNamePlaceholder: 'e.g. Table 1',
+    autoNameNote: 'Automatic name will be given if left empty',
+    tableCategory: 'Table Category',
+    selectCategory: 'Select Category',
+    loadingCategories: 'Loading categories...',
+    noCategories: 'No categories found',
+    capacity: 'Capacity',
+    capacityPlaceholder: 'Number of people',
+    displayOrder: 'Display Order',
+    displayOrderPlaceholder: 'Number for ordering',
+    autoOrderNote: 'Automatic ordering will be applied if left empty',
+    tableActive: 'Table should be active',
+    
+    // Bulk table form
+    addBulkTables: 'Add Multiple Tables',
+    categoryQuantities: 'Category-based Table Quantities',
+    addCategory: 'Add Category',
+    category: 'Category',
+    tableCount: 'Table Count',
+    allTablesActive: 'All tables should be active',
+    tableSummary: 'Tables to be Created Summary:',
+    total: 'Total',
+    tables: 'tables',
+    
+    // Actions
+    cancel: 'Cancel',
+    adding: 'Adding...',
+    addTable: 'Add Table',
+    update: 'Update',
+    updating: 'Updating...',
+    creating: 'Creating... ({count} tables)',
+    createTables: '{count} Create Tables',
+    
+    // Validation
+    branchRequiredValidation: 'Branch selection is required',
+    categoryRequired: 'At least one category is required',
+    
+    accessibility: {
+      modal: 'Table creation modal',
+      stepSelection: 'Table creation method selection',
+      branchSelector: 'Branch selection dropdown',
+      categorySelector: 'Table category selection',
+      tableForm: 'Table creation form',
+      bulkForm: 'Bulk table creation form',
+      backButton: 'Go back to previous step',
+      closeButton: 'Close modal'
+    }
+  },
+
+  TableCategoryModal: {
+    title: 'Add Table Category',
+    subtitle: 'Create a new table category',
+    categoryName: 'Category Name',
+    categoryNamePlaceholder: 'e.g. VIP Tables, Garden Tables',
+    description: 'Description (Optional)',
+    descriptionPlaceholder: 'Brief description about the category...',
+    colorSelection: 'Color Selection',
+    customColor: 'Custom color',
+    iconSelection: 'Icon Selection',
+    branchSelection: 'Branch Selection',
+    cancel: 'Cancel',
+    addCategory: 'Add Category',
+    saving: 'Saving...',
+    
+    // Icons
+    table: 'Table',
+    chair: 'Chair',
+    service: 'Service',
+    label: 'Label',
+    layer: 'Layer',
+    
+    // Validation errors
+    categoryNameRequired: 'Category name is required',
+    iconRequired: 'You must select an icon',
+    branchRequired: 'Branch selection is required',
+    invalidData: 'Invalid data sent',
+    unauthorized: 'You are not authorized. Please log in again.',
+    forbidden: 'You do not have permission for this operation.',
+    branchNotFound: 'Selected branch not found.',
+    serverError: 'Server error occurred. Please try again later.',
+    unexpectedError: 'An unexpected error occurred while adding category',
+    
+    accessibility: {
+      modal: 'Table category creation modal',
+      colorPalette: 'Color selection palette',
+      colorPreset: 'Preset color option',
+      customColorPicker: 'Custom color picker',
+      iconGrid: 'Icon selection grid',
+      iconOption: 'Icon selection option',
+      branchDropdown: 'Branch selection dropdown',
+      form: 'Category creation form'
+    }
+  },
+
+  AddQRCodeCard: {
+    title: 'Add New Table',
+    subtitle: 'Click to add a new table',
+    accessibility: {
+      addButton: 'Add new table button',
+      addCard: 'Add new table card'
+    }
+  },
+  // translations/en/userManagement.ts
+  userManagementPage: {
+    // Page header and navigation
+    title: 'User Management',
+    loading: 'Loading...',
+    error: {
+      title: 'Error',
+      loadFailed: 'Failed to load users',
+      rolesLoadFailed: 'Failed to load roles',
+      retry: 'Try Again',
+      createUserFailed: 'Failed to create user',
+      createRoleFailed: 'Failed to create role'
+    },
+
+    // Statistics
+    stats: {
+      total: 'Total',
+      active: 'Active',
+      users: 'users',
+      roles: 'roles',
+      system: 'System',
+      custom: 'Custom',
+      totalUsers: 'Total Users',
+      owner: 'Owner',
+      manager: 'Manager',
+      staff: 'Staff'
+    },
+
+    // Tabs
+    tabs: {
+      users: 'Users',
+      roles: 'Roles'
+    },
+
+    // Controls and filters
+    controls: {
+      search: 'Search user, email or phone...',
+      searchRoles: 'Search role, description or category...',
+      filterAll: 'All Categories',
+      filterOwner: 'Restaurant Owner',
+      filterManager: 'Branch Manager',
+      filterStaff: 'Staff',
+      filterActive: 'Active Users',
+      filterInactive: 'Inactive Users',
+      addUser: 'Add User',
+      addRole: 'Add Role'
+    },
+
+    // Table headers
+    table: {
+      user: 'User',
+      contact: 'Contact',
+      roles: 'Roles',
+      location: 'Restaurant/Branch',
+      status: 'Status',
+      registrationDate: 'Registration Date',
+      actions: 'Actions',
+      role: 'Role',
+      description: 'Description',
+      statistics: 'Statistics',
+      position: 'Location'
+    },
+
+    // Status indicators
+    status: {
+      active: 'Active',
+      inactive: 'Inactive',
+      enabled: 'Enabled',
+      disabled: 'Disabled',
+      systemRole: 'System Role'
+    },
+
+    // Role types
+    roleTypes: {
+      RestaurantOwner: 'Owner',
+      BranchManager: 'Manager',
+      Staff: 'Staff'
+    },
+
+    // Actions menu
+    actions: {
+      viewDetails: 'View Details',
+      edit: 'Edit',
+      activate: 'Activate',
+      deactivate: 'Deactivate'
+    },
+
+    // No results messages
+    noResults: {
+      usersNotFound: 'No Users Found',
+      rolesNotFound: 'No Roles Found',
+      usersEmpty: 'No users have been added yet.',
+      rolesEmpty: 'No roles have been added yet.',
+      searchEmpty: 'No users found matching your search criteria.',
+      searchEmptyRoles: 'No roles found matching your search criteria.'
+    },
+
+    // Create Role Modal
+    createRole: {
+      title: 'Create New Role',
+      basicInfo: 'Basic Information',
+      roleName: 'Role Name',
+      roleNamePlaceholder: 'e.g.: Branch Manager',
+      category: 'Category',
+      categoryPlaceholder: 'e.g.: Management',
+      description: 'Description',
+      descriptionPlaceholder: 'Describe the role duties and responsibilities...',
+      restaurantId: 'Restaurant ID',
+      restaurantIdPlaceholder: 'Default: Current restaurant',
+      branchId: 'Branch ID',
+      branchIdPlaceholder: 'Empty: All branches',
+      isActive: 'Role should be active',
+      permissions: 'Permissions',
+      permissionsSelected: 'selected',
+      cancel: 'Cancel',
+      create: 'Create Role',
+      creating: 'Creating...',
+      validation: {
+        nameRequired: 'Role name must be at least 3 characters',
+        nameMaxLength: 'Role name can be maximum 50 characters',
+        descriptionMaxLength: 'Description can be maximum 200 characters',
+        categoryMaxLength: 'Category can be maximum 50 characters'
+      }
+    },
+
+    // Create User Modal
+    createUser: {
+      title: 'Create New User',
+      personalInfo: 'Personal Information',
+      contactInfo: 'Contact Information',
+      passwordInfo: 'Password Information',
+      locationInfo: 'Location Information',
+      roleAssignment: 'Authority and Role Assignment',
+      
+      // Form fields
+      firstName: 'First Name',
+      firstNamePlaceholder: 'e.g.: John',
+      lastName: 'Last Name',
+      lastNamePlaceholder: 'e.g.: Doe',
+      userName: 'Username',
+      userNamePlaceholder: 'Will be auto-generated',
+      userNameHint: 'If left empty, it will be automatically created in firstname.lastname format',
+      email: 'Email',
+      emailPlaceholder: 'john@example.com',
+      phone: 'Phone',
+      phonePlaceholder: '+1 555 123 4567',
+      password: 'Password',
+      passwordPlaceholder: 'At least 6 characters',
+      passwordConfirm: 'Confirm Password',
+      passwordConfirmPlaceholder: 'Re-enter your password',
+      
+      // Location
+      locationType: 'Location Type',
+      restaurant: 'Restaurant',
+      branch: 'Branch',
+      restaurantId: 'Restaurant ID',
+      restaurantIdPlaceholder: 'e.g.: 123',
+      branchId: 'Branch ID',
+      branchIdPlaceholder: 'e.g.: 456',
+      profileImage: 'Profile Image URL',
+      profileImagePlaceholder: 'https://example.com/avatar.jpg',
+      userCreatorId: 'Creator User ID',
+      userCreatorIdPlaceholder: 'Current user ID',
+      
+      // Role assignment
+      assignmentType: 'Assignment Type',
+      rolesSelection: 'Select from Existing Roles (Recommended)',
+      permissionsSelection: 'Direct Permission Selection (Currently not supported)',
+      apiWarning: '⚠️ API only supports role-based user creation. Create roles first, then assign them to users.',
+      rolesLabel: 'Roles',
+      rolesSelected: 'selected',
+      
+      // No roles state
+      noRoles: {
+        title: 'No roles defined yet',
+        description: 'Create roles from the roles tab before creating users',
+        tip: '💡 Tip: Switch to "Roles" tab first to create necessary roles',
+        warning: 'Role Required',
+        warningDescription: 'At least one role must be defined to create a user. You can create new roles from the "Roles" tab.'
+      },
+      
+      isActive: 'User should be active',
+      cancel: 'Cancel',
+      create: 'Create User',
+      creating: 'Creating...',
+      createRoleFirst: 'Create Role First',
+      
+      // Validation messages
+      validation: {
+        nameRequired: 'First name is required',
+        nameMaxLength: 'First name can be maximum 50 characters',
+        surnameRequired: 'Last name is required',
+        surnameMaxLength: 'Last name can be maximum 50 characters',
+        emailRequired: 'Email is required',
+        emailInvalid: 'Please enter a valid email address',
+        passwordRequired: 'Password must be at least 6 characters',
+        passwordMaxLength: 'Password can be maximum 100 characters',
+        passwordConfirmRequired: 'Password confirmation is required',
+        passwordMismatch: 'Passwords do not match',
+        phoneRequired: 'Phone number is required',
+        restaurantIdRequired: 'Please enter a valid restaurant ID',
+        branchIdRequired: 'Please enter a valid branch ID',
+        rolesRequired: 'You must select at least one role',
+        permissionsNotSupported: 'API only supports role-based user creation. Please select from existing roles.'
+      }
+    },
+
+    // Role details
+    roleDetails: {
+      userCount: 'User Count',
+      permissionCount: 'Permission Count',
+      restaurant: 'Restaurant',
+      branch: 'Branch',
+      noDescription: 'No description available',
+      users: 'users',
+      permissions: 'permissions'
+    },
+
+    // Permission categories
+    permissionCategories: {
+      'User Management': 'User Management',
+      'Restaurant Management': 'Restaurant Management', 
+      'Branch Management': 'Branch Management',
+      'Order Management': 'Order Management',
+      'Product Management': 'Product Management',
+      'Analytics': 'Analytics'
+    },
+
+    // Success messages
+    success: {
+      userCreated: 'User created successfully',
+      roleCreated: 'Role created successfully',
+      userUpdated: 'User updated successfully',
+      roleUpdated: 'Role updated successfully'
+    },
+
+  },
+  BranchtableManagement: {
+    title: "Table Management",
+    subtitle: "Manage your restaurant tables and categories", 
+    tabs: {
+      tables: "Tables",
+      categories: "Categories",
+      statistics: "Statistics",
+      batchCreate: "Batch Create"
+    },
+    buttons: {
+      addTable: "Add Table",
+      addCategory: "Add Category", 
+      batchCreate: "Batch Create",
+      edit: "Edit",
+      delete: "Delete",
+      save: "Save",
+      cancel: "Cancel",
+      refresh: "Refresh",
+      selectAll: "Select All",
+      clearSelection: "Clear Selection",
+      export: "Export",
+      import: "Import"
+    },
+    labels: {
+      tableName: "Table Name",
+      category: "Category",
+      capacity: "Capacity",
+      status: "Status",
+      occupation: "Occupation",
+      displayOrder: "Display Order",
+      search: "Search tables...",
+      filterByCategory: "Filter by Category",
+      viewMode: "View Mode",
+      totalTables: "Total Tables",
+      activeTables: "Active Tables", 
+      occupiedTables: "Occupied Tables",
+      availableTables: "Available Tables"
+    },
+    status: {
+      active: "Active",
+      inactive: "Inactive",
+      occupied: "Occupied",
+      available: "Available",
+      outOfService: "Out of Service"
+    },
+    actions: {
+      markOccupied: "Mark as Occupied",
+      markAvailable: "Mark as Available",
+      activate: "Activate", 
+      deactivate: "Deactivate",
+      viewDetails: "View Details"
+    },
+    messages: {
+      tableCreated: "Table created successfully",
+      tableUpdated: "Table updated successfully",
+      tableDeleted: "Table deleted successfully", 
+      statusUpdated: "Status updated successfully",
+      error: "An error occurred",
+      noTables: "No tables found",
+      confirmDelete: "Are you sure you want to delete this table?",
+      loading: "Loading...",
+      saving: "Saving...",
+      deleting: "Deleting..."
+    },
+    statistics: {
+      title: "Table Statistics",
+      occupancyRate: "Occupancy Rate",
+      averageCapacity: "Average Capacity",
+      categoryBreakdown: "Category Breakdown",
+      dailyOccupancy: "Daily Occupancy", 
+      peakHours: "Peak Hours"
+    },
+    forms: {
+      createTable: "Create New Table",
+      editTable: "Edit Table",
+      batchCreateTables: "Create Multiple Tables",
+      quantity: "Quantity",
+      namePrefix: "Name Prefix",
+      startingNumber: "Starting Number"
+    }
+  },
+
+  BranchTableManagement: {
+    header: "Category & Table Management",
+    subheader: "Manage restaurant categories and tables with accordion view",
+    totalCategories: "Total Categories",
+    totalTables: "Total Tables",
+    occupiedTables: "Occupied Tables",
+    availableTables: "Available Tables",
+    searchPlaceholder: "Search categories...",
+    refresh: "Refresh",
+    addCategory: "Add Category",
+    addCategoryTitle: "Add New Category",
+    categoryNameLabel: "Category Name",
+    categoryNamePlaceholder: "Enter category name",
+    colorLabel: "Color",
+    iconLabel: "Icon",
+    save: "Save",
+    cancel: "Cancel",
+    noCategories: "No categories found",
+    addFirstCategory: "Add Your First Category",
+    tablesCount: "tables",
+    status: "Status",
+    active: "Active",
+    inactive: "Inactive",
+    occupation: "Occupation",
+    occupied: "Occupied",
+    available: "Available",
+    addTable: "Add Table",
+    tableNamePlaceholder: "Table name",
+    capacityPlaceholder: "Capacity",
+    noTables: "No tables in this category",
+    qrCodeTitle: "QR Code - {tableName}",
+    qrCodeDescription: "Scan this QR code to access the table menu",
+    downloadQR: "Download QR Code",
+    downloading: "Downloading...",
+    copyQRUrl: "Copy QR URL",
+    copied: "Copied!",
+    success: {
+      categoryAdded: "Category added successfully",
+      categoryUpdated: "Category updated successfully",
+      categoryDeleted: "Category deleted successfully",
+      tableAdded: "Table added successfully",
+      tableUpdated: "Table updated successfully",
+      tableDeleted: "Table deleted successfully",
+      categoryActivated: "Category activated successfully",
+      categoryDeactivated: "Category deactivated successfully",
+      tableActivated: "Table activated successfully",
+      tableDeactivated: "Table deactivated successfully",
+      tableOccupied: "Table marked as occupied",
+      tableAvailable: "Table marked as available",
+      dataRefreshed: "Data refreshed successfully"
+    },
+    error: {
+      fetchCategoriesFailed: "Failed to fetch categories",
+      fetchTablesFailed: "Failed to fetch tables",
+      categoryNameRequired: "Category name is required",
+      addCategoryFailed: "Failed to add category",
+      updateCategoryFailed: "Failed to update category",
+      deleteCategoryFailed: "Failed to delete category",
+      categoryHasTables: "Cannot delete category with existing tables",
+      categoryNotFound: "Category not found",
+      addTableFailed: "Failed to add table",
+      updateTableFailed: "Failed to update table",
+      deleteTableFailed: "Failed to delete table",
+      tableNameRequired: "Table name is required",
+      tableNotFound: "Table not found",
+      updateCategoryStatusFailed: "Failed to update category status",
+      updateTableStatusFailed: "Failed to update table status",
+      updateTableOccupationFailed: "Failed to update table occupation",
+      refreshFailed: "Failed to refresh data"
+    }
+  },
+   branchManagementBranch: {
+    title: 'Branch Management',
+    description: 'Manage your branch information and settings.',
+    loading: 'Loading branch information...',
+    noBranchFound: 'No branch found',
+    
+    status: {
+      open: 'Open',
+      closed: 'Closed',
+      temporarilyClosed: 'Temporarily Closed',
+      reopenBranch: 'Reopen Branch',
+      temporaryClose: 'Temporary Close'
+    },
+    
+    actions: {
+      edit: 'Edit',
+      save: 'Save',
+      cancel: 'Cancel',
+      delete: 'Delete',
+      deleting: 'Deleting...',
+      confirmDelete: 'Confirm Delete',
+      deleteWarning: 'Are you sure you want to delete this branch? This action cannot be undone.',
+    },
+    
+    basicInfo: {
+      title: 'Basic Information',
+      branchName: 'Branch Name',
+      whatsappNumber: 'WhatsApp Number',
+      email: 'Email',
+      notSpecified: 'Not specified'
+    },
+    
+    addressInfo: {
+      title: 'Address Information',
+      country: 'Country',
+      city: 'City',
+      street: 'Street',
+      postalCode: 'Postal Code',
+      region: 'Region'
+    },
+    
+    workingHours: {
+      title: 'Working Hours',
+      workingDay: 'Working day',
+      openTime: 'Open Time',
+      closeTime: 'Close Time',
+      noWorkingHours: 'No working hours specified',
+      days: {
+        0: 'Sunday',
+        1: 'Monday',
+        2: 'Tuesday',
+        3: 'Wednesday',
+        4: 'Thursday',
+        5: 'Friday',
+        6: 'Saturday'
+      }
+    },
+    
+    messages: {
+      updateSuccess: 'Branch information updated successfully',
+      deleteSuccess: 'Branch deleted successfully',
+      temporaryCloseSuccess: 'Branch temporarily closed',
+      reopenSuccess: 'Branch reopened',
+      updateError: 'Error occurred during update',
+      deleteError: 'Error occurred during deletion',
+      statusChangeError: 'Error occurred while changing status',
+      loadError: 'Error occurred while loading branch information'
+    },
+    
+    placeholders: {
+      branchName: 'Enter branch name',
+      whatsappNumber: 'Enter WhatsApp number',
+      email: 'Enter email address',
+      country: 'Enter country',
+      city: 'Enter city',
+      street: 'Enter street',
+      postalCode: 'Enter postal code',
+      region: 'Enter region'
+    }
+  },
+  branchCategories: {
+    // Header and Stats
+    header: 'Branch Categories Management',
+    subheader: 'Manage categories and products for Branch {branchId}',
+    lastUpdated: 'Last Updated',
+    
+    stats: {
+      availableCategories: 'Available Categories',
+      readyToAdd: 'Ready to add',
+      activeCategories: 'Active Categories',
+      currentlyInBranch: 'Currently in branch',
+      selectedCategories: 'Selected Categories',
+      toBeAdded: 'To be added',
+      selectedProducts: 'Selected Products',
+      fromCategories: 'From categories'
+    },
+
+    // Tab Navigation
+    tabs: {
+      addNew: 'Add New',
+      manageExisting: 'Manage Existing'
+    },
+
+    // Step Progress
+    steps: {
+      chooseCategories: 'Choose Categories',
+      selectProducts: 'Select Products',
+      reviewAdd: 'Review & Add',
+      finalStep: 'Final step',
+      selected: 'selected',
+      back: 'Back'
+    },
+
+    // Add New Categories
+    addCategories: {
+      title: 'Choose Categories',
+      subtitle: 'Select categories to add to your branch',
+      noAvailable: 'No categories available',
+      allAdded: 'All available categories have been added to this branch',
+      categoriesSelected: 'categories selected',
+      clearSelection: 'Clear Selection',
+      nextSelectProducts: 'Next: Select Products'
+    },
+
+    // Select Products
+    selectProducts: {
+      title: 'Select Products',
+      subtitle: 'Choose products from selected categories',
+      selectAll: 'Select All',
+      clearAll: 'Clear All',
+      noProducts: 'No products found',
+      noProductsInCategories: 'Selected categories don\'t have any products',
+      available: 'available',
+      productsSelectedFrom: 'products selected from',
+      categories: 'categories',
+      reviewSelection: 'Review Selection'
+    },
+
+    // Review and Add
+    review: {
+      title: 'Review & Add',
+      subtitle: 'Review your selection before adding to branch',
+      of: 'of',
+      productsSelected: 'products selected',
+      all: 'All',
+      productsWillBeAdded: 'products will be added',
+      totalValue: 'Total value',
+      selectedProducts: 'Selected Products',
+      readyToAdd: 'Ready to add',
+      with: 'with',
+      availableInBranch: 'Available in Branch',
+      startOver: 'Start Over',
+      adding: 'Adding...',
+      addToBranch: 'Add to Branch'
+    },
+
+    // Manage Existing
+    manage: {
+      title: 'Manage Existing Categories',
+      subtitle: 'Manage categories and products in your branch',
+      saving: 'Saving...',
+      saveOrder: 'Save Order',
+      exitReorder: 'Exit Reorder',
+      reorder: 'Reorder',
+      noCategoriesAdded: 'No categories added',
+      noCategoriesAddedDesc: 'No categories have been added to this branch yet',
+      addCategories: 'Add Categories',
+      original: 'Original:',
+      added: 'added',
+      available: 'available',
+      total: 'Total',
+      active: 'Active',
+      inactive: 'Inactive',
+      protected: 'Protected'
+    },
+
+    // Products Section
+    products: {
+      inCategory: 'Products in Category',
+      added: 'Added',
+      available: 'Available',
+      ingredients: 'ingredients',
+      allergens: 'allergens',
+      viewDetails: 'View Details',
+      removeFromBranch: 'Remove from Branch',
+      addToBranch: 'Add to Branch',
+      addedToBranch: 'products added to branch',
+      moreAvailableToAdd: 'more available to add',
+      withDetailedInfo: 'with detailed info',
+      products: 'products'
+    },
+
+    // Product Details Modal
+    productDetails: {
+      addedToBranch: 'Added to Branch',
+      allergens: 'Allergens',
+      contains: 'Contains',
+      mayContain: 'May Contain',
+      ingredients: 'Ingredients',
+      allergenic: 'Allergenic',
+      available: 'Available',
+      unavailable: 'Unavailable',
+      quantity: 'Quantity:',
+      ingredientId: 'Ingredient ID:',
+      allergenInformation: 'Allergen Information:',
+      additionalInformation: 'Additional Information',
+      originalProduct: 'Original Product',
+      originalPrice: 'Original Price:',
+      originalStatus: 'Original Status:',
+      originalDisplayOrder: 'Original Display Order:',
+      orderDetails: 'Order Details',
+      lastUpdated: 'Last Updated:',
+      close: 'Close'
+    },
+
+    // Common Actions
+    actions: {
+      refresh: 'Refresh',
+      delete: 'Delete',
+      edit: 'Edit',
+      save: 'Save',
+      cancel: 'Cancel',
+      confirm: 'Confirm',
+      loading: 'Loading...'
+    },
+
+    // Search and Filters
+    search: {
+      categories: 'Search categories...',
+      products: 'Search products...'
+    },
+
+    // Status
+    status: {
+      active: 'Active',
+      inactive: 'Inactive',
+      available: 'Available',
+      unavailable: 'Unavailable'
+    },
+
+    // Messages
+    messages: {
+      success: {
+        categoryAdded: 'Category added successfully',
+        categoryDeleted: 'Category deleted successfully',
+        productAdded: 'Product {name} added successfully',
+        productRemoved: 'Product {name} removed successfully',
+        orderSaved: 'Category order saved successfully'
+      },
+      error: {
+        cannotDelete: 'Cannot delete category "{name}" because it contains {count} products. Please remove all products first.',
+        cannotDeleteTooltip: 'Cannot delete: Category contains {count} products. Remove all products first.',
+        productNotFound: 'Product not found',
+        addingProduct: 'Error adding product',
+        removingProduct: 'Error removing product',
+        savingOrder: 'Error saving category order',
+        loadingCategories: 'Error loading categories',
+        loadingProducts: 'Error loading products'
+      }
+    },
+
+    // Delete Modal
+    deleteModal: {
+      title: 'Delete Category',
+      message: 'Are you sure you want to delete the category "{name}"? This action cannot be undone.',
+      confirm: 'Delete',
+      cancel: 'Cancel'
+    },
+
+    // Placeholders
+    placeholders: {
+      searchCategories: 'Search categories...',
+      searchProducts: 'Search products...'
+    }
+  },
+ profile: {
+      title: 'Profile',
+      personalInfo: 'Personal Information',
+      editProfile: 'Edit Profile',
+      accountStatus: {
+        active: 'Active Account',
+        inactive: 'Inactive Account',
+        status: 'Account Status'
+      },
+      fields: {
+        firstName: 'First Name',
+        lastName: 'Last Name',
+        username: 'Username',
+        email: 'Email',
+        registrationDate: 'Registration Date',
+        restaurantName: 'Restaurant Name',
+        status: 'Status'
+      },
+      restaurant: {
+        info: 'Restaurant Information',
+        name: 'Restaurant Name',
+        status: {
+          active: 'Active',
+          inactive: 'Inactive'
+        }
+      },
+      permissions: {
+        summary: 'Permission Summary',
+        totalCategories: 'Total Categories',
+        totalPermissions: 'Total Permissions',
+        rolesAndPermissions: 'Categories and Permissions',
+        systemRole: 'System Role'
+      },
+      categories: {
+        'Category': 'Category Management',
+        'BranchCategory': 'Branch Category Management',
+        'Product': 'Product Management',
+        'BranchProduct': 'Branch Product Management',
+        'BranchQRCode': 'QR Code Management',
+        'Order': 'Order Management',
+        'Restaurant': 'Restaurant Management',
+        'Branch': 'Branch Management',
+        'Admin': 'Admin Operations'
+      },
+      permissionNames: {
+        'category.create': 'Create Category',
+        'category.delete': 'Delete Category',
+        'category.update': 'Update Category',
+        'category.read': 'View Category',
+        'branch.category.create': 'Create Branch Category',
+        'branch.category.delete': 'Delete Branch Category',
+        'branch.category.update': 'Update Branch Category',
+        'branch.category.read': 'View Branch Category',
+        'product.create': 'Create Product',
+        'product.delete': 'Delete Product',
+        'product.update': 'Update Product',
+        'product.read': 'View Product',
+        'product.edit': 'Edit Product',
+        'branch.product.create': 'Create Branch Product',
+        'branch.product.delete': 'Delete Branch Product',
+        'branch.product.update': 'Update Branch Product',
+        'branch.product.read': 'View Branch Product',
+        'branch.qrcode.create': 'Create QR Code',
+        'branch.qrcode.delete': 'Delete QR Code',
+        'branch.qrcode.update': 'Update QR Code',
+        'branch.qrcode.read': 'View QR Code',
+        'order.create': 'Create Order',
+        'order.delete': 'Delete Order',
+        'order.update': 'Update Order',
+        'order.read': 'View Order',
+        'order.view': 'View Order Details',
+        'order.cancel': 'Cancel Order',
+        'restaurant.create': 'Create Restaurant',
+        'restaurant.delete': 'Delete Restaurant',
+        'restaurant.update': 'Update Restaurant',
+        'restaurant.read': 'View Restaurant',
+        'restaurant.user.create': 'Create Restaurant User',
+        'restaurant.user.delete': 'Delete Restaurant User',
+        'restaurant.user.update': 'Update Restaurant User',
+        'restaurant.user.read': 'View Restaurant User',
+        'branch.create': 'Create Branch',
+        'branch.delete': 'Delete Branch',
+        'branch.update': 'Update Branch',
+        'branch.read': 'View Branch',
+        'branch.user.create': 'Create Branch User',
+        'branch.user.delete': 'Delete Branch User',
+        'branch.user.update': 'Update Branch User',
+        'branch.user.read': 'View Branch User',
+        'admin.api.control': 'API Control'
+      },
+      error: {
+        loadFailed: 'Failed to load profile data'
+      }
+    }
 }; 

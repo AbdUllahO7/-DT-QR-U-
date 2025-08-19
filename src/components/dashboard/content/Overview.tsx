@@ -24,7 +24,6 @@ const Overview: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t, language } = useLanguage();
-  const isRTL = language === 'ar';
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -134,7 +133,7 @@ const Overview: React.FC = () => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="flex items-center justify-center h-64" >
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">{t('common.loading')}</p>
@@ -146,7 +145,7 @@ const Overview: React.FC = () => {
   // Error state
   if (error) {
     return (
-      <div className="flex items-center justify-center h-64" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="text-red-500 mb-4">
             <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,7 +165,7 @@ const Overview: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="space-y-6">
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {kpiCards.map((card, index) => (

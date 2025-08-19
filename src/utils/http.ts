@@ -3,7 +3,7 @@ import type { ApiError } from '../types/api';
 import { logger } from './logger';
 import { getUserFriendlyErrorMessage, shouldRetryRequest } from './errorHandler';
 
-const BASE_URL = import.meta.env.DEV ? 'https://localhost:7001' : 'https://localhost:7001';
+const BASE_URL = import.meta.env.DEV ? 'http://localhost:7001' : 'http://localhost:7001';
 
 // Network bağlantısı kontrolü
 const checkNetworkConnection = (): boolean => {
@@ -125,7 +125,7 @@ httpClient.interceptors.request.use(
             logger.warn('⚠️ Token süresi dolmuş veya geçersiz!');
           }
         }
-      } else {
+      } /* else {
         // Token yoksa hata fırlat
         if (config.url?.includes('/api/Restaurants/branches') || 
             config.url?.includes('/api/Branches') ||
@@ -139,7 +139,7 @@ httpClient.interceptors.request.use(
           };
           return Promise.reject(authError);
         }
-      }
+      } */
     }
     
     return config;

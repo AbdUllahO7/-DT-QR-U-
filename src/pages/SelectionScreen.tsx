@@ -185,7 +185,7 @@ const SelectionScreen: React.FC = () => {
   }
 
   // Hata durumu
-  if (error && !data) {
+  if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 via-blue-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <ModernError 
@@ -198,7 +198,6 @@ const SelectionScreen: React.FC = () => {
       </div>
     );
   }
-
   // Veri yoksa
   if (!data) {
     return (

@@ -340,6 +340,7 @@ const OnboardingBranch: React.FC = () => {
         }
         
         // Çalışma saatleri validation
+        // eslint-disable-next-line no-case-declarations
         const workingDays = formData.createBranchWorkingHourCoreDto?.filter(day => day.isWorkingDay) || [];
         if (workingDays.length === 0) {
           newErrors.workingHours = 'En az bir gün için çalışma saati belirtmelisiniz';
@@ -1032,6 +1033,7 @@ const OnboardingBranch: React.FC = () => {
                       Açılış
                     </label>
                     <input
+                      title='time'
                       type="time"
                       value={formatTimeForInput(day.openTime)}
                       onChange={(e) => handleWorkingHourChange(index, 'openTime', e.target.value)}
@@ -1051,6 +1053,7 @@ const OnboardingBranch: React.FC = () => {
                       Kapanış
                     </label>
                     <input
+                      title='time'
                       type="time"
                       value={formatTimeForInput(day.closeTime)}
                       onChange={(e) => handleWorkingHourChange(index, 'closeTime', e.target.value)}

@@ -1,20 +1,33 @@
 // Dashboard bileşenleri için type tanımları
 
 export interface Product {
-  id: string;
-  categoryId: string;
+  productId: number;
+  categoryId: number;
   name: string;
   description: string;
   price: number;
   isAvailable: boolean;
+  imageUrl : string;
+  status : boolean;
+  displayOrder : number;
+  branchProductId?:number
+  branchCategory?:Category
+   ingredients?: APIIngredient[];
+  allergens?: APIAllergen[];
 }
 
 export interface Category {
-  id: string;
-  name: string;
+  [x: string]: any;
+  productId: any;
+  name: any;
+  categoryId: number;
+  categoryName: string;
   description: string;
   isExpanded: boolean;
   products: Product[];
+  status : boolean;
+  displayOrder : number;
+  restaurantId: number
 }
 
 export interface QRCodeData {
@@ -69,4 +82,78 @@ export interface Order {
   items: number;
   orderTime: string; // ISO date string
   table: string;
-} 
+}
+
+export interface CategoryReorderRequest {
+  categoryOrders: Array<{
+    categoryId: number;
+    newDisplayOrder: number;
+  }>;
+}
+
+export interface ProductReorderRequest {
+  productOrders: Array<{
+    productId: number;
+    newDisplayOrder: number;
+  }>;
+}
+
+// ALLERGEN TYPES
+
+export interface AllergenDetail {
+  allergenId: number;
+  containsAllergen: boolean;
+  note: string;
+}
+
+// FIXED: API Allergen type (matches actual API response)
+export interface APIAllergen {
+  id: number;
+  allergenId: number;
+  code: string | null;
+  allergenCode: string;
+  name: string;
+  icon: string | null;
+  description: string | null;
+  productCount: number;
+  containsAllergen: boolean | null;
+  note: string | null;
+  presence:number,
+}
+
+// FIXED: API Ingredient type (matches actual API response)
+export interface APIIngredient {
+  id :number,
+  ingredientId: number;
+  ingredientName: string;
+  isAllergenic: boolean;
+  isAvailable: boolean;
+  restaurantId: number;
+  products: any[];
+  quantity?:number,
+  unit?:number,
+  productIngredients: any[];
+  allergens: APIAllergen[]; // ← FIXED: This matches the actual API response
+}
+
+// Component/Internal Ingredient type (what your component uses)
+export interface Ingredient {
+  id: number;
+  name: string;
+  isAllergenic: boolean;
+  isAvailable: boolean;
+  allergenIds: number[];
+  allergenDetails: AllergenDetail[];
+}
+
+export interface CreateIngredientData {
+  name: string;
+  isAllergenic: boolean;
+  isAvailable: boolean;
+  allergenIds: number[];
+  allergenDetails: AllergenDetail[];
+}
+
+export interface UpdateIngredientData extends CreateIngredientData {
+  id: number;
+}

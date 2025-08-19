@@ -9,7 +9,8 @@ import type {
   Branch,
   BranchDropdownItem,
   TableData,
-  TableCategory
+  TableCategory,
+  BatchUpdateBranchDto
 } from '../types/api';
 
 // Table management için yeni tipler
@@ -19,6 +20,15 @@ interface CreateMenuTableDto {
   capacity: number;
   displayOrder: number | null;
   isActive: boolean;
+}
+export interface UpdateMenuTableDto {
+  id: number;
+  menuTableName: string | null;
+  menuTableCategoryId: number;
+  capacity: number;
+  isActive: boolean;
+  isOccupied: boolean;
+  rowVersion: string;
 }
 
 interface BatchCreateMenuTableItemDto {
@@ -86,14 +96,67 @@ class BranchService {
     }
   }
 
-  async updateBranch(id: number, data: Partial<CreateBranchWithDetailsDto>): Promise<BranchData> {
+ async updateBranch(id: number, data: Partial<CreateBranchWithDetailsDto>): Promise<BranchData> {
     try {
       logger.info('Branch güncelleme isteği gönderiliyor', { id, data }, { prefix: 'BranchService' });
-      const response = await httpClient.put<any>(`${this.baseUrl}/${id}`, data);
+      
+      // Transform the data to match the API's expected format
+      const batchUpdateData: BatchUpdateBranchDto = {
+        branchName: data.branchName?.trim() || null,
+        whatsappOrderNumber: data.whatsappOrderNumber?.trim() || null,
+        branchLogoPath: data.branchLogoPath || null,
+      };
+
+      // Transform address data if provided
+      if (data.createAddressDto) {
+        batchUpdateData.batchUpdateAddressDto = {
+          country: data.createAddressDto.country?.trim() || null,
+          city: data.createAddressDto.city?.trim() || null,
+          street: data.createAddressDto.street?.trim() || null,
+          adressLine1: data.createAddressDto.addressLine1?.trim() || null, // Note the field name mapping
+          adressLine2: data.createAddressDto.addressLine2?.trim() || null, // Note the field name mapping
+          zipCode: data.createAddressDto.zipCode?.trim() || null,
+        };
+      }
+
+      // Transform contact data if provided
+      if (data.createContactDto) {
+        batchUpdateData.batchUpdateContactDto = {
+          contactHeader: data.createContactDto.contactHeader?.trim() || null,
+          location: data.createContactDto.location?.trim() || null,
+          phone: data.createContactDto.phone?.trim() || null,
+          mail: data.createContactDto.mail?.trim() || null,
+          footerTitle: data.createContactDto.footerTitle?.trim() || null,
+          footerDescription: data.createContactDto.footerDescription?.trim() || null,
+          openTitle: data.createContactDto.openTitle?.trim() || null,
+          openDays: data.createContactDto.openDays?.trim() || null,
+          openHours: data.createContactDto.openHours?.trim() || null,
+        };
+      }
+
+      // Transform working hours data if provided
+      if (data.createBranchWorkingHourCoreDto && data.createBranchWorkingHourCoreDto.length > 0) {
+        batchUpdateData.batchUpdateBranchWorkingHourDto = data.createBranchWorkingHourCoreDto.map(hour => ({
+          dayOfWeek: hour.dayOfWeek,
+          openTime: hour.openTime,
+          closeTime: hour.closeTime,
+          isWorkingDay: hour.isWorkingDay
+        }));
+      }
+
+      logger.info('Transformed batch update data', batchUpdateData, { prefix: 'BranchService' });
+
+      const response = await httpClient.put<any>(`${this.baseUrl}/${id}/batch-update`, batchUpdateData);
       logger.info('Branch Update API Response alındı', response.data, { prefix: 'BranchService' });
       return response.data.data!;
     } catch (error: any) {
       logger.error('Branch güncelleme hatası', error, { prefix: 'BranchService' });
+      
+      // Enhanced error handling
+      if (error.response?.data?.errors) {
+        logger.error('API Validation Hataları:', error.response.data.errors, { prefix: 'BranchService' });
+      }
+      
       throw error;
     }
   }
@@ -118,21 +181,39 @@ class BranchService {
     try {
       logger.info('Branch detayları API çağrısı başlatılıyor', { id }, { prefix: 'BranchService' });
       
-      const response = await httpClient.get<any>(`${this.baseUrl}/${id}`); // ApiResponse<BranchDetailResponse> yerine any kullanıldı
+      // Include query parameters for address, contact, and workingHours
+      const includes = ['address', 'contact', 'workingHours'].join('%2C');
+      const url = `${this.baseUrl}?branchId=${id}&include=${includes}`;
+      
+      logger.info('API URL:', url, { prefix: 'BranchService' });
+      
+      const response = await httpClient.get<any>(url);
       
       logger.info('Branch API Response alındı', response.data, { prefix: 'BranchService' });
 
       // API response formatını kontrol et
       if (response.data && response.data.data) {
-        return response.data.data;
+        const branchData = response.data.data;
+        
+        // Ensure branchId is set for compatibility
+        if (branchData.id && !branchData.branchId) {
+          branchData.branchId = branchData.id;
+        }
+        
+        return branchData as BranchDetailResponse;
       }
 
       // Alternatif format kontrolü (direkt data)
       if (response.data && !response.data.data && typeof response.data === 'object') {
-        // ApiResponse wrapper olmadan direkt branch data gelmiş olabilir
         const directData = response.data as any;
-        if (directData.branchId && directData.branchName) {
-                  logger.info('API yanıtı direkt branch formatında', null, { prefix: 'BranchService' });
+        if (directData.id && directData.branchName) {
+          logger.info('API yanıtı direkt branch formatında', null, { prefix: 'BranchService' });
+          
+          // Ensure branchId is set for compatibility
+          if (directData.id && !directData.branchId) {
+            directData.branchId = directData.id;
+          }
+          
           return directData as BranchDetailResponse;
         }
       }
@@ -169,8 +250,11 @@ class BranchService {
 
       logger.info(`Restaurant ID: ${restaurantId} ile şube listesi isteniyor`, null, { prefix: 'BranchService' });
       
+      // Include query parameters for richer data
+      const includes = ['address', 'contact', 'workingHours'].join('%2C');
+      
       // İlk endpoint'i dene
-      let url = `/api/Restaurants/branches?include=BranchIsOpen`;
+      let url = `/api/Restaurants/branches?include=BranchIsOpen%2C${includes}`;
       let response;
       
       try {
@@ -180,7 +264,7 @@ class BranchService {
         logger.warn('İlk endpoint başarısız, alternatif deneniyor', firstError, { prefix: 'BranchService' });
         
         // Alternatif endpoint'i dene
-        url = `/api/Branches?restaurantId=${restaurantId}&include=BranchIsOpen`;
+        url = `/api/Branches?restaurantId=${restaurantId}&include=BranchIsOpen%2C${includes}`;
         response = await httpClient.get<any[]>(url);
         logger.info('Alternatif endpoint başarılı', response, { prefix: 'BranchService' });
       }
@@ -209,8 +293,8 @@ class BranchService {
 
         return {
           // Hem id hem branchId alanlarını dolduruyoruz
-          id: b.branchId,
-          branchId: b.branchId,
+          id: b.branchId || b.id,
+          branchId: b.branchId || b.id,
           branchName: b.branchName,
           whatsappOrderNumber: b.whatsappOrderNumber ?? null,
           email: b.email ?? null,
@@ -221,13 +305,16 @@ class BranchService {
           isTemporarilyClosed: b.isTemporarilyClosed ?? false,
           BranchIsOpen: b.BranchIsOpen,
           createAddressDto: {
-            country: b.country ?? null,
-            city: b.city ?? null,
-            street: b.street ?? null,
-            zipCode: b.zipCode ?? null,
-            addressLine1: b.addressLine1 ?? null,
+            country: b.address?.country ?? null,
+            city: b.address?.city ?? null,
+            street: b.address?.street ?? null,
+            zipCode: b.address?.zipCode ?? null,
+            addressLine1: b.address?.addressLine1 ?? null,
           },
           workingHours: b.workingHours ?? [],
+          // Store the full objects for future use
+          address: b.address,
+          contact: b.contact,
         } as BranchData;
       });
 
@@ -390,14 +477,66 @@ class BranchService {
     }
   }
 
-  async toggleTableStatus(tableId: number, branchId: number, isOccupied: boolean): Promise<void> {
+
+  async updateTable(tableId: number, data: UpdateMenuTableDto): Promise<any> {
     try {
-      await httpClient.patch(`/api/branches/tables/${tableId}/status?branchId=${branchId}`, {
-        isOccupied
+      logger.info('Masa güncelleme API çağrısı başlatılıyor', { tableId, data }, { prefix: 'BranchService' });
+      
+      const response = await httpClient.put(`/api/branches/tables/${tableId}`, data);
+      
+      logger.info('Masa başarıyla güncellendi', response.data, { prefix: 'BranchService' });
+      
+      return response.data;
+    } catch (error) {
+      logger.error('Masa güncellenirken hata oluştu', error, { prefix: 'BranchService' });
+      throw error;
+    }
+  }
+
+  // Delete a table
+  async deleteTable(tableId: number, branchId: number): Promise<void> {
+    try {
+      logger.info('Masa silme API çağrısı başlatılıyor', { tableId, branchId }, { prefix: 'BranchService' });
+      
+      // Include branchId as query parameter
+      await httpClient.delete(`/api/branches/tables/${tableId}?branchId=${branchId}`);
+      
+      logger.info('Masa başarıyla silindi', { tableId, branchId }, { prefix: 'BranchService' });
+    } catch (error) {
+      logger.error('Masa silinirken hata oluştu', error, { prefix: 'BranchService' });
+      throw error;
+    }
+  }
+
+  // Fix the existing toggleTableStatus method (it should toggle isActive, not isOccupied for status changes)
+  async toggleTableStatus(tableId: number, branchId: number, isActive: boolean): Promise<void> {
+    try {
+      logger.info('Masa durumu güncelleme isteği', { tableId, branchId, isActive }, { prefix: 'BranchService' });
+      
+      // You might need to adjust this endpoint based on your actual API
+      await httpClient.patch(`/api/branches/tables/${tableId}/toggle-status?branchId=${branchId}`, {
+        isActive
       });
-      logger.info('Masa durumu başarıyla güncellendi', { tableId, branchId, isOccupied }, { prefix: 'BranchService' });
+      
+      logger.info('Masa durumu başarıyla güncellendi', { tableId, isActive }, { prefix: 'BranchService' });
     } catch (error) {
       logger.error('Masa durumu güncellenirken hata oluştu', error, { prefix: 'BranchService' });
+      throw error;
+    }
+  }
+
+  // Toggle table occupation status (for when customers sit/leave)
+  async toggleTableOccupation(tableId: number, branchId: number, isOccupied: boolean): Promise<void> {
+    try {
+      logger.info('Masa doluluk durumu güncelleme isteği', { tableId, branchId, isOccupied }, { prefix: 'BranchService' });
+      
+      await httpClient.patch(`/api/branches/tables/${tableId}/occupation?branchId=${branchId}`, {
+        isOccupied
+      });
+      
+      logger.info('Masa doluluk durumu başarıyla güncellendi', { tableId, isOccupied }, { prefix: 'BranchService' });
+    } catch (error) {
+      logger.error('Masa doluluk durumu güncellenirken hata oluştu', error, { prefix: 'BranchService' });
       throw error;
     }
   }

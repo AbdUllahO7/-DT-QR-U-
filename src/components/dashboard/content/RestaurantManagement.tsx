@@ -332,12 +332,12 @@ const RestaurantManagement: React.FC = () => {
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         {activeTab === 'general' && (
           <div className="p-8 space-y-8">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Genel Bilgiler</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">{t('restaurantManagement.GeneralInformation')}</h3>
             
             {/* Logo Upload Section - En üstte */}
             <div className="space-y-6 border-b border-gray-200 dark:border-gray-700 pb-8">
               <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <h4 className="text-lg font-medium text-gray-900 dark:text-white">{t('dashboard.restaurant.restaurantLogo')}</h4>
+                <h4 className="text-lg font-medium text-gray-900 dark:text-white">{t('restaurant.restaurantLogo')}</h4>
                 <button
                   type="button"
                   onClick={() => logoInputRef.current?.click()}
@@ -350,6 +350,7 @@ const RestaurantManagement: React.FC = () => {
               </div>
               
               <input
+                title='logoInputRef'
                 ref={logoInputRef}
                 type="file"
                 accept="image/*"
@@ -710,6 +711,7 @@ const RestaurantManagement: React.FC = () => {
                       )}
                     </div>
                     <input
+                      title='aboutImageInputRef'
                       ref={aboutImageInputRef}
                       type="file"
                       accept="image/*"

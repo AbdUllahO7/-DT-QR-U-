@@ -11,9 +11,10 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   variant = 'header',
   showLabel = false 
 }) => {
-  const { language, setLanguage, t, isRTL } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const isRTL = language === 'ar';
 
   const languages = [
     { code: 'tr' as Language, name: t('language.turkish'), flag: '🇹🇷' },
@@ -37,6 +38,10 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const handleLanguageChange = (langCode: Language) => {
     setLanguage(langCode);
     setIsOpen(false);
+    // Force a small delay to ensure the direction change takes effect
+    setTimeout(() => {
+      // This helps with any transition issues
+    }, 100);
   };
 
   const getButtonStyle = () => {
@@ -50,7 +55,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`${getButtonStyle()} flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}
+        className={`${getButtonStyle()} flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
         aria-label={t('accessibility.language')}
         title={t('language.selectLanguage')}
       >
@@ -69,7 +74,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             <button
               key={lang.code}
               onClick={() => handleLanguageChange(lang.code)}
-              className={`w-full flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
+              className={`w-full flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
                 language === lang.code ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : ''
               }`}
             >
@@ -88,4 +93,4 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   );
 };
 
-export default LanguageSelector; 
+export default LanguageSelector;

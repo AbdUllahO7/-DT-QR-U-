@@ -10,6 +10,7 @@ import {
   Legend
 } from 'recharts';
 import { useTheme } from '../../../../contexts/ThemeContext';
+import { useLanguage } from '../../../../contexts/LanguageContext';
 
 interface PopularProductData {
   name: string;
@@ -24,27 +25,29 @@ interface PopularProductsChartProps {
 }
 
 const RADIAN = Math.PI / 180;
-const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-  const x = cx + radius * Math.cos(-midAngle * RADIAN);
-  const y = cy + radius * Math.sin(-midAngle * RADIAN);
-
-  return (
-    <text
-      x={x}
-      y={y}
-      fill="white"
-      textAnchor={x > cx ? 'start' : 'end'}
-      dominantBaseline="central"
-      className="text-xs"
-    >
-      {`${name} ${(percent * 100).toFixed(0)}%`}
-    </text>
-  );
-};
 
 export const PopularProductsChart: React.FC<PopularProductsChartProps> = ({ data, colors }) => {
   const { isDark } = useTheme();
+  const { t } = useLanguage();
+
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
+    const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
+    const x = cx + radius * Math.cos(-midAngle * RADIAN);
+    const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+    return (
+      <text
+        x={x}
+        y={y}
+        fill="white"
+        textAnchor={x > cx ? 'start' : 'end'}
+        dominantBaseline="central"
+        className="text-xs"
+      >
+        {`${name} ${(percent * 100).toFixed(0)}${t('popularProducts.labels.percentage')}`}
+      </text>
+    );
+  };
 
   if (data.length === 0) {
     return (
@@ -58,8 +61,10 @@ export const PopularProductsChart: React.FC<PopularProductsChartProps> = ({ data
           <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
             <ShoppingCart className="h-8 w-8 text-gray-400" />
           </div>
-          <p className="text-gray-500 dark:text-gray-400 font-medium">Henüz ürün satış verisi yok</p>
-          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">Ürün satışları burada görünecek</p>
+          <p className="text-gray-500 dark:text-gray-400 font-medium"></p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+            {t('popularProducts.empty')}
+          </p>
         </div>
       </motion.div>
     );
@@ -72,7 +77,9 @@ export const PopularProductsChart: React.FC<PopularProductsChartProps> = ({ data
       transition={{ delay: 0.6 }}
       className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6"
     >
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Popüler Ürünler</h3>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+        {t('popularProducts.title')}
+      </h3>
       <ResponsiveContainer width="100%" height={300}>
         <PieChart>
           <Pie
@@ -97,7 +104,7 @@ export const PopularProductsChart: React.FC<PopularProductsChartProps> = ({ data
               color: isDark ? '#FFFFFF' : '#000000'
             }}
             formatter={(value: any, name: any, props: any) => [
-              `${value} sipariş (${props.payload.percentage}%)`,
+              `${value} ${t('popularProducts.labels.orders')} (${props.payload.percentage}${t('popularProducts.labels.percentage')})`,
               name
             ]}
           />
@@ -112,4 +119,4 @@ export const PopularProductsChart: React.FC<PopularProductsChartProps> = ({ data
       </ResponsiveContainer>
     </motion.div>
   );
-}; 
+};

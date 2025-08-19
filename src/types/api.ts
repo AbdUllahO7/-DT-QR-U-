@@ -235,45 +235,11 @@ export interface BranchData {
     openTime: string;
     closeTime: string;
     dayOfWeek: number;
+    isWorkingDay:boolean
   }>;
 }
 
-// Detailed Branch Response for edit modal
-export interface BranchDetailResponse {
-  branchId: number;
-  branchName: string;
-  whatsappOrderNumber?: string;
-  restaurantId: number;
-  branchLogoPath?: string;
-  address?: {
-    country: string;
-    city: string;
-    street: string;
-    zipCode: string;
-    addressLine1: string;
-    addressLine2?: string;
-  };
-  contact?: {
-    phone: string;
-    mail: string;
-    location: string;
-    contactHeader?: string;
-    footerTitle?: string;
-    footerDescription?: string;
-    openTitle?: string;
-    openDays?: string;
-    openHours?: string;
-  };
-  workingHours?: Array<{
-    dayOfWeek: number;
-    openTime: string;
-    closeTime: string;
-    isWorkingDay: boolean;
-  }>;
-  branchStatus: boolean;
-  isOpenNow: boolean;
-  isTemporarilyClosed: boolean;
-}
+
 
 export interface SelectionScreenData {
   restaurantId: string;
@@ -394,6 +360,7 @@ export interface TableData {
   isActive: boolean;
   activeSessionId: number | null;
   branchId: number;
+  rowVersion : string
 }
 
 export interface TableCategory {
@@ -459,16 +426,19 @@ export interface CreateRoleResponse {
 // User Creation Types
 export interface CreateUserDto {
   name: string;
-  surname: string;
+  surName: string;
   email: string;
   userName: string;
   phoneNumber?: string | null;
   password: string;
   restaurantId?: number | null;
+  passwordConfirm:string,
   branchId?: number | null;
   roleIds?: string[] | null;
   profileImage?: string | null;
   isActive: boolean;
+  userCreatorId:string,
+  roleIdsList:string[],
 }
 
 export interface CreateUserResponse {
@@ -554,3 +524,167 @@ export interface BranchesResponseItem {
 }
 
 export type BranchesResponse = BranchesResponseItem[]; 
+
+
+
+// Updated types for branch API responses with includes
+
+export interface BranchAddress {
+  addressId: number;
+  country: string | null;
+  fullAdress?: string | null;
+  city: string | null;
+  street?: string | null;
+  zipCode?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+}
+
+export interface BranchContact {
+  contactId: number;
+  phone: string | null;
+  mail: string | null;
+  location?: string | null;
+  contactHeader?: string | null;
+  footerTitle?: string | null;
+  footerDescription?: string | null;
+  openTitle?: string | null;
+  openDays?: string | null;
+  openHours?: string | null;
+}
+
+export interface BranchWorkingHour {
+  id: number;
+  dayOfWeek: number; // 0-6 (Sunday = 0, Monday = 1, etc.)
+  openTime: string; // "HH:mm:ss" format
+  closeTime: string; // "HH:mm:ss" format
+  isWorkingDay: boolean;
+}
+
+// Updated BranchDetailResponse to match the new API structure
+export interface BranchDetailResponse {
+  id: number;
+  branchId: number; // Keep both for compatibility
+  branchName: string;
+  branchTag?: string | null;
+  branchStatus: boolean;
+  isTemporarilyClosed: boolean;
+  isOpenNow: boolean | null;
+  whatsappOrderNumber: string | null;
+  branchLogoPath: string | null;
+  branchDateCreated: string;
+  branchDateModified: string | null;
+  restaurantId: number;
+  restaurant?: any | null;
+  address: BranchAddress | null;
+  contact: BranchContact | null;
+  workingHours: BranchWorkingHour[] | null;
+  categories?: any | null;
+  menuTables?: any | null;
+  activeOrders?: any | null;
+}
+
+// Form data structure for editing (maps to CreateBranchWithDetailsDto)
+export interface BranchEditFormData {
+  branchName: string;
+  restaurantId: number;
+  whatsappOrderNumber: string | null;
+  branchLogoPath: string | null;
+  createAddressDto: {
+    country: string | null;
+    city: string | null;
+    street: string | null;
+    zipCode: string | null;
+    addressLine1: string | null;
+    addressLine2: string | null;
+  };
+  createContactDto: {
+    phone: string | null;
+    mail: string | null;
+    location: string | null;
+    contactHeader: string | null;
+    footerTitle: string | null;
+    footerDescription: string | null;
+    openTitle: string | null;
+    openDays: string | null;
+    openHours: string | null;
+  };
+  createBranchWorkingHourCoreDto: CreateBranchWorkingHourCoreDto[];
+}
+
+// Helper function to convert BranchDetailResponse to BranchEditFormData
+export function convertBranchDetailToFormData(
+  branchDetail: BranchDetailResponse,
+  defaultWorkingHours: CreateBranchWorkingHourCoreDto[]
+): BranchEditFormData {
+  return {
+    branchName: branchDetail.branchName || '',
+    restaurantId: branchDetail.restaurantId,
+    whatsappOrderNumber: branchDetail.whatsappOrderNumber || null,
+    branchLogoPath: branchDetail.branchLogoPath || null,
+    createAddressDto: {
+      country: branchDetail.address?.country || null,
+      city: branchDetail.address?.city || null,
+      street: branchDetail.address?.street || null,
+      zipCode: branchDetail.address?.zipCode || null,
+      addressLine1: branchDetail.address?.addressLine1 || null,
+      addressLine2: branchDetail.address?.addressLine2 || null,
+    },
+    createContactDto: {
+      phone: branchDetail.contact?.phone || null,
+      mail: branchDetail.contact?.mail || null,
+      location: branchDetail.contact?.location || null,
+      contactHeader: branchDetail.contact?.contactHeader || null,
+      footerTitle: branchDetail.contact?.footerTitle || null,
+      footerDescription: branchDetail.contact?.footerDescription || null,
+      openTitle: branchDetail.contact?.openTitle || null,
+      openDays: branchDetail.contact?.openDays || null,
+      openHours: branchDetail.contact?.openHours || null,
+    },
+    createBranchWorkingHourCoreDto: branchDetail.workingHours?.length
+      ? branchDetail.workingHours.map(wh => ({
+          dayOfWeek: wh.dayOfWeek,
+          openTime: wh.openTime || '08:00:00',
+          closeTime: wh.closeTime || '22:00:00',
+          isWorkingDay: wh.isWorkingDay ?? true,
+        }))
+      : defaultWorkingHours,
+  };
+}
+
+export interface BatchUpdateAddressDto {
+  country?: string | null;
+  city?: string | null;
+  street?: string | null;
+  adressLine1?: string | null;  // Note: API uses single 'd' in 'adressLine'
+  adressLine2?: string | null;  // Note: API uses single 'd' in 'adressLine'
+  zipCode?: string | null;
+}
+
+export interface BatchUpdateContactDto {
+  contactHeader?: string | null;
+  location?: string | null;
+  phone?: string | null;
+  mail?: string | null;
+  footerTitle?: string | null;
+  footerDescription?: string | null;
+  openTitle?: string | null;
+  openDays?: string | null;
+  openHours?: string | null;
+}
+
+export interface BatchUpdateBranchWorkingHourDto {
+  dayOfWeek: number;
+  openTime: string;
+  closeTime: string;
+  isWorkingDay: boolean;
+}
+
+export interface BatchUpdateBranchDto {
+  branchName?: string | null;
+  whatsappOrderNumber?: string | null;
+  branchLogoPath?: string | null;
+  batchUpdateAddressDto?: BatchUpdateAddressDto;
+  batchUpdateContactDto?: BatchUpdateContactDto;
+  batchUpdateBranchWorkingHourDto?: BatchUpdateBranchWorkingHourDto[];
+}
