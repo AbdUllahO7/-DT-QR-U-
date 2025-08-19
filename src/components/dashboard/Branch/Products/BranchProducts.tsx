@@ -183,17 +183,17 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     }
   };
 
-const handleProductPriceSave = async (productId: number) => {
-  if (activeTab === 'manage') {
-    // For manage tab: save immediately to API
-    const editedPrice = editedProductPrices.get(productId);
-    if (editedPrice && Math.abs(editedPrice.newPrice - editedPrice.originalPrice) > 0.001) {
-      await saveBranchProductPrice(productId, editedPrice.newPrice);
+  const handleProductPriceSave = async (productId: number) => {
+    if (activeTab === 'manage') {
+      // For manage tab: save immediately to API
+      const editedPrice = editedProductPrices.get(productId);
+      if (editedPrice && Math.abs(editedPrice.newPrice - editedPrice.originalPrice) > 0.001) {
+        await saveBranchProductPrice(productId, editedPrice.newPrice);
+      }
     }
-  }
-  setEditingProductId(null);
-  // For add tab: the edited price is already saved in state, will be used when saving the final form
-};
+    setEditingProductId(null);
+    // For add tab: the edited price is already saved in state, will be used when saving the final form
+  };
 
   const handleProductPriceCancel = (productId: number) => {
     setEditingProductId(null);
@@ -232,32 +232,109 @@ const handleProductPriceSave = async (productId: number) => {
 
   const handleCategoryNameChange = (categoryId: number, newName: string) => {
     console.log('Category name changing:', { categoryId, newName });
+
+    // Create a new Map to ensure immutability
     const newEditedNames = new Map(editedCategoryNames);
-    const existing = newEditedNames.get(categoryId);
-    if (existing) {
-      newEditedNames.set(categoryId, {
-        ...existing,
-        newName: newName // Don't trim while typing, only trim on save
-      });
-      setEditedCategoryNames(newEditedNames);
+
+    // Get the existing entry or create a new one
+    const existing = newEditedNames.get(categoryId) || {
+      categoryId,
+      originalName: categories.find(cat => cat.categoryId === categoryId)?.categoryName || '',
+      newName: '',
+    };
+
+    // Update the Map with the new entry
+    newEditedNames.set(categoryId, {
+      ...existing,
+      newName: newName.trim(),
+    });
+
+    // Update state and ensure the change is applied
+    setEditedCategoryNames(newEditedNames);
+
+    // Log the updated state in the next tick to verify
+    setTimeout(() => {
+      console.log('Updated editedCategoryNames:', Array.from(newEditedNames.entries()));
       console.log('Updated category name state:', newEditedNames.get(categoryId));
-    } else {
-      console.warn('No existing edit state found for category:', categoryId);
-    }
+    }, 0);
   };
 
-  const handleCategoryNameSave = async (categoryId: number) => {
-  if (activeTab === 'manage') {
-    // For manage tab: save immediately to API
-    const editedName = editedCategoryNames.get(categoryId);
-    if (editedName && editedName.newName.trim() !== editedName.originalName) {
-      await saveBranchCategoryName(categoryId, editedName.newName.trim());
-    }
-  }
-  setEditingCategoryId(null);
-  // For add tab: the edited name is already saved in state, will be used when saving the final form
-};
+ const handleCategoryNameSave = async (categoryId: number, newName?: string) => {
+  console.log('handleCategoryNameSave:', { categoryId, newName });
 
+  // Use functional state update to get the most current state
+  let nameToSave: string | undefined;
+  let originalName: string;
+
+  setEditedCategoryNames((currentEditedNames) => {
+    // Get the edited name from the current Map state
+    const editedName = currentEditedNames.get(categoryId);
+    nameToSave = newName?.trim() || editedName?.newName?.trim();
+    originalName = editedName?.originalName || categories.find(cat => cat.categoryId === categoryId)?.categoryName || '';
+    
+    console.log('Current state in save function:', { 
+      categoryId, 
+      editedName, 
+      nameToSave, 
+      originalName,
+      providedNewName: newName 
+    });
+    
+    // Return the same state (we're just reading it)
+    return currentEditedNames;
+  });
+
+  // Add a small delay to ensure state has been read
+  await new Promise(resolve => setTimeout(resolve, 0));
+
+  // Validate the name to save
+  if (!nameToSave) {
+    console.warn('No valid name to save:', { categoryId, nameToSave });
+    setEditingCategoryId(null);
+    return;
+  }
+
+  // Check if the name has changed
+  if (nameToSave === originalName) {
+    console.warn('No changes to save:', { categoryId, nameToSave, originalName });
+    setEditingCategoryId(null);
+    return;
+  }
+
+  console.log('Saving category name:', { categoryId, nameToSave, originalName });
+  try {
+    // Call API to save the new name
+    await saveBranchCategoryName(categoryId, nameToSave);
+    console.log('Category name saved successfully:', { categoryId, nameToSave });
+
+    // Update editedCategoryNames to reflect the saved name as the new originalName
+    setEditedCategoryNames((prev) => {
+      const newMap = new Map(prev);
+      newMap.set(categoryId, {
+        categoryId,
+        originalName: nameToSave, // Update originalName to the saved name
+        newName: nameToSave,
+      });
+      return newMap;
+    });
+
+    // Optionally, update local categories state
+    setCategories((prev) =>
+      prev.map((cat) =>
+        cat.categoryId === categoryId ? { ...cat, categoryName: nameToSave } : cat
+      )
+    );
+  } catch (error) {
+    console.error('Failed to save category name:', error);
+    // Optionally, set an error state for UI feedback
+    // setError('Failed to save category name. Please try again.');
+    return; // Keep editing state active on failure
+  }
+
+  // Clear editing state
+  setEditingCategoryId(null);
+};
+  
   const handleCategoryNameCancel = (categoryId: number) => {
     setEditingCategoryId(null);
     const newEditedNames = new Map(editedCategoryNames);
@@ -309,7 +386,9 @@ const handleProductPriceSave = async (productId: number) => {
 
   // Save functions for existing branch items
  const saveBranchCategoryName = async (categoryId: number, newName: string) => {
+  console.log("newName",newName)
   try {
+    console.log("saveBranchCategoryName")
     // Find the branch category
     const branchCategory = branchCategories.find(bc => bc.categoryId === categoryId);
     if (!branchCategory) {
@@ -321,7 +400,8 @@ const handleProductPriceSave = async (productId: number) => {
     
     // Update the branch category name using the branchCategoryId (not categoryId)
     await branchCategoryService.updateBranchCategory(branchCategory.branchCategoryId, {
-      displayName: newName
+      displayName: newName,
+    
     });
 
     // Update local state

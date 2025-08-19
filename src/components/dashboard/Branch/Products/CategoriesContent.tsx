@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Check, 
   X, 
@@ -26,11 +26,11 @@ import {
   DollarSign
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
-import { Category } from '../../../../types/dashboard';
+import { APIIngredient, Category } from '../../../../types/dashboard';
 import { BranchCategory } from './BranchProducts';
+import { APIAllergen } from '../../../../services/allergen';
 
 // Enhanced interfaces
-
 interface DetailedProduct {
   productId: number;
   name: string;
@@ -113,7 +113,6 @@ interface CategoriesContentProps {
   onDeleteCategory: (branchCategoryId: number, categoryName: string) => void;
   onRefresh: () => void;
   setActiveTab: (tab: 'add' | 'manage') => void;
-  // New props for editing functionality
   editedProductPrices: Map<number, EditedProductPrice>;
   editedCategoryNames: Map<number, EditedCategoryName>;
   editingProductId: number | null;
@@ -156,6 +155,8 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   setExpandedCategories,
   setExpandedBranchCategories,
   setIsReorderMode,
+  setEditingProductId,
+  setEditingCategoryId,
   handleShowProductDetails,
   onCategorySelect,
   onProductSelect,
@@ -191,6 +192,9 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
 }) => {
   const { t, isRTL } = useLanguage();
 
+  // Local state for inline editing
+  const [editingCategoryName, setEditingCategoryName] = useState('');
+  console.log("editingCategoryName",editingCategoryName)
   // Helper functions
   const toggleCategoryExpansion = (categoryId: number) => {
     const newExpanded = new Set(expandedCategories);
@@ -210,6 +214,26 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
       newExpanded.add(categoryId);
     }
     setExpandedBranchCategories(newExpanded);
+  };
+
+  // Category name editing functions
+  const startEditingCategoryName = (categoryId: number, currentName: string) => {
+    const displayName = getCategoryName(categoryId, currentName); // Use current display name
+    setEditingCategoryName(displayName);
+    onCategoryNameEdit(categoryId, currentName);
+  };
+
+  const saveCategoryName = (categoryId: number) => {
+    if (editingCategoryName.trim()) {
+      onCategoryNameChange(categoryId, editingCategoryName);
+      onCategoryNameSave(categoryId);
+    }
+    setEditingCategoryName('');
+  };
+
+  const cancelCategoryNameEdit = (categoryId: number) => {
+    onCategoryNameCancel(categoryId);
+    setEditingCategoryName('');
   };
 
   // Filter functions
@@ -259,8 +283,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   }> = ({ productId, originalPrice, isEditing, onEdit, onSave, onCancel, onChange, currentPrice, showEditButton = true }) => {
     const hasChanged = Math.abs(currentPrice - originalPrice) > 0.001;
     
-    console.log('PriceEditor render:', { productId, originalPrice, currentPrice, isEditing, hasChanged, showEditButton });
-    
     if (isEditing) {
       return (
         <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
@@ -271,10 +293,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
               step="0.01"
               min="0"
               value={currentPrice}
-              onChange={(e) => {
-                console.log('Price input onChange:', e.target.value);
-                onChange(e.target.value);
-              }}
+              onChange={(e) => onChange(e.target.value)}
               className="pl-6 pr-2 py-1 w-20 text-sm border border-blue-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
               autoFocus
               onKeyDown={(e) => {
@@ -322,46 +341,39 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
     );
   };
 
-  // Category name editor component
-  const CategoryNameEditor: React.FC<{
+  // Category name display/edit component
+  const CategoryNameDisplay: React.FC<{
     categoryId: number;
     originalName: string;
-    isEditing: boolean;
-    onEdit: () => void;
-    onSave: () => void;
-    onCancel: () => void;
-    onChange: (value: string) => void;
-    currentName: string;
-  }> = ({ categoryId, originalName, isEditing, onEdit, onSave, onCancel, onChange, currentName }) => {
-    const hasChanged = currentName !== originalName;
-    
-    console.log('CategoryNameEditor render:', { categoryId, originalName, currentName, isEditing, hasChanged });
-    
-    if (isEditing) {
+    currentDisplayName: string;
+    showEditButton?: boolean;
+  }> = ({ categoryId, originalName, currentDisplayName, showEditButton = true }) => {
+    const isCurrentlyEditing = editingCategoryId === categoryId;
+    const hasChanged = currentDisplayName !== originalName;
+
+    if (isCurrentlyEditing) {
       return (
         <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
           <input
+            title="editingCategoryName"
             type="text"
-            value={currentName}
-            onChange={(e) => {
-              console.log('Input onChange:', e.target.value);
-              onChange(e.target.value);
-            }}
+            value={editingCategoryName}
+            onChange={(e) => setEditingCategoryName(e.target.value)}
             className="px-3 py-2 border border-blue-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             autoFocus
             onKeyDown={(e) => {
-              if (e.key === 'Enter') onSave();
-              if (e.key === 'Escape') onCancel();
+              if (e.key === 'Enter') saveCategoryName(categoryId);
+              if (e.key === 'Escape') cancelCategoryNameEdit(categoryId);
             }}
           />
           <button
-            onClick={onSave}
+            onClick={() => saveCategoryName(categoryId)}
             className="p-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
           >
             <Check className="h-4 w-4" />
           </button>
           <button
-            onClick={onCancel}
+            onClick={() => cancelCategoryNameEdit(categoryId)}
             className="p-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
           >
             <X className="h-4 w-4" />
@@ -373,20 +385,22 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
     return (
       <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
         <h4 className={`text-xl font-bold ${hasChanged ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-          {currentName}
+          {currentDisplayName}
         </h4>
         {hasChanged && (
           <span className="text-sm text-gray-500 dark:text-gray-400">
             (was: {originalName})
           </span>
         )}
-        <button
-          onClick={onEdit}
-          className="p-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-          title="Edit category name"
-        >
-          <Edit3 className="h-3 w-3" />
-        </button>
+        {showEditButton && (
+          <button
+            onClick={() => startEditingCategoryName(categoryId, currentDisplayName)}
+            className="p-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+            title="Edit category name"
+          >
+            <Edit3 className="h-3 w-3" />
+          </button>
+        )}
       </div>
     );
   };
@@ -574,7 +588,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
 
                 {/* Product header with image and name */}
                 <div className={`flex items-start space-x-3 mb-3 ${isRTL ? 'space-x-reverse' : ''}`}>
-                  {/* Product image */}
                   {product.imageUrl && (
                     <img 
                       src={product.imageUrl} 
@@ -582,8 +595,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                       className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
                     />
                   )}
-                  
-                  {/* Product details */}
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-gray-900 dark:text-white truncate">
                       {product.name}
@@ -596,7 +607,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                   </div>
                 </div>
 
-                {/* Price section */}
                 <div className="mb-3">
                   <PriceEditor
                     productId={product.productId}
@@ -611,7 +621,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                   />
                 </div>
 
-                {/* Ingredients/Allergens info */}
                 {hasDetailedInfo && (
                   <div className={`flex items-center space-x-2 mb-3 ${isRTL ? 'space-x-reverse' : ''}`}>
                     {product.ingredients && product.ingredients.length > 0 && (
@@ -627,10 +636,8 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                   </div>
                 )}
                 
-                {/* Action buttons */}
                 <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className={`flex space-x-1 ${isRTL ? 'space-x-reverse' : ''}`}>
-                    {/* Details button */}
                     {hasDetailedInfo && (
                       <button
                         onClick={() => handleShowProductDetails(product)}
@@ -641,8 +648,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                       </button>
                     )}
                   </div>
-                  
-                  {/* Add/Remove button */}
                   {isSelected ? (
                     <button
                       onClick={() => onRemoveProduct(product.branchProductId || product.productId, product.name)}
@@ -668,7 +673,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
           })}
         </div>
         
-        {/* Category summary */}
         <div className="mt-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600">
           <div className={`flex items-center justify-between text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
             <div className={`flex items-center space-x-6 ${isRTL ? 'space-x-reverse' : ''}`}>
@@ -708,12 +712,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 mb-8 overflow-hidden">
         <div className="flex">
           <button
-            onClick={() => {
-              setActiveTab('add');
-              // Clear editing states when switching tabs
-              setEditingProductId(null);
-              setEditingCategoryId(null);
-            }}
+            onClick={() => setActiveTab('add')}
             className={`flex-1 py-6 px-8 text-lg font-semibold transition-all ${
               activeTab === 'add'
                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-b-4 border-blue-600 dark:border-blue-400'
@@ -729,12 +728,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
             </div>
           </button>
           <button
-            onClick={() => {
-              setActiveTab('manage');
-              // Clear editing states when switching tabs
-              setEditingProductId(null);
-              setEditingCategoryId(null);
-            }}
+            onClick={() => setActiveTab('manage')}
             className={`flex-1 py-6 px-8 text-lg font-semibold transition-all ${
               activeTab === 'manage'
                 ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-b-4 border-blue-600 dark:border-blue-400'
@@ -755,13 +749,10 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
       {/* Main Content */}
       {activeTab === 'add' ? (
         <>
-          {/* Step Progress */}
           <StepProgress />
 
-          {/* Content Based on Current Step */}
           {currentStep === AdditionStep.SELECT_CATEGORIES && (
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-              {/* Header */}
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div>
@@ -791,7 +782,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                 </div>
               </div>
 
-              {/* Categories Grid */}
               <div className="p-6">
                 {isLoading ? (
                   <div className="text-center py-12">
@@ -810,18 +800,17 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                       const isSelected = selectedCategories.has(category.categoryId);
                       const currentName = getCategoryName(category.categoryId, category.categoryName);
                       const isEditingName = editingCategoryId === category.categoryId;
-                      
+
                       return (
                         <div
                           key={category.categoryId}
                           className={`relative rounded-2xl border-2 transition-all cursor-pointer hover:shadow-lg ${
-                            isSelected 
-                              ? 'border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-md' 
+                            isSelected
+                              ? 'border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-md'
                               : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500'
                           }`}
                           onClick={!isEditingName ? () => onCategorySelect(category.categoryId) : undefined}
                         >
-                          {/* Selection indicator */}
                           {isSelected && (
                             <div className={`absolute -top-2 ${isRTL ? '-left-2' : '-right-2'} w-6 h-6 bg-blue-600 dark:bg-blue-500 rounded-full flex items-center justify-center`}>
                               <Check className="h-4 w-4 text-white" />
@@ -831,15 +820,10 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                           <div className="p-6">
                             <div className={`flex items-start justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                               <div className="flex-1">
-                                <CategoryNameEditor
+                                <CategoryNameDisplay
                                   categoryId={category.categoryId}
                                   originalName={category.categoryName}
-                                  currentName={currentName}
-                                  isEditing={isEditingName}
-                                  onEdit={() => onCategoryNameEdit(category.categoryId, category.categoryName)}
-                                  onSave={() => onCategoryNameSave(category.categoryId)}
-                                  onCancel={() => onCategoryNameCancel(category.categoryId)}
-                                  onChange={(newName) => onCategoryNameChange(category.categoryId, newName)}
+                                  currentDisplayName={currentName}
                                 />
                                 {category.description && (
                                   <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 mt-2">
@@ -858,8 +842,8 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                                   </span>
                                 </div>
                                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                  category.status 
-                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
+                                  category.status
+                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
                                     : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                                 }`}>
                                   {category.status ? t('branchCategories.status.active') : t('branchCategories.status.inactive')}
@@ -874,7 +858,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                 )}
               </div>
 
-              {/* Actions */}
               {selectedCategories.size > 0 && (
                 <div className="p-6 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
                   <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -909,7 +892,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
 
           {currentStep === AdditionStep.SELECT_PRODUCTS && (
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-              {/* Header */}
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div>
@@ -945,7 +927,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                 </div>
               </div>
 
-              {/* Products by Category */}
               <div className="p-6">
                 {isLoadingProducts ? (
                   <div className="text-center py-12">
@@ -965,7 +946,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                       
                       return (
                         <div key={category.categoryId} className="border border-gray-200 dark:border-gray-600 rounded-2xl overflow-hidden">
-                          {/* Category Header */}
                           <div 
                             className="p-6 bg-gray-50 dark:bg-gray-700/50 border-b border-gray-200 dark:border-gray-600 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                             onClick={() => toggleCategoryExpansion(category.categoryId)}
@@ -1000,7 +980,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                             </div>
                           </div>
 
-                          {/* Products Grid */}
                           {expandedCategories.has(category.categoryId) && (
                             <div className="p-6">
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -1091,7 +1070,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                 )}
               </div>
 
-              {/* Actions */}
               <div className="p-6 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
                 <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className="text-sm text-gray-600 dark:text-gray-300">
@@ -1119,7 +1097,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
 
           {currentStep === AdditionStep.REVIEW_SELECTION && (
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
-              {/* Header */}
               <div className="p-6 border-b border-gray-100 dark:border-gray-700">
                 <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div>
@@ -1129,7 +1106,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                 </div>
               </div>
 
-              {/* Selection Summary */}
               <div className="p-6">
                 <div className="space-y-8">
                   {getSelectedCategoriesWithProducts().map((category) => {
@@ -1138,7 +1114,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                     
                     return (
                       <div key={category.categoryId} className="border border-gray-200 dark:border-gray-600 rounded-2xl overflow-hidden">
-                        {/* Category Header */}
                         <div className="p-6 bg-blue-50 dark:bg-blue-900/20 border-b border-blue-200 dark:border-blue-800">
                           <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                             <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
@@ -1180,7 +1155,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                           </div>
                         </div>
 
-                        {/* Selected Products */}
                         {category.selectedProducts.length > 0 && (
                           <div className="p-6">
                             <h5 className="font-medium text-gray-900 dark:text-white mb-4">{t('branchCategories.review.selectedProducts')}</h5>
@@ -1224,7 +1198,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                 </div>
               </div>
 
-              {/* Final Actions */}
               <div className="p-6 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
                 <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div>
@@ -1280,7 +1253,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
           )}
         </>
       ) : (
-        /* Enhanced Manage Existing Categories Tab */
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
           <div className="p-6 border-b border-gray-100 dark:border-gray-700">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -1347,7 +1319,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                         : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500'
                     }`}
                   >
-                    {/* Category Header */}
                     <div className="p-6">
                       <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
@@ -1358,15 +1329,10 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                             {branchCategory.displayOrder}
                           </div>
                           <div className="flex-1">
-                            <CategoryNameEditor
+                            <CategoryNameDisplay
                               categoryId={branchCategory.categoryId}
                               originalName={branchCategory.category.categoryName}
-                              currentName={branchCategory.displayName}
-                              isEditing={editingCategoryId === branchCategory.categoryId}
-                              onEdit={() => onCategoryNameEdit(branchCategory.categoryId, branchCategory.category.categoryName)}
-                              onSave={() => onCategoryNameSave(branchCategory.categoryId)}
-                              onCancel={() => onCategoryNameCancel(branchCategory.categoryId)}
-                              onChange={(newName) => onCategoryNameChange(branchCategory.categoryId, newName)}
+                              currentDisplayName={branchCategory.displayName}
                             />
                             <p className="text-gray-600 dark:text-gray-300">{t('branchCategories.manage.original')} {branchCategory.category.categoryName}</p>
                             <div className={`flex items-center space-x-4 mt-1 ${isRTL ? 'space-x-reverse' : ''}`}>
@@ -1408,56 +1374,53 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                             {branchCategory.isActive ? t('branchCategories.manage.active') : t('branchCategories.manage.inactive')}
                           </span>
                           
-                       {isReorderMode ? (
-                              <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-                                <button
-                                  onClick={() => onMoveUp(index)}
-                                  disabled={index === 0}
-                                  className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                  <ArrowUp className="h-4 w-4" />
-                                </button>
-                                <button
-                                  onClick={() => onMoveDown(index)}
-                                  disabled={index === branchCategories.length - 1}
-                                  className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                  <ArrowDown className="h-4 w-4" />
-                                </button>
-                              </div>
-                            ) : (
-                              <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-                                {/* Show product count warning if category has products */}
-                                {(branchCategory.selectedProductsCount || 0) > 0 && (
-                                  <div className={`flex items-center space-x-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-lg text-xs ${isRTL ? 'space-x-reverse' : ''}`}>
-                                    <AlertCircle className="h-3 w-3" />
-                                    <span>{branchCategory.selectedProductsCount} {t('branchCategories.products.products')}</span>
-                                  </div>
-                                )}
-                                
-                                <button
-                                  onClick={() => onDeleteCategory(branchCategory.branchCategoryId, branchCategory.displayName)}
-                                  disabled={(branchCategory.selectedProductsCount || 0) > 0}
-                                  className={`p-2 rounded-lg transition-colors ${
-                                    (branchCategory.selectedProductsCount || 0) > 0
-                                      ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50'
-                                      : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
-                                  }`}
-                                  title={
-                                    (branchCategory.selectedProductsCount || 0) > 0
-                                      ? t('branchCategories.messages.error.cannotDeleteTooltip', { count: branchCategory.selectedProductsCount })
-                                      : t('branchCategories.actions.delete')
-                                  }
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
-                            )}
+                          {isReorderMode ? (
+                            <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+                              <button
+                                onClick={() => onMoveUp(index)}
+                                disabled={index === 0}
+                                className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              >
+                                <ArrowUp className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => onMoveDown(index)}
+                                disabled={index === branchCategories.length - 1}
+                                className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                              >
+                                <ArrowDown className="h-4 w-4" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+                              {(branchCategory.selectedProductsCount || 0) > 0 && (
+                                <div className={`flex items-center space-x-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-lg text-xs ${isRTL ? 'space-x-reverse' : ''}`}>
+                                  <AlertCircle className="h-3 w-3" />
+                                  <span>{branchCategory.selectedProductsCount} {t('branchCategories.products.products')}</span>
+                                </div>
+                              )}
+                              <button
+                                onClick={() => onDeleteCategory(branchCategory.branchCategoryId, branchCategory.displayName)}
+                                disabled={(branchCategory.selectedProductsCount || 0) > 0}
+                                className={`p-2 rounded-lg transition-colors ${
+                                  (branchCategory.selectedProductsCount || 0) > 0
+                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50'
+                                    : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
+                                }`}
+                                title={
+                                  (branchCategory.selectedProductsCount || 0) > 0
+                                    ? t('branchCategories.messages.error.cannotDeleteTooltip', { count: branchCategory.selectedProductsCount })
+                                    : t('branchCategories.actions.delete')
+                                }
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
 
-                    {/* Enhanced Products Section */}
                     {renderManageProductsSection(branchCategory)}
                   </div>
                 ))}
