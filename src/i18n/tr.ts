@@ -2809,6 +2809,7 @@ SortableProduct: {
   }
   },
   BranchTableManagement: {
+    batchCreateTables: "Toplu Tablo Oluştur",
     header: "Category & Table Management",
     subheader: "Manage restaurant categories and tables with accordion view",
     totalCategories: "Total Categories",

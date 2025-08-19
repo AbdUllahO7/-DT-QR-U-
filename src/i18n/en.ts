@@ -2729,6 +2729,7 @@ export const en = {
   },
   BranchtableManagement: {
     title: "Table Management",
+    batchCreateTables: "batchCreateTables",
     subtitle: "Manage your restaurant tables and categories", 
     tabs: {
       tables: "Tables",
@@ -2811,6 +2812,7 @@ export const en = {
 
   BranchTableManagement: {
     header: "Category & Table Management",
+        batchCreateTables: "Batch Create Tables",
     subheader: "Manage restaurant categories and tables with accordion view",
     totalCategories: "Total Categories",
     totalTables: "Total Tables",

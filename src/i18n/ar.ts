@@ -2814,6 +2814,7 @@ export const ar = {
   },
 
   BranchTableManagement: {
+      batchCreateTables: "إنشاء جداول دفعة واحدة",
       header: "إدارة الفئات والطاولات",
       subheader: "إدارة فئات المطعم والطاولات مع عرض الأكورديون",
       totalCategories: "إجمالي الفئات",
@@ -2850,6 +2851,7 @@ export const ar = {
       copyQRUrl: "نسخ رابط QR",
       copied: "تم النسخ!",
       success: {
+      
         categoryAdded: "تم إضافة الفئة بنجاح",
         categoryUpdated: "تم تحديث الفئة بنجاح",
         categoryDeleted: "تم حذف الفئة بنجاح",
