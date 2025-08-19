@@ -67,6 +67,7 @@ const BranchManagementBranch: React.FC = () => {
       const data: BranchData[] = await branchService.getBranches();
       setBranches(data);
       if (data.length > 0) {
+        console.log("data", data)
         setSelectedBranch(data[0]);
         initializeEditData(data[0]);
       }
@@ -98,7 +99,7 @@ const BranchManagementBranch: React.FC = () => {
             dayOfWeek: hour.dayOfWeek,
             openTime: hour.openTime,
             closeTime: hour.closeTime,
-            isWorkingDay: true,
+            isWorkingDay: hour.isWorkingDay,
           }))
         : [
             { dayOfWeek: 1, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },

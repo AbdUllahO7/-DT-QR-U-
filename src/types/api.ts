@@ -235,6 +235,7 @@ export interface BranchData {
     openTime: string;
     closeTime: string;
     dayOfWeek: number;
+    isWorkingDay:boolean
   }>;
 }
 
