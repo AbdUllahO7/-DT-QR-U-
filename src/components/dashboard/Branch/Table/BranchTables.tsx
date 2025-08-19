@@ -31,18 +31,24 @@ const QRCodeModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   table: TableData;
-  qrCodeUrl: string;
-}> = ({ isOpen, onClose, table, qrCodeUrl }) => {
+  qrCodeImageUrl: string;
+}> = ({ isOpen, onClose, table, qrCodeImageUrl }) => {
   const { t } = useLanguage();
   const [isDownloading, setIsDownloading] = useState(false);
   const [isCopying, setIsCopying] = useState(false);
 
   if (!isOpen) return null;
 
+  // Generate the table URL that the QR code points to
+  const getTableUrl = (): string => {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/table/qr/${table.qrCode}`;
+  };
+
   const handleDownloadQR = async () => {
     setIsDownloading(true);
     try {
-      const response = await fetch(qrCodeUrl);
+      const response = await fetch(qrCodeImageUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -62,7 +68,7 @@ const QRCodeModal: React.FC<{
   const handleCopyUrl = async () => {
     setIsCopying(true);
     try {
-      await navigator.clipboard.writeText(qrCodeUrl);
+      await navigator.clipboard.writeText(getTableUrl());
       setTimeout(() => setIsCopying(false), 2000);
     } catch (error) {
       console.error('Error copying URL:', error);
@@ -88,7 +94,7 @@ const QRCodeModal: React.FC<{
         <div className="text-center mb-6">
           <div className="bg-white p-4 rounded-xl border-2 border-gray-200 inline-block">
             <img 
-              src={qrCodeUrl} 
+              src={qrCodeImageUrl} 
               alt={t('BranchTableManagement.qrCodeTitle', { tableName: table.menuTableName })}
               className="w-48 h-48 mx-auto"
               onError={(e) => {
@@ -99,6 +105,7 @@ const QRCodeModal: React.FC<{
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
             {t('BranchTableManagement.qrCodeDescription')}
           </p>
+         
         </div>
 
         <div className="space-y-3">
@@ -127,7 +134,7 @@ const QRCodeModal: React.FC<{
             ) : (
               <>
                 <Grid className="h-4 w-4" />
-                {t('BranchTableManagement.copyQRUrl')}
+                {t('BranchTableManagement.copied')}
               </>
             )}
           </button>
@@ -158,7 +165,8 @@ interface TableData {
   isOccupied: boolean;
   displayOrder: number;
   rowVersion?: string;
-  qrCodeUrl?: string;
+  qrCode?: string; // The QR token from the API
+  qrCodeUrl?: string; // The image URL for the QR code
 }
 
 const BranchTableManagement: React.FC = () => {
@@ -235,9 +243,13 @@ const BranchTableManagement: React.FC = () => {
   }, [successMessage, error]);
 
   // Utility functions
-  const generateQRCodeUrl = (table: TableData): string => {
+  const generateQRCodeImageUrl = (qrCode: string): string => {
+    if (!qrCode) return '';
+    
     const baseUrl = window.location.origin;
-    const tableUrl = `${baseUrl}/menu/table/${table.id}`;
+    const tableUrl = `${baseUrl}/table/qr/${qrCode}`;
+    
+    // Using QR Server API to generate QR code image
     return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(tableUrl)}`;
   };
 
@@ -273,11 +285,17 @@ const BranchTableManagement: React.FC = () => {
     
     try {
       const tablesData = await tableService.getTables(undefined, false, true);
-      const tablesWithQR = tablesData.map(table => ({
+      
+      // Process tables and ensure QR code data is properly set
+      const processedTables = tablesData.map(table => ({
         ...table,
-        qrCodeUrl: generateQRCodeUrl(table)
+        // Ensure we have the qrCode token from the API response
+        qrCode: table.qrCode || '',
+        // Generate the QR code image URL using the token
+        qrCodeImageUrl: table.qrCode ? generateQRCodeImageUrl(table.qrCode) : ''
       }));
-      setTables(tablesWithQR);
+      
+      setTables(processedTables);
     } catch (err: any) {
       console.error('Error fetching tables:', err);
       setError(t('BranchTableManagement.error.fetchTablesFailed'));
@@ -887,7 +905,7 @@ const BranchTableManagement: React.FC = () => {
             isOpen={qrModal.isOpen}
             onClose={handleCloseQRModal}
             table={qrModal.table}
-            qrCodeUrl={qrModal.table.qrCodeUrl || ''}
+            qrCodeImageUrl={generateQRCodeImageUrl(qrModal.table.qrCode || '')}
           />
         )}
       </div>
