@@ -96,7 +96,7 @@ class BranchCategoryService {
       if (onlyActive !== undefined) queryParams.append('onlyActive', onlyActive.toString());
       if (includes) queryParams.append('includes', includes);
 
-      const response = await httpClient.get<APIBranchCategory[]>(`/api/BranchProducts/branch/available-products?${queryParams.toString()}`);
+      const response = await httpClient.get(`/api/BranchProducts/branch/available-products?${queryParams.toString()}`);
 
       logger.info('Available products for branch retrieved successfully', {
         categoryId,
@@ -179,6 +179,7 @@ class BranchCategoryService {
         restaurantId: response.data.restaurantId,
         isExpanded: true,
         products: response.data.products.map(apiProduct => ({
+          productId: apiProduct.productId,
           id: apiProduct.productId,
           name: apiProduct.name,
           description: apiProduct.description || '',
@@ -188,7 +189,9 @@ class BranchCategoryService {
           status: apiProduct.status,
           displayOrder: apiProduct.displayOrder,
           categoryId: response.data.categoryId,
-        }))
+        })),
+        productId: undefined,
+        name: undefined
       };
       
       return transformedCategory;
@@ -210,19 +213,9 @@ class BranchCategoryService {
       logger.info('Creating branch category', { payload });
       
       try {
-        const response = await httpClient.post<APIBranchCategory>(`${this.baseUrl}`, payload);
+        const response = await httpClient.post(`${this.baseUrl}`, payload);
         logger.info('Branch category created successfully', { data: response.data });
-        
-        const transformedCategory: Category = {
-          categoryId: response.data.categoryId,
-          categoryName: response.data.categoryName,
-          description: response.data.description || '',
-          status: response.data.status,
-          displayOrder: response.data.displayOrder,
-          restaurantId: response.data.restaurantId,
-          isExpanded: true,
-          products: []
-        };
+  
         console.log("response.data",response.data)
         return response.data;
       } catch (error: any) {
@@ -242,7 +235,9 @@ class BranchCategoryService {
             displayOrder: response.data.displayOrder,
             restaurantId: response.data.restaurantId,
             isExpanded: true,
-            products: []
+            products: [],
+            productId: undefined,
+            name: undefined
           };
           
           return transformedCategory;
@@ -255,7 +250,7 @@ class BranchCategoryService {
     }
   }
 
-  async updateBranchCategory( branchCategoryData: {
+  async updateBranchCategory(branchCategoryData: {
     branchCategoryId: number;
     isActive?: boolean;
     displayName?: string;
@@ -292,7 +287,9 @@ class BranchCategoryService {
           status: apiProduct.status,
           displayOrder: apiProduct.displayOrder,
           categoryId: response.data.categoryId,
-        })) || []
+        })) || [],
+        productId: undefined,
+        name: undefined
       };
 
       return transformedCategory;

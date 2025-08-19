@@ -15,7 +15,7 @@ import { DetailedProduct } from './BranchProducts';
 interface ProductDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  product: DetailedProduct;
+  product: DetailedProduct | null;
 }
 
 const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ 
@@ -33,7 +33,6 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
     }
   };
 
-  console.log("product",product)
 
   return (
     <div 

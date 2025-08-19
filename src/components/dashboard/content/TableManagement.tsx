@@ -188,7 +188,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     const tableCategory = categories.find(cat => cat.id === table.menuTableCategoryId);
     const enrichedTable = {
       ...table,
-      categoryName: tableCategory?.categoryName || null
+      categoryName: tableCategory?.categoryName || ''
     };
     
     setEditingTable(enrichedTable);
@@ -391,10 +391,10 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
           {/* Şube Seçici Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
+              title='isBranchDropdownOpen'
               onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
               className={`flex items-center justify-between min-w-[200px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRTL ? 'flex-row-reverse' : ''}`}
               aria-label={t('tableManagement.accessibility.branchSelector')}
-              aria-expanded={isBranchDropdownOpen}
               aria-haspopup="true"
             >
               <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -499,6 +499,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
                 <div 
                   className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6"
                   role="grid"
+                  radioGroup=''
                   aria-label={t('tableManagement.accessibility.tablesGrid')}
                 >
                   {tables.map((table, index) => (

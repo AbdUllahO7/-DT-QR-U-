@@ -155,8 +155,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   setExpandedCategories,
   setExpandedBranchCategories,
   setIsReorderMode,
-  setEditingProductId,
-  setEditingCategoryId,
+
   handleShowProductDetails,
   onCategorySelect,
   onProductSelect,
@@ -192,9 +191,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
 }) => {
   const { t, isRTL } = useLanguage();
 
-  // Local state for inline editing
   const [editingCategoryName, setEditingCategoryName] = useState('');
-  console.log("editingCategoryName",editingCategoryName)
   // Helper functions
   const toggleCategoryExpansion = (categoryId: number) => {
     const newExpanded = new Set(expandedCategories);
@@ -280,7 +277,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
     onChange: (value: string) => void;
     currentPrice: number;
     showEditButton?: boolean;
-  }> = ({ productId, originalPrice, isEditing, onEdit, onSave, onCancel, onChange, currentPrice, showEditButton = true }) => {
+  }> = ({ originalPrice, isEditing, onEdit, onSave, onCancel, onChange, currentPrice, showEditButton = true }) => {
     const hasChanged = Math.abs(currentPrice - originalPrice) > 0.001;
     
     if (isEditing) {
@@ -289,8 +286,9 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
           <div className="relative">
             <DollarSign className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
             <input
+              title='number'
               type="number"
-              step="0.01"
+              step="1"
               min="0"
               value={currentPrice}
               onChange={(e) => onChange(e.target.value)}
@@ -341,7 +339,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
     );
   };
 
-  // Category name display/edit component
   const CategoryNameDisplay: React.FC<{
     categoryId: number;
     originalName: string;
@@ -824,6 +821,8 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                                   categoryId={category.categoryId}
                                   originalName={category.categoryName}
                                   currentDisplayName={currentName}
+                                                                showEditButton = {false}
+
                                 />
                                 {category.description && (
                                   <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 mt-2">
@@ -1409,7 +1408,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                                 }`}
                                 title={
                                   (branchCategory.selectedProductsCount || 0) > 0
-                                    ? t('branchCategories.messages.error.cannotDeleteTooltip', { count: branchCategory.selectedProductsCount })
+                                    ? t('branchCategories.messages.error.cannotDeleteTooltip', { count: branchCategory.selectedProductsCount ?? 0 })
                                     : t('branchCategories.actions.delete')
                                 }
                               >

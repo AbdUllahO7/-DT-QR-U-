@@ -348,6 +348,7 @@ const Orders: React.FC = () => {
                     Durum
                   </label>
                   <select
+                    title='selectedStatus'
                     value={selectedStatus}
                     onChange={(e) => setSelectedStatus(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
@@ -366,6 +367,7 @@ const Orders: React.FC = () => {
                     {t('orders.filters.dateRange')}
                   </label>
                   <select
+                    title='selectedDateRange'
                     value={selectedDateRange}
                     onChange={(e) => setSelectedDateRange(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
@@ -382,6 +384,7 @@ const Orders: React.FC = () => {
                     {t('orders.filters.paymentType')}
                   </label>
                   <select
+                    title='selectedPaymentType'
                     value={selectedPaymentType}
                     onChange={(e) => setSelectedPaymentType(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"

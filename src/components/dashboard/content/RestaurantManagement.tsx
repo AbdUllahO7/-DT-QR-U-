@@ -350,6 +350,7 @@ const RestaurantManagement: React.FC = () => {
               </div>
               
               <input
+                title='logoInputRef'
                 ref={logoInputRef}
                 type="file"
                 accept="image/*"
@@ -710,6 +711,7 @@ const RestaurantManagement: React.FC = () => {
                       )}
                     </div>
                     <input
+                      title='aboutImageInputRef'
                       ref={aboutImageInputRef}
                       type="file"
                       accept="image/*"
