@@ -930,24 +930,7 @@ export const en = {
       suspended: 'Suspended'
     }
   },
-  // Profile
-  profile: {
-    title: 'Profile',
-    description: 'View and edit your personal information',
-    error: {
-      loadFailed: 'Failed to load profile data'
-    },
-    personalInfo: 'Personal Information',
-    accountSettings: 'Account Settings',
-    security: 'Security',
-    preferences: 'Preferences',
-    actions: {
-      save: 'Save',
-      cancel: 'Cancel',
-      changePassword: 'Change Password',
-      updateProfile: 'Update Profile'
-    }
-  },
+
   // Subscription
   subscription: {
     title: 'Subscription',
@@ -3171,5 +3154,99 @@ export const en = {
       searchCategories: 'Search categories...',
       searchProducts: 'Search products...'
     }
-  }
+  },
+ profile: {
+      title: 'Profile',
+      personalInfo: 'Personal Information',
+      editProfile: 'Edit Profile',
+      accountStatus: {
+        active: 'Active Account',
+        inactive: 'Inactive Account',
+        status: 'Account Status'
+      },
+      fields: {
+        firstName: 'First Name',
+        lastName: 'Last Name',
+        username: 'Username',
+        email: 'Email',
+        registrationDate: 'Registration Date',
+        restaurantName: 'Restaurant Name',
+        status: 'Status'
+      },
+      restaurant: {
+        info: 'Restaurant Information',
+        name: 'Restaurant Name',
+        status: {
+          active: 'Active',
+          inactive: 'Inactive'
+        }
+      },
+      permissions: {
+        summary: 'Permission Summary',
+        totalCategories: 'Total Categories',
+        totalPermissions: 'Total Permissions',
+        rolesAndPermissions: 'Categories and Permissions',
+        systemRole: 'System Role'
+      },
+      categories: {
+        'Category': 'Category Management',
+        'BranchCategory': 'Branch Category Management',
+        'Product': 'Product Management',
+        'BranchProduct': 'Branch Product Management',
+        'BranchQRCode': 'QR Code Management',
+        'Order': 'Order Management',
+        'Restaurant': 'Restaurant Management',
+        'Branch': 'Branch Management',
+        'Admin': 'Admin Operations'
+      },
+      permissionNames: {
+        'category.create': 'Create Category',
+        'category.delete': 'Delete Category',
+        'category.update': 'Update Category',
+        'category.read': 'View Category',
+        'branch.category.create': 'Create Branch Category',
+        'branch.category.delete': 'Delete Branch Category',
+        'branch.category.update': 'Update Branch Category',
+        'branch.category.read': 'View Branch Category',
+        'product.create': 'Create Product',
+        'product.delete': 'Delete Product',
+        'product.update': 'Update Product',
+        'product.read': 'View Product',
+        'product.edit': 'Edit Product',
+        'branch.product.create': 'Create Branch Product',
+        'branch.product.delete': 'Delete Branch Product',
+        'branch.product.update': 'Update Branch Product',
+        'branch.product.read': 'View Branch Product',
+        'branch.qrcode.create': 'Create QR Code',
+        'branch.qrcode.delete': 'Delete QR Code',
+        'branch.qrcode.update': 'Update QR Code',
+        'branch.qrcode.read': 'View QR Code',
+        'order.create': 'Create Order',
+        'order.delete': 'Delete Order',
+        'order.update': 'Update Order',
+        'order.read': 'View Order',
+        'order.view': 'View Order Details',
+        'order.cancel': 'Cancel Order',
+        'restaurant.create': 'Create Restaurant',
+        'restaurant.delete': 'Delete Restaurant',
+        'restaurant.update': 'Update Restaurant',
+        'restaurant.read': 'View Restaurant',
+        'restaurant.user.create': 'Create Restaurant User',
+        'restaurant.user.delete': 'Delete Restaurant User',
+        'restaurant.user.update': 'Update Restaurant User',
+        'restaurant.user.read': 'View Restaurant User',
+        'branch.create': 'Create Branch',
+        'branch.delete': 'Delete Branch',
+        'branch.update': 'Update Branch',
+        'branch.read': 'View Branch',
+        'branch.user.create': 'Create Branch User',
+        'branch.user.delete': 'Delete Branch User',
+        'branch.user.update': 'Update Branch User',
+        'branch.user.read': 'View Branch User',
+        'admin.api.control': 'API Control'
+      },
+      error: {
+        loadFailed: 'Failed to load profile data'
+      }
+    }
 }; 

@@ -255,7 +255,7 @@ class BranchCategoryService {
     }
   }
 
-  async updateBranchCategory(branchId: number, branchCategoryData: {
+  async updateBranchCategory( branchCategoryData: {
     branchCategoryId: number;
     isActive?: boolean;
     displayName?: string;
@@ -269,9 +269,9 @@ class BranchCategoryService {
         displayOrder: branchCategoryData.displayOrder ?? 0
       };
 
-      logger.info('Updating branch category', { branchId, payload });
-      const response = await httpClient.put<APIBranchCategory>(`${this.baseUrl}/${branchId}`, payload);
-      logger.info('Branch category updated successfully', { branchId, data: response.data });
+      logger.info('Updating branch category', { payload });
+      const response = await httpClient.put<APIBranchCategory>(`${this.baseUrl}`, payload);
+      logger.info('Branch category updated successfully', {  data: response.data });
 
       const transformedCategory: Category = {
         categoryId: response.data.categoryId,
@@ -282,6 +282,7 @@ class BranchCategoryService {
         restaurantId: response.data.restaurantId,
         isExpanded: true,
         products: response.data.products?.map(apiProduct => ({
+          productId: apiProduct.productId,
           id: apiProduct.productId,
           name: apiProduct.name,
           description: apiProduct.description || '',

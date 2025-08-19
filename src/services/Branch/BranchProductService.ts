@@ -325,6 +325,7 @@ class BranchProductService {
     branchCategoryId?: number;
   }): Promise<Product> {
     try {
+      console.log("productData",productData)
       const payload: UpdateBranchProductRequest = {
         branchProductId: productData.branchProductId ?? id,
         price: productData.price ?? 0,

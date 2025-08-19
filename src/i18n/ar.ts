@@ -932,24 +932,7 @@ export const ar = {
     }
   },
 
-  // Profile
-  profile: {
-    title: 'الملف الشخصي',
-    description: 'عرض وتعديل معلوماتك الشخصية',
-    error: {
-      loadFailed: 'فشل في تحميل بيانات الملف الشخصي'
-    },
-    personalInfo: 'المعلومات الشخصية',
-    accountSettings: 'إعدادات الحساب',
-    security: 'الأمان',
-    preferences: 'التفضيلات',
-    actions: {
-      save: 'حفظ',
-      cancel: 'إلغاء',
-      changePassword: 'تغيير كلمة المرور',
-      updateProfile: 'تحديث الملف الشخصي'
-    }
-  },
+ 
 
   // Subscription
   subscription: {
@@ -3175,5 +3158,99 @@ export const ar = {
       searchCategories: 'البحث في الفئات...',
       searchProducts: 'البحث في المنتجات...'
     }
-  }
+  },
+   profile: {
+      title: 'الملف الشخصي',
+      personalInfo: 'المعلومات الشخصية',
+      editProfile: 'تعديل الملف الشخصي',
+      accountStatus: {
+        active: 'حساب نشط',
+        inactive: 'حساب غير نشط',
+        status: 'حالة الحساب'
+      },
+      fields: {
+        firstName: 'الاسم الأول',
+        lastName: 'اسم العائلة',
+        username: 'اسم المستخدم',
+        email: 'البريد الإلكتروني',
+        registrationDate: 'تاريخ التسجيل',
+        restaurantName: 'اسم المطعم',
+        status: 'الحالة'
+      },
+      restaurant: {
+        info: 'معلومات المطعم',
+        name: 'اسم المطعم',
+        status: {
+          active: 'نشط',
+          inactive: 'غير نشط'
+        }
+      },
+      permissions: {
+        summary: 'ملخص الصلاحيات',
+        totalCategories: 'إجمالي الفئات',
+        totalPermissions: 'إجمالي الصلاحيات',
+        rolesAndPermissions: 'الفئات والصلاحيات',
+        systemRole: 'دور النظام'
+      },
+      categories: {
+        'Category': 'إدارة الفئات',
+        'BranchCategory': 'إدارة فئات الفروع',
+        'Product': 'إدارة المنتجات',
+        'BranchProduct': 'إدارة منتجات الفروع',
+        'BranchQRCode': 'إدارة رموز QR',
+        'Order': 'إدارة الطلبات',
+        'Restaurant': 'إدارة المطاعم',
+        'Branch': 'إدارة الفروع',
+        'Admin': 'عمليات الإدارة'
+      },
+      permissionNames: {
+        'category.create': 'إنشاء فئة',
+        'category.delete': 'حذف فئة',
+        'category.update': 'تحديث فئة',
+        'category.read': 'عرض فئة',
+        'branch.category.create': 'إنشاء فئة فرع',
+        'branch.category.delete': 'حذف فئة فرع',
+        'branch.category.update': 'تحديث فئة فرع',
+        'branch.category.read': 'عرض فئة فرع',
+        'product.create': 'إنشاء منتج',
+        'product.delete': 'حذف منتج',
+        'product.update': 'تحديث منتج',
+        'product.read': 'عرض منتج',
+        'product.edit': 'تعديل منتج',
+        'branch.product.create': 'إنشاء منتج فرع',
+        'branch.product.delete': 'حذف منتج فرع',
+        'branch.product.update': 'تحديث منتج فرع',
+        'branch.product.read': 'عرض منتج فرع',
+        'branch.qrcode.create': 'إنشاء رمز QR',
+        'branch.qrcode.delete': 'حذف رمز QR',
+        'branch.qrcode.update': 'تحديث رمز QR',
+        'branch.qrcode.read': 'عرض رمز QR',
+        'order.create': 'إنشاء طلب',
+        'order.delete': 'حذف طلب',
+        'order.update': 'تحديث طلب',
+        'order.read': 'عرض طلب',
+        'order.view': 'عرض تفاصيل الطلب',
+        'order.cancel': 'إلغاء طلب',
+        'restaurant.create': 'إنشاء مطعم',
+        'restaurant.delete': 'حذف مطعم',
+        'restaurant.update': 'تحديث مطعم',
+        'restaurant.read': 'عرض مطعم',
+        'restaurant.user.create': 'إنشاء مستخدم مطعم',
+        'restaurant.user.delete': 'حذف مستخدم مطعم',
+        'restaurant.user.update': 'تحديث مستخدم مطعم',
+        'restaurant.user.read': 'عرض مستخدم مطعم',
+        'branch.create': 'إنشاء فرع',
+        'branch.delete': 'حذف فرع',
+        'branch.update': 'تحديث فرع',
+        'branch.read': 'عرض فرع',
+        'branch.user.create': 'إنشاء مستخدم فرع',
+        'branch.user.delete': 'حذف مستخدم فرع',
+        'branch.user.update': 'تحديث مستخدم فرع',
+        'branch.user.read': 'عرض مستخدم فرع',
+        'admin.api.control': 'التحكم في API'
+      },
+      error: {
+        loadFailed: 'فشل في تحميل بيانات الملف الشخصي'
+      }
+    }
 }; 
