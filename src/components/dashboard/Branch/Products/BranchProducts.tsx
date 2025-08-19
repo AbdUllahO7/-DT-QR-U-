@@ -650,7 +650,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
               onlyActive: true,
               includes: 'category,ingredients,allergens,addons'
             });
-            
+            console.log("allAvailableProducts",allAvailableProducts)
             // Transform available products to expected format
             const transformedAvailableProducts: DetailedProduct[] = allAvailableProducts.map(product => ({
               id: product.productId,

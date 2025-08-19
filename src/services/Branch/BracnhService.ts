@@ -207,7 +207,8 @@ class BranchService {
       workingHours: apiBranch.workingHours?.map(wh => ({
         openTime: wh.openTime,
         closeTime: wh.closeTime,
-        dayOfWeek: wh.dayOfWeek
+        dayOfWeek: wh.dayOfWeek,
+        isWorkingDay : wh.isWorkingDay
       })) || []
     };
   }
