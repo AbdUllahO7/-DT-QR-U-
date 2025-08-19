@@ -236,44 +236,35 @@ class BranchProductService {
   }
 
   // Get menu for specific branch
-  async getBranchMenu(branchId: number, includes?: string[]): Promise<Product[]> {
-    try {
-      let url = `${this.baseUrl}/branch/${branchId}/menu`;
-      
-      // Add includes parameter if provided
-      if (includes && includes.length > 0) {
-        const includesParam = includes.join(', ');
-        url += `?includes=${encodeURIComponent(includesParam)}`;
-      }
-      
-      const response = await httpClient.get<APIBranchProduct[]>(url);
-      
-      logger.info('Branch menu retrieved successfully', { 
-        branchId,
-        count: response.data.length,
-        hasIncludes: !!includes?.length
-      });
-      
-      // Determine transformation method based on response structure
-      const firstItem = response.data[0];
-      const hasComplexStructure = firstItem && (
-        firstItem.product || 
-        firstItem.branchCategory || 
-        firstItem.ingredients || 
-        firstItem.allergens
-      );
-      
-      if (hasComplexStructure) {
-        return this.transformComplexAPIDataToComponentData(response.data);
-      } else {
-        return this.transformSimpleAPIDataToComponentData(response.data as unknown as SimpleBranchProduct[]);
-      }
-      
-    } catch (error: any) {
-      logger.error('Error retrieving branch menu:', error);
-      return [];
+  async getBranchMenu(branchId: number, includes?: string[]): Promise<any> {
+  try {
+    let url = `${this.baseUrl}/branch/${branchId}/menu`;
+    
+    // Add includes parameter if provided
+    if (includes && includes.length > 0) {
+      const includesParam = includes.join(', ');
+      url += `?includes=${encodeURIComponent(includesParam)}`;
     }
+    
+    const response = await httpClient.get(url);
+    
+    logger.info('Branch menu retrieved successfully', { 
+      branchId,
+      hasIncludes: !!includes?.length,
+      branchName: response.data?.branchName,
+      categoriesCount: response.data?.categories?.length
+    });
+    
+    console.log("response.data", response.data);
+    
+
+    return response.data;
+    
+  } catch (error: any) {
+    logger.error('Error retrieving branch menu:', error);
+    throw error;
   }
+}
 
   // Create branch product
   async createBranchProduct(productData: {
