@@ -72,7 +72,6 @@ enum AdditionStep {
   REVIEW_SELECTION = 'review_selection'
 }
 
-// New interfaces for tracking edited values
 interface EditedProductPrice {
   productId: number;
   originalPrice: number;
@@ -264,21 +263,14 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
 
   // Use functional state update to get the most current state
   let nameToSave: string | undefined;
-  let originalName: string;
+  let originalName: string = '';
 
   setEditedCategoryNames((currentEditedNames) => {
-    // Get the edited name from the current Map state
     const editedName = currentEditedNames.get(categoryId);
     nameToSave = newName?.trim() || editedName?.newName?.trim();
     originalName = editedName?.originalName || categories.find(cat => cat.categoryId === categoryId)?.categoryName || '';
     
-    console.log('Current state in save function:', { 
-      categoryId, 
-      editedName, 
-      nameToSave, 
-      originalName,
-      providedNewName: newName 
-    });
+
     
     // Return the same state (we're just reading it)
     return currentEditedNames;
@@ -289,7 +281,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
 
   // Validate the name to save
   if (!nameToSave) {
-    console.warn('No valid name to save:', { categoryId, nameToSave });
     setEditingCategoryId(null);
     return;
   }
@@ -301,37 +292,33 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     return;
   }
 
-  console.log('Saving category name:', { categoryId, nameToSave, originalName });
   try {
-    // Call API to save the new name
     await saveBranchCategoryName(categoryId, nameToSave);
     console.log('Category name saved successfully:', { categoryId, nameToSave });
 
-    // Update editedCategoryNames to reflect the saved name as the new originalName
     setEditedCategoryNames((prev) => {
       const newMap = new Map(prev);
       newMap.set(categoryId, {
         categoryId,
-        originalName: nameToSave, // Update originalName to the saved name
-        newName: nameToSave,
+        originalName: nameToSave ?? '', 
+        newName: nameToSave ?? '',
       });
       return newMap;
     });
 
-    // Optionally, update local categories state
     setCategories((prev) =>
       prev.map((cat) =>
-        cat.categoryId === categoryId ? { ...cat, categoryName: nameToSave } : cat
+        cat.categoryId === categoryId
+          ? { ...cat, categoryName: nameToSave ?? '' }
+          : cat
       )
     );
   } catch (error) {
     console.error('Failed to save category name:', error);
-    // Optionally, set an error state for UI feedback
-    // setError('Failed to save category name. Please try again.');
-    return; // Keep editing state active on failure
+   
+    return; 
   }
 
-  // Clear editing state
   setEditingCategoryId(null);
 };
   
@@ -399,9 +386,9 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     setIsLoading(true);
     
     // Update the branch category name using the branchCategoryId (not categoryId)
-    await branchCategoryService.updateBranchCategory(branchCategory.branchCategoryId, {
+    await branchCategoryService.updateBranchCategory( {
       displayName: newName,
-    
+       branchCategoryId :branchCategory.branchCategoryId,
     });
 
     // Update local state

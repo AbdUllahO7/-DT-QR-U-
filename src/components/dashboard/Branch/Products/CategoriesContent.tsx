@@ -155,8 +155,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   setExpandedCategories,
   setExpandedBranchCategories,
   setIsReorderMode,
-  setEditingProductId,
-  setEditingCategoryId,
+
   handleShowProductDetails,
   onCategorySelect,
   onProductSelect,
@@ -289,8 +288,9 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
           <div className="relative">
             <DollarSign className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
             <input
+              title='number'
               type="number"
-              step="0.01"
+              step="1"
               min="0"
               value={currentPrice}
               onChange={(e) => onChange(e.target.value)}
@@ -1409,7 +1409,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                                 }`}
                                 title={
                                   (branchCategory.selectedProductsCount || 0) > 0
-                                    ? t('branchCategories.messages.error.cannotDeleteTooltip', { count: branchCategory.selectedProductsCount })
+                                    ? t('branchCategories.messages.error.cannotDeleteTooltip', { count: branchCategory.selectedProductsCount ?? 0 })
                                     : t('branchCategories.actions.delete')
                                 }
                               >
