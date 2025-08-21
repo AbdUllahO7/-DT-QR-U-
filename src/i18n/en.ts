@@ -216,6 +216,31 @@ export const en = {
         avgOrderValue: 'Average Order Value'
       }
     },
+   orderType: {
+        title: "Order Type Settings",
+        subtitle: "Manage activation status, minimum order amount and service charges for order types",
+        loading: "Loading order types...",
+        pleaseWait: "Please wait",
+        settingsUpdated: "settings updated successfully",
+        updateError: "Error occurred while updating settings",
+        loadingError: "Error occurred while loading order types",
+        active: "active",
+        minutes: "minutes",
+        requirements: "Requirements",
+        table: "Table",
+        address: "Address",
+        phone: "Phone",
+        activeStatus: "Active Status",
+        activeStatusDescription: "Enable/disable this order type",
+        minOrderAmount: "Minimum Order Amount",
+        serviceCharge: "Service Charge",
+        saveSettings: "Save Settings",
+        updating: "Updating...",
+        totalOrderTypes: "Total Order Types",
+        activeTypes: "Active Types",
+        totalActiveOrders: "Total Active Orders",
+        estimatedTime: "Estimated Time"
+      },
     products: {
       title: 'Products',
       description: 'View and manage your products.'

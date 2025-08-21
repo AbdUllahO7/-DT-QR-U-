@@ -220,6 +220,31 @@ export const ar = {
     ingredients : {
       title : "المكونات"
     },
+    orderType: {
+        title: "إعدادات أنواع الطلبات",
+        subtitle: "إدارة حالة التفعيل والحد الأدنى لقيمة الطلب ورسوم الخدمة لأنواع الطلبات",
+        loading: "جاري تحميل أنواع الطلبات...",
+        pleaseWait: "يرجى الانتظار",
+        settingsUpdated: "تم تحديث الإعدادات بنجاح",
+        updateError: "حدث خطأ أثناء تحديث الإعدادات",
+        loadingError: "حدث خطأ أثناء تحميل أنواع الطلبات",
+        active: "نشط",
+        minutes: "دقيقة",
+        requirements: "المتطلبات",
+        table: "طاولة",
+        address: "عنوان",
+        phone: "هاتف",
+        activeStatus: "الحالة النشطة",
+        activeStatusDescription: "تفعيل/إلغاء تفعيل نوع الطلب هذا",
+        minOrderAmount: "الحد الأدنى لقيمة الطلب",
+        serviceCharge: "رسوم الخدمة",
+        saveSettings: "حفظ الإعدادات",
+        updating: "جاري التحديث...",
+        totalOrderTypes: "إجمالي أنواع الطلبات",
+        activeTypes: "الأنواع النشطة",
+        totalActiveOrders: "إجمالي الطلبات النشطة",
+        estimatedTime: "الوقت المقدر"
+      },
     products : {
       title : "المنتجات",
       description: 'عرض وإدارة المنتجات.',

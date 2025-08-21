@@ -25,6 +25,7 @@ import SetupSidebar from '../components/dashboard/layout/SetupSidebar';
 import BranchProducts from '../components/dashboard/Branch/Products/BranchProducts';
 import BranchTableManagement from '../components/dashboard/Branch/Table/BranchTables';
 import BranchManagementBranch from '../components/dashboard/Branch/BranchManagement/BranchManagement';
+import OrderTypeComponeent from '../components/dashboard/Branch/OrderType/Ordertype';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();
@@ -202,6 +203,7 @@ const Dashboard: React.FC = () => {
             {activeTab === 'branchProducts' && <BranchProducts />}
               {activeTab === 'TableManagement' && <BranchTableManagement />}
               {activeTab === 'BranchManagement' && <BranchManagementBranch />}
+              {activeTab === 'orderType' && <OrderTypeComponeent />}
 
       
         </main>
