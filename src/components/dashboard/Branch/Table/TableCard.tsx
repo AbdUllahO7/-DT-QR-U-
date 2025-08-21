@@ -9,7 +9,8 @@ import {
   Save,
   XCircle,
   QrCode,
-  Loader2
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
 import { UpdateMenuTableDto } from '../../../../services/Branch/branchTableService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
@@ -30,12 +31,14 @@ interface TableCardProps {
   table: TableData;
   isEditing: boolean;
   isToggling: boolean;
+  isClearing?: boolean; // New prop for clear table loading state
   onEdit: () => void;
   onCancelEdit: () => void;
   onUpdate: (tableId: number, updatedData: Partial<TableData>) => Promise<void>;
   onDelete: (tableId: number) => Promise<void>;
   onToggleStatus: (tableId: number, newStatus: boolean) => Promise<void>;
   onToggleOccupation: (tableId: number, isOccupied: boolean) => Promise<void>;
+  onClearTable: (tableId: number) => Promise<void>; // New prop for clear table
   onShowQRCode: (table: TableData) => void;
   onTableChange: (tableId: number, updatedData: Partial<TableData>) => void;
 }
@@ -44,12 +47,14 @@ const TableCard: React.FC<TableCardProps> = ({
   table,
   isEditing,
   isToggling,
+  isClearing = false,
   onEdit,
   onCancelEdit,
   onUpdate,
   onDelete,
   onToggleStatus,
   onToggleOccupation,
+  onClearTable,
   onShowQRCode,
   onTableChange
 }) => {
@@ -135,7 +140,6 @@ const TableCard: React.FC<TableCardProps> = ({
 
       <div className="space-y-2">
         <div className={`flex items-center justify-between`}>
-         
           <button
             onClick={() => onToggleStatus(table.id, !table.isActive)}
             disabled={isToggling}
@@ -154,8 +158,7 @@ const TableCard: React.FC<TableCardProps> = ({
           </button>
         </div>
 
-        <div className={`flex items-center justify-between `}>
-         
+        <div className={`flex items-center justify-between`}>
           <button
             onClick={() => onToggleOccupation(table.id, !table.isOccupied)}
             disabled={!table.isActive || isToggling}
@@ -169,6 +172,32 @@ const TableCard: React.FC<TableCardProps> = ({
             <span className={`text-xs ${table.isOccupied ? 'text-red-600' : 'text-green-600'}`}>
               {table.isOccupied ? t('BranchTableManagement.occupied') : t('BranchTableManagement.available')}
             </span>
+          </button>
+        </div>
+
+        {/* Clear Table Button - New Addition */}
+        <div className={`flex items-center justify-center pt-2 border-t border-gray-200 dark:border-gray-700`}>
+          <button
+            onClick={() => onClearTable(table.id)}
+            disabled={!table.isActive || isClearing || isToggling}
+            className={`w-full px-3 py-2 text-xs font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              table.isOccupied 
+                ? 'bg-orange-100 hover:bg-orange-200 text-orange-700 dark:bg-orange-900/30 dark:hover:bg-orange-900/50 dark:text-orange-300' 
+                : 'bg-blue-100 hover:bg-blue-200 text-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 dark:text-blue-300'
+            } flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+            title={table.isOccupied ? t('BranchTableManagement.clearTable') : t('BranchTableManagement.refreshTable')}
+          >
+            {isClearing ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <RefreshCw className="h-3 w-3" />
+            )}
+            {isClearing 
+              ? t('BranchTableManagement.clearing') 
+              : table.isOccupied 
+                ? t('BranchTableManagement.clearTable') 
+                : t('BranchTableManagement.refreshTable')
+            }
           </button>
         </div>
       </div>

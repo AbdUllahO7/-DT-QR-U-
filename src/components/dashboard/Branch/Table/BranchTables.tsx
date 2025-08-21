@@ -239,6 +239,7 @@ const BranchTableManagement: React.FC = () => {
     }
   ]);
   const [isBatchCreating, setIsBatchCreating] = useState<boolean>(false);
+const [clearLoading, setClearLoading] = useState<Set<number>>(new Set());
 
   const iconOptions: string[] = ['table', 'users', 'grid', 'building', 'settings'];
 
@@ -291,6 +292,66 @@ const BranchTableManagement: React.FC = () => {
   const removeBatchItem = (index: number) => {
     setBatchItems(prev => prev.filter((_, i) => i !== index));
   };
+const handleClearTable = async (tableId: number): Promise<void> => {
+  setClearLoading(prev => new Set(prev).add(tableId));
+
+  try {
+    console.log("tableId",tableId)
+    const result = await tableService.clearTable(tableId);
+    
+   console.log("result",result)
+    
+    setTables(prev => prev.map(table => 
+      table.id === tableId 
+        ? { ...table, isOccupied: false } // Assuming clear makes table available
+        : table
+    ));
+    
+    // Show success message from server
+    setSuccessMessage(result.message || 'Table cleared successfully');
+    
+    // Log additional info if available
+    if (result.endedSessions > 0) {
+      console.log(`Ended ${result.endedSessions} sessions for table ${tableId}` , );
+    }
+    
+    // Optionally refresh categories to update counts
+    await fetchCategories();
+    
+    // Alternative approach: If you're unsure about the final state,
+    // you can fetch the updated table data:
+    // try {
+    //   const updatedTable = await tableService.getTableById(tableId);
+    //   if (updatedTable) {
+    //     setTables(prev => prev.map(table => 
+    //       table.id === tableId ? updatedTable : table
+    //     ));
+    //   }
+    // } catch (fetchError) {
+    //   console.error('Error fetching updated table:', fetchError);
+    // }
+    
+  } catch (err: any) {
+    console.error('Error clearing table:', err);
+    
+    // More specific error handling based on status code
+    if (err.status === 415) {
+      setError('Server configuration error. Please contact support.');
+    } else if (err.status === 404) {
+      setError('Table not found. Please refresh the page.');
+    } else if (err.status === 400) {
+      setError('Invalid table operation. Please try again.');
+    } else {
+      setError('Failed to clear table. Please try again.');
+    }
+  } finally {
+    setClearLoading(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(tableId);
+      return newSet;
+    });
+  }
+};
 
   const updateBatchItem = (index: number, field: keyof BatchCreateMenuTableItemDto, value: any) => {
     setBatchItems(prev => prev.map((item, i) => 
@@ -1057,6 +1118,7 @@ const BranchTableManagement: React.FC = () => {
             {filteredCategories.map((category) => (
               <CategorySection
                 key={category.id}
+                  onClearTable={handleClearTable}
                 category={category}
                 tables={getTablesForCategory(category.id)}
                 isExpanded={expandedCategories.has(category.id)}

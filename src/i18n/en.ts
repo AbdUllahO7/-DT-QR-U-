@@ -2733,6 +2733,7 @@ export const en = {
   },
   BranchtableManagement: {
     title: "Table Management",
+
     batchCreateTables: "batchCreateTables",
     subtitle: "Manage your restaurant tables and categories", 
     tabs: {
@@ -2816,6 +2817,10 @@ export const en = {
 
   BranchTableManagement: {
     header: "Category & Table Management",
+    "clearTable": "Clear Table",
+    "refreshTable": "Refresh Status", 
+    "clearing": "Clearing...",
+
         batchCreateTables: "Batch Create Tables",
     subheader: "Manage restaurant categories and tables with accordion view",
     totalCategories: "Total Categories",
@@ -2852,6 +2857,10 @@ export const en = {
     copyQRUrl: "Copy QR URL",
     copied: "Copied!",
     success: {
+        "tableCleared": "Table {{tableName}} has been cleared and is now available",
+      "tableOccupied": "Table {{tableName}} status has been updated to occupied",
+      "tableClearedGeneric": "Table has been cleared successfully",
+      "tableStatusUpdated": "Table status has been updated successfully",
       categoryAdded: "Category added successfully",
       categoryUpdated: "Category updated successfully",
       categoryDeleted: "Category deleted successfully",
@@ -2862,11 +2871,11 @@ export const en = {
       categoryDeactivated: "Category deactivated successfully",
       tableActivated: "Table activated successfully",
       tableDeactivated: "Table deactivated successfully",
-      tableOccupied: "Table marked as occupied",
       tableAvailable: "Table marked as available",
       dataRefreshed: "Data refreshed successfully"
     },
     error: {
+            "clearTableFailed": "Failed to clear table. Please try again.",
       fetchCategoriesFailed: "Failed to fetch categories",
       fetchTablesFailed: "Failed to fetch tables",
       categoryNameRequired: "Category name is required",

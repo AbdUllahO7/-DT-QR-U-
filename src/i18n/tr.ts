@@ -2732,6 +2732,7 @@ SortableProduct: {
     }
   },
   BranchtableManagement: {
+
   title: "Masa Yönetimi",
   subtitle: "Restoran masalarınızı ve kategorilerinizi yönetin",
   tabs: {
@@ -2813,6 +2814,9 @@ SortableProduct: {
   }
   },
   BranchTableManagement: {
+  "clear Table": "Tablo temizleniyor",
+  "refresh Table": "Durumu güncelle",
+   "clearing": "Temizleniyor...",
     batchCreateTables: "Toplu Tablo Oluştur",
     header: "Category & Table Management",
     subheader: "Manage restaurant categories and tables with accordion view",
@@ -2850,6 +2854,10 @@ SortableProduct: {
     copyQRUrl: "Copy QR URL",
     copied: "Copied!",
     success: {
+      "tableCleared": "{{tableName}} tablosu temizlendi ve artık kullanılabilir",
+"tableOccupied": "{{tableName}} tablosunun durumu 'dolu' olarak güncellendi",
+"tableClearedGeneric": "Tablo başarıyla temizlendi",
+"tableStatusUpdated": "Tablo durumu başarıyla güncellendi",
       categoryAdded: "Category added successfully",
       categoryUpdated: "Category updated successfully",
       categoryDeleted: "Category deleted successfully",
@@ -2860,11 +2868,11 @@ SortableProduct: {
       categoryDeactivated: "Category deactivated successfully",
       tableActivated: "Table activated successfully",
       tableDeactivated: "Table deactivated successfully",
-      tableOccupied: "Table marked as occupied",
       tableAvailable: "Table marked as available",
       dataRefreshed: "Data refreshed successfully"
     },
     error: {
+      "clearTableFailed": "Tablo temizlenemedi. Lütfen tekrar deneyin.",
       fetchCategoriesFailed: "Failed to fetch categories",
       fetchTablesFailed: "Failed to fetch tables",
       categoryNameRequired: "Category name is required",
