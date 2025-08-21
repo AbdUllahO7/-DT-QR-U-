@@ -55,7 +55,6 @@ const BranchManagementBranch: React.FC = () => {
     },
     createBranchWorkingHourCoreDto: [],
   });
-  console.log("selectedBranch",selectedBranch)
 
   useEffect(() => {
     loadBranches();
@@ -68,7 +67,6 @@ const BranchManagementBranch: React.FC = () => {
       const data: BranchData[] = await branchService.getBranches();
       setBranches(data);
       if (data.length > 0) {
-        console.log("data", data)
         setSelectedBranch(data[0]);
         initializeEditData(data[0]);
       }

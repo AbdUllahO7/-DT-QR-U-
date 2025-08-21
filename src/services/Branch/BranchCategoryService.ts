@@ -216,7 +216,6 @@ class BranchCategoryService {
         const response = await httpClient.post(`${this.baseUrl}`, payload);
         logger.info('Branch category created successfully', { data: response.data });
   
-        console.log("response.data",response.data)
         return response.data;
       } catch (error: any) {
         if (error.response?.data?.errors && error.response.data.errors.createBranchCategoryDto) {

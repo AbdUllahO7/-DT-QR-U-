@@ -2736,6 +2736,7 @@ export const ar = {
     },
   },
   BranchtableManagement: {
+
   title: "إدارة الطاولات",
   subtitle: "إدارة طاولات المطعم والفئات",
   tabs: {
@@ -2818,6 +2819,9 @@ export const ar = {
   },
 
   BranchTableManagement: {
+      "clearTable": " تنضيف الطاولة",
+      "refreshTable": " تحديث الحالة",
+      "clearing": "جارٍ المسح...",
       batchCreateTables: "إنشاء جداول دفعة واحدة",
       header: "إدارة الفئات والطاولات",
       subheader: "إدارة فئات المطعم والطاولات مع عرض الأكورديون",
@@ -2855,7 +2859,10 @@ export const ar = {
       copyQRUrl: "نسخ رابط QR",
       copied: "تم النسخ!",
       success: {
-      
+        "tableCleared": "تم مسح الطاولة {{tableName}} وهو الآن متاح",
+        "tableOccupied": "تم تحديث حالة الطاولة {{tableName}} إلى ",
+        "tableClearedGeneric": "تم مسح الطاولة بنجاح",
+        "tableStatusUpdated": "تم تحديث حالة الطاولة بنجاح",
         categoryAdded: "تم إضافة الفئة بنجاح",
         categoryUpdated: "تم تحديث الفئة بنجاح",
         categoryDeleted: "تم حذف الفئة بنجاح",
@@ -2866,11 +2873,11 @@ export const ar = {
         categoryDeactivated: "تم إلغاء تفعيل الفئة بنجاح",
         tableActivated: "تم تفعيل الطاولة بنجاح",
         tableDeactivated: "تم إلغاء تفعيل الطاولة بنجاح",
-        tableOccupied: "تم وضع علامة على الطاولة كمشغولةة",
         tableAvailable: "تم وضع علامة على الطاولة كمتاحة",
         dataRefreshed: "تم تحديث البيانات بنجاح"
       },
       error: {
+      "clearTableFailed": "فشل مسح الطاولة. يُرجى المحاولة مرة أخرى",
         fetchCategoriesFailed: "فشل في جلب الفئات",
         fetchTablesFailed: "فشل في جلب الطاولات",
         categoryNameRequired: "اسم الفئة مطلوب",

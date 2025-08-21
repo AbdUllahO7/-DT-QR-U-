@@ -19,7 +19,12 @@ export interface UpdateTableCategoryDto {
   isActive: boolean;
   rowVersion?: string;
 }
-
+// New interface for clear table response
+export interface ClearTableResponseDto {
+  message: string;
+  endedSessions: number;
+  tableName: string;
+}
 export interface CategoryStatusToggleDto {
   isActive: boolean;
 }
@@ -598,6 +603,40 @@ class TableService {
       throw error;
     }
   }
+  /**
+   * Clear table - Toggle table occupation status between busy and available
+   * This is a simplified endpoint that automatically toggles the current state
+   */
+async clearTable(tableId: number): Promise<ClearTableResponseDto> {
+  console.log("tableId out",tableId)
+  try {
+      console.log("tableId in",tableId)
+
+    logger.info('Masa temizleme API çağrısı başlatılıyor', { tableId }, { prefix: 'TableService' });
+    
+    if (!tableId || tableId <= 0) {
+      throw new Error('Geçerli bir masa ID gereklidir');
+    }
+
+    const response = await httpClient.post<ClearTableResponseDto>(
+      `${this.baseUrl}/tables/${tableId}/clear` , {
+          "reason": "string"
+      }
+    );
+    
+   console.log("response",response)
+    logger.info('Masa durumu başarıyla temizlendi/değiştirildi', { 
+      tableId, 
+      message: response.data.message,
+      endedSessions: response.data.endedSessions
+    }, { prefix: 'TableService' });
+    
+    return response.data;
+  } catch (error) {
+    logger.error('Masa temizlenirken hata oluştu', error, { prefix: 'TableService' });
+    throw error;
+  }
+}
 }
 
 export const tableService = new TableService();

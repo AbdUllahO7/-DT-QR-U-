@@ -254,9 +254,6 @@ class BranchProductService {
       branchName: response.data?.branchName,
       categoriesCount: response.data?.categories?.length
     });
-    
-    console.log("response.data", response.data);
-    
 
     return response.data;
     
@@ -316,7 +313,6 @@ class BranchProductService {
     branchCategoryId?: number;
   }): Promise<Product> {
     try {
-      console.log("productData",productData)
       const payload: UpdateBranchProductRequest = {
         branchProductId: productData.branchProductId ?? id,
         price: productData.price ?? 0,

@@ -49,7 +49,6 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setIsBranchDropdownOpen(false));
 
-  console.log("groupedTables", groupedTables);
 
   const token = localStorage.getItem('token') || '';
 
