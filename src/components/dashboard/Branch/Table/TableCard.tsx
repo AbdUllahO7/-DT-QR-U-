@@ -81,7 +81,7 @@ const TableCard: React.FC<TableCardProps> = ({
             <h4 className="font-medium text-gray-900 dark:text-white">
               {table.menuTableName}
             </h4>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-left text-gray-500 dark:text-gray-400">
               {t('BranchTableManagement.capacityPlaceholder')}: {table.capacity}
             </p>
           </div>
@@ -134,10 +134,8 @@ const TableCard: React.FC<TableCardProps> = ({
       </div>
 
       <div className="space-y-2">
-        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            {t('BranchTableManagement.status')}
-          </span>
+        <div className={`flex items-center justify-between`}>
+         
           <button
             onClick={() => onToggleStatus(table.id, !table.isActive)}
             disabled={isToggling}
@@ -156,10 +154,8 @@ const TableCard: React.FC<TableCardProps> = ({
           </button>
         </div>
 
-        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            {t('BranchTableManagement.occupation')}
-          </span>
+        <div className={`flex items-center justify-between `}>
+         
           <button
             onClick={() => onToggleOccupation(table.id, !table.isOccupied)}
             disabled={!table.isActive || isToggling}

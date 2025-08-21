@@ -382,7 +382,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
       {/* Header */}
       <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
         <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4 flex-row-reverse' : 'space-x-4'}`}>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl mr-2 font-bold text-gray-900 dark:text-white">
             {t('tableManagement.title')}
           </h2>
           
@@ -481,7 +481,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
                 <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
                     <div 
-                      className="w-4 h-4 rounded-full"
+                      className="w-4 h-4 rounded-full mr-2"
                       style={{ backgroundColor: category.colorCode || '#3B82F6' }}
                     ></div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -544,7 +544,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
             setEditingTable({ ...editingTable, [field]: value });
           }
         }}
-        onSubmit={() => {}} // Remove this since modal handles its own submit
+        onSubmit={() => {}} 
         isSubmitting={isSubmitting}
         isEditMode={!!editingTable}
         selectedBranchForEdit={selectedBranchForTables}
