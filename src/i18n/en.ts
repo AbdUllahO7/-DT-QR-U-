@@ -1342,6 +1342,10 @@ export const en = {
     optional: 'Optional'
   },
   productsContent: {
+        branch : {
+    selectAll:"All",
+
+    },
   title: 'Products Management',
   description: 'Manage menu categories and products',
   

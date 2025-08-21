@@ -188,7 +188,7 @@ const Dashboard: React.FC = () => {
          
               {activeTab === 'overview' && <Overview />}
               {activeTab === 'orders' && <Orders />}
-              {activeTab === 'products' && <ProductsContent />}
+              {activeTab === 'products' && <ProductsContent  />}
               {activeTab === 'ingredients' && <IngredientsContent />}
               {activeTab === 'branches' && <BranchManagement />}
               {activeTab === 'tables' && <TableManagement selectedBranch={selectedBranch} />}

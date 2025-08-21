@@ -1348,6 +1348,10 @@ export const ar = {
     optional: 'اختياري'
   },
   productsContent: {
+    branch : {
+    selectAll:"الكل",
+
+    },
   title: 'إدارة المنتجات',
   description: 'إدارة فئات ومنتجات القائمة',
   

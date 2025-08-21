@@ -1,7 +1,7 @@
 // Dashboard bileşenleri için type tanımları
 
 export interface Product {
-  productId: number;
+  id: number;
   categoryId: number;
   name: string;
   description: string;

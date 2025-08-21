@@ -1347,6 +1347,10 @@ export const tr = {
     optional: 'Opsiyonel'
   },
   productsContent: {
+        branch : {
+    selectAll:"Hepsi",
+
+    },
   title: 'Ürün Yönetimi',
   description: 'Menü kategorileri ve ürünlerini yönetin',
   

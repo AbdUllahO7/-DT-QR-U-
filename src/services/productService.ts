@@ -13,7 +13,6 @@ interface APIProduct {
   displayOrder: number;
   description?: string; // May or may not be included
   categoryId: number;
-  
 }
 
 interface APICategory {
@@ -25,21 +24,58 @@ interface APICategory {
   products: APIProduct[];
   description?: string; // May or may not be included
 }
+
+// Branch-specific API interfaces
+interface BranchProduct {
+  branchProductId: number;
+  productId: number;
+  productName: string;
+  description?: string;
+  price: number;
+  imageUrl?: string;
+  isActive: boolean;
+  displayOrder: number;
+  ingredients?: any[];
+  allergens?: string[];
+  addons?: any[];
+}
+
+interface BranchCategoryResponse {
+  branchCategoryId: number;
+  branchId: number;
+  categoryId: number;
+  category: {
+    categoryId: number;
+    categoryName: string;
+    status: boolean;
+    displayOrder: number;
+    restaurantId: number;
+    description?: string;
+  };
+  isActive: boolean;
+  displayName: string;
+  displayOrder: number;
+  productCount: number;
+  products: BranchProduct[];
+}
+
 interface ProductIngredient {
   ingredientId: number;
   quantity: number;
   unit: string;
 }
+
 interface UpdateIngredientsPayload {
   productId: number;
   ingredients: ProductIngredient[];
 }
+
 class ProductService {
   private baseUrl = '/api';
 
   // Transform API response to match component expectations
   private transformAPIDataToComponentData(apiCategories: APICategory[]): Category[] {
-    return apiCategories.map( apiCategory => ({
+    return apiCategories.map(apiCategory => ({
       categoryId: apiCategory.categoryId, 
       categoryName: apiCategory.categoryName,
       description: apiCategory.description || '', 
@@ -61,6 +97,30 @@ class ProductService {
     }));
   }
 
+  // Transform Branch Categories API response to match component expectations
+  private transformBranchCategoriesToComponentData(branchCategories: BranchCategoryResponse[]): Category[] {
+    return branchCategories.map(branchCategory => ({
+      categoryId: branchCategory.category.categoryId,
+      categoryName: branchCategory.category.categoryName || branchCategory.displayName,
+      description: branchCategory.category.description || '',
+      status: branchCategory.category.status,
+      displayOrder: branchCategory.displayOrder,
+      restaurantId: branchCategory.category.restaurantId,
+      isExpanded: true,
+      products: branchCategory.products.map(branchProduct => ({
+        id: branchProduct.productId,
+        name: branchProduct.productName,
+        description: branchProduct.description || '',
+        price: branchProduct.price,
+        imageUrl: branchProduct.imageUrl || '',
+        isAvailable: branchProduct.isActive,
+        status: branchProduct.isActive,
+        displayOrder: branchProduct.displayOrder,
+        categoryId: branchCategory.category.categoryId,
+      }))
+    }));
+  }
+
   // Kategori listesini getirir
   async getCategories(): Promise<Category[]> {
     try {
@@ -72,7 +132,6 @@ class ProductService {
         }
       });
       
-      
       // Transform the API response to match component expectations
       const transformedData = this.transformAPIDataToComponentData(response.data);
       
@@ -83,6 +142,37 @@ class ProductService {
     }
   }
 
+  async getBranchCategories(branchId: number): Promise<Category[]> {
+    try {
+      const params = new URLSearchParams({
+        branchId: branchId.toString(),
+        includes: "products",
+      });
+      
+      const response = await httpClient.get<BranchCategoryResponse[]>(`${this.baseUrl}/BranchCategories?${params.toString()}`);
+      
+      logger.info('Branch categories retrieved successfully', { 
+        branchId,
+        count: response.data.length,
+        rawData: response.data
+      });
+      
+      // Transform the branch categories response to match component expectations
+      const transformedData = this.transformBranchCategoriesToComponentData(response.data);
+      
+      logger.info('Branch categories transformed successfully', { 
+        branchId,
+        transformedCount: transformedData.length,
+        transformedData
+      });
+      
+      return transformedData;
+    } catch (error: any) {
+      logger.error('Error retrieving branch categories:', error);
+      return [];
+    }
+  }
+  
   // Kategori ekleme
   async createCategory(categoryData: {
     categoryName: string;
@@ -518,8 +608,6 @@ class ProductService {
       throw error;
     }
   }
-
-
 }
 
 export const productService = new ProductService();
