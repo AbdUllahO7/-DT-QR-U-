@@ -17,6 +17,7 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onTog
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
 
+  console.log("branch",branch)
   // Status helpers
   const getStatusBadge = () => {
     if (branch.isTemporarilyClosed) {

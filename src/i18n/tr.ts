@@ -217,6 +217,31 @@ export const tr = {
         avgOrderValue: 'Ortalama Sipariş Değeri'
       }
     },
+  orderType: {
+        title: "Sipariş Türü Ayarları",
+        subtitle: "Sipariş türlerinin aktiflik durumu, minimum tutar ve servis ücretlerini yönetin",
+        loading: "Sipariş türleri yükleniyor...",
+        pleaseWait: "Lütfen bekleyin",
+        settingsUpdated: "ayarları başarıyla güncellendi",
+        updateError: "Ayarlar güncellenirken hata oluştu",
+        loadingError: "Sipariş türleri yüklenirken hata oluştu",
+        active: "aktif",
+        minutes: "dakika",
+        requirements: "Gereksinimler",
+        table: "Masa",
+        address: "Adres",
+        phone: "Telefon",
+        activeStatus: "Aktif Durum",
+        activeStatusDescription: "Bu sipariş türünü etkinleştir/devre dışı bırak",
+        minOrderAmount: "Minimum Sipariş Tutarı",
+        serviceCharge: "Servis Ücreti",
+        saveSettings: "Ayarları Kaydet",
+        updating: "Güncelleniyor...",
+        totalOrderTypes: "Toplam Sipariş Türü",
+        activeTypes: "Aktif Türler",
+        totalActiveOrders: "Toplam Aktif Sipariş",
+        estimatedTime: "Tahmini Süre"
+      },
     products: {
       title: 'Ürünler',
       description: 'Ürünlerinizi görüntüleyin ve yönetin.'
@@ -284,7 +309,7 @@ export const tr = {
         aboutDetails: 'Restoranınız hakkında detaylı bilgi verin...'
       }
     },
-        branchManagementTitle: "Şube Yönetimi" ,
+    branchManagementTitle: "Şube Yönetimi" ,
 
     sidebar: {
        title : "QR Menü",
