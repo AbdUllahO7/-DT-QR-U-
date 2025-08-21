@@ -138,7 +138,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
 
   // Price editing functions
   const handleProductPriceEdit = (productId: number, originalPrice: number) => {
-    console.log('Starting product price edit:', { productId, originalPrice, activeTab });
     setEditingProductId(productId);
     
     const newEditedPrices = new Map(editedProductPrices);
@@ -155,7 +154,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
       }
     }
     
-    console.log('Setting initial price edit state:', { productId, originalPrice, currentPrice });
     
     newEditedPrices.set(productId, {
       productId,
@@ -167,7 +165,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
 
   const handleProductPriceChange = (productId: number, newPrice: string) => {
     const priceValue = parseFloat(newPrice) || 0;
-    console.log('Product price changing:', { productId, newPrice, priceValue });
     const newEditedPrices = new Map(editedProductPrices);
     const existing = newEditedPrices.get(productId);
     if (existing) {
@@ -176,7 +173,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
         newPrice: priceValue
       });
       setEditedProductPrices(newEditedPrices);
-      console.log('Updated product price state:', newEditedPrices.get(productId));
     } else {
       console.warn('No existing edit state found for product:', productId);
     }
@@ -209,7 +205,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
 
   // Category name editing functions
   const handleCategoryNameEdit = (categoryId: number, originalName: string) => {
-    console.log('Starting category name edit:', { categoryId, originalName, activeTab });
     setEditingCategoryId(categoryId);
     
     const newEditedNames = new Map(editedCategoryNames);
@@ -219,7 +214,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
       ? branchCategories.find(bc => bc.categoryId === categoryId)?.displayName || originalName
       : originalName;
     
-    console.log('Setting initial edit state:', { categoryId, originalName, currentName });
     
     newEditedNames.set(categoryId, {
       categoryId,
@@ -230,7 +224,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
   };
 
   const handleCategoryNameChange = (categoryId: number, newName: string) => {
-    console.log('Category name changing:', { categoryId, newName });
 
     // Create a new Map to ensure immutability
     const newEditedNames = new Map(editedCategoryNames);
@@ -251,15 +244,10 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     // Update state and ensure the change is applied
     setEditedCategoryNames(newEditedNames);
 
-    // Log the updated state in the next tick to verify
-    setTimeout(() => {
-      console.log('Updated editedCategoryNames:', Array.from(newEditedNames.entries()));
-      console.log('Updated category name state:', newEditedNames.get(categoryId));
-    }, 0);
+ 
   };
 
  const handleCategoryNameSave = async (categoryId: number, newName?: string) => {
-  console.log('handleCategoryNameSave:', { categoryId, newName });
 
   // Use functional state update to get the most current state
   let nameToSave: string | undefined;
@@ -294,7 +282,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
 
   try {
     await saveBranchCategoryName(categoryId, nameToSave);
-    console.log('Category name saved successfully:', { categoryId, nameToSave });
 
     setEditedCategoryNames((prev) => {
       const newMap = new Map(prev);
@@ -650,7 +637,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
               onlyActive: true,
               includes: 'category,ingredients,allergens,addons'
             });
-            console.log("allAvailableProducts",allAvailableProducts)
             // Transform available products to expected format
             const transformedAvailableProducts: DetailedProduct[] = allAvailableProducts.map(product => ({
               id: product.productId,

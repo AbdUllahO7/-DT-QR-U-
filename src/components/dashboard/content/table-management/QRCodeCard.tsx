@@ -57,41 +57,41 @@ const TableCard: React.FC<TableCardProps> = ({ table, onEdit, onDelete, onToggle
               <QrCode className="h-5 w-5 text-gray-600 dark:text-gray-400" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <h3 className="text-lg font-semibold ml-2 text-gray-900 dark:text-white">
                 {table.menuTableName}
               </h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-500 ml-2 dark:text-gray-400">
                 {table.categoryName}
               </p>
             </div>
           </div>
 
           {/* QR Code Preview and Link */}
-          <div className="mt-2">
+          <div className="mt-2 text-left">
             <a
               href={`/table/qr/${table.qrCode}`}
               target="_blank"
               rel="noopener noreferrer"
               title={t('TableCard.viewQRCode')}
               aria-label={t('TableCard.accessibility.qrCodePreview')}
-              className="inline-block hover:opacity-80"
+              className="inline-block hover:opacity-80 "
             >
               <img
-                src={`/api/qr/${table.qrCode}`}
+                src={`${table.qrCodeUrl}`}
                 alt={t('TableCard.viewQRCode')}
                 className="w-20 h-20 rounded border border-gray-200 dark:border-gray-600 bg-white"
               />
             </a>
           </div>
 
-          <div className={`flex items-center space-x-4 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
-            <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex items-center space-x-4 `}>
+            <div className={`flex items-center ${isRTL ? 'ml-4' : 'mr-4'}`}>
               <Users className={`h-4 w-4 text-gray-400 ${isRTL ? 'ml-1' : 'mr-1'}`} />
               <span className="text-sm text-gray-600 dark:text-gray-400">
                 {getCapacityText(table.capacity)}
               </span>
             </div>
-            <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center ${isRTL ? 'text-left' : ''}`}>
               <Circle className={`h-4 w-4 ${isRTL ? 'ml-1' : 'mr-1'} ${table.isOccupied ? 'text-orange-500' : 'text-blue-500'}`} />
               <span className="text-sm text-gray-600 dark:text-gray-400">
                 {getOccupancyText(table.isOccupied)}
@@ -99,10 +99,10 @@ const TableCard: React.FC<TableCardProps> = ({ table, onEdit, onDelete, onToggle
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className={`flex space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+          <div className="flex items-center justify-end ">
+            <div className={`flex space-x-2  gap-3 ${isRTL ? '' : ''}`}>
               <span 
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(table.isActive)}`}
+                className={`inline-flex items-center px-2.5 py-0.5  rounded-full text-xs font-medium ${getStatusColor(table.isActive)}`}
                 aria-label={t('TableCard.accessibility.statusBadge')}
               >
                 {getStatusText(table.isActive)}

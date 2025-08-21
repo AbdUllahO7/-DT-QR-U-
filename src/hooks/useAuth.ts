@@ -21,7 +21,6 @@ export const useAuth = () => {
         if (!isNaN(expiryDate.getTime()) && expiryDate > new Date()) {
           setIsAuthenticated(true);
         } else {
-          // Token süresi dolmuşsa token'ı temizle
           console.log('Token expired during checkAuth');
           clearAuth();
         }

@@ -189,8 +189,6 @@ const BranchTableManagement: React.FC = () => {
   const [showAddTable, setShowAddTable] = useState<number | null>(null);
   const [showBatchCreate, setShowBatchCreate] = useState<boolean>(false);
   
-  console.log("tables",tables)
-  console.log("categories",categories)
 
   const [qrModal, setQrModal] = useState<{
     isOpen: boolean;
