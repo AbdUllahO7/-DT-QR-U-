@@ -1,1 +1,6 @@
 node_modules
+ca.crt
+ca.key
+cert.crt
+cert.keylocalhost+2-key.pem
+localhost+2.pem
