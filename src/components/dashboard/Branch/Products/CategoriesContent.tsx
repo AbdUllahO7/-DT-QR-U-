@@ -262,7 +262,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   const getSelectedCategoriesWithProducts = () => {
     return categoriesWithProducts.map(category => ({
       ...category,
-      selectedProducts: category.products.filter(product => selectedProducts.has(product.productId))
+      selectedProducts: category.products.filter(product => selectedProducts.has(product.id))
     })).filter(category => selectedCategories.has(category.categoryId));
   };
 
@@ -520,11 +520,10 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   );
 
   // Enhanced Products Section for Manage Existing Tab
-  const renderManageProductsSection = (branchCategory: BranchCategory) => {
-    if (isReorderMode || !expandedBranchCategories.has(branchCategory.categoryId) || !branchCategory.products || branchCategory.products.length === 0) {
-      return null;
-    }
-
+const renderManageProductsSection = (branchCategory : BranchCategory) => {
+  if (isReorderMode || !expandedBranchCategories.has(branchCategory.categoryId) || !branchCategory.products || branchCategory.products.length === 0) {
+    return null;
+  }
     return (
       <div className="border-t border-gray-200 dark:border-gray-600 p-6 bg-gray-50 dark:bg-gray-700/50">
         <div className={`flex items-center justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -551,12 +550,12 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
           {branchCategory.products.map((product) => {
             const isSelected = product.isSelected;
             const hasDetailedInfo = product.ingredients || product.allergens;
-            const currentPrice = getProductPrice(product.productId, product.price);
-            const isEditingPrice = editingProductId === product.productId;
-            
+            const currentPrice = getProductPrice(product.id, product.price);
+            const isEditingPrice = editingProductId === product.id;
+            console.log("product 2 ",product)
             return (
               <div 
-                key={product.productId} 
+                key={product.id} 
                 className={`relative flex flex-col p-4 rounded-xl border-2 transition-all ${
                   isSelected 
                     ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
@@ -606,14 +605,14 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
 
                 <div className="mb-3">
                   <PriceEditor
-                    productId={product.productId}
+                    productId={product.id}
                     originalPrice={product.price}
                     currentPrice={currentPrice}
                     isEditing={isEditingPrice}
-                    onEdit={() => onProductPriceEdit(product.productId, product.price)}
-                    onSave={() => onProductPriceSave(product.productId)}
-                    onCancel={() => onProductPriceCancel(product.productId)}
-                    onChange={(value) => onProductPriceChange(product.productId, value)}
+                    onEdit={() => onProductPriceEdit(product.id, product.price)}
+                    onSave={() => onProductPriceSave(product.id)}
+                    onCancel={() => onProductPriceCancel(product.id)}
+                    onChange={(value) => onProductPriceChange(product.id, value)}
                     showEditButton={isSelected}
                   />
                 </div>
@@ -645,25 +644,56 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                       </button>
                     )}
                   </div>
-                  {isSelected ? (
-                    <button
-                      onClick={() => onRemoveProduct(product.branchProductId || product.productId, product.name)}
-                      disabled={isLoading}
-                      className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50 text-sm font-medium"
-                      title={t('branchCategories.products.removeFromBranch')}
-                    >
-                      Remove
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => onAddProduct(product.productId, branchCategory.branchCategoryId)}
-                      disabled={isLoading}
-                      className="px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors disabled:opacity-50 text-sm font-medium"
-                      title={t('branchCategories.products.addToBranch')}
-                    >
-                      Add
-                    </button>
-                  )}
+                 {isSelected ? (
+                  <button
+                    onClick={async () => {
+                      const branchProductIdToRemove = product.branchProductId || product.id;
+                      const originalProductId = product.originalProductId || product.id || product.id;
+                      
+                      console.log('Removing product:', originalProductId, 'branchProductId:', branchProductIdToRemove);
+                      console.log('Product details before removal:', {
+                        id: product.id,
+                        productId: product.id,
+                        originalProductId: product.originalProductId,
+                        branchProductId: product.branchProductId
+                      });
+                      
+                      await onRemoveProduct(branchProductIdToRemove, product.name);
+                      setTimeout(() => {
+                        onRefresh();
+                      }, 500);
+                    }}
+                    disabled={isLoading}
+                    className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50 text-sm font-medium"
+                    title={t('branchCategories.products.removeFromBranch')}
+                  >
+                    {isLoading ? 'Removing...' : 'Remove'}
+                  </button>
+                ) : (
+                  <button
+                   onClick={async () => {
+                        // Use the correct original product ID - prioritize originalProductId, then productId, then id
+                        const originalProductId = product.id;
+                        console.log('Adding product:', originalProductId, 'to category:', branchCategory.branchCategoryId);
+                        console.log('Product details:', {
+                          id: product.id,
+                          productId: product.id,
+                          originalProductId: product.originalProductId,
+                          branchProductId: product.branchProductId
+                        });
+                        
+                        await onAddProduct(originalProductId, branchCategory.branchCategoryId);
+                        setTimeout(() => {
+                          onRefresh();
+                        }, 500);
+                      }}
+                    disabled={isLoading}
+                    className="px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors disabled:opacity-50 text-sm font-medium"
+                    title={t('branchCategories.products.addToBranch')}
+                  >
+                    {isLoading ? 'Adding...' : 'Add'}
+                  </button>
+                )}
                 </div>
               </div>
             );
@@ -968,7 +998,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                               </div>
                               <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
                                 <span className="text-sm text-gray-500 dark:text-gray-400">
-                                  {category.products.filter(p => selectedProducts.has(p.productId)).length} {t('branchCategories.steps.selected')}
+                                  {category.products.filter(p => selectedProducts.has(p.id)).length} {t('branchCategories.steps.selected')}
                                 </span>
                                 {expandedCategories.has(category.categoryId) ? (
                                   <ChevronUp className="h-5 w-5 text-gray-400 dark:text-gray-500" />
@@ -983,13 +1013,13 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                             <div className="p-6">
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                 {category.products.map((product) => {
-                                  const isSelected = selectedProducts.has(product.productId);
-                                  const currentPrice = getProductPrice(product.productId, product.price);
-                                  const isEditingPrice = editingProductId === product.productId;
+                                  const isSelected = selectedProducts.has(product.id);
+                                  const currentPrice = getProductPrice(product.id, product.price);
+                                  const isEditingPrice = editingProductId === product.id;
                                   
                                   return (
                                     <div
-                                      key={product.productId}
+                                      key={product.id}
                                       className={`relative rounded-xl border-2 transition-all hover:shadow-md ${
                                         isSelected 
                                           ? 'border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20' 
@@ -1024,14 +1054,14 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                                         <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                                           <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
                                             <PriceEditor
-                                              productId={product.productId}
+                                              productId={product.id}
                                               originalPrice={product.price}
                                               currentPrice={currentPrice}
                                               isEditing={isEditingPrice}
-                                              onEdit={() => onProductPriceEdit(product.productId, product.price)}
-                                              onSave={() => onProductPriceSave(product.productId)}
-                                              onCancel={() => onProductPriceCancel(product.productId)}
-                                              onChange={(value) => onProductPriceChange(product.productId, value)}
+                                              onEdit={() => onProductPriceEdit(product.id, product.price)}
+                                              onSave={() => onProductPriceSave(product.id)}
+                                              onCancel={() => onProductPriceCancel(product.id)}
+                                              onChange={(value) => onProductPriceChange(product.id, value)}
                                               showEditButton={isSelected}
                                             />
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -1044,7 +1074,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                                           </div>
                                           <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
                                             <button
-                                              onClick={() => onProductSelect(product.productId)}
+                                              onClick={() => onProductSelect(product.id)}
                                               className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
                                                 isSelected
                                                   ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
@@ -1140,11 +1170,11 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                                 ${category.selectedProducts.length > 0 
                                   ? category.selectedProducts.reduce((sum, product) => {
-                                      const price = getProductPrice(product.productId, product.price);
+                                      const price = getProductPrice(product.id, product.price);
                                       return sum + price;
                                     }, 0).toFixed(2)
                                   : category.products.reduce((sum, product) => {
-                                      const price = getProductPrice(product.productId, product.price);
+                                      const price = getProductPrice(product.id, product.price);
                                       return sum + price;
                                     }, 0).toFixed(2)
                                 }
@@ -1159,11 +1189,11 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                             <h5 className="font-medium text-gray-900 dark:text-white mb-4">{t('branchCategories.review.selectedProducts')}</h5>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                               {category.selectedProducts.map((product) => {
-                                const currentPrice = getProductPrice(product.productId, product.price);
+                                const currentPrice = getProductPrice(product.id, product.price);
                                 const hasEditedPrice = Math.abs(currentPrice - product.price) > 0.001;
                                 
                                 return (
-                                  <div key={product.productId} className={`flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800 ${isRTL ? 'space-x-reverse' : ''}`}>
+                                  <div key={product.id} className={`flex items-center space-x-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800 ${isRTL ? 'space-x-reverse' : ''}`}>
                                     {product.imageUrl && (
                                       <img 
                                         src={product.imageUrl} 
