@@ -11,7 +11,7 @@ import { productAddonsService } from "../../../services/ProductAddonsService";
 // Define Ingredient type (copied from ProductIngredientSelectionModal for consistency)
 interface Ingredient {
   id: number;
-  name: string;
+  ingredientName: string;
   isAllergenic: boolean;
   isAvailable: boolean;
   allergenIds: number[];
@@ -88,6 +88,7 @@ export const SortableProduct: React.FC<{
       try {
         // Load ingredients
         const fetchedIngredients = await productService.getProductIngredients(product.id);
+        console.log("fetchedIngredients",fetchedIngredients)
         setIngredients(fetchedIngredients);
         logger.info('Ürün malzemeleri yüklendi', { productId: product.id, ingredientCount: fetchedIngredients.length });
       } catch (error: any) {
@@ -192,7 +193,7 @@ export const SortableProduct: React.FC<{
                   <div className={`flex flex-wrap gap-1 mt-1 `}>
                     {ingredients.map((ingredient, index) => (
                       <span key={ingredient.id} className="inline-flex items-center">
-                        {ingredient.name}
+                        {ingredient.ingredientName}
                         {ingredient.isAllergenic && (
                           <AlertCircle 
                             className={`h-3 w-3 text-yellow-500 ${isRTL ? 'mr-1' : 'ml-1'}`}
