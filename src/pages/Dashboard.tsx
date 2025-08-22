@@ -4,10 +4,7 @@ import { useAuth } from '../hooks';
 import { useLanguage } from '../contexts/LanguageContext';
 import Navbar from '../components/dashboard/layout/Navbar';
 import Sidebar from '../components/dashboard/layout/Sidebar';
-import Overview from '../components/dashboard/content/Overview';
-import Orders from '../components/dashboard/content/Orders';
-import BranchManagement from '../components/dashboard/content/BranchManagement';
-import TableManagement from '../components/dashboard/content/TableManagement';
+import BranchManagement from '../components/dashboard/content/branch-management/BranchManagement';
 import UserManagement from '../components/dashboard/content/UserManagement';
 import Profile from '../components/dashboard/content/Profile';
 import Settings from '../components/dashboard/content/Settings';
@@ -26,6 +23,9 @@ import BranchProducts from '../components/dashboard/Branch/Products/BranchProduc
 import BranchTableManagement from '../components/dashboard/Branch/Table/BranchTables';
 import BranchManagementBranch from '../components/dashboard/Branch/BranchManagement/BranchManagement';
 import OrderTypeComponeent from '../components/dashboard/Branch/OrderType/Ordertype';
+import Overview from '../components/dashboard/content/overview/Overview';
+import Orders from '../components/dashboard/content/orders/Orders';
+import TableManagement from '../components/dashboard/content/table-management/TableManagement';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();

@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Eye, QrCode, ShoppingCart, Star, Calendar, TrendingUp, Users } from 'lucide-react';
-import { KPICard } from './overview/KPICard';
-import { WeeklyActivityChart } from './overview/WeeklyActivityChart';
-import { PopularProductsChart } from './overview/PopularProductsChart';
-import { QuickStats } from './overview/QuickStats';
-import { MonthlyRevenueChart } from './overview/MonthlyRevenueChart';
-import { dashboardService } from '../../../services/dashboardService';
-import { useLanguage } from '../../../contexts/LanguageContext';
-import { logger } from '../../../utils/logger';
+import { useLanguage } from '../../../../contexts/LanguageContext';
+import { WeeklyActivityChart } from './WeeklyActivityChart';
+import { KPICard } from './KPICard';
+import { PopularProductsChart } from './PopularProductsChart';
+import { MonthlyRevenueChart } from './MonthlyRevenueChart';
+import { QuickStats } from './QuickStats';
+import { dashboardService } from '../../../../services/dashboardService';
+import { logger } from '../../../../utils/logger';
 
 // Grafiklerde kullanılacak renk paleti
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];

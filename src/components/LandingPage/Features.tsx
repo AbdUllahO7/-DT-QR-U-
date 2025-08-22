@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { QrCode, Smartphone, Zap, BarChart3, Clock, Shield, Palette, Globe } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
-import type { Feature } from '../types';
+import { useLanguage } from '../../contexts/LanguageContext';
+import type { Feature } from '../../types';
 
 const iconComponents = {
   QrCode,

@@ -23,6 +23,7 @@ export interface OrderType {
 
 // Update OrderType DTO
 export interface UpdateOrderTypeDto {
+  id:number;
   name: string;
   code: string;
   description: string;
@@ -44,6 +45,7 @@ export interface UpdateOrderTypeSettingsDto {
   minOrderAmount: number;
   serviceCharge: number;
   rowVersion: string;
+  id:number,
 }
 
 // Reorder DTO
@@ -132,6 +134,7 @@ class OrderTypeService {
       
       // Trim string values
       const updateData: UpdateOrderTypeDto = {
+        id:data.id,
         name: data.name?.trim() || '',
         code: data.code?.trim() || '',
         description: data.description?.trim() || '',

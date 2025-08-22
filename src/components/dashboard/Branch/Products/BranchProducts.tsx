@@ -13,7 +13,6 @@ import {
   DollarSign
 } from 'lucide-react';
 import { branchCategoryService } from '../../../../services/Branch/BranchCategoryService';
-import { ConfirmDeleteModal } from '../../../ConfirmDeleteModal';
 import { branchProductService } from '../../../../services/Branch/BranchProductService';
 import { Category, Product } from '../../../../types/dashboard';
 import { useLanguage } from '../../../../contexts/LanguageContext';
@@ -22,6 +21,7 @@ import CategoriesContent from './CategoriesContent';
 
 // Enhanced interfaces for detailed product information
 import type { APIIngredient, APIAllergen } from '../../../../types/dashboard';
+import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 
 interface APIProduct {
   id: number;

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Moon, Sun, QrCode, LogIn, UserPlus, LayoutDashboard, LogOut } from 'lucide-react';
-import { useTheme } from '../contexts/ThemeContext';
-import { useLanguage } from '../contexts/LanguageContext';
-import { useScrollSpy } from '../hooks/useScrollSpy';
-import { useAuth } from '../hooks';
-import LanguageSelector from './LanguageSelector';
-import type { NavItem } from '../types';
+import { useTheme } from '../../contexts/ThemeContext';
+import { useAuth, useScrollSpy } from '../../hooks';
+import { useLanguage } from '../../contexts/LanguageContext';
+import { NavItem } from '../../types';
+import LanguageSelector from '../LanguageSelector';
+
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
