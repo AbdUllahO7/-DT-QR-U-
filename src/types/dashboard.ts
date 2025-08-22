@@ -14,6 +14,8 @@ export interface Product {
   branchCategory?:Category
    ingredients?: APIIngredient[];
   allergens?: APIAllergen[];
+    originalProductId:number,
+
 }
 
 export interface Category {
@@ -27,7 +29,7 @@ export interface Category {
   products: Product[];
   status : boolean;
   displayOrder : number;
-  restaurantId: number
+  restaurantId: number,
 }
 
 export interface QRCodeData {

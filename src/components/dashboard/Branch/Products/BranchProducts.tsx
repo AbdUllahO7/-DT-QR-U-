@@ -24,7 +24,7 @@ import CategoriesContent from './CategoriesContent';
 import type { APIIngredient, APIAllergen } from '../../../../types/dashboard';
 
 interface APIProduct {
-  productId: number;
+  id: number;
   name: string;
   price: number;
   imageUrl?: string;
@@ -34,7 +34,7 @@ interface APIProduct {
 
 export interface DetailedProduct extends Product {
   branchProductId?: number;
-  originalProductId?: number;
+  originalProductId: number;
   product?: APIProduct;
   branchCategory?: Category;
   ingredients?: APIIngredient[];
@@ -146,7 +146,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     let currentPrice = originalPrice;
     if (activeTab === 'manage') {
       for (const branchCategory of branchCategories) {
-        const product = branchCategory.products?.find(p => p.productId === productId && p.isSelected);
+        const product = branchCategory.products?.find(p => p.id === productId && p.isSelected);
         if (product) {
           currentPrice = product.price;
           break;
@@ -332,7 +332,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     // For existing branch products in manage tab, use the current price
     if (activeTab === 'manage') {
       for (const branchCategory of branchCategories) {
-        const product = branchCategory.products?.find(p => p.productId === productId && p.isSelected);
+        const product = branchCategory.products?.find(p => p.id === productId && p.isSelected);
         if (product) {
           return product.price;
         }
@@ -411,7 +411,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
       let branchCategoryId: number | undefined = undefined;
 
       for (let i = 0; i < branchCategories.length; i++) {
-        const product = branchCategories[i].products?.find(p => p.productId === productId && p.isSelected);
+        const product = branchCategories[i].products?.find(p => p.id === productId && p.isSelected);
         if (product && product.branchProductId) {
           branchProductId = product.branchProductId;
           categoryIndex = i;
@@ -448,7 +448,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
           updated[categoryIndex] = {
             ...updated[categoryIndex],
             products: updated[categoryIndex].products!.map(product =>
-              product.productId === productId
+              product.id === productId
                 ? { ...product, price: newPrice }
                 : product
             ),
@@ -548,168 +548,197 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     }
   };
 
-  const fetchBranchCategoriesWithProducts = async () => {
-    setIsLoadingBranchProducts(true);
-    
-    try {
-      // Get all branch products with full details including ingredients and allergens
-      const branchProducts = await branchProductService.getBranchProductsWithDetails();
+const fetchBranchCategoriesWithProducts = async () => {
+  setIsLoadingBranchProducts(true);
+  
+  try {
+    // Get all branch products with full details including ingredients and allergens
+    const branchProducts = await branchProductService.getBranchProductsWithDetails();
 
-      // Enhanced categories with both selected and available products
-      const categoriesWithProducts = await Promise.all(
-        branchCategories.map(async (branchCategory) => {
-          try {
-            // Get branch products for this category (SELECTED products)
-            const selectedProducts = branchProducts.filter(branchProduct => {
-              const matches = branchProduct.branchCategory?.categoryId === branchCategory.categoryId;
-              return matches;
-            });
+    // Enhanced categories with both selected and available products
+    const categoriesWithProducts = await Promise.all(
+      branchCategories.map(async (branchCategory) => {
+        try {
+          // Get branch products for this category (SELECTED products)
+          const selectedProducts = branchProducts.filter(branchProduct => {
+            const matches = branchProduct.branchCategory?.categoryId === branchCategory.categoryId;
+            return matches;
+          });
 
-            // Transform selected branch products to expected format with full details
-            const transformedSelectedProducts: DetailedProduct[] = selectedProducts.map(branchProduct => {
-              const transformed: DetailedProduct = {
-                productId: branchProduct.productId,
-                isAvailable: branchProduct.status,
-                branchProductId: branchProduct.branchProductId, 
-                originalProductId: branchProduct.productId || branchProduct.productId,
-                name: branchProduct.name,
-                description: branchProduct?.description,
-                price: branchProduct.price, 
-                imageUrl: branchProduct?.imageUrl,
-                status: branchProduct.status,
-                displayOrder: branchProduct.displayOrder,
-                categoryId: branchCategory.categoryId,
-                isSelected: true,
-                allergens: branchProduct.allergens
-                  ? branchProduct.allergens.map((a: any, idx: number) => ({
-                      id: a.id ?? a.allergenId ?? idx + 1,
-                      allergenId: a.allergenId ?? idx + 1,
-                      allergenCode: a.code ?? '',
-                      code: typeof a.code === 'string' ? a.code : a.code ?? '',
-                      name: a.name ?? '',
-                      icon: a.icon ?? '',
-                      note: a.note ?? '',
-                      description: a.description ?? null,
-                      productCount: a.productCount ?? 0,
-                      containsAllergen: a.containsAllergen ?? false,
-                      presence: a.presence ?? '',
-                    }))
-                  : [],
-                ingredients: branchProduct.ingredients
-                  ? branchProduct.ingredients.map((i: any, idx: number) => ({
-                      id: i.id ?? idx + 1,
-                      ingredientId: i.ingredientId ?? 0,
-                      name: i.ingredientName ?? '',
-                      ingredientName: i.ingredientName ?? '',
-                      productId: i.productId ?? branchProduct.productId,
-                      quantity: i.quantity ?? 0,
-                      unit: i.unit ?? '',
-                      isAllergenic: i.isAllergenic ?? false,
-                      isAvailable: i.isAvailable ?? true,
-                      allergenIds: i.allergenIds ?? [],
-                      allergens: i.allergens
-                        ? i.allergens.map((a: any, aidx: number) => ({
-                            id: a.id ?? a.allergenId ?? aidx + 1,
-                            allergenId: a.allergenId ?? aidx + 1,
-                            allergenCode: a.code ?? '',
-                            code: typeof a.code === 'string' ? a.code : a.code ?? '',
-                            name: a.name ?? '',
-                            icon: a.icon ?? '',
-                            note: a.note ?? '',
-                            description: a.description ?? null,
-                            productCount: a.productCount ?? 0,
-                            containsAllergen: a.containsAllergen ?? false,
-                            presence: a.presence ?? '',
-                          }))
-                        : [],
-                      restaurantId: i.restaurantId ?? 0,
-                      products: i.products ?? [],
-                      productIngredients: i.productIngredients ?? [],
-                    }))
-                  : [],
-              };
-              return transformed;
-            });
+          console.log("selectedProducts",selectedProducts)
 
-            // Get all available products for this category
-            const allAvailableProducts = await branchCategoryService.getAvailableProductsForBranch({
+          // ✅ FIXED: Transform selected branch products with proper ID mapping
+          const transformedSelectedProducts: DetailedProduct[] = selectedProducts.map(branchProduct => {
+      
+
+            // ✅ FIXED: Determine the correct product ID
+            const productId = branchProduct.originalProductId 
+
+            // ✅ Safety check - if we still don't have an ID, log error
+            if (!productId) {
+              console.error('❌ Cannot determine product ID for branch product:', branchProduct);
+            }
+
+            const transformed: DetailedProduct = {
+              // ✅ FIXED: Use the correct field for product ID
+              id: productId,
+              
+              isAvailable: branchProduct.status,
+              branchProductId: branchProduct.branchProductId, 
+              
+              // ✅ FIXED: Store original product ID correctly
+              originalProductId: productId,
+              
+              name: branchProduct.name,
+              description: branchProduct?.description,
+              price: branchProduct.price, 
+              imageUrl: branchProduct?.imageUrl,
+              status: branchProduct.status,
+              displayOrder: branchProduct.displayOrder,
               categoryId: branchCategory.categoryId,
-              onlyActive: true,
-              includes: 'category,ingredients,allergens,addons'
-            });
-            // Transform available products to expected format
-            const transformedAvailableProducts: DetailedProduct[] = allAvailableProducts.map(product => ({
-              id: product.productId,
-              productId: product.productId,
-              name: product.name,
-              description: product.description,
-              price: product.price,
-              imageUrl: product.imageUrl,
-              isAvailable: product.status,
-              status: product.status,
-              displayOrder: product.displayOrder,
-              categoryId: branchCategory.categoryId,
-              isSelected: false,
-              originalProductId: product.productId
-            }));
-
-            // Filter out products that are already selected (to get UNSELECTED products)
-            const selectedProductIds = new Set(transformedSelectedProducts.map(p => p.productId));
-            const unselectedProducts = transformedAvailableProducts.filter(product => {
-              return !selectedProductIds.has(product.productId);
-            });
-
-            // Combine selected and unselected products
-            const allProducts: DetailedProduct[] = [
-              ...transformedSelectedProducts,
-              ...unselectedProducts
-            ];
-
-            // Sort products: selected first, then by display order
-            allProducts.sort((a, b) => {
-              if (a.isSelected && !b.isSelected) return -1;
-              if (!a.isSelected && b.isSelected) return 1;
-              return (a.displayOrder || 0) - (b.displayOrder || 0);
-            });
-
-            return {
-              ...branchCategory,
-              products: allProducts,
-              selectedProductsCount: transformedSelectedProducts.length,
-              unselectedProductsCount: unselectedProducts.length
+              isSelected: true,
+              
+              allergens: branchProduct.allergens
+                ? branchProduct.allergens.map((a: any, idx: number) => ({
+                    id: a.id ?? a.allergenId ?? idx + 1,
+                    allergenId: a.allergenId ?? idx + 1,
+                    allergenCode: a.code ?? '',
+                    code: typeof a.code === 'string' ? a.code : a.code ?? '',
+                    name: a.name ?? '',
+                    icon: a.icon ?? '',
+                    note: a.note ?? '',
+                    description: a.description ?? null,
+                    productCount: a.productCount ?? 0,
+                    containsAllergen: a.containsAllergen ?? false,
+                    presence: a.presence ?? '',
+                  }))
+                : [],
+              
+              ingredients: branchProduct.ingredients
+                ? branchProduct.ingredients.map((i: any, idx: number) => ({
+                    id: i.id ?? idx + 1,
+                    ingredientId: i.ingredientId ?? 0,
+                    name: i.ingredientName ?? '',
+                    ingredientName: i.ingredientName ?? '',
+                    productId: i.productId ?? productId, // ✅ Use the determined productId
+                    quantity: i.quantity ?? 0,
+                    unit: i.unit ?? '',
+                    isAllergenic: i.isAllergenic ?? false,
+                    isAvailable: i.isAvailable ?? true,
+                    allergenIds: i.allergenIds ?? [],
+                    allergens: i.allergens
+                      ? i.allergens.map((a: any, aidx: number) => ({
+                          id: a.id ?? a.allergenId ?? aidx + 1,
+                          allergenId: a.allergenId ?? aidx + 1,
+                          allergenCode: a.code ?? '',
+                          code: typeof a.code === 'string' ? a.code : a.code ?? '',
+                          name: a.name ?? '',
+                          icon: a.icon ?? '',
+                          note: a.note ?? '',
+                          description: a.description ?? null,
+                          productCount: a.productCount ?? 0,
+                          containsAllergen: a.containsAllergen ?? false,
+                          presence: a.presence ?? '',
+                        }))
+                      : [],
+                    restaurantId: i.restaurantId ?? 0,
+                    products: i.products ?? [],
+                    productIngredients: i.productIngredients ?? [],
+                  }))
+                : [],
             };
-          } catch (err) {
-            console.error(`Error fetching products for category ${branchCategory.categoryId}:`, err);
-            return {
-              ...branchCategory,
-              products: [],
-              selectedProductsCount: 0,
-              unselectedProductsCount: 0
-            };
-          }
-        })
-      );
 
-      setBranchCategories(categoriesWithProducts);
-      setOriginalBranchCategories([...categoriesWithProducts]);
-    } catch (err: any) {
-      console.error('Error fetching branch categories with detailed products:', err);
-      setBranchCategories(prev => prev.map(cat => ({ 
-        ...cat, 
-        products: [], 
-        selectedProductsCount: 0,
-        unselectedProductsCount: 0 
-      })));
-      setOriginalBranchCategories(prev => prev.map(cat => ({ 
-        ...cat, 
-        products: [], 
-        selectedProductsCount: 0,
-        unselectedProductsCount: 0 
-      })));
-    } finally {
-      setIsLoadingBranchProducts(false);
-    }
-  };
+            return transformed;
+          });
+
+          // Get all available products for this category
+          const allAvailableProducts = await branchCategoryService.getAvailableProductsForBranch({
+            categoryId: branchCategory.categoryId,
+            onlyActive: true,
+            includes: 'category,ingredients,allergens,addons'
+          });
+
+          // Transform available products to expected format
+          const transformedAvailableProducts: DetailedProduct[] = allAvailableProducts.map(product => ({
+            id: product.productId,
+            productId: product.productId,
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            imageUrl: product.imageUrl,
+            isAvailable: product.status,
+            status: product.status,
+            displayOrder: product.displayOrder,
+            categoryId: branchCategory.categoryId,
+            isSelected: false,
+            originalProductId: product.productId
+          }));
+
+          // Filter out products that are already selected (to get UNSELECTED products)
+          const selectedProductIds = new Set(transformedSelectedProducts.map(p => p.id).filter(Boolean)); // ✅ Filter out undefined IDs
+          const unselectedProducts = transformedAvailableProducts.filter(product => {
+            return !selectedProductIds.has(product.id);
+          });
+
+          // Combine selected and unselected products
+          const allProducts: DetailedProduct[] = [
+            ...transformedSelectedProducts.filter(p => p.id), // ✅ Only include products with valid IDs
+            ...unselectedProducts
+          ];
+
+          // Sort products: selected first, then by display order
+          allProducts.sort((a, b) => {
+            if (a.isSelected && !b.isSelected) return -1;
+            if (!a.isSelected && b.isSelected) return 1;
+            return (a.displayOrder || 0) - (b.displayOrder || 0);
+          });
+
+          console.log(`✅ Category ${branchCategory.categoryId} processed:`, {
+            selectedProducts: transformedSelectedProducts.length,
+            unselectedProducts: unselectedProducts.length,
+            totalProducts: allProducts.length,
+            validSelectedProductsWithId: transformedSelectedProducts.filter(p => p.id).length
+          });
+
+          return {
+            ...branchCategory,
+            products: allProducts,
+            selectedProductsCount: transformedSelectedProducts.filter(p => p.id).length, // ✅ Only count products with valid IDs
+            unselectedProductsCount: unselectedProducts.length
+          };
+        } catch (err) {
+          console.error(`Error fetching products for category ${branchCategory.categoryId}:`, err);
+          return {
+            ...branchCategory,
+            products: [],
+            selectedProductsCount: 0,
+            unselectedProductsCount: 0
+          };
+        }
+      })
+    );
+
+    console.log('✅ All categories processed successfully');
+    setBranchCategories(categoriesWithProducts);
+    setOriginalBranchCategories([...categoriesWithProducts]);
+  } catch (err: any) {
+    console.error('❌ Error fetching branch categories with detailed products:', err);
+    setBranchCategories(prev => prev.map(cat => ({ 
+      ...cat, 
+      products: [], 
+      selectedProductsCount: 0,
+      unselectedProductsCount: 0 
+    })));
+    setOriginalBranchCategories(prev => prev.map(cat => ({ 
+      ...cat, 
+      products: [], 
+      selectedProductsCount: 0,
+      unselectedProductsCount: 0 
+    })));
+  } finally {
+    setIsLoadingBranchProducts(false);
+  }
+};
 
   const fetchProductsForSelectedCategories = async () => {
     if (selectedCategories.size === 0) return;
@@ -763,6 +792,8 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
           status: product.status,
           displayOrder: product.displayOrder,
           categoryId: categoryId,
+          originalProductId:product.originalProductId,
+
         };
         
         categoriesMap.get(categoryId)!.products.push(transformedProduct);
@@ -820,7 +851,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
       newSelectedCategories.delete(categoryId);
       const categoryProducts = categoriesWithProducts.find(cat => cat.categoryId === categoryId)?.products || [];
       const newSelectedProducts = new Set(selectedProducts);
-      categoryProducts.forEach(product => newSelectedProducts.delete(product.productId));
+      categoryProducts.forEach(product => newSelectedProducts.delete(product.id));
       setSelectedProducts(newSelectedProducts);
     } else {
       newSelectedCategories.add(categoryId);
@@ -834,7 +865,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     
     if (newSelectedProducts.has(productId)) {
       newSelectedProducts.delete(productId);
-      // Remove edited price when deselecting product
       const newEditedPrices = new Map(editedProductPrices);
       newEditedPrices.delete(productId);
       setEditedProductPrices(newEditedPrices);
@@ -847,7 +877,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
 
   const handleSelectAllProducts = () => {
     const allProductIds = new Set(
-      categoriesWithProducts.flatMap(cat => cat.products.map(product => product.productId))
+      categoriesWithProducts.flatMap(cat => cat.products.map(product => product.id))
     );
     setSelectedProducts(allProductIds);
   };
@@ -963,7 +993,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
           let categoryId = null;
           
           for (const category of categoriesWithProducts) {
-            const product = category.products.find(p => p.productId === productId);
+            const product = category.products.find(p => p.id === productId);
             if (product) {
               productToCreate = product;
               categoryId = category.categoryId;
@@ -984,9 +1014,9 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
           try {
             const editedPrice = getProductPrice(productId, productToCreate.price);
             const productData = {
-              price: editedPrice, // Use edited price if available
+              price: editedPrice,
               isActive: true,
-              productId: productToCreate.productId,
+              productId: productToCreate.id,
               branchCategoryId: branchCategoryId
             };
             
@@ -1035,14 +1065,18 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
 
   // Add function to handle adding products to existing categories
   const handleAddProductToCategory = async (productId: number, branchCategoryId: number) => {
+
+    console.log("handleAddProductToCategory")
     try {
+          console.log("handleAddProductToCategory 2 ")
+
       const scrollPosition = window.scrollY;
       
       let productToAdd = null;
       let categoryIndex = -1;
       
       for (let i = 0; i < branchCategories.length; i++) {
-        const product = branchCategories[i].products?.find(p => p.productId === productId);
+        const product = branchCategories[i].products?.find(p => p.id === productId);
         if (product) {
           productToAdd = product;
           categoryIndex = i;
@@ -1055,14 +1089,12 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
         return;
       }
       
-      // Optimistic update
       const updatedCategories = [...branchCategories];
       const updatedProducts = updatedCategories[categoryIndex].products?.map(product => {
-        if (product.productId === productId) {
+        if (product.id === productId) {
           return {
             ...product,
             isSelected: true,
-            branchProductId: 999999
           };
         }
         return product;
@@ -1082,7 +1114,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
         const productData = {
           price: productToAdd.price,
           isActive: true,
-          productId: productToAdd.productId,
+          productId: productToAdd.id,
           branchCategoryId: branchCategoryId
         };
         
@@ -1091,11 +1123,11 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
         setBranchCategories(prevCategories => {
           const finalUpdatedCategories = [...prevCategories];
           const finalUpdatedProducts = finalUpdatedCategories[categoryIndex].products?.map(product => {
-            if (product.productId === productId) {
+            if (product.id === productId) {
               return {
                 ...product,
                 isSelected: true,
-                branchProductId: createdBranchProduct.branchProductId || createdBranchProduct.productId
+                branchProductId: createdBranchProduct.branchProductId || createdBranchProduct.id
               };
             }
             return product;
@@ -1118,7 +1150,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
         setBranchCategories(prevCategories => {
           const revertedCategories = [...prevCategories];
           const revertedProducts = revertedCategories[categoryIndex].products?.map(product => {
-            if (product.productId === productId) {
+            if (product.id === productId) {
               return {
                 ...product,
                 isSelected: false,
@@ -1208,7 +1240,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
         // Revert optimistic update on API failure
         const revertedCategories = [...branchCategories];
         const revertedProducts = revertedCategories[categoryIndex].products?.map(product => {
-          if (product.productId === productToRemove.productId) {
+          if (product.id === productToRemove.id) {
             return {
               ...product,
               isSelected: true,
