@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, HelpCircle } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
-import type { FAQ as FAQType } from '../types';
+import { useLanguage } from '../../contexts/LanguageContext';
+import type { FAQ as FAQType } from '../../types';
 
 const FAQ: React.FC = () => {
   const { t, isRTL } = useLanguage();

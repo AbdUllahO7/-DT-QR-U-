@@ -237,7 +237,13 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-label={t('TableCategoryModal.accessibility.modal')}>
+        <div 
+          className="fixed inset-0 z-50 overflow-y-auto" 
+          role="dialog" 
+          aria-modal="true" 
+          aria-label={t('TableCategoryModal.accessibility.modal')}
+          dir={isRTL ? 'rtl' : 'ltr'}
+        >
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -254,24 +260,25 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2 }}
-              className={`relative w-full max-w-md bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/30 overflow-hidden ${isRTL ? 'text-right' : 'text-left'}`}
+              className="relative w-full max-w-md bg-white dark:bg-gray-800 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+              dir={isRTL ? 'rtl' : 'ltr'}
             >
               {/* Header */}
-              <div className="relative bg-gradient-to-r from-primary-500 to-primary-600 p-6 text-white">
+              <div className="relative bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 p-6 text-white">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
                 <button
                   onClick={onClose}
-                  className={`absolute top-4 p-2 hover:bg-white/20 rounded-full transition-colors duration-200 ${isRTL ? 'left-4' : 'right-4'}`}
-                  aria-label={t('TableCategoryModal.accessibility.modal')}
+                  className={`absolute top-4 p-2 hover:bg-white/20 dark:hover:bg-white/10 rounded-full transition-colors duration-200 ${isRTL ? 'left-4' : 'right-4'}`}
+                  aria-label={t('TableCategoryModal.accessibility.close')}
                 >
                   <X className="w-5 h-5" />
                 </button>
                 
-                <div className={`flex items-center gap-3 relative ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex items-center gap-3 relative ${isRTL ? 'text-right' : ''}`}>
                   <div className="p-3 bg-white/20 rounded-2xl">
                     <Sparkles className="w-6 h-6" />
                   </div>
-                  <div>
+                  <div className={isRTL ? 'text-right' : 'text-left'}>
                     <h3 className="text-xl font-bold">{t('TableCategoryModal.title')}</h3>
                     <p className="text-primary-100 text-sm">{t('TableCategoryModal.subtitle')}</p>
                   </div>
@@ -293,7 +300,7 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
 
                 {/* Category Name */}
                 <div className="space-y-2">
-                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : ''}`}>
                     <Tag className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                     {t('TableCategoryModal.categoryName')}
                   </label>
@@ -305,20 +312,25 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                       onChange={handleChange}
                       placeholder={t('TableCategoryModal.categoryNamePlaceholder')}
                       className={`
-                        w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-2 rounded-xl
-                        transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500
+                        w-full px-4 py-3 rounded-xl border-2 transition-all duration-200
+                        bg-white dark:bg-gray-900 
+                        text-gray-900 dark:text-gray-100
+                        placeholder-gray-400 dark:placeholder-gray-500
+                        border-gray-200 dark:border-gray-600
+                        hover:border-gray-300 dark:hover:border-gray-500
                         focus:outline-none focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500
-                        hover:border-gray-300 dark:hover:border-gray-600
                         ${errors.categoryName 
                           ? 'border-red-300 dark:border-red-600 focus:border-red-500 focus:ring-red-500/20' 
-                          : 'border-gray-200 dark:border-gray-600'
+                          : ''
                         }
+                        ${isRTL ? 'text-right' : 'text-left'}
                       `}
                       aria-describedby={errors.categoryName ? 'category-name-error' : undefined}
+                      dir={isRTL ? 'rtl' : 'ltr'}
                     />
                   </div>
                   {errors.categoryName && (
-                    <p id="category-name-error" className="text-red-500 text-xs flex items-center gap-1">
+                    <p id="category-name-error" className="text-red-500 dark:text-red-400 text-xs flex items-center gap-1">
                       {errors.categoryName}
                     </p>
                   )}
@@ -326,7 +338,7 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
 
                 {/* Description */}
                 <div className="space-y-2">
-                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : ''}`}>
                     <FileText className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                     {t('TableCategoryModal.description')}
                   </label>
@@ -336,13 +348,23 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                     onChange={handleChange}
                     rows={3}
                     placeholder={t('TableCategoryModal.descriptionPlaceholder')}
-                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-2 border-gray-200 dark:border-gray-600 rounded-xl transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 hover:border-gray-300 dark:hover:border-gray-600 resize-none"
+                    className={`
+                      w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 resize-none
+                      bg-white dark:bg-gray-900 
+                      text-gray-900 dark:text-gray-100
+                      placeholder-gray-400 dark:placeholder-gray-500
+                      border-gray-200 dark:border-gray-600
+                      hover:border-gray-300 dark:hover:border-gray-500
+                      focus:outline-none focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500
+                      ${isRTL ? 'text-right' : 'text-left'}
+                    `}
+                    dir={isRTL ? 'rtl' : 'ltr'}
                   />
                 </div>
 
                 {/* Color Selection */}
                 <div className="space-y-3">
-                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : ''}`}>
                     <Palette className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                     {t('TableCategoryModal.colorSelection')}
                   </label>
@@ -361,8 +383,8 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                         className={`
                           w-8 h-8 rounded-lg border-2 transition-all duration-200 hover:scale-110
                           ${formData.colorCode === color 
-                            ? 'border-white dark:border-gray-800 ring-2 ring-gray-400 dark:ring-gray-500' 
-                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400'
+                            ? 'border-white dark:border-gray-200 ring-2 ring-gray-400 dark:ring-gray-300' 
+                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-400'
                           }
                         `}
                         style={{ backgroundColor: color }}
@@ -393,7 +415,7 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
 
                 {/* Icon Selection */}
                 <div className="space-y-3">
-                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : ''}`}>
                     <Building2 className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                     {t('TableCategoryModal.iconSelection')}
                   </label>
@@ -412,7 +434,7 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                           hover:scale-105 hover:shadow-lg
                           ${formData.iconClass === option.value
                             ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                            : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500'
                           }
                         `}
                         aria-label={`${t('TableCategoryModal.accessibility.iconOption')} ${t(option.label)}`}
@@ -423,7 +445,7 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                     ))}
                   </div>
                   {errors.iconClass && (
-                    <p className="text-red-500 text-xs flex items-center gap-1">
+                    <p className="text-red-500 dark:text-red-400 text-xs flex items-center gap-1">
                       {errors.iconClass}
                     </p>
                   )}
@@ -432,18 +454,27 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                 {/* Branch Selection (if needed) */}
                 {!selectedBranch && branches.length > 0 && (
                   <div className="space-y-2">
-                    <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : ''}`}>
                       <Users className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                       {t('TableCategoryModal.branchSelection')}
                     </label>
                     <select
                       value={branchId ?? ''}
                       onChange={(e) => setBranchId(Number(e.target.value))}
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700/50 border-2 border-gray-200 dark:border-gray-600 rounded-xl transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 hover:border-gray-300 dark:hover:border-gray-600"
+                      className={`
+                        w-full px-4 py-3 rounded-xl border-2 transition-all duration-200
+                        bg-white dark:bg-gray-900 
+                        text-gray-900 dark:text-gray-100
+                        border-gray-200 dark:border-gray-600
+                        hover:border-gray-300 dark:hover:border-gray-500
+                        focus:outline-none focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500
+                        ${isRTL ? 'text-right' : 'text-left'}
+                      `}
                       aria-label={t('TableCategoryModal.accessibility.branchDropdown')}
+                      dir={isRTL ? 'rtl' : 'ltr'}
                     >
                       {branches.map(branch => (
-                        <option key={branch.id} value={branch.id}>
+                        <option key={branch.id} value={branch.id} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
                           {branch.name}
                         </option>
                       ))}
@@ -456,14 +487,14 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                   <button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-all duration-200 hover:scale-[1.02]"
+                    className="flex-1 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-all duration-200 hover:scale-[1.02] border border-gray-200 dark:border-gray-600"
                   >
                     {t('TableCategoryModal.cancel')}
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 px-4 py-3 text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 rounded-xl transition-all duration-200 hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-primary-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                    className="flex-1 px-4 py-3 text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 dark:from-primary-500 dark:to-primary-600 dark:hover:from-primary-600 dark:hover:to-primary-700 rounded-xl transition-all duration-200 hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-primary-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
                   >
                     {isSubmitting ? (
                       <div className={`flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>

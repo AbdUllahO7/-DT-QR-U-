@@ -76,7 +76,6 @@ class Logger {
     if (!this.shouldLog('info')) return;
     
     const formattedMessage = this.formatMessage('info', message, options?.prefix);
-    console.log(formattedMessage, data || '');
   }
   
   warn(message: string, data?: any, options?: LogOptions): void {

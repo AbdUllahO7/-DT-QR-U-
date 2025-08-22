@@ -44,7 +44,6 @@ const TableQR = () => {
   const [showMenu, setShowMenu] = useState(false);
   const hasRun = useRef(false);
 
-  console.log("tableInfo", tableInfo);
 
   useEffect(() => {
     if (hasRun.current) return;

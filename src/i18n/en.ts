@@ -216,6 +216,31 @@ export const en = {
         avgOrderValue: 'Average Order Value'
       }
     },
+   orderType: {
+        title: "Order Type Settings",
+        subtitle: "Manage activation status, minimum order amount and service charges for order types",
+        loading: "Loading order types...",
+        pleaseWait: "Please wait",
+        settingsUpdated: "settings updated successfully",
+        updateError: "Error occurred while updating settings",
+        loadingError: "Error occurred while loading order types",
+        active: "active",
+        minutes: "minutes",
+        requirements: "Requirements",
+        table: "Table",
+        address: "Address",
+        phone: "Phone",
+        activeStatus: "Active Status",
+        activeStatusDescription: "Enable/disable this order type",
+        minOrderAmount: "Minimum Order Amount",
+        serviceCharge: "Service Charge",
+        saveSettings: "Save Settings",
+        updating: "Updating...",
+        totalOrderTypes: "Total Order Types",
+        activeTypes: "Active Types",
+        totalActiveOrders: "Total Active Orders",
+        estimatedTime: "Estimated Time"
+      },
     products: {
       title: 'Products',
       description: 'View and manage your products.'
@@ -1342,6 +1367,10 @@ export const en = {
     optional: 'Optional'
   },
   productsContent: {
+        branch : {
+    selectAll:"All",
+
+    },
   title: 'Products Management',
   description: 'Manage menu categories and products',
   
@@ -2729,6 +2758,8 @@ export const en = {
   },
   BranchtableManagement: {
     title: "Table Management",
+
+    batchCreateTables: "batchCreateTables",
     subtitle: "Manage your restaurant tables and categories", 
     tabs: {
       tables: "Tables",
@@ -2811,6 +2842,11 @@ export const en = {
 
   BranchTableManagement: {
     header: "Category & Table Management",
+    "clearTable": "Clear Table",
+    "refreshTable": "Refresh Status", 
+    "clearing": "Clearing...",
+
+        batchCreateTables: "Batch Create Tables",
     subheader: "Manage restaurant categories and tables with accordion view",
     totalCategories: "Total Categories",
     totalTables: "Total Tables",
@@ -2846,6 +2882,10 @@ export const en = {
     copyQRUrl: "Copy QR URL",
     copied: "Copied!",
     success: {
+        "tableCleared": "Table {{tableName}} has been cleared and is now available",
+      "tableOccupied": "Table {{tableName}} status has been updated to occupied",
+      "tableClearedGeneric": "Table has been cleared successfully",
+      "tableStatusUpdated": "Table status has been updated successfully",
       categoryAdded: "Category added successfully",
       categoryUpdated: "Category updated successfully",
       categoryDeleted: "Category deleted successfully",
@@ -2856,11 +2896,11 @@ export const en = {
       categoryDeactivated: "Category deactivated successfully",
       tableActivated: "Table activated successfully",
       tableDeactivated: "Table deactivated successfully",
-      tableOccupied: "Table marked as occupied",
       tableAvailable: "Table marked as available",
       dataRefreshed: "Data refreshed successfully"
     },
     error: {
+            "clearTableFailed": "Failed to clear table. Please try again.",
       fetchCategoriesFailed: "Failed to fetch categories",
       fetchTablesFailed: "Failed to fetch tables",
       categoryNameRequired: "Category name is required",

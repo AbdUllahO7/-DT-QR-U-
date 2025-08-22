@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Building2, AlertTriangle, Plus } from 'lucide-react';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useLanguage } from '../../../../contexts/LanguageContext';
 import { 
   BranchInfo, 
   CreateBranchWithDetailsDto, 
   CreateBranchWorkingHourCoreDto,
   BranchDetailResponse,
-} from '../../../types/api';
-import { branchService } from '../../../services/branchService';
-import { getRestaurantIdFromToken } from '../../../utils/http';
-import BranchCard from './branch-management/BranchCard';
-import BranchModal from './branch-management/BranchModal';
-import BranchEditModal from './branch-management/BranchEditModal';
-import AddBranchCard from './branch-management/AddBranchCard';
-import { logger } from '../../../utils/logger';
-import { ConfirmDeleteModal } from '../../ConfirmDeleteModal';
+} from '../../../../types/api';
+import { branchService } from '../../../../services/branchService';
+import { getRestaurantIdFromToken } from '../../../../utils/http';
+import BranchCard from './BranchCard';
+import BranchModal from './BranchModal';
+import BranchEditModal from './BranchEditModal';
+import AddBranchCard from './AddBranchCard';
+import { logger } from '../../../../utils/logger';
+import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 
 const BranchManagement: React.FC = () => {
   const { t, isRTL } = useLanguage();

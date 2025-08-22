@@ -17,6 +17,7 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onTog
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
 
+  console.log("branch",branch)
   // Status helpers
   const getStatusBadge = () => {
     if (branch.isTemporarilyClosed) {
@@ -34,9 +35,9 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onTog
       };
     }
     return {
-      color: 'bg-red-500/90 text-white border-red-400/50 shadow-red-500/25',
+      color: 'bg-green-500/90 text-white border-green-400/50 shadow-green-500/25',
       icon: <XCircle className="w-4 h-4" />, 
-      text: t('branchCard.status.closed'),
+      text: t('branchCard.status.open'),
     };
   };
 
@@ -44,8 +45,8 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onTog
 
   // Aktiflik badge
   const activeBadge = branch.branchStatus
-    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300';
+    ? ' text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
+    : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300';
 
   // Switch
   const handleSwitch = async (checked: boolean) => {
@@ -126,18 +127,16 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onTog
           {branch.branchName}
         </h2>
         <div className="flex items-center justify-center mb-4">
-          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} px-4 py-3 rounded-2xl border backdrop-blur-sm transition-all duration-300 group-hover:scale-105 ${branch.isTemporarilyClosed ? 'bg-amber-50/80 dark:bg-amber-900/30 border-amber-200/50 dark:border-amber-700/50 text-amber-700 dark:text-amber-300' : branch.isOpenNow ? 'bg-emerald-50/80 dark:bg-emerald-900/30 border-emerald-200/50 dark:border-emerald-700/50 text-emerald-700 dark:text-emerald-300' : 'bg-red-50/80 dark:bg-red-900/30 border-red-200/50 dark:border-red-700/50 text-red-700 dark:text-red-300'}`}>
+          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} px-4 py-3 rounded-2xl border backdrop-blur-sm transition-all duration-300 group-hover:scale-105 ${branch.isTemporarilyClosed ? 'bg-amber-50/80 dark:bg-amber-900/30 border-amber-200/50 dark:border-amber-700/50 text-amber-700 dark:text-amber-300' : branch.isOpenNow ? 'bg-emerald-50/80 dark:bg-emerald-900/30 border-emerald-200/50 dark:border-emerald-700/50 text-emerald-700 dark:text-emerald-300' : 'bg-red-50/80 dark:bg-green-900/30 border-green-200/50 dark:border-green-700/50 text-green-700 dark:text-green-300'}`}>
             <Clock className="w-4 h-4" />
             <span className="text-sm font-medium">
-              {branch.isTemporarilyClosed ? t('branchCard.status.temporaryClosed') : (branch.isOpenNow ? t('branchCard.status.open') : t('branchCard.status.closed'))}
+              {branch.isTemporarilyClosed ? t('branchCard.status.temporaryClosed') : (branch.isOpenNow ? t('branchCard.status.open') : t('branchCard.status.open'))}
             </span>
           </div>
         </div>
         {/* Geçici Kapalı Switch */}
         <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} mt-2`}>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            {t('branchCard.labels.customerVisibility')}
-          </span>
+         
           <label className="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
@@ -152,7 +151,6 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onTog
           {branch.isTemporarilyClosed && (
             <span className={`text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center ${isRTL ? 'space-x-reverse space-x-1' : 'space-x-1'} ${isRTL ? 'mr-1' : 'ml-1'}`}>
               <EyeOff className="w-3 h-3" /> 
-              <span>{t('branchCard.status.hidden')}</span>
             </span>
           )}
         </div>

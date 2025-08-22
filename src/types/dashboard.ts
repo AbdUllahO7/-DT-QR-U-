@@ -1,7 +1,7 @@
 // Dashboard bileşenleri için type tanımları
 
 export interface Product {
-  productId: number;
+  id: number;
   categoryId: number;
   name: string;
   description: string;
@@ -14,6 +14,8 @@ export interface Product {
   branchCategory?:Category
    ingredients?: APIIngredient[];
   allergens?: APIAllergen[];
+    originalProductId:number,
+
 }
 
 export interface Category {
@@ -27,7 +29,7 @@ export interface Category {
   products: Product[];
   status : boolean;
   displayOrder : number;
-  restaurantId: number
+  restaurantId: number,
 }
 
 export interface QRCodeData {

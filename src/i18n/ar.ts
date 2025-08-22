@@ -220,6 +220,31 @@ export const ar = {
     ingredients : {
       title : "المكونات"
     },
+    orderType: {
+        title: "إعدادات أنواع الطلبات",
+        subtitle: "إدارة حالة التفعيل والحد الأدنى لقيمة الطلب ورسوم الخدمة لأنواع الطلبات",
+        loading: "جاري تحميل أنواع الطلبات...",
+        pleaseWait: "يرجى الانتظار",
+        settingsUpdated: "تم تحديث الإعدادات بنجاح",
+        updateError: "حدث خطأ أثناء تحديث الإعدادات",
+        loadingError: "حدث خطأ أثناء تحميل أنواع الطلبات",
+        active: "نشط",
+        minutes: "دقيقة",
+        requirements: "المتطلبات",
+        table: "طاولة",
+        address: "عنوان",
+        phone: "هاتف",
+        activeStatus: "الحالة النشطة",
+        activeStatusDescription: "تفعيل/إلغاء تفعيل نوع الطلب هذا",
+        minOrderAmount: "الحد الأدنى لقيمة الطلب",
+        serviceCharge: "رسوم الخدمة",
+        saveSettings: "حفظ الإعدادات",
+        updating: "جاري التحديث...",
+        totalOrderTypes: "إجمالي أنواع الطلبات",
+        activeTypes: "الأنواع النشطة",
+        totalActiveOrders: "إجمالي الطلبات النشطة",
+        estimatedTime: "الوقت المقدر"
+      },
     products : {
       title : "المنتجات",
       description: 'عرض وإدارة المنتجات.',
@@ -1348,6 +1373,10 @@ export const ar = {
     optional: 'اختياري'
   },
   productsContent: {
+    branch : {
+    selectAll:"الكل",
+
+    },
   title: 'إدارة المنتجات',
   description: 'إدارة فئات ومنتجات القائمة',
   
@@ -2732,6 +2761,7 @@ export const ar = {
     },
   },
   BranchtableManagement: {
+
   title: "إدارة الطاولات",
   subtitle: "إدارة طاولات المطعم والفئات",
   tabs: {
@@ -2814,11 +2844,15 @@ export const ar = {
   },
 
   BranchTableManagement: {
+      "clearTable": " تنضيف الطاولة",
+      "refreshTable": " تحديث الحالة",
+      "clearing": "جارٍ المسح...",
+      batchCreateTables: "إنشاء جداول دفعة واحدة",
       header: "إدارة الفئات والطاولات",
       subheader: "إدارة فئات المطعم والطاولات مع عرض الأكورديون",
       totalCategories: "إجمالي الفئات",
       totalTables: "إجمالي الطاولات",
-      occupiedTables: "الطاولات المحجوزة",
+      occupiedTables: "الطاولات المشغولة",
       availableTables: "الطاولات المتاحة",
       searchPlaceholder: "ابحث عن الفئات...",
       refresh: "تحديث",
@@ -2837,7 +2871,7 @@ export const ar = {
       active: "نشط",
       inactive: "غير نشط",
       occupation: "الإشغال",
-      occupied: "محجوز",
+      occupied: "مشغولة",
       available: "متاح",
       addTable: "إضافة طاولة",
       tableNamePlaceholder: "اسم الطاولة",
@@ -2850,6 +2884,10 @@ export const ar = {
       copyQRUrl: "نسخ رابط QR",
       copied: "تم النسخ!",
       success: {
+        "tableCleared": "تم مسح الطاولة {{tableName}} وهو الآن متاح",
+        "tableOccupied": "تم تحديث حالة الطاولة {{tableName}} إلى ",
+        "tableClearedGeneric": "تم مسح الطاولة بنجاح",
+        "tableStatusUpdated": "تم تحديث حالة الطاولة بنجاح",
         categoryAdded: "تم إضافة الفئة بنجاح",
         categoryUpdated: "تم تحديث الفئة بنجاح",
         categoryDeleted: "تم حذف الفئة بنجاح",
@@ -2860,11 +2898,11 @@ export const ar = {
         categoryDeactivated: "تم إلغاء تفعيل الفئة بنجاح",
         tableActivated: "تم تفعيل الطاولة بنجاح",
         tableDeactivated: "تم إلغاء تفعيل الطاولة بنجاح",
-        tableOccupied: "تم وضع علامة على الطاولة كمحجوزة",
         tableAvailable: "تم وضع علامة على الطاولة كمتاحة",
         dataRefreshed: "تم تحديث البيانات بنجاح"
       },
       error: {
+      "clearTableFailed": "فشل مسح الطاولة. يُرجى المحاولة مرة أخرى",
         fetchCategoriesFailed: "فشل في جلب الفئات",
         fetchTablesFailed: "فشل في جلب الطاولات",
         categoryNameRequired: "اسم الفئة مطلوب",

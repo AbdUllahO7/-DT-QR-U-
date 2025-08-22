@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Search, Plus, Filter, ArrowUp, List, Grid3X3, Package, Utensils, Loader2,
-  ChevronDown, Check, X, SortAsc, SortDesc, Eye, EyeOff, Calendar, DollarSign, Hash
+  ChevronDown, Check, X, SortAsc, SortDesc, Eye, EyeOff, DollarSign, Hash, Users
 } from 'lucide-react';
 import {
   DndContext,
@@ -21,10 +21,11 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useTheme } from '../../../contexts/ThemeContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useClickOutside } from '../../../hooks';
 import type { Category, Product } from '../../../types/dashboard';
 import { productService } from '../../../services/productService';
+import { branchService } from '../../../services/branchService';
 import { logger } from '../../../utils/logger';
 import CreateCategoryModal from './CreateCategoryModal';
 import CreateProductModal from './CreateProductModal';
@@ -34,7 +35,17 @@ import { EditProductModal } from './EditProductModal';
 import ProductIngredientSelectionModal from './ProductIngredientSelectionModal';
 import ProductIngredientUpdateModal from './ProductIngredientUpdateModal';
 import ProductAddonsModal from './ProductAddonsModal';
-import { ConfirmDeleteModal } from '../../ConfirmDeleteModal';
+import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
+import { useTheme } from '../../../contexts/ThemeContext';
+
+// Branch dropdown item interface
+interface BranchDropdownItem {
+  branchId: number;
+  branchName: string;
+}
+
+// Special constant for "Select All" option
+const SELECT_ALL_BRANCH_ID = -1;
 
 // Filter and Sort Types
 type SortOption = 'name_asc' | 'name_desc' | 'price_asc' | 'price_desc' | 'created_asc' | 'created_desc' | 'order_asc' | 'order_desc';
@@ -75,6 +86,12 @@ const ProductsContent: React.FC = () => {
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [activeId, setActiveId] = useState<number | null>(null);
   
+  // Branch Management States
+  const [branches, setBranches] = useState<BranchDropdownItem[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState<BranchDropdownItem | null>(null);
+  const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
+  const [isLoadingBranches, setIsLoadingBranches] = useState(false);
+  
   // Filter and Sort States
   const [sortBy, setSortBy] = useState<SortOption>('order_asc');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
@@ -87,6 +104,7 @@ const ProductsContent: React.FC = () => {
   
   const filterRef = useRef<HTMLDivElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
+  const branchDropdownRef = useRef<HTMLDivElement>(null);
 
   // Modal States
   const [isCreateCategoryModalOpen, setIsCreateCategoryModalOpen] = useState(false);
@@ -110,26 +128,6 @@ const ProductsContent: React.FC = () => {
     productName: string;
   } | null>(null);
   
-  const handleOpenAddonsManagement = (productId: number, productName: string) => {
-    if (!productId || productId === 0 || isNaN(productId)) {
-      console.error('❌ Invalid productId provided:', productId);
-      alert(t('productsContent.error.invalidData'));
-      return;
-    }
-    
-    if (!productName || productName.trim() === '') {
-      console.error('❌ Invalid productName provided:', productName);
-      alert(t('productsContent.error.invalidData'));
-      return;
-    }
-    
-    setSelectedProductForAddons({ 
-      productId: productId, 
-      productName: productName 
-    });
-    setIsAddonsModalOpen(true);
-  };
-  
   const [deleteConfig, setDeleteConfig] = useState<{
     type: 'product' | 'category';
     id: number;
@@ -150,19 +148,74 @@ const ProductsContent: React.FC = () => {
   } | null>(null);
 
   // Close dropdowns when clicking outside
+  useClickOutside(filterRef, () => setShowFilterDropdown(false));
+  useClickOutside(sortRef, () => setShowSortDropdown(false));
+  useClickOutside(branchDropdownRef, () => setIsBranchDropdownOpen(false));
+
+  // Load branches on component mount
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
-        setShowFilterDropdown(false);
-      }
-      if (sortRef.current && !sortRef.current.contains(event.target as Node)) {
-        setShowSortDropdown(false);
+    const fetchBranches = async () => {
+      setIsLoadingBranches(true);
+      try {
+        const branchList = await branchService.getBranchesDropdown();
+        
+        // Add "Select All" option at the beginning
+        const selectAllOption: BranchDropdownItem = {
+          branchId: SELECT_ALL_BRANCH_ID,
+          branchName: t('productsContent.branch.selectAll') || 'All Branches'
+        };
+        
+        const branchesWithSelectAll = [selectAllOption, ...branchList];
+        setBranches(branchesWithSelectAll);
+        
+        // Auto-select "Select All" option if no branch is selected
+        if (!selectedBranch) {
+          setSelectedBranch(selectAllOption);
+        }
+        
+        logger.info('Şube listesi başarıyla yüklendi', { branchCount: branchList.length });
+      } catch (error) {
+        logger.error('Şube listesi yüklenirken hata:', error);
+        // Handle error - you might want to show a toast or error message
+      } finally {
+        setIsLoadingBranches(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    fetchBranches();
   }, []);
+
+  // Load categories when branch changes
+  useEffect(() => {
+    if (selectedBranch) {
+      loadCategories();
+    }
+  }, [selectedBranch]);
+
+  const handleBranchSelect = (branch: BranchDropdownItem) => {
+    setSelectedBranch(branch);
+    setIsBranchDropdownOpen(false);
+  };
+
+  const handleOpenAddonsManagement = (productId: number, productName: string) => {
+    if (!productId || productId === 0 || isNaN(productId)) {
+      console.error('❌ Invalid productId provided:', productId);
+      alert(t('productsContent.error.invalidData'));
+      return;
+    }
+    
+    if (!productName || productName.trim() === '') {
+      console.error('❌ Invalid productName provided:', productName);
+      alert(t('productsContent.error.invalidData'));
+      return;
+    }
+    
+    setSelectedProductForAddons({ 
+      productId: productId, 
+      productName: productName 
+    });
+    setIsAddonsModalOpen(true);
+  };
 
   const handleOpenIngredientSelection = (productId: number, productName: string) => {
     setSelectedProductForIngredients({ productId: productId, productName: productName });
@@ -190,20 +243,38 @@ const ProductsContent: React.FC = () => {
   };
   
   const loadCategories = async () => {
+    if (!selectedBranch) return;
+    
     try {
       setLoading(true);
-      const fetchedCategories = await productService.getCategories();
+      
+      let fetchedCategories: Category[];
+      
+      // Check if "Select All" is selected
+      if (selectedBranch.branchId === SELECT_ALL_BRANCH_ID) {
+        // Use getCategories for all branches
+        fetchedCategories = await productService.getCategories();
+        logger.info('Tüm kategori verileri başarıyla yüklendi', { 
+          categoryCount: fetchedCategories.length 
+        });
+      } else {
+        // Use getBranchCategories for specific branch
+        fetchedCategories = await productService.getBranchCategories(selectedBranch.branchId);
+        logger.info('Şube kategori verileri başarıyla yüklendi', { 
+          branchId: selectedBranch.branchId,
+          categoryCount: fetchedCategories.length 
+        });
+      }
+      
       setCategories(fetchedCategories);
+      
     } catch (error) {
       logger.error('Kategori verileri alınamadı:', error);
+      // Handle error - you might want to show a toast or error message
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    loadCategories();
-  }, []);
 
   // Sort categories and products
   const applySorting = (categoriesToSort: Category[]): Category[] => {
@@ -253,7 +324,7 @@ const ProductsContent: React.FC = () => {
   const applyFilters = (categoriesToFilter: Category[]): Category[] => {
     return categoriesToFilter.map(category => {
       // Filter products within category
-      let filteredProducts = category.products.filter(product => {
+      let filteredProducts = category?.products?.filter(product => {
         // Status filter
         if (filters.status === 'active' && !product.isAvailable) return false;
         if (filters.status === 'inactive' && product.isAvailable) return false;
@@ -273,7 +344,7 @@ const ProductsContent: React.FC = () => {
       };
     }).filter(category => 
       // Show category if it has products or if no search/filter is applied
-      category.products.length > 0 || (searchQuery === '' && filters.status === 'all' && filters.categories.length === 0)
+      category?.products?.length > 0 || (searchQuery === '' && filters.status === 'all' && filters.categories.length === 0)
     );
   };
 
@@ -283,12 +354,12 @@ const ProductsContent: React.FC = () => {
 
     return categoriesToSearch.map(category => ({
       ...category,
-      products: category.products.filter(product =>
+      products: category?.products?.filter(product =>
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     })).filter(category => 
-      category.products.length > 0 || 
+      category?.products?.length > 0 || 
       category.categoryName.toLowerCase().includes(searchQuery.toLowerCase())
     );
   };
@@ -335,7 +406,7 @@ const ProductsContent: React.FC = () => {
           await productService.deleteProduct(productId);
           setCategories(categories.map(cat => ({
             ...cat,
-            products: cat.products.filter(product => product.id !== productId)
+            products: cat.products?.filter(product => product.id !== productId)
           })));
           logger.info('Ürün başarıyla silindi', { productId });
         } finally {
@@ -372,10 +443,10 @@ const ProductsContent: React.FC = () => {
       type: 'category',
       id: categoryId,
       title: t('productsContent.delete.category.title'),
-      message: category.products.length > 0
+      message: category?.products?.length > 0
         ? t('products.delete.category.messageWithProducts', { 
             categoryName: category.categoryName, 
-            productCount: category.products.length 
+            productCount: category?.products?.length 
           })
         : t('productsContent.delete.category.messageEmpty', { categoryName: category.categoryName }),
       onConfirm: async () => {
@@ -458,10 +529,10 @@ const ProductsContent: React.FC = () => {
         setCategories(prev => {
           const newCategories = [...prev];
           const sourceCategory = newCategories.find(cat =>
-            cat.products.some(product => product.id === activeId)
+            cat.products?.some(product => product.id === activeId)
           );
           if (sourceCategory) {
-            sourceCategory.products = sourceCategory.products.filter(
+            sourceCategory.products = sourceCategory.products?.filter(
               product => product.id !== activeId
             );
           }
@@ -469,7 +540,7 @@ const ProductsContent: React.FC = () => {
           const targetCategory = newCategories.find(cat => cat.categoryId === overId);
           if (targetCategory) {
             const updatedProduct = { ...activeProduct, categoryId: overId };
-            targetCategory.products.push(updatedProduct);
+            targetCategory.products?.push(updatedProduct);
           }
 
           return newCategories;
@@ -478,10 +549,10 @@ const ProductsContent: React.FC = () => {
         setCategories(prev => {
           const newCategories = [...prev];
           const sourceCategory = newCategories.find(cat =>
-            cat.products.some(product => product.id === activeId)
+            cat.products?.some(product => product.id === activeId)
           );
           if (sourceCategory) {
-            sourceCategory.products = sourceCategory.products.filter(
+            sourceCategory.products = sourceCategory.products?.filter(
               product => product.id !== activeId
             );
           }
@@ -489,8 +560,8 @@ const ProductsContent: React.FC = () => {
           const targetCategory = newCategories.find(cat => cat.categoryId === overProduct.categoryId);
           if (targetCategory) {
             const updatedProduct = { ...activeProduct, categoryId: overProduct.categoryId };
-            const overIndex = targetCategory.products.findIndex(product => product.id === overId);
-            targetCategory.products.splice(overIndex, 0, updatedProduct);
+            const overIndex = targetCategory.products?.findIndex(product => product.id === overId);
+            targetCategory.products?.splice(overIndex, 0, updatedProduct);
           }
 
           return newCategories;
@@ -546,12 +617,12 @@ const ProductsContent: React.FC = () => {
       const categoryIndex = categories.findIndex(cat => cat.categoryId === categoryId);
       const category = categories[categoryIndex];
       
-      const oldIndex = category.products.findIndex(product => product.id === activeId);
-      const newIndex = category.products.findIndex(product => product.id === overId);
+      const oldIndex = category?.products?.findIndex(product => product.id === activeId);
+      const newIndex = category?.products?.findIndex(product => product.id === overId);
 
       // Update local state
       const newCategories = [...categories];
-      const newProducts = arrayMove(category.products, oldIndex, newIndex);
+      const newProducts = arrayMove(category?.products, oldIndex, newIndex);
       newCategories[categoryIndex] = { ...category, products: newProducts };
       
       setCategories(newCategories);
@@ -611,18 +682,18 @@ const ProductsContent: React.FC = () => {
         await productService.updateProduct(activeProduct.id, {
           categoryId: targetCategoryId
         });
-        
-        const updatedCategories = await productService.getCategories();
+
+        const updatedCategories = await productService.getBranchCategories(selectedBranch?.branchId);
         setCategories(updatedCategories);
         
         const targetCategory = updatedCategories.find(cat => cat.categoryId === targetCategoryId);
         if (targetCategory) {
-          const movedProduct = targetCategory.products.find(p => p.id === activeProduct.id);
-          const targetProduct = targetCategory.products.find(p => p.id === overProduct.id);
+          const movedProduct = targetCategory.products?.find(p => p.id === activeProduct.id);
+          const targetProduct = targetCategory.products?.find(p => p.id === overProduct.id);
           
           if (movedProduct && targetProduct) {
-            const currentIndex = targetCategory.products.findIndex(p => p.id === activeProduct.id);
-            const targetIndex = targetCategory.products.findIndex(p => p.id === overProduct.id);
+            const currentIndex = targetCategory.products?.findIndex(p => p.id === activeProduct.id);
+            const targetIndex = targetCategory.products?.findIndex(p => p.id === overProduct.id);
             
             if (currentIndex !== targetIndex) {
               const reorderedProducts = arrayMove(targetCategory.products, currentIndex, targetIndex);
@@ -679,6 +750,71 @@ const ProductsContent: React.FC = () => {
     );
   }
 
+  // No branch selected state (this shouldn't happen now since we auto-select "Select All")
+  if (!selectedBranch) {
+    return (
+      <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
+              <input
+                type="text"
+                placeholder={t('productsContent.search.placeholder')}
+                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
+                disabled
+              />
+            </div>
+
+            {/* Branch Selector */}
+            <div className="relative" ref={branchDropdownRef}>
+              <button
+                onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
+                className={`flex items-center justify-between min-w-[200px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRTL ? 'flex-row-reverse' : ''}`}
+                disabled={isLoadingBranches}
+              >
+                <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                  {isLoadingBranches ? t('productsContent.branch.loading') : t('productsContent.branch.selectBranch')}
+                </span>
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
+              </button>
+
+              {isBranchDropdownOpen && (
+                <div className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'}`}>
+                  {branches.length === 0 ? (
+                    <div className="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                      {t('productsContent.branch.noBranches')}
+                    </div>
+                  ) : (
+                    branches.map(branch => (
+                      <button
+                        key={branch.branchId}
+                        onClick={() => handleBranchSelect(branch)}
+                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`}
+                      >
+                        {branch.branchName}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+            <p className="text-gray-500 dark:text-gray-400">
+              {t('productsContent.branch.selectBranchMessage')}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   if (categories.length === 0) {
     return (
       <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -697,6 +833,38 @@ const ProductsContent: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-3">
+              {/* Branch Selector */}
+              <div className="relative" ref={branchDropdownRef}>
+                <button
+                  onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
+                  className={`flex items-center justify-between min-w-[200px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRTL ? 'flex-row-reverse' : ''}`}
+                >
+                  <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    {selectedBranch ? selectedBranch.branchName : t('productsContent.branch.selectBranch')}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                </button>
+
+                {isBranchDropdownOpen && (
+                  <div className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'}`}>
+                    {branches.map(branch => (
+                      <button
+                        key={branch.branchId}
+                        onClick={() => handleBranchSelect(branch)}
+                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                          selectedBranch?.branchId === branch.branchId
+                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                            : 'text-gray-700 dark:text-gray-200'
+                        } ${isRTL ? 'text-right' : 'text-left'}`}
+                      >
+                        {branch.branchName}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <button
                 onClick={() => setIsCreateCategoryModalOpen(true)}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70 transition-colors duration-200"
@@ -725,7 +893,10 @@ const ProductsContent: React.FC = () => {
           </h3>
           
           <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-            {t('productsContent.emptyState.noCategories.description')}
+            {selectedBranch?.branchId === SELECT_ALL_BRANCH_ID 
+              ? t('productsContent.emptyState.noCategories.descriptionAllBranches') || 'No categories found across all branches. Start by creating your first category.'
+              : t('productsContent.emptyState.noCategories.description')
+            }
           </p>
           
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -790,6 +961,44 @@ const ProductsContent: React.FC = () => {
             </div>
 
             <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              {/* Branch Selector */}
+              <div className="relative" ref={branchDropdownRef}>
+                <button
+                  onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
+                  className={`flex items-center justify-between min-w-[200px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRTL ? 'flex-row-reverse' : ''}`}
+                >
+                  <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    {selectedBranch ? selectedBranch.branchName : t('productsContent.branch.selectBranch')}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                </button>
+
+                {isBranchDropdownOpen && (
+                  <div className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'}`}>
+                    {branches.map(branch => (
+                      <button
+                        key={branch.branchId}
+                        onClick={() => handleBranchSelect(branch)}
+                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
+                          selectedBranch?.branchId === branch.branchId
+                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                            : 'text-gray-700 dark:text-gray-200'
+                        } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+                      >
+                        {branch.branchId === SELECT_ALL_BRANCH_ID && (
+                          <Users className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        )}
+                        <span>{branch.branchName}</span>
+                        {selectedBranch?.branchId === branch.branchId && (
+                          <Check className={`h-4 w-4 ${isRTL ? 'mr-auto' : 'ml-auto'}`} />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               {/* Clear Filters Button */}
               {hasActiveFilters && (
                 <button
@@ -898,7 +1107,7 @@ const ProductsContent: React.FC = () => {
                                 className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                               />
                               <span className="text-sm text-gray-700 dark:text-gray-300">
-                                {category.categoryName} ({category.products.length})
+                                {category.categoryName} ({category?.products?.length})
                               </span>
                             </label>
                           ))}
@@ -1034,7 +1243,7 @@ const ProductsContent: React.FC = () => {
                         {category.categoryName}
                       </h3>
                       <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full">
-                        {category.products.length} {category.products.length === 1 ? 'product' : 'products'}
+                        {category?.products?.length} {category?.products?.length === 1 ? 'product' : 'products'}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -1066,9 +1275,9 @@ const ProductsContent: React.FC = () => {
                   )}
 
                   {/* Products Grid */}
-                  {category.products.length > 0 ? (
+                  {category?.products?.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                      {category.products.map((product) => {
+                      {category?.products?.map((product) => {
                         const hasValidImage = product.imageUrl && product.imageUrl !== 'string' && product.imageUrl.trim() !== '';
                         return (
                           <div

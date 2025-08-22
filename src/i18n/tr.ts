@@ -217,6 +217,31 @@ export const tr = {
         avgOrderValue: 'Ortalama Sipariş Değeri'
       }
     },
+  orderType: {
+        title: "Sipariş Türü Ayarları",
+        subtitle: "Sipariş türlerinin aktiflik durumu, minimum tutar ve servis ücretlerini yönetin",
+        loading: "Sipariş türleri yükleniyor...",
+        pleaseWait: "Lütfen bekleyin",
+        settingsUpdated: "ayarları başarıyla güncellendi",
+        updateError: "Ayarlar güncellenirken hata oluştu",
+        loadingError: "Sipariş türleri yüklenirken hata oluştu",
+        active: "aktif",
+        minutes: "dakika",
+        requirements: "Gereksinimler",
+        table: "Masa",
+        address: "Adres",
+        phone: "Telefon",
+        activeStatus: "Aktif Durum",
+        activeStatusDescription: "Bu sipariş türünü etkinleştir/devre dışı bırak",
+        minOrderAmount: "Minimum Sipariş Tutarı",
+        serviceCharge: "Servis Ücreti",
+        saveSettings: "Ayarları Kaydet",
+        updating: "Güncelleniyor...",
+        totalOrderTypes: "Toplam Sipariş Türü",
+        activeTypes: "Aktif Türler",
+        totalActiveOrders: "Toplam Aktif Sipariş",
+        estimatedTime: "Tahmini Süre"
+      },
     products: {
       title: 'Ürünler',
       description: 'Ürünlerinizi görüntüleyin ve yönetin.'
@@ -284,7 +309,7 @@ export const tr = {
         aboutDetails: 'Restoranınız hakkında detaylı bilgi verin...'
       }
     },
-        branchManagementTitle: "Şube Yönetimi" ,
+    branchManagementTitle: "Şube Yönetimi" ,
 
     sidebar: {
        title : "QR Menü",
@@ -1347,6 +1372,10 @@ export const tr = {
     optional: 'Opsiyonel'
   },
   productsContent: {
+        branch : {
+    selectAll:"Hepsi",
+
+    },
   title: 'Ürün Yönetimi',
   description: 'Menü kategorileri ve ürünlerini yönetin',
   
@@ -2728,6 +2757,7 @@ SortableProduct: {
     }
   },
   BranchtableManagement: {
+
   title: "Masa Yönetimi",
   subtitle: "Restoran masalarınızı ve kategorilerinizi yönetin",
   tabs: {
@@ -2809,6 +2839,10 @@ SortableProduct: {
   }
   },
   BranchTableManagement: {
+  "clear Table": "Tablo temizleniyor",
+  "refresh Table": "Durumu güncelle",
+   "clearing": "Temizleniyor...",
+    batchCreateTables: "Toplu Tablo Oluştur",
     header: "Category & Table Management",
     subheader: "Manage restaurant categories and tables with accordion view",
     totalCategories: "Total Categories",
@@ -2845,6 +2879,10 @@ SortableProduct: {
     copyQRUrl: "Copy QR URL",
     copied: "Copied!",
     success: {
+      "tableCleared": "{{tableName}} tablosu temizlendi ve artık kullanılabilir",
+"tableOccupied": "{{tableName}} tablosunun durumu 'dolu' olarak güncellendi",
+"tableClearedGeneric": "Tablo başarıyla temizlendi",
+"tableStatusUpdated": "Tablo durumu başarıyla güncellendi",
       categoryAdded: "Category added successfully",
       categoryUpdated: "Category updated successfully",
       categoryDeleted: "Category deleted successfully",
@@ -2855,11 +2893,11 @@ SortableProduct: {
       categoryDeactivated: "Category deactivated successfully",
       tableActivated: "Table activated successfully",
       tableDeactivated: "Table deactivated successfully",
-      tableOccupied: "Table marked as occupied",
       tableAvailable: "Table marked as available",
       dataRefreshed: "Data refreshed successfully"
     },
     error: {
+      "clearTableFailed": "Tablo temizlenemedi. Lütfen tekrar deneyin.",
       fetchCategoriesFailed: "Failed to fetch categories",
       fetchTablesFailed: "Failed to fetch tables",
       categoryNameRequired: "Category name is required",

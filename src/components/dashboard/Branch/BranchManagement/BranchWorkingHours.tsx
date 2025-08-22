@@ -41,7 +41,7 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                 className={`p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-lg ${
                   hour.isWorkingDay
                     ? 'bg-gradient-to-r from-emerald-50 to-emerald-100 dark:from-emerald-900/20 dark:to-emerald-800/20 border-emerald-200 dark:border-emerald-700'
-                    : 'bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-red-200 dark:border-red-700'
+                    : 'bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900/20 dark:to-slate-800/20 border-slate-200 dark:border-slate-700 opacity-75'
                 }`}
               >
                 <div className="flex items-center justify-between mb-4">
@@ -63,42 +63,62 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                   </label>
                 </div>
                 
-                {hour.isWorkingDay ? (
-                  <div className="grid grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">
-                        {t('branchManagementBranch.workingHours.openTime')}
-                      </label>
-                      <input
-                        title="openTime"
-                        type="time"
-                        value={hour.openTime}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          handleWorkingHourChange(hour.dayOfWeek, 'openTime', e.target.value)
-                        }
-                        className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 shadow-sm hover:shadow-md"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-3">
-                        {t('branchManagementBranch.workingHours.closeTime')}
-                      </label>
-                      <input
-                        title="closeTime"
-                        type="time"
-                        value={hour.closeTime}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          handleWorkingHourChange(hour.dayOfWeek, 'closeTime', e.target.value)
-                        }
-                        className="w-full px-4 py-3 border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all duration-300 shadow-sm hover:shadow-md"
-                      />
-                    </div>
+                {/* Always show time inputs, but style them differently when not a working day */}
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className={`block text-sm font-bold mb-3 ${
+                      hour.isWorkingDay 
+                        ? 'text-slate-700 dark:text-slate-300' 
+                        : 'text-slate-500 dark:text-slate-500'
+                    }`}>
+                      {t('branchManagementBranch.workingHours.openTime')}
+                    </label>
+                    <input
+                      title="openTime"
+                      type="time"
+                      value={hour.openTime}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        handleWorkingHourChange(hour.dayOfWeek, 'openTime', e.target.value)
+                      }
+                      disabled={!hour.isWorkingDay}
+                      className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 shadow-sm hover:shadow-md ${
+                        hour.isWorkingDay
+                          ? 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-emerald-500 focus:border-transparent'
+                          : 'border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-500 cursor-not-allowed'
+                      }`}
+                    />
                   </div>
-                ) : (
-                  <div className="text-center py-6">
-                    <div className="flex items-center justify-center space-x-2 text-red-600 dark:text-red-400">
-                      <X className="w-6 h-6" />
-                      <span className="text-lg font-bold">
+                  <div>
+                    <label className={`block text-sm font-bold mb-3 ${
+                      hour.isWorkingDay 
+                        ? 'text-slate-700 dark:text-slate-300' 
+                        : 'text-slate-500 dark:text-slate-500'
+                    }`}>
+                      {t('branchManagementBranch.workingHours.closeTime')}
+                    </label>
+                    <input
+                      title="closeTime"
+                      type="time"
+                      value={hour.closeTime}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        handleWorkingHourChange(hour.dayOfWeek, 'closeTime', e.target.value)
+                      }
+                      disabled={!hour.isWorkingDay}
+                      className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 shadow-sm hover:shadow-md ${
+                        hour.isWorkingDay
+                          ? 'border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-emerald-500 focus:border-transparent'
+                          : 'border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-500 cursor-not-allowed'
+                      }`}
+                    />
+                  </div>
+                </div>
+                
+                {/* Show status indicator when not a working day */}
+                {!hour.isWorkingDay && (
+                  <div className="mt-4 text-center">
+                    <div className="flex items-center justify-center space-x-2 text-slate-500 dark:text-slate-500">
+                      <X className="w-4 h-4" />
+                      <span className="text-sm font-semibold">
                         {t('branchManagementBranch.status.closed')}
                       </span>
                     </div>
@@ -132,11 +152,15 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                     </div>
                   ) : (
                     <div className="text-center">
-                      <div className="flex items-center justify-center space-x-2 text-red-600 dark:text-red-400">
+                      <div className="flex items-center justify-center space-x-2 text-red-600 dark:text-red-400 mb-2">
                         <X className="w-4 h-4" />
                         <span className="text-sm font-bold">
                           {t('branchManagementBranch.status.closed')}
                         </span>
+                      </div>
+                      {/* Show times even when closed in read-only mode */}
+                      <div className="text-xs text-slate-500 dark:text-slate-500">
+                        {formatTime(hour.openTime)} - {formatTime(hour.closeTime)}
                       </div>
                     </div>
                   )}

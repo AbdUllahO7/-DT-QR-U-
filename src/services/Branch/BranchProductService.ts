@@ -180,7 +180,7 @@ class BranchProductService {
       }
       
       const response = await httpClient.get<APIBranchProduct[]>(url);
-      
+      console.log("response",response)
       logger.info('Branch products retrieved successfully', { 
         count: response.data.length,
         hasIncludes: !!includes?.length
@@ -227,7 +227,7 @@ class BranchProductService {
       logger.info('Branch product retrieved successfully', { id });
       
       const transformedProduct = this.transformSingleProduct(response.data);
-      
+      console.log("transformedProduct",transformedProduct)
       return transformedProduct;
     } catch (error: any) {
       logger.error('Error retrieving branch product:', error);
@@ -254,9 +254,6 @@ class BranchProductService {
       branchName: response.data?.branchName,
       categoriesCount: response.data?.categories?.length
     });
-    
-    console.log("response.data", response.data);
-    
 
     return response.data;
     
@@ -316,7 +313,6 @@ class BranchProductService {
     branchCategoryId?: number;
   }): Promise<Product> {
     try {
-      console.log("productData",productData)
       const payload: UpdateBranchProductRequest = {
         branchProductId: productData.branchProductId ?? id,
         price: productData.price ?? 0,

@@ -14,13 +14,16 @@ import {
   Save,
   XCircle,
   Settings,
-  Users
+  Users,
+  Copy
 } from 'lucide-react';
 import { 
   CreateMenuTableDto, 
   UpdateMenuTableDto, 
   CreateTableCategoryDto,
   UpdateTableCategoryDto,
+  BatchCreateMenuTableItemDto,
+  CreateBatchMenuTableDto,
   tableService 
 } from '../../../../services/Branch/branchTableService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
@@ -105,7 +108,6 @@ const QRCodeModal: React.FC<{
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
             {t('BranchTableManagement.qrCodeDescription')}
           </p>
-         
         </div>
 
         <div className="space-y-3">
@@ -134,7 +136,7 @@ const QRCodeModal: React.FC<{
             ) : (
               <>
                 <Grid className="h-4 w-4" />
-                {t('BranchTableManagement.copied')}
+                {t('BranchTableManagement.copyUrl')}
               </>
             )}
           </button>
@@ -165,8 +167,8 @@ interface TableData {
   isOccupied: boolean;
   displayOrder: number;
   rowVersion?: string;
-  qrCode?: string; // The QR token from the API
-  qrCodeUrl?: string; // The image URL for the QR code
+  qrCode?: string;
+  qrCodeUrl?: string;
 }
 
 const BranchTableManagement: React.FC = () => {
@@ -185,7 +187,9 @@ const BranchTableManagement: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showAddCategory, setShowAddCategory] = useState<boolean>(false);
   const [showAddTable, setShowAddTable] = useState<number | null>(null);
-  console.log("tables",tables)
+  const [showBatchCreate, setShowBatchCreate] = useState<boolean>(false);
+  
+
   const [qrModal, setQrModal] = useState<{
     isOpen: boolean;
     table: TableData | null;
@@ -224,6 +228,19 @@ const BranchTableManagement: React.FC = () => {
     isActive: true
   });
 
+  // Batch creation states
+  const [batchItems, setBatchItems] = useState<BatchCreateMenuTableItemDto[]>([
+    {
+      categoryId: 0,
+      quantity: 1,
+      capacity: 4,
+      displayOrder: null,
+      isActive: true
+    }
+  ]);
+  const [isBatchCreating, setIsBatchCreating] = useState<boolean>(false);
+const [clearLoading, setClearLoading] = useState<Set<number>>(new Set());
+
   const iconOptions: string[] = ['table', 'users', 'grid', 'building', 'settings'];
 
   // Effects
@@ -260,6 +277,87 @@ const BranchTableManagement: React.FC = () => {
   const filteredCategories = categories.filter(category => 
     category.categoryName.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Batch creation methods
+  const addBatchItem = () => {
+    setBatchItems(prev => [...prev, {
+      categoryId: 0,
+      quantity: 1,
+      capacity: 4,
+      displayOrder: null,
+      isActive: true
+    }]);
+  };
+
+  const removeBatchItem = (index: number) => {
+    setBatchItems(prev => prev.filter((_, i) => i !== index));
+  };
+const handleClearTable = async (tableId: number): Promise<void> => {
+  setClearLoading(prev => new Set(prev).add(tableId));
+
+  try {
+    console.log("tableId",tableId)
+    const result = await tableService.clearTable(tableId);
+    
+   console.log("result",result)
+    
+    setTables(prev => prev.map(table => 
+      table.id === tableId 
+        ? { ...table, isOccupied: false } // Assuming clear makes table available
+        : table
+    ));
+    
+    // Show success message from server
+    setSuccessMessage(result.message || 'Table cleared successfully');
+    
+    // Log additional info if available
+    if (result.endedSessions > 0) {
+      console.log(`Ended ${result.endedSessions} sessions for table ${tableId}` , );
+    }
+    
+    // Optionally refresh categories to update counts
+    await fetchCategories();
+    
+    // Alternative approach: If you're unsure about the final state,
+    // you can fetch the updated table data:
+    // try {
+    //   const updatedTable = await tableService.getTableById(tableId);
+    //   if (updatedTable) {
+    //     setTables(prev => prev.map(table => 
+    //       table.id === tableId ? updatedTable : table
+    //     ));
+    //   }
+    // } catch (fetchError) {
+    //   console.error('Error fetching updated table:', fetchError);
+    // }
+    
+  } catch (err: any) {
+    console.error('Error clearing table:', err);
+    
+    // More specific error handling based on status code
+    if (err.status === 415) {
+      setError('Server configuration error. Please contact support.');
+    } else if (err.status === 404) {
+      setError('Table not found. Please refresh the page.');
+    } else if (err.status === 400) {
+      setError('Invalid table operation. Please try again.');
+    } else {
+      setError('Failed to clear table. Please try again.');
+    }
+  } finally {
+    setClearLoading(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(tableId);
+      return newSet;
+    });
+  }
+};
+
+  const updateBatchItem = (index: number, field: keyof BatchCreateMenuTableItemDto, value: any) => {
+    setBatchItems(prev => prev.map((item, i) => 
+      i === index ? { ...item, [field]: value } : item
+    ));
+  };
 
   // API functions
   const fetchCategories = async (): Promise<void> => {
@@ -298,7 +396,7 @@ const BranchTableManagement: React.FC = () => {
       setTables(processedTables);
     } catch (err: any) {
       console.error('Error fetching tables:', err);
-      setError(t('BranchTableManagement.error.fetchTablesFailed'));
+      setError(t('BranchTableManagement.error.tableUpdated'));
     }
   };
 
@@ -308,9 +406,50 @@ const BranchTableManagement: React.FC = () => {
       await Promise.all([fetchCategories(), fetchTables()]);
       setSuccessMessage(t('BranchTableManagement.success.dataRefreshed'));
     } catch (err: any) {
-      setError(t('BranchTableManagement.error.refreshFailed'));
+      setError(t('BranchTableManagement.error.updateTableStatusFailed'));
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Batch creation handler
+  const handleBatchCreateTables = async (): Promise<void> => {
+    const validItems = batchItems.filter(item => 
+      item.categoryId > 0 && 
+      item.quantity > 0 && 
+      item.capacity > 0
+    );
+
+    if (validItems.length === 0) {
+      setError(t('BranchTableManagement.error.addTableFailed'));
+      return;
+    }
+
+    setIsBatchCreating(true);
+    try {
+      const batchData: CreateBatchMenuTableDto = {
+        items: validItems
+      };
+
+      await tableService.createBatchTables(batchData);
+      await fetchTables();
+      await fetchCategories();
+      
+      setShowBatchCreate(false);
+      setBatchItems([{
+        categoryId: 0,
+        quantity: 1,
+        capacity: 4,
+        displayOrder: null,
+        isActive: true
+      }]);
+      
+      setSuccessMessage(t('BranchTableManagement.success.tableAdded'));
+    } catch (err: any) {
+      console.error('Error creating batch tables:', err);
+      setError(t('BranchTableManagement.error.batchCreateFailed'));
+    } finally {
+      setIsBatchCreating(false);
     }
   };
 
@@ -621,7 +760,7 @@ const BranchTableManagement: React.FC = () => {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center `}>
               <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                 <Building className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
@@ -635,7 +774,7 @@ const BranchTableManagement: React.FC = () => {
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center `}>
               <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
                 <Grid className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
@@ -649,7 +788,7 @@ const BranchTableManagement: React.FC = () => {
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center `}>
               <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
                 <UserX className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
@@ -665,7 +804,7 @@ const BranchTableManagement: React.FC = () => {
           </div>
 
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center `}>
               <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
                 <UserCheck className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
@@ -708,6 +847,14 @@ const BranchTableManagement: React.FC = () => {
               </button>
               
               <button
+                onClick={() => setShowBatchCreate(true)}
+                className={`px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 flex items-center gap-2 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+              >
+                <Copy className="h-4 w-4" />
+                {t('BranchTableManagement.batchCreateTables')}
+              </button>
+              
+              <button
                 onClick={() => setShowAddCategory(true)}
                 className={`px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 flex items-center gap-2 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
               >
@@ -747,7 +894,6 @@ const BranchTableManagement: React.FC = () => {
           </div>
         )}
 
-        {/* Add Category Form */}
         {showAddCategory && (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -831,6 +977,136 @@ const BranchTableManagement: React.FC = () => {
           </div>
         )}
 
+        {/* Batch Create Modal */}
+        {showBatchCreate && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                      {t('BranchTableManagement.batchCreateTables')}
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      Create multiple tables across different categories at once
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowBatchCreate(false)}
+                    className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    <X className="h-6 w-6" />
+                  </button>
+                </div>
+
+                <div className="space-y-4 mb-6">
+                  {batchItems.map((item, index) => (
+                    <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-gray-900 dark:text-white">
+                          Category {index + 1}
+                        </h4>
+                        {batchItems.length > 1 && (
+                          <button
+                            onClick={() => removeBatchItem(index)}
+                            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Category
+                          </label>
+                          <select
+                            value={item.categoryId}
+                            onChange={(e) => updateBatchItem(index, 'categoryId', parseInt(e.target.value))}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                          >
+                            <option value={0}>Select Category</option>
+                            {categories.filter(cat => cat.isActive).map(category => (
+                              <option key={category.id} value={category.id}>
+                                {category.categoryName}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Quantity
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="50"
+                            value={item.quantity}
+                            onChange={(e) => updateBatchItem(index, 'quantity', parseInt(e.target.value) || 1)}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Capacity
+                          </label>
+                          <input
+                            type="number"
+                            min="1"
+                            max="20"
+                            value={item.capacity}
+                            onChange={(e) => updateBatchItem(index, 'capacity', parseInt(e.target.value) || 1)}
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between mb-6">
+                  <button
+                    onClick={addBatchItem}
+                    className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Category
+                  </button>
+
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Total Tables: <span className="font-semibold">{batchItems.reduce((total, item) => total + (item.quantity || 0), 0)}</span>
+                  </div>
+                </div>
+
+                <div className="flex gap-3 justify-end">
+                  <button
+                    onClick={() => setShowBatchCreate(false)}
+                    disabled={isBatchCreating}
+                    className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleBatchCreateTables}
+                    disabled={isBatchCreating}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isBatchCreating ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Grid className="h-4 w-4" />
+                    )}
+                    {isBatchCreating ? 'Creating...' : 'Create Tables'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Main Content */}
         {isLoading ? (
           <div className="text-center py-12">
@@ -842,6 +1118,7 @@ const BranchTableManagement: React.FC = () => {
             {filteredCategories.map((category) => (
               <CategorySection
                 key={category.id}
+                  onClearTable={handleClearTable}
                 category={category}
                 tables={getTablesForCategory(category.id)}
                 isExpanded={expandedCategories.has(category.id)}

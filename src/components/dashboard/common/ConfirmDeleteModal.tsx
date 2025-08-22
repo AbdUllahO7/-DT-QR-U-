@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { X, AlertTriangle, Trash2 } from "lucide-react";
-import { useLanguage } from "../contexts/LanguageContext";
-import { logger } from "../utils/logger";
+import { useLanguage } from "../../../contexts/LanguageContext";
+import { logger } from "../../../utils/logger";
 
 // ConfirmDeleteModal Component
 export const ConfirmDeleteModal: React.FC<{

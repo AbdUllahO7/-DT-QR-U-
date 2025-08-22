@@ -69,6 +69,7 @@ interface CategorySectionProps {
   onToggleTableOccupation: (tableId: number, isOccupied: boolean) => Promise<void>;
   onShowQRCode: (table: TableData) => void;
   onTableChange: (tableId: number, updatedData: Partial<TableData>) => void;
+   onClearTable: (tableId: number) => Promise<void>;
   newTable: {
     menuTableName: string;
     capacity: number;
@@ -109,7 +110,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   onShowQRCode,
   onTableChange,
   newTable,
-  onNewTableChange
+  onNewTableChange,
+  onClearTable
 }) => {
   const { t, isRTL } = useLanguage();
 
@@ -314,6 +316,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                   <TableCard
                     key={table.id}
                     table={table}
+                    onClearTable={onClearTable}
                     isEditing={editingTable === table.id}
                     isToggling={toggleLoading.tables.has(table.id)}
                     onEdit={() => onStartTableEdit(table.id)}
