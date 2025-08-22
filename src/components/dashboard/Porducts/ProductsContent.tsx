@@ -21,7 +21,6 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useTheme } from '../../../contexts/ThemeContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../hooks';
 import type { Category, Product } from '../../../types/dashboard';
@@ -36,7 +35,8 @@ import { EditProductModal } from './EditProductModal';
 import ProductIngredientSelectionModal from './ProductIngredientSelectionModal';
 import ProductIngredientUpdateModal from './ProductIngredientUpdateModal';
 import ProductAddonsModal from './ProductAddonsModal';
-import { ConfirmDeleteModal } from '../../ConfirmDeleteModal';
+import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
+import { useTheme } from '../../../contexts/ThemeContext';
 
 // Branch dropdown item interface
 interface BranchDropdownItem {

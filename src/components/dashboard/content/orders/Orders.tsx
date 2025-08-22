@@ -25,10 +25,10 @@ import {
   BarChart3,
   Settings
 } from 'lucide-react';
-import { useLanguage } from '../../../contexts/LanguageContext';
-import { orderService } from '../../../services/orderService';
-import { Order, OrderStatus } from '../../../types/dashboard';
-import { logger } from '../../../utils/logger';
+import { useLanguage } from '../../../../contexts/LanguageContext';
+import { Order, OrderStatus } from '../../../../types/dashboard';
+import { logger } from '../../../../utils/logger';
+import { orderService } from '../../../../services/orderService';
 
 const Orders: React.FC = () => {
   const { t, language } = useLanguage();
@@ -58,9 +58,6 @@ const Orders: React.FC = () => {
     logger.info('View details', { order });
   };
 
-  const handleStatusChange = (orderId: string, newStatus: OrderStatus) => {
-    logger.info('Change status', { orderId, newStatus });
-  };
 
   const handleRefresh = async () => {
     setRefreshing(true);

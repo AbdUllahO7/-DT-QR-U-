@@ -1,6 +1,6 @@
 import React from 'react';
 import { QrCode, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 const Footer: React.FC = () => {
   const { t, isRTL } = useLanguage();

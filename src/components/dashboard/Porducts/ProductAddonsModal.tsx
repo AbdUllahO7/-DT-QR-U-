@@ -29,6 +29,13 @@ interface ProductAddonsModalProps {
   productName: string;
 }
 
+// Interface for selected product data
+interface SelectedProductData {
+  productId: number;
+  marketingText: string;
+  isRecommended: boolean;
+}
+
 // Sortable Addon Component
 const SortableAddonItem: React.FC<{
   addon: ProductAddon & { addonProduct?: AvailableAddonProduct };
@@ -41,7 +48,7 @@ const SortableAddonItem: React.FC<{
   editingData: { marketingText: string; isRecommended: boolean };
   onEditingDataChange: (field: string, value: any) => void;
 }> = ({ 
-  addon, onUpdate, onRemove, isEditing, onEdit, onSaveEdit, 
+  addon,  onRemove, isEditing, onEdit, onSaveEdit, 
   onCancelEdit, editingData, onEditingDataChange 
 }) => {
   const { t } = useLanguage();
@@ -221,7 +228,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
   const [currentAddons, setCurrentAddons] = useState<ProductAddon[]>([]);
   const [availableProducts, setAvailableProducts] = useState<AvailableAddonProduct[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedProductIds, setSelectedProductIds] = useState<Set<number>>(new Set());
+  const [selectedProductsData, setSelectedProductsData] = useState<Map<number, SelectedProductData>>(new Map());
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -271,9 +278,16 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
       setCurrentAddons(addonsResponse);
       setAvailableProducts(allProducts);
       
-      // Pre-select currently added products
-      const currentAddonProductIds = new Set(addonsResponse.map(addon => addon.addonProductId));
-      setSelectedProductIds(currentAddonProductIds);
+      // Pre-populate selected products data with current addons
+      const newSelectedProductsData = new Map<number, SelectedProductData>();
+      addonsResponse.forEach(addon => {
+        newSelectedProductsData.set(addon.addonProductId, {
+          productId: addon.addonProductId,
+          marketingText: addon.marketingText || '',
+          isRecommended: addon.isRecommended
+        });
+      });
+      setSelectedProductsData(newSelectedProductsData);
 
       logger.info('Eklenti verileri yüklendi', { 
         productId, 
@@ -300,13 +314,30 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
 
   // Handle product selection
   const toggleProductSelection = (productId: number) => {
-    const newSelection = new Set(selectedProductIds);
-    if (newSelection.has(productId)) {
-      newSelection.delete(productId);
+    const newSelectedProductsData = new Map(selectedProductsData);
+    if (newSelectedProductsData.has(productId)) {
+      newSelectedProductsData.delete(productId);
     } else {
-      newSelection.add(productId);
+      newSelectedProductsData.set(productId, {
+        productId,
+        marketingText: '',
+        isRecommended: false
+      });
     }
-    setSelectedProductIds(newSelection);
+    setSelectedProductsData(newSelectedProductsData);
+  };
+
+  // Handle updating selected product data
+  const updateSelectedProductData = (productId: number, field: 'marketingText' | 'isRecommended', value: string | boolean) => {
+    const newSelectedProductsData = new Map(selectedProductsData);
+    const existingData = newSelectedProductsData.get(productId);
+    if (existingData) {
+      newSelectedProductsData.set(productId, {
+        ...existingData,
+        [field]: value
+      });
+      setSelectedProductsData(newSelectedProductsData);
+    }
   };
 
   // Handle addon updates
@@ -339,11 +370,9 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
       
       // Update local state
       setCurrentAddons(prev => prev.filter(a => a.id !== addonId));
-      setSelectedProductIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(addon.addonProductId);
-        return newSet;
-      });
+      const newSelectedProductsData = new Map(selectedProductsData);
+      newSelectedProductsData.delete(addon.addonProductId);
+      setSelectedProductsData(newSelectedProductsData);
     } catch (error: any) {
       logger.error('Eklenti silinirken hata:', error);
       setError(t('productAddonsModal.errors.deletingAddon'));
@@ -413,6 +442,9 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
       // Get current addon product IDs
       const currentAddonProductIds = new Set(currentAddons.map(addon => addon.addonProductId));
       
+      // Get selected product IDs
+      const selectedProductIds = new Set(selectedProductsData.keys());
+      
       // Find products to add and remove
       const toAdd = Array.from(selectedProductIds).filter(id => !currentAddonProductIds.has(id));
       const toRemove = currentAddons.filter(addon => !selectedProductIds.has(addon.addonProductId));
@@ -422,15 +454,34 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
         await productAddonsService.deleteProductAddon(addon.id);
       }
 
-      // Add new addons
+      // Add new addons with their respective data
       if (toAdd.length > 0) {
-        const addRequests = toAdd.map(productId => ({
-          addonProductId: productId,
-          isRecommended: false,
-          marketingText: ''
-        }));
+        const addRequests = toAdd.map(productId => {
+          const productData = selectedProductsData.get(productId);
+          return {
+            addonProductId: productId,
+            isRecommended: productData?.isRecommended || false,
+            marketingText: productData?.marketingText || ''
+          };
+        });
         
         await productAddonsService.addMultipleAddons(productId, addRequests);
+      }
+
+      // Update existing addons that have changed
+      for (const addon of currentAddons) {
+        const selectedData = selectedProductsData.get(addon.addonProductId);
+        if (selectedData && selectedData.productId === addon.addonProductId) {
+          // Check if anything changed
+          if (addon.marketingText !== selectedData.marketingText || 
+              addon.isRecommended !== selectedData.isRecommended) {
+            await productAddonsService.updateProductAddon({
+              id: addon.id,
+              marketingText: selectedData.marketingText,
+              isRecommended: selectedData.isRecommended
+            });
+          }
+        }
       }
 
       logger.info('Ürün eklentileri başarıyla kaydedildi', { 
@@ -597,74 +648,118 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                 ) : (
                   <div className="space-y-3">
                     {filteredProducts.map((product) => {
-                      const isSelected = selectedProductIds.has(product.id);
+                      const isSelected = selectedProductsData.has(product.id);
+                      const productData = selectedProductsData.get(product.id);
                       const hasValidImage = product.imageUrl && product.imageUrl.trim() !== '';
 
                       return (
                         <div
                           key={product.id}
-                          className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                          className={`rounded-lg border-2 transition-all ${
                             isSelected
                               ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 shadow-sm'
                               : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-primary-300 hover:shadow-sm'
                           } ${!product.isAvailable ? 'opacity-60' : ''}`}
-                          onClick={() => toggleProductSelection(product.id)}
                         >
-                          <div className="flex items-start gap-3">
-                            {/* Selection Checkbox */}
-                            <div className="pt-1">
-                              <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${
-                                isSelected
-                                  ? 'bg-primary-600 border-primary-600 text-white'
-                                  : 'border-gray-300 dark:border-gray-600'
-                              }`}>
-                                {isSelected && <Check className="w-3 h-3" />}
+                          <div className="p-4">
+                            <div className="flex items-start gap-3">
+                              {/* Selection Checkbox */}
+                              <div className="pt-1">
+                                <button
+                                  onClick={() => toggleProductSelection(product.id)}
+                                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
+                                    isSelected
+                                      ? 'bg-primary-600 border-primary-600 text-white'
+                                      : 'border-gray-300 dark:border-gray-600 hover:border-primary-400'
+                                  }`}
+                                  aria-label={isSelected ? 'Deselect product' : 'Select product'}
+                                >
+                                  {isSelected && <Check className="w-3 h-3" />}
+                                </button>
                               </div>
-                            </div>
 
-                            {/* Product Image */}
-                            <div className="flex-shrink-0">
-                              {hasValidImage ? (
-                                <img
-                                  src={product.imageUrl}
-                                  alt={product.name}
-                                  className="w-12 h-12 rounded-lg object-cover bg-gray-200 dark:bg-gray-600"
-                                  loading="lazy"
-                                />
-                              ) : (
-                                <div className="w-12 h-12 rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                                  <Package className="h-5 w-5 text-gray-400" />
+                              {/* Product Image */}
+                              <div className="flex-shrink-0">
+                                {hasValidImage ? (
+                                  <img
+                                    src={product.imageUrl}
+                                    alt={product.name}
+                                    className="w-12 h-12 rounded-lg object-cover bg-gray-200 dark:bg-gray-600"
+                                    loading="lazy"
+                                  />
+                                ) : (
+                                  <div className="w-12 h-12 rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
+                                    <Package className="h-5 w-5 text-gray-400" />
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Product Info */}
+                              <div className="flex-1 min-w-0">
+                                <h4 className="font-medium text-gray-900 dark:text-white truncate">
+                                  {product.name}
+                                </h4>
+                                {product.description && (
+                                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
+                                    {product.description}
+                                  </p>
+                                )}
+                                <div className="flex items-center justify-between mt-2">
+                                  <span className="text-sm font-medium text-green-600 dark:text-green-400 flex items-center gap-1">
+                                    <DollarSign className="h-3 w-3" />
+                                    {product.price.toFixed(2)} ₺
+                                  </span>
+                                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                                    {product.categoryName}
+                                  </span>
                                 </div>
-                              )}
-                            </div>
-
-                            {/* Product Info */}
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-medium text-gray-900 dark:text-white truncate">
-                                {product.name}
-                              </h4>
-                              {product.description && (
-                                <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
-                                  {product.description}
-                                </p>
-                              )}
-                              <div className="flex items-center justify-between mt-2">
-                                <span className="text-sm font-medium text-green-600 dark:text-green-400 flex items-center gap-1">
-                                  <DollarSign className="h-3 w-3" />
-                                  {product.price.toFixed(2)} ₺
-                                </span>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">
-                                  {product.categoryName}
-                                </span>
+                                
+                                {!product.isAvailable && (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 mt-2">
+                                    {t('productAddonsModal.status.outOfStock')}
+                                  </span>
+                                )}
                               </div>
-                              
-                              {!product.isAvailable && (
-                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 mt-2">
-                                  {t('productAddonsModal.status.outOfStock')}
-                                </span>
-                              )}
                             </div>
                           </div>
+
+                          {/* Additional Fields for Selected Products */}
+                          {isSelected && (
+                            <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50">
+                              <div className="pt-3 space-y-3">
+                                {/* Marketing Text */}
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    {t('productAddonsModal.form.marketingText.label')}
+                                  </label>
+                                  <textarea
+                                    value={productData?.marketingText || ''}
+                                    onChange={(e) => updateSelectedProductData(product.id, 'marketingText', e.target.value)}
+                                    placeholder={t('productAddonsModal.form.marketingText.placeholder')}
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
+                                    rows={2}
+                                  />
+                                </div>
+
+                                {/* Is Recommended */}
+                                <div>
+                                  <label className="flex items-center gap-2 cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={productData?.isRecommended || false}
+                                      onChange={(e) => updateSelectedProductData(product.id, 'isRecommended', e.target.checked)}
+                                      className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                      aria-label={t('productAddonsModal.accessibility.toggleRecommended')}
+                                    />
+                                    <span className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-1">
+                                      <Star className="h-3 w-3" />
+                                      {t('productAddonsModal.form.isRecommended.label')}
+                                    </span>
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -685,7 +780,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
           {/* Footer */}
           <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700">
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              {t('productAddonsModal.counters.selectedProducts', { count: selectedProductIds.size })} • {t('productAddonsModal.counters.availableProducts', { count: filteredProducts.length })}
+              {t('productAddonsModal.counters.selectedProducts', { count: selectedProductsData.size })} • {t('productAddonsModal.counters.availableProducts', { count: filteredProducts.length })}
             </div>
             
             <div className="flex gap-3">

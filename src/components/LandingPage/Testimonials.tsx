@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Star, Quote } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
-import type { Testimonial } from '../types';
+import { useLanguage } from '../../contexts/LanguageContext';
+import type { Testimonial } from '../../types';
 
 const Testimonials: React.FC = () => {
   const { t, isRTL } = useLanguage();

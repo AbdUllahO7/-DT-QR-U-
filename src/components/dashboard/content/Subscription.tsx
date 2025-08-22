@@ -31,7 +31,7 @@ import {
   ShoppingCart,
   HardDrive
 } from 'lucide-react';
-import Pricing from '../../Pricing';
+import Pricing from '../../LandingPage/Pricing';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
 

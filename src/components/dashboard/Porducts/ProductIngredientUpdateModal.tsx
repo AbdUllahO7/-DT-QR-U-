@@ -41,6 +41,18 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Predefined units for selection - using translation keys like in the creation modal
+  const getUnitOptions = () => [
+    { value: 'g', label: t('productIngredientModal.units.grams') },
+    { value: 'ml', label: t('productIngredientModal.units.milliliters') },
+    { value: 'piece', label: t('productIngredientModal.units.pieces') },
+    { value: 'tbsp', label: t('productIngredientModal.units.tablespoons') },
+    { value: 'tsp', label: t('productIngredientModal.units.teaspoons') },
+    { value: 'cup', label: t('productIngredientModal.units.cups') },
+    { value: 'kg', label: t('productIngredientModal.units.kilograms') },
+    { value: 'l', label: t('productIngredientModal.units.liters') }
+  ];
+
   useEffect(() => {
     if (isOpen) {
       loadData();
@@ -66,7 +78,7 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
         selectedMap.set(ingredient.ingredientId || ingredient.id, {
           ingredientId: ingredient.ingredientId || ingredient.id,
           quantity: ingredient.quantity || 1,
-          unit: ingredient.unit || 'adet'
+          unit: ingredient.unit || 'piece'
         });
       });
       
@@ -94,7 +106,7 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
       return response.map((item: any) => ({
         id: item.ingredientId || item.id,
         name: item.ingredientName || item.name || 'Unknown Ingredient',
-        unit: item.unit || 'adet',
+        unit: item.unit || 'piece',
         price: item.price || 0
       }));
 
@@ -111,11 +123,11 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
       // Remove ingredient
       newSelected.delete(ingredient.id);
     } else {
-      // Add ingredient with default quantity
+      // Add ingredient with default quantity and unit
       newSelected.set(ingredient.id, {
         ingredientId: ingredient.id,
         quantity: 1,
-        unit: ingredient.unit
+        unit: ingredient.unit || 'piece'
       });
     }
     
@@ -135,9 +147,36 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
     }
   };
 
+  const handleUnitChange = (ingredientId: number, unit: string) => {
+    const newSelected = new Map(selectedIngredients);
+    const existing = newSelected.get(ingredientId);
+    
+    if (existing) {
+      newSelected.set(ingredientId, {
+        ...existing,
+        unit: unit
+      });
+      setSelectedIngredients(newSelected);
+    }
+  };
+
   const handleSave = async () => {
     setSaving(true);
     setError(null);
+
+    // Validate inputs for selected ingredients
+    for (const [id, ingredient] of selectedIngredients.entries()) {
+      if (ingredient.quantity <= 0) {
+        setError(t('productIngredientModal.errors.quantityRequired'));
+        setSaving(false);
+        return;
+      }
+      if (!ingredient.unit) {
+        setError(t('productIngredientModal.errors.unitRequired'));
+        setSaving(false);
+        return;
+      }
+    }
 
     try {
       // Get current product ingredients to compare
@@ -163,15 +202,14 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
         await productService.addIngredientsToProduct(productId, toAdd);
       }
 
-      // Update quantities for existing ingredients
+      // Update ingredients that have changed quantity or unit
       const toUpdate = Array.from(selectedIngredients.entries())
         .filter(([id]) => currentIds.has(id));
 
       for (const [id, ingredient] of toUpdate) {
         const current = currentIngredients.find((ing: any) => (ing.ingredientId || ing.id) === id);
-        if (current && current.quantity !== ingredient.quantity) {
-          // If your API supports updating ingredient quantities, call that here
-          // For now, we'll remove and re-add with new quantity
+        if (current && (current.quantity !== ingredient.quantity || current.unit !== ingredient.unit)) {
+          // Remove and re-add with new values (since API doesn't have direct update)
           await productService.removeIngredientFromProduct(productId, id);
           await productService.addIngredientsToProduct(productId, [ingredient]);
         }
@@ -202,7 +240,7 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className={`bg-white dark:bg-gray-800 rounded-lg w-full max-w-3xl mx-4 max-h-[90vh] overflow-hidden flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
+      <div className={`bg-white dark:bg-gray-800 rounded-lg w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
         {/* Header */}
         <div className={`flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div>
@@ -321,21 +359,52 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
                             )}
                           </div>
                           
-                          {/* Quantity Input */}
+                          {/* Quantity and Unit Inputs */}
                           {isSelected && (
-                            <div className="mt-3" onClick={(e) => e.stopPropagation()}>
-                              <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                {t('ProductIngredientUpdateModal.quantity')} ({ingredient.unit})
-                              </label>
-                              <input
-                                type="number"
-                                min="1"
-                                step="1"
-                                value={selectedIngredient?.quantity || 1}
-                                onChange={(e) => handleQuantityChange(ingredient.id, parseFloat(e.target.value) || 0)}
-                                aria-label={t('ProductIngredientUpdateModal.accessibility.quantityInput')}
-                                className="w-24 px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                              />
+                            <div className="mt-3 grid grid-cols-2 gap-2" onClick={(e) => e.stopPropagation()}>
+                              {/* Quantity Input */}
+                              <div>
+                                <label 
+                                  htmlFor={`quantity-${ingredient.id}`}
+                                  className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                  {t('productIngredientModal.form.quantity.label')}
+                                </label>
+                                <input
+                                  id={`quantity-${ingredient.id}`}
+                                  type="number"
+                                  min="0"
+                                  step="0.1"
+                                  value={selectedIngredient?.quantity || 1}
+                                  onChange={(e) => handleQuantityChange(ingredient.id, parseFloat(e.target.value) || 0)}
+                                  aria-label={t('productIngredientModal.accessibility.quantityInput')}
+                                  className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                  placeholder={t('productIngredientModal.form.quantity.placeholder')}
+                                />
+                              </div>
+                              
+                              {/* Unit Input */}
+                              <div>
+                                <label 
+                                  htmlFor={`unit-${ingredient.id}`}
+                                  className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
+                                >
+                                  {t('productIngredientModal.form.unit.label')}
+                                </label>
+                                <select
+                                  id={`unit-${ingredient.id}`}
+                                  value={selectedIngredient?.unit || 'piece'}
+                                  onChange={(e) => handleUnitChange(ingredient.id, e.target.value)}
+                                  aria-label={t('productIngredientModal.accessibility.unitSelect')}
+                                  className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                >
+                                  {getUnitOptions().map(option => (
+                                    <option key={option.value} value={option.value}>
+                                      {option.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
                             </div>
                           )}
                         </div>

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Check, Star } from 'lucide-react';
-import { useLanguage } from '../contexts/LanguageContext';
-import type { PricingPlan } from '../types';
+import { useLanguage } from '../../contexts/LanguageContext';
+import type { PricingPlan } from '../../types';
 
 const Pricing: React.FC = () => {
   const { t, isRTL } = useLanguage();

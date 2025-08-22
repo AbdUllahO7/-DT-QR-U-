@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown, Users, Plus } from 'lucide-react';
-import { useLanguage } from '../../../contexts/LanguageContext';
-import { logger } from '../../../utils/logger';
-import TableCard from './table-management/QRCodeCard';
-import QRCodeModal from './table-management/QRCodeModal';
-import AddQRCodeCard from './table-management/AddQRCodeCard';
-import TableCategoryModal from './table-management/TableCategoryModal';
-import { RestaurantBranchDropdownItem, TableData, TableCategory, BranchDropdownItem } from '../../../types/api';
-import { branchService } from '../../../services/branchService';
-import { useClickOutside } from '../../../hooks';
-import { useSignalR } from '../../../hooks/useSignalR';
-import { SignalRCallbacks } from '../../../types/signalR';
-import { ConfirmDeleteModal } from '../../ConfirmDeleteModal';
+import { BranchDropdownItem, RestaurantBranchDropdownItem, TableCategory, TableData } from '../../../../types/api';
+import { useLanguage } from '../../../../contexts/LanguageContext';
+import { useClickOutside, useSignalR } from '../../../../hooks';
+import { SignalRCallbacks } from '../../../../types/signalR';
+import { logger } from '../../../../utils/logger';
+import { branchService } from '../../../../services/branchService';
+import TableCard from './QRCodeCard';
+import AddQRCodeCard from './AddQRCodeCard';
+import QRCodeModal from './QRCodeModal';
+import TableCategoryModal from './TableCategoryModal';
+import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 
 interface Props {
   selectedBranch: RestaurantBranchDropdownItem | null;

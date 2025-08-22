@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Save, AlertCircle, CheckCircle, Loader2, Clock, DollarSign, Phone, MapPin, Users } from 'lucide-react';
-import { OrderType, orderTypeService } from '../../../../services/Branch/BranchOrderTypeService';
+import { OrderType, orderTypeService, UpdateOrderTypeDto, UpdateOrderTypeSettingsDto } from '../../../../services/Branch/BranchOrderTypeService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 
 const OrderTypeComponent = () => {
@@ -11,7 +11,6 @@ const OrderTypeComponent = () => {
   const [updating, setUpdating] = useState<Record<number, boolean>>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
   
-  console.log("orderTypes", orderTypes);
 
   // Fetch order types on component mount
   useEffect(() => {
@@ -32,13 +31,22 @@ const OrderTypeComponent = () => {
     }
   };
 
-  const updateSettings = async (orderType: OrderType, newSettings: Partial<OrderType>) => {
+  const updateSettings = async (orderType: UpdateOrderTypeSettingsDto, newSettings: Partial<UpdateOrderTypeSettingsDto>) => {
     try {
       setUpdating(prev => ({ ...prev, [orderType.id]: true }));
       setError(null);
       setSuccessMessage('');
 
-      const updateData = {
+      if (
+        typeof newSettings.isActive !== 'boolean' ||
+        typeof newSettings.minOrderAmount !== 'number' ||
+        typeof newSettings.serviceCharge !== 'number'
+      ) {
+        throw new Error(t('dashboard.orderType.invalidSettings'));
+      }
+
+      const updateData: UpdateOrderTypeSettingsDto = {
+        id: orderType.id,
         isActive: newSettings.isActive,
         minOrderAmount: newSettings.minOrderAmount,
         serviceCharge: newSettings.serviceCharge,
@@ -56,7 +64,7 @@ const OrderTypeComponent = () => {
         )
       );
 
-      setSuccessMessage(`${orderType.name} ${t('dashboard.orderType.settingsUpdated')}`);
+      setSuccessMessage(` ${t('dashboard.orderType.settingsUpdated')}`);
       
       // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
@@ -108,7 +116,7 @@ const OrderTypeComponent = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header Section */}
         <div className="mb-12">
-          <div className={`flex items-center gap-4 mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex items-center gap-4 mb-4 `}>
             <div className="p-3 bg-indigo-600 dark:bg-indigo-500 rounded-xl shadow-lg">
               <Settings className="w-8 h-8 text-white" />
             </div>
@@ -289,8 +297,8 @@ const OrderTypeComponent = () => {
         {orderTypes.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 p-6 rounded-2xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <div className={isRTL ? 'text-right' : 'text-left'}>
+              <div className={`flex items-center justify-between `}>
+                <div>
                   <div className="text-3xl font-bold">{orderTypes.length}</div>
                   <div className="text-blue-100 font-medium">{t('dashboard.orderType.totalOrderTypes')}</div>
                 </div>
@@ -299,7 +307,7 @@ const OrderTypeComponent = () => {
             </div>
             
             <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 dark:from-emerald-600 dark:to-emerald-700 p-6 rounded-2xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className={`flex items-center justify-between `}>
                 <div className={isRTL ? 'text-right' : 'text-left'}>
                   <div className="text-3xl font-bold">
                     {orderTypes.filter(ot => ot.isActive).length}
@@ -311,7 +319,7 @@ const OrderTypeComponent = () => {
             </div>
             
             <div className="bg-gradient-to-br from-orange-500 to-orange-600 dark:from-orange-600 dark:to-orange-700 p-6 rounded-2xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">
-              <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className={`flex items-center justify-between `}>
                 <div className={isRTL ? 'text-right' : 'text-left'}>
                   <div className="text-3xl font-bold">
                     {orderTypes.reduce((sum, ot) => sum + ot.activeOrderCount, 0)}

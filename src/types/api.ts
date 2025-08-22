@@ -230,6 +230,19 @@ export interface BranchData {
     street: string | null;
     zipCode: string | null;
     addressLine1: string | null;
+    addressLine2: string | null;
+
+  };
+   createContactDto: {
+    phone: string | null;
+    mail: string | null;
+    location: string | null;
+    contactHeader: string | null;
+    footerTitle: string | null;
+    footerDescription: string | null;
+    openTitle: string | null;
+    openDays: string | null;
+    openHours: string | null;
   };
   workingHours?: Array<{
     openTime: string;

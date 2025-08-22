@@ -17,10 +17,18 @@ export interface EditDataType {
     street: string;
     zipCode: string;
     addressLine1: string;
+    addressLine2: string;
   };
   createContactDto: {
-    phone: string;
-    mail: string;
+    phone: string | null;
+    mail: string | null;
+    location: string | null;
+    contactHeader: string | null;
+    footerTitle: string | null;
+    footerDescription: string | null;
+    openTitle: string | null;
+    openDays: string | null;
+    openHours: string | null;
   };
   createBranchWorkingHourCoreDto: Array<{
     dayOfWeek: number;
@@ -48,10 +56,18 @@ const BranchManagementBranch: React.FC = () => {
       street: '',
       zipCode: '',
       addressLine1: '',
+      addressLine2: '',
     },
     createContactDto: {
       phone: '',
       mail: '',
+      location: '',
+      contactHeader: '',
+      footerTitle: '',
+      footerDescription: '',
+      openTitle: '',
+      openDays: '',
+      openHours: '',
     },
     createBranchWorkingHourCoreDto: [],
   });
@@ -88,10 +104,18 @@ const BranchManagementBranch: React.FC = () => {
         street: branch.createAddressDto?.street || '',
         zipCode: branch.createAddressDto?.zipCode || '',
         addressLine1: branch.createAddressDto?.addressLine1 || '',
+        addressLine2:branch.createAddressDto?.addressLine1 || '',
       },
       createContactDto: {
         phone: branch.whatsappOrderNumber || '',
         mail: branch.email || '',
+        location: branch?.createContactDto.location || '',
+        contactHeader: branch?.createContactDto.contactHeader || '',
+        footerTitle: branch?.createContactDto.footerTitle || '',
+        footerDescription: branch?.createContactDto.footerDescription || '',
+        openTitle: branch?.createContactDto.openTitle || '',
+        openDays: branch?.createContactDto.openDays || '',
+        openHours: branch?.createContactDto.openHours || '',
       },
       createBranchWorkingHourCoreDto: branch.workingHours
         ? branch.workingHours.map((hour) => ({
