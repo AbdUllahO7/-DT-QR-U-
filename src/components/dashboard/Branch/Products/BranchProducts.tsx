@@ -10,7 +10,10 @@ import {
   Package,
   Edit3,
   Save,
-  DollarSign
+  DollarSign,
+  Puzzle,
+  Eye,
+  Settings
 } from 'lucide-react';
 import { branchCategoryService } from '../../../../services/Branch/BranchCategoryService';
 import { branchProductService } from '../../../../services/Branch/BranchProductService';
@@ -22,6 +25,9 @@ import CategoriesContent from './CategoriesContent';
 // Enhanced interfaces for detailed product information
 import type { APIIngredient, APIAllergen } from '../../../../types/dashboard';
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
+import { BranchProductAddon } from '../../../../services/Branch/BracnhService';
+import { branchProductAddonsService } from '../../../../services/Branch/BranchAddonsService';
+import BranchProductAddonsModal from './BranchProductAddonsModal';
 
 interface APIProduct {
   id: number;
@@ -41,6 +47,8 @@ export interface DetailedProduct extends Product {
   allergens?: APIAllergen[];
   orderDetails?: any;
   isSelected?: boolean;
+  addonsCount?: number; // New field for addon count
+  hasAddons?: boolean;   // New field to indicate if product has addons
 }
 
 export interface BranchCategory {
@@ -84,6 +92,14 @@ interface EditedCategoryName {
   newName: string;
 }
 
+// New interfaces for addon management
+interface ProductAddonData {
+  branchProductId: number;
+  availableAddons: BranchProductAddon[];
+  selectedAddons: any[];
+  isLoading: boolean;
+}
+
 const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => {
   // Translation hook
   const { t, isRTL } = useLanguage();
@@ -111,6 +127,13 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
   const [selectedProductForDetails, setSelectedProductForDetails] = useState<DetailedProduct | null>(null);
   const [isProductDetailsModalOpen, setIsProductDetailsModalOpen] = useState(false);
   
+  // New addon management states
+  const [selectedProductForAddons, setSelectedProductForAddons] = useState<DetailedProduct | null>(null);
+  const [isProductAddonsModalOpen, setIsProductAddonsModalOpen] = useState(false);
+  const [availableAddons, setAvailableAddons] = useState<BranchProductAddon[]>([]);
+  const [productAddonsData, setProductAddonsData] = useState<Map<number, ProductAddonData>>(new Map());
+  const [isLoadingAddons, setIsLoadingAddons] = useState(false);
+  
   // Reordering states
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -135,6 +158,119 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
   const [isLoadingBranchProducts, setIsLoadingBranchProducts] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  console.log("availableAddons",availableAddons)
+  // Fetch available addons on component mount
+  useEffect(() => {
+    fetchAvailableAddons();
+  }, []);
+
+  // New addon management functions
+  const fetchAvailableAddons = async () => {
+    try {
+      setIsLoadingAddons(true);
+      const addons = await branchProductAddonsService.getAvailableBranchProductAddons();
+      setAvailableAddons(addons);
+      console.log("addons12",addons)
+    } catch (err: any) {
+      console.error('Error fetching available addons:', err);
+      setError('Failed to load available addons');
+    } finally {
+      setIsLoadingAddons(false);
+    }
+  };
+
+  const fetchProductAddons = async (branchProductId: number) => {
+    try {
+      const existingAddons = await branchProductAddonsService.getBranchProductAddons(branchProductId);
+      
+      setProductAddonsData(prev => {
+        const newData = new Map(prev);
+        newData.set(branchProductId, {
+          branchProductId,
+          availableAddons,
+          selectedAddons: existingAddons,
+          isLoading: false
+        });
+        return newData;
+      });
+      
+      return existingAddons;
+    } catch (err: any) {
+      console.error('Error fetching product addons:', err);
+      setError('Failed to load product addons');
+      return [];
+    }
+  };
+
+  const handleShowProductAddons = async (product: DetailedProduct) => {
+    if (!product.branchProductId) {
+      setError('Product must be added to branch first before configuring addons');
+      return;
+    }
+
+    setSelectedProductForAddons(product);
+    setIsProductAddonsModalOpen(true);
+    
+    // Fetch existing addons for this product
+    await fetchProductAddons(product.branchProductId);
+  };
+
+  const handleCloseProductAddons = () => {
+    setSelectedProductForAddons(null);
+    setIsProductAddonsModalOpen(false);
+  };
+
+  const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds: number[], customizations: any) => {
+    try {
+      setIsLoading(true);
+      
+      // Create addon assignments
+      const addonPromises = selectedAddonIds.map(async (addonBranchProductId) => {
+        const customization = customizations[addonBranchProductId] || {};
+        
+        const addonData = {
+          mainBranchProductId: branchProductId,
+          addonBranchProductId,
+          isActive: true,
+          specialPrice: customization.specialPrice || 0,
+          marketingText: customization.marketingText || '',
+          maxQuantity: customization.maxQuantity || 10,
+          minQuantity: customization.minQuantity || 0,
+          groupTag: customization.groupTag || '',
+          isGroupRequired: customization.isGroupRequired || false
+        };
+
+        return await branchProductAddonsService.createBranchProductAddon(addonData);
+      });
+
+      await Promise.all(addonPromises);
+
+      // Update the product addons count in the UI
+      setBranchCategories(prev => 
+        prev.map(category => ({
+          ...category,
+          products: category.products?.map(product => 
+            product.branchProductId === branchProductId
+              ? { 
+                  ...product, 
+                  addonsCount: selectedAddonIds.length,
+                  hasAddons: selectedAddonIds.length > 0
+                }
+              : product
+          )
+        }))
+      );
+
+      setSuccessMessage(`Successfully configured ${selectedAddonIds.length} addons for the product`);
+      handleCloseProductAddons();
+      
+    } catch (err: any) {
+      console.error('Error saving product addons:', err);
+      setError('Failed to save product addons');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Price editing functions
   const handleProductPriceEdit = (productId: number, originalPrice: number) => {
@@ -153,7 +289,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
         }
       }
     }
-    
     
     newEditedPrices.set(productId, {
       productId,
@@ -214,7 +349,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
       ? branchCategories.find(bc => bc.categoryId === categoryId)?.displayName || originalName
       : originalName;
     
-    
     newEditedNames.set(categoryId, {
       categoryId,
       originalName,
@@ -224,7 +358,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
   };
 
   const handleCategoryNameChange = (categoryId: number, newName: string) => {
-
     // Create a new Map to ensure immutability
     const newEditedNames = new Map(editedCategoryNames);
 
@@ -243,71 +376,65 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
 
     // Update state and ensure the change is applied
     setEditedCategoryNames(newEditedNames);
-
- 
   };
 
- const handleCategoryNameSave = async (categoryId: number, newName?: string) => {
+  const handleCategoryNameSave = async (categoryId: number, newName?: string) => {
+    // Use functional state update to get the most current state
+    let nameToSave: string | undefined;
+    let originalName: string = '';
 
-  // Use functional state update to get the most current state
-  let nameToSave: string | undefined;
-  let originalName: string = '';
-
-  setEditedCategoryNames((currentEditedNames) => {
-    const editedName = currentEditedNames.get(categoryId);
-    nameToSave = newName?.trim() || editedName?.newName?.trim();
-    originalName = editedName?.originalName || categories.find(cat => cat.categoryId === categoryId)?.categoryName || '';
-    
-
-    
-    // Return the same state (we're just reading it)
-    return currentEditedNames;
-  });
-
-  // Add a small delay to ensure state has been read
-  await new Promise(resolve => setTimeout(resolve, 0));
-
-  // Validate the name to save
-  if (!nameToSave) {
-    setEditingCategoryId(null);
-    return;
-  }
-
-  // Check if the name has changed
-  if (nameToSave === originalName) {
-    console.warn('No changes to save:', { categoryId, nameToSave, originalName });
-    setEditingCategoryId(null);
-    return;
-  }
-
-  try {
-    await saveBranchCategoryName(categoryId, nameToSave);
-
-    setEditedCategoryNames((prev) => {
-      const newMap = new Map(prev);
-      newMap.set(categoryId, {
-        categoryId,
-        originalName: nameToSave ?? '', 
-        newName: nameToSave ?? '',
-      });
-      return newMap;
+    setEditedCategoryNames((currentEditedNames) => {
+      const editedName = currentEditedNames.get(categoryId);
+      nameToSave = newName?.trim() || editedName?.newName?.trim();
+      originalName = editedName?.originalName || categories.find(cat => cat.categoryId === categoryId)?.categoryName || '';
+      
+      // Return the same state (we're just reading it)
+      return currentEditedNames;
     });
 
-    setCategories((prev) =>
-      prev.map((cat) =>
-        cat.categoryId === categoryId
-          ? { ...cat, categoryName: nameToSave ?? '' }
-          : cat
-      )
-    );
-  } catch (error) {
-    console.error('Failed to save category name:', error);
-   
-    return; 
-  }
+    // Add a small delay to ensure state has been read
+    await new Promise(resolve => setTimeout(resolve, 0));
 
-  setEditingCategoryId(null);
-};
+    // Validate the name to save
+    if (!nameToSave) {
+      setEditingCategoryId(null);
+      return;
+    }
+
+    // Check if the name has changed
+    if (nameToSave === originalName) {
+      console.warn('No changes to save:', { categoryId, nameToSave, originalName });
+      setEditingCategoryId(null);
+      return;
+    }
+
+    try {
+      await saveBranchCategoryName(categoryId, nameToSave);
+
+      setEditedCategoryNames((prev) => {
+        const newMap = new Map(prev);
+        newMap.set(categoryId, {
+          categoryId,
+          originalName: nameToSave ?? '', 
+          newName: nameToSave ?? '',
+        });
+        return newMap;
+      });
+
+      setCategories((prev) =>
+        prev.map((cat) =>
+          cat.categoryId === categoryId
+            ? { ...cat, categoryName: nameToSave ?? '' }
+            : cat
+        )
+      );
+    } catch (error) {
+      console.error('Failed to save category name:', error);
+      return; 
+    }
+
+    setEditingCategoryId(null);
+  };
   
   const handleCategoryNameCancel = (categoryId: number) => {
     setEditingCategoryId(null);
@@ -359,47 +486,46 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
   };
 
   // Save functions for existing branch items
- const saveBranchCategoryName = async (categoryId: number, newName: string) => {
-  try {
-    // Find the branch category
-    const branchCategory = branchCategories.find(bc => bc.categoryId === categoryId);
-    if (!branchCategory) {
-      setError('Branch category not found');
-      return;
+  const saveBranchCategoryName = async (categoryId: number, newName: string) => {
+    try {
+      // Find the branch category
+      const branchCategory = branchCategories.find(bc => bc.categoryId === categoryId);
+      if (!branchCategory) {
+        setError('Branch category not found');
+        return;
+      }
+
+      setIsLoading(true);
+      
+      // Update the branch category name using the branchCategoryId (not categoryId)
+      await branchCategoryService.updateBranchCategory({
+        displayName: newName,
+        branchCategoryId: branchCategory.branchCategoryId,
+      });
+
+      // Update local state
+      setBranchCategories(prev => 
+        prev.map(bc => 
+          bc.categoryId === categoryId 
+            ? { ...bc, displayName: newName }
+            : bc
+        )
+      );
+
+      setSuccessMessage(`Category name updated to "${newName}"`);
+      
+      // Clear the edited state
+      const newEditedNames = new Map(editedCategoryNames);
+      newEditedNames.delete(categoryId);
+      setEditedCategoryNames(newEditedNames);
+
+    } catch (err: any) {
+      console.error('Error updating category name:', err);
+      setError('Failed to update category name');
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(true);
-    
-    // Update the branch category name using the branchCategoryId (not categoryId)
-    await branchCategoryService.updateBranchCategory( {
-      displayName: newName,
-       branchCategoryId :branchCategory.branchCategoryId,
-    });
-
-    // Update local state
-    setBranchCategories(prev => 
-      prev.map(bc => 
-        bc.categoryId === categoryId 
-          ? { ...bc, displayName: newName }
-          : bc
-      )
-    );
-
-    setSuccessMessage(`Category name updated to "${newName}"`);
-    
-    // Clear the edited state
-    const newEditedNames = new Map(editedCategoryNames);
-    newEditedNames.delete(categoryId);
-    setEditedCategoryNames(newEditedNames);
-
-  } catch (err: any) {
-    console.error('Error updating category name:', err);
-    setError('Failed to update category name');
-  } finally {
-    setIsLoading(false);
-  }
-};
-
+  };
 
   const saveBranchProductPrice = async (productId: number, newPrice: number) => {
     try {
@@ -548,197 +674,215 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     }
   };
 
-const fetchBranchCategoriesWithProducts = async () => {
-  setIsLoadingBranchProducts(true);
-  
-  try {
-    // Get all branch products with full details including ingredients and allergens
-    const branchProducts = await branchProductService.getBranchProductsWithDetails();
+  const fetchBranchCategoriesWithProducts = async () => {
+    setIsLoadingBranchProducts(true);
+    
+    try {
+      // Get all branch products with full details including ingredients and allergens
+      const branchProducts = await branchProductService.getBranchProductsWithDetails();
 
-    // Enhanced categories with both selected and available products
-    const categoriesWithProducts = await Promise.all(
-      branchCategories.map(async (branchCategory) => {
-        try {
-          // Get branch products for this category (SELECTED products)
-          const selectedProducts = branchProducts.filter(branchProduct => {
-            const matches = branchProduct.branchCategory?.categoryId === branchCategory.categoryId;
-            return matches;
-          });
+      // Enhanced categories with both selected and available products
+      const categoriesWithProducts = await Promise.all(
+        branchCategories.map(async (branchCategory) => {
+          try {
+            // Get branch products for this category (SELECTED products)
+            const selectedProducts = branchProducts.filter(branchProduct => {
+              const matches = branchProduct.branchCategory?.categoryId === branchCategory.categoryId;
+              return matches;
+            });
 
-          console.log("selectedProducts",selectedProducts)
+            // ✅ FIXED: Transform selected branch products with proper ID mapping
+            const transformedSelectedProducts: DetailedProduct[] = await Promise.all(
+              selectedProducts.map(async (branchProduct) => {
+                // ✅ FIXED: Determine the correct product ID
+                const productId = branchProduct.originalProductId;
 
-          // ✅ FIXED: Transform selected branch products with proper ID mapping
-          const transformedSelectedProducts: DetailedProduct[] = selectedProducts.map(branchProduct => {
-      
+                // ✅ Safety check - if we still don't have an ID, log error
+                if (!productId) {
+                  console.error('❌ Cannot determine product ID for branch product:', branchProduct);
+                }
 
-            // ✅ FIXED: Determine the correct product ID
-            const productId = branchProduct.originalProductId 
+                // Fetch addon count for this branch product
+                let addonsCount = 0;
+                let hasAddons = false;
+                
+                if (branchProduct.branchProductId) {
+                  try {
+                    const existingAddons = await branchProductAddonsService.getBranchProductAddons(branchProduct.branchProductId);
+                    addonsCount = existingAddons.length;
+                    hasAddons = addonsCount > 0;
+                  } catch (err) {
+                    console.warn('Failed to fetch addons for product:', branchProduct.branchProductId, err);
+                  }
+                }
 
-            // ✅ Safety check - if we still don't have an ID, log error
-            if (!productId) {
-              console.error('❌ Cannot determine product ID for branch product:', branchProduct);
-            }
+                const transformed: DetailedProduct = {
+                  // ✅ FIXED: Use the correct field for product ID
+                  id: productId,
+                  
+                  isAvailable: branchProduct.status,
+                  branchProductId: branchProduct.branchProductId, 
+                  
+                  // ✅ FIXED: Store original product ID correctly
+                  originalProductId: productId,
+                  
+                  name: branchProduct.name,
+                  description: branchProduct?.description,
+                  price: branchProduct.price, 
+                  imageUrl: branchProduct?.imageUrl,
+                  status: branchProduct.status,
+                  displayOrder: branchProduct.displayOrder,
+                  categoryId: branchCategory.categoryId,
+                  isSelected: true,
+                  
+                  // New addon fields
+                  addonsCount,
+                  hasAddons,
+                  
+                  allergens: branchProduct.allergens
+                    ? branchProduct.allergens.map((a: any, idx: number) => ({
+                        id: a.id ?? a.allergenId ?? idx + 1,
+                        allergenId: a.allergenId ?? idx + 1,
+                        allergenCode: a.code ?? '',
+                        code: typeof a.code === 'string' ? a.code : a.code ?? '',
+                        name: a.name ?? '',
+                        icon: a.icon ?? '',
+                        note: a.note ?? '',
+                        description: a.description ?? null,
+                        productCount: a.productCount ?? 0,
+                        containsAllergen: a.containsAllergen ?? false,
+                        presence: a.presence ?? '',
+                      }))
+                    : [],
+                  
+                  ingredients: branchProduct.ingredients
+                    ? branchProduct.ingredients.map((i: any, idx: number) => ({
+                        id: i.id ?? idx + 1,
+                        ingredientId: i.ingredientId ?? 0,
+                        name: i.ingredientName ?? '',
+                        ingredientName: i.ingredientName ?? '',
+                        productId: i.productId ?? productId, // ✅ Use the determined productId
+                        quantity: i.quantity ?? 0,
+                        unit: i.unit ?? '',
+                        isAllergenic: i.isAllergenic ?? false,
+                        isAvailable: i.isAvailable ?? true,
+                        allergenIds: i.allergenIds ?? [],
+                        allergens: i.allergens
+                          ? i.allergens.map((a: any, aidx: number) => ({
+                              id: a.id ?? a.allergenId ?? aidx + 1,
+                              allergenId: a.allergenId ?? aidx + 1,
+                              allergenCode: a.code ?? '',
+                              code: typeof a.code === 'string' ? a.code : a.code ?? '',
+                              name: a.name ?? '',
+                              icon: a.icon ?? '',
+                              note: a.note ?? '',
+                              description: a.description ?? null,
+                              productCount: a.productCount ?? 0,
+                              containsAllergen: a.containsAllergen ?? false,
+                              presence: a.presence ?? '',
+                            }))
+                          : [],
+                        restaurantId: i.restaurantId ?? 0,
+                        products: i.products ?? [],
+                        productIngredients: i.productIngredients ?? [],
+                      }))
+                    : [],
+                };
 
-            const transformed: DetailedProduct = {
-              // ✅ FIXED: Use the correct field for product ID
-              id: productId,
-              
-              isAvailable: branchProduct.status,
-              branchProductId: branchProduct.branchProductId, 
-              
-              // ✅ FIXED: Store original product ID correctly
-              originalProductId: productId,
-              
-              name: branchProduct.name,
-              description: branchProduct?.description,
-              price: branchProduct.price, 
-              imageUrl: branchProduct?.imageUrl,
-              status: branchProduct.status,
-              displayOrder: branchProduct.displayOrder,
+                return transformed;
+              })
+            );
+
+            // Get all available products for this category
+            const allAvailableProducts = await branchCategoryService.getAvailableProductsForBranch({
               categoryId: branchCategory.categoryId,
-              isSelected: true,
-              
-              allergens: branchProduct.allergens
-                ? branchProduct.allergens.map((a: any, idx: number) => ({
-                    id: a.id ?? a.allergenId ?? idx + 1,
-                    allergenId: a.allergenId ?? idx + 1,
-                    allergenCode: a.code ?? '',
-                    code: typeof a.code === 'string' ? a.code : a.code ?? '',
-                    name: a.name ?? '',
-                    icon: a.icon ?? '',
-                    note: a.note ?? '',
-                    description: a.description ?? null,
-                    productCount: a.productCount ?? 0,
-                    containsAllergen: a.containsAllergen ?? false,
-                    presence: a.presence ?? '',
-                  }))
-                : [],
-              
-              ingredients: branchProduct.ingredients
-                ? branchProduct.ingredients.map((i: any, idx: number) => ({
-                    id: i.id ?? idx + 1,
-                    ingredientId: i.ingredientId ?? 0,
-                    name: i.ingredientName ?? '',
-                    ingredientName: i.ingredientName ?? '',
-                    productId: i.productId ?? productId, // ✅ Use the determined productId
-                    quantity: i.quantity ?? 0,
-                    unit: i.unit ?? '',
-                    isAllergenic: i.isAllergenic ?? false,
-                    isAvailable: i.isAvailable ?? true,
-                    allergenIds: i.allergenIds ?? [],
-                    allergens: i.allergens
-                      ? i.allergens.map((a: any, aidx: number) => ({
-                          id: a.id ?? a.allergenId ?? aidx + 1,
-                          allergenId: a.allergenId ?? aidx + 1,
-                          allergenCode: a.code ?? '',
-                          code: typeof a.code === 'string' ? a.code : a.code ?? '',
-                          name: a.name ?? '',
-                          icon: a.icon ?? '',
-                          note: a.note ?? '',
-                          description: a.description ?? null,
-                          productCount: a.productCount ?? 0,
-                          containsAllergen: a.containsAllergen ?? false,
-                          presence: a.presence ?? '',
-                        }))
-                      : [],
-                    restaurantId: i.restaurantId ?? 0,
-                    products: i.products ?? [],
-                    productIngredients: i.productIngredients ?? [],
-                  }))
-                : [],
+              onlyActive: true,
+              includes: 'category,ingredients,allergens,addons'
+            });
+
+            // Transform available products to expected format
+            const transformedAvailableProducts: DetailedProduct[] = allAvailableProducts.map(product => ({
+              id: product.productId,
+              productId: product.productId,
+              name: product.name,
+              description: product.description,
+              price: product.price,
+              imageUrl: product.imageUrl,
+              isAvailable: product.status,
+              status: product.status,
+              displayOrder: product.displayOrder,
+              categoryId: branchCategory.categoryId,
+              isSelected: false,
+              originalProductId: product.productId,
+              addonsCount: 0,
+              hasAddons: false
+            }));
+
+            // Filter out products that are already selected (to get UNSELECTED products)
+            const selectedProductIds = new Set(transformedSelectedProducts.map(p => p.id).filter(Boolean)); // ✅ Filter out undefined IDs
+            const unselectedProducts = transformedAvailableProducts.filter(product => {
+              return !selectedProductIds.has(product.id);
+            });
+
+            // Combine selected and unselected products
+            const allProducts: DetailedProduct[] = [
+              ...transformedSelectedProducts.filter(p => p.id), // ✅ Only include products with valid IDs
+              ...unselectedProducts
+            ];
+
+            // Sort products: selected first, then by display order
+            allProducts.sort((a, b) => {
+              if (a.isSelected && !b.isSelected) return -1;
+              if (!a.isSelected && b.isSelected) return 1;
+              return (a.displayOrder || 0) - (b.displayOrder || 0);
+            });
+
+            console.log(`✅ Category ${branchCategory.categoryId} processed:`, {
+              selectedProducts: transformedSelectedProducts.length,
+              unselectedProducts: unselectedProducts.length,
+              totalProducts: allProducts.length,
+              validSelectedProductsWithId: transformedSelectedProducts.filter(p => p.id).length
+            });
+
+            return {
+              ...branchCategory,
+              products: allProducts,
+              selectedProductsCount: transformedSelectedProducts.filter(p => p.id).length, // ✅ Only count products with valid IDs
+              unselectedProductsCount: unselectedProducts.length
             };
+          } catch (err) {
+            console.error(`Error fetching products for category ${branchCategory.categoryId}:`, err);
+            return {
+              ...branchCategory,
+              products: [],
+              selectedProductsCount: 0,
+              unselectedProductsCount: 0
+            };
+          }
+        })
+      );
 
-            return transformed;
-          });
-
-          // Get all available products for this category
-          const allAvailableProducts = await branchCategoryService.getAvailableProductsForBranch({
-            categoryId: branchCategory.categoryId,
-            onlyActive: true,
-            includes: 'category,ingredients,allergens,addons'
-          });
-
-          // Transform available products to expected format
-          const transformedAvailableProducts: DetailedProduct[] = allAvailableProducts.map(product => ({
-            id: product.productId,
-            productId: product.productId,
-            name: product.name,
-            description: product.description,
-            price: product.price,
-            imageUrl: product.imageUrl,
-            isAvailable: product.status,
-            status: product.status,
-            displayOrder: product.displayOrder,
-            categoryId: branchCategory.categoryId,
-            isSelected: false,
-            originalProductId: product.productId
-          }));
-
-          // Filter out products that are already selected (to get UNSELECTED products)
-          const selectedProductIds = new Set(transformedSelectedProducts.map(p => p.id).filter(Boolean)); // ✅ Filter out undefined IDs
-          const unselectedProducts = transformedAvailableProducts.filter(product => {
-            return !selectedProductIds.has(product.id);
-          });
-
-          // Combine selected and unselected products
-          const allProducts: DetailedProduct[] = [
-            ...transformedSelectedProducts.filter(p => p.id), // ✅ Only include products with valid IDs
-            ...unselectedProducts
-          ];
-
-          // Sort products: selected first, then by display order
-          allProducts.sort((a, b) => {
-            if (a.isSelected && !b.isSelected) return -1;
-            if (!a.isSelected && b.isSelected) return 1;
-            return (a.displayOrder || 0) - (b.displayOrder || 0);
-          });
-
-          console.log(`✅ Category ${branchCategory.categoryId} processed:`, {
-            selectedProducts: transformedSelectedProducts.length,
-            unselectedProducts: unselectedProducts.length,
-            totalProducts: allProducts.length,
-            validSelectedProductsWithId: transformedSelectedProducts.filter(p => p.id).length
-          });
-
-          return {
-            ...branchCategory,
-            products: allProducts,
-            selectedProductsCount: transformedSelectedProducts.filter(p => p.id).length, // ✅ Only count products with valid IDs
-            unselectedProductsCount: unselectedProducts.length
-          };
-        } catch (err) {
-          console.error(`Error fetching products for category ${branchCategory.categoryId}:`, err);
-          return {
-            ...branchCategory,
-            products: [],
-            selectedProductsCount: 0,
-            unselectedProductsCount: 0
-          };
-        }
-      })
-    );
-
-    console.log('✅ All categories processed successfully');
-    setBranchCategories(categoriesWithProducts);
-    setOriginalBranchCategories([...categoriesWithProducts]);
-  } catch (err: any) {
-    console.error('❌ Error fetching branch categories with detailed products:', err);
-    setBranchCategories(prev => prev.map(cat => ({ 
-      ...cat, 
-      products: [], 
-      selectedProductsCount: 0,
-      unselectedProductsCount: 0 
-    })));
-    setOriginalBranchCategories(prev => prev.map(cat => ({ 
-      ...cat, 
-      products: [], 
-      selectedProductsCount: 0,
-      unselectedProductsCount: 0 
-    })));
-  } finally {
-    setIsLoadingBranchProducts(false);
-  }
-};
+      console.log('✅ All categories processed successfully');
+      setBranchCategories(categoriesWithProducts);
+      setOriginalBranchCategories([...categoriesWithProducts]);
+    } catch (err: any) {
+      console.error('❌ Error fetching branch categories with detailed products:', err);
+      setBranchCategories(prev => prev.map(cat => ({ 
+        ...cat, 
+        products: [], 
+        selectedProductsCount: 0,
+        unselectedProductsCount: 0 
+      })));
+      setOriginalBranchCategories(prev => prev.map(cat => ({ 
+        ...cat, 
+        products: [], 
+        selectedProductsCount: 0,
+        unselectedProductsCount: 0 
+      })));
+    } finally {
+      setIsLoadingBranchProducts(false);
+    }
+  };
 
   const fetchProductsForSelectedCategories = async () => {
     if (selectedCategories.size === 0) return;
@@ -792,8 +936,7 @@ const fetchBranchCategoriesWithProducts = async () => {
           status: product.status,
           displayOrder: product.displayOrder,
           categoryId: categoryId,
-          originalProductId:product.originalProductId,
-
+          originalProductId: product.originalProductId,
         };
         
         categoriesMap.get(categoryId)!.products.push(transformedProduct);
@@ -1065,11 +1208,7 @@ const fetchBranchCategoriesWithProducts = async () => {
 
   // Add function to handle adding products to existing categories
   const handleAddProductToCategory = async (productId: number, branchCategoryId: number) => {
-
-    console.log("handleAddProductToCategory")
     try {
-          console.log("handleAddProductToCategory 2 ")
-
       const scrollPosition = window.scrollY;
       
       let productToAdd = null;
@@ -1214,7 +1353,9 @@ const fetchBranchCategoriesWithProducts = async () => {
           return {
             ...product,
             isSelected: false,
-            branchProductId: undefined
+            branchProductId: undefined,
+            addonsCount: 0,
+            hasAddons: false
           };
         }
         return product;
@@ -1295,7 +1436,9 @@ const fetchBranchCategoriesWithProducts = async () => {
       setBranchCategories(newCategories);
     }
   };
-
+const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAddon[] => {
+  return availableAddons
+};
   const handleSaveOrder = async () => {
     setIsReordering(true);
     setError(null);
@@ -1319,8 +1462,6 @@ const fetchBranchCategoriesWithProducts = async () => {
       setIsReordering(false);
     }
   };
-
-
 
   return (
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}>
@@ -1346,8 +1487,8 @@ const fetchBranchCategoriesWithProducts = async () => {
           </div>
         </div>
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {/* Enhanced Stats Overview with Addons */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div>
@@ -1396,6 +1537,24 @@ const fetchBranchCategoriesWithProducts = async () => {
               </div>
               <div className="p-3 bg-orange-50 dark:bg-orange-900/30 rounded-xl">
                 <Package className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+              </div>
+            </div>
+          </div>
+
+          {/* New Addons Stats */}
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Available Addons</p>
+                <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{availableAddons.length}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  {branchCategories.reduce((total, cat) => 
+                    total + (cat.products?.filter(p => p.hasAddons).length || 0), 0
+                  )} configured
+                </p>
+              </div>
+              <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
+                <Puzzle className="h-8 w-8 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
           </div>
@@ -1465,6 +1624,7 @@ const fetchBranchCategoriesWithProducts = async () => {
           setIsReorderMode={setIsReorderMode}
           setEditingProductId={setEditingProductId}
           setEditingCategoryId={setEditingCategoryId}
+          handleShowProductAddons={handleShowProductAddons}
           handleShowProductDetails={handleShowProductDetails}
           onCategorySelect={handleCategorySelect}
           onProductSelect={handleProductSelect}
@@ -1483,7 +1643,6 @@ const fetchBranchCategoriesWithProducts = async () => {
           onDeleteCategory={openDeleteModal}
           onRefresh={fetchAvailableCategories}
           setActiveTab={setActiveTab}
-          // New props for editing functionality
           editedProductPrices={editedProductPrices}
           editedCategoryNames={editedCategoryNames}
           editingProductId={editingProductId}
@@ -1518,6 +1677,14 @@ const fetchBranchCategoriesWithProducts = async () => {
           onClose={handleCloseProductDetails}
           product={selectedProductForDetails}
         />
+      <BranchProductAddonsModal
+        isOpen={isProductAddonsModalOpen}
+        onClose={handleCloseProductAddons}
+        product={selectedProductForAddons}
+        availableAddons={getAvailableAddonsForProduct(selectedProductForAddons?.branchProductId || 0)}
+        onSave={handleSaveProductAddons}
+        isLoading={isLoading}
+      />
       </div>
     </div>
   );

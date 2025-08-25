@@ -12,19 +12,20 @@ export interface UpdateMenuTableDto {
   rowVersion: string;
 }
 
-interface BatchCreateMenuTableItemDto {
-  categoryId: number;
-  quantity: number;
-  capacity: number;
-  displayOrder: number | null;
-  isActive: boolean;
-}
 
-// API response interface for GET /api/Branches
-interface GetBranchesResponse {
-  data?: BranchData | BranchData[]; // Can be single object or array
-  isSuccess?: boolean;
-  message?: string | null;
+// Export the interface so it can be used in other files
+export interface BranchProductAddon {
+  mainBranchProductId: number;
+  addonBranchProductId: number;
+  mainProductName: string;
+  addonProductName: string;
+  addonProductDescription: string;
+  addonImageUrl: string;
+  addonPrice: number;
+  addonCategoryName: string;
+  isRecommended: boolean;
+  marketingText: string;
+  suggestedDisplayOrder: number;
 }
 
 // Updated BranchData interface to match your API response
@@ -56,11 +57,10 @@ interface ApiBranchResponse {
     fullAddress: string;
   };
   contact: {
-    contactId: number;
+     phone: string | null;
+    mail: string | null;
+    location: string | null;
     contactHeader: string | null;
-    location: string;
-    phone: string;
-    mail: string;
     footerTitle: string | null;
     footerDescription: string | null;
     openTitle: string | null;
@@ -184,6 +184,8 @@ class BranchService {
     }
   }
 
+
+
   // Helper method to transform API response to BranchData
   private transformApiBranchToBranchData(apiBranch: ApiBranchResponse): BranchData {
     return {
@@ -203,6 +205,18 @@ class BranchService {
         street: apiBranch.address?.street || null,
         zipCode: apiBranch.address?.zipCode || null,
         addressLine1: apiBranch.address?.addressLine1 || null,
+        addressLine2 : apiBranch.address?.addressLine2 || null,
+      },
+      createContactDto :{
+          phone: apiBranch.whatsappOrderNumber || '',
+          mail: apiBranch.contact.mail || '',
+          location: apiBranch?.contact.location || '',
+          contactHeader: apiBranch?.contact.contactHeader || '',
+          footerTitle: apiBranch?.contact.footerTitle || '',
+          footerDescription: apiBranch?.contact.footerDescription || '',
+          openTitle: apiBranch?.contact.openTitle || '',
+          openDays: apiBranch?.contact.openDays || '',
+          openHours: apiBranch?.contact.openHours || '',
       },
       workingHours: apiBranch.workingHours?.map(wh => ({
         openTime: wh.openTime,
@@ -213,7 +227,7 @@ class BranchService {
     };
   }
 
- async updateBranch(id: number, data: Partial<CreateBranchWithDetailsDto>): Promise<BranchData> {
+  async updateBranch(id: number, data: Partial<CreateBranchWithDetailsDto>): Promise<BranchData> {
     try {
       logger.info('Branch güncelleme isteği gönderiliyor', { id, data }, { prefix: 'BranchService' });
       

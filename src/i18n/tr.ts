@@ -3285,5 +3285,66 @@ SortableProduct: {
       error: {
         loadFailed: 'Profil verisi alınamadı'
       }
+    },
+      addonModal: {
+      title: 'Eklentileri Yapılandır',
+      loading: 'Eklentiler yükleniyor...',
+      refresh: 'Yenile',
+      search: {
+        placeholder: 'Eklentileri ad, açıklama veya kategoriye göre arayın...'
+      },
+      stats: {
+        available: 'Mevcut',
+        assigned: 'Atanmış',
+        recommended: 'Önerilen'
+      },
+      sections: {
+        assignedAddons: 'Atanmış Eklentiler',
+        availableAddons: 'Mevcut Eklentiler'
+      },
+      emptyState: {
+        title: 'Mevcut eklenti yok',
+        description: 'Bu ürün için eklenti kombinasyonları tanımlamak için restoran yönetimiyle iletişime geçin',
+        productId: 'Ürün ID:'
+      },
+      actions: {
+        add: 'Ekle',
+        remove: 'Kaldır',
+        configure: 'Yapılandır',
+        done: 'Tamam',
+        saveChanges: 'Değişiklikleri Kaydet'
+      },
+      status: {
+        assigned: 'ATANMIŞ',
+        recommended: 'Önerilen'
+      },
+      configuration: {
+        title: 'Yapılandırma Ayarları',
+        specialPrice: 'Özel Fiyat',
+        maxQuantity: 'Maksimum Miktar',
+        marketingText: 'Pazarlama Metni',
+        markRecommended: 'Önerilen olarak işaretle',
+        placeholders: {
+          marketingText: 'örn., Popüler seçim, En iyi değer, Müşteri favorisi...'
+        }
+      },
+      messages: {
+        success: {
+          addonAdded: 'Eklenti başarıyla eklendi',
+          addonRemoved: 'Eklenti başarıyla kaldırıldı',
+          addonUpdated: 'Eklenti başarıyla güncellendi'
+        },
+        errors: {
+          loadFailed: 'Ürün eklentileri yüklenemedi',
+          updateFailed: 'Eklenti ataması güncellenemedi',
+          propertiesFailed: 'Eklenti özellikleri güncellenemedi'
+        }
+      },
+      footer: {
+        summary: 'of', // "5 of 10" -> "10 dan 5"
+        addon: 'eklenti',
+        addons: 'eklenti',
+        assigned: 'atanmış'
+      }
     }
 }; 
