@@ -3290,5 +3290,66 @@ export const ar = {
       error: {
         loadFailed: 'فشل في تحميل بيانات الملف الشخصي'
       }
+    },
+     addonModal: {
+      title: 'إعداد الإضافات',
+      loading: 'جاري تحميل الإضافات...',
+      refresh: 'تحديث',
+      search: {
+        placeholder: 'البحث في الإضافات بالاسم أو الوصف أو الفئة...'
+      },
+      stats: {
+        available: 'متاحة',
+        assigned: 'مُعيَّنة',
+        recommended: 'مُوصى بها'
+      },
+      sections: {
+        assignedAddons: 'الإضافات المُعيَّنة',
+        availableAddons: 'الإضافات المتاحة'
+      },
+      emptyState: {
+        title: 'لا توجد إضافات متاحة',
+        description: 'اتصل بإدارة المطعم لتحديد مجموعات الإضافات لهذا المنتج',
+        productId: 'معرف المنتج:'
+      },
+      actions: {
+        add: 'إضافة',
+        remove: 'إزالة',
+        configure: 'إعداد',
+        done: 'تم',
+        saveChanges: 'حفظ التغييرات'
+      },
+      status: {
+        assigned: 'مُعيَّنة',
+        recommended: 'مُوصى بها'
+      },
+      configuration: {
+        title: 'إعدادات التكوين',
+        specialPrice: 'السعر الخاص',
+        maxQuantity: 'الحد الأقصى للكمية',
+        marketingText: 'النص التسويقي',
+        markRecommended: 'وضع علامة كموصى بها',
+        placeholders: {
+          marketingText: 'مثل: خيار شائع، أفضل قيمة، مفضل العملاء...'
+        }
+      },
+      messages: {
+        success: {
+          addonAdded: 'تم إضافة الإضافة بنجاح',
+          addonRemoved: 'تم إزالة الإضافة بنجاح',
+          addonUpdated: 'تم تحديث الإضافة بنجاح'
+        },
+        errors: {
+          loadFailed: 'فشل في تحميل إضافات المنتج',
+          updateFailed: 'فشل في تحديث تعيين الإضافة',
+          propertiesFailed: 'فشل في تحديث خصائص الإضافة'
+        }
+      },
+      footer: {
+        summary: 'من',
+        addon: 'إضافة',
+        addons: 'إضافات',
+        assigned: 'مُعيَّنة'
+      }
     }
 }; 
