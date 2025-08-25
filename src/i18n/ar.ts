@@ -3016,7 +3016,9 @@ export const ar = {
       selectedCategories: 'الفئات المحددة',
       toBeAdded: 'ستتم إضافتها',
       selectedProducts: 'المنتجات المحددة',
-      fromCategories: 'من الفئات'
+      fromCategories: 'من الفئات',
+      avalibleAddons: 'الإضافات المتاحة',
+
     },
 
     // Tab Navigation

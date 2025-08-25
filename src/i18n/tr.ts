@@ -3011,7 +3011,8 @@ SortableProduct: {
       selectedCategories: 'Seçilen Kategoriler',
       toBeAdded: 'Eklenecek',
       selectedProducts: 'Seçilen Ürünler',
-      fromCategories: 'Kategorilerden'
+      fromCategories: 'Kategorilerden',
+      avalibleAddons: 'Mevcut Eklentiler',
     },
 
     // Tab Navigation
