@@ -3014,7 +3014,8 @@ export const en = {
       selectedCategories: 'Selected Categories',
       toBeAdded: 'To be added',
       selectedProducts: 'Selected Products',
-      fromCategories: 'From categories'
+      fromCategories: 'From categories',
+      avalibleAddons: 'Available Addons',
     },
 
     // Tab Navigation
