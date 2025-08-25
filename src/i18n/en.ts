@@ -2925,7 +2925,7 @@ export const en = {
     description: 'Manage your branch information and settings.',
     loading: 'Loading branch information...',
     noBranchFound: 'No branch found',
-    
+    uploadLogo: 'Upload Logo',
     status: {
       open: 'Open',
       closed: 'Closed',
@@ -3326,6 +3326,8 @@ export const en = {
         title: 'Configuration Settings',
         specialPrice: 'Special Price',
         maxQuantity: 'Max Quantity',
+        minQuantity: 'Min Quantity',
+
         marketingText: 'Marketing Text',
         markRecommended: 'Mark as recommended',
         placeholders: {

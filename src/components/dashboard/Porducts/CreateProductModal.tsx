@@ -7,15 +7,6 @@ import { logger } from '../../../utils/logger';
 import { mediaService } from '../../../services/mediaService';
 import { productService } from '../../../services/productService';
 
-interface CreateProductModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  categories: Category[];
-  selectedCategoryId?: number;
-  onOpenIngredientSelection?: (productId: number, productName: string) => void;
-}
-
 interface CreateProductFormData {
   name: string;
   description: string;
@@ -25,6 +16,17 @@ interface CreateProductFormData {
   imageFile: File | null;
   imageUrl: string;
 }
+
+interface CreateProductModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  categories: Category[];
+  selectedCategoryId?: number;
+  onOpenIngredientSelection?: (productId: number, productName: string) => void;
+}
+
+const DEFAULT_IMAGE_URL = 'https://www.customcardsandgames.com/assets/images/noImageUploaded.png';
 
 const CreateProductModal: React.FC<CreateProductModalProps> = ({ 
   isOpen, 
@@ -72,8 +74,11 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
       
       setFormData(prev => ({
         ...prev,
-        categoryId: initialCategoryId
+        categoryId: initialCategoryId,
+        imageUrl: '',
+        imageFile: null
       }));
+      setImagePreview('');
     }
   }, [isOpen, selectedCategoryId, categories]);
 
@@ -103,7 +108,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
       newErrors.price = t('createProductModal.validation.priceMax');
     }
     
-    // Fixed validation: convert categoryId to number if it's a string
+    // Convert categoryId to number if it's a string
     const categoryIdToCheck = typeof formData.categoryId === 'string' ? parseInt(formData.categoryId) : formData.categoryId;
     
     if (!categoryIdToCheck || categoryIdToCheck === 0) {
@@ -183,7 +188,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
       return;
     }
 
-    setFormData(prev => ({ ...prev, imageFile: file }));
+    setFormData(prev => ({ ...prev, imageFile: file, imageUrl: '' }));
     
     // Create preview
     const reader = new FileReader();
@@ -206,27 +211,28 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
     }
   };
 
-  const uploadImage = async (): Promise<string | null> => {
-    if (!formData.imageFile) return null;
-
-    try {
-      setIsUploadingImage(true);
-      logger.info('Görsel yükleniyor', { fileName: formData.imageFile.name });
-      
-      const imageUrl = await mediaService.uploadFile(formData.imageFile);
-      
-      logger.info('Görsel başarıyla yüklendi', { imageUrl });
-      return imageUrl;
-    } catch (error: any) {
-      logger.error('❌ Görsel yüklenirken hata:', error);
-      setErrors(prev => ({
-        ...prev,
-        image: t('createProductModal.errors.imageUploadFailed')
-      }));
-      return null;
-    } finally {
-      setIsUploadingImage(false);
+  const uploadImage = async (): Promise<string> => {
+    if (formData.imageFile) {
+      try {
+        setIsUploadingImage(true);
+        logger.info('Görsel yükleniyor', { fileName: formData.imageFile.name });
+        
+        const imageUrl = await mediaService.uploadFile(formData.imageFile);
+        
+        logger.info('Görsel başarıyla yüklendi', { imageUrl });
+        return imageUrl;
+      } catch (error: any) {
+        logger.error('❌ Görsel yüklenirken hata:', error);
+        setErrors(prev => ({
+          ...prev,
+          image: t('createProductModal.errors.imageUploadFailed')
+        }));
+        return DEFAULT_IMAGE_URL; // Use default image if upload fails
+      } finally {
+        setIsUploadingImage(false);
+      }
     }
+    return DEFAULT_IMAGE_URL; // Use default image if no file is provided
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -236,14 +242,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
     
     setIsSubmitting(true);
     try {
-      let imageUrl = formData.imageUrl;
-      if (formData.imageFile) {
-        const uploadedUrl = await uploadImage();
-        if (!uploadedUrl) {
-          return;
-        }
-        imageUrl = uploadedUrl;
-      }
+      const imageUrl = await uploadImage();
 
       // Ensure categoryId is a number
       const categoryId = typeof formData.categoryId === 'string' ? parseInt(formData.categoryId) : formData.categoryId;

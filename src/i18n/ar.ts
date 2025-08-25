@@ -2927,7 +2927,7 @@ export const ar = {
     description: 'إدارة معلومات وإعدادات فرعك.',
     loading: 'جاري تحميل معلومات الفرع...',
     noBranchFound: 'لم يتم العثور على أي فرع',
-    
+    uploadLogo: 'تحميل الشعار',
     status: {
       open: 'مفتوح',
       closed: 'مغلق',
@@ -3329,6 +3329,7 @@ export const ar = {
         title: 'إعدادات التكوين',
         specialPrice: 'السعر الخاص',
         maxQuantity: 'الحد الأقصى للكمية',
+          minQuantity: 'الحد الادنى للكمية',
         marketingText: 'النص التسويقي',
         markRecommended: 'وضع علامة كموصى بها',
         placeholders: {
