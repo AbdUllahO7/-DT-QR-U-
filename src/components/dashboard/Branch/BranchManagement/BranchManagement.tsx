@@ -11,6 +11,7 @@ export interface EditDataType {
   branchName: string;
   whatsappOrderNumber: string;
   email: string;
+  branchLogoPath?: string; // Added to support logo editing
   createAddressDto: {
     country: string;
     city: string;
@@ -50,6 +51,7 @@ const BranchManagementBranch: React.FC = () => {
     branchName: '',
     whatsappOrderNumber: '',
     email: '',
+    branchLogoPath: '',
     createAddressDto: {
       country: '',
       city: '',
@@ -98,13 +100,14 @@ const BranchManagementBranch: React.FC = () => {
       branchName: branch.branchName || '',
       whatsappOrderNumber: branch.whatsappOrderNumber || '',
       email: branch.email || '',
+      branchLogoPath: branch.branchLogoPath || '', // Initialize branchLogoPath
       createAddressDto: {
         country: branch.createAddressDto?.country || '',
         city: branch.createAddressDto?.city || '',
         street: branch.createAddressDto?.street || '',
         zipCode: branch.createAddressDto?.zipCode || '',
         addressLine1: branch.createAddressDto?.addressLine1 || '',
-        addressLine2:branch.createAddressDto?.addressLine1 || '',
+        addressLine2: branch.createAddressDto?.addressLine2 || '',
       },
       createContactDto: {
         phone: branch.whatsappOrderNumber || '',
@@ -141,7 +144,10 @@ const BranchManagementBranch: React.FC = () => {
     try {
       setIsLoading(true);
       setError('');
-      const updateData: Partial<CreateBranchWithDetailsDto> = editData;
+      const updateData: Partial<CreateBranchWithDetailsDto> = {
+        ...editData,
+        branchLogoPath: editData.branchLogoPath, // Include branchLogoPath in update
+      };
       await branchService.updateBranch(selectedBranch.id, updateData);
       setSuccess(t('branchManagementBranch.messages.updateSuccess'));
       setIsEditing(false);
@@ -149,22 +155,6 @@ const BranchManagementBranch: React.FC = () => {
       setTimeout(() => setSuccess(''), 3000);
     } catch (err: any) {
       setError(err.message || t('branchManagementBranch.messages.updateError'));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDelete = async (): Promise<void> => {
-    if (!selectedBranch) return;
-    try {
-      setIsLoading(true);
-      setError('');
-      await branchService.deleteBranch(selectedBranch.id);
-      setSuccess(t('branchManagementBranch.messages.deleteSuccess'));
-      await loadBranches();
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (err: any) {
-      setError(err.message || t('branchManagementBranch.messages.deleteError'));
     } finally {
       setIsLoading(false);
     }
@@ -230,7 +220,17 @@ const BranchManagementBranch: React.FC = () => {
     return (
       <div className="text-center py-12 bg-gray-50 dark:bg-gray-900">
         <div className="text-lg text-gray-500">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-12 h-12 mx-auto mb-3 text-gray-500 dark:text-gray-400">
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="w-12 h-12 mx-auto mb-3 text-gray-500 dark:text-gray-400"
+          >
             <path d="M12 2L2 7h20l-10-5zm0 0v20m-7-7h14"></path>
           </svg>
           <p className="text-lg font-medium">{t('branchManagementBranch.noBranchFound')}</p>
@@ -264,6 +264,7 @@ const BranchManagementBranch: React.FC = () => {
           handleToggleTemporaryClose={handleToggleTemporaryClose}
           handleSave={handleSave}
           initializeEditData={initializeEditData}
+          setEditData={setEditData} // Pass setEditData to BranchHeader
         />
         <BranchInfo
           selectedBranch={selectedBranch}

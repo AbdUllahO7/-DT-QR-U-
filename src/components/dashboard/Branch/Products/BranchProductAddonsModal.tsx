@@ -643,6 +643,19 @@ const AddonCard: React.FC<{
               
               <div>
                 <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'text-right' : ''}`}>
+                  {t('addonModal.configuration.minQuantity')}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={addon.editedMinQuantity || 0}
+                  onChange={(e) => onPropertyChange(addon.addonBranchProductId, 'minQuantity', parseInt(e.target.value) || 0)}
+                  className={`w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isRTL ? 'text-right' : ''}`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'text-right' : ''}`}>
                   {t('addonModal.configuration.maxQuantity')}
                 </label>
                 <input
@@ -652,6 +665,10 @@ const AddonCard: React.FC<{
                   onChange={(e) => onPropertyChange(addon.addonBranchProductId, 'maxQuantity', parseInt(e.target.value) || 10)}
                   className={`w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isRTL ? 'text-right' : ''}`}
                 />
+              </div>
+
+              <div>
+                {/* Empty grid cell to balance the layout */}
               </div>
 
               <div className="sm:col-span-2">
@@ -667,8 +684,8 @@ const AddonCard: React.FC<{
                 />
               </div>
 
-              <div className={`sm:col-span-2 flex items-center`}>
-                <div className={`flex items-center `}>
+              <div className={`sm:col-span-2 flex items-center justify-between`}>
+                <div className={`flex items-center`}>
                   <input
                     type="checkbox"
                     id={`recommended-${addon.addonBranchProductId}`}
