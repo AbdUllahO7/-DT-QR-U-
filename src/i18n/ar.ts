@@ -2927,7 +2927,7 @@ export const ar = {
     description: 'إدارة معلومات وإعدادات فرعك.',
     loading: 'جاري تحميل معلومات الفرع...',
     noBranchFound: 'لم يتم العثور على أي فرع',
-    
+    uploadLogo: 'تحميل الشعار',
     status: {
       open: 'مفتوح',
       closed: 'مغلق',
@@ -3016,7 +3016,9 @@ export const ar = {
       selectedCategories: 'الفئات المحددة',
       toBeAdded: 'ستتم إضافتها',
       selectedProducts: 'المنتجات المحددة',
-      fromCategories: 'من الفئات'
+      fromCategories: 'من الفئات',
+      avalibleAddons: 'الإضافات المتاحة',
+
     },
 
     // Tab Navigation
@@ -3327,6 +3329,7 @@ export const ar = {
         title: 'إعدادات التكوين',
         specialPrice: 'السعر الخاص',
         maxQuantity: 'الحد الأقصى للكمية',
+          minQuantity: 'الحد الادنى للكمية',
         marketingText: 'النص التسويقي',
         markRecommended: 'وضع علامة كموصى بها',
         placeholders: {

@@ -2922,7 +2922,7 @@ SortableProduct: {
     description: 'Şube bilgilerinizi ve ayarlarınızı yönetin.',
     loading: 'Şube bilgileri yükleniyor...',
     noBranchFound: 'Herhangi bir şube bulunamadı',
-    
+    uploadLogo: 'Logoyu Yükle',
     status: {
       open: 'Açık',
       closed: 'Kapalı',
@@ -3011,7 +3011,8 @@ SortableProduct: {
       selectedCategories: 'Seçilen Kategoriler',
       toBeAdded: 'Eklenecek',
       selectedProducts: 'Seçilen Ürünler',
-      fromCategories: 'Kategorilerden'
+      fromCategories: 'Kategorilerden',
+      avalibleAddons: 'Mevcut Eklentiler',
     },
 
     // Tab Navigation
@@ -3322,6 +3323,8 @@ SortableProduct: {
         title: 'Yapılandırma Ayarları',
         specialPrice: 'Özel Fiyat',
         maxQuantity: 'Maksimum Miktar',
+        minQuantity: 'Minumum Miktar',
+
         marketingText: 'Pazarlama Metni',
         markRecommended: 'Önerilen olarak işaretle',
         placeholders: {

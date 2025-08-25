@@ -263,17 +263,17 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
   const totalCount = filteredAddons.length;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto backdrop-blur-sm">
+    <div dir={isRTL ? 'rtl' : 'ltr'} className="fixed inset-0 z-50 overflow-y-auto backdrop-blur-sm">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 transition-opacity bg-gray-900/50" onClick={resetAndClose} />
         
-        <div className="inline-block w-full max-w-6xl px-0 py-0 my-4 overflow-hidden text-left align-middle transition-all transform bg-white dark:bg-gray-800 shadow-2xl rounded-2xl">
+        <div className="inline-block w-full max-w-6xl px-0 py-0 my-4 overflow-hidden text-right transition-all transform bg-white dark:bg-gray-800 shadow-2xl rounded-2xl">
           
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 text-white">
-            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center justify-between `}>
               <div className="flex-1">
-                <div className="flex items-center space-x-3 mb-3">
+                <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} mb-3`}>
                   <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                     <Settings className="w-5 h-5" />
                   </div>
@@ -284,23 +284,23 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                 </div>
                 
                 {/* Stats Pills */}
-                <div className="flex items-center space-x-3">
+                <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
                   <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5 text-sm font-medium">
-                    <Package className="w-4 h-4 inline mr-1.5" />
+                    <Package className={`w-4 h-4 inline ${isRTL ? 'ml-1.5' : 'mr-1.5'}`} />
                     {totalCount} {t('addonModal.stats.available')}
                   </div>
                   <div className="bg-green-500/30 backdrop-blur-sm rounded-full px-3 py-1.5 text-sm font-medium">
-                    <Check className="w-4 h-4 inline mr-1.5" />
+                    <Check className={`w-4 h-4 inline ${isRTL ? 'ml-1.5' : 'mr-1.5'}`} />
                     {assignedCount} {t('addonModal.stats.assigned')}
                   </div>
                   <div className="bg-yellow-500/30 backdrop-blur-sm rounded-full px-3 py-1.5 text-sm font-medium">
-                    <Star className="w-4 h-4 inline mr-1.5" />
+                    <Star className={`w-4 h-4 inline ${isRTL ? 'ml-1.5' : 'mr-1.5'}`} />
                     {assignedAddons.filter(a => a.isRecommended).length} {t('addonModal.stats.recommended')}
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-3">
+              <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
                 <button
                   onClick={loadProductAddons}
                   disabled={isLoadingAddons}
@@ -322,18 +322,18 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
           <div className="px-6 py-6">
             {/* Messages */}
             {error && (
-              <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-r-lg">
-                <div className="flex items-center">
-                  <AlertCircle className="h-5 w-5 text-red-500 mr-3" />
+              <div className={`mb-6 p-4 bg-red-50 dark:bg-red-900/20 ${isRTL ? 'border-r-4 border-l-0' : 'border-l-4'} border-red-500 rounded-r-lg`}>
+                <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <AlertCircle className={`h-5 w-5 text-red-500 ${isRTL ? 'ml-3' : 'mr-3'}`} />
                   <span className="text-red-700 dark:text-red-300 text-sm font-medium">{error}</span>
                 </div>
               </div>
             )}
 
             {successMessage && (
-              <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 rounded-r-lg">
-                <div className="flex items-center">
-                  <Check className="h-5 w-5 text-green-500 mr-3" />
+              <div className={`mb-6 p-4 bg-green-50 dark:bg-green-900/20 ${isRTL ? 'border-r-4 border-l-0' : 'border-l-4'} border-green-500 rounded-r-lg`}>
+                <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <Check className={`h-5 w-5 text-green-500 ${isRTL ? 'ml-3' : 'mr-3'}`} />
                   <span className="text-green-700 dark:text-green-300 text-sm font-medium">{successMessage}</span>
                 </div>
               </div>
@@ -342,13 +342,13 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
             {/* Search */}
             <div className="mb-6">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 ${isRTL ? 'right-4' : 'left-4'}`} />
                 <input
                   type="text"
                   placeholder={t('addonModal.search.placeholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-400"
+                  className={`w-full py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-400 ${isRTL ? 'pr-12 pl-4 text-right' : 'pl-12 pr-4'}`}
                 />
               </div>
             </div>
@@ -373,8 +373,8 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                   <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-md mx-auto">
                     {t('addonModal.emptyState.description')}
                   </p>
-                  <div className="inline-flex items-center px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-700 dark:text-blue-300 text-sm">
-                    <Zap className="w-4 h-4 mr-2" />
+                  <div className={`inline-flex items-center px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-700 dark:text-blue-300 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <Zap className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     {t('addonModal.emptyState.productId')} {product.branchProductId}
                   </div>
                 </div>
@@ -383,7 +383,7 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                   {/* Assigned Addons Section */}
                   {assignedAddons.length > 0 && (
                     <div>
-                      <div className="flex items-center space-x-3 mb-4">
+                      <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} mb-4`}>
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                         <h4 className="font-semibold text-gray-900 dark:text-white text-lg">
                           {t('addonModal.sections.assignedAddons')} ({assignedAddons.length})
@@ -409,7 +409,7 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                   {/* Unassigned Addons Section */}
                   {unassignedAddons.length > 0 && (
                     <div>
-                      <div className="flex items-center space-x-3 mb-4">
+                      <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} mb-4`}>
                         <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                         <h4 className="font-semibold text-gray-900 dark:text-white text-lg">
                           {t('addonModal.sections.availableAddons')} ({unassignedAddons.length})
@@ -504,10 +504,10 @@ const AddonCard: React.FC<{
       
       {/* Main Content */}
       <div className="p-5">
-        <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex items-start justify-between `}>
           
           {/* Left Side - Info */}
-          <div className="flex items-start space-x-4 flex-1 min-w-0">
+          <div className={`flex items-start ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'} flex-1 min-w-0`}>
             {/* Image */}
             {addon.addonImageUrl ? (
               <img
@@ -523,12 +523,12 @@ const AddonCard: React.FC<{
             
             {/* Product Info */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center space-x-2 mb-2">
+              <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} mb-2`}>
                 <h4 className="font-semibold text-gray-900 dark:text-white truncate">
                   {addon.addonProductName}
                 </h4>
                 {addon.isRecommended && (
-                  <div className="flex items-center space-x-1">
+                  <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-1' : 'space-x-1'}`}>
                     <Star className="w-4 h-4 text-yellow-500 fill-current" />
                     <span className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">{t('addonModal.status.recommended')}</span>
                   </div>
@@ -536,13 +536,13 @@ const AddonCard: React.FC<{
               </div>
               
               {addon.addonProductDescription && (
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2">
+                <p className={`text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2 ${isRTL ? 'text-right' : ''}`}>
                   {addon.addonProductDescription}
                 </p>
               )}
               
               {/* Price and Category */}
-              <div className="flex items-center space-x-3">
+              <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
                 <div className="flex items-center">
                   <span className="text-green-600 dark:text-green-400 font-bold text-lg">
                     ${addon.isAssigned && addon.editedSpecialPrice !== addon.addonPrice 
@@ -551,7 +551,7 @@ const AddonCard: React.FC<{
                     }
                   </span>
                   {addon.isAssigned && addon.editedSpecialPrice !== addon.addonPrice && (
-                    <span className="text-gray-400 line-through text-sm ml-2">
+                    <span className={`text-gray-400 line-through text-sm ${isRTL ? 'mr-2' : 'ml-2'}`}>
                       ${addon.addonPrice}
                     </span>
                   )}
@@ -565,7 +565,7 @@ const AddonCard: React.FC<{
 
               {/* Marketing Text */}
               {addon.isAssigned && addon.editedMarketingText && (
-                <div className="mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium">
+                <div className={`mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium ${isRTL ? 'text-right' : ''}`}>
                   "{addon.editedMarketingText}"
                 </div>
               )}
@@ -573,7 +573,7 @@ const AddonCard: React.FC<{
           </div>
           
           {/* Right Side - Actions */}
-          <div className="flex flex-col items-end space-y-2 ml-4">
+          <div className={`flex flex-col ${isRTL ? 'items-start mr-4' : 'items-end ml-4'} space-y-2`}>
             {/* Status Badge */}
             {addon.isAssigned && (
               <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-xs font-medium">
@@ -582,7 +582,7 @@ const AddonCard: React.FC<{
             )}
             
             {/* Action Buttons */}
-            <div className="flex items-center space-x-2">
+            <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
               {addon.isAssigned && (
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
@@ -596,7 +596,7 @@ const AddonCard: React.FC<{
               <button
                 onClick={onToggle}
                 disabled={isSaving}
-                className={`px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50 flex items-center space-x-2 ${
+                className={`px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50 flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} ${
                   addon.isAssigned
                     ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
                     : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'
@@ -618,29 +618,44 @@ const AddonCard: React.FC<{
       
       {/* Expandable Configuration Panel */}
       {addon.isAssigned && isExpanded && (
-        <div className="px-5 pb-5 border-t border-green-200 dark:border-green-800 bg-green-25 dark:bg-green-900/10">
+        <div className={`px-5 pb-5 border-t border-green-200 dark:border-green-800 bg-green-25 dark:bg-green-900/10`}>
           <div className="pt-4">
-            <h5 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">{t('addonModal.configuration.title')}</h5>
+            <h5 className={`text-sm font-semibold text-gray-900 dark:text-white mb-4 ${isRTL ? 'text-right' : ''}`}>
+              {t('addonModal.configuration.title')}
+            </h5>
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'text-right' : ''}`}>
                   {t('addonModal.configuration.specialPrice')}
                 </label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <DollarSign className={`absolute top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 ${isRTL ? 'right-3' : 'left-3'}`} />
                   <input
                     type="number"
                     step="0.01"
                     value={addon.editedSpecialPrice || addon.addonPrice}
                     onChange={(e) => onPropertyChange(addon.addonBranchProductId, 'specialPrice', parseFloat(e.target.value) || 0)}
-                    className="w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className={`w-full py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isRTL ? 'pr-10 pl-3 text-right' : 'pl-10 pr-3'}`}
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'text-right' : ''}`}>
+                  {t('addonModal.configuration.minQuantity')}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={addon.editedMinQuantity || 0}
+                  onChange={(e) => onPropertyChange(addon.addonBranchProductId, 'minQuantity', parseInt(e.target.value) || 0)}
+                  className={`w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isRTL ? 'text-right' : ''}`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'text-right' : ''}`}>
                   {t('addonModal.configuration.maxQuantity')}
                 </label>
                 <input
@@ -648,12 +663,16 @@ const AddonCard: React.FC<{
                   min="1"
                   value={addon.editedMaxQuantity || 10}
                   onChange={(e) => onPropertyChange(addon.addonBranchProductId, 'maxQuantity', parseInt(e.target.value) || 10)}
-                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isRTL ? 'text-right' : ''}`}
                 />
               </div>
 
+              <div>
+                {/* Empty grid cell to balance the layout */}
+              </div>
+
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'text-right' : ''}`}>
                   {t('addonModal.configuration.marketingText')}
                 </label>
                 <input
@@ -661,12 +680,12 @@ const AddonCard: React.FC<{
                   placeholder={t('addonModal.configuration.placeholders.marketingText')}
                   value={addon.editedMarketingText || ''}
                   onChange={(e) => onPropertyChange(addon.addonBranchProductId, 'marketingText', e.target.value)}
-                  className="w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400"
+                  className={`w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 ${isRTL ? 'text-right' : ''}`}
                 />
               </div>
 
-              <div className="sm:col-span-2 flex items-center justify-between pt-2">
-                <div className="flex items-center">
+              <div className={`sm:col-span-2 flex items-center justify-between`}>
+                <div className={`flex items-center`}>
                   <input
                     type="checkbox"
                     id={`recommended-${addon.addonBranchProductId}`}
@@ -676,7 +695,7 @@ const AddonCard: React.FC<{
                   />
                   <label 
                     htmlFor={`recommended-${addon.addonBranchProductId}`}
-                    className="ml-3 text-sm text-gray-700 dark:text-gray-300 font-medium"
+                    className={`text-sm text-gray-700 dark:text-gray-300 font-medium ${isRTL ? 'mr-3' : 'ml-3'}`}
                   >
                     {t('addonModal.configuration.markRecommended')}
                   </label>
@@ -686,12 +705,12 @@ const AddonCard: React.FC<{
                   <button
                     onClick={onUpdate}
                     disabled={isSaving}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg flex items-center disabled:opacity-50 text-sm font-medium transition-colors"
+                    className={`px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg flex items-center disabled:opacity-50 text-sm font-medium transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
                   >
                     {isSaving ? (
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      <Loader2 className={`w-4 h-4 animate-spin ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     ) : (
-                      <Save className="w-4 h-4 mr-2" />
+                      <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     )}
                     {t('addonModal.actions.saveChanges')}
                   </button>

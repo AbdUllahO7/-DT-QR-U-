@@ -8,12 +8,8 @@ import {
   CheckCircle,
   Calendar,
   Package,
-  Edit3,
-  Save,
-  DollarSign,
-  Puzzle,
-  Eye,
-  Settings
+  PlusSquare,
+
 } from 'lucide-react';
 import { branchCategoryService } from '../../../../services/Branch/BranchCategoryService';
 import { branchProductService } from '../../../../services/Branch/BranchProductService';
@@ -1494,7 +1490,6 @@ const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAdd
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{t('branchCategories.stats.availableCategories')}</p>
                 <p className="text-3xl font-bold text-gray-900 dark:text-white">{categories.length}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('branchCategories.stats.readyToAdd')}</p>
               </div>
               <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-xl">
                 <Store className="h-8 w-8 text-blue-600 dark:text-blue-400" />
@@ -1507,7 +1502,6 @@ const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAdd
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{t('branchCategories.stats.activeCategories')}</p>
                 <p className="text-3xl font-bold text-gray-900 dark:text-white">{branchCategories.length}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('branchCategories.stats.currentlyInBranch')}</p>
               </div>
               <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-xl">
                 <Check className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -1520,7 +1514,6 @@ const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAdd
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{t('branchCategories.stats.selectedCategories')}</p>
                 <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{selectedCategories.size}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('branchCategories.stats.toBeAdded')}</p>
               </div>
               <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
                 <Plus className="h-8 w-8 text-purple-600 dark:text-purple-400" />
@@ -1533,7 +1526,6 @@ const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAdd
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{t('branchCategories.stats.selectedProducts')}</p>
                 <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">{selectedProducts.size}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('branchCategories.stats.fromCategories')}</p>
               </div>
               <div className="p-3 bg-orange-50 dark:bg-orange-900/30 rounded-xl">
                 <Package className="h-8 w-8 text-orange-600 dark:text-orange-400" />
@@ -1545,16 +1537,11 @@ const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAdd
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">Available Addons</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{t('branchCategories.stats.avalibleAddons')}</p>
                 <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">{availableAddons.length}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  {branchCategories.reduce((total, cat) => 
-                    total + (cat.products?.filter(p => p.hasAddons).length || 0), 0
-                  )} configured
-                </p>
               </div>
-              <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
-                <Puzzle className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+             <div className="p-3 bg-orange-50 dark:bg-orange-900/30 rounded-xl">
+                <PlusSquare className="h-8 w-8 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
           </div>
