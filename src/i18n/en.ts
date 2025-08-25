@@ -3195,7 +3195,7 @@ export const en = {
       searchProducts: 'Search products...'
     }
   },
- profile: {
+  profile: {
       title: 'Profile',
       personalInfo: 'Personal Information',
       editProfile: 'Edit Profile',
@@ -3287,6 +3287,67 @@ export const en = {
       },
       error: {
         loadFailed: 'Failed to load profile data'
+      }
+  },
+  addonModal: {
+      title: 'Configure Addons',
+      loading: 'Loading addons...',
+      refresh: 'Refresh',
+      search: {
+        placeholder: 'Search addons by name, description, or category...'
+      },
+      stats: {
+        available: 'Available',
+        assigned: 'Assigned', 
+        recommended: 'Recommended'
+      },
+      sections: {
+        assignedAddons: 'Assigned Addons',
+        availableAddons: 'Available Addons'
+      },
+      emptyState: {
+        title: 'No addons available',
+        description: 'Contact restaurant management to define addon combinations for this product',
+        productId: 'Product ID:'
+      },
+      actions: {
+        add: 'Add',
+        remove: 'Remove',
+        configure: 'Configure',
+        done: 'Done',
+        saveChanges: 'Save Changes'
+      },
+      status: {
+        assigned: 'ASSIGNED',
+        recommended: 'Recommended'
+      },
+      configuration: {
+        title: 'Configuration Settings',
+        specialPrice: 'Special Price',
+        maxQuantity: 'Max Quantity',
+        marketingText: 'Marketing Text',
+        markRecommended: 'Mark as recommended',
+        placeholders: {
+          marketingText: 'e.g., Popular choice, Best value, Customer favorite...'
+        }
+      },
+      messages: {
+        success: {
+          addonAdded: 'Addon added successfully',
+          addonRemoved: 'Addon removed successfully',
+          addonUpdated: 'Addon updated successfully'
+        },
+        errors: {
+          loadFailed: 'Failed to load product addons',
+          updateFailed: 'Failed to update addon assignment',
+          propertiesFailed: 'Failed to update addon properties'
+        }
+      },
+      footer: {
+        summary: 'of',
+        addon: 'addon',
+        addons: 'addons',
+        assigned: 'assigned'
       }
     }
 }; 

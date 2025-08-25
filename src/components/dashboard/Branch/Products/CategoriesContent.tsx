@@ -23,7 +23,8 @@ import {
   Grid3X3,
   Info,
   Edit3,
-  DollarSign
+  DollarSign,
+  Puzzle
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { APIIngredient, Category } from '../../../../types/dashboard';
@@ -46,6 +47,8 @@ interface DetailedProduct {
   allergens?: APIAllergen[];
   orderDetails?: any;
   isSelected?: boolean;
+  addonsCount?: number;
+  hasAddons?: boolean;
 }
 
 interface EditedProductPrice {
@@ -127,6 +130,7 @@ interface CategoriesContentProps {
   onCategoryNameCancel: (categoryId: number) => void;
   getProductPrice: (productId: number, originalPrice: number) => number;
   getCategoryName: (categoryId: number, originalName: string) => string;
+  handleShowProductAddons?: (product: DetailedProduct) => void;
 }
 
 const CategoriesContent: React.FC<CategoriesContentProps> = ({
@@ -187,7 +191,8 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   onCategoryNameSave,
   onCategoryNameCancel,
   getProductPrice,
-  getCategoryName
+  getCategoryName,
+  handleShowProductAddons,
 }) => {
   const { t, isRTL } = useLanguage();
 
@@ -239,10 +244,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
     category?.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const filteredBranchCategories = branchCategories.filter(branchCategory => 
-    branchCategory?.displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    branchCategory?.category?.categoryName?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+
 
   const filteredCategoriesWithProducts = categoriesWithProducts.filter(category =>
     category?.categoryName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -520,7 +522,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   );
 
   // Enhanced Products Section for Manage Existing Tab
-const renderManageProductsSection = (branchCategory : BranchCategory) => {
+  const renderManageProductsSection = (branchCategory : BranchCategory) => {
   if (isReorderMode || !expandedBranchCategories.has(branchCategory.categoryId) || !branchCategory.products || branchCategory.products.length === 0) {
     return null;
   }
@@ -541,6 +543,13 @@ const renderManageProductsSection = (branchCategory : BranchCategory) => {
               <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
               <span className="text-gray-600 dark:text-gray-300">
                 {branchCategory.unselectedProductsCount || 0} {t('branchCategories.products.available')}
+              </span>
+            </div>
+            {/* ADD THIS NEW SECTION */}
+            <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+              <div className="w-3 h-3 bg-purple-500 rounded-full"></div>
+              <span className="text-gray-600 dark:text-gray-300">
+                {branchCategory.products?.filter(p => p.hasAddons).length || 0} with addons
               </span>
             </div>
           </div>
@@ -573,6 +582,12 @@ const renderManageProductsSection = (branchCategory : BranchCategory) => {
                   ) : (
                     <Plus className="h-4 w-4 text-white" />
                   )}
+                  {product.hasAddons && (
+                    <div className={`absolute -top-2 ${isRTL ? '-right-12' : '-left-12'} bg-purple-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center`}>
+                      <Puzzle className="h-3 w-3 mr-1" />
+                      {product.addonsCount}
+                    </div>
+                  )}
                 </div>
 
                 {/* Detailed info indicator */}
@@ -593,13 +608,24 @@ const renderManageProductsSection = (branchCategory : BranchCategory) => {
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-gray-900 dark:text-white truncate">
-                      {product.name}
+                      <div className="font-medium text-gray-900 dark:text-white truncate flex items-center">
+                          {product.name}
+                          {/* ADD THIS ADDON INDICATOR */}
+                          {product.hasAddons && (
+                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300 ml-2">
+                              <Puzzle className="h-3 w-3 mr-1" />
+                              {product.addonsCount} addon{product.addonsCount !== 1 ? 's' : ''}
+                            </div>
+                          )}
+                        </div>
                     </div>
+                    
                     {product.description && (
                       <div className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">
                         {product.description}
                       </div>
                     )}
+                    
                   </div>
                 </div>
 
@@ -643,6 +669,24 @@ const renderManageProductsSection = (branchCategory : BranchCategory) => {
                         <Eye className="h-4 w-4" />
                       </button>
                     )}
+                    {product.isSelected && product.branchProductId && handleShowProductAddons && (
+                        <button
+                          onClick={() => handleShowProductAddons(product)}
+                          disabled={isLoading}
+                          className={`p-2 rounded-lg transition-colors flex items-center justify-center ${
+                            product.hasAddons
+                              ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-800/50'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                          }`}
+                          title={`Configure Addons${product.hasAddons ? ` (${product.addonsCount})` : ''}`}
+                        >
+                          <Puzzle className="h-4 w-4" />
+                          {product.hasAddons && (
+                            <span className="ml-1 text-xs font-medium">{product.addonsCount}</span>
+                          )}
+                        </button>
+                      )}
+
                   </div>
                  {isSelected ? (
                   <button
@@ -694,10 +738,14 @@ const renderManageProductsSection = (branchCategory : BranchCategory) => {
                     {isLoading ? 'Adding...' : 'Add'}
                   </button>
                 )}
+                
                 </div>
+             
               </div>
             );
+            
           })}
+          
         </div>
         
         <div className="mt-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600">
