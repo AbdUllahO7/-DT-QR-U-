@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Edit, MapPin, Save, X, Loader2, Upload, Image } from 'lucide-react';
-import { BranchData } from '../../../../types/api';
-import { EditDataType } from './BranchManagement';
 import { mediaService } from '../../../../services/mediaService';
+import { BranchData, EditDataType } from '../../../../types/BranchManagement/type';
 
 // Move to a config file for better maintainability
 const DEFAULT_IMAGE_URL = 'https://via.placeholder.com/150';
@@ -48,7 +47,7 @@ const ModernToggleSwitch: React.FC<{
   t: (key: string) => string;
   isRTL: boolean;
 }> = ({ checked, onChange, disabled, t, isRTL }) => (
-  <div className="flex flex-col gap-2">
+  <div className="flex flex-col gap-2 justify-center items-center">
   
     <button
       type="button"
@@ -85,45 +84,13 @@ const ModernToggleSwitch: React.FC<{
             ? t('branchManagementBranch.status.open') || 'Active'
             : t('branchManagementBranch.status.temporarilyClosed') || 'Temporarily Closed'}
         </span>
-        <span className={`text-xs ${theme.text.muted}`}>
-          {checked ? 'Branch is operational' : 'Branch is temporarily closed'}
-        </span>
+       
       </div>
     </button>
   </div>
 );
 
-// Modern Status Badge
-const StatusBadge: React.FC<{ branch: BranchData; t: (key: string) => string }> = ({ branch, t }) => {
-  const getStatusStyle = () => {
-    if (branch.isTemporarilyClosed) {
-      return 'bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/30';
-    }
-    if (branch.isOpenNow) {
-      return 'bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-500/30';
-    }
-    return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30';
-  };
 
-  const getStatusText = () => {
-    if (branch.isTemporarilyClosed) {
-      return t('branchManagementBranch.status.temporarilyClosed') || 'Temporarily Closed';
-    }
-    if (branch.isOpenNow) {
-      return t('branchManagementBranch.status.open') || 'Open Now';
-    }
-    return t('branchManagementBranch.status.closed') || 'Closed';
-  };
-
-  return (
-    <div className={`px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm transition-all duration-300 hover:scale-105 ${getStatusStyle()}`}>
-      <div className="flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-white/80 animate-pulse" />
-        {getStatusText()}
-      </div>
-    </div>
-  );
-};
 
 // Modern Button Component
 const ModernButton: React.FC<{
@@ -222,10 +189,10 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
         <div className="flex flex-col gap-8 xl:flex-row xl:items-start xl:justify-between">
           
           {/* Main Header Section */}
-          <div className={`flex flex-col gap-6 ${isRTL ? 'items-end' : 'items-start'} min-w-0 flex-1`}>
+          <div className={`flex flex-col gap-6  min-w-0 flex-1`}>
             
             {/* Title and Description */}
-            <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center gap-4 `}>
               <div className="relative group flex-shrink-0">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
                 <div className="relative p-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl shadow-lg">
@@ -240,10 +207,7 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
                   {t('branchManagementBranch.description') || 'Manage your branch information and settings'}
                 </p>
               </div>
-            </div>
-
-            {/* Branch Info */}
-            {selectedBranch && (
+                  {selectedBranch && (
               <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''} flex-wrap`}>
                 {/* Logo */}
                 <div className="relative group flex-shrink-0">
@@ -251,21 +215,24 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
                   <img
                     src={selectedBranch.branchLogoPath || DEFAULT_IMAGE_URL}
                     alt={t('branchManagementBranch.logoAlt') || 'Branch Logo'}
-                    className="relative w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-2xl border-2 border-white dark:border-slate-700 shadow-xl transition-transform duration-300 group-hover:scale-105"
+                    className="relative lg:w-96 lg:h-32 sm:w-20 sm:h-20 object-cover rounded-2xl border-2 border-white dark:border-slate-700 shadow-xl transition-transform duration-300 group-hover:scale-105"
                   />
                 </div>
                 
                 {/* Status Badge */}
-                <StatusBadge branch={selectedBranch} t={t} />
               </div>
             )}
+            </div>
+
+            {/* Branch Info */}
+        
           </div>
 
           {/* Controls Section */}
           <div className={`flex flex-col gap-6 ${isRTL ? 'items-start' : 'items-end'}`}>
             
             {/* Top Row - Toggle and Actions */}
-            <div className={`flex flex-col sm:flex-row gap-4 items-start sm:items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex flex-col justify-center h-full w-full sm:flex-row gap-4 items-start sm:items-center `}>
               {/* Toggle Switch */}
               {selectedBranch && (
                 <ModernToggleSwitch
@@ -360,9 +327,7 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
                       <p className={`text-sm font-medium ${theme.text.primary}`}>
                         {isUploadingImage ? 'Uploading...' : 'Drop image here or click to browse'}
                       </p>
-                      <p className={`text-xs ${theme.text.muted}`}>
-                        Supports JPG, PNG, GIF up to 10MB
-                      </p>
+                     
                     </div>
                   </div>
                 </div>

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Calendar, Clock, X } from 'lucide-react';
-import { BranchData } from '../../../../types/api';
-import { EditDataType } from './BranchManagement';
+import { BranchData, EditDataType } from '../../../../types/BranchManagement/type';
 
 interface BranchWorkingHoursProps {
   selectedBranch: BranchData | null;

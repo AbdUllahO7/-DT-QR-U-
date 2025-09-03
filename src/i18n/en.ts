@@ -2758,6 +2758,7 @@ export const en = {
   },
   BranchtableManagement: {
     title: "Table Management",
+    loading : "Loading...",
 
     batchCreateTables: "batchCreateTables",
     subtitle: "Manage your restaurant tables and categories", 
@@ -2837,7 +2838,7 @@ export const en = {
       quantity: "Quantity",
       namePrefix: "Name Prefix",
       startingNumber: "Starting Number"
-    }
+    },
   },
 
   BranchTableManagement: {
@@ -2845,8 +2846,14 @@ export const en = {
     "clearTable": "Clear Table",
     "refreshTable": "Refresh Status", 
     "clearing": "Clearing...",
-
-        batchCreateTables: "Batch Create Tables",
+    loading : "Loading...",
+    category : "Category",
+    createTables: "Create Tables",
+    creatingTables: "Creating...",
+   SelectCategory: "Select Category", 
+   Capacity: "Capacity",
+   Quantity: "Quantity",
+    batchCreateTables: "Batch Create Tables",
     subheader: "Manage restaurant categories and tables with accordion view",
     totalCategories: "Total Categories",
     totalTables: "Total Tables",
@@ -2856,6 +2863,7 @@ export const en = {
     refresh: "Refresh",
     addCategory: "Add Category",
     addCategoryTitle: "Add New Category",
+    multiCategory: "Create multiple tables across different categories at once",
     categoryNameLabel: "Category Name",
     categoryNamePlaceholder: "Enter category name",
     colorLabel: "Color",

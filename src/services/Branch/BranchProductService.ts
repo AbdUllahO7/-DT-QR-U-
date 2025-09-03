@@ -132,7 +132,8 @@ class BranchProductService {
   // Transform simple API response to match component expectations
   private transformSimpleAPIDataToComponentData(apiBranchProducts: SimpleBranchProduct[]): Product[] {
     return apiBranchProducts.map(apiBranchProduct => ({
-      productId: apiBranchProduct.branchProductId || apiBranchProduct.productId,
+      id: apiBranchProduct.branchProductId, 
+      branchProductId: apiBranchProduct.branchProductId,
       name: apiBranchProduct.name,
       description: apiBranchProduct.description || '',
       price: apiBranchProduct.price,
@@ -141,7 +142,6 @@ class BranchProductService {
       status: apiBranchProduct.isActive ?? apiBranchProduct.status ?? true,
       displayOrder: apiBranchProduct.displayOrder || 0,
       categoryId: apiBranchProduct.branchCategoryId,
-      branchProductId: apiBranchProduct.branchProductId,
       originalProductId: apiBranchProduct.productId
     }));
   }
@@ -149,7 +149,7 @@ class BranchProductService {
   // Transform single product response
   private transformSingleProduct(apiBranchProduct: SimpleBranchProduct): Product {
     return {
-      productId: apiBranchProduct.branchProductId || apiBranchProduct.productId,
+      id: apiBranchProduct.branchProductId || apiBranchProduct.productId,
       name: apiBranchProduct.name,
       description: apiBranchProduct.description || '',
       price: apiBranchProduct.price,

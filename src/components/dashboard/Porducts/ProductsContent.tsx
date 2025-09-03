@@ -683,7 +683,7 @@ const ProductsContent: React.FC = () => {
           categoryId: targetCategoryId
         });
 
-        const updatedCategories = await productService.getBranchCategories(selectedBranch?.branchId);
+        const updatedCategories = await productService.getBranchCategories(selectedBranch!.branchId);
         setCategories(updatedCategories);
         
         const targetCategory = updatedCategories.find(cat => cat.categoryId === targetCategoryId);

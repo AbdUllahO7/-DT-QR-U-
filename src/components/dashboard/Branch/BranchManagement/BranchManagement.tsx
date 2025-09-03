@@ -1,43 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
-import { BranchData, CreateBranchWithDetailsDto } from '../../../../types/api';
+import {  CreateBranchWithDetailsDto } from '../../../../types/api';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import BranchHeader from './BranchHeader';
 import BranchInfo from './BranchInfo';
 import { branchService } from '../../../../services/Branch/BracnhService';
 import BranchWorkingHours from './BranchWorkingHours';
-
-export interface EditDataType {
-  branchName: string;
-  whatsappOrderNumber: string;
-  email: string;
-  branchLogoPath?: string; // Added to support logo editing
-  createAddressDto: {
-    country: string;
-    city: string;
-    street: string;
-    zipCode: string;
-    addressLine1: string;
-    addressLine2: string;
-  };
-  createContactDto: {
-    phone: string | null;
-    mail: string | null;
-    location: string | null;
-    contactHeader: string | null;
-    footerTitle: string | null;
-    footerDescription: string | null;
-    openTitle: string | null;
-    openDays: string | null;
-    openHours: string | null;
-  };
-  createBranchWorkingHourCoreDto: Array<{
-    dayOfWeek: number;
-    openTime: string;
-    closeTime: string;
-    isWorkingDay: boolean;
-  }>;
-}
+import { BranchData, EditDataType } from '../../../../types/BranchManagement/type';
 
 const BranchManagementBranch: React.FC = () => {
   const { t, isRTL } = useLanguage();

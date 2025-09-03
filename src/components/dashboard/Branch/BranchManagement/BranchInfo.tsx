@@ -1,15 +1,8 @@
 import React from 'react';
 import { Phone, Mail, MapPin } from 'lucide-react';
-import { BranchData } from '../../../../types/api';
-import { EditDataType } from './BranchManagement';
+import { BranchInfoProps } from '../../../../types/BranchManagement/type';
 
-interface BranchInfoProps {
-  selectedBranch: BranchData | null;
-  isEditing: boolean;
-  editData: EditDataType;
-  t: (key: string) => string;
-  handleInputChange: (path: string, value: string) => void;
-}
+
 
 const BranchInfo: React.FC<BranchInfoProps> = ({
   selectedBranch,

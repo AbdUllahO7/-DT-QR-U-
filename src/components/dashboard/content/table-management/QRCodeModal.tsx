@@ -265,7 +265,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
         };
 
         // Pass branch ID to update method to ensure proper branch context
-        await branchService.updateTable(qrData.id, updateData, branchIdToUse);
+        await branchService.updateTable(qrData.id, updateData);
         logger.info('Table updated successfully', { tableId: qrData.id, updateData, branchId: branchIdToUse });
       } else {
         // Create new table
@@ -670,25 +670,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
 
         {!isEditMode && (
           <div>
-            <label htmlFor="displayOrder" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              {t('QRCodeModal.displayOrder')}
-            </label>
-            <input
-              type="number"
-              id="displayOrder"
-              min="0"
-              value={singleTableData.displayOrder || ''}
-              onChange={(e) => {
-                const newDisplayOrder = e.target.value ? parseInt(e.target.value) : null;
-                setSingleTableData({ ...singleTableData, displayOrder: newDisplayOrder });
-                // Also call the parent onChange if provided
-                if (onChange) {
-                  onChange('displayOrder' as keyof QRCodeData, e.target.value);
-                }
-              }}
-              className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400"
-              placeholder={t('QRCodeModal.displayOrderPlaceholder')}
-            />
+           
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
               {t('QRCodeModal.autoOrderNote')}
             </p>
@@ -855,20 +837,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      {t('QRCodeModal.displayOrder')}
-                    </label>
-                    <input
-                      title='number'
-                      type="number"
-                      min="0"
-                      value={item.displayOrder || ''}
-                      onChange={(e) => updateCategoryQuantity(index, 'displayOrder', e.target.value ? parseInt(e.target.value) : null)}
-                      disabled={isSubmitting}
-                      className="w-full text-sm rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-2 py-1.5 text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-blue-400 disabled:opacity-50"
-                    />
-                  </div>
+                 
                 </div>
               </div>
             ))}

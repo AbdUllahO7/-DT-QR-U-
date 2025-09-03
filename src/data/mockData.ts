@@ -5,10 +5,42 @@ export const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
 // Mock kategoriler
 export const mockCategories: Category[] = [
-  { id: '1', name: 'Ana Yemekler', description: 'Ana yemek kategorisi', isExpanded: false, products: [] },
-  { id: '2', name: 'Başlangıçlar', description: 'Başlangıç kategorisi', isExpanded: false, products: [] },
-  { id: '3', name: 'İçecekler', description: 'İçecek kategorisi', isExpanded: false, products: [] },
-  { id: '4', name: 'Tatlılar', description: 'Tatlı kategorisi', isExpanded: false, products: [] }
+  {
+    id: '1', name: 'Ana Yemekler', description: 'Ana yemek kategorisi', isExpanded: false, products: [],
+    productId: undefined,
+    categoryId: 0,
+    categoryName: '',
+    status: false,
+    displayOrder: 0,
+    restaurantId: 0
+  },
+  {
+    id: '2', name: 'Başlangıçlar', description: 'Başlangıç kategorisi', isExpanded: false, products: [],
+    productId: undefined,
+    categoryId: 0,
+    categoryName: '',
+    status: false,
+    displayOrder: 0,
+    restaurantId: 0
+  },
+  {
+    id: '3', name: 'İçecekler', description: 'İçecek kategorisi', isExpanded: false, products: [],
+    productId: undefined,
+    categoryId: 0,
+    categoryName: '',
+    status: false,
+    displayOrder: 0,
+    restaurantId: 0
+  },
+  {
+    id: '4', name: 'Tatlılar', description: 'Tatlı kategorisi', isExpanded: false, products: [],
+    productId: undefined,
+    categoryId: 0,
+    categoryName: '',
+    status: false,
+    displayOrder: 0,
+    restaurantId: 0
+  }
 ];
 
 // Mock haftalık görüntülenme verileri
