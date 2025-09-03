@@ -19,52 +19,13 @@ import ProductDetailsModal from './ProductDetailsModal';
 import CategoriesContent from './CategoriesContent';
 
 // Enhanced interfaces for detailed product information
-import type { APIIngredient, APIAllergen } from '../../../../types/dashboard';
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 import { BranchProductAddon } from '../../../../services/Branch/BracnhService';
 import { branchProductAddonsService } from '../../../../services/Branch/BranchAddonsService';
 import BranchProductAddonsModal from './BranchProductAddonsModal';
+import { BranchCategory, DetailedProduct, EditedCategoryName, EditedProductPrice, ProductAddonData } from '../../../../types/BranchManagement/type';
 
-interface APIProduct {
-  id: number;
-  name: string;
-  price: number;
-  imageUrl?: string;
-  status: boolean;
-  displayOrder: number;
-}
 
-export interface DetailedProduct extends Product {
-  branchProductId?: number;
-  originalProductId: number;
-  product?: APIProduct;
-  branchCategory?: Category;
-  ingredients?: APIIngredient[];
-  allergens?: APIAllergen[];
-  orderDetails?: any;
-  isSelected?: boolean;
-  addonsCount?: number; // New field for addon count
-  hasAddons?: boolean;   // New field to indicate if product has addons
-}
-
-export interface BranchCategory {
-  branchCategoryId: number;
-  branchId: number;
-  categoryId: number;
-  category: {
-    categoryId: number;
-    categoryName: string;
-    status: boolean;
-    displayOrder: number;
-    restaurantId: number;
-  };
-  isActive: boolean;
-  displayName: string;
-  displayOrder: number;
-  products?: DetailedProduct[]; 
-  selectedProductsCount?: number;
-  unselectedProductsCount?: number;
-}
 
 interface BranchCategoriesProps {
   branchId?: number;
@@ -76,25 +37,6 @@ enum AdditionStep {
   REVIEW_SELECTION = 'review_selection'
 }
 
-interface EditedProductPrice {
-  productId: number;
-  originalPrice: number;
-  newPrice: number;
-}
-
-interface EditedCategoryName {
-  categoryId: number;
-  originalName: string;
-  newName: string;
-}
-
-// New interfaces for addon management
-interface ProductAddonData {
-  branchProductId: number;
-  availableAddons: BranchProductAddon[];
-  selectedAddons: any[];
-  isLoading: boolean;
-}
 
 const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => {
   // Translation hook
@@ -716,7 +658,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
                   // ✅ FIXED: Use the correct field for product ID
                   id: productId,
                   
-                  isAvailable: branchProduct.status,
                   branchProductId: branchProduct.branchProductId, 
                   
                   // ✅ FIXED: Store original product ID correctly
@@ -728,7 +669,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
                   imageUrl: branchProduct?.imageUrl,
                   status: branchProduct.status,
                   displayOrder: branchProduct.displayOrder,
-                  categoryId: branchCategory.categoryId,
                   isSelected: true,
                   
                   // New addon fields
@@ -748,6 +688,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
                         productCount: a.productCount ?? 0,
                         containsAllergen: a.containsAllergen ?? false,
                         presence: a.presence ?? '',
+                        displayOrder: a.displayOrder ?? idx + 1,
                       }))
                     : [],
                   

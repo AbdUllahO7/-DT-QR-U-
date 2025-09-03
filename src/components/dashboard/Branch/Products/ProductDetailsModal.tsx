@@ -7,7 +7,7 @@ import {
   Package
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
-import { DetailedProduct } from './BranchProducts';
+import { DetailedProduct } from '../../../../types/BranchManagement/type';
 
 
 

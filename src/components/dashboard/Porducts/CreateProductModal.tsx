@@ -251,8 +251,9 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
         name: formData.name.trim() as string,
         description: formData.description.trim() as string,
         price: formData.price as number,
-        categoryId: categoryId, 
-        isAvailable: formData.isAvailable,
+        categoryId: categoryId,
+        status: formData.isAvailable, // status is required by API
+        displayOrder: 0, // Set a default value or compute as needed
         imageUrl: imageUrl,
       };
       

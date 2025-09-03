@@ -159,15 +159,15 @@ const Dashboard: React.FC = () => {
         />
       ) : (
         <SetupSidebar
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-          isLoading={infoLoading}
-          error={infoError}
-          onLogout={handleLogout}
-          onRetry={handleRestaurantSetup}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-        />
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+            onLogout={handleLogout}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab} restaurantName={''} branchName={null} isBranchOnly={false} onSelectBranch={function (item: RestaurantBranchDropdownItem): void {
+              throw new Error('Function not implemented.');
+            } } onBackToMain={function (): void {
+              throw new Error('Function not implemented.');
+            } }        />
       )}
       
       <div className={`flex-1 flex flex-col overflow-hidden ${isRTL ? 'lg:mr-64' : 'lg:ml-64'}`}>

@@ -1,4 +1,4 @@
-import { APIIngredient, CreateIngredientData, Ingredient, UpdateIngredientData, AllergenDetail } from '../types/dashboard';
+import { APIIngredient, CreateIngredientData, Ingredient, UpdateIngredientData } from '../types/dashboard';
 import { httpClient } from "../utils/http";
 import { logger } from "../utils/logger";
 

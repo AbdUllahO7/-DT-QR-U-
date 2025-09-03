@@ -73,7 +73,7 @@ class BranchCategoryService {
       displayOrder: apiCategory.displayOrder,
       restaurantId: apiCategory.restaurantId,
       isExpanded: apiCategory.isExpanded ?? true,
-      products: apiCategory?.products?.map(apiProduct => ({
+      products: apiCategory.products?.map(apiProduct => ({
         id: apiProduct.productId,
         name: apiProduct.name,
         description: apiProduct.description || '',
@@ -83,7 +83,9 @@ class BranchCategoryService {
         status: apiProduct.status,
         displayOrder: apiProduct.displayOrder,
         categoryId: apiCategory.categoryId,
-      })) || []
+      })) || [],
+      productId: undefined,
+      name: undefined
     }));
   }
 
@@ -116,10 +118,14 @@ class BranchCategoryService {
 
   async getAvailableCategoriesForBranch(): Promise<Category[]> {
     try {
-      const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/available-categories`);
+        const params = new URLSearchParams({
+        includes: "products",
+        onlyActive: "true"
+      });
+      const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/available-categories?${params.toString()}` );
       
       logger.info('Available categories for branch retrieved successfully', { 
-        count: response.data.length
+        count: response.data.length,
       });
       
       const transformedData = this.transformAPIDataToComponentData(response.data);
@@ -189,6 +195,7 @@ class BranchCategoryService {
           status: apiProduct.status,
           displayOrder: apiProduct.displayOrder,
           categoryId: response.data.categoryId,
+          originalProductId: apiProduct.productId,
         })),
         productId: undefined,
         name: undefined

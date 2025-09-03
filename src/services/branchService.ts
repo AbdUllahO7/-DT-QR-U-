@@ -2,7 +2,6 @@ import { httpClient } from '../utils/http';
 import { logger } from '../utils/logger';
 import { getRestaurantIdFromToken } from '../utils/http';
 import type { 
-  BranchData, 
   CreateBranchWithDetailsDto, 
   CreateBranchResponse, 
   BranchDetailResponse,
@@ -12,6 +11,7 @@ import type {
   TableCategory,
   BatchUpdateBranchDto
 } from '../types/api';
+import { BranchData } from '../types/BranchManagement/type';
 
 // Table management için yeni tipler
 interface CreateMenuTableDto {
@@ -315,7 +315,7 @@ class BranchService {
           // Store the full objects for future use
           address: b.address,
           contact: b.contact,
-        } as BranchData;
+        } as unknown as BranchData;
       });
 
       logger.info(`Branch listesi başarıyla işlendi, toplam: ${mapped.length}`, mapped, { prefix: 'BranchService' });

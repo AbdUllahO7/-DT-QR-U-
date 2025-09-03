@@ -6,10 +6,11 @@ interface NetworkStatus {
   isConnecting: boolean;
   lastOnline: Date | null;
   lastOffline: Date | null;
+  testConnection: () => Promise<boolean>; // Added this line
 }
 
 export const useNetworkStatus = (): NetworkStatus => {
-  const [networkStatus, setNetworkStatus] = useState<NetworkStatus>({
+  const [networkStatus, setNetworkStatus] = useState<Omit<NetworkStatus, 'testConnection'>>({
     isOnline: navigator.onLine,
     isConnecting: false,
     lastOnline: null,
@@ -92,4 +93,4 @@ export const useNetworkStatus = (): NetworkStatus => {
     ...networkStatus,
     testConnection,
   };
-}; 
+};
