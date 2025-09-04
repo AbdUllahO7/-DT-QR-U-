@@ -242,7 +242,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
     !branchCategories.some(bc => bc.categoryId === category.categoryId)
   );
 
-  console.log("availableCategoriesNotInBranch", availableCategoriesNotInBranch)
   // Get selected categories with their selected products
   const getSelectedCategoriesWithProducts = () => {
     return categoriesWithProducts.map(category => ({
@@ -544,7 +543,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
             const hasDetailedInfo = product.ingredients || product.allergens;
             const currentPrice = getProductPrice(product.id, product.price);
             const isEditingPrice = editingProductId === product.id;
-            console.log("product 2 ",product)
             return (
               <div 
                 key={product.id} 
@@ -661,13 +659,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                       const branchProductIdToRemove = product.branchProductId || product.id;
                       const originalProductId = product.originalProductId || product.id || product.id;
                       
-                      console.log('Removing product:', originalProductId, 'branchProductId:', branchProductIdToRemove);
-                      console.log('Product details before removal:', {
-                        id: product.id,
-                        productId: product.id,
-                        originalProductId: product.originalProductId,
-                        branchProductId: product.branchProductId
-                      });
+                 
                       
                       await onRemoveProduct(branchProductIdToRemove, product.name);
                       setTimeout(() => {
@@ -685,13 +677,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                    onClick={async () => {
                         // Use the correct original product ID - prioritize originalProductId, then productId, then id
                         const originalProductId = product.id;
-                        console.log('Adding product:', originalProductId, 'to category:', branchCategory.branchCategoryId);
-                        console.log('Product details:', {
-                          id: product.id,
-                          productId: product.id,
-                          originalProductId: product.originalProductId,
-                          branchProductId: product.branchProductId
-                        });
+                     
                         
                         await onAddProduct(originalProductId, branchCategory.branchCategoryId);
                         setTimeout(() => {

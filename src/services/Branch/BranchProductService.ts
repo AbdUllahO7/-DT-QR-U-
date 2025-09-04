@@ -180,11 +180,7 @@ class BranchProductService {
       }
       
       const response = await httpClient.get<APIBranchProduct[]>(url);
-      console.log("response",response)
-      logger.info('Branch products retrieved successfully', { 
-        count: response.data.length,
-        hasIncludes: !!includes?.length
-      });
+ 
       
       // Determine if response has complex structure (with includes) or simple structure
       const firstItem = response.data[0];
@@ -227,7 +223,6 @@ class BranchProductService {
       logger.info('Branch product retrieved successfully', { id });
       
       const transformedProduct = this.transformSingleProduct(response.data);
-      console.log("transformedProduct",transformedProduct)
       return transformedProduct;
     } catch (error: any) {
       logger.error('Error retrieving branch product:', error);
