@@ -3360,5 +3360,91 @@ export const en = {
         addons: 'addons',
         assigned: 'assigned'
       }
+    },
+  menu: {
+    title: "Menu",
+    loading: "Loading Menu",
+    loadingSubtitle: "Preparing our delicious selections for you...",
+    error: {
+      title: "Menu Unavailable",
+      tryAgain: "Try Again"
+    },
+    search: {
+      placeholder: "Search for delicious dishes..."
+    },
+    categories: "Categories",
+    ingredients: "Ingredients",
+    open: "Open",
+    closed: "Closed",
+    chefsChoice: "Chef's Choice",
+    add: "Add",
+    remove: "Remove",
+    items: "items",
+    item: "item",
+    available: "available",
+    deliciousItems: "delicious",
+    exploreMenu: "Explore Our Menu",
+    noResults: "No results found",
+    noResultsDesc: "Try different keywords or browse other categories",
+    noItemsCategory: "No items in this category",
+    noItemsCategoryDesc: "Check other categories for delicious options",
+    selectCategory: "Select a category to start exploring our carefully crafted culinary offerings",
+    whyChooseUs: {
+      title: "Why Choose Us?",
+      subtitle: "Experience culinary excellence with our commitment to quality, freshness, and exceptional service",
+      freshIngredients: {
+        title: "Fresh Ingredients",
+        description: "Locally sourced, premium quality ingredients prepared daily"
+      },
+      fastDelivery: {
+        title: "Fast Delivery",
+        description: "Quick and reliable delivery service to your doorstep"
+      },
+      qualityAssured: {
+        title: "Quality Assured",
+        description: "Rigorous quality control and hygiene standards"
+      },
+      expertChefs: {
+        title: "Expert Chefs",
+        description: "Experienced culinary professionals crafting memorable experiences"
+      }
+    },
+    cart: {
+      title: "Your Cart",
+      empty: "Your cart is empty",
+      emptyDesc: "Browse our menu to discover delicious dishes",
+      total: "Total:",
+      placeOrder: "Place Order"
+    },
+    footer: {
+      brand: "MenuHub",
+      description: "Discover exceptional dining experiences with our curated selection of restaurants and delicious cuisines.",
+      quickLinks: "Quick Links",
+      services: "Services",
+      getInTouch: "Get in Touch",
+      visitUs: "Visit Us",
+      callUs: "Call Us",
+      emailUs: "Email Us",
+      copyright: "All rights reserved.",
+      privacyPolicy: "Privacy Policy",
+      termsOfService: "Terms of Service",
+      poweredBy: "Powered by",
+      links: {
+        ourMenu: "Our Menu",
+        aboutUs: "About Us",
+        locations: "Locations",
+        reservations: "Reservations",
+        specialOffers: "Special Offers",
+        giftCards: "Gift Cards"
+      },
+      services: {
+        onlineOrdering: "Online Ordering",
+        tableBooking: "Table Booking",
+        privateEvents: "Private Events",
+        catering: "Catering",
+        takeaway: "Takeaway",
+        corporateMeals: "Corporate Meals"
+      }
     }
+  }
 }; 

@@ -3204,7 +3204,7 @@ export const ar = {
       searchProducts: 'البحث في المنتجات...'
     }
   },
-   profile: {
+  profile: {
       title: 'الملف الشخصي',
       personalInfo: 'المعلومات الشخصية',
       editProfile: 'تعديل الملف الشخصي',
@@ -3297,67 +3297,153 @@ export const ar = {
       error: {
         loadFailed: 'فشل في تحميل بيانات الملف الشخصي'
       }
+  },
+  addonModal: {
+    title: 'إعداد الإضافات',
+    loading: 'جاري تحميل الإضافات...',
+    refresh: 'تحديث',
+    search: {
+      placeholder: 'البحث في الإضافات بالاسم أو الوصف أو الفئة...'
     },
-     addonModal: {
-      title: 'إعداد الإضافات',
-      loading: 'جاري تحميل الإضافات...',
-      refresh: 'تحديث',
+    stats: {
+      available: 'متاحة',
+      assigned: 'مُعيَّنة',
+      recommended: 'مُوصى بها'
+    },
+    sections: {
+      assignedAddons: 'الإضافات المُعيَّنة',
+      availableAddons: 'الإضافات المتاحة'
+    },
+    emptyState: {
+      title: 'لا توجد إضافات متاحة',
+      description: 'اتصل بإدارة المطعم لتحديد مجموعات الإضافات لهذا المنتج',
+      productId: 'معرف المنتج:'
+    },
+    actions: {
+      add: 'إضافة',
+      remove: 'إزالة',
+      configure: 'إعداد',
+      done: 'تم',
+      saveChanges: 'حفظ التغييرات'
+    },
+    status: {
+      assigned: 'مُعيَّنة',
+      recommended: 'مُوصى بها'
+    },
+    configuration: {
+      title: 'إعدادات التكوين',
+      specialPrice: 'السعر الخاص',
+      maxQuantity: 'الحد الأقصى للكمية',
+        minQuantity: 'الحد الادنى للكمية',
+      marketingText: 'النص التسويقي',
+      markRecommended: 'وضع علامة كموصى بها',
+      placeholders: {
+        marketingText: 'مثل: خيار شائع، أفضل قيمة، مفضل العملاء...'
+      }
+    },
+    messages: {
+      success: {
+        addonAdded: 'تم إضافة الإضافة بنجاح',
+        addonRemoved: 'تم إزالة الإضافة بنجاح',
+        addonUpdated: 'تم تحديث الإضافة بنجاح'
+      },
+      errors: {
+        loadFailed: 'فشل في تحميل إضافات المنتج',
+        updateFailed: 'فشل في تحديث تعيين الإضافة',
+        propertiesFailed: 'فشل في تحديث خصائص الإضافة'
+      }
+    },
+    footer: {
+      summary: 'من',
+      addon: 'إضافة',
+      addons: 'إضافات',
+      assigned: 'مُعيَّنة'
+    }
+  },
+  menu: {
+      title: "القائمة",
+      loading: "تحميل القائمة",
+      loadingSubtitle: "نحضر لك أشهى المأكولات...",
+      error: {
+        title: "القائمة غير متوفرة",
+        tryAgain: "حاول مرة أخرى"
+      },
       search: {
-        placeholder: 'البحث في الإضافات بالاسم أو الوصف أو الفئة...'
+        placeholder: "ابحث عن الأطباق الشهية..."
       },
-      stats: {
-        available: 'متاحة',
-        assigned: 'مُعيَّنة',
-        recommended: 'مُوصى بها'
-      },
-      sections: {
-        assignedAddons: 'الإضافات المُعيَّنة',
-        availableAddons: 'الإضافات المتاحة'
-      },
-      emptyState: {
-        title: 'لا توجد إضافات متاحة',
-        description: 'اتصل بإدارة المطعم لتحديد مجموعات الإضافات لهذا المنتج',
-        productId: 'معرف المنتج:'
-      },
-      actions: {
-        add: 'إضافة',
-        remove: 'إزالة',
-        configure: 'إعداد',
-        done: 'تم',
-        saveChanges: 'حفظ التغييرات'
-      },
-      status: {
-        assigned: 'مُعيَّنة',
-        recommended: 'مُوصى بها'
-      },
-      configuration: {
-        title: 'إعدادات التكوين',
-        specialPrice: 'السعر الخاص',
-        maxQuantity: 'الحد الأقصى للكمية',
-          minQuantity: 'الحد الادنى للكمية',
-        marketingText: 'النص التسويقي',
-        markRecommended: 'وضع علامة كموصى بها',
-        placeholders: {
-          marketingText: 'مثل: خيار شائع، أفضل قيمة، مفضل العملاء...'
-        }
-      },
-      messages: {
-        success: {
-          addonAdded: 'تم إضافة الإضافة بنجاح',
-          addonRemoved: 'تم إزالة الإضافة بنجاح',
-          addonUpdated: 'تم تحديث الإضافة بنجاح'
+      categories: "الفئات",
+      ingredients: "المكونات",
+      open: "مفتوح",
+      closed: "مغلق",
+      chefsChoice: "اختيار الشيف",
+      add: "إضافة",
+      remove: "حذف",
+      items: "عنصر",
+      item: "عنصر",
+      available: "متوفر",
+      deliciousItems: "لذيذة",
+      exploreMenu: "استكشف قائمتنا",
+      noResults: "لم يتم العثور على نتائج",
+      noResultsDesc: "جرب كلمات مختلفة أو تصفح فئات أخرى",
+      noItemsCategory: "لا توجد عناصر في هذه الفئة",
+      noItemsCategoryDesc: "تحقق من الفئات الأخرى للحصول على خيارات لذيذة",
+      selectCategory: "اختر فئة لبدء استكشاف مأكولاتنا المتقنة بعناية",
+      whyChooseUs: {
+        title: "لماذا تختارنا؟",
+        subtitle: "استمتع بالتميز الطهي مع التزامنا بالجودة والطازجة والخدمة الاستثنائية",
+        freshIngredients: {
+          title: "مكونات طازجة",
+          description: "مكونات عالية الجودة من مصادر محلية تُحضر يومياً"
         },
-        errors: {
-          loadFailed: 'فشل في تحميل إضافات المنتج',
-          updateFailed: 'فشل في تحديث تعيين الإضافة',
-          propertiesFailed: 'فشل في تحديث خصائص الإضافة'
+        fastDelivery: {
+          title: "توصيل سريع",
+          description: "خدمة توصيل سريعة وموثوقة إلى باب منزلك"
+        },
+        qualityAssured: {
+          title: "جودة مضمونة",
+          description: "معايير صارمة لمراقبة الجودة والنظافة"
+        },
+        expertChefs: {
+          title: "طهاة خبراء",
+          description: "محترفون في الطهي ذوو خبرة يصنعون تجارب لا تُنسى"
         }
+      },
+      cart: {
+        title: "سلة التسوق",
+        empty: "سلة التسوق فارغة",
+        emptyDesc: "تصفح قائمتنا لاكتشاف الأطباق اللذيذة",
+        total: "المجموع:",
+        placeOrder: "إتمام الطلب"
       },
       footer: {
-        summary: 'من',
-        addon: 'إضافة',
-        addons: 'إضافات',
-        assigned: 'مُعيَّنة'
+        brand: "قائمة المطاعم",
+        description: "اكتشف تجارب طعام استثنائية مع مجموعتنا المختارة من المطاعم والمأكولات اللذيذة.",
+        quickLinks: "روابط سريعة",
+        services: "الخدمات",
+        getInTouch: "تواصل معنا",
+        visitUs: "زرنا",
+        callUs: "اتصل بنا",
+        emailUs: "راسلنا",
+        copyright: "جميع الحقوق محفوظة.",
+        privacyPolicy: "سياسة الخصوصية",
+        termsOfService: "شروط الخدمة",
+        poweredBy: "بدعم من",
+        links: {
+          ourMenu: "قائمتنا",
+          aboutUs: "من نحن",
+          locations: "المواقع",
+          reservations: "الحجوزات",
+          specialOffers: "العروض الخاصة",
+          giftCards: "بطاقات الهدايا"
+        },
+        services: {
+          onlineOrdering: "الطلب عبر الإنترنت",
+          tableBooking: "حجز الطاولات",
+          privateEvents: "الفعاليات الخاصة",
+          catering: "خدمات الضيافة",
+          takeaway: "الطلبات الخارجية",
+          corporateMeals: "وجبات الشركات"
+        }
       }
-    }
+  }
 }; 

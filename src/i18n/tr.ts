@@ -3357,5 +3357,91 @@ SortableProduct: {
         addons: 'eklenti',
         assigned: 'atanmış'
       }
+    },
+     menu: {
+      title: "Menü",
+      loading: "Menü Yükleniyor",
+      loadingSubtitle: "Lezzetli seçimlerimizi sizin için hazırlıyoruz...",
+      error: {
+        title: "Menü Mevcut Değil",
+        tryAgain: "Tekrar Dene"
+      },
+      search: {
+        placeholder: "Lezzetli yemekler ara..."
+      },
+      categories: "Kategoriler",
+      ingredients: "Malzemeler",
+      open: "Açık",
+      closed: "Kapalı",
+      chefsChoice: "Şef'in Önerisi",
+      add: "Ekle",
+      remove: "Kaldır",
+      items: "öğe",
+      item: "öğe",
+      available: "mevcut",
+      deliciousItems: "lezzetli",
+      exploreMenu: "Menümüzü Keşfedin",
+      noResults: "Sonuç bulunamadı",
+      noResultsDesc: "Farklı anahtar kelimeler deneyin veya diğer kategorilere göz atın",
+      noItemsCategory: "Bu kategoride öğe yok",
+      noItemsCategoryDesc: "Lezzetli seçenekler için diğer kategorileri kontrol edin",
+      selectCategory: "Özenle hazırlanmış mutfak tekliflerimizi keşfetmeye başlamak için bir kategori seçin",
+      whyChooseUs: {
+        title: "Neden Bizi Seçmelisiniz?",
+        subtitle: "Kalite, tazelik ve olağanüstü hizmet taahhüdümüzle mutfak mükemmelliğini deneyimleyin",
+        freshIngredients: {
+          title: "Taze Malzemeler",
+          description: "Yerel kaynaklı, premium kalite malzemeler günlük hazırlanır"
+        },
+        fastDelivery: {
+          title: "Hızlı Teslimat",
+          description: "Kapınıza hızlı ve güvenilir teslimat hizmeti"
+        },
+        qualityAssured: {
+          title: "Kalite Garantisi",
+          description: "Titiz kalite kontrol ve hijyen standartları"
+        },
+        expertChefs: {
+          title: "Uzman Şefler",
+          description: "Unutulmaz deneyimler yaratan deneyimli mutfak profesyonelleri"
+        }
+      },
+      cart: {
+        title: "Sepetiniz",
+        empty: "Sepetiniz boş",
+        emptyDesc: "Lezzetli yemekleri keşfetmek için menümüze göz atın",
+        total: "Toplam:",
+        placeOrder: "Sipariş Ver"
+      },
+      footer: {
+        brand: "MenuHub",
+        description: "Seçkin restoran ve lezzetli mutfak seçkimizle olağanüstü yemek deneyimleri keşfedin.",
+        quickLinks: "Hızlı Bağlantılar",
+        services: "Hizmetler",
+        getInTouch: "İletişime Geçin",
+        visitUs: "Bizi Ziyaret Edin",
+        callUs: "Bizi Arayın",
+        emailUs: "Bize Mail Gönderin",
+        copyright: "Tüm hakları saklıdır.",
+        privacyPolicy: "Gizlilik Politikası",
+        termsOfService: "Hizmet Şartları",
+        poweredBy: "Destekleyen",
+        links: {
+          ourMenu: "Menümüz",
+          aboutUs: "Hakkımızda",
+          locations: "Lokasyonlar",
+          reservations: "Rezervasyonlar",
+          specialOffers: "Özel Teklifler",
+          giftCards: "Hediye Kartları"
+        },
+        services: {
+          onlineOrdering: "Online Sipariş",
+          tableBooking: "Masa Rezervasyonu",
+          privateEvents: "Özel Etkinlikler",
+          catering: "Catering",
+          takeaway: "Paket Servis",
+          corporateMeals: "Kurumsal Yemekler"
+        }
+      }
     }
 }; 
