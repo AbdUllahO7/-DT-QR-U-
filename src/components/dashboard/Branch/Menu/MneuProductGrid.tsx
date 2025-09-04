@@ -3,8 +3,25 @@
 import type React from "react"
 import { Sparkles, Coffee, UtensilsCrossed } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
-import { MenuCategory, MenuProduct, CartItem } from "../../../../types/menu/type"
-import ProductCard from "./ProductCard"
+import { MenuCategory, MenuProduct } from "../../../../types/menu/type"
+import ProductCard from "./MneuProdcutCard"
+
+interface SelectedAddon {
+  branchProductAddonId: number
+  addonName: string
+  price: number
+  quantity: number
+}
+
+interface CartItem {
+  branchProductId: number
+  productName: string
+  price: number
+  quantity: number
+  productImageUrl?: string
+  addons?: any[]
+  totalItemPrice: number
+}
 
 interface ProductGridProps {
   categories: MenuCategory[]
@@ -12,11 +29,13 @@ interface ProductGridProps {
   searchTerm: string
   cart: CartItem[]
   favorites: Set<number>
-  onAddToCart: (product: MenuProduct) => void
+  onAddToCart: (product: MenuProduct, addons?: SelectedAddon[]) => void
   onRemoveFromCart: (branchProductId: number) => void
   onToggleFavorite: (branchProductId: number) => void
   onCategorySelect: (categoryId: number) => void
   restaurantName: string
+  onCustomize?: (product: MenuProduct) => void
+  getCartItemQuantity: (branchProductId: number) => number
 }
 
 const ProductGrid: React.FC<ProductGridProps> = ({
@@ -29,7 +48,9 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   onRemoveFromCart,
   onToggleFavorite,
   onCategorySelect,
-  restaurantName
+  restaurantName,
+  onCustomize,
+  getCartItemQuantity
 }) => {
   const { t } = useLanguage()
 
@@ -40,11 +61,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
         product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.productDescription.toLowerCase().includes(searchTerm.toLowerCase())
     )
-  }
-
-  const getCartItemQuantity = (branchProductId: number): number => {
-    const item = cart.find((item) => item.branchProductId === branchProductId)
-    return item ? item.quantity : 0
   }
 
   // Find the selected category
@@ -116,6 +132,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
               onAddToCart={onAddToCart}
               onRemoveFromCart={onRemoveFromCart}
               onToggleFavorite={onToggleFavorite}
+              onCustomize={onCustomize}
             />
           ))}
         </div>

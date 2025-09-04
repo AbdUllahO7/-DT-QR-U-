@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { Coffee, Award, Heart, Utensils, Plus, Minus } from "lucide-react"
+import { Coffee, Award, Heart, Utensils, Plus, Minus, Settings } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import { MenuProduct } from "../../../../types/menu/type"
 
@@ -9,9 +9,10 @@ interface ProductCardProps {
   product: MenuProduct
   cartQuantity: number
   isFavorite: boolean
-  onAddToCart: (product: MenuProduct) => void
+  onAddToCart: (product: MenuProduct, addons?: any[]) => void
   onRemoveFromCart: (branchProductId: number) => void
   onToggleFavorite: (branchProductId: number) => void
+  onCustomize?: (product: MenuProduct) => void
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({
@@ -20,9 +21,19 @@ const ProductCard: React.FC<ProductCardProps> = ({
   isFavorite,
   onAddToCart,
   onRemoveFromCart,
-  onToggleFavorite
+  onToggleFavorite,
+  onCustomize
 }) => {
   const { t } = useLanguage()
+  const hasAddons = product.availableAddons && product.availableAddons.length > 0
+
+  const handleQuickAdd = () => {
+    if (hasAddons && onCustomize) {
+      onCustomize(product)
+    } else {
+      onAddToCart(product)
+    }
+  }
 
   return (
     <div className="group bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 overflow-hidden hover:shadow-xl transition-all duration-500 flex flex-col h-full hover:-translate-y-1 hover:rotate-1">
@@ -46,6 +57,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <span className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs px-2 py-1 rounded-full flex items-center shadow-lg backdrop-blur-sm">
               <Award className="h-2 w-2 mr-1" />
               {t('menu.chefsChoice')}
+            </span>
+          )}
+          {hasAddons && (
+            <span className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs px-2 py-1 rounded-full flex items-center shadow-lg backdrop-blur-sm">
+              <Settings className="h-2 w-2 mr-1" />
+              Customizable
             </span>
           )}
         </div>
@@ -81,6 +98,30 @@ const ProductCard: React.FC<ProductCardProps> = ({
             </p>
           )}
         </div>
+
+        {/* Available Addons Preview */}
+        {hasAddons && (
+          <div className="mb-3">
+            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">
+              {product.availableAddons!.length} addon{product.availableAddons!.length > 1 ? 's' : ''} available
+            </p>
+            <div className="flex flex-wrap gap-1">
+              {product.availableAddons!.slice(0, 2).map((addon) => (
+                <span
+                  key={addon.branchProductAddonId}
+                  className="text-xs bg-blue-100/80 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full"
+                >
+                  +${addon.price}
+                </span>
+              ))}
+              {product.availableAddons!.length > 2 && (
+                <span className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-700/50 px-2 py-1 rounded-full">
+                  +{product.availableAddons!.length - 2} more
+                </span>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Allergens */}
         <div className="mb-3 min-h-[50px] flex flex-col justify-start">
@@ -155,7 +196,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                   {cartQuantity}
                 </span>
                 <button
-                  onClick={() => onAddToCart(product)}
+                  onClick={handleQuickAdd}
                   className="w-7 h-7 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg flex items-center justify-center transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-110"
                 >
                   <Plus className="h-3 w-3" />
@@ -163,11 +204,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
               </div>
             ) : (
               <button
-                onClick={() => onAddToCart(product)}
+                onClick={handleQuickAdd}
                 className="bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white px-3 py-2 rounded-xl transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold"
               >
-                <Plus className="h-3 w-3" />
-                <span className="text-xs">{t('menu.add')}</span>
+                {hasAddons ? <Settings className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
+                <span className="text-xs">{hasAddons ? 'Customize' : t('menu.add')}</span>
               </button>
             )}
           </div>

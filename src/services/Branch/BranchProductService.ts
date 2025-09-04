@@ -241,7 +241,7 @@ class BranchProductService {
       url += `?includes=${encodeURIComponent(includesParam)}`;
     }
     
-    const response = await httpClient.get(url);
+    const response = await httpClient.get(`${this.baseUrl}/branch/${branchId}/menu`);
     
     logger.info('Branch menu retrieved successfully', { 
       branchId,
