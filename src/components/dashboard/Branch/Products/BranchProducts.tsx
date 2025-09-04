@@ -20,7 +20,7 @@ import CategoriesContent from './CategoriesContent';
 
 // Enhanced interfaces for detailed product information
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
-import { BranchProductAddon } from '../../../../services/Branch/BracnhService';
+import { BranchProductAddon } from '../../../../services/Branch/BranchService';
 import { branchProductAddonsService } from '../../../../services/Branch/BranchAddonsService';
 import BranchProductAddonsModal from './BranchProductAddonsModal';
 import { BranchCategory, DetailedProduct, EditedCategoryName, EditedProductPrice, ProductAddonData } from '../../../../types/BranchManagement/type';

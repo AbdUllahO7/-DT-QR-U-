@@ -4,7 +4,7 @@ import {  CreateBranchWithDetailsDto } from '../../../../types/api';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import BranchHeader from './BranchHeader';
 import BranchInfo from './BranchInfo';
-import { branchService } from '../../../../services/Branch/BracnhService';
+import { branchService } from '../../../../services/Branch/BranchService';
 import BranchWorkingHours from './BranchWorkingHours';
 import { BranchData, EditDataType } from '../../../../types/BranchManagement/type';
 
