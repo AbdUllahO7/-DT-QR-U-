@@ -27,7 +27,6 @@ import {
 } from '../../../../services/Branch/BranchAddonsService';
 import { DetailedProduct, EnhancedAddon } from '../../../../types/BranchManagement/type';
 
-
 interface ProductAddonsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -55,6 +54,9 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  
+  // Add processing state to prevent multiple rapid actions
+  const [processingAddonId, setProcessingAddonId] = useState<number | null>(null);
 
   // Load data when modal opens
   useEffect(() => {
@@ -147,17 +149,38 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
   };
 
   const handleAddonToggle = async (addon: EnhancedAddon) => {
-    if (!product?.branchProductId) return;
+    if (!product?.branchProductId || processingAddonId === addon.addonBranchProductId) return;
 
+    // Set processing state to prevent double clicks
+    setProcessingAddonId(addon.addonBranchProductId);
     setIsSaving(true);
     setError(null);
-
+    
+    console.log('Toggling addon:', addon);
+    console.log('Assignment ID:', addon.assignmentId);
+    console.log('Is Assigned:', addon.isAssigned);
+    
     try {
-      if (addon.isAssigned) {
-        if (addon.assignmentId) {
-          await branchProductAddonsService.deleteBranchProductAddon(addon.assignmentId);
-        }
-      } else {
+      if (addon.isAssigned && addon.assignmentId) {
+        console.log('Attempting to delete assignment with ID:', addon.assignmentId);
+        
+        // First update local state optimistically
+        setEnhancedAddons(prev => prev.map(a => 
+          a.addonBranchProductId === addon.addonBranchProductId 
+            ? { ...a, isAssigned: false, assignmentId: undefined }
+            : a
+        ));
+        
+        // Then make the API call
+        await branchProductAddonsService.deleteBranchProductAddon(addon.assignmentId);
+        
+        console.log('Successfully deleted assignment');
+        setSuccessMessage(t('addonModal.messages.success.addonRemoved'));
+        
+        // Wait a bit before reloading to ensure the deletion is processed
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+      } else if (!addon.isAssigned) {
         const createData: CreateBranchProductAddonDto = {
           mainBranchProductId: product.branchProductId,
           addonBranchProductId: addon.addonBranchProductId,
@@ -170,14 +193,26 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
           isGroupRequired: addon.editedIsGroupRequired || false,
         };
 
-        await branchProductAddonsService.createBranchProductAddon(createData);
+        console.log('Creating new assignment with data:', createData);
+        const newAssignment = await branchProductAddonsService.createBranchProductAddon(createData);
+        console.log('Successfully created assignment:', newAssignment);
+        
+        setSuccessMessage(t('addonModal.messages.success.addonAdded'));
       }
 
+      // Always reload after any change to ensure consistency
       await loadProductAddons();
-      setSuccessMessage(addon.isAssigned ? t('addonModal.messages.success.addonRemoved') : t('addonModal.messages.success.addonAdded'));
+      
+      // Call onSave callback if provided
       if (onSave && product?.branchProductId) {
-        const selectedAddonIds = enhancedAddons.filter(a => a.isAssigned).map(a => a.addonBranchProductId);
-        const customizations = enhancedAddons
+        const updatedEnhancedAddons = enhancedAddons.map(a => 
+          a.addonBranchProductId === addon.addonBranchProductId 
+            ? { ...a, isAssigned: !addon.isAssigned }
+            : a
+        );
+        
+        const selectedAddonIds = updatedEnhancedAddons.filter(a => a.isAssigned).map(a => a.addonBranchProductId);
+        const customizations = updatedEnhancedAddons
           .filter(a => a.isAssigned)
           .reduce((acc, a) => {
             acc[a.addonBranchProductId] = {
@@ -190,14 +225,19 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
             };
             return acc;
           }, {} as any);
+        
         onSave(product.branchProductId, selectedAddonIds, customizations);
       }
       
     } catch (err: any) {
       console.error('Error toggling addon:', err);
-      setError(t('addonModal.messages.errors.updateFailed'));
+      setError(t('addonModal.messages.errors.updateFailed') + ': ' + (err.message || 'Unknown error'));
+      
+      // Revert optimistic update on error
+      await loadProductAddons();
     } finally {
       setIsSaving(false);
+      setProcessingAddonId(null);
     }
   };
 
@@ -214,8 +254,9 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
   };
 
   const handleUpdateAddon = async (addon: EnhancedAddon) => {
-    if (!addon.assignmentId) return;
+    if (!addon.assignmentId || processingAddonId === addon.addonBranchProductId) return;
 
+    setProcessingAddonId(addon.addonBranchProductId);
     setIsSaving(true);
     setError(null);
 
@@ -233,7 +274,8 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
       await branchProductAddonsService.updateBranchProductAddon(addon.assignmentId, updateData);
       await loadProductAddons();
       setSuccessMessage(t('addonModal.messages.success.addonUpdated'));
-        if (onSave && product?.branchProductId) {
+      
+      if (onSave && product?.branchProductId) {
         const selectedAddonIds = enhancedAddons.filter(a => a.isAssigned).map(a => a.addonBranchProductId);
         const customizations = enhancedAddons
           .filter(a => a.isAssigned)
@@ -256,6 +298,7 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
       setError(t('addonModal.messages.errors.propertiesFailed'));
     } finally {
       setIsSaving(false);
+      setProcessingAddonId(null);
     }
   };
 
@@ -264,6 +307,7 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
     setSearchTerm('');
     setError(null);
     setSuccessMessage(null);
+    setProcessingAddonId(null);
     onClose();
   };
 
@@ -407,7 +451,7 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                             key={addon.addonBranchProductId}
                             addon={addon}
                             isRTL={isRTL}
-                            isSaving={isSaving}
+                            isSaving={processingAddonId === addon.addonBranchProductId}
                             onToggle={() => handleAddonToggle(addon)}
                             onPropertyChange={handlePropertyChange}
                             onUpdate={() => handleUpdateAddon(addon)}
@@ -433,7 +477,7 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                             key={addon.addonBranchProductId}
                             addon={addon}
                             isRTL={isRTL}
-                            isSaving={isSaving}
+                            isSaving={processingAddonId === addon.addonBranchProductId}
                             onToggle={() => handleAddonToggle(addon)}
                             onPropertyChange={handlePropertyChange}
                             onUpdate={() => handleUpdateAddon(addon)}
@@ -486,7 +530,7 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
   );
 };
 
-// Enhanced Addon Card Component
+// Enhanced Addon Card Component (unchanged from original)
 const AddonCard: React.FC<{
   addon: EnhancedAddon;
   isRTL: boolean;
@@ -646,7 +690,7 @@ const AddonCard: React.FC<{
                   <input
                     title='number'
                     type="number"
-                    step="1"
+                    step="0.01"
                     value={addon.editedSpecialPrice || addon.addonPrice}
                     onChange={(e) => onPropertyChange(addon.addonBranchProductId, 'specialPrice', parseFloat(e.target.value) || 0)}
                     className={`w-full py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isRTL ? 'pr-10 pl-3 text-right' : 'pl-10 pr-3'}`}
@@ -701,8 +745,6 @@ const AddonCard: React.FC<{
               </div>
 
               <div className={`sm:col-span-2 flex items-center justify-between`}>
-              
-
                 {hasPropertyChanges && (
                   <button
                     onClick={onUpdate}
