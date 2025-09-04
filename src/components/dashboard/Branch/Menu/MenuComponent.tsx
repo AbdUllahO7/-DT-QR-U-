@@ -38,73 +38,12 @@ import {
 } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import { branchProductService } from "../../../../services/Branch/BranchProductService"
-
-// Interfaces matching the actual API response from getBranchMenu
-interface MenuAllergen {
-  allergenId: number
-  code: string
-  name: string
-  icon: string
-  presence: number
-  note: string
-}
-
-interface MenuIngredient {
-  id: number
-  productId: number
-  ingredientId: number
-  ingredientName: string
-  quantity: number
-  unit: string
-  isAllergenic: boolean
-  isAvailable: boolean
-  allergenIds: number[]
-  allergens: MenuAllergen[]
-}
-
-interface MenuProduct {
-  branchProductId: number
-  productId: number
-  productName: string
-  productDescription: string
-  productImageUrl: string
-  price: number
-  isRecommended: boolean
-  ingredients: MenuIngredient[]
-  allergens: MenuAllergen[]
-  availableAddons: any[]
-}
-
-interface MenuCategory {
-  categoryId: number
-  categoryName: string
-  displayOrder: number
-  products: MenuProduct[]
-}
-
-interface BranchMenuResponse {
-  branchId: number
-  branchName: string
-  restaurantName: string
-  branchAddress: string
-  isOpen: boolean
-  categories: MenuCategory[]
-}
-
-interface CartItem {
-  branchProductId: number
-  productName: string
-  price: number
-  quantity: number
-  productImageUrl?: string
-}
-
-interface MenuComponentProps {
-  branchId: number
-}
+import { BranchMenuResponse, CartItem, MenuCategory, MenuComponentProps, MenuProduct } from "../../../../types/menu/type"
+import LanguageSelector from "../../../LanguageSelector"
 
 // Footer Component
 const Footer: React.FC = () => {
+  const { t } = useLanguage()
   const [showScrollTop, setShowScrollTop] = useState(false)
 
   useEffect(() => {
@@ -136,10 +75,10 @@ const Footer: React.FC = () => {
               <Sparkles className="h-6 w-6 text-white" />
             </div>
             <h2 className="text-2xl font-bold text-white mb-3 bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-              Why Choose Us?
+              {t('menu.whyChooseUs.title')}
             </h2>
             <p className="text-slate-300 text-sm max-w-2xl mx-auto leading-relaxed">
-              Experience culinary excellence with our commitment to quality, freshness, and exceptional service
+              {t('menu.whyChooseUs.subtitle')}
             </p>
           </div>
           
@@ -148,9 +87,9 @@ const Footer: React.FC = () => {
               <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                 <Leaf className="h-7 w-7 text-white" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Fresh Ingredients</h3>
+              <h3 className="text-lg font-bold text-white mb-2">{t('menu.whyChooseUs.freshIngredients.title')}</h3>
               <p className="text-slate-400 leading-relaxed text-sm">
-                Locally sourced, premium quality ingredients prepared daily
+                {t('menu.whyChooseUs.freshIngredients.description')}
               </p>
             </div>
 
@@ -158,9 +97,9 @@ const Footer: React.FC = () => {
               <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                 <Truck className="h-7 w-7 text-white" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Fast Delivery</h3>
+              <h3 className="text-lg font-bold text-white mb-2">{t('menu.whyChooseUs.fastDelivery.title')}</h3>
               <p className="text-slate-400 leading-relaxed text-sm">
-                Quick and reliable delivery service to your doorstep
+                {t('menu.whyChooseUs.fastDelivery.description')}
               </p>
             </div>
 
@@ -168,9 +107,9 @@ const Footer: React.FC = () => {
               <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                 <Shield className="h-7 w-7 text-white" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Quality Assured</h3>
+              <h3 className="text-lg font-bold text-white mb-2">{t('menu.whyChooseUs.qualityAssured.title')}</h3>
               <p className="text-slate-400 leading-relaxed text-sm">
-                Rigorous quality control and hygiene standards
+                {t('menu.whyChooseUs.qualityAssured.description')}
               </p>
             </div>
 
@@ -178,9 +117,9 @@ const Footer: React.FC = () => {
               <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300">
                 <Users className="h-7 w-7 text-white" />
               </div>
-              <h3 className="text-lg font-bold text-white mb-2">Expert Chefs</h3>
+              <h3 className="text-lg font-bold text-white mb-2">{t('menu.whyChooseUs.expertChefs.title')}</h3>
               <p className="text-slate-400 leading-relaxed text-sm">
-                Experienced culinary professionals crafting memorable experiences
+                {t('menu.whyChooseUs.expertChefs.description')}
               </p>
             </div>
           </div>
@@ -204,11 +143,11 @@ const Footer: React.FC = () => {
                   <UtensilsCrossed className="h-5 w-5 text-white" />
                 </div>
                 <h3 className="text-xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-                  MenuHub
+                  {t('menu.footer.brand')}
                 </h3>
               </div>
               <p className="text-slate-400 leading-relaxed mb-4 text-sm">
-                Discover exceptional dining experiences with our curated selection of restaurants and delicious cuisines.
+                {t('menu.footer.description')}
               </p>
               <div className="flex space-x-2">
                 <a href="#" className="w-8 h-8 bg-slate-800/50 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-all duration-300 backdrop-blur-sm border border-slate-700 hover:border-blue-500 group">
@@ -230,10 +169,17 @@ const Footer: React.FC = () => {
             <div>
               <h4 className="text-lg font-bold text-white mb-4 flex items-center">
                 <Utensils className="h-4 w-4 mr-2 text-orange-500" />
-                Quick Links
+                {t('menu.footer.quickLinks')}
               </h4>
               <ul className="space-y-2">
-                {['Our Menu', 'About Us', 'Locations', 'Reservations', 'Special Offers', 'Gift Cards'].map((link) => (
+                {[
+                  t('menu.footer.links.ourMenu'),
+                  t('menu.footer.links.aboutUs'),
+                  t('menu.footer.links.locations'),
+                  t('menu.footer.links.reservations'),
+                  t('menu.footer.links.specialOffers'),
+                  t('menu.footer.links.giftCards')
+                ].map((link) => (
                   <li key={link}>
                     <a href="#" className="text-slate-400 hover:text-white transition-colors duration-200 text-sm hover:translate-x-1 inline-block transform transition-transform">
                       {link}
@@ -247,10 +193,17 @@ const Footer: React.FC = () => {
             <div>
               <h4 className="text-lg font-bold text-white mb-4 flex items-center">
                 <Zap className="h-4 w-4 mr-2 text-orange-500" />
-                Services
+                {t('menu.footer.services')}
               </h4>
               <ul className="space-y-2">
-                {['Online Ordering', 'Table Booking', 'Private Events', 'Catering', 'Takeaway', 'Corporate Meals'].map((service) => (
+                {[
+                  t('menu.footer.services.onlineOrdering'),
+                  t('menu.footer.services.tableBooking'),
+                  t('menu.footer.services.privateEvents'),
+                  t('menu.footer.services.catering'),
+                  t('menu.footer.services.takeaway'),
+                  t('menu.footer.services.corporateMeals')
+                ].map((service) => (
                   <li key={service}>
                     <a href="#" className="text-slate-400 hover:text-white transition-colors duration-200 text-sm hover:translate-x-1 inline-block transform transition-transform">
                       {service}
@@ -264,7 +217,7 @@ const Footer: React.FC = () => {
             <div>
               <h4 className="text-lg font-bold text-white mb-4 flex items-center">
                 <Phone className="h-4 w-4 mr-2 text-orange-500" />
-                Get in Touch
+                {t('menu.footer.getInTouch')}
               </h4>
               <div className="space-y-3">
                 <div className="flex items-start space-x-3">
@@ -272,7 +225,7 @@ const Footer: React.FC = () => {
                     <MapPin className="h-3 w-3 text-orange-500" />
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">Visit Us</p>
+                    <p className="text-white font-semibold text-sm">{t('menu.footer.visitUs')}</p>
                     <p className="text-slate-400 text-xs">123 Culinary Street<br />Food District, City</p>
                   </div>
                 </div>
@@ -282,7 +235,7 @@ const Footer: React.FC = () => {
                     <Phone className="h-3 w-3 text-orange-500" />
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">Call Us</p>
+                    <p className="text-white font-semibold text-sm">{t('menu.footer.callUs')}</p>
                     <p className="text-slate-400 text-xs">+1 (555) 123-4567</p>
                   </div>
                 </div>
@@ -292,7 +245,7 @@ const Footer: React.FC = () => {
                     <Mail className="h-3 w-3 text-orange-500" />
                   </div>
                   <div>
-                    <p className="text-white font-semibold text-sm">Email Us</p>
+                    <p className="text-white font-semibold text-sm">{t('menu.footer.emailUs')}</p>
                     <p className="text-slate-400 text-xs">hello@menuhub.com</p>
                   </div>
                 </div>
@@ -304,15 +257,15 @@ const Footer: React.FC = () => {
           <div className="mt-8 pt-6 border-t border-slate-800">
             <div className="flex flex-col lg:flex-row items-center justify-between space-y-3 lg:space-y-0">
               <div className="flex items-center space-x-4 text-slate-400 text-sm">
-                <p>&copy; 2024 MenuHub. All rights reserved.</p>
+                <p>&copy; 2024 MenuHub. {t('menu.footer.copyright')}</p>
                 <span className="hidden lg:inline">|</span>
-                <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+                <a href="#" className="hover:text-white transition-colors">{t('menu.footer.privacyPolicy')}</a>
                 <span>|</span>
-                <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+                <a href="#" className="hover:text-white transition-colors">{t('menu.footer.termsOfService')}</a>
               </div>
               
               <div className="flex items-center space-x-3 text-slate-400 text-sm">
-                <span>Powered by</span>
+                <span>{t('menu.footer.poweredBy')}</span>
                 <div className="flex items-center space-x-1 text-orange-500 font-semibold">
                   <Flame className="h-3 w-3" />
                   <span>Idigitek</span>
@@ -528,10 +481,10 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
               </div>
             </div>
             <h2 className="text-xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent mb-3">
-              Loading Menu
+              {t('menu.loading')}
             </h2>
             <p className="text-slate-600 dark:text-slate-400 text-sm">
-              Preparing our delicious selections for you...
+              {t('menu.loadingSubtitle')}
             </p>
           </div>
         </div>
@@ -548,13 +501,13 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
             <div className="mx-auto w-16 h-16 bg-gradient-to-br from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-800/30 rounded-2xl flex items-center justify-center mb-6 shadow-lg">
               <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
             </div>
-            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-3">Menu Unavailable</h2>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-3">{t('menu.error.title')}</h2>
             <p className="text-red-600 dark:text-red-400 mb-6 text-sm">{error}</p>
             <button
               onClick={() => window.location.reload()}
               className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 px-6 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
             >
-              Try Again
+              {t('menu.error.tryAgain')}
             </button>
           </div>
         </div>
@@ -567,7 +520,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
   const filteredCategories = getFilteredCategories()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800">
+    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Modern Header with Glassmorphism */}
       <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-40 shadow-lg">
         <div className="max-w-6xl mx-auto px-4 py-4">
@@ -577,29 +530,33 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
                 <UtensilsCrossed className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 dark:from-slate-100 dark:via-slate-200 dark:to-slate-300 bg-clip-text text-transparent">
+                <h1 className="text-xl mr-2 font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 dark:from-slate-100 dark:via-slate-200 dark:to-slate-300 bg-clip-text text-transparent">
                   {menuData.restaurantName}
                 </h1>
-                <div className="flex items-center space-x-2 mt-1">
+                
+                <div className="flex items-center space-x-2 mt-1 mr-2">
                   <div className="flex items-center space-x-1 text-slate-600 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-800/50 px-2 py-1 rounded-full backdrop-blur-sm">
                     <MapPin className="h-3 w-3" />
                     <p className="text-xs font-medium">{menuData.branchName}</p>
                   </div>
-                  <div className={`flex items-center space-x-1 px-2 py-1 rounded-full backdrop-blur-sm ${
+                  <div className={`flex items-center space-x-1 px-2 py-1 rounded-full backdrop-blur-sm mr-2${
                     menuData.isOpen 
                       ? "bg-emerald-100/50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300" 
                       : "bg-red-100/50 dark:bg-red-900/30 text-red-700 dark:text-red-300"
                   }`}>
-                    <div className={`w-2 h-2 rounded-full ${menuData.isOpen ? "bg-emerald-500" : "bg-red-500"} animate-pulse`} />
-                    <span className="text-xs font-semibold">{menuData.isOpen ? "Open" : "Closed"}</span>
+                    <div className={`w-2 h-2 rounded-full ml-2 ${menuData.isOpen ? "bg-emerald-500" : "bg-red-500"} animate-pulse`} />
+                    <span className="text-xs font-semibold">{menuData.isOpen ? t('menu.open') : t('menu.closed')}</span>
+                    
                   </div>
                 </div>
               </div>
+              
             </div>
 
-            <button
+            <div className="flex items-center space-x-4">
+              <button
               onClick={() => setShowCart(!showCart)}
-              className="relative bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white p-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-orange-500/25 transform hover:scale-105 group"
+              className="relative bg-gradient-to-r ml-2 from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white p-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-orange-500/25 transform hover:scale-105 group"
             >
               <ShoppingCart className="h-5 w-5 group-hover:rotate-12 transition-transform duration-300" />
               {getTotalItems() > 0 && (
@@ -608,6 +565,9 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
                 </span>
               )}
             </button>
+              <LanguageSelector variant="header" />
+
+            </div>
           </div>
         </div>
       </div>
@@ -621,7 +581,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500 h-4 w-4" />
               <input
                 type="text"
-                placeholder="Search for delicious dishes..."
+                placeholder={t('menu.search.placeholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 bg-transparent border-0 rounded-2xl focus:ring-2 focus:ring-orange-500/50 text-slate-800 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 text-sm font-medium outline-none"
@@ -641,7 +601,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
                 <div className="w-6 h-6 bg-gradient-to-r from-orange-500 to-pink-500 rounded-lg flex items-center justify-center mr-2">
                   <Filter className="h-3 w-3 text-white" />
                 </div>
-                Categories
+                {t('menu.categories')}
               </h3>
               <div className="space-y-2">
                 {filteredCategories.map((category) => (
@@ -697,7 +657,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
                           </div>
                           <h2 className="text-2xl font-bold mb-2">{currentCategory.categoryName}</h2>
                           <p className="text-orange-100 text-sm">
-                            {products.length} delicious {products.length === 1 ? 'item' : 'items'} available
+                            {products.length} {t('menu.deliciousItems')} {products.length === 1 ? t('menu.item') : t('menu.items')} {t('menu.available')}
                           </p>
                         </div>
                       </div>
@@ -734,7 +694,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
                             {product.isRecommended && (
                               <span className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs px-2 py-1 rounded-full flex items-center shadow-lg backdrop-blur-sm">
                                 <Award className="h-2 w-2 mr-1" />
-                                Chef's Choice
+                                {t('menu.chefsChoice')}
                               </span>
                             )}
                           </div>
@@ -800,7 +760,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
                               <>
                                 <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center">
                                   <Utensils className="h-3 w-3 mr-1 text-orange-500" />
-                                  Ingredients
+                                  {t('menu.ingredients')}
                                 </h4>
                                 <div className="flex flex-wrap gap-1">
                                   {product.ingredients.slice(0, 2).map((ingredient) => (
@@ -856,7 +816,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
                                   className="bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white px-3 py-2 rounded-xl transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold"
                                 >
                                   <Plus className="h-3 w-3" />
-                                  <span className="text-xs">Add</span>
+                                  <span className="text-xs">{t('menu.add')}</span>
                                 </button>
                               )}
                             </div>
@@ -880,10 +840,10 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
                             <Coffee className="h-8 w-8 text-slate-400 dark:text-slate-500" />
                           </div>
                           <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-3">
-                            {searchTerm ? "No results found" : "No items in this category"}
+                            {searchTerm ? t('menu.noResults') : t('menu.noItemsCategory')}
                           </h3>
                           <p className="text-slate-600 dark:text-slate-400 text-sm">
-                            {searchTerm ? "Try different keywords or browse other categories" : "Check other categories for delicious options"}
+                            {searchTerm ? t('menu.noResultsDesc') : t('menu.noItemsCategoryDesc')}
                           </p>
                         </div>
                       </div>
@@ -899,17 +859,17 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
                     <UtensilsCrossed className="h-10 w-10 text-white" />
                   </div>
                   <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">
-                    {menuData.restaurantName} Menu
+                    {menuData.restaurantName} {t('menu.title')}
                   </h2>
                   <p className="text-slate-600 dark:text-slate-400 mb-6 leading-relaxed text-sm">
-                    Select a category to start exploring our carefully crafted culinary offerings
+                    {t('menu.selectCategory')}
                   </p>
                   {filteredCategories.length > 0 && (
                     <button
                       onClick={() => setSelectedCategory(filteredCategories[0].categoryId)}
                       className="bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl font-bold text-sm transform hover:scale-105"
                     >
-                      Explore Our Menu
+                      {t('menu.exploreMenu')}
                     </button>
                   )}
                 </div>
@@ -927,7 +887,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-bold text-white flex items-center">
                   <ShoppingCart className="h-4 w-4 mr-2" />
-                  Your Cart
+                  {t('menu.cart.title')}
                 </h3>
                 <button 
                   onClick={() => setShowCart(false)} 
@@ -985,13 +945,13 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
 
                   <div className="border-t border-slate-200/50 dark:border-slate-700/50 pt-6">
                     <div className="flex items-center justify-between mb-6 p-4 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 rounded-xl">
-                      <span className="text-lg font-bold text-slate-800 dark:text-slate-100">Total:</span>
+                      <span className="text-lg font-bold text-slate-800 dark:text-slate-100">{t('menu.cart.total')}</span>
                       <span className="text-xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-pink-500 bg-clip-text text-transparent">
                         ${getTotalPrice().toFixed(2)}
                       </span>
                     </div>
                     <button className="w-full bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-4 rounded-xl font-bold text-sm transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
-                      Place Order
+                      {t('menu.cart.placeOrder')}
                     </button>
                   </div>
                 </>
@@ -1001,8 +961,8 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
                     <div className="w-16 h-16 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 rounded-xl flex items-center justify-center mx-auto mb-4">
                       <ShoppingCart className="h-8 w-8 text-slate-400 dark:text-slate-500" />
                     </div>
-                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">Your cart is empty</h3>
-                    <p className="text-slate-600 dark:text-slate-400 text-sm">Browse our menu to discover delicious dishes</p>
+                    <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">{t('menu.cart.empty')}</h3>
+                    <p className="text-slate-600 dark:text-slate-400 text-sm">{t('menu.cart.emptyDesc')}</p>
                   </div>
                 </div>
               )}
