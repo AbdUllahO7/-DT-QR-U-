@@ -1,5 +1,5 @@
 import { APIAllergen } from "../../services/allergen";
-import { BranchProductAddon } from "../../services/Branch/BracnhService";
+import { BranchProductAddon } from "../../services/Branch/BranchService";
 import { APIIngredient, Category, Product } from "../dashboard";
 
 export interface BranchData {
