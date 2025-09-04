@@ -29,21 +29,29 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const { t } = useLanguage()
   const [selectedAddons, setSelectedAddons] = useState<SelectedAddon[]>([])
   const [quantity, setQuantity] = useState(1)
-
+  console.log("Product Modal Rendered,", product)
+  
   if (!isOpen || !product) return null
 
   const handleAddonChange = (addon: any, newQuantity: number) => {
     setSelectedAddons(prev => {
       const existingIndex = prev.findIndex(a => a.branchProductAddonId === addon.branchProductAddonId)
       
+      // If trying to set quantity to 0, remove the addon entirely
       if (newQuantity === 0) {
         return prev.filter(a => a.branchProductAddonId !== addon.branchProductAddonId)
       }
       
+      // Ensure quantity respects minQuantity and maxQuantity constraints
+      const constrainedQuantity = Math.max(
+        addon.minQuantity || 0, 
+        Math.min(addon.maxQuantity || 999, newQuantity)
+      )
+      
       if (existingIndex >= 0) {
         return prev.map((a, index) => 
           index === existingIndex 
-            ? { ...a, quantity: newQuantity }
+            ? { ...a, quantity: constrainedQuantity }
             : a
         )
       } else {
@@ -51,10 +59,36 @@ const ProductModal: React.FC<ProductModalProps> = ({
           branchProductAddonId: addon.branchProductAddonId,
           addonName: addon.addonName,
           price: addon.price,
-          quantity: newQuantity
+          quantity: constrainedQuantity
         }]
       }
     })
+  }
+
+  // Add addon with minimum quantity
+  const handleAddAddon = (addon: any) => {
+    const initialQuantity = Math.max(1, addon.minQuantity || 1)
+    handleAddonChange(addon, initialQuantity)
+  }
+
+  // Decrease addon quantity with minQuantity respect
+  const handleDecreaseAddon = (addon: any, currentQuantity: number) => {
+    const minQty = addon.minQuantity || 1
+    const newQuantity = currentQuantity - 1
+    
+    // If going below minQuantity, remove the addon entirely
+    if (newQuantity < minQty) {
+      handleAddonChange(addon, 0)
+    } else {
+      handleAddonChange(addon, newQuantity)
+    }
+  }
+
+  // Increase addon quantity with maxQuantity respect
+  const handleIncreaseAddon = (addon: any, currentQuantity: number) => {
+    const maxQty = addon.maxQuantity || 999
+    const newQuantity = Math.min(maxQty, currentQuantity + 1)
+    handleAddonChange(addon, newQuantity)
   }
 
   const getAddonQuantity = (addonId: number): number => {
@@ -181,6 +215,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
               <div className="space-y-3">
                 {product.availableAddons.map((addon) => {
                   const addonQuantity = getAddonQuantity(addon.branchProductAddonId)
+                  const minQty = addon.minQuantity || 1
+                  const maxQty = addon.maxQuantity || 999
+                  
                   return (
                     <div
                       key={addon.branchProductAddonId}
@@ -212,6 +249,20 @@ const ProductModal: React.FC<ProductModalProps> = ({
                                 {addon.isRecommended && (
                                   <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs px-1.5 py-0.5 rounded-full">
                                     Recommended
+                                  </span>
+                                )}
+                              </div>
+                              
+                              {/* Quantity constraints info */}
+                              <div className="flex items-center space-x-2 mt-1">
+                                {addon.minQuantity > 1 && (
+                                  <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded-full">
+                                    Min: {addon.minQuantity}
+                                  </span>
+                                )}
+                                {addon.maxQuantity && addon.maxQuantity < 999 && (
+                                  <span className="text-xs text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 px-1.5 py-0.5 rounded-full">
+                                    Max: {addon.maxQuantity}
                                   </span>
                                 )}
                               </div>
@@ -247,8 +298,13 @@ const ProductModal: React.FC<ProductModalProps> = ({
                         {addonQuantity > 0 ? (
                           <div className="flex items-center space-x-2 bg-white dark:bg-slate-700 rounded-lg p-1 border border-slate-200 dark:border-slate-600">
                             <button
-                              onClick={() => handleAddonChange(addon, Math.max(0, addonQuantity - 1))}
-                              className="w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-md flex items-center justify-center transition-colors"
+                              onClick={() => handleDecreaseAddon(addon, addonQuantity)}
+                              className={`w-7 h-7 ${
+                                addonQuantity <= minQty 
+                                  ? 'bg-gray-400 cursor-not-allowed' 
+                                  : 'bg-red-500 hover:bg-red-600'
+                              } text-white rounded-md flex items-center justify-center transition-colors`}
+                              disabled={addonQuantity <= minQty}
                             >
                               <Minus className="h-3 w-3" />
                             </button>
@@ -256,19 +312,24 @@ const ProductModal: React.FC<ProductModalProps> = ({
                               {addonQuantity}
                             </span>
                             <button
-                              onClick={() => handleAddonChange(addon, Math.min(addon.maxQuantity, addonQuantity + 1))}
-                              className="w-7 h-7 bg-orange-500 hover:bg-orange-600 text-white rounded-md flex items-center justify-center transition-colors"
+                              onClick={() => handleIncreaseAddon(addon, addonQuantity)}
+                              className={`w-7 h-7 ${
+                                addonQuantity >= maxQty 
+                                  ? 'bg-gray-400 cursor-not-allowed' 
+                                  : 'bg-orange-500 hover:bg-orange-600'
+                              } text-white rounded-md flex items-center justify-center transition-colors`}
+                              disabled={addonQuantity >= maxQty}
                             >
                               <Plus className="h-3 w-3" />
                             </button>
                           </div>
                         ) : (
                           <button
-                            onClick={() => handleAddonChange(addon, 1)}
+                            onClick={() => handleAddAddon(addon)}
                             className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg transition-colors text-sm font-semibold flex items-center space-x-1"
                           >
                             <Plus className="h-3 w-3" />
-                            <span>Add</span>
+                            <span>Add {addon.minQuantity > 1 ? `(${addon.minQuantity})` : ''}</span>
                           </button>
                         )}
                       </div>
