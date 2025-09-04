@@ -12,9 +12,9 @@ export interface Product {
   displayOrder : number;
   branchProductId?:number
   branchCategory?:Category
-   ingredients?: APIIngredient[];
+  ingredients?: APIIngredient[];
   allergens?: APIAllergen[];
-    originalProductId:number,
+  originalProductId:number,
 
 }
 
@@ -110,6 +110,7 @@ export interface AllergenDetail {
 
 // FIXED: API Allergen type (matches actual API response)
 export interface APIAllergen {
+  displayOrder: number;
   id: number;
   allergenId: number;
   code: string | null;
@@ -126,6 +127,7 @@ export interface APIAllergen {
 // FIXED: API Ingredient type (matches actual API response)
 export interface APIIngredient {
   id :number,
+  name :string,
   ingredientId: number;
   ingredientName: string;
   isAllergenic: boolean;

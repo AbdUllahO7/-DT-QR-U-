@@ -80,14 +80,11 @@ class BranchProductAddonsService {
 
   // GET /api/BranchProductAddons/available
   async getAvailableBranchProductAddons(): Promise<BranchProductAddon[]> {
-    console.log("Fetching available addons from service...");
     try {
-      console.log("hi")
       const url = `${this.baseUrl}/available`;
       
       const response = await httpClient.get<BranchProductAddon[]>(url);
       
-      console.log("response",response)
       // The response is a direct array of BranchProductAddon objects
       const addonsData: BranchProductAddon[] = Array.isArray(response.data) ? response.data : [];
       
@@ -101,7 +98,6 @@ class BranchProductAddonsService {
           isRecommended: addon.isRecommended
         }))
       }, );
-      console.log("addonsData",addonsData)
       return addonsData;
     } catch (error: any) {
       logger.error('Available branch product addons getirme hatası', error, { prefix: 'BranchProductAddonsService' });

@@ -116,7 +116,6 @@ const ProductsContent: React.FC = () => {
   const [isReorderingProducts, setIsReorderingProducts] = useState(false);
   const [reorderingCategoryId, setReorderingCategoryId] = useState<number | null>(null);
   const [isIngredientUpdateModalOpen, setIsIngredientUpdateModalOpen] = useState(false);
-
   const [selectedProductForIngredientUpdate, setSelectedProductForIngredientUpdate] = useState<{
     productId: number;
     productName: string;
@@ -249,7 +248,6 @@ const ProductsContent: React.FC = () => {
       setLoading(true);
       
       let fetchedCategories: Category[];
-      
       // Check if "Select All" is selected
       if (selectedBranch.branchId === SELECT_ALL_BRANCH_ID) {
         // Use getCategories for all branches
@@ -264,6 +262,7 @@ const ProductsContent: React.FC = () => {
           branchId: selectedBranch.branchId,
           categoryCount: fetchedCategories.length 
         });
+        console.log("fetchedCategories",fetchedCategories)
       }
       
       setCategories(fetchedCategories);
@@ -683,7 +682,7 @@ const ProductsContent: React.FC = () => {
           categoryId: targetCategoryId
         });
 
-        const updatedCategories = await productService.getBranchCategories(selectedBranch?.branchId);
+        const updatedCategories = await productService.getBranchCategories(selectedBranch!.branchId);
         setCategories(updatedCategories);
         
         const targetCategory = updatedCategories.find(cat => cat.categoryId === targetCategoryId);

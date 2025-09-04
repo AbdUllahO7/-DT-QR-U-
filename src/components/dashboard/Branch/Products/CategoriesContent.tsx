@@ -27,29 +27,11 @@ import {
   Puzzle
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
-import { APIIngredient, Category } from '../../../../types/dashboard';
-import { BranchCategory } from './BranchProducts';
-import { APIAllergen } from '../../../../services/allergen';
+import {  Category } from '../../../../types/dashboard';
+import { BranchCategory, DetailedProduct } from '../../../../types/BranchManagement/type';
 
 // Enhanced interfaces
-interface DetailedProduct {
-  productId: number;
-  name: string;
-  description?: string;
-  price: number;
-  imageUrl?: string;
-  status: boolean;
-  displayOrder?: number;
-  categoryId?: number;
-  branchProductId?: number;
-  originalProductId?: number;
-  ingredients?: APIIngredient[];
-  allergens?: APIAllergen[];
-  orderDetails?: any;
-  isSelected?: boolean;
-  addonsCount?: number;
-  hasAddons?: boolean;
-}
+
 
 interface EditedProductPrice {
   productId: number;
@@ -561,7 +543,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
             const hasDetailedInfo = product.ingredients || product.allergens;
             const currentPrice = getProductPrice(product.id, product.price);
             const isEditingPrice = editingProductId === product.id;
-            console.log("product 2 ",product)
             return (
               <div 
                 key={product.id} 
@@ -600,7 +581,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                     <div className="font-medium text-gray-900 dark:text-white truncate">
                       <div className="font-medium text-gray-900 dark:text-white truncate flex items-center">
                           {product.name}
-                          {/* ADD THIS ADDON INDICATOR */}
                          
                         </div>
                     </div>
@@ -679,13 +659,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                       const branchProductIdToRemove = product.branchProductId || product.id;
                       const originalProductId = product.originalProductId || product.id || product.id;
                       
-                      console.log('Removing product:', originalProductId, 'branchProductId:', branchProductIdToRemove);
-                      console.log('Product details before removal:', {
-                        id: product.id,
-                        productId: product.id,
-                        originalProductId: product.originalProductId,
-                        branchProductId: product.branchProductId
-                      });
+                 
                       
                       await onRemoveProduct(branchProductIdToRemove, product.name);
                       setTimeout(() => {
@@ -703,13 +677,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                    onClick={async () => {
                         // Use the correct original product ID - prioritize originalProductId, then productId, then id
                         const originalProductId = product.id;
-                        console.log('Adding product:', originalProductId, 'to category:', branchCategory.branchCategoryId);
-                        console.log('Product details:', {
-                          id: product.id,
-                          productId: product.id,
-                          originalProductId: product.originalProductId,
-                          branchProductId: product.branchProductId
-                        });
+                     
                         
                         await onAddProduct(originalProductId, branchCategory.branchCategoryId);
                         setTimeout(() => {
@@ -900,7 +868,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                                 <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
                                   <Package className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                   <span className="text-sm text-gray-600 dark:text-gray-300">
-                                    {category.products?.length || 0} {t('branchCategories.products.products')}
+                                    {category.products?.length } {t('branchCategories.products.products')}
                                   </span>
                                 </div>
                                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${

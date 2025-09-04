@@ -1,24 +1,9 @@
+import { Allergen } from "../types/BranchManagement/type";
+import { APIAllergen } from "../types/dashboard";
 import { httpClient } from "../utils/http";
 import { logger } from "../utils/logger";
 
 // Types/Interfaces - Updated to match your exact API response
-interface APIAllergen {
-  id: number;
-  code: string;
-  name: string;
-  icon: string;
-  displayOrder: number;
-  description: string;
-}
-
-interface Allergen {
-  id: number;
-  code: string;
-  name: string;
-  icon: string;
-  displayOrder: number;
-  description: string;
-}
 
 // Allergen Service Class
 class AllergenService {
@@ -39,11 +24,11 @@ class AllergenService {
       const transformedAllergens: Allergen[] = response.data
         .map((apiAllergen: APIAllergen) => ({
           id: apiAllergen.id,
-          code: apiAllergen.code,
+          code: apiAllergen.code ?? "",
           name: apiAllergen.name,
-          icon: apiAllergen.icon,
+          icon: apiAllergen.icon ?? "",
           displayOrder: apiAllergen.displayOrder,
-          description: apiAllergen.description,
+          description: apiAllergen.description ?? "",
         }))
         .sort((a, b) => a.displayOrder - b.displayOrder); // Sort by displayOrder
       
@@ -65,11 +50,11 @@ class AllergenService {
       
       const transformedAllergen: Allergen = {
         id: response.data.id,
-        code: response.data.code,
+        code: response.data.code ?? "",
         name: response.data.name,
-        icon: response.data.icon,
+        icon: response.data.icon ?? "",
         displayOrder: response.data.displayOrder,
-        description: response.data.description,
+        description: response.data.description ?? "",
       };
       
       return transformedAllergen;

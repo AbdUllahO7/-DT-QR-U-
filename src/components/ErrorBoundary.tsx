@@ -25,7 +25,10 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
   componentDidCatch(error: Error, info: ErrorInfo) {
     // Geliştirici ortamında detaylı log
     if (import.meta.env.DEV) {
-      logger.error('React ErrorBoundary yakaladı:', error, info);
+      logger.error('React ErrorBoundary yakaladı:', {
+        error,
+        componentStack: info.componentStack
+      });
     } else {
       // Production'da sadece hata mesajını logla
       logger.error('Uygulama hatası:', {

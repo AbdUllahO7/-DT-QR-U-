@@ -1,3 +1,5 @@
+import { BranchData } from "./BranchManagement/type";
+
 // API Response Types
 export interface ApiResponse<T> {
   data?: T;
@@ -213,44 +215,7 @@ export interface CreateBranchDto {
   longitude?: number;
 }
 
-export interface BranchData {
-  id: number;
-  branchId: number;
-  branchName: string;
-  whatsappOrderNumber: string | null;
-  email: string | null;
-  branchStatus: boolean;
-  restaurantId: number;
-  branchLogoPath: string | null;
-  isOpenNow: boolean;
-  isTemporarilyClosed: boolean;
-  createAddressDto: {
-    country: string | null;
-    city: string | null;
-    street: string | null;
-    zipCode: string | null;
-    addressLine1: string | null;
-    addressLine2: string | null;
 
-  };
-   createContactDto: {
-    phone: string | null;
-    mail: string | null;
-    location: string | null;
-    contactHeader: string | null;
-    footerTitle: string | null;
-    footerDescription: string | null;
-    openTitle: string | null;
-    openDays: string | null;
-    openHours: string | null;
-  };
-  workingHours?: Array<{
-    openTime: string;
-    closeTime: string;
-    dayOfWeek: number;
-    isWorkingDay:boolean
-  }>;
-}
 
 
 

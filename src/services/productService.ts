@@ -65,10 +65,7 @@ interface ProductIngredient {
   unit: string;
 }
 
-interface UpdateIngredientsPayload {
-  productId: number;
-  ingredients: ProductIngredient[];
-}
+
 
 class ProductService {
   private baseUrl = '/api';
@@ -128,10 +125,9 @@ class ProductService {
       const response = await httpClient.get<APICategory[]>(`${this.baseUrl}/categories`, {
         params: {
           includes: 'Products',
-          onlyActive: true
+          onlyActive: ""
         }
       });
-      
       // Transform the API response to match component expectations
       const transformedData = this.transformAPIDataToComponentData(response.data);
       
@@ -156,7 +152,6 @@ class ProductService {
         count: response.data.length,
         rawData: response.data
       });
-      
       // Transform the branch categories response to match component expectations
       const transformedData = this.transformBranchCategoriesToComponentData(response.data);
       
@@ -199,7 +194,9 @@ class ProductService {
           displayOrder: response.data.displayOrder,
           restaurantId: response.data.restaurantId,
           isExpanded: true,
-          products: []
+          products: [],
+          productId: undefined,
+          name: undefined
         };
         
         return transformedCategory;
@@ -222,7 +219,9 @@ class ProductService {
             displayOrder: response.data.displayOrder,
             restaurantId: response.data.restaurantId,
             isExpanded: true,
-            products: []
+            products: [],
+            productId: undefined,
+            name: undefined
           };
           
           return transformedCategory;
@@ -278,6 +277,7 @@ class ProductService {
         status: response.data.status,
         displayOrder: response.data.displayOrder,
         categoryId: payload.categoryId,
+        originalProductId: 0
       };
       
       return transformedProduct;
@@ -324,6 +324,7 @@ class ProductService {
         status: response.data.status,
         displayOrder: response.data.displayOrder,
         categoryId: response.data.categoryId,
+        originalProductId: 0
       };
 
       return transformedProduct;
@@ -478,7 +479,10 @@ class ProductService {
           status: apiProduct.status,
           displayOrder: apiProduct.displayOrder,
           categoryId: response.data.categoryId,
-        })) || []
+          originalProductId: 0
+        })) || [],
+        productId: undefined,
+        name: undefined
       };
 
       return transformedCategory;

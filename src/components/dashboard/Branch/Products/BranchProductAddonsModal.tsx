@@ -25,35 +25,15 @@ import {
   CreateBranchProductAddonDto,
   UpdateBranchProductAddonDto 
 } from '../../../../services/Branch/BranchAddonsService';
-import { DetailedProduct } from './BranchProducts';
+import { DetailedProduct, EnhancedAddon } from '../../../../types/BranchManagement/type';
 
-// Enhanced addon interface that combines available and assigned data
-interface EnhancedAddon extends BranchProductAddon {
-  assignmentId?: number;
-  isAssigned: boolean;
-  currentSpecialPrice?: number;
-  currentMarketingText?: string;
-  currentMaxQuantity?: number;
-  currentMinQuantity?: number;
-  currentGroupTag?: string;
-  currentIsGroupRequired?: boolean;
-  currentIsActive?: boolean;
-  currentDisplayOrder?: number;
-  editedSpecialPrice?: number;
-  editedMarketingText?: string;
-  editedMaxQuantity?: number;
-  editedMinQuantity?: number;
-  editedGroupTag?: string;
-  editedIsGroupRequired?: boolean;
-  editedIsRecommended?: boolean;
-}
 
 interface ProductAddonsModalProps {
   isOpen: boolean;
   onClose: () => void;
   product: DetailedProduct | null;
   availableAddons: BranchProductAddon[];
-  onSave?: () => void;
+  onSave?: (branchProductId: number, selectedAddonIds: number[], customizations: any) => void;
   isLoading?: boolean;
 }
 
@@ -195,7 +175,23 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
 
       await loadProductAddons();
       setSuccessMessage(addon.isAssigned ? t('addonModal.messages.success.addonRemoved') : t('addonModal.messages.success.addonAdded'));
-      if (onSave) onSave();
+      if (onSave && product?.branchProductId) {
+        const selectedAddonIds = enhancedAddons.filter(a => a.isAssigned).map(a => a.addonBranchProductId);
+        const customizations = enhancedAddons
+          .filter(a => a.isAssigned)
+          .reduce((acc, a) => {
+            acc[a.addonBranchProductId] = {
+              specialPrice: a.editedSpecialPrice,
+              marketingText: a.editedMarketingText,
+              maxQuantity: a.editedMaxQuantity,
+              minQuantity: a.editedMinQuantity,
+              groupTag: a.editedGroupTag,
+              isGroupRequired: a.editedIsGroupRequired,
+            };
+            return acc;
+          }, {} as any);
+        onSave(product.branchProductId, selectedAddonIds, customizations);
+      }
       
     } catch (err: any) {
       console.error('Error toggling addon:', err);
@@ -237,7 +233,23 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
       await branchProductAddonsService.updateBranchProductAddon(addon.assignmentId, updateData);
       await loadProductAddons();
       setSuccessMessage(t('addonModal.messages.success.addonUpdated'));
-      if (onSave) onSave();
+        if (onSave && product?.branchProductId) {
+        const selectedAddonIds = enhancedAddons.filter(a => a.isAssigned).map(a => a.addonBranchProductId);
+        const customizations = enhancedAddons
+          .filter(a => a.isAssigned)
+          .reduce((acc, a) => {
+            acc[a.addonBranchProductId] = {
+              specialPrice: a.editedSpecialPrice,
+              marketingText: a.editedMarketingText,
+              maxQuantity: a.editedMaxQuantity,
+              minQuantity: a.editedMinQuantity,
+              groupTag: a.editedGroupTag,
+              isGroupRequired: a.editedIsGroupRequired,
+            };
+            return acc;
+          }, {} as any);
+        onSave(product.branchProductId, selectedAddonIds, customizations);
+      }
       
     } catch (err: any) {
       console.error('Error updating addon:', err);
@@ -454,7 +466,7 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
         </div>
       </div>
       
-      <style jsx>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }
@@ -632,8 +644,9 @@ const AddonCard: React.FC<{
                 <div className="relative">
                   <DollarSign className={`absolute top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 ${isRTL ? 'right-3' : 'left-3'}`} />
                   <input
+                    title='number'
                     type="number"
-                    step="0.01"
+                    step="1"
                     value={addon.editedSpecialPrice || addon.addonPrice}
                     onChange={(e) => onPropertyChange(addon.addonBranchProductId, 'specialPrice', parseFloat(e.target.value) || 0)}
                     className={`w-full py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isRTL ? 'pr-10 pl-3 text-right' : 'pl-10 pr-3'}`}
@@ -646,8 +659,10 @@ const AddonCard: React.FC<{
                   {t('addonModal.configuration.minQuantity')}
                 </label>
                 <input
+                  title='number'
                   type="number"
                   min="0"
+                  step="1"
                   value={addon.editedMinQuantity || 0}
                   onChange={(e) => onPropertyChange(addon.addonBranchProductId, 'minQuantity', parseInt(e.target.value) || 0)}
                   className={`w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isRTL ? 'text-right' : ''}`}
@@ -659,6 +674,7 @@ const AddonCard: React.FC<{
                   {t('addonModal.configuration.maxQuantity')}
                 </label>
                 <input
+                title='number'
                   type="number"
                   min="1"
                   value={addon.editedMaxQuantity || 10}
@@ -685,21 +701,7 @@ const AddonCard: React.FC<{
               </div>
 
               <div className={`sm:col-span-2 flex items-center justify-between`}>
-                <div className={`flex items-center`}>
-                  <input
-                    type="checkbox"
-                    id={`recommended-${addon.addonBranchProductId}`}
-                    checked={addon.editedIsRecommended || false}
-                    onChange={(e) => onPropertyChange(addon.addonBranchProductId, 'isRecommended', e.target.checked)}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
-                  />
-                  <label 
-                    htmlFor={`recommended-${addon.addonBranchProductId}`}
-                    className={`text-sm text-gray-700 dark:text-gray-300 font-medium ${isRTL ? 'mr-3' : 'ml-3'}`}
-                  >
-                    {t('addonModal.configuration.markRecommended')}
-                  </label>
-                </div>
+              
 
                 {hasPropertyChanges && (
                   <button

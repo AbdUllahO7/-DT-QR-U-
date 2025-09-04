@@ -1,4 +1,5 @@
-import { BatchUpdateBranchDto,  BranchData, CreateBranchWithDetailsDto } from "../../types/api";
+import { BatchUpdateBranchDto,  CreateBranchWithDetailsDto } from "../../types/api";
+import { BranchData } from "../../types/BranchManagement/type";
 import {  httpClient } from "../../utils/http";
 import { logger } from "../../utils/logger";
 

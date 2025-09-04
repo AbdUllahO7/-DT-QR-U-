@@ -132,7 +132,8 @@ class BranchProductService {
   // Transform simple API response to match component expectations
   private transformSimpleAPIDataToComponentData(apiBranchProducts: SimpleBranchProduct[]): Product[] {
     return apiBranchProducts.map(apiBranchProduct => ({
-      productId: apiBranchProduct.branchProductId || apiBranchProduct.productId,
+      id: apiBranchProduct.branchProductId, 
+      branchProductId: apiBranchProduct.branchProductId,
       name: apiBranchProduct.name,
       description: apiBranchProduct.description || '',
       price: apiBranchProduct.price,
@@ -141,7 +142,6 @@ class BranchProductService {
       status: apiBranchProduct.isActive ?? apiBranchProduct.status ?? true,
       displayOrder: apiBranchProduct.displayOrder || 0,
       categoryId: apiBranchProduct.branchCategoryId,
-      branchProductId: apiBranchProduct.branchProductId,
       originalProductId: apiBranchProduct.productId
     }));
   }
@@ -149,7 +149,7 @@ class BranchProductService {
   // Transform single product response
   private transformSingleProduct(apiBranchProduct: SimpleBranchProduct): Product {
     return {
-      productId: apiBranchProduct.branchProductId || apiBranchProduct.productId,
+      id: apiBranchProduct.branchProductId || apiBranchProduct.productId,
       name: apiBranchProduct.name,
       description: apiBranchProduct.description || '',
       price: apiBranchProduct.price,
@@ -180,11 +180,7 @@ class BranchProductService {
       }
       
       const response = await httpClient.get<APIBranchProduct[]>(url);
-      console.log("response",response)
-      logger.info('Branch products retrieved successfully', { 
-        count: response.data.length,
-        hasIncludes: !!includes?.length
-      });
+ 
       
       // Determine if response has complex structure (with includes) or simple structure
       const firstItem = response.data[0];
@@ -227,7 +223,6 @@ class BranchProductService {
       logger.info('Branch product retrieved successfully', { id });
       
       const transformedProduct = this.transformSingleProduct(response.data);
-      console.log("transformedProduct",transformedProduct)
       return transformedProduct;
     } catch (error: any) {
       logger.error('Error retrieving branch product:', error);

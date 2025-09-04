@@ -136,7 +136,7 @@ const QRCodeModal: React.FC<{
             ) : (
               <>
                 <Grid className="h-4 w-4" />
-                {t('BranchTableManagement.copyUrl')}
+                {t('BranchTableManagement.copyQRUrl')}
               </>
             )}
           </button>
@@ -296,10 +296,8 @@ const handleClearTable = async (tableId: number): Promise<void> => {
   setClearLoading(prev => new Set(prev).add(tableId));
 
   try {
-    console.log("tableId",tableId)
     const result = await tableService.clearTable(tableId);
     
-   console.log("result",result)
     
     setTables(prev => prev.map(table => 
       table.id === tableId 
@@ -390,7 +388,9 @@ const handleClearTable = async (tableId: number): Promise<void> => {
         // Ensure we have the qrCode token from the API response
         qrCode: table.qrCode || '',
         // Generate the QR code image URL using the token
-        qrCodeImageUrl: table.qrCode ? generateQRCodeImageUrl(table.qrCode) : ''
+        qrCodeImageUrl: table.qrCode ? generateQRCodeImageUrl(table.qrCode) : '',
+        // Ensure displayOrder is a number (not null)
+        displayOrder: table.displayOrder ?? 0
       }));
       
       setTables(processedTables);
@@ -988,7 +988,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
                       {t('BranchTableManagement.batchCreateTables')}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      Create multiple tables across different categories at once
+                      {t('BranchTableManagement.multiCategory')}
                     </p>
                   </div>
                   <button
@@ -1004,7 +1004,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
                     <div key={index} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-medium text-gray-900 dark:text-white">
-                          Category {index + 1}
+                          {t("BranchTableManagement.category")} {index + 1}
                         </h4>
                         {batchItems.length > 1 && (
                           <button
@@ -1019,14 +1019,15 @@ const handleClearTable = async (tableId: number): Promise<void> => {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Category
+                            {t("BranchTableManagement.category")} 
                           </label>
                           <select
+                            title='categoryId'
                             value={item.categoryId}
                             onChange={(e) => updateBatchItem(index, 'categoryId', parseInt(e.target.value))}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
                           >
-                            <option value={0}>Select Category</option>
+                            <option value={0}>                            {t("BranchTableManagement.SelectCategory")} </option>
                             {categories.filter(cat => cat.isActive).map(category => (
                               <option key={category.id} value={category.id}>
                                 {category.categoryName}
@@ -1037,9 +1038,10 @@ const handleClearTable = async (tableId: number): Promise<void> => {
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Quantity
+                              {t("BranchTableManagement.Quantity")}
                           </label>
                           <input
+                          title='quantity'
                             type="number"
                             min="1"
                             max="50"
@@ -1051,9 +1053,10 @@ const handleClearTable = async (tableId: number): Promise<void> => {
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Capacity
+                            {t("BranchTableManagement.Capacity")}
                           </label>
                           <input
+                          title='capacity'
                             type="number"
                             min="1"
                             max="20"
@@ -1073,12 +1076,10 @@ const handleClearTable = async (tableId: number): Promise<void> => {
                     className="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center gap-2"
                   >
                     <Plus className="h-4 w-4" />
-                    Add Category
+                    {t('BranchTableManagement.addCategoryTitle')}
                   </button>
 
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    Total Tables: <span className="font-semibold">{batchItems.reduce((total, item) => total + (item.quantity || 0), 0)}</span>
-                  </div>
+                  
                 </div>
 
                 <div className="flex gap-3 justify-end">
@@ -1087,7 +1088,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
                     disabled={isBatchCreating}
                     className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50"
                   >
-                    Cancel
+                    {t('BranchTableManagement.cancel')}
                   </button>
                   <button
                     onClick={handleBatchCreateTables}
@@ -1099,7 +1100,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
                     ) : (
                       <Grid className="h-4 w-4" />
                     )}
-                    {isBatchCreating ? 'Creating...' : 'Create Tables'}
+                    {isBatchCreating ? t('BranchTableManagement.creatingTables') :  t('BranchTableManagement.createTables')}
                   </button>
                 </div>
               </div>
