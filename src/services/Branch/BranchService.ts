@@ -110,13 +110,9 @@ class BranchService {
       
       // Include related entities in the request
       const includes = [
-        'restaurant',
         'address',
         'contact',
         'workingHours',
-        'categories',
-        'menuTables',
-        'activeOrders'
       ];
       
       // Use 'include' (singular) parameter as confirmed working
