@@ -128,7 +128,6 @@ class ProductService {
           onlyActive: ""
         }
       });
-      console.log('API Response for categories:', response.data);
       // Transform the API response to match component expectations
       const transformedData = this.transformAPIDataToComponentData(response.data);
       
@@ -153,7 +152,6 @@ class ProductService {
         count: response.data.length,
         rawData: response.data
       });
-      
       // Transform the branch categories response to match component expectations
       const transformedData = this.transformBranchCategoriesToComponentData(response.data);
       

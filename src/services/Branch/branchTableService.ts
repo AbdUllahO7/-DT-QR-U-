@@ -608,9 +608,7 @@ class TableService {
    * This is a simplified endpoint that automatically toggles the current state
    */
 async clearTable(tableId: number): Promise<ClearTableResponseDto> {
-  console.log("tableId out",tableId)
   try {
-      console.log("tableId in",tableId)
 
     logger.info('Masa temizleme API çağrısı başlatılıyor', { tableId }, { prefix: 'TableService' });
     
@@ -624,7 +622,6 @@ async clearTable(tableId: number): Promise<ClearTableResponseDto> {
       }
     );
     
-   console.log("response",response)
     logger.info('Masa durumu başarıyla temizlendi/değiştirildi', { 
       tableId, 
       message: response.data.message,

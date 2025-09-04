@@ -88,7 +88,6 @@ export const SortableProduct: React.FC<{
       try {
         // Load ingredients
         const fetchedIngredients = await productService.getProductIngredients(product.id);
-        console.log("fetchedIngredients",fetchedIngredients)
         setIngredients(fetchedIngredients);
         logger.info('Ürün malzemeleri yüklendi', { productId: product.id, ingredientCount: fetchedIngredients.length });
       } catch (error: any) {

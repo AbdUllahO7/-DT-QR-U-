@@ -296,10 +296,8 @@ const handleClearTable = async (tableId: number): Promise<void> => {
   setClearLoading(prev => new Set(prev).add(tableId));
 
   try {
-    console.log("tableId",tableId)
     const result = await tableService.clearTable(tableId);
     
-   console.log("result",result)
     
     setTables(prev => prev.map(table => 
       table.id === tableId 

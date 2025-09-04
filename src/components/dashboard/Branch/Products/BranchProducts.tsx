@@ -96,7 +96,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
   const [isLoadingBranchProducts, setIsLoadingBranchProducts] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  console.log("availableAddons",availableAddons)
   // Fetch available addons on component mount
   useEffect(() => {
     fetchAvailableAddons();
@@ -108,7 +107,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
       setIsLoadingAddons(true);
       const addons = await branchProductAddonsService.getAvailableBranchProductAddons();
       setAvailableAddons(addons);
-      console.log("addons12",addons)
     } catch (err: any) {
       console.error('Error fetching available addons:', err);
       setError('Failed to load available addons');
@@ -774,12 +772,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
               return (a.displayOrder || 0) - (b.displayOrder || 0);
             });
 
-            console.log(`✅ Category ${branchCategory.categoryId} processed:`, {
-              selectedProducts: transformedSelectedProducts.length,
-              unselectedProducts: unselectedProducts.length,
-              totalProducts: allProducts.length,
-              validSelectedProductsWithId: transformedSelectedProducts.filter(p => p.id).length
-            });
+      
 
             return {
               ...branchCategory,
@@ -799,7 +792,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
         })
       );
 
-      console.log('✅ All categories processed successfully');
       setBranchCategories(categoriesWithProducts);
       setOriginalBranchCategories([...categoriesWithProducts]);
     } catch (err: any) {
