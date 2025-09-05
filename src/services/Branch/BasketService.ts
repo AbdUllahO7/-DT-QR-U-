@@ -318,7 +318,7 @@ class BasketService {
     }
   }
 
-  // DELETE /api/Basket/my-basket
+  
   async clearMyBasket(): Promise<void> {
     try {
       logger.info('Sepet temizleme isteği gönderiliyor', {}, { prefix: 'BasketService' });

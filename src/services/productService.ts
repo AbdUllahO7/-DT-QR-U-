@@ -96,27 +96,27 @@ class ProductService {
 
   // Transform Branch Categories API response to match component expectations
   private transformBranchCategoriesToComponentData(branchCategories: BranchCategoryResponse[]): Category[] {
-    return branchCategories.map(branchCategory => ({
+  return branchCategories.map(branchCategory => ({
+    categoryId: branchCategory.category.categoryId,
+    categoryName: branchCategory.category.categoryName || branchCategory.displayName,
+    description: branchCategory.category.description || '',
+    status: branchCategory.isActive, // Use branch-specific isActive status
+    displayOrder: branchCategory.displayOrder, // Use branch-specific displayOrder
+    restaurantId: branchCategory.category.restaurantId,
+    isExpanded: true,
+    products: (branchCategory.products || []).map(branchProduct => ({
+      id: branchProduct.productId,
+      name: branchProduct.productName,
+      description: branchProduct.description || '',
+      price: branchProduct.price,
+      imageUrl: branchProduct.imageUrl || '',
+      isAvailable: branchProduct.isActive,
+      status: branchProduct.isActive,
+      displayOrder: branchProduct.displayOrder,
       categoryId: branchCategory.category.categoryId,
-      categoryName: branchCategory.category.categoryName || branchCategory.displayName,
-      description: branchCategory.category.description || '',
-      status: branchCategory.category.status,
-      displayOrder: branchCategory.displayOrder,
-      restaurantId: branchCategory.category.restaurantId,
-      isExpanded: true,
-      products: branchCategory.products.map(branchProduct => ({
-        id: branchProduct.productId,
-        name: branchProduct.productName,
-        description: branchProduct.description || '',
-        price: branchProduct.price,
-        imageUrl: branchProduct.imageUrl || '',
-        isAvailable: branchProduct.isActive,
-        status: branchProduct.isActive,
-        displayOrder: branchProduct.displayOrder,
-        categoryId: branchCategory.category.categoryId,
-      }))
-    }));
-  }
+    }))
+  }));
+}
 
   // Kategori listesini getirir
   async getCategories(): Promise<Category[]> {
@@ -144,23 +144,10 @@ class ProductService {
         branchId: branchId.toString(),
         includes: "products",
       });
-      
       const response = await httpClient.get<BranchCategoryResponse[]>(`${this.baseUrl}/BranchCategories?${params.toString()}`);
-      
-      logger.info('Branch categories retrieved successfully', { 
-        branchId,
-        count: response.data.length,
-        rawData: response.data
-      });
+    
       // Transform the branch categories response to match component expectations
       const transformedData = this.transformBranchCategoriesToComponentData(response.data);
-      
-      logger.info('Branch categories transformed successfully', { 
-        branchId,
-        transformedCount: transformedData.length,
-        transformedData
-      });
-      
       return transformedData;
     } catch (error: any) {
       logger.error('Error retrieving branch categories:', error);
