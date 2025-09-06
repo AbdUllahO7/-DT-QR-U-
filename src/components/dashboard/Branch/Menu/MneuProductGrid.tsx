@@ -1,48 +1,32 @@
+// Updated ProductGrid component to work with async getCartItemQuantity
+
 "use client"
 
 import type React from "react"
-import { Sparkles, Coffee, UtensilsCrossed } from "lucide-react"
+import { useState, useEffect } from "react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import { MenuCategory, MenuProduct } from "../../../../types/menu/type"
 import ProductCard from "./MneuProdcutCard"
-
-interface SelectedAddon {
-  branchProductAddonId: number
-  addonName: string
-  price: number
-  quantity: number
-}
-
-interface CartItem {
-  branchProductId: number
-  productName: string
-  price: number
-  quantity: number
-  productImageUrl?: string
-  addons?: any[]
-  totalItemPrice: number
-}
 
 interface ProductGridProps {
   categories: MenuCategory[]
   selectedCategory: number | null
   searchTerm: string
-  cart: CartItem[]
+  cart: any[] // No longer used but kept for compatibility
   favorites: Set<number>
-  onAddToCart: (product: MenuProduct, addons?: SelectedAddon[]) => void
-  onRemoveFromCart: (branchProductId: number) => void
+  onAddToCart: (product: MenuProduct, addons?: any[]) => Promise<void>
+  onRemoveFromCart: (branchProductId: number) => Promise<void>
   onToggleFavorite: (branchProductId: number) => void
   onCategorySelect: (categoryId: number) => void
   restaurantName: string
   onCustomize?: (product: MenuProduct) => void
-  getCartItemQuantity: (branchProductId: number) => number
+  getCartItemQuantity: (branchProductId: number) => Promise<number>
 }
 
 const ProductGrid: React.FC<ProductGridProps> = ({
   categories,
   selectedCategory,
   searchTerm,
-  cart,
   favorites,
   onAddToCart,
   onRemoveFromCart,
@@ -53,102 +37,212 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   getCartItemQuantity
 }) => {
   const { t } = useLanguage()
+  const [productQuantities, setProductQuantities] = useState<Map<number, number>>(new Map())
+  const [loadingQuantities, setLoadingQuantities] = useState(false)
 
-  const getFilteredProducts = (products: MenuProduct[]): MenuProduct[] => {
-    if (!searchTerm) return products
-    return products.filter(
-      (product) =>
-        product.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.productDescription.toLowerCase().includes(searchTerm.toLowerCase())
+  // Load quantities for all visible products
+  const loadQuantities = async (products: MenuProduct[]) => {
+    setLoadingQuantities(true)
+    const newQuantities = new Map<number, number>()
+    
+    try {
+      // Load quantities for all products in parallel
+      const quantityPromises = products.map(async (product) => {
+        const quantity = await getCartItemQuantity(product.branchProductId)
+        return { productId: product.branchProductId, quantity }
+      })
+      
+      const results = await Promise.all(quantityPromises)
+      results.forEach(({ productId, quantity }) => {
+        newQuantities.set(productId, quantity)
+      })
+      
+      setProductQuantities(newQuantities)
+    } catch (err) {
+      console.error('Error loading product quantities:', err)
+    } finally {
+      setLoadingQuantities(false)
+    }
+  }
+
+  // Get all visible products
+  const getVisibleProducts = (): MenuProduct[] => {
+    let products: MenuProduct[] = []
+
+    if (searchTerm) {
+      // When searching, show all matching products
+      products = categories.flatMap(category => 
+        category.products.filter(product =>
+          product.productName.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      )
+    } else if (selectedCategory) {
+      // When category is selected, show products from that category
+      const category = categories.find(cat => cat.categoryId === selectedCategory)
+      products = category?.products || []
+    } else {
+      // Show all products
+      products = categories.flatMap(category => category.products)
+    }
+
+    return products
+  }
+
+  // Reload quantities when visible products change
+  useEffect(() => {
+    const visibleProducts = getVisibleProducts()
+    if (visibleProducts.length > 0) {
+      loadQuantities(visibleProducts)
+    }
+  }, [selectedCategory, searchTerm, categories])
+
+  // Enhanced add to cart handler that refreshes quantities
+  const handleAddToCart = async (product: MenuProduct, addons?: any[]) => {
+    await onAddToCart(product, addons)
+    // Refresh quantity for this specific product
+    const quantity = await getCartItemQuantity(product.branchProductId)
+    setProductQuantities(prev => new Map(prev).set(product.branchProductId, quantity))
+  }
+
+  // Enhanced remove from cart handler that refreshes quantities
+  const handleRemoveFromCart = async (branchProductId: number) => {
+    await onRemoveFromCart(branchProductId)
+    // Refresh quantity for this specific product
+    const quantity = await getCartItemQuantity(branchProductId)
+    setProductQuantities(prev => new Map(prev).set(branchProductId, quantity))
+  }
+
+  const visibleProducts = getVisibleProducts()
+
+  if (categories.length === 0) {
+    return (
+      <div className="text-center py-16">
+        <div className="bg-slate-50/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-200/50 dark:border-slate-700/50">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">
+            {t('menu.noCategories')}
+          </h3>
+          <p className="text-slate-600 dark:text-slate-400">
+            {t('menu.noCategoriesDesc')}
+          </p>
+        </div>
+      </div>
     )
   }
 
-  // Find the selected category
-  const currentCategory = categories.find((cat) => cat.categoryId === selectedCategory)
-  const products = currentCategory ? getFilteredProducts(currentCategory.products) : []
-
-  if (!selectedCategory) {
-    // Welcome State
+  if (visibleProducts.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-10 max-w-md mx-auto">
-          <div className="w-20 h-20 bg-gradient-to-br from-orange-500 via-orange-600 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg transform hover:scale-105 transition-transform duration-300">
-            <UtensilsCrossed className="h-10 w-10 text-white" />
-          </div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">
-            {restaurantName} {t('menu.title')}
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400 mb-6 leading-relaxed text-sm">
-            {t('menu.selectCategory')}
+      <div className="text-center py-16">
+        <div className="bg-slate-50/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-200/50 dark:border-slate-700/50">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">
+            {searchTerm ? t('menu.noSearchResults') : t('menu.noProducts')}
+          </h3>
+          <p className="text-slate-600 dark:text-slate-400">
+            {searchTerm 
+              ? `${t('menu.noSearchResultsDesc')} "${searchTerm}"`
+              : t('menu.noProductsDesc')
+            }
           </p>
-          {categories.length > 0 && (
-            <button
-              onClick={() => onCategorySelect(categories[0].categoryId)}
-              className="bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white px-6 py-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl font-bold text-sm transform hover:scale-105"
-            >
-              {t('menu.exploreMenu')}
-            </button>
-          )}
         </div>
       </div>
     )
   }
 
   return (
-    <div>
-      {/* Category Header */}
-      {currentCategory && (
-        <div className="mb-8">
-          <div className="relative overflow-hidden bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 rounded-2xl p-6 text-white text-center shadow-lg">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 opacity-20">
-              <div className="absolute inset-0" style={{
-                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.3'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
-              }} />
-            </div>
-            
-            <div className="relative z-10">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl mb-4 shadow-lg">
-                <Sparkles className="h-7 w-7 animate-pulse" />
+    <div className="space-y-8">
+      {/* Show category sections when not searching */}
+      {!searchTerm ? (
+        categories
+          .filter(category => !selectedCategory || category.categoryId === selectedCategory)
+          .map((category) => (
+            <div key={category.categoryId} className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+                  {category.categoryName}
+                </h2>
+                <span className="text-sm text-slate-600 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-700/50 px-3 py-1 rounded-full">
+                  {category.products.length} {category.products.length === 1 ? 'item' : 'items'}
+                </span>
               </div>
-              <h2 className="text-2xl font-bold mb-2">{currentCategory.categoryName}</h2>
-              <p className="text-orange-100 text-sm">
-                {products.length} {t('menu.deliciousItems')} {products.length === 1 ? t('menu.item') : t('menu.items')} {t('menu.available')}
-              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {category.products.map((product) => (
+                  <ProductCard
+                    key={product.branchProductId}
+                    product={product}
+                    cartQuantity={productQuantities.get(product.branchProductId) || 0}
+                    isFavorite={favorites.has(product.branchProductId)}
+                    onAddToCart={handleAddToCart}
+                    onRemoveFromCart={handleRemoveFromCart}
+                    onToggleFavorite={onToggleFavorite}
+                    onCustomize={onCustomize}
+                  />
+                ))}
+              </div>
+            </div>
+          ))
+      ) : (
+        /* Show search results */
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+              {t('menu.searchResults')}
+            </h2>
+            <span className="text-sm text-slate-600 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-700/50 px-3 py-1 rounded-full">
+              {visibleProducts.length} {visibleProducts.length === 1 ? 'result' : 'results'} for "{searchTerm}"
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {visibleProducts.map((product) => (
+              <ProductCard
+                key={product.branchProductId}
+                product={product}
+                cartQuantity={productQuantities.get(product.branchProductId) || 0}
+                isFavorite={favorites.has(product.branchProductId)}
+                onAddToCart={handleAddToCart}
+                onRemoveFromCart={handleRemoveFromCart}
+                onToggleFavorite={onToggleFavorite}
+                onCustomize={onCustomize}
+              />
+            ))}
+          </div>
+
+          {/* Category quick navigation for search results */}
+          <div className="mt-8 p-4 bg-slate-50/50 dark:bg-slate-800/50 rounded-xl">
+            <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">
+              {t('menu.browseCategories')}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((category) => {
+                const categoryResults = category.products.filter(product =>
+                  product.productName.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+                
+                if (categoryResults.length === 0) return null
+                
+                return (
+                  <button
+                    key={category.categoryId}
+                    onClick={() => {
+                      onCategorySelect(category.categoryId)
+                    }}
+                    className="text-xs bg-white/80 dark:bg-slate-700/80 hover:bg-orange-500 hover:text-white text-slate-700 dark:text-slate-300 px-3 py-2 rounded-lg transition-all duration-200 border border-slate-200/50 dark:border-slate-600/50"
+                  >
+                    {category.categoryName} ({categoryResults.length})
+                  </button>
+                )
+              })}
             </div>
           </div>
         </div>
       )}
 
-      {/* Products Grid */}
-      {products.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {products.map((product) => (
-            <ProductCard
-              key={product.branchProductId}
-              product={product}
-              cartQuantity={getCartItemQuantity(product.branchProductId)}
-              isFavorite={favorites.has(product.branchProductId)}
-              onAddToCart={onAddToCart}
-              onRemoveFromCart={onRemoveFromCart}
-              onToggleFavorite={onToggleFavorite}
-              onCustomize={onCustomize}
-            />
-          ))}
-        </div>
-      ) : (
-        // Empty State for Category
-        <div className="text-center py-12">
-          <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl p-10 max-w-md mx-auto border border-slate-200/50 dark:border-slate-700/50 shadow-lg">
-            <div className="w-16 h-16 bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Coffee className="h-8 w-8 text-slate-400 dark:text-slate-500" />
-            </div>
-            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-3">
-              {searchTerm ? t('menu.noResults') : t('menu.noItemsCategory')}
-            </h3>
-            <p className="text-slate-600 dark:text-slate-400 text-sm">
-              {searchTerm ? t('menu.noResultsDesc') : t('menu.noItemsCategoryDesc')}
-            </p>
+      {/* Loading overlay */}
+      {loadingQuantities && (
+        <div className="fixed bottom-4 right-4 bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm p-3 rounded-lg shadow-lg border border-slate-200/50 dark:border-slate-700/50">
+          <div className="flex items-center space-x-2">
+            <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-sm text-slate-700 dark:text-slate-300">Updating cart...</span>
           </div>
         </div>
       )}
