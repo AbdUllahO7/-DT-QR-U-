@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import { branchProductService } from "../../../../services/Branch/BranchProductService"
 import { BranchMenuResponse, MenuCategory, MenuComponentProps, MenuProduct } from "../../../../types/menu/type"
@@ -15,25 +15,7 @@ import { LoadingState, ErrorState } from "./Menustate"
 import ProductGrid from "./MneuProductGrid"
 import CartSidebar from "./MenuCartSidebar"
 import ProductModal from "./MenuProductModal"
-
-// Updated CartItem interface to include addons
-interface CartItemAddon {
-  branchProductAddonId: number
-  addonName: string
-  price: number
-  quantity: number
-  maxQuantity?: number
-}
-
-interface CartItem {
-  branchProductId: number
-  productName: string
-  price: number
-  quantity: number
-  productImageUrl?: string
-  addons?: CartItemAddon[]
-  totalItemPrice: number // includes base price + addons
-}
+import { basketService } from "../../../../services/Branch/BasketService"
 
 interface SelectedAddon {
   branchProductAddonId: number
@@ -51,9 +33,9 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
   const [error, setError] = useState<string | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
-  const [cart, setCart] = useState<CartItem[]>([])
   const [showCart, setShowCart] = useState(false)
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
+  const [basketItemCount, setBasketItemCount] = useState(0)
   
   // Modal state
   const [showProductModal, setShowProductModal] = useState(false)
@@ -81,12 +63,25 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
     return Array.from(categoryMap.values()).sort((a, b) => a.displayOrder - b.displayOrder)
   }
 
+  // Load basket item count
+  const loadBasketItemCount = useCallback(async () => {
+    try {
+      const basket = await basketService.getMyBasket()
+      const totalItems = basket.items.reduce((total, item) => total + item.quantity, 0)
+      setBasketItemCount(totalItems)
+    } catch (err: any) {
+      // Ignore errors for item count - basket might not exist yet
+      setBasketItemCount(0)
+    }
+  }, [])
+
   // Fetch menu data
   useEffect(() => {
     if (branchId) {
       fetchMenuData()
+      loadBasketItemCount()
     }
-  }, [branchId])
+  }, [branchId, loadBasketItemCount])
 
   const fetchMenuData = async () => {
     try {
@@ -130,144 +125,94 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
     }
   }
 
-  // Helper function to check if two addon arrays are the same
-  const areAddonsEqual = (addons1: CartItemAddon[], addons2: CartItemAddon[]): boolean => {
-    if (addons1.length !== addons2.length) return false
-    
-    const sorted1 = [...addons1].sort((a, b) => a.branchProductAddonId - b.branchProductAddonId)
-    const sorted2 = [...addons2].sort((a, b) => a.branchProductAddonId - b.branchProductAddonId)
-    
-    return sorted1.every((addon, index) => {
-      const other = sorted2[index]
-      return addon.branchProductAddonId === other.branchProductAddonId && 
-             addon.quantity === other.quantity
-    })
-  }
+  // Add to basket function
+  const addToBasket = async (product: MenuProduct, addons: SelectedAddon[] = []) => {
+    try {
+      if (addons.length > 0) {
+        // First, add the main product
+        const mainItem = await basketService.addUnifiedItemToMyBasket({
+          branchProductId: product.branchProductId,
+          quantity: 1
+        })
 
-  // Updated cart functions to handle addons intelligently
-  const addToCart = (product: MenuProduct, addons: SelectedAddon[] = []) => {
-    const cartAddons: CartItemAddon[] = addons.map(addon => {
-      // Find max quantity from product's available addons
-      const availableAddon = product.availableAddons?.find(a => a.branchProductAddonId === addon.branchProductAddonId)
-      return {
-        branchProductAddonId: addon.branchProductAddonId,
-        addonName: addon.addonName,
-        price: addon.price,
-        quantity: addon.quantity,
-        maxQuantity: availableAddon?.maxQuantity
-      }
-    })
-
-    const addonsPrice = cartAddons.reduce((total, addon) => total + (addon.price * addon.quantity), 0)
-    const totalItemPrice = product.price + addonsPrice
-
-    setCart((prev) => {
-      // For items with no addons, find existing plain item and increment
-      if (cartAddons.length === 0) {
-        const existingPlainItemIndex = prev.findIndex(item => 
-          item.branchProductId === product.branchProductId &&
-          (!item.addons || item.addons.length === 0)
-        )
-
-        if (existingPlainItemIndex >= 0) {
-          return prev.map((item, index) =>
-            index === existingPlainItemIndex 
-              ? { ...item, quantity: item.quantity + 1 } 
-              : item
-          )
+        // Then add addons with the main item as parent
+        // Use the actual addon's branchProductId from availableAddons, not branchProductAddonId
+        if (mainItem.basketItemId) {
+          const addonItems = addons.map(addon => {
+            // Find the corresponding available addon to get the correct branchProductId
+            const availableAddon = product.availableAddons?.find(
+              a => a.branchProductAddonId === addon.branchProductAddonId
+            )
+            
+            return {
+              branchProductId: availableAddon?.addonBranchProductId || addon.branchProductAddonId,
+              quantity: addon.quantity,
+              parentBasketItemId: mainItem.basketItemId
+            }
+          })
+          
+          await basketService.batchAddItemsToMyBasket(addonItems)
         }
       } else {
-        // For items with addons, find matching configuration
-        const existingItemIndex = prev.findIndex(item => 
-          item.branchProductId === product.branchProductId &&
-          item.addons && 
-          areAddonsEqual(item.addons, cartAddons)
-        )
-
-        if (existingItemIndex >= 0) {
-          return prev.map((item, index) =>
-            index === existingItemIndex 
-              ? { ...item, quantity: item.quantity + 1 } 
-              : item
-          )
-        }
-      }
-
-      // Add new item if no matching configuration found
-      return [
-        ...prev,
-        {
+        // Simple add for items without addons
+        await basketService.addUnifiedItemToMyBasket({
           branchProductId: product.branchProductId,
-          productName: product.productName,
-          price: product.price,
-          quantity: 1,
-          productImageUrl: product.productImageUrl,
-          addons: cartAddons.length > 0 ? cartAddons : undefined,
-          totalItemPrice
-        },
-      ]
-    })
+          quantity: 1
+        })
+      }
+
+      // Update basket item count
+      await loadBasketItemCount()
+    } catch (err: any) {
+      console.error('Error adding to basket:', err)
+      // You might want to show a toast notification here
+    }
   }
 
-  const removeFromCart = (cartIndex: number) => {
-    setCart((prev) => {
-      return prev.reduce((acc, item, index) => {
-        if (index === cartIndex) {
-          if (item.quantity > 1) {
-            acc.push({ ...item, quantity: item.quantity - 1 })
-          }
-          // If quantity is 1, don't add it back (remove it)
-        } else {
-          acc.push(item)
-        }
-        return acc
-      }, [] as CartItem[])
-    })
-  }
-
-  const updateCartItem = (cartIndex: number, updatedItem: CartItem) => {
-    setCart((prev) => {
-      return prev.map((item, index) => 
-        index === cartIndex ? updatedItem : item
+  // Remove from basket function
+  const removeFromBasket = async (branchProductId: number) => {
+    try {
+      // Get current basket to find the item to remove
+      const basket = await basketService.getMyBasket()
+      const itemToRemove = basket.items.find(item => 
+        item.branchProductId === branchProductId &&
+        (!item.addons || item.addons.length === 0) // Prefer plain items
       )
-    })
+      
+      if (itemToRemove) {
+        if (itemToRemove.quantity > 1) {
+          // Update quantity if more than 1
+          await basketService.updateMyBasketItem(itemToRemove.basketItemId, {
+            basketItemId: itemToRemove.basketItemId,
+            basketId: basket.basketId,
+            branchProductId: itemToRemove.branchProductId,
+            quantity: itemToRemove.quantity - 1
+          })
+        } else {
+          // Remove item if quantity is 1
+          await basketService.deleteMyBasketItem(itemToRemove.basketItemId)
+        }
+
+        // Update basket item count
+        await loadBasketItemCount()
+      }
+    } catch (err: any) {
+      console.error('Error removing from basket:', err)
+      // You might want to show a toast notification here
+    }
   }
 
-  const removeCartItem = (cartIndex: number) => {
-    setCart((prev) => prev.filter((_, index) => index !== cartIndex))
-  }
-
-  const mergeCartItems = (targetIndex: number, sourceIndex: number) => {
-    console.log('Merging items:', targetIndex, sourceIndex)
-    setCart((prev) => {
-      if (targetIndex >= prev.length || sourceIndex >= prev.length) {
-        console.error('Invalid indices for merge')
-        return prev
-      }
-
-      const target = prev[targetIndex]
-      const source = prev[sourceIndex]
-      
-      if (!target || !source) {
-        console.error('Target or source item not found')
-        return prev
-      }
-      
-      // Merge quantities into target item
-      const updatedTarget = {
-        ...target,
-        quantity: target.quantity + source.quantity
-      }
-      
-      // Create new array with updated target and without source
-      const newCart = prev
-        .map((item, index) => index === targetIndex ? updatedTarget : item)
-        .filter((_, index) => index !== sourceIndex)
-      
-      console.log('Merge completed')
-      return newCart
-    })
-  }
+  // Get quantity of a specific product in basket
+  const getCartItemQuantity = useCallback(async (branchProductId: number): Promise<number> => {
+    try {
+      const basket = await basketService.getMyBasket()
+      return basket.items
+        .filter(item => item.branchProductId === branchProductId && !item.isAddon)
+        .reduce((total, item) => total + item.quantity, 0)
+    } catch (err: any) {
+      return 0
+    }
+  }, [])
 
   const toggleFavorite = (branchProductId: number) => {
     setFavorites(prev => {
@@ -279,21 +224,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       }
       return newFavorites
     })
-  }
-
-  const getTotalPrice = (): number => {
-    return cart.reduce((total, item) => total + (item.totalItemPrice * item.quantity), 0)
-  }
-
-  const getTotalItems = (): number => {
-    return cart.reduce((total, item) => total + item.quantity, 0)
-  }
-
-  // Get quantity of a specific product in cart (regardless of addons)
-  const getCartItemQuantity = (branchProductId: number): number => {
-    return cart
-      .filter(item => item.branchProductId === branchProductId)
-      .reduce((total, item) => total + item.quantity, 0)
   }
 
   // Helper function to find a product by ID
@@ -323,10 +253,18 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
     setShowProductModal(true)
   }
 
-  const handleModalAddToCart = (product: MenuProduct, addons: SelectedAddon[]) => {
-    addToCart(product, addons)
+  const handleModalAddToCart = async (product: MenuProduct, addons: SelectedAddon[]) => {
+    await addToBasket(product, addons)
     setShowProductModal(false)
     setSelectedProduct(null)
+  }
+
+  // Handle cart toggle with basket count refresh
+  const handleCartToggle = async () => {
+    if (!showCart) {
+      await loadBasketItemCount()
+    }
+    setShowCart(!showCart)
   }
 
   // Loading state
@@ -348,8 +286,8 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       {/* Header */}
       <Header 
         menuData={menuData}
-        totalItems={getTotalItems()}
-        onCartToggle={() => setShowCart(!showCart)}
+        totalItems={basketItemCount}
+        onCartToggle={handleCartToggle}
       />
 
       <div className="max-w-6xl mx-auto px-4 py-6">
@@ -373,25 +311,10 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
               categories={filteredCategories}
               selectedCategory={selectedCategory}
               searchTerm={searchTerm}
-              cart={cart}
+              cart={[]} // No longer needed since we're using basket service
               favorites={favorites}
-              onAddToCart={addToCart}
-              onRemoveFromCart={(branchProductId: number) => {
-                // For simple remove, remove from first matching plain item
-                const plainItemIndex = cart.findIndex(item => 
-                  item.branchProductId === branchProductId && 
-                  (!item.addons || item.addons.length === 0)
-                )
-                if (plainItemIndex >= 0) {
-                  removeFromCart(plainItemIndex)
-                } else {
-                  // If no plain item, remove from first matching item
-                  const itemIndex = cart.findIndex(item => item.branchProductId === branchProductId)
-                  if (itemIndex >= 0) {
-                    removeFromCart(itemIndex)
-                  }
-                }
-              }}
+              onAddToCart={addToBasket}
+              onRemoveFromCart={removeFromBasket}
               onToggleFavorite={toggleFavorite}
               onCategorySelect={setSelectedCategory}
               restaurantName={menuData.restaurantName}
@@ -405,14 +328,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       {/* Cart Sidebar */}
       <CartSidebar
         isOpen={showCart}
-        cart={cart}
-        totalPrice={getTotalPrice()}
         onClose={() => setShowCart(false)}
-        onAddToCart={addToCart}
-        onRemoveFromCart={removeFromCart}
-        onUpdateCartItem={updateCartItem}
-        onRemoveCartItem={removeCartItem}
-        onMergeCartItems={mergeCartItems}
         findProduct={findProduct}
       />
 

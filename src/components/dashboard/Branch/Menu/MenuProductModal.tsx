@@ -318,7 +318,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
                                   ? 'bg-gray-400 cursor-not-allowed' 
                                   : 'bg-orange-500 hover:bg-orange-600'
                               } text-white rounded-md flex items-center justify-center transition-colors`}
-                              disabled={addonQuantity >= maxQty}
                             >
                               <Plus className="h-3 w-3" />
                             </button>

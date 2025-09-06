@@ -1,6 +1,18 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { QrCode, Users, Eye, Download, MoreVertical, Check, X, Circle } from 'lucide-react';
+import { 
+  QrCode, 
+  Users, 
+  Download, 
+  Edit,
+  Trash2,
+  ToggleLeft,
+  ToggleRight,
+  UserX,
+  UserCheck,
+  Circle,
+  Loader2
+} from 'lucide-react';
 import { TableData } from '../../../../types/api';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 
@@ -10,22 +22,29 @@ interface TableCardProps {
   onDelete: (id: number) => void;
   onToggleStatus: (id: number) => void;
   onDownload: (table: TableData) => void;
+  isToggling?: boolean;
 }
 
-const TableCard: React.FC<TableCardProps> = ({ table, onEdit, onDelete, onToggleStatus, onDownload }) => {
+const TableCard: React.FC<TableCardProps> = ({ 
+  table, 
+  onEdit, 
+  onDelete, 
+  onToggleStatus, 
+  onDownload,
+  isToggling = false
+}) => {
   const { t, isRTL } = useLanguage();
-  const [showDropdown, setShowDropdown] = React.useState(false);
 
   const getStatusColor = (isActive: boolean) => {
     return isActive
-      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-      : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+      ? 'text-green-600 dark:text-green-400'
+      : 'text-gray-500 dark:text-gray-400';
   };
 
   const getOccupancyColor = (isOccupied: boolean) => {
     return isOccupied
-      ? 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400'
-      : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400';
+      ? 'text-red-600 dark:text-red-400'
+      : 'text-green-600 dark:text-green-400';
   };
 
   const getStatusText = (isActive: boolean) => {
@@ -46,157 +65,115 @@ const TableCard: React.FC<TableCardProps> = ({ table, onEdit, onDelete, onToggle
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={`bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow duration-200 ${isRTL ? 'text-right' : 'text-left'}`}
+      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
       role="article"
       aria-label={t('TableCard.accessibility.tableCard')}
     >
-      <div className={`flex items-start justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <div className="space-y-4">
-          <div className={`flex items-center space-x-4 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
-            <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-              <QrCode className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold ml-2 text-gray-900 dark:text-white">
-                {table.menuTableName}
-              </h3>
-              <p className="text-sm text-gray-500 ml-2 dark:text-gray-400">
-                {table.categoryName}
-              </p>
-            </div>
+      {/* Header Section */}
+      <div className={`flex items-start justify-between mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+          <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+            <QrCode className="h-4 w-4 text-gray-600 dark:text-gray-400" />
           </div>
-
-          {/* QR Code Preview and Link */}
-          <div className="mt-2 text-left">
-            <a
-              href={`/table/qr/${table.qrCode}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              title={t('TableCard.viewQRCode')}
-              aria-label={t('TableCard.accessibility.qrCodePreview')}
-              className="inline-block hover:opacity-80 "
-            >
-              <img
-                src={`${table.qrCodeUrl}`}
-                alt={t('TableCard.viewQRCode')}
-                className="w-20 h-20 rounded border border-gray-200 dark:border-gray-600 bg-white"
-              />
-            </a>
-          </div>
-
-          <div className={`flex items-center space-x-4 `}>
-            <div className={`flex items-center ${isRTL ? 'ml-4' : 'mr-4'}`}>
-              <Users className={`h-4 w-4 text-gray-400 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                {getCapacityText(table.capacity)}
-              </span>
-            </div>
-            <div className={`flex items-center ${isRTL ? 'text-left' : ''}`}>
-              <Circle className={`h-4 w-4 ${isRTL ? 'ml-1' : 'mr-1'} ${table.isOccupied ? 'text-orange-500' : 'text-blue-500'}`} />
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                {getOccupancyText(table.isOccupied)}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-end ">
-            <div className={`flex space-x-2  gap-3 ${isRTL ? '' : ''}`}>
-              <span 
-                className={`inline-flex items-center px-2.5 py-0.5  rounded-full text-xs font-medium ${getStatusColor(table.isActive)}`}
-                aria-label={t('TableCard.accessibility.statusBadge')}
-              >
-                {getStatusText(table.isActive)}
-              </span>
-              <span 
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getOccupancyColor(table.isOccupied)}`}
-                aria-label={t('TableCard.accessibility.occupancyBadge')}
-              >
-                {getOccupancyText(table.isOccupied)}
-              </span>
-            </div>
+          <div>
+            <h4 className="font-medium text-gray-900 dark:text-white">
+              {table.menuTableName}
+            </h4>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {table.categoryName}
+            </p>
           </div>
         </div>
 
-        <div className="relative">
+        {/* Action Buttons */}
+        <div className={`flex gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <button
-            onClick={() => setShowDropdown(!showDropdown)}
-            className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-            aria-label={t('TableCard.accessibility.actionsMenu')}
-            aria-expanded={showDropdown}
-            aria-haspopup="true"
+            onClick={() => onDownload(table)}
+            className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+            title={t('TableCard.downloadQR')}
+            aria-label={t('TableCard.accessibility.downloadButton')}
           >
-            <MoreVertical className="h-5 w-5" />
+            <Download className="h-3 w-3" />
           </button>
+          <button
+            onClick={() => onEdit(table)}
+            className="p-1 text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300"
+            title={t('TableCard.edit')}
+            aria-label={t('TableCard.accessibility.editButton')}
+          >
+            <Edit className="h-3 w-3" />
+          </button>
+          <button
+            onClick={() => onDelete(table.id)}
+            className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+            title={t('TableCard.delete')}
+            aria-label={t('TableCard.accessibility.deleteButton')}
+          >
+            <Trash2 className="h-3 w-3" />
+          </button>
+        </div>
+      </div>
 
-          {showDropdown && (
-            <div 
-              className={`absolute mt-2 w-48 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10 `}
-              role="menu"
-              aria-label={t('TableCard.accessibility.actionsMenu')}
-            >
-              <div className="py-1">
-                <button
-                  onClick={() => {
-                    onEdit(table);
-                    setShowDropdown(false);
-                  }}
-                  className={`block w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}
-                  role="menuitem"
-                  aria-label={t('TableCard.accessibility.editButton')}
-                >
-                  {t('TableCard.edit')}
-                </button>
-                <button
-                  onClick={() => {
-                    onDownload(table);
-                    setShowDropdown(false);
-                  }}
-                  className={`block w-full px-4 py-2 text-sm text-blue-600 dark:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}
-                  role="menuitem"
-                  aria-label={t('TableCard.accessibility.downloadButton')}
-                >
-                  <Download className={`h-4 w-4 inline-block ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                  {t('TableCard.downloadQR')}
-                </button>
-                <button
-                  onClick={() => {
-                    onToggleStatus(table.id);
-                    setShowDropdown(false);
-                  }}
-                  className={`block w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 ${
-                    table.isActive
-                      ? 'text-red-600 dark:text-red-400'
-                      : 'text-green-600 dark:text-green-400'
-                  } ${isRTL ? 'text-right' : 'text-left'}`}
-                  role="menuitem"
-                  aria-label={t('TableCard.accessibility.toggleButton')}
-                >
-                  {table.isActive ? (
-                    <>
-                      <X className={`h-4 w-4 inline-block ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                      {t('TableCard.disable')}
-                    </>
-                  ) : (
-                    <>
-                      <Check className={`h-4 w-4 inline-block ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                      {t('TableCard.enable')}
-                    </>
-                  )}
-                </button>
-                <button
-                  onClick={() => {
-                    onDelete(table.id);
-                    setShowDropdown(false);
-                  }}
-                  className={`block w-full px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}
-                  role="menuitem"
-                  aria-label={t('TableCard.accessibility.deleteButton')}
-                >
-                  {t('TableCard.delete')}
-                </button>
-              </div>
-            </div>
-          )}
+      {/* QR Code Preview */}
+      <div className="mb-3">
+        <a
+          href={`/table/qr/${table.qrCode}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={t('TableCard.viewQRCode')}
+          aria-label={t('TableCard.accessibility.qrCodePreview')}
+          className="inline-block hover:opacity-80"
+        >
+          <img
+            src={`${table.qrCodeUrl}`}
+            alt={t('TableCard.viewQRCode')}
+            className="w-16 h-16 rounded border border-gray-200 dark:border-gray-600 bg-white"
+          />
+        </a>
+      </div>
+
+      {/* Capacity Info */}
+      <div className={`flex items-center mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <Users className={`h-4 w-4 text-gray-400 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+        <span className="text-sm text-gray-600 dark:text-gray-400">
+          {getCapacityText(table.capacity)}
+        </span>
+      </div>
+
+      {/* Status Controls */}
+      <div className="space-y-2">
+        {/* Active/Inactive Toggle */}
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => onToggleStatus(table.id)}
+            disabled={isToggling}
+            className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}
+          >
+            {isToggling ? (
+              <Loader2 className="h-3 w-3 animate-spin text-gray-400" />
+            ) : table.isActive ? (
+              <ToggleRight className="h-4 w-4 text-green-500" />
+            ) : (
+              <ToggleLeft className="h-4 w-4 text-gray-400" />
+            )}
+            <span className={`text-xs ${getStatusColor(table.isActive)}`}>
+              {getStatusText(table.isActive)}
+            </span>
+          </button>
+        </div>
+
+        {/* Occupancy Status */}
+        <div className="flex items-center justify-between">
+          <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            {table.isOccupied ? (
+              <UserX className="h-4 w-4 text-red-500" />
+            ) : (
+              <UserCheck className="h-4 w-4 text-green-500" />
+            )}
+            <span className={`text-xs ${getOccupancyColor(table.isOccupied)}`}>
+              {getOccupancyText(table.isOccupied)}
+            </span>
+          </div>
         </div>
       </div>
     </motion.div>
