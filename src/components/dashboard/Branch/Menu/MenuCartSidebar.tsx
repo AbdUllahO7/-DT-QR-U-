@@ -2,18 +2,19 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { ShoppingCart, X, Plus, Minus, Settings, Trash2,  ArrowRight, Loader2, User, MapPin, Phone, Clock } from "lucide-react"
+import { ShoppingCart, X, Plus, Minus, Settings, Trash2, ArrowRight, Loader2, User, MapPin, Phone, Clock, AlertTriangle } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import { MenuProduct } from "../../../../types/menu/type"
 import { basketService } from "../../../../services/Branch/BasketService"
 import { orderService, CreateSessionOrderDto, SmartCreateOrderDto } from "../../../../services/Branch/OrderService"
-import { OrderType } from "../../../../services/Branch/BranchOrderTypeService"
+import { OrderType, orderTypeService } from "../../../../services/Branch/BranchOrderTypeService"
 
 interface CartItemAddon {
   branchProductAddonId: number
   addonName: string
   price: number
   quantity: number
+  minQuantity?: number
   maxQuantity?: number
   basketItemId?: number
 }
@@ -75,24 +76,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   onOrderCreated
 }) => {
   const { t } = useLanguage()
-   const defaultOrderType: OrderType = {
-  "id": 1,
-    "name": "Dine In",
-    "code": "DINE_IN",
-    "description": "Eat at restaurant table",
-    "icon": "🍽️",
-    "isActive": true,
-    "isStandard": true,
-    "displayOrder": 1,
-    "requiresTable": true,
-    "requiresAddress": false,
-    "requiresPhone": false,
-    "minOrderAmount": 0,
-    "serviceCharge": 0,
-    "estimatedMinutes": 45,
-    "activeOrderCount": 0,
-    "rowVersion": "AAAAAAAAB9E="
-  }
+
   // State management
   const [cart, setCart] = useState<CartItem[]>([])
   const [totalPrice, setTotalPrice] = useState(0)
@@ -102,11 +86,12 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   
   // Order creation states
   const [showOrderForm, setShowOrderForm] = useState(false)
-  const [orderTypes, setOrderTypes] = useState<OrderType[]>([defaultOrderType])
+  const [orderTypes, setOrderTypes] = useState<OrderType[]>([])
+  const [loadingOrderTypes, setLoadingOrderTypes] = useState(false)
   const [orderForm, setOrderForm] = useState<OrderForm>({
     customerName: '',
     notes: '',
-    orderTypeId: defaultOrderType.id, // Use default order type ID
+    orderTypeId: 0,
     tableId: tableId,
     address: '',
     phone: ''
@@ -118,6 +103,63 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   })
   const [estimatedTime, setEstimatedTime] = useState(0)
   const [validationErrors, setValidationErrors] = useState<string[]>([])
+
+  // Price change confirmation states
+  const [showPriceChangeModal, setShowPriceChangeModal] = useState(false)
+  const [priceChanges, setPriceChanges] = useState<any>(null)
+  const [confirmingPriceChanges, setConfirmingPriceChanges] = useState(false)
+
+  // Load order types when component mounts or when showing order form
+  useEffect(() => {
+    if (showOrderForm && orderTypes.length === 0) {
+      loadOrderTypes()
+    }
+  }, [showOrderForm])
+
+  // Load order types function
+  const loadOrderTypes = async () => {
+    try {
+      setLoadingOrderTypes(true)
+      setError(null)
+      
+      console.log('🔄 Loading order types from service...')
+      const types = await orderTypeService.getOrderTypesBySessionId()
+      console.log('📋 Order types loaded:', types)
+      
+      setOrderTypes(types)
+      
+      // Set default order type if none selected and types are available
+      if (types.length > 0 && orderForm.orderTypeId === 0) {
+        const defaultType = types.find(t => t.isStandard) || types[0]
+        setOrderForm(prev => ({ 
+          ...prev, 
+          orderTypeId: defaultType.id 
+        }))
+        console.log('🎯 Default order type set:', defaultType)
+      }
+      
+    } catch (err: any) {
+      console.error('❌ Error loading order types:', err)
+      setError('Failed to load order types')
+    } finally {
+      setLoadingOrderTypes(false)
+    }
+  }
+
+  // Helper function to get clean session ID
+  const getCleanSessionId = (sessionId?: string | null): string | null => {
+    if (!sessionId || sessionId === 'empty' || sessionId.trim() === '') {
+      return null
+    }
+    
+    // Remove 'session_' prefix if present
+    const cleanId = sessionId.trim()
+    if (cleanId.startsWith('session_')) {
+      return cleanId.replace('session_', '')
+    }
+    
+    return cleanId
+  }
 
   // Helper function to calculate item total price including addons
   const calculateItemTotalPrice = (item: CartItem): number => {
@@ -133,7 +175,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
     return itemTotal
   }
 
-  // Calculate total price whenever cart changes - FIXED VERSION
+  // Calculate total price whenever cart changes
   useEffect(() => {
     const total = cart.reduce((sum, item) => {
       const itemTotalPrice = calculateItemTotalPrice(item)
@@ -164,7 +206,6 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   useEffect(() => {
     if (isOpen) {
       loadBasket()
-      // loadOrderTypes()
     }
   }, [isOpen])
 
@@ -174,19 +215,6 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
       calculateOrderTotal()
     }
   }, [orderForm.orderTypeId, totalPrice])
-
-/*   const loadOrderTypes = async () => {
-    try {
-      const types = await orderService.getActiveOrderTypes()
-      // setOrderTypes(types)      
-      if (types.length > 0 && !orderForm.orderTypeId) {
-        setOrderForm(prev => ({ ...prev, orderTypeId: types[0].id }))
-      }
-    } catch (err) {
-      console.error('Error loading order types:', err)
-      setError('Failed to load order types')
-    }
-  } */
 
   const calculateOrderTotal = async () => {
     try {
@@ -200,143 +228,295 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
     }
   }
 
-/*   const validateOrderForm = async (): Promise<boolean> => {
+  // Handle price change confirmation
+  const handlePriceChangeConfirmation = async () => {
     try {
-      const validation = await orderService.validateOrderRequirements(orderForm.orderTypeId, {
-        tableId: orderForm.tableId,
-        address: orderForm.address,
-        phone: orderForm.phone,
-        orderAmount: totalPrice
-      })
-
-      const errors: string[] = [...validation.errors]
-
-      // Additional validation
-      if (!orderForm.customerName.trim()) {
-        errors.push('Customer name is required')
-      }
-
-      setValidationErrors(errors)
-      return validation.isValid && errors.length === 0
-    } catch (err) {
-      console.error('Validation error:', err)
-      setValidationErrors(['Validation failed'])
-      return false
-    }
-  }
- */
-  const createOrder = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-
-    
-
-      let order
-            console.log('Creating order with form data:', orderForm)
-
-      if (sessionId) {
-        // Create session-based order
-        const sessionOrderDto: CreateSessionOrderDto = {
-          customerName: orderForm.customerName.trim(),
-          notes: orderForm.notes.trim() || undefined,
-          orderTypeId: orderForm.orderTypeId
+      console.log('🔄 Handling price change confirmation...')
+      
+      // Show the price change modal immediately
+      setShowPriceChangeModal(true)
+      
+      // Try to get specific price change details if available
+      const cleanSessionId = getCleanSessionId(sessionId || basketId)
+      
+      if (cleanSessionId) {
+        try {
+          console.log('🔍 Fetching price change details for session:', cleanSessionId)
+          const changes = await basketService.confirmSessionPriceChanges(cleanSessionId)
+          setPriceChanges(changes)
+          console.log('📋 Price changes details:', changes)
+        } catch (err: any) {
+          console.log('ℹ️ No specific price changes endpoint available or error fetching details:', err.message)
+          // Set a generic message since we can't get specific details
+          setPriceChanges({
+            message: 'Some items in your basket have price changes that need to be confirmed.',
+            requiresConfirmation: true
+          })
         }
-        console.log('Creating session order with DTO:', sessionOrderDto)
-        order = await orderService.createSessionOrder(sessionId, sessionOrderDto)
-        console.log('🆕 Session order created:', order)
       } else {
-        // Create smart order (includes all table baskets)
-        const smartOrderDto: SmartCreateOrderDto = {
-          includeAllTableBaskets: true, // Include current basket
-          customerName: orderForm.customerName.trim(),
-          notes: orderForm.notes.trim() || undefined,
-          orderTypeId: orderForm.orderTypeId
-        }
-        
-        order = await orderService.smartCreateOrder(smartOrderDto)
-        console.log('🆕 Smart order created:', order)
+        console.log('⚠️ No session ID available for price change details')
+        setPriceChanges({
+          message: 'Price changes detected. Please confirm to continue with your order.',
+          requiresConfirmation: true
+        })
       }
-
-      // Clear the basket after successful order creation
-     /*  await basketService.deleteMyBasket() */
-      setCart([])
-      setBasketId(null)
-      setShowOrderForm(false)
       
-      // Notify parent component
-      if (onOrderCreated) {
-        onOrderCreated(order.orderId)
-      }
-
-      // Show success message
-      setError(null)
-      
-      // Close the sidebar after a short delay
-      setTimeout(() => {
-        onClose()
-      }, 2000)
-
     } catch (err: any) {
-      console.error('Error creating order:', err)
-      setError(err.message || 'Failed to create order')
-    } finally {
-      setLoading(false)
+      console.error('❌ Error handling price change confirmation:', err)
+      setError('Failed to load price change details')
     }
   }
 
-  const loadBasket = async () => {
+  // Confirm price changes and retry order creation
+  const confirmPriceChanges = async () => {
     try {
-      setLoading(true)
+      setConfirmingPriceChanges(true)
       setError(null)
+
+      const cleanSessionId = getCleanSessionId(sessionId || basketId)
+
+      if (!cleanSessionId) {
+        setError('Session ID required for price change confirmation')
+        return
+      }
+
+      console.log('✅ Confirming price changes for session:', cleanSessionId)
+
+      // Confirm the price changes
+      await basketService.confirmSessionPriceChanges(cleanSessionId)
       
-      const basket = await basketService.getMyBasket()
-      console.log('🛒 Raw basket data from API:', basket)
+      console.log('✅ Price changes confirmed successfully')
       
-      setBasketId(basket.basketId)
+      // Close the modal
+      setShowPriceChangeModal(false)
+      setPriceChanges(null)
+      setConfirmingPriceChanges(false)
       
-      // Convert API basket items to cart items
-      const cartItems: CartItem[] = basket.items.map((item, index) => {
-        console.log(`\n📝 Processing basket item ${index + 1}:`, item)
-        
-        const mappedAddons = item.addonItems?.map(addon => {
-          console.log('   📎 Addon:', addon)
-          return {
-            branchProductAddonId: addon.branchProductId,
-            addonName: addon.productName || '',
-            price: addon.price || 0,
-            quantity: addon.quantity,
-            maxQuantity: undefined,
-            basketItemId: addon.basketItemId
-          }
-        })
-        
-        console.log('   📎 Mapped addons:', mappedAddons)
-        
-        const cartItem = {
-          basketItemId: item.basketItemId,
-          branchProductId: item.branchProductId,
-          productName: item.productName || '',
-          price: item.price || 0,
-          quantity: item.quantity,
-          productImageUrl: item.imageUrl,
-          addons: mappedAddons,
-          totalItemPrice: item.totalPrice || 0
+      // Reload the basket to get updated prices
+      await loadBasket()
+      
+      console.log('🔄 Retrying order creation after price confirmation...')
+      
+      // Retry creating the order
+      await createOrder()
+      
+    } catch (err: any) {
+      console.error('❌ Error confirming price changes:', err)
+      setError(err.message || 'Failed to confirm price changes')
+      setConfirmingPriceChanges(false)
+    }
+  }
+
+const validateCart = (): string[] => {
+  const errors: string[] = []
+  
+  cart.forEach(item => {
+    if (item.addons) {
+      item.addons.forEach(addon => {
+        const error = getAddonQuantityError(addon)
+        if (error) {
+          errors.push(error)
         }
+      })
+    }
+  })
+  
+  return errors
+}
+
+const validateOrderForm = (): string[] => {
+  const errors: string[] = []
+  
+  // Validate customer name
+  if (!orderForm.customerName.trim()) {
+    errors.push('Customer name is required')
+  }
+  
+  // Validate order type selection
+  if (!orderForm.orderTypeId) {
+    errors.push('Please select an order type')
+  }
+  
+  // Get selected order type for conditional validation
+  const selectedOrderType = getSelectedOrderType()
+  
+  // Validate address if required
+  if (selectedOrderType?.requiresAddress && !orderForm.address?.trim()) {
+    errors.push('Delivery address is required for this order type')
+  }
+  
+  // Validate phone if required
+  if (selectedOrderType?.requiresPhone && !orderForm.phone?.trim()) {
+    errors.push('Phone number is required for this order type')
+  }
+  
+  return errors
+}
+
+const createOrder = async () => {
+  try {
+    setLoading(true)
+    setError(null)
+    setValidationErrors([])
+
+    // Validate cart quantities before creating order
+    const cartErrors = validateCart()
+    const formErrors = validateOrderForm()
+    const allErrors = [...cartErrors, ...formErrors]
+    
+    if (allErrors.length > 0) {
+      setValidationErrors(allErrors)
+      setLoading(false)
+      return
+    }
+
+    // Rest of your createOrder logic...
+    let order
+    console.log('📝 Creating order with form data:', orderForm)
+
+    if (sessionId) {
+      // Create session-based order
+      const sessionOrderDto: CreateSessionOrderDto = {
+        customerName: orderForm.customerName.trim(),
+        notes: orderForm.notes.trim() || undefined,
+        orderTypeId: orderForm.orderTypeId
+      }
+      console.log('📤 Creating session order with DTO:', sessionOrderDto)
+      order = await orderService.createSessionOrder(sessionId, sessionOrderDto)
+      console.log('🆕 Session order created:', order)
+    } else {
+      // Create smart order (includes all table baskets)
+      const smartOrderDto: SmartCreateOrderDto = {
+        includeAllTableBaskets: true,
+        customerName: orderForm.customerName.trim(),
+        notes: orderForm.notes.trim() || undefined,
+        orderTypeId: orderForm.orderTypeId
+      }
+      
+      console.log('📤 Creating smart order with DTO:', smartOrderDto)
+      order = await orderService.smartCreateOrder(smartOrderDto)
+      console.log('🆕 Smart order created:', order)
+    }
+
+    // Clear the basket after successful order creation
+    setCart([])
+    setBasketId(null)
+    setShowOrderForm(false)
+    
+    // Notify parent component
+    if (onOrderCreated) {
+      onOrderCreated(order.orderId)
+    }
+
+    // Show success message
+    setError(null)
+    
+    // Close the sidebar after a short delay
+    setTimeout(() => {
+      onClose()
+    }, 2000)
+
+  } catch (err: any) {
+    console.error('❌ Error creating order:', err)
+    
+    // Check if it's a price change confirmation error
+    if (err?.response?.status === 409) {
+      const errorMessage = err?.response?.data?.message || err?.message || ''
+      
+      // Check if the error is specifically about unconfirmed price changes
+      if (errorMessage.toLowerCase().includes('unconfirmed price changes') || 
+          errorMessage.toLowerCase().includes('price changes')) {
         
-        console.log('   ✅ Final cart item:', cartItem)
-        return cartItem
+        console.log('💰 Price change confirmation required')
+        await handlePriceChangeConfirmation()
+        return // Don't show error message, show modal instead
+        
+      } else {
+        // Other 409 errors
+        setError(err.message || 'This order is already being processed')
+      }
+    } else {
+      // Other errors
+      setError(err.message || 'Failed to create order')
+    }
+  } finally {
+    setLoading(false)
+  }
+}
+
+const loadBasket = async () => {
+  try {
+    setLoading(true)
+    setError(null)
+    
+    const basket = await basketService.getMyBasket()
+    console.log('🛒 Raw basket data from API:', basket)
+    
+    setBasketId(basket.basketId)
+    
+    // Convert API basket items to cart items
+    const cartItems: CartItem[] = basket.items.map((item, index) => {
+      console.log(`\n📝 Processing basket item ${index + 1}:`, item)
+      
+      const mappedAddons = item.addonItems?.map(addon => {
+        console.log('   📎 Addon:', addon)
+        return {
+          branchProductAddonId: addon.branchProductId,
+          addonName: addon.productName || '',
+          price: addon.price || 0,
+          quantity: addon.quantity,
+          minQuantity: addon.minQuantity, 
+          maxQuantity: addon.maxQuantity, 
+          basketItemId: addon.basketItemId
+        }
       })
       
-      console.log('🎯 Final cart items array:', cartItems)
-      setCart(cartItems)
-    } catch (err: any) {
-      console.error('Error loading basket:', err)
-      setError('Failed to load basket')
-    } finally {
-      setLoading(false)
-    }
+      console.log('   📎 Mapped addons:', mappedAddons)
+      
+      const cartItem = {
+        basketItemId: item.basketItemId,
+        branchProductId: item.branchProductId,
+        productName: item.productName || '',
+        price: item.price || 0,
+        quantity: item.quantity,
+        productImageUrl: item.imageUrl,
+        addons: mappedAddons,
+        totalItemPrice: item.totalPrice || 0
+      }
+      
+      console.log('   ✅ Final cart item:', cartItem)
+      return cartItem
+    })
+    
+    console.log('🎯 Final cart items array:', cartItems)
+    setCart(cartItems)
+  } catch (err: any) {
+    console.error('Error loading basket:', err)
+    setError('Failed to load basket')
+  } finally {
+    setLoading(false)
   }
+}
+
+const canIncreaseAddonQuantity = (addon: CartItemAddon): boolean => {
+  if (!addon.maxQuantity) return true
+  return addon.quantity < addon.maxQuantity
+}
+
+const canDecreaseAddonQuantity = (addon: CartItemAddon): boolean => {
+  if (!addon.minQuantity) return addon.quantity > 0
+  return addon.quantity > addon.minQuantity
+}
+
+const getAddonQuantityError = (addon: CartItemAddon): string | null => {
+  if (addon.minQuantity && addon.quantity < addon.minQuantity) {
+    return `Minimum quantity for ${addon.addonName} is ${addon.minQuantity}`
+  }
+  if (addon.maxQuantity && addon.quantity > addon.maxQuantity) {
+    return `Maximum quantity for ${addon.addonName} is ${addon.maxQuantity}`
+  }
+  return null
+}
 
   const removeFromBasket = async (basketItemId: number) => {
     try {
@@ -454,7 +634,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
     }
   }
 
-  // Group cart items by product with correct total calculations - FIXED VERSION
+  // Group cart items by product with correct total calculations
   const groupedItems: GroupedCartItem[] = cart.reduce((groups, item, index) => {
     const existingGroup = groups.find(g => g.product.branchProductId === item.branchProductId)
     
@@ -495,6 +675,74 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
     return orderTypes.find(ot => ot.id === orderForm.orderTypeId)
   }
 
+  // Price Change Confirmation Modal Component
+  const PriceChangeModal = () => {
+    if (!showPriceChangeModal) return null
+
+    return (
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+        <div className="bg-white dark:bg-slate-900 rounded-xl p-6 max-w-md w-full border border-slate-200 dark:border-slate-700 shadow-xl">
+          <div className="text-center mb-6">
+            <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-2">
+              Price Changes Detected
+            </h3>
+            <p className="text-slate-600 dark:text-slate-400 text-sm">
+              Some items in your basket have price changes that need to be confirmed before proceeding with the order.
+            </p>
+          </div>
+
+          {priceChanges && (
+            <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg mb-6">
+              <h4 className="font-medium text-slate-800 dark:text-slate-200 mb-2">
+                Changes Required:
+              </h4>
+              <div className="text-sm text-slate-600 dark:text-slate-400">
+                {typeof priceChanges === 'string' ? (
+                  <p>{priceChanges}</p>
+                ) : priceChanges?.message ? (
+                  <p>{priceChanges.message}</p>
+                ) : (
+                  <p>Price updates need to be confirmed to continue.</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="flex space-x-3">
+            <button
+              onClick={() => {
+                setShowPriceChangeModal(false)
+                setPriceChanges(null)
+                setLoading(false) // Reset loading state
+              }}
+              disabled={confirmingPriceChanges}
+              className="flex-1 py-3 px-4 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmPriceChanges}
+              disabled={confirmingPriceChanges}
+              className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50"
+            >
+              {confirmingPriceChanges ? (
+                <div className="flex items-center justify-center">
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Confirming...
+                </div>
+              ) : (
+                'Confirm & Continue'
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   if (!isOpen) return null
 
   return (
@@ -505,18 +753,21 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
             <h3 className="text-lg font-bold text-white flex items-center">
               <ShoppingCart className="h-4 w-4 mr-2" />
               {showOrderForm ? 'Order Details' : t('menu.cart.title')}
-              {loading && <Loader2 className="h-3 w-3 ml-2 animate-spin" />}
+              {(loading || loadingOrderTypes) && <Loader2 className="h-3 w-3 ml-2 animate-spin" />}
             </h3>
             <div className="flex items-center space-x-2">
               {cart.length > 0 && !showOrderForm && (
-                <button 
-                  onClick={clearBasket}
-                  disabled={loading}
-                  className="p-2 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50"
-                  title="Clear basket"
-                >
-                  <Trash2 className="h-4 w-4 text-white" />
-                </button>
+                <>
+                  <button 
+                    onClick={clearBasket}
+                    disabled={loading}
+                    className="p-2 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50"
+                    title="Clear basket"
+                  >
+                    <Trash2 className="h-4 w-4 text-white" />
+                  </button>
+                 
+                </>
               )}
               <button 
                 onClick={onClose} 
@@ -549,141 +800,160 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
           {showOrderForm ? (
             // Order Form
             <div className="space-y-6">
-              {/* Order Type Selection */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Order Type
-                </label>
-                <select
-                  value={orderForm.orderTypeId}
-                  onChange={(e) => setOrderForm(prev => ({ ...prev, orderTypeId: parseInt(e.target.value) }))}
-                  className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-                >
-                  {orderTypes.map(type => (
-                    <option key={type.id} value={type.id}>
-                      {type.name} {type.serviceCharge > 0 && `(+${type.serviceCharge}% service)`}
-                    </option>
-                  ))}
-                </select>
-                {getSelectedOrderType() && (
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    {getSelectedOrderType()?.description}
-                  </p>
-                )}
-              </div>
-
-              {/* Customer Name */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  <User className="h-4 w-4 inline mr-1" />
-                  Customer Name *
-                </label>
-                <input
-                  type="text"
-                  value={orderForm.customerName}
-                  onChange={(e) => setOrderForm(prev => ({ ...prev, customerName: e.target.value }))}
-                  className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-                  placeholder="Enter customer name"
-                />
-              </div>
-
-              {/* Conditional Fields Based on Order Type */}
-              {getSelectedOrderType()?.requiresAddress && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    <MapPin className="h-4 w-4 inline mr-1" />
-                    Delivery Address *
-                  </label>
-                  <textarea
-                    value={orderForm.address}
-                    onChange={(e) => setOrderForm(prev => ({ ...prev, address: e.target.value }))}
-                    className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-                    placeholder="Enter delivery address"
-                    rows={3}
-                  />
+              {loadingOrderTypes ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+                  <span className="ml-2 text-slate-600 dark:text-slate-400">Loading order types...</span>
                 </div>
-              )}
-
-              {getSelectedOrderType()?.requiresPhone && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    <Phone className="h-4 w-4 inline mr-1" />
-                    Phone Number *
-                  </label>
-                  <input
-                    type="tel"
-                    value={orderForm.phone}
-                    onChange={(e) => setOrderForm(prev => ({ ...prev, phone: e.target.value }))}
-                    className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-                    placeholder="Enter phone number"
-                  />
-                </div>
-              )}
-
-              {/* Notes */}
-              <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  Special Instructions
-                </label>
-                <textarea
-                  value={orderForm.notes}
-                  onChange={(e) => setOrderForm(prev => ({ ...prev, notes: e.target.value }))}
-                  className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-                  placeholder="Any special instructions for your order..."
-                  rows={3}
-                />
-              </div>
-
-              {/* Order Summary */}
-              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg">
-                <h4 className="font-medium text-slate-800 dark:text-slate-200 mb-3">Order Summary</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-slate-400">Subtotal:</span>
-                    <span className="text-slate-800 dark:text-slate-200">${totalPrice.toFixed(2)}</span>
+              ) : (
+                <>
+                  {/* Order Type Selection */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Order Type *
+                    </label>
+                    <select
+                      value={orderForm.orderTypeId}
+                      onChange={(e) => setOrderForm(prev => ({ ...prev, orderTypeId: parseInt(e.target.value) }))}
+                      className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                      disabled={orderTypes.length === 0}
+                    >
+                      <option value={0}>Select order type...</option>
+                      {orderTypes.map(type => (
+                        <option key={type.id} value={type.id}>
+                          {type.name} {type.serviceCharge > 0 && `(+${type.serviceCharge}% service)`}
+                        </option>
+                      ))}
+                    </select>
+                    {getSelectedOrderType() && (
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        {getSelectedOrderType()?.description}
+                        {getSelectedOrderType()?.estimatedMinutes && (
+                          <span className="block">Estimated time: {getSelectedOrderType()?.estimatedMinutes} minutes</span>
+                        )}
+                      </p>
+                    )}
+                    {orderTypes.length === 0 && (
+                      <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+                        No order types available. Please contact support.
+                      </p>
+                    )}
                   </div>
-                  {orderTotal.serviceCharge > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-slate-600 dark:text-slate-400">Service Charge ({getSelectedOrderType()?.serviceCharge}%):</span>
-                      <span className="text-slate-800 dark:text-slate-200">${orderTotal.serviceCharge.toFixed(2)}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between font-bold border-t border-slate-200 dark:border-slate-600 pt-2">
-                    <span className="text-slate-800 dark:text-slate-200">Total:</span>
-                    <span className="text-orange-600 dark:text-orange-400">${orderTotal.totalAmount.toFixed(2)}</span>
-                  </div>
-                  {estimatedTime > 0 && (
-                    <div className="flex items-center text-slate-600 dark:text-slate-400 mt-2">
-                      <Clock className="h-4 w-4 mr-1" />
-                      <span>Estimated time: {estimatedTime} minutes</span>
-                    </div>
-                  )}
-                </div>
-              </div>
 
-              {/* Action Buttons */}
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => setShowOrderForm(false)}
-                  className="flex-1 py-3 px-4 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                >
-                  Back to Cart
-                </button>
-                <button
-                  onClick={createOrder}
-                  disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50"
-                >
-                  {loading ? (
-                    <div className="flex items-center justify-center">
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Creating...
+                  {/* Customer Name */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      <User className="h-4 w-4 inline mr-1" />
+                      Customer Name *
+                    </label>
+                    <input
+                      type="text"
+                      value={orderForm.customerName}
+                      onChange={(e) => setOrderForm(prev => ({ ...prev, customerName: e.target.value }))}
+                      className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                      placeholder="Enter customer name"
+                    />
+                  </div>
+
+                  {/* Conditional Fields Based on Order Type */}
+                  {getSelectedOrderType()?.requiresAddress && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        <MapPin className="h-4 w-4 inline mr-1" />
+                        Delivery Address *
+                      </label>
+                      <textarea
+                        value={orderForm.address}
+                        onChange={(e) => setOrderForm(prev => ({ ...prev, address: e.target.value }))}
+                        className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                        placeholder="Enter delivery address"
+                        rows={3}
+                      />
                     </div>
-                  ) : (
-                    'Create Order'
                   )}
-                </button>
-              </div>
+
+                  {getSelectedOrderType()?.requiresPhone && (
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        <Phone className="h-4 w-4 inline mr-1" />
+                        Phone Number *
+                      </label>
+                      <input
+                        type="tel"
+                        value={orderForm.phone}
+                        onChange={(e) => setOrderForm(prev => ({ ...prev, phone: e.target.value }))}
+                        className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                        placeholder="Enter phone number"
+                      />
+                    </div>
+                  )}
+
+                  {/* Notes */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      Special Instructions
+                    </label>
+                    <textarea
+                      value={orderForm.notes}
+                      onChange={(e) => setOrderForm(prev => ({ ...prev, notes: e.target.value }))}
+                      className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                      placeholder="Any special instructions for your order..."
+                      rows={3}
+                    />
+                  </div>
+
+                  {/* Order Summary */}
+                  <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg">
+                    <h4 className="font-medium text-slate-800 dark:text-slate-200 mb-3">Order Summary</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-slate-600 dark:text-slate-400">Subtotal:</span>
+                        <span className="text-slate-800 dark:text-slate-200">${totalPrice.toFixed(2)}</span>
+                      </div>
+                      {orderTotal.serviceCharge > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-600 dark:text-slate-400">Service Charge ({getSelectedOrderType()?.serviceCharge}%):</span>
+                          <span className="text-slate-800 dark:text-slate-200">${orderTotal.serviceCharge.toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between font-bold border-t border-slate-200 dark:border-slate-600 pt-2">
+                        <span className="text-slate-800 dark:text-slate-200">Total:</span>
+                        <span className="text-orange-600 dark:text-orange-400">${orderTotal.totalAmount.toFixed(2)}</span>
+                      </div>
+                      {estimatedTime > 0 && (
+                        <div className="flex items-center text-slate-600 dark:text-slate-400 mt-2">
+                          <Clock className="h-4 w-4 mr-1" />
+                          <span>Estimated time: {estimatedTime} minutes</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setShowOrderForm(false)}
+                      className="flex-1 py-3 px-4 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      Back to Cart
+                    </button>
+                    <button
+                      onClick={createOrder}
+                      disabled={loading || orderTypes.length === 0 || !orderForm.orderTypeId}
+                      className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50"
+                    >
+                      {loading ? (
+                        <div className="flex items-center justify-center">
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Creating...
+                        </div>
+                      ) : (
+                        'Create Order'
+                      )}
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ) : (
             // Cart View
@@ -764,52 +1034,85 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
                               </div>
 
                               {/* Current Addons */}
-                              {variant.addons && variant.addons.length > 0 && (
-                                <div className="mb-3">
-                                  <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">Add-ons:</p>
-                                  <div className="space-y-2">
-                                    {variant.addons.map((addon) => (
-                                      <div key={addon.branchProductAddonId} className="flex justify-between items-center bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
-                                        <div className="flex-1">
-                                          <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">
-                                            {addon.addonName}
-                                          </span>
-                                          <div className="text-xs text-orange-600 dark:text-orange-400">
-                                            ${addon.price.toFixed(2)} each × {addon.quantity}
-                                          </div>
-                                        </div>
-                                        
-                                        {/* Addon Quantity Controls */}
-                                        <div className="flex items-center space-x-2">
-                                          <div className="flex items-center space-x-1 bg-white dark:bg-slate-700 rounded p-0.5">
-                                            <button
-                                              onClick={() => addon.basketItemId && removeFromBasket(addon.basketItemId)}
-                                              disabled={loading || !addon.basketItemId}
-                                              className="w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded flex items-center justify-center transition-colors disabled:opacity-50"
-                                            >
-                                              <Minus className="h-2 w-2" />
-                                            </button>
-                                            <span className="w-4 text-center font-bold text-xs text-slate-800 dark:text-slate-100">
-                                              {addon.quantity}
-                                            </span>
-                                            <button
-                                              onClick={() => addon.basketItemId && handleAddonQuantityIncrease(addon.basketItemId)}
-                                              disabled={loading || !addon.basketItemId}
-                                              className="w-4 h-4 bg-orange-500 hover:bg-orange-600 text-white rounded flex items-center justify-center transition-colors disabled:opacity-50"
-                                            >
-                                              <Plus className="h-2 w-2" />
-                                            </button>
-                                          </div>
+                             {variant.addons && variant.addons.length > 0 && (
+  <div className="mb-3">
+    <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">Add-ons:</p>
+    <div className="space-y-2">
+      {variant.addons.map((addon) => {
+        const canDecrease = canDecreaseAddonQuantity(addon)
+        const canIncrease = canIncreaseAddonQuantity(addon)
+        const quantityError = getAddonQuantityError(addon)
+        
+        return (
+          <div key={addon.branchProductAddonId} className="flex justify-between items-center bg-amber-50 dark:bg-amber-900/20 p-2 rounded">
+            <div className="flex-1">
+              <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                {addon.addonName}
+              </span>
+              <div className="text-xs text-orange-600 dark:text-orange-400">
+                ${addon.price.toFixed(2)} each × {addon.quantity}
+              </div>
+              {/* Min/Max quantity info */}
+              {(addon.minQuantity || addon.maxQuantity) && (
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  {addon.minQuantity && addon.maxQuantity 
+                    ? `Qty: ${addon.minQuantity}-${addon.maxQuantity}`
+                    : addon.minQuantity 
+                    ? `Min: ${addon.minQuantity}`
+                    : `Max: ${addon.maxQuantity}`
+                  }
+                </div>
+              )}
+              {/* Quantity error message */}
+              {quantityError && (
+                <div className="text-xs text-red-500 dark:text-red-400 mt-1">
+                  {quantityError}
+                </div>
+              )}
+            </div>
+            
+            {/* Addon Quantity Controls */}
+            <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1 bg-white dark:bg-slate-700 rounded p-0.5">
+                <button
+                  onClick={() => addon.basketItemId && removeFromBasket(addon.basketItemId)}
+                  disabled={loading || !addon.basketItemId || !canDecrease}
+                  className={`w-4 h-4 text-white rounded flex items-center justify-center transition-colors disabled:opacity-50 ${
+                    canDecrease 
+                      ? 'bg-red-500 hover:bg-red-600' 
+                      : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+                  title={!canDecrease ? `Minimum quantity is ${addon.minQuantity || 0}` : 'Decrease quantity'}
+                >
+                  <Minus className="h-2 w-2" />
+                </button>
+                <span className="w-4 text-center font-bold text-xs text-slate-800 dark:text-slate-100">
+                  {addon.quantity}
+                </span>
+                <button
+                  onClick={() => addon.basketItemId && handleAddonQuantityIncrease(addon.basketItemId)}
+                  disabled={loading || !addon.basketItemId || !canIncrease}
+                  className={`w-4 h-4 text-white rounded flex items-center justify-center transition-colors disabled:opacity-50 ${
+                    canIncrease 
+                      ? 'bg-orange-500 hover:bg-orange-600' 
+                      : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+                  title={!canIncrease ? `Maximum quantity is ${addon.maxQuantity}` : 'Increase quantity'}
+                >
+                  <Plus className="h-2 w-2" />
+                </button>
+              </div>
 
-                                          <div className="text-xs font-medium text-orange-600 dark:text-orange-400 ml-1">
-                                            +${(addon.price * addon.quantity).toFixed(2)}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
+              <div className="text-xs font-medium text-orange-600 dark:text-orange-400 ml-1">
+                +${(addon.price * addon.quantity).toFixed(2)}
+              </div>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  </div>
+)}
 
                               {/* Variant Total */}
                               <div className="flex justify-between items-center pt-2 border-t border-slate-200/50 dark:border-slate-600/50">
@@ -866,6 +1169,9 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
           )}
         </div>
       </div>
+
+      {/* Price Change Confirmation Modal */}
+      <PriceChangeModal />
     </div>
   )
 }

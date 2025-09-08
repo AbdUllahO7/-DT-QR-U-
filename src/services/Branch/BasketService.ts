@@ -37,6 +37,8 @@ export interface BasketItem {
   addonItems: BasketAddonItem[];
   addonPrice: number | null;
   addonNote: string | null;
+  maxQuantity:number;
+  minQuantity:number;
 }
 
 // Basket interface
@@ -88,6 +90,23 @@ export interface UpdateBasketItemDto {
   basketId: string;
   branchProductId: number;
   quantity: number;
+}
+
+// Price change interfaces
+export interface PriceChange {
+  branchProductId: number;
+  productName: string;
+  oldPrice: number;
+  newPrice: number;
+  quantity: number;
+  basketItemId: number;
+}
+
+export interface BasketResponse {
+  basketId: string;
+  basketItems: BasketItem[];
+  totalPrice: number;
+  totalQuantity: number;
 }
 
 class BasketService {
@@ -142,77 +161,77 @@ class BasketService {
   }
 
   // GET /api/Basket/my-basket
-async getMyBasket(): Promise<Basket> {
-  try {
-    logger.info('My basket getirme isteği gönderiliyor', {}, { prefix: 'BasketService' });
-    
-    const url = `${this.baseUrl}/my-basket`;
-    const response = await httpClient.get(url);
-    
-    // Let's see the exact structure
-    console.log("Full Response:", response);
-    console.log("Response.data:", response.data);
-    console.log("Response.data.data:", response.data.data);
-    
-    // Try to access the basket data safely
-    let basketData;
-    
-    // Check if the data is directly in response.data
-    if (response.data && response.data.basketId) {
-      basketData = response.data;
-      console.log("Found basket data in response.data");
-    }
-    // Check if the data is nested in response.data.data
-    else if (response.data && response.data.data && response.data.data.basketId) {
-      basketData = response.data.data;
-      console.log("Found basket data in response.data.data");
-    }
-    // If no basket exists, return empty basket
-    else {
-      console.log("No basket found, returning empty basket");
-      return {
-        basketId: 'empty',
-        items: [],
-        totalAmount: 0,
-        totalQuantity: 0
+  async getMyBasket(): Promise<Basket> {
+    try {
+      logger.info('My basket getirme isteği gönderiliyor', {}, { prefix: 'BasketService' });
+      
+      const url = `${this.baseUrl}/my-basket`;
+      const response = await httpClient.get(url);
+      
+      // Let's see the exact structure
+      console.log("Full Response:", response);
+      console.log("Response.data:", response.data);
+      console.log("Response.data.data:", response.data.data);
+      
+      // Try to access the basket data safely
+      let basketData;
+      
+      // Check if the data is directly in response.data
+      if (response.data && response.data.basketId) {
+        basketData = response.data;
+        console.log("Found basket data in response.data");
+      }
+      // Check if the data is nested in response.data.data
+      else if (response.data && response.data.data && response.data.data.basketId) {
+        basketData = response.data.data;
+        console.log("Found basket data in response.data.data");
+      }
+      // If no basket exists, return empty basket
+      else {
+        console.log("No basket found, returning empty basket");
+        return {
+          basketId: 'empty',
+          items: [],
+          totalAmount: 0,
+          totalQuantity: 0
+        };
+      }
+      
+      console.log("Final basketData:", basketData);
+      
+      const basket: Basket = {
+        basketId: basketData.basketId || 'unknown',
+        items: basketData.basketItems || [],
+        totalAmount: basketData.totalPrice || 0,
+        totalQuantity: basketData.totalQuantity || 0
       };
+      
+      logger.info('My basket başarıyla alındı', { 
+        basketId: basket.basketId,
+        itemsCount: basket.items.length,
+        totalAmount: basket.totalAmount,
+        totalQuantity: basket.totalQuantity
+      }, { prefix: 'BasketService' });
+      
+      console.log("Final basket:", basket);
+      return basket;
+    } catch (error: any) {
+      logger.error('My basket getirme hatası', error, { prefix: 'BasketService' });
+      
+      // Instead of throwing error, return empty basket when basket doesn't exist
+      if (error?.response?.status === 404) {
+        console.log("Basket not found (404), returning empty basket");
+        return {
+          basketId: 'empty',
+          items: [],
+          totalAmount: 0,
+          totalQuantity: 0
+        };
+      }
+      
+      this.handleError(error, 'My basket getirilirken hata oluştu');
     }
-    
-    console.log("Final basketData:", basketData);
-    
-    const basket: Basket = {
-      basketId: basketData.basketId || 'unknown',
-      items: basketData.basketItems || [],
-      totalAmount: basketData.totalPrice || 0,
-      totalQuantity: basketData.totalQuantity || 0
-    };
-    
-    logger.info('My basket başarıyla alındı', { 
-      basketId: basket.basketId,
-      itemsCount: basket.items.length,
-      totalAmount: basket.totalAmount,
-      totalQuantity: basket.totalQuantity
-    }, { prefix: 'BasketService' });
-    
-    console.log("Final basket:", basket);
-    return basket;
-  } catch (error: any) {
-    logger.error('My basket getirme hatası', error, { prefix: 'BasketService' });
-    
-    // Instead of throwing error, return empty basket when basket doesn't exist
-    if (error?.response?.status === 404) {
-      console.log("Basket not found (404), returning empty basket");
-      return {
-        basketId: 'empty',
-        items: [],
-        totalAmount: 0,
-        totalQuantity: 0
-      };
-    }
-    
-    this.handleError(error, 'My basket getirilirken hata oluştu');
   }
-}
 
   // DELETE /api/Basket/my-basket
   async deleteMyBasket(): Promise<void> {
@@ -228,6 +247,23 @@ async getMyBasket(): Promise<Basket> {
       this.handleError(error, 'My basket silinirken hata oluştu');
     }
   }
+
+  // POST /api/Basket/session/{sessionId}/confirm-price-changes
+  async confirmSessionPriceChanges(sessionId: string): Promise<void> {
+    try {
+      logger.info('Session price changes onaylama isteği gönderiliyor', { sessionId }, { prefix: 'BasketService' });
+      
+      const url = `${this.baseUrl}/session/${sessionId}/confirm-price-changes`;
+      await httpClient.post(url);
+      
+      logger.info('Session price changes başarıyla onaylandı', { sessionId }, { prefix: 'BasketService' });
+    } catch (error: any) {
+      logger.error('Session price changes onaylama hatası', error, { prefix: 'BasketService' });
+      this.handleError(error, 'Price changes onaylanırken hata oluştu');
+    }
+  }
+
+
 
   // GET /api/Basket/products/{branchProductId}/recommended-addons
   async getRecommendedAddons(branchProductId: number): Promise<RecommendedAddon[]> {
@@ -328,35 +364,35 @@ async getMyBasket(): Promise<Basket> {
   }
 
   // PUT /api/Basket/my-basket/items/{basketItemId}
-async updateMyBasketItem(basketItemId: number, data: UpdateBasketItemDto): Promise<BasketItem> {
-  try {
-    logger.info('My basket item güncelleme isteği gönderiliyor', { basketItemId, data }, { prefix: 'BasketService' });
-    console.log("Updating basket item:", basketItemId, data);
-    
-    const url = `${this.baseUrl}/my-basket/items/${basketItemId}`;
-    
-    // The API expects basketId at the top level and the rest in updateDto
-    const requestBody = {
-      basketId: data.basketId,  // basketId at top level
-      updateDto: {
-        basketItemId: data.basketItemId,
-        branchProductId: data.branchProductId,
-        quantity: data.quantity
-      }
-    };
-    
-    console.log("Request body:", requestBody);
-    
-    const response = await httpClient.put<BasketItem>(url, requestBody);
-    
-    logger.info('My basket item başarıyla güncellendi', { basketItemId }, { prefix: 'BasketService' });
-    
-    return response.data;
-  } catch (error: any) {
-    logger.error('My basket item güncelleme hatası', error, { prefix: 'BasketService' });
-    this.handleError(error, 'My basket item güncellenirken hata oluştu');
+  async updateMyBasketItem(basketItemId: number, data: UpdateBasketItemDto): Promise<BasketItem> {
+    try {
+      logger.info('My basket item güncelleme isteği gönderiliyor', { basketItemId, data }, { prefix: 'BasketService' });
+      console.log("Updating basket item:", basketItemId, data);
+      
+      const url = `${this.baseUrl}/my-basket/items/${basketItemId}`;
+      
+      // The API expects basketId at the top level and the rest in updateDto
+      const requestBody = {
+        basketId: data.basketId,  // basketId at top level
+        updateDto: {
+          basketItemId: data.basketItemId,
+          branchProductId: data.branchProductId,
+          quantity: data.quantity
+        }
+      };
+      
+      console.log("Request body:", requestBody);
+      
+      const response = await httpClient.put<BasketItem>(url, requestBody);
+      
+      logger.info('My basket item başarıyla güncellendi', { basketItemId }, { prefix: 'BasketService' });
+      
+      return response.data;
+    } catch (error: any) {
+      logger.error('My basket item güncelleme hatası', error, { prefix: 'BasketService' });
+      this.handleError(error, 'My basket item güncellenirken hata oluştu');
+    }
   }
-}
 
   // DELETE /api/Basket/my-basket/items/{basketItemId}
   async deleteMyBasketItem(basketItemId: number): Promise<void> {
