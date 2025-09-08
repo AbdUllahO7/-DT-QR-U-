@@ -19,6 +19,10 @@ export interface OrderType {
   estimatedMinutes: number;
   activeOrderCount: number;
   rowVersion: string;
+  // Additional fields from the new API response
+  branchId?: number;
+  createdAt?: string;
+  updatedAt?: string | null;
 }
 
 // Update OrderType DTO
@@ -111,6 +115,59 @@ class OrderTypeService {
       logger.error('Error response data:', error?.response?.data, { prefix: 'OrderTypeService' });
       
       this.handleError(error, 'OrderType listesi getirilirken hata oluştu');
+    }
+  }
+
+  async getOrderTypesBySessionId(): Promise<OrderType[]> {
+    try {
+      logger.info('Session OrderType listesi getirme isteği gönderiliyor', { prefix: 'OrderTypeService' });
+      
+      const response = await httpClient.get<OrderType[]>(`${this.baseUrl}/GetOrderTypesBySessionId`);
+      
+      logger.info('Session OrderType API Raw Response:', response, { prefix: 'OrderTypeService' });
+      logger.info('Session OrderType API Response Data:', response.data, { prefix: 'OrderTypeService' });
+      
+      let orderTypes: OrderType[] = [];
+      
+      // Handle response - expecting direct array based on your example
+      if (Array.isArray(response.data)) {
+        orderTypes = response.data;
+      } else if (response.data && typeof response.data === 'object' && 'data' in response.data) {
+        // Handle wrapped response if needed
+        const apiData = (response.data as any).data;
+        if (Array.isArray(apiData)) {
+          orderTypes = apiData;
+        } else if (apiData) {
+          orderTypes = [apiData];
+        }
+      } else if (response.data) {
+        // Single object response
+        orderTypes = [response.data as OrderType];
+      }
+      
+      logger.info('Session OrderType listesi başarıyla alındı', { 
+        orderTypeCount: orderTypes.length,
+        orderTypes: orderTypes.map(ot => ({ 
+          id: ot.id, 
+          name: ot.name, 
+          code: ot.code, 
+          isActive: ot.isActive,
+          branchId: ot.branchId,
+          requiresTable: ot.requiresTable,
+          requiresAddress: ot.requiresAddress,
+          requiresPhone: ot.requiresPhone,
+          serviceCharge: ot.serviceCharge,
+          estimatedMinutes: ot.estimatedMinutes
+        }))
+      }, { prefix: 'OrderTypeService' });
+      
+      return orderTypes;
+    } catch (error: any) {
+      logger.error('Session OrderType listesi getirme hatası', error, { prefix: 'OrderTypeService' });
+      logger.error('Error response:', error?.response, { prefix: 'OrderTypeService' });
+      logger.error('Error response data:', error?.response?.data, { prefix: 'OrderTypeService' });
+      
+      this.handleError(error, 'Session OrderType listesi getirilirken hata oluştu');
     }
   }
 
