@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, AlertCircle, CheckCircle, Loader2, Clock, DollarSign, Phone, MapPin, Users } from 'lucide-react';
-import { OrderType, orderTypeService, UpdateOrderTypeDto, UpdateOrderTypeSettingsDto } from '../../../../services/Branch/BranchOrderTypeService';
+import { Settings, Save, AlertCircle, CheckCircle, Loader2, Clock, DollarSign,  Users } from 'lucide-react';
+import { OrderType, orderTypeService, UpdateOrderTypeSettingsDto } from '../../../../services/Branch/BranchOrderTypeService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 
 const OrderTypeComponent = () => {
