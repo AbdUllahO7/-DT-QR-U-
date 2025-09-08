@@ -26,7 +26,7 @@ import OrderTypeComponeent from '../components/dashboard/Branch/OrderType/Ordert
 import Overview from '../components/dashboard/content/overview/Overview';
 import Orders from '../components/dashboard/content/orders/Orders';
 import TableManagement from '../components/dashboard/content/table-management/TableManagement';
-import OrderManagementDashboard from '../components/dashboard/Branch/Orders/OrderManagement';
+import OrdersManager from '../components/dashboard/Branch/Orders/OrderManagement';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();
@@ -205,7 +205,7 @@ const Dashboard: React.FC = () => {
               {activeTab === 'TableManagement' && <BranchTableManagement />}
               {activeTab === 'BranchManagement' && <BranchManagementBranch />}
               {activeTab === 'orderType' && <OrderTypeComponeent />}
-              {activeTab === 'Branchorders' && <OrderManagementDashboard/>}
+              {activeTab === 'Branchorders' && <OrdersManager/>}
 
       
         </main>
