@@ -446,53 +446,53 @@ class OrderService {
   }
 
   // Helper methods for status management - Updated for new API format
-getOrderStatusText(status: OrderStatus | string): string {
-    if (typeof status === 'string') {
-      // Handle string status from new API
-      switch (status.toLowerCase()) {
-        case 'pending':
+  getOrderStatusText(status: OrderStatus | string): string {
+      if (typeof status === 'string') {
+        // Handle string status from new API
+        switch (status.toLowerCase()) {
+          case 'pending':
+            return 'Bekliyor';
+          case 'confirmed':
+            return 'Onaylandı';
+          case 'preparing':
+            return 'Hazırlanıyor';
+          case 'ready':
+            return 'Hazır';
+          case 'completed':
+            return 'Tamamlandı';
+          case 'delivered':
+            return 'Teslim Edildi';
+          case 'cancelled':
+            return 'İptal Edildi';
+          case 'rejected':
+            return 'Reddedildi';
+          default:
+            return 'Bilinmeyen';
+        }
+      }
+      
+      // Handle numeric enum status
+      switch (status) {
+        case OrderStatus.Pending:
           return 'Bekliyor';
-        case 'confirmed':
+        case OrderStatus.Confirmed:
           return 'Onaylandı';
-        case 'preparing':
+        case OrderStatus.Preparing:
           return 'Hazırlanıyor';
-        case 'ready':
+        case OrderStatus.Ready:
           return 'Hazır';
-        case 'completed':
+        case OrderStatus.Completed:
           return 'Tamamlandı';
-        case 'delivered':
-          return 'Teslim Edildi';
-        case 'cancelled':
+        case OrderStatus.Cancelled:
           return 'İptal Edildi';
-        case 'rejected':
+        case OrderStatus.Rejected:
           return 'Reddedildi';
+        case OrderStatus.Delivered:
+          return 'Teslim Edildi';
         default:
           return 'Bilinmeyen';
       }
     }
-    
-    // Handle numeric enum status
-    switch (status) {
-      case OrderStatus.Pending:
-        return 'Bekliyor';
-      case OrderStatus.Confirmed:
-        return 'Onaylandı';
-      case OrderStatus.Preparing:
-        return 'Hazırlanıyor';
-      case OrderStatus.Ready:
-        return 'Hazır';
-      case OrderStatus.Completed:
-        return 'Tamamlandı';
-      case OrderStatus.Cancelled:
-        return 'İptal Edildi';
-      case OrderStatus.Rejected:
-        return 'Reddedildi';
-      case OrderStatus.Delivered:
-        return 'Teslim Edildi';
-      default:
-        return 'Bilinmeyen';
-    }
-  }
 
   // Convert string status to OrderStatus enum
  parseOrderStatus(status: string): OrderStatus {
@@ -706,9 +706,13 @@ getOrderStatusText(status: OrderStatus | string): string {
       throw new Error('Bu işlem için yetkiniz bulunmuyor.');
     } else if (error?.response?.status === 404) {
       throw new Error('Sipariş bulunamadı.');
-    } else if (error?.response?.status === 409) {
-      throw new Error('Bu sipariş zaten işlemde.');
-    } else if (error?.response?.status === 422) {
+    }else if (error?.response?.status === 409) {
+  const originalMessage = error?.response?.data?.message || '';
+  if (originalMessage.toLowerCase().includes('unconfirmed price changes') || 
+      originalMessage.toLowerCase().includes('price changes')) {
+    // Preserve the original message for price change errors
+    throw error; // Re-throw the original error with response data intact
+     } } else if (error?.response?.status === 422) {
       throw new Error('Sipariş durumu bu işleme uygun değil.');
     } else if (error?.response?.status === 0 || !navigator.onLine) {
       throw new Error('İnternet bağlantınızı kontrol edin.');
