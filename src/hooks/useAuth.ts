@@ -21,7 +21,6 @@ export const useAuth = () => {
         if (!isNaN(expiryDate.getTime()) && expiryDate > new Date()) {
           setIsAuthenticated(true);
         } else {
-          console.log('Token expired during checkAuth');
           clearAuth();
         }
       } else {
@@ -52,7 +51,6 @@ export const useAuth = () => {
       const tokenExpiry = localStorage.getItem('tokenExpiry');
 
       if (!token || !tokenExpiry) {
-        console.log('Auth check failed: Token or expiry not found');
         clearAuth();
         navigate('/login', { replace: true });
         return false;
@@ -63,7 +61,6 @@ export const useAuth = () => {
       
       // Geçersiz tarih kontrolü
       if (isNaN(expiryDate.getTime())) {
-        console.log('Auth check failed: Invalid expiry date');
         clearAuth();
         navigate('/login', { replace: true });
         return false;
@@ -71,7 +68,6 @@ export const useAuth = () => {
       
       // Süre dolmuş mu kontrolü
       if (expiryDate <= new Date()) {
-        console.log('Auth check failed: Token expired');
         clearAuth();
         navigate('/login', { replace: true });
         return false;

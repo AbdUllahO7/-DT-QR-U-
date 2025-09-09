@@ -156,13 +156,10 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
     setIsSaving(true);
     setError(null);
     
-    console.log('Toggling addon:', addon);
-    console.log('Assignment ID:', addon.assignmentId);
-    console.log('Is Assigned:', addon.isAssigned);
+
     
     try {
       if (addon.isAssigned && addon.assignmentId) {
-        console.log('Attempting to delete assignment with ID:', addon.assignmentId);
         
         // First update local state optimistically
         setEnhancedAddons(prev => prev.map(a => 
@@ -174,7 +171,6 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
         // Then make the API call
         await branchProductAddonsService.deleteBranchProductAddon(addon.assignmentId);
         
-        console.log('Successfully deleted assignment');
         setSuccessMessage(t('addonModal.messages.success.addonRemoved'));
         
         // Wait a bit before reloading to ensure the deletion is processed
@@ -193,9 +189,7 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
           isGroupRequired: addon.editedIsGroupRequired || false,
         };
 
-        console.log('Creating new assignment with data:', createData);
         const newAssignment = await branchProductAddonsService.createBranchProductAddon(createData);
-        console.log('Successfully created assignment:', newAssignment);
         
         setSuccessMessage(t('addonModal.messages.success.addonAdded'));
       }
