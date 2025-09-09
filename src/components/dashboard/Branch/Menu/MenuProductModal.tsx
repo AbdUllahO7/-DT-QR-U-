@@ -118,7 +118,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
         {/* Header */}
         <div className="sticky top-0 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 p-6 border-b border-slate-200/50 dark:border-slate-700/50">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white">Customize Your Order</h2>
+            <h2 className="text-xl font-bold text-white">{t('productModal.customizeOrder')}</h2>
             <button 
               onClick={onClose}
               className="p-2 hover:bg-white/20 rounded-lg transition-colors"
@@ -130,12 +130,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
         <div className="p-6">
           {/* Product Info */}
-          <div className="flex space-x-4 mb-6 p-4 bg-slate-50/50 dark:bg-slate-800/50 rounded-xl">
+          <div className="flex space-x-4 mb-6 p-4   bg-slate-50/50 dark:bg-slate-800/50 rounded-xl">
             {product.productImageUrl && (
               <img
                 src={product.productImageUrl}
                 alt={product.productName}
-                className="w-20 h-20 object-cover rounded-lg shadow-md"
+                className="w-20 h-20 object-cover ml-2 rounded-lg shadow-md"
               />
             )}
             <div className="flex-1">
@@ -156,7 +156,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                     {product.isRecommended && (
                       <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs px-2 py-1 rounded-full flex items-center">
                         <Award className="h-2 w-2 mr-1" />
-                        Recommended
+                        {t('productModal.recommended')}
                       </span>
                     )}
                   </div>
@@ -169,7 +169,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
           {product.allergens && product.allergens.length > 0 && (
             <div className="mb-6">
               <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
-                Allergen Information
+                {t('productModal.allergenInformation')}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {product.allergens.map((allergen) => (
@@ -191,7 +191,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
             <div className="mb-6">
               <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2 flex items-center">
                 <Utensils className="h-3 w-3 mr-1 text-orange-500" />
-                Ingredients
+                {t('productModal.ingredients')}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {product.ingredients.map((ingredient) => (
@@ -210,7 +210,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
           {product.availableAddons && product.availableAddons.length > 0 && (
             <div className="mb-6">
               <h4 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">
-                Available Add-ons
+                {t('productModal.availableAddons')}
               </h4>
               <div className="space-y-3">
                 {product.availableAddons.map((addon) => {
@@ -248,7 +248,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                                 </span>
                                 {addon.isRecommended && (
                                   <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs px-1.5 py-0.5 rounded-full">
-                                    Recommended
+                                    {t('productModal.recommended')}
                                   </span>
                                 )}
                               </div>
@@ -257,12 +257,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
                               <div className="flex items-center space-x-2 mt-1">
                                 {addon.minQuantity > 1 && (
                                   <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded-full">
-                                    Min: {addon.minQuantity}
+                                    {t('productModal.min')}: {addon.minQuantity}
                                   </span>
                                 )}
                                 {addon.maxQuantity && addon.maxQuantity < 999 && (
                                   <span className="text-xs text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 px-1.5 py-0.5 rounded-full">
-                                    Max: {addon.maxQuantity}
+                                    {t('productModal.max')}: {addon.maxQuantity}
                                   </span>
                                 )}
                               </div>
@@ -328,7 +328,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
                             className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg transition-colors text-sm font-semibold flex items-center space-x-1"
                           >
                             <Plus className="h-3 w-3" />
-                            <span>Add {addon.minQuantity > 1 ? `(${addon.minQuantity})` : ''}</span>
+                            <span>
+                              {t('productModal.add')} {addon.minQuantity > 1 ? `(${addon.minQuantity})` : ''}
+                            </span>
                           </button>
                         )}
                       </div>
@@ -342,7 +344,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
           {/* Order Summary */}
           <div className="border-t border-slate-200 dark:border-slate-700 pt-6">
             <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 p-4 rounded-xl mb-4">
-              <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-3">Order Summary</h4>
+              <h4 className="font-bold text-slate-800 dark:text-slate-100 mb-3">
+                {t('productModal.orderSummary')}
+              </h4>
               
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
@@ -365,7 +369,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
                 
                 <div className="border-t border-slate-300 dark:border-slate-600 pt-2 mt-3">
                   <div className="flex justify-between items-center">
-                    <span className="font-bold text-lg text-slate-800 dark:text-slate-100">Total</span>
+                    <span className="font-bold text-lg text-slate-800 dark:text-slate-100">
+                      {t('productModal.total')}
+                    </span>
                     <span className="font-bold text-xl bg-gradient-to-r from-orange-600 to-pink-500 bg-clip-text text-transparent">
                       ${getTotalPrice().toFixed(2)}
                     </span>
@@ -377,7 +383,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
             {/* Quantity and Add to Cart */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Quantity:</span>
+                <span className="text-sm font-semibol ml-2 text-slate-700 dark:text-slate-300">
+                  {t('productModal.quantity')}:
+                </span>
                 <div className="flex items-center space-x-2 bg-slate-100 dark:bg-slate-700 rounded-lg p-1">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -400,7 +408,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                 className="bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
               >
                 <ShoppingCart className="h-4 w-4" />
-                <span>Add to Cart</span>
+                <span>{t('productModal.addToCart')}</span>
               </button>
             </div>
           </div>

@@ -175,7 +175,7 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
               } ${isRTL ? 'text-right' : 'text-left'}`}
             >
               <BarChart3 className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-              <span>{t('dashboard.order.title')}</span>
+              <span>{t('dashboard.orders.title')}</span>
             </button>
             <button
               onClick={() => handleNavigate('orderType', 'orderType')}

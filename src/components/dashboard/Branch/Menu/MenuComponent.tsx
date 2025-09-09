@@ -13,7 +13,7 @@ import CategoriesSidebar from "./MenuCategoriesSidebar"
 import Footer from "./MneuFooter"
 import { LoadingState, ErrorState } from "./Menustate"
 import ProductGrid from "./MneuProductGrid"
-import CartSidebar from "./MenuCartSidebar"
+import CartSidebar from "./CartSideBar/MenuCartSidebar"
 import ProductModal from "./MenuProductModal"
 import { basketService } from "../../../../services/Branch/BasketService"
 

@@ -18,6 +18,8 @@ export interface BasketAddonItem {
   addonItems: BasketAddonItem[];
   addonPrice: number | null;
   addonNote: string | null;
+  minQuantity:number;
+  maxQuantity:number;
 }
 
 // Main basket item interface based on your API response
