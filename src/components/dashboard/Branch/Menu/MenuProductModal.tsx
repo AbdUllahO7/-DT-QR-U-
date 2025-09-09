@@ -29,7 +29,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const { t } = useLanguage()
   const [selectedAddons, setSelectedAddons] = useState<SelectedAddon[]>([])
   const [quantity, setQuantity] = useState(1)
-  console.log("Product Modal Rendered,", product)
   
   if (!isOpen || !product) return null
 
