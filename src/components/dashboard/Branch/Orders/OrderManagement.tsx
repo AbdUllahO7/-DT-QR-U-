@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, AlertCircle, Package, Truck, Eye, Filter } from 'lucide-react';
-import { orderService, Order, PendingOrder, BranchOrder, OrderStatus, ConfirmOrderDto, RejectOrderDto, UpdateOrderStatusDto } from '../../../../services/Branch/OrderService';
+import { orderService } from '../../../../services/Branch/OrderService';
+import { useLanguage } from '../../../../contexts/LanguageContext';
+import { BranchOrder, ConfirmOrderDto, Order, OrderStatus, PendingOrder, RejectOrderDto, UpdateOrderStatusDto } from '../../../../types/Orders/type';
 
 // Types for component state
 interface OrdersManagerState {
@@ -27,6 +29,10 @@ interface OrdersManagerState {
 }
 
 const OrdersManager: React.FC = () => {
+  const { t ,language} = useLanguage();
+  
+  const lang = language // Get the current language (e.g., 'en', 'tr', 'ar')
+  console.log("Current language in OrdersManager:", language);
   const [state, setState] = useState<OrdersManagerState>({
     pendingOrders: [],
     branchOrders: [],
@@ -83,7 +89,7 @@ const OrdersManager: React.FC = () => {
         fetchBranchOrders();
       }
       setState(prev => ({ ...prev, selectedOrder: updatedOrder, loading: false, activeOrderId: null, activeRowVersion: null }));
-      alert('Sipariş başarıyla onaylandı!');
+      alert(t('ordersManager.orderConfirmedSuccess'));
     } catch (error: any) {
       setState(prev => ({ ...prev, error: error.message, loading: false, activeOrderId: null, activeRowVersion: null }));
     }
@@ -102,7 +108,7 @@ const OrdersManager: React.FC = () => {
         fetchBranchOrders();
       }
       setState(prev => ({ ...prev, selectedOrder: updatedOrder, loading: false, activeOrderId: null, activeRowVersion: null, rejectReason: '' }));
-      alert('Sipariş başarıyla reddedildi!');
+      alert(t('ordersManager.orderRejectedSuccess'));
     } catch (error: any) {
       setState(prev => ({ ...prev, error: error.message, loading: false, activeOrderId: null, activeRowVersion: null, rejectReason: '' }));
     }
@@ -121,13 +127,13 @@ const OrdersManager: React.FC = () => {
         fetchBranchOrders();
       }
       setState(prev => ({ ...prev, selectedOrder: updatedOrder, loading: false, activeOrderId: null, activeRowVersion: null, newStatus: null }));
-      alert('Sipariş durumu başarıyla güncellendi!');
+      alert(t('ordersManager.orderStatusUpdatedSuccess'));
     } catch (error: any) {
       let errorMessage = error.message;
       if (error.response?.status === 400 && error.response?.data?.message.includes('Invalid status transition')) {
-        errorMessage = `Geçersiz durum geçişi: Lütfen önce siparişi onaylayın (Onaylandı durumuna geçin).`;
+        errorMessage = t('ordersManager.errorInvalidStatusTransition');
       } else if (error.response?.status === 400 && error.response?.data?.message.includes('cannot be confirmed')) {
-        errorMessage = `Bu sipariş onaylanamaz. Mevcut durum: ${error.response?.data?.message.split('Current status: ')[1] || 'Bilinmeyen'}.`;
+        errorMessage = t('ordersManager.errorCannotConfirm', { currentStatus: error.response?.data?.message.split('Current status: ')[1] || t('ordersManager.unknownStatus') });
       }
       setState(prev => ({ ...prev, error: errorMessage, loading: false, activeOrderId: null, activeRowVersion: null, newStatus: null }));
     }
@@ -318,8 +324,8 @@ const OrdersManager: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Sipariş Yönetimi</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">Restoranınızın siparişlerini kolayca yönetin ve takip edin.</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">{t('ordersManager.title')}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-2">{t('ordersManager.description')}</p>
         </div>
 
         {/* View Mode Toggle */}
@@ -333,7 +339,7 @@ const OrdersManager: React.FC = () => {
                   : 'bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
               }`}
             >
-              Bekleyen Siparişler ({state.pendingOrders.length})
+              {t('ordersManager.pendingOrders')} ({state.pendingOrders.length})
             </button>
             <button
               onClick={() => switchViewMode('branch')}
@@ -343,7 +349,7 @@ const OrdersManager: React.FC = () => {
                   : 'bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
               }`}
             >
-              Şube Siparişleri ({state.branchOrders.length})
+              {t('ordersManager.branchOrders')} ({state.branchOrders.length})
             </button>
           </div>
 
@@ -352,14 +358,15 @@ const OrdersManager: React.FC = () => {
             <div className="flex items-center space-x-2">
               <Filter className="w-4 h-4 text-gray-500" />
               <select
+                title={t('ordersManager.statusFilter')}
                 value={state.statusFilter}
                 onChange={(e) => setState(prev => ({ ...prev, statusFilter: e.target.value === 'all' ? 'all' : parseInt(e.target.value) as OrderStatus }))}
                 className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="all">Tüm Durumlar</option>
+                <option value="all">{t('ordersManager.allStatuses')}</option>
                 {Object.values(OrderStatus).filter(v => typeof v === 'number').map((status) => (
                   <option key={status} value={status}>
-                    {orderService.getOrderStatusText(status as OrderStatus)}
+                    {orderService.getOrderStatusText(status as OrderStatus, lang)}
                   </option>
                 ))}
               </select>
@@ -391,7 +398,7 @@ const OrdersManager: React.FC = () => {
               <div className="text-center py-12">
                 <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-lg text-gray-500 dark:text-gray-400">
-                  Henüz {state.viewMode === 'pending' ? 'bekleyen' : 'şube'} sipariş yok.
+                  {t('ordersManager.noOrders', { viewMode: state.viewMode === 'pending' ? t('ordersManager.pendingOrders').toLowerCase() : t('ordersManager.branchOrders').toLowerCase() })}
                 </p>
               </div>
             ) : (
@@ -404,29 +411,29 @@ const OrdersManager: React.FC = () => {
                           onClick={() => handleSort('customerName')}
                           className="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-100"
                         >
-                          <span>Müşteri</span>
+                          <span>{t('ordersManager.customer')}</span>
                           {state.sortField === 'customerName' && (
                             state.sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
                           )}
                         </button>
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Sipariş No
+                        {t('ordersManager.orderNumber')}
                       </th>
                       {state.viewMode === 'branch' && (
                         <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                          Durum
+                          {t('ordersManager.status')}
                         </th>
                       )}
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        Masa
+                        {t('ordersManager.table')}
                       </th>
                       <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                         <button
                           onClick={() => handleSort('totalPrice')}
                           className="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-100"
                         >
-                          <span>Tutar</span>
+                          <span>{t('ordersManager.amount')}</span>
                           {state.sortField === 'totalPrice' && (
                             state.sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
                           )}
@@ -437,14 +444,14 @@ const OrdersManager: React.FC = () => {
                           onClick={() => handleSort('createdAt')}
                           className="flex items-center space-x-1 hover:text-gray-700 dark:hover:text-gray-100"
                         >
-                          <span>Tarih</span>
+                          <span>{t('ordersManager.date')}</span>
                           {state.sortField === 'createdAt' && (
                             state.sortDirection === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />
                           )}
                         </button>
                       </th>
                       <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                        İşlemler
+                        {t('ordersManager.actions')}
                       </th>
                     </tr>
                   </thead>
@@ -484,7 +491,7 @@ const OrdersManager: React.FC = () => {
                               <td className="px-6 py-4 whitespace-nowrap">
                                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusBadgeClass(status)}`}>
                                   {getStatusIcon(status)}
-                                  <span className="ml-1">{orderService.getOrderStatusText(status)}</span>
+                                  <span className="ml-1">{orderService.getOrderStatusText(status, lang)}</span>
                                 </span>
                               </td>
                             )}
@@ -493,13 +500,13 @@ const OrdersManager: React.FC = () => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                {order.totalPrice.toFixed(2)} TL
+                                {order.totalPrice.toFixed(2)}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                              {new Date(order.createdAt).toLocaleDateString('tr-TR')}
+                              {new Date(order.createdAt).toLocaleDateString(lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US')}
                               <div className="text-xs">
-                                {new Date(order.createdAt).toLocaleTimeString('tr-TR')}
+                                {new Date(order.createdAt).toLocaleTimeString(lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US')}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -507,35 +514,33 @@ const OrdersManager: React.FC = () => {
                                 <button
                                   onClick={() => openDetailsModal(order)}
                                   className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-1 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors"
-                                  title="Detayları Görüntüle"
+                                  title={t('ordersManager.viewDetails')}
                                 >
                                   <Eye className="w-4 h-4" />
                                 </button>
-                                
                                 {orderService.canModifyOrder(status) && (
                                   <button
                                     onClick={() => openConfirmModal(order.id.toString(), rowVersion)}
                                     className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 p-1 rounded hover:bg-green-100 dark:hover:bg-green-900 transition-colors"
                                     disabled={state.loading}
-                                    title="Onayla"
+                                    title={t('ordersManager.confirm')}
                                   >
                                     <CheckCircle className="w-4 h-4" />
                                   </button>
                                 )}
-                                
                                 {orderService.canCancelOrder(status) && (
                                   <button
                                     onClick={() => openRejectModal(order.id.toString(), rowVersion)}
                                     className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
                                     disabled={state.loading}
-                                    title="Reddet"
+                                    title={t('ordersManager.reject')}
                                   >
                                     <XCircle className="w-4 h-4" />
                                   </button>
                                 )}
-                                
                                 {validStatuses.length > 0 && (
                                   <select
+                                    title={t('ordersManager.changeStatus')}
                                     onChange={(e) => {
                                       const newStatus = parseInt(e.target.value) as OrderStatus;
                                       if (newStatus !== status) {
@@ -547,10 +552,10 @@ const OrdersManager: React.FC = () => {
                                     disabled={state.loading}
                                     defaultValue=""
                                   >
-                                    <option value="" disabled>Durum Değiştir</option>
+                                    <option value="" disabled>{t('ordersManager.changeStatus')}</option>
                                     {validStatuses.map((validStatus) => (
                                       <option key={validStatus} value={validStatus}>
-                                        {orderService.getOrderStatusText(validStatus)}
+                                        {orderService.getOrderStatusText(validStatus, lang)}
                                       </option>
                                     ))}
                                   </select>
@@ -558,7 +563,6 @@ const OrdersManager: React.FC = () => {
                               </div>
                             </td>
                           </tr>
-                          
                           {/* Expanded Row Content */}
                           {isExpanded && (
                             <tr>
@@ -566,7 +570,7 @@ const OrdersManager: React.FC = () => {
                                 <div className="space-y-3">
                                   {flatItems.length > 0 && (
                                     <div>
-                                      <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">Sipariş Ürünleri:</h4>
+                                      <h4 className="font-medium text-gray-700 dark:text-gray-300 mb-2">{t('ordersManager.orderItems')}</h4>
                                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                                         {flatItems.map((item, i) => (
                                           <div key={i} className={`text-sm p-2 rounded ${item.isAddon ? 'bg-gray-100 dark:bg-gray-600 ml-4' : 'bg-white dark:bg-gray-800'}`}>
@@ -574,11 +578,11 @@ const OrdersManager: React.FC = () => {
                                               <span className={item.isAddon ? 'text-gray-600 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}>
                                                 {item.isAddon && '↳ '}{item.productName} x{orderService.getItemQuantity(item)}
                                               </span>
-                                              <span className="font-medium">{item.totalPrice.toFixed(2)} TL</span>
+                                              <span className="font-medium">{item.totalPrice.toFixed(2)}</span>
                                             </div>
                                             {orderService.getItemNotes(item) && (
                                               <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                Not: {orderService.getItemNotes(item)}
+                                                {t('ordersManager.notes')}: {orderService.getItemNotes(item)}
                                               </div>
                                             )}
                                           </div>
@@ -586,24 +590,23 @@ const OrdersManager: React.FC = () => {
                                       </div>
                                     </div>
                                   )}
-                                  
                                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                                     <div>
-                                      <span className="font-medium text-gray-700 dark:text-gray-300">Oluşturulma:</span>
+                                      <span className="font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.createdAt')}:</span>
                                       <div className="text-gray-600 dark:text-gray-400">
-                                        {new Date(order.createdAt).toLocaleString('tr-TR')}
+                                        {new Date(order.createdAt).toLocaleString(lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US')}
                                       </div>
                                     </div>
                                     {'confirmedAt' in order && order.confirmedAt && (
                                       <div>
-                                        <span className="font-medium text-gray-700 dark:text-gray-300">Onaylanma:</span>
+                                        <span className="font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.confirmedAt')}:</span>
                                         <div className="text-gray-600 dark:text-gray-400">
-                                          {new Date(order.confirmedAt).toLocaleString('tr-TR')}
+                                          {new Date(order.confirmedAt).toLocaleString(lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US')}
                                         </div>
                                       </div>
                                     )}
                                     <div>
-                                      <span className="font-medium text-gray-700 dark:text-gray-300">Row Version:</span>
+                                      <span className="font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.rowVersion')}:</span>
                                       <div className="text-gray-600 dark:text-gray-400 font-mono text-xs">
                                         {rowVersion}
                                       </div>
@@ -629,22 +632,22 @@ const OrdersManager: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl">
               <div className="flex items-center mb-4">
                 <CheckCircle className="w-6 h-6 text-green-600 mr-3" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Siparişi Onayla</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('ordersManager.confirmOrderTitle')}</h3>
               </div>
-              <p className="text-gray-600 dark:text-gray-400 mb-6">Bu siparişi onaylamak istediğinizden emin misiniz?</p>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">{t('ordersManager.confirmOrderPrompt')}</p>
               <div className="flex justify-end gap-3">
                 <button
                   onClick={closeModals}
                   className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors duration-200"
                 >
-                  İptal
+                  {t('ordersManager.cancel')}
                 </button>
                 <button
                   onClick={handleConfirmOrder}
                   className="px-4 py-2 bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors duration-200"
                   disabled={state.loading}
                 >
-                  {state.loading ? 'Onaylanıyor...' : 'Onayla'}
+                  {state.loading ? t('ordersManager.confirming') : t('ordersManager.confirmAction')}
                 </button>
               </div>
             </div>
@@ -657,29 +660,29 @@ const OrdersManager: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl">
               <div className="flex items-center mb-4">
                 <XCircle className="w-6 h-6 text-red-600 mr-3" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Siparişi Reddet</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('ordersManager.rejectOrderTitle')}</h3>
               </div>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">Reddetme nedenini girin:</p>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">{t('ordersManager.rejectOrderPrompt')}</p>
               <textarea
                 value={state.rejectReason}
                 onChange={(e) => setState(prev => ({ ...prev, rejectReason: e.target.value }))}
                 className="w-full p-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 dark:focus:ring-red-400 mb-6"
                 rows={4}
-                placeholder="Reddetme nedeni..."
+                placeholder={t('ordersManager.rejectReasonPlaceholder')}
               />
               <div className="flex justify-end gap-3">
                 <button
                   onClick={closeModals}
                   className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors duration-200"
                 >
-                  İptal
+                  {t('ordersManager.cancel')}
                 </button>
                 <button
                   onClick={handleRejectOrder}
                   className="px-4 py-2 bg-red-600 dark:bg-red-500 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors duration-200"
                   disabled={!state.rejectReason.trim() || state.loading}
                 >
-                  {state.loading ? 'Reddediliyor...' : 'Reddet'}
+                  {state.loading ? t('ordersManager.rejecting') : t('ordersManager.rejectAction')}
                 </button>
               </div>
             </div>
@@ -692,24 +695,24 @@ const OrdersManager: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4 shadow-2xl">
               <div className="flex items-center mb-4">
                 {getStatusIcon(state.newStatus)}
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 ml-3">Durumu Güncelle</h3>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 ml-3">{t('ordersManager.updateStatusTitle')}</h3>
               </div>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Sipariş durumunu <span className="font-medium text-gray-900 dark:text-gray-100">{orderService.getOrderStatusText(state.newStatus)}</span> olarak güncellemek istediğinizden emin misiniz?
+                {t('ordersManager.updateStatusPrompt', { status: orderService.getOrderStatusText(state.newStatus, lang) })}
               </p>
               <div className="flex justify-end gap-3">
                 <button
                   onClick={closeModals}
                   className="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors duration-200"
                 >
-                  İptal
+                  {t('ordersManager.cancel')}
                 </button>
                 <button
                   onClick={handleUpdateStatus}
                   className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors duration-200"
                   disabled={state.loading}
                 >
-                  {state.loading ? 'Güncelleniyor...' : 'Güncelle'}
+                  {state.loading ? t('ordersManager.updating') : t('ordersManager.updateAction')}
                 </button>
               </div>
             </div>
@@ -723,7 +726,7 @@ const OrdersManager: React.FC = () => {
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
                   <Eye className="w-6 h-6 text-indigo-600 mr-3" />
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Sipariş Detayları</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('ordersManager.orderDetailsTitle')}</h3>
                 </div>
                 <button
                   onClick={closeModals}
@@ -732,34 +735,32 @@ const OrdersManager: React.FC = () => {
                   <XCircle className="w-6 h-6" />
                 </button>
               </div>
-              
               <div className="space-y-6">
                 {/* Order Info */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Müşteri Adı</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.customer')}</label>
                     <p className="mt-1 text-gray-900 dark:text-gray-100">{state.selectedOrder.customerName}</p>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Sipariş No</label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.orderNumber')}</label>
                     <p className="mt-1 text-gray-900 dark:text-gray-100 font-mono">{state.selectedOrder.orderTag}</p>
                   </div>
                   {state.selectedOrder && typeof (state.selectedOrder as any).tableName === 'string' && (state.selectedOrder as any).tableName && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Masa</label>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.table')}</label>
                       <p className="mt-1 text-gray-900 dark:text-gray-100">{(state.selectedOrder as any).tableName}</p>
                     </div>
                   )}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Toplam Tutar</label>
-                    <p className="mt-1 text-lg font-bold text-green-600 dark:text-green-400">{state.selectedOrder.totalPrice.toFixed(2)} TL</p>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.amountLabel')}</label>
+                    <p className="mt-1 text-lg font-bold text-green-600 dark:text-green-400">{state.selectedOrder.totalPrice.toFixed(2)}</p>
                   </div>
                 </div>
-
                 {/* Items */}
                 {'items' in state.selectedOrder && state.selectedOrder.items && (
                   <div>
-                    <h4 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-3">Sipariş Ürünleri</h4>
+                    <h4 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-3">{t('ordersManager.orderItems')}</h4>
                     <div className="space-y-2">
                       {orderService.getFlatItemList(state.selectedOrder.items).map((item, i) => (
                         <div key={i} className={`p-3 rounded-lg ${item.isAddon ? 'bg-gray-100 dark:bg-gray-600 ml-6' : 'bg-gray-50 dark:bg-gray-700'}`}>
@@ -769,16 +770,16 @@ const OrdersManager: React.FC = () => {
                                 {item.isAddon && '↳ '}{item.productName}
                               </p>
                               <p className="text-sm text-gray-500 dark:text-gray-400">
-                                Miktar: {orderService.getItemQuantity(item)}
+                                {t('ordersManager.quantity')}: {orderService.getItemQuantity(item)}
                               </p>
                               {orderService.getItemNotes(item) && (
                                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                  Not: {orderService.getItemNotes(item)}
+                                  {t('ordersManager.notes')}: {orderService.getItemNotes(item)}
                                 </p>
                               )}
                             </div>
                             <div className="text-right">
-                              <p className="font-bold text-gray-900 dark:text-gray-100">{item.totalPrice.toFixed(2)} TL</p>
+                              <p className="font-bold text-gray-900 dark:text-gray-100">{item.totalPrice.toFixed(2)}</p>
                             </div>
                           </div>
                         </div>
@@ -786,17 +787,16 @@ const OrdersManager: React.FC = () => {
                     </div>
                   </div>
                 )}
-
                 {/* Timestamps */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Oluşturulma Tarihi</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100">{new Date(state.selectedOrder.createdAt).toLocaleString('tr-TR')}</p>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.createdAt')}</label>
+                    <p className="mt-1 text-gray-900 dark:text-gray-100">{new Date(state.selectedOrder.createdAt).toLocaleString(lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US')}</p>
                   </div>
                   {typeof state.selectedOrder.confirmedAt === 'string' && state.selectedOrder.confirmedAt && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Onaylanma Tarihi</label>
-                      <p className="mt-1 text-gray-900 dark:text-gray-100">{new Date(state.selectedOrder.confirmedAt).toLocaleString('tr-TR')}</p>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.confirmedAt')}</label>
+                      <p className="mt-1 text-gray-900 dark:text-gray-100">{new Date(state.selectedOrder.confirmedAt).toLocaleString(lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US')}</p>
                     </div>
                   )}
                 </div>
@@ -804,14 +804,13 @@ const OrdersManager: React.FC = () => {
             </div>
           </div>
         )}
-
         {/* Success notification */}
         {state.selectedOrder && (
           <div className="fixed bottom-4 right-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded-lg shadow-lg max-w-sm">
             <div className="flex items-center">
               <CheckCircle className="w-5 h-5 mr-2" />
               <div>
-                <p className="font-medium">İşlem Başarılı</p>
+                <p className="font-medium">{t('ordersManager.successNotification')}</p>
                 <p className="text-sm">{state.selectedOrder.customerName} - {state.selectedOrder.orderTag}</p>
               </div>
             </div>
