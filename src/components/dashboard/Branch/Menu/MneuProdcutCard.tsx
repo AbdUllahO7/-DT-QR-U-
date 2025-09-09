@@ -62,7 +62,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {hasAddons && (
             <span className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs px-2 py-1 rounded-full flex items-center shadow-lg backdrop-blur-sm">
               <Settings className="h-2 w-2 mr-1" />
-              Customizable
+                <h2 className="text-xl font-bold text-white">{t('productModal.customizeOrder')}</h2>
             </span>
           )}
         </div>
@@ -208,7 +208,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 className="bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white px-3 py-2 rounded-xl transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105 font-semibold"
               >
                 {hasAddons ? <Settings className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
-                <span className="text-xs">{hasAddons ? 'Customize' : t('menu.add')}</span>
+                <span className="text-xs">{hasAddons ? t('productModal.customizeOrder') : t('menu.add')}</span>
               </button>
             )}
           </div>
