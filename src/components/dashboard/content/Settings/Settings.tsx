@@ -32,8 +32,9 @@ import {
   Wifi,
   WifiOff
 } from 'lucide-react';
-import { useTheme } from '../../../contexts/ThemeContext';
-import { useLanguage } from '../../../contexts/LanguageContext';
+import { useTheme } from '../../../../contexts/ThemeContext';
+import { useLanguage } from '../../../../contexts/LanguageContext';
+import BranchPreferencesTab from './BranchPreferencesTab';
 
 interface UserSettingsState {
   notificationsEnabled: boolean;
@@ -67,7 +68,7 @@ const Settings: React.FC = () => {
   });
 
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [activeTab, setActiveTab] = useState<'general' | 'notifications' | 'privacy' | 'appearance' | 'data'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'branch' | 'notifications' | 'privacy' | 'appearance' | 'data'>('general');
 
   // Load settings from localStorage on mount
   useEffect(() => {
@@ -106,12 +107,14 @@ const Settings: React.FC = () => {
   };
 
   const tabs = [
-    { id: 'general', label: t('settings.tabs.general'), icon: SettingsIcon },
-    { id: 'notifications', label: t('settings.tabs.notifications'), icon: Bell },
-    { id: 'privacy', label: t('settings.tabs.privacy'), icon: Shield },
-    { id: 'appearance', label: t('settings.tabs.appearance'), icon: Palette },
-    { id: 'data', label: t('settings.tabs.data'), icon: Database }
-  ];
+/*     { id: 'general', label: t('settings.tabs.general'), icon: SettingsIcon },
+ */    { id: 'branch', label: t('branchPreferences.title'), icon: SettingsIcon },
+/*     { id: 'notifications', label: t('settings.tabs.notifications'), icon: Bell },
+ *//*     { id: 'privacy', label: t('settings.tabs.privacy'), icon: Shield },
+ */    { id: 'appearance', label: t('settings.tabs.appearance'), icon: Palette },
+/*     { id: 'data', label: t('settings.tabs.data'), icon: Database }
+ */  
+];
 
   // Reusable switch component
   const Switch: React.FC<{ 
@@ -393,7 +396,12 @@ const Settings: React.FC = () => {
             </div>
           </motion.div>
         )}
-
+        {activeTab === 'branch' && (
+          <BranchPreferencesTab 
+            isRTL={isRTL} 
+            t={t} 
+          />
+        )}
         {activeTab === 'notifications' && (
           <motion.div
             key="notifications"

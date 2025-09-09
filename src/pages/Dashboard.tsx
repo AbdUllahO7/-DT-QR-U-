@@ -7,7 +7,7 @@ import Sidebar from '../components/dashboard/layout/Sidebar';
 import BranchManagement from '../components/dashboard/content/branch-management/BranchManagement';
 import UserManagement from '../components/dashboard/content/UserManagement';
 import Profile from '../components/dashboard/content/Profile';
-import Settings from '../components/dashboard/content/Settings';
+import Settings from '../components/dashboard/content/Settings/Settings';
 import Subscription from '../components/dashboard/content/Subscription';
 import ProductsContent from '../components/dashboard/Porducts/ProductsContent';
 import RestaurantManagement from '../components/dashboard/content/RestaurantManagement';
