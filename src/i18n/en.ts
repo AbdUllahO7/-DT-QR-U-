@@ -3637,5 +3637,88 @@ export const en = {
         "getOrderTypesForDisplay": "Error fetching order types for display",
         "unknownOrderType": "Unknown order type"
       }
+    },
+    branchPreferences: {
+    "title": "Branch Preferences",
+    "description": "Configure branch-specific settings and preferences",
+    "loading": "Loading branch preferences...",
+    "saving": "Saving...",
+    "refresh": "Refresh",
+    "saveChanges": "Save Changes",
+    "saveSuccess": "Branch preferences saved successfully!",
+    "sections": {
+      "orderManagement": {
+        "title": "Order Management",
+        "description": "Configure how orders are handled and processed",
+        "autoConfirmOrders": "Auto Confirm Orders",
+        "autoConfirmOrdersDesc": "Automatically confirm incoming orders without manual approval",
+        "useWhatsappForOrders": "WhatsApp for Orders",
+        "useWhatsappForOrdersDesc": "Enable WhatsApp integration for order notifications"
+      },
+      "displaySettings": {
+        "title": "Display Settings",
+        "description": "Configure what information is displayed to customers",
+        "showProductDescriptions": "Show Product Descriptions",
+        "showProductDescriptionsDesc": "Display detailed product descriptions to customers",
+        "enableAllergenDisplay": "Display Allergen Information",
+        "enableAllergenDisplayDesc": "Show allergen warnings and information",
+        "enableIngredientDisplay": "Display Ingredients",
+        "enableIngredientDisplayDesc": "Show ingredient lists for products"
+      },
+      "paymentMethods": {
+        "title": "Payment Methods",
+        "description": "Configure accepted payment methods",
+        "acceptCash": "Accept Cash Payments",
+        "acceptCashDesc": "Allow customers to pay with cash",
+        "acceptCreditCard": "Accept Credit Cards",
+        "acceptCreditCardDesc": "Allow customers to pay with credit/debit cards",
+        "acceptOnlinePayment": "Accept Online Payments",
+        "acceptOnlinePaymentDesc": "Allow customers to pay online through digital payment methods"
+      },
+      "localization": {
+        "title": "Localization",
+        "description": "Configure language and regional settings",
+        "defaultLanguage": "Default Language",
+        "defaultCurrency": "Default Currency",
+        "timeZone": "Time Zone",
+        "supportedLanguages": "Supported Languages"
+      },
+      "sessionManagement": {
+        "title": "Session Management",
+        "description": "Configure session timeout and cleanup settings",
+        "sessionTimeout": "Session Timeout (Minutes)",
+        "cleanupMode": "Cleanup Mode",
+        "cleanupDelay": "Cleanup Delay After Close (Minutes)"
+      }
+    },
+    "currencies": {
+      "TRY": "Turkish Lira (₺)",
+      "USD": "US Dollar ($)",
+      "EUR": "Euro (€)"
+    },
+    "languages": {
+      "tr": "Turkish",
+      "en": "English",
+      "ar": "Arabic"
+    },
+    "timezones": {
+      "Europe/Istanbul": "Istanbul (UTC+3)",
+      "Europe/London": "London (UTC+0)",
+      "America/New_York": "New York (UTC-5)"
+    },
+    "errors": {
+      "loadFailed": "Failed to load branch preferences",
+      "saveFailed": "Failed to save branch preferences",
+      "validationError": "Validation error: {errors}",
+      "invalidRequest": "Invalid request. Please check the data.",
+      "sessionExpired": "Session expired. Please log in again.",
+      "unauthorized": "You don't have permission for this action.",
+      "notFound": "Branch preferences not found.",
+      "conflict": "Data is not up to date. Please refresh the page and try again.",
+      "noInternet": "Check your internet connection.",
+      "unknownError": "An unknown error occurred",
+      "invalidPaymentSettings": "Invalid payment settings. At least one payment method must be selected.",
+      "invalidSessionSettings": "Invalid session settings. Please check the values."
     }
+  }
 }; 

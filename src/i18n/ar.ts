@@ -3637,5 +3637,88 @@ export const ar = {
       "getOrderTypesForDisplay": "حدث خطأ أثناء جلب أنواع الطلبات للعرض",
       "unknownOrderType": "نوع طلب غير معروف"
     }
+  },
+   branchPreferences: {
+    "title": "إعدادات الفرع",
+    "description": "تكوين الإعدادات والتفضيلات الخاصة بالفرع",
+    "loading": "جاري تحميل إعدادات الفرع...",
+    "saving": "جاري الحفظ...",
+    "refresh": "تحديث",
+    "saveChanges": "حفظ التغييرات",
+    "saveSuccess": "تم حفظ إعدادات الفرع بنجاح!",
+    "sections": {
+      "orderManagement": {
+        "title": "إدارة الطلبات",
+        "description": "تكوين كيفية التعامل مع الطلبات ومعالجتها",
+        "autoConfirmOrders": "تأكيد الطلبات تلقائياً",
+        "autoConfirmOrdersDesc": "تأكيد الطلبات الواردة تلقائياً بدون موافقة يدوية",
+        "useWhatsappForOrders": "واتساب للطلبات",
+        "useWhatsappForOrdersDesc": "تفعيل تكامل واتساب لإشعارات الطلبات"
+      },
+      "displaySettings": {
+        "title": "إعدادات العرض",
+        "description": "تكوين المعلومات التي يتم عرضها للعملاء",
+        "showProductDescriptions": "عرض أوصاف المنتجات",
+        "showProductDescriptionsDesc": "عرض أوصاف مفصلة للمنتجات للعملاء",
+        "enableAllergenDisplay": "عرض معلومات مسببات الحساسية",
+        "enableAllergenDisplayDesc": "إظهار تحذيرات ومعلومات مسببات الحساسية",
+        "enableIngredientDisplay": "عرض المكونات",
+        "enableIngredientDisplayDesc": "إظهار قوائم المكونات للمنتجات"
+      },
+      "paymentMethods": {
+        "title": "طرق الدفع",
+        "description": "تكوين طرق الدفع المقبولة",
+        "acceptCash": "قبول الدفع النقدي",
+        "acceptCashDesc": "السماح للعملاء بالدفع نقداً",
+        "acceptCreditCard": "قبول البطاقات الائتمانية",
+        "acceptCreditCardDesc": "السماح للعملاء بالدفع ببطاقات الائتمان/الخصم",
+        "acceptOnlinePayment": "قبول الدفع الإلكتروني",
+        "acceptOnlinePaymentDesc": "السماح للعملاء بالدفع عبر الإنترنت من خلال وسائل الدفع الرقمية"
+      },
+      "localization": {
+        "title": "الإعدادات المحلية",
+        "description": "تكوين إعدادات اللغة والمنطقة",
+        "defaultLanguage": "اللغة الافتراضية",
+        "defaultCurrency": "العملة الافتراضية",
+        "timeZone": "المنطقة الزمنية",
+        "supportedLanguages": "اللغات المدعومة"
+      },
+      "sessionManagement": {
+        "title": "إدارة الجلسات",
+        "description": "تكوين مهلة الجلسة وإعدادات التنظيف",
+        "sessionTimeout": "مهلة الجلسة (بالدقائق)",
+        "cleanupMode": "وضع التنظيف",
+        "cleanupDelay": "تأخير التنظيف بعد الإغلاق (بالدقائق)"
+      }
+    },
+    "currencies": {
+      "TRY": "الليرة التركية (₺)",
+      "USD": "الدولار الأمريكي ($)",
+      "EUR": "اليورو (€)"
+    },
+    "languages": {
+      "tr": "التركية",
+      "en": "الإنجليزية",
+      "ar": "العربية"
+    },
+    "timezones": {
+      "Europe/Istanbul": "إسطنبول (UTC+3)",
+      "Europe/London": "لندن (UTC+0)",
+      "America/New_York": "نيويورك (UTC-5)"
+    },
+    "errors": {
+      "loadFailed": "فشل في تحميل إعدادات الفرع",
+      "saveFailed": "فشل في حفظ إعدادات الفرع",
+      "validationError": "خطأ التحقق: {errors}",
+      "invalidRequest": "طلب غير صالح. يرجى التحقق من البيانات.",
+      "sessionExpired": "انتهت صلاحية الجلسة. يرجى تسجيل الدخول مرة أخرى.",
+      "unauthorized": "ليس لديك الصلاحية لهذا الإجراء.",
+      "notFound": "إعدادات الفرع غير موجودة.",
+      "conflict": "البيانات غير محدثة. يرجى تحديث الصفحة والمحاولة مرة أخرى.",
+      "noInternet": "تحقق من اتصالك بالإنترنت.",
+      "unknownError": "حدث خطأ غير معروف",
+      "invalidPaymentSettings": "إعدادات دفع غير صالحة. يجب تحديد طريقة دفع واحدة على الأقل.",
+      "invalidSessionSettings": "إعدادات جلسة غير صالحة. يرجى التحقق من القيم."
+    }
   }
 }; 

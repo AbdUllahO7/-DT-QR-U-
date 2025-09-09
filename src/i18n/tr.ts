@@ -3635,5 +3635,88 @@ SortableProduct: {
         "getOrderTypesForDisplay": "Order types for display getirme hatası",
         "unknownOrderType": "Bilinmeyen Sipariş Türü"
       }
+    },
+     branchPreferences: {
+    "title": "Şube Tercihleri",
+    "description": "Şubeye özel ayarları ve tercihleri yapılandırın",
+    "loading": "Şube tercihleri yükleniyor...",
+    "saving": "Kaydediliyor...",
+    "refresh": "Yenile",
+    "saveChanges": "Değişiklikleri Kaydet",
+    "saveSuccess": "Şube tercihleri başarıyla kaydedildi!",
+    "sections": {
+      "orderManagement": {
+        "title": "Sipariş Yönetimi",
+        "description": "Siparişlerin nasıl işlendiğini ve yönetildiğini yapılandırın",
+        "autoConfirmOrders": "Siparişleri Otomatik Onayla",
+        "autoConfirmOrdersDesc": "Gelen siparişleri manuel onay olmadan otomatik olarak onaylayın",
+        "useWhatsappForOrders": "Siparişler için WhatsApp",
+        "useWhatsappForOrdersDesc": "Sipariş bildirimleri için WhatsApp entegrasyonunu etkinleştirin"
+      },
+      "displaySettings": {
+        "title": "Görüntü Ayarları",
+        "description": "Müşterilere hangi bilgilerin gösterileceğini yapılandırın",
+        "showProductDescriptions": "Ürün Açıklamalarını Göster",
+        "showProductDescriptionsDesc": "Müşterilere detaylı ürün açıklamalarını göster",
+        "enableAllergenDisplay": "Alerjen Bilgilerini Göster",
+        "enableAllergenDisplayDesc": "Alerjen uyarılarını ve bilgilerini göster",
+        "enableIngredientDisplay": "İçerikleri Göster",
+        "enableIngredientDisplayDesc": "Ürünler için içerik listelerini göster"
+      },
+      "paymentMethods": {
+        "title": "Ödeme Yöntemleri",
+        "description": "Kabul edilen ödeme yöntemlerini yapılandırın",
+        "acceptCash": "Nakit Ödemeleri Kabul Et",
+        "acceptCashDesc": "Müşterilerin nakit ile ödeme yapmalarına izin ver",
+        "acceptCreditCard": "Kredi Kartlarını Kabul Et",
+        "acceptCreditCardDesc": "Müşterilerin kredi/banka kartları ile ödeme yapmalarına izin ver",
+        "acceptOnlinePayment": "Online Ödemeleri Kabul Et",
+        "acceptOnlinePaymentDesc": "Müşterilerin dijital ödeme yöntemleri ile online ödeme yapmalarına izin ver"
+      },
+      "localization": {
+        "title": "Yerelleştirme",
+        "description": "Dil ve bölgesel ayarları yapılandırın",
+        "defaultLanguage": "Varsayılan Dil",
+        "defaultCurrency": "Varsayılan Para Birimi",
+        "timeZone": "Saat Dilimi",
+        "supportedLanguages": "Desteklenen Diller"
+      },
+      "sessionManagement": {
+        "title": "Oturum Yönetimi",
+        "description": "Oturum zaman aşımı ve temizleme ayarlarını yapılandırın",
+        "sessionTimeout": "Oturum Zaman Aşımı (Dakika)",
+        "cleanupMode": "Temizleme Modu",
+        "cleanupDelay": "Kapanış Sonrası Temizleme Gecikmesi (Dakika)"
+      }
+    },
+    "currencies": {
+      "TRY": "Türk Lirası (₺)",
+      "USD": "Amerikan Doları ($)",
+      "EUR": "Euro (€)"
+    },
+    "languages": {
+      "tr": "Türkçe",
+      "en": "İngilizce",
+      "ar": "Arapça"
+    },
+    "timezones": {
+      "Europe/Istanbul": "İstanbul (UTC+3)",
+      "Europe/London": "Londra (UTC+0)",
+      "America/New_York": "New York (UTC-5)"
+    },
+    "errors": {
+      "loadFailed": "Şube tercihleri yüklenemedi",
+      "saveFailed": "Şube tercihleri kaydedilemedi",
+      "validationError": "Doğrulama hatası: {errors}",
+      "invalidRequest": "Geçersiz istek. Lütfen verileri kontrol edin.",
+      "sessionExpired": "Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.",
+      "unauthorized": "Bu işlem için yetkiniz bulunmuyor.",
+      "notFound": "Şube tercihleri bulunamadı.",
+      "conflict": "Veriler güncel değil. Sayfayı yenileyip tekrar deneyin.",
+      "noInternet": "İnternet bağlantınızı kontrol edin.",
+      "unknownError": "Bilinmeyen bir hata oluştu",
+      "invalidPaymentSettings": "Geçersiz ödeme ayarları. En az bir ödeme yöntemi seçilmelidir.",
+      "invalidSessionSettings": "Geçersiz oturum ayarları. Lütfen değerleri kontrol edin."
     }
+  }
 }; 
