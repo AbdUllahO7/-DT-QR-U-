@@ -96,7 +96,6 @@ class Logger {
     if (!this.shouldLogDebug('debug')) return;
     
     const formattedMessage = this.formatMessage('debug', message, options?.prefix);
-    console.log(formattedMessage, data || '');
   }
 
   // SignalR için özel log metodu

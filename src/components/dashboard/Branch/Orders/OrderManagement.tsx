@@ -32,7 +32,6 @@ const OrdersManager: React.FC = () => {
   const { t ,language} = useLanguage();
   
   const lang = language // Get the current language (e.g., 'en', 'tr', 'ar')
-  console.log("Current language in OrdersManager:", language);
   const [state, setState] = useState<OrdersManagerState>({
     pendingOrders: [],
     branchOrders: [],
@@ -89,7 +88,7 @@ const OrdersManager: React.FC = () => {
         fetchBranchOrders();
       }
       setState(prev => ({ ...prev, selectedOrder: updatedOrder, loading: false, activeOrderId: null, activeRowVersion: null }));
-      alert(t('ordersManager.orderConfirmedSuccess'));
+    
     } catch (error: any) {
       setState(prev => ({ ...prev, error: error.message, loading: false, activeOrderId: null, activeRowVersion: null }));
     }
@@ -108,7 +107,6 @@ const OrdersManager: React.FC = () => {
         fetchBranchOrders();
       }
       setState(prev => ({ ...prev, selectedOrder: updatedOrder, loading: false, activeOrderId: null, activeRowVersion: null, rejectReason: '' }));
-      alert(t('ordersManager.orderRejectedSuccess'));
     } catch (error: any) {
       setState(prev => ({ ...prev, error: error.message, loading: false, activeOrderId: null, activeRowVersion: null, rejectReason: '' }));
     }
@@ -127,7 +125,6 @@ const OrdersManager: React.FC = () => {
         fetchBranchOrders();
       }
       setState(prev => ({ ...prev, selectedOrder: updatedOrder, loading: false, activeOrderId: null, activeRowVersion: null, newStatus: null }));
-      alert(t('ordersManager.orderStatusUpdatedSuccess'));
     } catch (error: any) {
       let errorMessage = error.message;
       if (error.response?.status === 400 && error.response?.data?.message.includes('Invalid status transition')) {
@@ -605,12 +602,7 @@ const OrdersManager: React.FC = () => {
                                         </div>
                                       </div>
                                     )}
-                                    <div>
-                                      <span className="font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.rowVersion')}:</span>
-                                      <div className="text-gray-600 dark:text-gray-400 font-mono text-xs">
-                                        {rowVersion}
-                                      </div>
-                                    </div>
+                                   
                                   </div>
                                 </div>
                               </td>

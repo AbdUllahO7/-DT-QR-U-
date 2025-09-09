@@ -262,7 +262,6 @@ const ProductsContent: React.FC = () => {
           branchId: selectedBranch.branchId,
           categoryCount: fetchedCategories.length 
         });
-        console.log("fetchedCategories",fetchedCategories)
       }
       
       setCategories(fetchedCategories);

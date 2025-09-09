@@ -170,10 +170,7 @@ class BasketService {
       const url = `${this.baseUrl}/my-basket`;
       const response = await httpClient.get(url);
       
-      // Let's see the exact structure
-      console.log("Full Response:", response);
-      console.log("Response.data:", response.data);
-      console.log("Response.data.data:", response.data.data);
+
       
       // Try to access the basket data safely
       let basketData;
@@ -181,16 +178,13 @@ class BasketService {
       // Check if the data is directly in response.data
       if (response.data && response.data.basketId) {
         basketData = response.data;
-        console.log("Found basket data in response.data");
       }
       // Check if the data is nested in response.data.data
       else if (response.data && response.data.data && response.data.data.basketId) {
         basketData = response.data.data;
-        console.log("Found basket data in response.data.data");
       }
       // If no basket exists, return empty basket
       else {
-        console.log("No basket found, returning empty basket");
         return {
           basketId: 'empty',
           items: [],
@@ -199,7 +193,6 @@ class BasketService {
         };
       }
       
-      console.log("Final basketData:", basketData);
       
       const basket: Basket = {
         basketId: basketData.basketId || 'unknown',
@@ -215,14 +208,12 @@ class BasketService {
         totalQuantity: basket.totalQuantity
       }, { prefix: 'BasketService' });
       
-      console.log("Final basket:", basket);
       return basket;
     } catch (error: any) {
       logger.error('My basket getirme hatası', error, { prefix: 'BasketService' });
       
       // Instead of throwing error, return empty basket when basket doesn't exist
       if (error?.response?.status === 404) {
-        console.log("Basket not found (404), returning empty basket");
         return {
           basketId: 'empty',
           items: [],
@@ -369,7 +360,6 @@ class BasketService {
   async updateMyBasketItem(basketItemId: number, data: UpdateBasketItemDto): Promise<BasketItem> {
     try {
       logger.info('My basket item güncelleme isteği gönderiliyor', { basketItemId, data }, { prefix: 'BasketService' });
-      console.log("Updating basket item:", basketItemId, data);
       
       const url = `${this.baseUrl}/my-basket/items/${basketItemId}`;
       
@@ -383,7 +373,6 @@ class BasketService {
         }
       };
       
-      console.log("Request body:", requestBody);
       
       const response = await httpClient.put<BasketItem>(url, requestBody);
       

@@ -308,10 +308,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
     // Show success message from server
     setSuccessMessage(result.message || 'Table cleared successfully');
     
-    // Log additional info if available
-    if (result.endedSessions > 0) {
-      console.log(`Ended ${result.endedSessions} sessions for table ${tableId}` , );
-    }
+
     
     // Optionally refresh categories to update counts
     await fetchCategories();

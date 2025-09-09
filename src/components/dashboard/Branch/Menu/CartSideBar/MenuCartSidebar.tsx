@@ -128,9 +128,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
       setLoadingOrderTypes(true)
       setError(null)
       
-      console.log('🔄 Loading order types from service...')
       const types = await orderTypeService.getOrderTypesBySessionId()
-      console.log('📋 Order types loaded:', types)
       
       setOrderTypes(types)
       
@@ -141,7 +139,6 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
           ...prev, 
           orderTypeId: defaultType.id 
         }))
-        console.log('🎯 Default order type set:', defaultType)
       }
       
     } catch (err: any) {
