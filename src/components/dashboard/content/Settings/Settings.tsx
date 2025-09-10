@@ -68,7 +68,7 @@ const Settings: React.FC = () => {
   });
 
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [activeTab, setActiveTab] = useState<'general' | 'branch' | 'notifications' | 'privacy' | 'appearance' | 'data'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'branch' | 'notifications' | 'privacy' | 'appearance' | 'data'>('branch');
 
   // Load settings from localStorage on mount
   useEffect(() => {
