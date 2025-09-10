@@ -62,7 +62,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
           {hasAddons && (
             <span className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs px-2 py-1 rounded-full flex items-center shadow-lg backdrop-blur-sm">
               <Settings className="h-2 w-2 mr-1" />
-                <h2 className="text-xl font-bold text-white">{t('productModal.customizeOrder')}</h2>
             </span>
           )}
         </div>

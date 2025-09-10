@@ -69,6 +69,7 @@ class OrderService {
       logger.info('Pending orders başarıyla alındı', { 
         ordersCount: orders.length 
       }, { prefix: 'OrderService' });
+      console.log('Pending Orders:', orders);
       return orders;
     } catch (error: any) {
       logger.error('Pending orders getirme hatası', error, { prefix: 'OrderService' });
@@ -112,13 +113,14 @@ class OrderService {
 
   async getBranchOrders(): Promise<BranchOrder[]> {
     try {
-      logger.info('Branch orders getirme isteği gönderiliyor', {}, { prefix: 'OrderService' });
-      const url = `${this.baseUrl}/branch`;
+      logger.info('Branch orders getirme isteği gönderiliyor', {}, { prefix: 'OrderServicke' });
+      const url = `${this.baseUrl}/branch?includeItems=true`;
       const response = await httpClient.get<BranchOrder[]>(url);
       const orders = Array.isArray(response.data) ? response.data : [];
       logger.info('Branch orders başarıyla alındı', { 
         ordersCount: orders.length 
       }, { prefix: 'OrderService' });
+      console.log('Branch Orders:', orders);
       return orders;
     } catch (error: any) {
       logger.error('Branch orders getirme hatası', error, { prefix: 'OrderService' });

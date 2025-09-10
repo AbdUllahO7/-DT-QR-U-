@@ -3646,6 +3646,11 @@ export const en = {
     "refresh": "Refresh",
     "saveChanges": "Save Changes",
     "saveSuccess": "Branch preferences saved successfully!",
+    "cleanupModes": {
+      "afterTimeout": "After Timeout",
+      "afterClosing": "After Closing", 
+      "disabled": "Disabled"
+    },
     "sections": {
       "orderManagement": {
         "title": "Order Management",
@@ -3688,7 +3693,11 @@ export const en = {
         "description": "Configure session timeout and cleanup settings",
         "sessionTimeout": "Session Timeout (Minutes)",
         "cleanupMode": "Cleanup Mode",
-        "cleanupDelay": "Cleanup Delay After Close (Minutes)"
+        "cleanupDelay": "Cleanup Delay After Close (Minutes)",
+            "cleanupModeDesc": "Choose when to cleanup expired sessions",
+      "sessionTimeoutDesc": "Minutes before session expires due to inactivity",
+      "cleanupDelayDesc": "Minutes to wait after closing before cleanup",
+      "cleanupDisabledMessage": "Session cleanup is disabled. Sessions will not be automatically cleaned up."
       }
     },
     "currencies": {
@@ -3699,7 +3708,14 @@ export const en = {
     "languages": {
       "tr": "Turkish",
       "en": "English",
-      "ar": "Arabic"
+      "ar": "Arabic",
+      "de": "German",
+      "fr": "French",
+      "es": "Spanish",
+      "it": "Italian",
+      "ru": "Russian",
+      "zh": "Chinese",
+      "ja": "Japanese"
     },
     "timezones": {
       "Europe/Istanbul": "Istanbul (UTC+3)",
