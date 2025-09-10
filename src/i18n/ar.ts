@@ -3646,6 +3646,11 @@ export const ar = {
     "refresh": "تحديث",
     "saveChanges": "حفظ التغييرات",
     "saveSuccess": "تم حفظ إعدادات الفرع بنجاح!",
+    "cleanupModes": {
+  "afterTimeout": "بعد انتهاء المهلة",
+  "afterClosing": "بعد الإغلاق",
+  "disabled": "معطل"
+    },
     "sections": {
       "orderManagement": {
         "title": "إدارة الطلبات",
@@ -3655,6 +3660,7 @@ export const ar = {
         "useWhatsappForOrders": "واتساب للطلبات",
         "useWhatsappForOrdersDesc": "تفعيل تكامل واتساب لإشعارات الطلبات"
       },
+
       "displaySettings": {
         "title": "إعدادات العرض",
         "description": "تكوين المعلومات التي يتم عرضها للعملاء",
@@ -3688,7 +3694,12 @@ export const ar = {
         "description": "تكوين مهلة الجلسة وإعدادات التنظيف",
         "sessionTimeout": "مهلة الجلسة (بالدقائق)",
         "cleanupMode": "وضع التنظيف",
-        "cleanupDelay": "تأخير التنظيف بعد الإغلاق (بالدقائق)"
+        "cleanupDelay": "تأخير التنظيف بعد الإغلاق (بالدقائق)",
+        
+         "cleanupModeDesc": "اختر متى يتم تنظيف الجلسات المنتهية الصلاحية",
+    "sessionTimeoutDesc": "الدقائق قبل انتهاء صلاحية الجلسة بسبب عدم النشاط",
+    "cleanupDelayDesc": "الدقائق للانتظار بعد الإغلاق قبل التنظيف",
+    "cleanupDisabledMessage": "تنظيف الجلسات معطل. لن يتم تنظيف الجلسات تلقائياً."
       }
     },
     "currencies": {
@@ -3697,9 +3708,13 @@ export const ar = {
       "EUR": "اليورو (€)"
     },
     "languages": {
-      "tr": "التركية",
-      "en": "الإنجليزية",
-      "ar": "العربية"
+        "tr": "التركية",
+        "en": "الإنجليزية",
+        "ar": "العربية", 
+        "de": "الألمانية",
+        "fr": "الفرنسية",
+        "ru": "الروسية",
+        "es": "الإسبانية"
     },
     "timezones": {
       "Europe/Istanbul": "إسطنبول (UTC+3)",

@@ -3644,6 +3644,11 @@ SortableProduct: {
     "refresh": "Yenile",
     "saveChanges": "Değişiklikleri Kaydet",
     "saveSuccess": "Şube tercihleri başarıyla kaydedildi!",
+    "cleanupModes": {
+      "afterTimeout": "Zaman Aşımından Sonra",
+      "afterClosing": "Kapatmadan Sonra",
+      "disabled": "Devre Dışı"
+    },
     "sections": {
       "orderManagement": {
         "title": "Sipariş Yönetimi",
@@ -3686,7 +3691,11 @@ SortableProduct: {
         "description": "Oturum zaman aşımı ve temizleme ayarlarını yapılandırın",
         "sessionTimeout": "Oturum Zaman Aşımı (Dakika)",
         "cleanupMode": "Temizleme Modu",
-        "cleanupDelay": "Kapanış Sonrası Temizleme Gecikmesi (Dakika)"
+        "cleanupDelay": "Kapanış Sonrası Temizleme Gecikmesi (Dakika)",
+         "cleanupModeDesc": "Süresi dolan oturumların ne zaman temizleneceğini seçin",
+    "sessionTimeoutDesc": "Hareketsizlik nedeniyle oturumun sona ermesinden önceki dakikalar",
+    "cleanupDelayDesc": "Kapatmadan sonra temizlikten önce beklenecek dakikalar",
+    "cleanupDisabledMessage": "Oturum temizliği devre dışı. Oturumlar otomatik olarak temizlenmeyecek."
       }
     },
     "currencies": {
@@ -3697,7 +3706,11 @@ SortableProduct: {
     "languages": {
       "tr": "Türkçe",
       "en": "İngilizce",
-      "ar": "Arapça"
+      "ar": "Arapça",
+      "de": "Almanca", 
+      "fr": "Fransızca",
+      "ru": "Rusça",
+      "es": "İspanyolca"
     },
     "timezones": {
       "Europe/Istanbul": "İstanbul (UTC+3)",
@@ -3718,5 +3731,5 @@ SortableProduct: {
       "invalidPaymentSettings": "Geçersiz ödeme ayarları. En az bir ödeme yöntemi seçilmelidir.",
       "invalidSessionSettings": "Geçersiz oturum ayarları. Lütfen değerleri kontrol edin."
     }
-  }
+    }
 }; 

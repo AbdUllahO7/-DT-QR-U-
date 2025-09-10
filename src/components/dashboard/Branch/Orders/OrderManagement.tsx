@@ -712,90 +712,300 @@ const OrdersManager: React.FC = () => {
         )}
 
         {/* Details Modal */}
-        {state.showDetailsModal && state.selectedOrder && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 shadow-2xl max-h-[80vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center">
-                  <Eye className="w-6 h-6 text-indigo-600 mr-3" />
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{t('ordersManager.orderDetailsTitle')}</h3>
+
+    {/* Details Modal - Complete Fix */}
+    {state.showDetailsModal && state.selectedOrder && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
+        <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-2xl w-full mx-4 shadow-2xl max-h-[80vh] overflow-y-auto">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <Eye className="w-6 h-6 text-indigo-600 mr-3" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                {t('ordersManager.orderDetailsTitle')}
+              </h3>
+            </div>
+            <button
+              onClick={closeModals}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+            >
+              <XCircle className="w-6 h-6" />
+            </button>
+          </div>
+
+      <div className="space-y-6">
+        {/* Order Basic Info */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {t('ordersManager.customer')}
+            </label>
+            <p className="text-gray-900 dark:text-gray-100 font-medium">
+              {state.selectedOrder.customerName}
+            </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {t('ordersManager.orderNumber')}
+            </label>
+            <p className="text-gray-900 dark:text-gray-100 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+              {state.selectedOrder.orderTag}
+            </p>
+          </div>
+          
+          {/* Table Information */}
+          {(() => {
+            const tableName = 'tableName' in state.selectedOrder ? state.selectedOrder.tableName : null;
+            if (tableName) {
+              return (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t('ordersManager.table')}
+                  </label>
+                  <p className="text-gray-900 dark:text-gray-100 font-medium">
+                    {tableName}
+                  </p>
                 </div>
-                <button
-                  onClick={closeModals}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
-                >
-                  <XCircle className="w-6 h-6" />
-                </button>
-              </div>
-              <div className="space-y-6">
-                {/* Order Info */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.customer')}</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100">{state.selectedOrder.customerName}</p>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.orderNumber')}</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100 font-mono">{state.selectedOrder.orderTag}</p>
-                  </div>
-                  {state.selectedOrder && typeof (state.selectedOrder as any).tableName === 'string' && (state.selectedOrder as any).tableName && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.table')}</label>
-                      <p className="mt-1 text-gray-900 dark:text-gray-100">{(state.selectedOrder as any).tableName}</p>
-                    </div>
-                  )}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.amountLabel')}</label>
-                    <p className="mt-1 text-lg font-bold text-green-600 dark:text-green-400">{state.selectedOrder.totalPrice.toFixed(2)}</p>
-                  </div>
-                </div>
-                {/* Items */}
-                {'items' in state.selectedOrder && state.selectedOrder.items && (
-                  <div>
-                    <h4 className="text-md font-medium text-gray-700 dark:text-gray-300 mb-3">{t('ordersManager.orderItems')}</h4>
-                    <div className="space-y-2">
-                      {orderService.getFlatItemList(state.selectedOrder.items).map((item, i) => (
-                        <div key={i} className={`p-3 rounded-lg ${item.isAddon ? 'bg-gray-100 dark:bg-gray-600 ml-6' : 'bg-gray-50 dark:bg-gray-700'}`}>
-                          <div className="flex justify-between items-start">
-                            <div className="flex-1">
-                              <p className={`font-medium ${item.isAddon ? 'text-gray-600 dark:text-gray-400' : 'text-gray-900 dark:text-gray-100'}`}>
-                                {item.isAddon && '↳ '}{item.productName}
-                              </p>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">
-                                {t('ordersManager.quantity')}: {orderService.getItemQuantity(item)}
-                              </p>
-                              {orderService.getItemNotes(item) && (
-                                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                                  {t('ordersManager.notes')}: {orderService.getItemNotes(item)}
-                                </p>
-                              )}
+              );
+            }
+            return null;
+          })()}
+
+          {/* Order Status for Branch Orders */}
+          {state.viewMode === 'branch' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t('ordersManager.status')}
+              </label>
+              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusBadgeClass(orderService.parseOrderStatus((state.selectedOrder as BranchOrder).status))}`}>
+                {getStatusIcon(orderService.parseOrderStatus((state.selectedOrder as BranchOrder).status))}
+                <span className="ml-1">
+                  {orderService.getOrderStatusText(orderService.parseOrderStatus((state.selectedOrder as BranchOrder).status), lang)}
+                </span>
+              </span>
+            </div>
+          )}
+
+          {/* Total Amount */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              {t('ordersManager.amountLabel')}
+            </label>
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+              {state.selectedOrder.totalPrice.toFixed(2)}
+            </p>
+          </div>
+        </div>
+
+        {/* Order Items Section - Enhanced */}
+        {(() => {
+          // Function to get order items from different possible structures
+          const getOrderItemsData = (order: Order) => {
+            // Check for different possible item properties
+            if ('items' in order && order.items) {
+              return order.items;
+            }
+            if ('orderItems' in order && (order as any).orderItems) {
+              return (order as any).orderItems;
+            }
+            if ('orderDetails' in order && (order as any).orderDetails) {
+              return (order as any).orderDetails;
+            }
+            if ('details' in order && (order as any).details) {
+              return (order as any).details;
+            }
+            return null;
+          };
+
+          const itemsData = getOrderItemsData(state.selectedOrder);
+          let flatItemsList = [];
+
+          if (itemsData) {
+            try {
+              flatItemsList = orderService.getFlatItemList(itemsData);
+            } catch (error) {
+              console.error('Error processing items:', error);
+              console.log('Items data structure:', itemsData);
+            }
+          }
+
+          return (
+            <div className="border-t border-gray-200 dark:border-gray-600 pt-6">
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                <Package className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+                {t('ordersManager.orderItems')}
+                {flatItemsList.length > 0 && (
+                  <span className="ml-2 px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full">
+                    {flatItemsList.length} items
+                  </span>
+                )}
+              </h4>
+              
+              {flatItemsList.length > 0 ? (
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {flatItemsList.map((item, index) => (
+                    <div 
+                      key={index} 
+                      className={`p-4 rounded-lg border-l-4 transition-all hover:shadow-sm ${
+                        item.isAddon 
+                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-400 ml-6' 
+                          : 'bg-gray-50 dark:bg-gray-700 border-gray-400 dark:border-gray-500'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center">
+                            {item.isAddon && (
+                              <span className="text-blue-600 dark:text-blue-400 mr-2">↳</span>
+                            )}
+                            <h5 className={`font-semibold ${
+                              item.isAddon 
+                                ? 'text-blue-700 dark:text-blue-300' 
+                                : 'text-gray-900 dark:text-gray-100'
+                            }`}>
+                              {item.productName}
+                            </h5>
+                          </div>
+                          
+                          <div className="flex items-center gap-4 mt-2">
+                            <div className="flex items-center">
+                              <span className="text-sm text-gray-600 dark:text-gray-400 mr-1">
+                                {t('ordersManager.quantity')}:
+                              </span>
+                              <span className="font-medium text-gray-900 dark:text-gray-100">
+                                {orderService.getItemQuantity(item)}
+                              </span>
                             </div>
-                            <div className="text-right">
-                              <p className="font-bold text-gray-900 dark:text-gray-100">{item.totalPrice.toFixed(2)}</p>
+                            <div className="flex items-center">
+                              <span className="text-sm text-gray-600 dark:text-gray-400 mr-1">
+                                Unit Price:
+                              </span>
+                              <span className="font-medium text-gray-900 dark:text-gray-100">
+                                {(item.totalPrice / orderService.getItemQuantity(item)).toFixed(2)}
+                              </span>
                             </div>
                           </div>
+
+                          {orderService.getItemNotes(item) && (
+                            <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border-l-4 border-yellow-400">
+                              <div className="flex items-start">
+                                <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 mr-2 mt-0.5 flex-shrink-0" />
+                                <div>
+                                  <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                                    {t('ordersManager.notes')}:
+                                  </p>
+                                  <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                                    {orderService.getItemNotes(item)}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                      ))}
+                        
+                        <div className="text-right ml-4">
+                          <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                            {item.totalPrice.toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                )}
-                {/* Timestamps */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.createdAt')}</label>
-                    <p className="mt-1 text-gray-900 dark:text-gray-100">{new Date(state.selectedOrder.createdAt).toLocaleString(lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US')}</p>
-                  </div>
-                  {typeof state.selectedOrder.confirmedAt === 'string' && state.selectedOrder.confirmedAt && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('ordersManager.confirmedAt')}</label>
-                      <p className="mt-1 text-gray-900 dark:text-gray-100">{new Date(state.selectedOrder.confirmedAt).toLocaleString(lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US')}</p>
-                    </div>
-                  )}
+                  ))}
                 </div>
-              </div>
+              ) : (
+                <div className="p-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
+                  <div className="flex items-center justify-center">
+                    <AlertCircle className="w-8 h-8 text-yellow-600 dark:text-yellow-400 mr-3" />
+                    <div>
+                      <p className="text-yellow-800 dark:text-yellow-200 font-medium">
+                        No items data available
+                      </p>
+                      <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                        Items might not have been loaded or saved for this order.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Debug information - Remove in production */}
+                  <details className="mt-4">
+                    <summary className="text-xs cursor-pointer text-yellow-700 dark:text-yellow-300 hover:text-yellow-900">
+                      Debug Info (Click to expand)
+                    </summary>
+                    <div className="mt-2 p-3 bg-gray-100 dark:bg-gray-800 rounded text-xs">
+                      <pre className="overflow-auto">
+                        {JSON.stringify({
+                          orderId: state.selectedOrder?.id,
+                          orderType: state.viewMode,
+                          availableProperties: Object.keys(state.selectedOrder || {}),
+                          hasItems: 'items' in state.selectedOrder,
+                          hasOrderItems: 'orderItems' in state.selectedOrder,
+                          hasDetails: 'details' in state.selectedOrder,
+                          itemsData: itemsData ? 'Found' : 'Not found'
+                        }, null, 2)}
+                      </pre>
+                    </div>
+                  </details>
+                </div>
+              )}
+              
+              {/* Order Total */}
+              {flatItemsList.length > 0 && (
+                <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                  <div className="flex justify-between items-center">
+                    <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                      {t('ordersManager.total')}:
+                    </span>
+                    <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {state.selectedOrder.totalPrice.toFixed(2)}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
+          );
+        })()}
+
+        {/* Timestamps Section */}
+        <div className="border-t border-gray-200 dark:border-gray-600 pt-6">
+          <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+            <Clock className="w-5 h-5 mr-2 text-gray-600 dark:text-gray-400" />
+            Order Timeline
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t('ordersManager.createdAt')}
+              </label>
+              <p className="text-gray-900 dark:text-gray-100 font-mono text-sm">
+                {new Date(state.selectedOrder.createdAt).toLocaleString(
+                  lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US'
+                )}
+              </p>
+            </div>
+            
+            {(() => {
+              const confirmedAt = 'confirmedAt' in state.selectedOrder ? state.selectedOrder.confirmedAt : null;
+              if (confirmedAt) {
+                return (
+                  <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t('ordersManager.confirmedAt')}
+                    </label>
+                    <p className="text-gray-900 dark:text-gray-100 font-mono text-sm">
+                      {new Date(confirmedAt).toLocaleString(
+                        lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US'
+                      )}
+                    </p>
+                  </div>
+                );
+              }
+              return null;
+            })()}
           </div>
-        )}
+        </div>
+      </div>
+    </div>
+  </div>
+)}
         {/* Success notification */}
         {state.selectedOrder && (
           <div className="fixed bottom-4 right-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded-lg shadow-lg max-w-sm">

@@ -51,7 +51,11 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
     { value: 'Europe/London', label: t('branchPreferences.timezones.Europe/London') },
     { value: 'America/New_York', label: t('branchPreferences.timezones.America/New_York') }
   ];
-
+const cleanupModes = [
+  { value: 0, label: t('branchPreferences.cleanupModes.afterTimeout') },
+  { value: 1, label: t('branchPreferences.cleanupModes.afterClosing') },
+  { value: 2, label: t('branchPreferences.cleanupModes.disabled') }
+];
   // Load preferences on component mount
   const loadPreferences = useCallback(async () => {
     try {
@@ -517,87 +521,142 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               </select>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                {t('branchPreferences.sections.localization.supportedLanguages')}
-              </label>
-              <input
-                title='supportedLanguages'
-                type="number"
-                min="1"
-                max="10"
-                value={formData.supportedLanguages}
-                onChange={(e) => handleFieldChange('supportedLanguages', parseInt(e.target.value) || 1)}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+<div className="col-span-2">
+  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+    {t('branchPreferences.sections.localization.supportedLanguages')}
+  </label>
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    {[
+      { flag: 1, code: 'tr', label: t('branchPreferences.languages.tr') },
+      { flag: 2, code: 'en', label: t('branchPreferences.languages.en') },
+      { flag: 4, code: 'ar', label: t('branchPreferences.languages.ar') },
+      { flag: 8, code: 'de', label: t('branchPreferences.languages.de') },
+      { flag: 16, code: 'fr', label: t('branchPreferences.languages.fr') },
+      { flag: 32, code: 'ru', label: t('branchPreferences.languages.ru') },
+      { flag: 64, code: 'es', label: t('branchPreferences.languages.es') }
+    ].map((lang) => (
+      <div key={lang.code} className="flex items-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+        <input
+          id={`lang-${lang.code}`}
+          type="checkbox"
+          checked={(formData.supportedLanguages & lang.flag) === lang.flag}
+          onChange={(e) => {
+            const currentValue = formData.supportedLanguages;
+            const newValue = e.target.checked 
+              ? currentValue | lang.flag  // Add flag
+              : currentValue & ~lang.flag; // Remove flag
+            handleFieldChange('supportedLanguages', newValue);
+          }}
+          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+        />
+        <label htmlFor={`lang-${lang.code}`} className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300 cursor-pointer">
+          {lang.label}
+        </label>
+      </div>
+    ))}
+  </div>
+  <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+    {t('branchPreferences.sections.localization.supportedLanguagesDesc')}
+  </p>
+</div>
           </div>
         </div>
 
         {/* Session Management Section */}
-        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
-          <div className="flex items-center space-x-3 rtl:space-x-reverse mb-4">
-            <Clock className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {t('branchPreferences.sections.sessionManagement.title')}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                {t('branchPreferences.sections.sessionManagement.description')}
-              </p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                {t('branchPreferences.sections.sessionManagement.sessionTimeout')}
-              </label>
-              <input
-                title='sessionTimeoutMinutes'
-                type="number"
-                min="5"
-                max="1440"
-                value={formData.sessionTimeoutMinutes}
-                onChange={(e) => handleFieldChange('sessionTimeoutMinutes', parseInt(e.target.value) || 30)}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+ <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
+  <div className="flex items-center space-x-3 rtl:space-x-reverse mb-4">
+    <Clock className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+    <div>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        {t('branchPreferences.sections.sessionManagement.title')}
+      </h3>
+      <p className="text-gray-600 dark:text-gray-400 text-sm">
+        {t('branchPreferences.sections.sessionManagement.description')}
+      </p>
+    </div>
+  </div>
+  
+  <div className="space-y-4">
+    <div>
+      <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+        {t('branchPreferences.sections.sessionManagement.cleanupMode')}
+      </label>
+      <select
+        title='cleanupMode'
+        name='cleanupMode'
+        value={formData.cleanupMode}
+        onChange={(e) => handleFieldChange('cleanupMode', parseInt(e.target.value))}
+        className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+      >
+        {cleanupModes.map((mode) => (
+          <option key={mode.value} value={mode.value}>
+            {mode.label}
+          </option>
+        ))}
+      </select>
+      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+        {t('branchPreferences.sections.sessionManagement.cleanupModeDesc')}
+      </p>
+    </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                {t('branchPreferences.sections.sessionManagement.cleanupMode')}
-              </label>
-              <select
-                title='cleanupMode'
-                name='cleanupMode'
-                value={formData.cleanupMode}
-                onChange={(e) => handleFieldChange('cleanupMode', parseInt(e.target.value))}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value={0}>تلقائي</option>
-                <option value={1}>يدوي</option>
-                <option value={2}>مجدول</option>
-              </select>
-            </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Session Timeout - Only shown when cleanup mode is "After Timeout" (0) */}
+      {formData.cleanupMode === 0 && (
+        <div className="transition-all duration-300 ease-in-out">
+          <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+            {t('branchPreferences.sections.sessionManagement.sessionTimeout')}
+          </label>
+          <input
+            title='sessionTimeoutMinutes'
+            type="number"
+            min="5"
+            max="1440"
+            value={formData.sessionTimeoutMinutes}
+            onChange={(e) => handleFieldChange('sessionTimeoutMinutes', parseInt(e.target.value) || 30)}
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+          />
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+            {t('branchPreferences.sections.sessionManagement.sessionTimeoutDesc')}
+          </p>
+        </div>
+      )}
 
-            <div>
-              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                {t('branchPreferences.sections.sessionManagement.cleanupDelay')}
-              </label>
-              <input
-                title='s'
-                name='cleanupDelayAfterCloseMinutes'
-                type="number"
-                min="0"
-                max="60"
-                value={formData.cleanupDelayAfterCloseMinutes}
-                onChange={(e) => handleFieldChange('cleanupDelayAfterCloseMinutes', parseInt(e.target.value) || 5)}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
+      {/* Cleanup Delay - Only shown when cleanup mode is "After Closing" (1) */}
+      {formData.cleanupMode === 1 && (
+        <div className="transition-all duration-300 ease-in-out">
+          <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+            {t('branchPreferences.sections.sessionManagement.cleanupDelay')}
+          </label>
+          <input
+            title='cleanupDelayAfterCloseMinutes'
+            name='cleanupDelayAfterCloseMinutes'
+            type="number"
+            min="0"
+            max="60"
+            value={formData.cleanupDelayAfterCloseMinutes}
+            onChange={(e) => handleFieldChange('cleanupDelayAfterCloseMinutes', parseInt(e.target.value) || 5)}
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+          />
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+            {t('branchPreferences.sections.sessionManagement.cleanupDelayDesc')}
+          </p>
+        </div>
+      )}
+
+      {/* Disabled message - shown when cleanup mode is "Disabled" (2) */}
+      {formData.cleanupMode === 2 && (
+        <div className="transition-all duration-300 ease-in-out p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+          <div className="flex items-center space-x-3 rtl:space-x-reverse">
+            <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+            <span className="text-yellow-800 dark:text-yellow-300 text-sm">
+              {t('branchPreferences.sections.sessionManagement.cleanupDisabledMessage')}
+            </span>
           </div>
         </div>
+      )}
+    </div>
+  </div>
+</div>
       </div>
     </div>
   );
