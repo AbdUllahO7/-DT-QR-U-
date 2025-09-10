@@ -13,7 +13,8 @@ import { MenuProduct } from "../../../../../types/menu/type"
 import { useLanguage } from "../../../../../contexts/LanguageContext"
 import { OrderType, orderTypeService } from "../../../../../services/Branch/BranchOrderTypeService"
 import { basketService } from "../../../../../services/Branch/BasketService"
-import { CreateSessionOrderDto, orderService, SmartCreateOrderDto } from "../../../../../services/Branch/OrderService"
+import {  orderService } from "../../../../../services/Branch/OrderService"
+import { CreateSessionOrderDto } from "../../../../../types/Orders/type"
 
 interface CartItemAddon {
   branchProductAddonId: number
@@ -60,8 +61,8 @@ interface OrderForm {
   notes: string
   orderTypeId: number
   tableId?: number
-  address?: string
-  phone?: string
+  deliveryAddress?: string
+  customerPhone?: string
 }
 
 interface CartSidebarProps {
@@ -99,8 +100,8 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
     notes: '',
     orderTypeId: 0,
     tableId: tableId,
-    address: '',
-    phone: ''
+    deliveryAddress: '',
+    customerPhone: ''
   })
   const [orderTotal, setOrderTotal] = useState({
     baseAmount: 0,
@@ -329,114 +330,140 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   }
 
   // Updated validateOrderForm to include minimum order check
-  const validateOrderForm = (): string[] => {
-    const errors: string[] = []
-    
-    // Validate customer name
-    if (!orderForm.customerName.trim()) {
-      errors.push('Customer name is required')
+// Updated validateOrderForm to include minimum order check
+const validateOrderForm = (): string[] => {
+  const errors: string[] = []
+  
+  // Add debugging logs
+  console.log('🔍 VALIDATION DEBUG:')
+  console.log('Current orderForm state:', orderForm)
+  console.log('Customer name trim:', `"${orderForm.customerName.trim()}"`)
+  console.log('Customer phone trim:', `"${orderForm.customerPhone?.trim()}"`)
+  console.log('Order type ID:', orderForm.orderTypeId)
+  
+  // Validate customer name
+  if (!orderForm.customerName.trim()) {
+    errors.push('Customer name is required')
+  }
+  
+  // Validate order type selection
+  if (!orderForm.orderTypeId) {
+    errors.push('Please select an order type')
+  }
+  
+  // Get selected order type for conditional validation
+  const selectedOrderType = getSelectedOrderType()
+  console.log('Selected Order Type:', selectedOrderType)
+  console.log('Order type requires phone:', selectedOrderType?.requiresPhone)
+  console.log('Phone value exists:', !!orderForm.customerPhone?.trim())
+  console.log('Phone value length:', orderForm.customerPhone?.trim()?.length || 0)
+  
+  // Validate minimum order amount
+  const minOrderErrors = validateMinimumOrder()
+  errors.push(...minOrderErrors)
+  
+  // Validate address if required
+  if (selectedOrderType?.requiresAddress && !orderForm.deliveryAddress?.trim()) {
+    console.log('❌ Address validation failed')
+    errors.push('Delivery address is required for this order type')
+  }
+  
+  // Validate phone if required - corrected logic with enhanced debugging
+  if (selectedOrderType?.requiresPhone) {
+    console.log('📞 Phone is required by order type')
+    if (!orderForm.customerPhone?.trim()) {
+      console.log('❌ Phone validation failed - no phone provided')
+      errors.push('Phone number is required for this order type')
+    } else {
+      console.log('✅ Phone validation passed')
     }
+  } else {
+    console.log('📞 Phone is NOT required by order type')
+  }
+  
+  console.log('Final validation errors:', errors)
+  return errors
+}
+
+const createOrder = async () => {
+  try {
+    setLoading(true)
+    setError(null)
+    setValidationErrors([])
+
+    // Validate cart quantities before creating order
+    const cartErrors = validateCart()
+    const formErrors = validateOrderForm()
+    const allErrors = [...cartErrors, ...formErrors]
     
-    // Validate order type selection
-    if (!orderForm.orderTypeId) {
-      errors.push('Please select an order type')
+    if (allErrors.length > 0) {
+      setValidationErrors(allErrors)
+      setLoading(false)
+      return
     }
+
+    let order
+    console.log('Creating order with form data:', orderForm)
     
-    // Get selected order type for conditional validation
+    // Get selected order type to determine which fields to include
     const selectedOrderType = getSelectedOrderType()
     
-    // Validate minimum order amount
-    const minOrderErrors = validateMinimumOrder()
-    errors.push(...minOrderErrors)
-    
-    // Validate address if required
-    if (selectedOrderType?.requiresAddress && !orderForm.address?.trim()) {
-      errors.push('Delivery address is required for this order type')
+    // Build the session order DTO with conditional fields
+    const sessionOrderDto: CreateSessionOrderDto = {
+      customerName: orderForm.customerName.trim(),
+      notes: orderForm.notes.trim() || undefined,
+      orderTypeId: orderForm.orderTypeId,
+      // Include tableId if it exists
+      ...(orderForm.tableId && { tableId: orderForm.tableId }),
+      // Include address if the order type requires it or if it's provided
+      ...(selectedOrderType?.requiresAddress || orderForm.deliveryAddress?.trim() ? { deliveryAddress: orderForm.deliveryAddress?.trim() } : {}),
+      // Include phone if the order type requires it or if it's provided
+      ...(selectedOrderType?.requiresPhone || orderForm.customerPhone?.trim() ? { customerPhone: orderForm.customerPhone?.trim() } : {})
     }
     
-    // Validate phone if required
-    if (selectedOrderType?.requiresPhone && !orderForm.phone?.trim()) {
-      errors.push('Phone number is required for this order type')
-    }
+    console.log('Session order DTO being sent:', sessionOrderDto)
     
-    return errors
-  }
+    order = await orderService.createSessionOrder(sessionOrderDto)
 
-  const createOrder = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      setValidationErrors([])
+    // Clear the basket after successful order creation
+    setCart([])
+    setBasketId(null)
+    setShowOrderForm(false)
+    
+    // Notify parent component
+    if (onOrderCreated) {
+      onOrderCreated(order.orderId)
+    }
 
-      // Validate cart quantities before creating order
-      const cartErrors = validateCart()
-      const formErrors = validateOrderForm()
-      const allErrors = [...cartErrors, ...formErrors]
+    setError(null)
+    
+    setTimeout(() => {
+      onClose()
+    }, 2000)
+
+  } catch (err: any) {
+    console.error('❌ Error creating order:', err)
+    
+    // Check if it's a price change confirmation error
+    if (err?.response?.status === 409) {
+      const errorMessage = err?.response?.data?.message || err?.message || ''
       
-      if (allErrors.length > 0) {
-        setValidationErrors(allErrors)
-        setLoading(false)
-        return
-      }
-
-      let order
-      
-      if (sessionId) {
-        const sessionOrderDto: CreateSessionOrderDto = {
-          customerName: orderForm.customerName.trim(),
-          notes: orderForm.notes.trim() || undefined,
-          orderTypeId: orderForm.orderTypeId
-        }
-        order = await orderService.createSessionOrder(sessionId, sessionOrderDto)
-      } else {
-        const smartOrderDto: SmartCreateOrderDto = {
-          includeAllTableBaskets: true,
-          customerName: orderForm.customerName.trim(),
-          notes: orderForm.notes.trim() || undefined,
-          orderTypeId: orderForm.orderTypeId
-        }
-        order = await orderService.smartCreateOrder(smartOrderDto)
-      }
-
-      // Clear the basket after successful order creation
-      setCart([])
-      setBasketId(null)
-      setShowOrderForm(false)
-      
-      // Notify parent component
-      if (onOrderCreated) {
-        onOrderCreated(order.orderId)
-      }
-
-      setError(null)
-      
-      setTimeout(() => {
-        onClose()
-      }, 2000)
-
-    } catch (err: any) {
-      console.error('❌ Error creating order:', err)
-      
-      // Check if it's a price change confirmation error
-      if (err?.response?.status === 409) {
-        const errorMessage = err?.response?.data?.message || err?.message || ''
+      if (errorMessage.toLowerCase().includes('unconfirmed price changes') || 
+          errorMessage.toLowerCase().includes('price changes')) {
         
-        if (errorMessage.toLowerCase().includes('unconfirmed price changes') || 
-            errorMessage.toLowerCase().includes('price changes')) {
-          
-          await handlePriceChangeConfirmation()
-          return
-          
-        } else {
-          setError(err.message || 'This order is already being processed')
-        }
+        await handlePriceChangeConfirmation()
+        return
+        
       } else {
-        setError(err.message || 'Failed to create order')
+        setError(err.message || 'This order is already being processed')
       }
-    } finally {
-      setLoading(false)
+    } else {
+      setError(err.message || 'Failed to create order')
     }
+  } finally {
+    setLoading(false)
   }
+}
 
   const loadBasket = async () => {
     try {

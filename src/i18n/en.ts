@@ -3547,6 +3547,14 @@ export const en = {
       cartItemNotFound: 'Cart item not found'
     },
 "ordersManager": {
+      total : 'Total',
+      OrderType : 'Order Type',
+      DeliveryAddress : 'Delivery Address',
+      OrderNotesInformation : 'Order Notes & Information',
+      OrderMetadata: 'Order Metadata',
+      ItemCount : 'Item Count',
+      TotalItems: 'Total Items',
+      OrderTimeline: 'Order Timeline',
       "title": "Order Management",
       "description": "Easily manage and track your restaurant's orders.",
       "pendingOrders": "Pending Orders",
