@@ -3545,6 +3545,14 @@ SortableProduct: {
     cartItemNotFound: 'Sepet ürünü bulunamadı'
     },
     "ordersManager": {
+      total : 'Toplam',
+      OrderType : 'Sipariş Türü',
+      DeliveryAddress : 'Teslimat Adresi',
+      OrderNotesInformation : 'Sipariş Notları & Bilgiler',
+      OrderMetadata: 'Sipariş Meta Verisi',
+      ItemCount : 'Ürün Sayısı',
+      TotalItems: 'Toplam Ürünler',
+      OrderTimeline: 'Sipariş Zaman Çizelgesi',
       "title": "Sipariş Yönetimi",
       "description": "Restoranınızın siparişlerini kolayca yönetin ve takip edin.",
       "pendingOrders": "Bekleyen Siparişler",

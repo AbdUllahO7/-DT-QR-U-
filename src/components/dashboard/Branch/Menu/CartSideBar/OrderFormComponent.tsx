@@ -8,8 +8,8 @@ interface OrderForm {
   notes: string;
   orderTypeId: number;
   tableId?: number;
-  address?: string;
-  phone?: string;
+  deliveryAddress?: string;
+  customerPhone?: string;
 }
 
 interface OrderTotal {
@@ -148,9 +148,9 @@ const OrderFormComponent: React.FC<OrderFormProps> = ({
             {t('order.form.deliveryAddress')} *
           </label>
           <textarea
-            value={orderForm.address}
+            value={orderForm.deliveryAddress}
             onChange={(e) =>
-              setOrderForm((prev) => ({ ...prev, address: e.target.value }))
+              setOrderForm((prev) => ({ ...prev, deliveryAddress: e.target.value }))
             }
             className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             placeholder={t('order.form.deliveryAddressPlaceholder')}
@@ -167,9 +167,9 @@ const OrderFormComponent: React.FC<OrderFormProps> = ({
           </label>
           <input
             type="tel"
-            value={orderForm.phone}
+            value={orderForm.customerPhone}
             onChange={(e) =>
-              setOrderForm((prev) => ({ ...prev, phone: e.target.value }))
+              setOrderForm((prev) => ({ ...prev, customerPhone: e.target.value }))
             }
             className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
             placeholder={t('order.form.phoneNumberPlaceholder')}
