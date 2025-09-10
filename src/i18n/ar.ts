@@ -3547,6 +3547,14 @@ export const ar = {
     cartItemNotFound: 'لم يتم العثور على عنصر السلة'
   },
 "ordersManager": {
+    total : 'المجموع',
+    OrderType : 'نوع الطلب',
+    DeliveryAddress : 'عنوان التسليم',
+    OrderNotesInformation : 'ملاحظات ومعلومات الطلب',
+    OrderMetadata: 'بيانات تعريف الطلب',
+    ItemCount : 'عدد العناصر',
+    TotalItems: 'إجمالي العناصر',
+    OrderTimeline: 'الجدول الزمني للطلب',
     "title": "إدارة الطلبات",
     "description": "إدارة وتتبع طلبات مطعمك بسهولة.",
     "pendingOrders": "الطلبات المعلقة",

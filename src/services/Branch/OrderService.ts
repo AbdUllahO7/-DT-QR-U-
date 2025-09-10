@@ -44,13 +44,12 @@ class OrderService {
   private cacheExpiry: number = 0;
   private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
-  async createSessionOrder(sessionId: string, data: CreateSessionOrderDto): Promise<Order> {
+  async createSessionOrder(data: CreateSessionOrderDto): Promise<Order> {
     try {
-      logger.info('Session order oluşturma isteği gönderiliyor', { sessionId, data }, { prefix: 'OrderService' });
-      const url = `${this.baseUrl}/session/${sessionId}`;
+      logger.info('Session order oluşturma isteği gönderiliyor', { data }, { prefix: 'OrderService' });
+      const url = `${this.baseUrl}/from-session`;
       const response = await httpClient.post<Order>(url, data);
       logger.info('Session order başarıyla oluşturuldu', { 
-        sessionId, 
         orderId: response.data.orderId 
       }, { prefix: 'OrderService' });
       return response.data;
