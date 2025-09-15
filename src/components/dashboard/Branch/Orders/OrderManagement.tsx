@@ -27,6 +27,8 @@ interface FilterOptions {
 interface PaginationState {
   currentPage: number;
   itemsPerPage: number;
+  totalItems: number;
+  totalPages: number;
 }
 
 // Enhanced component state
@@ -53,6 +55,7 @@ interface OrdersManagerState {
   filters: FilterOptions;
   pagination: PaginationState;
   showAdvancedFilters: boolean;
+  filteredOrders: (PendingOrder | BranchOrder)[];
 }
 
 const OrdersManager: React.FC = () => {
@@ -96,9 +99,12 @@ const OrdersManager: React.FC = () => {
     },
     pagination: {
       currentPage: 1,
-      itemsPerPage: 10
+      itemsPerPage: 10,
+      totalItems: 0,
+      totalPages: 0
     },
-    showAdvancedFilters: false
+    showAdvancedFilters: false,
+    filteredOrders: []
   });
 
   console.log("selectedOrder", state.selectedOrder);
@@ -125,8 +131,8 @@ const OrdersManager: React.FC = () => {
     }
   };
 
-  // FIXED: Smart filtering function - moved outside of state to prevent infinite loops
-  const filteredOrders = useMemo(() => {
+  // Smart filtering function
+  const applyFilters = useMemo(() => {
     let orders = state.viewMode === 'pending' ? state.pendingOrders : state.branchOrders;
     
     // Apply search filter
@@ -230,27 +236,31 @@ const OrdersManager: React.FC = () => {
     state.sortDirection
   ]);
 
-  // FIXED: Calculate pagination values separately
-  const paginationData = useMemo(() => {
-    const totalItems = filteredOrders.length;
-    const totalPages = Math.ceil(totalItems / state.pagination.itemsPerPage);
-    const currentPage = Math.min(state.pagination.currentPage, Math.max(1, totalPages));
+  // Update filtered orders and pagination when filters change
+  useEffect(() => {
+    const filtered = applyFilters;
+    const totalPages = Math.ceil(filtered.length / state.pagination.itemsPerPage);
     
-    return {
-      totalItems,
-      totalPages,
-      currentPage
-    };
-  }, [filteredOrders.length, state.pagination.itemsPerPage, state.pagination.currentPage]);
+    setState(prev => ({
+      ...prev,
+      filteredOrders: filtered,
+      pagination: {
+        ...prev.pagination,
+        totalItems: filtered.length,
+        totalPages,
+        currentPage: Math.min(prev.pagination.currentPage, Math.max(1, totalPages))
+      }
+    }));
+  }, [applyFilters, state.pagination.itemsPerPage]);
 
-  // FIXED: Get paginated orders
-  const paginatedOrders = useMemo(() => {
-    const startIndex = (paginationData.currentPage - 1) * state.pagination.itemsPerPage;
+  // Get paginated orders
+  const getPaginatedOrders = () => {
+    const startIndex = (state.pagination.currentPage - 1) * state.pagination.itemsPerPage;
     const endIndex = startIndex + state.pagination.itemsPerPage;
-    return filteredOrders.slice(startIndex, endIndex);
-  }, [filteredOrders, paginationData.currentPage, state.pagination.itemsPerPage]);
+    return state.filteredOrders.slice(startIndex, endIndex);
+  };
 
-  // FIXED: Filter update handlers
+  // Filter update handlers
   const updateFilter = (key: keyof FilterOptions, value: any) => {
     setState(prev => ({
       ...prev,
@@ -302,14 +312,13 @@ const OrdersManager: React.FC = () => {
     }));
   };
 
-  // FIXED: Pagination handlers
+  // Pagination handlers
   const changePage = (page: number) => {
-    const newPage = Math.max(1, Math.min(page, paginationData.totalPages));
     setState(prev => ({
       ...prev,
       pagination: {
         ...prev.pagination,
-        currentPage: newPage
+        currentPage: Math.max(1, Math.min(page, prev.pagination.totalPages))
       }
     }));
   };
@@ -325,7 +334,7 @@ const OrdersManager: React.FC = () => {
     }));
   };
 
-  // Existing handlers
+  // Existing handlers (abbreviated for space - include all your existing handlers here)
   const handleConfirmOrder = async () => {
     if (!state.activeOrderId || !state.activeRowVersion) return;
     setState(prev => ({ ...prev, loading: true, error: null, showConfirmModal: false }));
@@ -519,8 +528,7 @@ const OrdersManager: React.FC = () => {
     fetchPendingOrders();
   }, []);
 
-  // FIXED: Use the new paginated orders
-  const ordersToDisplay = paginatedOrders;
+  const ordersToDisplay = getPaginatedOrders();
   const hasActiveFilters = state.filters.search || 
     state.filters.status !== 'all' || 
     state.filters.dateRange.start || 
@@ -530,10 +538,6 @@ const OrdersManager: React.FC = () => {
     state.filters.customerName ||
     state.filters.tableName ||
     state.filters.orderType;
-
-  // FIXED: Calculate display values for pagination
-  const startItem = ((paginationData.currentPage - 1) * state.pagination.itemsPerPage) + 1;
-  const endItem = Math.min(paginationData.currentPage * state.pagination.itemsPerPage, paginationData.totalItems);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
@@ -652,7 +656,7 @@ const OrdersManager: React.FC = () => {
                 </button>
               )}
               <span className="text-sm text-gray-500 dark:text-gray-400">
-                {filteredOrders.length} of {state.viewMode === 'pending' ? state.pendingOrders.length : state.branchOrders.length} orders
+                {state.filteredOrders.length} of {state.viewMode === 'pending' ? state.pendingOrders.length : state.branchOrders.length} orders
               </span>
             </div>
           </div>
@@ -729,7 +733,9 @@ const OrdersManager: React.FC = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div className="flex items-center gap-4">
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              Showing {startItem} to {endItem} of {paginationData.totalItems} orders
+              Showing {((state.pagination.currentPage - 1) * state.pagination.itemsPerPage) + 1} to{' '}
+              {Math.min(state.pagination.currentPage * state.pagination.itemsPerPage, state.pagination.totalItems)} of{' '}
+              {state.pagination.totalItems} orders
             </div>
             
             {/* Items per page selector */}
@@ -753,8 +759,8 @@ const OrdersManager: React.FC = () => {
           {/* Pagination */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => changePage(paginationData.currentPage - 1)}
-              disabled={paginationData.currentPage <= 1}
+              onClick={() => changePage(state.pagination.currentPage - 1)}
+              disabled={state.pagination.currentPage <= 1}
               className="p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -763,8 +769,8 @@ const OrdersManager: React.FC = () => {
             {/* Page numbers */}
             <div className="flex items-center gap-1">
               {(() => {
-                const totalPages = paginationData.totalPages;
-                const currentPage = paginationData.currentPage;
+                const totalPages = state.pagination.totalPages;
+                const currentPage = state.pagination.currentPage;
                 const pages = [];
                 
                 // Always show first page
@@ -815,8 +821,8 @@ const OrdersManager: React.FC = () => {
             </div>
 
             <button
-              onClick={() => changePage(paginationData.currentPage + 1)}
-              disabled={paginationData.currentPage >= paginationData.totalPages}
+              onClick={() => changePage(state.pagination.currentPage + 1)}
+              disabled={state.pagination.currentPage >= state.pagination.totalPages}
               className="p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRight className="w-4 h-4" />
@@ -1033,6 +1039,7 @@ const OrdersManager: React.FC = () => {
           </div>
         )}
 
+        {/* All your existing modals remain the same */}
         {/* Confirm Modal */}
         {state.showConfirmModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
@@ -1126,8 +1133,11 @@ const OrdersManager: React.FC = () => {
           </div>
         )}
 
-        {/* Details Modal */}
-        {state.showDetailsModal && state.selectedOrder && (
+        {/* Details Modal - keeping your existing implementation */}
+       {/* Details Modal */}
+
+        {/* Details Modal - Complete Fix */}
+            {state.showDetailsModal && state.selectedOrder && (
           <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
@@ -1144,13 +1154,397 @@ const OrdersManager: React.FC = () => {
                   <XCircle className="w-6 h-6" />
                 </button>
               </div>
-              <div className="text-center p-4 text-gray-500 dark:text-gray-400">
-                Order details content would go here...
+
+              <div className="space-y-6">
+                {/* Order Basic Info */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t('ordersManager.customer')}
+                    </label>
+                    <p className="text-gray-900 dark:text-gray-100 font-medium">
+                      {state.selectedOrder.customerName}
+                    </p>
+                    {/* Show customer phone if available */}
+                    {(state.selectedOrder as any).customerPhone && (
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {(state.selectedOrder as any).customerPhone}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t('ordersManager.orderNumber')}
+                    </label>
+                    <p className="text-gray-900 dark:text-gray-100 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
+                      {state.selectedOrder.orderTag}
+                    </p>
+                  </div>
+                
+                </div>
+
+                {/* Order Type & Table Info */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Order Type */}
+                  {(state.selectedOrder as any).orderTypeName && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                         {t('ordersManager.OrderType')}
+                      </label>
+                      <div className="flex items-center">
+                        <span className="text-lg mr-2">{(state.selectedOrder as any).orderTypeIcon}</span>
+                        <span className="text-gray-900 dark:text-gray-100 font-medium">
+                          {(state.selectedOrder as any).orderTypeName}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {(state.selectedOrder as any).orderTypeCode}
+                      </p>
+                    </div>
+                  )}
+
+            
+
+                  {/* Order Status for Branch Orders */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t('ordersManager.status')}
+                    </label>
+                    {(() => {
+                      const status = state.viewMode === 'branch' 
+                        ? orderService.parseOrderStatus((state.selectedOrder as unknown as BranchOrder).status)
+                        : OrderStatus.Pending;
+                      return (
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusBadgeClass(status)}`}>
+                          {getStatusIcon(status)}
+                          <span className="ml-1">
+                            {orderService.getOrderStatusText(status, lang)}
+                          </span>
+                        </span>
+                      );
+                    })()}
+                  </div>
+                </div>
+
+                {/* Delivery Address (if available) */}
+                {(state.selectedOrder as any).deliveryAddress && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                       {t('ordersManager.DeliveryAddress')}
+                    </label>
+                    <p className="text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                      {(state.selectedOrder as any).deliveryAddress}
+                    </p>
+                  </div>
+                )}
+
+                {/* Order Notes */}
+                {(() => {
+                  const notes = (state.selectedOrder as any).notes;
+                  if (notes) {
+                    // Parse notes to separate regular notes from metadata
+                    const notesLines = notes.split('\n');
+                    const regularNotes = notesLines.filter((line: string | string[]) => !line.includes('[METADATA:')).join('\n').trim();
+                    const metadataLine = notesLines.find((line: string | string[]) => line.includes('[METADATA:'));
+                    
+                    let metadata = null;
+                    if (metadataLine) {
+                      try {
+                        const metadataJson = metadataLine.substring(metadataLine.indexOf('{'), metadataLine.lastIndexOf('}') + 1);
+                        metadata = JSON.parse(metadataJson);
+                      } catch (e) {
+                        console.error('Error parsing metadata:', e);
+                      }
+                    }
+
+                    return (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {t('ordersManager.OrderNotesInformation')}
+                        </label>
+                        
+                        {regularNotes && (
+                          <div className="mb-3">
+                            <p className="text-gray-900 dark:text-gray-100 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border-l-4 border-yellow-400">
+                              {regularNotes}
+                            </p>
+                          </div>
+                        )}
+
+                        {metadata && (
+                          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-700">
+                            <h5 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">  {t('ordersManager.OrderMetadata')}</h5>
+                            <div className="grid grid-cols-2 gap-2 text-xs">
+                              {metadata.UnifiedOrder && (
+                                <div>
+                                  <span className="text-blue-600 dark:text-blue-300">Unified Order:</span>
+                                  <span className="text-blue-800 dark:text-blue-100 ml-1">Yes</span>
+                                </div>
+                              )}
+                              {metadata.CustomerCount && (
+                                <div>
+                                  <span className="text-blue-600 dark:text-blue-300">Customers:</span>
+                                  <span className="text-blue-800 dark:text-blue-100 ml-1">{metadata.CustomerCount}</span>
+                                </div>
+                              )}
+                             
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+
+                {/* Order Summary */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                  <div className="text-center">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t('ordersManager.ItemCount')}
+                    </label>
+                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                      {(state.selectedOrder as any).itemCount || 
+                      (state.selectedOrder as any).items?.length || 
+                      'N/A'}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {t('ordersManager.TotalItems')}
+                    </label>
+                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                      {(() => {
+                        const items = (state.selectedOrder as any).items;
+                        if (items) {
+                          let totalCount = 0;
+                          const countItems = (itemList: any[]) => {
+                            itemList.forEach(item => {
+                              totalCount += item.count || 1;
+                              if (item.addonItems && item.addonItems.length > 0) {
+                                countItems(item.addonItems);
+                              }
+                            });
+                          };
+                          countItems(items);
+                          return totalCount;
+                        }
+                        return 'N/A';
+                      })()}
+                    </p>
+                  </div>
+                  <div className="text-center">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      {t('ordersManager.amountLabel')}
+                    </label>
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {state.selectedOrder.totalPrice.toFixed(2)}
+                    </p>
+                  </div>
+                 
+                </div>
+
+                {/* Order Items Section - Enhanced */}
+                <div className="border-t border-gray-200 dark:border-gray-600 pt-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                    <Package className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
+                    {t('ordersManager.orderItems')}
+                  </h4>
+                  
+                  {(() => {
+                    const items = (state.selectedOrder as any).items;
+                    
+                    if (!items || items.length === 0) {
+                      return (
+                        <div className="p-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
+                          <div className="flex items-center justify-center">
+                            <AlertCircle className="w-8 h-8 text-yellow-600 dark:text-yellow-400 mr-3" />
+                            <div>
+                              <p className="text-yellow-800 dark:text-yellow-200 font-medium">
+                                No items data available
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    // Render items recursively
+                    const renderItems = (itemList: any[], isAddon = false, level = 0) => {
+                      return itemList.map((item, index) => (
+                        <div key={`${level}-${index}`} className={`space-y-3`}>
+                          <div 
+                            className={`p-4 rounded-lg border-l-4 transition-all hover:shadow-sm ${
+                              isAddon 
+                                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-400 ml-6' 
+                                : 'bg-gray-50 dark:bg-gray-700 border-gray-400 dark:border-gray-500'
+                            }`}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-center">
+                                  {isAddon && (
+                                    <span className="text-blue-600 dark:text-blue-400 mr-2">↳</span>
+                                  )}
+                                  <h5 className={`font-semibold ${
+                                    isAddon 
+                                      ? 'text-blue-700 dark:text-blue-300' 
+                                      : 'text-gray-900 dark:text-gray-100'
+                                  }`}>
+                                    {item.productName}
+                                  </h5>
+                                  
+                                </div>
+                                
+                                <div className="flex items-center gap-4 mt-2">
+                                  <div className="flex items-center">
+                                    <span className="text-sm text-gray-600 dark:text-gray-400 ml-1 mr-1">
+                                        {t('ordersManager.quantity')}
+                                    </span>
+                                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                                      {item.count || 1}
+                                    </span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <span className="text-sm text-gray-600 dark:text-gray-400 ml-1 mr-1">
+                                       {t('ordersManager.unitPrice')}
+                                    </span>
+                                    <span className="font-medium text-gray-900 dark:text-gray-100 ">
+                                      {item.price?.toFixed(2) || 'N/A'}
+                                    </span>
+                                  </div>
+                                  {item.addonPrice && (
+                                    <div className="flex items-center">
+                                      <span className="text-sm text-gray-600 dark:text-gray-400 mr-1 ml-1">
+                                        {t('ordersManager.addonPrice')}
+                                      </span>
+                                      <span className="font-medium text-blue-600 dark:text-blue-400">
+                                        {item.addonPrice.toFixed(2)}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Item Notes */}
+                                {(item.note || item.addonNote) && (
+                                  <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border-l-4 border-yellow-400">
+                                    <div className="flex items-start">
+                                      <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 mr-2 mt-0.5 flex-shrink-0" />
+                                      <div>
+                                        <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
+                                          Notes:
+                                        </p>
+                                        <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
+                                          {item.note || item.addonNote}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <div className="text-right ml-4">
+                                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                                  {item.totalPrice?.toFixed(2) || 'N/A'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Render addon items */}
+                          {item.addonItems && item.addonItems.length > 0 && (
+                            <div className="ml-4">
+                              {renderItems(item.addonItems, true, level + 1)}
+                            </div>
+                          )}
+                        </div>
+                      ));
+                    };
+
+                    return (
+                      <div className="space-y-4 max-h-64 overflow-y-auto">
+                        {renderItems(items)}
+                        
+                        {/* Order Total */}
+                        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                          <div className="flex justify-between items-center">
+                            <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                              {t('ordersManager.total')}:
+                            </span>
+                            <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                              {state.selectedOrder.totalPrice.toFixed(2)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+
+                {/* Timestamps Section */}
+                <div className="border-t border-gray-200 dark:border-gray-600 pt-6">
+                  <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
+                    <Clock className="w-5 h-5 mr-2 text-gray-600 dark:text-gray-400" />
+                    {t('ordersManager.OrderTimeline')}:
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {t('ordersManager.createdAt')}
+                      </label>
+                      <p className="text-gray-900 dark:text-gray-100 font-mono text-sm">
+                        {new Date(state.selectedOrder.createdAt).toLocaleString(
+                          lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US'
+                        )}
+                      </p>
+                    </div>
+                    
+                    {(() => {
+                      const confirmedAt = (state.selectedOrder as any).confirmedAt;
+                      if (confirmedAt) {
+                        return (
+                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              {t('ordersManager.confirmedAt')}
+                            </label>
+                            <p className="text-gray-900 dark:text-gray-100 font-mono text-sm">
+                              {new Date(confirmedAt).toLocaleString(
+                                lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US'
+                              )}
+                            </p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+
+                    {(() => {
+                      const completedAt = (state.selectedOrder as any).completedAt;
+                      if (completedAt) {
+                        return (
+                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              Completed At
+                            </label>
+                            <p className="text-gray-900 dark:text-gray-100 font-mono text-sm">
+                              {new Date(completedAt).toLocaleString(
+                                lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US'
+                              )}
+                            </p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
+                </div>
+
+                {/* Row Version (for debugging/admin purposes) */}
+                
               </div>
             </div>
           </div>
         )}
-
         {/* Success notification */}
         {state.selectedOrder && (
           <div className="fixed bottom-4 right-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded-lg shadow-lg max-w-sm">
