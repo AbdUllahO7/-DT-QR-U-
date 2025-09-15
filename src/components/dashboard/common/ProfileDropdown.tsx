@@ -134,7 +134,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
               <User className="h-4 w-4" />
               <span>{t('profile.title')}</span>
             </button>
-            <button
+           {/*  <button
               onClick={() => {
                 onTabChange('subscription');
                 setIsOpen(false);
@@ -145,7 +145,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
             >
               <FileText className="h-4 w-4" />
               <span>{t('subscription.title')}</span>
-            </button>
+            </button> */}
             {!isBranchOnly && (
               <button
                 onClick={() => {

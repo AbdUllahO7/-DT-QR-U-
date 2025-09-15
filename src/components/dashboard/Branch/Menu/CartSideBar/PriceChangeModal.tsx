@@ -1,14 +1,8 @@
 import React from 'react'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import { useLanguage } from '../../../../../contexts/LanguageContext'
+import { PriceChangeModalProps } from '../../../../../types/menu/carSideBarTypes'
 
-interface PriceChangeModalProps {
-  isVisible: boolean
-  priceChanges: any
-  confirmingPriceChanges: boolean
-  onCancel: () => void
-  onConfirm: () => void
-}
 
 const PriceChangeModal: React.FC<PriceChangeModalProps> = ({
   isVisible,

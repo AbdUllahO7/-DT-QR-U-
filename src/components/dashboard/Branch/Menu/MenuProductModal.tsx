@@ -4,21 +4,9 @@ import type React from "react"
 import { useState } from "react"
 import { X, Plus, Minus, ShoppingCart, Utensils, Award } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
-import { MenuProduct } from "../../../../types/menu/type"
+import { MenuProduct, ProductModalProps, SelectedAddon } from "../../../../types/menu/type"
 
-interface SelectedAddon {
-  branchProductAddonId: number
-  addonName: string
-  price: number
-  quantity: number
-}
 
-interface ProductModalProps {
-  isOpen: boolean
-  product: MenuProduct | null
-  onClose: () => void
-  onAddToCart: (product: MenuProduct, addons: SelectedAddon[]) => void
-}
 
 const ProductModal: React.FC<ProductModalProps> = ({
   isOpen,
@@ -272,7 +260,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                           {addon.allergens && addon.allergens.length > 0 && (
                             <div className="mt-2">
                               <div className="flex flex-wrap gap-1">
-                                {addon.allergens.slice(0, 3).map((allergen) => (
+                                {addon.allergens.slice(0, 3).map((allergen: { allergenId: React.Key | null | undefined; name: string | undefined; icon: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined }) => (
                                   <span
                                     key={allergen.allergenId}
                                     className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded-full"

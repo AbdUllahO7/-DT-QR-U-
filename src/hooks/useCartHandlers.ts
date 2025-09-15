@@ -1,5 +1,8 @@
+// hooks/useCartHandlers.ts (Fixed version)
+
 import { basketService } from "../services/Branch/BasketService"
 import { orderService } from "../services/Branch/OrderService"
+import { WhatsAppService } from "../services/WhatsAppService"
 import { CreateSessionOrderDto } from "../types/Orders/type"
 
 interface CartItemAddon {
@@ -58,6 +61,10 @@ interface UseCartHandlersProps {
   setShowOrderForm: (show: boolean) => void
   setOrderForm: (form: OrderForm) => void
   tableId?: number
+  // FIXED: Add WhatsApp confirmation modal controls
+  restaurantPreferences?: any
+  setPendingWhatsAppData?: (data: any) => void
+  setShowWhatsAppConfirmation?: (show: boolean) => void
 }
 
 export const useCartHandlers = ({
@@ -79,7 +86,11 @@ export const useCartHandlers = ({
   setValidationErrors,
   setShowOrderForm,
   setOrderForm,
-  tableId
+  tableId,
+  restaurantPreferences,
+  // FIXED: Add these parameters
+  setPendingWhatsAppData,
+  setShowWhatsAppConfirmation
 }: UseCartHandlersProps) => {
 
   // Helper function to get clean session ID
@@ -113,6 +124,21 @@ export const useCartHandlers = ({
   // Helper function to get selected order type
   const getSelectedOrderType = () => {
     return orderTypes.find(ot => ot.id === orderForm.orderTypeId)
+  }
+
+  // Function to send order to WhatsApp
+  const sendOrderToWhatsApp = async (whatsappData: any) => {
+    try {
+      const whatsappNumber = WhatsAppService.formatWhatsAppNumber(
+        restaurantPreferences.whatsappOrderNumber
+      )
+
+      await WhatsAppService.sendOrderToWhatsApp(whatsappNumber, whatsappData)
+      
+    } catch (error) {
+      console.error('Error sending WhatsApp notification:', error)
+      throw error // Re-throw so the caller can handle it
+    }
   }
 
   // Load basket
@@ -401,6 +427,7 @@ export const useCartHandlers = ({
     }
   }
 
+  // FIXED: Create order function with proper WhatsApp confirmation
   const createOrder = async () => {
     try {
       setLoading(true)
@@ -430,6 +457,40 @@ export const useCartHandlers = ({
       
       const order = await orderService.createSessionOrder(sessionOrderDto)
 
+      // Calculate order total for WhatsApp message
+      const serviceChargeAmount = selectedOrderType?.serviceCharge || 0
+
+      // FIXED: Check if WhatsApp confirmation should be shown
+      if (order.orderTag && WhatsAppService.isWhatsAppEnabled(restaurantPreferences)) {
+        console.log('Order created, preparing WhatsApp confirmation...')
+        
+        const whatsappData = {
+          orderTag: order.orderTag,
+          customerName: orderForm.customerName,
+          cart,
+          totalPrice,
+          orderType: selectedOrderType?.name || 'Standard',
+          notes: orderForm.notes,
+          tableId: orderForm.tableId,
+          deliveryAddress: orderForm.deliveryAddress,
+          estimatedTime: selectedOrderType?.estimatedMinutes,
+          serviceCharge: serviceChargeAmount
+        }
+
+        console.log('Prepared WhatsApp data:', whatsappData)
+        
+        // FIXED: Check if functions are available before calling
+        if (setPendingWhatsAppData && setShowWhatsAppConfirmation) {
+          console.log('Setting WhatsApp confirmation modal to show')
+          setPendingWhatsAppData(whatsappData)
+          setShowWhatsAppConfirmation(true)
+        } else {
+          console.warn('WhatsApp confirmation functions not available - setPendingWhatsAppData:', !!setPendingWhatsAppData, 'setShowWhatsAppConfirmation:', !!setShowWhatsAppConfirmation)
+        }
+      } else {
+        console.log('WhatsApp not enabled or no order tag, skipping confirmation')
+      }
+        
       if (order.orderTag) {
         await addOrderToTracking(order.orderTag)
       }
@@ -544,6 +605,7 @@ export const useCartHandlers = ({
     removeOrderFromTracking,
     refreshAllPendingOrders,
     calculateItemTotalPrice,
-    getSelectedOrderType
+    getSelectedOrderType,
+    sendOrderToWhatsApp
   }
 }
