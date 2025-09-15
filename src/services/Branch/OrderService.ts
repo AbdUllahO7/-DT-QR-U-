@@ -50,7 +50,7 @@ class OrderService {
       const url = `${this.baseUrl}/from-session`;
       const response = await httpClient.post<Order>(url, data);
       logger.info('Session order başarıyla oluşturuldu', { 
-        orderId: response.data.orderId 
+        orderId: response.data 
       }, { prefix: 'OrderService' });
       return response.data;
     } catch (error: any) {
