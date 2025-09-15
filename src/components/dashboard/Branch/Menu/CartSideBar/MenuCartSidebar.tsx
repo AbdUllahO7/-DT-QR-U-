@@ -235,14 +235,24 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   }, [orderForm.orderTypeId, totalPrice])
 
   // Calculate total price whenever cart changes
-  useEffect(() => {
-    const total = cart.reduce((sum, item) => {
-      const itemTotalPrice = calculateItemTotalPrice(item)
-      return sum + (itemTotalPrice * item.quantity)
-    }, 0)
+useEffect(() => {
+  const total = cart.reduce((sum, item) => {
+    // Calculate the base price for all quantities
+    const baseTotal = item.price * item.quantity
     
-    setTotalPrice(total)
-  }, [cart])
+    // Calculate addons price (addons are fixed cost, not multiplied by main product quantity)
+    const addonsPrice = item.addons?.reduce((addonSum, addon) => {
+      return addonSum + (addon.price * addon.quantity)
+    }, 0) || 0
+    
+    // Total for this item = (base price × quantity) + addon prices
+    const itemTotal = baseTotal + addonsPrice
+    
+    return sum + itemTotal
+  }, 0)
+  
+  setTotalPrice(total)
+}, [cart])
 
   // Load order types function
   const loadOrderTypes = async () => {
@@ -374,13 +384,13 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
         {/* Header */}
         <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-white flex items-center">
+            <h3 className="text-lg font-bold text-white flex items-center ">
               {activeTab === 'cart' ? (
-                <ShoppingCart className="h-4 w-4 mr-2" />
+                <ShoppingCart className="h-4 w-4 mr-2 ml-2" />
               ) : (
-                <ClipboardList className="h-4 w-4 mr-2" />
+                <ClipboardList className="h-4 w-4 mr-2 ml-2" />
               )}
-              {activeTab === 'cart' ? (showOrderForm ? 'Order Form' : t('menu.cart.title')) : t('menu.cart.ordersß')}
+              {activeTab === 'cart' ? (showOrderForm ? 'Order Form' : t('menu.cart.title')) : t('menu.cart.orders')}
               {(loading || loadingOrderTypes || trackingLoading) && <Loader2 className="h-3 w-3 ml-2 animate-spin" />}
             </h3>
             <div className="flex items-center space-x-2">
