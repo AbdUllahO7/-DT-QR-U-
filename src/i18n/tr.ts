@@ -1,3 +1,6 @@
+import { table } from "console";
+import { ref } from "process";
+
 export const tr = {
   // Common
   common: {
@@ -3439,7 +3442,15 @@ SortableProduct: {
       },
       cart: {
       title: 'Sepet',
+      orderType: 'Sipariş Türü:',
+      table: 'Masa:',
+      notes: 'Notlar:',
+      refresh: 'Yenile',
+      refreshing: 'Yenileniyor...',
+      remove: 'Kaldır',
       empty: 'Sepetiniz boş',
+      newOrder: 'Yeni Sipariş',
+      orders: 'Siparişler',
       placeOrder: "Sipariş Ver",
       emptyDesc: 'Sepetinize ürün ekleyerek başlayın',
       total: 'Toplam',
@@ -3463,7 +3474,7 @@ SortableProduct: {
       maxQuantityError: '{name} için maksimum miktar {max}',
       decreaseQuantity: 'Miktarı azalt',
       increaseQuantity: 'Miktarı artır'
-    }
+      }
   },
   order: {
     form: {
@@ -3597,6 +3608,8 @@ SortableProduct: {
       "errorInvalidStatusTransition": "Geçersiz durum geçişi: Lütfen önce siparişi onaylayın (Onaylandı durumuna geçin).",
       "errorCannotConfirm": "Bu sipariş onaylanamaz. Mevcut durum: {currentStatus}.",
       "quantity": "Miktar",
+      "unitPrice": "Birim Fiyat",
+      "addonPrice": "Ekstra Fiyat",
       "notes": "Not",
       "amountLabel": "Toplam Tutar"
     },

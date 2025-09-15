@@ -52,7 +52,7 @@ const OrdersManager: React.FC = () => {
     sortDirection: 'desc',
     statusFilter: 'all'
   });
-
+  console.log("selectedOrder", state.selectedOrder)
   // Fetch pending orders
   const fetchPendingOrders = async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
@@ -889,6 +889,7 @@ const OrdersManager: React.FC = () => {
                       {state.selectedOrder.totalPrice.toFixed(2)}
                     </p>
                   </div>
+                 
                 </div>
 
                 {/* Order Items Section - Enhanced */}
@@ -945,25 +946,25 @@ const OrdersManager: React.FC = () => {
                                 
                                 <div className="flex items-center gap-4 mt-2">
                                   <div className="flex items-center">
-                                    <span className="text-sm text-gray-600 dark:text-gray-400 mr-1">
-                                      Quantity:
+                                    <span className="text-sm text-gray-600 dark:text-gray-400 ml-1 mr-1">
+                                        {t('ordersManager.quantity')}
                                     </span>
                                     <span className="font-medium text-gray-900 dark:text-gray-100">
                                       {item.count || 1}
                                     </span>
                                   </div>
                                   <div className="flex items-center">
-                                    <span className="text-sm text-gray-600 dark:text-gray-400 mr-1">
-                                      Unit Price:
+                                    <span className="text-sm text-gray-600 dark:text-gray-400 ml-1 mr-1">
+                                       {t('ordersManager.unitPrice')}
                                     </span>
-                                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                                    <span className="font-medium text-gray-900 dark:text-gray-100 ">
                                       {item.price?.toFixed(2) || 'N/A'}
                                     </span>
                                   </div>
                                   {item.addonPrice && (
                                     <div className="flex items-center">
-                                      <span className="text-sm text-gray-600 dark:text-gray-400 mr-1">
-                                        Addon Price:
+                                      <span className="text-sm text-gray-600 dark:text-gray-400 mr-1 ml-1">
+                                        {t('ordersManager.addonPrice')}
                                       </span>
                                       <span className="font-medium text-blue-600 dark:text-blue-400">
                                         {item.addonPrice.toFixed(2)}

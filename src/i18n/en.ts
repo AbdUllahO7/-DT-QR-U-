@@ -1,3 +1,5 @@
+import { ref } from "process";
+
 export const en = {
   // Common
   common: {
@@ -3441,6 +3443,14 @@ export const en = {
     },
      cart: {
       title: 'Cart',
+      newOrder: 'New Order',
+      orders: 'Orders',
+      orderType: 'Order Type',
+      table: 'Table:',
+      notes: 'Notes:',
+      refresh: 'Refresh',
+      refreshing: 'Refreshing...',
+      remove: 'Remove',
       empty: 'Your cart is empty',
       emptyDesc: 'Start by adding some items to your cart',
       total: 'Total',
@@ -3599,6 +3609,8 @@ export const en = {
       "errorInvalidStatusTransition": "Invalid status transition: Please confirm the order first (move to Confirmed status).",
       "errorCannotConfirm": "This order cannot be confirmed. Current status: {currentStatus}.",
       "quantity": "Quantity",
+      "unitPrice": "Unit Price",
+      "addonPrice": "Addon Price",
       "notes": "Notes",
       "amountLabel": "Total Amount"
     },
