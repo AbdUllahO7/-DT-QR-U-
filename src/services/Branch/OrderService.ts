@@ -110,22 +110,44 @@ class OrderService {
     }
   }
 
-  async getBranchOrders(): Promise<BranchOrder[]> {
-    try {
-      logger.info('Branch orders getirme isteği gönderiliyor', {}, { prefix: 'OrderServicke' });
-      const url = `${this.baseUrl}/branch?includeItems=true`;
-      const response = await httpClient.get<BranchOrder[]>(url);
-      const orders = Array.isArray(response.data) ? response.data : [];
-      logger.info('Branch orders başarıyla alındı', { 
-        ordersCount: orders.length 
-      }, { prefix: 'OrderService' });
-      console.log('Branch Orders:', orders);
-      return orders;
-    } catch (error: any) {
-      logger.error('Branch orders getirme hatası', error, { prefix: 'OrderService' });
-      this.handleError(error, 'Branch orders getirilirken hata oluştu');
-    }
+async getBranchOrders(): Promise<BranchOrder[]> {
+  try {
+    logger.info('Branch orders getirme isteği gönderiliyor', {}, { prefix: 'OrderService' });
+    
+    // Test different page sizes to find the limit
+    const response = await httpClient.get(`${this.baseUrl}/branch`, {
+      params: {
+        page: 1,
+        pageSize: 200, // Same as Swagger
+        includeItems: false
+      }
+    });
+    
+    console.log('=== PAGINATION DEBUG ===');
+    console.log('Requested pageSize: 200');
+    console.log('Actual items returned:', response.data.length);
+    console.log('Response headers:', response.headers);
+    console.log('Full response structure:', {
+      hasData: !!response.data,
+      dataType: typeof response.data,
+      isArray: Array.isArray(response.data),
+      length: response.data?.length,
+      hasPaginationInfo: !!(response.data.totalCount || response.data.total || response.data.pagination)
+    });
+    
+    const orders = Array.isArray(response.data) ? response.data : [];
+    
+    logger.info('Branch orders başarıyla alındı', { 
+      ordersCount: orders.length 
+    }, { prefix: 'OrderService' });
+    
+    return orders;
+  } catch (error: any) {
+    logger.error('Branch orders getirme hatası', error, { prefix: 'OrderService' });
+    this.handleError(error, 'Branch orders getirilirken hata oluştu');
+    return [];
   }
+}
 
   async confirmOrder(orderId: string, data: ConfirmOrderDto): Promise<Order> {
     try {
@@ -450,35 +472,37 @@ class OrderService {
     logger.info('Order types cache temizlendi', {}, { prefix: 'OrderService' });
   }
 
-  private handleError(error: any, defaultMessage: string): never {
-    if (error?.response?.status === 400) {
-      const errorData = error?.response?.data;
-      if (errorData?.errors) {
-        const validationErrors = Object.values(errorData.errors).flat();
-        throw new Error(`Doğrulama hatası: ${validationErrors.join(', ')}`);
-      } else {
-        throw new Error('Geçersiz istek. Lütfen verileri kontrol edin.');
-      }
-    } else if (error?.response?.status === 401) {
-      throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
-    } else if (error?.response?.status === 403) {
-      throw new Error('Bu işlem için yetkiniz bulunmuyor.');
-    } else if (error?.response?.status === 404) {
-      throw new Error('Sipariş bulunamadı.');
-    } else if (error?.response?.status === 409) {
-      const originalMessage = error?.response?.data?.message || '';
-      if (originalMessage.toLowerCase().includes('unconfirmed price changes') || 
-          originalMessage.toLowerCase().includes('price changes')) {
-        throw error;
-      }
-    } else if (error?.response?.status === 422) {
-      throw new Error('Sipariş durumu bu işleme uygun değil.');
-    } else if (error?.response?.status === 0 || !navigator.onLine) {
-      throw new Error('İnternet bağlantınızı kontrol edin.');
+ private handleError(error: any, defaultMessage: string): never {
+  if (error?.response?.status === 400) {
+    const errorData = error?.response?.data;
+    if (errorData?.errors) {
+      const validationErrors = Object.values(errorData.errors).flat();
+      throw new Error(`Doğrulama hatası: ${validationErrors.join(', ')}`);
     } else {
-      throw new Error(`${defaultMessage}: ${error?.message || 'Bilinmeyen hata'}`);
+      throw new Error('Geçersiz istek. Lütfen verileri kontrol edin.');
     }
+  } else if (error?.response?.status === 401) {
+    throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+  } else if (error?.response?.status === 403) {
+    throw new Error('Bu işlem için yetkiniz bulunmuyor.');
+  } else if (error?.response?.status === 404) {
+    throw new Error('Sipariş bulunamadı.');
+  } else if (error?.response?.status === 409) {
+    const originalMessage = error?.response?.data?.message || '';
+    if (originalMessage.toLowerCase().includes('unconfirmed price changes') || 
+        originalMessage.toLowerCase().includes('price changes')) {
+      throw error; // Re-throw the original error for price changes
+    }
+    // Add fallback for other 409 errors
+    throw new Error('Çakışma hatası: İşlem tamamlanamadı.');
+  } else if (error?.response?.status === 422) {
+    throw new Error('Sipariş durumu bu işleme uygun değil.');
+  } else if (error?.response?.status === 0 || !navigator.onLine) {
+    throw new Error('İnternet bağlantınızı kontrol edin.');
+  } else {
+    throw new Error(`${defaultMessage}: ${error?.message || 'Bilinmeyen hata'}`);
   }
+}
 }
 
 export const orderService = new OrderService();

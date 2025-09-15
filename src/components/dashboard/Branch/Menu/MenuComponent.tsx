@@ -1,10 +1,12 @@
+// MenuComponent.tsx - Updated with WhatsApp integration (showing key changes)
+
 "use client"
 
 import type React from "react"
 import { useState, useEffect, useCallback } from "react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import { branchProductService } from "../../../../services/Branch/BranchProductService"
-import { BranchMenuResponse, MenuCategory, MenuComponentProps, MenuProduct } from "../../../../types/menu/type"
+import { BranchMenuResponse, MenuCategory, MenuComponentProps, MenuProduct, SelectedAddon } from "../../../../types/menu/type"
 
 // Import separated components
 import Header from "./MenuHeaderComponent"
@@ -16,13 +18,6 @@ import ProductGrid from "./MneuProductGrid"
 import CartSidebar from "./CartSideBar/MenuCartSidebar"
 import ProductModal from "./MenuProductModal"
 import { basketService } from "../../../../services/Branch/BasketService"
-
-interface SelectedAddon {
-  branchProductAddonId: number
-  addonName: string
-  price: number
-  quantity: number
-}
 
 const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
   const { t, isRTL } = useLanguage()
@@ -93,6 +88,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         "allergens",
         "availableAddons",
       ])
+      console.log("menuResponse",menuResponse)
       if (Array.isArray(menuResponse)) {
         setError("Menu format not supported yet. Please update the service.")
         return
@@ -175,7 +171,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       const basket = await basketService.getMyBasket()
       const itemToRemove = basket.items.find(item => 
         item.branchProductId === branchProductId &&
-        (!item.addons || item.addons.length === 0) // Prefer plain items
+        (!item.addonItems || item.addonItems.length === 0) // Prefer plain items
       )
       
       if (itemToRemove) {
@@ -324,11 +320,12 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         </div>
       </div>
 
-      {/* Cart Sidebar */}
+      {/* UPDATED: Cart Sidebar with restaurant preferences */}
       <CartSidebar
         isOpen={showCart}
         onClose={() => setShowCart(false)}
         findProduct={findProduct}
+        restaurantPreferences={menuData.preferences} // NEW: Pass restaurant preferences
       />
 
       {/* Product Customization Modal */}

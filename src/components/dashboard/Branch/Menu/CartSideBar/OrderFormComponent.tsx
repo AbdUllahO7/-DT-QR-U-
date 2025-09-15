@@ -1,36 +1,9 @@
 import React from 'react';
 import { User, MapPin, Phone, Clock, Loader2 } from 'lucide-react';
-import { OrderType } from '../../../../../services/Branch/BranchOrderTypeService';
 import { useLanguage } from '../../../../../contexts/LanguageContext';
+import { OrderFormProps } from '../../../../../types/menu/carSideBarTypes';
 
-interface OrderForm {
-  customerName: string;
-  notes: string;
-  orderTypeId: number;
-  tableId?: number;
-  deliveryAddress?: string;
-  customerPhone?: string;
-}
 
-interface OrderTotal {
-  baseAmount: number;
-  serviceCharge: number;
-  totalAmount: number;
-}
-
-interface OrderFormProps {
-  orderForm: OrderForm;
-  setOrderForm: React.Dispatch<React.SetStateAction<OrderForm>>;
-  orderTypes: OrderType[];
-  loadingOrderTypes: boolean;
-  orderTotal: OrderTotal;
-  estimatedTime: number;
-  totalPrice: number;
-  validationErrors: string[];
-  loading: boolean;
-  onBack: () => void;
-  onCreate: () => void;
-}
 
 const OrderFormComponent: React.FC<OrderFormProps> = ({
   orderForm,
@@ -60,7 +33,15 @@ const OrderFormComponent: React.FC<OrderFormProps> = ({
       </div>
     );
   }
-
+  
+  const selectedOrderType = getSelectedOrderType();
+  const minOrderAmount = selectedOrderType?.minOrderAmount || 0;
+  const isBelowMinimumOrder = minOrderAmount > 0 && totalPrice < minOrderAmount;
+  const isButtonDisabled = 
+    loading ||
+    orderTypes.length === 0 ||
+    !orderForm.orderTypeId ||
+    isBelowMinimumOrder;
   return (
     <div className="space-y-6">
       {/* Order Type Selection */}
@@ -266,25 +247,19 @@ const OrderFormComponent: React.FC<OrderFormProps> = ({
           {t('order.form.backToCart')}
         </button>
         <button
-          onClick={onCreate}
-          disabled={
-            loading ||
-            orderTypes.length === 0 ||
-            !orderForm.orderTypeId ||
-            (getSelectedOrderType()?.minOrderAmount &&
-              totalPrice < getSelectedOrderType()!.minOrderAmount)
-          }
-          className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50"
-        >
-          {loading ? (
-            <div className="flex items-center justify-center">
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              {t('order.form.creating')}
-            </div>
-          ) : (
-            t('order.form.createOrder')
-          )}
-        </button>
+        onClick={onCreate}
+        disabled={isButtonDisabled}
+        className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50"
+      >
+        {loading ? (
+          <div className="flex items-center justify-center">
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            {t('order.form.creating')}
+          </div>
+        ) : (
+          t('order.form.createOrder')
+        )}
+      </button>
       </div>
     </div>
   );

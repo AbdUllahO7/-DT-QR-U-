@@ -1,12 +1,35 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, AlertCircle, Package, Truck, Eye, Filter } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ChevronDown, ChevronUp, Clock, CheckCircle, XCircle, AlertCircle, Package, Truck, Eye, Filter, Search, Calendar, User, CreditCard, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { orderService } from '../../../../services/Branch/OrderService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { BranchOrder, ConfirmOrderDto, Order, OrderStatus, PendingOrder, RejectOrderDto, UpdateOrderStatusDto } from '../../../../types/Orders/type';
 
-// Types for component state
+// Enhanced filtering interface
+interface FilterOptions {
+  search: string;
+  status: OrderStatus | 'all';
+  dateRange: {
+    start: string;
+    end: string;
+  };
+  priceRange: {
+    min: number | null;
+    max: number | null;
+  };
+  orderType: string;
+  customerName: string;
+  tableName: string;
+}
+
+// Pagination interface
+interface PaginationState {
+  currentPage: number;
+  itemsPerPage: number;
+}
+
+// Enhanced component state
 interface OrdersManagerState {
   pendingOrders: PendingOrder[];
   branchOrders: BranchOrder[];
@@ -25,13 +48,17 @@ interface OrdersManagerState {
   expandedRows: Set<string>;
   sortField: string;
   sortDirection: 'asc' | 'desc';
-  statusFilter: OrderStatus | 'all';
+  
+  // Enhanced filtering and pagination
+  filters: FilterOptions;
+  pagination: PaginationState;
+  showAdvancedFilters: boolean;
 }
 
 const OrdersManager: React.FC = () => {
-  const { t ,language} = useLanguage();
+  const { t, language } = useLanguage();
   
-  const lang = language // Get the current language (e.g., 'en', 'tr', 'ar')
+  const lang = language;
   const [state, setState] = useState<OrdersManagerState>({
     pendingOrders: [],
     branchOrders: [],
@@ -50,9 +77,32 @@ const OrdersManager: React.FC = () => {
     expandedRows: new Set(),
     sortField: 'createdAt',
     sortDirection: 'desc',
-    statusFilter: 'all'
+    
+    // Enhanced filtering and pagination
+    filters: {
+      search: '',
+      status: 'all',
+      dateRange: {
+        start: '',
+        end: ''
+      },
+      priceRange: {
+        min: null,
+        max: null
+      },
+      orderType: '',
+      customerName: '',
+      tableName: ''
+    },
+    pagination: {
+      currentPage: 1,
+      itemsPerPage: 10
+    },
+    showAdvancedFilters: false
   });
-  console.log("selectedOrder", state.selectedOrder)
+
+  console.log("selectedOrder", state.selectedOrder);
+
   // Fetch pending orders
   const fetchPendingOrders = async () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
@@ -75,7 +125,207 @@ const OrdersManager: React.FC = () => {
     }
   };
 
-  // Confirm order
+  // FIXED: Smart filtering function - moved outside of state to prevent infinite loops
+  const filteredOrders = useMemo(() => {
+    let orders = state.viewMode === 'pending' ? state.pendingOrders : state.branchOrders;
+    
+    // Apply search filter
+    if (state.filters.search.trim()) {
+      const searchTerm = state.filters.search.toLowerCase();
+      orders = orders.filter(order => 
+        order.customerName.toLowerCase().includes(searchTerm) ||
+        order.orderTag.toLowerCase().includes(searchTerm) ||
+        (('tableName' in order) && order.tableName?.toLowerCase().includes(searchTerm)) ||
+        (('notes' in order) && order.notes?.toLowerCase().includes(searchTerm))
+      );
+    }
+
+    // Apply status filter (only for branch orders)
+    if (state.viewMode === 'branch' && state.filters.status !== 'all') {
+      orders = orders.filter(order => {
+        const status = orderService.parseOrderStatus((order as BranchOrder).status);
+        return status === state.filters.status;
+      });
+    }
+
+    // Apply date range filter
+    if (state.filters.dateRange.start) {
+      const startDate = new Date(state.filters.dateRange.start);
+      orders = orders.filter(order => new Date(order.createdAt) >= startDate);
+    }
+    if (state.filters.dateRange.end) {
+      const endDate = new Date(state.filters.dateRange.end);
+      endDate.setHours(23, 59, 59, 999); // Include the entire end date
+      orders = orders.filter(order => new Date(order.createdAt) <= endDate);
+    }
+
+    // Apply price range filter
+    if (state.filters.priceRange.min !== null) {
+      orders = orders.filter(order => order.totalPrice >= state.filters.priceRange.min!);
+    }
+    if (state.filters.priceRange.max !== null) {
+      orders = orders.filter(order => order.totalPrice <= state.filters.priceRange.max!);
+    }
+
+    // Apply customer name filter
+    if (state.filters.customerName.trim()) {
+      const customerTerm = state.filters.customerName.toLowerCase();
+      orders = orders.filter(order => 
+        order.customerName.toLowerCase().includes(customerTerm)
+      );
+    }
+
+    // Apply table name filter
+    if (state.filters.tableName.trim()) {
+      const tableTerm = state.filters.tableName.toLowerCase();
+      orders = orders.filter(order => 
+        ('tableName' in order) && order.tableName?.toLowerCase().includes(tableTerm)
+      );
+    }
+
+    // Apply order type filter
+    if (state.filters.orderType.trim()) {
+      const orderTypeTerm = state.filters.orderType.toLowerCase();
+      orders = orders.filter(order => 
+        (('orderTypeName' in order) && (order as any).orderTypeName?.toLowerCase().includes(orderTypeTerm)) ||
+        (('orderTypeCode' in order) && (order as any).orderTypeCode?.toLowerCase().includes(orderTypeTerm))
+      );
+    }
+
+    // Sort orders
+    orders = orders.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (state.sortField) {
+        case 'customerName':
+          aValue = a.customerName.toLowerCase();
+          bValue = b.customerName.toLowerCase();
+          break;
+        case 'totalPrice':
+          aValue = a.totalPrice;
+          bValue = b.totalPrice;
+          break;
+        case 'createdAt':
+          aValue = new Date(a.createdAt).getTime();
+          bValue = new Date(b.createdAt).getTime();
+          break;
+        default:
+          return 0;
+      }
+      
+      if (state.sortDirection === 'asc') {
+        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+      } else {
+        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+      }
+    });
+
+    return orders;
+  }, [
+    state.viewMode,
+    state.pendingOrders,
+    state.branchOrders,
+    state.filters,
+    state.sortField,
+    state.sortDirection
+  ]);
+
+  // FIXED: Calculate pagination values separately
+  const paginationData = useMemo(() => {
+    const totalItems = filteredOrders.length;
+    const totalPages = Math.ceil(totalItems / state.pagination.itemsPerPage);
+    const currentPage = Math.min(state.pagination.currentPage, Math.max(1, totalPages));
+    
+    return {
+      totalItems,
+      totalPages,
+      currentPage
+    };
+  }, [filteredOrders.length, state.pagination.itemsPerPage, state.pagination.currentPage]);
+
+  // FIXED: Get paginated orders
+  const paginatedOrders = useMemo(() => {
+    const startIndex = (paginationData.currentPage - 1) * state.pagination.itemsPerPage;
+    const endIndex = startIndex + state.pagination.itemsPerPage;
+    return filteredOrders.slice(startIndex, endIndex);
+  }, [filteredOrders, paginationData.currentPage, state.pagination.itemsPerPage]);
+
+  // FIXED: Filter update handlers
+  const updateFilter = (key: keyof FilterOptions, value: any) => {
+    setState(prev => ({
+      ...prev,
+      filters: {
+        ...prev.filters,
+        [key]: value
+      },
+      pagination: {
+        ...prev.pagination,
+        currentPage: 1 // Reset to first page when filtering
+      }
+    }));
+  };
+
+  const updateNestedFilter = (key: keyof FilterOptions, nestedKey: string, value: any) => {
+    setState(prev => ({
+      ...prev,
+      filters: {
+        ...prev.filters,
+        [key]: {
+          ...prev.filters[key],
+          [nestedKey]: value
+        }
+      },
+      pagination: {
+        ...prev.pagination,
+        currentPage: 1
+      }
+    }));
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setState(prev => ({
+      ...prev,
+      filters: {
+        search: '',
+        status: 'all',
+        dateRange: { start: '', end: '' },
+        priceRange: { min: null, max: null },
+        orderType: '',
+        customerName: '',
+        tableName: ''
+      },
+      pagination: {
+        ...prev.pagination,
+        currentPage: 1
+      }
+    }));
+  };
+
+  // FIXED: Pagination handlers
+  const changePage = (page: number) => {
+    const newPage = Math.max(1, Math.min(page, paginationData.totalPages));
+    setState(prev => ({
+      ...prev,
+      pagination: {
+        ...prev.pagination,
+        currentPage: newPage
+      }
+    }));
+  };
+
+  const changeItemsPerPage = (itemsPerPage: number) => {
+    setState(prev => ({
+      ...prev,
+      pagination: {
+        ...prev.pagination,
+        itemsPerPage,
+        currentPage: 1
+      }
+    }));
+  };
+
+  // Existing handlers
   const handleConfirmOrder = async () => {
     if (!state.activeOrderId || !state.activeRowVersion) return;
     setState(prev => ({ ...prev, loading: true, error: null, showConfirmModal: false }));
@@ -88,13 +338,11 @@ const OrdersManager: React.FC = () => {
         fetchBranchOrders();
       }
       setState(prev => ({ ...prev, selectedOrder: updatedOrder, loading: false, activeOrderId: null, activeRowVersion: null }));
-    
     } catch (error: any) {
       setState(prev => ({ ...prev, error: error.message, loading: false, activeOrderId: null, activeRowVersion: null }));
     }
   };
 
-  // Reject order
   const handleRejectOrder = async () => {
     if (!state.activeOrderId || !state.activeRowVersion || !state.rejectReason) return;
     setState(prev => ({ ...prev, loading: true, error: null, showRejectModal: false }));
@@ -112,7 +360,6 @@ const OrdersManager: React.FC = () => {
     }
   };
 
-  // Update order status
   const handleUpdateStatus = async () => {
     if (!state.activeOrderId || !state.activeRowVersion || state.newStatus === null) return;
     setState(prev => ({ ...prev, loading: true, error: null, showStatusModal: false }));
@@ -136,9 +383,13 @@ const OrdersManager: React.FC = () => {
     }
   };
 
-  // Switch view mode
   const switchViewMode = (mode: 'pending' | 'branch') => {
-    setState(prev => ({ ...prev, viewMode: mode, statusFilter: 'all' }));
+    setState(prev => ({ 
+      ...prev, 
+      viewMode: mode,
+      pagination: { ...prev.pagination, currentPage: 1 }
+    }));
+    clearFilters();
     if (mode === 'pending') {
       fetchPendingOrders();
     } else {
@@ -146,7 +397,6 @@ const OrdersManager: React.FC = () => {
     }
   };
 
-  // Get valid status transitions based on current status
   const getValidStatusTransitions = (currentStatus: OrderStatus): OrderStatus[] => {
     switch (currentStatus) {
       case OrderStatus.Pending:
@@ -162,13 +412,12 @@ const OrdersManager: React.FC = () => {
       case OrderStatus.Cancelled:
       case OrderStatus.Rejected:
       case OrderStatus.Delivered:
-        return []; // Final states - no transitions allowed
+        return [];
       default:
         return [];
     }
   };
 
-  // Get status icon and color
   const getStatusIcon = (status: OrderStatus) => {
     switch (status) {
       case OrderStatus.Pending:
@@ -191,7 +440,6 @@ const OrdersManager: React.FC = () => {
     }
   };
 
-  // Get status badge styles
   const getStatusBadgeClass = (status: OrderStatus) => {
     switch (status) {
       case OrderStatus.Pending:
@@ -228,7 +476,7 @@ const OrdersManager: React.FC = () => {
   };
 
   const openDetailsModal = (order: PendingOrder | BranchOrder) => {
-    setState(prev => ({ ...prev, showDetailsModal: true, selectedOrder: order as Order }));
+    setState(prev => ({ ...prev, showDetailsModal: true, selectedOrder: order as unknown as Order }));
   };
 
   const closeModals = () => {
@@ -246,7 +494,6 @@ const OrdersManager: React.FC = () => {
     }));
   };
 
-  // Toggle row expansion
   const toggleRowExpansion = (orderId: string) => {
     setState(prev => {
       const newExpanded = new Set(prev.expandedRows);
@@ -259,7 +506,6 @@ const OrdersManager: React.FC = () => {
     });
   };
 
-  // Sort orders
   const handleSort = (field: string) => {
     setState(prev => ({
       ...prev,
@@ -268,53 +514,26 @@ const OrdersManager: React.FC = () => {
     }));
   };
 
-  // Filter and sort orders
-  const getFilteredAndSortedOrders = () => {
-    let orders = state.viewMode === 'pending' ? state.pendingOrders : state.branchOrders;
-    
-    // Apply status filter (only for branch orders)
-    if (state.viewMode === 'branch' && state.statusFilter !== 'all') {
-      orders = orders.filter(order => {
-        const status = orderService.parseOrderStatus((order as BranchOrder).status);
-        return status === state.statusFilter;
-      });
-    }
-
-    // Sort orders
-    return orders.sort((a, b) => {
-      let aValue, bValue;
-      
-      switch (state.sortField) {
-        case 'customerName':
-          aValue = a.customerName.toLowerCase();
-          bValue = b.customerName.toLowerCase();
-          break;
-        case 'totalPrice':
-          aValue = a.totalPrice;
-          bValue = b.totalPrice;
-          break;
-        case 'createdAt':
-          aValue = new Date(a.createdAt).getTime();
-          bValue = new Date(b.createdAt).getTime();
-          break;
-        default:
-          return 0;
-      }
-      
-      if (state.sortDirection === 'asc') {
-        return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-      } else {
-        return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
-      }
-    });
-  };
-
   // Initial fetch on mount
   useEffect(() => {
     fetchPendingOrders();
   }, []);
 
-  const ordersToDisplay = getFilteredAndSortedOrders();
+  // FIXED: Use the new paginated orders
+  const ordersToDisplay = paginatedOrders;
+  const hasActiveFilters = state.filters.search || 
+    state.filters.status !== 'all' || 
+    state.filters.dateRange.start || 
+    state.filters.dateRange.end ||
+    state.filters.priceRange.min !== null ||
+    state.filters.priceRange.max !== null ||
+    state.filters.customerName ||
+    state.filters.tableName ||
+    state.filters.orderType;
+
+  // FIXED: Calculate display values for pagination
+  const startItem = ((paginationData.currentPage - 1) * state.pagination.itemsPerPage) + 1;
+  const endItem = Math.min(paginationData.currentPage * state.pagination.itemsPerPage, paginationData.totalItems);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
@@ -349,26 +568,260 @@ const OrdersManager: React.FC = () => {
               {t('ordersManager.branchOrders')} ({state.branchOrders.length})
             </button>
           </div>
+        </div>
 
-          {/* Status Filter (only for branch orders) */}
-          {state.viewMode === 'branch' && (
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-gray-500" />
-              <select
-                title={t('ordersManager.statusFilter')}
-                value={state.statusFilter}
-                onChange={(e) => setState(prev => ({ ...prev, statusFilter: e.target.value === 'all' ? 'all' : parseInt(e.target.value) as OrderStatus }))}
-                className="border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">{t('ordersManager.allStatuses')}</option>
-                {Object.values(OrderStatus).filter(v => typeof v === 'number').map((status) => (
-                  <option key={status} value={status}>
-                    {orderService.getOrderStatusText(status as OrderStatus, lang)}
-                  </option>
-                ))}
-              </select>
+        {/* Enhanced Filtering Section */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
+          {/* Basic Filters Row */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            {/* Search Filter */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder={t('ordersManager.searchPlaceholder') || 'Search orders...'}
+                value={state.filters.search}
+                onChange={(e) => updateFilter('search', e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Status Filter (only for branch orders) */}
+            {state.viewMode === 'branch' && (
+              <div className="relative">
+                <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <select
+                  value={state.filters.status}
+                  onChange={(e) => updateFilter('status', e.target.value === 'all' ? 'all' : parseInt(e.target.value) as OrderStatus)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">{t('ordersManager.allStatuses')}</option>
+                  {Object.values(OrderStatus).filter(v => typeof v === 'number').map((status) => (
+                    <option key={status} value={status}>
+                      {orderService.getOrderStatusText(status as OrderStatus, lang)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {/* Date Range Start */}
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="date"
+                placeholder="Start Date"
+                value={state.filters.dateRange.start}
+                onChange={(e) => updateNestedFilter('dateRange', 'start', e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Date Range End */}
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="date"
+                placeholder="End Date"
+                value={state.filters.dateRange.end}
+                onChange={(e) => updateNestedFilter('dateRange', 'end', e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          {/* Advanced Filters Toggle */}
+          <div className="flex justify-between items-center">
+            <button
+              onClick={() => setState(prev => ({ ...prev, showAdvancedFilters: !prev.showAdvancedFilters }))}
+              className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              {state.showAdvancedFilters ? 'Hide Advanced Filters' : 'Show Advanced Filters'}
+              {state.showAdvancedFilters ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
+            </button>
+
+            <div className="flex items-center gap-2">
+              {hasActiveFilters && (
+                <button
+                  onClick={clearFilters}
+                  className="flex items-center text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium"
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Clear Filters
+                </button>
+              )}
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                {filteredOrders.length} of {state.viewMode === 'pending' ? state.pendingOrders.length : state.branchOrders.length} orders
+              </span>
+            </div>
+          </div>
+
+          {/* Advanced Filters */}
+          {state.showAdvancedFilters && (
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {/* Customer Name Filter */}
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Customer Name"
+                    value={state.filters.customerName}
+                    onChange={(e) => updateFilter('customerName', e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Table Name Filter */}
+                <div className="relative">
+                  <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Table Name"
+                    value={state.filters.tableName}
+                    onChange={(e) => updateFilter('tableName', e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Order Type Filter */}
+                <div className="relative">
+                  <Truck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Order Type"
+                    value={state.filters.orderType}
+                    onChange={(e) => updateFilter('orderType', e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Price Range Min */}
+                <div className="relative">
+                  <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="number"
+                    placeholder="Min Price"
+                    value={state.filters.priceRange.min || ''}
+                    onChange={(e) => updateNestedFilter('priceRange', 'min', e.target.value ? parseFloat(e.target.value) : null)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Price Range Max */}
+                <div className="relative">
+                  <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="number"
+                    placeholder="Max Price"
+                    value={state.filters.priceRange.max || ''}
+                    onChange={(e) => updateNestedFilter('priceRange', 'max', e.target.value ? parseFloat(e.target.value) : null)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
             </div>
           )}
+        </div>
+
+        {/* Results Summary and Pagination Controls */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <div className="flex items-center gap-4">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              Showing {startItem} to {endItem} of {paginationData.totalItems} orders
+            </div>
+            
+            {/* Items per page selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">Show:</span>
+              <select
+                value={state.pagination.itemsPerPage}
+                onChange={(e) => changeItemsPerPage(parseInt(e.target.value))}
+                className="text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={25}>25</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+              <span className="text-sm text-gray-600 dark:text-gray-400">per page</span>
+            </div>
+          </div>
+
+          {/* Pagination */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => changePage(paginationData.currentPage - 1)}
+              disabled={paginationData.currentPage <= 1}
+              className="p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+
+            {/* Page numbers */}
+            <div className="flex items-center gap-1">
+              {(() => {
+                const totalPages = paginationData.totalPages;
+                const currentPage = paginationData.currentPage;
+                const pages = [];
+                
+                // Always show first page
+                if (totalPages > 0) {
+                  pages.push(1);
+                }
+
+                // Add ellipsis and current page area
+                if (currentPage > 3) {
+                  pages.push('...');
+                }
+
+                // Show current page and surrounding pages
+                for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+                  if (!pages.includes(i)) {
+                    pages.push(i);
+                  }
+                }
+
+                // Add ellipsis and last page
+                if (currentPage < totalPages - 2) {
+                  if (!pages.includes('...')) {
+                    pages.push('...');
+                  }
+                }
+
+                if (totalPages > 1 && !pages.includes(totalPages)) {
+                  pages.push(totalPages);
+                }
+
+                return pages.map((page, index) => (
+                  <button
+                    key={index}
+                    onClick={() => typeof page === 'number' ? changePage(page) : null}
+                    disabled={typeof page !== 'number'}
+                    className={`px-3 py-1 text-sm rounded-lg transition-colors ${
+                      page === currentPage
+                        ? 'bg-blue-600 text-white dark:bg-blue-500'
+                        : typeof page === 'number'
+                        ? 'border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                        : 'text-gray-400 dark:text-gray-500 cursor-default'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ));
+              })()}
+            </div>
+
+            <button
+              onClick={() => changePage(paginationData.currentPage + 1)}
+              disabled={paginationData.currentPage >= paginationData.totalPages}
+              className="p-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Error Message */}
@@ -395,8 +848,19 @@ const OrdersManager: React.FC = () => {
               <div className="text-center py-12">
                 <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-lg text-gray-500 dark:text-gray-400">
-                  {t('ordersManager.noOrders', { viewMode: state.viewMode === 'pending' ? t('ordersManager.pendingOrders').toLowerCase() : t('ordersManager.branchOrders').toLowerCase() })}
+                  {hasActiveFilters 
+                    ? 'No orders match your current filters'
+                    : t('ordersManager.noOrders', { viewMode: state.viewMode === 'pending' ? t('ordersManager.pendingOrders').toLowerCase() : t('ordersManager.branchOrders').toLowerCase() })
+                  }
                 </p>
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                )}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -459,7 +923,6 @@ const OrdersManager: React.FC = () => {
                       const rowVersion = order.rowVersion || '';
                       const validStatuses = getValidStatusTransitions(status);
                       const isExpanded = state.expandedRows.has(order.id.toString());
-                      const flatItems = isPending && 'items' in order ? orderService.getFlatItemList(order.items) : [];
 
                       return (
                         <React.Fragment key={order.id}>
@@ -543,7 +1006,7 @@ const OrdersManager: React.FC = () => {
                                       if (newStatus !== status) {
                                         openStatusModal(order.id.toString(), rowVersion, newStatus);
                                       }
-                                      e.target.value = status.toString(); // Reset select
+                                      e.target.value = status.toString();
                                     }}
                                     className="text-xs border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
                                     disabled={state.loading}
@@ -560,7 +1023,6 @@ const OrdersManager: React.FC = () => {
                               </div>
                             </td>
                           </tr>
-                  
                         </React.Fragment>
                       );
                     })}
@@ -665,9 +1127,7 @@ const OrdersManager: React.FC = () => {
         )}
 
         {/* Details Modal */}
-
-        {/* Details Modal - Complete Fix */}
-            {state.showDetailsModal && state.selectedOrder && (
+        {state.showDetailsModal && state.selectedOrder && (
           <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-6">
@@ -684,415 +1144,13 @@ const OrdersManager: React.FC = () => {
                   <XCircle className="w-6 h-6" />
                 </button>
               </div>
-
-              <div className="space-y-6">
-                {/* Order Basic Info */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      {t('ordersManager.customer')}
-                    </label>
-                    <p className="text-gray-900 dark:text-gray-100 font-medium">
-                      {state.selectedOrder.customerName}
-                    </p>
-                    {/* Show customer phone if available */}
-                    {(state.selectedOrder as any).customerPhone && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {(state.selectedOrder as any).customerPhone}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      {t('ordersManager.orderNumber')}
-                    </label>
-                    <p className="text-gray-900 dark:text-gray-100 font-mono bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
-                      {state.selectedOrder.orderTag}
-                    </p>
-                  </div>
-                
-                </div>
-
-                {/* Order Type & Table Info */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {/* Order Type */}
-                  {(state.selectedOrder as any).orderTypeName && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                         {t('ordersManager.OrderType')}
-                      </label>
-                      <div className="flex items-center">
-                        <span className="text-lg mr-2">{(state.selectedOrder as any).orderTypeIcon}</span>
-                        <span className="text-gray-900 dark:text-gray-100 font-medium">
-                          {(state.selectedOrder as any).orderTypeName}
-                        </span>
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {(state.selectedOrder as any).orderTypeCode}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Table Information */}
-                  {(() => {
-                    const tableName = 'tableName' in state.selectedOrder ? state.selectedOrder.tableName : null;
-                    const tableId = (state.selectedOrder as any).tableId;
-                    if (tableName || tableId) {
-                      return (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                            {t('ordersManager.table')}
-                          </label>
-                          <p className="text-gray-900 dark:text-gray-100 font-medium">
-                            {tableName || `Table #${tableId}`}
-                          </p>
-                         
-                        </div>
-                      );
-                    }
-                    return null;
-                  })()}
-
-                  {/* Order Status for Branch Orders */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      {t('ordersManager.status')}
-                    </label>
-                    {(() => {
-                      const status = state.viewMode === 'branch' 
-                        ? orderService.parseOrderStatus((state.selectedOrder as BranchOrder).status)
-                        : OrderStatus.Pending;
-                      return (
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusBadgeClass(status)}`}>
-                          {getStatusIcon(status)}
-                          <span className="ml-1">
-                            {orderService.getOrderStatusText(status, lang)}
-                          </span>
-                        </span>
-                      );
-                    })()}
-                  </div>
-                </div>
-
-                {/* Delivery Address (if available) */}
-                {(state.selectedOrder as any).deliveryAddress && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                       {t('ordersManager.DeliveryAddress')}
-                    </label>
-                    <p className="text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-                      {(state.selectedOrder as any).deliveryAddress}
-                    </p>
-                  </div>
-                )}
-
-                {/* Order Notes */}
-                {(() => {
-                  const notes = (state.selectedOrder as any).notes;
-                  if (notes) {
-                    // Parse notes to separate regular notes from metadata
-                    const notesLines = notes.split('\n');
-                    const regularNotes = notesLines.filter(line => !line.includes('[METADATA:')).join('\n').trim();
-                    const metadataLine = notesLines.find(line => line.includes('[METADATA:'));
-                    
-                    let metadata = null;
-                    if (metadataLine) {
-                      try {
-                        const metadataJson = metadataLine.substring(metadataLine.indexOf('{'), metadataLine.lastIndexOf('}') + 1);
-                        metadata = JSON.parse(metadataJson);
-                      } catch (e) {
-                        console.error('Error parsing metadata:', e);
-                      }
-                    }
-
-                    return (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            {t('ordersManager.OrderNotesInformation')}
-                        </label>
-                        
-                        {regularNotes && (
-                          <div className="mb-3">
-                            <p className="text-gray-900 dark:text-gray-100 bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border-l-4 border-yellow-400">
-                              {regularNotes}
-                            </p>
-                          </div>
-                        )}
-
-                        {metadata && (
-                          <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-700">
-                            <h5 className="text-sm font-medium text-blue-800 dark:text-blue-200 mb-2">  {t('ordersManager.OrderMetadata')}</h5>
-                            <div className="grid grid-cols-2 gap-2 text-xs">
-                              {metadata.UnifiedOrder && (
-                                <div>
-                                  <span className="text-blue-600 dark:text-blue-300">Unified Order:</span>
-                                  <span className="text-blue-800 dark:text-blue-100 ml-1">Yes</span>
-                                </div>
-                              )}
-                              {metadata.CustomerCount && (
-                                <div>
-                                  <span className="text-blue-600 dark:text-blue-300">Customers:</span>
-                                  <span className="text-blue-800 dark:text-blue-100 ml-1">{metadata.CustomerCount}</span>
-                                </div>
-                              )}
-                             
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  }
-                  return null;
-                })()}
-
-                {/* Order Summary */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                  <div className="text-center">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      {t('ordersManager.ItemCount')}
-                    </label>
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      {(state.selectedOrder as any).itemCount || 
-                      (state.selectedOrder as any).items?.length || 
-                      'N/A'}
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {t('ordersManager.TotalItems')}
-                    </label>
-                    <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                      {(() => {
-                        const items = (state.selectedOrder as any).items;
-                        if (items) {
-                          let totalCount = 0;
-                          const countItems = (itemList: any[]) => {
-                            itemList.forEach(item => {
-                              totalCount += item.count || 1;
-                              if (item.addonItems && item.addonItems.length > 0) {
-                                countItems(item.addonItems);
-                              }
-                            });
-                          };
-                          countItems(items);
-                          return totalCount;
-                        }
-                        return 'N/A';
-                      })()}
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      {t('ordersManager.amountLabel')}
-                    </label>
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      {state.selectedOrder.totalPrice.toFixed(2)}
-                    </p>
-                  </div>
-                 
-                </div>
-
-                {/* Order Items Section - Enhanced */}
-                <div className="border-t border-gray-200 dark:border-gray-600 pt-6">
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                    <Package className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-400" />
-                    {t('ordersManager.orderItems')}
-                  </h4>
-                  
-                  {(() => {
-                    const items = (state.selectedOrder as any).items;
-                    
-                    if (!items || items.length === 0) {
-                      return (
-                        <div className="p-6 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
-                          <div className="flex items-center justify-center">
-                            <AlertCircle className="w-8 h-8 text-yellow-600 dark:text-yellow-400 mr-3" />
-                            <div>
-                              <p className="text-yellow-800 dark:text-yellow-200 font-medium">
-                                No items data available
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-
-                    // Render items recursively
-                    const renderItems = (itemList: any[], isAddon = false, level = 0) => {
-                      return itemList.map((item, index) => (
-                        <div key={`${level}-${index}`} className={`space-y-3`}>
-                          <div 
-                            className={`p-4 rounded-lg border-l-4 transition-all hover:shadow-sm ${
-                              isAddon 
-                                ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-400 ml-6' 
-                                : 'bg-gray-50 dark:bg-gray-700 border-gray-400 dark:border-gray-500'
-                            }`}
-                          >
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <div className="flex items-center">
-                                  {isAddon && (
-                                    <span className="text-blue-600 dark:text-blue-400 mr-2">↳</span>
-                                  )}
-                                  <h5 className={`font-semibold ${
-                                    isAddon 
-                                      ? 'text-blue-700 dark:text-blue-300' 
-                                      : 'text-gray-900 dark:text-gray-100'
-                                  }`}>
-                                    {item.productName}
-                                  </h5>
-                                  
-                                </div>
-                                
-                                <div className="flex items-center gap-4 mt-2">
-                                  <div className="flex items-center">
-                                    <span className="text-sm text-gray-600 dark:text-gray-400 ml-1 mr-1">
-                                        {t('ordersManager.quantity')}
-                                    </span>
-                                    <span className="font-medium text-gray-900 dark:text-gray-100">
-                                      {item.count || 1}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center">
-                                    <span className="text-sm text-gray-600 dark:text-gray-400 ml-1 mr-1">
-                                       {t('ordersManager.unitPrice')}
-                                    </span>
-                                    <span className="font-medium text-gray-900 dark:text-gray-100 ">
-                                      {item.price?.toFixed(2) || 'N/A'}
-                                    </span>
-                                  </div>
-                                  {item.addonPrice && (
-                                    <div className="flex items-center">
-                                      <span className="text-sm text-gray-600 dark:text-gray-400 mr-1 ml-1">
-                                        {t('ordersManager.addonPrice')}
-                                      </span>
-                                      <span className="font-medium text-blue-600 dark:text-blue-400">
-                                        {item.addonPrice.toFixed(2)}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-
-                                {/* Item Notes */}
-                                {(item.note || item.addonNote) && (
-                                  <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border-l-4 border-yellow-400">
-                                    <div className="flex items-start">
-                                      <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-400 mr-2 mt-0.5 flex-shrink-0" />
-                                      <div>
-                                        <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                                          Notes:
-                                        </p>
-                                        <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                                          {item.note || item.addonNote}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                              
-                              <div className="text-right ml-4">
-                                <p className="text-lg font-bold text-gray-900 dark:text-gray-100">
-                                  {item.totalPrice?.toFixed(2) || 'N/A'}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Render addon items */}
-                          {item.addonItems && item.addonItems.length > 0 && (
-                            <div className="ml-4">
-                              {renderItems(item.addonItems, true, level + 1)}
-                            </div>
-                          )}
-                        </div>
-                      ));
-                    };
-
-                    return (
-                      <div className="space-y-4 max-h-64 overflow-y-auto">
-                        {renderItems(items)}
-                        
-                        {/* Order Total */}
-                        <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
-                          <div className="flex justify-between items-center">
-                            <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
-                              {t('ordersManager.total')}:
-                            </span>
-                            <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                              {state.selectedOrder.totalPrice.toFixed(2)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-
-                {/* Timestamps Section */}
-                <div className="border-t border-gray-200 dark:border-gray-600 pt-6">
-                  <h4 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4 flex items-center">
-                    <Clock className="w-5 h-5 mr-2 text-gray-600 dark:text-gray-400" />
-                    {t('ordersManager.OrderTimeline')}:
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        {t('ordersManager.createdAt')}
-                      </label>
-                      <p className="text-gray-900 dark:text-gray-100 font-mono text-sm">
-                        {new Date(state.selectedOrder.createdAt).toLocaleString(
-                          lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US'
-                        )}
-                      </p>
-                    </div>
-                    
-                    {(() => {
-                      const confirmedAt = (state.selectedOrder as any).confirmedAt;
-                      if (confirmedAt) {
-                        return (
-                          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              {t('ordersManager.confirmedAt')}
-                            </label>
-                            <p className="text-gray-900 dark:text-gray-100 font-mono text-sm">
-                              {new Date(confirmedAt).toLocaleString(
-                                lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US'
-                              )}
-                            </p>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })()}
-
-                    {(() => {
-                      const completedAt = (state.selectedOrder as any).completedAt;
-                      if (completedAt) {
-                        return (
-                          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                              Completed At
-                            </label>
-                            <p className="text-gray-900 dark:text-gray-100 font-mono text-sm">
-                              {new Date(completedAt).toLocaleString(
-                                lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US'
-                              )}
-                            </p>
-                          </div>
-                        );
-                      }
-                      return null;
-                    })()}
-                  </div>
-                </div>
-
-                {/* Row Version (for debugging/admin purposes) */}
-                
+              <div className="text-center p-4 text-gray-500 dark:text-gray-400">
+                Order details content would go here...
               </div>
             </div>
           </div>
         )}
+
         {/* Success notification */}
         {state.selectedOrder && (
           <div className="fixed bottom-4 right-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-200 px-4 py-3 rounded-lg shadow-lg max-w-sm">

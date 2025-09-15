@@ -4,13 +4,9 @@ import type React from "react"
 import { UtensilsCrossed, MapPin, ShoppingCart } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import LanguageSelector from "../../../LanguageSelector"
-import { BranchMenuResponse } from "../../../../types/menu/type"
+import { HeaderProps } from "../../../../types/menu/type"
 
-interface HeaderProps {
-  menuData: BranchMenuResponse
-  totalItems: number
-  onCartToggle: () => void
-}
+
 
 const Header: React.FC<HeaderProps> = ({ menuData, totalItems, onCartToggle }) => {
   const { t, isRTL } = useLanguage()
