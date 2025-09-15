@@ -1,20 +1,7 @@
 import type React from "react"
 import { Clock, CheckCircle, ClipboardList, Loader2 } from "lucide-react"
-import { OrderTrackingInfo } from "../../../../../types/Orders/type"
 import { useLanguage } from "../../../../../contexts/LanguageContext"
-
-interface TrackedOrder {
-  orderTag: string
-  trackingInfo: OrderTrackingInfo
-  createdAt: Date
-}
-
-interface OrdersTabProps {
-  trackedOrders: TrackedOrder[]
-  trackingLoading: boolean
-  onLoadOrderTracking: (orderTag: string) => Promise<void>
-  onRemoveOrderFromTracking: (orderTag: string) => void
-}
+import { OrderCardProps, OrdersTabProps, TrackedOrder } from "../../../../../types/menu/carSideBarTypes"
 
 const OrdersTab: React.FC<OrdersTabProps> = ({
   trackedOrders,
@@ -85,14 +72,6 @@ const OrdersTab: React.FC<OrdersTabProps> = ({
   )
 }
 
-interface OrderCardProps {
-  order: TrackedOrder
-  trackingLoading: boolean
-  getStatusColor: (status: string) => string
-  getStatusIcon: (status: string) => React.ReactElement
-  onLoadOrderTracking: (orderTag: string) => Promise<void>
-  onRemoveOrderFromTracking: (orderTag: string) => void
-}
 
 const OrderCard: React.FC<OrderCardProps> = ({
   order,
@@ -103,7 +82,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
   onRemoveOrderFromTracking
 }) => {
       const { t } = useLanguage()
-    
+      console.log("order11",order)
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
       {/* Order Header */}

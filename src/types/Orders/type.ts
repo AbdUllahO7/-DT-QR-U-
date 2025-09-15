@@ -66,6 +66,7 @@ export interface BranchOrder {
   tableId?: number;
   tableName?: string;
   customerName: string;
+  items: OrderItem[];
   itemCount: number;
   rowVersion: string;
 }
@@ -97,6 +98,7 @@ export interface OrderTrackingInfo {
   notes?: string;
   sessionId?: string | null;
   branchId: number;
+  orderTypeName: string;
   tableId?: number | null;
   tableName?: string;
   items: OrderItem[];

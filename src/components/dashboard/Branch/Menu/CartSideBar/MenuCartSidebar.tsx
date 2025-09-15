@@ -1,3 +1,5 @@
+// Updated CartSidebar component (fixed version)
+
 "use client"
 
 import type React from "react"
@@ -16,78 +18,21 @@ import { OrderTrackingInfo } from "../../../../../types/Orders/type"
 import { useCartHandlers } from "../../../../../hooks/useCartHandlers"
 import CartContent from "./CartContent"
 import OrdersTab from "./OrdersTab"
+import { CartItem, CartSidebarProps, GroupedCartItem, OrderForm, TrackedOrder } from "../../../../../types/menu/carSideBarTypes"
+import WhatsAppConfirmationModal from "./WhatsAppConfirmationModal"
 
-// Types
-interface CartItemAddon {
-  branchProductAddonId: number
-  addonName: string
-  price: number
-  quantity: number
-  minQuantity?: number
-  maxQuantity?: number
-  basketItemId?: number
+// UPDATED: Add restaurantPreferences to props
+interface UpdatedCartSidebarProps extends CartSidebarProps {
+  restaurantPreferences?: any // Add restaurant preferences for WhatsApp integration
 }
 
-interface CartItem {
-  basketItemId?: number
-  branchProductId: number
-  productName: string
-  price: number
-  quantity: number
-  productImageUrl?: string
-  addons?: CartItemAddon[]
-  totalItemPrice: number
-}
-
-interface GroupedCartItem {
-  product: {
-    branchProductId: number
-    productName: string
-    price: number
-    productImageUrl?: string
-  }
-  variants: Array<{
-    basketItemId?: number
-    cartIndex: number
-    quantity: number
-    addons?: CartItemAddon[]
-    totalItemPrice: number
-    isPlain: boolean
-  }>
-  totalQuantity: number
-  totalPrice: number
-}
-
-interface OrderForm {
-  customerName: string
-  notes: string
-  orderTypeId: number
-  tableId?: number
-  deliveryAddress?: string
-  customerPhone?: string
-}
-
-interface TrackedOrder {
-  orderTag: string
-  trackingInfo: OrderTrackingInfo
-  createdAt: Date
-}
-
-interface CartSidebarProps {
-  isOpen: boolean
-  onClose: () => void
-  findProduct: (branchProductId: number) => MenuProduct | undefined
-  sessionId?: string
-  tableId?: number
-  onOrderCreated?: (orderId: string) => void
-}
-
-const CartSidebar: React.FC<CartSidebarProps> = ({
+const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   isOpen,
   onClose,
   sessionId,
   tableId,
-  onOrderCreated
+  onOrderCreated,
+  restaurantPreferences // NEW: Restaurant preferences prop
 }) => {
   const { t } = useLanguage()
 
@@ -100,6 +45,9 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [basketId, setBasketId] = useState<string | null>(null)
+  const [showWhatsAppConfirmation, setShowWhatsAppConfirmation] = useState(false)
+  const [pendingWhatsAppData, setPendingWhatsAppData] = useState<any>(null)
+  const [whatsappSending, setWhatsappSending] = useState(false)
   
   // Order creation states
   const [showOrderForm, setShowOrderForm] = useState(false)
@@ -130,7 +78,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   const [trackedOrders, setTrackedOrders] = useState<TrackedOrder[]>([])
   const [trackingLoading, setTrackingLoading] = useState(false)
 
-  // Use the custom hook for cart handlers
+  // FIXED: Use the custom hook for cart handlers with ALL required parameters
   const {
     loadBasket,
     clearBasket,
@@ -146,7 +94,8 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
     removeOrderFromTracking,
     refreshAllPendingOrders,
     calculateItemTotalPrice,
-    getSelectedOrderType
+    getSelectedOrderType,
+    sendOrderToWhatsApp
   } = useCartHandlers({
     cart,
     setCart,
@@ -166,8 +115,34 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
     setValidationErrors,
     setShowOrderForm,
     setOrderForm,
-    tableId
+    tableId,
+    restaurantPreferences,
+    // FIXED: Pass the missing WhatsApp confirmation parameters
+    setPendingWhatsAppData,
+    setShowWhatsAppConfirmation
   })
+
+  const handleWhatsAppConfirm = async () => {
+    if (!pendingWhatsAppData) return
+    
+    try {
+      setWhatsappSending(true)
+      await sendOrderToWhatsApp(pendingWhatsAppData)
+      setShowWhatsAppConfirmation(false)
+      setPendingWhatsAppData(null)
+    } catch (error) {
+      console.error('Error sending WhatsApp message:', error)
+      setError('Failed to send WhatsApp message')
+    } finally {
+      setWhatsappSending(false)
+    }
+  }
+
+  const handleWhatsAppCancel = () => {
+    setShowWhatsAppConfirmation(false)
+    setPendingWhatsAppData(null)
+    setWhatsappSending(false)
+  }
 
   // Load tracked orders from localStorage on mount
   useEffect(() => {
@@ -194,7 +169,7 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
 
   // Auto-refresh all pending orders
   useEffect(() => {
-    let interval: NodeJS.Timeout | null = null
+    let interval: ReturnType<typeof setInterval> | null = null
     
     const pendingOrders = trackedOrders.filter(order => 
       order.trackingInfo.orderStatus === 'Pending'
@@ -235,24 +210,24 @@ const CartSidebar: React.FC<CartSidebarProps> = ({
   }, [orderForm.orderTypeId, totalPrice])
 
   // Calculate total price whenever cart changes
-useEffect(() => {
-  const total = cart.reduce((sum, item) => {
-    // Calculate the base price for all quantities
-    const baseTotal = item.price * item.quantity
+  useEffect(() => {
+    const total = cart.reduce((sum, item) => {
+      // Calculate the base price for all quantities
+      const baseTotal = item.price * item.quantity
+      
+      // Calculate addons price (addons are fixed cost, not multiplied by main product quantity)
+      const addonsPrice = item.addons?.reduce((addonSum, addon) => {
+        return addonSum + (addon.price * addon.quantity)
+      }, 0) || 0
+      
+      // Total for this item = (base price × quantity) + addon prices
+      const itemTotal = baseTotal + addonsPrice
+      
+      return sum + itemTotal
+    }, 0)
     
-    // Calculate addons price (addons are fixed cost, not multiplied by main product quantity)
-    const addonsPrice = item.addons?.reduce((addonSum, addon) => {
-      return addonSum + (addon.price * addon.quantity)
-    }, 0) || 0
-    
-    // Total for this item = (base price × quantity) + addon prices
-    const itemTotal = baseTotal + addonsPrice
-    
-    return sum + itemTotal
-  }, 0)
-  
-  setTotalPrice(total)
-}, [cart])
+    setTotalPrice(total)
+  }, [cart])
 
   // Load order types function
   const loadOrderTypes = async () => {
@@ -266,7 +241,7 @@ useEffect(() => {
       
       if (types.length > 0 && orderForm.orderTypeId === 0) {
         const defaultType = types.find(t => t.isStandard) || types[0]
-        setOrderForm(prev => ({ 
+        setOrderForm((prev: any) => ({ 
           ...prev, 
           orderTypeId: defaultType.id 
         }))
@@ -531,6 +506,16 @@ useEffect(() => {
           setLoading(false)
         }}
         onConfirm={confirmPriceChanges}
+      />
+
+      {/* FIXED: WhatsApp Confirmation Modal */}
+      <WhatsAppConfirmationModal
+        isVisible={showWhatsAppConfirmation}
+        restaurantName={restaurantPreferences?.restaurantName || 'Restaurant'}
+        whatsappNumber={restaurantPreferences?.whatsappOrderNumber}
+        onConfirm={handleWhatsAppConfirm}
+        onCancel={handleWhatsAppCancel}
+        loading={whatsappSending}
       />
     </div>
   )

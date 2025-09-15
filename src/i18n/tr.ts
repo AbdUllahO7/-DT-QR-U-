@@ -3752,5 +3752,23 @@ SortableProduct: {
       "invalidPaymentSettings": "Geçersiz ödeme ayarları. En az bir ödeme yöntemi seçilmelidir.",
       "invalidSessionSettings": "Geçersiz oturum ayarları. Lütfen değerleri kontrol edin."
     }
-    }
+    },
+    whatsapp: {
+  confirmation: {
+    title: 'WhatsApp\'a Gönder?',
+    subtitle: 'Restoranı WhatsApp ile bilgilendir',
+    sendTo: 'Sipariş detaylarınız şuraya gönderilecek:',
+    restaurant: 'Restoran',
+    whatWillBeSent: 'Gönderilecek bilgiler:',
+    orderDetails: '• Sipariş detayları ve ürünler',
+    customerInfo: '• Müşteri adı ve masa numarası',
+    totalPrice: '• Toplam fiyat ve özel notlar',
+    timestamp: '• Sipariş zamanı',
+    note: 'Not:',
+    noteDescription: 'Bu işlem cihazınızda WhatsApp\'ı açacaktır. WhatsApp\'a göndermemeyi seçseniz bile siparişiniz işlenecektir.',
+    skipWhatsApp: 'WhatsApp\'ı Atla',
+    sendToWhatsApp: 'WhatsApp\'a Gönder',
+    sending: 'Gönderiliyor...'
+  }
+}
 }; 

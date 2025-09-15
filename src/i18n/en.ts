@@ -3756,5 +3756,24 @@ export const en = {
       "invalidPaymentSettings": "Invalid payment settings. At least one payment method must be selected.",
       "invalidSessionSettings": "Invalid session settings. Please check the values."
     }
+  },
+  whatsapp: {
+  confirmation: {
+    title: 'Send to WhatsApp?',
+    subtitle: 'Notify restaurant via WhatsApp',
+    sendTo: 'Your order details will be sent to:',
+    restaurant: 'Restaurant',
+    whatWillBeSent: 'What will be sent:',
+    orderDetails: '• Your order details and items',
+    customerInfo: '• Customer name and table number',
+    totalPrice: '• Total price and any special notes',
+    timestamp: '• Order timestamp',
+    note: 'Note:',
+    noteDescription: 'This will open WhatsApp on your device. Your order will still be processed even if you choose not to send to WhatsApp.',
+    skipWhatsApp: 'Skip WhatsApp',
+    sendToWhatsApp: 'Send to WhatsApp',
+    sending: 'Sending...'
   }
+}
+
 }; 

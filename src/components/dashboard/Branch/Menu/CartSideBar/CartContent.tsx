@@ -3,61 +3,8 @@ import { ArrowRight, Loader2 } from "lucide-react"
 import CartItemComponent from "./CartItemComponent"
 import EmptyCartComponent from "./EmptyCartComponent"
 import { useLanguage } from "../../../../../contexts/LanguageContext"
+import { CartContentProps } from "../../../../../types/menu/carSideBarTypes"
 
-interface CartItemAddon {
-  branchProductAddonId: number
-  addonName: string
-  price: number
-  quantity: number
-  minQuantity?: number
-  maxQuantity?: number
-  basketItemId?: number
-}
-
-interface CartItem {
-  basketItemId?: number
-  branchProductId: number
-  productName: string
-  price: number
-  quantity: number
-  productImageUrl?: string
-  addons?: CartItemAddon[]
-  totalItemPrice: number
-}
-
-interface GroupedCartItem {
-  product: {
-    branchProductId: number
-    productName: string
-    price: number
-    productImageUrl?: string
-  }
-  variants: Array<{
-    basketItemId?: number
-    cartIndex: number
-    quantity: number
-    addons?: CartItemAddon[]
-    totalItemPrice: number
-    isPlain: boolean
-  }>
-  totalQuantity: number
-  totalPrice: number
-}
-
-interface CartContentProps {
-  cart: CartItem[]
-  groupedItems: GroupedCartItem[]
-  totalPrice: number
-  loading: boolean
-  onProceedToOrder: () => void
-  onQuantityIncrease: (basketItemId?: number) => Promise<void>
-  onQuantityDecrease: (basketItemId?: number) => Promise<void>
-  onAddonQuantityIncrease: (addonBasketItemId: number) => Promise<void>
-  onRemoveFromBasket: (basketItemId: number) => Promise<void>
-  canIncreaseAddonQuantity: (addon: CartItemAddon) => boolean
-  canDecreaseAddonQuantity: (addon: CartItemAddon) => boolean
-  getAddonQuantityError: (addon: CartItemAddon) => string | null
-}
 
 const CartContent: React.FC<CartContentProps> = ({
   cart,

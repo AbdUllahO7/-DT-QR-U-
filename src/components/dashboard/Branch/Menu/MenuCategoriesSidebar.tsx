@@ -3,13 +3,8 @@
 import type React from "react"
 import { Filter } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
-import { MenuCategory } from "../../../../types/menu/type"
+import { CategoriesSidebarProps } from "../../../../types/menu/type"
 
-interface CategoriesSidebarProps {
-  categories: MenuCategory[]
-  selectedCategory: number | null
-  onCategorySelect: (categoryId: number) => void
-}
 
 const CategoriesSidebar: React.FC<CategoriesSidebarProps> = ({
   categories,

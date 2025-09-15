@@ -60,3 +60,30 @@ export interface CartItem {
 export interface MenuComponentProps {
   branchId: number
 }
+export interface CategoriesSidebarProps {
+  categories: MenuCategory[]
+  selectedCategory: number | null
+  onCategorySelect: (categoryId: number) => void
+}
+
+export interface SelectedAddon {
+  branchProductAddonId: number
+  addonName: string
+  price: number
+  quantity: number
+}
+
+export interface HeaderProps {
+  menuData: BranchMenuResponse
+  totalItems: number
+  onCartToggle: () => void
+}
+
+
+
+export interface ProductModalProps {
+  isOpen: boolean
+  product: MenuProduct | null
+  onClose: () => void
+  onAddToCart: (product: MenuProduct, addons: SelectedAddon[]) => void
+}

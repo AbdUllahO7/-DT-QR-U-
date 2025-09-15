@@ -398,8 +398,7 @@ const Settings: React.FC = () => {
         )}
         {activeTab === 'branch' && (
           <BranchPreferencesTab 
-            isRTL={isRTL} 
-            t={t} 
+          
           />
         )}
         {activeTab === 'notifications' && (

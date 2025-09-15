@@ -3755,5 +3755,23 @@ export const ar = {
       "invalidPaymentSettings": "إعدادات دفع غير صالحة. يجب تحديد طريقة دفع واحدة على الأقل.",
       "invalidSessionSettings": "إعدادات جلسة غير صالحة. يرجى التحقق من القيم."
     }
+  },
+  whatsapp: {
+  confirmation: {
+    title: 'إرسال إلى واتساب؟',
+    subtitle: 'إشعار المطعم عبر واتساب',
+    sendTo: 'سيتم إرسال تفاصيل طلبك إلى:',
+    restaurant: 'المطعم',
+    whatWillBeSent: 'ما سيتم إرساله:',
+    orderDetails: '• تفاصيل طلبك والعناصر',
+    customerInfo: '• اسم العميل ورقم الطاولة',
+    totalPrice: '• إجمالي السعر وأي ملاحظات خاصة',
+    timestamp: '• توقيت الطلب',
+    note: 'ملاحظة:',
+    noteDescription: 'سيؤدي هذا إلى فتح واتساب على جهازك. سيتم معالجة طلبك حتى لو اخترت عدم الإرسال إلى واتساب.',
+    skipWhatsApp: 'تخطي واتساب',
+    sendToWhatsApp: 'إرسال إلى واتساب',
+    sending: 'جاري الإرسال...'
   }
+}
 }; 
