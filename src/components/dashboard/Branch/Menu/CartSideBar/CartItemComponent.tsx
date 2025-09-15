@@ -76,9 +76,7 @@ const CartItemComponent: React.FC<CartItemProps> = ({
           </p>
         </div>
         <div className="text-right">
-          <span className="text-lg font-bold text-orange-600 dark:text-orange-400">
-            ${group.totalPrice.toFixed(2)}
-          </span>
+          
         </div>
       </div>
 
@@ -212,12 +210,7 @@ const CartItemComponent: React.FC<CartItemProps> = ({
             )}
 
             {/* Variant Total */}
-            <div className="flex justify-between items-center pt-2 border-t border-slate-200/50 dark:border-slate-600/50">
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">{t('menu.cart.variantTotal')}:</span>
-              <span className="text-sm font-bold text-orange-600 dark:text-orange-400">
-                ${(variant.totalItemPrice * variant.quantity).toFixed(2)}
-              </span>
-            </div>
+         
           </div>
         ))}
       </div>
