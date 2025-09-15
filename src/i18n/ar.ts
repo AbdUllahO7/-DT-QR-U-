@@ -1,3 +1,5 @@
+import { table } from "console";
+import { ref } from "process";
 
 export const ar = {
   // Common
@@ -3439,8 +3441,16 @@ export const ar = {
           corporateMeals: "وجبات الشركات"
         }
       },
-       cart: {
+      cart: {
       title: 'السلة',
+      newOrder: 'طلب جديد',
+      orders: 'الطلبات',
+      notes: 'ملاحظات',
+      refresh: 'تحديث',
+      refreshing: 'جاري التحديث...',
+      remove: 'إزالة',
+      orderType: 'نوع الطلب',
+      table: 'الطاولة',
       empty: 'السلة فارغة',
       emptyDesc: 'ابدأ بإضافة بعض العناصر إلى سلتك',
       total: 'المجموع',
@@ -3546,7 +3556,7 @@ export const ar = {
     addonProductNotFound: 'لم يتم العثور على معرف منتج الإضافة',
     cartItemNotFound: 'لم يتم العثور على عنصر السلة'
   },
-"ordersManager": {
+  "ordersManager": {
     total : 'المجموع',
     OrderType : 'نوع الطلب',
     DeliveryAddress : 'عنوان التسليم',
@@ -3599,6 +3609,8 @@ export const ar = {
     "errorInvalidStatusTransition": "انتقال الحالة غير صالح: يرجى تأكيد الطلب أولاً (الانتقال إلى حالة 'مؤكد').",
     "errorCannotConfirm": "لا يمكن تأكيد هذا الطلب. الحالة الحالية: {currentStatus}.",
     "quantity": "الكمية",
+    "unitPrice": "سعر الوحدة",
+    "addonPrice": "سعر الإضافة",
     "notes": "ملاحظات",
     "amountLabel": "المبلغ الإجمالي"
   },
