@@ -14,16 +14,10 @@ import {
   AlertCircle,
   DollarSign,
   ShoppingCart,
-  Users,
-  Calendar,
   ChevronDown,
   Eye,
   Edit3,
-  Trash2,
-  Download,
   Plus,
-  BarChart3,
-  Settings
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { Order, OrderStatus } from '../../../../types/dashboard';

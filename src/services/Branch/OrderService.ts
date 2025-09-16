@@ -1,4 +1,5 @@
-import { BranchOrder, ConfirmOrderDto, CreateSessionOrderDto, Order, OrderItem, OrderStatus, OrderTrackingInfo, PendingOrder, QRTrackingInfo, RejectOrderDto, SmartCreateOrderDto, TableBasketSummary, UpdateOrderStatusDto } from '../../types/Orders/type';
+import { BranchOrder, ConfirmOrderDto, CreateSessionOrderDto, Order, OrderItem, OrderTrackingInfo, PendingOrder, QRTrackingInfo, RejectOrderDto, SmartCreateOrderDto, TableBasketSummary, UpdateOrderStatusDto } from '../../types/BranchManagement/type';
+import { OrderStatus } from '../../types/Orders/type';
 import { httpClient } from '../../utils/http';
 import { logger } from '../../utils/logger';
 import { OrderType, orderTypeService } from './BranchOrderTypeService';

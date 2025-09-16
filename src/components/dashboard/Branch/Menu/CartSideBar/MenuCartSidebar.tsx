@@ -1,29 +1,82 @@
-// Updated CartSidebar component (fixed version)
-
 "use client"
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { ShoppingCart, X, Trash2, ClipboardList, Loader2 } from "lucide-react"
-
-// Import the separate components
+import { ShoppingCart, X, Trash2, ClipboardList, Loader2, CheckCircle, XCircle } from "lucide-react"
 import OrderFormComponent from "./OrderFormComponent"
 import PriceChangeModal from "./PriceChangeModal"
-
-import { MenuProduct } from "../../../../../types/menu/type"
 import { useLanguage } from "../../../../../contexts/LanguageContext"
 import { OrderType, orderTypeService } from "../../../../../services/Branch/BranchOrderTypeService"
 import { basketService } from "../../../../../services/Branch/BasketService"
-import { OrderTrackingInfo } from "../../../../../types/Orders/type"
 import { useCartHandlers } from "../../../../../hooks/useCartHandlers"
 import CartContent from "./CartContent"
 import OrdersTab from "./OrdersTab"
 import { CartItem, CartSidebarProps, GroupedCartItem, OrderForm, TrackedOrder } from "../../../../../types/menu/carSideBarTypes"
 import WhatsAppConfirmationModal from "./WhatsAppConfirmationModal"
 
-// UPDATED: Add restaurantPreferences to props
 interface UpdatedCartSidebarProps extends CartSidebarProps {
-  restaurantPreferences?: any // Add restaurant preferences for WhatsApp integration
+  restaurantPreferences?: any
+}
+
+// Toast Interface and Component
+interface Toast {
+  id: string
+  type: 'success' | 'error' | 'loading'
+  message: string
+  duration?: number
+}
+
+const ToastComponent: React.FC<{ toast: Toast; onClose: (id: string) => void }> = ({ toast, onClose }) => {
+  const { t } = useLanguage()
+
+  useEffect(() => {
+    if (toast.type !== 'loading' && toast.duration && toast.duration > 0) {
+      const timer = setTimeout(() => {
+        onClose(toast.id)
+      }, toast.duration)
+
+      return () => clearTimeout(timer)
+    }
+  }, [toast.id, toast.duration, onClose, toast.type])
+
+  const getIcon = () => {
+    switch (toast.type) {
+      case 'success':
+        return <CheckCircle className="h-5 w-5 text-green-500" />
+      case 'error':
+        return <XCircle className="h-5 w-5 text-red-500" />
+      case 'loading':
+        return <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+    }
+  }
+
+  const getBgColor = () => {
+    switch (toast.type) {
+      case 'success':
+        return 'bg-green-50 border-green-200 text-green-800 dark:bg-green-900/30 dark:border-green-800 dark:text-green-300'
+      case 'error':
+        return 'bg-red-50 border-red-200 text-red-800 dark:bg-red-900/30 dark:border-red-800 dark:text-red-300'
+      case 'loading':
+        return 'bg-blue-50 border-blue-200 text-blue-800 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300'
+    }
+  }
+
+  return (
+    <div className={`flex items-center p-4 mb-3 border rounded-lg shadow-lg transform transition-all duration-300 ease-in-out ${getBgColor()}`}>
+      {getIcon()}
+      <div className="ml-3 text-sm font-medium flex-1">
+        {toast.message}
+      </div>
+      {toast.type !== 'loading' && (
+        <button
+          onClick={() => onClose(toast.id)}
+          className="ml-2 p-1 hover:bg-black/10 rounded-full transition-colors"
+        >
+          <X className="h-4 w-4" />
+        </button>
+      )}
+    </div>
+  )
 }
 
 const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
@@ -32,9 +85,38 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   sessionId,
   tableId,
   onOrderCreated,
-  restaurantPreferences // NEW: Restaurant preferences prop
+  restaurantPreferences
 }) => {
   const { t } = useLanguage()
+
+  // Toast state
+  const [toasts, setToasts] = useState<Toast[]>([])
+
+  // Toast functions
+  const showToast = (type: 'success' | 'error' | 'loading', message: string, duration?: number): string => {
+    const id = Math.random().toString(36).substr(2, 9)
+    const newToast: Toast = {
+      id,
+      type,
+      message,
+      duration: duration || (type === 'loading' ? 0 : type === 'success' ? 4000 : 5000)
+    }
+
+    setToasts(prev => [...prev, newToast])
+    return id
+  }
+
+  const hideToast = (id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id))
+  }
+
+  const updateToast = (id: string, type: 'success' | 'error', message: string, duration?: number) => {
+    setToasts(prev => prev.map(toast => 
+      toast.id === id 
+        ? { ...toast, type, message, duration: duration || (type === 'success' ? 4000 : 5000) }
+        : toast
+    ))
+  }
 
   // Tab management
   const [activeTab, setActiveTab] = useState<'cart' | 'orders'>('cart')
@@ -78,7 +160,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   const [trackedOrders, setTrackedOrders] = useState<TrackedOrder[]>([])
   const [trackingLoading, setTrackingLoading] = useState(false)
 
-  // FIXED: Use the custom hook for cart handlers with ALL required parameters
+  // Use the custom hook for cart handlers
   const {
     loadBasket,
     clearBasket,
@@ -89,7 +171,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     canIncreaseAddonQuantity,
     canDecreaseAddonQuantity,
     getAddonQuantityError,
-    createOrder,
+    createOrder: originalCreateOrder,
     loadOrderTracking,
     removeOrderFromTracking,
     refreshAllPendingOrders,
@@ -117,21 +199,75 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     setOrderForm,
     tableId,
     restaurantPreferences,
-    // FIXED: Pass the missing WhatsApp confirmation parameters
     setPendingWhatsAppData,
     setShowWhatsAppConfirmation
   })
 
+  // Enhanced createOrder function with toast messages
+  const createOrder = async () => {
+    let toastId: string | null = null
+    
+    try {
+      toastId = showToast('loading', t('menu.cart.creating_order') || 'Creating order...')
+
+      await originalCreateOrder()
+      
+      // Success toast
+      if (toastId) {
+        updateToast(toastId, 'success', t('menu.cart.order_created_success') || 'Order created successfully!')
+      } else {
+        showToast('success', t('menu.cart.order_created_success') || 'Order created successfully!')
+      }
+
+      // Switch to orders tab to show the new order
+      setActiveTab('orders')
+      
+    } catch (error: any) {
+      console.error('Error creating order:', error)
+      
+      // Error toast
+      const errorMessage = error?.message || 
+        t('menu.cart.order_creation_failed') || 
+        'Failed to create order. Please try again.'
+
+      if (toastId) {
+        updateToast(toastId, 'error', errorMessage)
+      } else {
+        showToast('error', errorMessage)
+      }
+    }
+  }
+
   const handleWhatsAppConfirm = async () => {
     if (!pendingWhatsAppData) return
     
+    let toastId: string | null = null
+    
     try {
       setWhatsappSending(true)
+      toastId = showToast('loading', t('menu.cart.sending_whatsapp') || 'Sending WhatsApp message...')
+
       await sendOrderToWhatsApp(pendingWhatsAppData)
+      
+      if (toastId) {
+        updateToast(toastId, 'success', t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!')
+      } else {
+        showToast('success', t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!')
+      }
+
       setShowWhatsAppConfirmation(false)
       setPendingWhatsAppData(null)
     } catch (error) {
       console.error('Error sending WhatsApp message:', error)
+      
+      const errorMessage = t('menu.cart.whatsapp_send_failed') || 'Failed to send WhatsApp message'
+      
+      if (toastId) {
+        updateToast(toastId, 'error', errorMessage)
+      } else {
+        showToast('error', errorMessage)
+      }
+      
       setError('Failed to send WhatsApp message')
     } finally {
       setWhatsappSending(false)
@@ -142,6 +278,31 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     setShowWhatsAppConfirmation(false)
     setPendingWhatsAppData(null)
     setWhatsappSending(false)
+  }
+
+  // Enhanced clearBasket with toast
+  const handleClearBasket = async () => {
+    let toastId: string | null = null
+    
+    try {
+      toastId = showToast('loading', t('menu.cart.clearing_basket') || 'Clearing basket...')
+
+      await clearBasket()
+      
+      if (toastId) {
+        updateToast(toastId, 'success', t('menu.cart.basket_cleared') || 'Basket cleared successfully!')
+      } else {
+        showToast('success', t('menu.cart.basket_cleared') || 'Basket cleared successfully!')
+      }
+    } catch (error) {
+      const errorMessage = t('menu.cart.clear_basket_failed') || 'Failed to clear basket'
+      
+      if (toastId) {
+        updateToast(toastId, 'error', errorMessage)
+      } else {
+        showToast('error', errorMessage)
+      }
+    }
   }
 
   // Load tracked orders from localStorage on mount
@@ -212,17 +373,11 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   // Calculate total price whenever cart changes
   useEffect(() => {
     const total = cart.reduce((sum, item) => {
-      // Calculate the base price for all quantities
       const baseTotal = item.price * item.quantity
-      
-      // Calculate addons price (addons are fixed cost, not multiplied by main product quantity)
       const addonsPrice = item.addons?.reduce((addonSum, addon) => {
         return addonSum + (addon.price * addon.quantity)
       }, 0) || 0
-      
-      // Total for this item = (base price × quantity) + addon prices
       const itemTotal = baseTotal + addonsPrice
-      
       return sum + itemTotal
     }, 0)
     
@@ -250,12 +405,13 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     } catch (err: any) {
       console.error('❌ Error loading order types:', err)
       setError('Failed to load order types')
+      showToast('error', t('menu.cart.load_order_types_failed') || 'Failed to load order types')
     } finally {
       setLoadingOrderTypes(false)
     }
   }
 
-  // Updated calculateOrderTotal function
+  // Calculate order total function
   const calculateOrderTotal = async () => {
     try {
       const selectedOrderType = getSelectedOrderType()
@@ -289,17 +445,34 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
 
   // Confirm price changes and retry order creation
   const confirmPriceChanges = async () => {
+    let toastId: string | null = null
+    
     try {
       setConfirmingPriceChanges(true)
       setError(null)
 
+      toastId = showToast('loading', t('menu.cart.confirming_price_changes') || 'Confirming price changes...')
+
       const cleanSessionId = sessionId || basketId
       if (!cleanSessionId) {
+        const errorMessage = t('menu.cart.session_required') || 'Session ID required'
         setError('Session ID required for price change confirmation')
+        
+        if (toastId) {
+          updateToast(toastId, 'error', errorMessage)
+        } else {
+          showToast('error', errorMessage)
+        }
         return
       }
 
       await basketService.confirmSessionPriceChanges(cleanSessionId)
+      
+      if (toastId) {
+        updateToast(toastId, 'success', t('menu.cart.price_changes_confirmed') || 'Price changes confirmed successfully!')
+      } else {
+        showToast('success', t('menu.cart.price_changes_confirmed') || 'Price changes confirmed successfully!')
+      }
       
       setShowPriceChangeModal(false)
       setPriceChanges(null)
@@ -310,6 +483,14 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
       
     } catch (err: any) {
       console.error('❌ Error confirming price changes:', err)
+      const errorMessage = err.message || t('menu.cart.price_changes_failed') || 'Failed to confirm price changes'
+      
+      if (toastId) {
+        updateToast(toastId, 'error', errorMessage)
+      } else {
+        showToast('error', errorMessage)
+      }
+      
       setError(err.message || 'Failed to confirm price changes')
       setConfirmingPriceChanges(false)
     }
@@ -354,170 +535,180 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex justify-end">
-      <div className="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl h-full overflow-y-auto border-l border-slate-200/50 dark:border-slate-700/50 shadow-xl">
-        {/* Header */}
-        <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-white flex items-center ">
-              {activeTab === 'cart' ? (
-                <ShoppingCart className="h-4 w-4 mr-2 ml-2" />
-              ) : (
-                <ClipboardList className="h-4 w-4 mr-2 ml-2" />
-              )}
-              {activeTab === 'cart' ? (showOrderForm ? 'Order Form' : t('menu.cart.title')) : t('menu.cart.orders')}
-              {(loading || loadingOrderTypes || trackingLoading) && <Loader2 className="h-3 w-3 ml-2 animate-spin" />}
-            </h3>
-            <div className="flex items-center space-x-2">
-              {cart.length > 0 && activeTab === 'cart' && !showOrderForm && (
+    <>
+      {/* Toast Container */}
+      {toasts.length > 0 && (
+        <div className="fixed top-4 right-4 z-[60] space-y-2 max-w-sm">
+          {toasts.map((toast) => (
+            <ToastComponent key={toast.id} toast={toast} onClose={hideToast} />
+          ))}
+        </div>
+      )}
+
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex justify-end">
+        <div className="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl h-full overflow-y-auto border-l border-slate-200/50 dark:border-slate-700/50 shadow-xl">
+          {/* Header */}
+          <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white flex items-center ">
+                {activeTab === 'cart' ? (
+                  <ShoppingCart className="h-4 w-4 mr-2 ml-2" />
+                ) : (
+                  <ClipboardList className="h-4 w-4 mr-2 ml-2" />
+                )}
+                {activeTab === 'cart' ? (showOrderForm ? 'Order Form' : t('menu.cart.title')) : t('menu.cart.orders')}
+                {(loading || loadingOrderTypes || trackingLoading) && <Loader2 className="h-3 w-3 ml-2 animate-spin" />}
+              </h3>
+              <div className="flex items-center space-x-2">
+                {cart.length > 0 && activeTab === 'cart' && !showOrderForm && (
+                  <button 
+                    onClick={handleClearBasket}
+                    disabled={loading}
+                    className="p-2 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50"
+                    title="Clear basket"
+                  >
+                    <Trash2 className="h-4 w-4 text-white" />
+                  </button>
+                )}
                 <button 
-                  onClick={clearBasket}
-                  disabled={loading}
-                  className="p-2 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50"
-                  title="Clear basket"
+                  onClick={onClose} 
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
                 >
-                  <Trash2 className="h-4 w-4 text-white" />
+                  <X className="h-4 w-4 text-white" />
                 </button>
-              )}
-              <button 
-                onClick={onClose} 
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-              >
-                <X className="h-4 w-4 text-white" />
-              </button>
+              </div>
             </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50">
+            <button
+              onClick={() => {
+                setActiveTab('cart')
+                setShowOrderForm(false)
+              }}
+              className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
+                activeTab === 'cart'
+                  ? 'text-orange-600 border-b-2 border-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <div className="flex items-center justify-center space-x-2">
+                <ShoppingCart className="h-4 w-4" />
+                <span>{t('menu.cart.newOrder')}</span>
+                {cart.length > 0 && (
+                  <span className="bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {cart.length}
+                  </span>
+                )}
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('orders')
+                setShowOrderForm(false)
+              }}
+              className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
+                activeTab === 'orders'
+                  ? 'text-orange-600 border-b-2 border-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+              }`}
+            >
+              <div className="flex items-center justify-center space-x-2">
+                <ClipboardList className="h-4 w-4" />
+                <span>{t('menu.cart.orders')}</span>
+                {trackedOrders.filter(order => order.trackingInfo.orderStatus === 'Pending').length > 0 && (
+                  <span className="bg-yellow-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {trackedOrders.filter(order => order.trackingInfo.orderStatus === 'Pending').length}
+                  </span>
+                )}
+              </div>
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="p-6">
+            {error && (
+              <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+              </div>
+            )}
+
+            {validationErrors.length > 0 && (
+              <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+                <p className="text-red-700 dark:text-red-300 text-sm font-medium mb-1">Please fix the following errors:</p>
+                <ul className="text-red-600 dark:text-red-400 text-xs list-disc list-inside">
+                  {validationErrors.map((error, index) => (
+                    <li key={index}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {activeTab === 'cart' ? (
+              showOrderForm ? (
+                <OrderFormComponent
+                  orderForm={orderForm}
+                  setOrderForm={setOrderForm}
+                  orderTypes={orderTypes}
+                  loadingOrderTypes={loadingOrderTypes}
+                  orderTotal={orderTotal}
+                  estimatedTime={estimatedTime}
+                  totalPrice={totalPrice}
+                  validationErrors={validationErrors}
+                  loading={loading}
+                  onBack={() => setShowOrderForm(false)}
+                  onCreate={createOrder}
+                />
+              ) : (
+                <CartContent
+                  cart={cart}
+                  groupedItems={groupedItems}
+                  totalPrice={totalPrice}
+                  loading={loading}
+                  onProceedToOrder={() => setShowOrderForm(true)}
+                  onQuantityIncrease={handleQuantityIncrease}
+                  onQuantityDecrease={handleQuantityDecrease}
+                  onAddonQuantityIncrease={handleAddonQuantityIncrease}
+                  onRemoveFromBasket={removeFromBasket}
+                  canIncreaseAddonQuantity={canIncreaseAddonQuantity}
+                  canDecreaseAddonQuantity={canDecreaseAddonQuantity}
+                  getAddonQuantityError={getAddonQuantityError}
+                />
+              )
+            ) : (
+              <OrdersTab
+                trackedOrders={trackedOrders}
+                trackingLoading={trackingLoading}
+                onLoadOrderTracking={loadOrderTracking}
+                onRemoveOrderFromTracking={removeOrderFromTracking}
+              />
+            )}
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50">
-          <button
-            onClick={() => {
-              setActiveTab('cart')
-              setShowOrderForm(false)
-            }}
-            className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-              activeTab === 'cart'
-                ? 'text-orange-600 border-b-2 border-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            <div className="flex items-center justify-center space-x-2">
-              <ShoppingCart className="h-4 w-4" />
-              <span>{t('menu.cart.newOrder')}</span>
-              {cart.length > 0 && (
-                <span className="bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {cart.length}
-                </span>
-              )}
-            </div>
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab('orders')
-              setShowOrderForm(false)
-            }}
-            className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-              activeTab === 'orders'
-                ? 'text-orange-600 border-b-2 border-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-            }`}
-          >
-            <div className="flex items-center justify-center space-x-2">
-              <ClipboardList className="h-4 w-4" />
-              <span> <span>{t('menu.cart.orders')}</span></span>
-              {trackedOrders.filter(order => order.trackingInfo.orderStatus === 'Pending').length > 0 && (
-                <span className="bg-yellow-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {trackedOrders.filter(order => order.trackingInfo.orderStatus === 'Pending').length}
-                </span>
-              )}
-            </div>
-          </button>
-        </div>
+        <PriceChangeModal
+          isVisible={showPriceChangeModal}
+          priceChanges={priceChanges}
+          confirmingPriceChanges={confirmingPriceChanges}
+          onCancel={() => {
+            setShowPriceChangeModal(false)
+            setPriceChanges(null)
+            setLoading(false)
+          }}
+          onConfirm={confirmPriceChanges}
+        />
 
-        {/* Content */}
-        <div className="p-6">
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
-            </div>
-          )}
-
-          {validationErrors.length > 0 && (
-            <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-              <p className="text-red-700 dark:text-red-300 text-sm font-medium mb-1">Please fix the following errors:</p>
-              <ul className="text-red-600 dark:text-red-400 text-xs list-disc list-inside">
-                {validationErrors.map((error, index) => (
-                  <li key={index}>{error}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {activeTab === 'cart' ? (
-            showOrderForm ? (
-              <OrderFormComponent
-                orderForm={orderForm}
-                setOrderForm={setOrderForm}
-                orderTypes={orderTypes}
-                loadingOrderTypes={loadingOrderTypes}
-                orderTotal={orderTotal}
-                estimatedTime={estimatedTime}
-                totalPrice={totalPrice}
-                validationErrors={validationErrors}
-                loading={loading}
-                onBack={() => setShowOrderForm(false)}
-                onCreate={createOrder}
-              />
-            ) : (
-              <CartContent
-                cart={cart}
-                groupedItems={groupedItems}
-                totalPrice={totalPrice}
-                loading={loading}
-                onProceedToOrder={() => setShowOrderForm(true)}
-                onQuantityIncrease={handleQuantityIncrease}
-                onQuantityDecrease={handleQuantityDecrease}
-                onAddonQuantityIncrease={handleAddonQuantityIncrease}
-                onRemoveFromBasket={removeFromBasket}
-                canIncreaseAddonQuantity={canIncreaseAddonQuantity}
-                canDecreaseAddonQuantity={canDecreaseAddonQuantity}
-                getAddonQuantityError={getAddonQuantityError}
-              />
-            )
-          ) : (
-            <OrdersTab
-              trackedOrders={trackedOrders}
-              trackingLoading={trackingLoading}
-              onLoadOrderTracking={loadOrderTracking}
-              onRemoveOrderFromTracking={removeOrderFromTracking}
-            />
-          )}
-        </div>
+        <WhatsAppConfirmationModal
+          isVisible={showWhatsAppConfirmation}
+          restaurantName={restaurantPreferences?.restaurantName || 'Restaurant'}
+          whatsappNumber={restaurantPreferences?.whatsappOrderNumber}
+          onConfirm={handleWhatsAppConfirm}
+          onCancel={handleWhatsAppCancel}
+          loading={whatsappSending}
+        />
       </div>
-
-      <PriceChangeModal
-        isVisible={showPriceChangeModal}
-        priceChanges={priceChanges}
-        confirmingPriceChanges={confirmingPriceChanges}
-        onCancel={() => {
-          setShowPriceChangeModal(false)
-          setPriceChanges(null)
-          setLoading(false)
-        }}
-        onConfirm={confirmPriceChanges}
-      />
-
-      {/* FIXED: WhatsApp Confirmation Modal */}
-      <WhatsAppConfirmationModal
-        isVisible={showWhatsAppConfirmation}
-        restaurantName={restaurantPreferences?.restaurantName || 'Restaurant'}
-        whatsappNumber={restaurantPreferences?.whatsappOrderNumber}
-        onConfirm={handleWhatsAppConfirm}
-        onCancel={handleWhatsAppCancel}
-        loading={whatsappSending}
-      />
-    </div>
+    </>
   )
 }
 

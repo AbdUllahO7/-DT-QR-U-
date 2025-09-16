@@ -4,9 +4,9 @@ import { ImageIcon, Loader2, X } from "lucide-react";
 import { logger } from "../../../utils/logger";
 import { productService } from "../../../services/productService";
 import { mediaService } from "../../../services/mediaService";
-import { Category, Product } from "../../../types/dashboard";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import { useEffect, useRef, useState } from "react";
+import { Category, Product } from "../../../types/BranchManagement/type";
 
 // EditProductModal Component - Updated with ingredient selection functionality
 export const EditProductModal: React.FC<{

@@ -69,17 +69,9 @@ export interface CreateRestaurantResponse {
 }
 
 // Restaurant Branch Dropdown Types
-export interface RestaurantBranchDropdownItem {
-  id: number;
-  name: string;
-  type: 'branch';
-  isActive: boolean;
-  branchTag?: string;
-}
 
-export interface RestaurantBranchDropdownResponse {
-  items: RestaurantBranchDropdownItem[];
-}
+
+
 
 // Branch Types
 export interface CreateBranchWithDetailsDto {
@@ -325,38 +317,9 @@ export interface UserProfileResponse {
 }
 
 // Table Management Types
-export interface TableData {
-  id: number;
-  menuTableName: string;
-  qrCode: string;
-  qrCodeUrl: string;
-  menuTableCategoryId: number;
-  categoryName: string;
-  capacity: number;
-  displayOrder: number | null;
-  isOccupied: boolean;
-  isActive: boolean;
-  activeSessionId: number | null;
-  branchId: number;
-  rowVersion : string
-}
 
-export interface TableCategory {
-  id: number;
-  categoryName: string;
-  branchId: number;
-  colorCode: string;
-  displayOrder: number;
-  iconClass: string;
-  isActive: boolean;
-  tableCount: number | null;
-  description?: string;
-}
 
-export interface BranchDropdownItem {
-  branchId: number;
-  branchName: string;
-}
+
 
 // User Management Types
 export interface UserData {

@@ -3473,8 +3473,22 @@ SortableProduct: {
       minQuantityError: '{name} için minimum miktar {min}',
       maxQuantityError: '{name} için maksimum miktar {max}',
       decreaseQuantity: 'Miktarı azalt',
-      increaseQuantity: 'Miktarı artır'
-      }
+      increaseQuantity: 'Miktarı artır',
+        "creating_order": "Sipariş oluşturuluyor...",
+      "order_created_success": "Sipariş başarıyla oluşturuldu!",
+      "order_creation_failed": "Sipariş oluşturulamadı. Lütfen tekrar deneyin.",
+      "sending_whatsapp": "WhatsApp mesajı gönderiliyor...",
+      "whatsapp_sent_success": "WhatsApp mesajı başarıyla gönderildi!",
+      "whatsapp_send_failed": "WhatsApp mesajı gönderilemedi",
+      "clearing_basket": "Sepet temizleniyor...",
+      "basket_cleared": "Sepet başarıyla temizlendi!",
+      "clear_basket_failed": "Sepet temizlenemedi",
+      "load_order_types_failed": "Sipariş türleri yüklenemedi",
+      "confirming_price_changes": "Fiyat değişiklikleri onaylanıyor...",
+      "price_changes_confirmed": "Fiyat değişiklikleri başarıyla onaylandı!",
+      "price_changes_failed": "Fiyat değişiklikleri onaylanamadı",
+      "session_required": "Oturum kimliği gerekli"
+          }
   },
   order: {
     form: {

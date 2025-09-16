@@ -4,37 +4,10 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
 import { ingredientsService } from '../../../services/IngredientsService';
 import { productService } from '../../../services/productService';
+import { Ingredient, ProductIngredientSelectionModalProps, SelectedIngredient } from '../../../types/BranchManagement/type';
 
 // Types
-interface Ingredient {
-  id: number;
-  name: string;
-  isAllergenic: boolean;
-  isAvailable: boolean;
-  allergenIds: number[];
-  allergenDetails: AllergenDetail[];
-}
 
-interface AllergenDetail {
-  allergenId: number;
-  containsAllergen: boolean;
-  note: string;
-}
-
-// New interface for ingredient selection with quantity and unit
-interface SelectedIngredient {
-  ingredientId: number;
-  quantity: number;
-  unit: string;
-}
-
-interface ProductIngredientSelectionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  productId: number;
-  productName: string;
-}
 
 const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalProps> = ({
   isOpen,

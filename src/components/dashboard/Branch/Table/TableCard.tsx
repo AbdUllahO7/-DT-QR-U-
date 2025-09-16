@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Edit,
   Trash2,
@@ -12,36 +12,11 @@ import {
   Loader2,
   RefreshCw
 } from 'lucide-react';
-import { UpdateMenuTableDto } from '../../../../services/Branch/branchTableService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { TableCardProps, TableData } from '../../../../types/BranchManagement/type';
 
-interface TableData {
-  id: number;
-  menuTableName: string;
-  menuTableCategoryId: number;
-  capacity: number;
-  isActive: boolean;
-  isOccupied: boolean;
-  displayOrder: number;
-  rowVersion?: string;
-  qrCodeUrl?: string;
-}
 
-interface TableCardProps {
-  table: TableData;
-  isEditing: boolean;
-  isToggling: boolean;
-  isClearing?: boolean; // New prop for clear table loading state
-  onEdit: () => void;
-  onCancelEdit: () => void;
-  onUpdate: (tableId: number, updatedData: Partial<TableData>) => Promise<void>;
-  onDelete: (tableId: number) => Promise<void>;
-  onToggleStatus: (tableId: number, newStatus: boolean) => Promise<void>;
-  onToggleOccupation: (tableId: number, isOccupied: boolean) => Promise<void>;
-  onClearTable: (tableId: number) => Promise<void>; // New prop for clear table
-  onShowQRCode: (table: TableData) => void;
-  onTableChange: (tableId: number, updatedData: Partial<TableData>) => void;
-}
+
 
 const TableCard: React.FC<TableCardProps> = ({
   table,

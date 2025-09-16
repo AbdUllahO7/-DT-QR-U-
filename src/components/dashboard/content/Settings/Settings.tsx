@@ -35,19 +35,9 @@ import {
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import BranchPreferencesTab from './BranchPreferencesTab';
+import { UserSettingsState } from '../../../../types/BranchManagement/type';
 
-interface UserSettingsState {
-  notificationsEnabled: boolean;
-  emailNotificationsEnabled: boolean;
-  pushNotificationsEnabled: boolean;
-  soundEnabled: boolean;
-  autoSaveEnabled: boolean;
-  dataSyncEnabled: boolean;
-  language: string;
-  timezone: string;
-  dateFormat: string;
-  currency: string;
-}
+
 
 const Settings: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();

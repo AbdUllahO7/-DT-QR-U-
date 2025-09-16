@@ -11,42 +11,9 @@ import { AllergenService } from '../../../services/allergen';
 import { ingredientsService } from '../../../services/IngredientsService';
 import IngredientFormModal from './IngredientFormModal';
 import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
+import { Allergen, FilterAllergen, FilterOptions, FilterStatus, Ingredient, SortOption } from '../../../types/BranchManagement/type';
 
-// Types and Interfaces
-interface Allergen {
-  id: number;
-  code: string;
-  name: string;
-  icon: string;
-  displayOrder: number;
-  description: string;
-}
 
-interface AllergenDetail {
-  allergenId: number;
-  containsAllergen: boolean;
-  note: string;
-}
-
-interface Ingredient {
-  id: number;
-  name: string;
-  isAllergenic: boolean;
-  isAvailable: boolean;
-  allergenIds: number[];
-  allergenDetails: AllergenDetail[];
-}
-
-// Filter and Sort Types
-type SortOption = 'name_asc' | 'name_desc' | 'status_asc' | 'status_desc' | 'allergen_asc' | 'allergen_desc';
-type FilterStatus = 'all' | 'available' | 'unavailable';
-type FilterAllergen = 'all' | 'allergenic' | 'non-allergenic';
-
-interface FilterOptions {
-  status: FilterStatus;
-  allergen: FilterAllergen;
-  selectedAllergens: number[];
-}
 
 const IngredientsContent: React.FC = () => {
   const { isDark } = useTheme();

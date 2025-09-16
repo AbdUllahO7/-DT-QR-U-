@@ -3,52 +3,10 @@ import { Plus, X, AlertCircle, Check, Loader2 } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
 import { ingredientsService } from '../../../services/IngredientsService';
+import { Allergen, AllergenDetail, CreateIngredientData, IngredientFormModalProps, UpdateIngredientData } from '../../../types/BranchManagement/type';
 
 // Types and Interfaces
-interface Allergen {
-  id: number;
-  code: string;
-  name: string;
-  icon: string;
-  displayOrder: number;
-  description: string;
-}
 
-interface AllergenDetail {
-  allergenId: number;
-  containsAllergen: boolean;
-  note: string;
-}
-
-interface Ingredient {
-  id: number;
-  name: string;
-  isAllergenic: boolean;
-  isAvailable: boolean;
-  allergenIds: number[];
-  allergenDetails: AllergenDetail[];
-}
-
-interface CreateIngredientData {
-  name: string;
-  isAllergenic: boolean;
-  isAvailable: boolean;
-  allergenIds: number[];
-  allergenDetails: AllergenDetail[];
-}
-
-interface UpdateIngredientData extends CreateIngredientData {
-  id: number;
-}
-
-interface IngredientFormModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  ingredient?: Ingredient | null;
-  allergens: Allergen[];
-  isEdit?: boolean;
-}
 
 const IngredientFormModal: React.FC<IngredientFormModalProps> = ({ 
   isOpen, 
