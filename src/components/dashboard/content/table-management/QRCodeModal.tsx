@@ -3,7 +3,6 @@ import { Plus, Users, QrCode, Minus } from 'lucide-react';
 import { QRCodeData } from './QRCodeCard';
 import { logger } from '../../../../utils/logger';
 import { branchService, UpdateMenuTableDto } from '../../../../services/branchService';
-import { httpClient } from '../../../../utils/http';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 
 // API Response Types

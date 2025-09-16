@@ -1,7 +1,7 @@
 import { httpClient } from '../utils/http';
 import { logger } from '../utils/logger';
-import type { Category, CategoryReorderRequest, Product, ProductReorderRequest } from '../types/dashboard';
 import { productAddonsService } from './ProductAddonsService';
+import { Category, CategoryReorderRequest, Product, ProductReorderRequest } from '../types/BranchManagement/type';
 
 // API Response interfaces (what the backend actually returns)
 interface APIProduct {

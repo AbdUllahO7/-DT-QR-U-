@@ -13,8 +13,8 @@ import {
   Circle,
   Loader2
 } from 'lucide-react';
-import { TableData } from '../../../../types/api';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { TableData } from '../../../../types/BranchManagement/type';
 
 interface TableCardProps {
   table: TableData;

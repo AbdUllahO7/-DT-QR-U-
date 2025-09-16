@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronDown, Users, Plus } from 'lucide-react';
-import { BranchDropdownItem, RestaurantBranchDropdownItem, TableCategory, TableData } from '../../../../types/api';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside, useSignalR } from '../../../../hooks';
 import { SignalRCallbacks } from '../../../../types/signalR';
@@ -12,17 +11,13 @@ import AddQRCodeCard from './AddQRCodeCard';
 import QRCodeModal from './QRCodeModal';
 import TableCategoryModal from './TableCategoryModal';
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
+import { BranchDropdownItem, GroupedTables, RestaurantBranchDropdownItem, TableCategory, TableData } from '../../../../types/BranchManagement/type';
 
 interface Props {
   selectedBranch: RestaurantBranchDropdownItem | null;
 }
 
-interface GroupedTables {
-  [categoryId: string]: {
-    category: TableCategory;
-    tables: TableData[];
-  };
-}
+
 
 const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   const { t, isRTL } = useLanguage();

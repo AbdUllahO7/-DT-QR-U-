@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useLanguage } from "../../../contexts/LanguageContext";
-import { Category } from "../../../types/dashboard";
 import { productService } from "../../../services/productService";
 import { logger } from "../../../utils/logger";
 import { X } from "lucide-react";
+import { Category } from "../../../types/BranchManagement/type";
 
 // EditCategoryModal Component
 export const EditCategoryModal: React.FC<{

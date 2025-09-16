@@ -12,8 +12,7 @@ import {
   Utensils, 
   Hash, 
   Building, 
-  Phone, 
-  Mail 
+
 } from 'lucide-react';
 import { restaurantService } from '../../../services/restaurantService';
 import { useLogoUpload } from '../../../hooks/useLogoUpload';

@@ -2,23 +2,9 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, User, MapPin, ShoppingCart, MoreVertical, Eye, CheckCircle, XCircle } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { OrderCardProps, OrderData } from '../../../../types/BranchManagement/type';
 
-interface OrderData {
-  id: string;
-  customerName: string;
-  orderNumber: string;
-  status: 'pending' | 'preparing' | 'ready' | 'delivered' | 'cancelled';
-  total: number;
-  items: number;
-  orderTime: string;
-  table: string;
-}
 
-interface OrderCardProps {
-  order: OrderData;
-  onViewDetails: (order: OrderData) => void;
-  onStatusChange: (orderId: string, status: OrderData['status']) => void;
-}
 
 const OrderCard: React.FC<OrderCardProps> = ({ order, onViewDetails, onStatusChange }) => {
   const { t } = useLanguage();

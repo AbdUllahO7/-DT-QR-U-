@@ -1,43 +1,8 @@
 import React, { useState } from 'react';
 import { Edit, MapPin, Save, X, Loader2, Upload, Image } from 'lucide-react';
 import { mediaService } from '../../../../services/mediaService';
-import { BranchData, EditDataType } from '../../../../types/BranchManagement/type';
+import { BranchHeaderProps, DEFAULT_IMAGE_URL, theme } from '../../../../types/BranchManagement/type';
 
-// Move to a config file for better maintainability
-const DEFAULT_IMAGE_URL = 'https://via.placeholder.com/150';
-
-// Modern theme with enhanced colors and styling
-const theme = {
-  primary: 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:ring-blue-500/50',
-  success: 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 focus:ring-emerald-500/50',
-  neutral: 'bg-gradient-to-r from-slate-600 to-gray-600 hover:from-slate-700 hover:to-gray-700 focus:ring-slate-500/50',
-  danger: 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 focus:ring-red-500/50',
-  text: {
-    primary: 'text-slate-800 dark:text-slate-100',
-    secondary: 'text-slate-600 dark:text-slate-300',
-    muted: 'text-slate-500 dark:text-slate-400',
-    error: 'text-red-600 dark:text-red-400',
-    success: 'text-emerald-600 dark:text-emerald-400',
-    warning: 'text-amber-600 dark:text-amber-400',
-  },
-  background: {
-    card: 'bg-white/90 dark:bg-slate-800/90',
-    cardHover: 'hover:bg-white/95 dark:hover:bg-slate-800/95',
-  }
-};
-
-interface BranchHeaderProps {
-  selectedBranch: BranchData | null;
-  isEditing: boolean;
-  isLoading: boolean;
-  t: (key: string) => string;
-  isRTL: boolean;
-  setIsEditing: (editing: boolean) => void;
-  handleToggleTemporaryClose: () => Promise<void>;
-  handleSave: () => Promise<void>;
-  initializeEditData: (branch: BranchData) => void;
-  setEditData: React.Dispatch<React.SetStateAction<EditDataType>>;
-}
 
 // Modern Toggle Switch with sleek design
 const ModernToggleSwitch: React.FC<{
@@ -89,7 +54,6 @@ const ModernToggleSwitch: React.FC<{
     </button>
   </div>
 );
-
 
 
 // Modern Button Component

@@ -34,24 +34,8 @@ import {
 import Pricing from '../../LandingPage/Pricing';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
+import { CardData, InvoiceData } from '../../../types/BranchManagement/type';
 
-interface CardData {
-  id: number;
-  last4: string;
-  brand: string;
-  expMonth: number;
-  expYear: number;
-  isDefault: boolean;
-}
-
-interface InvoiceData {
-  id: string;
-  date: string;
-  amount: number;
-  status: 'paid' | 'pending' | 'failed';
-  plan: string;
-  description: string;
-}
 
 const Subscription: React.FC = () => {
   const { t, language } = useLanguage();

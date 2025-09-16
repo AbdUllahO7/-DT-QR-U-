@@ -1,4 +1,4 @@
-import { Product } from "../../types/dashboard";
+import { Product } from "../../types/BranchManagement/type";
 import { httpClient } from "../../utils/http";
 import { logger } from "../../utils/logger";
 

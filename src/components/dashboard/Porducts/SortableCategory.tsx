@@ -1,9 +1,9 @@
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useLanguage } from "../../../contexts/LanguageContext";
-import { Category } from "../../../types/dashboard";
 import { CSS } from "@dnd-kit/utilities";
 import { Edit2, GripVertical, Loader2, Package, Trash2, Plus } from "lucide-react";
 import { SortableProduct } from "./SortableProduct";
+import { Category } from "../../../types/BranchManagement/type";
 
 export const SortableCategory: React.FC<{
   category: Category;

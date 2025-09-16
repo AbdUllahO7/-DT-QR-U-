@@ -2,31 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Upload, Image as ImageIcon, Loader2, Sparkles, Plus } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import { Category } from '../../../types/dashboard';
 import { logger } from '../../../utils/logger';
 import { mediaService } from '../../../services/mediaService';
 import { productService } from '../../../services/productService';
+import { CreateProductFormData, CreateProductModalProps, DEFAULT_IMAGE_URL } from '../../../types/BranchManagement/type';
 
-interface CreateProductFormData {
-  name: string;
-  description: string;
-  price: number;
-  categoryId: number;
-  isAvailable: boolean;
-  imageFile: File | null;
-  imageUrl: string;
-}
 
-interface CreateProductModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  categories: Category[];
-  selectedCategoryId?: number;
-  onOpenIngredientSelection?: (productId: number, productName: string) => void;
-}
-
-const DEFAULT_IMAGE_URL = 'https://www.customcardsandgames.com/assets/images/noImageUploaded.png';
 
 const CreateProductModal: React.FC<CreateProductModalProps> = ({ 
   isOpen, 

@@ -1,21 +1,17 @@
 import { httpClient } from '../utils/http';
 import { logger } from '../utils/logger';
 import { sanitizePlaceholder } from '../utils/sanitize';
-import { API_CONFIG } from '../config/api';
 import type {
   CreateRestaurantDto,
   CreateRestaurantResponse,
   ApiResponse,
-  RestaurantBranchDropdownResponse,
-  RestaurantBranchDropdownItem,
   RestaurantManagementInfo,
-  UpdateRestaurantDto,
-  UpdateAboutDto,
   UpdateRestaurantManagementRequest,
   CreateAboutDto,
   AboutInfo,
   CreateAboutResponse
 } from '../types/api';
+import { RestaurantBranchDropdownItem } from '../types/BranchManagement/type';
 
 interface Restaurant {
   id: string;

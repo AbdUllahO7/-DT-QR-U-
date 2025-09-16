@@ -4,18 +4,10 @@ import { logger } from "../../../utils/logger";
 import { httpClient } from "../../../utils/http";
 import { AnimatePresence, motion } from 'framer-motion';
 import { Sparkles, X } from "lucide-react";
+import { CreateCategoryFormData, CreateCategoryModalProps } from "../../../types/BranchManagement/type";
 
 // CreateCategoryModal Component
-interface CreateCategoryModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-}
 
-interface CreateCategoryFormData {
-  categoryName: string;
-  status: boolean;
-}
 
 const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { t, isRTL } = useLanguage();

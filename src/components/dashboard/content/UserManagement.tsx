@@ -26,6 +26,7 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { userService } from '../../../services/userService';
 import { logger } from '../../../utils/logger';
 import type { UserData, CreateRoleDto, PermissionOption, Role, CreateUserDto } from '../../../types/api';
+import { CreateRoleModalProps, CreateUserModalProps } from '../../../types/BranchManagement/type';
 
 type ViewMode = 'grid' | 'list';
 type FilterMode = 'all' | 'RestaurantOwner' | 'BranchManager' | 'Staff' | 'active' | 'inactive';
@@ -1060,14 +1061,7 @@ const UserManagement: React.FC = () => {
     );
   };
 
-  // Create Role Modal Component
-  interface CreateRoleModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onSubmit: (roleData: CreateRoleDto) => void;
-    permissions: PermissionOption[];
-    isLoading: boolean;
-  }
+
 
   const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
     isOpen,
@@ -1360,13 +1354,7 @@ const UserManagement: React.FC = () => {
   };
 
   // Create User Modal Component
-  interface CreateUserModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onSubmit: (userData: CreateUserDto) => void;
-    roles: Role[];
-    isLoading: boolean;
-  }
+
 
   const CreateUserModal: React.FC<CreateUserModalProps> = ({
     isOpen,

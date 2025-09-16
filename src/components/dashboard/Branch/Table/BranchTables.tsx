@@ -13,8 +13,6 @@ import {
   X,
   Save,
   XCircle,
-  Settings,
-  Users,
   Copy
 } from 'lucide-react';
 import { 
@@ -28,6 +26,7 @@ import {
 } from '../../../../services/Branch/branchTableService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import CategorySection from './CategorySection';
+import { CategoryData, TableData } from '../../../../types/BranchManagement/type';
 
 // QR Code Modal Component
 const QRCodeModal: React.FC<{
@@ -146,30 +145,7 @@ const QRCodeModal: React.FC<{
   );
 };
 
-// Interfaces
-interface CategoryData {
-  id: number;
-  categoryName: string;
-  colorCode: string;
-  iconClass: string;
-  displayOrder: number;
-  isActive: boolean;
-  branchId: number;
-  tableCount?: number;
-}
 
-interface TableData {
-  id: number;
-  menuTableName: string;
-  menuTableCategoryId: number;
-  capacity: number;
-  isActive: boolean;
-  isOccupied: boolean;
-  displayOrder: number;
-  rowVersion?: string;
-  qrCode?: string;
-  qrCodeUrl?: string;
-}
 
 const BranchTableManagement: React.FC = () => {
   const { t, isRTL } = useLanguage();

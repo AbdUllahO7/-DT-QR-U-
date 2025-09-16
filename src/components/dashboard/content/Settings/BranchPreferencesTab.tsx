@@ -51,11 +51,11 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
     { value: 'Europe/London', label: t('branchPreferences.timezones.Europe/London') },
     { value: 'America/New_York', label: t('branchPreferences.timezones.America/New_York') }
   ];
-const cleanupModes = [
-  { value: 0, label: t('branchPreferences.cleanupModes.afterTimeout') },
-  { value: 1, label: t('branchPreferences.cleanupModes.afterClosing') },
-  { value: 2, label: t('branchPreferences.cleanupModes.disabled') }
-];
+  const cleanupModes = [
+    { value: 0, label: t('branchPreferences.cleanupModes.afterTimeout') },
+    { value: 1, label: t('branchPreferences.cleanupModes.afterClosing') },
+    { value: 2, label: t('branchPreferences.cleanupModes.disabled') }
+  ];
   // Load preferences on component mount
   const loadPreferences = useCallback(async () => {
     try {

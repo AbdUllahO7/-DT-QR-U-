@@ -1,46 +1,14 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "../../../contexts/LanguageContext";
-import { Product } from "../../../types/dashboard";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Edit2, EyeOff, GripVertical, Package, Trash2, AlertCircle, Loader2, Plus } from "lucide-react";
 import { productService } from "../../../services/productService";
 import { logger } from "../../../utils/logger";
 import { productAddonsService } from "../../../services/ProductAddonsService";
+import { Ingredient, Product, ProductAddon } from "../../../types/BranchManagement/type";
 
 // Define Ingredient type (copied from ProductIngredientSelectionModal for consistency)
-interface Ingredient {
-  id: number;
-  ingredientName: string;
-  isAllergenic: boolean;
-  isAvailable: boolean;
-  allergenIds: number[];
-  allergenDetails: AllergenDetail[];
-}
-
-interface AllergenDetail {
-  allergenId: number;
-  containsAllergen: boolean;
-  note: string;
-}
-
-// Define Addon type
-interface ProductAddon {
-  id: number;
-  productId: number;
-  addonProductId: number;
-  displayOrder: number;
-  isRecommended: boolean;
-  marketingText: string;
-  addonProduct?: {
-    id: number;
-    name: string;
-    price: number;
-    imageUrl?: string;
-    description?: string;
-    isAvailable: boolean;
-  };
-}
 
 // SortableProduct Component
 export const SortableProduct: React.FC<{
