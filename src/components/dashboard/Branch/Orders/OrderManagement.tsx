@@ -1462,19 +1462,39 @@ const OrdersManager: React.FC = () => {
                     };
 
                     return (
-                      <div className="space-y-4 max-h-64 overflow-y-auto">
+                      <div className="space-y-4 max-h-84 overflow-y-auto">
                         {renderItems(items)}
                         
                         {/* Order Total */}
                         <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                           <div className="flex justify-between items-center">
+                            <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                              {t('ordersManager.subTotal')}:
+                            </span>
+                            
+                            <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                              {state.selectedOrder.subTotal.toFixed(2)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                              {t('ordersManager.serviceFeeApplied')}:
+                            </span>
+                            
+                            <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                              {state.selectedOrder.serviceFeeApplied.toFixed(2)}
+                            </span>
+                          </div>
                           <div className="flex justify-between items-center">
                             <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                               {t('ordersManager.total')}:
                             </span>
+                            
                             <span className="text-2xl font-bold text-green-600 dark:text-green-400">
                               {state.selectedOrder.totalPrice.toFixed(2)}
                             </span>
                           </div>
+                         
                         </div>
                       </div>
                     );
