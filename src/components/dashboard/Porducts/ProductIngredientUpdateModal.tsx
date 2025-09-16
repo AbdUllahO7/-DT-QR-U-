@@ -4,6 +4,7 @@ import { productService } from '../../../services/productService';
 import { logger } from '../../../utils/logger';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { ingredientsService } from '../../../services/IngredientsService';
+import { ProductIngredient, ProductIngredientUpdateModalProps } from '../../../types/BranchManagement/type';
 
 interface Ingredient {
   id: number;
@@ -12,19 +13,9 @@ interface Ingredient {
   price?: number;
 }
 
-interface ProductIngredient {
-  ingredientId: number;
-  quantity: number;
-  unit: string;
-}
 
-interface ProductIngredientUpdateModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  productId: number;
-  productName: string;
-}
+
+
 
 const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> = ({
   isOpen,

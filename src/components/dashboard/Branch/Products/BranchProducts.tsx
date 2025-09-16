@@ -9,21 +9,18 @@ import {
   Calendar,
   Package,
   PlusSquare,
-
 } from 'lucide-react';
 import { branchCategoryService } from '../../../../services/Branch/BranchCategoryService';
 import { branchProductService } from '../../../../services/Branch/BranchProductService';
-import { Category, Product } from '../../../../types/dashboard';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import ProductDetailsModal from './ProductDetailsModal';
 import CategoriesContent from './CategoriesContent';
 
-// Enhanced interfaces for detailed product information
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 import { BranchProductAddon } from '../../../../services/Branch/BranchService';
 import { branchProductAddonsService } from '../../../../services/Branch/BranchAddonsService';
 import BranchProductAddonsModal from './BranchProductAddonsModal';
-import { BranchCategory, DetailedProduct, EditedCategoryName, EditedProductPrice, ProductAddonData } from '../../../../types/BranchManagement/type';
+import { BranchCategory, Category, DetailedProduct, EditedCategoryName, EditedProductPrice, ProductAddonData } from '../../../../types/BranchManagement/type';
 
 
 

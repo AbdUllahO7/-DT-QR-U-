@@ -47,6 +47,8 @@ export interface BranchMenuResponse {
   branchAddress: string
   isOpen: boolean
   categories: MenuCategory[]
+  statusMessage?:string
+  preferences?:any
 }
 
 export interface CartItem {

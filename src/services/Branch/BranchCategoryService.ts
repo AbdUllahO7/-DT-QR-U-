@@ -1,4 +1,4 @@
-import { Category } from "../../types/dashboard";
+import { Category } from "../../types/BranchManagement/type";
 import { httpClient } from "../../utils/http";
 import { logger } from "../../utils/logger";
 

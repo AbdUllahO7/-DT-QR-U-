@@ -1,5 +1,4 @@
-import { table } from "console";
-import { ref } from "process";
+
 
 export const ar = {
   // Common
@@ -3474,7 +3473,21 @@ export const ar = {
       minQuantityError: 'الحد الأدنى للكمية لـ {name} هو {min}',
       maxQuantityError: 'الحد الأقصى للكمية لـ {name} هو {max}',
       decreaseQuantity: 'تقليل الكمية',
-      increaseQuantity: 'زيادة الكمية'
+      increaseQuantity: 'زيادة الكمية',
+        "creating_order": "جاري إنشاء الطلب...",
+  "order_created_success": "تم إنشاء الطلب بنجاح!",
+  "order_creation_failed": "فشل في إنشاء الطلب. يرجى المحاولة مرة أخرى.",
+  "sending_whatsapp": "جاري إرسال رسالة واتساب...",
+  "whatsapp_sent_success": "تم إرسال رسالة واتساب بنجاح!",
+  "whatsapp_send_failed": "فشل في إرسال رسالة واتساب",
+  "clearing_basket": "جاري مسح السلة...",
+  "basket_cleared": "تم مسح السلة بنجاح!",
+  "clear_basket_failed": "فشل في مسح السلة",
+  "load_order_types_failed": "فشل في تحميل أنواع الطلبات",
+  "confirming_price_changes": "جاري تأكيد تغييرات الأسعار...",
+  "price_changes_confirmed": "تم تأكيد تغييرات الأسعار بنجاح!",
+  "price_changes_failed": "فشل في تأكيد تغييرات الأسعار",
+  "session_required": "معرف الجلسة مطلوب"
     }
   },
   order: {

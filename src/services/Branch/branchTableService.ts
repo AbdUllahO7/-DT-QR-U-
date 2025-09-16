@@ -1,4 +1,4 @@
-import { TableCategory, TableData } from "../../types/api";
+import { TableCategory, TableData } from "../../types/BranchManagement/type";
 import { httpClient } from "../../utils/http";
 import { logger } from "../../utils/logger";
 

@@ -6,6 +6,7 @@ import { useLanguage } from '../../../../contexts/LanguageContext';
 const OrderTypeComponent = () => {
   const { t, isRTL } = useLanguage();
   const [orderTypes, setOrderTypes] = useState<OrderType[]>([]);
+  const [originalOrderTypes, setOriginalOrderTypes] = useState<OrderType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState<Record<number, boolean>>({});
@@ -24,6 +25,7 @@ const OrderTypeComponent = () => {
       
       const data = await orderTypeService.getOrderTypes();
       setOrderTypes(data);
+      setOriginalOrderTypes(JSON.parse(JSON.stringify(data))); // Deep copy for comparison
     } catch (err: any) {
       setError(err.message || t('dashboard.orderType.loadingError'));
     } finally {
@@ -55,8 +57,17 @@ const OrderTypeComponent = () => {
 
       const updatedOrderType = await orderTypeService.updateOrderTypeSettings(orderType.id, updateData);
       
-      // Update local state with the response from the server
+      // Update local state with the response from the server (including new rowVersion)
       setOrderTypes(prev => 
+        prev.map(ot => 
+          ot.id === orderType.id 
+            ? { ...ot, ...updatedOrderType }
+            : ot
+        )
+      );
+
+      // Update original data for comparison
+      setOriginalOrderTypes(prev => 
         prev.map(ot => 
           ot.id === orderType.id 
             ? { ...ot, ...updatedOrderType }
@@ -76,7 +87,23 @@ const OrderTypeComponent = () => {
     }
   };
 
+  const hasChanges = (orderType: OrderType): boolean => {
+    const original = originalOrderTypes.find(ot => ot.id === orderType.id);
+    if (!original) return false;
+    
+    return (
+      original.isActive !== orderType.isActive ||
+      original.minOrderAmount !== orderType.minOrderAmount ||
+      original.serviceCharge !== orderType.serviceCharge
+    );
+  };
+
   const handleSettingChange = (orderTypeId: number, field: keyof OrderType, value: any) => {
+    // Prevent changes while updating
+    if (updating[orderTypeId]) {
+      return;
+    }
+    
     setOrderTypes(prev =>
       prev.map(ot =>
         ot.id === orderTypeId
@@ -87,6 +114,11 @@ const OrderTypeComponent = () => {
   };
 
   const handleSave = (orderType: OrderType) => {
+    // Prevent multiple clicks
+    if (updating[orderType.id]) {
+      return;
+    }
+    
     const newSettings = {
       isActive: orderType.isActive,
       minOrderAmount: orderType.minOrderAmount,
@@ -156,7 +188,7 @@ const OrderTypeComponent = () => {
                 orderType.isActive 
                   ? 'ring-2 ring-emerald-500 dark:ring-emerald-400 shadow-emerald-100 dark:shadow-emerald-900/20' 
                   : 'hover:ring-2 hover:ring-gray-300 dark:hover:ring-gray-600'
-              }`}
+              } ${updating[orderType.id] ? 'pointer-events-none opacity-75' : ''}`}
             >
               {/* Status Indicator */}
               <div className={`absolute top-0 left-0 w-full h-1 ${
@@ -164,6 +196,18 @@ const OrderTypeComponent = () => {
                   ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' 
                   : 'bg-gradient-to-r from-gray-400 to-gray-500'
               }`} />
+
+              {/* Loading Overlay */}
+              {updating[orderType.id] && (
+                <div className="absolute inset-0 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm z-10 flex items-center justify-center">
+                  <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                      {t('dashboard.orderType.updating')}
+                    </span>
+                  </div>
+                </div>
+              )}
 
               <div className="p-8">
                 {/* Header */}
@@ -199,8 +243,6 @@ const OrderTypeComponent = () => {
                   )}
                 </div>
 
-            
-
                 {/* Settings Form */}
                 <div className="space-y-6">
                   {/* Active Toggle */}
@@ -218,10 +260,11 @@ const OrderTypeComponent = () => {
                         title={t('dashboard.orderType.activeStatus')}
                         type="checkbox"
                         checked={orderType.isActive}
+                        disabled={updating[orderType.id]}
                         onChange={(e) => handleSettingChange(orderType.id, 'isActive', e.target.checked)}
                         className="sr-only peer"
                       />
-                      <div className="w-14 h-7 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer transition-all duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all after:shadow-md peer-checked:bg-indigo-600 dark:peer-checked:bg-indigo-500"></div>
+                      <div className={`w-14 h-7 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer transition-all duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all after:shadow-md peer-checked:bg-indigo-600 dark:peer-checked:bg-indigo-500 ${updating[orderType.id] ? 'opacity-50 cursor-not-allowed' : ''}`}></div>
                     </label>
                   </div>
 
@@ -237,8 +280,9 @@ const OrderTypeComponent = () => {
                         min="0"
                         step="1"
                         value={orderType.minOrderAmount}
+                        disabled={updating[orderType.id]}
                         onChange={(e) => handleSettingChange(orderType.id, 'minOrderAmount', parseFloat(e.target.value) || 0)}
-                        className={`w-full px-4 py-3 ${isRTL ? 'pr-10 text-right' : 'pl-10'} border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all duration-200 shadow-sm`}
+                        className={`w-full px-4 py-3 ${isRTL ? 'pr-10 text-right' : 'pl-10'} border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all duration-200 shadow-sm ${updating[orderType.id] ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-600' : ''}`}
                         placeholder="0.00"
                       />
                       <span className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400`}>₺</span>
@@ -257,8 +301,9 @@ const OrderTypeComponent = () => {
                         min="0"
                         step="1"
                         value={orderType.serviceCharge}
+                        disabled={updating[orderType.id]}
                         onChange={(e) => handleSettingChange(orderType.id, 'serviceCharge', parseFloat(e.target.value) || 0)}
-                        className={`w-full px-4 py-3 ${isRTL ? 'pr-10 text-right' : 'pl-10'} border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all duration-200 shadow-sm`}
+                        className={`w-full px-4 py-3 ${isRTL ? 'pr-10 text-right' : 'pl-10'} border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all duration-200 shadow-sm ${updating[orderType.id] ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-600' : ''}`}
                         placeholder="0.00"
                       />
                       <span className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400`}>₺</span>
@@ -268,9 +313,9 @@ const OrderTypeComponent = () => {
                   {/* Save Button */}
                   <button
                     onClick={() => handleSave(orderType)}
-                    disabled={updating[orderType.id]}
+                    disabled={updating[orderType.id] || !hasChanges(orderType)}
                     className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-semibold text-white transition-all duration-300 transform ${
-                      updating[orderType.id]
+                      updating[orderType.id] || !hasChanges(orderType)
                         ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed scale-95'
                         : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 dark:from-indigo-500 dark:to-purple-500 dark:hover:from-indigo-600 dark:hover:to-purple-600 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95'
                     } ${isRTL ? 'flex-row-reverse' : ''}`}
@@ -279,6 +324,11 @@ const OrderTypeComponent = () => {
                       <>
                         <Loader2 className="w-5 h-5 animate-spin" />
                         {t('dashboard.orderType.updating')}
+                      </>
+                    ) : !hasChanges(orderType) ? (
+                      <>
+                        <CheckCircle className="w-5 h-5" />
+                        {t('dashboard.orderType.noChanges') || 'No Changes'}
                       </>
                     ) : (
                       <>

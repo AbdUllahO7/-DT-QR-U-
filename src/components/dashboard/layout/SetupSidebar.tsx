@@ -3,31 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import {
   Building2,
   BarChart3,
-  FileText,
   ShoppingCart,
   Users,
   Settings,
   LogOut,
   X,
-
-  FolderPlus
 } from 'lucide-react';
-import { useTheme } from '../../../contexts/ThemeContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import { RestaurantBranchDropdownItem } from '../../../types/api';
+import { SetupSidebarProps } from '../../../types/BranchManagement/type';
 
-interface SetupSidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  restaurantName: string;
-  branchName: string | null;
-  isBranchOnly: boolean;
-  onLogout: () => void;
-  onSelectBranch: (item: RestaurantBranchDropdownItem) => void;
-  onBackToMain: () => void;
-}
+
 
 const SetupSidebar: React.FC<SetupSidebarProps> = ({
   isOpen,
@@ -60,7 +45,6 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
 
   return (
     <>
-      {/* Mobile sidebar backdrop */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
@@ -113,22 +97,6 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
 
           {/* Navigation */}
           <nav className="mt-5 flex-1 px-3 space-y-1">
-         
-
-          
-
-            <button
-              onClick={() => handleNavigate('orders', 'orders')}
-              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                activeTab === 'orders'
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              } ${isRTL ? 'text-right' : 'text-left'}`}
-            >
-              <FileText className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-              <span>{t('dashboard.orders.title')}</span>
-            </button>
-
             <button
               onClick={() => handleNavigate('branchProducts', 'branchProducts')}
               className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
@@ -140,9 +108,6 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
               <ShoppingCart className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.products.title')}</span>
             </button>
-
-        
-
             <button
               onClick={() => handleNavigate('TableManagement', 'TableManagement')}
               className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
@@ -166,7 +131,7 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
               <BarChart3 className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.branchManagementTitle')}</span>
             </button>
-                <button
+            <button
               onClick={() => handleNavigate('Branchorders', 'Branchorders')}
               className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
                 activeTab === 'Branchorders'
@@ -219,7 +184,6 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
               </button>
             )}
 
-         
           </nav>
 
           {/* Logout */}

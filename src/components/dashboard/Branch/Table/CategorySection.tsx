@@ -15,9 +15,9 @@ import {
   Settings,
   Loader2
 } from 'lucide-react';
-import { CreateMenuTableDto, UpdateTableCategoryDto } from '../../../../services/Branch/branchTableService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import TableCard from './TableCard';
+import { TableData } from '../../../../types/BranchManagement/type';
 
 interface CategoryData {
   id: number;
@@ -30,17 +30,7 @@ interface CategoryData {
   tableCount?: number;
 }
 
-interface TableData {
-  id: number;
-  menuTableName: string;
-  menuTableCategoryId: number;
-  capacity: number;
-  isActive: boolean;
-  isOccupied: boolean;
-  displayOrder: number;
-  rowVersion?: string;
-  qrCodeUrl?: string;
-}
+
 
 interface CategorySectionProps {
   category: CategoryData;

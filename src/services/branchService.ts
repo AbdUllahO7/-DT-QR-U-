@@ -6,12 +6,10 @@ import type {
   CreateBranchResponse, 
   BranchDetailResponse,
   Branch,
-  BranchDropdownItem,
-  TableData,
-  TableCategory,
+
   BatchUpdateBranchDto
 } from '../types/api';
-import { BranchData } from '../types/BranchManagement/type';
+import { BranchData, BranchDropdownItem, TableCategory, TableData } from '../types/BranchManagement/type';
 
 // Table management için yeni tipler
 interface CreateMenuTableDto {

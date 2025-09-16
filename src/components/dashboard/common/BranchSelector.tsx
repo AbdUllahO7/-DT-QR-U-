@@ -1,9 +1,9 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { ChevronDown, Check, Store, Building2 } from 'lucide-react';
 import { useClickOutside } from '../../../hooks';
-import { RestaurantBranchDropdownItem } from '../../../types/api';
 import { restaurantService } from '../../../services/restaurantService';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { RestaurantBranchDropdownItem } from '../../../types/BranchManagement/type';
 
 interface BranchSelectorProps {
   restaurantName: string;

@@ -3,7 +3,7 @@
 import { basketService } from "../services/Branch/BasketService"
 import { orderService } from "../services/Branch/OrderService"
 import { WhatsAppService } from "../services/WhatsAppService"
-import { CreateSessionOrderDto } from "../types/Orders/type"
+import { CreateSessionOrderDto } from "../types/BranchManagement/type"
 
 interface CartItemAddon {
   branchProductAddonId: number

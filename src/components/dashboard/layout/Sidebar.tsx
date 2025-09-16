@@ -10,28 +10,14 @@ import {
   Settings,
   LogOut,
   X,
-  Eye,
-  ChevronDown,
-  Check,
   FolderPlus
 } from 'lucide-react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import BranchSelector from '../common/BranchSelector';
-import { RestaurantBranchDropdownItem } from '../../../types/api';
+import { SidebarProps } from '../../../types/BranchManagement/type';
 
-interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
-  restaurantName: string;
-  branchName: string | null;
-  isBranchOnly: boolean;
-  onLogout: () => void;
-  onSelectBranch: (item: RestaurantBranchDropdownItem) => void;
-  onBackToMain: () => void;
-}
+
 
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,

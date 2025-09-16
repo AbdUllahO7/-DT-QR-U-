@@ -15,19 +15,10 @@ import {
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { UserProfileResponse } from '../../../types/api';
 import { authService } from '../../../services/authService';
+import { CATEGORY_COLORS } from '../../../types/BranchManagement/type';
 
 // Kategori renkleri
-const CATEGORY_COLORS: Record<string, string> = {
-  Category: 'bg-purple-100 text-purple-900 dark:bg-purple-900/20 dark:text-purple-300',
-  BranchCategory: 'bg-indigo-100 text-indigo-900 dark:bg-indigo-900/20 dark:text-indigo-300',
-  Product: 'bg-green-100 text-green-900 dark:bg-green-900/20 dark:text-green-300',
-  BranchProduct: 'bg-emerald-100 text-emerald-900 dark:bg-emerald-900/20 dark:text-emerald-300',
-  BranchQRCode: 'bg-cyan-100 text-cyan-900 dark:bg-cyan-900/20 dark:text-cyan-300',
-  Order: 'bg-amber-100 text-amber-900 dark:bg-amber-900/20 dark:text-amber-300',
-  Restaurant: 'bg-orange-100 text-orange-900 dark:bg-orange-900/20 dark:text-orange-300',
-  Branch: 'bg-blue-100 text-blue-900 dark:bg-blue-900/20 dark:text-blue-300',
-  Admin: 'bg-red-100 text-red-900 dark:bg-red-900/20 dark:text-red-300',
-};
+
 
 const Profile: React.FC = () => {
   const { t, isRTL } = useLanguage();

@@ -1,4 +1,5 @@
-import type { Category, WeeklyViewData, PopularProductData, HourlyActivityData, MonthlyRevenueData } from '../types/dashboard';
+import { Category } from '../types/BranchManagement/type';
+import type {  WeeklyViewData, PopularProductData, HourlyActivityData, MonthlyRevenueData } from '../types/dashboard';
 
 // Chart renkleri
 export const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];

@@ -12,7 +12,7 @@ import Subscription from '../components/dashboard/content/Subscription';
 import ProductsContent from '../components/dashboard/Porducts/ProductsContent';
 import RestaurantManagement from '../components/dashboard/content/RestaurantManagement';
 import NetworkStatus from '../components/NetworkStatus';
-import { RestaurantManagementInfo, RestaurantBranchDropdownItem } from '../types/api';
+import { RestaurantManagementInfo } from '../types/api';
 import { restaurantService } from '../services/restaurantService';
 import { decodeToken } from '../utils/http';
 import { sanitizePlaceholder } from '../utils/sanitize';
@@ -27,6 +27,7 @@ import Overview from '../components/dashboard/content/overview/Overview';
 import Orders from '../components/dashboard/content/orders/Orders';
 import TableManagement from '../components/dashboard/content/table-management/TableManagement';
 import OrdersManager from '../components/dashboard/Branch/Orders/OrderManagement';
+import { RestaurantBranchDropdownItem } from '../types/BranchManagement/type';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();

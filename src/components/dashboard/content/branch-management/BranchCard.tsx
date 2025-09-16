@@ -138,6 +138,7 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onTog
          
           <label className="relative inline-flex items-center cursor-pointer">
             <input
+              title='isTemporarilyClosed'
               type="checkbox"
               className="sr-only peer"
               checked={branch.isTemporarilyClosed}

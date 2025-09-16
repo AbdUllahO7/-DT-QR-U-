@@ -1,15 +1,8 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { logger } from '../utils/logger';
+import { ErrorBoundaryProps, ErrorBoundaryState } from '../types/BranchManagement/type';
 
-interface ErrorBoundaryProps {
-  children: ReactNode;
-  fallback?: ReactNode;
-}
 
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error?: Error;
-}
 
 // Basit global ErrorBoundary – prod ortamında kullanıcı dostu mesaj, dev modda hatayı konsola basar
 export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {

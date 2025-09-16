@@ -1,5 +1,5 @@
 import { OrderType } from "../../services/Branch/BranchOrderTypeService";
-import { OrderTrackingInfo } from "../Orders/type";
+import { OrderTrackingInfo } from "../BranchManagement/type";
 import { MenuProduct } from "./type";
 
 export interface OrderForm {

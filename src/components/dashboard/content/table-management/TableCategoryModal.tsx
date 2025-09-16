@@ -16,8 +16,8 @@ import {
 import { httpClient } from '../../../../utils/http';
 import { restaurantService } from '../../../../services/restaurantService';
 import { logger } from '../../../../utils/logger';
-import { RestaurantBranchDropdownItem } from '../../../../types/api';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { colorPresets, iconOptions, RestaurantBranchDropdownItem, TableCategoryFormData, TableCategoryPayload } from '../../../../types/BranchManagement/type';
 
 interface Props {
   isOpen: boolean;
@@ -26,40 +26,6 @@ interface Props {
   onSuccess?: () => void;
 }
 
-// CreateMenuTableCategoryDto formatına uygun interface
-interface TableCategoryPayload {
-  categoryName: string | null;
-  description: string | null;
-  colorCode: string | null;
-  iconClass: string | null;
-  displayOrder: number;
-  isActive: boolean;
-}
-
-const iconOptions = [
-  { value: 'table', label: 'TableCategoryModal.table', icon: Table },
-  { value: 'chair', label: 'TableCategoryModal.chair', icon: Armchair },
-  { value: 'utensils', label: 'TableCategoryModal.service', icon: Utensils },
-  { value: 'tag', label: 'TableCategoryModal.label', icon: Tag },
-  { value: 'layers', label: 'TableCategoryModal.layer', icon: Layers },
-];
-
-const colorPresets = [
-  '#ef4444', '#f97316', '#f59e0b', '#eab308', 
-  '#84cc16', '#22c55e', '#10b981', '#14b8a6', 
-  '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', 
-  '#8b5cf6', '#a855f7', '#d946ef', '#ec4899',
-];
-
-// Form için ayrı interface
-interface TableCategoryFormData {
-  categoryName: string;
-  description: string;
-  colorCode: string;
-  iconClass: string;
-  displayOrder: number;
-  isActive: boolean;
-}
 
 const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, onSuccess }) => {
   const { t, isRTL } = useLanguage();

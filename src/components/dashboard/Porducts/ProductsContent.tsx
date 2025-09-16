@@ -23,7 +23,6 @@ import {
 } from '@dnd-kit/sortable';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../hooks';
-import type { Category, Product } from '../../../types/dashboard';
 import { productService } from '../../../services/productService';
 import { branchService } from '../../../services/branchService';
 import { logger } from '../../../utils/logger';
@@ -37,6 +36,7 @@ import ProductIngredientUpdateModal from './ProductIngredientUpdateModal';
 import ProductAddonsModal from './ProductAddonsModal';
 import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { Category, Product } from '../../../types/BranchManagement/type';
 
 // Branch dropdown item interface
 interface BranchDropdownItem {
@@ -686,12 +686,12 @@ const ProductsContent: React.FC = () => {
         
         const targetCategory = updatedCategories.find(cat => cat.categoryId === targetCategoryId);
         if (targetCategory) {
-          const movedProduct = targetCategory.products?.find(p => p.id === activeProduct.id);
-          const targetProduct = targetCategory.products?.find(p => p.id === overProduct.id);
+          const movedProduct = targetCategory.products?.find((p: { id: number; }) => p.id === activeProduct.id);
+          const targetProduct = targetCategory.products?.find((p: { id: number; }) => p.id === overProduct.id);
           
           if (movedProduct && targetProduct) {
-            const currentIndex = targetCategory.products?.findIndex(p => p.id === activeProduct.id);
-            const targetIndex = targetCategory.products?.findIndex(p => p.id === overProduct.id);
+            const currentIndex = targetCategory.products?.findIndex((p: { id: number; }) => p.id === activeProduct.id);
+            const targetIndex = targetCategory.products?.findIndex((p: { id: number; }) => p.id === overProduct.id);
             
             if (currentIndex !== targetIndex) {
               const reorderedProducts = arrayMove(targetCategory.products, currentIndex, targetIndex);

@@ -3474,7 +3474,21 @@ export const en = {
       minQuantityError: 'Minimum quantity for {name} is {min}',
       maxQuantityError: 'Maximum quantity for {name} is {max}',
       decreaseQuantity: 'Decrease quantity',
-      increaseQuantity: 'Increase quantity'
+      increaseQuantity: 'Increase quantity',
+        "creating_order": "Creating order...",
+  "order_created_success": "Order created successfully!",
+  "order_creation_failed": "Failed to create order. Please try again.",
+  "sending_whatsapp": "Sending WhatsApp message...",
+  "whatsapp_sent_success": "WhatsApp message sent successfully!",
+  "whatsapp_send_failed": "Failed to send WhatsApp message",
+  "clearing_basket": "Clearing basket...",
+  "basket_cleared": "Basket cleared successfully!",
+  "clear_basket_failed": "Failed to clear basket",
+  "load_order_types_failed": "Failed to load order types",
+  "confirming_price_changes": "Confirming price changes...",
+  "price_changes_confirmed": "Price changes confirmed successfully!",
+  "price_changes_failed": "Failed to confirm price changes",
+  "session_required": "Session ID required"
     }
     },
     order: {
@@ -3556,7 +3570,7 @@ export const en = {
       addonProductNotFound: 'Could not find addon product ID',
       cartItemNotFound: 'Cart item not found'
     },
-"ordersManager": {
+    "ordersManager": {
       total : 'Total',
       subTotal:"Sub Total",
       OrderType : 'Order Type',

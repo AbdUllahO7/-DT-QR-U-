@@ -7,16 +7,8 @@ import {
   Package
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
-import { DetailedProduct } from '../../../../types/BranchManagement/type';
+import {ProductDetailsModalProps } from '../../../../types/BranchManagement/type';
 
-
-
-
-interface ProductDetailsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  product: DetailedProduct | null;
-}
 
 const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({ 
   isOpen, 

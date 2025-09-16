@@ -1,36 +1,8 @@
 // Dashboard bileşenleri için type tanımları
 
-export interface Product {
-  id: number;
-  categoryId: number;
-  name: string;
-  description: string;
-  price: number;
-  isAvailable: boolean;
-  imageUrl : string;
-  status : boolean;
-  displayOrder : number;
-  branchProductId?:number
-  branchCategory?:Category
-  ingredients?: APIIngredient[];
-  allergens?: APIAllergen[];
-  originalProductId:number,
 
-}
 
-export interface Category {
-  [x: string]: any;
-  productId: any;
-  name: any;
-  categoryId: number;
-  categoryName: string;
-  description: string;
-  isExpanded: boolean;
-  products: Product[];
-  status : boolean;
-  displayOrder : number;
-  restaurantId: number,
-}
+
 
 export interface QRCodeData {
   id: string;

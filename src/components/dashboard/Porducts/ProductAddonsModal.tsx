@@ -20,21 +20,9 @@ import { logger } from '../../../utils/logger';
 
 import { productService } from '../../../services/productService';
 import { AvailableAddonProduct, ProductAddon, productAddonsService } from '../../../services/ProductAddonsService';
+import { ProductAddonsModalProps, SelectedProductData } from '../../../types/BranchManagement/type';
 
-interface ProductAddonsModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSuccess: () => void;
-  productId: number;
-  productName: string;
-}
 
-// Interface for selected product data
-interface SelectedProductData {
-  productId: number;
-  marketingText: string;
-  isRecommended: boolean;
-}
 
 // Sortable Addon Component
 const SortableAddonItem: React.FC<{
@@ -263,7 +251,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
 
       // Extract all products from categories and transform to AvailableAddonProduct format
       const allProducts: AvailableAddonProduct[] = categoriesResponse.flatMap(category => 
-        category.products.map(product => ({
+        category.products.map((product: { id: any; name: any; price: any; imageUrl: any; description: any; isAvailable: any; }) => ({
           id: product.id,
           name: product.name,
           price: product.price,
