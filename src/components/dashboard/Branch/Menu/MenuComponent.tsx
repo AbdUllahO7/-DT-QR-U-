@@ -1,4 +1,4 @@
-// MenuComponent.tsx - Updated with WhatsApp integration (showing key changes)
+// MenuComponent.tsx - Simple restaurant status check
 
 "use client"
 
@@ -88,7 +88,8 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         "allergens",
         "availableAddons",
       ])
-      console.log("menuResponse",menuResponse)
+      console.log("menuResponse", menuResponse)
+      
       if (Array.isArray(menuResponse)) {
         setError("Menu format not supported yet. Please update the service.")
         return
@@ -131,7 +132,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         })
 
         // Then add addons with the main item as parent
-        // Use the actual addon's branchProductId from availableAddons, not branchProductAddonId
         if (mainItem.basketItemId) {
           const addonItems = addons.map(addon => {
             // Find the corresponding available addon to get the correct branchProductId
@@ -160,7 +160,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       await loadBasketItemCount()
     } catch (err: any) {
       console.error('Error adding to basket:', err)
-      // You might want to show a toast notification here
     }
   }
 
@@ -193,7 +192,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       }
     } catch (err: any) {
       console.error('Error removing from basket:', err)
-      // You might want to show a toast notification here
     }
   }
 
@@ -274,8 +272,32 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
 
   if (!menuData) return null
 
-  const filteredCategories = getFilteredCategories()
+  // SIMPLE RESTAURANT CLOSED CHECK
+  if (!menuData.isOpen) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-8">
+          <div className="text-6xl mb-4">🕐</div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            {menuData.restaurantName} is Currently Closed
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            {menuData.statusMessage || "We are currently closed. Please check back during our operating hours."}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Refresh Status
+          </button>
+        </div>
+      </div>
+    )
+  }
 
+  const filteredCategories = getFilteredCategories()
+  console.log("menuData", menuData)
+  
   return (
     <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Header */}
@@ -320,12 +342,12 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         </div>
       </div>
 
-      {/* UPDATED: Cart Sidebar with restaurant preferences */}
+      {/* Cart Sidebar with restaurant preferences */}
       <CartSidebar
         isOpen={showCart}
         onClose={() => setShowCart(false)}
         findProduct={findProduct}
-        restaurantPreferences={menuData.preferences} // NEW: Pass restaurant preferences
+        restaurantPreferences={menuData.preferences}
       />
 
       {/* Product Customization Modal */}

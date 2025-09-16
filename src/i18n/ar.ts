@@ -3559,6 +3559,8 @@ export const ar = {
   "ordersManager": {
     total : 'المجموع',
     OrderType : 'نوع الطلب',
+    subTotal: "المجموع الفرعي",
+    serviceFeeApplied:"رسوم الخدمة",
     DeliveryAddress : 'عنوان التسليم',
     OrderNotesInformation : 'ملاحظات ومعلومات الطلب',
     OrderMetadata: 'بيانات تعريف الطلب',
