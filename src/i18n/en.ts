@@ -3558,7 +3558,9 @@ export const en = {
     },
 "ordersManager": {
       total : 'Total',
+      subTotal:"Sub Total",
       OrderType : 'Order Type',
+      serviceFeeApplied:"Service Charge",
       DeliveryAddress : 'Delivery Address',
       OrderNotesInformation : 'Order Notes & Information',
       OrderMetadata: 'Order Metadata',

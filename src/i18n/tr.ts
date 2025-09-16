@@ -3539,7 +3539,7 @@ SortableProduct: {
       "total": "Toplam",
       "addToCart": "Sepete Ekle"
     },
-  errors: {
+    errors: {
     loadingBasket: 'Sepet yüklenemedi',
     loadingOrderTypes: 'Sipariş türleri yüklenemedi',
     removingItem: 'Ürün sepetten kaldırılamadı',
@@ -3557,6 +3557,8 @@ SortableProduct: {
     },
     "ordersManager": {
       total : 'Toplam',
+      subTotal:"Ara Toplam",
+      serviceFeeApplied:"Servis ücreti",
       OrderType : 'Sipariş Türü',
       DeliveryAddress : 'Teslimat Adresi',
       OrderNotesInformation : 'Sipariş Notları & Bilgiler',
