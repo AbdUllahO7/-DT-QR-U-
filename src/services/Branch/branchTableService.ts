@@ -84,7 +84,6 @@ class TableService {
       logger.info('Masa kategorileri API çağrısı başlatılıyor', { onlyActive, includeTableCount }, { prefix: 'TableService' });
       
       const params = new URLSearchParams({
-        onlyActive: onlyActive.toString(),
         includeTableCount: includeTableCount.toString()
       });
       

@@ -23,10 +23,6 @@ interface LanguageProviderProps {
   children: React.ReactNode;
 }
 
-// Translation keys interface
-interface Translations {
-  [key: string]: string | Translations;
-}
 
 // Import translations
 import { translations } from '../i18n';
