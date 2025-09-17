@@ -43,7 +43,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setIsBranchDropdownOpen(false));
 
-
+  console.log("helllo")
   const token = localStorage.getItem('token') || '';
 
   // SignalR ile gerçek zamanlı güncelleme - Dokümantasyona uygun event'ler
@@ -123,7 +123,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
       // Paralel olarak masalar ve kategorileri yükle
       const [tablesData, categoriesData] = await Promise.all([
         branchService.getTables(selectedBranchForTables.branchId),
-        branchService.getTableCategories(selectedBranchForTables.branchId, true, true)
+        branchService.getTableCategories(selectedBranchForTables.branchId, false, true)
       ]);
 
       setTables(tablesData);

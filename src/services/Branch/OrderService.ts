@@ -1,49 +1,48 @@
-import { BranchOrder, ConfirmOrderDto, CreateSessionOrderDto, Order, OrderItem, OrderTrackingInfo, PendingOrder, QRTrackingInfo, RejectOrderDto, SmartCreateOrderDto, TableBasketSummary, UpdateOrderStatusDto } from '../../types/BranchManagement/type';
-import { OrderStatus } from '../../types/Orders/type';
+import { BranchOrder, ConfirmOrderDto, CreateSessionOrderDto, Order, OrderItem, OrderTrackingInfo, PendingOrder, QRTrackingInfo, RejectOrderDto, SmartCreateOrderDto, TableBasketSummary, UpdateOrderStatusDto, OrderStatus } from '../../types/BranchManagement/type';
+import { OrderStatusEnums } from '../../types/Orders/type';
 import { httpClient } from '../../utils/http';
 import { logger } from '../../utils/logger';
 import { OrderType, orderTypeService } from './BranchOrderTypeService';
 
-// Updated Order interfaces
 
 
-export const orderStatusTranslations: Record<string, Record<OrderStatus, string>> = {
+export const orderStatusTranslations: Record<string, Record<OrderStatusEnums, string>> = {
   en: {
-    [OrderStatus.Pending]: 'Pending',
-    [OrderStatus.Confirmed]: 'Confirmed',
-    [OrderStatus.Preparing]: 'Preparing',
-    [OrderStatus.Ready]: 'Ready',
-    [OrderStatus.Completed]: 'Completed',
-    [OrderStatus.Cancelled]: 'Cancelled',
-    [OrderStatus.Rejected]: 'Rejected',
-    [OrderStatus.Delivered]: 'Delivered',
+    [OrderStatusEnums.Pending]: 'Pending',
+    [OrderStatusEnums.Confirmed]: 'Confirmed',
+    [OrderStatusEnums.Preparing]: 'Preparing',
+    [OrderStatusEnums.Ready]: 'Ready',
+    [OrderStatusEnums.Completed]: 'Completed',
+    [OrderStatusEnums.Cancelled]: 'Cancelled',
+    [OrderStatusEnums.Rejected]: 'Rejected',
+    [OrderStatusEnums.Delivered]: 'Delivered',
   },
   tr: {
-    [OrderStatus.Pending]: 'Bekliyor',
-    [OrderStatus.Confirmed]: 'Onaylandı',
-    [OrderStatus.Preparing]: 'Hazırlanıyor',
-    [OrderStatus.Ready]: 'Hazır',
-    [OrderStatus.Completed]: 'Tamamlandı',
-    [OrderStatus.Cancelled]: 'İptal Edildi',
-    [OrderStatus.Rejected]: 'Reddedildi',
-    [OrderStatus.Delivered]: 'Teslim Edildi',
+    [OrderStatusEnums.Pending]: 'Bekliyor',
+    [OrderStatusEnums.Confirmed]: 'Onaylandı',
+    [OrderStatusEnums.Preparing]: 'Hazırlanıyor',
+    [OrderStatusEnums.Ready]: 'Hazır',
+    [OrderStatusEnums.Completed]: 'Tamamlandı',
+    [OrderStatusEnums.Cancelled]: 'İptal Edildi',
+    [OrderStatusEnums.Rejected]: 'Reddedildi',
+    [OrderStatusEnums.Delivered]: 'Teslim Edildi',
   },
   ar: {
-    [OrderStatus.Pending]: 'معلق',
-    [OrderStatus.Confirmed]: 'مؤكد',
-    [OrderStatus.Preparing]: 'يتم التحضير',
-    [OrderStatus.Ready]: 'جاهز',
-    [OrderStatus.Completed]: 'مكتمل',
-    [OrderStatus.Cancelled]: 'ملغى',
-    [OrderStatus.Rejected]: 'مرفوض',
-    [OrderStatus.Delivered]: 'تم التوصيل',
+    [OrderStatusEnums.Pending]: 'معلق',
+    [OrderStatusEnums.Confirmed]: 'مؤكد',
+    [OrderStatusEnums.Preparing]: 'يتم التحضير',
+    [OrderStatusEnums.Ready]: 'جاهز',
+    [OrderStatusEnums.Completed]: 'مكتمل',
+    [OrderStatusEnums.Cancelled]: 'ملغى',
+    [OrderStatusEnums.Rejected]: 'مرفوض',
+    [OrderStatusEnums.Delivered]: 'تم التوصيل',
   },
 };
 class OrderService {
   private baseUrl = '/api/Order';
   private orderTypesCache: OrderType[] = [];
   private cacheExpiry: number = 0;
-  private readonly CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  private readonly CACHE_DURATION = 5 * 60 * 1000; 
 
   async createSessionOrder(data: CreateSessionOrderDto): Promise<Order> {
     try {
@@ -55,24 +54,18 @@ class OrderService {
       }, { prefix: 'OrderService' });
       return response.data;
     } catch (error: any) {
-      logger.error('Session order oluşturma hatası', error, { prefix: 'OrderService' });
       this.handleError(error, 'Session order oluşturulurken hata oluştu');
     }
   }
 
   async getPendingOrders(): Promise<PendingOrder[]> {
     try {
-      logger.info('Pending orders getirme isteği gönderiliyor', {}, { prefix: 'OrderService' });
       const url = `${this.baseUrl}/pending`;
       const response = await httpClient.get<PendingOrder[]>(url);
       const orders = Array.isArray(response.data) ? response.data : [];
-      logger.info('Pending orders başarıyla alındı', { 
-        ordersCount: orders.length 
-      }, { prefix: 'OrderService' });
-      console.log('Pending Orders:', orders);
+
       return orders;
     } catch (error: any) {
-      logger.error('Pending orders getirme hatası', error, { prefix: 'OrderService' });
       this.handleError(error, 'Pending orders getirilirken hata oluştu');
     }
   }
@@ -114,7 +107,6 @@ class OrderService {
 
   async getBranchOrders(): Promise<BranchOrder[]> {
     try {
-      logger.info('Branch orders getirme isteği gönderiliyor', {}, { prefix: 'OrderService' });
       
       const allOrders: BranchOrder[] = [];
       let currentPage = 1;
@@ -135,24 +127,13 @@ class OrderService {
           const responseData = response.data;
           let pageOrders: BranchOrder[] = [];
           
-          console.log("Response data keys:", Object.keys(responseData || {}));
           
           // Check for direct structure with items array
           if (responseData && typeof responseData === 'object' && 'items' in responseData) {
             // Direct structure: response.data.items
             pageOrders = Array.isArray(responseData.items) ? responseData.items : [];
             totalPages = responseData.totalPages || 1;
-            
-            console.log("Direct structure detected - extracting from items");
-            console.log("Items found:", pageOrders.length);
-            console.log("Total pages:", totalPages);
-            
-            console.log("Pagination info from API:", {
-              currentPage: responseData.currentPage || currentPage,
-              pageSize: responseData.pageSize || pageSize,
-              totalCount: responseData.totalCount,
-              totalPages: responseData.totalPages
-            });
+     
           } 
           // Check if response has nested structure with data.items (old format)
           else if (responseData && typeof responseData === 'object' && 'data' in responseData) {
@@ -160,7 +141,6 @@ class OrderService {
             if (nestedData && 'items' in nestedData) {
               pageOrders = Array.isArray(nestedData.items) ? nestedData.items : [];
               totalPages = nestedData.totalPages || 1;
-              console.log("Nested structure detected");
             }
           } 
           // Fallback: direct array response
@@ -195,12 +175,7 @@ class OrderService {
           }
           
         } catch (pageError: any) {
-          console.log("Page error occurred:", pageError);
-          logger.error('Branch orders sayfa fetch hatası', { 
-            page: currentPage, 
-            error: pageError 
-          }, { prefix: 'OrderService' });
-          
+       
           // If it's a 404 or similar, we might have reached the end
           if (pageError?.response?.status === 404) {
             break; // Exit the loop
@@ -210,15 +185,6 @@ class OrderService {
           }
         }
       }
-      
-      console.log("Final allOrders:", allOrders);
-      console.log("Final allOrders length:", allOrders.length);
-      
-      logger.info('Branch orders başarıyla alındı', { 
-        totalPages: totalPages,
-        totalOrders: allOrders.length 
-      }, { prefix: 'OrderService' });
-      
       return allOrders;
       
     } catch (error: any) {
@@ -285,7 +251,7 @@ class OrderService {
       const response = await httpClient.get<OrderTrackingInfo>(url);
       logger.info('Order tracking başarıyla alındı', { 
         orderTag,
-        orderStatus: response.data.orderStatus,
+        OrderStatusEnums: response.data.orderStatus,
         statusCode: response.data.statusCode
       }, { prefix: 'OrderService' });
       return response.data;
@@ -364,36 +330,36 @@ class OrderService {
     return this.orderTypesCache;
   }
 
-  getOrderStatusText(status: OrderStatus | string, lang: string = 'en'): string {
+  getOrderStatusText(status: OrderStatusEnums | string, lang: string = 'en'): string {
     const langCode = lang.split('-')[0].toLowerCase();
     const translations = orderStatusTranslations[langCode] || orderStatusTranslations['en'];
     if (typeof status === 'string') {
       const enumStatus = this.parseOrderStatus(status);
-      return translations[enumStatus] || translations[OrderStatus.Pending];
+      return translations[enumStatus] || translations[OrderStatusEnums.Pending];
     }
-    return translations[status] || translations[OrderStatus.Pending];
+    return translations[status] || translations[OrderStatusEnums.Pending];
   }
 
-  parseOrderStatus(status: string): OrderStatus {
+  parseOrderStatus(status: string): OrderStatusEnums {
     switch (status.toLowerCase()) {
       case 'pending':
-        return OrderStatus.Pending;
+        return OrderStatusEnums.Pending;
       case 'confirmed':
-        return OrderStatus.Confirmed;
+        return OrderStatusEnums.Confirmed;
       case 'preparing':
-        return OrderStatus.Preparing;
+        return OrderStatusEnums.Preparing;
       case 'ready':
-        return OrderStatus.Ready;
+        return OrderStatusEnums.Ready;
       case 'completed':
-        return OrderStatus.Completed;
+        return OrderStatusEnums.Completed;
       case 'cancelled':
-        return OrderStatus.Cancelled;
+        return OrderStatusEnums.Cancelled;
       case 'rejected':
-        return OrderStatus.Rejected;
+        return OrderStatusEnums.Rejected;
       case 'delivered':
-        return OrderStatus.Delivered;
+        return OrderStatusEnums.Delivered;
       default:
-        return OrderStatus.Pending;
+        return OrderStatusEnums.Pending;
     }
   }
 
@@ -498,20 +464,20 @@ class OrderService {
     }
   }
 
-  canModifyOrder(status: OrderStatus | string): boolean {
+  canModifyOrder(status: OrderStatusEnums | string): boolean {
     if (typeof status === 'string') {
       const enumStatus = this.parseOrderStatus(status);
-      return enumStatus === OrderStatus.Pending || enumStatus === OrderStatus.Confirmed;
+      return enumStatus === OrderStatusEnums.Pending || enumStatus === OrderStatusEnums.Confirmed;
     }
-    return status === OrderStatus.Pending || status === OrderStatus.Confirmed;
+    return status === OrderStatusEnums.Pending || status === OrderStatusEnums.Confirmed;
   }
 
-  canCancelOrder(status: OrderStatus | string): boolean {
+  canCancelOrder(status: OrderStatusEnums | string): boolean {
     if (typeof status === 'string') {
       const enumStatus = this.parseOrderStatus(status);
-      return enumStatus === OrderStatus.Pending || enumStatus === OrderStatus.Confirmed || enumStatus === OrderStatus.Preparing;
+      return enumStatus === OrderStatusEnums.Pending || enumStatus === OrderStatusEnums.Confirmed || enumStatus === OrderStatusEnums.Preparing;
     }
-    return status === OrderStatus.Pending || status === OrderStatus.Confirmed || status === OrderStatus.Preparing;
+    return status === OrderStatusEnums.Pending || status === OrderStatusEnums.Confirmed || status === OrderStatusEnums.Preparing;
   }
 
   getItemQuantity(item: OrderItem): number {

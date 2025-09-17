@@ -3,7 +3,7 @@ import { ChevronDown, ChevronUp, Eye, CheckCircle, XCircle } from 'lucide-react'
 import { BranchOrder, PendingOrder } from '../../../../types/BranchManagement/type';
 import { orderService } from '../../../../services/Branch/OrderService';
 import OrderStatusUtils from '../../../../utils/OrderStatusUtils';
-import { OrderStatus } from '../../../../types/Orders/type';
+import { OrderStatusEnums } from '../../../../types/Orders/type';
 
 interface OrderTableRowProps {
   order: PendingOrder | BranchOrder;
@@ -14,7 +14,7 @@ interface OrderTableRowProps {
   onOpenDetails: (order: PendingOrder | BranchOrder) => void;
   onOpenConfirm: (orderId: string, rowVersion: string) => void;
   onOpenReject: (orderId: string, rowVersion: string) => void;
-  onOpenStatus:(orderId: string, rowVersion: string, newStatus: OrderStatus) => void;
+  onOpenStatus:(orderId: string, rowVersion: string, newStatus: OrderStatusEnums) => void;
   t: (key: string) => string;
 }
 
@@ -31,7 +31,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
   t
 }) => {
   const isPending = viewMode === 'pending';
-  const status = isPending ? OrderStatus.Pending : orderService.parseOrderStatus((order as BranchOrder).status);
+  const status = isPending ? OrderStatusEnums.Pending : orderService.parseOrderStatus((order as BranchOrder).status);
   const rowVersion = order.rowVersion || '';
   const validStatuses = OrderStatusUtils.getValidStatusTransitions(status);
 
@@ -119,7 +119,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
             <select
               title={t('ordersManager.changeStatus')}
               onChange={(e) => {
-                const newStatus = parseInt(e.target.value) as OrderStatus;
+                const newStatus = parseInt(e.target.value) as OrderStatusEnums;
                 if (newStatus !== status) {
                   onOpenStatus(order.id.toString(), rowVersion, newStatus);
                 }
