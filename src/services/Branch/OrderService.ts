@@ -111,44 +111,34 @@ class OrderService {
     }
   }
 
-async getBranchOrders(): Promise<BranchOrder[]> {
-  try {
-    logger.info('Branch orders getirme isteği gönderiliyor', {}, { prefix: 'OrderService' });
+  async getBranchOrders(): Promise<BranchOrder[]> {
+    try {
+      logger.info('Branch orders getirme isteği gönderiliyor', {}, { prefix: 'OrderService' });
+      
+      // Test different page sizes to find the limit
+      const response = await httpClient.get(`${this.baseUrl}/branch`, {
+        params: {
+          page: 1,
+          pageSize: 200, // Same as Swagger
+          includeItems: true
+        }
+      });
+      
     
-    // Test different page sizes to find the limit
-    const response = await httpClient.get(`${this.baseUrl}/branch`, {
-      params: {
-        page: 1,
-        pageSize: 200, // Same as Swagger
-        includeItems: false
-      }
-    });
-    
-    console.log('=== PAGINATION DEBUG ===');
-    console.log('Requested pageSize: 200');
-    console.log('Actual items returned:', response.data.length);
-    console.log('Response headers:', response.headers);
-    console.log('Full response structure:', {
-      hasData: !!response.data,
-      dataType: typeof response.data,
-      isArray: Array.isArray(response.data),
-      length: response.data?.length,
-      hasPaginationInfo: !!(response.data.totalCount || response.data.total || response.data.pagination)
-    });
-    
-    const orders = Array.isArray(response.data) ? response.data : [];
-    
-    logger.info('Branch orders başarıyla alındı', { 
-      ordersCount: orders.length 
-    }, { prefix: 'OrderService' });
-    
-    return orders;
-  } catch (error: any) {
-    logger.error('Branch orders getirme hatası', error, { prefix: 'OrderService' });
-    this.handleError(error, 'Branch orders getirilirken hata oluştu');
-    return [];
+      
+      const orders = Array.isArray(response.data) ? response.data : [];
+      
+      logger.info('Branch orders başarıyla alındı', { 
+        ordersCount: orders.length 
+      }, { prefix: 'OrderService' });
+      
+      return orders;
+    } catch (error: any) {
+      logger.error('Branch orders getirme hatası', error, { prefix: 'OrderService' });
+      this.handleError(error, 'Branch orders getirilirken hata oluştu');
+      return [];
+    }
   }
-}
 
   async confirmOrder(orderId: string, data: ConfirmOrderDto): Promise<Order> {
     try {

@@ -1048,3 +1048,6 @@ export interface OrdersManagerState {
 
 
 
+
+// Pagination interface
+

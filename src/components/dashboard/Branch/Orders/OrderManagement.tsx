@@ -125,6 +125,7 @@ const OrdersManager: React.FC = () => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
       const orders = await orderService.getBranchOrders();
+      console.log("orderService",orders)
       setState(prev => ({ ...prev, branchOrders: orders, loading: false }));
     } catch (error: any) {
       setState(prev => ({ ...prev, error: error.message, loading: false }));
