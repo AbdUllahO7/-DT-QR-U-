@@ -2,6 +2,7 @@ import { Armchair, Layers, Table, Tag, Utensils } from "lucide-react";
 import { BranchProductAddon } from "../../services/Branch/BranchService";
 import { CreateRoleDto, CreateUserDto, PermissionOption, Role } from "../api";
 import { ReactNode } from "react";
+import { OrderStatusEnums } from "../Orders/type";
 
 export interface BranchData {
   id: number;
@@ -672,7 +673,7 @@ export interface Order {
   customerName: string;
   notes?: string;
   orderTypeId: number;
-  status: OrderStatus;
+  status: OrderStatusEnums;
   totalAmount: number;
   totalQuantity: number;
   createdDate: string;
@@ -964,7 +965,7 @@ export interface RejectOrderDto {
 }
 
 export interface UpdateOrderStatusDto {
-  newStatus: OrderStatus;
+  newStatus: OrderStatusEnums;
   notes?: string;
   rowVersion: string;
 }

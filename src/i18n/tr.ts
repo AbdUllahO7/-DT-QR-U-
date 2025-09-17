@@ -1,5 +1,3 @@
-import { table } from "console";
-import { ref } from "process";
 
 export const tr = {
   // Common

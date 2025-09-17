@@ -111,29 +111,118 @@ class OrderService {
     }
   }
 
+
   async getBranchOrders(): Promise<BranchOrder[]> {
     try {
       logger.info('Branch orders getirme isteği gönderiliyor', {}, { prefix: 'OrderService' });
       
-      // Test different page sizes to find the limit
-      const response = await httpClient.get(`${this.baseUrl}/branch`, {
-        params: {
-          page: 1,
-          pageSize: 200, // Same as Swagger
-          includeItems: true
+      const allOrders: BranchOrder[] = [];
+      let currentPage = 1;
+      const pageSize = 20;
+      let totalPages = 1; // Will be updated from API response
+      
+      while (currentPage <= totalPages) {
+        try {
+          const response = await httpClient.get(`${this.baseUrl}/branch`, {
+            params: {
+              page: currentPage,
+              pageSize: pageSize,
+              includeItems: true
+            }
+          });
+          
+          // Extract pagination info from response - Fixed for direct structure
+          const responseData = response.data;
+          let pageOrders: BranchOrder[] = [];
+          
+          console.log("Response data keys:", Object.keys(responseData || {}));
+          
+          // Check for direct structure with items array
+          if (responseData && typeof responseData === 'object' && 'items' in responseData) {
+            // Direct structure: response.data.items
+            pageOrders = Array.isArray(responseData.items) ? responseData.items : [];
+            totalPages = responseData.totalPages || 1;
+            
+            console.log("Direct structure detected - extracting from items");
+            console.log("Items found:", pageOrders.length);
+            console.log("Total pages:", totalPages);
+            
+            console.log("Pagination info from API:", {
+              currentPage: responseData.currentPage || currentPage,
+              pageSize: responseData.pageSize || pageSize,
+              totalCount: responseData.totalCount,
+              totalPages: responseData.totalPages
+            });
+          } 
+          // Check if response has nested structure with data.items (old format)
+          else if (responseData && typeof responseData === 'object' && 'data' in responseData) {
+            const nestedData = responseData.data;
+            if (nestedData && 'items' in nestedData) {
+              pageOrders = Array.isArray(nestedData.items) ? nestedData.items : [];
+              totalPages = nestedData.totalPages || 1;
+              console.log("Nested structure detected");
+            }
+          } 
+          // Fallback: direct array response
+          else if (Array.isArray(responseData)) {
+            pageOrders = responseData;
+            console.log("Direct array response detected");
+          } else {
+            console.log("Unknown response structure");
+            pageOrders = [];
+          }
+          
+          console.log("Branch orders sayfa alındı", currentPage, pageOrders.length, allOrders.length + pageOrders.length, "of", totalPages, "pages");
+          
+          logger.info('Branch orders sayfa alındı', { 
+            page: currentPage,
+            totalPages: totalPages,
+            ordersCount: pageOrders.length,
+            totalSoFar: allOrders.length + pageOrders.length
+          }, { prefix: 'OrderService' });
+          
+          // Add orders from this page to the total
+          allOrders.push(...pageOrders);
+          
+          console.log("allOrders length after push:", allOrders.length);
+          
+          // Move to next page
+          currentPage++;
+          
+          // Add a small delay between requests to be API-friendly
+          if (currentPage <= totalPages) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+          
+        } catch (pageError: any) {
+          console.log("Page error occurred:", pageError);
+          logger.error('Branch orders sayfa fetch hatası', { 
+            page: currentPage, 
+            error: pageError 
+          }, { prefix: 'OrderService' });
+          
+          // If it's a 404 or similar, we might have reached the end
+          if (pageError?.response?.status === 404) {
+            break; // Exit the loop
+          } else {
+            // For other errors, break the loop to avoid infinite retries
+            throw pageError;
+          }
         }
-      });
+      }
       
-    
-      
-      const orders = Array.isArray(response.data) ? response.data : [];
+      console.log("Final allOrders:", allOrders);
+      console.log("Final allOrders length:", allOrders.length);
       
       logger.info('Branch orders başarıyla alındı', { 
-        ordersCount: orders.length 
+        totalPages: totalPages,
+        totalOrders: allOrders.length 
       }, { prefix: 'OrderService' });
       
-      return orders;
+      return allOrders;
+      
     } catch (error: any) {
+      console.log("Main catch error:", error);
       logger.error('Branch orders getirme hatası', error, { prefix: 'OrderService' });
       this.handleError(error, 'Branch orders getirilirken hata oluştu');
       return [];
