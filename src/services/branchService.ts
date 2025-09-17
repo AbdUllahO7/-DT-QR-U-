@@ -413,7 +413,7 @@ class BranchService {
     }
   }
 
-  async getTableCategories(branchId: number, onlyActive: boolean = true, includeTableCount: boolean = false): Promise<TableCategory[]> {
+  async getTableCategories(branchId: number, onlyActive: boolean , includeTableCount: boolean = false): Promise<TableCategory[]> {
     try {
       logger.info('Masa kategorileri API çağrısı başlatılıyor', { branchId, onlyActive, includeTableCount }, { prefix: 'BranchService' });
       

@@ -120,14 +120,14 @@ class BranchCategoryService {
     try {
         const params = new URLSearchParams({
         includes: "products",
-        onlyActive: "true"
       });
       const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/available-categories?${params.toString()}` );
       
       logger.info('Available categories for branch retrieved successfully', { 
         count: response.data.length,
       });
-      
+            console.log("params",params)
+
       const transformedData = this.transformAPIDataToComponentData(response.data);
 
       return transformedData;
