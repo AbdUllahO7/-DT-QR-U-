@@ -79,10 +79,10 @@ const CartItemComponent: React.FC<CartItemProps> = ({
           
         </div>
       </div>
-
+        
       {/* Variants */}
       <div className="space-y-4">
-        {group.variants.map((variant, variantIndex) => (
+        {group.variants.map((variant) => (
           <div key={variant.basketItemId || variant.cartIndex} className="bg-white/50 dark:bg-slate-700/30 p-3 rounded-lg border border-slate-200/30 dark:border-slate-600/30">
             {/* Variant Header */}
             <div className="flex items-center justify-between mb-3">

@@ -4,7 +4,7 @@ import type React from "react"
 import { useState } from "react"
 import { X, Plus, Minus, ShoppingCart, Utensils, Award } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
-import { MenuProduct, ProductModalProps, SelectedAddon } from "../../../../types/menu/type"
+import {  ProductModalProps, SelectedAddon } from "../../../../types/menu/type"
 
 
 

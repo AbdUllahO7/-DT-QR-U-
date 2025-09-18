@@ -20,14 +20,14 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
       <div className="flex items-center gap-4">
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} to{' '}
-          {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of{' '}
-          {pagination.totalItems} orders
+          {t("ordersManager.showing")} {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} {t("ordersManager.to")} {' '}
+          {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} {t("ordersManager.of")} {' '}
+          {pagination.totalItems} {t("ordersManager.orders")} 
         </div>
         
         {/* Items per page selector */}
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600 dark:text-gray-400">Show:</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400"> {t("ordersManager.showing")}:</span>
           <select
             title='pagination'
             value={pagination.itemsPerPage}
@@ -40,7 +40,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
             <option value={50}>50</option>
             <option value={100}>100</option>
           </select>
-          <span className="text-sm text-gray-600 dark:text-gray-400">per page</span>
+          <span className="text-sm text-gray-600 dark:text-gray-400">{t("ordersManager.perpage")}</span>
         </div>
       </div>
 

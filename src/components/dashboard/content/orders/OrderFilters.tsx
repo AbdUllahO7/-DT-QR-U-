@@ -162,7 +162,6 @@ const OrderFilters: React.FC<OrderFiltersProps> = ({
                           <option value="preparing">{t('dashboard.orders.status.preparing')}</option>
         <option value="ready">{t('dashboard.orders.status.ready')}</option>
                   <option value="delivered">{t('common.delivered')}</option>
-                  <option value="cancelled">{t('common.cancelled')}</option>
                 </motion.select>
               </motion.div>
 

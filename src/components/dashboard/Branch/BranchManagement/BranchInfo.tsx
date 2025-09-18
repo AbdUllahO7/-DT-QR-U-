@@ -2,8 +2,6 @@ import React from 'react';
 import { Phone, Mail, MapPin } from 'lucide-react';
 import { BranchInfoProps } from '../../../../types/BranchManagement/type';
 
-
-
 const BranchInfo: React.FC<BranchInfoProps> = ({
   selectedBranch,
   isEditing,
