@@ -4,8 +4,6 @@ import { httpClient } from '../../utils/http';
 import { logger } from '../../utils/logger';
 import { OrderType, orderTypeService } from './BranchOrderTypeService';
 
-
-
 export const orderStatusTranslations: Record<string, Record<OrderStatusEnums, string>> = {
   en: {
     [OrderStatusEnums.Pending]: 'Pending',
@@ -38,31 +36,48 @@ export const orderStatusTranslations: Record<string, Record<OrderStatusEnums, st
     [OrderStatusEnums.Delivered]: 'تم التوصيل',
   },
 };
+
 class OrderService {
   private baseUrl = '/api/Order';
   private orderTypesCache: OrderType[] = [];
   private cacheExpiry: number = 0;
   private readonly CACHE_DURATION = 5 * 60 * 1000; 
 
-  async createSessionOrder(data: CreateSessionOrderDto): Promise<Order> {
+  async createSessionOrder(data: CreateSessionOrderDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Session order oluşturma isteği gönderiliyor', { data }, { prefix: 'OrderService' });
-      const url = `${this.baseUrl}/from-session`;
+      logger.info('Session order oluşturma isteği gönderiliyor', { data, branchId }, { prefix: 'OrderService' });
+      
+      const url = branchId 
+        ? `${this.baseUrl}/from-session?branchId=${branchId}`
+        : `${this.baseUrl}/from-session`;
+        
       const response = await httpClient.post<Order>(url, data);
+      
       logger.info('Session order başarıyla oluşturuldu', { 
-        orderId: response.data 
+        orderId: response.data,
+        branchId
       }, { prefix: 'OrderService' });
+      
       return response.data;
     } catch (error: any) {
       this.handleError(error, 'Session order oluşturulurken hata oluştu');
     }
   }
 
-  async getPendingOrders(): Promise<PendingOrder[]> {
+  async getPendingOrders(branchId?: number): Promise<PendingOrder[]> {
     try {
-      const url = `${this.baseUrl}/pending`;
+      const url = branchId 
+        ? `${this.baseUrl}/pending?branchId=${branchId}` 
+        : `${this.baseUrl}/pending`;
+        
+      logger.info('Pending orders getirme isteği gönderiliyor', { branchId }, { prefix: 'OrderService' });
       const response = await httpClient.get<PendingOrder[]>(url);
       const orders = Array.isArray(response.data) ? response.data : [];
+
+      logger.info('Pending orders başarıyla alındı', { 
+        branchId,
+        ordersCount: orders.length 
+      }, { prefix: 'OrderService' });
 
       return orders;
     } catch (error: any) {
@@ -70,72 +85,42 @@ class OrderService {
     }
   }
 
-  async getTableOrders(tableId: number): Promise<Order[]> {
+  async getBranchOrders(branchId?: number): Promise<BranchOrder[]> {
     try {
-      logger.info('Table orders getirme isteği gönderiliyor', { tableId }, { prefix: 'OrderService' });
-      const url = `${this.baseUrl}/table/${tableId}`;
-      const response = await httpClient.get<Order[]>(url);
-      const orders = Array.isArray(response.data) ? response.data : [];
-      logger.info('Table orders başarıyla alındı', { 
-        tableId,
-        ordersCount: orders.length 
-      }, { prefix: 'OrderService' });
-      return orders;
-    } catch (error: any) {
-      logger.error('Table orders getirme hatası', error, { prefix: 'OrderService' });
-      this.handleError(error, 'Table orders getirilirken hata oluştu');
-    }
-  }
-
-  async getOrder(orderId: string): Promise<Order> {
-    try {
-      logger.info('Order getirme isteği gönderiliyor', { orderId }, { prefix: 'OrderService' });
-      const url = `${this.baseUrl}/${orderId}`;
-      const response = await httpClient.get<Order>(url);
-      logger.info('Order başarıyla alındı', { 
-        orderId,
-        customerName: response.data.customerName,
-        status: response.data.status
-      }, { prefix: 'OrderService' });
-      return response.data;
-    } catch (error: any) {
-      logger.error('Order getirme hatası', error, { prefix: 'OrderService' });
-      this.handleError(error, 'Order getirilirken hata oluştu');
-    }
-  }
-
-
-  async getBranchOrders(): Promise<BranchOrder[]> {
-    try {
-      
       const allOrders: BranchOrder[] = [];
       let currentPage = 1;
       const pageSize = 20;
-      let totalPages = 1; // Will be updated from API response
+      let totalPages = 1;
+      
+      logger.info('Branch orders getirme isteği başlatılıyor', { branchId }, { prefix: 'OrderService' });
       
       while (currentPage <= totalPages) {
         try {
+          const params: any = {
+            page: currentPage,
+            pageSize: pageSize,
+            includeItems: true
+          };
+          
+          // Add branchId if provided
+          if (branchId) {
+            params.branchId = branchId;
+          }
+          
           const response = await httpClient.get(`${this.baseUrl}/branch`, {
-            params: {
-              page: currentPage,
-              pageSize: pageSize,
-              includeItems: true
-            }
+            params
           });
           
-          // Extract pagination info from response - Fixed for direct structure
+          // Extract pagination info from response
           const responseData = response.data;
           let pageOrders: BranchOrder[] = [];
           
-          
           // Check for direct structure with items array
           if (responseData && typeof responseData === 'object' && 'items' in responseData) {
-            // Direct structure: response.data.items
             pageOrders = Array.isArray(responseData.items) ? responseData.items : [];
             totalPages = responseData.totalPages || 1;
-     
           } 
-          // Check if response has nested structure with data.items (old format)
+          // Check if response has nested structure with data.items
           else if (responseData && typeof responseData === 'object' && 'data' in responseData) {
             const nestedData = responseData.data;
             if (nestedData && 'items' in nestedData) {
@@ -146,15 +131,10 @@ class OrderService {
           // Fallback: direct array response
           else if (Array.isArray(responseData)) {
             pageOrders = responseData;
-            console.log("Direct array response detected");
-          } else {
-            console.log("Unknown response structure");
-            pageOrders = [];
           }
           
-          console.log("Branch orders sayfa alındı", currentPage, pageOrders.length, allOrders.length + pageOrders.length, "of", totalPages, "pages");
-          
           logger.info('Branch orders sayfa alındı', { 
+            branchId,
             page: currentPage,
             totalPages: totalPages,
             ordersCount: pageOrders.length,
@@ -164,46 +144,103 @@ class OrderService {
           // Add orders from this page to the total
           allOrders.push(...pageOrders);
           
-          console.log("allOrders length after push:", allOrders.length);
-          
           // Move to next page
           currentPage++;
           
-          // Add a small delay between requests to be API-friendly
+          // Add delay between requests
           if (currentPage <= totalPages) {
             await new Promise(resolve => setTimeout(resolve, 100));
           }
           
         } catch (pageError: any) {
-       
-          // If it's a 404 or similar, we might have reached the end
+          // If it's a 404, we might have reached the end
           if (pageError?.response?.status === 404) {
-            break; // Exit the loop
+            break;
           } else {
-            // For other errors, break the loop to avoid infinite retries
             throw pageError;
           }
         }
       }
+      
+      logger.info('Branch orders tamamlandı', { 
+        branchId,
+        totalOrders: allOrders.length,
+        totalPages
+      }, { prefix: 'OrderService' });
+      
       return allOrders;
       
     } catch (error: any) {
-      console.log("Main catch error:", error);
       logger.error('Branch orders getirme hatası', error, { prefix: 'OrderService' });
       this.handleError(error, 'Branch orders getirilirken hata oluştu');
       return [];
     }
   }
 
-  async confirmOrder(orderId: string, data: ConfirmOrderDto): Promise<Order> {
+  async getTableOrders(tableId: number, branchId?: number): Promise<Order[]> {
     try {
-      logger.info('Order onaylama isteği gönderiliyor', { orderId, data }, { prefix: 'OrderService' });
-      const url = `${this.baseUrl}/${orderId}/confirm`;
+      logger.info('Table orders getirme isteği gönderiliyor', { tableId, branchId }, { prefix: 'OrderService' });
+      
+      const url = branchId 
+        ? `${this.baseUrl}/table/${tableId}?branchId=${branchId}`
+        : `${this.baseUrl}/table/${tableId}`;
+        
+      const response = await httpClient.get<Order[]>(url);
+      const orders = Array.isArray(response.data) ? response.data : [];
+      
+      logger.info('Table orders başarıyla alındı', { 
+        tableId,
+        branchId,
+        ordersCount: orders.length 
+      }, { prefix: 'OrderService' });
+      
+      return orders;
+    } catch (error: any) {
+      logger.error('Table orders getirme hatası', error, { prefix: 'OrderService' });
+      this.handleError(error, 'Table orders getirilirken hata oluştu');
+    }
+  }
+
+  async getOrder(orderId: string, branchId?: number): Promise<Order> {
+    try {
+      logger.info('Order getirme isteği gönderiliyor', { orderId, branchId }, { prefix: 'OrderService' });
+      
+      const url = branchId 
+        ? `${this.baseUrl}/${orderId}?branchId=${branchId}`
+        : `${this.baseUrl}/${orderId}`;
+        
+      const response = await httpClient.get<Order>(url);
+      
+      logger.info('Order başarıyla alındı', { 
+        orderId,
+        branchId,
+        customerName: response.data.customerName,
+        status: response.data.status
+      }, { prefix: 'OrderService' });
+      
+      return response.data;
+    } catch (error: any) {
+      logger.error('Order getirme hatası', error, { prefix: 'OrderService' });
+      this.handleError(error, 'Order getirilirken hata oluştu');
+    }
+  }
+
+  async confirmOrder(orderId: string, data: ConfirmOrderDto, branchId?: number): Promise<Order> {
+    try {
+      logger.info('Order onaylama isteği gönderiliyor', { orderId, data, branchId }, { prefix: 'OrderService' });
+      
+      const url = branchId 
+        ? `${this.baseUrl}/${orderId}/confirm?branchId=${branchId}`
+        : `${this.baseUrl}/${orderId}/confirm`;
+        
       const response = await httpClient.post<Order>(url, data);
+      
       logger.info('Order başarıyla onaylandı', { 
         orderId,
+        branchId,
         newStatus: response.data.status
       }, { prefix: 'OrderService' });
+      
       return response.data;
     } catch (error: any) {
       logger.error('Order onaylama hatası', error, { prefix: 'OrderService' });
@@ -211,15 +248,22 @@ class OrderService {
     }
   }
 
-  async rejectOrder(orderId: string, data: RejectOrderDto): Promise<Order> {
+  async rejectOrder(orderId: string, data: RejectOrderDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Order reddetme isteği gönderiliyor', { orderId, data }, { prefix: 'OrderService' });
-      const url = `${this.baseUrl}/${orderId}/reject`;
+      logger.info('Order reddetme isteği gönderiliyor', { orderId, data, branchId }, { prefix: 'OrderService' });
+      
+      const url = branchId 
+        ? `${this.baseUrl}/${orderId}/reject?branchId=${branchId}`
+        : `${this.baseUrl}/${orderId}/reject`;
+        
       const response = await httpClient.post<Order>(url, data);
+      
       logger.info('Order başarıyla reddedildi', { 
         orderId,
+        branchId,
         rejectionReason: data.rejectionReason
       }, { prefix: 'OrderService' });
+      
       return response.data;
     } catch (error: any) {
       logger.error('Order reddetme hatası', error, { prefix: 'OrderService' });
@@ -227,16 +271,23 @@ class OrderService {
     }
   }
 
-  async updateOrderStatus(orderId: string, data: UpdateOrderStatusDto): Promise<Order> {
+  async updateOrderStatus(orderId: string, data: UpdateOrderStatusDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Order status güncelleme isteği gönderiliyor', { orderId, data }, { prefix: 'OrderService' });
-      const url = `${this.baseUrl}/${orderId}/status`;
+      logger.info('Order status güncelleme isteği gönderiliyor', { orderId, data, branchId }, { prefix: 'OrderService' });
+      
+      const url = branchId 
+        ? `${this.baseUrl}/${orderId}/status?branchId=${branchId}`
+        : `${this.baseUrl}/${orderId}/status`;
+        
       const response = await httpClient.put<Order>(url, data);
+      
       logger.info('Order status başarıyla güncellendi', { 
         orderId,
+        branchId,
         oldStatus: data.newStatus,
         newStatus: response.data.status
       }, { prefix: 'OrderService' });
+      
       return response.data;
     } catch (error: any) {
       logger.error('Order status güncelleme hatası', error, { prefix: 'OrderService' });
@@ -277,16 +328,23 @@ class OrderService {
     }
   }
 
-  async smartCreateOrder(data: SmartCreateOrderDto): Promise<Order> {
+  async smartCreateOrder(data: SmartCreateOrderDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Smart order oluşturma isteği gönderiliyor', { data }, { prefix: 'OrderService' });
-      const url = `${this.baseUrl}/smart-create`;
+      logger.info('Smart order oluşturma isteği gönderiliyor', { data, branchId }, { prefix: 'OrderService' });
+      
+      const url = branchId 
+        ? `${this.baseUrl}/smart-create?branchId=${branchId}`
+        : `${this.baseUrl}/smart-create`;
+        
       const response = await httpClient.post<Order>(url, data);
+      
       logger.info('Smart order başarıyla oluşturuldu', { 
         orderId: response.data.orderId,
         customerName: data.customerName,
-        includeAllTableBaskets: data.includeAllTableBaskets
+        includeAllTableBaskets: data.includeAllTableBaskets,
+        branchId
       }, { prefix: 'OrderService' });
+      
       return response.data;
     } catch (error: any) {
       logger.error('Smart order oluşturma hatası', error, { prefix: 'OrderService' });
@@ -294,16 +352,22 @@ class OrderService {
     }
   }
 
-  async getTableBasketSummary(): Promise<TableBasketSummary[]> {
+  async getTableBasketSummary(branchId?: number): Promise<TableBasketSummary[]> {
     try {
-      logger.info('Table basket summary getirme isteği gönderiliyor', {}, { prefix: 'OrderService' });
-      const url = `${this.baseUrl}/table-basket-summary`;
+      const url = branchId 
+        ? `${this.baseUrl}/table-basket-summary?branchId=${branchId}` 
+        : `${this.baseUrl}/table-basket-summary`;
+        
+      logger.info('Table basket summary getirme isteği gönderiliyor', { branchId }, { prefix: 'OrderService' });
       const response = await httpClient.get<TableBasketSummary[]>(url);
       const summaries = Array.isArray(response.data) ? response.data : [];
+      
       logger.info('Table basket summary başarıyla alındı', { 
+        branchId,
         tablesCount: summaries.length,
         activeBaskets: summaries.filter(s => s.hasActiveBasket).length
       }, { prefix: 'OrderService' });
+      
       return summaries;
     } catch (error: any) {
       logger.error('Table basket summary getirme hatası', error, { prefix: 'OrderService' });
@@ -311,11 +375,15 @@ class OrderService {
     }
   }
 
-  private async refreshOrderTypesCache(): Promise<void> {
+  // Cache management methods with branch support
+  private async refreshOrderTypesCache(branchId?: number): Promise<void> {
     try {
-      this.orderTypesCache = await orderTypeService.getOrderTypes();
+      // Use the updated orderTypeService.getOrderTypes method that accepts branchId
+      this.orderTypesCache = await orderTypeService.getOrderTypes(branchId);
       this.cacheExpiry = Date.now() + this.CACHE_DURATION;
+      
       logger.info('Order types cache güncellendi', { 
+        branchId,
         orderTypesCount: this.orderTypesCache.length 
       }, { prefix: 'OrderService' });
     } catch (error) {
@@ -323,13 +391,15 @@ class OrderService {
     }
   }
 
-  private async getOrderTypesFromCache(): Promise<OrderType[]> {
+  private async getOrderTypesFromCache(branchId?: number): Promise<OrderType[]> {
+    // Always refresh cache when branchId changes or cache is expired
     if (!this.orderTypesCache.length || Date.now() > this.cacheExpiry) {
-      await this.refreshOrderTypesCache();
+      await this.refreshOrderTypesCache(branchId);
     }
     return this.orderTypesCache;
   }
 
+  // Status handling methods
   getOrderStatusText(status: OrderStatusEnums | string, lang: string = 'en'): string {
     const langCode = lang.split('-')[0].toLowerCase();
     const translations = orderStatusTranslations[langCode] || orderStatusTranslations['en'];
@@ -361,9 +431,10 @@ class OrderService {
     }
   }
 
-  async getOrderTypeText(orderTypeId: number): Promise<string> {
+  // Order type methods with branch support
+  async getOrderTypeText(orderTypeId: number, branchId?: number): Promise<string> {
     try {
-      const orderTypes = await this.getOrderTypesFromCache();
+      const orderTypes = await this.getOrderTypesFromCache(branchId);
       const orderType = orderTypes.find(ot => ot.id === orderTypeId);
       return orderType?.name || 'Bilinmeyen Sipariş Türü';
     } catch (error) {
@@ -372,9 +443,9 @@ class OrderService {
     }
   }
 
-  async getOrderType(orderTypeId: number): Promise<OrderType | undefined> {
+  async getOrderType(orderTypeId: number, branchId?: number): Promise<OrderType | undefined> {
     try {
-      const orderTypes = await this.getOrderTypesFromCache();
+      const orderTypes = await this.getOrderTypesFromCache(branchId);
       return orderTypes.find(ot => ot.id === orderTypeId);
     } catch (error) {
       logger.error('Order type getirme hatası', error, { prefix: 'OrderService' });
@@ -382,9 +453,9 @@ class OrderService {
     }
   }
 
-  async getActiveOrderTypes(): Promise<OrderType[]> {
+  async getActiveOrderTypes(branchId?: number): Promise<OrderType[]> {
     try {
-      const orderTypes = await this.getOrderTypesFromCache();
+      const orderTypes = await this.getOrderTypesFromCache(branchId);
       return orderTypes.filter(ot => ot.isActive);
     } catch (error) {
       logger.error('Active order types getirme hatası', error, { prefix: 'OrderService' });
@@ -392,22 +463,22 @@ class OrderService {
     }
   }
 
-  async getAllOrderTypes(): Promise<OrderType[]> {
+  async getAllOrderTypes(branchId?: number): Promise<OrderType[]> {
     try {
-      return await this.getOrderTypesFromCache();
+      return await this.getOrderTypesFromCache(branchId);
     } catch (error) {
       logger.error('All order types getirme hatası', error, { prefix: 'OrderService' });
       return [];
     }
   }
 
-  async calculateOrderTotal(orderTypeId: number, baseAmount: number): Promise<{
+  async calculateOrderTotal(orderTypeId: number, baseAmount: number, branchId?: number): Promise<{
     baseAmount: number;
     serviceCharge: number;
     totalAmount: number;
   }> {
     try {
-      const orderType = await this.getOrderType(orderTypeId);
+      const orderType = await this.getOrderType(orderTypeId, branchId);
       if (!orderType) {
         return {
           baseAmount,
@@ -432,9 +503,9 @@ class OrderService {
     }
   }
 
-  async getEstimatedTime(orderTypeId: number): Promise<number> {
+  async getEstimatedTime(orderTypeId: number, branchId?: number): Promise<number> {
     try {
-      const orderType = await this.getOrderType(orderTypeId);
+      const orderType = await this.getOrderType(orderTypeId, branchId);
       return orderType?.estimatedMinutes || 0;
     } catch (error) {
       logger.error('Estimated time getirme hatası', error, { prefix: 'OrderService' });
@@ -442,9 +513,9 @@ class OrderService {
     }
   }
 
-  async getOrderTypeByCode(code: string): Promise<OrderType | undefined> {
+  async getOrderTypeByCode(code: string, branchId?: number): Promise<OrderType | undefined> {
     try {
-      const orderTypes = await this.getOrderTypesFromCache();
+      const orderTypes = await this.getOrderTypesFromCache(branchId);
       return orderTypes.find(ot => ot.code.toLowerCase() === code.toLowerCase());
     } catch (error) {
       logger.error('Order type by code getirme hatası', error, { prefix: 'OrderService' });
@@ -452,9 +523,9 @@ class OrderService {
     }
   }
 
-  async getOrderTypesForDisplay(): Promise<OrderType[]> {
+  async getOrderTypesForDisplay(branchId?: number): Promise<OrderType[]> {
     try {
-      const orderTypes = await this.getActiveOrderTypes();
+      const orderTypes = await this.getActiveOrderTypes(branchId);
       return orderTypes.sort((a, b) => a.displayOrder - b.displayOrder);
     } catch (error) {
       logger.error('Order types for display getirme hatası', error, { prefix: 'OrderService' });
@@ -462,6 +533,7 @@ class OrderService {
     }
   }
 
+  // Order validation methods
   canModifyOrder(status: OrderStatusEnums | string): boolean {
     if (typeof status === 'string') {
       const enumStatus = this.parseOrderStatus(status);
@@ -478,6 +550,7 @@ class OrderService {
     return status === OrderStatusEnums.Pending || status === OrderStatusEnums.Confirmed || status === OrderStatusEnums.Preparing;
   }
 
+  // Order item utility methods
   getItemQuantity(item: OrderItem): number {
     return item.count ?? item.quantity ?? 0;
   }
@@ -506,8 +579,9 @@ class OrderService {
     return flatList;
   }
 
-  async refreshOrderTypes(): Promise<void> {
-    await this.refreshOrderTypesCache();
+  // Cache management methods
+  async refreshOrderTypes(branchId?: number): Promise<void> {
+    await this.refreshOrderTypesCache(branchId);
   }
 
   clearOrderTypesCache(): void {
@@ -516,37 +590,37 @@ class OrderService {
     logger.info('Order types cache temizlendi', {}, { prefix: 'OrderService' });
   }
 
- private handleError(error: any, defaultMessage: string): never {
-  if (error?.response?.status === 400) {
-    const errorData = error?.response?.data;
-    if (errorData?.errors) {
-      const validationErrors = Object.values(errorData.errors).flat();
-      throw new Error(`Doğrulama hatası: ${validationErrors.join(', ')}`);
+  private handleError(error: any, defaultMessage: string): never {
+    if (error?.response?.status === 400) {
+      const errorData = error?.response?.data;
+      if (errorData?.errors) {
+        const validationErrors = Object.values(errorData.errors).flat();
+        throw new Error(`Doğrulama hatası: ${validationErrors.join(', ')}`);
+      } else {
+        throw new Error('Geçersiz istek. Lütfen verileri kontrol edin.');
+      }
+    } else if (error?.response?.status === 401) {
+      throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+    } else if (error?.response?.status === 403) {
+      throw new Error('Bu işlem için yetkiniz bulunmuyor.');
+    } else if (error?.response?.status === 404) {
+      throw new Error('Sipariş bulunamadı.');
+    } else if (error?.response?.status === 409) {
+      const originalMessage = error?.response?.data?.message || '';
+      if (originalMessage.toLowerCase().includes('unconfirmed price changes') || 
+          originalMessage.toLowerCase().includes('price changes')) {
+        throw error; // Re-throw the original error for price changes
+      }
+      // Add fallback for other 409 errors
+      throw new Error('Çakışma hatası: İşlem tamamlanamadı.');
+    } else if (error?.response?.status === 422) {
+      throw new Error('Sipariş durumu bu işleme uygun değil.');
+    } else if (error?.response?.status === 0 || !navigator.onLine) {
+      throw new Error('İnternet bağlantınızı kontrol edin.');
     } else {
-      throw new Error('Geçersiz istek. Lütfen verileri kontrol edin.');
+      throw new Error(`${defaultMessage}: ${error?.message || 'Bilinmeyen hata'}`);
     }
-  } else if (error?.response?.status === 401) {
-    throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
-  } else if (error?.response?.status === 403) {
-    throw new Error('Bu işlem için yetkiniz bulunmuyor.');
-  } else if (error?.response?.status === 404) {
-    throw new Error('Sipariş bulunamadı.');
-  } else if (error?.response?.status === 409) {
-    const originalMessage = error?.response?.data?.message || '';
-    if (originalMessage.toLowerCase().includes('unconfirmed price changes') || 
-        originalMessage.toLowerCase().includes('price changes')) {
-      throw error; // Re-throw the original error for price changes
-    }
-    // Add fallback for other 409 errors
-    throw new Error('Çakışma hatası: İşlem tamamlanamadı.');
-  } else if (error?.response?.status === 422) {
-    throw new Error('Sipariş durumu bu işleme uygun değil.');
-  } else if (error?.response?.status === 0 || !navigator.onLine) {
-    throw new Error('İnternet bağlantınızı kontrol edin.');
-  } else {
-    throw new Error(`${defaultMessage}: ${error?.message || 'Bilinmeyen hata'}`);
   }
-}
 }
 
 export const orderService = new OrderService();
