@@ -6,16 +6,15 @@ class OrderStatusUtils {
   static getValidStatusTransitions(currentStatus: OrderStatusEnums): OrderStatusEnums[] {
     switch (currentStatus) {
       case OrderStatusEnums.Pending:
-        return [OrderStatusEnums.Confirmed, OrderStatusEnums.Cancelled, OrderStatusEnums.Rejected];
+        return [OrderStatusEnums.Confirmed, OrderStatusEnums.Rejected];
       case OrderStatusEnums.Confirmed:
-        return [OrderStatusEnums.Preparing, OrderStatusEnums.Cancelled];
+        return [OrderStatusEnums.Preparing];
       case OrderStatusEnums.Preparing:
         return [OrderStatusEnums.Ready, OrderStatusEnums.Cancelled];
       case OrderStatusEnums.Ready:
         return [OrderStatusEnums.Completed, OrderStatusEnums.Cancelled];
       case OrderStatusEnums.Completed:
         return [OrderStatusEnums.Delivered];
-      case OrderStatusEnums.Cancelled:
       case OrderStatusEnums.Rejected:
       case OrderStatusEnums.Delivered:
         return [];
@@ -60,7 +59,6 @@ class OrderStatusUtils {
         return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-700';
       case OrderStatusEnums.Delivered:
         return 'bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900 dark:text-indigo-200 dark:border-indigo-700';
-      case OrderStatusEnums.Cancelled:
       case OrderStatusEnums.Rejected:
         return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900 dark:text-red-200 dark:border-red-700';
       default:

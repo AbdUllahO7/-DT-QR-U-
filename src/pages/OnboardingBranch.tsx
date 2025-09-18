@@ -8,13 +8,8 @@ import {
 } from 'lucide-react';
 import type { 
   CreateBranchWithDetailsDto, 
-  CreateAddressCoreDto, 
-  CreateContactCoreDto,
   CreateBranchWorkingHourCoreDto,
-  DayOfWeek,
   ApiError,
-  CreateBranchDto,
-  TimeSpan
 } from '../types/api';
 import { branchService } from '../services/branchService';
 import { mediaService } from '../services/mediaService';

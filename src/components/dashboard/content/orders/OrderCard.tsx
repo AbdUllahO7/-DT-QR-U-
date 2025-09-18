@@ -20,8 +20,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onViewDetails, onStatusCha
         return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800';
       case 'delivered':
         return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400 border-purple-200 dark:border-purple-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800';
+     
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400 border-gray-200 dark:border-gray-800';
     }
@@ -37,8 +36,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onViewDetails, onStatusCha
         return t('orders.status.ready');
       case 'delivered':
         return t('orders.status.delivered');
-      case 'cancelled':
-        return t('orders.status.cancelled');
+    
       default:
         return status;
     }
@@ -54,8 +52,7 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onViewDetails, onStatusCha
         return <CheckCircle className="h-3 w-3" />;
       case 'delivered':
         return <CheckCircle className="h-3 w-3" />;
-      case 'cancelled':
-        return <XCircle className="h-3 w-3" />;
+    
       default:
         return <Clock className="h-3 w-3" />;
     }

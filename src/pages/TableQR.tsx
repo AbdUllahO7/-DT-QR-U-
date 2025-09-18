@@ -99,7 +99,7 @@ const TableQR = () => {
           setError(sessionData.message || 'Oturum başlatılamadı.');
         }
       } catch (e) {
-        setError('Bir hata oluştu.');
+        setError(error);
       } finally {
         setLoading(false);
       }

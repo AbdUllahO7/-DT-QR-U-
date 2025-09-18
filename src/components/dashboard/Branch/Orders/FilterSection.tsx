@@ -100,7 +100,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium"
         >
           <Filter className="w-4 h-4 mr-2" />
-          {showAdvancedFilters ? 'Hide Advanced Filters' : 'Show Advanced Filters'}
+          {showAdvancedFilters ?   t('ordersManager.hideAdvancedFilter') :  t('ordersManager.showAdvancedFilter')}
           {showAdvancedFilters ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
         </button>
 
@@ -111,11 +111,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               className="flex items-center text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 font-medium"
             >
               <X className="w-4 h-4 mr-1" />
-              Clear Filters
+              {t('ordersManager.clearFilter')}
             </button>
           )}
           <span className="text-sm text-gray-500 dark:text-gray-400">
-            {filteredCount} of {totalCount} orders
+            {filteredCount} {t('ordersManager.of')} {totalCount} {t('ordersManager.orders')}
           </span>
         </div>
       </div>
@@ -129,7 +129,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Customer Name"
+                placeholder={t('ordersManager.customerName')}
                 value={filters.customerName}
                 onChange={(e) => onUpdateFilter('customerName', e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -141,7 +141,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               <Package className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Table Name"
+                placeholder={t('ordersManager.tableName')}
                 value={filters.tableName}
                 onChange={(e) => onUpdateFilter('tableName', e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -153,7 +153,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               <Truck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Order Type"
+                placeholder= {t('ordersManager.orderType')}
                 value={filters.orderType}
                 onChange={(e) => onUpdateFilter('orderType', e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -165,7 +165,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="number"
-                placeholder="Min Price"
+                placeholder={t('ordersManager.minPrice')}
                 value={filters.priceRange.min || ''}
                 onChange={(e) => onUpdateNestedFilter('priceRange', 'min', e.target.value ? parseFloat(e.target.value) : null)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -177,7 +177,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
               <CreditCard className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="number"
-                placeholder="Max Price"
+                placeholder={t('ordersManager.maxPrice')}
                 value={filters.priceRange.max || ''}
                 onChange={(e) => onUpdateNestedFilter('priceRange', 'max', e.target.value ? parseFloat(e.target.value) : null)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

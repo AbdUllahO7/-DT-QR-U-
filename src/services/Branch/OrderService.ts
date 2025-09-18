@@ -352,8 +352,6 @@ class OrderService {
         return OrderStatusEnums.Ready;
       case 'completed':
         return OrderStatusEnums.Completed;
-      case 'cancelled':
-        return OrderStatusEnums.Cancelled;
       case 'rejected':
         return OrderStatusEnums.Rejected;
       case 'delivered':
