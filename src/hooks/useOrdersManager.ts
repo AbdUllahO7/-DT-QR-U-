@@ -1,11 +1,19 @@
 import { useState } from 'react';
 import { OrdersManagerActions, OrdersManagerState, OrderStatusEnums } from '../types/Orders/type';
 import { orderService } from '../services/Branch/OrderService';
-import { BranchOrder, Order, PendingOrder, RejectOrderDto, UpdateOrderStatusDto } from '../types/BranchManagement/type';
-
+import { branchService } from '../services/branchService';
+import { BranchOrder, Order, PendingOrder, RejectOrderDto, UpdateOrderStatusDto, TableBasketSummary } from '../types/BranchManagement/type';
+import { BranchDropdownItem } from '../types/BranchManagement/type';
+import { OrderType } from '../services/Branch/BranchOrderTypeService';
 
 export const useOrdersManager = () => {
   const [state, setState] = useState<OrdersManagerState>({
+    // Branch related states
+    branches: [],
+    selectedBranch: null,
+    isBranchDropdownOpen: false,
+    
+    // Existing states
     pendingOrders: [],
     branchOrders: [],
     selectedOrder: null,
@@ -49,40 +57,159 @@ export const useOrdersManager = () => {
     filteredOrders: []
   });
 
-  // Fetch pending orders
-  const fetchPendingOrders = async () => {
+  // Helper to get current branch ID
+  const getCurrentBranchId = () => state.selectedBranch?.branchId;
+
+  // Fetch branches
+  const fetchBranches = async () => {
+    try {
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      const branchList = await branchService.getBranchesDropdown();
+      setState(prev => ({ 
+        ...prev, 
+        branches: branchList,
+        selectedBranch: branchList.length > 0 && !prev.selectedBranch ? branchList[0] : prev.selectedBranch,
+        loading: false 
+      }));
+    } catch (error: any) {
+      setState(prev => ({ ...prev, error: error.message, loading: false }));
+    }
+  };
+
+  // Handle branch selection
+  const handleBranchSelect = (branch: BranchDropdownItem) => {
+    setState(prev => ({ 
+      ...prev, 
+      selectedBranch: branch,
+      isBranchDropdownOpen: false,
+      error: null,
+      // Reset pagination when switching branches
+      pagination: { ...prev.pagination, currentPage: 1 }
+    }));
+    
+    // Clear order types cache when switching branches to force refresh
+    orderService.clearOrderTypesCache();
+    
+    // Refetch orders for the new branch
+    if (state.viewMode === 'pending') {
+      fetchPendingOrders(branch.branchId);
+    } else {
+      fetchBranchOrders(branch.branchId);
+    }
+  };
+
+  // Fetch pending orders with branch filter
+  const fetchPendingOrders = async (branchId?: number) => {
+    const targetBranchId = branchId || getCurrentBranchId();
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const orders = await orderService.getPendingOrders();
+      const orders = await orderService.getPendingOrders(targetBranchId);
       setState(prev => ({ ...prev, pendingOrders: orders, loading: false }));
     } catch (error: any) {
       setState(prev => ({ ...prev, error: error.message, loading: false }));
     }
   };
 
-  // Fetch branch orders
-  const fetchBranchOrders = async () => {
+  // Fetch branch orders with branch filter
+  const fetchBranchOrders = async (branchId?: number) => {
+    const targetBranchId = branchId || getCurrentBranchId();
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const orders = await orderService.getBranchOrders();
+      const orders = await orderService.getBranchOrders(targetBranchId);
       setState(prev => ({ ...prev, branchOrders: orders, loading: false }));
     } catch (error: any) {
       setState(prev => ({ ...prev, error: error.message, loading: false }));
     }
   };
 
-  // Handle confirm order
+  // Fetch table basket summary with branch filter
+  const fetchTableBasketSummary = async (): Promise<TableBasketSummary[]> => {
+    const branchId = getCurrentBranchId();
+    try {
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      const summaries = await orderService.getTableBasketSummary(branchId);
+      setState(prev => ({ ...prev, loading: false }));
+      return summaries;
+    } catch (error: any) {
+      setState(prev => ({ ...prev, error: error.message, loading: false }));
+      return [];
+    }
+  };
+
+  // Get order types for current branch
+  const getOrderTypesForCurrentBranch = async (): Promise<OrderType[]> => {
+    const branchId = getCurrentBranchId();
+    try {
+      return await orderService.getOrderTypesForDisplay(branchId);
+    } catch (error: any) {
+      console.error('Error fetching order types:', error);
+      return [];
+    }
+  };
+
+  // Get order type text for current branch
+  const getOrderTypeText = async (orderTypeId: number): Promise<string> => {
+    const branchId = getCurrentBranchId();
+    return await orderService.getOrderTypeText(orderTypeId, branchId);
+  };
+
+  // Calculate order total for current branch
+  const calculateOrderTotal = async (orderTypeId: number, baseAmount: number) => {
+    const branchId = getCurrentBranchId();
+    return await orderService.calculateOrderTotal(orderTypeId, baseAmount, branchId);
+  };
+
+  // Get estimated time for current branch
+  const getEstimatedTime = async (orderTypeId: number): Promise<number> => {
+    const branchId = getCurrentBranchId();
+    return await orderService.getEstimatedTime(orderTypeId, branchId);
+  };
+
+  // Get order type by code for current branch
+  const getOrderTypeByCode = async (code: string) => {
+    const branchId = getCurrentBranchId();
+    return await orderService.getOrderTypeByCode(code, branchId);
+  };
+
+  // Get active order types for current branch
+  const getActiveOrderTypes = async (): Promise<OrderType[]> => {
+    const branchId = getCurrentBranchId();
+    try {
+      return await orderService.getActiveOrderTypes(branchId);
+    } catch (error: any) {
+      console.error('Error fetching active order types:', error);
+      return [];
+    }
+  };
+
+  // Get all order types for current branch
+  const getAllOrderTypes = async (): Promise<OrderType[]> => {
+    const branchId = getCurrentBranchId();
+    try {
+      return await orderService.getAllOrderTypes(branchId);
+    } catch (error: any) {
+      console.error('Error fetching all order types:', error);
+      return [];
+    }
+  };
+
+  // Handle confirm order - FIXED: Now passes branchId
   const handleConfirmOrder = async () => {
     if (!state.activeOrderId || !state.activeRowVersion) return;
+    
+    const branchId = getCurrentBranchId();
     setState(prev => ({ ...prev, loading: true, error: null, showConfirmModal: false }));
+    
     try {
       const data = { rowVersion: state.activeRowVersion };
-      const updatedOrder = await orderService.confirmOrder(state.activeOrderId, data);
+      const updatedOrder = await orderService.confirmOrder(state.activeOrderId, data, branchId);
+      
       if (state.viewMode === 'pending') {
         fetchPendingOrders();
       } else {
         fetchBranchOrders();
       }
+      
       setState(prev => ({ 
         ...prev, 
         selectedOrder: updatedOrder, 
@@ -101,21 +228,26 @@ export const useOrdersManager = () => {
     }
   };
 
-  // Handle reject order
+  // Handle reject order - FIXED: Now passes branchId
   const handleRejectOrder = async () => {
     if (!state.activeOrderId || !state.activeRowVersion || !state.rejectReason) return;
+    
+    const branchId = getCurrentBranchId();
     setState(prev => ({ ...prev, loading: true, error: null, showRejectModal: false }));
+    
     try {
       const data: RejectOrderDto = { 
         rejectionReason: state.rejectReason, 
         rowVersion: state.activeRowVersion 
       };
-      const updatedOrder = await orderService.rejectOrder(state.activeOrderId, data);
+      const updatedOrder = await orderService.rejectOrder(state.activeOrderId, data, branchId);
+      
       if (state.viewMode === 'pending') {
         fetchPendingOrders();
       } else {
         fetchBranchOrders();
       }
+      
       setState(prev => ({ 
         ...prev, 
         selectedOrder: updatedOrder, 
@@ -136,21 +268,26 @@ export const useOrdersManager = () => {
     }
   };
 
-  // Handle update status
+  // Handle update status - FIXED: Now passes branchId
   const handleUpdateStatus = async () => {
     if (!state.activeOrderId || !state.activeRowVersion || state.newStatus === null) return;
+    
+    const branchId = getCurrentBranchId();
     setState(prev => ({ ...prev, loading: true, error: null, showStatusModal: false }));
+    
     try {
       const data: UpdateOrderStatusDto = { 
         newStatus: state.newStatus, 
         rowVersion: state.activeRowVersion 
       };
-      const updatedOrder = await orderService.updateOrderStatus(state.activeOrderId, data);
+      const updatedOrder = await orderService.updateOrderStatus(state.activeOrderId, data, branchId);
+      
       if (state.viewMode === 'pending') {
         fetchPendingOrders();
       } else {
         fetchBranchOrders();
       }
+      
       setState(prev => ({ 
         ...prev, 
         selectedOrder: updatedOrder, 
@@ -174,6 +311,88 @@ export const useOrdersManager = () => {
         activeRowVersion: null, 
         newStatus: null 
       }));
+    }
+  };
+
+  // NEW: Get order details with branch support
+  const getOrderDetails = async (orderId: string): Promise<Order | null> => {
+    const branchId = getCurrentBranchId();
+    try {
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      const order = await orderService.getOrder(orderId, branchId);
+      setState(prev => ({ ...prev, loading: false }));
+      return order;
+    } catch (error: any) {
+      setState(prev => ({ ...prev, error: error.message, loading: false }));
+      return null;
+    }
+  };
+
+  // NEW: Get table orders with branch support
+  const getTableOrders = async (tableId: number): Promise<Order[]> => {
+    const branchId = getCurrentBranchId();
+    try {
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      const orders = await orderService.getTableOrders(tableId, branchId);
+      setState(prev => ({ ...prev, loading: false }));
+      return orders;
+    } catch (error: any) {
+      setState(prev => ({ ...prev, error: error.message, loading: false }));
+      return [];
+    }
+  };
+
+  // NEW: Create session order with branch support
+  const createSessionOrder = async (data: any): Promise<Order | null> => {
+    const branchId = getCurrentBranchId();
+    try {
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      const order = await orderService.createSessionOrder(data, branchId);
+      setState(prev => ({ ...prev, loading: false }));
+      
+      // Refresh orders after creating
+      if (state.viewMode === 'pending') {
+        fetchPendingOrders();
+      } else {
+        fetchBranchOrders();
+      }
+      
+      return order;
+    } catch (error: any) {
+      setState(prev => ({ ...prev, error: error.message, loading: false }));
+      return null;
+    }
+  };
+
+  // NEW: Smart create order with branch support
+  const smartCreateOrder = async (data: any): Promise<Order | null> => {
+    const branchId = getCurrentBranchId();
+    try {
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      const order = await orderService.smartCreateOrder(data, branchId);
+      setState(prev => ({ ...prev, loading: false }));
+      
+      // Refresh orders after creating
+      if (state.viewMode === 'pending') {
+        fetchPendingOrders();
+      } else {
+        fetchBranchOrders();
+      }
+      
+      return order;
+    } catch (error: any) {
+      setState(prev => ({ ...prev, error: error.message, loading: false }));
+      return null;
+    }
+  };
+
+  // NEW: Refresh order types for current branch
+  const refreshOrderTypes = async (): Promise<void> => {
+    const branchId = getCurrentBranchId();
+    try {
+      await orderService.refreshOrderTypes(branchId);
+    } catch (error: any) {
+      console.error('Error refreshing order types:', error);
     }
   };
 
@@ -264,11 +483,26 @@ export const useOrdersManager = () => {
   };
 
   const actions: OrdersManagerActions = {
+    fetchBranches,
+    handleBranchSelect,
     fetchPendingOrders,
     fetchBranchOrders,
+    fetchTableBasketSummary,
+    getOrderTypesForCurrentBranch,
+    getOrderTypeText,
+    calculateOrderTotal,
+    getEstimatedTime,
+    getOrderTypeByCode,
+    getActiveOrderTypes,
+    getAllOrderTypes,
     handleConfirmOrder,
     handleRejectOrder,
     handleUpdateStatus,
+    getOrderDetails,
+    getTableOrders,
+    createSessionOrder,
+    smartCreateOrder,
+    refreshOrderTypes,
     switchViewMode,
     openConfirmModal,
     openRejectModal,

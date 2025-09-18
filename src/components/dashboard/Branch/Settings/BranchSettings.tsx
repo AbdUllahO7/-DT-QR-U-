@@ -39,7 +39,7 @@ import { UserSettingsState } from '../../../../types/BranchManagement/type';
 
 
 
-const Settings: React.FC = () => {
+const BranchSettings: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
   const { t, language, setLanguage } = useLanguage();
   const isRTL = language === 'ar';
@@ -644,4 +644,4 @@ const Settings: React.FC = () => {
   );
 };
 
-export default Settings;
+export default BranchSettings;

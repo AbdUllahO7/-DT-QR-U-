@@ -7,7 +7,7 @@ import Sidebar from '../components/dashboard/layout/Sidebar';
 import BranchManagement from '../components/dashboard/content/branch-management/BranchManagement';
 import UserManagement from '../components/dashboard/content/UserManagement';
 import Profile from '../components/dashboard/content/Profile';
-import Settings from '../components/dashboard/content/Settings/Settings';
+import Settings from '../components/dashboard/content/Settings/ResturantSettings';
 import Subscription from '../components/dashboard/content/Subscription';
 import ProductsContent from '../components/dashboard/Porducts/ProductsContent';
 import RestaurantManagement from '../components/dashboard/content/RestaurantManagement';
@@ -24,10 +24,13 @@ import BranchTableManagement from '../components/dashboard/Branch/Table/BranchTa
 import BranchManagementBranch from '../components/dashboard/Branch/BranchManagement/BranchManagement';
 import OrderTypeComponeent from '../components/dashboard/Branch/OrderType/Ordertype';
 import Overview from '../components/dashboard/content/overview/Overview';
-import Orders from '../components/dashboard/content/orders/Orders';
 import TableManagement from '../components/dashboard/content/table-management/TableManagement';
 import OrdersManager from '../components/dashboard/Branch/Orders/OrderManagement';
 import { RestaurantBranchDropdownItem } from '../types/BranchManagement/type';
+import OrderTypeResturantComponent from '../components/dashboard/content/OrderType/OrderTypeRestaurantComponent';
+import OrdersManagerResturant from '../components/dashboard/content/ResturantOrders/OrdersManagerRestaurant';
+import BranchSettings from '../components/dashboard/Branch/Settings/BranchSettings';
+import ResturantSettings from '../components/dashboard/content/Settings/ResturantSettings';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();
@@ -190,7 +193,7 @@ const Dashboard: React.FC = () => {
         
          
               {activeTab === 'overview' && <Overview />}
-              {activeTab === 'orders' && <Orders />}
+              {activeTab === 'ResturantOrders' && <OrdersManagerResturant />}
               {activeTab === 'products' && <ProductsContent  />}
               {activeTab === 'ingredients' && <IngredientsContent />}
               {activeTab === 'branches' && <BranchManagement />}
@@ -198,15 +201,17 @@ const Dashboard: React.FC = () => {
               {activeTab === 'restaurant-management' && <RestaurantManagement />}
               {activeTab === 'users' && <UserManagement />}
               {activeTab === 'profile' && <Profile />}
-              {activeTab === 'settings' && <Settings />}
               {activeTab === 'subscription' && <Subscription />}
+              {activeTab === 'orderTypeResturant' && <OrderTypeResturantComponent />}
+              {activeTab === 'ResturantSettings' && <ResturantSettings />}
 
             {/* branch */}
-            {activeTab === 'branchProducts' && <BranchProducts />}
+              {activeTab === 'branchProducts' && <BranchProducts />}
               {activeTab === 'TableManagement' && <BranchTableManagement />}
               {activeTab === 'BranchManagement' && <BranchManagementBranch />}
               {activeTab === 'orderType' && <OrderTypeComponeent />}
               {activeTab === 'Branchorders' && <OrdersManager/>}
+              {activeTab === 'BranchSettings' && <BranchSettings />}
 
       
         </main>

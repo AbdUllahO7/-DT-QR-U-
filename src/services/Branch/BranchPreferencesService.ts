@@ -62,14 +62,19 @@ export interface UpdatePaymentSettingsDto {
 class BranchPreferencesService {
   private baseUrl = '/api/BranchPreferences';
 
-  async getBranchPreferences(): Promise<BranchPreferences> {
+  // UPDATED: Now accepts branchId parameter
+  async getBranchPreferences(branchId?: number): Promise<BranchPreferences> {
     try {
-      logger.info('Branch preferences bilgileri getirme isteği gönderiliyor', null, { prefix: 'BranchPreferencesService' });
+      logger.info('Branch preferences bilgileri getirme isteği gönderiliyor', { branchId }, { prefix: 'BranchPreferencesService' });
       
-      const response = await httpClient.get<BranchPreferences>(this.baseUrl);
+      const url = branchId 
+        ? `${this.baseUrl}?branchId=${branchId}`
+        : this.baseUrl;
+      
+      const response = await httpClient.get<BranchPreferences>(url);
       
       logger.info('Branch Preferences API Response:', response.data, { prefix: 'BranchPreferencesService' });
-      logger.info('Branch preferences bilgileri başarıyla alındı', null, { prefix: 'BranchPreferencesService' });
+      logger.info('Branch preferences bilgileri başarıyla alındı', { branchId }, { prefix: 'BranchPreferencesService' });
       
       return response.data;
     } catch (error: any) {
@@ -92,9 +97,10 @@ class BranchPreferencesService {
     }
   }
 
-  async updateBranchPreferences(data: UpdateBranchPreferencesDto): Promise<BranchPreferences> {
+  // UPDATED: Now accepts branchId parameter
+  async updateBranchPreferences(data: UpdateBranchPreferencesDto, branchId?: number): Promise<BranchPreferences> {
     try {
-      logger.info('Branch preferences güncelleme isteği gönderiliyor', { data }, { prefix: 'BranchPreferencesService' });
+      logger.info('Branch preferences güncelleme isteği gönderiliyor', { data, branchId }, { prefix: 'BranchPreferencesService' });
       
       // Clean and trim string values
       const updateData: UpdateBranchPreferencesDto = {
@@ -118,10 +124,14 @@ class BranchPreferencesService {
 
       logger.info('Cleaned update data:', updateData, { prefix: 'BranchPreferencesService' });
 
-      const response = await httpClient.put<BranchPreferences>(this.baseUrl, updateData);
+      const url = branchId 
+        ? `${this.baseUrl}?branchId=${branchId}`
+        : this.baseUrl;
+
+      const response = await httpClient.put<BranchPreferences>(url, updateData);
       
       logger.info('Branch Preferences Update API Response alındı', response.data, { prefix: 'BranchPreferencesService' });
-      logger.info('Branch preferences başarıyla güncellendi', null, { prefix: 'BranchPreferencesService' });
+      logger.info('Branch preferences başarıyla güncellendi', { branchId }, { prefix: 'BranchPreferencesService' });
       
       return response.data;
     } catch (error: any) {
@@ -151,9 +161,10 @@ class BranchPreferencesService {
     }
   }
 
-  async updateSessionSettings(data: UpdateSessionSettingsDto): Promise<BranchPreferences> {
+  // UPDATED: Now accepts branchId parameter
+  async updateSessionSettings(data: UpdateSessionSettingsDto, branchId?: number): Promise<BranchPreferences> {
     try {
-      logger.info('Session settings güncelleme isteği gönderiliyor', { data }, { prefix: 'BranchPreferencesService' });
+      logger.info('Session settings güncelleme isteği gönderiliyor', { data, branchId }, { prefix: 'BranchPreferencesService' });
       
       const updateData: UpdateSessionSettingsDto = {
         cleanupMode: data.cleanupMode,
@@ -163,10 +174,14 @@ class BranchPreferencesService {
 
       logger.info('Session settings update data:', updateData, { prefix: 'BranchPreferencesService' });
 
-      const response = await httpClient.put<BranchPreferences>(`${this.baseUrl}/session-settings`, updateData);
+      const url = branchId 
+        ? `${this.baseUrl}/session-settings?branchId=${branchId}`
+        : `${this.baseUrl}/session-settings`;
+
+      const response = await httpClient.put<BranchPreferences>(url, updateData);
       
       logger.info('Session Settings Update API Response alındı', response.data, { prefix: 'BranchPreferencesService' });
-      logger.info('Session settings başarıyla güncellendi', null, { prefix: 'BranchPreferencesService' });
+      logger.info('Session settings başarıyla güncellendi', { branchId }, { prefix: 'BranchPreferencesService' });
       
       return response.data;
     } catch (error: any) {
@@ -194,9 +209,10 @@ class BranchPreferencesService {
     }
   }
 
-  async updatePaymentSettings(data: UpdatePaymentSettingsDto): Promise<BranchPreferences> {
+  // UPDATED: Now accepts branchId parameter
+  async updatePaymentSettings(data: UpdatePaymentSettingsDto, branchId?: number): Promise<BranchPreferences> {
     try {
-      logger.info('Payment settings güncelleme isteği gönderiliyor', { data }, { prefix: 'BranchPreferencesService' });
+      logger.info('Payment settings güncelleme isteği gönderiliyor', { data, branchId }, { prefix: 'BranchPreferencesService' });
       
       const updateData: UpdatePaymentSettingsDto = {
         acceptCash: data.acceptCash,
@@ -206,10 +222,14 @@ class BranchPreferencesService {
 
       logger.info('Payment settings update data:', updateData, { prefix: 'BranchPreferencesService' });
 
-      const response = await httpClient.put<BranchPreferences>(`${this.baseUrl}/payment-settings`, updateData);
+      const url = branchId 
+        ? `${this.baseUrl}/payment-settings?branchId=${branchId}`
+        : `${this.baseUrl}/payment-settings`;
+
+      const response = await httpClient.put<BranchPreferences>(url, updateData);
       
       logger.info('Payment Settings Update API Response alındı', response.data, { prefix: 'BranchPreferencesService' });
-      logger.info('Payment settings başarıyla güncellendi', null, { prefix: 'BranchPreferencesService' });
+      logger.info('Payment settings başarıyla güncellendi', { branchId }, { prefix: 'BranchPreferencesService' });
       
       return response.data;
     } catch (error: any) {

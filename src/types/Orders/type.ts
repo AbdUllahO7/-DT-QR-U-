@@ -1,4 +1,5 @@
-import { BranchOrder, Order, PendingOrder } from "../BranchManagement/type";
+import { OrderType } from "../../services/Branch/BranchOrderTypeService";
+import { BranchDropdownItem, BranchOrder, Order, PendingOrder, TableBasketSummary } from "../BranchManagement/type";
 
 export enum OrderStatusEnums {
   Pending = 0,
@@ -56,7 +57,9 @@ export interface OrdersManagerState {
   expandedRows: Set<string>;
   sortField: string;
   sortDirection: 'asc' | 'desc';
-  
+   branches: BranchDropdownItem[];
+  selectedBranch: BranchDropdownItem | null;
+  isBranchDropdownOpen: boolean;
   // Enhanced filtering and pagination
   filters: FilterOptions;
   pagination: PaginationState;
@@ -65,11 +68,32 @@ export interface OrdersManagerState {
 }
 
 export interface OrdersManagerActions {
-  fetchPendingOrders: () => Promise<void>;
-  fetchBranchOrders: () => Promise<void>;
+  fetchBranches: () => Promise<void>;
+  handleBranchSelect: (branch: BranchDropdownItem) => void;
+  fetchPendingOrders: (branchId?: number) => Promise<void>;
+  fetchBranchOrders: (branchId?: number) => Promise<void>;
+  fetchTableBasketSummary: () => Promise<TableBasketSummary[]>;
+  getOrderTypesForCurrentBranch: () => Promise<OrderType[]>;
+  getOrderTypeText: (orderTypeId: number) => Promise<string>;
+  calculateOrderTotal: (orderTypeId: number, baseAmount: number) => Promise<{
+    baseAmount: number;
+    serviceCharge: number;
+    totalAmount: number;
+  }>;
+  getEstimatedTime: (orderTypeId: number) => Promise<number>;
+  getOrderTypeByCode: (code: string) => Promise<OrderType | undefined>;
+  getActiveOrderTypes: () => Promise<OrderType[]>;
+  getAllOrderTypes: () => Promise<OrderType[]>;
   handleConfirmOrder: () => Promise<void>;
   handleRejectOrder: () => Promise<void>;
   handleUpdateStatus: () => Promise<void>;
+  // NEW: Added methods with branch support
+  getOrderDetails: (orderId: string) => Promise<Order | null>;
+  getTableOrders: (tableId: number) => Promise<Order[]>;
+  createSessionOrder: (data: any) => Promise<Order | null>;
+  smartCreateOrder: (data: any) => Promise<Order | null>;
+  refreshOrderTypes: () => Promise<void>;
+  // Existing methods
   switchViewMode: (mode: 'pending' | 'branch') => void;
   openConfirmModal: (orderId: string, rowVersion: string) => void;
   openRejectModal: (orderId: string, rowVersion: string) => void;

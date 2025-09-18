@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   Settings, 
   Save, 
@@ -10,82 +10,62 @@ import {
   Clock,
   AlertCircle,
   CheckCircle,
-  Loader2,
-  Building2,
+  Loader2
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { BranchPreferences, branchPreferencesService, UpdateBranchPreferencesDto } from '../../../../services/Branch/BranchPreferencesService';
-import { BranchDropdownItem } from '../../../../types/BranchManagement/type';
 
 interface BranchPreferencesComponentProps {
   className?: string;
-  selectedBranch: BranchDropdownItem | null;
-  preferences: BranchPreferences | null;
-  setPreferences: (prefs: BranchPreferences | null) => void;
-  formData: UpdateBranchPreferencesDto | null;
-  setFormData: (data: UpdateBranchPreferencesDto | null) => void;
-  isSaving: boolean;
-  setIsSaving: (isSaving: boolean) => void;
-  error: string | null;
-  setError: (error: string | null) => void;
-  success: string | null;
-  setSuccess: (success: string | null) => void;
-  hasChanges: boolean;
-  setHasChanges: (hasChanges: boolean) => void;
 }
 
-const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
-  className = '',
-  selectedBranch,
-  preferences,
-  setPreferences,
-  formData,
-  setFormData,
-  isSaving,
-  setIsSaving,
-  error,
-  setError,
-  success,
-  setSuccess,
-  hasChanges,
-  setHasChanges,
-}) => {
+const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({ className = '' }) => {
   const { t } = useLanguage();
+  
+  // State management
+  const [preferences, setPreferences] = useState<BranchPreferences | null>(null);
+  const [formData, setFormData] = useState<UpdateBranchPreferencesDto | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+  const [hasChanges, setHasChanges] = useState(false);
 
   // Currency options
   const currencies = [
     { value: 'TRY', label: t('branchPreferences.currencies.TRY') },
     { value: 'USD', label: t('branchPreferences.currencies.USD') },
-    { value: 'EUR', label: t('branchPreferences.currencies.EUR') },
+    { value: 'EUR', label: t('branchPreferences.currencies.EUR') }
   ];
 
   // Language options
   const languages = [
     { value: 'tr', label: t('branchPreferences.languages.tr') },
     { value: 'en', label: t('branchPreferences.languages.en') },
-    { value: 'ar', label: t('branchPreferences.languages.ar') },
+    { value: 'ar', label: t('branchPreferences.languages.ar') }
   ];
 
   // Timezone options
   const timezones = [
     { value: 'Europe/Istanbul', label: t('branchPreferences.timezones.Europe/Istanbul') },
     { value: 'Europe/London', label: t('branchPreferences.timezones.Europe/London') },
-    { value: 'America/New_York', label: t('branchPreferences.timezones.America/New_York') },
+    { value: 'America/New_York', label: t('branchPreferences.timezones.America/New_York') }
   ];
-
   const cleanupModes = [
     { value: 0, label: t('branchPreferences.cleanupModes.afterTimeout') },
     { value: 1, label: t('branchPreferences.cleanupModes.afterClosing') },
-    { value: 2, label: t('branchPreferences.cleanupModes.disabled') },
+    { value: 2, label: t('branchPreferences.cleanupModes.disabled') }
   ];
-
-  // Load preferences for current branch
-  const loadPreferences = useCallback(async (branchId?: number) => {
-    if (!branchId) return;
+  // Load preferences on component mount
+  const loadPreferences = useCallback(async () => {
     try {
+      setIsLoading(true);
       setError(null);
-      const data = await branchPreferencesService.getBranchPreferences(branchId);
+      
+      const data = await branchPreferencesService.getBranchPreferences();
       setPreferences(data);
+      
+      // Initialize form data
       const initialFormData: UpdateBranchPreferencesDto = {
         autoConfirmOrders: data.autoConfirmOrders,
         useWhatsappForOrders: data.useWhatsappForOrders,
@@ -102,29 +82,31 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
         sessionTimeoutMinutes: data.sessionTimeoutMinutes,
         cleanupMode: data.cleanupMode,
         cleanupDelayAfterCloseMinutes: data.cleanupDelayAfterCloseMinutes,
-        rowVersion: data.rowVersion,
+        rowVersion: data.rowVersion
       };
+      
       setFormData(initialFormData);
       setHasChanges(false);
     } catch (err: any) {
       setError(err.message || t('branchPreferences.errors.loadFailed'));
+    } finally {
+      setIsLoading(false);
     }
-  }, [setPreferences, setFormData, setError, setHasChanges, t]);
+  }, [t]);
 
-  // Load preferences when branch changes
   useEffect(() => {
-    if (selectedBranch) {
-      loadPreferences(selectedBranch.branchId);
-    } else {
-      setPreferences(null);
-      setFormData(null);
-    }
-  }, [selectedBranch, loadPreferences]);
+    loadPreferences();
+  }, [loadPreferences]);
 
   // Handle form field changes
   const handleFieldChange = (field: keyof UpdateBranchPreferencesDto, value: any) => {
     if (!formData) return;
-    const updatedFormData = { ...formData, [field]: value };
+    
+    const updatedFormData = {
+      ...formData,
+      [field]: value
+    };
+    
     setFormData(updatedFormData);
     setHasChanges(true);
     setError(null);
@@ -133,15 +115,19 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
 
   // Save preferences
   const handleSave = async () => {
-    if (!formData || !hasChanges || !selectedBranch) return;
+    if (!formData || !hasChanges) return;
+    
     try {
       setIsSaving(true);
       setError(null);
-      const updatedPreferences = await branchPreferencesService.updateBranchPreferences(formData, selectedBranch.branchId);
+      
+      const updatedPreferences = await branchPreferencesService.updateBranchPreferences(formData);
       setPreferences(updatedPreferences);
       setFormData({ ...formData, rowVersion: updatedPreferences.rowVersion });
       setHasChanges(false);
       setSuccess(t('branchPreferences.saveSuccess'));
+      
+      // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
       setError(err.message || t('branchPreferences.errors.saveFailed'));
@@ -152,32 +138,30 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
 
   // Refresh preferences
   const handleRefresh = () => {
-    if (selectedBranch) {
-      loadPreferences(selectedBranch.branchId);
-      setSuccess(null);
-    }
+    loadPreferences();
+    setSuccess(null);
   };
 
-  if (!selectedBranch) {
-    return (
-      <div className="p-6 bg-red-50 dark:bg-red-900/20 rounded-lg">
-        <div className="flex items-center space-x-3 rtl:space-x-reverse">
-          <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
-          <span className="text-red-800 dark:text-red-300">
-            {t('branchPreferences.errors.noBranchSelected')}
-          </span>
-        </div>
-      </div>
-    );
-  }
-
-  if (!formData || !preferences) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <div className="flex items-center space-x-3 rtl:space-x-reverse">
           <Loader2 className="w-6 h-6 animate-spin text-blue-600 dark:text-blue-400" />
           <span className="text-gray-600 dark:text-gray-300">
             {t('branchPreferences.loading')}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!formData) {
+    return (
+      <div className="p-6 bg-red-50 dark:bg-red-900/20 rounded-lg">
+        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+          <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
+          <span className="text-red-800 dark:text-red-300">
+            {error || t('branchPreferences.errors.loadFailed')}
           </span>
         </div>
       </div>
@@ -200,15 +184,17 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               </p>
             </div>
           </div>
+          
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             <button
               onClick={handleRefresh}
-              disabled={isSaving}
+              disabled={isLoading}
               className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
             >
-              <RefreshCw className={`w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0 ${isSaving ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0 ${isLoading ? 'animate-spin' : ''}`} />
               {t('branchPreferences.refresh')}
             </button>
+            
             <button
               onClick={handleSave}
               disabled={!hasChanges || isSaving}
@@ -221,14 +207,6 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               )}
               {isSaving ? t('branchPreferences.saving') : t('branchPreferences.saveChanges')}
             </button>
-          </div>
-        </div>
-        <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-          <div className="flex items-center space-x-2 rtl:space-x-reverse">
-            <Building2 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-            <span className="text-sm font-medium text-blue-800 dark:text-blue-300">
-               {selectedBranch.branchName}
-            </span>
           </div>
         </div>
       </div>
@@ -267,6 +245,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               </p>
             </div>
           </div>
+          
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
               <div>
@@ -279,7 +258,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
-                  title='autoConfirmOrders'
+                title='autoConfirmOrders'
                   type="checkbox"
                   checked={formData.autoConfirmOrders}
                   onChange={(e) => handleFieldChange('autoConfirmOrders', e.target.checked)}
@@ -288,6 +267,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </div>
+
             <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
               <div>
                 <label className="text-sm font-medium text-gray-900 dark:text-white">
@@ -299,7 +279,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
-                  title='useWhatsappForOrders'
+                title='useWhatsappForOrders'
                   type="checkbox"
                   checked={formData.useWhatsappForOrders}
                   onChange={(e) => handleFieldChange('useWhatsappForOrders', e.target.checked)}
@@ -324,6 +304,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               </p>
             </div>
           </div>
+          
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
               <div>
@@ -336,6 +317,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
+                  name=''
                   title='showProductDescriptions'
                   type="checkbox"
                   checked={formData.showProductDescriptions}
@@ -345,6 +327,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </div>
+
             <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
               <div>
                 <label className="text-sm font-medium text-gray-900 dark:text-white">
@@ -365,6 +348,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </div>
+
             <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
               <div>
                 <label className="text-sm font-medium text-gray-900 dark:text-white">
@@ -401,6 +385,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               </p>
             </div>
           </div>
+          
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
               <div>
@@ -413,7 +398,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
-                  title='acceptCash'
+                title='acceptCash'
                   type="checkbox"
                   checked={formData.acceptCash}
                   onChange={(e) => handleFieldChange('acceptCash', e.target.checked)}
@@ -422,6 +407,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </div>
+
             <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
               <div>
                 <label className="text-sm font-medium text-gray-900 dark:text-white">
@@ -433,7 +419,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
-                  title='acceptCreditCard'
+                title='acceptCreditCard'
                   type="checkbox"
                   checked={formData.acceptCreditCard}
                   onChange={(e) => handleFieldChange('acceptCreditCard', e.target.checked)}
@@ -442,6 +428,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </div>
+
             <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
               <div>
                 <label className="text-sm font-medium text-gray-900 dark:text-white">
@@ -453,7 +440,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
-                  title='acceptOnlinePayment'
+                title='acceptOnlinePayment'
                   type="checkbox"
                   checked={formData.acceptOnlinePayment}
                   onChange={(e) => handleFieldChange('acceptOnlinePayment', e.target.checked)}
@@ -478,6 +465,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               </p>
             </div>
           </div>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
@@ -496,6 +484,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                 ))}
               </select>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                 {t('branchPreferences.sections.localization.defaultCurrency')}
@@ -513,6 +502,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                 ))}
               </select>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                 {t('branchPreferences.sections.localization.timeZone')}
@@ -530,133 +520,143 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                 ))}
               </select>
             </div>
-            <div className="col-span-2">
-              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                {t('branchPreferences.sections.localization.supportedLanguages')}
-              </label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {[
-                  { flag: 1, code: 'tr', label: t('branchPreferences.languages.tr') },
-                  { flag: 2, code: 'en', label: t('branchPreferences.languages.en') },
-                  { flag: 4, code: 'ar', label: t('branchPreferences.languages.ar') },
-                  { flag: 8, code: 'de', label: t('branchPreferences.languages.de') },
-                  { flag: 16, code: 'fr', label: t('branchPreferences.languages.fr') },
-                  { flag: 32, code: 'ru', label: t('branchPreferences.languages.ru') },
-                  { flag: 64, code: 'es', label: t('branchPreferences.languages.es') },
-                ].map((lang) => (
-                  <div key={lang.code} className="flex items-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
-                    <input
-                      id={`lang-${lang.code}`}
-                      type="checkbox"
-                      checked={(formData.supportedLanguages & lang.flag) === lang.flag}
-                      onChange={(e) => {
-                        const currentValue = formData.supportedLanguages;
-                        const newValue = e.target.checked 
-                          ? currentValue | lang.flag
-                          : currentValue & ~lang.flag;
-                        handleFieldChange('supportedLanguages', newValue);
-                      }}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                    />
-                    <label htmlFor={`lang-${lang.code}`} className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300 cursor-pointer">
-                      {lang.label}
-                    </label>
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                {t('branchPreferences.sections.localization.supportedLanguagesDesc')}
-              </p>
-            </div>
+
+<div className="col-span-2">
+  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+    {t('branchPreferences.sections.localization.supportedLanguages')}
+  </label>
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    {[
+      { flag: 1, code: 'tr', label: t('branchPreferences.languages.tr') },
+      { flag: 2, code: 'en', label: t('branchPreferences.languages.en') },
+      { flag: 4, code: 'ar', label: t('branchPreferences.languages.ar') },
+      { flag: 8, code: 'de', label: t('branchPreferences.languages.de') },
+      { flag: 16, code: 'fr', label: t('branchPreferences.languages.fr') },
+      { flag: 32, code: 'ru', label: t('branchPreferences.languages.ru') },
+      { flag: 64, code: 'es', label: t('branchPreferences.languages.es') }
+    ].map((lang) => (
+      <div key={lang.code} className="flex items-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+        <input
+          id={`lang-${lang.code}`}
+          type="checkbox"
+          checked={(formData.supportedLanguages & lang.flag) === lang.flag}
+          onChange={(e) => {
+            const currentValue = formData.supportedLanguages;
+            const newValue = e.target.checked 
+              ? currentValue | lang.flag  // Add flag
+              : currentValue & ~lang.flag; // Remove flag
+            handleFieldChange('supportedLanguages', newValue);
+          }}
+          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+        />
+        <label htmlFor={`lang-${lang.code}`} className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300 cursor-pointer">
+          {lang.label}
+        </label>
+      </div>
+    ))}
+  </div>
+  <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+    {t('branchPreferences.sections.localization.supportedLanguagesDesc')}
+  </p>
+</div>
           </div>
         </div>
 
         {/* Session Management Section */}
-        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
-          <div className="flex items-center space-x-3 rtl:space-x-reverse mb-4">
-            <Clock className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                {t('branchPreferences.sections.sessionManagement.title')}
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 text-sm">
-                {t('branchPreferences.sections.sessionManagement.description')}
-              </p>
-            </div>
-          </div>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                {t('branchPreferences.sections.sessionManagement.cleanupMode')}
-              </label>
-              <select
-                title='cleanupMode'
-                value={formData.cleanupMode}
-                onChange={(e) => handleFieldChange('cleanupMode', parseInt(e.target.value))}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-              >
-                {cleanupModes.map((mode) => (
-                  <option key={mode.value} value={mode.value}>
-                    {mode.label}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                {t('branchPreferences.sections.sessionManagement.cleanupModeDesc')}
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {formData.cleanupMode === 0 && (
-                <div className="transition-all duration-300 ease-in-out">
-                  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                    {t('branchPreferences.sections.sessionManagement.sessionTimeout')}
-                  </label>
-                  <input
-                    title='sessionTimeoutMinutes'
-                    type="number"
-                    min="5"
-                    max="1440"
-                    value={formData.sessionTimeoutMinutes}
-                    onChange={(e) => handleFieldChange('sessionTimeoutMinutes', parseInt(e.target.value) || 30)}
-                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                  />
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    {t('branchPreferences.sections.sessionManagement.sessionTimeoutDesc')}
-                  </p>
-                </div>
-              )}
-              {formData.cleanupMode === 1 && (
-                <div className="transition-all duration-300 ease-in-out">
-                  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                    {t('branchPreferences.sections.sessionManagement.cleanupDelay')}
-                  </label>
-                  <input
-                    title='cleanupDelayAfterCloseMinutes'
-                    type="number"
-                    min="0"
-                    max="60"
-                    value={formData.cleanupDelayAfterCloseMinutes}
-                    onChange={(e) => handleFieldChange('cleanupDelayAfterCloseMinutes', parseInt(e.target.value) || 5)}
-                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-                  />
-                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                    {t('branchPreferences.sections.sessionManagement.cleanupDelayDesc')}
-                  </p>
-                </div>
-              )}
-              {formData.cleanupMode === 2 && (
-                <div className="transition-all duration-300 ease-in-out p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-                  <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                    <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
-                    <span className="text-yellow-800 dark:text-yellow-300 text-sm">
-                      {t('branchPreferences.sections.sessionManagement.cleanupDisabledMessage')}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
+ <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
+  <div className="flex items-center space-x-3 rtl:space-x-reverse mb-4">
+    <Clock className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+    <div>
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        {t('branchPreferences.sections.sessionManagement.title')}
+      </h3>
+      <p className="text-gray-600 dark:text-gray-400 text-sm">
+        {t('branchPreferences.sections.sessionManagement.description')}
+      </p>
+    </div>
+  </div>
+  
+  <div className="space-y-4">
+    <div>
+      <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+        {t('branchPreferences.sections.sessionManagement.cleanupMode')}
+      </label>
+      <select
+        title='cleanupMode'
+        name='cleanupMode'
+        value={formData.cleanupMode}
+        onChange={(e) => handleFieldChange('cleanupMode', parseInt(e.target.value))}
+        className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+      >
+        {cleanupModes.map((mode) => (
+          <option key={mode.value} value={mode.value}>
+            {mode.label}
+          </option>
+        ))}
+      </select>
+      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+        {t('branchPreferences.sections.sessionManagement.cleanupModeDesc')}
+      </p>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Session Timeout - Only shown when cleanup mode is "After Timeout" (0) */}
+      {formData.cleanupMode === 0 && (
+        <div className="transition-all duration-300 ease-in-out">
+          <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+            {t('branchPreferences.sections.sessionManagement.sessionTimeout')}
+          </label>
+          <input
+            title='sessionTimeoutMinutes'
+            type="number"
+            min="5"
+            max="1440"
+            value={formData.sessionTimeoutMinutes}
+            onChange={(e) => handleFieldChange('sessionTimeoutMinutes', parseInt(e.target.value) || 30)}
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+          />
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+            {t('branchPreferences.sections.sessionManagement.sessionTimeoutDesc')}
+          </p>
+        </div>
+      )}
+
+      {/* Cleanup Delay - Only shown when cleanup mode is "After Closing" (1) */}
+      {formData.cleanupMode === 1 && (
+        <div className="transition-all duration-300 ease-in-out">
+          <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+            {t('branchPreferences.sections.sessionManagement.cleanupDelay')}
+          </label>
+          <input
+            title='cleanupDelayAfterCloseMinutes'
+            name='cleanupDelayAfterCloseMinutes'
+            type="number"
+            min="0"
+            max="60"
+            value={formData.cleanupDelayAfterCloseMinutes}
+            onChange={(e) => handleFieldChange('cleanupDelayAfterCloseMinutes', parseInt(e.target.value) || 5)}
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+          />
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+            {t('branchPreferences.sections.sessionManagement.cleanupDelayDesc')}
+          </p>
+        </div>
+      )}
+
+      {/* Disabled message - shown when cleanup mode is "Disabled" (2) */}
+      {formData.cleanupMode === 2 && (
+        <div className="transition-all duration-300 ease-in-out p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+          <div className="flex items-center space-x-3 rtl:space-x-reverse">
+            <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+            <span className="text-yellow-800 dark:text-yellow-300 text-sm">
+              {t('branchPreferences.sections.sessionManagement.cleanupDisabledMessage')}
+            </span>
           </div>
         </div>
+      )}
+    </div>
+  </div>
+</div>
       </div>
     </div>
   );
