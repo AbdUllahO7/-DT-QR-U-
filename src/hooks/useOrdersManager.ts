@@ -22,11 +22,13 @@ export const useOrdersManager = () => {
     viewMode: 'pending',
     showConfirmModal: false,
     showRejectModal: false,
+    showCancelModal: false, // NEW: Add cancel modal state
     showStatusModal: false,
     showDetailsModal: false,
     activeOrderId: null,
     activeRowVersion: null,
     rejectReason: '',
+    cancelReason: '', // NEW: Add cancel reason state
     newStatus: null,
     expandedRows: new Set(),
     sortField: 'createdAt',
@@ -268,6 +270,47 @@ export const useOrdersManager = () => {
     }
   };
 
+  // NEW: Handle cancel order
+  const handleCancelOrder = async () => {
+    if (!state.activeOrderId || !state.activeRowVersion) return;
+    
+    const branchId = getCurrentBranchId();
+    setState(prev => ({ ...prev, loading: true, error: null, showCancelModal: false }));
+    
+    try {
+      // Cancel order by updating status to Cancelled
+      const data: UpdateOrderStatusDto = { 
+        newStatus: OrderStatusEnums.Cancelled,
+        rowVersion: state.activeRowVersion 
+      };
+      const updatedOrder = await orderService.updateOrderStatus(state.activeOrderId, data, branchId);
+      
+      if (state.viewMode === 'pending') {
+        fetchPendingOrders();
+      } else {
+        fetchBranchOrders();
+      }
+      
+      setState(prev => ({ 
+        ...prev, 
+        selectedOrder: updatedOrder, 
+        loading: false, 
+        activeOrderId: null, 
+        activeRowVersion: null, 
+        cancelReason: '' 
+      }));
+    } catch (error: any) {
+      setState(prev => ({ 
+        ...prev, 
+        error: error.message, 
+        loading: false, 
+        activeOrderId: null, 
+        activeRowVersion: null, 
+        cancelReason: '' 
+      }));
+    }
+  };
+
   // Handle update status - FIXED: Now passes branchId
   const handleUpdateStatus = async () => {
     if (!state.activeOrderId || !state.activeRowVersion || state.newStatus === null) return;
@@ -429,6 +472,16 @@ export const useOrdersManager = () => {
     }));
   };
 
+  // NEW: Cancel modal handler
+  const openCancelModal = (orderId: string, rowVersion: string) => {
+    setState(prev => ({ 
+      ...prev, 
+      showCancelModal: true, 
+      activeOrderId: orderId, 
+      activeRowVersion: rowVersion 
+    }));
+  };
+
   const openStatusModal = (orderId: string, rowVersion: string, newStatus: OrderStatusEnums) => {
     setState(prev => ({ 
       ...prev, 
@@ -452,11 +505,13 @@ export const useOrdersManager = () => {
       ...prev, 
       showConfirmModal: false, 
       showRejectModal: false, 
+      showCancelModal: false, // NEW: Reset cancel modal
       showStatusModal: false, 
       showDetailsModal: false,
       activeOrderId: null, 
       activeRowVersion: null, 
       rejectReason: '', 
+      cancelReason: '', // NEW: Reset cancel reason
       newStatus: null,
       selectedOrder: null
     }));
@@ -497,6 +552,7 @@ export const useOrdersManager = () => {
     getAllOrderTypes,
     handleConfirmOrder,
     handleRejectOrder,
+    handleCancelOrder, // NEW: Add cancel handler
     handleUpdateStatus,
     getOrderDetails,
     getTableOrders,
@@ -506,6 +562,7 @@ export const useOrdersManager = () => {
     switchViewMode,
     openConfirmModal,
     openRejectModal,
+    openCancelModal, // NEW: Add cancel modal opener
     openStatusModal,
     openDetailsModal,
     closeModals,

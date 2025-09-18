@@ -21,6 +21,7 @@ interface OrdersTableProps {
   onOpenStatus: (orderId: string, rowVersion: string, newStatus: OrderStatusEnums) => void;
   onClearFilters: () => void;
   t: (key: string) => string;
+  onOpenCancel: (orderId: string, rowVersion: string) => void;
 }
 
 const OrdersTable: React.FC<OrdersTableProps> = ({
@@ -38,6 +39,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
   onOpenConfirm,
   onOpenReject,
   onOpenStatus,
+   onOpenCancel, 
   onClearFilters,
   t
 }) => {
@@ -60,6 +62,8 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
 
     return `No ${orderType} found`;
   };
+console.log('OrdersTable received onOpenCancel:', onOpenCancel);
+
 
   if (loading) {
     return (
@@ -120,6 +124,10 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                     {getSortIcon('totalPrice')}
                   </button>
                 </th>
+           
+                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  {t('ordersManager.orderType')}
+                </th>
                 <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   <button
                     onClick={() => onSort('createdAt')}
@@ -129,6 +137,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                     {getSortIcon('createdAt')}
                   </button>
                 </th>
+                
                 <th className="px-6 py-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                   {t('ordersManager.actions')}
                 </th>
@@ -139,6 +148,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                 <OrderTableRow
                   key={order.id}
                   order={order}
+                   onOpenCancel={onOpenCancel} 
                   viewMode={viewMode}
                   isExpanded={expandedRows.has(order.id.toString())}
                   lang={lang}

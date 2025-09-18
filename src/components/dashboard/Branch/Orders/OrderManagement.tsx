@@ -16,6 +16,7 @@ import StatusModal from './StatusModal';
 import OrderDetailsModal from './OrderDetailsModal';
 import SuccessNotification from './SuccessNotification';
 import OrdersTable from './OrdersTable';
+import CancelModal from './CancelModal';
 
 const OrdersManager: React.FC = () => {
   const { t, language } = useLanguage();
@@ -29,10 +30,12 @@ const OrdersManager: React.FC = () => {
       fetchBranchOrders,
       handleConfirmOrder,
       handleRejectOrder,
+      handleCancelOrder, // NEW: Add cancel handler
       handleUpdateStatus,
       switchViewMode,
       openConfirmModal,
       openRejectModal,
+      openCancelModal, // NEW: Add cancel modal opener
       openStatusModal,
       openDetailsModal,
       closeModals,
@@ -41,6 +44,10 @@ const OrdersManager: React.FC = () => {
       setState
     }
   } = useOrdersManager();
+
+  // Debug logging to verify the function exists
+  console.log('OrdersManager - openCancelModal function:', openCancelModal);
+  console.log('OrdersManager - typeof openCancelModal:', typeof openCancelModal);
 
   const {
     filteredOrders,
@@ -55,6 +62,22 @@ const OrdersManager: React.FC = () => {
     changePage,
     changeItemsPerPage
   } = usePagination(filteredOrders, state.pagination, setState);
+
+  const handleOpenCancel = React.useCallback((orderId: string, rowVersion: string) => {
+    console.log('handleOpenCancel called with:', { orderId, rowVersion });
+    if (typeof openCancelModal === 'function') {
+      openCancelModal(orderId, rowVersion);
+    } else {
+      console.error('openCancelModal is not a function:', openCancelModal);
+      // Fallback: directly update state to show cancel modal
+      setState(prev => ({ 
+        ...prev, 
+        showCancelModal: true, 
+        activeOrderId: orderId, 
+        activeRowVersion: rowVersion 
+      }));
+    }
+  }, [openCancelModal, setState]);
 
   // Initial fetch on mount
   useEffect(() => {
@@ -113,6 +136,7 @@ const OrdersManager: React.FC = () => {
           onOpenDetails={openDetailsModal}
           onOpenConfirm={openConfirmModal}
           onOpenReject={openRejectModal}
+          onOpenCancel={handleOpenCancel} // Use our safe wrapper function
           onOpenStatus={openStatusModal}
           onClearFilters={clearFilters}
           t={t}
@@ -133,6 +157,15 @@ const OrdersManager: React.FC = () => {
           rejectReason={state.rejectReason}
           onReasonChange={(reason) => setState(prev => ({ ...prev, rejectReason: reason }))}
           onReject={handleRejectOrder}
+          onClose={closeModals}
+          t={t}
+        />
+
+        {/* NEW: Cancel Modal */}
+        <CancelModal
+          show={state.showCancelModal}
+          loading={state.loading}
+          onCancel={handleCancelOrder}
           onClose={closeModals}
           t={t}
         />

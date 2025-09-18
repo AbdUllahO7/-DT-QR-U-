@@ -18,6 +18,7 @@ interface OrdersTableProps {
   onOpenDetails: (order: PendingOrder | BranchOrder) => void;
   onOpenConfirm: (orderId: string, rowVersion: string) => void;
   onOpenReject: (orderId: string, rowVersion: string) => void;
+  onOpenCancel: (orderId: string, rowVersion: string) => void;
   onOpenStatus: (orderId: string, rowVersion: string, newStatus: OrderStatusEnums) => void;
   onClearFilters: () => void;
   t: (key: string) => string;
@@ -37,6 +38,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
   onOpenDetails,
   onOpenConfirm,
   onOpenReject,
+  onOpenCancel,
   onOpenStatus,
   onClearFilters,
   t
@@ -146,6 +148,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                   onOpenDetails={onOpenDetails}
                   onOpenConfirm={onOpenConfirm}
                   onOpenReject={onOpenReject}
+                  onOpenCancel={onOpenCancel}
                   onOpenStatus={onOpenStatus}
                   t={t}
                 />

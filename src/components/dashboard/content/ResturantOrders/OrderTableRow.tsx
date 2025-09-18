@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, ChevronUp, Eye, CheckCircle, XCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, Eye, CheckCircle, XCircle, Ban } from 'lucide-react';
 import { BranchOrder, PendingOrder } from '../../../../types/BranchManagement/type';
 import { orderService } from '../../../../services/Branch/OrderService';
 import OrderStatusUtils from '../../../../utils/OrderStatusUtils';
@@ -14,6 +14,7 @@ interface OrderTableRowProps {
   onOpenDetails: (order: PendingOrder | BranchOrder) => void;
   onOpenConfirm: (orderId: string, rowVersion: string) => void;
   onOpenReject: (orderId: string, rowVersion: string) => void;
+  onOpenCancel: (orderId: string, rowVersion: string) => void;
   onOpenStatus:(orderId: string, rowVersion: string, newStatus: OrderStatusEnums) => void;
   t: (key: string) => string;
 }
@@ -27,6 +28,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
   onOpenDetails,
   onOpenConfirm,
   onOpenReject,
+  onOpenCancel,
   onOpenStatus,
   t
 }) => {
@@ -105,13 +107,25 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
             </button>
           )}
           
-          {orderService.canCancelOrder(status) && (
+          {/* Only show reject button for Pending status */}
+          {status === OrderStatusEnums.Pending && (
             <button
               onClick={() => onOpenReject(order.id.toString(), rowVersion)}
               className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
               title={t('ordersManager.reject')}
             >
               <XCircle className="w-4 h-4" />
+            </button>
+          )}
+          
+          {/* Cancel button - available for orders that can be cancelled */}
+          {orderService.canCancelOrder(status) && (
+            <button
+              onClick={() => onOpenCancel(order.id.toString(), rowVersion)}
+              className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300 p-1 rounded hover:bg-orange-100 dark:hover:bg-orange-900 transition-colors"
+              title={t('ordersManager.cancel')}
+            >
+              <Ban className="w-4 h-4" />
             </button>
           )}
           

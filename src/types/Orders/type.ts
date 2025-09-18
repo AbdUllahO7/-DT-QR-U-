@@ -44,6 +44,8 @@ export interface OrdersManagerState {
   branchOrders: BranchOrder[];
   selectedOrder: Order| null;
   loading: boolean;
+  showCancelModal:boolean;
+  cancelReason:string,
   error: string | null;
   viewMode: 'pending' | 'branch';
   showConfirmModal: boolean;
@@ -80,6 +82,8 @@ export interface OrdersManagerActions {
     serviceCharge: number;
     totalAmount: number;
   }>;
+  handleCancelOrder: () => Promise<void>;
+  openCancelModal: (orderId: string, rowVersion: string) => void;
   getEstimatedTime: (orderTypeId: number) => Promise<number>;
   getOrderTypeByCode: (code: string) => Promise<OrderType | undefined>;
   getActiveOrderTypes: () => Promise<OrderType[]>;
