@@ -35,9 +35,7 @@ const StatusModal: React.FC<StatusModalProps> = ({
           </h3>
         </div>
         <p className="text-gray-600 dark:text-gray-400 mb-6">
-          {t('ordersManager.updateStatusPrompt', { 
-            status: orderService.getOrderStatusText(newStatus, lang) 
-          })}
+          {t('ordersManager.updateStatusPrompt')} {orderService.getOrderStatusText(newStatus, lang)}
         </p>
         <div className="flex justify-end gap-3">
           <button

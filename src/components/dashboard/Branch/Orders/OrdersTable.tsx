@@ -57,11 +57,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
       : 'ordersManager.branchOrders';
     
     const orderType = t(orderTypeKey).toLowerCase();
-    
-    // If your translation function supports interpolation, use this format:
-    // return t('ordersManager.noOrdersFound').replace('{orderType}', orderType);
-    
-    // Otherwise, construct the message manually:
+
     return `No ${orderType} found`;
   };
 

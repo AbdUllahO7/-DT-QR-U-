@@ -9,7 +9,7 @@ import { HeaderProps } from "../../../../types/menu/type"
 
 
 const Header: React.FC<HeaderProps> = ({ menuData, totalItems, onCartToggle }) => {
-  const { t, isRTL } = useLanguage()
+  const { t } = useLanguage()
 
   return (
     <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-40 shadow-lg">

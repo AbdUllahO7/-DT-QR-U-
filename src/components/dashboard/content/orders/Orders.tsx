@@ -45,7 +45,6 @@ const Orders: React.FC = () => {
     { id: 'preparing', label: t('dashboard.orders.tabs.preparing'), count: orders.filter(o => o.status === 'preparing').length, icon: AlertCircle },
     { id: 'ready', label: t('dashboard.orders.tabs.ready'), count: orders.filter(o => o.status === 'ready').length, icon: CheckCircle },
     { id: 'delivered', label: t('dashboard.orders.tabs.delivered'), count: orders.filter(o => o.status === 'delivered').length, icon: CheckCircle },
-    { id: 'cancelled', label: t('dashboard.orders.tabs.cancelled'), count: orders.filter(o => o.status === 'cancelled').length, icon: XCircle }
   ];
 
   const handleViewDetails = (order: Order) => {
@@ -76,8 +75,7 @@ const Orders: React.FC = () => {
         return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400';
       case 'delivered':
         return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400';
+    
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400';
     }
@@ -93,8 +91,7 @@ const Orders: React.FC = () => {
         return t('dashboard.orders.status.ready');
       case 'delivered':
         return t('dashboard.orders.status.delivered');
-      case 'cancelled':
-        return t('dashboard.orders.status.cancelled');
+     
       default:
         return status;
     }
@@ -349,7 +346,6 @@ const Orders: React.FC = () => {
                     <option value="preparing">{t('orders.status.preparing')}</option>
                     <option value="ready">{t('orders.status.ready')}</option>
                     <option value="delivered">{t('orders.status.delivered')}</option>
-                    <option value="cancelled">{t('orders.status.cancelled')}</option>
                   </select>
                 </div>
 
