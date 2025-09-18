@@ -8,6 +8,7 @@ import {
   Settings,
   LogOut,
   X,
+  Type,
 } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { SetupSidebarProps } from '../../../types/BranchManagement/type';
@@ -150,7 +151,7 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               } ${isRTL ? 'text-right' : 'text-left'}`}
             >
-              <BarChart3 className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+              <Type className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.orderType.title')}</span>
             </button>
 

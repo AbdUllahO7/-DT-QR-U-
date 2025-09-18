@@ -28,6 +28,7 @@ import Orders from '../components/dashboard/content/orders/Orders';
 import TableManagement from '../components/dashboard/content/table-management/TableManagement';
 import OrdersManager from '../components/dashboard/Branch/Orders/OrderManagement';
 import { RestaurantBranchDropdownItem } from '../types/BranchManagement/type';
+import OrderTypeResturantComponent from '../components/dashboard/content/OrderType/OrderTypeRestaurantComponent';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();
@@ -200,9 +201,10 @@ const Dashboard: React.FC = () => {
               {activeTab === 'profile' && <Profile />}
               {activeTab === 'settings' && <Settings />}
               {activeTab === 'subscription' && <Subscription />}
+              {activeTab === 'orderTypeResturant' && <OrderTypeResturantComponent />}
 
             {/* branch */}
-            {activeTab === 'branchProducts' && <BranchProducts />}
+              {activeTab === 'branchProducts' && <BranchProducts />}
               {activeTab === 'TableManagement' && <BranchTableManagement />}
               {activeTab === 'BranchManagement' && <BranchManagementBranch />}
               {activeTab === 'orderType' && <OrderTypeComponeent />}

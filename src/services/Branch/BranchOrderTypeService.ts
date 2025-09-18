@@ -68,55 +68,58 @@ interface GetOrderTypesResponse {
 class OrderTypeService {
   private baseUrl = '/api/OrderTypes';
 
-  async getOrderTypes(): Promise<OrderType[]> {
-    try {
-      logger.info('OrderType listesi getirme isteği gönderiliyor', null, { prefix: 'OrderTypeService' });
-      
-      const response = await httpClient.get<OrderType[] | GetOrderTypesResponse>(this.baseUrl);
-      
-      logger.info('OrderType API Raw Response:', response, { prefix: 'OrderTypeService' });
-      logger.info('OrderType API Response Data:', response.data, { prefix: 'OrderTypeService' });
-      
-      let orderTypes: OrderType[] = [];
-      
-      // Handle different response structures
-      if (Array.isArray(response.data)) {
-        // Direct array response from database
-        orderTypes = response.data;
-      } else if (response.data && typeof response.data === 'object' && 'data' in response.data) {
-        // Wrapped response structure
-        const apiData = response.data.data;
-        if (Array.isArray(apiData)) {
-          orderTypes = apiData;
-        } else if (apiData) {
-          orderTypes = [apiData];
-        }
-      } else if (response.data) {
-        // Single object response
-        orderTypes = [response.data as OrderType];
+  async getOrderTypes(branchId?: number): Promise<OrderType[]> {
+  try {
+    const url = branchId ? `${this.baseUrl}?branchId=${branchId}` : this.baseUrl;
+    
+    logger.info('OrderType listesi getirme isteği gönderiliyor', { branchId }, { prefix: 'OrderTypeService' });
+    
+    const response = await httpClient.get<OrderType[] | GetOrderTypesResponse>(url);
+    
+    logger.info('OrderType API Raw Response:', response, { prefix: 'OrderTypeService' });
+    logger.info('OrderType API Response Data:', response.data, { prefix: 'OrderTypeService' });
+    
+    let orderTypes: OrderType[] = [];
+    
+    // Handle different response structures
+    if (Array.isArray(response.data)) {
+      // Direct array response from database
+      orderTypes = response.data;
+    } else if (response.data && typeof response.data === 'object' && 'data' in response.data) {
+      // Wrapped response structure
+      const apiData = response.data.data;
+      if (Array.isArray(apiData)) {
+        orderTypes = apiData;
+      } else if (apiData) {
+        orderTypes = [apiData];
       }
-      
-      logger.info('OrderType listesi başarıyla alındı', { 
-        orderTypeCount: orderTypes.length,
-        orderTypes: orderTypes.map(ot => ({ 
-          id: ot.id, 
-          name: ot.name, 
-          code: ot.code, 
-          isActive: ot.isActive,
-          isStandard: ot.isStandard,
-          activeOrderCount: ot.activeOrderCount 
-        }))
-      }, { prefix: 'OrderTypeService' });
-      
-      return orderTypes;
-    } catch (error: any) {
-      logger.error('OrderType listesi getirme hatası', error, { prefix: 'OrderTypeService' });
-      logger.error('Error response:', error?.response, { prefix: 'OrderTypeService' });
-      logger.error('Error response data:', error?.response?.data, { prefix: 'OrderTypeService' });
-      
-      this.handleError(error, 'OrderType listesi getirilirken hata oluştu');
+    } else if (response.data) {
+      // Single object response
+      orderTypes = [response.data as OrderType];
     }
+    
+    logger.info('OrderType listesi başarıyla alındı', { 
+      branchId,
+      orderTypeCount: orderTypes.length,
+      orderTypes: orderTypes.map(ot => ({ 
+        id: ot.id, 
+        name: ot.name, 
+        code: ot.code, 
+        isActive: ot.isActive,
+        isStandard: ot.isStandard,
+        activeOrderCount: ot.activeOrderCount 
+      }))
+    }, { prefix: 'OrderTypeService' });
+    
+    return orderTypes;
+  } catch (error: any) {
+    logger.error('OrderType listesi getirme hatası', error, { prefix: 'OrderTypeService' });
+    logger.error('Error response:', error?.response, { prefix: 'OrderTypeService' });
+    logger.error('Error response data:', error?.response?.data, { prefix: 'OrderTypeService' });
+    
+    this.handleError(error, 'OrderType listesi getirilirken hata oluştu');
   }
+}
 
   async getOrderTypesBySessionId(): Promise<OrderType[]> {
     try {
@@ -235,99 +238,99 @@ class OrderTypeService {
     }
   }
 
-async updateOrderTypeSettings(id: number, data: UpdateOrderTypeSettingsDto): Promise<OrderType> {
-  try {
-    logger.info('OrderType ayarları güncelleme isteği gönderiliyor', { id, data }, { prefix: 'OrderTypeService' });
-    
-    const response = await httpClient.put<any>(`${this.baseUrl}/${id}/settings`, data);
-    
-    logger.info('OrderType ayarları API Raw Response:', response, { prefix: 'OrderTypeService' });
-    logger.info('OrderType ayarları API Response Data:', response.data, { prefix: 'OrderTypeService' });
-    
-    console.log('=== DEBUG: Response Data Structure ===');
-    console.log('Type of response.data:', typeof response.data);
-    console.log('Is Array:', Array.isArray(response.data));
-    console.log('Response.data:', response.data);
-    console.log('Response status:', response.status);
-    console.log('Response.data keys:', response.data && typeof response.data === 'object' ? Object.keys(response.data) : 'No keys');
-    console.log('=====================================');
-    
-    let orderType: OrderType | null = null;
-    
-    // Handle 204 No Content or empty string response (successful update with no data returned)
-    if ((response.status === 204 || response.status === 200) && 
-        (response.data === '' || response.data === null || response.data === undefined)) {
-      console.log('Detected successful response with no data (204 No Content) - creating response from input data');
+  async updateOrderTypeSettings(id: number, data: UpdateOrderTypeSettingsDto): Promise<OrderType> {
+    try {
+      logger.info('OrderType ayarları güncelleme isteği gönderiliyor', { id, data }, { prefix: 'OrderTypeService' });
       
-      // Since the server confirmed the update was successful but didn't return data,
-      // we'll create a response using the input data and generate a new rowVersion
-      orderType = {
-        id: data.id,
-        isActive: data.isActive,
-        minOrderAmount: data.minOrderAmount,
-        serviceCharge: data.serviceCharge,
-        rowVersion: this.generateNewRowVersion(data.rowVersion), // Generate a new rowVersion
-        updatedAt: new Date().toISOString(),
-        // These fields won't be updated by this endpoint, so we'll mark them as undefined
-        // The component will handle this by refetching if needed
-        name: undefined as any,
-        code: undefined as any,
-        description: undefined as any,
-        icon: undefined as any,
-      } as OrderType;
+      const response = await httpClient.put<any>(`${this.baseUrl}/${id}/settings`, data);
       
-      logger.info('Created mock OrderType from successful empty response', orderType, { prefix: 'OrderTypeService' });
+      logger.info('OrderType ayarları API Raw Response:', response, { prefix: 'OrderTypeService' });
+      logger.info('OrderType ayarları API Response Data:', response.data, { prefix: 'OrderTypeService' });
+      
+      console.log('=== DEBUG: Response Data Structure ===');
+      console.log('Type of response.data:', typeof response.data);
+      console.log('Is Array:', Array.isArray(response.data));
+      console.log('Response.data:', response.data);
+      console.log('Response status:', response.status);
+      console.log('Response.data keys:', response.data && typeof response.data === 'object' ? Object.keys(response.data) : 'No keys');
+      console.log('=====================================');
+      
+      let orderType: OrderType | null = null;
+      
+      // Handle 204 No Content or empty string response (successful update with no data returned)
+      if ((response.status === 204 || response.status === 200) && 
+          (response.data === '' || response.data === null || response.data === undefined)) {
+        console.log('Detected successful response with no data (204 No Content) - creating response from input data');
+        
+        // Since the server confirmed the update was successful but didn't return data,
+        // we'll create a response using the input data and generate a new rowVersion
+        orderType = {
+          id: data.id,
+          isActive: data.isActive,
+          minOrderAmount: data.minOrderAmount,
+          serviceCharge: data.serviceCharge,
+          rowVersion: this.generateNewRowVersion(data.rowVersion), // Generate a new rowVersion
+          updatedAt: new Date().toISOString(),
+          // These fields won't be updated by this endpoint, so we'll mark them as undefined
+          // The component will handle this by refetching if needed
+          name: undefined as any,
+          code: undefined as any,
+          description: undefined as any,
+          icon: undefined as any,
+        } as OrderType;
+        
+        logger.info('Created mock OrderType from successful empty response', orderType, { prefix: 'OrderTypeService' });
+        return orderType;
+      }
+      
+      // Handle other response structures
+      if (response.data) {
+        // Check if it's a direct OrderType object
+        if (typeof response.data === 'object' && !Array.isArray(response.data) && 'id' in response.data && 'rowVersion' in response.data) {
+          console.log('Detected direct OrderType object');
+          orderType = response.data as OrderType;
+        }
+        // Check if it's wrapped in { data: OrderType }
+        else if ('data' in response.data && response.data.data) {
+          console.log('Detected wrapped { data: OrderType } structure');
+          const apiData = response.data.data;
+          if (typeof apiData === 'object' && !Array.isArray(apiData) && 'id' in apiData && 'rowVersion' in apiData) {
+            orderType = apiData as OrderType;
+          }
+        }
+        // Check for different success response structures
+        else if ('isSuccess' in response.data) {
+          console.log('Detected isSuccess response structure');
+          if (response.data.data && typeof response.data.data === 'object' && !Array.isArray(response.data.data)) {
+            orderType = response.data.data as OrderType;
+          }
+        }
+      }
+      
+      if (!orderType) {
+        logger.error('Invalid API response structure:', {
+          responseData: response.data,
+          responseStatus: response.status,
+          responseType: typeof response.data,
+          isArray: Array.isArray(response.data)
+        }, { prefix: 'OrderTypeService' });
+        throw new Error('Sunucudan geçersiz yanıt alındı - lütfen yanıt yapısını kontrol edin');
+      }
+      
+      logger.info('OrderType ayarları başarıyla güncellendi', orderType, { prefix: 'OrderTypeService' });
       return orderType;
-    }
-    
-    // Handle other response structures
-    if (response.data) {
-      // Check if it's a direct OrderType object
-      if (typeof response.data === 'object' && !Array.isArray(response.data) && 'id' in response.data && 'rowVersion' in response.data) {
-        console.log('Detected direct OrderType object');
-        orderType = response.data as OrderType;
+    } catch (error: any) {
+      logger.error('OrderType ayarları güncelleme hatası', error, { prefix: 'OrderTypeService' });
+      logger.error('Error response:', error?.response, { prefix: 'OrderTypeService' });
+      logger.error('Error response data:', error?.response?.data, { prefix: 'OrderTypeService' });
+      
+      if (error.response?.data?.errors) {
+        logger.error('API Validation Hataları:', error.response.data.errors, { prefix: 'OrderTypeService' });
       }
-      // Check if it's wrapped in { data: OrderType }
-      else if ('data' in response.data && response.data.data) {
-        console.log('Detected wrapped { data: OrderType } structure');
-        const apiData = response.data.data;
-        if (typeof apiData === 'object' && !Array.isArray(apiData) && 'id' in apiData && 'rowVersion' in apiData) {
-          orderType = apiData as OrderType;
-        }
-      }
-      // Check for different success response structures
-      else if ('isSuccess' in response.data) {
-        console.log('Detected isSuccess response structure');
-        if (response.data.data && typeof response.data.data === 'object' && !Array.isArray(response.data.data)) {
-          orderType = response.data.data as OrderType;
-        }
-      }
+      
+      this.handleError(error, 'OrderType ayarları güncellenirken hata oluştu');
     }
-    
-    if (!orderType) {
-      logger.error('Invalid API response structure:', {
-        responseData: response.data,
-        responseStatus: response.status,
-        responseType: typeof response.data,
-        isArray: Array.isArray(response.data)
-      }, { prefix: 'OrderTypeService' });
-      throw new Error('Sunucudan geçersiz yanıt alındı - lütfen yanıt yapısını kontrol edin');
-    }
-    
-    logger.info('OrderType ayarları başarıyla güncellendi', orderType, { prefix: 'OrderTypeService' });
-    return orderType;
-  } catch (error: any) {
-    logger.error('OrderType ayarları güncelleme hatası', error, { prefix: 'OrderTypeService' });
-    logger.error('Error response:', error?.response, { prefix: 'OrderTypeService' });
-    logger.error('Error response data:', error?.response?.data, { prefix: 'OrderTypeService' });
-    
-    if (error.response?.data?.errors) {
-      logger.error('API Validation Hataları:', error.response.data.errors, { prefix: 'OrderTypeService' });
-    }
-    
-    this.handleError(error, 'OrderType ayarları güncellenirken hata oluştu');
   }
-}
 
 // Helper method to generate a new rowVersion (simple increment)
 private generateNewRowVersion(currentRowVersion: string): string {
