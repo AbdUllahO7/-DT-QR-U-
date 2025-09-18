@@ -1022,6 +1022,12 @@ export interface BranchOrder {
 }
 // Enhanced component state
 export interface OrdersManagerState {
+  // Branch related states
+  branches: BranchDropdownItem[];
+  selectedBranch: BranchDropdownItem | null;
+  isBranchDropdownOpen: boolean;
+  
+  // Existing fields...
   pendingOrders: PendingOrder[];
   branchOrders: BranchOrder[];
   selectedOrder: Order | null;
@@ -1035,14 +1041,34 @@ export interface OrdersManagerState {
   activeOrderId: string | null;
   activeRowVersion: string | null;
   rejectReason: string;
-  newStatus: OrderStatus | null;
+  newStatus: OrderStatusEnums | null;
   expandedRows: Set<string>;
   sortField: string;
   sortDirection: 'asc' | 'desc';
   
-  // Enhanced filtering and pagination
-  filters: FilterOptions;
-  pagination: PaginationState;
+  filters: {
+    search: string;
+    status: string;
+    dateRange: {
+      start: string;
+      end: string;
+    };
+    priceRange: {
+      min: number | null;
+      max: number | null;
+    };
+    orderType: string;
+    customerName: string;
+    tableName: string;
+  };
+  
+  pagination: {
+    currentPage: number;
+    itemsPerPage: number;
+    totalItems: number;
+    totalPages: number;
+  };
+  
   showAdvancedFilters: boolean;
   filteredOrders: (PendingOrder | BranchOrder)[];
 }

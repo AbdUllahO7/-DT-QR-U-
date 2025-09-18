@@ -173,9 +173,9 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
             {/* Settings - Only for non-branch-only users */}
             {!isBranchOnly && (
               <button
-                onClick={() => handleNavigate('settings', 'settings')}
+                onClick={() => handleNavigate('BranchSettings', 'BranchSettings')}
                 className={`w-full flex items-center px-4 py-3 rounded-lg ${
-                  activeTab === 'settings'
+                  activeTab === 'BranchSettings'
                     ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                 } ${isRTL ? 'text-right' : 'text-left'}`}
