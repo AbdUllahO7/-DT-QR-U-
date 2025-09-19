@@ -10,14 +10,15 @@ class OrderStatusUtils {
       case OrderStatusEnums.Confirmed:
         return [OrderStatusEnums.Preparing];
       case OrderStatusEnums.Preparing:
-        return [OrderStatusEnums.Ready, OrderStatusEnums.Cancelled];
+        return [OrderStatusEnums.Ready, OrderStatusEnums.Cancelled,OrderStatusEnums.Completed,];
       case OrderStatusEnums.Ready:
-        return [OrderStatusEnums.Completed, OrderStatusEnums.Cancelled];
+        return [OrderStatusEnums.Completed, OrderStatusEnums.Cancelled,OrderStatusEnums.Delivered,];
       case OrderStatusEnums.Completed:
-        return [OrderStatusEnums.Delivered];
-      case OrderStatusEnums.Rejected:
-      case OrderStatusEnums.Delivered:
         return [];
+      case OrderStatusEnums.Rejected:
+        return []
+      case OrderStatusEnums.Delivered:
+        return [OrderStatusEnums.Completed,];
       default:
         return [];
     }

@@ -117,7 +117,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
       </div>
     ));
   };
-
+  console.log("order",order)
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-4xl w-full mx-4 shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -171,6 +171,26 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 </span>
               </span>
             </div>
+              <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                {t('ordersManager.orderType')}
+              </label>
+              <span
+              className={`
+                inline-flex items-center gap-1.5 
+                px-3 py-1 rounded-full 
+                text-xs font-medium 
+                border shadow-sm
+                bg-gradient-to-r from-orange-100 to-orange-200 
+                text-orange-700 border-orange-300
+              `}
+            >
+              <span className="flex items-center gap-1">
+                {order.orderTypeIcon}
+                <span>{order.orderTypeName}</span>
+              </span>
+            </span>
+            </div>
           </div>
 
           {/* Order Summary */}
@@ -215,6 +235,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 {order.totalPrice.toFixed(2)}
               </p>
             </div>
+            
           </div>
 
           {/* Order Items Section */}
@@ -248,6 +269,22 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                   
                   {/* Order Total */}
                   <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-600">
+                     <div className="flex justify-between items-center">
+                      <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                        {t('ordersManager.serviceFeeApplied')}:
+                      </span>
+                      <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        {order.serviceFeeApplied?.toFixed(2)}
+                      </span>
+                    </div>
+                     <div className="flex justify-between items-center">
+                      <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
+                        {t('ordersManager.subTotal')}:
+                      </span>
+                      <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        {order.subTotal?.toFixed(2)}
+                      </span>
+                    </div>
                     <div className="flex justify-between items-center">
                       <span className="text-lg font-semibold text-gray-700 dark:text-gray-300">
                         {t('ordersManager.total')}:

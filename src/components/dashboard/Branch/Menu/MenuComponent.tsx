@@ -264,39 +264,13 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
   if (loading) {
     return <LoadingState />
   }
-
   // Error state
   if (error) {
     return <ErrorState error={error} />
   }
-
   if (!menuData) return null
-
-  // SIMPLE RESTAURANT CLOSED CHECK
-  if (!menuData.isOpen) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-8">
-          <div className="text-6xl mb-4">🕐</div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-            {menuData.restaurantName} is Currently Closed
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            {menuData.statusMessage || "We are currently closed. Please check back during our operating hours."}
-          </p>
-          <button
-            onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Refresh Status
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   const filteredCategories = getFilteredCategories()
-  console.log("menuData", menuData)
+
   
   return (
     <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 ${isRTL ? 'rtl' : 'ltr'}`}>

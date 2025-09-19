@@ -6,10 +6,10 @@ export enum OrderStatusEnums {
   Confirmed = 1,
   Preparing = 2,
   Ready = 3,
-  Completed = 4,
-  Cancelled = 5,
-  Rejected = 6,
-  Delivered = 7
+  Completed = 5,
+  Cancelled = 6,
+  Rejected = 7,
+  Delivered = 4
 }
 
 
@@ -44,6 +44,8 @@ export interface OrdersManagerState {
   branchOrders: BranchOrder[];
   selectedOrder: Order| null;
   loading: boolean;
+  showCancelModal:boolean;
+  cancelReason:string,
   error: string | null;
   viewMode: 'pending' | 'branch';
   showConfirmModal: boolean;
@@ -80,6 +82,8 @@ export interface OrdersManagerActions {
     serviceCharge: number;
     totalAmount: number;
   }>;
+  handleCancelOrder: () => Promise<void>;
+  openCancelModal: (orderId: string, rowVersion: string) => void;
   getEstimatedTime: (orderTypeId: number) => Promise<number>;
   getOrderTypeByCode: (code: string) => Promise<OrderType | undefined>;
   getActiveOrderTypes: () => Promise<OrderType[]>;
