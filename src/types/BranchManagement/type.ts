@@ -688,6 +688,8 @@ export interface Order {
   totalPrice: number;
   subTotal?:number;
   serviceFeeApplied?:number
+  orderTypeName:string
+  orderTypeIcon:string
 }
 export interface CategoryReorderRequest {
   categoryOrders: Array<{
@@ -995,6 +997,8 @@ export interface PendingOrder {
   sessionId?: string;
   items: OrderItem[];
   rowVersion: string;
+  orderTypeName:string
+  orderTypeIcon:string
 }
 
 
@@ -1019,6 +1023,8 @@ export interface BranchOrder {
   items: OrderItem[];
   itemCount: number;
   rowVersion: string;
+  orderTypeName : string
+  orderTypeIcon:string
 }
 // Enhanced component state
 export interface OrdersManagerState {

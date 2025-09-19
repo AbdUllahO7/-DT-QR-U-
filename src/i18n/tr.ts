@@ -3592,6 +3592,8 @@ SortableProduct: {
      Showing:"Gösteriliyor",
       to:"a",
       perpage : "Sayfa Başına",
+      cancelOrder:"Siparişi İptal Et",
+cancelOrderConfirmation:"Siparişi iptal etmek istediğinizden emin misiniz?",
       "title": "Sipariş Yönetimi",
       "description": "Restoranınızın siparişlerini kolayca yönetin ve takip edin.",
       "pendingOrders": "Bekleyen Siparişler",

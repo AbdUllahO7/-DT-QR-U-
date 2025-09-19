@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, ChevronUp, Eye, CheckCircle, XCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, Eye, CheckCircle, XCircle, Ban } from 'lucide-react';
 import { BranchOrder, PendingOrder } from '../../../../types/BranchManagement/type';
 import { orderService } from '../../../../services/Branch/OrderService';
 import OrderStatusUtils from '../../../../utils/OrderStatusUtils';
@@ -14,6 +14,7 @@ interface OrderTableRowProps {
   onOpenDetails: (order: PendingOrder | BranchOrder) => void;
   onOpenConfirm: (orderId: string, rowVersion: string) => void;
   onOpenReject: (orderId: string, rowVersion: string) => void;
+  onOpenCancel: (orderId: string, rowVersion: string) => void;
   onOpenStatus:(orderId: string, rowVersion: string, newStatus: OrderStatusEnums) => void;
   t: (key: string) => string;
 }
@@ -28,12 +29,14 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
   onOpenConfirm,
   onOpenReject,
   onOpenStatus,
+  onOpenCancel, 
   t
 }) => {
   const isPending = viewMode === 'pending';
   const status = isPending ? OrderStatusEnums.Pending : orderService.parseOrderStatus((order as BranchOrder).status);
   const rowVersion = order.rowVersion || '';
   const validStatuses = OrderStatusUtils.getValidStatusTransitions(status);
+
 
   return (
     <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
@@ -73,8 +76,15 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
       </td>
       
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+        <div className="text-sm text-center font-medium text-gray-900 dark:text-gray-100">
           {order.totalPrice.toFixed(2)}
+        </div>
+      </td>
+      
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+          {order.orderTypeName}
+          <span className='mr-1 ml-1'>{order.orderTypeIcon}</span>
         </div>
       </td>
       
@@ -105,7 +115,8 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
             </button>
           )}
           
-          {orderService.canCancelOrder(status) && (
+          {/* FIXED: Only show reject button for Pending status */}
+          {status === OrderStatusEnums.Pending && (
             <button
               onClick={() => onOpenReject(order.id.toString(), rowVersion)}
               className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
@@ -115,6 +126,19 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
             </button>
           )}
           
+          {/* FIXED: Cancel button - available for orders that can be cancelled */}
+           {orderService.canCancelOrder(status) && (
+                   <button
+                     onClick={() => {
+                       onOpenCancel(order.id.toString(), rowVersion)
+                     }}
+                     className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300 p-1 rounded hover:bg-orange-100 dark:hover:bg-orange-900 transition-colors"
+                     title={t('ordersManager.cancel')}
+                   >
+                     <Ban className="w-4 h-4" />
+                   </button>
+                 )}
+                 
           {validStatuses.length > 0 && (
             <select
               title={t('ordersManager.changeStatus')}

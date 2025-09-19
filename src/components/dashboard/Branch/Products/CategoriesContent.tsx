@@ -141,8 +141,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
     category?.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-
-
   const filteredCategoriesWithProducts = categoriesWithProducts.filter(category =>
     category?.categoryName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category?.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -311,7 +309,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
             currentStep === AdditionStep.SELECT_CATEGORIES 
               ? 'text-blue-600 dark:text-blue-400' 
               : currentStep === AdditionStep.SELECT_PRODUCTS || currentStep === AdditionStep.REVIEW_SELECTION
-              ? 'text-green-600 dark:text-green-400' 
+              ? 'text-green-600 dark:text-green-400'
               : 'text-gray-400 dark:text-gray-500'
           } ${isRTL ? 'flex-row-reverse' : ''}`}>
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isRTL ? 'ml-3' : 'mr-3'} font-semibold ${
@@ -665,9 +663,11 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
             <div className={`flex items-center justify-center space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
               <Plus className="h-6 w-6" />
               <span>{t('branchCategories.tabs.addNew')}</span>
-              <span className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-sm font-medium">
-                {availableCategoriesNotInBranch.length}
-              </span>
+             {availableCategoriesNotInBranch.some(category => category.status) && (
+                <span className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-sm font-medium">
+                  {availableCategoriesNotInBranch.filter(category => category.status).length}
+                </span>
+              )}
             </div>
           </button>
           <button
@@ -738,69 +738,71 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                     <p className="text-gray-500 dark:text-gray-400">{t('branchCategories.addCategories.allAdded')}</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {availableCategoriesNotInBranch.map((category) => {
-                      const isSelected = selectedCategories.has(category.categoryId);
-                      const currentName = getCategoryName(category.categoryId, category.categoryName);
-                      const isEditingName = editingCategoryId === category.categoryId;
+               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {availableCategoriesNotInBranch.map((category) => {
+                  const isSelected = selectedCategories.has(category.categoryId);
+                  const currentName = getCategoryName(category.categoryId, category.categoryName);
+                  const isEditingName = editingCategoryId === category.categoryId;
 
-                      return (
-                        <div
-                          key={category.categoryId}
-                          className={`relative rounded-2xl border-2 transition-all cursor-pointer hover:shadow-lg ${
-                            isSelected
-                              ? 'border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-md'
-                              : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500'
-                          }`}
-                          onClick={!isEditingName ? () => onCategorySelect(category.categoryId) : undefined}
-                        >
-                          {isSelected && (
-                            <div className={`absolute -top-2 ${isRTL ? '-left-2' : '-right-2'} w-6 h-6 bg-blue-600 dark:bg-blue-500 rounded-full flex items-center justify-center`}>
-                              <Check className="h-4 w-4 text-white" />
-                            </div>
-                          )}
+                  // Skip rendering if category status is false
+                  if (!category.status) return null;
 
-                          <div className="p-6">
-                            <div className={`flex items-start justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                              <div className="flex-1">
-                                <CategoryNameDisplay
-                                  categoryId={category.categoryId}
-                                  originalName={category.categoryName}
-                                  currentDisplayName={currentName}
-                                                                showEditButton = {false}
+                  return (
+                    <div
+                      key={category.categoryId}
+                      className={`relative rounded-2xl border-2 transition-all cursor-pointer hover:shadow-lg ${
+                        isSelected
+                          ? 'border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-md'
+                          : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500'
+                      }`}
+                      onClick={!isEditingName ? () => onCategorySelect(category.categoryId) : undefined}
+                    >
+                      {isSelected && (
+                        <div className={`absolute -top-2 ${isRTL ? '-left-2' : '-right-2'} w-6 h-6 bg-blue-600 dark:bg-blue-500 rounded-full flex items-center justify-center`}>
+                          <Check className="h-4 w-4 text-white" />
+                        </div>
+                      )}
 
-                                />
-                                {category.description && (
-                                  <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 mt-2">
-                                    {category.description}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-
-                            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                              <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
-                                <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-                                  <Package className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                                  <span className="text-sm text-gray-600 dark:text-gray-300">
-                                    {category.products?.length } {t('branchCategories.products.products')}
-                                  </span>
-                                </div>
-                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                  category.status
-                                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                                    : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-                                }`}>
-                                  {category.status ? t('branchCategories.status.active') : t('branchCategories.status.inactive')}
-                                </span>
-                              </div>
-                            </div>
+                      <div className="p-6">
+                        <div className={`flex items-start justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <div className="flex-1">
+                            <CategoryNameDisplay
+                              categoryId={category.categoryId}
+                              originalName={category.categoryName}
+                              currentDisplayName={currentName}
+                              showEditButton={false}
+                            />
+                            {category.description && (
+                              <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 mt-2">
+                                {category.description}
+                              </p>
+                            )}
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                )}
+
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
+                            <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+                              <Package className="h-4 w-4 text-gray-400 dark:text-gray-500" />
+                              <span className="text-sm text-gray-600 dark:text-gray-300">
+                                {category.products?.length} {t('branchCategories.products.products')}
+                              </span>
+                            </div>
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                              category.status
+                                ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                                : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                            }`}>
+                              {category.status ? t('branchCategories.status.active') : t('branchCategories.status.inactive')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+                              )}
               </div>
 
               {selectedCategories.size > 0 && (
@@ -909,12 +911,23 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                                       </span>
                                     )}
                                   </h4>
-                                  <p className="text-gray-600 dark:text-gray-300">{category.products.length} {t('branchCategories.selectProducts.available')}</p>
+                                  {availableCategoriesNotInBranch.some(category => category.status) && (
+                                        <span className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-sm font-medium">
+                                                                            <p className="text-gray-600 dark:text-gray-300">{availableCategoriesNotInBranch.filter(category => category.status).length} {t('branchCategories.selectProducts.available')}</p>
+
+                                        </span>
+                                      )}
                                 </div>
                               </div>
                               <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
+                                
                                 <span className="text-sm text-gray-500 dark:text-gray-400">
-                                  {category.products.filter(p => selectedProducts.has(p.id)).length} {t('branchCategories.steps.selected')}
+                                    {availableCategoriesNotInBranch.some(category => category.status) && (
+                                        <span className="bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full text-sm font-medium">
+                                       <p className="text-gray-600 dark:text-gray-300">{availableCategoriesNotInBranch.filter(category => category.status).length} {t('branchCategories.selectProducts.selected')}</p>
+
+                                        </span>
+                                      )}
                                 </span>
                                 {expandedCategories.has(category.categoryId) ? (
                                   <ChevronUp className="h-5 w-5 text-gray-400 dark:text-gray-500" />

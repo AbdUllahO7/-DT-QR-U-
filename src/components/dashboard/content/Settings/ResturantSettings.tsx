@@ -26,7 +26,8 @@ import {
   HardDrive,
   Wifi,
   ChevronDown,
-  Building2
+  Building2,
+  AlertCircle
 } from 'lucide-react';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { useLanguage } from '../../../../contexts/LanguageContext';

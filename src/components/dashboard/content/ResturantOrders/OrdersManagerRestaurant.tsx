@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, {  useEffect } from 'react';
 import { ChevronDown, Users } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../../hooks';
@@ -18,6 +18,7 @@ import StatusModal from './StatusModal';
 import OrderDetailsModal from './OrderDetailsModal';
 import SuccessNotification from './SuccessNotification';
 import OrdersTable from './OrdersTable';
+import CancelModal from './CancelModal';
 
 const OrdersManagerRestaurant: React.FC = () => {
   const { t, language, isRTL } = useLanguage();
@@ -42,7 +43,9 @@ const OrdersManagerRestaurant: React.FC = () => {
       closeModals,
       toggleRowExpansion,
       handleSort,
-      setState
+      setState,
+      handleCancelOrder,
+      openCancelModal
     }
   } = useOrdersManager();
 
@@ -238,7 +241,16 @@ const OrdersManagerRestaurant: React.FC = () => {
           onOpenConfirm={openConfirmModal}
           onOpenReject={openRejectModal}
           onOpenStatus={openStatusModal}
+          onOpenCancel={openCancelModal}
           onClearFilters={clearFilters}
+          t={t}
+        />
+
+        <CancelModal
+          show={state.showCancelModal}
+          loading={state.loading}
+          onCancel={handleCancelOrder}
+          onClose={closeModals}
           t={t}
         />
 

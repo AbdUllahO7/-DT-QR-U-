@@ -125,7 +125,7 @@ class ProductService {
       const response = await httpClient.get<APICategory[]>(`${this.baseUrl}/categories`, {
         params: {
           includes: 'Products',
-          onlyActive: ""
+          onlyActive:""
         }
       });
       // Transform the API response to match component expectations
