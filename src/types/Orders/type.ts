@@ -6,10 +6,10 @@ export enum OrderStatusEnums {
   Confirmed = 1,
   Preparing = 2,
   Ready = 3,
-  Completed = 4,
-  Cancelled = 5,
-  Rejected = 6,
-  Delivered = 7
+  Completed = 5,
+  Cancelled = 6,
+  Rejected = 7,
+  Delivered = 4
 }
 
 

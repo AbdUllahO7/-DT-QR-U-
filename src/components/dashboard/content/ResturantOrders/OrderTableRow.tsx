@@ -28,14 +28,15 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
   onOpenDetails,
   onOpenConfirm,
   onOpenReject,
-  onOpenCancel,
   onOpenStatus,
+  onOpenCancel, 
   t
 }) => {
   const isPending = viewMode === 'pending';
   const status = isPending ? OrderStatusEnums.Pending : orderService.parseOrderStatus((order as BranchOrder).status);
   const rowVersion = order.rowVersion || '';
   const validStatuses = OrderStatusUtils.getValidStatusTransitions(status);
+
 
   return (
     <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
@@ -48,7 +49,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
             {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
           </button>
           <div>
-            <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+            <div className="text-sm font-medium  text-gray-900 dark:text-gray-100">
               {order.customerName}
             </div>
           </div>
@@ -56,27 +57,34 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
       </td>
       
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-900 dark:text-gray-100 font-mono">
+        <div className="text-sm text-gray-900 text-left  dark:text-gray-100 font-mono">
           {order.orderTag}
         </div>
       </td>
       
       {viewMode === 'branch' && (
         <td className="px-6 py-4 whitespace-nowrap">
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${OrderStatusUtils.getStatusBadgeClass(status)}`}>
+          <span className={`inline-flex text-left items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${OrderStatusUtils.getStatusBadgeClass(status)}`}>
             {OrderStatusUtils.getStatusIcon(status)}
             <span className="ml-1">{orderService.getOrderStatusText(status, lang)}</span>
           </span>
         </td>
       )}
       
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
+      <td className="px-6 py-4 text-left  whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
         {'tableName' in order && order.tableName ? order.tableName : '-'}
       </td>
       
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+        <div className="text-sm text-left  font-medium text-gray-900 dark:text-gray-100">
           {order.totalPrice.toFixed(2)}
+        </div>
+      </td>
+      
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm text-left font-medium text-gray-900 dark:text-gray-100">
+          {order.orderTypeName}
+          <span className='mr-1 ml-1'>{order.orderTypeIcon}</span>
         </div>
       </td>
       
@@ -107,7 +115,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
             </button>
           )}
           
-          {/* Only show reject button for Pending status */}
+          {/* FIXED: Only show reject button for Pending status */}
           {status === OrderStatusEnums.Pending && (
             <button
               onClick={() => onOpenReject(order.id.toString(), rowVersion)}
@@ -118,17 +126,19 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
             </button>
           )}
           
-          {/* Cancel button - available for orders that can be cancelled */}
-          {orderService.canCancelOrder(status) && (
-            <button
-              onClick={() => onOpenCancel(order.id.toString(), rowVersion)}
-              className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300 p-1 rounded hover:bg-orange-100 dark:hover:bg-orange-900 transition-colors"
-              title={t('ordersManager.cancel')}
-            >
-              <Ban className="w-4 h-4" />
-            </button>
-          )}
-          
+          {/* FIXED: Cancel button - available for orders that can be cancelled */}
+           {orderService.canCancelOrder(status) && (
+                   <button
+                     onClick={() => {
+                       onOpenCancel(order.id.toString(), rowVersion)
+                     }}
+                     className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300 p-1 rounded hover:bg-orange-100 dark:hover:bg-orange-900 transition-colors"
+                     title={t('ordersManager.cancel')}
+                   >
+                     <Ban className="w-4 h-4" />
+                   </button>
+                 )}
+                 
           {validStatuses.length > 0 && (
             <select
               title={t('ordersManager.changeStatus')}

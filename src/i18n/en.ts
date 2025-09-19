@@ -3595,6 +3595,8 @@ export const en = {
       Showing:"Showing",
       to:"to",
       perpage : "Per Page",
+      cancelOrder:"Cancel Order",
+      cancelOrderConfirmation :"Are you sure you want to cancel the order?",
       "title": "Order Management",
       "description": "Easily manage and track your restaurant's orders.",
       "pendingOrders": "Pending Orders",

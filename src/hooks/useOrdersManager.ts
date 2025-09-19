@@ -283,6 +283,7 @@ export const useOrdersManager = () => {
         newStatus: OrderStatusEnums.Cancelled,
         rowVersion: state.activeRowVersion 
       };
+      console.log("data",data)
       const updatedOrder = await orderService.updateOrderStatus(state.activeOrderId, data, branchId);
       
       if (state.viewMode === 'pending') {

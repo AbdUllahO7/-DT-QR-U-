@@ -136,8 +136,8 @@ const OrdersManager: React.FC = () => {
           onOpenDetails={openDetailsModal}
           onOpenConfirm={openConfirmModal}
           onOpenReject={openRejectModal}
-          onOpenCancel={handleOpenCancel} // Use our safe wrapper function
           onOpenStatus={openStatusModal}
+          onOpenCancel={openCancelModal}
           onClearFilters={clearFilters}
           t={t}
         />
@@ -161,14 +161,14 @@ const OrdersManager: React.FC = () => {
           t={t}
         />
 
-        {/* NEW: Cancel Modal */}
-        <CancelModal
+          <CancelModal
           show={state.showCancelModal}
           loading={state.loading}
           onCancel={handleCancelOrder}
           onClose={closeModals}
           t={t}
         />
+
 
         <StatusModal
           show={state.showStatusModal}

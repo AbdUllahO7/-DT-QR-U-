@@ -62,7 +62,6 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
 
     return `No ${orderType} found`;
   };
-console.log('OrdersTable received onOpenCancel:', onOpenCancel);
 
 
   if (loading) {

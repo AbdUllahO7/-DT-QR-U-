@@ -144,7 +144,6 @@ const TableQR = () => {
             <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-400" />
           </div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
-            Bir Sorun Oluştu
           </h2>
           <p className="text-red-600 dark:text-red-400 mb-6 bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-200 dark:border-red-800">
             {error}

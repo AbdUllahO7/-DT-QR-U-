@@ -37,28 +37,6 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
   const rowVersion = order.rowVersion || '';
   const validStatuses = OrderStatusUtils.getValidStatusTransitions(status);
 
-  // Debug logging
-  console.log('OrderTableRow - onOpenCancel prop:', onOpenCancel);
-  console.log('OrderTableRow - typeof onOpenCancel:', typeof onOpenCancel);
-
-  // Safe cancel handler with error checking
-  const handleCancelClick = React.useCallback(() => {
-    console.log('Cancel button clicked');
-    console.log('onOpenCancel function:', onOpenCancel);
-    console.log('typeof onOpenCancel:', typeof onOpenCancel);
-    
-    if (typeof onOpenCancel === 'function') {
-      try {
-        onOpenCancel(order.id.toString(), rowVersion);
-      } catch (error) {
-        console.error('Error calling onOpenCancel:', error);
-      }
-    } else {
-      console.error('onOpenCancel is not a function. Received:', onOpenCancel);
-      // You could also show a user-friendly error message here
-      alert('Cancel function is not available. Please refresh the page and try again.');
-    }
-  }, [onOpenCancel, order.id, rowVersion]);
 
   return (
     <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
@@ -149,17 +127,18 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
           )}
           
           {/* FIXED: Cancel button - available for orders that can be cancelled */}
-          {orderService.canCancelOrder(status) && (
-            <button
-                           onClick={() => onOpenReject(order.id.toString(), rowVersion)}
-
-              className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300 p-1 rounded hover:bg-orange-100 dark:hover:bg-orange-900 transition-colors"
-              title={t('ordersManager.cancel')}
-            >
-              <Ban className="w-4 h-4" />
-            </button>
-          )}
-          
+           {orderService.canCancelOrder(status) && (
+                   <button
+                     onClick={() => {
+                       onOpenCancel(order.id.toString(), rowVersion)
+                     }}
+                     className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300 p-1 rounded hover:bg-orange-100 dark:hover:bg-orange-900 transition-colors"
+                     title={t('ordersManager.cancel')}
+                   >
+                     <Ban className="w-4 h-4" />
+                   </button>
+                 )}
+                 
           {validStatuses.length > 0 && (
             <select
               title={t('ordersManager.changeStatus')}
