@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Building2, AlertTriangle, Plus } from 'lucide-react';
+import { Building2, AlertTriangle, Plus, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { 
   BranchInfo, 
@@ -16,6 +16,7 @@ import BranchEditModal from './BranchEditModal';
 import AddBranchCard from './AddBranchCard';
 import { logger } from '../../../../utils/logger';
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
+import { useNavigate } from 'react-router-dom';
 
 const BranchManagement: React.FC = () => {
   const { t, isRTL } = useLanguage();
@@ -26,7 +27,7 @@ const BranchManagement: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingBranch, setEditingBranch] = useState<BranchDetailResponse | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const navigate = useNavigate()
   // Delete confirmation modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [branchToDelete, setBranchToDelete] = useState<BranchInfo | null>(null);
@@ -409,6 +410,7 @@ const BranchManagement: React.FC = () => {
   return (
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             {t('branchManagement.title')}
@@ -416,6 +418,15 @@ const BranchManagement: React.FC = () => {
           <p className="text-gray-600 dark:text-gray-400">
             {t('branchManagement.description')}
           </p>
+            <button 
+                onClick={() => {
+                navigate('/dashboard/RecycleBin')
+                }}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>{t('productsContent.actions.RecycleBin')}</span>
+              </button>
         </div>
 
         {/* Error message */}
