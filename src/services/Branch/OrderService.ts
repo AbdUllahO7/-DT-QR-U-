@@ -328,7 +328,7 @@ class OrderService {
     }
   }
 
-  async smartCreateOrder(data: SmartCreateOrderDto, branchId?: number): Promise<Order> {
+  /*   async smartCreateOrder(data: SmartCreateOrderDto, branchId?: number): Promise<Order> {
     try {
       logger.info('Smart order oluşturma isteği gönderiliyor', { data, branchId }, { prefix: 'OrderService' });
       
@@ -350,7 +350,7 @@ class OrderService {
       logger.error('Smart order oluşturma hatası', error, { prefix: 'OrderService' });
       this.handleError(error, 'Smart order oluşturulurken hata oluştu');
     }
-  }
+  } */
 
   async getTableBasketSummary(branchId?: number): Promise<TableBasketSummary[]> {
     try {

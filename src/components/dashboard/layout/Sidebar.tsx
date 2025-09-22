@@ -11,7 +11,8 @@ import {
   LogOut,
   X,
   FolderPlus,
-  Type
+  Type,
+  Trash2
 } from 'lucide-react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -214,7 +215,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               </button>
             )}
 
-          
+       
            {!isBranchOnly && (
               <button
                 onClick={() => handleNavigate('ResturantSettings', 'ResturantSettings')}
@@ -227,7 +228,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <Settings className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
                 <span>{t('dashboard.settings.title')}</span>
               </button>
+              
             )}
+              
           </nav>
 
           {/* Logout */}

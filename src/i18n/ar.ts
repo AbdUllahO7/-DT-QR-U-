@@ -1410,7 +1410,8 @@ export const ar = {
     updateIngredients: 'تحديث المكونات',
     manageAddons: 'إدارة الإضافات',
     importSampleMenu: 'استيراد قائمة نموذجية',
-    addFirstCategoryTitle: 'إضافة الفئة الأولى'
+    addFirstCategoryTitle: 'إضافة الفئة الأولى',
+    RecycleBin:"سلة المحذوفات"
   },
 
   // Empty states
@@ -3597,6 +3598,7 @@ maxPrice: "السعر الأقصى",
       perpage : "لكل صفحة",
             cancelOrder:"إلغاء الطلب",
       cancelOrderConfirmation :"هل أنت متأكد من رغبتك في إلغاء الطلب?",
+      deletedOrders:"الطلبات المحذوفة",
     "description": "إدارة وتتبع طلبات مطعمك بسهولة.",
     "pendingOrders": "الطلبات المعلقة",
     "branchOrders": "طلبات الفرع",

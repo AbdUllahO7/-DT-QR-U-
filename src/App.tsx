@@ -12,6 +12,7 @@ import OnboardingComplete from './pages/OnboardingComplete';
 import SelectionScreen from './pages/SelectionScreen';
 import Dashboard from './pages/Dashboard';
 import TableQR from './pages/TableQR';
+import RecycleBin from './components/dashboard/Porducts/RecycleBinProducts';
 
 const App: React.FC = () => {
   return (
@@ -30,6 +31,7 @@ const App: React.FC = () => {
             <Route path="/dashboard/*" element={<Dashboard />} />
             <Route path="/table/qr/:qrToken" element={<TableQR />} />
             <Route path="*" element={<Navigate to="/" replace />} />
+
           </Routes>
         </Router>
       </ThemeProvider>

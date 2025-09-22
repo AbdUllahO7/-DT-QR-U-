@@ -1409,7 +1409,9 @@ export const tr = {
     updateIngredients: 'Malzemeleri Güncelle',
     manageAddons: 'Eklentileri Yönet',
     importSampleMenu: 'Örnek Menü İçe Aktar',
-    addFirstCategoryTitle: 'İlk Kategoriyi Ekle'
+    addFirstCategoryTitle: 'İlk Kategoriyi Ekle',
+    RecycleBin:"Geri Dönüşüm Kutusu"
+
   },
 
   // Empty states
@@ -3593,7 +3595,8 @@ SortableProduct: {
       to:"a",
       perpage : "Sayfa Başına",
       cancelOrder:"Siparişi İptal Et",
-cancelOrderConfirmation:"Siparişi iptal etmek istediğinizden emin misiniz?",
+      cancelOrderConfirmation:"Siparişi iptal etmek istediğinizden emin misiniz?",
+      deletedOrders:"Slienen Siparişler",
       "title": "Sipariş Yönetimi",
       "description": "Restoranınızın siparişlerini kolayca yönetin ve takip edin.",
       "pendingOrders": "Bekleyen Siparişler",

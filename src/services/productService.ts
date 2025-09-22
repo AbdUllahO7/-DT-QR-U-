@@ -14,6 +14,21 @@ interface APIProduct {
   description?: string; // May or may not be included
   categoryId: number;
 }
+interface DeletedEntity {
+  id: number;
+  displayName: string;
+  description: string | null;
+  code: string | null;
+  entityType: 'Category' | 'Product';
+  deletedAt: string;
+  deletedBy: string;
+  branchId: number | null;
+  branchName: string | null;
+  restaurantId: number;
+  restaurantName: string | null;
+  categoryId: number | null;
+  categoryName: string | null;
+}
 
 interface APICategory {
   categoryId: number;
@@ -413,7 +428,25 @@ class ProductService {
       throw error;
     }
   }
-
+  /**
+ * Get all deleted categories
+ */
+  async getDeletedCategories(): Promise<DeletedEntity[]> {
+    try {
+      logger.info('Silinmiş kategoriler getiriliyor');
+      
+      const response = await httpClient.get<DeletedEntity[]>(`${this.baseUrl}/Categories/deleted`);
+      
+      logger.info('Silinmiş kategoriler başarıyla getirildi', { 
+        count: response.data?.length || 0 
+      });
+      
+      return response.data || [];
+    } catch (error: any) {
+      logger.error('❌ Silinmiş kategoriler getirilirken hata:', error);
+      throw error;
+    }
+  }
   // Ürün malzeme silme (ingredientId şimdilik 0 olacak)
   async deleteProductIngredient(productId: number, ingredientId: number = 0): Promise<void> {
     try {
@@ -426,7 +459,77 @@ class ProductService {
       throw error;
     }
   }
+  /**
+   * Restore a deleted category
+   */
+  async restoreCategory(categoryId: number): Promise<void> {
+    try {
+      logger.info('Kategori geri yükleniyor', { categoryId });
+      
+      const response = await httpClient.post(`${this.baseUrl}/Categories/${categoryId}/restore`);
+      
+      logger.info('Kategori başarıyla geri yüklendi', { 
+        categoryId,
+        response: response.status 
+      });
+    } catch (error: any) {
+      logger.error('❌ Kategori geri yüklenirken hata:', error);
+      
+      if (error.response?.status === 404) {
+        throw new Error('Geri yüklenecek kategori bulunamadı');
+      } else if (error.response?.status === 400) {
+        throw new Error('Geçersiz kategori geri yükleme isteği');
+      } else {
+        throw new Error('Kategori geri yüklenirken bir hata oluştu');
+      }
+    }
+  }
 
+  /**
+   * Get all deleted products
+   */
+  async getDeletedProducts(): Promise<DeletedEntity[]> {
+    try {
+      logger.info('Silinmiş ürünler getiriliyor');
+      
+      const response = await httpClient.get<DeletedEntity[]>(`${this.baseUrl}/Products/deleted`);
+      
+      logger.info('Silinmiş ürünler başarıyla getirildi', { 
+        count: response.data?.length || 0 
+      });
+      
+      return response.data || [];
+    } catch (error: any) {
+      logger.error('❌ Silinmiş ürünler getirilirken hata:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Restore a deleted product
+   */
+  async restoreProduct(productId: number): Promise<void> {
+    try {
+      logger.info('Ürün geri yükleniyor', { productId });
+      
+      const response = await httpClient.post(`${this.baseUrl}/Products/${productId}/restore`);
+      
+      logger.info('Ürün başarıyla geri yüklendi', { 
+        productId,
+        response: response.status 
+      });
+    } catch (error: any) {
+      logger.error('❌ Ürün geri yüklenirken hata:', error);
+      
+      if (error.response?.status === 404) {
+        throw new Error('Geri yüklenecek ürün bulunamadı');
+      } else if (error.response?.status === 400) {
+        throw new Error('Geçersiz ürün geri yükleme isteği');
+      } else {
+        throw new Error('Ürün geri yüklenirken bir hata oluştu');
+      }
+    }
+  }
   // Kategori güncelleme
   async updateCategory(categoryId: number, categoryData: {
     categoryName?: string;

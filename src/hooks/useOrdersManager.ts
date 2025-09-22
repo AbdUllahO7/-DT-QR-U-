@@ -408,27 +408,7 @@ export const useOrdersManager = () => {
     }
   };
 
-  // NEW: Smart create order with branch support
-  const smartCreateOrder = async (data: any): Promise<Order | null> => {
-    const branchId = getCurrentBranchId();
-    try {
-      setState(prev => ({ ...prev, loading: true, error: null }));
-      const order = await orderService.smartCreateOrder(data, branchId);
-      setState(prev => ({ ...prev, loading: false }));
-      
-      // Refresh orders after creating
-      if (state.viewMode === 'pending') {
-        fetchPendingOrders();
-      } else {
-        fetchBranchOrders();
-      }
-      
-      return order;
-    } catch (error: any) {
-      setState(prev => ({ ...prev, error: error.message, loading: false }));
-      return null;
-    }
-  };
+
 
   // NEW: Refresh order types for current branch
   const refreshOrderTypes = async (): Promise<void> => {
@@ -441,7 +421,8 @@ export const useOrdersManager = () => {
   };
 
   // Switch view mode
-  const switchViewMode = (mode: 'pending' | 'branch') => {
+  const switchViewMode = (mode: 'pending' | 'branch' | 'deletedOrders') => {
+    console.log()
     setState(prev => ({ 
       ...prev, 
       viewMode: mode,
@@ -449,8 +430,10 @@ export const useOrdersManager = () => {
     }));
     if (mode === 'pending') {
       fetchPendingOrders();
-    } else {
+    } else if (mode === 'branch') {
       fetchBranchOrders();
+    } else {
+      return null
     }
   };
 
@@ -553,17 +536,16 @@ export const useOrdersManager = () => {
     getAllOrderTypes,
     handleConfirmOrder,
     handleRejectOrder,
-    handleCancelOrder, // NEW: Add cancel handler
+    handleCancelOrder, 
     handleUpdateStatus,
     getOrderDetails,
     getTableOrders,
     createSessionOrder,
-    smartCreateOrder,
     refreshOrderTypes,
     switchViewMode,
     openConfirmModal,
     openRejectModal,
-    openCancelModal, // NEW: Add cancel modal opener
+    openCancelModal, 
     openStatusModal,
     openDetailsModal,
     closeModals,
