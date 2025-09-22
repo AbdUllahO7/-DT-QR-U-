@@ -7,7 +7,7 @@ interface FilterSectionProps {
   filters: FilterOptions;
   showAdvancedFilters: boolean;
   hasActiveFilters: boolean;
-  viewMode: 'pending' | 'branch';
+  viewMode: 'pending' | 'branch' | 'deletedOrders';
   lang: string;
   filteredCount: number;
   totalCount: number;

@@ -6,7 +6,7 @@ import { OrderStatusEnums } from '../../../../types/Orders/type';
 
 interface OrdersTableProps {
   orders: (PendingOrder | BranchOrder)[];
-  viewMode: 'pending' | 'branch';
+  viewMode: 'pending' | 'branch' | 'deletedOrders';
   loading: boolean;
   expandedRows: Set<string>;
   sortField: string;

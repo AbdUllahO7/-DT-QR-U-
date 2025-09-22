@@ -47,7 +47,7 @@ export interface OrdersManagerState {
   showCancelModal:boolean;
   cancelReason:string,
   error: string | null;
-  viewMode: 'pending' | 'branch';
+  viewMode: 'pending' | 'branch' ;
   showConfirmModal: boolean;
   showRejectModal: boolean;
   showStatusModal: boolean;

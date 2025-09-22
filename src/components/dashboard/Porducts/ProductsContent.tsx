@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Search, Plus, Filter, ArrowUp, List, Grid3X3, Package, Utensils, Loader2,
-  ChevronDown, Check, X, SortAsc, SortDesc, Eye, EyeOff, DollarSign, Hash, Users
+  ChevronDown, Check, X, SortAsc, SortDesc, Eye, EyeOff, DollarSign, Hash, Users,
+  Trash2
 } from 'lucide-react';
 import {
   DndContext,
@@ -37,6 +38,7 @@ import ProductAddonsModal from './ProductAddonsModal';
 import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { Category, Product } from '../../../types/BranchManagement/type';
+import { useNavigate } from 'react-router-dom';
 
 // Branch dropdown item interface
 interface BranchDropdownItem {
@@ -85,7 +87,7 @@ const ProductsContent: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
   const [activeId, setActiveId] = useState<number | null>(null);
-  
+  const navigate = useNavigate()
   // Branch Management States
   const [branches, setBranches] = useState<BranchDropdownItem[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<BranchDropdownItem | null>(null);
@@ -1202,6 +1204,16 @@ const ProductsContent: React.FC = () => {
               >
                 <Plus className="h-4 w-4" />
                 <span>{t('productsContent.actions.newProduct')}</span>
+              </button>
+
+              <button 
+                onClick={() => {
+                navigate('/dashboard/RecycleBin')
+                }}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>{t('productsContent.actions.RecycleBin')}</span>
               </button>
             </div>
           </div>
