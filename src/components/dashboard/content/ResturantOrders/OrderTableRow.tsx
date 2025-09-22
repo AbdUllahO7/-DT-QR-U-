@@ -7,7 +7,7 @@ import { OrderStatusEnums } from '../../../../types/Orders/type';
 
 interface OrderTableRowProps {
   order: PendingOrder | BranchOrder;
-  viewMode: 'pending' | 'branch';
+  viewMode: 'pending' | 'branch' | 'deletedOrders';
   isExpanded: boolean;
   lang: string;
   onToggleExpansion: (orderId: string) => void;

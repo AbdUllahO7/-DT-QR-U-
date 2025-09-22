@@ -31,6 +31,7 @@ import OrderTypeResturantComponent from '../components/dashboard/content/OrderTy
 import OrdersManagerResturant from '../components/dashboard/content/ResturantOrders/OrdersManagerRestaurant';
 import BranchSettings from '../components/dashboard/Branch/Settings/BranchSettings';
 import ResturantSettings from '../components/dashboard/content/Settings/ResturantSettings';
+import RecycleBin from '../components/dashboard/Porducts/RecycleBinProducts';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();
@@ -204,6 +205,7 @@ const Dashboard: React.FC = () => {
               {activeTab === 'subscription' && <Subscription />}
               {activeTab === 'orderTypeResturant' && <OrderTypeResturantComponent />}
               {activeTab === 'ResturantSettings' && <ResturantSettings />}
+              {activeTab === 'RecycleBin' && <RecycleBin />}
 
             {/* branch */}
               {activeTab === 'branchProducts' && <BranchProducts />}

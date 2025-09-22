@@ -191,6 +191,8 @@ const OrdersManagerRestaurant: React.FC = () => {
               </div>
             )}
           </div>
+
+
         </div>
 
         <ViewModeToggle 

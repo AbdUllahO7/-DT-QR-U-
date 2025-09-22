@@ -8,7 +8,7 @@ import OrderStatusUtils from '../../../../utils/OrderStatusUtils';
 interface OrderDetailsModalProps {
   show: boolean;
   order: Order | null;
-  viewMode: 'pending' | 'branch';
+  viewMode: 'pending' | 'branch' | 'deletedOrders';
   lang: string;
   onClose: () => void;
   t: (key: string) => string;
