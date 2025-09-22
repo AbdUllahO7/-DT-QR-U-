@@ -6,7 +6,6 @@ import type {
   CreateBranchResponse, 
   BranchDetailResponse,
   Branch,
-
   BatchUpdateBranchDto
 } from '../types/api';
 import { BranchData, BranchDropdownItem, TableCategory, TableData } from '../types/BranchManagement/type';
@@ -18,6 +17,22 @@ interface CreateMenuTableDto {
   capacity: number;
   displayOrder: number | null;
   isActive: boolean;
+}
+
+interface DeletedBranch {
+  id: number;
+  displayName: string;
+  description: string | null;
+  code: string | null;
+  entityType: 'Branch';
+  deletedAt: string;
+  deletedBy: string;
+  branchId: number | null;
+  branchName: string | null;
+  restaurantId: number;
+  restaurantName: string | null;
+  categoryId: number | null;
+  categoryName: string | null;
 }
 export interface UpdateMenuTableDto {
   id: number;
@@ -158,7 +173,77 @@ class BranchService {
       throw error;
     }
   }
+  /**
+   * Get all deleted branches
+   */
+  async getDeletedBranches(): Promise<DeletedBranch[]> {
+    try {
+      logger.info('Silinmiş şubeler getiriliyor', null, { prefix: 'BranchService' });
+      
+      const response = await httpClient.get<DeletedBranch[]>(`${this.baseUrl}/deleted`);
+      
+      logger.info('Silinmiş şubeler başarıyla getirildi', { 
+        count: response.data?.length || 0 
+      }, { prefix: 'BranchService' });
+      
+      return response.data || [];
+    } catch (error: any) {
+      logger.error('❌ Silinmiş şubeler getirilirken hata:', error, { prefix: 'BranchService' });
+      
+      // Enhanced error handling
+      if (error?.response?.status === 401) {
+        throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+      } else if (error?.response?.status === 403) {
+        throw new Error('Bu işlem için yetkiniz bulunmuyor.');
+      } else if (error?.response?.status === 0 || !navigator.onLine) {
+        throw new Error('İnternet bağlantınızı kontrol edin.');
+      } else {
+        throw new Error(`Silinmiş şubeler getirilirken hata oluştu: ${error?.message || 'Bilinmeyen hata'}`);
+      }
+    }
+  }
 
+  /**
+   * Restore a deleted branch
+   */
+  async restoreBranch(branchId: number): Promise<void> {
+    try {
+      logger.info('Şube geri yükleniyor', { branchId }, { prefix: 'BranchService' });
+      
+      const response = await httpClient.post(`${this.baseUrl}/${branchId}/restore`);
+      
+      logger.info('Şube başarıyla geri yüklendi', { 
+        branchId,
+        response: response.status 
+      }, { prefix: 'BranchService' });
+    } catch (error: any) {
+      logger.error('❌ Şube geri yüklenirken hata:', error, { prefix: 'BranchService' });
+      
+      // Enhanced error handling with specific error messages
+      if (error?.response?.status === 404) {
+        throw new Error('Geri yüklenecek şube bulunamadı.');
+      } else if (error?.response?.status === 400) {
+        const errorData = error?.response?.data;
+        if (errorData?.errors) {
+          // Show validation errors
+          const validationErrors = Object.values(errorData.errors).flat();
+          throw new Error(`Doğrulama hatası: ${validationErrors.join(', ')}`);
+        } else {
+          throw new Error('Geçersiz şube geri yükleme isteği.');
+        }
+      } else if (error?.response?.status === 401) {
+        throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+      } else if (error?.response?.status === 403) {
+        throw new Error('Bu işlem için yetkiniz bulunmuyor.');
+      } else if (error?.response?.status === 409) {
+        throw new Error('Bu şube zaten aktif durumda veya aynı isimde aktif bir şube mevcut.');
+      } else if (error?.response?.status === 0 || !navigator.onLine) {
+        throw new Error('İnternet bağlantınızı kontrol edin.');
+      } else {
+        throw new Error(`Şube geri yüklenirken hata oluştu: ${error?.message || 'Bilinmeyen hata'}`);
+      }
+    }
+  }
   async deleteBranch(id: number): Promise<void> {
     try {
       logger.info('Branch silme isteği gönderiliyor', { id }, { prefix: 'BranchService' });

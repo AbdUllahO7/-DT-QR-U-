@@ -18,10 +18,7 @@ export const ConfirmDeleteModal: React.FC<{
   onClose, 
   onConfirm, 
   title, 
-  message, 
   isSubmitting = false,
-  itemType,
-  itemName 
 }) => {
   const { t, isRTL } = useLanguage();
   const [error, setError] = useState<string | null>(null);
