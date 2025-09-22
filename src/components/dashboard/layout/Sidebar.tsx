@@ -12,7 +12,6 @@ import {
   X,
   FolderPlus,
   Type,
-  Trash2
 } from 'lucide-react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -200,6 +199,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <span>{t('dashboard.orderType.title')}</span>
 
             </button>
+
             {/* User Management - Only for non-branch-only users */}
             {!isBranchOnly && (
               <button

@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, RotateCcw, Search, Filter, Calendar, Package, FolderOpen, AlertCircle, CheckCircle, RefreshCw, X } from 'lucide-react';
+import { Trash2, RotateCcw, Search, Filter, Calendar, Package, FolderOpen, AlertCircle, CheckCircle, RefreshCw, X, Building2 } from 'lucide-react';
 import { productService } from '../../../services/productService';
-import Sidebar from '../layout/Sidebar';
+import { branchService } from '../../../services/branchService';
 
 interface DeletedEntity {
   id: number;
   displayName: string;
   description: string | null;
   code: string | null;
-  entityType: 'Category' | 'Product';
+  entityType: 'Category' | 'Product' | 'Branch';
   deletedAt: string;
   deletedBy: string;
   branchId: number | null;
@@ -23,7 +23,7 @@ const RecycleBin: React.FC = () => {
   const [deletedItems, setDeletedItems] = useState<DeletedEntity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'Category' | 'Product'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'Category' | 'Product' | 'Branch'>('all');
   const [restoringIds, setRestoringIds] = useState<Set<number>>(new Set());
   const [notification, setNotification] = useState<{
     type: 'success' | 'error';
@@ -34,12 +34,13 @@ const RecycleBin: React.FC = () => {
   const loadDeletedItems = async () => {
     setLoading(true);
     try {
-      const [deletedCategories, deletedProducts] = await Promise.all([
+      const [deletedCategories, deletedProducts, deletedBranches] = await Promise.all([
         productService.getDeletedCategories(),
-        productService.getDeletedProducts()
+        productService.getDeletedProducts(),
+        branchService.getDeletedBranches()
       ]);
       
-      const allDeletedItems = [...deletedCategories, ...deletedProducts];
+      const allDeletedItems = [...deletedCategories, ...deletedProducts, ...deletedBranches];
       setDeletedItems(allDeletedItems);
     } catch (error) {
       console.error('Error loading deleted items:', error);
@@ -63,9 +64,12 @@ const RecycleBin: React.FC = () => {
       if (item.entityType === 'Category') {
         await productService.restoreCategory(item.id);
         showNotification('success', `"${item.displayName}" kategorisi başarıyla geri yüklendi`);
-      } else {
+      } else if (item.entityType === 'Product') {
         await productService.restoreProduct(item.id);
         showNotification('success', `"${item.displayName}" ürünü başarıyla geri yüklendi`);
+      } else if (item.entityType === 'Branch') {
+        await branchService.restoreBranch(item.id);
+        showNotification('success', `"${item.displayName}" şubesi başarıyla geri yüklendi`);
       }
       
       // Remove from list after successful restore
@@ -102,6 +106,48 @@ const RecycleBin: React.FC = () => {
     });
   };
 
+  // Get icon and color based on entity type
+  const getEntityConfig = (entityType: string) => {
+    switch (entityType) {
+      case 'Category':
+        return {
+          icon: FolderOpen,
+          color: 'green',
+          bgClass: 'bg-green-100 dark:bg-green-900/20',
+          textClass: 'text-green-600 dark:text-green-400',
+          badgeClass: 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300',
+          label: 'Kategori'
+        };
+      case 'Product':
+        return {
+          icon: Package,
+          color: 'blue',
+          bgClass: 'bg-blue-100 dark:bg-blue-900/20',
+          textClass: 'text-blue-600 dark:text-blue-400',
+          badgeClass: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300',
+          label: 'Ürün'
+        };
+      case 'Branch':
+        return {
+          icon: Building2,
+          color: 'purple',
+          bgClass: 'bg-purple-100 dark:bg-purple-900/20',
+          textClass: 'text-purple-600 dark:text-purple-400',
+          badgeClass: 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300',
+          label: 'Şube'
+        };
+      default:
+        return {
+          icon: Package,
+          color: 'gray',
+          bgClass: 'bg-gray-100 dark:bg-gray-900/20',
+          textClass: 'text-gray-600 dark:text-gray-400',
+          badgeClass: 'bg-gray-100 dark:bg-gray-900/20 text-gray-700 dark:text-gray-300',
+          label: 'Diğer'
+        };
+    }
+  };
+
   // Load data on component mount
   useEffect(() => {
     loadDeletedItems();
@@ -120,7 +166,7 @@ const RecycleBin: React.FC = () => {
           </h1>
         </div>
         <p className="text-gray-600 dark:text-gray-400">
-          Silinmiş kategoriler ve ürünleri yönetin
+          Silinmiş şubeler, kategoriler ve ürünleri yönetin
         </p>
       </div>
 
@@ -146,7 +192,7 @@ const RecycleBin: React.FC = () => {
           <div className="flex items-center gap-2">
             <Filter className="w-5 h-5 text-gray-500 dark:text-gray-400" />
             <select
-            title='filter'
+            title='filterType'
               value={filterType}
               onChange={(e) => setFilterType(e.target.value as typeof filterType)}
               className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
@@ -154,6 +200,7 @@ const RecycleBin: React.FC = () => {
                        focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">Tümü</option>
+              <option value="Branch">Şubeler</option>
               <option value="Category">Kategoriler</option>
               <option value="Product">Ürünler</option>
             </select>
@@ -174,17 +221,17 @@ const RecycleBin: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-              <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            <div className="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+              <Building2 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {deletedItems.filter(item => item.entityType === 'Product').length}
+                {deletedItems.filter(item => item.entityType === 'Branch').length}
               </p>
-              <p className="text-gray-600 dark:text-gray-400">Silinmiş Ürün</p>
+              <p className="text-gray-600 dark:text-gray-400">Silinmiş Şube</p>
             </div>
           </div>
         </div>
@@ -205,8 +252,22 @@ const RecycleBin: React.FC = () => {
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-              <Trash2 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+            <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+              <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                {deletedItems.filter(item => item.entityType === 'Product').length}
+              </p>
+              <p className="text-gray-600 dark:text-gray-400">Silinmiş Ürün</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
+              <Trash2 className="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
             <div>
               <p className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -234,89 +295,93 @@ const RecycleBin: React.FC = () => {
             <p className="text-gray-600 dark:text-gray-400">
               {searchTerm || filterType !== 'all' 
                 ? 'Arama kriterlerinize uygun silinmiş öğe bulunmadı'
-                : 'Henüz silinmiş kategori veya ürün bulunmuyor'
+                : 'Henüz silinmiş şube, kategori veya ürün bulunmuyor'
               }
             </p>
           </div>
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {filteredItems.map((item) => (
-              <div key={`${item.entityType}-${item.id}`} 
-                   className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-start gap-4 flex-1">
-                    {/* Icon */}
-                    <div className={`p-2 rounded-lg ${
-                      item.entityType === 'Category' 
-                        ? 'bg-green-100 dark:bg-green-900/20' 
-                        : 'bg-blue-100 dark:bg-blue-900/20'
-                    }`}>
-                      {item.entityType === 'Category' ? (
-                        <FolderOpen className={`w-5 h-5 ${
-                          item.entityType === 'Category' 
-                            ? 'text-green-600 dark:text-green-400' 
-                            : 'text-blue-600 dark:text-blue-400'
-                        }`} />
-                      ) : (
-                        <Package className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                      )}
+            {filteredItems.map((item) => {
+              const config = getEntityConfig(item.entityType);
+              const IconComponent = config.icon;
+              
+              return (
+                <div key={`${item.entityType}-${item.id}`} 
+                     className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-start gap-4 flex-1">
+                      {/* Icon */}
+                      <div className={`p-2 rounded-lg ${config.bgClass}`}>
+                        <IconComponent className={`w-5 h-5 ${config.textClass}`} />
+                      </div>
+
+                      {/* Content */}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                            {item.displayName}
+                          </h3>
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.badgeClass}`}>
+                            {config.label}
+                          </span>
+                        </div>
+                        
+                        {item.description && (
+                          <p className="text-gray-600 dark:text-gray-400 mb-2">
+                            {item.description}
+                          </p>
+                        )}
+                        
+                        {/* Additional context information */}
+                        <div className="flex flex-col gap-1 mb-2">
+                          {item.entityType === 'Product' && item.categoryName && (
+                            <p className="text-sm text-gray-500 dark:text-gray-500">
+                              Kategori: {item.categoryName}
+                            </p>
+                          )}
+                          
+                          {item.entityType === 'Branch' && item.restaurantName && (
+                            <p className="text-sm text-gray-500 dark:text-gray-500">
+                              Restoran: {item.restaurantName}
+                            </p>
+                          )}
+                          
+                          {item.entityType !== 'Branch' && item.restaurantName && (
+                            <p className="text-sm text-gray-500 dark:text-gray-500">
+                              Restoran: {item.restaurantName}
+                            </p>
+                          )}
+                        </div>
+                        
+                        <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-500">
+                          <Calendar className="w-4 h-4" />
+                          <span>Silinme: {formatDate(item.deletedAt)}</span>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Content */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-                          {item.displayName}
-                        </h3>
-                        <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          item.entityType === 'Category'
-                            ? 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-                            : 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                        }`}>
-                          {item.entityType === 'Category' ? 'Kategori' : 'Ürün'}
-                        </span>
-                      </div>
-                      
-                      {item.description && (
-                        <p className="text-gray-600 dark:text-gray-400 mb-2">
-                          {item.description}
-                        </p>
-                      )}
-                      
-                      {item.entityType === 'Product' && item.categoryName && (
-                        <p className="text-sm text-gray-500 dark:text-gray-500 mb-2">
-                          Kategori: {item.categoryName}
-                        </p>
-                      )}
-                      
-                      <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-500">
-                        <Calendar className="w-4 h-4" />
-                        <span>Silinme: {formatDate(item.deletedAt)}</span>
-                      </div>
+                    {/* Actions */}
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleRestore(item)}
+                        disabled={restoringIds.has(item.id)}
+                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 
+                                 disabled:bg-gray-400 dark:disabled:bg-gray-600
+                                 text-white rounded-lg transition-colors duration-200
+                                 disabled:cursor-not-allowed"
+                      >
+                        {restoringIds.has(item.id) ? (
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <RotateCcw className="w-4 h-4" />
+                        )}
+                        {restoringIds.has(item.id) ? 'Geri yükleniyor...' : 'Geri Yükle'}
+                      </button>
                     </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleRestore(item)}
-                      disabled={restoringIds.has(item.id)}
-                      className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 
-                               disabled:bg-gray-400 dark:disabled:bg-gray-600
-                               text-white rounded-lg transition-colors duration-200
-                               disabled:cursor-not-allowed"
-                    >
-                      {restoringIds.has(item.id) ? (
-                        <RefreshCw className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <RotateCcw className="w-4 h-4" />
-                      )}
-                      {restoringIds.has(item.id) ? 'Geri yükleniyor...' : 'Geri Yükle'}
-                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
