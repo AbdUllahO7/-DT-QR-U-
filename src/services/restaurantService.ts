@@ -13,6 +13,19 @@ import type {
 } from '../types/api';
 import { RestaurantBranchDropdownItem } from '../types/BranchManagement/type';
 
+// Interface for restaurant response from GET /api/Restaurants
+interface RestaurantInfo {
+  restaurantId: number;
+  restaurantName: string;
+  cuisineType: string;
+  branchCount: number;
+  activeBranchCount: number;
+  hasAlcoholService: boolean;
+  restaurantStatus: boolean;
+  restaurantLogoPath: string;
+}
+
+// Existing interfaces
 interface Restaurant {
   id: string;
   name: string;
@@ -27,8 +40,37 @@ interface Restaurant {
   updatedAt: string;
 }
 
+interface DeletedRestaurant {
+  id: string;
+  name: string;
+  description?: string;
+  deletedAt: string;
+  userId: string;
+}
+
 class RestaurantService {
   private baseUrl = '/api/Restaurants';
+
+  // NEW: Get all restaurants
+  async getRestaurants(): Promise<RestaurantInfo[]> {
+    try {
+      logger.info('Tüm restoranlar getiriliyor...');
+      const response = await httpClient.get<RestaurantInfo[]>(this.baseUrl);
+      logger.info('Restoranlar alındı:', response.data);
+      
+      // Sanitize restaurantName and restaurantLogoPath for each restaurant
+      const sanitizedData = response.data.map(restaurant => ({
+        ...restaurant,
+        restaurantName: sanitizePlaceholder(restaurant.restaurantName),
+        restaurantLogoPath: sanitizePlaceholder(restaurant.restaurantLogoPath)
+      }));
+
+      return sanitizedData;
+    } catch (error: any) {
+      logger.error('Restoranlar alınırken hata oluştu:', error);
+      throw error;
+    }
+  }
 
   async createRestaurant(data: CreateRestaurantDto): Promise<CreateRestaurantResponse> {
     try {
@@ -70,14 +112,12 @@ class RestaurantService {
         logger.info('🔍 Restaurant branches dropdown API çağrısı başlatılıyor...');
       }
 
-      // API doğrudan bir dizi dönüyor, items özelliği içinde değil
       const response = await httpClient.get<any[]>(`${this.baseUrl}/branches/dropdown`);
 
       if (import.meta.env.DEV) {
         logger.info('📡 Restaurant branches dropdown API yanıtı:', response.data);
       }
 
-      // API yanıtını RestaurantBranchDropdownItem formatına dönüştür
       const items: RestaurantBranchDropdownItem[] = response.data.map(item => ({
         id: item.branchId,
         name: item.branchName,
@@ -100,11 +140,9 @@ class RestaurantService {
   async getRestaurantManagementInfo(): Promise<RestaurantManagementInfo | null> {
     try {
       logger.info('Restaurant yönetim bilgileri alınıyor...');
-      // Token'dan restaurantId al
       const { getRestaurantIdFromToken } = await import('../utils/http');
       const restaurantId = getRestaurantIdFromToken();
 
-      // Endpoint: /api/Restaurants/management-info?restaurantId=ID
       const url = restaurantId
         ? `${this.baseUrl}/management-info?restaurantId=${restaurantId}`
         : `${this.baseUrl}/management-info`;
@@ -113,14 +151,11 @@ class RestaurantService {
       logger.info('Restaurant yönetim bilgileri alındı:', response.data);
       let fixedData = response.data;
 
-      // Geçersiz ya da placeholder isim kontrolü
       if (!fixedData.restaurantName || fixedData.restaurantName.toLowerCase() === 'string') {
-        // 1) localStorage -> SelectionScreen sayfası burada gerçek ismi kaydediyor
         const storedName = localStorage.getItem('restaurantName');
         if (storedName && storedName.toLowerCase() !== 'string') {
           fixedData = { ...fixedData, restaurantName: storedName };
         } else {
-          // 2) JWT decode fallback
           const token = localStorage.getItem('token');
           if (token) {
             const { decodeToken } = await import('../utils/http');
@@ -133,19 +168,15 @@ class RestaurantService {
         }
       }
 
-      // Restaurant logo path placeholder düzeltmesi
       if (fixedData.restaurantLogoPath && sanitizePlaceholder(fixedData.restaurantLogoPath) === '') {
-        // JWT veya başka bir kaynaktan alınabilecek logoyu bul (varsa)
         const storedLogo = localStorage.getItem('restaurantLogoPath');
         if (storedLogo && storedLogo.toLowerCase() !== 'string') {
           fixedData = { ...fixedData, restaurantLogoPath: storedLogo };
         } else {
-          // Şimdilik boş string ile değiştir
           fixedData = { ...fixedData, restaurantLogoPath: '' };
         }
       }
 
-      // restaurantName de sanitizePlaceholder ile normalize edilsin (kodu tekrar etmemek için)
       fixedData = { ...fixedData, restaurantName: sanitizePlaceholder(fixedData.restaurantName) };
 
       return fixedData;
@@ -163,7 +194,6 @@ class RestaurantService {
     try {
       logger.info('Restaurant yönetim bilgileri güncelleniyor...', data);
 
-      // API'nin beklediği format
       const updateRequest: UpdateRestaurantManagementRequest = {
         updateRestaurantDto: {
           restaurantId: data.restaurantId || 0,
@@ -205,7 +235,37 @@ class RestaurantService {
   }
 
   async deleteRestaurant(id: string): Promise<void> {
-    await httpClient.delete(`/api/Restaurants/${id}`);
+    try {
+      logger.info('Restaurant silme isteği gönderiliyor:', id);
+      await httpClient.delete(`/api/Restaurants/${id}`);
+      logger.info('Restaurant başarıyla silindi:', id);
+    } catch (error: any) {
+      logger.error('Restaurant silinirken hata oluştu:', error);
+      throw error;
+    }
+  }
+
+  async getDeletedRestaurants(): Promise<DeletedRestaurant[]> {
+    try {
+      logger.info('Silinmiş restaurantlar getiriliyor...');
+      const response = await httpClient.get<DeletedRestaurant[]>(`${this.baseUrl}/deleted`);
+      logger.info('Silinmiş restaurantlar alındı:', response.data);
+      return response.data;
+    } catch (error: any) {
+      logger.error('Silinmiş restaurantlar alınırken hata oluştu:', error);
+      throw error;
+    }
+  }
+
+  async restoreRestaurant(id: string): Promise<void> {
+    try {
+      logger.info('Restaurant restore isteği gönderiliyor:', id);
+      await httpClient.post(`${this.baseUrl}/${id}/restore`);
+      logger.info('Restaurant başarıyla restore edildi:', id);
+    } catch (error: any) {
+      logger.error('Restaurant restore edilirken hata oluştu:', error);
+      throw error;
+    }
   }
 
   async createAbout(data: CreateAboutDto): Promise<CreateAboutResponse> {
@@ -256,6 +316,4 @@ class RestaurantService {
 }
 
 export const restaurantService = new RestaurantService();
-
-// Export singleton instance
-export const restaurantServiceInstance = restaurantService; 
+export const restaurantServiceInstance = restaurantService;

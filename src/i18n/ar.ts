@@ -315,6 +315,9 @@ export const ar = {
       logout: 'تسجيل الخروج',
       branch: 'فرع'
     },
+    RestaurantManagement : {
+      title : "إدارة المطعم"
+    },
     branchManagementTitle: "إدارة الفروع" 
   },
 
@@ -3805,6 +3808,64 @@ maxPrice: "السعر الأقصى",
     skipWhatsApp: 'تخطي واتساب',
     sendToWhatsApp: 'إرسال إلى واتساب',
     sending: 'جاري الإرسال...'
+  }
+},
+recycleBin: {
+  title: 'سلة المحذوفات',
+  titleProducts: 'المنتجات والفئات المحذوفة',
+  titleBranches: 'الفروع المحذوفة',
+  titleTables: 'الطاولات المحذوفة',
+  description: 'إدارة الفروع والفئات والمنتجات والطاولات المحذوفة',
+  descriptionProducts: 'إدارة المنتجات والفئات المحذوفة',
+  descriptionBranches: 'إدارة الفروع المحذوفة',
+  descriptionTables: 'إدارة الطاولات المحذوفة',
+  search: 'البحث في العناصر...',
+  filter: {
+    all: 'الكل',
+    branches: 'الفروع',
+    categories: 'الفئات',
+    products: 'المنتجات',
+    tables: 'الطاولات'
+  },
+  refresh: 'تحديث',
+  loading: 'جاري التحميل...',
+  stats: {
+    deletedBranch: 'فرع محذوف',
+    deletedCategory: 'فئة محذوفة',
+    deletedProduct: 'منتج محذوف',
+    deletedTable: 'طاولة محذوفة',
+    totalDeleted: 'إجمالي المحذوفات'
+  },
+  entityTypes: {
+    category: 'فئة',
+    product: 'منتج',
+    branch: 'فرع',
+    table: 'طاولة',
+    other: 'أخرى'
+  },
+  contextInfo: {
+    category: 'الفئة:',
+    branch: 'الفرع:',
+    restaurant: 'المطعم:'
+  },
+  deletedAt: 'تاريخ الحذف:',
+  restore: {
+    button: 'استعادة',
+    restoring: 'جاري الاستعادة...',
+    successCategory: 'تم استعادة الفئة "{name}" بنجاح',
+    successProduct: 'تم استعادة المنتج "{name}" بنجاح',
+    successBranch: 'تم استعادة الفرع "{name}" بنجاح',
+    successTable: 'تم استعادة الطاولة "{name}" بنجاح',
+    error: 'فشلت عملية الاستعادة'
+  },
+  empty: {
+    title: 'سلة المحذوفات فارغة',
+    titleFiltered: 'لم يتم العثور على نتائج',
+    description: 'لا توجد فروع أو فئات أو منتجات أو طاولات محذوفة حتى الآن',
+    descriptionFiltered: 'لم يتم العثور على عناصر محذوفة تطابق معايير البحث الخاصة بك'
+  },
+  errors: {
+    loadingError: 'حدث خطأ أثناء تحميل العناصر المحذوفة'
   }
 }
 }; 
