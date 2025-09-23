@@ -218,7 +218,7 @@ export const tr = {
         avgOrderValue: 'Ortalama Sipariş Değeri'
       }
     },
-  orderType: {
+    orderType: {
         title: "Sipariş Türü Ayarları",
         subtitle: "Sipariş türlerinin aktiflik durumu, minimum tutar ve servis ücretlerini yönetin",
         loading: "Sipariş türleri yükleniyor...",
@@ -311,7 +311,9 @@ export const tr = {
       }
     },
     branchManagementTitle: "Şube Yönetimi" ,
-
+     ResturantManagment : {
+      title : "Restoran Yönetimi"
+    },
     sidebar: {
        title : "QR Menü",
       logout: 'Çıkış Yap',
@@ -3803,5 +3805,64 @@ SortableProduct: {
     sendToWhatsApp: 'WhatsApp\'a Gönder',
     sending: 'Gönderiliyor...'
   }
-}
+},
+recycleBin: {
+  title: 'Geri Dönüşüm Kutusu',
+  titleProducts: 'Silinmiş Ürünler ve Kategoriler',
+  titleBranches: 'Silinmiş Şubeler',
+  titleTables: 'Silinmiş Masalar',
+  description: 'Silinmiş şubeler, kategoriler, ürünler ve masaları yönetin',
+  descriptionProducts: 'Silinmiş ürünler ve kategorileri yönetin',
+  descriptionBranches: 'Silinmiş şubeleri yönetin',
+  descriptionTables: 'Silinmiş masaları yönetin',
+  search: 'Öğe ara...',
+  filter: {
+    all: 'Tümü',
+    branches: 'Şubeler',
+    categories: 'Kategoriler',
+    products: 'Ürünler',
+    tables: 'Masalar'
+  },
+  refresh: 'Yenile',
+  loading: 'Yükleniyor...',
+  stats: {
+    deletedBranch: 'Silinmiş Şube',
+    deletedCategory: 'Silinmiş Kategori',
+    deletedProduct: 'Silinmiş Ürün',
+    deletedTable: 'Silinmiş Masa',
+    totalDeleted: 'Toplam Silinmiş'
+  },
+  entityTypes: {
+    category: 'Kategori',
+    product: 'Ürün',
+    branch: 'Şube',
+    table: 'Masa',
+    other: 'Diğer'
+  },
+  contextInfo: {
+    category: 'Kategori:',
+    branch: 'Şube:',
+    restaurant: 'Restoran:'
+  },
+  deletedAt: 'Silinme:',
+  restore: {
+    button: 'Geri Yükle',
+    restoring: 'Geri yükleniyor...',
+    successCategory: '"{name}" kategorisi başarıyla geri yüklendi',
+    successProduct: '"{name}" ürünü başarıyla geri yüklendi',
+    successBranch: '"{name}" şubesi başarıyla geri yüklendi',
+    successTable: '"{name}" masası başarıyla geri yüklendi',
+    error: 'Geri yükleme işlemi başarısız oldu'
+  },
+  empty: {
+    title: 'Geri dönüşüm kutusu boş',
+    titleFiltered: 'Sonuç bulunamadı',
+    description: 'Henüz silinmiş şube, kategori, ürün veya masa bulunmuyor',
+    descriptionFiltered: 'Arama kriterlerinize uygun silinmiş öğe bulunmadı'
+  },
+  errors: {
+    loadingError: 'Silinmiş öğeler yüklenirken hata oluştu'
+  }
+},
+
 }; 

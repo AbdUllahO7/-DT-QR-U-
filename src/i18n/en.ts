@@ -313,6 +313,9 @@ export const en = {
 
 
     },
+     RestaurantManagement : {
+      title : "Restaurant Management"
+    },
     branchManagementTitle: "Branch Management" ,
     sidebar: {
       title : "QR Menu",
@@ -3808,6 +3811,63 @@ export const en = {
     sendToWhatsApp: 'Send to WhatsApp',
     sending: 'Sending...'
   }
-}
-
+},
+recycleBin: {
+  title: 'Recycle Bin',
+  titleProducts: 'Deleted Products and Categories',
+  titleBranches: 'Deleted Branches',
+  titleTables: 'Deleted Tables',
+  description: 'Manage deleted branches, categories, products and tables',
+  descriptionProducts: 'Manage deleted products and categories',
+  descriptionBranches: 'Manage deleted branches',
+  descriptionTables: 'Manage deleted tables',
+  search: 'Search items...',
+  filter: {
+    all: 'All',
+    branches: 'Branches',
+    categories: 'Categories',
+    products: 'Products',
+    tables: 'Tables'
+  },
+  refresh: 'Refresh',
+  loading: 'Loading...',
+  stats: {
+    deletedBranch: 'Deleted Branch',
+    deletedCategory: 'Deleted Category',
+    deletedProduct: 'Deleted Product',
+    deletedTable: 'Deleted Table',
+    totalDeleted: 'Total Deleted'
+  },
+  entityTypes: {
+    category: 'Category',
+    product: 'Product',
+    branch: 'Branch',
+    table: 'Table',
+    other: 'Other'
+  },
+  contextInfo: {
+    category: 'Category:',
+    branch: 'Branch:',
+    restaurant: 'Restaurant:'
+  },
+  deletedAt: 'Deleted:',
+  restore: {
+    button: 'Restore',
+    restoring: 'Restoring...',
+    successCategory: 'Category "{name}" successfully restored',
+    successProduct: 'Product "{name}" successfully restored',
+    successBranch: 'Branch "{name}" successfully restored',
+    successTable: 'Table "{name}" successfully restored',
+    error: 'Restore operation failed'
+  },
+  empty: {
+    title: 'Recycle bin is empty',
+    titleFiltered: 'No results found',
+    description: 'No deleted branches, categories, products or tables found yet',
+    descriptionFiltered: 'No deleted items found matching your search criteria'
+  },
+  errors: {
+    loadingError: 'Error occurred while loading deleted items'
+  }
+},
 }; 

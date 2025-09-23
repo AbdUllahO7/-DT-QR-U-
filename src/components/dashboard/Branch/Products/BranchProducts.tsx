@@ -153,58 +153,68 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     setIsProductAddonsModalOpen(false);
   };
 
-  const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds: number[], customizations: any) => {
-    try {
-      setIsLoading(true);
-      
-      // Create addon assignments
-      const addonPromises = selectedAddonIds.map(async (addonBranchProductId) => {
-        const customization = customizations[addonBranchProductId] || {};
-        
-        const addonData = {
-          mainBranchProductId: branchProductId,
-          addonBranchProductId,
-          isActive: true,
-          specialPrice: customization.specialPrice || 0,
-          marketingText: customization.marketingText || '',
-          maxQuantity: customization.maxQuantity || 10,
-          minQuantity: customization.minQuantity || 0,
-          groupTag: customization.groupTag || '',
-          isGroupRequired: customization.isGroupRequired || false
-        };
+let isProcessing = false; // Module-level lock to prevent multiple executions
 
-        return await branchProductAddonsService.createBranchProductAddon(addonData);
-      });
+const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds: number[], customizations: any) => {
+  if (isLoading || isProcessing) {
+    console.log(`handleSaveProductAddons blocked - Already processing or loading`);
+    return; // Prevent multiple executions
+  }
 
-      await Promise.all(addonPromises);
+  const invocationId = Math.random().toString(36).substring(2, 15);
+  console.log(`handleSaveProductAddons started - Invocation ID: ${invocationId}`);
 
-      // Update the product addons count in the UI
-      setBranchCategories(prev => 
-        prev.map(category => ({
-          ...category,
-          products: category.products?.map(product => 
-            product.branchProductId === branchProductId
-              ? { 
-                  ...product, 
-                  addonsCount: selectedAddonIds.length,
-                  hasAddons: selectedAddonIds.length > 0
-                }
-              : product
-          )
-        }))
-      );
+  try {
+    isProcessing = true; // Set lock
+    setIsLoading(true);
 
-      setSuccessMessage(`Successfully configured ${selectedAddonIds.length} addons for the product`);
-      handleCloseProductAddons();
-      
-    } catch (err: any) {
-      console.error('Error saving product addons:', err);
-      setError('Failed to save product addons');
-    } finally {
-      setIsLoading(false);
+    // Process addon assignments sequentially
+    for (const addonBranchProductId of selectedAddonIds) {
+      const customization = customizations[addonBranchProductId] || {};
+
+      const addonData = {
+        mainBranchProductId: branchProductId,
+        addonBranchProductId,
+        isActive: true,
+        specialPrice: customization.specialPrice || 0,
+        marketingText: customization.marketingText || '',
+        maxQuantity: customization.maxQuantity || 10,
+        minQuantity: customization.minQuantity || 0,
+        groupTag: customization.groupTag || '',
+        isGroupRequired: customization.isGroupRequired || false,
+      };
+
+      console.log(`Creating addon ${addonBranchProductId} - Invocation ID: ${invocationId}`);
+      await branchProductAddonsService.createBranchProductAddon(addonData);
     }
-  };
 
+    // Update the product addons count in the UI
+    setBranchCategories(prev =>
+      prev.map(category => ({
+        ...category,
+        products: category.products?.map(product =>
+          product.branchProductId === branchProductId
+            ? {
+                ...product,
+                addonsCount: selectedAddonIds.length,
+                hasAddons: selectedAddonIds.length > 0,
+              }
+            : product
+        ),
+      }))
+    );
+
+    console.log(`handleSaveProductAddons completed successfully - Invocation ID: ${invocationId}`);
+    setSuccessMessage(`Successfully configured ${selectedAddonIds.length} addons for the product`);
+    handleCloseProductAddons();
+  } catch (err: any) {
+    console.error(`Error in handleSaveProductAddons - Invocation ID: ${invocationId}`, err);
+    setError(`Failed to save product addons: ${err.message || 'Unknown error'}`);
+  } finally {
+    setIsLoading(false);
+    isProcessing = false; // Release lock
+  }
+};
   // Price editing functions
   const handleProductPriceEdit = (productId: number, originalPrice: number) => {
     setEditingProductId(productId);

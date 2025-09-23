@@ -222,41 +222,47 @@ class BranchService {
   /**
    * Get all deleted tables
    */
-  async getDeletedTables(): Promise<DeletedTable[]> {
-    try {
-      logger.info('Silinmiş masalar getiriliyor', null, { prefix: 'BranchService' });
-      
-      const response = await httpClient.get<DeletedTable[]>(`/api/branches/tables/deleted`);
-      
-      logger.info('Silinmiş masalar başarıyla getirildi', { 
-        count: response.data?.length || 0 
-      }, { prefix: 'BranchService' });
-      
-      return response.data || [];
-    } catch (error: any) {
-      logger.error('❌ Silinmiş masalar getirilirken hata:', error, { prefix: 'BranchService' });
-      
-      // Enhanced error handling
-      if (error?.response?.status === 401) {
-        throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
-      } else if (error?.response?.status === 403) {
-        throw new Error('Bu işlem için yetkiniz bulunmuyor.');
-      } else if (error?.response?.status === 0 || !navigator.onLine) {
-        throw new Error('İnternet bağlantınızı kontrol edin.');
-      } else {
-        throw new Error(`Silinmiş masalar getirilirken hata oluştu: ${error?.message || 'Bilinmeyen hata'}`);
+    async getDeletedTables(branchId?: number): Promise<DeletedTable[]> {
+      try {
+        logger.info('Silinmiş masalar getiriliyor', { branchId }, { prefix: 'BranchService' });
+        
+        // Build the URL with branchId parameter if provided
+        const url = branchId 
+          ? `/api/branches/tables/deleted?branchId=${branchId}`
+          : '/api/branches/tables/deleted';
+        
+        const response = await httpClient.get<DeletedTable[]>(url);
+        
+        logger.info('Silinmiş masalar başarıyla getirildi', { 
+          count: response.data?.length || 0,
+          branchId
+        }, { prefix: 'BranchService' });
+        
+        return response.data || [];
+      } catch (error: any) {
+        logger.error('❌ Silinmiş masalar getirilirken hata:', error, { prefix: 'BranchService' });
+        
+        // Enhanced error handling
+        if (error?.response?.status === 401) {
+          throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+        } else if (error?.response?.status === 403) {
+          throw new Error('Bu işlem için yetkiniz bulunmuyor.');
+        } else if (error?.response?.status === 0 || !navigator.onLine) {
+          throw new Error('İnternet bağlantınızı kontrol edin.');
+        } else {
+          throw new Error(`Silinmiş masalar getirilirken hata oluştu: ${error?.message || 'Bilinmeyen hata'}`);
+        }
       }
     }
-  }
 
   /**
    * Restore a deleted table
    */
-  async restoreTable(tableId: number): Promise<void> {
+  async restoreTable(tableId: number,branchId?: number): Promise<void> {
     try {
       logger.info('Masa geri yükleniyor', { tableId }, { prefix: 'BranchService' });
       
-      const response = await httpClient.post(`/api/branches/tables/${tableId}/restore`);
+      const response = await httpClient.post(`/api/branches/tables/${tableId}/restore?branchId=${branchId}`);
       
       logger.info('Masa başarıyla geri yüklendi', { 
         tableId,

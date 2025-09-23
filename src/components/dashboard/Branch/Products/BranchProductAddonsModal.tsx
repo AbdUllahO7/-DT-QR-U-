@@ -42,7 +42,7 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
   product,
   availableAddons,
   onSave,
-  isLoading: parentLoading = false
+
 }) => {
   const { t, isRTL } = useLanguage();
   
@@ -740,18 +740,18 @@ const AddonCard: React.FC<{
 
               <div className={`sm:col-span-2 flex items-center justify-between`}>
                 {hasPropertyChanges && (
-                  <button
-                    onClick={onUpdate}
-                    disabled={isSaving}
-                    className={`px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg flex items-center disabled:opacity-50 text-sm font-medium transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
-                  >
-                    {isSaving ? (
-                      <Loader2 className={`w-4 h-4 animate-spin ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                    ) : (
-                      <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                    )}
-                    {t('addonModal.actions.saveChanges')}
-                  </button>
+                <button
+                onClick={onUpdate}
+                disabled={isSaving || !hasPropertyChanges}
+                className={`px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg flex items-center disabled:opacity-50 text-sm font-medium transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+              >
+                {isSaving ? (
+                  <Loader2 className={`w-4 h-4 animate-spin ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                ) : (
+                  <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                )}
+                {t('addonModal.actions.saveChanges')}
+              </button>
                 )}
               </div>
             </div>

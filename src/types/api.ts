@@ -396,6 +396,7 @@ export interface CreateAboutDto {
 }
 
 export interface AboutInfo {
+  about: string;
   id?: number;
   imageUrl?: string | null;
   title?: string | null;
