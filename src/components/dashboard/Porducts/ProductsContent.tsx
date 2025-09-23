@@ -1205,16 +1205,15 @@ const ProductsContent: React.FC = () => {
                 <Plus className="h-4 w-4" />
                 <span>{t('productsContent.actions.newProduct')}</span>
               </button>
-
-              <button 
-                onClick={() => {
-                navigate('/dashboard/RecycleBin')
-                }}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span>{t('productsContent.actions.RecycleBin')}</span>
-              </button>
+                  <button 
+                    onClick={() => {
+                      navigate('/dashboard/RecycleBin', { state: { source: 'products' } })
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span>{t('productsContent.actions.RecycleBin')}</span>
+                  </button>
             </div>
           </div>
         </div>
