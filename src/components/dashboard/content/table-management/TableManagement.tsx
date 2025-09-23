@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, Users, Plus } from 'lucide-react';
+import { ChevronDown, Users, Plus, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside, useSignalR } from '../../../../hooks';
 import { SignalRCallbacks } from '../../../../types/signalR';
@@ -12,6 +12,7 @@ import QRCodeModal from './QRCodeModal';
 import TableCategoryModal from './TableCategoryModal';
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 import { BranchDropdownItem, GroupedTables, RestaurantBranchDropdownItem, TableCategory, TableData } from '../../../../types/BranchManagement/type';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   selectedBranch: RestaurantBranchDropdownItem | null;
@@ -42,7 +43,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
 
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setIsBranchDropdownOpen(false));
-
+  const navigate = useNavigate()
   console.log("helllo")
   const token = localStorage.getItem('token') || '';
 
@@ -378,7 +379,15 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
           <h2 className="text-2xl mr-2 font-bold text-gray-900 dark:text-white">
             {t('tableManagement.title')}
           </h2>
-          
+               <button 
+                onClick={() => {
+                navigate('/dashboard/RecycleBin', { state: { source: 'tables' } })
+                }}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>{t('productsContent.actions.RecycleBin')}</span>
+              </button>
           {/* Şube Seçici Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button
