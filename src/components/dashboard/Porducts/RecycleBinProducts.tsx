@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, RotateCcw, Search, Filter, Calendar, Package, FolderOpen, AlertCircle, CheckCircle, RefreshCw, X, Building2 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { Trash2, RotateCcw, Search, Filter, Calendar, Package, FolderOpen, AlertCircle, CheckCircle, RefreshCw, X, Building2, Table } from 'lucide-react';
 import { productService } from '../../../services/productService';
 import { branchService } from '../../../services/branchService';
 
@@ -8,39 +9,77 @@ interface DeletedEntity {
   displayName: string;
   description: string | null;
   code: string | null;
-  entityType: 'Category' | 'Product' | 'Branch';
+  entityType: 'Category' | 'Product' | 'Branch' | 'MenuTable';
   deletedAt: string;
   deletedBy: string;
   branchId: number | null;
   branchName: string | null;
-  restaurantId: number;
+  restaurantId: number | null;
   restaurantName: string | null;
   categoryId: number | null;
   categoryName: string | null;
 }
 
 const RecycleBin: React.FC = () => {
+  const location = useLocation();
   const [deletedItems, setDeletedItems] = useState<DeletedEntity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'Category' | 'Product' | 'Branch'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'Category' | 'Product' | 'Branch' | 'MenuTable'>('all');
   const [restoringIds, setRestoringIds] = useState<Set<number>>(new Set());
   const [notification, setNotification] = useState<{
     type: 'success' | 'error';
     message: string;
   } | null>(null);
 
-  // Load deleted items
+  // Get the source parameter from location state
+  const source = location.state?.source || 'all';
+
+  // Load deleted items based on source parameter
   const loadDeletedItems = async () => {
     setLoading(true);
     try {
-      const [deletedCategories, deletedProducts, deletedBranches] = await Promise.all([
-        productService.getDeletedCategories(),
-        productService.getDeletedProducts(),
-        branchService.getDeletedBranches()
-      ]);
+      let allDeletedItems: DeletedEntity[] = [];
+
+      switch (source) {
+        case 'products':
+          // eslint-disable-next-line no-case-declarations
+          const [deletedCategories, deletedProducts] = await Promise.all([
+            productService.getDeletedCategories(),
+            productService.getDeletedProducts(),
+          ]);
+          allDeletedItems = [...deletedCategories, ...deletedProducts];
+          break;
+
+        case 'branches':
+          // eslint-disable-next-line no-case-declarations
+          const [deletedBranches] = await Promise.all([
+            branchService.getDeletedBranches(),
+          ]);
+          allDeletedItems = [...deletedBranches];
+          break;
+
+        case 'tables':
+          // Uncomment when tables service is available
+          // const [deletedTables] = await Promise.all([
+          //   branchService.getDeletedTables(),
+          // ]);
+          // allDeletedItems = [...deletedTables];
+          break;
+
+        case 'all':
+        default:
+          // eslint-disable-next-line no-case-declarations
+          const [allCategories, allProducts, allBranches] = await Promise.all([
+            productService.getDeletedCategories(),
+            productService.getDeletedProducts(),
+            branchService.getDeletedBranches(),
+            // branchService.getDeletedTables() // Uncomment when available
+          ]);
+          allDeletedItems = [...allCategories, ...allProducts, ...allBranches];
+          break;
+      }
       
-      const allDeletedItems = [...deletedCategories, ...deletedProducts, ...deletedBranches];
       setDeletedItems(allDeletedItems);
     } catch (error) {
       console.error('Error loading deleted items:', error);
@@ -70,6 +109,9 @@ const RecycleBin: React.FC = () => {
       } else if (item.entityType === 'Branch') {
         await branchService.restoreBranch(item.id);
         showNotification('success', `"${item.displayName}" şubesi başarıyla geri yüklendi`);
+      } else if (item.entityType === 'MenuTable') {
+        await branchService.restoreTable(item.id);
+        showNotification('success', `"${item.displayName}" masası başarıyla geri yüklendi`);
       }
       
       // Remove from list after successful restore
@@ -136,6 +178,15 @@ const RecycleBin: React.FC = () => {
           badgeClass: 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300',
           label: 'Şube'
         };
+      case 'MenuTable':
+        return {
+          icon: Table,
+          color: 'orange',
+          bgClass: 'bg-orange-100 dark:bg-orange-900/20',
+          textClass: 'text-orange-600 dark:text-orange-400',
+          badgeClass: 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300',
+          label: 'Masa'
+        };
       default:
         return {
           icon: Package,
@@ -148,10 +199,38 @@ const RecycleBin: React.FC = () => {
     }
   };
 
-  // Load data on component mount
+  // Get header title based on source
+  const getHeaderTitle = () => {
+    switch (source) {
+      case 'products':
+        return 'Silinmiş Ürünler ve Kategoriler';
+      case 'branches':
+        return 'Silinmiş Şubeler';
+      case 'tables':
+        return 'Silinmiş Masalar';
+      default:
+        return 'Geri Dönüşüm Kutusu';
+    }
+  };
+
+  // Get header description based on source
+  const getHeaderDescription = () => {
+    switch (source) {
+      case 'products':
+        return 'Silinmiş ürünler ve kategorileri yönetin';
+      case 'branches':
+        return 'Silinmiş şubeleri yönetin';
+      case 'tables':
+        return 'Silinmiş masaları yönetin';
+      default:
+        return 'Silinmiş şubeler, kategoriler, ürünler ve masaları yönetin';
+    }
+  };
+
+  // Load data on component mount or when source changes
   useEffect(() => {
     loadDeletedItems();
-  }, []);
+  }, [source]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
@@ -162,11 +241,11 @@ const RecycleBin: React.FC = () => {
             <Trash2 className="w-6 h-6 text-red-600 dark:text-red-400" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Geri Dönüşüm Kutusu
+            {getHeaderTitle()}
           </h1>
         </div>
         <p className="text-gray-600 dark:text-gray-400">
-          Silinmiş şubeler, kategoriler ve ürünleri yönetin
+          {getHeaderDescription()}
         </p>
       </div>
 
@@ -188,24 +267,7 @@ const RecycleBin: React.FC = () => {
             />
           </div>
 
-          {/* Filter */}
-          <div className="flex items-center gap-2">
-            <Filter className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-            <select
-            title='filterType'
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value as typeof filterType)}
-              className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
-                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white
-                       focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">Tümü</option>
-              <option value="Branch">Şubeler</option>
-              <option value="Category">Kategoriler</option>
-              <option value="Product">Ürünler</option>
-            </select>
-          </div>
-
+        
           {/* Refresh Button */}
           <button
             onClick={loadDeletedItems}
@@ -220,64 +282,7 @@ const RecycleBin: React.FC = () => {
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
-              <Building2 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {deletedItems.filter(item => item.entityType === 'Branch').length}
-              </p>
-              <p className="text-gray-600 dark:text-gray-400">Silinmiş Şube</p>
-            </div>
-          </div>
-        </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-green-100 dark:bg-green-900/20 rounded-lg">
-              <FolderOpen className="w-6 h-6 text-green-600 dark:text-green-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {deletedItems.filter(item => item.entityType === 'Category').length}
-              </p>
-              <p className="text-gray-600 dark:text-gray-400">Silinmiş Kategori</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
-              <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {deletedItems.filter(item => item.entityType === 'Product').length}
-              </p>
-              <p className="text-gray-600 dark:text-gray-400">Silinmiş Ürün</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
-              <Trash2 className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                {deletedItems.length}
-              </p>
-              <p className="text-gray-600 dark:text-gray-400">Toplam Silinmiş</p>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Items List */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
@@ -295,7 +300,7 @@ const RecycleBin: React.FC = () => {
             <p className="text-gray-600 dark:text-gray-400">
               {searchTerm || filterType !== 'all' 
                 ? 'Arama kriterlerinize uygun silinmiş öğe bulunmadı'
-                : 'Henüz silinmiş şube, kategori veya ürün bulunmuyor'
+                : 'Henüz silinmiş şube, kategori, ürün veya masa bulunmuyor'
               }
             </p>
           </div>
@@ -340,13 +345,28 @@ const RecycleBin: React.FC = () => {
                             </p>
                           )}
                           
+                          {item.entityType === 'MenuTable' && (
+                            <>
+                              {item.branchName && (
+                                <p className="text-sm text-gray-500 dark:text-gray-500">
+                                  Şube: {item.branchName}
+                                </p>
+                              )}
+                              {item.categoryName && (
+                                <p className="text-sm text-gray-500 dark:text-gray-500">
+                                  Kategori: {item.categoryName}
+                                </p>
+                              )}
+                            </>
+                          )}
+                          
                           {item.entityType === 'Branch' && item.restaurantName && (
                             <p className="text-sm text-gray-500 dark:text-gray-500">
                               Restoran: {item.restaurantName}
                             </p>
                           )}
                           
-                          {item.entityType !== 'Branch' && item.restaurantName && (
+                          {item.entityType !== 'Branch' && item.entityType !== 'MenuTable' && item.restaurantName && (
                             <p className="text-sm text-gray-500 dark:text-gray-500">
                               Restoran: {item.restaurantName}
                             </p>
@@ -390,7 +410,7 @@ const RecycleBin: React.FC = () => {
       {notification && (
         <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg border max-w-md ${
           notification.type === 'success'
-            ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+            ? 'bg-green-900 dark:bg-green-900 border-green-200 dark:border-green-800'
             : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
         }`}>
           <div className="flex items-center gap-3">
@@ -401,7 +421,7 @@ const RecycleBin: React.FC = () => {
             )}
             <p className={`font-medium ${
               notification.type === 'success'
-                ? 'text-green-800 dark:text-green-200'
+                ? 'text-green-200 dark:text-green-200'
                 : 'text-red-800 dark:text-red-200'
             }`}>
               {notification.message}

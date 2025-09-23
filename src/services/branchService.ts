@@ -10,6 +10,8 @@ import type {
 } from '../types/api';
 import { BranchData, BranchDropdownItem, TableCategory, TableData } from '../types/BranchManagement/type';
 
+
+
 // Table management için yeni tipler
 interface CreateMenuTableDto {
   menuTableName: string | null;
@@ -18,7 +20,21 @@ interface CreateMenuTableDto {
   displayOrder: number | null;
   isActive: boolean;
 }
-
+interface DeletedTable {
+  id: number;
+  displayName: string;
+  description: string | null;
+  code: string | null;
+  entityType: 'MenuTable';
+  deletedAt: string;
+  deletedBy: string;
+  branchId: number;
+  branchName: string;
+  restaurantId: number | null;
+  restaurantName: string | null;
+  categoryId: number;
+  categoryName: string;
+}
 interface DeletedBranch {
   id: number;
   displayName: string;
@@ -109,7 +125,7 @@ class BranchService {
     }
   }
 
- async updateBranch(id: number, data: Partial<CreateBranchWithDetailsDto>): Promise<BranchData> {
+  async updateBranch(id: number, data: Partial<CreateBranchWithDetailsDto>): Promise<BranchData> {
     try {
       logger.info('Branch güncelleme isteği gönderiliyor', { id, data }, { prefix: 'BranchService' });
       
@@ -203,6 +219,77 @@ class BranchService {
     }
   }
 
+  /**
+   * Get all deleted tables
+   */
+  async getDeletedTables(): Promise<DeletedTable[]> {
+    try {
+      logger.info('Silinmiş masalar getiriliyor', null, { prefix: 'BranchService' });
+      
+      const response = await httpClient.get<DeletedTable[]>(`/api/branches/tables/deleted`);
+      
+      logger.info('Silinmiş masalar başarıyla getirildi', { 
+        count: response.data?.length || 0 
+      }, { prefix: 'BranchService' });
+      
+      return response.data || [];
+    } catch (error: any) {
+      logger.error('❌ Silinmiş masalar getirilirken hata:', error, { prefix: 'BranchService' });
+      
+      // Enhanced error handling
+      if (error?.response?.status === 401) {
+        throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+      } else if (error?.response?.status === 403) {
+        throw new Error('Bu işlem için yetkiniz bulunmuyor.');
+      } else if (error?.response?.status === 0 || !navigator.onLine) {
+        throw new Error('İnternet bağlantınızı kontrol edin.');
+      } else {
+        throw new Error(`Silinmiş masalar getirilirken hata oluştu: ${error?.message || 'Bilinmeyen hata'}`);
+      }
+    }
+  }
+
+  /**
+   * Restore a deleted table
+   */
+  async restoreTable(tableId: number): Promise<void> {
+    try {
+      logger.info('Masa geri yükleniyor', { tableId }, { prefix: 'BranchService' });
+      
+      const response = await httpClient.post(`/api/branches/tables/${tableId}/restore`);
+      
+      logger.info('Masa başarıyla geri yüklendi', { 
+        tableId,
+        response: response.status 
+      }, { prefix: 'BranchService' });
+    } catch (error: any) {
+      logger.error('❌ Masa geri yüklenirken hata:', error, { prefix: 'BranchService' });
+      
+      // Enhanced error handling with specific error messages
+      if (error?.response?.status === 404) {
+        throw new Error('Geri yüklenecek masa bulunamadı.');
+      } else if (error?.response?.status === 400) {
+        const errorData = error?.response?.data;
+        if (errorData?.errors) {
+          // Show validation errors
+          const validationErrors = Object.values(errorData.errors).flat();
+          throw new Error(`Doğrulama hatası: ${validationErrors.join(', ')}`);
+        } else {
+          throw new Error('Geçersiz masa geri yükleme isteği.');
+        }
+      } else if (error?.response?.status === 401) {
+        throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+      } else if (error?.response?.status === 403) {
+        throw new Error('Bu işlem için yetkiniz bulunmuyor.');
+      } else if (error?.response?.status === 409) {
+        throw new Error('Bu masa zaten aktif durumda veya aynı isimde aktif bir masa mevcut.');
+      } else if (error?.response?.status === 0 || !navigator.onLine) {
+        throw new Error('İnternet bağlantınızı kontrol edin.');
+      } else {
+        throw new Error(`Masa geri yüklenirken hata oluştu: ${error?.message || 'Bilinmeyen hata'}`);
+      }
+    }
+  }
   /**
    * Restore a deleted branch
    */
