@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { Trash2, RotateCcw, Search, Filter, Calendar, Package, FolderOpen, AlertCircle, CheckCircle, RefreshCw, X, Building2, Table } from 'lucide-react';
 import { productService } from '../../../services/productService';
 import { branchService } from '../../../services/branchService';
+import { useLanguage } from '../../../contexts/LanguageContext';
 
 interface DeletedEntity {
   id: number;
@@ -22,6 +23,7 @@ interface DeletedEntity {
 
 const RecycleBin: React.FC = () => {
   const location = useLocation();
+  const { t } = useLanguage();
   const [deletedItems, setDeletedItems] = useState<DeletedEntity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -32,8 +34,9 @@ const RecycleBin: React.FC = () => {
     message: string;
   } | null>(null);
 
-  // Get the source parameter from location state
+  // Get the source parameter and branchId from location state
   const source = location.state?.source || 'all';
+  const branchId = location.state?.branchId;
 
   // Load deleted items based on source parameter
   const loadDeletedItems = async () => {
@@ -60,30 +63,30 @@ const RecycleBin: React.FC = () => {
           break;
 
         case 'tables':
-          // Uncomment when tables service is available
-          // const [deletedTables] = await Promise.all([
-          //   branchService.getDeletedTables(),
-          // ]);
-          // allDeletedItems = [...deletedTables];
+          // eslint-disable-next-line no-case-declarations
+          const [deletedTables] = await Promise.all([
+            branchService.getDeletedTables(branchId),
+          ]);
+          allDeletedItems = [...deletedTables];
           break;
 
         case 'all':
         default:
           // eslint-disable-next-line no-case-declarations
-          const [allCategories, allProducts, allBranches] = await Promise.all([
+          const [allCategories, allProducts, allBranches, allTables] = await Promise.all([
             productService.getDeletedCategories(),
             productService.getDeletedProducts(),
             branchService.getDeletedBranches(),
-            // branchService.getDeletedTables() // Uncomment when available
+            branchService.getDeletedTables() // Load all deleted tables without branch filter
           ]);
-          allDeletedItems = [...allCategories, ...allProducts, ...allBranches];
+          allDeletedItems = [...allCategories, ...allProducts, ...allBranches, ...allTables];
           break;
       }
       
       setDeletedItems(allDeletedItems);
     } catch (error) {
       console.error('Error loading deleted items:', error);
-      showNotification('error', 'Silinmiş öğeler yüklenirken hata oluştu');
+      showNotification('error', t('recycleBin.errors.loadingError'));
     } finally {
       setLoading(false);
     }
@@ -102,23 +105,23 @@ const RecycleBin: React.FC = () => {
     try {
       if (item.entityType === 'Category') {
         await productService.restoreCategory(item.id);
-        showNotification('success', `"${item.displayName}" kategorisi başarıyla geri yüklendi`);
+        showNotification('success', t('recycleBin.restore.successCategory').replace('{name}', item.displayName));
       } else if (item.entityType === 'Product') {
         await productService.restoreProduct(item.id);
-        showNotification('success', `"${item.displayName}" ürünü başarıyla geri yüklendi`);
+        showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
       } else if (item.entityType === 'Branch') {
         await branchService.restoreBranch(item.id);
-        showNotification('success', `"${item.displayName}" şubesi başarıyla geri yüklendi`);
+        showNotification('success', t('recycleBin.restore.successBranch').replace('{name}', item.displayName));
       } else if (item.entityType === 'MenuTable') {
-        await branchService.restoreTable(item.id);
-        showNotification('success', `"${item.displayName}" masası başarıyla geri yüklendi`);
+        await branchService.restoreTable(item.id , branchId);
+        showNotification('success', t('recycleBin.restore.successTable').replace('{name}', item.displayName));
       }
       
       // Remove from list after successful restore
       setDeletedItems(prev => prev.filter(i => i.id !== item.id));
     } catch (error) {
       console.error('Error restoring item:', error);
-      showNotification('error', 'Geri yükleme işlemi başarısız oldu');
+      showNotification('error', t('recycleBin.restore.error'));
     } finally {
       setRestoringIds(prev => {
         const newSet = new Set(prev);
@@ -158,7 +161,7 @@ const RecycleBin: React.FC = () => {
           bgClass: 'bg-green-100 dark:bg-green-900/20',
           textClass: 'text-green-600 dark:text-green-400',
           badgeClass: 'bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-300',
-          label: 'Kategori'
+          label: t('recycleBin.entityTypes.category')
         };
       case 'Product':
         return {
@@ -167,7 +170,7 @@ const RecycleBin: React.FC = () => {
           bgClass: 'bg-blue-100 dark:bg-blue-900/20',
           textClass: 'text-blue-600 dark:text-blue-400',
           badgeClass: 'bg-blue-100 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300',
-          label: 'Ürün'
+          label: t('recycleBin.entityTypes.product')
         };
       case 'Branch':
         return {
@@ -176,7 +179,7 @@ const RecycleBin: React.FC = () => {
           bgClass: 'bg-purple-100 dark:bg-purple-900/20',
           textClass: 'text-purple-600 dark:text-purple-400',
           badgeClass: 'bg-purple-100 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300',
-          label: 'Şube'
+          label: t('recycleBin.entityTypes.branch')
         };
       case 'MenuTable':
         return {
@@ -185,7 +188,7 @@ const RecycleBin: React.FC = () => {
           bgClass: 'bg-orange-100 dark:bg-orange-900/20',
           textClass: 'text-orange-600 dark:text-orange-400',
           badgeClass: 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300',
-          label: 'Masa'
+          label: t('recycleBin.entityTypes.table')
         };
       default:
         return {
@@ -194,7 +197,7 @@ const RecycleBin: React.FC = () => {
           bgClass: 'bg-gray-100 dark:bg-gray-900/20',
           textClass: 'text-gray-600 dark:text-gray-400',
           badgeClass: 'bg-gray-100 dark:bg-gray-900/20 text-gray-700 dark:text-gray-300',
-          label: 'Diğer'
+          label: t('recycleBin.entityTypes.other')
         };
     }
   };
@@ -203,13 +206,13 @@ const RecycleBin: React.FC = () => {
   const getHeaderTitle = () => {
     switch (source) {
       case 'products':
-        return 'Silinmiş Ürünler ve Kategoriler';
+        return t('recycleBin.titleProducts');
       case 'branches':
-        return 'Silinmiş Şubeler';
+        return t('recycleBin.titleBranches');
       case 'tables':
-        return 'Silinmiş Masalar';
+        return t('recycleBin.titleTables');
       default:
-        return 'Geri Dönüşüm Kutusu';
+        return t('recycleBin.title');
     }
   };
 
@@ -217,20 +220,20 @@ const RecycleBin: React.FC = () => {
   const getHeaderDescription = () => {
     switch (source) {
       case 'products':
-        return 'Silinmiş ürünler ve kategorileri yönetin';
+        return t('recycleBin.descriptionProducts');
       case 'branches':
-        return 'Silinmiş şubeleri yönetin';
+        return t('recycleBin.descriptionBranches');
       case 'tables':
-        return 'Silinmiş masaları yönetin';
+        return t('recycleBin.descriptionTables');
       default:
-        return 'Silinmiş şubeler, kategoriler, ürünler ve masaları yönetin';
+        return t('recycleBin.description');
     }
   };
 
-  // Load data on component mount or when source changes
+  // Load data on component mount or when source/branchId changes
   useEffect(() => {
     loadDeletedItems();
-  }, [source]);
+  }, [source, branchId]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
@@ -257,7 +260,7 @@ const RecycleBin: React.FC = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
             <input
               type="text"
-              placeholder="Öğe ara..."
+              placeholder={t('recycleBin.search')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg 
@@ -267,7 +270,25 @@ const RecycleBin: React.FC = () => {
             />
           </div>
 
-        
+          {/* Filter */}
+          <div className="flex items-center gap-2">
+            <Filter className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+            <select
+              title='filterType'
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value as typeof filterType)}
+              className="px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg
+                       bg-white dark:bg-gray-700 text-gray-900 dark:text-white
+                       focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="all">{t('recycleBin.filter.all')}</option>
+              <option value="Branch">{t('recycleBin.filter.branches')}</option>
+              <option value="Category">{t('recycleBin.filter.categories')}</option>
+              <option value="Product">{t('recycleBin.filter.products')}</option>
+              <option value="MenuTable">{t('recycleBin.filter.tables')}</option>
+            </select>
+          </div>
+
           {/* Refresh Button */}
           <button
             onClick={loadDeletedItems}
@@ -277,30 +298,101 @@ const RecycleBin: React.FC = () => {
                      text-white rounded-lg transition-colors duration-200"
           >
             <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-            Yenile
+            {t('recycleBin.refresh')}
           </button>
         </div>
       </div>
 
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
+              <Building2 className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {deletedItems.filter(item => item.entityType === 'Branch').length}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t('recycleBin.stats.deletedBranch')}</p>
+            </div>
+          </div>
+        </div>
 
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-green-100 dark:bg-green-900/20 rounded-lg">
+              <FolderOpen className="w-5 h-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {deletedItems.filter(item => item.entityType === 'Category').length}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t('recycleBin.stats.deletedCategory')}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+              <Package className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {deletedItems.filter(item => item.entityType === 'Product').length}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t('recycleBin.stats.deletedProduct')}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-orange-100 dark:bg-orange-900/20 rounded-lg">
+              <Table className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+            </div>
+            <div>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {deletedItems.filter(item => item.entityType === 'MenuTable').length}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t('recycleBin.stats.deletedTable')}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-red-100 dark:bg-red-900/20 rounded-lg">
+              <Trash2 className="w-5 h-5 text-red-600 dark:text-red-400" />
+            </div>
+            <div>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {deletedItems.length}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t('recycleBin.stats.totalDeleted')}</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Items List */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         {loading ? (
           <div className="p-12 text-center">
             <RefreshCw className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-4 animate-spin" />
-            <p className="text-gray-600 dark:text-gray-400">Yükleniyor...</p>
+            <p className="text-gray-600 dark:text-gray-400">{t('recycleBin.loading')}</p>
           </div>
         ) : filteredItems.length === 0 ? (
           <div className="p-12 text-center">
             <Trash2 className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              {searchTerm || filterType !== 'all' ? 'Sonuç bulunamadı' : 'Geri dönüşüm kutusu boş'}
+              {searchTerm || filterType !== 'all' ? t('recycleBin.empty.titleFiltered') : t('recycleBin.empty.title')}
             </h3>
             <p className="text-gray-600 dark:text-gray-400">
               {searchTerm || filterType !== 'all' 
-                ? 'Arama kriterlerinize uygun silinmiş öğe bulunmadı'
-                : 'Henüz silinmiş şube, kategori, ürün veya masa bulunmuyor'
+                ? t('recycleBin.empty.descriptionFiltered')
+                : t('recycleBin.empty.description')
               }
             </p>
           </div>
@@ -341,7 +433,7 @@ const RecycleBin: React.FC = () => {
                         <div className="flex flex-col gap-1 mb-2">
                           {item.entityType === 'Product' && item.categoryName && (
                             <p className="text-sm text-gray-500 dark:text-gray-500">
-                              Kategori: {item.categoryName}
+                              {t('recycleBin.contextInfo.category')} {item.categoryName}
                             </p>
                           )}
                           
@@ -349,12 +441,12 @@ const RecycleBin: React.FC = () => {
                             <>
                               {item.branchName && (
                                 <p className="text-sm text-gray-500 dark:text-gray-500">
-                                  Şube: {item.branchName}
+                                  {t('recycleBin.contextInfo.branch')} {item.branchName}
                                 </p>
                               )}
                               {item.categoryName && (
                                 <p className="text-sm text-gray-500 dark:text-gray-500">
-                                  Kategori: {item.categoryName}
+                                  {t('recycleBin.contextInfo.category')} {item.categoryName}
                                 </p>
                               )}
                             </>
@@ -362,20 +454,20 @@ const RecycleBin: React.FC = () => {
                           
                           {item.entityType === 'Branch' && item.restaurantName && (
                             <p className="text-sm text-gray-500 dark:text-gray-500">
-                              Restoran: {item.restaurantName}
+                              {t('recycleBin.contextInfo.restaurant')} {item.restaurantName}
                             </p>
                           )}
                           
                           {item.entityType !== 'Branch' && item.entityType !== 'MenuTable' && item.restaurantName && (
                             <p className="text-sm text-gray-500 dark:text-gray-500">
-                              Restoran: {item.restaurantName}
+                              {t('recycleBin.contextInfo.restaurant')} {item.restaurantName}
                             </p>
                           )}
                         </div>
                         
                         <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-500">
                           <Calendar className="w-4 h-4" />
-                          <span>Silinme: {formatDate(item.deletedAt)}</span>
+                          <span>{t('recycleBin.deletedAt')} {formatDate(item.deletedAt)}</span>
                         </div>
                       </div>
                     </div>
@@ -395,7 +487,7 @@ const RecycleBin: React.FC = () => {
                         ) : (
                           <RotateCcw className="w-4 h-4" />
                         )}
-                        {restoringIds.has(item.id) ? 'Geri yükleniyor...' : 'Geri Yükle'}
+                        {restoringIds.has(item.id) ? t('recycleBin.restore.restoring') : t('recycleBin.restore.button')}
                       </button>
                     </div>
                   </div>
