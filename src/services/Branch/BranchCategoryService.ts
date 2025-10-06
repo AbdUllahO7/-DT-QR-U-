@@ -9,7 +9,21 @@ interface CreateBranchCategoryRequest {
   displayName: string;
   displayOrder: number;
 }
-
+interface DeletedBranchCategory {
+  id: number;
+  displayName: string;
+  description: string;
+  code: string | null;
+  entityType: string;
+  deletedAt: string;
+  deletedBy: string;
+  branchId: number;
+  branchName: string | null;
+  restaurantId: number | null;
+  restaurantName: string | null;
+  categoryId: number | null;
+  categoryName: string | null;
+}
 interface UpdateBranchCategoryRequest {
   branchCategoryId: number;
   isActive: boolean;
@@ -378,6 +392,37 @@ class BranchCategoryService {
       } else {
         throw new Error('Error occurred while batch updating categories');
       }
+    }
+  }
+  // Get all deleted branch categories
+  async getDeletedBranchCategories(): Promise<DeletedBranchCategory[]> {
+    try {
+      logger.info('Fetching deleted branch categories');
+      
+      const response = await httpClient.get<DeletedBranchCategory[]>(`${this.baseUrl}/deleted`);
+      
+      logger.info('Deleted branch categories retrieved successfully', { 
+        count: response.data.length 
+      });
+      
+      return response.data;
+    } catch (error: any) {
+      logger.error('❌ Error retrieving deleted branch categories:', error);
+      return [];
+    }
+  }
+
+  // Restore a deleted branch category
+  async restoreBranchCategory(id: number): Promise<void> {
+    try {
+      logger.info('Restoring branch category', { id });
+      
+      await httpClient.post(`${this.baseUrl}/${id}/restore`);
+      
+      logger.info('Branch category restored successfully', { id });
+    } catch (error: any) {
+      logger.error('❌ Error restoring branch category:', error);
+      throw error;
     }
   }
 }

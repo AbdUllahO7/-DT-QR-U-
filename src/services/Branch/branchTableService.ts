@@ -10,7 +10,21 @@ export interface CreateTableCategoryDto {
   displayOrder: number;
   isActive: boolean;
 }
-
+interface DeletedTable {
+  id: number;
+  displayName: string;
+  description: string | null;
+  code: string | null;
+  entityType: string;
+  deletedAt: string;
+  deletedBy: string;
+  branchId: number;
+  branchName: string;
+  restaurantId: number | null;
+  restaurantName: string | null;
+  categoryId: number;
+  categoryName: string;
+}
 export interface UpdateTableCategoryDto {
   id: number;
   categoryName: string;
@@ -55,7 +69,22 @@ export interface BatchCreateMenuTableItemDto {
   displayOrder: number | null;
   isActive: boolean;
 }
-
+// Deleted table category response
+interface DeletedTableCategory {
+  id: number;
+  displayName: string;
+  description: string | null;
+  code: string | null;
+  entityType: string;
+  deletedAt: string;
+  deletedBy: string;
+  branchId: number;
+  branchName: string;
+  restaurantId: number | null;
+  restaurantName: string | null;
+  categoryId: number | null;
+  categoryName: string | null;
+}
 export interface CreateBatchMenuTableDto {
   items: BatchCreateMenuTableItemDto[];
 }
@@ -606,33 +635,111 @@ class TableService {
    * Clear table - Toggle table occupation status between busy and available
    * This is a simplified endpoint that automatically toggles the current state
    */
-async clearTable(tableId: number): Promise<ClearTableResponseDto> {
-  try {
+  async clearTable(tableId: number): Promise<ClearTableResponseDto> {
+    try {
 
-    logger.info('Masa temizleme API çağrısı başlatılıyor', { tableId }, { prefix: 'TableService' });
-    
-    if (!tableId || tableId <= 0) {
-      throw new Error('Geçerli bir masa ID gereklidir');
-    }
-
-    const response = await httpClient.post<ClearTableResponseDto>(
-      `${this.baseUrl}/tables/${tableId}/clear` , {
-          "reason": "string"
+      logger.info('Masa temizleme API çağrısı başlatılıyor', { tableId }, { prefix: 'TableService' });
+      
+      if (!tableId || tableId <= 0) {
+        throw new Error('Geçerli bir masa ID gereklidir');
       }
-    );
-    
-    logger.info('Masa durumu başarıyla temizlendi/değiştirildi', { 
-      tableId, 
-      message: response.data.message,
-      endedSessions: response.data.endedSessions
-    }, { prefix: 'TableService' });
-    
-    return response.data;
-  } catch (error) {
-    logger.error('Masa temizlenirken hata oluştu', error, { prefix: 'TableService' });
-    throw error;
+
+      const response = await httpClient.post<ClearTableResponseDto>(
+        `${this.baseUrl}/tables/${tableId}/clear` , {
+            "reason": "string"
+        }
+      );
+      
+      logger.info('Masa durumu başarıyla temizlendi/değiştirildi', { 
+        tableId, 
+        message: response.data.message,
+        endedSessions: response.data.endedSessions
+      }, { prefix: 'TableService' });
+      
+      return response.data;
+    } catch (error) {
+      logger.error('Masa temizlenirken hata oluştu', error, { prefix: 'TableService' });
+      throw error;
+    }
   }
-}
+  /**
+   * Get all deleted table categories
+   */
+  async getDeletedTableCategories(): Promise<DeletedTableCategory[]> {
+    try {
+      logger.info('Silinmiş masa kategorileri API çağrısı başlatılıyor', null, { prefix: 'TableService' });
+      
+      const response = await httpClient.get<DeletedTableCategory[]>(`${this.baseUrl}/table-categories/deleted`);
+      
+      logger.info('Silinmiş masa kategorileri alındı', { 
+        count: response.data.length 
+      }, { prefix: 'TableService' });
+      
+      return response.data;
+    } catch (error) {
+      logger.error('Silinmiş masa kategorileri alınırken hata oluştu', error, { prefix: 'TableService' });
+      return [];
+    }
+  }
+
+  /**
+   * Restore a deleted table category
+   */
+  async restoreTableCategory(categoryId: number): Promise<void> {
+    try {
+      logger.info('Masa kategorisi geri yükleme isteği', { categoryId }, { prefix: 'TableService' });
+      
+      if (!categoryId || categoryId <= 0) {
+        throw new Error('Geçerli bir kategori ID gereklidir');
+      }
+      
+      await httpClient.post(`${this.baseUrl}/table-categories/${categoryId}/restore`);
+      
+      logger.info('Masa kategorisi başarıyla geri yüklendi', { categoryId }, { prefix: 'TableService' });
+    } catch (error) {
+      logger.error('Masa kategorisi geri yüklenirken hata oluştu', error, { prefix: 'TableService' });
+      throw error;
+    }
+  }
+  /**
+   * Get all deleted tables
+   */
+  async getDeletedTables(branchId?: number): Promise<DeletedTable[]> {
+    try {
+      logger.info('Silinmiş masalar API çağrısı başlatılıyor', { branchId }, { prefix: 'TableService' });
+      
+      const response = await httpClient.get<DeletedTable[]>(`${this.baseUrl}/tables/deleted`);
+      
+      logger.info('Silinmiş masalar alındı', { 
+        count: response.data.length 
+      }, { prefix: 'TableService' });
+      
+      return response.data;
+    } catch (error) {
+      logger.error('Silinmiş masalar alınırken hata oluştu', error, { prefix: 'TableService' });
+      return [];
+    }
+  }
+
+  /**
+   * Restore a deleted table
+   */
+  async restoreTable(tableId: number): Promise<void> {
+    try {
+      logger.info('Masa geri yükleme isteği', { tableId }, { prefix: 'TableService' });
+      
+      if (!tableId || tableId <= 0) {
+        throw new Error('Geçerli bir masa ID gereklidir');
+      }
+      
+      await httpClient.post(`${this.baseUrl}/tables/${tableId}/restore`);
+      
+      logger.info('Masa başarıyla geri yüklendi', { tableId }, { prefix: 'TableService' });
+    } catch (error) {
+      logger.error('Masa geri yüklenirken hata oluştu', error, { prefix: 'TableService' });
+      throw error;
+    }
+  }
 }
 
 export const tableService = new TableService();

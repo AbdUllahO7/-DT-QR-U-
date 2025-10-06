@@ -9,20 +9,17 @@ import {
   Calendar,
   Package,
   PlusSquare,
-  Trash2,
 } from 'lucide-react';
 import { branchCategoryService } from '../../../../services/Branch/BranchCategoryService';
 import { branchProductService } from '../../../../services/Branch/BranchProductService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import ProductDetailsModal from './ProductDetailsModal';
 import CategoriesContent from './CategoriesContent';
-
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 import { BranchProductAddon } from '../../../../services/Branch/BranchService';
 import { branchProductAddonsService } from '../../../../services/Branch/BranchAddonsService';
 import BranchProductAddonsModal from './BranchProductAddonsModal';
 import { BranchCategory, Category, DetailedProduct, EditedCategoryName, EditedProductPrice, ProductAddonData } from '../../../../types/BranchManagement/type';
-import { useNavigate } from 'react-router-dom';
 
 
 

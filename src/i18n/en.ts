@@ -3817,32 +3817,59 @@ recycleBin: {
   titleProducts: 'Deleted Products and Categories',
   titleBranches: 'Deleted Branches',
   titleTables: 'Deleted Tables',
-  description: 'Manage deleted branches, categories, products and tables',
+  titleBranchProducts: 'Deleted Branch Products and Categories',
+  titleBranchCategories: 'Deleted Branch Categories',
+  titleTableCategories: 'Deleted Table Categories',
+  description: 'Manage deleted branches, categories, products, and tables',
   descriptionProducts: 'Manage deleted products and categories',
   descriptionBranches: 'Manage deleted branches',
   descriptionTables: 'Manage deleted tables',
+  descriptionBranchProducts: 'Manage deleted branch products and categories',
+  descriptionBranchCategories: 'Manage deleted branch categories',
+  descriptionTableCategories: 'Manage deleted table categories',
   search: 'Search items...',
   filter: {
-    all: 'All',
+    all: 'All Items',
+    group1: 'All Group 1',
+    group2: 'All Group 2',
+    group1Label: '📋 Restaurant Level (Branches, Products, Tables)',
+    group2Label: '🏢 Branch Level (Branch Products & Categories)',
     branches: 'Branches',
     categories: 'Categories',
     products: 'Products',
-    tables: 'Tables'
+    tables: 'Tables',
+    branchProducts: 'Branch Products',
+    branchCategories: 'Branch Categories',
+    tableCategories: 'Table Categories'
   },
   refresh: 'Refresh',
   loading: 'Loading...',
   stats: {
-    deletedBranch: 'Deleted Branch',
-    deletedCategory: 'Deleted Category',
-    deletedProduct: 'Deleted Product',
-    deletedTable: 'Deleted Table',
-    totalDeleted: 'Total Deleted'
+    group1: 'Restaurant Level',
+    group1Desc: 'Branches, Products, Tables',
+    group2: 'Branch Level',
+    group2Desc: 'Branch Products & Categories',
+    totalDeleted: 'Total Deleted',
+    totalDesc: 'All deleted items',
+    filtered: 'Showing',
+    filteredDesc: 'Current filter results',
+    deletedBranch: 'Deleted Branches',
+    deletedCategory: 'Deleted Categories',
+    deletedProduct: 'Deleted Products',
+    deletedTable: 'Deleted Tables',
+    deletedBranchProduct: 'Deleted Branch Products',
+    deletedBranchCategory: 'Deleted Branch Categories',
+    deletedTableCategory: 'Deleted Table Categories',
+
   },
   entityTypes: {
     category: 'Category',
     product: 'Product',
     branch: 'Branch',
     table: 'Table',
+    branchProduct: 'Branch Product',
+    branchCategory: 'Branch Category',
+    tableCategory: 'Table Category',
     other: 'Other'
   },
   contextInfo: {
@@ -3854,20 +3881,22 @@ recycleBin: {
   restore: {
     button: 'Restore',
     restoring: 'Restoring...',
-    successCategory: 'Category "{name}" successfully restored',
-    successProduct: 'Product "{name}" successfully restored',
-    successBranch: 'Branch "{name}" successfully restored',
-    successTable: 'Table "{name}" successfully restored',
+    successCategory: '"{name}" category has been restored successfully',
+    successProduct: '"{name}" product has been restored successfully',
+    successBranch: '"{name}" branch has been restored successfully',
+    successTable: '"{name}" table has been restored successfully',
+    successBranchCategory: '"{name}" branch category has been restored successfully',
+    successTableCategory: '"{name}" table category has been restored successfully',
     error: 'Restore operation failed'
   },
   empty: {
     title: 'Recycle bin is empty',
     titleFiltered: 'No results found',
-    description: 'No deleted branches, categories, products or tables found yet',
-    descriptionFiltered: 'No deleted items found matching your search criteria'
+    description: 'No deleted items found yet',
+    descriptionFiltered: 'No deleted items match your search criteria'
   },
   errors: {
-    loadingError: 'Error occurred while loading deleted items'
+    loadingError: 'Error loading deleted items'
   }
-},
+}
 }; 
