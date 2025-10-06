@@ -3815,6 +3815,8 @@ recycleBin: {
   titleProducts: 'المنتجات والفئات المحذوفة',
   titleBranches: 'الفروع المحذوفة',
   titleTables: 'الطاولات المحذوفة',
+  titleBranchProducts: 'منتجات الفروع المحذوفة',
+  descriptionBranchProducts: 'إدارة منتجات الفروع المحذوفة',
   description: 'إدارة الفروع والفئات والمنتجات والطاولات المحذوفة',
   descriptionProducts: 'إدارة المنتجات والفئات المحذوفة',
   descriptionBranches: 'إدارة الفروع المحذوفة',
@@ -3834,7 +3836,9 @@ recycleBin: {
     deletedCategory: 'فئة محذوفة',
     deletedProduct: 'منتج محذوف',
     deletedTable: 'طاولة محذوفة',
-    totalDeleted: 'إجمالي المحذوفات'
+    totalDeleted: 'إجمالي المحذوفات',
+      deletedBranchProduct: 'منتج  محذوف',
+
   },
   entityTypes: {
     category: 'فئة',

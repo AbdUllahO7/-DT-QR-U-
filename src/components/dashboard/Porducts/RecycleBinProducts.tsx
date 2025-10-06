@@ -4,13 +4,14 @@ import { Trash2, RotateCcw, Search, Filter, Calendar, Package, FolderOpen, Alert
 import { productService } from '../../../services/productService';
 import { branchService } from '../../../services/branchService';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { branchProductService } from '../../../services/Branch/BranchProductService';
 
 interface DeletedEntity {
   id: number;
   displayName: string;
   description: string | null;
   code: string | null;
-  entityType: 'Category' | 'Product' | 'Branch' | 'MenuTable';
+  entityType: 'Category' | 'Product' | 'Branch' | 'MenuTable' | 'BranchProduct' ;
   deletedAt: string;
   deletedBy: string;
   branchId: number | null;
@@ -27,7 +28,7 @@ const RecycleBin: React.FC = () => {
   const [deletedItems, setDeletedItems] = useState<DeletedEntity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'Category' | 'Product' | 'Branch' | 'MenuTable'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'Category' | 'Product' | 'Branch' | 'MenuTable' | 'BranchProduct'>('all');
   const [restoringIds, setRestoringIds] = useState<Set<number>>(new Set());
   const [notification, setNotification] = useState<{
     type: 'success' | 'error';
@@ -70,14 +71,23 @@ const RecycleBin: React.FC = () => {
           allDeletedItems = [...deletedTables];
           break;
 
+        case 'branchProducts':
+          // eslint-disable-next-line no-case-declarations
+          const [deletedBranchProducts] = await Promise.all([
+            branchProductService.getDeletedBranchProducts(),
+          ]);
+                   allDeletedItems = [...deletedBranchProducts] as DeletedEntity[];
+          break;
+
         case 'all':
         default:
           // eslint-disable-next-line no-case-declarations
-          const [allCategories, allProducts, allBranches, allTables] = await Promise.all([
+          const [allCategories, allProducts, allBranches, allTables, allBranchProducts] = await Promise.all([
             productService.getDeletedCategories(),
             productService.getDeletedProducts(),
             branchService.getDeletedBranches(),
-            branchService.getDeletedTables() // Load all deleted tables without branch filter
+            branchService.getDeletedTables(), // Load all deleted tables without branch filter
+            branchProductService.getDeletedBranchProducts()
           ]);
           allDeletedItems = [...allCategories, ...allProducts, ...allBranches, ...allTables];
           break;
@@ -115,6 +125,9 @@ const RecycleBin: React.FC = () => {
       } else if (item.entityType === 'MenuTable') {
         await branchService.restoreTable(item.id , branchId);
         showNotification('success', t('recycleBin.restore.successTable').replace('{name}', item.displayName));
+      } else if (item.entityType === 'BranchProduct') {
+        await branchProductService.restoreBranchProduct(item.id);
+        showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
       }
       
       // Remove from list after successful restore
@@ -190,6 +203,15 @@ const RecycleBin: React.FC = () => {
           badgeClass: 'bg-orange-100 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300',
           label: t('recycleBin.entityTypes.table')
         };
+      case 'BranchProduct':
+        return {
+          icon: Package,
+          color: 'indigo',
+          bgClass: 'bg-indigo-100 dark:bg-indigo-900/20',
+          textClass: 'text-indigo-600 dark:text-indigo-400',
+          badgeClass: 'bg-indigo-100 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300',
+          label: t('recycleBin.entityTypes.product')
+        };
       default:
         return {
           icon: Package,
@@ -211,6 +233,8 @@ const RecycleBin: React.FC = () => {
         return t('recycleBin.titleBranches');
       case 'tables':
         return t('recycleBin.titleTables');
+      case 'branchProducts':
+        return t('recycleBin.titleBranchProducts');
       default:
         return t('recycleBin.title');
     }
@@ -225,6 +249,8 @@ const RecycleBin: React.FC = () => {
         return t('recycleBin.descriptionBranches');
       case 'tables':
         return t('recycleBin.descriptionTables');
+      case 'branchProducts':
+        return t('recycleBin.descriptionBranchProducts');
       default:
         return t('recycleBin.description');
     }
@@ -286,6 +312,7 @@ const RecycleBin: React.FC = () => {
               <option value="Category">{t('recycleBin.filter.categories')}</option>
               <option value="Product">{t('recycleBin.filter.products')}</option>
               <option value="MenuTable">{t('recycleBin.filter.tables')}</option>
+              <option value="BranchProduct">{t('recycleBin.filter.branchProducts')}</option>
             </select>
           </div>
 
@@ -304,7 +331,7 @@ const RecycleBin: React.FC = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-purple-100 dark:bg-purple-900/20 rounded-lg">
@@ -357,6 +384,20 @@ const RecycleBin: React.FC = () => {
                 {deletedItems.filter(item => item.entityType === 'MenuTable').length}
               </p>
               <p className="text-sm text-gray-600 dark:text-gray-400">{t('recycleBin.stats.deletedTable')}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-indigo-100 dark:bg-indigo-900/20 rounded-lg">
+              <Package className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div>
+              <p className="text-xl font-bold text-gray-900 dark:text-white">
+                {deletedItems.filter(item => item.entityType === 'BranchProduct').length}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{t('recycleBin.stats.deletedBranchProduct')}</p>
             </div>
           </div>
         </div>
@@ -431,9 +472,15 @@ const RecycleBin: React.FC = () => {
                         
                         {/* Additional context information */}
                         <div className="flex flex-col gap-1 mb-2">
-                          {item.entityType === 'Product' && item.categoryName && (
+                          {(item.entityType === 'Product' || item.entityType === 'BranchProduct') && item.categoryName && (
                             <p className="text-sm text-gray-500 dark:text-gray-500">
                               {t('recycleBin.contextInfo.category')} {item.categoryName}
+                            </p>
+                          )}
+                          
+                          {item.entityType === 'BranchProduct' && item.branchName && (
+                            <p className="text-sm text-gray-500 dark:text-gray-500">
+                              {t('recycleBin.contextInfo.branch')} {item.branchName}
                             </p>
                           )}
                           
@@ -458,7 +505,7 @@ const RecycleBin: React.FC = () => {
                             </p>
                           )}
                           
-                          {item.entityType !== 'Branch' && item.entityType !== 'MenuTable' && item.restaurantName && (
+                          {item.entityType !== 'Branch' && item.entityType !== 'MenuTable' && item.entityType !== 'BranchProduct' && item.restaurantName && (
                             <p className="text-sm text-gray-500 dark:text-gray-500">
                               {t('recycleBin.contextInfo.restaurant')} {item.restaurantName}
                             </p>

@@ -39,7 +39,22 @@ interface APIAllergen {
   presence?: number;
   note: string;
 }
-
+// Deleted branch product response
+interface DeletedBranchProduct {
+  id: number;
+  displayName: string;
+  description: string;
+  code: string | null;
+  entityType: string;
+  deletedAt: string;
+  deletedBy: string;
+  branchId: number;
+  branchName: string;
+  restaurantId: number | null;
+  restaurantName: string | null;
+  categoryId: number;
+  categoryName: string;
+}
 interface APIIngredient {
   id: number;
   productId: number;
@@ -437,6 +452,37 @@ class BranchProductService {
       });
     } catch (error: any) {
       logger.error('❌ Error updating branch product prices:', error);
+      throw error;
+    }
+  }
+  // Get all deleted branch products
+  async getDeletedBranchProducts(): Promise<DeletedBranchProduct[]> {
+    try {
+      logger.info('Fetching deleted branch products');
+      
+      const response = await httpClient.get<DeletedBranchProduct[]>(`${this.baseUrl}/deleted`);
+      
+      logger.info('Deleted branch products retrieved successfully', { 
+        count: response.data.length 
+      });
+      
+      return response.data;
+    } catch (error: any) {
+      logger.error('❌ Error retrieving deleted branch products:', error);
+      return [];
+    }
+  }
+
+  // Restore a deleted branch product
+  async restoreBranchProduct(id: number): Promise<void> {
+    try {
+      logger.info('Restoring branch product', { id });
+      
+      await httpClient.post(`${this.baseUrl}/${id}/restore`);
+      
+      logger.info('Branch product restored successfully', { id });
+    } catch (error: any) {
+      logger.error('❌ Error restoring branch product:', error);
       throw error;
     }
   }
