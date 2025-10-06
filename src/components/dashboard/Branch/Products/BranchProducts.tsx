@@ -15,7 +15,6 @@ import { branchProductService } from '../../../../services/Branch/BranchProductS
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import ProductDetailsModal from './ProductDetailsModal';
 import CategoriesContent from './CategoriesContent';
-
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 import { BranchProductAddon } from '../../../../services/Branch/BranchService';
 import { branchProductAddonsService } from '../../../../services/Branch/BranchAddonsService';
@@ -51,7 +50,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
   const [currentStep, setCurrentStep] = useState<AdditionStep>(AdditionStep.SELECT_CATEGORIES);
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
   const [expandedBranchCategories, setExpandedBranchCategories] = useState<Set<number>>(new Set());
-  
+
   // New state for tracking edited values
   const [editedProductPrices, setEditedProductPrices] = useState<Map<number, EditedProductPrice>>(new Map());
   const [editedCategoryNames, setEditedCategoryNames] = useState<Map<number, EditedCategoryName>>(new Map());
@@ -1422,7 +1421,7 @@ const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAdd
             </div>
           </div>
         </div>
-
+   
         {/* Enhanced Stats Overview with Addons */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
