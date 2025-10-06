@@ -13,7 +13,8 @@ import {
   X,
   Save,
   XCircle,
-  Copy
+  Copy,
+  Trash2
 } from 'lucide-react';
 import { 
   CreateMenuTableDto, 
@@ -27,6 +28,8 @@ import {
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import CategorySection from './CategorySection';
 import { CategoryData, TableData } from '../../../../types/BranchManagement/type';
+import { use } from 'i18next';
+import { useNavigate } from 'react-router-dom';
 
 // QR Code Modal Component
 const QRCodeModal: React.FC<{
@@ -164,7 +167,7 @@ const BranchTableManagement: React.FC = () => {
   const [showAddCategory, setShowAddCategory] = useState<boolean>(false);
   const [showAddTable, setShowAddTable] = useState<number | null>(null);
   const [showBatchCreate, setShowBatchCreate] = useState<boolean>(false);
-  
+  const navigate = useNavigate();
 
   const [qrModal, setQrModal] = useState<{
     isOpen: boolean;
@@ -765,6 +768,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
               <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
                 <UserX className="h-6 w-6 text-red-600 dark:text-red-400" />
               </div>
+                     
               <div className={`${isRTL ? 'mr-4' : 'ml-4'}`}>
                 <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
                   {t('BranchTableManagement.occupiedTables')}
@@ -834,6 +838,15 @@ const handleClearTable = async (tableId: number): Promise<void> => {
                 <Plus className="h-4 w-4" />
                 {t('BranchTableManagement.addCategory')}
               </button>
+              <button 
+                onClick={() => {
+                    navigate('/dashboard/RecycleBin', { state: { source: 'tableCategories' } })
+                  }}
+                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
+                    >
+                  <Trash2 className="h-4 w-4" />
+                  <span>{t('productsContent.actions.RecycleBin')}</span>
+                  </button> 
             </div>
           </div>
         </div>

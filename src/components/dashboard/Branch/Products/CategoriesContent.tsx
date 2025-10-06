@@ -28,6 +28,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { AdditionStep, BranchCategory, CategoriesContentProps, DetailedProduct } from '../../../../types/BranchManagement/type';
+import { useNavigate } from 'react-router-dom';
 
 
 const CategoriesContent: React.FC<CategoriesContentProps> = ({
@@ -92,6 +93,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   handleShowProductAddons,
 }) => {
   const { t, isRTL } = useLanguage();
+    const navigate = useNavigate()
 
   const [editingCategoryName, setEditingCategoryName] = useState('');
   // Helper functions
@@ -427,6 +429,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
           <h5 className="font-medium text-gray-900 dark:text-white">
             {t('branchCategories.products.inCategory')}
           </h5>
+      
           <div className={`flex items-center space-x-4 text-sm ${isRTL ? 'space-x-reverse' : ''}`}>
             <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
               <div className="w-3 h-3 bg-green-500 rounded-full"></div>
@@ -1244,6 +1247,15 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                   <GripVertical className="h-4 w-4" />
                   {isReorderMode ? t('branchCategories.manage.exitReorder') : t('branchCategories.manage.reorder')}
                 </button>
+                       <button 
+                      onClick={() => {
+                        navigate('/dashboard/RecycleBin', { state: { source: 'branchProducts' } })
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span>{t('productsContent.actions.RecycleBin')}</span>
+                  </button>
               </div>
             </div>
           </div>

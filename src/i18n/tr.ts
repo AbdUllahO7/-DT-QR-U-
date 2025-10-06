@@ -3811,32 +3811,58 @@ recycleBin: {
   titleProducts: 'Silinmiş Ürünler ve Kategoriler',
   titleBranches: 'Silinmiş Şubeler',
   titleTables: 'Silinmiş Masalar',
+  titleBranchProducts: 'Silinmiş Şube Ürünleri ve Kategorileri',
+  titleBranchCategories: 'Silinmiş Şube Kategorileri',
+  titleTableCategories: 'Silinmiş Masa Kategorileri',
   description: 'Silinmiş şubeler, kategoriler, ürünler ve masaları yönetin',
   descriptionProducts: 'Silinmiş ürünler ve kategorileri yönetin',
   descriptionBranches: 'Silinmiş şubeleri yönetin',
   descriptionTables: 'Silinmiş masaları yönetin',
+  descriptionBranchProducts: 'Silinmiş şube ürünleri ve kategorileri yönetin',
+  descriptionBranchCategories: 'Silinmiş şube kategorilerini yönetin',
+  descriptionTableCategories: 'Silinmiş masa kategorilerini yönetin',
   search: 'Öğe ara...',
   filter: {
     all: 'Tümü',
+    group1: 'Tüm Grup 1',
+    group2: 'Tüm Grup 2',
+    group1Label: '📋 Restoran Seviyesi (Şubeler, Ürünler, Masalar)',
+    group2Label: '🏢 Şube Seviyesi (Şube Ürünleri ve Kategorileri)',
     branches: 'Şubeler',
     categories: 'Kategoriler',
     products: 'Ürünler',
-    tables: 'Masalar'
+    tables: 'Masalar',
+    branchProducts: 'Şube Ürünleri',
+    branchCategories: 'Şube Kategorileri',
+    tableCategories: 'Masa Kategorileri'
   },
   refresh: 'Yenile',
   loading: 'Yükleniyor...',
   stats: {
+    group1: 'Restoran Seviyesi',
+    group1Desc: 'Şubeler, Ürünler, Masalar',
+    group2: 'Şube Seviyesi',
+    group2Desc: 'Şube Ürünleri ve Kategorileri',
+    totalDeleted: 'Toplam Silinmiş',
+    totalDesc: 'Tüm silinmiş öğeler',
+    filtered: 'Gösterilen',
+    filteredDesc: 'Mevcut filtre sonuçları',
     deletedBranch: 'Silinmiş Şube',
     deletedCategory: 'Silinmiş Kategori',
     deletedProduct: 'Silinmiş Ürün',
     deletedTable: 'Silinmiş Masa',
-    totalDeleted: 'Toplam Silinmiş'
+    deletedBranchProduct: 'Silinmiş Şube Ürünü',
+    deletedBranchCategory: 'Silinmiş Şube Kategorisi',
+    deletedTableCategory: 'Silinmiş Masa Kategorisi'
   },
   entityTypes: {
     category: 'Kategori',
     product: 'Ürün',
     branch: 'Şube',
     table: 'Masa',
+    branchProduct: 'Şube Ürünü',
+    branchCategory: 'Şube Kategorisi',
+    tableCategory: 'Masa Kategorisi',
     other: 'Diğer'
   },
   contextInfo: {
@@ -3852,17 +3878,19 @@ recycleBin: {
     successProduct: '"{name}" ürünü başarıyla geri yüklendi',
     successBranch: '"{name}" şubesi başarıyla geri yüklendi',
     successTable: '"{name}" masası başarıyla geri yüklendi',
+    successBranchCategory: '"{name}" şube kategorisi başarıyla geri yüklendi',
+    successTableCategory: '"{name}" masa kategorisi başarıyla geri yüklendi',
     error: 'Geri yükleme işlemi başarısız oldu'
   },
   empty: {
     title: 'Geri dönüşüm kutusu boş',
     titleFiltered: 'Sonuç bulunamadı',
-    description: 'Henüz silinmiş şube, kategori, ürün veya masa bulunmuyor',
+    description: 'Henüz silinmiş öğe bulunmuyor',
     descriptionFiltered: 'Arama kriterlerinize uygun silinmiş öğe bulunmadı'
   },
   errors: {
     loadingError: 'Silinmiş öğeler yüklenirken hata oluştu'
   }
-},
+}
 
 }; 
