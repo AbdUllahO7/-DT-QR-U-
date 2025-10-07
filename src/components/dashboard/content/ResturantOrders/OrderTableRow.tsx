@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronDown, ChevronUp, Eye, CheckCircle, XCircle, Ban } from 'lucide-react';
+import { Eye, CheckCircle, XCircle, Ban, Clock, Phone, MapPin, Home, Package, Zap } from 'lucide-react';
 import { BranchOrder, PendingOrder } from '../../../../types/BranchManagement/type';
 import { orderService } from '../../../../services/Branch/OrderService';
 import OrderStatusUtils from '../../../../utils/OrderStatusUtils';
@@ -7,7 +7,7 @@ import { OrderStatusEnums } from '../../../../types/Orders/type';
 
 interface OrderTableRowProps {
   order: PendingOrder | BranchOrder;
-  viewMode: 'pending' | 'branch' | 'deletedOrders';
+  viewMode: 'pending' | 'branch';
   isExpanded: boolean;
   lang: string;
   onToggleExpansion: (orderId: string) => void;
@@ -17,149 +17,211 @@ interface OrderTableRowProps {
   onOpenCancel: (orderId: string, rowVersion: string) => void;
   onOpenStatus:(orderId: string, rowVersion: string, newStatus: OrderStatusEnums) => void;
   t: (key: string) => string;
+  rowIndex: number;
 }
 
 const OrderTableRow: React.FC<OrderTableRowProps> = ({
   order,
   viewMode,
-  isExpanded,
   lang,
-  onToggleExpansion,
   onOpenDetails,
   onOpenConfirm,
   onOpenReject,
   onOpenStatus,
   onOpenCancel, 
-  t
+  t,
+  rowIndex
 }) => {
   const isPending = viewMode === 'pending';
   const status = isPending ? OrderStatusEnums.Pending : orderService.parseOrderStatus((order as BranchOrder).status);
   const rowVersion = order.rowVersion || '';
   const validStatuses = OrderStatusUtils.getValidStatusTransitions(status);
+  const isRTL = lang === 'ar';
+  console.log('Rendering OrderTableRow for order:', order);
+  // Helper to calculate time ago
+  const getTimeAgo = (date: string) => {
+    const now = new Date();
+    const created = new Date(date);
+    const diffInMinutes = Math.floor((now.getTime() - created.getTime()) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return t('ordersManager.justNow') || 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays}d`;
+  };
 
+  // Alternating row colors for better readability
+  const rowBgClass = rowIndex % 2 === 0 
+    ? 'bg-white dark:bg-gray-800' 
+    : 'bg-gray-50 dark:bg-gray-800/50';
 
   return (
-    <tr className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-150">
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="flex items-center">
-          <button
-            onClick={() => onToggleExpansion(order.id.toString())}
-            className="mr-2 p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-          >
-            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-          <div>
-            <div className="text-sm font-medium  text-gray-900 dark:text-gray-100">
-              {order.customerName}
-            </div>
+    <tr className={`${rowBgClass} hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 border-b border-gray-100 dark:border-gray-700`}>
+      {/* Customer Column */}
+      <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+        <div className="flex flex-col gap-1">
+          <div className="text-sm font-bold text-gray-900 dark:text-gray-100">
+            {order.customerName}
           </div>
+          {(order as any).customerPhone && (
+            <div className={`flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <Phone className="w-3 h-3" />
+              <span>{(order as any).customerPhone}</span>
+            </div>
+          )}
         </div>
       </td>
       
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-900 text-left  dark:text-gray-100 font-mono">
-          {order.orderTag}
+      {/* Order Number */}
+      <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-800">
+          <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+          <span className="text-xs font-mono font-bold text-gray-900 dark:text-gray-100">
+            {order.orderTag}
+          </span>
         </div>
       </td>
       
+      {/* Status (Branch View Only) */}
       {viewMode === 'branch' && (
-        <td className="px-6 py-4 whitespace-nowrap">
-          <span className={`inline-flex text-left items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${OrderStatusUtils.getStatusBadgeClass(status)}`}>
+        <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border-2 ${OrderStatusUtils.getStatusBadgeClass(status)} shadow-sm`}>
             {OrderStatusUtils.getStatusIcon(status)}
-            <span className="ml-1">{orderService.getOrderStatusText(status, lang)}</span>
+            <span>{orderService.getOrderStatusText(status, lang)}</span>
           </span>
         </td>
       )}
       
-      <td className="px-6 py-4 text-left  whitespace-nowrap text-sm text-gray-900 dark:text-gray-100">
-        {'tableName' in order && order.tableName ? order.tableName : '-'}
-      </td>
-      
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-left  font-medium text-gray-900 dark:text-gray-100">
-          {order.totalPrice.toFixed(2)}
+   
+      {/* Amount */}
+      <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+        <div className="flex flex-col gap-1">
+          <div className="text-lg font-black text-green-600 dark:text-green-400">
+            {order.totalPrice.toFixed(2)}
+          </div>
+          <div className={`flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <Package className="w-3 h-3" />
+            <span>{(order as any).itemCount || 0} {t('ordersManager.orderItems')}</span>
+          </div>
         </div>
       </td>
       
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-left font-medium text-gray-900 dark:text-gray-100">
-          {order.orderTypeName}
-          <span className='mr-1 ml-1'>{order.orderTypeIcon}</span>
+      {/* Order Type */}
+      <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <span className="text-2xl">{order.orderTypeIcon}</span>
+          <div className="flex flex-col">
+            <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+              {order.orderTypeName}
+            </span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {order.orderTypeCode}
+            </span>
+          </div>
         </div>
       </td>
       
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-        {new Date(order.createdAt).toLocaleDateString(lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US')}
-        <div className="text-xs">
-          {new Date(order.createdAt).toLocaleTimeString(lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US')}
-        </div>
-      </td>
-      
-      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-        <div className="flex items-center justify-end space-x-2">
-          <button
-            onClick={() => onOpenDetails(order)}
-            className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 p-1 rounded hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors"
-            title={t('ordersManager.viewDetails')}
-          >
-            <Eye className="w-4 h-4" />
-          </button>
+      {/* Time */}
+      <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <div className="p-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+            <Clock className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div className="flex flex-col">
           
-          {orderService.canModifyOrder(status) && (
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {new Date(order.createdAt).toLocaleTimeString(
+                lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US',
+                { hour: '2-digit', minute: '2-digit' }
+              )}
+            </span>
+          </div>
+        </div>
+      </td>
+      
+      {/* Actions */}
+      <td className={`px-4 py-4 ${isRTL ? 'text-left' : 'text-right'}`}>
+        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-end'}`}>
+          {/* Primary Actions - Larger Buttons */}
+          <div className="flex items-center gap-2">
+            {/* Confirm Button - Most Important */}
+            {orderService.canModifyOrder(status) && (
+              <button
+                onClick={() => onOpenConfirm(order.id.toString(), rowVersion)}
+                className="group relative px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg font-bold text-sm flex items-center gap-2"
+                title={t('ordersManager.confirm')}
+              >
+                <CheckCircle className="w-5 h-5" />
+                <span className="hidden sm:inline">{t('ordersManager.confirm')}</span>
+              </button>
+            )}
+            
+            {/* View Details */}
             <button
-              onClick={() => onOpenConfirm(order.id.toString(), rowVersion)}
-              className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 p-1 rounded hover:bg-green-100 dark:hover:bg-green-900 transition-colors"
-              title={t('ordersManager.confirm')}
+              onClick={() => onOpenDetails(order)}
+              className="p-2.5 text-indigo-600 hover:text-white hover:bg-indigo-600 dark:text-indigo-400 dark:hover:bg-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg"
+              title={t('ordersManager.viewDetails')}
             >
-              <CheckCircle className="w-4 h-4" />
+              <Eye className="w-5 h-5" />
             </button>
-          )}
+          </div>
           
-          {/* FIXED: Only show reject button for Pending status */}
-          {status === OrderStatusEnums.Pending && (
-            <button
-              onClick={() => onOpenReject(order.id.toString(), rowVersion)}
-              className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded hover:bg-red-100 dark:hover:bg-red-900 transition-colors"
-              title={t('ordersManager.reject')}
-            >
-              <XCircle className="w-4 h-4" />
-            </button>
-          )}
-          
-          {/* FIXED: Cancel button - available for orders that can be cancelled */}
-           {orderService.canCancelOrder(status) && (
-                   <button
-                     onClick={() => {
-                       onOpenCancel(order.id.toString(), rowVersion)
-                     }}
-                     className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300 p-1 rounded hover:bg-orange-100 dark:hover:bg-orange-900 transition-colors"
-                     title={t('ordersManager.cancel')}
-                   >
-                     <Ban className="w-4 h-4" />
-                   </button>
-                 )}
-                 
-          {validStatuses.length > 0 && (
-            <select
-              title={t('ordersManager.changeStatus')}
-              onChange={(e) => {
-                const newStatus = parseInt(e.target.value) as OrderStatusEnums;
-                if (newStatus !== status) {
-                  onOpenStatus(order.id.toString(), rowVersion, newStatus);
-                }
-                e.target.value = status.toString();
-              }}
-              className="text-xs border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
-              defaultValue=""
-            >
-              <option value="" disabled>{t('ordersManager.changeStatus')}</option>
-              {validStatuses.map((validStatus) => (
-                <option key={validStatus} value={validStatus}>
-                  {orderService.getOrderStatusText(validStatus, lang)}
-                </option>
-              ))}
-            </select>
-          )}
+          {/* Secondary Actions */}
+          <div className="flex items-center gap-1 pl-2 border-l-2 border-gray-200 dark:border-gray-600">
+            {/* Reject Button - Only for Pending */}
+            {status === OrderStatusEnums.Pending && (
+              <button
+                onClick={() => onOpenReject(order.id.toString(), rowVersion)}
+                className="p-2 text-red-600 hover:text-white hover:bg-red-600 dark:text-red-400 dark:hover:bg-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg transition-all duration-200 hover:scale-105"
+                title={t('ordersManager.reject')}
+              >
+                <XCircle className="w-4 h-4" />
+              </button>
+            )}
+            
+            {/* Cancel Button */}
+            {orderService.canCancelOrder(status) && (
+              <button
+                onClick={() => onOpenCancel(order.id.toString(), rowVersion)}
+                className="p-2 text-orange-600 hover:text-white hover:bg-orange-600 dark:text-orange-400 dark:hover:bg-orange-500 bg-orange-50 dark:bg-orange-900/20 rounded-lg transition-all duration-200 hover:scale-105"
+                title={t('ordersManager.cancel')}
+              >
+                <Ban className="w-4 h-4" />
+              </button>
+            )}
+            
+            {/* Status Change Dropdown */}
+            {validStatuses.length > 0 && (
+              <div className="relative group">
+                <select
+                  title={t('ordersManager.changeStatus')}
+                  onChange={(e) => {
+                    const newStatus = parseInt(e.target.value) as OrderStatusEnums;
+                    if (newStatus !== status) {
+                      onOpenStatus(order.id.toString(), rowVersion, newStatus);
+                    }
+                    e.target.value = '';
+                  }}
+                  className="appearance-none text-xs border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent hover:border-blue-400 transition-all cursor-pointer font-semibold hover:shadow-md"
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    <Zap className="inline w-3 h-3" /> {t('ordersManager.status')}
+                  </option>
+                  {validStatuses.map((validStatus) => (
+                    <option key={validStatus} value={validStatus}>
+                      {orderService.getOrderStatusText(validStatus, lang)}
+                    </option>
+                  ))}
+                </select>
+                <Zap className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+            )}
+          </div>
         </div>
       </td>
     </tr>

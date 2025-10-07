@@ -3657,6 +3657,7 @@ SortableProduct: {
       MinOrderAmount: "Minimum Sipariş Tutarı",
       CompletedAt: "Tamamlanma Tarihi",
       time: "saat",
+      Status: "Durum",
     },
     "orderService": {
       "statuses": {
@@ -3901,6 +3902,140 @@ recycleBin: {
   errors: {
     loadingError: 'Silinmiş öğeler yüklenirken hata oluştu'
   }
-}
+},
+"management": {
+    "title": "Yönetim Bilgileri",
+    "subtitle": "Şirket ve yasal detaylar",
+    "noDataTitle": "Yönetim Bilgisi Yok",
+    "noDataMessage": "Yönetim bilgileri henüz ayarlanmadı. Başlamak için lütfen restoran detaylarını ekleyin.",
+    
+    "buttons": {
+      "edit": "Düzenle",
+      "cancel": "İptal",
+      "save": "Değişiklikleri Kaydet",
+      "saving": "Kaydediliyor..."
+    },
 
+    "sections": {
+      "restaurantDetails": "Restoran Detayları",
+      "companyInfo": "Şirket Bilgileri",
+      "taxInfo": "Vergi ve Kayıt",
+      "certificates": "Sertifikalar ve İzinler",
+      "additionalSettings": "Ek Ayarlar"
+    },
+
+    "fields": {
+      "restaurantName": "Restoran Adı",
+      "restaurantLogo": "Restoran Logosu",
+      "companyTitle": "Şirket Unvanı",
+      "legalType": "Yasal Tür",
+      "taxNumber": "Vergi Numarası",
+      "taxOffice": "Vergi Dairesi",
+      "mersisNumber": "MERSIS Numarası",
+      "tradeRegistry": "Ticaret Sicil Numarası",
+      "workPermit": "Çalışma İzni",
+      "foodCertificate": "Gıda Sertifikası",
+      "alcoholService": "Alkol Servisi Var",
+      "logo": "Logo"
+    },
+
+    "placeholders": {
+      "restaurantName": "Restoran adını girin",
+      "companyTitle": "Şirket unvanını girin",
+      "taxNumber": "Vergi numarasını girin",
+      "taxOffice": "Vergi dairesini girin",
+      "mersisNumber": "MERSIS numarasını girin",
+      "tradeRegistry": "Ticaret sicil numarasını girin",
+      "selectLegalType": "Yasal Tür Seçin"
+    },
+
+    "legalTypes": {
+      "llc": "Limited Şirket",
+      "corporation": "Anonim Şirket",
+      "partnership": "Ortaklık"
+    },
+
+    "status": {
+      "uploaded": "Yüklendi",
+      "notUploaded": "Yüklenmedi",
+      "available": "Mevcut",
+      "notAvailable": "Mevcut Değil",
+      "alcoholService": "Alkol Servisi:"
+    },
+
+    "common": {
+      "na": "Mevcut Değil"
+    }
+  },
+  "branches": {
+  "status": {
+    "active": "Aktif",
+    "inactive": "Pasif"
+  },
+  "fields": {
+    "branchType": "Şube Türü",
+    "branchTag": "Şube Etiketi"
+  }
+},
+"restaurants": {
+  "status": {
+    "active": "Aktif",
+    "inactive": "Pasif"
+  },
+  "actions": {
+    "edit": "Restoranı Düzenle",
+    "delete": "Restoranı Sil"
+  },
+  "stats": {
+    "totalBranches": "Toplam Şube",
+    "active": "Aktif",
+    "inactive": "Pasif",
+    "alcohol": "Alkol"
+  },
+  "common": {
+    "yes": "Evet",
+    "no": "Hayır"
+  }
+},
+
+"restaurantsTab": {
+  "status": {
+    "active": "Aktif",
+    "inactive": "Pasif"
+  },
+  "actions": {
+    "edit": "Restoranı Düzenle",
+    "delete": "Restoranı Sil"
+  },
+  "stats": {
+    "totalBranches": "Toplam Şube",
+    "active": "Aktif",
+    "inactive": "Pasif",
+    "alcohol": "Alkol"
+  },
+  "common": {
+    "yes": "Evet",
+    "no": "Hayır"
+  },
+  "modal": {
+    "editTitle": "Restoranı Düzenle",
+    "placeholders": {
+      "restaurantName": "Restoran Adı",
+      "cuisineType": "Mutfak Türü"
+    },
+    "labels": {
+      "hasAlcoholService": "Alkol Servisi Var"
+    },
+    "buttons": {
+      "update": "Restoranı Güncelle",
+      "updating": "Güncelleniyor..."
+    }
+  }
+},
+"tabs": {
+  "restaurants": "Restoranlar",
+  "branches": "Şubeler",
+  "management": "Yönetim Bilgileri",
+  "deleted": "Silinmiş"
+}
 }; 
