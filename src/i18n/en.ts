@@ -3649,7 +3649,17 @@ export const en = {
       "unitPrice": "Unit Price",
       "addonPrice": "Addon Price",
       "notes": "Notes",
-      "amountLabel": "Total Amount"
+      "amountLabel": "Total Amount",
+      DeliveryInformation: "Delivery Information",
+      TableInformation: "Table Information",
+      CustomerInformation: "Customer Information",
+      CustomerName: "Customer Name",
+      PhoneNumber: "Phone Number",
+      OrderTag: "Order Tag",
+      OrderNotes: "Order Notes",
+      MinOrderAmount: "Minimum Order Amount",
+      CompletedAt: "Completed At",
+      time: "Time",
     },
     "orderService": {
       "statuses": {

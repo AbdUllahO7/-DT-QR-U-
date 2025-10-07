@@ -3646,7 +3646,17 @@ SortableProduct: {
       "unitPrice": "Birim Fiyat",
       "addonPrice": "Ekstra Fiyat",
       "notes": "Not",
-      "amountLabel": "Toplam Tutar"
+      "amountLabel": "Toplam Tutar",
+      DeliveryInformation: "Teslimat Bilgileri",
+      TableInformation: "Masa Bilgileri",
+      CustomerInformation: "Müşteri Bilgileri",
+      CustomerName: "Müşteri Adı",
+      PhoneNumber: "Telefon Numarası",
+      OrderTag: "Etiket",
+      OrderNotes: "Sipariş Notları",
+      MinOrderAmount: "Minimum Sipariş Tutarı",
+      CompletedAt: "Tamamlanma Tarihi",
+      time: "saat",
     },
     "orderService": {
       "statuses": {
