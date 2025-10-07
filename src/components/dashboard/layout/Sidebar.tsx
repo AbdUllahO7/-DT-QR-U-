@@ -92,26 +92,10 @@ const Sidebar: React.FC<SidebarProps> = ({
             <h2 className="text-lg font-medium text-gray-800 dark:text-gray-200 truncate">
               {restaurantName}
             </h2>
-            {branchName && (
-              <div className={`mt-1 flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2`}>
-                <span className="text-sm text-primary-600 dark:text-primary-400 font-medium">
-                  {branchName}
-                </span>
-                <span className={`px-2 py-0.5 text-xs rounded-full bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-300`}>
-                  {t('dashboard.sidebar.branch')}
-                </span>
-              </div>
-            )}
+          
 
             {/* Branch Selector - Only for non-branch-only users */}
-            {!isBranchOnly && (
-              <BranchSelector
-                restaurantName={restaurantName}
-                branchName={branchName}
-                onSelectBranch={onSelectBranch}
-                onBackToMain={onBackToMain}
-              />
-            )}
+         
           </div>
 
           {/* Navigation */}
