@@ -21,7 +21,6 @@ import IngredientsContent from '../components/dashboard/Ingredients/Ingredients'
 import SetupSidebar from '../components/dashboard/layout/SetupSidebar';
 import BranchProducts from '../components/dashboard/Branch/Products/BranchProducts';
 import BranchTableManagement from '../components/dashboard/Branch/Table/BranchTables';
-import BranchManagementBranch from '../components/dashboard/Branch/BranchManagement/BranchManagement';
 import OrderTypeComponeent from '../components/dashboard/Branch/OrderType/Ordertype';
 import Overview from '../components/dashboard/content/overview/Overview';
 import TableManagement from '../components/dashboard/content/table-management/TableManagement';
@@ -33,6 +32,7 @@ import BranchSettings from '../components/dashboard/Branch/Settings/BranchSettin
 import ResturantSettings from '../components/dashboard/content/Settings/ResturantSettings';
 import RecycleBin from '../components/dashboard/Porducts/RecycleBinProducts';
 import RestaurantManagementSetting from '../components/dashboard/content/RestaurantManagement/RestaurantManagement';
+import BranchManagementBranch from '../components/dashboard/Branch/BranchManagement/BranchManagement';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();

@@ -3660,6 +3660,7 @@ export const en = {
       MinOrderAmount: "Minimum Order Amount",
       CompletedAt: "Completed At",
       time: "Time",
+      Status: "Status",
     },
     "orderService": {
       "statuses": {
@@ -3908,5 +3909,120 @@ recycleBin: {
   errors: {
     loadingError: 'Error loading deleted items'
   }
+},
+"management": {
+    "title": "Management Information",
+    "subtitle": "Company and legal details",
+    "noDataTitle": "No Management Information",
+    "noDataMessage": "Management information has not been set up yet. Please add restaurant details to get started.",
+    
+    "buttons": {
+      "edit": "Edit",
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "saving": "Saving Changes..."
+    },
+
+    "sections": {
+      "restaurantDetails": "Restaurant Details",
+      "companyInfo": "Company Information",
+      "taxInfo": "Tax & Registration",
+      "certificates": "Certificates & Permits",
+      "additionalSettings": "Additional Settings"
+    },
+
+    "fields": {
+      "restaurantName": "Restaurant Name",
+      "restaurantLogo": "Restaurant Logo",
+      "companyTitle": "Company Title",
+      "legalType": "Legal Type",
+      "taxNumber": "Tax Number",
+      "taxOffice": "Tax Office",
+      "mersisNumber": "MERSIS Number",
+      "tradeRegistry": "Trade Registry Number",
+      "workPermit": "Work Permit",
+      "foodCertificate": "Food Certificate",
+      "alcoholService": "Has Alcohol Service",
+      "logo": "Logo"
+    },
+
+    "placeholders": {
+      "restaurantName": "Enter restaurant name",
+      "companyTitle": "Enter company title",
+      "taxNumber": "Enter tax number",
+      "taxOffice": "Enter tax office",
+      "mersisNumber": "Enter MERSIS number",
+      "tradeRegistry": "Enter trade registry number",
+      "selectLegalType": "Select Legal Type"
+    },
+
+    "legalTypes": {
+      "llc": "LLC",
+      "corporation": "Corporation",
+      "partnership": "Partnership"
+    },
+
+    "status": {
+      "uploaded": "Uploaded",
+      "notUploaded": "Not uploaded",
+      "available": "Available",
+      "notAvailable": "Not Available",
+      "alcoholService": "Alcohol Service:"
+    },
+
+    "common": {
+      "na": "N/A"
+    }
+  },
+  "branches": {
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "fields": {
+    "branchType": "Branch Type",
+    "branchTag": "Branch Tag"
+  }
+},
+
+"restaurantsTab": {
+  "status": {
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "actions": {
+    "edit": "Edit Restaurant",
+    "delete": "Delete Restaurant"
+  },
+  "stats": {
+    "totalBranches": "Total Branches",
+    "active": "Active",
+    "inactive": "Inactive",
+    "alcohol": "Alcohol"
+  },
+  "common": {
+    "yes": "Yes",
+    "no": "No"
+  },
+  "modal": {
+    "editTitle": "Edit Restaurant",
+    "placeholders": {
+      "restaurantName": "Restaurant Name",
+      "cuisineType": "Cuisine Type"
+    },
+    "labels": {
+      "hasAlcoholService": "Has Alcohol Service"
+    },
+    "buttons": {
+      "update": "Update Restaurant",
+      "updating": "Updating..."
+    }
+  }
+},
+"tabs": {
+  "restaurants": "Restaurants",
+  "branches": "Branches",
+  "management": "Management Info",
+  "deleted": "Deleted"
 }
 }; 
