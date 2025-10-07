@@ -9,7 +9,6 @@ import { RestaurantsTab } from './RestaurantsTab';
 import { ManagementInfoPanel } from './ManagementInfoPanel';
 import { BranchesTab } from './BranchesTab';
 import { DeletedTab } from './DeletedTab';
-import { EditRestaurantModal } from './EditRestaurantModal';
 import { LoadingOverlay } from './LoadingOverlay';
 
 
@@ -21,21 +20,17 @@ interface NotificationState {
 
 const RestaurantManagement: React.FC = () => {
   // Tab and UI state
-  const [activeTab, setActiveTab] = useState<ActiveTab>('restaurants');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('branches');
   const [loading, setLoading] = useState<boolean>(false);
   const [notification, setNotification] = useState<NotificationState | null>(null);
 
   // Data state
-  const [restaurants, setRestaurants] = useState<RestaurantInfo[]>([]);
   const [branches, setBranches] = useState<RestaurantBranchDropdownItem[]>([]);
   const [managementInfo, setManagementInfo] = useState<RestaurantManagementInfo | null>(null);
   const [deletedRestaurants, setDeletedRestaurants] = useState<DeletedRestaurant[]>([]);
 
   // Modal and form state
-  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
-  const [editingRestaurant, setEditingRestaurant] = useState<RestaurantInfo | null>(null);
   const [editingManagement, setEditingManagement] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Notification handler
   const showNotification = (message: string, type: 'success' | 'error' = 'success'): void => {
@@ -53,7 +48,6 @@ const RestaurantManagement: React.FC = () => {
         restaurantService.getDeletedRestaurants()
       ]);
 
-      setRestaurants(restaurantData);
       setBranches(branchData);
       setManagementInfo(managementData);
       setDeletedRestaurants(deletedData);
@@ -80,7 +74,6 @@ const RestaurantManagement: React.FC = () => {
 
       await restaurantService.updateRestaurant(id, data);
       showNotification('Restaurant updated successfully!');
-      setEditingRestaurant(null);
       await fetchData();
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
@@ -164,18 +157,7 @@ const RestaurantManagement: React.FC = () => {
         {/* Tab Navigation */}
         <TabNavigation activeTab={activeTab} onTabChange={setActiveTab} />
 
-        {/* Tab Content */}
-        {activeTab === 'restaurants' && (
-          <RestaurantsTab
-            restaurants={restaurants}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-            onCreateClick={() => setShowCreateModal(true)}
-            onEdit={setEditingRestaurant}
-            onDelete={handleDeleteRestaurant}
-            loading={loading}
-          />
-        )}
+      
 
         {activeTab === 'branches' && (
           <BranchesTab branches={branches} loading={loading} />
@@ -200,13 +182,6 @@ const RestaurantManagement: React.FC = () => {
         )}
 
        
-
-        <EditRestaurantModal
-          restaurant={editingRestaurant}
-          onClose={() => setEditingRestaurant(null)}
-          onSubmit={handleUpdateRestaurant}
-          loading={loading}
-        />
 
         {/* Loading Overlay */}
         {loading && <LoadingOverlay />}

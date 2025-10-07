@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, CheckCircle, XCircle, Ban, Clock, Phone, MapPin, Home, Package, Zap } from 'lucide-react';
+import { Eye, CheckCircle, XCircle, Ban, Clock, Phone,Package, Zap } from 'lucide-react';
 import { BranchOrder, PendingOrder } from '../../../../types/BranchManagement/type';
 import { orderService } from '../../../../services/Branch/OrderService';
 import OrderStatusUtils from '../../../../utils/OrderStatusUtils';
@@ -38,26 +38,21 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
   const validStatuses = OrderStatusUtils.getValidStatusTransitions(status);
   const isRTL = lang === 'ar';
   console.log('Rendering OrderTableRow for order:', order);
-  // Helper to calculate time ago
-  const getTimeAgo = (date: string) => {
-    const now = new Date();
-    const created = new Date(date);
-    const diffInMinutes = Math.floor((now.getTime() - created.getTime()) / (1000 * 60));
-    
-    if (diffInMinutes < 1) return t('ordersManager.justNow') || 'Just now';
-    if (diffInMinutes < 60) return `${diffInMinutes}m`;
-    
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours}h`;
-    
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays}d`;
-  };
+  
 
   // Alternating row colors for better readability
   const rowBgClass = rowIndex % 2 === 0 
     ? 'bg-white dark:bg-gray-800' 
     : 'bg-gray-50 dark:bg-gray-800/50';
+
+  // Check if order is completed or confirmed - hide confirm button
+  // Don't show confirm button for Confirmed, Completed, Delivered, Cancelled, or Rejected orders
+  const shouldShowConfirmButton = orderService.canModifyOrder(status) && 
+    status !== OrderStatusEnums.Completed && 
+    status !== OrderStatusEnums.Confirmed &&
+    status !== OrderStatusEnums.Delivered &&
+    status !== OrderStatusEnums.Cancelled &&
+    status !== OrderStatusEnums.Rejected;
 
   return (
     <tr className={`${rowBgClass} hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 border-b border-gray-100 dark:border-gray-700`}>
@@ -148,8 +143,8 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
         <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-end'}`}>
           {/* Primary Actions - Larger Buttons */}
           <div className="flex items-center gap-2">
-            {/* Confirm Button - Most Important */}
-            {orderService.canModifyOrder(status) && (
+            {/* Confirm Button - Only show if not Completed or Confirmed */}
+            {shouldShowConfirmButton && (
               <button
                 onClick={() => onOpenConfirm(order.id.toString(), rowVersion)}
                 className="group relative px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg font-bold text-sm flex items-center gap-2"
@@ -212,11 +207,23 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
                   <option value="" disabled>
                     <Zap className="inline w-3 h-3" /> {t('ordersManager.status')}
                   </option>
-                  {validStatuses.map((validStatus) => (
-                    <option key={validStatus} value={validStatus}>
-                      {orderService.getOrderStatusText(validStatus, lang)}
-                    </option>
-                  ))}
+                  {validStatuses
+                    .filter((validStatus) => {
+                      // If current status is Preparing, don't show Completed option
+                      if (status === OrderStatusEnums.Preparing && validStatus === OrderStatusEnums.Completed) {
+                        return false;
+                      }
+                      // If current status is Ready, don't show Completed option
+                      if (status === OrderStatusEnums.Ready && validStatus === OrderStatusEnums.Completed) {
+                        return false;
+                      }
+                      return true;
+                    })
+                    .map((validStatus) => (
+                      <option key={validStatus} value={validStatus}>
+                        {orderService.getOrderStatusText(validStatus, lang)}
+                      </option>
+                    ))}
                 </select>
                 <Zap className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>

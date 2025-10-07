@@ -19,7 +19,6 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onTabCh
   const { t } = useLanguage();
   
   const tabs: Tab[] = [
-    { id: 'restaurants', label: t('tabs.restaurants'), icon: Building },
     { id: 'branches', label: t('tabs.branches'), icon: Users },
     { id: 'management', label: t('tabs.management'), icon: Info },
     { id: 'deleted', label: t('tabs.deleted'), icon: Trash2 }
