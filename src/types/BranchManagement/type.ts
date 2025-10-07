@@ -998,7 +998,8 @@ export interface PendingOrder {
   items: OrderItem[];
   rowVersion: string;
   orderTypeName:string
-  orderTypeIcon:string
+  orderTypeIcon:string;
+  orderTypeCode:string
 }
 
 
@@ -1024,7 +1025,9 @@ export interface BranchOrder {
   itemCount: number;
   rowVersion: string;
   orderTypeName : string
-  orderTypeIcon:string
+  orderTypeIcon:string;
+  orderTypeCode:string
+
 }
 // Enhanced component state
 export interface OrdersManagerState {

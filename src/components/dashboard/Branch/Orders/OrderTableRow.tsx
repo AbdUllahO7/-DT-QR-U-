@@ -37,7 +37,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
   const rowVersion = order.rowVersion || '';
   const validStatuses = OrderStatusUtils.getValidStatusTransitions(status);
   const isRTL = lang === 'ar';
-
+  console.log('Rendering OrderTableRow for order:', order);
   // Helper to calculate time ago
   const getTimeAgo = (date: string) => {
     const now = new Date();
@@ -105,7 +105,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
           </div>
           <div className={`flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Package className="w-3 h-3" />
-            <span>{(order as any).itemCount || 0} items</span>
+            <span>{(order as any).itemCount || 0} {t('ordersManager.orderItems')}</span>
           </div>
         </div>
       </td>
@@ -210,7 +210,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
                   defaultValue=""
                 >
                   <option value="" disabled>
-                    <Zap className="inline w-3 h-3" /> Status
+                    <Zap className="inline w-3 h-3" /> {t('ordersManager.status')}
                   </option>
                   {validStatuses.map((validStatus) => (
                     <option key={validStatus} value={validStatus}>

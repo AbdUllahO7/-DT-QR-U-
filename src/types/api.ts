@@ -50,6 +50,7 @@ export interface CreateRestaurantDto {
   restaurantName: string;
   userId: string;
   restaurantLogoPath?: string;
+  description?: string;
   workPermitFilePath?: string;
   foodCertificateFilePath?: string;
   cuisineType: number;
