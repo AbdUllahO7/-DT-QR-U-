@@ -408,8 +408,6 @@ export const useOrdersManager = () => {
     }
   };
 
-
-
   // NEW: Refresh order types for current branch
   const refreshOrderTypes = async (): Promise<void> => {
     const branchId = getCurrentBranchId();

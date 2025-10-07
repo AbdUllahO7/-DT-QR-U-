@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useOrdersManager } from '../../../../hooks/useOrdersManager';
 import { useFiltering } from '../../../../hooks/useFiltering';
@@ -21,21 +21,21 @@ import CancelModal from './CancelModal';
 const OrdersManager: React.FC = () => {
   const { t, language } = useLanguage();
   const lang = language;
+  const intervalRef = useRef<number | null>(null);
 
   // Custom hooks for state management
   const {
     state,
     actions: {
       fetchPendingOrders,
-      fetchBranchOrders,
       handleConfirmOrder,
       handleRejectOrder,
-      handleCancelOrder, // NEW: Add cancel handler
+      handleCancelOrder, 
       handleUpdateStatus,
       switchViewMode,
       openConfirmModal,
       openRejectModal,
-      openCancelModal, // NEW: Add cancel modal opener
+      openCancelModal, 
       openStatusModal,
       openDetailsModal,
       closeModals,
@@ -44,10 +44,6 @@ const OrdersManager: React.FC = () => {
       setState
     }
   } = useOrdersManager();
-
-  // Debug logging to verify the function exists
-  console.log('OrdersManager - openCancelModal function:', openCancelModal);
-  console.log('OrdersManager - typeof openCancelModal:', typeof openCancelModal);
 
   const {
     filteredOrders,
@@ -63,26 +59,33 @@ const OrdersManager: React.FC = () => {
     changeItemsPerPage
   } = usePagination(filteredOrders, state.pagination, setState);
 
-  const handleOpenCancel = React.useCallback((orderId: string, rowVersion: string) => {
-    console.log('handleOpenCancel called with:', { orderId, rowVersion });
-    if (typeof openCancelModal === 'function') {
-      openCancelModal(orderId, rowVersion);
-    } else {
-      console.error('openCancelModal is not a function:', openCancelModal);
-      // Fallback: directly update state to show cancel modal
-      setState(prev => ({ 
-        ...prev, 
-        showCancelModal: true, 
-        activeOrderId: orderId, 
-        activeRowVersion: rowVersion 
-      }));
-    }
-  }, [openCancelModal, setState]);
-
   // Initial fetch on mount
   useEffect(() => {
     fetchPendingOrders();
   }, []);
+
+  // Auto-refresh pending orders every 30 seconds
+  useEffect(() => {
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    // Only set up auto-refresh if we're in pending view mode
+    if (state.viewMode === 'pending') {
+      intervalRef.current = setInterval(() => {
+        fetchPendingOrders();
+      }, 30000); // 30 seconds
+    }
+
+    // Cleanup function
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [state.viewMode, fetchPendingOrders]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
@@ -161,14 +164,13 @@ const OrdersManager: React.FC = () => {
           t={t}
         />
 
-          <CancelModal
+        <CancelModal
           show={state.showCancelModal}
           loading={state.loading}
           onCancel={handleCancelOrder}
           onClose={closeModals}
           t={t}
         />
-
 
         <StatusModal
           show={state.showStatusModal}

@@ -39,7 +39,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
   onOpenConfirm,
   onOpenReject,
   onOpenStatus,
-   onOpenCancel, 
+  onOpenCancel, 
   onClearFilters,
   t
 }) => {
