@@ -218,7 +218,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
         <div className="bg-gray-50 dark:bg-gray-700/50 px-6 py-4 border-t border-gray-200 dark:border-gray-600">
           <div className="flex items-center justify-between">
             <div className="text-sm text-gray-600 dark:text-gray-400">
-              {t('ordersManager.showing')} <span className="font-semibold text-gray-900 dark:text-gray-100">{orders.length}</span> {orders.length === 1 ? t('ordersManager.order') : t('ordersManager.orders')}
+              {t('ordersManager.Showing')} <span className="font-semibold text-gray-900 dark:text-gray-100">{orders.length}</span> {orders.length === 1 ? t('ordersManager.order') : t('ordersManager.orders')}
             </div>
             <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
               {t('ordersManager.total')}: <span className="text-green-600 dark:text-green-400 text-lg ml-2">
