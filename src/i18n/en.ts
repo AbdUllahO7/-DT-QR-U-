@@ -3366,614 +3366,614 @@ export const en = {
         addons: 'addons',
         assigned: 'assigned'
       }
-    },
+  },
   menu: {
-    title: "Menu",
-    loading: "Loading Menu",
-    loadingSubtitle: "Preparing our delicious selections for you...",
-    error: {
-      title: "Menu Unavailable",
-      tryAgain: "Try Again"
+  title: "Menu",
+  loading: "Loading Menu",
+  loadingSubtitle: "Preparing our delicious selections for you...",
+  error: {
+    title: "Menu Unavailable",
+    tryAgain: "Try Again"
+  },
+  search: {
+    placeholder: "Search for delicious dishes..."
+  },
+  categories: "Categories",
+  ingredients: "Ingredients",
+  open: "Open",
+  closed: "Closed",
+  chefsChoice: "Chef's Choice",
+  add: "Add",
+  remove: "Remove",
+  items: "items",
+  item: "item",
+  available: "available",
+  deliciousItems: "delicious",
+  exploreMenu: "Explore Our Menu",
+  noResults: "No results found",
+  noResultsDesc: "Try different keywords or browse other categories",
+  noItemsCategory: "No items in this category",
+  noItemsCategoryDesc: "Check other categories for delicious options",
+  selectCategory: "Select a category to start exploring our carefully crafted culinary offerings",
+  whyChooseUs: {
+    title: "Why Choose Us?",
+    subtitle: "Experience culinary excellence with our commitment to quality, freshness, and exceptional service",
+    freshIngredients: {
+      title: "Fresh Ingredients",
+      description: "Locally sourced, premium quality ingredients prepared daily"
     },
-    search: {
-      placeholder: "Search for delicious dishes..."
+    fastDelivery: {
+      title: "Fast Delivery",
+      description: "Quick and reliable delivery service to your doorstep"
     },
-    categories: "Categories",
-    ingredients: "Ingredients",
-    open: "Open",
-    closed: "Closed",
-    chefsChoice: "Chef's Choice",
-    add: "Add",
-    remove: "Remove",
-    items: "items",
-    item: "item",
-    available: "available",
-    deliciousItems: "delicious",
-    exploreMenu: "Explore Our Menu",
-    noResults: "No results found",
-    noResultsDesc: "Try different keywords or browse other categories",
-    noItemsCategory: "No items in this category",
-    noItemsCategoryDesc: "Check other categories for delicious options",
-    selectCategory: "Select a category to start exploring our carefully crafted culinary offerings",
-    whyChooseUs: {
-      title: "Why Choose Us?",
-      subtitle: "Experience culinary excellence with our commitment to quality, freshness, and exceptional service",
-      freshIngredients: {
-        title: "Fresh Ingredients",
-        description: "Locally sourced, premium quality ingredients prepared daily"
-      },
-      fastDelivery: {
-        title: "Fast Delivery",
-        description: "Quick and reliable delivery service to your doorstep"
-      },
-      qualityAssured: {
-        title: "Quality Assured",
-        description: "Rigorous quality control and hygiene standards"
-      },
-      expertChefs: {
-        title: "Expert Chefs",
-        description: "Experienced culinary professionals crafting memorable experiences"
-      }
+    qualityAssured: {
+      title: "Quality Assured",
+      description: "Rigorous quality control and hygiene standards"
     },
-    footer: {
-      brand: "MenuHub",
-      description: "Discover exceptional dining experiences with our curated selection of restaurants and delicious cuisines.",
-      quickLinks: "Quick Links",
-      services: "Services",
-      getInTouch: "Get in Touch",
-      visitUs: "Visit Us",
-      callUs: "Call Us",
-      emailUs: "Email Us",
-      copyright: "All rights reserved.",
-      privacyPolicy: "Privacy Policy",
-      termsOfService: "Terms of Service",
-      poweredBy: "Powered by",
-      links: {
-        ourMenu: "Our Menu",
-        aboutUs: "About Us",
-        locations: "Locations",
-        reservations: "Reservations",
-        specialOffers: "Special Offers",
-        giftCards: "Gift Cards"
-      },
-      services: {
-        onlineOrdering: "Online Ordering",
-        tableBooking: "Table Booking",
-        privateEvents: "Private Events",
-        catering: "Catering",
-        takeaway: "Takeaway",
-        corporateMeals: "Corporate Meals"
-      }
-    },
-     cart: {
-      title: 'Cart',
-      newOrder: 'New Order',
-      orders: 'Orders',
-      orderType: 'Order Type',
-      table: 'Table:',
-      notes: 'Notes:',
-      refresh: 'Refresh',
-      refreshing: 'Refreshing...',
-      remove: 'Remove',
-      empty: 'Your cart is empty',
-      emptyDesc: 'Start by adding some items to your cart',
-      total: 'Total',
-      placeOrder: "Place Order",
-      proceed: 'Proceed to Order',
-      processing: 'Processing...',
-      clear: 'Clear Cart',
-      item: 'item',
-      items: 'items',
-      variant: 'variant',
-      variants: 'variants',
-      plain: 'Plain',
-      customized: 'Customized',
-      addons: 'Add-ons',
-      variantTotal: 'Variant Total',
-      quantity: 'Quantity',
-      each: 'each',
-      min: 'Min',
-      max: 'Max',
-      qty: 'Qty',
-      minQuantityError: 'Minimum quantity for {name} is {min}',
-      maxQuantityError: 'Maximum quantity for {name} is {max}',
-      decreaseQuantity: 'Decrease quantity',
-      increaseQuantity: 'Increase quantity',
-        "creating_order": "Creating order...",
-  "order_created_success": "Order created successfully!",
-  "order_creation_failed": "Failed to create order. Please try again.",
-  "sending_whatsapp": "Sending WhatsApp message...",
-  "whatsapp_sent_success": "WhatsApp message sent successfully!",
-  "whatsapp_send_failed": "Failed to send WhatsApp message",
-  "clearing_basket": "Clearing basket...",
-  "basket_cleared": "Basket cleared successfully!",
-  "clear_basket_failed": "Failed to clear basket",
-  "load_order_types_failed": "Failed to load order types",
-  "confirming_price_changes": "Confirming price changes...",
-  "price_changes_confirmed": "Price changes confirmed successfully!",
-  "price_changes_failed": "Failed to confirm price changes",
-  "session_required": "Session ID required"
+    expertChefs: {
+      title: "Expert Chefs",
+      description: "Experienced culinary professionals crafting memorable experiences"
     }
+  },
+  footer: {
+    brand: "MenuHub",
+    description: "Discover exceptional dining experiences with our curated selection of restaurants and delicious cuisines.",
+    quickLinks: "Quick Links",
+    services: "Services",
+    getInTouch: "Get in Touch",
+    visitUs: "Visit Us",
+    callUs: "Call Us",
+    emailUs: "Email Us",
+    copyright: "All rights reserved.",
+    privacyPolicy: "Privacy Policy",
+    termsOfService: "Terms of Service",
+    poweredBy: "Powered by",
+    links: {
+      ourMenu: "Our Menu",
+      aboutUs: "About Us",
+      locations: "Locations",
+      reservations: "Reservations",
+      specialOffers: "Special Offers",
+      giftCards: "Gift Cards"
     },
-    order: {
-      form: {
-        title: 'Order Details',
-        orderType: 'Order Type',
-        orderTypeRequired: 'Order type is required',
-        selectOrderType: 'Select order type...',
-        customerName: 'Customer Name',
-        customerNameRequired: 'Customer name is required',
-        customerNamePlaceholder: 'Enter customer name',
-        deliveryAddress: 'Delivery Address',
-        deliveryAddressRequired: 'Delivery address is required for this order type',
-        deliveryAddressPlaceholder: 'Enter delivery address',
-        phoneNumber: 'Phone Number',
-        phoneNumberRequired: 'Phone number is required for this order type',
-        phoneNumberPlaceholder: 'Enter phone number',
-        specialInstructions: 'Special Instructions',
-        specialInstructionsPlaceholder: 'Any special instructions for your order...',
-        orderSummary: 'Order Summary',
-        subtotal: 'Subtotal',
-        serviceCharge: 'Service Charge',
-        minimumRequired: 'Minimum required',
-        estimatedTime: 'Estimated time',
-        minutes: 'minutes',
-        backToCart: 'Back to Cart',
-        createOrder: 'Create Order',
-        creating: 'Creating...',
-        loadingOrderTypes: 'Loading order types...',
-        noOrderTypes: 'No order types available. Please contact support.',
-        minimumOrder: 'Minimum order',
-        service: 'service',
-        minimumOrderError: 'Minimum order amount for {type} is ${amount}. Current total: ${current}'
-      },
-      validation: {
-        fixErrors: 'Please fix the following errors:',
-        customerNameRequired: 'Customer name is required',
-        orderTypeRequired: 'Please select an order type',
-        addressRequired: 'Delivery address is required for this order type',
-        phoneRequired: 'Phone number is required for this order type'
-      }
+    services: {
+      onlineOrdering: "Online Ordering",
+      tableBooking: "Table Booking",
+      privateEvents: "Private Events",
+      catering: "Catering",
+      takeaway: "Takeaway",
+      corporateMeals: "Corporate Meals"
+    }
+  },
+    cart: {
+    title: 'Cart',
+    newOrder: 'New Order',
+    orders: 'Orders',
+    orderType: 'Order Type',
+    table: 'Table:',
+    notes: 'Notes:',
+    refresh: 'Refresh',
+    refreshing: 'Refreshing...',
+    remove: 'Remove',
+    empty: 'Your cart is empty',
+    emptyDesc: 'Start by adding some items to your cart',
+    total: 'Total',
+    placeOrder: "Place Order",
+    proceed: 'Proceed to Order',
+    processing: 'Processing...',
+    clear: 'Clear Cart',
+    item: 'item',
+    items: 'items',
+    variant: 'variant',
+    variants: 'variants',
+    plain: 'Plain',
+    customized: 'Customized',
+    addons: 'Add-ons',
+    variantTotal: 'Variant Total',
+    quantity: 'Quantity',
+    each: 'each',
+    min: 'Min',
+    max: 'Max',
+    qty: 'Qty',
+    minQuantityError: 'Minimum quantity for {name} is {min}',
+    maxQuantityError: 'Maximum quantity for {name} is {max}',
+    decreaseQuantity: 'Decrease quantity',
+    increaseQuantity: 'Increase quantity',
+      "creating_order": "Creating order...",
+"order_created_success": "Order created successfully!",
+"order_creation_failed": "Failed to create order. Please try again.",
+"sending_whatsapp": "Sending WhatsApp message...",
+"whatsapp_sent_success": "WhatsApp message sent successfully!",
+"whatsapp_send_failed": "Failed to send WhatsApp message",
+"clearing_basket": "Clearing basket...",
+"basket_cleared": "Basket cleared successfully!",
+"clear_basket_failed": "Failed to clear basket",
+"load_order_types_failed": "Failed to load order types",
+"confirming_price_changes": "Confirming price changes...",
+"price_changes_confirmed": "Price changes confirmed successfully!",
+"price_changes_failed": "Failed to confirm price changes",
+"session_required": "Session ID required"
+  }
+  },
+  order: {
+    form: {
+      title: 'Order Details',
+      orderType: 'Order Type',
+      orderTypeRequired: 'Order type is required',
+      selectOrderType: 'Select order type...',
+      customerName: 'Customer Name',
+      customerNameRequired: 'Customer name is required',
+      customerNamePlaceholder: 'Enter customer name',
+      deliveryAddress: 'Delivery Address',
+      deliveryAddressRequired: 'Delivery address is required for this order type',
+      deliveryAddressPlaceholder: 'Enter delivery address',
+      phoneNumber: 'Phone Number',
+      phoneNumberRequired: 'Phone number is required for this order type',
+      phoneNumberPlaceholder: 'Enter phone number',
+      specialInstructions: 'Special Instructions',
+      specialInstructionsPlaceholder: 'Any special instructions for your order...',
+      orderSummary: 'Order Summary',
+      subtotal: 'Subtotal',
+      serviceCharge: 'Service Charge',
+      minimumRequired: 'Minimum required',
+      estimatedTime: 'Estimated time',
+      minutes: 'minutes',
+      backToCart: 'Back to Cart',
+      createOrder: 'Create Order',
+      creating: 'Creating...',
+      loadingOrderTypes: 'Loading order types...',
+      noOrderTypes: 'No order types available. Please contact support.',
+      minimumOrder: 'Minimum order',
+      service: 'service',
+      minimumOrderError: 'Minimum order amount for {type} is ${amount}. Current total: ${current}'
     },
-    priceChange: {
-      title: 'Price Changes Detected',
-      description: 'Some items in your basket have price changes that need to be confirmed before proceeding with the order.',
-      changesRequired: 'Changes Required:',
-      defaultMessage: 'Price updates need to be confirmed to continue.',
-      cancel: 'Cancel',
-      confirm: 'Confirm & Continue',
-      confirming: 'Confirming...'
-    },
-    "productModal": {
-      "customizeOrder": "Customize Your Order",
-      "allergenInformation": "Allergen Information",
-      "ingredients": "Ingredients",
-      "availableAddons": "Available Add-ons",
-      "add": "Add",
-      "recommended": "Recommended",
-      "min": "Min",
-      "max": "Max",
-      "orderSummary": "Order Summary",
-      "quantity": "Quantity",
-      "total": "Total",
-      "addToCart": "Add to Cart"
-    },
-    errors: {
-      loadingBasket: 'Failed to load basket',
-      loadingOrderTypes: 'Failed to load order types',
-      removingItem: 'Failed to remove item from basket',
-      increasingQuantity: 'Failed to increase item quantity',
-      decreasingQuantity: 'Failed to decrease item quantity',
-      increasingAddonQuantity: 'Failed to increase addon quantity',
-      clearingBasket: 'Failed to clear basket',
-      creatingOrder: 'Failed to create order',
-      orderAlreadyProcessing: 'This order is already being processed',
-      priceChangeDetails: 'Failed to load price change details',
-      confirmingPriceChanges: 'Failed to confirm price changes',
-      sessionIdRequired: 'Session ID required for price change confirmation',
-      addonProductNotFound: 'Could not find addon product ID',
-      cartItemNotFound: 'Cart item not found'
-    },
-    "ordersManager": {
-      total : 'Total',
-      subTotal:"Sub Total",
-      OrderType : 'Order Type',
-      serviceFeeApplied:"Service Charge",
-      DeliveryAddress : 'Delivery Address',
-      OrderNotesInformation : 'Order Notes & Information',
-      OrderMetadata: 'Order Metadata',
-      ItemCount : 'Item Count',
-      TotalItems: 'Total Items',
-      OrderTimeline: 'Order Timeline',
-      searchPlaceholder:"Write here",
-      showAdvancedFilter:"Show Advanced Filters",
-      hideAdvancedFilter:"Hide Advanced Filters",
-      of:"of",
-      orders:"orders",
-      clearFilter:"Clear Filters",
-      customerName:"Customer Name",
-      tableName:"Table Name",
-      orderType:"Order type",
-      minPrice :"Min Price",
-      maxPrice:"Max price",
-      Showing:"Showing",
-      to:"to",
-      perpage : "Per Page",
-      cancelOrder:"Cancel Order",
-      cancelOrderConfirmation :"Are you sure you want to cancel the order?",
-      deletedOrders:"Deleted Orders",
-      "title": "Order Management",
-      "description": "Easily manage and track your restaurant's orders.",
-      "pendingOrders": "Pending Orders",
-      "branchOrders": "Branch Orders",
-      "allStatuses": "All Statuses",
-      "statusFilter": "Status Filter",
-      "noOrders": "No {viewMode} orders yet.",
-      "customer": "Customer",
-      "orderNumber": "Order Number",
-      "status": "Status",
-      "table": "Table",
-      "amount": "Amount",
-      "date": "Date",
-      "actions": "Actions",
-      "viewDetails": "View Details",
-      "confirm": "Confirm",
-      "reject": "Reject",
-      "changeStatus": "Change Status",
-      "orderItems": "Order Items",
-      "createdAt": "Created At",
-      "confirmedAt": "Confirmed At",
-      "rowVersion": "Row Version",
-      "confirmOrderTitle": "Confirm Order",
-      "confirmOrderPrompt": "Are you sure you want to confirm this order?",
-      "rejectOrderTitle": "Reject Order",
-      "rejectOrderPrompt": "Enter the reason for rejection:",
-      "rejectReasonPlaceholder": "Reason for rejection...",
-      "updateStatusTitle": "Update Status",
-      "updateStatusPrompt": "Are you sure you want to update the order status ?",
-      "cancel": "Cancel",
-      "confirmAction": "Confirm",
-      "rejectAction": "Reject",
-      "updateAction": "Update",
-      "confirming": "Confirming...",
-      "rejecting": "Rejecting...",
-      "updating": "Updating...",
-      "orderDetailsTitle": "Order Details",
-      "successNotification": "Operation Successful",
-      "orderConfirmedSuccess": "Order confirmed successfully!",
-      "orderRejectedSuccess": "Order rejected successfully!",
-      "orderStatusUpdatedSuccess": "Order status updated successfully!",
-      "errorInvalidStatusTransition": "Invalid status transition: Please confirm the order first (move to Confirmed status).",
-      "errorCannotConfirm": "This order cannot be confirmed. Current status: {currentStatus}.",
-      "quantity": "Quantity",
-      "unitPrice": "Unit Price",
-      "addonPrice": "Addon Price",
-      "notes": "Notes",
-      "amountLabel": "Total Amount",
-      DeliveryInformation: "Delivery Information",
-      TableInformation: "Table Information",
-      CustomerInformation: "Customer Information",
-      CustomerName: "Customer Name",
-      PhoneNumber: "Phone Number",
-      OrderTag: "Order Tag",
-      OrderNotes: "Order Notes",
-      MinOrderAmount: "Minimum Order Amount",
-      CompletedAt: "Completed At",
-      time: "Time",
-      Status: "Status",
-    },
-    "orderService": {
-      "statuses": {
-        "pending": "Pending",
-        "confirmed": "Confirmed",
-        "preparing": "Preparing",
-        "ready": "Ready",
-        "completed": "Completed",
-        "delivered": "Delivered",
-        "cancelled": "Cancelled",
-        "rejected": "Rejected",
-        "unknown": "Unknown"
-      },
-      "errors": {
-        "createSessionOrder": "Error creating session order",
-        "getPendingOrders": "Error fetching pending orders",
-        "getTableOrders": "Error fetching table orders",
-        "getOrder": "Error fetching order",
-        "getBranchOrders": "Error fetching branch orders",
-        "confirmOrder": "Error confirming order",
-        "rejectOrder": "Error rejecting order",
-        "updateOrderStatus": "Error updating order status",
-        "trackOrder": "Error fetching order tracking",
-        "getOrderTrackingQR": "Error fetching order tracking QR",
-        "smartCreateOrder": "Error creating smart order",
-        "getTableBasketSummary": "Error fetching table basket summary",
-        "validationError": "Validation error: {errors}",
-        "invalidRequest": "Invalid request. Please check the data.",
-        "sessionExpired": "Session expired. Please log in again.",
-        "unauthorized": "You are not authorized for this action.",
-        "orderNotFound": "Order not found.",
-        "invalidStatus": "Order status is not suitable for this action.",
-        "noInternet": "Check your internet connection.",
-        "unknownError": "Unknown error",
-        "getOrderTypeText": "Error fetching order type text",
-        "getOrderType": "Error fetching order type",
-        "getActiveOrderTypes": "Error fetching active order types",
-        "getAllOrderTypes": "Error fetching all order types",
-        "orderTotalCalculation": "Error calculating order total",
-        "getEstimatedTime": "Error fetching estimated delivery time",
-        "getOrderTypeByCode": "Error fetching order type by code",
-        "getOrderTypesForDisplay": "Error fetching order types for display",
-        "unknownOrderType": "Unknown order type"
-      }
-    },
-    branchPreferences: {
-    "title": "Branch Preferences",
-    "description": "Configure branch-specific settings and preferences",
-    "loading": "Loading branch preferences...",
-    "saving": "Saving...",
-    "refresh": "Refresh",
-    "saveChanges": "Save Changes",
-    "saveSuccess": "Branch preferences saved successfully!",
-    "cleanupModes": {
-      "afterTimeout": "After Timeout",
-      "afterClosing": "After Closing", 
-      "disabled": "Disabled"
-    },
-    "sections": {
-      "orderManagement": {
-        "title": "Order Management",
-        "description": "Configure how orders are handled and processed",
-        "autoConfirmOrders": "Auto Confirm Orders",
-        "autoConfirmOrdersDesc": "Automatically confirm incoming orders without manual approval",
-        "useWhatsappForOrders": "WhatsApp for Orders",
-        "useWhatsappForOrdersDesc": "Enable WhatsApp integration for order notifications"
-      },
-      "displaySettings": {
-        "title": "Display Settings",
-        "description": "Configure what information is displayed to customers",
-        "showProductDescriptions": "Show Product Descriptions",
-        "showProductDescriptionsDesc": "Display detailed product descriptions to customers",
-        "enableAllergenDisplay": "Display Allergen Information",
-        "enableAllergenDisplayDesc": "Show allergen warnings and information",
-        "enableIngredientDisplay": "Display Ingredients",
-        "enableIngredientDisplayDesc": "Show ingredient lists for products"
-      },
-      "paymentMethods": {
-        "title": "Payment Methods",
-        "description": "Configure accepted payment methods",
-        "acceptCash": "Accept Cash Payments",
-        "acceptCashDesc": "Allow customers to pay with cash",
-        "acceptCreditCard": "Accept Credit Cards",
-        "acceptCreditCardDesc": "Allow customers to pay with credit/debit cards",
-        "acceptOnlinePayment": "Accept Online Payments",
-        "acceptOnlinePaymentDesc": "Allow customers to pay online through digital payment methods"
-      },
-      "localization": {
-        "title": "Localization",
-        "description": "Configure language and regional settings",
-        "defaultLanguage": "Default Language",
-        "defaultCurrency": "Default Currency",
-        "timeZone": "Time Zone",
-        "supportedLanguages": "Supported Languages"
-      },
-      "sessionManagement": {
-        "title": "Session Management",
-        "description": "Configure session timeout and cleanup settings",
-        "sessionTimeout": "Session Timeout (Minutes)",
-        "cleanupMode": "Cleanup Mode",
-        "cleanupDelay": "Cleanup Delay After Close (Minutes)",
-            "cleanupModeDesc": "Choose when to cleanup expired sessions",
-      "sessionTimeoutDesc": "Minutes before session expires due to inactivity",
-      "cleanupDelayDesc": "Minutes to wait after closing before cleanup",
-      "cleanupDisabledMessage": "Session cleanup is disabled. Sessions will not be automatically cleaned up."
-      }
-    },
-    "currencies": {
-      "TRY": "Turkish Lira (₺)",
-      "USD": "US Dollar ($)",
-      "EUR": "Euro (€)"
-    },
-    "languages": {
-      "tr": "Turkish",
-      "en": "English",
-      "ar": "Arabic",
-      "de": "German",
-      "fr": "French",
-      "es": "Spanish",
-      "it": "Italian",
-      "ru": "Russian",
-      "zh": "Chinese",
-      "ja": "Japanese"
-    },
-    "timezones": {
-      "Europe/Istanbul": "Istanbul (UTC+3)",
-      "Europe/London": "London (UTC+0)",
-      "America/New_York": "New York (UTC-5)"
+    validation: {
+      fixErrors: 'Please fix the following errors:',
+      customerNameRequired: 'Customer name is required',
+      orderTypeRequired: 'Please select an order type',
+      addressRequired: 'Delivery address is required for this order type',
+      phoneRequired: 'Phone number is required for this order type'
+    }
+  },
+  priceChange: {
+    title: 'Price Changes Detected',
+    description: 'Some items in your basket have price changes that need to be confirmed before proceeding with the order.',
+    changesRequired: 'Changes Required:',
+    defaultMessage: 'Price updates need to be confirmed to continue.',
+    cancel: 'Cancel',
+    confirm: 'Confirm & Continue',
+    confirming: 'Confirming...'
+  },
+  "productModal": {
+    "customizeOrder": "Customize Your Order",
+    "allergenInformation": "Allergen Information",
+    "ingredients": "Ingredients",
+    "availableAddons": "Available Add-ons",
+    "add": "Add",
+    "recommended": "Recommended",
+    "min": "Min",
+    "max": "Max",
+    "orderSummary": "Order Summary",
+    "quantity": "Quantity",
+    "total": "Total",
+    "addToCart": "Add to Cart"
+  },
+  errors: {
+    loadingBasket: 'Failed to load basket',
+    loadingOrderTypes: 'Failed to load order types',
+    removingItem: 'Failed to remove item from basket',
+    increasingQuantity: 'Failed to increase item quantity',
+    decreasingQuantity: 'Failed to decrease item quantity',
+    increasingAddonQuantity: 'Failed to increase addon quantity',
+    clearingBasket: 'Failed to clear basket',
+    creatingOrder: 'Failed to create order',
+    orderAlreadyProcessing: 'This order is already being processed',
+    priceChangeDetails: 'Failed to load price change details',
+    confirmingPriceChanges: 'Failed to confirm price changes',
+    sessionIdRequired: 'Session ID required for price change confirmation',
+    addonProductNotFound: 'Could not find addon product ID',
+    cartItemNotFound: 'Cart item not found'
+  },
+  "ordersManager": {
+    total : 'Total',
+    subTotal:"Sub Total",
+    OrderType : 'Order Type',
+    serviceFeeApplied:"Service Charge",
+    DeliveryAddress : 'Delivery Address',
+    OrderNotesInformation : 'Order Notes & Information',
+    OrderMetadata: 'Order Metadata',
+    ItemCount : 'Item Count',
+    TotalItems: 'Total Items',
+    OrderTimeline: 'Order Timeline',
+    searchPlaceholder:"Write here",
+    showAdvancedFilter:"Show Advanced Filters",
+    hideAdvancedFilter:"Hide Advanced Filters",
+    of:"of",
+    orders:"orders",
+    clearFilter:"Clear Filters",
+    customerName:"Customer Name",
+    tableName:"Table Name",
+    orderType:"Order type",
+    minPrice :"Min Price",
+    maxPrice:"Max price",
+    Showing:"Showing",
+    to:"to",
+    perpage : "Per Page",
+    cancelOrder:"Cancel Order",
+    cancelOrderConfirmation :"Are you sure you want to cancel the order?",
+    deletedOrders:"Deleted Orders",
+    "title": "Order Management",
+    "description": "Easily manage and track your restaurant's orders.",
+    "pendingOrders": "Pending Orders",
+    "branchOrders": "Branch Orders",
+    "allStatuses": "All Statuses",
+    "statusFilter": "Status Filter",
+    "noOrders": "No {viewMode} orders yet.",
+    "customer": "Customer",
+    "orderNumber": "Order Number",
+    "status": "Status",
+    "table": "Table",
+    "amount": "Amount",
+    "date": "Date",
+    "actions": "Actions",
+    "viewDetails": "View Details",
+    "confirm": "Confirm",
+    "reject": "Reject",
+    "changeStatus": "Change Status",
+    "orderItems": "Order Items",
+    "createdAt": "Created At",
+    "confirmedAt": "Confirmed At",
+    "rowVersion": "Row Version",
+    "confirmOrderTitle": "Confirm Order",
+    "confirmOrderPrompt": "Are you sure you want to confirm this order?",
+    "rejectOrderTitle": "Reject Order",
+    "rejectOrderPrompt": "Enter the reason for rejection:",
+    "rejectReasonPlaceholder": "Reason for rejection...",
+    "updateStatusTitle": "Update Status",
+    "updateStatusPrompt": "Are you sure you want to update the order status ?",
+    "cancel": "Cancel",
+    "confirmAction": "Confirm",
+    "rejectAction": "Reject",
+    "updateAction": "Update",
+    "confirming": "Confirming...",
+    "rejecting": "Rejecting...",
+    "updating": "Updating...",
+    "orderDetailsTitle": "Order Details",
+    "successNotification": "Operation Successful",
+    "orderConfirmedSuccess": "Order confirmed successfully!",
+    "orderRejectedSuccess": "Order rejected successfully!",
+    "orderStatusUpdatedSuccess": "Order status updated successfully!",
+    "errorInvalidStatusTransition": "Invalid status transition: Please confirm the order first (move to Confirmed status).",
+    "errorCannotConfirm": "This order cannot be confirmed. Current status: {currentStatus}.",
+    "quantity": "Quantity",
+    "unitPrice": "Unit Price",
+    "addonPrice": "Addon Price",
+    "notes": "Notes",
+    "amountLabel": "Total Amount",
+    DeliveryInformation: "Delivery Information",
+    TableInformation: "Table Information",
+    CustomerInformation: "Customer Information",
+    CustomerName: "Customer Name",
+    PhoneNumber: "Phone Number",
+    OrderTag: "Order Tag",
+    OrderNotes: "Order Notes",
+    MinOrderAmount: "Minimum Order Amount",
+    CompletedAt: "Completed At",
+    time: "Time",
+    Status: "Status",
+  },
+  "orderService": {
+    "statuses": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "preparing": "Preparing",
+      "ready": "Ready",
+      "completed": "Completed",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled",
+      "rejected": "Rejected",
+      "unknown": "Unknown"
     },
     "errors": {
-      "loadFailed": "Failed to load branch preferences",
-      "saveFailed": "Failed to save branch preferences",
+      "createSessionOrder": "Error creating session order",
+      "getPendingOrders": "Error fetching pending orders",
+      "getTableOrders": "Error fetching table orders",
+      "getOrder": "Error fetching order",
+      "getBranchOrders": "Error fetching branch orders",
+      "confirmOrder": "Error confirming order",
+      "rejectOrder": "Error rejecting order",
+      "updateOrderStatus": "Error updating order status",
+      "trackOrder": "Error fetching order tracking",
+      "getOrderTrackingQR": "Error fetching order tracking QR",
+      "smartCreateOrder": "Error creating smart order",
+      "getTableBasketSummary": "Error fetching table basket summary",
       "validationError": "Validation error: {errors}",
       "invalidRequest": "Invalid request. Please check the data.",
       "sessionExpired": "Session expired. Please log in again.",
-      "unauthorized": "You don't have permission for this action.",
-      "notFound": "Branch preferences not found.",
-      "conflict": "Data is not up to date. Please refresh the page and try again.",
+      "unauthorized": "You are not authorized for this action.",
+      "orderNotFound": "Order not found.",
+      "invalidStatus": "Order status is not suitable for this action.",
       "noInternet": "Check your internet connection.",
-      "unknownError": "An unknown error occurred",
-      "invalidPaymentSettings": "Invalid payment settings. At least one payment method must be selected.",
-      "invalidSessionSettings": "Invalid session settings. Please check the values."
+      "unknownError": "Unknown error",
+      "getOrderTypeText": "Error fetching order type text",
+      "getOrderType": "Error fetching order type",
+      "getActiveOrderTypes": "Error fetching active order types",
+      "getAllOrderTypes": "Error fetching all order types",
+      "orderTotalCalculation": "Error calculating order total",
+      "getEstimatedTime": "Error fetching estimated delivery time",
+      "getOrderTypeByCode": "Error fetching order type by code",
+      "getOrderTypesForDisplay": "Error fetching order types for display",
+      "unknownOrderType": "Unknown order type"
     }
+  },
+  branchPreferences: {
+  "title": "Branch Preferences",
+  "description": "Configure branch-specific settings and preferences",
+  "loading": "Loading branch preferences...",
+  "saving": "Saving...",
+  "refresh": "Refresh",
+  "saveChanges": "Save Changes",
+  "saveSuccess": "Branch preferences saved successfully!",
+  "cleanupModes": {
+    "afterTimeout": "After Timeout",
+    "afterClosing": "After Closing", 
+    "disabled": "Disabled"
+  },
+  "sections": {
+    "orderManagement": {
+      "title": "Order Management",
+      "description": "Configure how orders are handled and processed",
+      "autoConfirmOrders": "Auto Confirm Orders",
+      "autoConfirmOrdersDesc": "Automatically confirm incoming orders without manual approval",
+      "useWhatsappForOrders": "WhatsApp for Orders",
+      "useWhatsappForOrdersDesc": "Enable WhatsApp integration for order notifications"
     },
-    whatsapp: {
-    confirmation: {
-      title: 'Send to WhatsApp?',
-      subtitle: 'Notify restaurant via WhatsApp',
-      sendTo: 'Your order details will be sent to:',
-      restaurant: 'Restaurant',
-      whatWillBeSent: 'What will be sent:',
-      orderDetails: '• Your order details and items',
-      customerInfo: '• Customer name and table number',
-      totalPrice: '• Total price and any special notes',
-      timestamp: '• Order timestamp',
-      note: 'Note:',
-      noteDescription: 'This will open WhatsApp on your device. Your order will still be processed even if you choose not to send to WhatsApp.',
-      skipWhatsApp: 'Skip WhatsApp',
-      sendToWhatsApp: 'Send to WhatsApp',
-      sending: 'Sending...'
+    "displaySettings": {
+      "title": "Display Settings",
+      "description": "Configure what information is displayed to customers",
+      "showProductDescriptions": "Show Product Descriptions",
+      "showProductDescriptionsDesc": "Display detailed product descriptions to customers",
+      "enableAllergenDisplay": "Display Allergen Information",
+      "enableAllergenDisplayDesc": "Show allergen warnings and information",
+      "enableIngredientDisplay": "Display Ingredients",
+      "enableIngredientDisplayDesc": "Show ingredient lists for products"
+    },
+    "paymentMethods": {
+      "title": "Payment Methods",
+      "description": "Configure accepted payment methods",
+      "acceptCash": "Accept Cash Payments",
+      "acceptCashDesc": "Allow customers to pay with cash",
+      "acceptCreditCard": "Accept Credit Cards",
+      "acceptCreditCardDesc": "Allow customers to pay with credit/debit cards",
+      "acceptOnlinePayment": "Accept Online Payments",
+      "acceptOnlinePaymentDesc": "Allow customers to pay online through digital payment methods"
+    },
+    "localization": {
+      "title": "Localization",
+      "description": "Configure language and regional settings",
+      "defaultLanguage": "Default Language",
+      "defaultCurrency": "Default Currency",
+      "timeZone": "Time Zone",
+      "supportedLanguages": "Supported Languages"
+    },
+    "sessionManagement": {
+      "title": "Session Management",
+      "description": "Configure session timeout and cleanup settings",
+      "sessionTimeout": "Session Timeout (Minutes)",
+      "cleanupMode": "Cleanup Mode",
+      "cleanupDelay": "Cleanup Delay After Close (Minutes)",
+          "cleanupModeDesc": "Choose when to cleanup expired sessions",
+    "sessionTimeoutDesc": "Minutes before session expires due to inactivity",
+    "cleanupDelayDesc": "Minutes to wait after closing before cleanup",
+    "cleanupDisabledMessage": "Session cleanup is disabled. Sessions will not be automatically cleaned up."
     }
-},
-recycleBin: {
-  title: 'Recycle Bin',
-  titleProducts: 'Deleted Products and Categories',
-  titleBranches: 'Deleted Branches',
-  titleTables: 'Deleted Tables',
-  titleBranchProducts: 'Deleted Branch Products and Categories',
-  titleBranchCategories: 'Deleted Branch Categories',
-  titleTableCategories: 'Deleted Table Categories',
-  description: 'Manage deleted branches, categories, products, and tables',
-  descriptionProducts: 'Manage deleted products and categories',
-  descriptionBranches: 'Manage deleted branches',
-  descriptionTables: 'Manage deleted tables',
-  descriptionBranchProducts: 'Manage deleted branch products and categories',
-  descriptionBranchCategories: 'Manage deleted branch categories',
-  descriptionTableCategories: 'Manage deleted table categories',
-  search: 'Search items...',
-  filter: {
-    all: 'All Items',
-    group1: 'All Group 1',
-    group2: 'All Group 2',
-    group1Label: '📋 Restaurant Level (Branches, Products, Tables)',
-    group2Label: '🏢 Branch Level (Branch Products & Categories)',
-    branches: 'Branches',
-    categories: 'Categories',
-    products: 'Products',
-    tables: 'Tables',
-    branchProducts: 'Branch Products',
-    branchCategories: 'Branch Categories',
-    tableCategories: 'Table Categories'
   },
-  refresh: 'Refresh',
-  loading: 'Loading...',
-  stats: {
-    group1: 'Restaurant Level',
-    group1Desc: 'Branches, Products, Tables',
-    group2: 'Branch Level',
-    group2Desc: 'Branch Products & Categories',
-    totalDeleted: 'Total Deleted',
-    totalDesc: 'All deleted items',
-    filtered: 'Showing',
-    filteredDesc: 'Current filter results',
-    deletedBranch: 'Deleted Branches',
-    deletedCategory: 'Deleted Categories',
-    deletedProduct: 'Deleted Products',
-    deletedTable: 'Deleted Tables',
-    deletedBranchProduct: 'Deleted Branch Products',
-    deletedBranchCategory: 'Deleted Branch Categories',
-    deletedTableCategory: 'Deleted Table Categories',
-
+  "currencies": {
+    "TRY": "Turkish Lira (₺)",
+    "USD": "US Dollar ($)",
+    "EUR": "Euro (€)"
   },
-  entityTypes: {
-    category: 'Category',
-    product: 'Product',
-    branch: 'Branch',
-    table: 'Table',
-    branchProduct: 'Branch Product',
-    branchCategory: 'Branch Category',
-    tableCategory: 'Table Category',
-    other: 'Other'
+  "languages": {
+    "tr": "Turkish",
+    "en": "English",
+    "ar": "Arabic",
+    "de": "German",
+    "fr": "French",
+    "es": "Spanish",
+    "it": "Italian",
+    "ru": "Russian",
+    "zh": "Chinese",
+    "ja": "Japanese"
   },
-  contextInfo: {
-    category: 'Category:',
-    branch: 'Branch:',
-    restaurant: 'Restaurant:'
+  "timezones": {
+    "Europe/Istanbul": "Istanbul (UTC+3)",
+    "Europe/London": "London (UTC+0)",
+    "America/New_York": "New York (UTC-5)"
   },
-  deletedAt: 'Deleted:',
-  restore: {
-    button: 'Restore',
-    restoring: 'Restoring...',
-    successCategory: '"{name}" category has been restored successfully',
-    successProduct: '"{name}" product has been restored successfully',
-    successBranch: '"{name}" branch has been restored successfully',
-    successTable: '"{name}" table has been restored successfully',
-    successBranchCategory: '"{name}" branch category has been restored successfully',
-    successTableCategory: '"{name}" table category has been restored successfully',
-    error: 'Restore operation failed'
-  },
-  empty: {
-    title: 'Recycle bin is empty',
-    titleFiltered: 'No results found',
-    description: 'No deleted items found yet',
-    descriptionFiltered: 'No deleted items match your search criteria'
-  },
-  errors: {
-    loadingError: 'Error loading deleted items'
+  "errors": {
+    "loadFailed": "Failed to load branch preferences",
+    "saveFailed": "Failed to save branch preferences",
+    "validationError": "Validation error: {errors}",
+    "invalidRequest": "Invalid request. Please check the data.",
+    "sessionExpired": "Session expired. Please log in again.",
+    "unauthorized": "You don't have permission for this action.",
+    "notFound": "Branch preferences not found.",
+    "conflict": "Data is not up to date. Please refresh the page and try again.",
+    "noInternet": "Check your internet connection.",
+    "unknownError": "An unknown error occurred",
+    "invalidPaymentSettings": "Invalid payment settings. At least one payment method must be selected.",
+    "invalidSessionSettings": "Invalid session settings. Please check the values."
   }
-},
-"management": {
-    "title": "Management Information",
-    "subtitle": "Company and legal details",
-    "noDataTitle": "No Management Information",
-    "noDataMessage": "Management information has not been set up yet. Please add restaurant details to get started.",
-    
-    "buttons": {
-      "edit": "Edit",
-      "cancel": "Cancel",
-      "save": "Save Changes",
-      "saving": "Saving Changes..."
+  },
+  whatsapp: {
+  confirmation: {
+    title: 'Send to WhatsApp?',
+    subtitle: 'Notify restaurant via WhatsApp',
+    sendTo: 'Your order details will be sent to:',
+    restaurant: 'Restaurant',
+    whatWillBeSent: 'What will be sent:',
+    orderDetails: '• Your order details and items',
+    customerInfo: '• Customer name and table number',
+    totalPrice: '• Total price and any special notes',
+    timestamp: '• Order timestamp',
+    note: 'Note:',
+    noteDescription: 'This will open WhatsApp on your device. Your order will still be processed even if you choose not to send to WhatsApp.',
+    skipWhatsApp: 'Skip WhatsApp',
+    sendToWhatsApp: 'Send to WhatsApp',
+    sending: 'Sending...'
+  }
+  },
+  recycleBin: {
+    title: 'Recycle Bin',
+    titleProducts: 'Deleted Products and Categories',
+    titleBranches: 'Deleted Branches',
+    titleTables: 'Deleted Tables',
+    titleBranchProducts: 'Deleted Branch Products and Categories',
+    titleBranchCategories: 'Deleted Branch Categories',
+    titleTableCategories: 'Deleted Table Categories',
+    description: 'Manage deleted branches, categories, products, and tables',
+    descriptionProducts: 'Manage deleted products and categories',
+    descriptionBranches: 'Manage deleted branches',
+    descriptionTables: 'Manage deleted tables',
+    descriptionBranchProducts: 'Manage deleted branch products and categories',
+    descriptionBranchCategories: 'Manage deleted branch categories',
+    descriptionTableCategories: 'Manage deleted table categories',
+    search: 'Search items...',
+    filter: {
+      all: 'All Items',
+      group1: 'All Group 1',
+      group2: 'All Group 2',
+      group1Label: '📋 Restaurant Level (Branches, Products, Tables)',
+      group2Label: '🏢 Branch Level (Branch Products & Categories)',
+      branches: 'Branches',
+      categories: 'Categories',
+      products: 'Products',
+      tables: 'Tables',
+      branchProducts: 'Branch Products',
+      branchCategories: 'Branch Categories',
+      tableCategories: 'Table Categories'
     },
+    refresh: 'Refresh',
+    loading: 'Loading...',
+    stats: {
+      group1: 'Restaurant Level',
+      group1Desc: 'Branches, Products, Tables',
+      group2: 'Branch Level',
+      group2Desc: 'Branch Products & Categories',
+      totalDeleted: 'Total Deleted',
+      totalDesc: 'All deleted items',
+      filtered: 'Showing',
+      filteredDesc: 'Current filter results',
+      deletedBranch: 'Deleted Branches',
+      deletedCategory: 'Deleted Categories',
+      deletedProduct: 'Deleted Products',
+      deletedTable: 'Deleted Tables',
+      deletedBranchProduct: 'Deleted Branch Products',
+      deletedBranchCategory: 'Deleted Branch Categories',
+      deletedTableCategory: 'Deleted Table Categories',
 
-    "sections": {
-      "restaurantDetails": "Restaurant Details",
-      "companyInfo": "Company Information",
-      "taxInfo": "Tax & Registration",
-      "certificates": "Certificates & Permits",
-      "additionalSettings": "Additional Settings"
     },
-
-    "fields": {
-      "restaurantName": "Restaurant Name",
-      "restaurantLogo": "Restaurant Logo",
-      "companyTitle": "Company Title",
-      "legalType": "Legal Type",
-      "taxNumber": "Tax Number",
-      "taxOffice": "Tax Office",
-      "mersisNumber": "MERSIS Number",
-      "tradeRegistry": "Trade Registry Number",
-      "workPermit": "Work Permit",
-      "foodCertificate": "Food Certificate",
-      "alcoholService": "Has Alcohol Service",
-      "logo": "Logo"
+    entityTypes: {
+      category: 'Category',
+      product: 'Product',
+      branch: 'Branch',
+      table: 'Table',
+      branchProduct: 'Branch Product',
+      branchCategory: 'Branch Category',
+      tableCategory: 'Table Category',
+      other: 'Other'
     },
-
-    "placeholders": {
-      "restaurantName": "Enter restaurant name",
-      "companyTitle": "Enter company title",
-      "taxNumber": "Enter tax number",
-      "taxOffice": "Enter tax office",
-      "mersisNumber": "Enter MERSIS number",
-      "tradeRegistry": "Enter trade registry number",
-      "selectLegalType": "Select Legal Type"
+    contextInfo: {
+      category: 'Category:',
+      branch: 'Branch:',
+      restaurant: 'Restaurant:'
     },
-
-    "legalTypes": {
-      "llc": "LLC",
-      "corporation": "Corporation",
-      "partnership": "Partnership"
+    deletedAt: 'Deleted:',
+    restore: {
+      button: 'Restore',
+      restoring: 'Restoring...',
+      successCategory: '"{name}" category has been restored successfully',
+      successProduct: '"{name}" product has been restored successfully',
+      successBranch: '"{name}" branch has been restored successfully',
+      successTable: '"{name}" table has been restored successfully',
+      successBranchCategory: '"{name}" branch category has been restored successfully',
+      successTableCategory: '"{name}" table category has been restored successfully',
+      error: 'Restore operation failed'
     },
-
-    "status": {
-      "uploaded": "Uploaded",
-      "notUploaded": "Not uploaded",
-      "available": "Available",
-      "notAvailable": "Not Available",
-      "alcoholService": "Alcohol Service:"
+    empty: {
+      title: 'Recycle bin is empty',
+      titleFiltered: 'No results found',
+      description: 'No deleted items found yet',
+      descriptionFiltered: 'No deleted items match your search criteria'
     },
-
-    "common": {
-      "na": "N/A"
+    errors: {
+      loadingError: 'Error loading deleted items'
     }
   },
+  "management": {
+      "title": "Management Information",
+      "subtitle": "Company and legal details",
+      "noDataTitle": "No Management Information",
+      "noDataMessage": "Management information has not been set up yet. Please add restaurant details to get started.",
+      
+      "buttons": {
+        "edit": "Edit",
+        "cancel": "Cancel",
+        "save": "Save Changes",
+        "saving": "Saving Changes..."
+      },
+
+      "sections": {
+        "restaurantDetails": "Restaurant Details",
+        "companyInfo": "Company Information",
+        "taxInfo": "Tax & Registration",
+        "certificates": "Certificates & Permits",
+        "additionalSettings": "Additional Settings"
+      },
+
+      "fields": {
+        "restaurantName": "Restaurant Name",
+        "restaurantLogo": "Restaurant Logo",
+        "companyTitle": "Company Title",
+        "legalType": "Legal Type",
+        "taxNumber": "Tax Number",
+        "taxOffice": "Tax Office",
+        "mersisNumber": "MERSIS Number",
+        "tradeRegistry": "Trade Registry Number",
+        "workPermit": "Work Permit",
+        "foodCertificate": "Food Certificate",
+        "alcoholService": "Has Alcohol Service",
+        "logo": "Logo"
+      },
+
+      "placeholders": {
+        "restaurantName": "Enter restaurant name",
+        "companyTitle": "Enter company title",
+        "taxNumber": "Enter tax number",
+        "taxOffice": "Enter tax office",
+        "mersisNumber": "Enter MERSIS number",
+        "tradeRegistry": "Enter trade registry number",
+        "selectLegalType": "Select Legal Type"
+      },
+
+      "legalTypes": {
+        "llc": "LLC",
+        "corporation": "Corporation",
+        "partnership": "Partnership"
+      },
+
+      "status": {
+        "uploaded": "Uploaded",
+        "notUploaded": "Not uploaded",
+        "available": "Available",
+        "notAvailable": "Not Available",
+        "alcoholService": "Alcohol Service:"
+      },
+
+      "common": {
+        "na": "N/A"
+      }
+    },
   "branches": {
   "status": {
     "active": "Active",
@@ -3983,46 +3983,45 @@ recycleBin: {
     "branchType": "Branch Type",
     "branchTag": "Branch Tag"
   }
-},
-
-"restaurantsTab": {
-  "status": {
-    "active": "Active",
-    "inactive": "Inactive"
   },
-  "actions": {
-    "edit": "Edit Restaurant",
-    "delete": "Delete Restaurant"
-  },
-  "stats": {
-    "totalBranches": "Total Branches",
-    "active": "Active",
-    "inactive": "Inactive",
-    "alcohol": "Alcohol"
-  },
-  "common": {
-    "yes": "Yes",
-    "no": "No"
-  },
-  "modal": {
-    "editTitle": "Edit Restaurant",
-    "placeholders": {
-      "restaurantName": "Restaurant Name",
-      "cuisineType": "Cuisine Type"
+  "restaurantsTab": {
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
     },
-    "labels": {
-      "hasAlcoholService": "Has Alcohol Service"
+    "actions": {
+      "edit": "Edit Restaurant",
+      "delete": "Delete Restaurant"
     },
-    "buttons": {
-      "update": "Update Restaurant",
-      "updating": "Updating..."
+    "stats": {
+      "totalBranches": "Total Branches",
+      "active": "Active",
+      "inactive": "Inactive",
+      "alcohol": "Alcohol"
+    },
+    "common": {
+      "yes": "Yes",
+      "no": "No"
+    },
+    "modal": {
+      "editTitle": "Edit Restaurant",
+      "placeholders": {
+        "restaurantName": "Restaurant Name",
+        "cuisineType": "Cuisine Type"
+      },
+      "labels": {
+        "hasAlcoholService": "Has Alcohol Service"
+      },
+      "buttons": {
+        "update": "Update Restaurant",
+        "updating": "Updating..."
+      }
     }
+  },
+  "tabs": {
+    "restaurants": "Restaurants",
+    "branches": "Branches",
+    "management": "Management Info",
+    "deleted": "Deleted"
   }
-},
-"tabs": {
-  "restaurants": "Restaurants",
-  "branches": "Branches",
-  "management": "Management Info",
-  "deleted": "Deleted"
-}
 }; 

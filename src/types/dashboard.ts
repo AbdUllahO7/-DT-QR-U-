@@ -20,19 +20,7 @@ export interface QRCodeData {
   updatedAt: string;
 }
 
-// Chart data types
-export interface WeeklyViewData {
-  day: string;
-  views: number;
-  scans: number;
-}
 
-export interface PopularProductData {
-  name: string;
-  orders: number;
-  percentage: number;
-  fill: string;
-}
 
 export interface HourlyActivityData {
   hour: string;
