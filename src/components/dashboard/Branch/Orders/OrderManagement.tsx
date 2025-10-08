@@ -41,6 +41,7 @@ const OrdersManager: React.FC = () => {
       closeModals,
       toggleRowExpansion,
       handleSort,
+      fetchBranchOrders,
       setState
     }
   } = useOrdersManager();
@@ -62,6 +63,7 @@ const OrdersManager: React.FC = () => {
   // Initial fetch on mount
   useEffect(() => {
     fetchPendingOrders();
+    fetchBranchOrders();
   }, []);
 
   // Auto-refresh pending orders every 30 seconds
