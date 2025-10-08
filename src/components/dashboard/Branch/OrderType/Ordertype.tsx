@@ -53,11 +53,9 @@ const OrderTypeComponent = () => {
         rowVersion: orderType.rowVersion // Use the current rowVersion from the orderType
       };
 
-      console.log('Sending update data:', updateData);
 
       const updatedOrderType = await orderTypeService.updateOrderTypeSettings(orderType.id, updateData);
       
-      console.log('Received updated order type:', updatedOrderType);
 
       // Check if we got a valid response
       if (!updatedOrderType) {
@@ -67,7 +65,6 @@ const OrderTypeComponent = () => {
 
       // If the response doesn't have all required fields, refetch the data
       if (!updatedOrderType.rowVersion || !updatedOrderType.name) {
-        console.log('Incomplete response, refetching data...');
         await fetchOrderTypes();
         setSuccessMessage(` ${t('dashboard.orderType.settingsUpdated')}`);
         setTimeout(() => setSuccessMessage(''), 3000);

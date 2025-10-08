@@ -82,7 +82,6 @@ const OrderCard: React.FC<OrderCardProps> = ({
   onRemoveOrderFromTracking
 }) => {
       const { t } = useLanguage()
-      console.log("order11",order)
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
       {/* Order Header */}

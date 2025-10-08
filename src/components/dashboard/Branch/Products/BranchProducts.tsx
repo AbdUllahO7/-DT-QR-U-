@@ -156,12 +156,10 @@ let isProcessing = false; // Module-level lock to prevent multiple executions
 
 const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds: number[], customizations: any) => {
   if (isLoading || isProcessing) {
-    console.log(`handleSaveProductAddons blocked - Already processing or loading`);
     return; // Prevent multiple executions
   }
 
   const invocationId = Math.random().toString(36).substring(2, 15);
-  console.log(`handleSaveProductAddons started - Invocation ID: ${invocationId}`);
 
   try {
     isProcessing = true; // Set lock
@@ -183,7 +181,6 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
         isGroupRequired: customization.isGroupRequired || false,
       };
 
-      console.log(`Creating addon ${addonBranchProductId} - Invocation ID: ${invocationId}`);
       await branchProductAddonsService.createBranchProductAddon(addonData);
     }
 
@@ -203,11 +200,9 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
       }))
     );
 
-    console.log(`handleSaveProductAddons completed successfully - Invocation ID: ${invocationId}`);
     setSuccessMessage(`Successfully configured ${selectedAddonIds.length} addons for the product`);
     handleCloseProductAddons();
   } catch (err: any) {
-    console.error(`Error in handleSaveProductAddons - Invocation ID: ${invocationId}`, err);
     setError(`Failed to save product addons: ${err.message || 'Unknown error'}`);
   } finally {
     setIsLoading(false);
