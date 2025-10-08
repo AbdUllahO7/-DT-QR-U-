@@ -462,7 +462,6 @@ export const useCartHandlers = ({
 
       // FIXED: Check if WhatsApp confirmation should be shown
       if (order.orderTag && WhatsAppService.isWhatsAppEnabled(restaurantPreferences)) {
-        console.log('Order created, preparing WhatsApp confirmation...')
         
         const whatsappData = {
           orderTag: order.orderTag,
@@ -477,11 +476,9 @@ export const useCartHandlers = ({
           serviceCharge: serviceChargeAmount
         }
 
-        console.log('Prepared WhatsApp data:', whatsappData)
         
         // FIXED: Check if functions are available before calling
         if (setPendingWhatsAppData && setShowWhatsAppConfirmation) {
-          console.log('Setting WhatsApp confirmation modal to show')
           setPendingWhatsAppData(whatsappData)
           setShowWhatsAppConfirmation(true)
         } else {

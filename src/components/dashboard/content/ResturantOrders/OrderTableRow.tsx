@@ -37,7 +37,6 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
   const rowVersion = order.rowVersion || '';
   const validStatuses = OrderStatusUtils.getValidStatusTransitions(status);
   const isRTL = lang === 'ar';
-  console.log('Rendering OrderTableRow for order:', order);
   
 
   // Alternating row colors for better readability

@@ -44,7 +44,6 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setIsBranchDropdownOpen(false));
   const navigate = useNavigate()
-  console.log("helllo")
   const token = localStorage.getItem('token') || '';
 
   // SignalR ile gerçek zamanlı güncelleme - Dokümantasyona uygun event'ler

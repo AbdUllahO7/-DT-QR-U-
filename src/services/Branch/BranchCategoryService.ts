@@ -140,7 +140,6 @@ class BranchCategoryService {
       logger.info('Available categories for branch retrieved successfully', { 
         count: response.data.length,
       });
-            console.log("params",params)
 
       const transformedData = this.transformAPIDataToComponentData(response.data);
 
