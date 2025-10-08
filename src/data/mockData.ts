@@ -1,68 +1,8 @@
-import { Category } from '../types/BranchManagement/type';
-import type {  WeeklyViewData, PopularProductData, HourlyActivityData, MonthlyRevenueData } from '../types/dashboard';
+import type { HourlyActivityData, MonthlyRevenueData } from '../types/dashboard';
 
 // Chart renkleri
 export const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
 
-// Mock kategoriler
-export const mockCategories: Category[] = [
-  {
-    id: '1', name: 'Ana Yemekler', description: 'Ana yemek kategorisi', isExpanded: false, products: [],
-    productId: undefined,
-    categoryId: 0,
-    categoryName: '',
-    status: false,
-    displayOrder: 0,
-    restaurantId: 0
-  },
-  {
-    id: '2', name: 'Başlangıçlar', description: 'Başlangıç kategorisi', isExpanded: false, products: [],
-    productId: undefined,
-    categoryId: 0,
-    categoryName: '',
-    status: false,
-    displayOrder: 0,
-    restaurantId: 0
-  },
-  {
-    id: '3', name: 'İçecekler', description: 'İçecek kategorisi', isExpanded: false, products: [],
-    productId: undefined,
-    categoryId: 0,
-    categoryName: '',
-    status: false,
-    displayOrder: 0,
-    restaurantId: 0
-  },
-  {
-    id: '4', name: 'Tatlılar', description: 'Tatlı kategorisi', isExpanded: false, products: [],
-    productId: undefined,
-    categoryId: 0,
-    categoryName: '',
-    status: false,
-    displayOrder: 0,
-    restaurantId: 0
-  }
-];
-
-// Mock haftalık görüntülenme verileri
-export const weeklyViewsData: WeeklyViewData[] = [
-  { day: 'Pzt', views: 120, scans: 45 },
-  { day: 'Sal', views: 145, scans: 52 },
-  { day: 'Çar', views: 135, scans: 48 },
-  { day: 'Per', views: 160, scans: 58 },
-  { day: 'Cum', views: 180, scans: 65 },
-  { day: 'Cmt', views: 220, scans: 80 },
-  { day: 'Paz', views: 200, scans: 72 }
-];
-
-// Mock popüler ürünler verileri
-export const popularProductsData: PopularProductData[] = [
-  { name: 'Köfte', orders: 150, percentage: 30, fill: COLORS[0] },
-  { name: 'Pizza', orders: 120, percentage: 24, fill: COLORS[1] },
-  { name: 'Burger', orders: 100, percentage: 20, fill: COLORS[2] },
-  { name: 'Salata', orders: 80, percentage: 16, fill: COLORS[3] },
-  { name: 'Makarna', orders: 50, percentage: 10, fill: COLORS[4] }
-];
 
 // Mock saatlik aktivite verileri
 export const hourlyActivityData: HourlyActivityData[] = [

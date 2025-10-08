@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw } from 'lucide-react';
-import { ActiveTab, DeletedRestaurant, RestaurantBranchDropdownItem, RestaurantInfo, RestaurantManagementInfo } from '../../../../types/RestaurantTypes';
+import { ActiveTab, DeletedRestaurant, RestaurantBranchDropdownItem,  RestaurantManagementInfo } from '../../../../types/RestaurantTypes';
 import { restaurantService } from '../../../../services/restaurantService';
 import { CreateRestaurantDto } from '../../../../types';
 import { Notification } from './Notification';
 import { TabNavigation } from './TabNavigation';
-import { RestaurantsTab } from './RestaurantsTab';
 import { ManagementInfoPanel } from './ManagementInfoPanel';
 import { BranchesTab } from './BranchesTab';
 import { DeletedTab } from './DeletedTab';
