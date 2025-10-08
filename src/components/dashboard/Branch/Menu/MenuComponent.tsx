@@ -88,7 +88,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         "allergens",
         "availableAddons",
       ])
-      console.log("menuResponse", menuResponse)
       
       if (Array.isArray(menuResponse)) {
         setError("Menu format not supported yet. Please update the service.")

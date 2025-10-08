@@ -47,7 +47,7 @@ export interface OrdersManagerState {
   showCancelModal:boolean;
   cancelReason:string,
   error: string | null;
-  viewMode: 'pending' | 'branch' ;
+  viewMode: 'pending' | 'branch' | 'deletedOrders';
   showConfirmModal: boolean;
   showRejectModal: boolean;
   showStatusModal: boolean;
@@ -95,7 +95,7 @@ export interface OrdersManagerActions {
   getOrderDetails: (orderId: string) => Promise<Order | null>;
   getTableOrders: (tableId: number) => Promise<Order[]>;
   createSessionOrder: (data: any) => Promise<Order | null>;
-  smartCreateOrder: (data: any) => Promise<Order | null>;
+  smartCreateOrder?: (data: any) => Promise<Order | null>;
   refreshOrderTypes: () => Promise<void>;
   // Existing methods
   switchViewMode: (mode: 'pending' | 'branch') => void;

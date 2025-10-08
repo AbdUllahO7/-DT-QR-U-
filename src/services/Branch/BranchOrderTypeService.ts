@@ -243,24 +243,12 @@ class OrderTypeService {
       logger.info('OrderType ayarları güncelleme isteği gönderiliyor', { id, data }, { prefix: 'OrderTypeService' });
       
       const response = await httpClient.put<any>(`${this.baseUrl}/${id}/settings`, data);
-      
-      logger.info('OrderType ayarları API Raw Response:', response, { prefix: 'OrderTypeService' });
-      logger.info('OrderType ayarları API Response Data:', response.data, { prefix: 'OrderTypeService' });
-      
-      console.log('=== DEBUG: Response Data Structure ===');
-      console.log('Type of response.data:', typeof response.data);
-      console.log('Is Array:', Array.isArray(response.data));
-      console.log('Response.data:', response.data);
-      console.log('Response status:', response.status);
-      console.log('Response.data keys:', response.data && typeof response.data === 'object' ? Object.keys(response.data) : 'No keys');
-      console.log('=====================================');
-      
+
       let orderType: OrderType | null = null;
       
       // Handle 204 No Content or empty string response (successful update with no data returned)
       if ((response.status === 204 || response.status === 200) && 
           (response.data === '' || response.data === null || response.data === undefined)) {
-        console.log('Detected successful response with no data (204 No Content) - creating response from input data');
         
         // Since the server confirmed the update was successful but didn't return data,
         // we'll create a response using the input data and generate a new rowVersion
@@ -287,12 +275,10 @@ class OrderTypeService {
       if (response.data) {
         // Check if it's a direct OrderType object
         if (typeof response.data === 'object' && !Array.isArray(response.data) && 'id' in response.data && 'rowVersion' in response.data) {
-          console.log('Detected direct OrderType object');
           orderType = response.data as OrderType;
         }
         // Check if it's wrapped in { data: OrderType }
         else if ('data' in response.data && response.data.data) {
-          console.log('Detected wrapped { data: OrderType } structure');
           const apiData = response.data.data;
           if (typeof apiData === 'object' && !Array.isArray(apiData) && 'id' in apiData && 'rowVersion' in apiData) {
             orderType = apiData as OrderType;
@@ -300,7 +286,6 @@ class OrderTypeService {
         }
         // Check for different success response structures
         else if ('isSuccess' in response.data) {
-          console.log('Detected isSuccess response structure');
           if (response.data.data && typeof response.data.data === 'object' && !Array.isArray(response.data.data)) {
             orderType = response.data.data as OrderType;
           }

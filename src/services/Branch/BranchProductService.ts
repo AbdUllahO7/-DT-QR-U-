@@ -257,7 +257,6 @@ class BranchProductService {
     }
     
     const response = await httpClient.get(`${this.baseUrl}/branch/${branchId}/menu`);
-    console.log("Branch Menu Response:", response.data); // Debug log
     logger.info('Branch menu retrieved successfully', { 
       branchId,
       hasIncludes: !!includes?.length,
