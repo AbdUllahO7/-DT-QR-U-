@@ -1312,7 +1312,7 @@ export const en = {
       modal: {
         createTitle: 'Add New Branch',
         createDescription: 'Enter new branch information',
-        editTitle: 'Edit Branch - {{branchName}}',
+        editTitle: 'Edit Branch - {branchName}',
         editDescription: 'Edit branch information',
         
         tabs: {

@@ -233,7 +233,7 @@ const BranchManagementBranch: React.FC = () => {
           handleToggleTemporaryClose={handleToggleTemporaryClose}
           handleSave={handleSave}
           initializeEditData={initializeEditData}
-          setEditData={setEditData} // Pass setEditData to BranchHeader
+          setEditData={setEditData} 
         />
         <BranchInfo
           selectedBranch={selectedBranch}

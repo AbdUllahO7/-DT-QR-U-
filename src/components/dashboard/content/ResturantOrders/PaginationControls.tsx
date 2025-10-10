@@ -11,7 +11,6 @@ interface PaginationControlsProps {
 }
 const PaginationControls: React.FC<PaginationControlsProps> = ({
   pagination,
-  totalFiltered,
   onPageChange,
   onItemsPerPageChange,
   t
