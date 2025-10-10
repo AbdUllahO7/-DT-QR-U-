@@ -4037,5 +4037,63 @@ recycleBin: {
   "branches": "Şubeler",
   "management": "Yönetim Bilgileri",
   "deleted": "Silinmiş"
-}
+},
+ "allergens": {
+    "GLUTEN": {
+      "name": "Gluten",
+      "description": "Buğday, çavdar, arpa, yulaf"
+    },
+    "CRUSTACEANS": {
+      "name": "Kabuklu Deniz Ürünleri",
+      "description": "Karides, yengeç, ıstakoz"
+    },
+    "EGGS": {
+      "name": "Yumurta",
+      "description": "Yumurta ve yumurta ürünleri"
+    },
+    "FISH": {
+      "name": "Balık",
+      "description": "Tüm balık ürünleri"
+    },
+    "PEANUTS": {
+      "name": "Yer Fıstığı",
+      "description": "Yer fıstığı ve yer fıstığı ürünleri"
+    },
+    "SOYBEANS": {
+      "name": "Soya",
+      "description": "Soya ve soya ürünleri"
+    },
+    "MILK": {
+      "name": "Süt",
+      "description": "Süt ve süt ürünleri"
+    },
+    "NUTS": {
+      "name": "Sert Kabuklu Meyveler",
+      "description": "Badem, fındık, ceviz, kaju vb."
+    },
+    "CELERY": {
+      "name": "Kereviz",
+      "description": "Kereviz ve kereviz kökü"
+    },
+    "MUSTARD": {
+      "name": "Hardal",
+      "description": "Hardal ve hardal ürünleri"
+    },
+    "SESAME": {
+      "name": "Susam",
+      "description": "Susam tohumu ve ürünleri"
+    },
+    "SULPHITES": {
+      "name": "Sülfitler",
+      "description": "Kükürt dioksit ve sülfitler (>10mg/kg)"
+    },
+    "LUPIN": {
+      "name": "Acı Bakla",
+      "description": "Acı bakla ve acı bakla ürünleri"
+    },
+    "MOLLUSCS": {
+      "name": "Yumuşakçalar",
+      "description": "Midye, istiridye, salyangoz, kalamar"
+    }
+  }
 }; 

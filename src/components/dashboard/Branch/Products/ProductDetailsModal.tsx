@@ -17,6 +17,20 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
 }) => {
   const { t, isRTL } = useLanguage();
 
+  // Helper function to get translated allergen name
+  const getTranslatedAllergenName = (allergenCode: string | null, originalName: string) => {
+    try {
+      const nameKey = `allergens.${allergenCode}.name`;
+      const translatedName = t(nameKey);
+      
+      // If translation returns the key itself, use original value
+      return translatedName === nameKey ? originalName : translatedName;
+    } catch (error) {
+      // Fallback to original value if translation fails
+      return originalName;
+    }
+  };
+
   if (!isOpen || !product) return null;
 
   const handleOverlayClick = (e: React.MouseEvent) => {
@@ -96,7 +110,7 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                         <span className="text-2xl">{allergen.icon}</span>
                         <div>
                           <div className="font-medium text-gray-900 dark:text-white text-sm">
-                            {allergen.name}
+                            {getTranslatedAllergenName(allergen.code, allergen.name)}
                           </div>
                           <div className="text-xs text-gray-500 dark:text-gray-400">
                             {allergen.code}
@@ -180,7 +194,7 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                                     className={`inline-flex items-center space-x-1 px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded-full text-xs ${isRTL ? 'space-x-reverse' : ''}`}
                                   >
                                     <span>{allergen.icon}</span>
-                                    <span>{allergen.name}</span>
+                                    <span>{getTranslatedAllergenName(allergen.code, allergen.name)}</span>
                                   </span>
                                 ))}
                               </div>
