@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Users, QrCode, Minus } from 'lucide-react';
+import { Plus, Users, QrCode, Minus, X } from 'lucide-react';
 import { QRCodeData } from './QRCodeCard';
 import { logger } from '../../../../utils/logger';
 import { branchService, UpdateMenuTableDto } from '../../../../services/branchService';
@@ -927,7 +927,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
               className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 transition-colors disabled:opacity-50"
               aria-label={t('QRCodeModal.accessibility.closeButton')}
             >
-              <QrCode className="h-6 w-6" />
+              <X className="h-6 w-6" />
             </button>
           </div>
 

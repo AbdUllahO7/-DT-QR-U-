@@ -1316,7 +1316,7 @@ export const tr = {
     modal: {
       createTitle: 'Yeni Şube Ekle',
       createDescription: 'Yeni şube bilgilerini girin',
-      editTitle: 'Şube Düzenle - {{branchName}}',
+      editTitle: 'Şube Düzenle - {branchName}',
       editDescription: 'Şube bilgilerini düzenleyin',
       
       tabs: {
