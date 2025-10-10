@@ -50,7 +50,6 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
       // Load all available ingredients
       const fetchedIngredients = await ingredientsService.getIngredients();
       setIngredients(fetchedIngredients);
-
       // Load current product ingredients if editing
       try {
         const currentIngredients = await productService.getProductIngredients(productId);

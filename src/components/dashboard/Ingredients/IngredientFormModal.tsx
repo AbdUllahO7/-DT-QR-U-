@@ -5,9 +5,6 @@ import { logger } from '../../../utils/logger';
 import { ingredientsService } from '../../../services/IngredientsService';
 import { Allergen, AllergenDetail, CreateIngredientData, IngredientFormModalProps, UpdateIngredientData } from '../../../types/BranchManagement/type';
 
-// Types and Interfaces
-
-
 const IngredientFormModal: React.FC<IngredientFormModalProps> = ({ 
   isOpen, 
   onClose, 
@@ -29,6 +26,29 @@ const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Helper function to get translated allergen name and description
+  const getTranslatedAllergen = (allergen: Allergen) => {
+    try {
+      const nameKey = `allergens.${allergen.code}.name`;
+      const descKey = `allergens.${allergen.code}.description`;
+      
+      // Try to get translation, if it returns the key itself, use original value
+      const translatedName = t(nameKey);
+      const translatedDesc = t(descKey);
+      
+      return {
+        name: translatedName === nameKey ? allergen.name : translatedName,
+        description: translatedDesc === descKey ? allergen.description : translatedDesc
+      };
+    } catch (error) {
+      // Fallback to original values if translation fails
+      return {
+        name: allergen.name,
+        description: allergen.description
+      };
+    }
+  };
 
   // Reset form when modal opens/closes or ingredient changes
   useEffect(() => {
@@ -293,6 +313,7 @@ const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
                 .map((allergen) => {
                 const isSelected = selectedAllergens.find(a => a.id === allergen.id);
                 const isDisabled = !formData.isAllergenic || loading;
+                const translatedAllergen = getTranslatedAllergen(allergen);
                 
                 return (
                   <div
@@ -325,14 +346,14 @@ const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
                               ? 'text-gray-400 dark:text-gray-500' 
                               : 'text-gray-800 dark:text-white'
                           }`}>
-                            {allergen.name}
+                            {translatedAllergen.name}
                           </h4>
                           <p className={`text-sm ${
                             isDisabled 
                               ? 'text-gray-400 dark:text-gray-500' 
                               : 'text-gray-500 dark:text-gray-400'
                           }`}>
-                            {allergen.description}
+                            {translatedAllergen.description}
                           </p>
                         </div>
                       </div>
@@ -356,53 +377,57 @@ const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
                 <div className="space-y-4">
                   {selectedAllergens
                     .sort((a, b) => a.displayOrder - b.displayOrder)
-                    .map((allergen) => (
-                    <div key={allergen.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
-                      <div className={`flex items-center justify-between mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <span className="text-xl">{allergen.icon}</span>
-                          <h5 className="font-medium text-gray-800 dark:text-white">{allergen.name}</h5>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handleAllergenSelect(allergen)}
-                          disabled={loading}
-                          className="text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          aria-label={`Remove ${allergen.name}`}
-                        >
-                          <X className="w-5 h-5" />
-                        </button>
-                      </div>
+                    .map((allergen) => {
+                      const translatedAllergen = getTranslatedAllergen(allergen);
                       
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <input
-                              type="checkbox"
-                              checked={allergenDetails[allergen.id]?.containsAllergen || false}
-                              onChange={(e) => handleAllergenDetailChange(allergen.id, 'containsAllergen', e.target.checked)}
+                      return (
+                        <div key={allergen.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-600">
+                          <div className={`flex items-center justify-between mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                              <span className="text-xl">{allergen.icon}</span>
+                              <h5 className="font-medium text-gray-800 dark:text-white">{translatedAllergen.name}</h5>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleAllergenSelect(allergen)}
                               disabled={loading}
-                              className="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 disabled:opacity-50"
-                            />
-                            <span className={`text-sm text-gray-700 dark:text-gray-300 ${isRTL ? 'mr-2' : 'ml-2'}`}>
-                              {t('IngredientsContent.containsThisAllergen')}
-                            </span>
-                          </label>
+                              className="text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              aria-label={`Remove ${translatedAllergen.name}`}
+                            >
+                              <X className="w-5 h-5" />
+                            </button>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                <input
+                                  type="checkbox"
+                                  checked={allergenDetails[allergen.id]?.containsAllergen || false}
+                                  onChange={(e) => handleAllergenDetailChange(allergen.id, 'containsAllergen', e.target.checked)}
+                                  disabled={loading}
+                                  className="w-4 h-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 disabled:opacity-50"
+                                />
+                                <span className={`text-sm text-gray-700 dark:text-gray-300 ${isRTL ? 'mr-2' : 'ml-2'}`}>
+                                  {t('IngredientsContent.containsThisAllergen')}
+                                </span>
+                              </label>
+                            </div>
+                            
+                            <div>
+                              <input
+                                type="text"
+                                placeholder={t('IngredientsContent.additionalNotes')}
+                                value={allergenDetails[allergen.id]?.note || ''}
+                                onChange={(e) => handleAllergenDetailChange(allergen.id, 'note', e.target.value)}
+                                disabled={loading}
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:ring-1 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                              />
+                            </div>
+                          </div>
                         </div>
-                        
-                        <div>
-                          <input
-                            type="text"
-                            placeholder={t('IngredientsContent.additionalNotes')}
-                            value={allergenDetails[allergen.id]?.note || ''}
-                            onChange={(e) => handleAllergenDetailChange(allergen.id, 'note', e.target.value)}
-                            disabled={loading}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm focus:ring-1 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                      );
+                    })}
                 </div>
               </div>
             )}

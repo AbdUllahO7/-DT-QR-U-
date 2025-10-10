@@ -4023,5 +4023,63 @@ export const en = {
     "branches": "Branches",
     "management": "Management Info",
     "deleted": "Deleted"
+  },
+    "allergens": {
+    "GLUTEN": {
+      "name": "Gluten",
+      "description": "Wheat, rye, barley, oats"
+    },
+    "CRUSTACEANS": {
+      "name": "Crustaceans",
+      "description": "Prawns, crabs, lobster"
+    },
+    "EGGS": {
+      "name": "Eggs",
+      "description": "Eggs and egg products"
+    },
+    "FISH": {
+      "name": "Fish",
+      "description": "All fish products"
+    },
+    "PEANUTS": {
+      "name": "Peanuts",
+      "description": "Peanuts and peanut products"
+    },
+    "SOYBEANS": {
+      "name": "Soybeans",
+      "description": "Soya and soya products"
+    },
+    "MILK": {
+      "name": "Milk",
+      "description": "Milk and dairy products"
+    },
+    "NUTS": {
+      "name": "Tree Nuts",
+      "description": "Almonds, hazelnuts, walnuts, cashews, etc."
+    },
+    "CELERY": {
+      "name": "Celery",
+      "description": "Celery and celeriac"
+    },
+    "MUSTARD": {
+      "name": "Mustard",
+      "description": "Mustard and mustard products"
+    },
+    "SESAME": {
+      "name": "Sesame",
+      "description": "Sesame seeds and products"
+    },
+    "SULPHITES": {
+      "name": "Sulphites",
+      "description": "Sulphur dioxide and sulphites (>10mg/kg)"
+    },
+    "LUPIN": {
+      "name": "Lupin",
+      "description": "Lupin and lupin products"
+    },
+    "MOLLUSCS": {
+      "name": "Molluscs",
+      "description": "Clams, mussels, oysters, snails, squid"
+    }
   }
 }; 

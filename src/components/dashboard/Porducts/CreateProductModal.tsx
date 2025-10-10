@@ -516,47 +516,58 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
                   {/* Price and Category Row */}
                   <div className="grid grid-cols-2 gap-3">
                     {/* Price */}
-                    <div>
-                      <label htmlFor="price" className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        {t('createProductModal.form.price.label')} <span className="text-red-500">*</span>
-                      </label>
-                      <div className="relative">
-                        <input
-                          type="number"
-                          id="price"
-                          value={formData.price}
-                          onChange={(e) => handleChange('price', parseFloat(e.target.value) || 0)}
-                          step="1"
-                          min="0"
-                          className={`w-full px-3 py-2.5 border-2 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 ${
-                            errors.price
-                              ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10'
-                              : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300'
-                          } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm ${isRTL ? 'pl-8' : 'pr-8'}`}
-                          placeholder={t('createProductModal.form.price.placeholder')}
-                          aria-describedby={errors.price ? 'price-error' : undefined}
-                          aria-required="true"
-                          aria-label={t('createProductModal.accessibility.priceInput')}
-                        />
-                        <div className={`absolute ${isRTL ? 'left-2' : 'right-2'} top-1/2 transform -translate-y-1/2 text-gray-400 text-sm`}>
-                          {t('createProductModal.form.price.currency')}
-                        </div>
-                      </div>
-                      <AnimatePresence>
-                        {errors.price && (
-                          <motion.p 
-                            id="price-error"
-                            initial={{ opacity: 0, y: -3 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -3 }}
-                            className="mt-1 text-xs text-red-600 dark:text-red-400"
-                            role="alert"
-                          >
-                            {errors.price}
-                          </motion.p>
-                        )}
-                      </AnimatePresence>
+                <div>
+                    <label htmlFor="price" className="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      {t('createProductModal.form.price.label')} <span className="text-red-500">*</span>
+                    </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      id="price"
+                      value={formData.price}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        // Allow empty string and valid numbers
+                        if (value === '' || value === '-') {
+                          handleChange('price', '');
+                        } else {
+                          const numValue = parseFloat(value);
+                          if (!isNaN(numValue)) {
+                            handleChange('price', numValue);
+                          }
+                        }
+                      }}
+                      step="1"
+                      min="0"
+                      className={`w-full px-3 py-2.5 border-2 rounded-lg focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all duration-200 ${
+                        errors.price
+                          ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10'
+                          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300'
+                      } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm ${isRTL ? 'pl-8' : 'pr-8'}`}
+                      placeholder={t('createProductModal.form.price.placeholder')}
+                      aria-describedby={errors.price ? 'price-error' : undefined}
+                      aria-required="true"
+                      aria-label={t('createProductModal.accessibility.priceInput')}
+                    />
+                    <div className={`absolute ${isRTL ? 'left-2' : 'right-2'} top-1/2 transform -translate-y-1/2 text-gray-400 text-sm`}>
+                      {t('createProductModal.form.price.currency')}
                     </div>
+                  </div>
+              <AnimatePresence>
+                {errors.price && (
+                  <motion.p 
+                    id="price-error"
+                    initial={{ opacity: 0, y: -3 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -3 }}
+                    className="mt-1 text-xs text-red-600 dark:text-red-400"
+                    role="alert"
+                  >
+                    {errors.price}
+                  </motion.p>
+                )}
+              </AnimatePresence>
+            </div>
 
                     {/* Category */}
                     <div>

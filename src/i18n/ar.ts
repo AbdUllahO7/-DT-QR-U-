@@ -4022,5 +4022,63 @@ export const ar = {
   "branches": "الفروع",
   "management": "معلومات الإدارة",
   "deleted": "المحذوفة"
-}
+},
+ "allergens": {
+    "GLUTEN": {
+      "name": "الغلوتين",
+      "description": "القمح، الجاودار، الشعير، الشوفان"
+    },
+    "CRUSTACEANS": {
+      "name": "القشريات",
+      "description": "الجمبري، السلطعون، الكركند"
+    },
+    "EGGS": {
+      "name": "البيض",
+      "description": "البيض ومنتجات البيض"
+    },
+    "FISH": {
+      "name": "السمك",
+      "description": "جميع منتجات الأسماك"
+    },
+    "PEANUTS": {
+      "name": "الفول السوداني",
+      "description": "الفول السوداني ومنتجاته"
+    },
+    "SOYBEANS": {
+      "name": "فول الصويا",
+      "description": "الصويا ومنتجات الصويا"
+    },
+    "MILK": {
+      "name": "الحليب",
+      "description": "الحليب ومنتجات الألبان"
+    },
+    "NUTS": {
+      "name": "المكسرات",
+      "description": "اللوز، البندق، الجوز، الكاجو، إلخ"
+    },
+    "CELERY": {
+      "name": "الكرفس",
+      "description": "الكرفس وجذر الكرفس"
+    },
+    "MUSTARD": {
+      "name": "الخردل",
+      "description": "الخردل ومنتجات الخردل"
+    },
+    "SESAME": {
+      "name": "السمسم",
+      "description": "بذور السمسم ومنتجاته"
+    },
+    "SULPHITES": {
+      "name": "الكبريتات",
+      "description": "ثاني أكسيد الكبريت والكبريتات (>10مغ/كغ)"
+    },
+    "LUPIN": {
+      "name": "الترمس",
+      "description": "الترمس ومنتجات الترمس"
+    },
+    "MOLLUSCS": {
+      "name": "الرخويات",
+      "description": "المحار، بلح البحر، الحلزون، الحبار"
+    }
+  }
 }; 
