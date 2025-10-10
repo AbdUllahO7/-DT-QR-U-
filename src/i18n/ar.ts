@@ -1318,7 +1318,7 @@ export const ar = {
     modal: {
       createTitle: 'إضافة فرع جديد',
       createDescription: 'أدخل معلومات الفرع الجديد',
-      editTitle: 'تعديل الفرع - {{branchName}}',
+      editTitle: 'تعديل الفرع - {branchName}',
       editDescription: 'تعديل معلومات الفرع',
       
       tabs: {

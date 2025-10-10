@@ -31,7 +31,6 @@ const OrdersManagerRestaurant: React.FC = () => {
       fetchBranches,
       handleBranchSelect,
       fetchPendingOrders,
-      fetchBranchOrders,
       handleConfirmOrder,
       handleRejectOrder,
       handleUpdateStatus,
@@ -45,7 +44,8 @@ const OrdersManagerRestaurant: React.FC = () => {
       handleSort,
       setState,
       handleCancelOrder,
-      openCancelModal
+      openCancelModal,
+      fetchBranchOrders
     }
   } = useOrdersManager();
 
@@ -70,6 +70,8 @@ const OrdersManagerRestaurant: React.FC = () => {
   // Initial fetch on mount
   useEffect(() => {
     fetchBranches();
+      fetchBranchOrders();
+      fetchBranchOrders();
   }, []);
 
   // Fetch orders when branch is selected
