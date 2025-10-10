@@ -35,7 +35,8 @@ export const tr = {
     lastMonth: 'Geçen Ay',
     retry: 'Tekrar Dene'
   },
-    filter: {
+
+  filter: {
       "status": "Durum",
       "all": "Tümü",
       "active": "Aktif",
@@ -51,8 +52,9 @@ export const tr = {
         "min": "Min Fiyat",
         "max": "Max Fiyat"
       }
-    },
-    sort: {
+  },
+
+  sort: {
       "title": "Sırala",
       "name": {
         "asc": "İsim (A-Z)",
@@ -71,11 +73,13 @@ export const tr = {
         "desc": "Oluşturulma Tarihi (En Yeniden)"
       },
 
-    },
-    clear: {
+  },
+
+  clear: {
       "filters": "Filtreleri Temizle",
       "all": "Tümünü Temizle"
-    },
+  },
+
   restaurantManagement : {
     tabs : {
       general : "Genel",
@@ -960,8 +964,6 @@ export const tr = {
     }
   },
 
-
-
   // Subscription
   subscription: {
     title: 'Abonelik',
@@ -1006,6 +1008,7 @@ export const tr = {
       deleteProduct: 'Ürün Sil'
     }
   },
+
   branchSelector: {
   status: {
     loading: 'Yükleniyor...',
@@ -1021,6 +1024,7 @@ export const tr = {
   }
   
   },
+
   popularProducts: {
     title: 'Popüler Ürünler',
     empty: 'Ürün satışları burada görünecek',
@@ -1033,6 +1037,7 @@ export const tr = {
       noData: 'Veri bulunamadı'
     }
   },
+
   weeklyActivity: {
     title: 'Haftalık Aktivite',
     empty: {
@@ -1048,6 +1053,7 @@ export const tr = {
       qrScans: 'QR Tarama'
     }
   },
+
   monthlyRevenue: {
     QuickStats : "Hızlı İstatistikler",
     title: 'Aylık Gelir Trendi',
@@ -1064,6 +1070,7 @@ export const tr = {
       format: (value: { toLocaleString: (arg0: string) => any; }) => `₺${value.toLocaleString('tr-TR')}`
     }
   },
+
   branchCard: {
     status: {
       temporaryClosed: 'Geçici Kapalı',
@@ -1085,10 +1092,12 @@ export const tr = {
       logo: 'logo'
     }
   },
+
   addBranchCard: {
     title: 'Add New Branch',
     description: 'Click to add a new branch'
   },
+
   branchModal: {
     title: {
       add: 'Yeni Şube Ekle',
@@ -1215,6 +1224,7 @@ export const tr = {
       saving: 'Kaydediliyor...'
     }
   },
+
   branchManagement: {
     title: 'Şube Yönetimi',
     description: 'Restoran şubelerini yönetin ve bilgilerini güncelleyin',
@@ -1358,6 +1368,7 @@ export const tr = {
       }
     }
   },
+
   commonBranch: {
     cancel: 'İptal',
     delete: 'Sil',
@@ -1374,6 +1385,7 @@ export const tr = {
     required: 'Gerekli',
     optional: 'Opsiyonel'
   },
+
   productsContent: {
         branch : {
     selectAll:"Hepsi",
@@ -1538,6 +1550,7 @@ export const tr = {
     manageAddons: 'Ürün eklentilerini yönet'
   }
   },
+
   createCategoryModal: {
   // Header
   title: 'Yeni Kategori Ekle',
@@ -1597,6 +1610,7 @@ export const tr = {
     optionalField: 'İsteğe bağlı alan'
   }
   },
+
   createProductModal: {
   // Header
   title: 'Yeni Ürün Ekle',
@@ -1709,7 +1723,8 @@ export const tr = {
     statusToggle: 'Ürün durumunu değiştir'
   }
   },
-    productAddonsModal: {
+
+  productAddonsModal: {
       // Header
       title: 'Ürün Eklentileri',
       subtitle: 'için eklenti ürünleri yönetin',
@@ -1813,8 +1828,9 @@ export const tr = {
         productImage: 'Ürün resmi',
         toggleRecommended: 'Önerilen durumunu değiştir'
       }
-    },
-      editCategoryModal: {
+  },
+
+  editCategoryModal: {
       // Header
       title: 'Kategori Düzenle',
       subtitle: 'Kategori bilgilerini güncelle',
@@ -1888,8 +1904,9 @@ export const tr = {
         nameInput: 'Kategori adı girişi',
         descriptionInput: 'Kategori açıklama girişi'
       }
-    },
-     confirmDeleteModal: {
+  },
+
+  confirmDeleteModal: {
       // Common titles (can be overridden by props)
       defaultTitle: 'Silmeyi Onayla',
       deleteTitle: 'Öğeyi Sil',
@@ -1968,8 +1985,9 @@ export const tr = {
         cancelButton: 'Silmeyi iptal et',
         errorAlert: 'Hata mesajı'
       }
-    },
-     editProductModal: {
+  },
+
+  editProductModal: {
       // Header
       title: 'Ürün Düzenle',
       subtitle: 'Ürün bilgilerini güncelle',
@@ -2083,8 +2101,9 @@ export const tr = {
         statusToggle: 'Ürün durumunu değiştir',
         imagePreview: 'Ürün görseli önizleme'
       }
-    },
-     productIngredientModal: {
+  },
+
+  productIngredientModal: {
       // Header
       title: 'Ürün Malzemeleri',
       subtitle: 'için malzemeleri seçin',
@@ -2221,8 +2240,9 @@ export const tr = {
         allergenWarning: 'Alerjen içerir',
         availabilityStatus: 'Kullanılabilirlik durumu'
       }
-    },
-    ProductIngredientUpdateModal: {
+  },
+
+  ProductIngredientUpdateModal: {
   title: 'Malzemeleri Güncelle',
   searchPlaceholder: 'Malzeme ara...',
   selectedCount: 'malzeme seçili',
@@ -2251,63 +2271,66 @@ export const tr = {
     saveButton: 'Malzeme değişikliklerini kaydet',
     cancelButton: 'Malzeme güncellemesini iptal et'
   }
-},
-SortableCategory: {
-  product: 'ürün',
-  products: 'ürün',
-  editCategory: 'Kategoriyi düzenle',
-  deleteCategory: 'Kategoriyi sil', 
-  reorderingProducts: 'Ürün sıralaması kaydediliyor...',
-  noCategoryProducts: 'Bu kategoride henüz ürün yok.',
-  expandCategory: 'Kategoriyi genişlet',
-  collapseCategory: 'Kategoriyi daralt',
-  dragCategory: 'Kategori sırasını değiştirmek için sürükle',
-  accessibility: {
-    categoryActions: 'Kategori işlemleri',
-    productCount: 'Ürün sayısı',
-    expandToggle: 'Kategori genişletme durumunu değiştir',
-    editCategoryButton: 'Kategoriyi düzenle',
-    deleteCategoryButton: 'Kategoriyi sil',
-    dragHandle: 'Kategori sırasını değiştirmek için sürükleme kolu',
-    categoryCard: 'Kategori kartı',
-    emptyCategory: 'Boş kategori',
-    reorderingStatus: 'Kategori yeniden sıralanıyor'
-  }
-},
-SortableProduct: {
-  outOfStock: 'Stokta Yok',
-  loadingIngredients: 'Malzemeler yükleniyor...',
-  ingredients: 'Malzemeler',
-  noIngredients: 'Malzeme eklenmemiş',
-  loadingAddons: 'Eklentiler yükleniyor...',
-  addons: 'Eklentiler',
-  noAddons: 'Eklenti eklenmemiş',
-  manageAddons: 'Eklentileri yönet',
-  editProduct: 'Ürünü düzenle',
-  deleteProduct: 'Ürünü sil',
-  dragProduct: 'Ürün sırasını değiştirmek için sürükle',
-  allergenic: 'Alerjen içerir',
-  recommended: 'Önerilen',
-  price: 'Fiyat',
-  errors: {
-    loadingIngredients: 'Malzemeler yüklenirken bir hata oluştu.',
-    loadingAddons: 'Eklentiler yüklenirken bir hata oluştu.'
   },
-  accessibility: {
-    productImage: 'Ürün resmi',
-    productCard: 'Ürün kartı',
-    productActions: 'Ürün işlemleri',
-    dragHandle: 'Ürün sırasını değiştirmek için sürükleme kolu',
-    outOfStockBadge: 'Ürün stokta yok',
-    ingredientsList: 'Ürün malzemeleri listesi',
-    addonsList: 'Ürün eklentileri listesi',
-    allergenWarning: 'Alerjen içerir',
-    recommendedAddon: 'Önerilen eklenti',
-    editButton: 'Ürünü düzenle',
-    deleteButton: 'Ürünü sil',
-    addonsButton: 'Ürün eklentilerini yönet'
-  }
-},
+
+  SortableCategory: {
+    product: 'ürün',
+    products: 'ürün',
+    editCategory: 'Kategoriyi düzenle',
+    deleteCategory: 'Kategoriyi sil', 
+    reorderingProducts: 'Ürün sıralaması kaydediliyor...',
+    noCategoryProducts: 'Bu kategoride henüz ürün yok.',
+    expandCategory: 'Kategoriyi genişlet',
+    collapseCategory: 'Kategoriyi daralt',
+    dragCategory: 'Kategori sırasını değiştirmek için sürükle',
+    accessibility: {
+      categoryActions: 'Kategori işlemleri',
+      productCount: 'Ürün sayısı',
+      expandToggle: 'Kategori genişletme durumunu değiştir',
+      editCategoryButton: 'Kategoriyi düzenle',
+      deleteCategoryButton: 'Kategoriyi sil',
+      dragHandle: 'Kategori sırasını değiştirmek için sürükleme kolu',
+      categoryCard: 'Kategori kartı',
+      emptyCategory: 'Boş kategori',
+      reorderingStatus: 'Kategori yeniden sıralanıyor'
+    }
+  },
+
+  SortableProduct: {
+    outOfStock: 'Stokta Yok',
+    loadingIngredients: 'Malzemeler yükleniyor...',
+    ingredients: 'Malzemeler',
+    noIngredients: 'Malzeme eklenmemiş',
+    loadingAddons: 'Eklentiler yükleniyor...',
+    addons: 'Eklentiler',
+    noAddons: 'Eklenti eklenmemiş',
+    manageAddons: 'Eklentileri yönet',
+    editProduct: 'Ürünü düzenle',
+    deleteProduct: 'Ürünü sil',
+    dragProduct: 'Ürün sırasını değiştirmek için sürükle',
+    allergenic: 'Alerjen içerir',
+    recommended: 'Önerilen',
+    price: 'Fiyat',
+    errors: {
+      loadingIngredients: 'Malzemeler yüklenirken bir hata oluştu.',
+      loadingAddons: 'Eklentiler yüklenirken bir hata oluştu.'
+    },
+    accessibility: {
+      productImage: 'Ürün resmi',
+      productCard: 'Ürün kartı',
+      productActions: 'Ürün işlemleri',
+      dragHandle: 'Ürün sırasını değiştirmek için sürükleme kolu',
+      outOfStockBadge: 'Ürün stokta yok',
+      ingredientsList: 'Ürün malzemeleri listesi',
+      addonsList: 'Ürün eklentileri listesi',
+      allergenWarning: 'Alerjen içerir',
+      recommendedAddon: 'Önerilen eklenti',
+      editButton: 'Ürünü düzenle',
+      deleteButton: 'Ürünü sil',
+      addonsButton: 'Ürün eklentilerini yönet'
+    }
+  },
+
   IngredientsContent: {
     // Search and filters
     searchPlaceholder: 'Malzemeleri ara...',
@@ -2381,6 +2404,7 @@ SortableProduct: {
       dragToReorder: 'Yeniden sıralamak için sürükle'
     }
   },
+
   TableCard: {
     active: 'Aktif',
     inactive: 'Pasif',
@@ -2407,6 +2431,7 @@ SortableProduct: {
       deleteButton: 'Masayı sil'
     }
   },
+
   QRCodeModal: {
     // Step selection
     tableAddOption: 'Masa Ekleme Seçeneği',
@@ -2474,6 +2499,7 @@ SortableProduct: {
       closeButton: 'Modalı kapat'
     }
   },
+
   TableCategoryModal: {
     title: 'Masa Kategorisi Ekle',
     subtitle: 'Yeni masa kategorisi oluşturun',
@@ -2518,6 +2544,7 @@ SortableProduct: {
       form: 'Kategori oluşturma formu'
     }
   },
+
   AddQRCodeCard: {
     title: 'Yeni Masa Ekle',
     subtitle: 'Yeni masa eklemek için tıklayın',
@@ -2526,6 +2553,7 @@ SortableProduct: {
       addCard: 'Yeni masa ekle kartı'
     }
   },
+
   userManagementPage: {
     // Page header and navigation
     title: 'Kullanıcı Yönetimi',
@@ -2761,6 +2789,7 @@ SortableProduct: {
       roleUpdated: 'Rol başarıyla güncellendi'
     }
   },
+
   BranchtableManagement: {
 
   title: "Masa Yönetimi",
@@ -2843,6 +2872,7 @@ SortableProduct: {
     startingNumber: "Başlangıç Numarası"
   }
   },
+  
   BranchTableManagement: {
   "clear Table": "Tablo temizleniyor",
   "refresh Table": "Durumu güncelle",
@@ -2930,6 +2960,7 @@ SortableProduct: {
       refreshFailed: "Failed to refresh data"
     }
   },
+
   branchManagementBranch: {
     title: 'Şube Yönetimi',
     description: 'Şube bilgilerinizi ve ayarlarınızı yönetin.',
@@ -3010,6 +3041,7 @@ SortableProduct: {
       region: 'Bölge adını girin'
     }
   },
+
   branchCategories: {
     // Header and Stats
     header: 'Şube Kategori Yönetimi',
@@ -3206,7 +3238,8 @@ SortableProduct: {
       searchProducts: 'Ürünlerde ara...'
     }
   },
- profile: {
+
+  profile: {
       title: 'Profil',
       personalInfo: 'Kişisel Bilgiler',
       editProfile: 'Profili Düzenle',
@@ -3299,8 +3332,9 @@ SortableProduct: {
       error: {
         loadFailed: 'Profil verisi alınamadı'
       }
-    },
-      addonModal: {
+  },
+
+  addonModal: {
       title: 'Eklentileri Yapılandır',
       loading: 'Eklentiler yükleniyor...',
       refresh: 'Yenile',
@@ -3362,8 +3396,9 @@ SortableProduct: {
         addons: 'eklenti',
         assigned: 'atanmış'
       }
-    },
-     menu: {
+  },
+
+  menu: {
       title: "Menü",
       loading: "Menü Yükleniyor",
       loadingSubtitle: "Lezzetli seçimlerimizi sizin için hazırlıyoruz...",
@@ -3492,6 +3527,7 @@ SortableProduct: {
       "session_required": "Oturum kimliği gerekli"
           }
   },
+
   order: {
     form: {
       title: 'Sipariş Detayları',
@@ -3532,6 +3568,7 @@ SortableProduct: {
       phoneRequired: 'Bu sipariş türü için telefon numarası gerekli'
     }
   },
+
   priceChange: {
     title: 'Fiyat Değişiklikleri Tespit Edildi',
     description: 'Sepetinizdeki bazı ürünlerin fiyat değişiklikleri var ve siparişe devam etmeden önce onaylanması gerekiyor.',
@@ -3541,7 +3578,8 @@ SortableProduct: {
     confirm: 'Onayla ve Devam Et',
     confirming: 'Onaylanıyor...'
   },
-    "productModal": {
+  
+  productModal: {
       "customizeOrder": "Siparişinizi Özelleştirin",
       "allergenInformation": "Alerjen Bilgileri",
       "ingredients": "İçindekiler",
@@ -3554,8 +3592,9 @@ SortableProduct: {
       "quantity": "Miktar",
       "total": "Toplam",
       "addToCart": "Sepete Ekle"
-    },
-    errors: {
+  },
+
+  errors: {
     loadingBasket: 'Sepet yüklenemedi',
     loadingOrderTypes: 'Sipariş türleri yüklenemedi',
     removingItem: 'Ürün sepetten kaldırılamadı',
@@ -3570,8 +3609,9 @@ SortableProduct: {
     sessionIdRequired: 'Fiyat değişikliği onayı için oturum kimliği gerekli',
     addonProductNotFound: 'Ekstra ürün kimliği bulunamadı',
     cartItemNotFound: 'Sepet ürünü bulunamadı'
-    },
-    "ordersManager": {
+  },
+
+  ordersManager: {
       total : 'Toplam',
       subTotal:"Ara Toplam",
       serviceFeeApplied:"Servis ücreti",
@@ -3658,8 +3698,9 @@ SortableProduct: {
       CompletedAt: "Tamamlanma Tarihi",
       time: "saat",
       Status: "Durum",
-    },
-    "orderService": {
+  },
+
+  orderService: {
       "statuses": {
         "pending": "Bekliyor",
         "confirmed": "Onaylandı",
@@ -3702,8 +3743,9 @@ SortableProduct: {
         "getOrderTypesForDisplay": "Order types for display getirme hatası",
         "unknownOrderType": "Bilinmeyen Sipariş Türü"
       }
-    },
-     branchPreferences: {
+  },
+  
+  branchPreferences: {
     "title": "Şube Tercihleri",
     "description": "Şubeye özel ayarları ve tercihleri yapılandırın",
     "loading": "Şube tercihleri yükleniyor...",
@@ -3798,8 +3840,9 @@ SortableProduct: {
       "invalidPaymentSettings": "Geçersiz ödeme ayarları. En az bir ödeme yöntemi seçilmelidir.",
       "invalidSessionSettings": "Geçersiz oturum ayarları. Lütfen değerleri kontrol edin."
     }
-    },
-    whatsapp: {
+  },
+
+  whatsapp: {
   confirmation: {
     title: 'WhatsApp\'a Gönder?',
     subtitle: 'Restoranı WhatsApp ile bilgilendir',
@@ -3816,229 +3859,235 @@ SortableProduct: {
     sendToWhatsApp: 'WhatsApp\'a Gönder',
     sending: 'Gönderiliyor...'
   }
-},
-recycleBin: {
-  title: 'Geri Dönüşüm Kutusu',
-  titleProducts: 'Silinmiş Ürünler ve Kategoriler',
-  titleBranches: 'Silinmiş Şubeler',
-  titleTables: 'Silinmiş Masalar',
-  titleBranchProducts: 'Silinmiş Şube Ürünleri ve Kategorileri',
-  titleBranchCategories: 'Silinmiş Şube Kategorileri',
-  titleTableCategories: 'Silinmiş Masa Kategorileri',
-  description: 'Silinmiş şubeler, kategoriler, ürünler ve masaları yönetin',
-  descriptionProducts: 'Silinmiş ürünler ve kategorileri yönetin',
-  descriptionBranches: 'Silinmiş şubeleri yönetin',
-  descriptionTables: 'Silinmiş masaları yönetin',
-  descriptionBranchProducts: 'Silinmiş şube ürünleri ve kategorileri yönetin',
-  descriptionBranchCategories: 'Silinmiş şube kategorilerini yönetin',
-  descriptionTableCategories: 'Silinmiş masa kategorilerini yönetin',
-  search: 'Öğe ara...',
-  filter: {
-    all: 'Tümü',
-    group1: 'Tüm Grup 1',
-    group2: 'Tüm Grup 2',
-    group1Label: '📋 Restoran Seviyesi (Şubeler, Ürünler, Masalar)',
-    group2Label: '🏢 Şube Seviyesi (Şube Ürünleri ve Kategorileri)',
-    branches: 'Şubeler',
-    categories: 'Kategoriler',
-    products: 'Ürünler',
-    tables: 'Masalar',
-    branchProducts: 'Şube Ürünleri',
-    branchCategories: 'Şube Kategorileri',
-    tableCategories: 'Masa Kategorileri'
   },
-  refresh: 'Yenile',
-  loading: 'Yükleniyor...',
-  stats: {
-    group1: 'Restoran Seviyesi',
-    group1Desc: 'Şubeler, Ürünler, Masalar',
-    group2: 'Şube Seviyesi',
-    group2Desc: 'Şube Ürünleri ve Kategorileri',
-    totalDeleted: 'Toplam Silinmiş',
-    totalDesc: 'Tüm silinmiş öğeler',
-    filtered: 'Gösterilen',
-    filteredDesc: 'Mevcut filtre sonuçları',
-    deletedBranch: 'Silinmiş Şube',
-    deletedCategory: 'Silinmiş Kategori',
-    deletedProduct: 'Silinmiş Ürün',
-    deletedTable: 'Silinmiş Masa',
-    deletedBranchProduct: 'Silinmiş Şube Ürünü',
-    deletedBranchCategory: 'Silinmiş Şube Kategorisi',
-    deletedTableCategory: 'Silinmiş Masa Kategorisi'
-  },
-  entityTypes: {
-    category: 'Kategori',
-    product: 'Ürün',
-    branch: 'Şube',
-    table: 'Masa',
-    branchProduct: 'Şube Ürünü',
-    branchCategory: 'Şube Kategorisi',
-    tableCategory: 'Masa Kategorisi',
-    other: 'Diğer'
-  },
-  contextInfo: {
-    category: 'Kategori:',
-    branch: 'Şube:',
-    restaurant: 'Restoran:'
-  },
-  deletedAt: 'Silinme:',
-  restore: {
-    button: 'Geri Yükle',
-    restoring: 'Geri yükleniyor...',
-    successCategory: '"{name}" kategorisi başarıyla geri yüklendi',
-    successProduct: '"{name}" ürünü başarıyla geri yüklendi',
-    successBranch: '"{name}" şubesi başarıyla geri yüklendi',
-    successTable: '"{name}" masası başarıyla geri yüklendi',
-    successBranchCategory: '"{name}" şube kategorisi başarıyla geri yüklendi',
-    successTableCategory: '"{name}" masa kategorisi başarıyla geri yüklendi',
-    error: 'Geri yükleme işlemi başarısız oldu'
-  },
-  empty: {
-    title: 'Geri dönüşüm kutusu boş',
-    titleFiltered: 'Sonuç bulunamadı',
-    description: 'Henüz silinmiş öğe bulunmuyor',
-    descriptionFiltered: 'Arama kriterlerinize uygun silinmiş öğe bulunmadı'
-  },
-  errors: {
-    loadingError: 'Silinmiş öğeler yüklenirken hata oluştu'
-  }
-},
-"management": {
-    "title": "Yönetim Bilgileri",
-    "subtitle": "Şirket ve yasal detaylar",
-    "noDataTitle": "Yönetim Bilgisi Yok",
-    "noDataMessage": "Yönetim bilgileri henüz ayarlanmadı. Başlamak için lütfen restoran detaylarını ekleyin.",
-    
-    "buttons": {
-      "edit": "Düzenle",
-      "cancel": "İptal",
-      "save": "Değişiklikleri Kaydet",
-      "saving": "Kaydediliyor..."
-    },
 
-    "sections": {
-      "restaurantDetails": "Restoran Detayları",
-      "companyInfo": "Şirket Bilgileri",
-      "taxInfo": "Vergi ve Kayıt",
-      "certificates": "Sertifikalar ve İzinler",
-      "additionalSettings": "Ek Ayarlar"
+  recycleBin: {
+    title: 'Geri Dönüşüm Kutusu',
+    titleProducts: 'Silinmiş Ürünler ve Kategoriler',
+    titleBranches: 'Silinmiş Şubeler',
+    titleTables: 'Silinmiş Masalar',
+    titleBranchProducts: 'Silinmiş Şube Ürünleri ve Kategorileri',
+    titleBranchCategories: 'Silinmiş Şube Kategorileri',
+    titleTableCategories: 'Silinmiş Masa Kategorileri',
+    description: 'Silinmiş şubeler, kategoriler, ürünler ve masaları yönetin',
+    descriptionProducts: 'Silinmiş ürünler ve kategorileri yönetin',
+    descriptionBranches: 'Silinmiş şubeleri yönetin',
+    descriptionTables: 'Silinmiş masaları yönetin',
+    descriptionBranchProducts: 'Silinmiş şube ürünleri ve kategorileri yönetin',
+    descriptionBranchCategories: 'Silinmiş şube kategorilerini yönetin',
+    descriptionTableCategories: 'Silinmiş masa kategorilerini yönetin',
+    search: 'Öğe ara...',
+    filter: {
+      all: 'Tümü',
+      group1: 'Tüm Grup 1',
+      group2: 'Tüm Grup 2',
+      group1Label: '📋 Restoran Seviyesi (Şubeler, Ürünler, Masalar)',
+      group2Label: '🏢 Şube Seviyesi (Şube Ürünleri ve Kategorileri)',
+      branches: 'Şubeler',
+      categories: 'Kategoriler',
+      products: 'Ürünler',
+      tables: 'Masalar',
+      branchProducts: 'Şube Ürünleri',
+      branchCategories: 'Şube Kategorileri',
+      tableCategories: 'Masa Kategorileri'
     },
-
-    "fields": {
-      "restaurantName": "Restoran Adı",
-      "restaurantLogo": "Restoran Logosu",
-      "companyTitle": "Şirket Unvanı",
-      "legalType": "Yasal Tür",
-      "taxNumber": "Vergi Numarası",
-      "taxOffice": "Vergi Dairesi",
-      "mersisNumber": "MERSIS Numarası",
-      "tradeRegistry": "Ticaret Sicil Numarası",
-      "workPermit": "Çalışma İzni",
-      "foodCertificate": "Gıda Sertifikası",
-      "alcoholService": "Alkol Servisi Var",
-      "logo": "Logo"
+    refresh: 'Yenile',
+    loading: 'Yükleniyor...',
+    stats: {
+      group1: 'Restoran Seviyesi',
+      group1Desc: 'Şubeler, Ürünler, Masalar',
+      group2: 'Şube Seviyesi',
+      group2Desc: 'Şube Ürünleri ve Kategorileri',
+      totalDeleted: 'Toplam Silinmiş',
+      totalDesc: 'Tüm silinmiş öğeler',
+      filtered: 'Gösterilen',
+      filteredDesc: 'Mevcut filtre sonuçları',
+      deletedBranch: 'Silinmiş Şube',
+      deletedCategory: 'Silinmiş Kategori',
+      deletedProduct: 'Silinmiş Ürün',
+      deletedTable: 'Silinmiş Masa',
+      deletedBranchProduct: 'Silinmiş Şube Ürünü',
+      deletedBranchCategory: 'Silinmiş Şube Kategorisi',
+      deletedTableCategory: 'Silinmiş Masa Kategorisi'
     },
-
-    "placeholders": {
-      "restaurantName": "Restoran adını girin",
-      "companyTitle": "Şirket unvanını girin",
-      "taxNumber": "Vergi numarasını girin",
-      "taxOffice": "Vergi dairesini girin",
-      "mersisNumber": "MERSIS numarasını girin",
-      "tradeRegistry": "Ticaret sicil numarasını girin",
-      "selectLegalType": "Yasal Tür Seçin"
+    entityTypes: {
+      category: 'Kategori',
+      product: 'Ürün',
+      branch: 'Şube',
+      table: 'Masa',
+      branchProduct: 'Şube Ürünü',
+      branchCategory: 'Şube Kategorisi',
+      tableCategory: 'Masa Kategorisi',
+      other: 'Diğer'
     },
-
-    "legalTypes": {
-      "llc": "Limited Şirket",
-      "corporation": "Anonim Şirket",
-      "partnership": "Ortaklık"
+    contextInfo: {
+      category: 'Kategori:',
+      branch: 'Şube:',
+      restaurant: 'Restoran:'
     },
+    deletedAt: 'Silinme:',
+    restore: {
+      button: 'Geri Yükle',
+      restoring: 'Geri yükleniyor...',
+      successCategory: '"{name}" kategorisi başarıyla geri yüklendi',
+      successProduct: '"{name}" ürünü başarıyla geri yüklendi',
+      successBranch: '"{name}" şubesi başarıyla geri yüklendi',
+      successTable: '"{name}" masası başarıyla geri yüklendi',
+      successBranchCategory: '"{name}" şube kategorisi başarıyla geri yüklendi',
+      successTableCategory: '"{name}" masa kategorisi başarıyla geri yüklendi',
+      error: 'Geri yükleme işlemi başarısız oldu'
+    },
+    empty: {
+      title: 'Geri dönüşüm kutusu boş',
+      titleFiltered: 'Sonuç bulunamadı',
+      description: 'Henüz silinmiş öğe bulunmuyor',
+      descriptionFiltered: 'Arama kriterlerinize uygun silinmiş öğe bulunmadı'
+    },
+    errors: {
+      loadingError: 'Silinmiş öğeler yüklenirken hata oluştu'
+    }
+  },
 
+  management: {
+      "title": "Yönetim Bilgileri",
+      "subtitle": "Şirket ve yasal detaylar",
+      "noDataTitle": "Yönetim Bilgisi Yok",
+      "noDataMessage": "Yönetim bilgileri henüz ayarlanmadı. Başlamak için lütfen restoran detaylarını ekleyin.",
+      
+      "buttons": {
+        "edit": "Düzenle",
+        "cancel": "İptal",
+        "save": "Değişiklikleri Kaydet",
+        "saving": "Kaydediliyor..."
+      },
+
+      "sections": {
+        "restaurantDetails": "Restoran Detayları",
+        "companyInfo": "Şirket Bilgileri",
+        "taxInfo": "Vergi ve Kayıt",
+        "certificates": "Sertifikalar ve İzinler",
+        "additionalSettings": "Ek Ayarlar"
+      },
+
+      "fields": {
+        "restaurantName": "Restoran Adı",
+        "restaurantLogo": "Restoran Logosu",
+        "companyTitle": "Şirket Unvanı",
+        "legalType": "Yasal Tür",
+        "taxNumber": "Vergi Numarası",
+        "taxOffice": "Vergi Dairesi",
+        "mersisNumber": "MERSIS Numarası",
+        "tradeRegistry": "Ticaret Sicil Numarası",
+        "workPermit": "Çalışma İzni",
+        "foodCertificate": "Gıda Sertifikası",
+        "alcoholService": "Alkol Servisi Var",
+        "logo": "Logo"
+      },
+
+      "placeholders": {
+        "restaurantName": "Restoran adını girin",
+        "companyTitle": "Şirket unvanını girin",
+        "taxNumber": "Vergi numarasını girin",
+        "taxOffice": "Vergi dairesini girin",
+        "mersisNumber": "MERSIS numarasını girin",
+        "tradeRegistry": "Ticaret sicil numarasını girin",
+        "selectLegalType": "Yasal Tür Seçin"
+      },
+
+      "legalTypes": {
+        "llc": "Limited Şirket",
+        "corporation": "Anonim Şirket",
+        "partnership": "Ortaklık"
+      },
+
+      "status": {
+        "uploaded": "Yüklendi",
+        "notUploaded": "Yüklenmedi",
+        "available": "Mevcut",
+        "notAvailable": "Mevcut Değil",
+        "alcoholService": "Alkol Servisi:"
+      },
+
+      "common": {
+        "na": "Mevcut Değil"
+      }
+  },
+
+  branches: {
     "status": {
-      "uploaded": "Yüklendi",
-      "notUploaded": "Yüklenmedi",
-      "available": "Mevcut",
-      "notAvailable": "Mevcut Değil",
-      "alcoholService": "Alkol Servisi:"
+      "active": "Aktif",
+      "inactive": "Pasif"
     },
+    "fields": {
+      "branchType": "Şube Türü",
+      "branchTag": "Şube Etiketi"
+    }
+  },
 
+  restaurants: {
+    "status": {
+      "active": "Aktif",
+      "inactive": "Pasif"
+    },
+    "actions": {
+      "edit": "Restoranı Düzenle",
+      "delete": "Restoranı Sil"
+    },
+    "stats": {
+      "totalBranches": "Toplam Şube",
+      "active": "Aktif",
+      "inactive": "Pasif",
+      "alcohol": "Alkol"
+    },
     "common": {
-      "na": "Mevcut Değil"
+      "yes": "Evet",
+      "no": "Hayır"
     }
   },
-  "branches": {
-  "status": {
-    "active": "Aktif",
-    "inactive": "Pasif"
-  },
-  "fields": {
-    "branchType": "Şube Türü",
-    "branchTag": "Şube Etiketi"
-  }
-},
-"restaurants": {
-  "status": {
-    "active": "Aktif",
-    "inactive": "Pasif"
-  },
-  "actions": {
-    "edit": "Restoranı Düzenle",
-    "delete": "Restoranı Sil"
-  },
-  "stats": {
-    "totalBranches": "Toplam Şube",
-    "active": "Aktif",
-    "inactive": "Pasif",
-    "alcohol": "Alkol"
-  },
-  "common": {
-    "yes": "Evet",
-    "no": "Hayır"
-  }
-},
 
-"restaurantsTab": {
-  "status": {
-    "active": "Aktif",
-    "inactive": "Pasif"
-  },
-  "actions": {
-    "edit": "Restoranı Düzenle",
-    "delete": "Restoranı Sil"
-  },
-  "stats": {
-    "totalBranches": "Toplam Şube",
-    "active": "Aktif",
-    "inactive": "Pasif",
-    "alcohol": "Alkol"
-  },
-  "common": {
-    "yes": "Evet",
-    "no": "Hayır"
-  },
-  "modal": {
-    "editTitle": "Restoranı Düzenle",
-    "placeholders": {
-      "restaurantName": "Restoran Adı",
-      "cuisineType": "Mutfak Türü"
+  restaurantsTab: {
+    "status": {
+      "active": "Aktif",
+      "inactive": "Pasif"
     },
-    "labels": {
-      "hasAlcoholService": "Alkol Servisi Var"
+    "actions": {
+      "edit": "Restoranı Düzenle",
+      "delete": "Restoranı Sil"
     },
-    "buttons": {
-      "update": "Restoranı Güncelle",
-      "updating": "Güncelleniyor..."
+    "stats": {
+      "totalBranches": "Toplam Şube",
+      "active": "Aktif",
+      "inactive": "Pasif",
+      "alcohol": "Alkol"
+    },
+    "common": {
+      "yes": "Evet",
+      "no": "Hayır"
+    },
+    "modal": {
+      "editTitle": "Restoranı Düzenle",
+      "placeholders": {
+        "restaurantName": "Restoran Adı",
+        "cuisineType": "Mutfak Türü"
+      },
+      "labels": {
+        "hasAlcoholService": "Alkol Servisi Var"
+      },
+      "buttons": {
+        "update": "Restoranı Güncelle",
+        "updating": "Güncelleniyor..."
+      }
     }
-  }
-},
-"tabs": {
-  "restaurants": "Restoranlar",
-  "branches": "Şubeler",
-  "management": "Yönetim Bilgileri",
-  "deleted": "Silinmiş"
-},
- "allergens": {
+  },
+
+  tabs: {
+    "restaurants": "Restoranlar",
+    "branches": "Şubeler",
+    "management": "Yönetim Bilgileri",
+    "deleted": "Silinmiş"
+  },
+  
+  allergens: {
     "GLUTEN": {
       "name": "Gluten",
       "description": "Buğday, çavdar, arpa, yulaf"

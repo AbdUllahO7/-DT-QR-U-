@@ -32,7 +32,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   onRemoveFromCart,
   onToggleFavorite,
   onCategorySelect,
-  restaurantName,
   onCustomize,
   getCartItemQuantity
 }) => {
