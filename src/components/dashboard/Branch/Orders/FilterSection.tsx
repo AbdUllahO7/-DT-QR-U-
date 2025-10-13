@@ -6,8 +6,8 @@ import { FilterOptions, OrderStatusEnums } from '../../../../types/Orders/type';
 interface FilterSectionProps {
   filters: FilterOptions;
   showAdvancedFilters: boolean;
-  hasActiveFilters: boolean;
-  viewMode: 'pending' | 'branch';
+  hasActiveFilters: string | boolean;
+  viewMode: 'pending' | 'branch'  | 'deletedOrders';
   lang: string;
   filteredCount: number;
   totalCount: number;

@@ -21,8 +21,6 @@ import { branchProductAddonsService } from '../../../../services/Branch/BranchAd
 import BranchProductAddonsModal from './BranchProductAddonsModal';
 import { BranchCategory, Category, DetailedProduct, EditedCategoryName, EditedProductPrice, ProductAddonData } from '../../../../types/BranchManagement/type';
 
-
-
 interface BranchCategoriesProps {
   branchId?: number;
 }
@@ -478,9 +476,9 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
         if (product && product.branchProductId) {
           branchProductId = product.branchProductId;
           categoryIndex = i;
-          isActive = product.status; // Assuming `status` represents `isActive`
-          displayOrder = product.displayOrder; // Assuming `displayOrder` is available in product
-          branchCategoryId = branchCategories[i].branchCategoryId; // Get from branch category
+          isActive = product.status; 
+          displayOrder = product.displayOrder; 
+          branchCategoryId = branchCategories[i].branchCategoryId; 
           break;
         }
       }
@@ -628,13 +626,13 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
               return matches;
             });
 
-            // ✅ FIXED: Transform selected branch products with proper ID mapping
+            // Transform selected branch products with proper ID mapping
             const transformedSelectedProducts: DetailedProduct[] = await Promise.all(
               selectedProducts.map(async (branchProduct) => {
-                // ✅ FIXED: Determine the correct product ID
+                //  Determine the correct product ID
                 const productId = branchProduct.originalProductId;
 
-                // ✅ Safety check - if we still don't have an ID, log error
+                //  Safety check - if we still don't have an ID, log error
                 if (!productId) {
                   console.error('❌ Cannot determine product ID for branch product:', branchProduct);
                 }
@@ -654,12 +652,12 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
                 }
 
                 const transformed: DetailedProduct = {
-                  // ✅ FIXED: Use the correct field for product ID
+                  //  Use the correct field for product ID
                   id: productId,
                   
                   branchProductId: branchProduct.branchProductId, 
                   
-                  // ✅ FIXED: Store original product ID correctly
+                  //  Store original product ID correctly
                   originalProductId: productId,
                   
                   name: branchProduct.name,
@@ -697,7 +695,7 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
                         ingredientId: i.ingredientId ?? 0,
                         name: i.ingredientName ?? '',
                         ingredientName: i.ingredientName ?? '',
-                        productId: i.productId ?? productId, // ✅ Use the determined productId
+                        productId: i.productId ?? productId, 
                         quantity: i.quantity ?? 0,
                         unit: i.unit ?? '',
                         isAllergenic: i.isAllergenic ?? false,
@@ -755,7 +753,7 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
             }));
 
             // Filter out products that are already selected (to get UNSELECTED products)
-            const selectedProductIds = new Set(transformedSelectedProducts.map(p => p.id).filter(Boolean)); // ✅ Filter out undefined IDs
+            const selectedProductIds = new Set(transformedSelectedProducts.map(p => p.id).filter(Boolean)); 
             const unselectedProducts = transformedAvailableProducts.filter(product => {
               return !selectedProductIds.has(product.id);
             });
@@ -778,7 +776,7 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
             return {
               ...branchCategory,
               products: allProducts,
-              selectedProductsCount: transformedSelectedProducts.filter(p => p.id).length, // ✅ Only count products with valid IDs
+              selectedProductsCount: transformedSelectedProducts.filter(p => p.id).length, 
               unselectedProductsCount: unselectedProducts.length
             };
           } catch (err) {

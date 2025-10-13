@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface ViewModeToggleProps {
-  viewMode: 'pending' | 'branch';
+  viewMode: 'pending' | 'branch' | 'deletedOrders';
   pendingCount: number;
   branchCount: number;
   onModeChange: (mode: 'pending' | 'branch') => void;
