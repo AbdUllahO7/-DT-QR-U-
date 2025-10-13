@@ -7,18 +7,19 @@ import { useClickOutside } from '../../../../hooks';
 import { useOrdersManager } from '../../../../hooks/useOrdersManager';
 import { useFiltering } from '../../../../hooks/useFiltering';
 import { usePagination } from '../../../../hooks/usePagination';
-import OrdersHeader from './OrdersHeader';
-import ViewModeToggle from './ViewModeToggle';
-import FilterSection from './FilterSection';
-import PaginationControls from './PaginationControls';
-import ErrorNotification from './ErrorNotification';
-import ConfirmModal from './ConfirmModal';
-import RejectModal from './RejectModal';
-import StatusModal from './StatusModal';
-import OrderDetailsModal from './OrderDetailsModal';
-import SuccessNotification from './SuccessNotification';
-import OrdersTable from './OrdersTable';
-import CancelModal from './CancelModal';
+
+import OrderDetailsModal from '../../Branch/Orders/OrderDetailsModal';
+import ErrorNotification from '../../Branch/Orders/ErrorNotification';
+import OrdersTable from '../../Branch/Orders/OrdersTable';
+import ConfirmModal from '../../Branch/Orders/ConfirmModal';
+import RejectModal from '../../Branch/Orders/RejectModal';
+import StatusModal from '../../Branch/Orders/StatusModal';
+import CancelModal from '../../Branch/Orders/CancelModal';
+import OrdersHeader from '../../Branch/Orders/OrdersHeader';
+import ViewModeToggle from '../../Branch/Orders/ViewModeToggle';
+import FilterSection from '../../Branch/Orders/FilterSection';
+import PaginationControls from '../../Branch/Orders/PaginationControls';
+import SuccessNotification from '../../Branch/Orders/SuccessNotification';
 
 const OrdersManagerRestaurant: React.FC = () => {
   const { t, language, isRTL } = useLanguage();

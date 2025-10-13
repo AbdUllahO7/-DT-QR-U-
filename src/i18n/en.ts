@@ -987,6 +987,7 @@ export const en = {
       settings: 'Settings'
     }
   },
+
   products: {
     status: {
       outOfStock: 'Out of Stock',
@@ -1003,6 +1004,7 @@ export const en = {
       deleteProduct: 'Delete Product'
     }
   },
+
   branchSelector: {
   status: {
     loading: 'Loading...',
@@ -1017,6 +1019,7 @@ export const en = {
     branches: 'Branches'
   }
   },
+
   popularProducts: {
     title: 'Popular Products',
     empty: 'Product sales will appear here',
@@ -1029,6 +1032,7 @@ export const en = {
       noData: 'No data available'
     }
   },
+
   weeklyActivity: {
     title: 'Haftalık Aktivite',
     empty: {
@@ -1044,6 +1048,7 @@ export const en = {
       qrScans: 'QR Scan'
     }
   },
+
   monthlyRevenue: {
     QuickStats: "Quick Stats",
     title: 'Monthly Revenue Trend',
@@ -1060,6 +1065,7 @@ export const en = {
       format: (value: { toLocaleString: (arg0: string) => any; }) => `$${value.toLocaleString('en-US')}`
     }
   },
+
   branchCard: {
     status: {
       temporaryClosed: 'Temporarily Closed',
@@ -1081,10 +1087,12 @@ export const en = {
       logo: 'logo'
     }
   },
+
   addBranchCard: {
     title: 'Add New Branch',
     description: 'Click to add a new branch'
   },
+
   branchModal: {
     title: {
       add: 'Add New Branch',
@@ -1211,6 +1219,7 @@ export const en = {
       saving: 'Saving...'
     }
   },
+
   branchManagement: {
       title: 'Branch Management',
       description: 'Manage restaurant branches and update their information',
@@ -1371,6 +1380,7 @@ export const en = {
     required: 'Required',
     optional: 'Optional'
   },
+
   productsContent: {
         branch : {
     selectAll:"All",
@@ -1534,6 +1544,7 @@ export const en = {
     manageAddons: 'Manage product add-ons'
   }
   },
+
   createCategoryModal: {
   // Header
   title: 'Add New Category',
@@ -1593,6 +1604,7 @@ export const en = {
     optionalField: 'Optional field'
   }
   },
+
   createProductModal: {
   // Header
   title: 'Add New Product',
@@ -1705,6 +1717,7 @@ export const en = {
     statusToggle: 'Toggle product status'
   }
   },
+  
   productAddonsModal: {
       // Header
       title: 'Product Addons',
@@ -1885,6 +1898,7 @@ export const en = {
         descriptionInput: 'Category description input'
       }
   },
+
   confirmDeleteModal: {
       // Common titles (can be overridden by props)
       defaultTitle: 'Confirm Deletion',
@@ -1965,6 +1979,7 @@ export const en = {
         errorAlert: 'Error message'
       }
   },
+
   editProductModal: {
       // Header
       title: 'Edit Product',
@@ -2080,6 +2095,7 @@ export const en = {
         imagePreview: 'Product image preview'
       }
   },
+
   productIngredientModal: {
       // Header
       title: 'Product Ingredients',
@@ -2249,6 +2265,7 @@ export const en = {
     cancelButton: 'Cancel ingredient update'
   }
   },
+
   SortableCategory: {
     product: 'product',
     products: 'products', 
@@ -2271,6 +2288,7 @@ export const en = {
       reorderingStatus: 'Category is being reordered'
     }
   },
+
   SortableProduct: {
     outOfStock: 'Out of Stock',
     loadingIngredients: 'Loading ingredients...',
@@ -2305,6 +2323,7 @@ export const en = {
       addonsButton: 'Manage product addons'
     }
   },
+
   IngredientsContent: {
     // Search and filters
     searchPlaceholder: 'Search ingredients...',
@@ -2378,6 +2397,7 @@ export const en = {
       dragToReorder: 'Drag to reorder'
     }
   },
+
   TableCard: {
     active: 'Active',
     inactive: 'Inactive',
@@ -2404,6 +2424,7 @@ export const en = {
       deleteButton: 'Delete table'
     }
   },
+
   QRCodeModal: {
     // Step selection
     tableAddOption: 'Table Adding Option',
@@ -2525,7 +2546,7 @@ export const en = {
       addCard: 'Add new table card'
     }
   },
-  // translations/en/userManagement.ts
+
   userManagementPage: {
     // Page header and navigation
     title: 'User Management',
@@ -2762,6 +2783,7 @@ export const en = {
     },
 
   },
+
   BranchtableManagement: {
     title: "Table Management",
     loading : "Loading...",
@@ -2934,7 +2956,8 @@ export const en = {
       refreshFailed: "Failed to refresh data"
     }
   },
-   branchManagementBranch: {
+
+  branchManagementBranch: {
     title: 'Branch Management',
     description: 'Manage your branch information and settings.',
     loading: 'Loading branch information...',
@@ -3014,6 +3037,7 @@ export const en = {
       region: 'Enter region'
     }
   },
+
   branchCategories: {
     // Header and Stats
     header: 'Branch Categories Management',
@@ -3210,6 +3234,7 @@ export const en = {
       searchProducts: 'Search products...'
     }
   },
+
   profile: {
       title: 'Profile',
       personalInfo: 'Personal Information',
@@ -3304,6 +3329,7 @@ export const en = {
         loadFailed: 'Failed to load profile data'
       }
   },
+
   addonModal: {
       title: 'Configure Addons',
       loading: 'Loading addons...',
@@ -3367,6 +3393,7 @@ export const en = {
         assigned: 'assigned'
       }
   },
+
   menu: {
   title: "Menu",
   loading: "Loading Menu",
@@ -3495,6 +3522,7 @@ export const en = {
 "session_required": "Session ID required"
   }
   },
+
   order: {
     form: {
       title: 'Order Details',
@@ -3535,6 +3563,7 @@ export const en = {
       phoneRequired: 'Phone number is required for this order type'
     }
   },
+
   priceChange: {
     title: 'Price Changes Detected',
     description: 'Some items in your basket have price changes that need to be confirmed before proceeding with the order.',
@@ -3544,7 +3573,8 @@ export const en = {
     confirm: 'Confirm & Continue',
     confirming: 'Confirming...'
   },
-  "productModal": {
+
+  productModal: {
     "customizeOrder": "Customize Your Order",
     "allergenInformation": "Allergen Information",
     "ingredients": "Ingredients",
@@ -3558,6 +3588,7 @@ export const en = {
     "total": "Total",
     "addToCart": "Add to Cart"
   },
+
   errors: {
     loadingBasket: 'Failed to load basket',
     loadingOrderTypes: 'Failed to load order types',
@@ -3574,7 +3605,7 @@ export const en = {
     addonProductNotFound: 'Could not find addon product ID',
     cartItemNotFound: 'Cart item not found'
   },
-  "ordersManager": {
+  ordersManager: {
     total : 'Total',
     subTotal:"Sub Total",
     OrderType : 'Order Type',
@@ -3662,7 +3693,8 @@ export const en = {
     time: "Time",
     Status: "Status",
   },
-  "orderService": {
+
+  orderService: {
     "statuses": {
       "pending": "Pending",
       "confirmed": "Confirmed",
@@ -3706,6 +3738,7 @@ export const en = {
       "unknownOrderType": "Unknown order type"
     }
   },
+
   branchPreferences: {
   "title": "Branch Preferences",
   "description": "Configure branch-specific settings and preferences",
@@ -3822,7 +3855,9 @@ export const en = {
     sendToWhatsApp: 'Send to WhatsApp',
     sending: 'Sending...'
   }
+
   },
+
   recycleBin: {
     title: 'Recycle Bin',
     titleProducts: 'Deleted Products and Categories',
@@ -3910,7 +3945,8 @@ export const en = {
       loadingError: 'Error loading deleted items'
     }
   },
-  "management": {
+
+  management: {
       "title": "Management Information",
       "subtitle": "Company and legal details",
       "noDataTitle": "No Management Information",
@@ -3973,8 +4009,8 @@ export const en = {
       "common": {
         "na": "N/A"
       }
-    },
-  "branches": {
+  },
+  branches: {
   "status": {
     "active": "Active",
     "inactive": "Inactive"
@@ -3984,7 +4020,8 @@ export const en = {
     "branchTag": "Branch Tag"
   }
   },
-  "restaurantsTab": {
+  
+  restaurantsTab: {
     "status": {
       "active": "Active",
       "inactive": "Inactive"
@@ -4018,10 +4055,70 @@ export const en = {
       }
     }
   },
-  "tabs": {
+
+  tabs: {
     "restaurants": "Restaurants",
     "branches": "Branches",
     "management": "Management Info",
     "deleted": "Deleted"
+  },
+
+  allergens: {
+    "GLUTEN": {
+      "name": "Gluten",
+      "description": "Wheat, rye, barley, oats"
+    },
+    "CRUSTACEANS": {
+      "name": "Crustaceans",
+      "description": "Prawns, crabs, lobster"
+    },
+    "EGGS": {
+      "name": "Eggs",
+      "description": "Eggs and egg products"
+    },
+    "FISH": {
+      "name": "Fish",
+      "description": "All fish products"
+    },
+    "PEANUTS": {
+      "name": "Peanuts",
+      "description": "Peanuts and peanut products"
+    },
+    "SOYBEANS": {
+      "name": "Soybeans",
+      "description": "Soya and soya products"
+    },
+    "MILK": {
+      "name": "Milk",
+      "description": "Milk and dairy products"
+    },
+    "NUTS": {
+      "name": "Tree Nuts",
+      "description": "Almonds, hazelnuts, walnuts, cashews, etc."
+    },
+    "CELERY": {
+      "name": "Celery",
+      "description": "Celery and celeriac"
+    },
+    "MUSTARD": {
+      "name": "Mustard",
+      "description": "Mustard and mustard products"
+    },
+    "SESAME": {
+      "name": "Sesame",
+      "description": "Sesame seeds and products"
+    },
+    "SULPHITES": {
+      "name": "Sulphites",
+      "description": "Sulphur dioxide and sulphites (>10mg/kg)"
+    },
+    "LUPIN": {
+      "name": "Lupin",
+      "description": "Lupin and lupin products"
+    },
+    "MOLLUSCS": {
+      "name": "Molluscs",
+      "description": "Clams, mussels, oysters, snails, squid"
+    }
   }
 }; 

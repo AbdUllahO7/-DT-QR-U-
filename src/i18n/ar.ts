@@ -961,8 +961,6 @@ export const ar = {
     }
   },
 
- 
-
   // Subscription
   subscription: {
     title: 'الاشتراك',
@@ -1007,6 +1005,7 @@ export const ar = {
       deleteProduct: 'حذف المنتج'
     }
   },
+
   branchSelector: {
   status: {
     loading: 'جاري التحميل...',
@@ -1021,6 +1020,7 @@ export const ar = {
     branches: 'الفروع'
   }
   },
+
   popularProducts: {
     title: 'المنتجات الأكثر شيوعاً',
     empty: 'ستظهر مبيعات المنتجات هنا',
@@ -1033,6 +1033,7 @@ export const ar = {
       noData: 'لا توجد بيانات متاحة'
     }
   },
+
   weeklyActivity: {
     title: 'النشاط الأسبوعي',
     empty: {
@@ -1048,6 +1049,7 @@ export const ar = {
       qrScans: 'مسح رمز QR'
     }
   },
+
   monthlyRevenue: {
       QuickStats : "إحصائيات سريعة",
     title: 'اتجاه الإيرادات الشهرية',
@@ -1065,6 +1067,7 @@ export const ar = {
       format: (value: { toLocaleString: (arg0: string) => any; }) => `${value.toLocaleString('ar-SA')} ₺`
     }
   },
+
   branchCard: {
     status: {
       temporaryClosed: 'مغلق مؤقتاً',
@@ -1086,10 +1089,12 @@ export const ar = {
       logo: 'الشعار'
     }
   },
+
   addBranchCard: {
     title: 'إضافة فرع جديد',
     description: 'انقر لإضافة فرع جديد'
   },
+
   branchModal: {
     title: {
       add: 'إضافة فرع جديد',
@@ -1360,6 +1365,7 @@ export const ar = {
       }
     }
   },
+
   commonBranch: {
     cancel: 'إلغاء',
     delete: 'حذف',
@@ -1376,6 +1382,7 @@ export const ar = {
     required: 'مطلوب',
     optional: 'اختياري'
   },
+
   productsContent: {
     branch : {
     selectAll:"الكل",
@@ -1539,6 +1546,7 @@ export const ar = {
     manageAddons: 'إدارة إضافات المنتج'
   }
   },
+
   createCategoryModal: {
     // Header
     title: 'إضافة فئة جديدة',
@@ -1598,6 +1606,7 @@ export const ar = {
       optionalField: 'حقل اختياري'
     }
   },
+
   createProductModal: {
   // Header
   title: 'إضافة منتج جديد',
@@ -1710,6 +1719,7 @@ export const ar = {
     statusToggle: 'تبديل حالة المنتج'
   }
   },
+
   productAddonsModal: {
     // Header
     title: 'إضافات المنتج',
@@ -1815,6 +1825,7 @@ export const ar = {
       toggleRecommended: 'تبديل حالة التوصية'
     }
   },
+
   editCategoryModal: {
     // Header
     title: 'تحرير الفئة',
@@ -1890,6 +1901,7 @@ export const ar = {
       descriptionInput: 'إدخال وصف الفئة'
     }
   },
+
   confirmDeleteModal: {
     // Common titles (can be overridden by props)
     defaultTitle: 'تأكيد الحذف',
@@ -1970,6 +1982,7 @@ export const ar = {
       errorAlert: 'رسالة خطأ'
     }
   },
+
   editProductModal: {
       // Header
       title: 'تحرير المنتج',
@@ -2085,6 +2098,7 @@ export const ar = {
         imagePreview: 'معاينة صورة المنتج'
       }
   },
+
   productIngredientModal: {
       // Header
       title: 'مكونات المنتج',
@@ -2223,6 +2237,7 @@ export const ar = {
         availabilityStatus: 'حالة التوفر'
       }
   },
+
   ProductIngredientUpdateModal: {
   title: 'تحديث المكونات',
   searchPlaceholder: 'البحث عن المكونات...',
@@ -2253,6 +2268,7 @@ export const ar = {
     cancelButton: 'إلغاء تحديث المكونات'
   }
   },
+
   SortableCategory: {
     product: 'منتج',
     products: 'منتجات',
@@ -2275,6 +2291,7 @@ export const ar = {
       reorderingStatus: 'جاري إعادة ترتيب التصنيف'
     }
   },
+
   SortableProduct: {
     outOfStock: 'نفد المخزون',
     loadingIngredients: 'جاري تحميل المكونات...',
@@ -2309,6 +2326,7 @@ export const ar = {
       addonsButton: 'إدارة إضافات المنتج'
     }
   },
+
   IngredientsContent: {
     // Search and filters
     searchPlaceholder: 'البحث عن المكونات...',
@@ -2382,6 +2400,7 @@ export const ar = {
       dragToReorder: 'اسحب لإعادة الترتيب'
     }
   },
+
   TableCard: {
     active: 'نشط',
     inactive: 'غير نشط',
@@ -2408,6 +2427,7 @@ export const ar = {
       deleteButton: 'حذف الطاولة'
     }
   },
+
   QRCodeModal: {
     // Step selection
     tableAddOption: 'خيار إضافة الطاولة',
@@ -2475,6 +2495,7 @@ export const ar = {
       closeButton: 'إغلاق النافذة'
     }
   },
+
   TableCategoryModal: {
     title: 'إضافة فئة طاولة',
     subtitle: 'إنشاء فئة طاولة جديدة',
@@ -2519,6 +2540,7 @@ export const ar = {
       form: 'نموذج إنشاء الفئة'
     }
   },
+
   AddQRCodeCard: {
     title: 'إضافة طاولة جديدة',
     subtitle: 'انقر لإضافة طاولة جديدة',
@@ -2527,6 +2549,7 @@ export const ar = {
       addCard: 'بطاقة إضافة طاولة جديدة'
     }
   },
+
   userManagementPage: {
     // Page header and navigation
     title: 'إدارة المستخدمين',
@@ -2762,6 +2785,7 @@ export const ar = {
       roleUpdated: 'تم تحديث الدور بنجاح'
     },
   },
+
   BranchtableManagement: {
 
   title: "إدارة الطاولات",
@@ -2932,6 +2956,7 @@ export const ar = {
         refreshFailed: "فشل في تحديث البيانات"
       }
   },
+
   branchManagementBranch: {
     title: 'إدارة الفروع',
     description: 'إدارة معلومات وإعدادات فرعك.',
@@ -3012,7 +3037,8 @@ export const ar = {
       region: 'أدخل المنطقة'
     }
   },
-   branchCategories: {
+
+  branchCategories: {
     // Header and Stats
     header: 'إدارة فئات الفرع',
     subheader: 'إدارة الفئات والمنتجات للفرع {branchId}',
@@ -3303,6 +3329,7 @@ export const ar = {
         loadFailed: 'فشل في تحميل بيانات الملف الشخصي'
       }
   },
+
   addonModal: {
     title: 'إعداد الإضافات',
     loading: 'جاري تحميل الإضافات...',
@@ -3365,6 +3392,7 @@ export const ar = {
       assigned: 'مُعيَّنة'
     }
   },
+
   menu: {
       title: "القائمة",
       loading: "تحميل القائمة",
@@ -3494,6 +3522,7 @@ export const ar = {
   "session_required": "معرف الجلسة مطلوب"
     }
   },
+
   order: {
     form: {
       title: 'تفاصيل الطلب',
@@ -3534,6 +3563,7 @@ export const ar = {
       phoneRequired: 'رقم الهاتف مطلوب لهذا النوع من الطلبات'
     }
   },
+
   priceChange: {
     title: 'تم اكتشاف تغييرات في الأسعار',
     description: 'بعض العناصر في سلتك تحتوي على تغييرات في الأسعار تحتاج إلى تأكيد قبل المتابعة مع الطلب.',
@@ -3543,7 +3573,8 @@ export const ar = {
     confirm: 'تأكيد والمتابعة',
     confirming: 'جاري التأكيد...'
   },
-  "productModal": {
+
+  productModal: {
     "customizeOrder": "تخصيص طلبك",
     "allergenInformation": "معلومات الحساسية",
     "ingredients": "المكونات",
@@ -3557,6 +3588,7 @@ export const ar = {
     "total": "المجموع",
     "addToCart": "إضافة إلى السلة"
   },
+
   errors: {
     loadingBasket: 'فشل تحميل السلة',
     loadingOrderTypes: 'فشل تحميل أنواع الطلبات',
@@ -3573,7 +3605,8 @@ export const ar = {
     addonProductNotFound: 'لم يتم العثور على معرف منتج الإضافة',
     cartItemNotFound: 'لم يتم العثور على عنصر السلة'
   },
-  "ordersManager": {
+
+  ordersManager: {
     total : 'المجموع',
     OrderType : 'نوع الطلب',
     subTotal: "المجموع الفرعي",
@@ -3660,6 +3693,7 @@ export const ar = {
     CompletedAt: "تاريخ الاكتمال",
     time: "الوقت",
   },
+
   orderService: {
     "statuses": {
       "pending": "معلق",
@@ -3704,7 +3738,8 @@ export const ar = {
       "unknownOrderType": "نوع طلب غير معروف"
     }
   },
-   branchPreferences: {
+
+  branchPreferences: {
     "title": "إعدادات الفرع",
     "description": "تكوين الإعدادات والتفضيلات الخاصة بالفرع",
     "loading": "جاري تحميل إعدادات الفرع...",
@@ -3802,6 +3837,7 @@ export const ar = {
       "invalidSessionSettings": "إعدادات جلسة غير صالحة. يرجى التحقق من القيم."
     }
   },
+
   whatsapp: {
   confirmation: {
     title: 'إرسال إلى واتساب؟',
@@ -3819,7 +3855,8 @@ export const ar = {
     sendToWhatsApp: 'إرسال إلى واتساب',
     sending: 'جاري الإرسال...'
   }
-},
+  },
+
   recycleBin: {
     title: 'سلة المحذوفات',
     titleProducts: 'المنتجات والفئات المحذوفة',
@@ -3908,7 +3945,8 @@ export const ar = {
       loadingError: 'خطأ في تحميل العناصر المحذوفة'
     }
   },
-   "management": {
+
+  management: {
     "title": "معلومات الإدارة",
     "subtitle": "تفاصيل الشركة والقانونية",
     "noDataTitle": "لا توجد معلومات إدارية",
@@ -3972,7 +4010,8 @@ export const ar = {
       "na": "غير متوفر"
     }
   },
-  "branches": {
+
+  branches: {
   "status": {
     "active": "نشط",
     "inactive": "غير نشط"
@@ -3981,46 +4020,106 @@ export const ar = {
     "branchType": "نوع الفرع",
     "branchTag": "علامة الفرع"
   }
-},
+  },
 
-"restaurantsTab": {
-  "status": {
-    "active": "نشط",
-    "inactive": "غير نشط"
-  },
-  "actions": {
-    "edit": "تعديل المطعم",
-    "delete": "حذف المطعم"
-  },
-  "stats": {
-    "totalBranches": "إجمالي الفروع",
-    "active": "نشط",
-    "inactive": "غير نشط",
-    "alcohol": "كحول"
-  },
-  "common": {
-    "yes": "نعم",
-    "no": "لا"
-  },
-  "modal": {
-    "editTitle": "تعديل المطعم",
-    "placeholders": {
-      "restaurantName": "اسم المطعم",
-      "cuisineType": "نوع المطبخ"
+  restaurantsTab: {
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
     },
-    "labels": {
-      "hasAlcoholService": "يقدم خدمة الكحول"
+    "actions": {
+      "edit": "تعديل المطعم",
+      "delete": "حذف المطعم"
     },
-    "buttons": {
-      "update": "تحديث المطعم",
-      "updating": "جاري التحديث..."
+    "stats": {
+      "totalBranches": "إجمالي الفروع",
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "alcohol": "كحول"
+    },
+    "common": {
+      "yes": "نعم",
+      "no": "لا"
+    },
+    "modal": {
+      "editTitle": "تعديل المطعم",
+      "placeholders": {
+        "restaurantName": "اسم المطعم",
+        "cuisineType": "نوع المطبخ"
+      },
+      "labels": {
+        "hasAlcoholService": "يقدم خدمة الكحول"
+      },
+      "buttons": {
+        "update": "تحديث المطعم",
+        "updating": "جاري التحديث..."
+      }
+    }
+  },
+
+  tabs: {
+    "restaurants": "المطاعم",
+    "branches": "الفروع",
+    "management": "معلومات الإدارة",
+    "deleted": "المحذوفة"
+  },
+  
+  allergens: {
+    "GLUTEN": {
+      "name": "الغلوتين",
+      "description": "القمح، الجاودار، الشعير، الشوفان"
+    },
+    "CRUSTACEANS": {
+      "name": "القشريات",
+      "description": "الجمبري، السلطعون، الكركند"
+    },
+    "EGGS": {
+      "name": "البيض",
+      "description": "البيض ومنتجات البيض"
+    },
+    "FISH": {
+      "name": "السمك",
+      "description": "جميع منتجات الأسماك"
+    },
+    "PEANUTS": {
+      "name": "الفول السوداني",
+      "description": "الفول السوداني ومنتجاته"
+    },
+    "SOYBEANS": {
+      "name": "فول الصويا",
+      "description": "الصويا ومنتجات الصويا"
+    },
+    "MILK": {
+      "name": "الحليب",
+      "description": "الحليب ومنتجات الألبان"
+    },
+    "NUTS": {
+      "name": "المكسرات",
+      "description": "اللوز، البندق، الجوز، الكاجو، إلخ"
+    },
+    "CELERY": {
+      "name": "الكرفس",
+      "description": "الكرفس وجذر الكرفس"
+    },
+    "MUSTARD": {
+      "name": "الخردل",
+      "description": "الخردل ومنتجات الخردل"
+    },
+    "SESAME": {
+      "name": "السمسم",
+      "description": "بذور السمسم ومنتجاته"
+    },
+    "SULPHITES": {
+      "name": "الكبريتات",
+      "description": "ثاني أكسيد الكبريت والكبريتات (>10مغ/كغ)"
+    },
+    "LUPIN": {
+      "name": "الترمس",
+      "description": "الترمس ومنتجات الترمس"
+    },
+    "MOLLUSCS": {
+      "name": "الرخويات",
+      "description": "المحار، بلح البحر، الحلزون، الحبار"
     }
   }
-},
-"tabs": {
-  "restaurants": "المطاعم",
-  "branches": "الفروع",
-  "management": "معلومات الإدارة",
-  "deleted": "المحذوفة"
-}
 }; 
