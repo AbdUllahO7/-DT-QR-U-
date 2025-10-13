@@ -12,7 +12,7 @@ import OrderStatusUtils from '../../../../utils/OrderStatusUtils';
 interface OrderDetailsModalProps {
   show: boolean;
   order: Order | null;
-  viewMode: 'pending' | 'branch';
+  viewMode: 'pending' | 'branch' | 'deletedOrders';
   lang: string;
   onClose: () => void;
   t: (key: string) => string;
@@ -968,7 +968,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }
