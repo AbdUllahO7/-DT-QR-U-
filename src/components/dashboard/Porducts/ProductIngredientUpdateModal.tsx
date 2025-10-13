@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { X, Package, Search, Loader2, AlertCircle, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Package, Search, Loader2, AlertCircle, Check, ChefHat, Save } from 'lucide-react';
 import { productService } from '../../../services/productService';
 import { logger } from '../../../utils/logger';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -12,10 +13,6 @@ interface Ingredient {
   unit: string;
   price?: number;
 }
-
-
-
-
 
 const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> = ({
   isOpen,
@@ -32,7 +29,6 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Predefined units for selection - using translation keys like in the creation modal
   const getUnitOptions = () => [
     { value: 'g', label: t('productIngredientModal.units.grams') },
     { value: 'ml', label: t('productIngredientModal.units.milliliters') },
@@ -55,7 +51,6 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
     setError(null);
     
     try {
-      // Load all available ingredients and current product ingredients in parallel
       const [allIngredientsResponse, productIngredientsResponse] = await Promise.all([
         fetchAllIngredients(), 
         productService.getProductIngredients(productId) 
@@ -63,7 +58,6 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
 
       setAllIngredients(allIngredientsResponse);
 
-      // Create a map of currently selected ingredients
       const selectedMap = new Map<number, ProductIngredient>();
       productIngredientsResponse.forEach((ingredient: any) => {
         selectedMap.set(ingredient.ingredientId || ingredient.id, {
@@ -88,19 +82,15 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
     }
   };
 
-  // Fetch all available ingredients using your productService
   const fetchAllIngredients = async (): Promise<Ingredient[]> => {
     try {
       const response = await ingredientsService.getIngredients();
-
-      // Transform API response to match Ingredient interface
       return response.map((item: any) => ({
         id: item.ingredientId || item.id,
         name: item.ingredientName || item.name || 'Unknown Ingredient',
         unit: item.unit || 'piece',
         price: item.price || 0
       }));
-
     } catch (error) {
       logger.error('Tüm malzemeler alınamadı:', error);
       throw error;
@@ -111,10 +101,8 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
     const newSelected = new Map(selectedIngredients);
     
     if (newSelected.has(ingredient.id)) {
-      // Remove ingredient
       newSelected.delete(ingredient.id);
     } else {
-      // Add ingredient with default quantity and unit
       newSelected.set(ingredient.id, {
         ingredientId: ingredient.id,
         quantity: 1,
@@ -130,10 +118,7 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
     const existing = newSelected.get(ingredientId);
     
     if (existing && quantity > 0) {
-      newSelected.set(ingredientId, {
-        ...existing,
-        quantity: quantity
-      });
+      newSelected.set(ingredientId, { ...existing, quantity: quantity });
       setSelectedIngredients(newSelected);
     }
   };
@@ -143,10 +128,7 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
     const existing = newSelected.get(ingredientId);
     
     if (existing) {
-      newSelected.set(ingredientId, {
-        ...existing,
-        unit: unit
-      });
+      newSelected.set(ingredientId, { ...existing, unit: unit });
       setSelectedIngredients(newSelected);
     }
   };
@@ -155,7 +137,6 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
     setSaving(true);
     setError(null);
 
-    // Validate inputs for selected ingredients
     for (const [id, ingredient] of selectedIngredients.entries()) {
       if (ingredient.quantity <= 0) {
         setError(t('productIngredientModal.errors.quantityRequired'));
@@ -170,37 +151,29 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
     }
 
     try {
-      // Get current product ingredients to compare
       const currentIngredients = await productService.getProductIngredients(productId);
       const currentIds = new Set(currentIngredients.map((ing: any) => ing.ingredientId || ing.id));
       const selectedIds = new Set(selectedIngredients.keys());
 
-      // Find ingredients to remove
       const toRemove = Array.from(currentIds).filter(id => !selectedIds.has(id));
-      
-      // Find ingredients to add
       const toAdd = Array.from(selectedIngredients.entries())
         .filter(([id]) => !currentIds.has(id))
         .map(([id, ingredient]) => ingredient);
 
-      // Remove ingredients that are no longer selected
       for (const ingredientId of toRemove) {
         await productService.removeIngredientFromProduct(productId, ingredientId);
       }
 
-      // Add new ingredients
       if (toAdd.length > 0) {
         await productService.addIngredientsToProduct(productId, toAdd);
       }
 
-      // Update ingredients that have changed quantity or unit
       const toUpdate = Array.from(selectedIngredients.entries())
         .filter(([id]) => currentIds.has(id));
 
       for (const [id, ingredient] of toUpdate) {
         const current = currentIngredients.find((ing: any) => (ing.ingredientId || ing.id) === id);
         if (current && (current.quantity !== ingredient.quantity || current.unit !== ingredient.unit)) {
-          // Remove and re-add with new values (since API doesn't have direct update)
           await productService.removeIngredientFromProduct(productId, id);
           await productService.addIngredientsToProduct(productId, [ingredient]);
         }
@@ -227,221 +200,286 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
     ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className={`bg-white dark:bg-gray-800 rounded-lg w-full max-w-4xl mx-4 max-h-[90vh] overflow-hidden flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
-        {/* Header */}
-        <div className={`flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {t('ProductIngredientUpdateModal.title')}
-            </h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {productName} (ID: {productId})
-            </p>
-          </div>
-          <button
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto" dir={isRTL ? 'rtl' : 'ltr'}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70 backdrop-blur-md"
             onClick={onClose}
-            aria-label={t('ProductIngredientUpdateModal.accessibility.closeModal')}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-hidden flex flex-col">
-          {/* Search */}
-          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-            <div className="relative">
-              <Search className={`absolute top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 ${isRTL ? 'right-3' : 'left-3'}`} />
-              <input
-                type="text"
-                placeholder={t('ProductIngredientUpdateModal.searchPlaceholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                aria-label={t('ProductIngredientUpdateModal.accessibility.searchInput')}
-                className={`w-full py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'}`}
-                disabled={loading}
-              />
-            </div>
-            
-            <div className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              {selectedIngredients.size} {t('ProductIngredientUpdateModal.selectedCount')}
-            </div>
-          </div>
-
-          {/* Error Message */}
-          {error && (
-            <div className={`mx-6 mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-start gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
-              <p className="text-red-600 dark:text-red-400 text-sm">{error}</p>
-            </div>
-          )}
-
-          {/* Loading State */}
-          {loading ? (
-            <div className="flex-1 flex items-center justify-center">
-              <div className="text-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary-600 mx-auto mb-2" />
-                <p className="text-gray-600 dark:text-gray-400">
-                  {t('ProductIngredientUpdateModal.loadingIngredients')}
-                </p>
-              </div>
-            </div>
-          ) : (
-            /* Ingredients List */
-            <div className="flex-1 overflow-y-auto p-6">
-              {filteredIngredients.length === 0 ? (
-                <div className="text-center py-8">
-                  <Package className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {searchQuery ? t('ProductIngredientUpdateModal.noIngredientsFoundSearch') : t('ProductIngredientUpdateModal.noIngredientsFound')}
-                  </p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {filteredIngredients.map((ingredient) => {
-                    const isSelected = selectedIngredients.has(ingredient.id);
-                    const selectedIngredient = selectedIngredients.get(ingredient.id);
-                    
-                    return (
-                      <div
-                        key={ingredient.id}
-                        className={`relative border rounded-lg p-4 transition-all duration-200 cursor-pointer ${
-                          isSelected
-                            ? 'border-primary-300 dark:border-primary-600 bg-primary-50 dark:bg-primary-900/20'
-                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                        }`}
-                        onClick={() => handleIngredientToggle(ingredient)}
-                        role="button"
-                        tabIndex={0}
-                        aria-label={t('ProductIngredientUpdateModal.accessibility.ingredientCard')}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            handleIngredientToggle(ingredient);
-                          }
-                        }}
-                      >
-                        {/* Selection Indicator */}
-                        <div className={`absolute top-3 w-5 h-5 rounded-full flex items-center justify-center ${
-                          isSelected
-                            ? 'bg-primary-600 text-white'
-                            : 'border-2 border-gray-300 dark:border-gray-600'
-                        } ${isRTL ? 'left-3' : 'right-3'}`}>
-                          {isSelected && <Check className="w-3 h-3" />}
-                          <span className="sr-only">
-                            {isSelected ? t('ProductIngredientUpdateModal.accessibility.selectedIndicator') : t('ProductIngredientUpdateModal.accessibility.unselectedIndicator')}
-                          </span>
-                        </div>
-                        
-                        {/* Ingredient Info */}
-                        <div className={isRTL ? 'pl-8' : 'pr-8'}>
-                          <h4 className="font-medium text-gray-900 dark:text-white mb-1">
-                            {ingredient.name}
-                          </h4>
-                          <div className={`flex items-center gap-4 text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
-                            <span>{t('ProductIngredientUpdateModal.unit')} {ingredient.unit}</span>
-                            {ingredient.price && (
-                              <span>{t('ProductIngredientUpdateModal.price')} {ingredient.price.toFixed(2)} ₺</span>
-                            )}
-                          </div>
-                          
-                          {/* Quantity and Unit Inputs */}
-                          {isSelected && (
-                            <div className="mt-3 grid grid-cols-2 gap-2" onClick={(e) => e.stopPropagation()}>
-                              {/* Quantity Input */}
-                              <div>
-                                <label 
-                                  htmlFor={`quantity-${ingredient.id}`}
-                                  className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                  {t('productIngredientModal.form.quantity.label')}
-                                </label>
-                                <input
-                                  id={`quantity-${ingredient.id}`}
-                                  type="number"
-                                  min="0"
-                                  step="0.1"
-                                  value={selectedIngredient?.quantity || 1}
-                                  onChange={(e) => handleQuantityChange(ingredient.id, parseFloat(e.target.value) || 0)}
-                                  aria-label={t('productIngredientModal.accessibility.quantityInput')}
-                                  className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                  placeholder={t('productIngredientModal.form.quantity.placeholder')}
-                                />
-                              </div>
-                              
-                              {/* Unit Input */}
-                              <div>
-                                <label 
-                                  htmlFor={`unit-${ingredient.id}`}
-                                  className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1"
-                                >
-                                  {t('productIngredientModal.form.unit.label')}
-                                </label>
-                                <select
-                                  id={`unit-${ingredient.id}`}
-                                  value={selectedIngredient?.unit || 'piece'}
-                                  onChange={(e) => handleUnitChange(ingredient.id, e.target.value)}
-                                  aria-label={t('productIngredientModal.accessibility.unitSelect')}
-                                  className="w-full px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                >
-                                  {getUnitOptions().map(option => (
-                                    <option key={option.value} value={option.value}>
-                                      {option.label}
-                                    </option>
-                                  ))}
-                                </select>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className={`flex justify-between items-center p-6 border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            {selectedIngredients.size} {t('ProductIngredientUpdateModal.selectedCount')}
-          </div>
+          />
           
-          <div className={`flex gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <button
-              onClick={onClose}
-              disabled={saving}
-              aria-label={t('ProductIngredientUpdateModal.accessibility.cancelButton')}
-              className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200 disabled:opacity-50"
+          <div className="flex min-h-screen items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 40 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 40 }}
+              transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+              className="relative w-full max-w-6xl"
             >
-              {t('ProductIngredientUpdateModal.cancel')}
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving || loading}
-              aria-label={t('ProductIngredientUpdateModal.accessibility.saveButton')}
-              className="px-6 py-2 text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {saving ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  {t('ProductIngredientUpdateModal.saving')}
-                </>
-              ) : (
-                t('ProductIngredientUpdateModal.save')
-              )}
-            </button>
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500/20 via-amber-500/20 to-yellow-500/20 blur-3xl rounded-3xl"></div>
+              
+              <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden max-h-[90vh] flex flex-col">
+                {/* Header */}
+                <div className="relative overflow-hidden flex-shrink-0">
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-amber-600 to-yellow-600"></div>
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+                  </div>
+                  
+                  <div className="relative px-8 py-6">
+                    <button
+                      onClick={onClose}
+                      className={`absolute top-6 ${isRTL ? 'left-6' : 'right-6'} p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110 text-white z-10`}
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  
+                    <div className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <motion.div 
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", delay: 0.2, duration: 0.6 }}
+                        className="relative"
+                      >
+                        <div className="absolute inset-0 bg-white/30 blur-xl rounded-2xl"></div>
+                        <div className="relative p-4 bg-white/20 backdrop-blur-xl rounded-2xl border border-white/30 shadow-lg">
+                          <ChefHat className="w-8 h-8 text-white" />
+                        </div>
+                      </motion.div>
+                      
+                      <div className="flex-1 pt-1">
+                        <motion.h3 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 }}
+                          className="text-2xl font-bold text-white mb-2"
+                        >
+                          {t('ProductIngredientUpdateModal.title')}
+                        </motion.h3>
+                        <motion.p 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.15 }}
+                          className="text-white/80 text-sm leading-relaxed"
+                        >
+                          {productName} (ID: {productId})
+                        </motion.p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-8 space-y-6">
+                  {/* Error */}
+                  <AnimatePresence>
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                        className="relative overflow-hidden rounded-2xl"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-red-600/10"></div>
+                        <div className="relative p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl">
+                          <div className={`flex items-start gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <div className="p-1.5 bg-red-100 dark:bg-red-800/30 rounded-lg">
+                              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                            </div>
+                            <span className="text-sm text-red-700 dark:text-red-400">{error}</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Search & Summary */}
+                  <div className="space-y-4">
+                    <div className="relative">
+                      <Search className={`absolute top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 ${isRTL ? 'right-4' : 'left-4'}`} />
+                      <input
+                        type="text"
+                        placeholder={t('ProductIngredientUpdateModal.searchPlaceholder')}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className={`w-full py-3 border-2 border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-4 focus:ring-orange-500/20 focus:border-orange-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200 ${isRTL ? 'pr-11 pl-4' : 'pl-11 pr-4'}`}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div className="p-4 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-900/10 dark:to-amber-900/10 rounded-2xl border border-orange-200 dark:border-orange-800">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {t('ProductIngredientUpdateModal.selectedCount')}:
+                        </span>
+                        <span className="px-3 py-1 bg-orange-100 dark:bg-orange-800/50 text-orange-700 dark:text-orange-300 rounded-lg font-bold">
+                          {selectedIngredients.size}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Ingredients Grid */}
+                  {loading ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-orange-600 mb-3" />
+                      <span className="text-gray-600 dark:text-gray-400">
+                        {t('ProductIngredientUpdateModal.loadingIngredients')}
+                      </span>
+                    </div>
+                  ) : filteredIngredients.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+                      <div className="relative mb-4">
+                        <div className="absolute inset-0 bg-orange-500/10 blur-2xl rounded-full"></div>
+                        <Package className="relative w-12 h-12 opacity-50" />
+                      </div>
+                      <p className="text-center font-medium">
+                        {searchQuery 
+                          ? t('ProductIngredientUpdateModal.noIngredientsFoundSearch') 
+                          : t('ProductIngredientUpdateModal.noIngredientsFound')
+                        }
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {filteredIngredients.map((ingredient) => {
+                        const isSelected = selectedIngredients.has(ingredient.id);
+                        const selectedIngredient = selectedIngredients.get(ingredient.id);
+                        
+                        return (
+                          <div
+                            key={ingredient.id}
+                            className={`group relative p-4 rounded-2xl transition-all duration-300 cursor-pointer ${
+                              isSelected
+                                ? 'ring-2 ring-orange-500 bg-orange-50 dark:bg-orange-900/20 shadow-lg'
+                                : 'bg-white dark:bg-gray-700 hover:shadow-md border border-gray-200 dark:border-gray-600'
+                            }`}
+                            onClick={() => handleIngredientToggle(ingredient)}
+                          >
+                            {/* Selection Indicator */}
+                            <div className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                              isSelected
+                                ? 'bg-orange-600 border-orange-600 text-white scale-110'
+                                : 'border-gray-300 dark:border-gray-600 hover:border-orange-400 hover:scale-105'
+                            }`}>
+                              {isSelected && <Check className="w-4 h-4" />}
+                            </div>
+
+                            {/* Ingredient Info */}
+                            <div className={isRTL ? 'pl-8' : 'pr-8'}>
+                              <h4 className="font-semibold text-gray-900 dark:text-white mb-2">
+                                {ingredient.name}
+                              </h4>
+                              
+                              <div className="flex flex-wrap gap-2 mb-3">
+                                <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg font-medium">
+                                  {t('ProductIngredientUpdateModal.unit')} {ingredient.unit}
+                                </span>
+                                {ingredient.price && (
+                                  <span className="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg font-medium">
+                                    {ingredient.price.toFixed(2)} ₺
+                                  </span>
+                                )}
+                              </div>
+
+                              {/* Quantity and Unit */}
+                              {isSelected && (
+                                <div className="pt-3 border-t border-orange-200 dark:border-orange-800 space-y-2" onClick={(e) => e.stopPropagation()}>
+                                  <div className="grid grid-cols-2 gap-2">
+                                    <div>
+                                      <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">
+                                        {t('productIngredientModal.form.quantity.label')}
+                                      </label>
+                                      <input
+                                        type="number"
+                                        min="0"
+                                        step="0.1"
+                                        value={selectedIngredient?.quantity || 1}
+                                        onChange={(e) => handleQuantityChange(ingredient.id, parseFloat(e.target.value) || 0)}
+                                        className="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                                        placeholder="0"
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-xs font-semibold text-gray-600 dark:text-gray-400 block mb-1">
+                                        {t('productIngredientModal.form.unit.label')}
+                                      </label>
+                                      <select
+                                        title='Unit'
+                                        value={selectedIngredient?.unit || 'piece'}
+                                        onChange={(e) => handleUnitChange(ingredient.id, e.target.value)}
+                                        className="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-xl text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all duration-200"
+                                      >
+                                        {getUnitOptions().map(option => (
+                                          <option key={option.value} value={option.value}>
+                                            {option.label}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer */}
+                <div className="flex-shrink-0 px-8 py-6 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <span className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium">
+                        {selectedIngredients.size} {t('ProductIngredientUpdateModal.selectedCount')}
+                      </span>
+                    </div>
+                    
+                    <div className={`flex gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <button
+                        onClick={onClose}
+                        disabled={saving}
+                        className="px-6 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-xl text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50"
+                      >
+                        {t('ProductIngredientUpdateModal.cancel')}
+                      </button>
+                      <button
+                        onClick={handleSave}
+                        disabled={saving || loading}
+                        className="px-6 py-3 bg-gradient-to-r from-orange-600 to-amber-600 text-white rounded-xl font-semibold hover:from-orange-700 hover:to-amber-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-orange-500/50 flex items-center gap-2 relative overflow-hidden group"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                        <span className="relative flex items-center gap-2">
+                          {saving ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              {t('ProductIngredientUpdateModal.saving')}
+                            </>
+                          ) : (
+                            <>
+                              <Save className="w-4 h-4" />
+                              {t('ProductIngredientUpdateModal.save')}
+                            </>
+                          )}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 };
 

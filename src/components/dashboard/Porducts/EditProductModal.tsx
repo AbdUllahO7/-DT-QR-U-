@@ -1,14 +1,12 @@
-// EditProductModal Component - Updated with translations and ingredient selection trigger
-
-import { ImageIcon, Loader2, X } from "lucide-react";
-import { logger } from "../../../utils/logger";
+import { useState, useRef, useEffect } from "react";
+import { useLanguage } from "../../../contexts/LanguageContext";
 import { productService } from "../../../services/productService";
 import { mediaService } from "../../../services/mediaService";
-import { useLanguage } from "../../../contexts/LanguageContext";
-import { useEffect, useRef, useState } from "react";
+import { logger } from "../../../utils/logger";
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Edit3, Upload, Loader2, Tag, FileText, DollarSign, Sparkles, CheckCircle2, AlertCircle, Image } from "lucide-react";
 import { Category, Product } from "../../../types/BranchManagement/type";
 
-// EditProductModal Component - Updated with ingredient selection functionality
 export const EditProductModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -32,9 +30,10 @@ export const EditProductModal: React.FC<{
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [imagePreview, setImagePreview] = useState<string>('');
+  const [dragActive, setDragActive] = useState(false);
+  const [focusedField, setFocusedField] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Initialize image preview on modal open
   useEffect(() => {
     if (isOpen && product.imageUrl && product.imageUrl !== 'string' && product.imageUrl.trim() !== '') {
       setImagePreview(product.imageUrl);
@@ -44,55 +43,59 @@ export const EditProductModal: React.FC<{
   }, [isOpen, product.imageUrl]);
 
   const handleChange = (field: keyof typeof formData, value: string | boolean | number | File | null) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
-    // Clear error when user starts typing
+    setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
+      setErrors(prev => ({ ...prev, [field]: '' }));
     }
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === 'dragenter' || e.type === 'dragover') {
+      setDragActive(true);
+    } else if (e.type === 'dragleave') {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    const files = e.dataTransfer.files;
+    if (files && files[0]) {
+      handleFileSelect(files[0]);
+    }
+  };
+
+  const handleFileSelect = (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      setErrors(prev => ({ ...prev, image: t('editProductModal.errors.imageInvalid') }));
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrors(prev => ({ ...prev, image: t('editProductModal.errors.imageTooLarge') }));
+      return;
+    }
+
+    setFormData(prev => ({ ...prev, imageFile: file }));
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setImagePreview(e.target?.result as string);
+    };
+    reader.readAsDataURL(file);
+
+    setErrors(prev => ({ ...prev, image: '' }));
   };
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setErrors(prev => ({
-          ...prev,
-          image: t('editProductModal.errors.imageInvalid')
-        }));
-        return;
-      }
-
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors(prev => ({
-          ...prev,
-          image: t('editProductModal.errors.imageTooLarge')
-        }));
-        return;
-      }
-
-      setFormData(prev => ({ ...prev, imageFile: file }));
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setImagePreview(e.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-
-      // Clear any previous image errors
-      setErrors(prev => ({
-        ...prev,
-        image: ''
-      }));
+      handleFileSelect(file);
     }
   };
 
@@ -102,17 +105,12 @@ export const EditProductModal: React.FC<{
     try {
       setIsUploadingImage(true);
       logger.info('Görsel yükleniyor', { fileName: formData.imageFile.name });
-      
       const imageUrl = await mediaService.uploadFile(formData.imageFile);
-      
       logger.info('Görsel başarıyla yüklendi', { imageUrl });
       return imageUrl;
     } catch (error: any) {
       logger.error('❌ Görsel yüklenirken hata:', error);
-      setErrors(prev => ({
-        ...prev,
-        image: t('editProductModal.errors.imageUploadFailed')
-      }));
+      setErrors(prev => ({ ...prev, image: t('editProductModal.errors.imageUploadFailed') }));
       return null;
     } finally {
       setIsUploadingImage(false);
@@ -127,19 +125,16 @@ export const EditProductModal: React.FC<{
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setIsSubmitting(true);
     setError(null);
     setErrors({});
 
     try {
-      // Handle image upload if a new file was selected
       let finalImageUrl = formData.imageUrl;
       if (formData.imageFile) {
         const uploadedUrl = await uploadImage();
         if (!uploadedUrl) {
-          // Image upload failed, don't proceed
           return;
         }
         finalImageUrl = uploadedUrl;
@@ -154,32 +149,22 @@ export const EditProductModal: React.FC<{
         imageUrl: finalImageUrl
       };
 
-
       const updatedProduct = await productService.updateProduct(product.id, payload);
-      
-   
       
       logger.info('Ürün başarıyla güncellendi', { 
         productId: product.id,
         updatedProductId: updatedProduct.id 
       });
       
-      // Check if callback exists and call it with debug logging
       if (onOpenIngredientUpdate) {
-  
-        
         onOpenIngredientUpdate(product.id, product.name);
-      } else {
-        console.log('❌ onOpenIngredientUpdate callback not provided');
       }
       
       onSuccess();
       onClose();
     } catch (err: any) {
-      console.error('❌ Error updating product:', err);
       logger.error('Ürün güncelleme hatası:', err);
       
-      // Handle specific API errors
       if (err.response?.data?.errors) {
         setErrors(err.response.data.errors);
       } else if (err.response?.data?.message) {
@@ -189,9 +174,7 @@ export const EditProductModal: React.FC<{
           if (apiMessage.toLowerCase().includes('already exists') || 
               apiMessage.toLowerCase().includes('zaten mevcut') ||
               apiMessage.toLowerCase().includes('duplicate')) {
-            setErrors({
-              name: t('editProductModal.errors.nameAlreadyExists')
-            });
+            setErrors({ name: t('editProductModal.errors.nameAlreadyExists') });
           } else {
             setError(apiMessage || t('editProductModal.errors.updateFailed'));
           }
@@ -214,315 +197,475 @@ export const EditProductModal: React.FC<{
     }
   };
 
-  if (!isOpen) return null;
+  const nameLength = formData.name.length;
+  const descriptionLength = formData.description.length;
+  const maxNameLength = 100;
+  const maxDescLength = 500;
+  const isNameValid = nameLength >= 2 && nameLength <= maxNameLength;
+  const isFormValid = formData.name.trim() && formData.price > 0 && formData.categoryId;
 
   return (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="edit-product-modal-title"
-    >
-      <div 
-        className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto"
-        dir={isRTL ? 'rtl' : 'ltr'}
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h3 
-            id="edit-product-modal-title"
-            className="text-lg font-semibold text-gray-900 dark:text-white"
-          >
-            {t('editProductModal.title')}
-          </h3>
-          <button
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto" dir={isRTL ? 'rtl' : 'ltr'}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70 backdrop-blur-md"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-            aria-label={t('editProductModal.accessibility.closeModal')}
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            {/* General Error */}
-            {error && (
-              <div 
-                className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
-                role="alert"
-                aria-live="polite"
-              >
-                <p className="text-red-600 dark:text-red-400 text-sm font-medium">
-                  {t('editProductModal.errors.errorLabel')}
-                </p>
-                <p className="text-red-600 dark:text-red-400 text-sm mt-1">{error}</p>
-              </div>
-            )}
-
-            {/* Image Upload */}
-            <div>
-              <label 
-                htmlFor="image-upload"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                {t('editProductModal.form.productImage.label')}
-              </label>
-              
-              {imagePreview ? (
-                <div className="relative">
-                  <img
-                    src={imagePreview}
-                    alt={t('editProductModal.imageUpload.preview')}
-                    className="w-full h-48 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
-                  />
-                  <button
-                    type="button"
-                    onClick={removeImage}
-                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors duration-200"
-                    aria-label={t('editProductModal.imageUpload.remove')}
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <div
-                  className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors duration-200 ${
-                    errors.image
-                      ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
-                      : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-                  }`}
-                  onClick={() => fileInputRef.current?.click()}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={t('editProductModal.accessibility.imageUpload')}
-                >
-                  <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
-                  <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                    {t('editProductModal.imageUpload.clickToUpload')}
-                  </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                    {t('editProductModal.imageUpload.supportedFormats')} ({t('editProductModal.imageUpload.maxSize')})
-                  </p>
-                </div>
-              )}
-              
-              <input
-                id="image-upload"
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageSelect}
-                className="hidden"
-                aria-describedby="image-upload-error"
-              />
-              
-              {errors.image && (
-                <p 
-                  id="image-upload-error"
-                  className="mt-1 text-sm text-red-600 dark:text-red-400"
-                  role="alert"
-                >
-                  {errors.image}
-                </p>
-              )}
-            </div>
-
-            {/* Product Name */}
-            <div>
-              <label 
-                htmlFor="edit-name" 
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                {t('editProductModal.form.productName.label')} *
-              </label>
-              <input
-                id="edit-name"
-                type="text"
-                value={formData.name}
-                onChange={(e) => handleChange('name', e.target.value)}
-                placeholder={t('editProductModal.form.productName.placeholder')}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 ${
-                  errors.name
-                    ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-white`}
-                required
-                aria-describedby="name-error"
-              />
-              {errors.name && (
-                <p 
-                  id="name-error"
-                  className="mt-1 text-sm text-red-600 dark:text-red-400"
-                  role="alert"
-                >
-                  {errors.name}
-                </p>
-              )}
-            </div>
-
-            {/* Description */}
-            <div>
-              <label 
-                htmlFor="edit-description" 
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              >
-                {t('editProductModal.form.description.label')}
-              </label>
-              <textarea
-                id="edit-description"
-                value={formData.description}
-                onChange={(e) => handleChange('description', e.target.value)}
-                placeholder={t('editProductModal.form.description.placeholder')}
-                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 resize-none ${
-                  errors.description
-                    ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-white`}
-                rows={3}
-                aria-describedby="description-error"
-              />
-              {errors.description && (
-                <p 
-                  id="description-error"
-                  className="mt-1 text-sm text-red-600 dark:text-red-400"
-                  role="alert"
-                >
-                  {errors.description}
-                </p>
-              )}
-            </div>
-
-            {/* Price and Category Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Price */}
-              <div>
-                <label 
-                  htmlFor="edit-price" 
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                >
-                  {t('editProductModal.form.price.label')} *
-                </label>
-                <input
-                  id="edit-price"
-                  type="number"
-                  step="1"
-                  min="0"
-                  value={formData.price}
-                  onChange={(e) => handleChange('price', parseFloat(e.target.value) || 0)}
-                  placeholder={t('editProductModal.form.price.placeholder')}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 ${
-                    errors.price
-                      ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
-                      : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                  } text-gray-900 dark:text-white`}
-                  required
-                  aria-describedby="price-error"
-                />
-                {errors.price && (
-                  <p 
-                    id="price-error"
-                    className="mt-1 text-sm text-red-600 dark:text-red-400"
-                    role="alert"
-                  >
-                    {errors.price}
-                  </p>
-                )}
-              </div>
-
-              {/* Category */}
-              <div>
-                <label 
-                  htmlFor="edit-categoryId" 
-                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                >
-                  {t('editProductModal.form.category.label')} *
-                </label>
-                <select
-                  id="edit-categoryId"
-                  value={formData.categoryId}
-                  onChange={(e) => handleChange('categoryId', e.target.value)}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors duration-200 ${
-                    errors.categoryId
-                      ? 'border-red-300 dark:border-red-600 bg-red-50 dark:bg-red-900/20'
-                      : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                  } text-gray-900 dark:text-white`}
-                  required
-                  aria-describedby="category-error"
-                >
-                  <option value="">{t('editProductModal.form.category.placeholder')}</option>
-                  {categories.map((cat) => (
-                    <option key={cat.categoryId} value={cat.categoryId}>
-                      {cat.categoryName}
-                    </option>
-                  ))}
-                </select>
-                {errors.categoryId && (
-                  <p 
-                    id="category-error"
-                    className="mt-1 text-sm text-red-600 dark:text-red-400"
-                    role="alert"
-                  >
-                    {errors.categoryId}
-                  </p>
-                )}
-              </div>
-            </div>
-
-            {/* Status */}
-            <div className="flex items-center">
-              <input
-                id="edit-isAvailable"
-                type="checkbox"
-                checked={formData.isAvailable}
-                onChange={(e) => handleChange('isAvailable', e.target.checked)}
-                className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded"
-                aria-describedby="status-description"
-              />
-              <label 
-                htmlFor="edit-isAvailable" 
-                className={`text-sm text-gray-700 dark:text-gray-300 cursor-pointer ${isRTL ? 'mr-2' : 'ml-2'}`}
-              >
-                {t('editProductModal.form.status.label')}
-              </label>
-            </div>
-            <p 
-              id="status-description" 
-              className="text-xs text-gray-500 dark:text-gray-400"
+          />
+          
+          <div className="flex min-h-screen items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 40 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 40 }}
+              transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+              className="relative w-full max-w-2xl"
             >
-              {t('editProductModal.form.status.description')}
-            </p>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-3xl rounded-3xl"></div>
+              
+              <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden max-h-[90vh] flex flex-col">
+                {/* Header */}
+                <div className="relative overflow-hidden flex-shrink-0">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600"></div>
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+                  </div>
+                  
+                  <div className="relative px-8 py-6">
+                    <button
+                      onClick={onClose}
+                      type="button"
+                      className={`absolute top-6 ${isRTL ? 'left-6' : 'right-6'} p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110 text-white z-10`}
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  
+                    <div className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <motion.div 
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", delay: 0.2, duration: 0.6 }}
+                        className="relative"
+                      >
+                        <div className="absolute inset-0 bg-white/30 blur-xl rounded-2xl"></div>
+                        <div className="relative p-4 bg-white/20 backdrop-blur-xl rounded-2xl border border-white/30 shadow-lg">
+                          <Edit3 className="w-8 h-8 text-white" />
+                        </div>
+                      </motion.div>
+                      
+                      <div className="flex-1 pt-1">
+                        <motion.h3 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 }}
+                          className="text-2xl font-bold text-white mb-2"
+                        >
+                          {t('editProductModal.title')}
+                        </motion.h3>
+                        <motion.p 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.15 }}
+                          className="text-white/80 text-sm leading-relaxed"
+                        >
+                          {t('editProductModal.subtitle') || 'Update product information'}
+                        </motion.p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-            {/* Actions */}
-            <div className="flex justify-end gap-3 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={isSubmitting || isUploadingImage}
-                className="px-4 py-2 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors duration-200 disabled:opacity-50"
-              >
-                {t('editProductModal.buttons.cancel')}
-              </button>
-              <button
-                type="submit"
-                disabled={isSubmitting || isUploadingImage}
-                className="px-4 py-2 text-white bg-primary-600 hover:bg-primary-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
-              >
-                {isSubmitting || isUploadingImage ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    {isUploadingImage 
-                      ? t('editProductModal.buttons.uploading') 
-                      : t('editProductModal.buttons.updating')
-                    }
-                  </>
-                ) : (
-                  t('editProductModal.buttons.update')
-                )}
-              </button>
-            </div>
+                {/* Form Content */}
+                <div className="overflow-y-auto flex-1 p-8 space-y-6">
+                  {/* General Error */}
+                  <AnimatePresence>
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                        className="relative overflow-hidden rounded-2xl"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-red-500/10 to-red-600/10"></div>
+                        <div className="relative p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl">
+                          <div className={`flex items-start gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <div className="p-1.5 bg-red-100 dark:bg-red-800/30 rounded-lg">
+                              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-red-800 dark:text-red-300 mb-1">
+                                {t('editProductModal.errors.errorLabel')}
+                              </p>
+                              <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Image Upload */}
+                  <div>
+                    <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <Image className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span>{t('editProductModal.form.productImage.label')}</span>
+                    </label>
+                    
+                    {imagePreview ? (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="relative group"
+                      >
+                        <div className="relative rounded-2xl overflow-hidden">
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-full h-56 object-cover"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                          
+                          <button
+                            type="button"
+                            onClick={removeImage}
+                            className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} p-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-lg transition-all duration-200 transform hover:scale-110 opacity-0 group-hover:opacity-100`}
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <div
+                        className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 ${
+                          dragActive 
+                            ? 'border-blue-400 bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20 scale-105'
+                            : errors.image
+                            ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10'
+                            : 'border-gray-300 dark:border-gray-600 hover:border-blue-400 hover:bg-gradient-to-br hover:from-blue-50/50 hover:to-transparent dark:hover:from-blue-950/20'
+                        }`}
+                        onClick={() => fileInputRef.current?.click()}
+                        onDragEnter={handleDrag}
+                        onDragLeave={handleDrag}
+                        onDragOver={handleDrag}
+                        onDrop={handleDrop}
+                      >
+                        <div className="flex flex-col items-center space-y-4">
+                          <motion.div 
+                            animate={{ 
+                              y: dragActive ? -10 : 0,
+                              scale: dragActive ? 1.1 : 1
+                            }}
+                            className={`p-4 rounded-2xl ${dragActive ? 'bg-blue-600 shadow-lg shadow-blue-500/50' : 'bg-gray-100 dark:bg-gray-700'}`}
+                          >
+                            <Upload className={`h-10 w-10 ${dragActive ? 'text-white' : 'text-gray-400 dark:text-gray-500'}`} />
+                          </motion.div>
+                          <div>
+                            <p className="text-base font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                              {dragActive ? t('editProductModal.imageUpload.dragActive') : t('editProductModal.imageUpload.clickToUpload')}
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                              {t('editProductModal.imageUpload.supportedFormats')} • {t('editProductModal.imageUpload.maxSize')}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <input
+                      title="image upload"
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageSelect}
+                      className="hidden"
+                    />
+                    
+                    <AnimatePresence>
+                      {errors.image && (
+                        <motion.p 
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          className={`mt-2 flex items-center gap-2 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'flex-row-reverse' : ''}`}
+                          role="alert"
+                        >
+                          <AlertCircle className="w-4 h-4" />
+                          {errors.image}
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Product Name */}
+                  <div>
+                    <label htmlFor="name" className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <Tag className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span>{t('editProductModal.form.productName.label')}</span>
+                      <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => handleChange('name', e.target.value)}
+                        onFocus={() => setFocusedField('name')}
+                        onBlur={() => setFocusedField('')}
+                        maxLength={maxNameLength}
+                        className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                          errors.name
+                            ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
+                            : focusedField === 'name'
+                            ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/10 focus:ring-4 focus:ring-blue-500/20'
+                            : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400'
+                        } focus:outline-none`}
+                        placeholder={t('editProductModal.form.productName.placeholder')}
+                        aria-required="true"
+                      />
+                      <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 flex items-center gap-2`}>
+                        {formData.name && isNameValid && !errors.name && (
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          </motion.div>
+                        )}
+                        <span className="text-xs text-gray-400">{nameLength}/{maxNameLength}</span>
+                      </div>
+                    </div>
+                    <AnimatePresence>
+                      {errors.name && (
+                        <motion.p 
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          className={`mt-2 flex items-center gap-2 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'flex-row-reverse' : ''}`}
+                          role="alert"
+                        >
+                          <AlertCircle className="w-4 h-4" />
+                          {errors.name}
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Price and Category */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label htmlFor="price" className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <DollarSign className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <span>{t('editProductModal.form.price.label')}</span>
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          id="price"
+                          value={formData.price || ''}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === '') {
+                              handleChange('price', 0);
+                            } else {
+                              const numValue = parseFloat(value);
+                              if (!isNaN(numValue)) {
+                                handleChange('price', numValue);
+                              }
+                            }
+                          }}
+                          onFocus={() => setFocusedField('price')}
+                          onBlur={() => setFocusedField('')}
+                          step="0.01"
+                          min="0"
+                          className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                            errors.price
+                              ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
+                              : focusedField === 'price'
+                              ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/10 focus:ring-4 focus:ring-blue-500/20'
+                              : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400'
+                          } focus:outline-none ${isRTL ? 'pl-12' : 'pr-12'}`}
+                          placeholder="0.00"
+                          aria-required="true"
+                        />
+                        <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 font-medium`}>
+                          {t('editProductModal.form.price.currency')}
+                        </div>
+                      </div>
+                      <AnimatePresence>
+                        {errors.price && (
+                          <motion.p 
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -5 }}
+                            className={`mt-2 flex items-center gap-2 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'flex-row-reverse' : ''}`}
+                            role="alert"
+                          >
+                            <AlertCircle className="w-4 h-4" />
+                            {errors.price}
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+                    </div>
+
+                    <div>
+                      <label htmlFor="categoryId" className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                        <span>{t('editProductModal.form.category.label')}</span>
+                        <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        id="categoryId"
+                        value={formData.categoryId}
+                        onChange={(e) => handleChange('categoryId', e.target.value)}
+                        onFocus={() => setFocusedField('categoryId')}
+                        onBlur={() => setFocusedField('')}
+                        className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 text-gray-900 dark:text-white ${
+                          errors.categoryId
+                            ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
+                            : focusedField === 'categoryId'
+                            ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/10 focus:ring-4 focus:ring-blue-500/20'
+                            : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400'
+                        } focus:outline-none`}
+                        aria-required="true"
+                      >
+                        <option value="">{t('editProductModal.form.category.placeholder')}</option>
+                        {categories.map((cat) => (
+                          <option key={cat.categoryId} value={cat.categoryId}>
+                            {cat.categoryName}
+                          </option>
+                        ))}
+                      </select>
+                      <AnimatePresence>
+                        {errors.categoryId && (
+                          <motion.p 
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -5 }}
+                            className={`mt-2 flex items-center gap-2 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'flex-row-reverse' : ''}`}
+                            role="alert"
+                          >
+                            <AlertCircle className="w-4 h-4" />
+                            {errors.categoryId}
+                          </motion.p>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label htmlFor="description" className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <span>{t('editProductModal.form.description.label')}</span>
+                    </label>
+                    <div className="relative">
+                      <textarea
+                        id="description"
+                        value={formData.description}
+                        onChange={(e) => handleChange('description', e.target.value)}
+                        onFocus={() => setFocusedField('description')}
+                        onBlur={() => setFocusedField('')}
+                        maxLength={maxDescLength}
+                        rows={3}
+                        className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 resize-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
+                          errors.description
+                            ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
+                            : focusedField === 'description'
+                            ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/10 focus:ring-4 focus:ring-blue-500/20'
+                            : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400'
+                        } focus:outline-none`}
+                        placeholder={t('editProductModal.form.description.placeholder')}
+                      />
+                      <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} bottom-3 text-xs text-gray-400`}>
+                        {descriptionLength}/{maxDescLength}
+                      </div>
+                    </div>
+                    <AnimatePresence>
+                      {errors.description && (
+                        <motion.p 
+                          initial={{ opacity: 0, y: -5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          className={`mt-2 flex items-center gap-2 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'flex-row-reverse' : ''}`}
+                          role="alert"
+                        >
+                          <AlertCircle className="w-4 h-4" />
+                          {errors.description}
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Status Toggle */}
+                  <div className="rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 p-5 border border-gray-200 dark:border-gray-600">
+                    <label className={`flex items-center gap-4 cursor-pointer group ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          checked={formData.isAvailable}
+                          onChange={(e) => handleChange('isAvailable', e.target.checked)}
+                          className="sr-only peer"
+                        />
+                        <div className="w-14 h-7 bg-gray-300 dark:bg-gray-600 peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-emerald-500 peer-checked:to-emerald-600 shadow-inner"></div>
+                      </div>
+                      
+                      <div className="flex-1">
+                        <span className="text-sm font-semibold text-gray-900 dark:text-white block mb-1">
+                          {t('editProductModal.form.status.label')}
+                        </span>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                          {t('editProductModal.form.status.description')}
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex-shrink-0 px-8 py-6 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
+                  <div className={`flex gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      disabled={isSubmitting || isUploadingImage}
+                      className="flex-1 px-6 py-4 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border border-gray-300 dark:border-gray-600"
+                    >
+                      {t('editProductModal.buttons.cancel')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSubmit}
+                      disabled={isSubmitting || isUploadingImage || !isFormValid}
+                      className="flex-1 px-6 py-4 text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed rounded-xl font-semibold transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-blue-500/50 disabled:hover:shadow-none relative overflow-hidden group"
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                      
+                      <span className={`relative flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        {isSubmitting || isUploadingImage ? (
+                          <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <span>
+                              {isUploadingImage ? t('editProductModal.buttons.uploading') : t('editProductModal.buttons.updating')}
+                            </span>
+                          </>
+                        ) : (
+                          <>
+                            <CheckCircle2 className="w-5 h-5" />
+                            <span>{t('editProductModal.buttons.update')}</span>
+                          </>
+                        )}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 };

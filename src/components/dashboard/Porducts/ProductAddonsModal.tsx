@@ -1,10 +1,9 @@
-// src/components/dashboard/Products/ProductAddonsModal.tsx
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, Search, Check, Plus, Trash2, Star, StarOff, 
+  X, Search, Check, Plus, Trash2, Star, 
   Loader2, AlertCircle, Package, DollarSign, 
-  GripVertical, Edit3, Save, XCircle 
+  GripVertical, Edit3, Save, XCircle, Sparkles
 } from 'lucide-react';
 import { 
   DndContext, closestCenter, KeyboardSensor, PointerSensor, 
@@ -17,12 +16,9 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
-
 import { productService } from '../../../services/productService';
 import { AvailableAddonProduct, ProductAddon, productAddonsService } from '../../../services/ProductAddonsService';
 import { ProductAddonsModalProps, SelectedProductData } from '../../../types/BranchManagement/type';
-
-
 
 // Sortable Addon Component
 const SortableAddonItem: React.FC<{
@@ -36,7 +32,7 @@ const SortableAddonItem: React.FC<{
   editingData: { marketingText: string; isRecommended: boolean };
   onEditingDataChange: (field: string, value: any) => void;
 }> = ({ 
-  addon,  onRemove, isEditing, onEdit, onSaveEdit, 
+  addon, onRemove, isEditing, onEdit, onSaveEdit, 
   onCancelEdit, editingData, onEditingDataChange 
 }) => {
   const { t } = useLanguage();
@@ -62,17 +58,20 @@ const SortableAddonItem: React.FC<{
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border ${
-        isDragging ? 'border-primary-500 shadow-lg' : 'border-gray-200 dark:border-gray-600'
+      className={`group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden transition-all duration-300 ${
+        isDragging 
+          ? 'shadow-2xl shadow-primary-500/20 ring-2 ring-primary-500 scale-105' 
+          : 'shadow-sm hover:shadow-lg border border-gray-200 dark:border-gray-700'
       }`}
     >
-      <div className="flex items-start gap-4">
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
+      
+      <div className="p-4 flex items-start gap-4">
         {/* Drag Handle */}
         <button
           {...attributes}
           {...listeners}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing mt-2"
-          aria-label={t('productAddonsModal.accessibility.dragHandle')}
+          className="mt-2 p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-110"
         >
           <GripVertical className="h-4 w-4" />
         </button>
@@ -80,15 +79,17 @@ const SortableAddonItem: React.FC<{
         {/* Product Image */}
         <div className="flex-shrink-0">
           {hasValidImage ? (
-            <img
-              src={addonProduct.imageUrl}
-              alt={addonProduct?.name}
-              className="w-16 h-16 rounded-lg object-cover bg-gray-200 dark:bg-gray-600"
-              loading="lazy"
-            />
+            <div className="relative group/image">
+              <img
+                src={addonProduct.imageUrl}
+                alt={addonProduct?.name}
+                className="w-20 h-20 rounded-xl object-cover bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 ring-2 ring-gray-200 dark:ring-gray-700"
+                loading="lazy"
+              />
+            </div>
           ) : (
-            <div className="w-16 h-16 rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-              <Package className="h-6 w-6 text-gray-400" />
+            <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center ring-2 ring-gray-200 dark:ring-gray-700">
+              <Package className="h-8 w-8 text-gray-400" />
             </div>
           )}
         </div>
@@ -96,18 +97,18 @@ const SortableAddonItem: React.FC<{
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between mb-2">
-            <div>
-              <h4 className="font-medium text-gray-900 dark:text-white">
+            <div className="flex-1">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
                 {addonProduct?.name || `Product ID: ${addon.addonProductId}`}
               </h4>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="text-sm font-medium text-green-600 dark:text-green-400 flex items-center gap-1">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 text-sm font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg">
                   <DollarSign className="h-3 w-3" />
                   {addonProduct?.price?.toFixed(2) || '0.00'} ₺
                 </span>
                 {addon.isRecommended && (
-                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
-                    <Star className="h-3 w-3 mr-1" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-lg">
+                    <Star className="h-3 w-3 fill-current" />
                     {t('productAddonsModal.form.isRecommended.badge')}
                   </span>
                 )}
@@ -115,22 +116,18 @@ const SortableAddonItem: React.FC<{
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700/50 rounded-xl p-1">
               {isEditing ? (
                 <>
                   <button
                     onClick={() => onSaveEdit(addon.id)}
-                    className="p-1.5 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
-                    title={t('productAddonsModal.actions.save')}
-                    aria-label={t('productAddonsModal.actions.save')}
+                    className="p-2 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200"
                   >
                     <Save className="h-4 w-4" />
                   </button>
                   <button
                     onClick={onCancelEdit}
-                    className="p-1.5 text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-                    title={t('productAddonsModal.actions.cancel')}
-                    aria-label={t('productAddonsModal.actions.cancel')}
+                    className="p-2 text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
                   >
                     <XCircle className="h-4 w-4" />
                   </button>
@@ -139,17 +136,13 @@ const SortableAddonItem: React.FC<{
                 <>
                   <button
                     onClick={() => onEdit(addon.id)}
-                    className="p-1.5 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                    title={t('productAddonsModal.actions.edit')}
-                    aria-label={t('productAddonsModal.accessibility.editAddon')}
+                    className="p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200"
                   >
                     <Edit3 className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => onRemove(addon.id)}
-                    className="p-1.5 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                    title={t('productAddonsModal.actions.remove')}
-                    aria-label={t('productAddonsModal.accessibility.removeAddon')}
+                    className="p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -159,43 +152,41 @@ const SortableAddonItem: React.FC<{
           </div>
 
           {/* Marketing Text */}
-          <div className="mb-2">
-            {isEditing ? (
-              <div className="space-y-2">
-                <textarea
-                  value={editingData.marketingText}
-                  onChange={(e) => onEditingDataChange('marketingText', e.target.value)}
-                  placeholder={t('productAddonsModal.form.marketingText.placeholder')}
-                  className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
-                  rows={2}
+          {isEditing ? (
+            <div className="space-y-3 mt-3 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+              <textarea
+                value={editingData.marketingText}
+                onChange={(e) => onEditingDataChange('marketingText', e.target.value)}
+                placeholder={t('productAddonsModal.form.marketingText.placeholder')}
+                className="w-full px-3 py-2 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none transition-all duration-200"
+                rows={2}
+              />
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editingData.isRecommended}
+                  onChange={(e) => onEditingDataChange('isRecommended', e.target.checked)}
+                  className="sr-only peer"
                 />
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={editingData.isRecommended}
-                    onChange={(e) => onEditingDataChange('isRecommended', e.target.checked)}
-                    className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                    aria-label={t('productAddonsModal.accessibility.toggleRecommended')}
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    {t('productAddonsModal.form.isRecommended.label')}
-                  </span>
-                </label>
-              </div>
-            ) : (
-              addon.marketingText && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 italic">
+                <div className="w-10 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-yellow-500 peer-checked:to-yellow-600"></div>
+                <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                  {t('productAddonsModal.form.isRecommended.label')}
+                </span>
+              </label>
+            </div>
+          ) : (
+            <>
+              {addon.marketingText && (
+                <p className="text-sm text-gray-600 dark:text-gray-400 italic mt-2 p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg">
                   "{addon.marketingText}"
                 </p>
-              )
-            )}
-          </div>
-
-          {/* Product Description */}
-          {addonProduct?.description && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
-              {addonProduct.description}
-            </p>
+              )}
+              {addonProduct?.description && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-2">
+                  {addonProduct.description}
+                </p>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -212,7 +203,6 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
 }) => {
   const { t, isRTL } = useLanguage();
 
-  // State
   const [currentAddons, setCurrentAddons] = useState<ProductAddon[]>([]);
   const [availableProducts, setAvailableProducts] = useState<AvailableAddonProduct[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -223,19 +213,11 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
   const [editingAddonId, setEditingAddonId] = useState<number | null>(null);
   const [editingData, setEditingData] = useState({ marketingText: '', isRecommended: false });
 
-  // DnD Sensors
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  // Load data when modal opens
   const loadData = async () => {
     if (!isOpen) return;
 
@@ -243,15 +225,13 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
     setError(null);
 
     try {
-      // Load current addons and all available products in parallel
       const [addonsResponse, categoriesResponse] = await Promise.all([
         productAddonsService.getProductAddons(productId),
-        productService.getCategories() // Use the same method as ProductsContent
+        productService.getCategories()
       ]);
 
-      // Extract all products from categories and transform to AvailableAddonProduct format
       const allProducts: AvailableAddonProduct[] = categoriesResponse.flatMap(category => 
-        category.products.map((product: { id: any; name: any; price: any; imageUrl: any; description: any; isAvailable: any; }) => ({
+        category.products.map((product: any) => ({
           id: product.id,
           name: product.name,
           price: product.price,
@@ -266,7 +246,6 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
       setCurrentAddons(addonsResponse);
       setAvailableProducts(allProducts);
       
-      // Pre-populate selected products data with current addons
       const newSelectedProductsData = new Map<number, SelectedProductData>();
       addonsResponse.forEach(addon => {
         newSelectedProductsData.set(addon.addonProductId, {
@@ -280,8 +259,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
       logger.info('Eklenti verileri yüklendi', { 
         productId, 
         currentAddons: addonsResponse.length,
-        availableProducts: allProducts.length,
-        categoriesCount: categoriesResponse.length
+        availableProducts: allProducts.length
       });
 
     } catch (err: any) {
@@ -300,7 +278,6 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
     }
   }, [isOpen, productId]);
 
-  // Handle product selection
   const toggleProductSelection = (productId: number) => {
     const newSelectedProductsData = new Map(selectedProductsData);
     if (newSelectedProductsData.has(productId)) {
@@ -315,48 +292,31 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
     setSelectedProductsData(newSelectedProductsData);
   };
 
-  // Handle updating selected product data
   const updateSelectedProductData = (productId: number, field: 'marketingText' | 'isRecommended', value: string | boolean) => {
     const newSelectedProductsData = new Map(selectedProductsData);
     const existingData = newSelectedProductsData.get(productId);
     if (existingData) {
-      newSelectedProductsData.set(productId, {
-        ...existingData,
-        [field]: value
-      });
+      newSelectedProductsData.set(productId, { ...existingData, [field]: value });
       setSelectedProductsData(newSelectedProductsData);
     }
   };
 
-  // Handle addon updates
   const handleUpdateAddon = async (addonId: number, updates: Partial<ProductAddon>) => {
     try {
-      await productAddonsService.updateProductAddon({
-        id: addonId,
-        ...updates
-      });
-      
-      // Update local state
-      setCurrentAddons(prev => 
-        prev.map(addon => 
-          addon.id === addonId ? { ...addon, ...updates } : addon
-        )
-      );
+      await productAddonsService.updateProductAddon({ id: addonId, ...updates });
+      setCurrentAddons(prev => prev.map(addon => addon.id === addonId ? { ...addon, ...updates } : addon));
     } catch (error: any) {
       logger.error('Eklenti güncellenirken hata:', error);
       setError(t('productAddonsModal.errors.updatingAddon'));
     }
   };
 
-  // Handle addon removal
   const handleRemoveAddon = async (addonId: number) => {
     try {
       const addon = currentAddons.find(a => a.id === addonId);
       if (!addon) return;
 
       await productAddonsService.deleteProductAddon(addonId);
-      
-      // Update local state
       setCurrentAddons(prev => prev.filter(a => a.id !== addonId));
       const newSelectedProductsData = new Map(selectedProductsData);
       newSelectedProductsData.delete(addon.addonProductId);
@@ -367,10 +327,8 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
     }
   };
 
-  // Handle drag and drop reordering
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
-
     if (!over || active.id === over.id) return;
 
     const oldIndex = currentAddons.findIndex(addon => addon.id === active.id);
@@ -379,31 +337,24 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
     const reorderedAddons = arrayMove(currentAddons, oldIndex, newIndex);
     setCurrentAddons(reorderedAddons);
 
-    // Save new order
     try {
       const addonOrders = reorderedAddons.map((addon, index) => ({
         addonId: addon.id,
         newDisplayOrder: index + 1
       }));
-
       await productAddonsService.reorderProductAddons(productId, addonOrders);
     } catch (error: any) {
       logger.error('Eklenti sıralaması kaydedilirken hata:', error);
       setError(t('productAddonsModal.errors.savingOrder'));
-      // Revert the reorder
       loadData();
     }
   };
 
-  // Handle editing
   const handleEditAddon = (addonId: number) => {
     const addon = currentAddons.find(a => a.id === addonId);
     if (addon) {
       setEditingAddonId(addonId);
-      setEditingData({
-        marketingText: addon.marketingText || '',
-        isRecommended: addon.isRecommended
-      });
+      setEditingData({ marketingText: addon.marketingText || '', isRecommended: addon.isRecommended });
     }
   };
 
@@ -421,28 +372,21 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
     setEditingData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Save changes
   const handleSave = async () => {
     setSaving(true);
     setError(null);
 
     try {
-      // Get current addon product IDs
       const currentAddonProductIds = new Set(currentAddons.map(addon => addon.addonProductId));
-      
-      // Get selected product IDs
       const selectedProductIds = new Set(selectedProductsData.keys());
       
-      // Find products to add and remove
       const toAdd = Array.from(selectedProductIds).filter(id => !currentAddonProductIds.has(id));
       const toRemove = currentAddons.filter(addon => !selectedProductIds.has(addon.addonProductId));
 
-      // Remove unselected addons
       for (const addon of toRemove) {
         await productAddonsService.deleteProductAddon(addon.id);
       }
 
-      // Add new addons with their respective data
       if (toAdd.length > 0) {
         const addRequests = toAdd.map(productId => {
           const productData = selectedProductsData.get(productId);
@@ -452,17 +396,13 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
             marketingText: productData?.marketingText || ''
           };
         });
-        
         await productAddonsService.addMultipleAddons(productId, addRequests);
       }
 
-      // Update existing addons that have changed
       for (const addon of currentAddons) {
         const selectedData = selectedProductsData.get(addon.addonProductId);
         if (selectedData && selectedData.productId === addon.addonProductId) {
-          // Check if anything changed
-          if (addon.marketingText !== selectedData.marketingText || 
-              addon.isRecommended !== selectedData.isRecommended) {
+          if (addon.marketingText !== selectedData.marketingText || addon.isRecommended !== selectedData.isRecommended) {
             await productAddonsService.updateProductAddon({
               id: addon.id,
               marketingText: selectedData.marketingText,
@@ -472,12 +412,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
         }
       }
 
-      logger.info('Ürün eklentileri başarıyla kaydedildi', { 
-        productId, 
-        added: toAdd.length,
-        removed: toRemove.length 
-      });
-      
+      logger.info('Ürün eklentileri başarıyla kaydedildi', { productId, added: toAdd.length, removed: toRemove.length });
       onSuccess();
       onClose();
     } catch (err: any) {
@@ -488,320 +423,372 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
     }
   };
 
-  // Filter available products
   const filteredProducts = availableProducts.filter(product => {
-    // Don't show the current product as an addon option
     if (product.id === productId) return false;
-    
     return product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
            (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()));
   });
 
-  // Combine current addons with product details
   const addonsWithProductDetails = currentAddons.map(addon => {
     const addonProduct = availableProducts.find(p => p.id === addon.addonProductId);
     return { ...addon, addonProduct };
   });
 
-  if (!isOpen) return null;
-
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-white dark:bg-gray-800 rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col"
-          dir={isRTL ? 'rtl' : 'ltr'}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
-                {t('productAddonsModal.title')}
-              </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                <strong>{productName}</strong> {t('productAddonsModal.subtitle')}
-              </p>
-            </div>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-              aria-label={t('productAddonsModal.accessibility.closeModal')}
+      {isOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto" dir={isRTL ? 'rtl' : 'ltr'}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70 backdrop-blur-md"
+            onClick={onClose}
+          />
+          
+          <div className="flex min-h-screen items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 40 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 40 }}
+              transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+              className="relative w-full max-w-7xl"
             >
-              <X className="w-6 h-6" />
-            </button>
-          </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-hidden flex">
-            {/* Current Addons Panel */}
-            <div className="w-1/2 border-r border-gray-200 dark:border-gray-700 flex flex-col">
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="font-medium text-gray-900 dark:text-white mb-2">
-                  {t('productAddonsModal.panels.currentAddons.title')} ({currentAddons.length})
-                </h3>
-                {currentAddons.length > 0 && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {t('productAddonsModal.panels.currentAddons.dragInstruction')}
-                  </p>
-                )}
-              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-3xl rounded-3xl"></div>
               
-              <div className="flex-1 overflow-y-auto p-4">
-                {loading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
-                    <span className="ml-2 text-gray-600 dark:text-gray-400">
-                      {t('productAddonsModal.loading.addons')}
-                    </span>
+              <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden max-h-[90vh] flex flex-col">
+                {/* Header */}
+                <div className="relative overflow-hidden flex-shrink-0">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600"></div>
+                  <div className="absolute inset-0 opacity-10">
+                    <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
                   </div>
-                ) : addonsWithProductDetails.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-8 text-gray-500 dark:text-gray-400">
-                    <Package className="w-8 h-8 mb-2 opacity-50" />
-                    <p className="text-center">{t('productAddonsModal.panels.currentAddons.emptyState.title')}</p>
-                    <p className="text-sm text-center mt-1">{t('productAddonsModal.panels.currentAddons.emptyState.subtitle')}</p>
-                  </div>
-                ) : (
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                  >
-                    <SortableContext 
-                      items={addonsWithProductDetails.map(addon => addon.id)} 
-                      strategy={verticalListSortingStrategy}
+                  
+                  <div className="relative px-8 py-6">
+                    <button
+                      onClick={onClose}
+                      className={`absolute top-6 ${isRTL ? 'left-6' : 'right-6'} p-2.5 hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110 text-white z-10`}
                     >
-                      <div className="space-y-3">
-                        {addonsWithProductDetails.map((addon) => (
-                          <SortableAddonItem
-                            key={addon.id}
-                            addon={addon}
-                            onUpdate={handleUpdateAddon}
-                            onRemove={handleRemoveAddon}
-                            isEditing={editingAddonId === addon.id}
-                            onEdit={handleEditAddon}
-                            onSaveEdit={handleSaveEdit}
-                            onCancelEdit={handleCancelEdit}
-                            editingData={editingData}
-                            onEditingDataChange={handleEditingDataChange}
-                          />
-                        ))}
-                      </div>
-                    </SortableContext>
-                  </DndContext>
-                )}
-              </div>
-            </div>
-
-            {/* Available Products Panel */}
-            <div className="w-1/2 flex flex-col">
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="font-medium text-gray-900 dark:text-white mb-3">
-                  {t('productAddonsModal.panels.availableProducts.title')}
-                </h3>
-                
-                {/* Search */}
-                <div className="relative">
-                  <Search className={`absolute top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 ${isRTL ? 'right-3' : 'left-3'}`} />
-                  <input
-                    type="text"
-                    placeholder={t('productAddonsModal.panels.availableProducts.searchPlaceholder')}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className={`w-full py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'}`}
-                  />
-                </div>
-              </div>
-              
-              <div className="flex-1 overflow-y-auto p-4">
-                {loading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
-                    <span className="ml-2 text-gray-600 dark:text-gray-400">
-                      {t('productAddonsModal.loading.products')}
-                    </span>
-                  </div>
-                ) : filteredProducts.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-8 text-gray-500 dark:text-gray-400">
-                    <Package className="w-8 h-8 mb-2 opacity-50" />
-                    <p>
-                      {searchQuery 
-                        ? t('productAddonsModal.panels.availableProducts.emptyState.noResults') 
-                        : t('productAddonsModal.panels.availableProducts.emptyState.noProducts')
-                      }
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {filteredProducts.map((product) => {
-                      const isSelected = selectedProductsData.has(product.id);
-                      const productData = selectedProductsData.get(product.id);
-                      const hasValidImage = product.imageUrl && product.imageUrl.trim() !== '';
-
-                      return (
-                        <div
-                          key={product.id}
-                          className={`rounded-lg border-2 transition-all ${
-                            isSelected
-                              ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30 shadow-sm'
-                              : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 hover:border-primary-300 hover:shadow-sm'
-                          } ${!product.isAvailable ? 'opacity-60' : ''}`}
+                      <X className="w-5 h-5" />
+                    </button>
+                  
+                    <div className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <motion.div 
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        transition={{ type: "spring", delay: 0.2, duration: 0.6 }}
+                        className="relative"
+                      >
+                        <div className="absolute inset-0 bg-white/30 blur-xl rounded-2xl"></div>
+                        <div className="relative p-4 bg-white/20 backdrop-blur-xl rounded-2xl border border-white/30 shadow-lg">
+                          <Sparkles className="w-8 h-8 text-white" />
+                        </div>
+                      </motion.div>
+                      
+                      <div className="flex-1 pt-1">
+                        <motion.h3 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.1 }}
+                          className="text-2xl font-bold text-white mb-2"
                         >
-                          <div className="p-4">
-                            <div className="flex items-start gap-3">
-                              {/* Selection Checkbox */}
-                              <div className="pt-1">
-                                <button
-                                  onClick={() => toggleProductSelection(product.id)}
-                                  className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
-                                    isSelected
-                                      ? 'bg-primary-600 border-primary-600 text-white'
-                                      : 'border-gray-300 dark:border-gray-600 hover:border-primary-400'
-                                  }`}
-                                  aria-label={isSelected ? 'Deselect product' : 'Select product'}
-                                >
-                                  {isSelected && <Check className="w-3 h-3" />}
-                                </button>
-                              </div>
+                          {t('productAddonsModal.title')}
+                        </motion.h3>
+                        <motion.p 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.15 }}
+                          className="text-white/80 text-sm leading-relaxed"
+                        >
+                          <strong>{productName}</strong> {t('productAddonsModal.subtitle')}
+                        </motion.p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-                              {/* Product Image */}
-                              <div className="flex-shrink-0">
-                                {hasValidImage ? (
-                                  <img
-                                    src={product.imageUrl}
-                                    alt={product.name}
-                                    className="w-12 h-12 rounded-lg object-cover bg-gray-200 dark:bg-gray-600"
-                                    loading="lazy"
-                                  />
-                                ) : (
-                                  <div className="w-12 h-12 rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center">
-                                    <Package className="h-5 w-5 text-gray-400" />
+                {/* Content */}
+                <div className="flex-1 overflow-hidden flex">
+                  {/* Current Addons Panel */}
+                  <div className="w-1/2 border-r border-gray-200 dark:border-gray-700 flex flex-col bg-gray-50/50 dark:bg-gray-900/30">
+                    <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
+                        {t('productAddonsModal.panels.currentAddons.title')}
+                        <span className="inline-flex items-center px-2.5 py-1 text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full">
+                          {currentAddons.length}
+                        </span>
+                      </h3>
+                      {currentAddons.length > 0 && (
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {t('productAddonsModal.panels.currentAddons.dragInstruction')}
+                        </p>
+                      )}
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto p-6">
+                      {loading ? (
+                        <div className="flex flex-col items-center justify-center py-12">
+                          <Loader2 className="w-8 h-8 animate-spin text-primary-600 mb-3" />
+                          <span className="text-gray-600 dark:text-gray-400">{t('productAddonsModal.loading.addons')}</span>
+                        </div>
+                      ) : addonsWithProductDetails.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+                          <div className="relative mb-4">
+                            <div className="absolute inset-0 bg-primary-500/10 blur-2xl rounded-full"></div>
+                            <Package className="relative w-12 h-12 opacity-50" />
+                          </div>
+                          <p className="text-center font-medium mb-1">{t('productAddonsModal.panels.currentAddons.emptyState.title')}</p>
+                          <p className="text-sm text-center">{t('productAddonsModal.panels.currentAddons.emptyState.subtitle')}</p>
+                        </div>
+                      ) : (
+                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                          <SortableContext items={addonsWithProductDetails.map(addon => addon.id)} strategy={verticalListSortingStrategy}>
+                            <div className="space-y-3">
+                              {addonsWithProductDetails.map((addon) => (
+                                <SortableAddonItem
+                                  key={addon.id}
+                                  addon={addon}
+                                  onUpdate={handleUpdateAddon}
+                                  onRemove={handleRemoveAddon}
+                                  isEditing={editingAddonId === addon.id}
+                                  onEdit={handleEditAddon}
+                                  onSaveEdit={handleSaveEdit}
+                                  onCancelEdit={handleCancelEdit}
+                                  editingData={editingData}
+                                  onEditingDataChange={handleEditingDataChange}
+                                />
+                              ))}
+                            </div>
+                          </SortableContext>
+                        </DndContext>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Available Products Panel */}
+                  <div className="w-1/2 flex flex-col">
+                    <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+                        {t('productAddonsModal.panels.availableProducts.title')}
+                      </h3>
+                      
+                      {/* Search */}
+                      <div className="relative">
+                        <Search className={`absolute top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 ${isRTL ? 'right-4' : 'left-4'}`} />
+                        <input
+                          type="text"
+                          placeholder={t('productAddonsModal.panels.availableProducts.searchPlaceholder')}
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className={`w-full py-3 border-2 border-gray-300 dark:border-gray-600 rounded-2xl focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-all duration-200 ${isRTL ? 'pr-11 pl-4' : 'pl-11 pr-4'}`}
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="flex-1 overflow-y-auto p-6">
+                      {loading ? (
+                        <div className="flex flex-col items-center justify-center py-12">
+                          <Loader2 className="w-8 h-8 animate-spin text-primary-600 mb-3" />
+                          <span className="text-gray-600 dark:text-gray-400">{t('productAddonsModal.loading.products')}</span>
+                        </div>
+                      ) : filteredProducts.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-12 text-gray-500 dark:text-gray-400">
+                          <div className="relative mb-4">
+                            <div className="absolute inset-0 bg-primary-500/10 blur-2xl rounded-full"></div>
+                            <Package className="relative w-12 h-12 opacity-50" />
+                          </div>
+                          <p>
+                            {searchQuery 
+                              ? t('productAddonsModal.panels.availableProducts.emptyState.noResults') 
+                              : t('productAddonsModal.panels.availableProducts.emptyState.noProducts')
+                            }
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          {filteredProducts.map((product) => {
+                            const isSelected = selectedProductsData.has(product.id);
+                            const productData = selectedProductsData.get(product.id);
+                            const hasValidImage = product.imageUrl && product.imageUrl.trim() !== '';
+
+                            return (
+                              <div
+                                key={product.id}
+                                className={`rounded-2xl transition-all duration-300 ${
+                                  isSelected
+                                    ? 'ring-2 ring-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-lg'
+                                    : 'bg-white dark:bg-gray-700 hover:shadow-md border border-gray-200 dark:border-gray-600'
+                                } ${!product.isAvailable ? 'opacity-60' : ''}`}
+                              >
+                                <div className="p-4">
+                                  <div className="flex items-start gap-3">
+                                    {/* Selection Checkbox */}
+                                    <div className="pt-1">
+                                      <button
+                                        onClick={() => toggleProductSelection(product.id)}
+                                        className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
+                                          isSelected
+                                            ? 'bg-primary-600 border-primary-600 text-white scale-110'
+                                            : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:scale-105'
+                                        }`}
+                                      >
+                                        {isSelected && <Check className="w-4 h-4" />}
+                                      </button>
+                                    </div>
+
+                                    {/* Product Image */}
+                                    <div className="flex-shrink-0">
+                                      {hasValidImage ? (
+                                        <img
+                                          src={product.imageUrl}
+                                          alt={product.name}
+                                          className="w-16 h-16 rounded-xl object-cover bg-gray-200 dark:bg-gray-600 ring-2 ring-gray-200 dark:ring-gray-700"
+                                          loading="lazy"
+                                        />
+                                      ) : (
+                                        <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center ring-2 ring-gray-200 dark:ring-gray-700">
+                                          <Package className="h-6 w-6 text-gray-400" />
+                                        </div>
+                                      )}
+                                    </div>
+
+                                    {/* Product Info */}
+                                    <div className="flex-1 min-w-0">
+                                      <h4 className="font-semibold text-gray-900 dark:text-white truncate mb-1">
+                                        {product.name}
+                                      </h4>
+                                      {product.description && (
+                                        <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+                                          {product.description}
+                                        </p>
+                                      )}
+                                      <div className="flex items-center justify-between">
+                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 text-sm font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg">
+                                          <DollarSign className="h-3 w-3" />
+                                          {product.price.toFixed(2)} ₺
+                                        </span>
+                                        <span className="text-xs text-gray-500 dark:text-gray-400 px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded-lg">
+                                          {product.categoryName}
+                                        </span>
+                                      </div>
+                                      
+                                      {!product.isAvailable && (
+                                        <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 mt-2">
+                                          {t('productAddonsModal.status.outOfStock')}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Additional Fields */}
+                                {isSelected && (
+                                  <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-600">
+                                    <div className="pt-4 space-y-3">
+                                      <div>
+                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                                          {t('productAddonsModal.form.marketingText.label')}
+                                        </label>
+                                        <textarea
+                                          value={productData?.marketingText || ''}
+                                          onChange={(e) => updateSelectedProductData(product.id, 'marketingText', e.target.value)}
+                                          placeholder={t('productAddonsModal.form.marketingText.placeholder')}
+                                          className="w-full px-3 py-2 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none transition-all duration-200"
+                                          rows={2}
+                                        />
+                                      </div>
+
+                                      <label className="flex items-center gap-2 cursor-pointer">
+                                        <input
+                                          type="checkbox"
+                                          checked={productData?.isRecommended || false}
+                                          onChange={(e) => updateSelectedProductData(product.id, 'isRecommended', e.target.checked)}
+                                          className="sr-only peer"
+                                        />
+                                        <div className="w-10 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-yellow-500 peer-checked:to-yellow-600"></div>
+                                        <span className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-1 font-medium">
+                                          <Star className="h-3.5 w-3.5" />
+                                          {t('productAddonsModal.form.isRecommended.label')}
+                                        </span>
+                                      </label>
+                                    </div>
                                   </div>
                                 )}
                               </div>
-
-                              {/* Product Info */}
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-medium text-gray-900 dark:text-white truncate">
-                                  {product.name}
-                                </h4>
-                                {product.description && (
-                                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mt-1">
-                                    {product.description}
-                                  </p>
-                                )}
-                                <div className="flex items-center justify-between mt-2">
-                                  <span className="text-sm font-medium text-green-600 dark:text-green-400 flex items-center gap-1">
-                                    <DollarSign className="h-3 w-3" />
-                                    {product.price.toFixed(2)} ₺
-                                  </span>
-                                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                                    {product.categoryName}
-                                  </span>
-                                </div>
-                                
-                                {!product.isAvailable && (
-                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 mt-2">
-                                    {t('productAddonsModal.status.outOfStock')}
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Additional Fields for Selected Products */}
-                          {isSelected && (
-                            <div className="px-4 pb-4 border-t border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50">
-                              <div className="pt-3 space-y-3">
-                                {/* Marketing Text */}
-                                <div>
-                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    {t('productAddonsModal.form.marketingText.label')}
-                                  </label>
-                                  <textarea
-                                    value={productData?.marketingText || ''}
-                                    onChange={(e) => updateSelectedProductData(product.id, 'marketingText', e.target.value)}
-                                    placeholder={t('productAddonsModal.form.marketingText.placeholder')}
-                                    className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none"
-                                    rows={2}
-                                  />
-                                </div>
-
-                                {/* Is Recommended */}
-                                <div>
-                                  <label className="flex items-center gap-2 cursor-pointer">
-                                    <input
-                                      type="checkbox"
-                                      checked={productData?.isRecommended || false}
-                                      onChange={(e) => updateSelectedProductData(product.id, 'isRecommended', e.target.checked)}
-                                      className="w-4 h-4 text-primary-600 bg-gray-100 border-gray-300 rounded focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                                      aria-label={t('productAddonsModal.accessibility.toggleRecommended')}
-                                    />
-                                    <span className="text-sm text-gray-700 dark:text-gray-300 flex items-center gap-1">
-                                      <Star className="h-3 w-3" />
-                                      {t('productAddonsModal.form.isRecommended.label')}
-                                    </span>
-                                  </label>
-                                </div>
-                              </div>
-                            </div>
-                          )}
+                            );
+                          })}
                         </div>
-                      );
-                    })}
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Error */}
+                {error && (
+                  <div className="mx-8 mb-4">
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-2xl flex items-center gap-3"
+                    >
+                      <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
+                      <span className="text-sm text-red-700 dark:text-red-400">{error}</span>
+                    </motion.div>
                   </div>
                 )}
+
+                {/* Footer */}
+                <div className="flex-shrink-0 px-8 py-6 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-3">
+                      <span className="px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg font-medium">
+                        {t('productAddonsModal.counters.selectedProducts', { count: selectedProductsData.size })}
+                      </span>
+                      <span className="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg">
+                        {t('productAddonsModal.counters.availableProducts', { count: filteredProducts.length })}
+                      </span>
+                    </div>
+                    
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        onClick={onClose}
+                        disabled={saving}
+                        className="px-6 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 rounded-xl text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200 hover:scale-105 active:scale-95 disabled:opacity-50"
+                      >
+                        {t('productAddonsModal.buttons.cancel')}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleSave}
+                        disabled={saving || loading}
+                        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 active:scale-95 hover:shadow-lg hover:shadow-blue-500/50 flex items-center gap-2 relative overflow-hidden group"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                        <span className="relative flex items-center gap-2">
+                          {saving ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              {t('productAddonsModal.loading.saving')}
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-4 h-4" />
+                              {t('productAddonsModal.buttons.saveAddons')}
+                            </>
+                          )}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            </motion.div>
           </div>
-
-          {/* Error Display */}
-          {error && (
-            <div className="mx-6 mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
-              <span className="text-red-700 dark:text-red-400">{error}</span>
-            </div>
-          )}
-
-          {/* Footer */}
-          <div className="flex items-center justify-between p-6 border-t border-gray-200 dark:border-gray-700">
-            <div className="text-sm text-gray-600 dark:text-gray-400">
-              {t('productAddonsModal.counters.selectedProducts', { count: selectedProductsData.size })} • {t('productAddonsModal.counters.availableProducts', { count: filteredProducts.length })}
-            </div>
-            
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={saving}
-                className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-              >
-                {t('productAddonsModal.buttons.cancel')}
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving || loading}
-                className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
-              >
-                {saving ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    {t('productAddonsModal.loading.saving')}
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-4 w-4" />
-                    {t('productAddonsModal.buttons.saveAddons')}
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        </motion.div>
-      </div>
+        </div>
+      )}
     </AnimatePresence>
   );
 };
