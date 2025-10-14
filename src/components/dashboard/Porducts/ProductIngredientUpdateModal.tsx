@@ -226,7 +226,7 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
               <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden max-h-[90vh] flex flex-col">
                 {/* Header */}
                 <div className="relative overflow-hidden flex-shrink-0">
-                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-amber-600 to-yellow-600"></div>
+                  <div className="absolute inset-0 bg-gradient-to-br "></div>
                   <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full blur-3xl"></div>
                     <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
@@ -357,7 +357,7 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
                             key={ingredient.id}
                             className={`group relative p-4 rounded-2xl transition-all duration-300 cursor-pointer ${
                               isSelected
-                                ? 'ring-2 ring-orange-500 bg-orange-50 dark:bg-orange-900/20 shadow-lg'
+                                ? 'ring-2 ring-blue-500 bg-orange-50 dark:bg-blue-900/20 shadow-lg'
                                 : 'bg-white dark:bg-gray-700 hover:shadow-md border border-gray-200 dark:border-gray-600'
                             }`}
                             onClick={() => handleIngredientToggle(ingredient)}
@@ -365,7 +365,7 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
                             {/* Selection Indicator */}
                             <div className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
                               isSelected
-                                ? 'bg-orange-600 border-orange-600 text-white scale-110'
+                                ? 'bg-blue-600 border-blue-600 text-white scale-110'
                                 : 'border-gray-300 dark:border-gray-600 hover:border-orange-400 hover:scale-105'
                             }`}>
                               {isSelected && <Check className="w-4 h-4" />}
