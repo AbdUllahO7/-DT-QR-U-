@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
   X,
-  Plus,
   Check,
   Star,
   Package,
-  DollarSign,
   Settings,
-  Save,
   Loader2,
   AlertCircle,
-  Trash2,
   RefreshCw,
   Search,
   Zap,
-  ChevronDown,
-  ChevronUp
+  Sparkles
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { 
@@ -26,6 +21,7 @@ import {
   UpdateBranchProductAddonDto 
 } from '../../../../services/Branch/BranchAddonsService';
 import { DetailedProduct, EnhancedAddon } from '../../../../types/BranchManagement/type';
+import AddonCard from './AddonCard';
 
 interface ProductAddonsModalProps {
   isOpen: boolean;
@@ -313,39 +309,71 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
   const totalCount = filteredAddons.length;
 
   return (
-    <div dir={isRTL ? 'rtl' : 'ltr'} className="fixed inset-0 z-50 overflow-y-auto backdrop-blur-sm">
+    <div dir={isRTL ? 'rtl' : 'ltr'} className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 transition-opacity bg-gray-900/50" onClick={resetAndClose} />
+        <div className="fixed inset-0 transition-opacity bg-gradient-to-br from-gray-900/80 via-purple-900/50 to-blue-900/80 backdrop-blur-md" onClick={resetAndClose} />
         
-        <div className="inline-block w-full max-w-6xl px-0 py-0 my-4 overflow-hidden text-right transition-all transform bg-white dark:bg-gray-800 shadow-2xl rounded-2xl">
+        <div className="inline-block w-full max-w-6xl px-0 py-0 my-4 overflow-hidden text-right transition-all transform bg-white dark:bg-gray-900 shadow-2xl rounded-3xl border border-gray-200/50 dark:border-gray-700/50">
           
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 text-white">
-            <div className={`flex items-center justify-between `}>
+          <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 px-8 py-6 text-white overflow-hidden">
+            {/* Animated background pattern */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute inset-0" style={{
+                backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
+                backgroundSize: '32px 32px'
+              }}></div>
+            </div>
+            
+            <div className={`relative z-10 flex items-center justify-between `}>
               <div className="flex-1">
-                <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} mb-3`}>
-                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                    <Settings className="w-5 h-5" />
+                <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} mb-4`}>
+                  <div className="w-14 h-14 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center shadow-lg border border-white/30">
+                    <Settings className="w-7 h-7" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold">{t('addonModal.title')}</h3>
-                    <p className="text-blue-100 text-sm font-medium">{product.name}</p>
+                    <h3 className="text-2xl font-bold mb-1 tracking-tight">{t('addonModal.title')}</h3>
+                    <div className="flex items-center space-x-2">
+                      <Sparkles className="w-4 h-4 text-purple-200" />
+                      <p className="text-purple-100 text-base font-medium">{product.name}</p>
+                    </div>
                   </div>
                 </div>
                 
                 {/* Stats Pills */}
-                <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-                  <div className="bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5 text-sm font-medium">
-                    <Package className={`w-4 h-4 inline ${isRTL ? 'ml-1.5' : 'mr-1.5'}`} />
-                    {totalCount} {t('addonModal.stats.available')}
+                <div className={`flex flex-wrap items-center gap-3`}>
+                  <div className="group bg-white/15 backdrop-blur-xl border border-white/20 rounded-2xl px-4 py-2.5 hover:bg-white/25 transition-all duration-300 shadow-lg">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                        <Package className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <div className="text-xl font-bold text-white">{totalCount}</div>
+                        <div className="text-xs text-purple-100 font-medium">{t('addonModal.stats.available')}</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="bg-green-500/30 backdrop-blur-sm rounded-full px-3 py-1.5 text-sm font-medium">
-                    <Check className={`w-4 h-4 inline ${isRTL ? 'ml-1.5' : 'mr-1.5'}`} />
-                    {assignedCount} {t('addonModal.stats.assigned')}
+                  <div className="group bg-emerald-500/20 backdrop-blur-xl border border-emerald-300/30 rounded-2xl px-4 py-2.5 hover:bg-emerald-500/30 transition-all duration-300 shadow-lg">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-emerald-400/30 rounded-lg flex items-center justify-center">
+                        <Check className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <div className="text-xl font-bold text-white">{assignedCount}</div>
+                        <div className="text-xs text-emerald-100 font-medium">{t('addonModal.stats.assigned')}</div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="bg-yellow-500/30 backdrop-blur-sm rounded-full px-3 py-1.5 text-sm font-medium">
-                    <Star className={`w-4 h-4 inline ${isRTL ? 'ml-1.5' : 'mr-1.5'}`} />
-                    {assignedAddons.filter(a => a.isRecommended).length} {t('addonModal.stats.recommended')}
+                  <div className="group bg-amber-500/20 backdrop-blur-xl border border-amber-300/30 rounded-2xl px-4 py-2.5 hover:bg-amber-500/30 transition-all duration-300 shadow-lg">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-amber-400/30 rounded-lg flex items-center justify-center">
+                        <Star className="w-4 h-4 text-white fill-current" />
+                      </div>
+                      <div>
+                        <div className="text-xl font-bold text-white">{assignedAddons.filter(a => a.isRecommended).length}</div>
+                        <div className="text-xs text-amber-100 font-medium">{t('addonModal.stats.recommended')}</div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -354,14 +382,14 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                 <button
                   onClick={loadProductAddons}
                   disabled={isLoadingAddons}
-                  className="p-2 bg-white/20 hover:bg-white/30 rounded-xl transition-colors"
+                  className="p-3 bg-white/15 hover:bg-white/25 backdrop-blur-xl border border-white/20 rounded-2xl transition-all duration-300 shadow-lg hover:scale-105 active:scale-95"
                   title={t('addonModal.refresh')}
                 >
                   <RefreshCw className={`w-5 h-5 ${isLoadingAddons ? 'animate-spin' : ''}`} />
                 </button>
                 <button
                   onClick={resetAndClose}
-                  className="p-2 bg-white/20 hover:bg-white/30 rounded-xl transition-colors"
+                  className="p-3 bg-white/15 hover:bg-white/25 backdrop-blur-xl border border-white/20 rounded-2xl transition-all duration-300 shadow-lg hover:scale-105 active:scale-95"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -369,77 +397,86 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
             </div>
           </div>
 
-          <div className="px-6 py-6">
+          <div className="px-8 py-6">
             {/* Messages */}
             {error && (
-              <div className={`mb-6 p-4 bg-red-50 dark:bg-red-900/20 ${isRTL ? 'border-r-4 border-l-0' : 'border-l-4'} border-red-500 rounded-r-lg`}>
+              <div className={`mb-6 p-4 bg-gradient-to-r from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/10 ${isRTL ? 'border-r-4 border-l-0' : 'border-l-4'} border-red-500 rounded-xl shadow-sm`}>
                 <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <AlertCircle className={`h-5 w-5 text-red-500 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-                  <span className="text-red-700 dark:text-red-300 text-sm font-medium">{error}</span>
+                  <div className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center mr-3">
+                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                  </div>
+                  <span className="text-red-800 dark:text-red-300 text-sm font-medium">{error}</span>
                 </div>
               </div>
             )}
 
             {successMessage && (
-              <div className={`mb-6 p-4 bg-green-50 dark:bg-green-900/20 ${isRTL ? 'border-r-4 border-l-0' : 'border-l-4'} border-green-500 rounded-r-lg`}>
+              <div className={`mb-6 p-4 bg-gradient-to-r from-emerald-50 to-emerald-100/50 dark:from-emerald-900/20 dark:to-emerald-800/10 ${isRTL ? 'border-r-4 border-l-0' : 'border-l-4'} border-emerald-500 rounded-xl shadow-sm`}>
                 <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <Check className={`h-5 w-5 text-green-500 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-                  <span className="text-green-700 dark:text-green-300 text-sm font-medium">{successMessage}</span>
+                  <div className="w-10 h-10 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center mr-3">
+                    <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                  </div>
+                  <span className="text-emerald-800 dark:text-emerald-300 text-sm font-medium">{successMessage}</span>
                 </div>
               </div>
             )}
 
             {/* Search */}
             <div className="mb-6">
-              <div className="relative">
-                <Search className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 ${isRTL ? 'right-4' : 'left-4'}`} />
+              <div className="relative group">
+                <Search className={`absolute top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-indigo-500 transition-colors ${isRTL ? 'right-5' : 'left-5'}`} />
                 <input
                   type="text"
                   placeholder={t('addonModal.search.placeholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className={`w-full py-3 border border-gray-200 dark:border-gray-700 rounded-xl bg-gray-50 dark:bg-gray-900/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all placeholder-gray-400 ${isRTL ? 'pr-12 pl-4 text-right' : 'pl-12 pr-4'}`}
+                  className={`w-full py-4 border-2 border-gray-200 dark:border-gray-700 rounded-2xl bg-gray-50/50 dark:bg-gray-800/50 text-gray-900 dark:text-white focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder-gray-400 text-base backdrop-blur-sm ${isRTL ? 'pr-14 pl-6 text-right' : 'pl-14 pr-6'}`}
                 />
               </div>
             </div>
 
             {/* Content */}
-            <div className="max-h-[60vh] overflow-y-auto custom-scrollbar">
+            <div className="max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
               {isLoadingAddons ? (
-                <div className="flex items-center justify-center py-16">
+                <div className="flex items-center justify-center py-20">
                   <div className="text-center">
-                    <Loader2 className="h-12 w-12 animate-spin text-blue-500 mx-auto mb-4" />
-                    <p className="text-gray-600 dark:text-gray-400 font-medium">{t('addonModal.loading')}</p>
+                    <div className="relative w-20 h-20 mx-auto mb-6">
+                      <div className="absolute inset-0 rounded-full border-4 border-indigo-100 dark:border-indigo-900/30"></div>
+                      <div className="absolute inset-0 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin"></div>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-400 font-medium text-lg">{t('addonModal.loading')}</p>
+                    <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">Please wait a moment</p>
                   </div>
                 </div>
               ) : filteredAddons.length === 0 ? (
-                <div className="text-center py-16">
-                  <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <Package className="h-10 w-10 text-gray-400" />
+                <div className="text-center py-20">
+                  <div className="w-24 h-24 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                    <Package className="h-12 w-12 text-gray-400" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
                     {t('addonModal.emptyState.title')}
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4 max-w-md mx-auto">
+                  <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto text-lg">
                     {t('addonModal.emptyState.description')}
                   </p>
-                  <div className={`inline-flex items-center px-4 py-2 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-blue-700 dark:text-blue-300 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <Zap className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                    {t('addonModal.emptyState.productId')} {product.branchProductId}
+                  <div className={`inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-2xl border border-indigo-200 dark:border-indigo-800 shadow-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <Zap className={`w-5 h-5 ${isRTL ? 'ml-2' : 'mr-2'} text-indigo-600 dark:text-indigo-400`} />
+                    <span className="text-indigo-700 dark:text-indigo-300 font-medium">{t('addonModal.emptyState.productId')} {product.branchProductId}</span>
                   </div>
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {/* Assigned Addons Section */}
                   {assignedAddons.length > 0 && (
                     <div>
-                      <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} mb-4`}>
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <h4 className="font-semibold text-gray-900 dark:text-white text-lg">
-                          {t('addonModal.sections.assignedAddons')} ({assignedAddons.length})
+                      <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} mb-5`}>
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full shadow-lg shadow-emerald-500/50"></div>
+                        <h4 className="font-bold text-gray-900 dark:text-white text-xl">
+                          {t('addonModal.sections.assignedAddons')} <span className="text-emerald-600 dark:text-emerald-400">({assignedAddons.length})</span>
                         </h4>
+                        <div className="flex-1 h-px bg-gradient-to-r from-emerald-200 to-transparent dark:from-emerald-800"></div>
                       </div>
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                         {assignedAddons.map((addon) => (
                           <AddonCard
                             key={addon.addonBranchProductId}
@@ -459,13 +496,14 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                   {/* Unassigned Addons Section */}
                   {unassignedAddons.length > 0 && (
                     <div>
-                      <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} mb-4`}>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                        <h4 className="font-semibold text-gray-900 dark:text-white text-lg">
-                          {t('addonModal.sections.availableAddons')} ({unassignedAddons.length})
+                      <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} mb-5`}>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full shadow-lg shadow-gray-400/50"></div>
+                        <h4 className="font-bold text-gray-900 dark:text-white text-xl">
+                          {t('addonModal.sections.availableAddons')} <span className="text-gray-500 dark:text-gray-400">({unassignedAddons.length})</span>
                         </h4>
+                        <div className="flex-1 h-px bg-gradient-to-r from-gray-200 to-transparent dark:from-gray-700"></div>
                       </div>
-                      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5">
                         {unassignedAddons.map((addon) => (
                           <AddonCard
                             key={addon.addonBranchProductId}
@@ -487,15 +525,25 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-100 dark:border-gray-700">
+          <div className="px-8 py-5 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-900/50 border-t border-gray-200 dark:border-gray-700">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                <span className="font-medium">{assignedCount}</span> {t('addonModal.footer.summary')} <span className="font-medium">{totalCount}</span> {totalCount === 1 ? t('addonModal.footer.addon') : t('addonModal.footer.addons')} {t('addonModal.footer.assigned')}
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <Check className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-gray-900 dark:text-white">
+                    {assignedCount} {t('addonModal.footer.summary')} {totalCount} {totalCount === 1 ? t('addonModal.footer.addon') : t('addonModal.footer.addons')} {t('addonModal.footer.assigned')}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    All changes saved automatically
+                  </div>
+                </div>
               </div>
               
               <button
                 onClick={resetAndClose}
-                className="px-6 py-2.5 bg-gray-800 dark:bg-gray-700 hover:bg-gray-700 dark:hover:bg-gray-600 text-white rounded-xl text-sm font-medium transition-colors"
+                className="px-8 py-3 bg-gradient-to-r from-gray-800 to-gray-900 dark:from-gray-700 dark:to-gray-600 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
               >
                 {t('addonModal.actions.done')}
               </button>
@@ -506,258 +554,20 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
       
       <style>{`
         .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
+          width: 8px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
           background: rgba(156, 163, 175, 0.1);
-          border-radius: 3px;
+          border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(156, 163, 175, 0.3);
-          border-radius: 3px;
+          background: linear-gradient(180deg, rgba(99, 102, 241, 0.4), rgba(168, 85, 247, 0.4));
+          border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(156, 163, 175, 0.5);
+          background: linear-gradient(180deg, rgba(99, 102, 241, 0.6), rgba(168, 85, 247, 0.6));
         }
       `}</style>
-    </div>
-  );
-};
-
-// Enhanced Addon Card Component (unchanged from original)
-const AddonCard: React.FC<{
-  addon: EnhancedAddon;
-  isRTL: boolean;
-  isSaving: boolean;
-  onToggle: () => void;
-  onPropertyChange: (addonBranchProductId: number, property: string, value: any) => void;
-  onUpdate: () => void;
-  t: (key: string) => string;
-}> = ({ addon, isRTL, isSaving, onToggle, onPropertyChange, onUpdate, t }) => {
-  
-  const [isExpanded, setIsExpanded] = useState(false);
-  
-  const hasPropertyChanges = 
-    addon.editedSpecialPrice !== addon.currentSpecialPrice ||
-    addon.editedMarketingText !== addon.currentMarketingText ||
-    addon.editedMaxQuantity !== addon.currentMaxQuantity ||
-    addon.editedMinQuantity !== addon.currentMinQuantity ||
-    addon.editedGroupTag !== addon.currentGroupTag ||
-    addon.editedIsGroupRequired !== addon.currentIsGroupRequired;
-
-  return (
-    <div className={`group relative rounded-xl border transition-all duration-200 overflow-hidden ${
-      addon.isAssigned
-        ? 'border-green-200 bg-green-50 dark:bg-green-900/20 dark:border-green-700 shadow-sm'
-        : 'border-gray-200 bg-white dark:bg-gray-800 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-md'
-    }`}>
-      
-      {/* Main Content */}
-      <div className="p-5">
-        <div className={`flex items-start justify-between `}>
-          
-          {/* Left Side - Info */}
-          <div className={`flex items-start ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'} flex-1 min-w-0`}>
-            {/* Image */}
-            {addon.addonImageUrl ? (
-              <img
-                src={addon.addonImageUrl}
-                alt={addon.addonProductName}
-                className="w-16 h-16 object-cover rounded-xl shadow-sm flex-shrink-0"
-              />
-            ) : (
-              <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Package className="w-6 h-6 text-gray-400" />
-              </div>
-            )}
-            
-            {/* Product Info */}
-            <div className="flex-1 min-w-0">
-              <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} mb-2`}>
-                <h4 className="font-semibold text-gray-900 dark:text-white truncate">
-                  {addon.addonProductName}
-                </h4>
-                {addon.isRecommended && (
-                  <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-1' : 'space-x-1'}`}>
-                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                    <span className="text-xs text-yellow-600 dark:text-yellow-400 font-medium">{t('addonModal.status.recommended')}</span>
-                  </div>
-                )}
-              </div>
-              
-              {addon.addonProductDescription && (
-                <p className={`text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2 ${isRTL ? 'text-right' : ''}`}>
-                  {addon.addonProductDescription}
-                </p>
-              )}
-              
-              {/* Price and Category */}
-              <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-                <div className="flex items-center">
-                  <span className="text-green-600 dark:text-green-400 font-bold text-lg">
-                    ${addon.isAssigned && addon.editedSpecialPrice !== addon.addonPrice 
-                      ? addon.editedSpecialPrice 
-                      : addon.addonPrice
-                    }
-                  </span>
-                  {addon.isAssigned && addon.editedSpecialPrice !== addon.addonPrice && (
-                    <span className={`text-gray-400 line-through text-sm ${isRTL ? 'mr-2' : 'ml-2'}`}>
-                      ${addon.addonPrice}
-                    </span>
-                  )}
-                </div>
-                {addon.addonCategoryName && (
-                  <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-1 rounded-lg text-xs font-medium">
-                    {addon.addonCategoryName}
-                  </span>
-                )}
-              </div>
-
-              {/* Marketing Text */}
-              {addon.isAssigned && addon.editedMarketingText && (
-                <div className={`mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium ${isRTL ? 'text-right' : ''}`}>
-                  "{addon.editedMarketingText}"
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {/* Right Side - Actions */}
-          <div className={`flex flex-col ${isRTL ? 'items-start mr-4' : 'items-end ml-4'} space-y-2`}>
-            {/* Status Badge */}
-            {addon.isAssigned && (
-              <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-3 py-1 rounded-full text-xs font-medium">
-                {t('addonModal.status.assigned')}
-              </span>
-            )}
-            
-            {/* Action Buttons */}
-            <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
-              {addon.isAssigned && (
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-                  title="Configure"
-                >
-                  {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                </button>
-              )}
-              
-              <button
-                onClick={onToggle}
-                disabled={isSaving}
-                className={`px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50 flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} ${
-                  addon.isAssigned
-                    ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
-                    : 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm'
-                }`}
-              >
-                {isSaving ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : addon.isAssigned ? (
-                  <Trash2 className="w-4 h-4" />
-                ) : (
-                  <Plus className="w-4 h-4" />
-                )}
-                <span className="text-sm">{addon.isAssigned ? t('addonModal.actions.remove') : t('addonModal.actions.add')}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      {/* Expandable Configuration Panel */}
-      {addon.isAssigned && isExpanded && (
-        <div className={`px-5 pb-5 border-t border-green-200 dark:border-green-800 bg-green-25 dark:bg-green-900/10`}>
-          <div className="pt-4">
-            <h5 className={`text-sm font-semibold text-gray-900 dark:text-white mb-4 ${isRTL ? 'text-right' : ''}`}>
-              {t('addonModal.configuration.title')}
-            </h5>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'text-right' : ''}`}>
-                  {t('addonModal.configuration.specialPrice')}
-                </label>
-                <div className="relative">
-                  <DollarSign className={`absolute top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 ${isRTL ? 'right-3' : 'left-3'}`} />
-                  <input
-                    title='number'
-                    type="number"
-                    step="0.01"
-                    value={addon.editedSpecialPrice || addon.addonPrice}
-                    onChange={(e) => onPropertyChange(addon.addonBranchProductId, 'specialPrice', parseFloat(e.target.value) || 0)}
-                    className={`w-full py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isRTL ? 'pr-10 pl-3 text-right' : 'pl-10 pr-3'}`}
-                  />
-                </div>
-              </div>
-              
-              <div>
-                <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'text-right' : ''}`}>
-                  {t('addonModal.configuration.minQuantity')}
-                </label>
-                <input
-                  title='number'
-                  type="number"
-                  min="0"
-                  step="1"
-                  value={addon.editedMinQuantity || 0}
-                  onChange={(e) => onPropertyChange(addon.addonBranchProductId, 'minQuantity', parseInt(e.target.value) || 0)}
-                  className={`w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isRTL ? 'text-right' : ''}`}
-                />
-              </div>
-
-              <div>
-                <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'text-right' : ''}`}>
-                  {t('addonModal.configuration.maxQuantity')}
-                </label>
-                <input
-                title='number'
-                  type="number"
-                  min="1"
-                  value={addon.editedMaxQuantity || 10}
-                  onChange={(e) => onPropertyChange(addon.addonBranchProductId, 'maxQuantity', parseInt(e.target.value) || 10)}
-                  className={`w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent ${isRTL ? 'text-right' : ''}`}
-                />
-              </div>
-
-              <div>
-                {/* Empty grid cell to balance the layout */}
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'text-right' : ''}`}>
-                  {t('addonModal.configuration.marketingText')}
-                </label>
-                <input
-                  type="text"
-                  placeholder={t('addonModal.configuration.placeholders.marketingText')}
-                  value={addon.editedMarketingText || ''}
-                  onChange={(e) => onPropertyChange(addon.addonBranchProductId, 'marketingText', e.target.value)}
-                  className={`w-full px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-400 ${isRTL ? 'text-right' : ''}`}
-                />
-              </div>
-
-              <div className={`sm:col-span-2 flex items-center justify-between`}>
-                {hasPropertyChanges && (
-                <button
-                onClick={onUpdate}
-                disabled={isSaving || !hasPropertyChanges}
-                className={`px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg flex items-center disabled:opacity-50 text-sm font-medium transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
-              >
-                {isSaving ? (
-                  <Loader2 className={`w-4 h-4 animate-spin ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                ) : (
-                  <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                )}
-                {t('addonModal.actions.saveChanges')}
-              </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
