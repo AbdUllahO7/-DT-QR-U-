@@ -28,7 +28,6 @@ import {
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import CategorySection from './CategorySection';
 import { CategoryData, TableData } from '../../../../types/BranchManagement/type';
-import { use } from 'i18next';
 import { useNavigate } from 'react-router-dom';
 
 // QR Code Modal Component
