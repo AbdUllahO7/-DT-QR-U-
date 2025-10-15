@@ -33,6 +33,7 @@ interface OrderForm {
   tableId?: number
   deliveryAddress?: string
   customerPhone?: string
+  paymentMethod: string
 }
 
 interface TrackedOrder {
@@ -456,7 +457,7 @@ export const useCartHandlers = ({
       }
       
       const order = await orderService.createSessionOrder(sessionOrderDto)
-
+      console.log('✅ Order created successfully:', order)
       // Calculate order total for WhatsApp message
       const serviceChargeAmount = selectedOrderType?.serviceCharge || 0
 
@@ -502,7 +503,8 @@ export const useCartHandlers = ({
         orderTypeId: 0,
         tableId: tableId,
         deliveryAddress: '',
-        customerPhone: ''
+        customerPhone: '',
+        paymentMethod: ''
       })
       
       if (onOrderCreated) {
@@ -542,7 +544,7 @@ export const useCartHandlers = ({
       
       const trackingInfo = await orderService.trackOrder(orderTag)
       
-      setTrackedOrders(prev => 
+      setTrackedOrders((prev: any[]) => 
         prev.map(order => 
           order.orderTag === orderTag 
             ? { ...order, trackingInfo }

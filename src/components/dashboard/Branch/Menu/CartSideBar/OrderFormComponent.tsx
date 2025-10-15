@@ -1,10 +1,18 @@
 import React from 'react';
-import { User, MapPin, Phone, Clock, Loader2 } from 'lucide-react';
+import { User, MapPin, Phone, Clock, Loader2, CreditCard, Banknote, Smartphone } from 'lucide-react';
 import { useLanguage } from '../../../../../contexts/LanguageContext';
 import { OrderFormProps } from '../../../../../types/menu/carSideBarTypes';
 
+// Add payment preferences to the props interface
+interface ExtendedOrderFormProps extends OrderFormProps {
+  paymentPreferences?: {
+    acceptCash: boolean;
+    acceptCreditCard: boolean;
+    acceptOnlinePayment: boolean;
+  };
+}
 
-const OrderFormComponent: React.FC<OrderFormProps> = ({
+const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
   orderForm,
   setOrderForm,
   orderTypes,
@@ -15,12 +23,30 @@ const OrderFormComponent: React.FC<OrderFormProps> = ({
   loading,
   onBack,
   onCreate,
+  paymentPreferences,
 }) => {
-  const { t } = useLanguage(); // Initialize the translation hook
+  const { t } = useLanguage(); 
 
   const getSelectedOrderType = () => {
     return orderTypes.find((ot) => ot.id === orderForm.orderTypeId);
   };
+
+  // Get available payment methods
+  const getAvailablePaymentMethods = () => {
+    const methods = [];
+    if (paymentPreferences?.acceptCash) {
+      methods.push({ value: 'cash', label: t('order.form.cash'), icon: Banknote });
+    }
+    if (paymentPreferences?.acceptCreditCard) {
+      methods.push({ value: 'creditCard', label: t('order.form.creditCard'), icon: CreditCard });
+    }
+    if (paymentPreferences?.acceptOnlinePayment) {
+      methods.push({ value: 'onlinePayment', label: t('order.form.onlinePayment'), icon: Smartphone });
+    }
+    return methods;
+  };
+
+  const availablePaymentMethods = getAvailablePaymentMethods();
 
   if (loadingOrderTypes) {
     return (
@@ -40,7 +66,9 @@ const OrderFormComponent: React.FC<OrderFormProps> = ({
     loading ||
     orderTypes.length === 0 ||
     !orderForm.orderTypeId ||
-    isBelowMinimumOrder;
+    isBelowMinimumOrder ||
+    (availablePaymentMethods.length > 0 && !orderForm.paymentMethod); // Add payment method validation
+
   return (
     <div className="space-y-6">
       {/* Order Type Selection */}
@@ -102,6 +130,53 @@ const OrderFormComponent: React.FC<OrderFormProps> = ({
           </p>
         )}
       </div>
+
+      {/* Payment Method Selection - Only show if there are available methods */}
+      {availablePaymentMethods.length > 0 && (
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+            {t('order.form.paymentMethod')} *
+          </label>
+          <div className="grid grid-cols-1 gap-3">
+            {availablePaymentMethods.map((method) => {
+              const Icon = method.icon;
+              const isSelected = orderForm.paymentMethod === method.value;
+              
+              return (
+                <button
+                  key={method.value}
+                  type="button"
+                  onClick={() =>
+                    setOrderForm((prev) => ({ ...prev, paymentMethod: method.value }))
+                  }
+                  className={`
+                    flex items-center p-4 border-2 rounded-lg transition-all
+                    ${isSelected
+                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                      : 'border-slate-300 dark:border-slate-600 hover:border-orange-300 dark:hover:border-orange-700'
+                    }
+                  `}
+                >
+                  <Icon className={`h-5 w-5 mr-3 ${isSelected ? 'text-orange-500' : 'text-slate-500 dark:text-slate-400'}`} />
+                  <span className={`font-medium ${isSelected ? 'text-orange-600 dark:text-orange-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                    {method.label}
+                  </span>
+                  {isSelected && (
+                    <div className="ml-auto w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
+                      <div className="w-2 h-2 rounded-full bg-white"></div>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          {!orderForm.paymentMethod && (
+            <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+              {t('order.form.selectPaymentMethod')}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Customer Name */}
       <div>
@@ -246,19 +321,19 @@ const OrderFormComponent: React.FC<OrderFormProps> = ({
           {t('order.form.backToCart')}
         </button>
         <button
-        onClick={onCreate}
-        disabled={isButtonDisabled}
-        className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50"
-      >
-        {loading ? (
-          <div className="flex items-center justify-center">
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            {t('order.form.creating')}
-          </div>
-        ) : (
-          t('order.form.createOrder')
-        )}
-      </button>
+          onClick={onCreate}
+          disabled={isButtonDisabled}
+          className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50"
+        >
+          {loading ? (
+            <div className="flex items-center justify-center">
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              {t('order.form.creating')}
+            </div>
+          ) : (
+            t('order.form.createOrder')
+          )}
+        </button>
       </div>
     </div>
   );
