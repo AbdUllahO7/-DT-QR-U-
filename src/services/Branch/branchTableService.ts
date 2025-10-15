@@ -707,9 +707,9 @@ class TableService {
   async getDeletedTables(branchId?: number): Promise<DeletedTable[]> {
     try {
       logger.info('Silinmiş masalar API çağrısı başlatılıyor', { branchId }, { prefix: 'TableService' });
-      
-      const response = await httpClient.get<DeletedTable[]>(`${this.baseUrl}/tables/deleted`);
-      
+      console.log("branchId getDeletedTables",branchId);
+      const response = await httpClient.get<DeletedTable[]>(`${this.baseUrl}/tables/deleted?branchId=${branchId || ''}`);
+      console.log("response table",response);
       logger.info('Silinmiş masalar alındı', { 
         count: response.data.length 
       }, { prefix: 'TableService' });
@@ -724,7 +724,7 @@ class TableService {
   /**
    * Restore a deleted table
    */
-  async restoreTable(tableId: number): Promise<void> {
+  async restoreTable(tableId: number , branchId?:string): Promise<void> {
     try {
       logger.info('Masa geri yükleme isteği', { tableId }, { prefix: 'TableService' });
       
@@ -732,7 +732,7 @@ class TableService {
         throw new Error('Geçerli bir masa ID gereklidir');
       }
       
-      await httpClient.post(`${this.baseUrl}/tables/${tableId}/restore`);
+      await httpClient.post(`${this.baseUrl}/tables/${tableId}/restore?branchId=${branchId || ''}`);
       
       logger.info('Masa başarıyla geri yüklendi', { tableId }, { prefix: 'TableService' });
     } catch (error) {

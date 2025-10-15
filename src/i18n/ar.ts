@@ -2870,17 +2870,17 @@ export const ar = {
   },
 
   BranchTableManagement: {
-      "clearTable": " تنضيف الطاولة",
-      "refreshTable": " تحديث الحالة",
-      "clearing": "جارٍ المسح...",
-          loading : "جارٍ التحميل...",
-        multiCategory : "إنشاء جداول متعددة عبر فئات مختلفة في وقت واحد",
-        category: "الفئة",
-        SelectCategory: "اختر فئة",
-        Quantity: "الكمية",
-        Capacity: "السعة",
-        createTables: "إنشاء الطاولات",
-        creatingTables: "جارٍ إنشاء الطاولات...",
+      clearTable: " تنضيف الطاولة",
+      refreshTable: " تحديث الحالة",
+      clearing: "جارٍ المسح...",
+      loading : "جارٍ التحميل...",
+      multiCategory : "إنشاء جداول متعددة عبر فئات مختلفة في وقت واحد",
+      category: "الفئة",
+      SelectCategory: "اختر فئة",
+      Quantity: "الكمية",
+      Capacity: "السعة",
+      createTables: "إنشاء الطاولات",
+      creatingTables: "جارٍ إنشاء الطاولات...",
       batchCreateTables: "إنشاء جداول دفعة واحدة",
       header: "إدارة الفئات والطاولات",
       subheader: "إدارة فئات المطعم والطاولات مع عرض الأكورديون",
@@ -2936,7 +2936,7 @@ export const ar = {
         dataRefreshed: "تم تحديث البيانات بنجاح"
       },
       error: {
-      "clearTableFailed": "فشل مسح الطاولة. يُرجى المحاولة مرة أخرى",
+        clearTableFailed: "فشل مسح الطاولة. يُرجى المحاولة مرة أخرى",
         fetchCategoriesFailed: "فشل في جلب الفئات",
         fetchTablesFailed: "فشل في جلب الطاولات",
         categoryNameRequired: "اسم الفئة مطلوب",
@@ -3747,37 +3747,37 @@ export const ar = {
   },
 
   branchPreferences: {
-    "title": "إعدادات الفرع",
-    "description": "تكوين الإعدادات والتفضيلات الخاصة بالفرع",
-    "loading": "جاري تحميل إعدادات الفرع...",
-    "saving": "جاري الحفظ...",
-    "refresh": "تحديث",
-    "saveChanges": "حفظ التغييرات",
-    "saveSuccess": "تم حفظ إعدادات الفرع بنجاح!",
-    "cleanupModes": {
-  "afterTimeout": "بعد انتهاء المهلة",
-  "afterClosing": "بعد الإغلاق",
-  "disabled": "معطل"
+    title: "إعدادات الفرع",
+    description: "تكوين الإعدادات والتفضيلات الخاصة بالفرع",
+    loading: "جاري تحميل إعدادات الفرع...",
+    saving: "جاري الحفظ...",
+    refresh: "تحديث",
+    saveChanges: "حفظ التغييرات",
+    saveSuccess: "تم حفظ إعدادات الفرع بنجاح!",
+    cleanupModes: {
+    afterTimeout: "بعد انتهاء المهلة",
+    afterClosing: "بعد الإغلاق",
+    disabled: "معطل"
     },
-    "sections": {
-      "orderManagement": {
-        "title": "إدارة الطلبات",
-        "description": "تكوين كيفية التعامل مع الطلبات ومعالجتها",
-        "autoConfirmOrders": "تأكيد الطلبات تلقائياً",
-        "autoConfirmOrdersDesc": "تأكيد الطلبات الواردة تلقائياً بدون موافقة يدوية",
-        "useWhatsappForOrders": "واتساب للطلبات",
-        "useWhatsappForOrdersDesc": "تفعيل تكامل واتساب لإشعارات الطلبات"
+    sections: {
+      orderManagement: {
+        title: "إدارة الطلبات",
+        description: "تكوين كيفية التعامل مع الطلبات ومعالجتها",
+        autoConfirmOrders: "تأكيد الطلبات تلقائياً",
+        autoConfirmOrdersDesc: "تأكيد الطلبات الواردة تلقائياً بدون موافقة يدوية",
+        useWhatsappForOrders: "واتساب للطلبات",
+        useWhatsappForOrdersDesc: "تفعيل تكامل واتساب لإشعارات الطلبات"
       },
 
-      "displaySettings": {
-        "title": "إعدادات العرض",
-        "description": "تكوين المعلومات التي يتم عرضها للعملاء",
-        "showProductDescriptions": "عرض أوصاف المنتجات",
-        "showProductDescriptionsDesc": "عرض أوصاف مفصلة للمنتجات للعملاء",
-        "enableAllergenDisplay": "عرض معلومات مسببات الحساسية",
-        "enableAllergenDisplayDesc": "إظهار تحذيرات ومعلومات مسببات الحساسية",
-        "enableIngredientDisplay": "عرض المكونات",
-        "enableIngredientDisplayDesc": "إظهار قوائم المكونات للمنتجات"
+      displaySettings: {
+        title: "إعدادات العرض",
+        description: "تكوين المعلومات التي يتم عرضها للعملاء",
+        showProductDescriptions: "عرض أوصاف المنتجات",
+        showProductDescriptionsDesc: "عرض أوصاف مفصلة للمنتجات للعملاء",
+        enableAllergenDisplay: "عرض معلومات مسببات الحساسية",
+        enableAllergenDisplayDesc: "إظهار تحذيرات ومعلومات مسببات الحساسية",
+        enableIngredientDisplay: "عرض المكونات",
+        enableIngredientDisplayDesc: "إظهار قوائم المكونات للمنتجات"
       },
       "paymentMethods": {
         "title": "طرق الدفع",
@@ -3954,39 +3954,39 @@ export const ar = {
   },
 
   management: {
-    "title": "معلومات الإدارة",
-    "subtitle": "تفاصيل الشركة والقانونية",
-    "noDataTitle": "لا توجد معلومات إدارية",
-    "noDataMessage": "لم يتم إعداد معلومات الإدارة بعد. يرجى إضافة تفاصيل المطعم للبدء.",
+    title: "معلومات الإدارة",
+    subtitle: "تفاصيل الشركة والقانونية",
+    noDataTitle: "لا توجد معلومات إدارية",
+    noDataMessage: "لم يتم إعداد معلومات الإدارة بعد. يرجى إضافة تفاصيل المطعم للبدء.",
     
-    "buttons": {
-      "edit": "تعديل",
-      "cancel": "إلغاء",
-      "save": "حفظ التغييرات",
-      "saving": "جاري الحفظ..."
+    buttons: {
+      edit: "تعديل",
+      cancel: "إلغاء",
+      save: "حفظ التغييرات",
+      saving: "جاري الحفظ..."
     },
 
-    "sections": {
-      "restaurantDetails": "تفاصيل المطعم",
-      "companyInfo": "معلومات الشركة",
-      "taxInfo": "الضرائب والتسجيل",
-      "certificates": "الشهادات والتصاريح",
-      "additionalSettings": "إعدادات إضافية"
+    sections: {
+      restaurantDetails: "تفاصيل المطعم",
+      companyInfo: "معلومات الشركة",
+      taxInfo: "الضرائب والتسجيل",
+      certificates: "الشهادات والتصاريح",
+      additionalSettings: "إعدادات إضافية"
     },
 
-    "fields": {
-      "restaurantName": "اسم المطعم",
-      "restaurantLogo": "شعار المطعم",
-      "companyTitle": "عنوان الشركة",
-      "legalType": "النوع القانوني",
-      "taxNumber": "الرقم الضريبي",
-      "taxOffice": "مكتب الضرائب",
-      "mersisNumber": "رقم MERSIS",
-      "tradeRegistry": "رقم السجل التجاري",
-      "workPermit": "تصريح العمل",
-      "foodCertificate": "شهادة الغذاء",
-      "alcoholService": "يوجد خدمة كحول",
-      "logo": "الشعار"
+    fields: {
+      restaurantName: "اسم المطعم",
+      restaurantLogo: "شعار المطعم",
+      companyTitle: "عنوان الشركة",
+      legalType: "النوع القانوني",
+      taxNumber: "الرقم الضريبي",
+      taxOffice: "مكتب الضرائب",
+      mersisNumbe: "رقم MERSIS",
+      tradeRegistry: "رقم السجل التجاري",
+      workPermit: "تصريح العمل",
+      foodCertificate: "شهادة الغذاء",
+      alcoholService: "يوجد خدمة كحول",
+      logo: "الشعار"
     },
 
     "placeholders": {
@@ -4019,114 +4019,114 @@ export const ar = {
   },
 
   branches: {
-  "status": {
-    "active": "نشط",
-    "inactive": "غير نشط"
+  status: {
+    active: "نشط",
+    inactive: "غير نشط"
   },
-  "fields": {
-    "branchType": "نوع الفرع",
-    "branchTag": "علامة الفرع"
+  fields: {
+    branchType: "نوع الفرع",
+    branchTag: "علامة الفرع"
   }
   },
 
   restaurantsTab: {
-    "status": {
-      "active": "نشط",
-      "inactive": "غير نشط"
+    status: {
+      active: "نشط",
+      inactive: "غير نشط"
     },
-    "actions": {
-      "edit": "تعديل المطعم",
-      "delete": "حذف المطعم"
+    actions: {
+      edit: "تعديل المطعم",
+      delete: "حذف المطعم"
     },
-    "stats": {
-      "totalBranches": "إجمالي الفروع",
-      "active": "نشط",
-      "inactive": "غير نشط",
-      "alcohol": "كحول"
+    stats: {
+      totalBranches: "إجمالي الفروع",
+      active: "نشط",
+      inactive: "غير نشط",
+      alcohol: "كحول"
     },
-    "common": {
-      "yes": "نعم",
-      "no": "لا"
+    common: {
+      yes: "نعم",
+      no: "لا"
     },
-    "modal": {
-      "editTitle": "تعديل المطعم",
-      "placeholders": {
-        "restaurantName": "اسم المطعم",
-        "cuisineType": "نوع المطبخ"
+    modal: {
+      editTitle: "تعديل المطعم",
+      placeholders: {
+        restaurantName: "اسم المطعم",
+        cuisineType: "نوع المطبخ"
       },
-      "labels": {
-        "hasAlcoholService": "يقدم خدمة الكحول"
+      labels: {
+        hasAlcoholService: "يقدم خدمة الكحول"
       },
-      "buttons": {
-        "update": "تحديث المطعم",
-        "updating": "جاري التحديث..."
+      buttons: {
+        update: "تحديث المطعم",
+        updating: "جاري التحديث..."
       }
     }
   },
 
   tabs: {
-    "restaurants": "المطاعم",
-    "branches": "الفروع",
-    "management": "معلومات الإدارة",
-    "deleted": "المحذوفة"
+    restaurants: "المطاعم",
+    branches: "الفروع",
+    management: "معلومات الإدارة",
+    deleted: "المحذوفة"
   },
   
   allergens: {
-    "GLUTEN": {
-      "name": "الغلوتين",
-      "description": "القمح، الجاودار، الشعير، الشوفان"
+    GLUTEN: {
+      name: "الغلوتين",
+      description: "القمح، الجاودار، الشعير، الشوفان"
     },
-    "CRUSTACEANS": {
-      "name": "القشريات",
-      "description": "الجمبري، السلطعون، الكركند"
+    CRUSTACEANS: {
+      name: "القشريات",
+      description: "الجمبري، السلطعون، الكركند"
     },
-    "EGGS": {
-      "name": "البيض",
-      "description": "البيض ومنتجات البيض"
+    EGGS: {
+      name: "البيض",
+      description: "البيض ومنتجات البيض"
     },
-    "FISH": {
-      "name": "السمك",
-      "description": "جميع منتجات الأسماك"
+    FISH: {
+      name: "السمك",
+      description: "جميع منتجات الأسماك"
     },
-    "PEANUTS": {
-      "name": "الفول السوداني",
-      "description": "الفول السوداني ومنتجاته"
+    PEANUTS: {
+      name: "الفول السوداني",
+      description: "الفول السوداني ومنتجاته"
     },
-    "SOYBEANS": {
-      "name": "فول الصويا",
-      "description": "الصويا ومنتجات الصويا"
+    SOYBEANS: {
+      name: "فول الصويا",
+      description: "الصويا ومنتجات الصويا"
     },
-    "MILK": {
-      "name": "الحليب",
-      "description": "الحليب ومنتجات الألبان"
+    MILK: {
+      name: "الحليب",
+      description: "الحليب ومنتجات الألبان"
     },
-    "NUTS": {
-      "name": "المكسرات",
-      "description": "اللوز، البندق، الجوز، الكاجو، إلخ"
+    NUTS: {
+      name: "المكسرات",
+      description: "اللوز، البندق، الجوز، الكاجو، إلخ"
     },
-    "CELERY": {
-      "name": "الكرفس",
-      "description": "الكرفس وجذر الكرفس"
+    CELERY: {
+      name: "الكرفس",
+      description: "الكرفس وجذر الكرفس"
     },
-    "MUSTARD": {
-      "name": "الخردل",
-      "description": "الخردل ومنتجات الخردل"
+    MUSTARD: {
+      name: "الخردل",
+      description: "الخردل ومنتجات الخردل"
     },
-    "SESAME": {
-      "name": "السمسم",
-      "description": "بذور السمسم ومنتجاته"
+    SESAME: {
+      name: "السمسم",
+      description: "بذور السمسم ومنتجاته"
     },
-    "SULPHITES": {
-      "name": "الكبريتات",
-      "description": "ثاني أكسيد الكبريت والكبريتات (>10مغ/كغ)"
+    SULPHITES: {
+      name: "الكبريتات",
+      description: "ثاني أكسيد الكبريت والكبريتات (>10مغ/كغ)"
     },
-    "LUPIN": {
-      "name": "الترمس",
-      "description": "الترمس ومنتجات الترمس"
+    LUPIN: {
+      name: "الترمس",
+      description: "الترمس ومنتجات الترمس"
     },
-    "MOLLUSCS": {
-      "name": "الرخويات",
-      "description": "المحار، بلح البحر، الحلزون، الحبار"
+    MOLLUSCS: {
+      name: "الرخويات",
+      description: "المحار، بلح البحر، الحلزون، الحبار"
     }
   }
 }; 
