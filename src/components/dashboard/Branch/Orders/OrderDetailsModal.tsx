@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Eye, XCircle, Clock, Package, AlertCircle, MapPin, Phone, User, Truck, 
   Home, CheckCircle, Printer, Calendar, Hash, ShoppingBag, MessageSquare,
-  DollarSign, TrendingUp
+  DollarSign, TrendingUp, Type, Maximize2, ChevronDown, ChevronUp, 
+  Settings, EyeOff, Droplets
 } from 'lucide-react';
 import { orderService } from '../../../../services/Branch/OrderService';
 import { BranchOrder, Order } from '../../../../types/BranchManagement/type';
 import { OrderStatusEnums } from '../../../../types/Orders/type';
 import OrderStatusUtils from '../../../../utils/OrderStatusUtils';
+import { OrderPrintService } from './OrderPrintService';
 
 interface OrderDetailsModalProps {
   show: boolean;
@@ -18,6 +20,19 @@ interface OrderDetailsModalProps {
   t: (key: string) => string;
 }
 
+type ViewDensity = 'compact' | 'comfortable' | 'spacious';
+type BlurIntensity = 'none' | 'light' | 'medium' | 'heavy';
+
+interface SectionVisibility {
+  stats: boolean;
+  customer: boolean;
+  delivery: boolean;
+  notes: boolean;
+  items: boolean;
+  pricing: boolean;
+  timeline: boolean;
+}
+
 const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
   show,
   order,
@@ -26,13 +41,118 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
   onClose,
   t
 }) => {
+  // Font size state
+  const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
+  
+  // View density state
+  const [viewDensity, setViewDensity] = useState<ViewDensity>('comfortable');
+  
+  // Blur intensity state
+  const [blurIntensity, setBlurIntensity] = useState<BlurIntensity>('medium');
+  
+  // Section visibility state
+  const [sectionVisibility, setSectionVisibility] = useState<SectionVisibility>({
+    stats: true,
+    customer: true,
+    delivery: true,
+    notes: true,
+    items: true,
+    pricing: true,
+    timeline: true
+  });
+  
+  // Settings panel toggle
+  const [showSettings, setShowSettings] = useState(false);
+  
+  const fontSizeClasses = {
+    small: 'text-xs',
+    medium: 'text-sm',
+    large: 'text-base'
+  };
+  
+  const densityClasses = {
+    compact: 'space-y-2 p-3',
+    comfortable: 'space-y-4 p-4',
+    spacious: 'space-y-6 p-6'
+  };
+  
+  const densityPadding = {
+    compact: 'p-2',
+    comfortable: 'p-3',
+    spacious: 'p-4'
+  };
+  
+  const densityGap = {
+    compact: 'gap-1',
+    comfortable: 'gap-2',
+    spacious: 'gap-3'
+  };
+  
+  const blurClasses = {
+    none: 'backdrop-blur-none',
+    light: 'backdrop-blur-sm',
+    medium: 'backdrop-blur-md',
+    heavy: 'backdrop-blur-xl'
+  };
+  
+  const blurOpacity = {
+    none: 'bg-black/40',
+    light: 'bg-black/50',
+    medium: 'bg-black/60',
+    heavy: 'bg-black/70'
+  };
+  
+  const cycleFontSize = () => {
+    setFontSize(prev => {
+      if (prev === 'small') return 'medium';
+      if (prev === 'medium') return 'large';
+      return 'small';
+    });
+  };
+  
+  const cycleViewDensity = () => {
+    setViewDensity(prev => {
+      if (prev === 'compact') return 'comfortable';
+      if (prev === 'comfortable') return 'spacious';
+      return 'compact';
+    });
+  };
+  
+  const cycleBlurIntensity = () => {
+    setBlurIntensity(prev => {
+      if (prev === 'none') return 'light';
+      if (prev === 'light') return 'medium';
+      if (prev === 'medium') return 'heavy';
+      return 'none';
+    });
+  };
+  
+  const toggleSection = (section: keyof SectionVisibility) => {
+    setSectionVisibility(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+  
+  const toggleAllSections = (visible: boolean) => {
+    setSectionVisibility({
+      stats: visible,
+      customer: visible,
+      delivery: visible,
+      notes: visible,
+      items: visible,
+      pricing: visible,
+      timeline: visible
+    });
+  };
+  
   if (!show || !order) return null;
   
   const status = viewMode === 'branch' 
     ? orderService.parseOrderStatus((order as unknown as BranchOrder).status)
     : OrderStatusEnums.Pending;
 
-  // Parse metadata from notes if exists
+  // Parse metadata from notes
   const parseMetadata = (notes: string | null) => {
     if (!notes) return null;
     const metadataMatch = notes.match(/\[METADATA:(.*?)\]/);
@@ -54,405 +174,9 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
   const metadata = parseMetadata((order as any).notes);
   const cleanNotes = getCleanNotes((order as any).notes);
 
-  // Handle print function
+  // Handle print using the service
   const handlePrint = () => {
-    const items = (order as any).items || [];
-    
-    // Calculate total quantity
-    const calculateTotalQuantity = () => {
-      let totalCount = 0;
-      const countItems = (itemList: any[]) => {
-        itemList.forEach(item => {
-          totalCount += item.count || 1;
-          if (item.addonItems && item.addonItems.length > 0) {
-            countItems(item.addonItems);
-          }
-        });
-      };
-      countItems(items);
-      return totalCount;
-    };
-
-    // Generate items HTML
-    const generateItemsHTML = (itemList: any[], isAddon = false): string => {
-      return itemList.map(item => `
-        <div style="margin-left: ${isAddon ? '20px' : '0'}; margin-bottom: 10px; padding: 12px; border: 1px solid #ddd; border-radius: 4px; background: ${isAddon ? '#f8f9fa' : 'white'};">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div style="flex: 1;">
-              <div style="font-weight: bold; margin-bottom: 8px; font-size: 14px;">
-                ${item.productName}
-                ${isAddon ? '<span style="background: #e3f2fd; padding: 2px 8px; border-radius: 12px; font-size: 10px; margin-left: 8px; color: #1976d2;">Add-on</span>' : ''}
-              </div>
-              <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
-                <span style="margin-right: 15px;">Qty: <strong>${item.count || 1}</strong></span>
-                <span style="margin-right: 15px;">Unit Price: <strong>$${item.price?.toFixed(2) || 'N/A'}</strong></span>
-                ${item.addonPrice ? `<span>Addon Price: <strong>$${item.addonPrice.toFixed(2)}</strong></span>` : ''}
-              </div>
-              ${(item.note || item.addonNote) ? `
-                <div style="background: #fff3cd; padding: 8px; border-radius: 4px; font-size: 11px; margin-top: 8px; border-left: 3px solid #ffc107;">
-                  <strong style="color: #856404;">Note:</strong> <span style="color: #856404;">${item.note || item.addonNote}</span>
-                </div>
-              ` : ''}
-            </div>
-            <div style="text-align: right; margin-left: 15px;">
-              <div style="font-size: 11px; color: #666; margin-bottom: 3px;">Total</div>
-              <div style="font-size: 18px; font-weight: bold; color: #2e7d32;">$${item.totalPrice?.toFixed(2) || 'N/A'}</div>
-            </div>
-          </div>
-          ${item.addonItems && item.addonItems.length > 0 ? generateItemsHTML(item.addonItems, true) : ''}
-        </div>
-      `).join('');
-    };
-
-    const totalQuantity = calculateTotalQuantity();
-
-    // Create the complete HTML document
-    const printHTML = `
-      <!DOCTYPE html>
-      <html lang="${lang}">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Order #${order.orderTag}</title>
-        <style>
-          @page {
-            size: A4;
-            margin: 15mm;
-          }
-          * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-          }
-          body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 20px;
-            color: #000;
-            background: white;
-            line-height: 1.6;
-          }
-          .header {
-            text-align: center;
-            border-bottom: 3px solid #333;
-            padding-bottom: 20px;
-            margin-bottom: 25px;
-          }
-          .header h1 {
-            font-size: 28px;
-            margin-bottom: 8px;
-            color: #1a1a1a;
-          }
-          .header .order-number {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 10px;
-          }
-          .header .order-type {
-            font-size: 18px;
-            margin-top: 10px;
-          }
-          .header .status {
-            display: inline-block;
-            padding: 6px 15px;
-            background: #e8f5e9;
-            border: 1px solid #4caf50;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: bold;
-            margin-top: 10px;
-          }
-          .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            margin-bottom: 25px;
-          }
-          .stat-card {
-            border: 1px solid #ddd;
-            padding: 15px;
-            text-align: center;
-            border-radius: 6px;
-            background: #f9f9f9;
-          }
-          .stat-label {
-            font-size: 11px;
-            color: #666;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-          }
-          .stat-value {
-            font-size: 22px;
-            font-weight: bold;
-            color: #1a1a1a;
-          }
-          .section {
-            margin-bottom: 25px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            background: #fafafa;
-          }
-          .section-title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e0e0e0;
-            color: #1a1a1a;
-          }
-          .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-          }
-          .info-item {
-            padding: 10px;
-            background: white;
-            border-radius: 4px;
-            border: 1px solid #e0e0e0;
-          }
-          .info-label {
-            font-size: 11px;
-            color: #666;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-          }
-          .info-value {
-            font-size: 13px;
-            font-weight: 600;
-            color: #1a1a1a;
-          }
-          .items-section {
-            margin-bottom: 25px;
-          }
-          .total-section {
-            background: #f5f5f5;
-            padding: 15px;
-            border-radius: 6px;
-            margin-top: 25px;
-            border: 1px solid #ddd;
-          }
-          .total-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            font-size: 14px;
-            border-bottom: 1px solid #e0e0e0;
-          }
-          .total-row:last-child {
-            border-bottom: none;
-          }
-          .grand-total {
-            font-size: 22px;
-            font-weight: bold;
-            border-top: 3px solid #333;
-            padding-top: 12px;
-            margin-top: 12px;
-          }
-          .grand-total .label {
-            color: #1a1a1a;
-          }
-          .grand-total .value {
-            color: #2e7d32;
-          }
-          .timeline {
-            margin-top: 25px;
-          }
-          .timeline-item {
-            padding: 12px;
-            border-left: 4px solid #1976d2;
-            margin-bottom: 12px;
-            background: #f8f9fa;
-            border-radius: 0 4px 4px 0;
-          }
-          .timeline-label {
-            font-size: 12px;
-            font-weight: bold;
-            color: #1976d2;
-            margin-bottom: 4px;
-          }
-          .timeline-value {
-            font-size: 13px;
-            color: #333;
-          }
-          .footer {
-            text-align: center;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #ddd;
-            font-size: 11px;
-            color: #666;
-          }
-          @media print {
-            body {
-              print-color-adjust: exact;
-              -webkit-print-color-adjust: exact;
-            }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h1>${t('ordersManager.orderDetailsTitle')}</h1>
-          <div class="order-number">Order #${order.orderTag}</div>
-          <div class="order-type">
-            ${(order as any).orderTypeIcon || '📦'} ${(order as any).orderTypeName || 'Order'} 
-            ${(order as any).orderTypeCode ? `(${(order as any).orderTypeCode})` : ''}
-          </div>
-          <div class="status">${orderService.getOrderStatusText(status, lang)}</div>
-        </div>
-
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-label">${t('ordersManager.OrderTag')}</div>
-            <div class="stat-value">${order.orderTag}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">${t('ordersManager.ItemCount')}</div>
-            <div class="stat-value">${(order as any).itemCount || items.length || 0}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">${t('ordersManager.quantity')}</div>
-            <div class="stat-value">${totalQuantity}</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">${t('ordersManager.total')}</div>
-            <div class="stat-value">$${order.totalPrice.toFixed(2)}</div>
-          </div>
-        </div>
-
-        <div class="section">
-          <div class="section-title">${t('ordersManager.CustomerInformation')}</div>
-          <div class="info-grid">
-            <div class="info-item">
-              <div class="info-label">${t('ordersManager.CustomerName')}</div>
-              <div class="info-value">${order.customerName || 'N/A'}</div>
-            </div>
-            ${(order as any).customerPhone ? `
-              <div class="info-item">
-                <div class="info-label">${t('ordersManager.PhoneNumber')}</div>
-                <div class="info-value">${(order as any).customerPhone}</div>
-              </div>
-            ` : ''}
-          </div>
-        </div>
-
-        ${((order as any).deliveryAddress || (order as any).tableName) ? `
-          <div class="section">
-            <div class="section-title">
-              ${(order as any).deliveryAddress ? t('ordersManager.DeliveryInformation') : t('ordersManager.TableInformation')}
-            </div>
-            ${(order as any).deliveryAddress ? `
-              <div class="info-item">
-                <div class="info-label">${t('ordersManager.DeliveryAddress')}</div>
-                <div class="info-value">${(order as any).deliveryAddress}</div>
-              </div>
-            ` : ''}
-            ${(order as any).tableName ? `
-              <div class="info-item">
-                <div class="info-label">${t('ordersManager.table')}</div>
-                <div class="info-value">${(order as any).tableName} ${(order as any).tableId ? `(ID: ${(order as any).tableId})` : ''}</div>
-              </div>
-            ` : ''}
-          </div>
-        ` : ''}
-
-        ${cleanNotes ? `
-          <div class="section">
-            <div class="section-title">${t('ordersManager.OrderNotes')}</div>
-            <div style="padding: 10px; background: white; border-radius: 4px; line-height: 1.8;">
-              ${cleanNotes}
-            </div>
-          </div>
-        ` : ''}
-
-        <div class="items-section">
-          <div class="section">
-            <div class="section-title">${t('ordersManager.orderItems')}</div>
-            ${items.length > 0 ? generateItemsHTML(items) : '<p style="text-align: center; color: #999; padding: 20px;">No items available</p>'}
-          </div>
-        </div>
-
-        <div class="total-section">
-          <div class="total-row">
-            <span>${t('ordersManager.subTotal')}:</span>
-            <span style="font-weight: 600;">$${(order.subTotal || 0).toFixed(2)}</span>
-          </div>
-          ${order.serviceFeeApplied !== undefined && order.serviceFeeApplied > 0 ? `
-            <div class="total-row">
-              <span>${t('ordersManager.serviceFeeApplied')}:</span>
-              <span style="font-weight: 600; color: #1976d2;">+$${order.serviceFeeApplied.toFixed(2)}</span>
-            </div>
-          ` : ''}
-          ${metadata?.MinOrderAmount ? `
-            <div class="total-row">
-              <span>${t('ordersManager.MinOrderAmount')}:</span>
-              <span style="font-weight: 600;">$${parseFloat(metadata.MinOrderAmount).toFixed(2)}</span>
-            </div>
-          ` : ''}
-          <div class="total-row grand-total">
-            <span class="label">${t('ordersManager.total')}:</span>
-            <span class="value">$${order.totalPrice.toFixed(2)}</span>
-          </div>
-        </div>
-
-        <div class="timeline">
-          <div class="section">
-            <div class="section-title">${t('ordersManager.OrderTimeline')}</div>
-            <div class="timeline-item">
-              <div class="timeline-label">${t('ordersManager.createdAt')}</div>
-              <div class="timeline-value">${new Date(order.createdAt).toLocaleString(
-                lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US',
-                { dateStyle: 'medium', timeStyle: 'short' }
-              )}</div>
-            </div>
-            ${(order as any).confirmedAt ? `
-              <div class="timeline-item" style="border-left-color: #4caf50;">
-                <div class="timeline-label" style="color: #4caf50;">${t('ordersManager.confirmedAt')}</div>
-                <div class="timeline-value">${new Date((order as any).confirmedAt).toLocaleString(
-                  lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US',
-                  { dateStyle: 'medium', timeStyle: 'short' }
-                )}</div>
-              </div>
-            ` : ''}
-            ${(order as any).completedAt ? `
-              <div class="timeline-item" style="border-left-color: #2196f3;">
-                <div class="timeline-label" style="color: #2196f3;">${t('ordersManager.CompletedAt')}</div>
-                <div class="timeline-value">${new Date((order as any).completedAt).toLocaleString(
-                  lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US',
-                  { dateStyle: 'medium', timeStyle: 'short' }
-                )}</div>
-              </div>
-            ` : ''}
-          </div>
-        </div>
-
-        <div class="footer">
-          <p>Printed: ${new Date().toLocaleString(lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US', {
-            dateStyle: 'full',
-            timeStyle: 'short'
-          })}</p>
-          <p style="margin-top: 5px;">Order Management System</p>
-        </div>
-      </body>
-      </html>
-    `;
-
-    // Open new window and print
-    const printWindow = window.open('', '_blank', 'width=900,height=800');
-    if (printWindow) {
-      printWindow.document.write(printHTML);
-      printWindow.document.close();
-      printWindow.focus();
-      
-      // Wait for content to load then trigger print
-      setTimeout(() => {
-        printWindow.print();
-      }, 500);
-    } else {
-      alert('Please allow popups to print the order');
-    }
+    OrderPrintService.print({ order, status, lang, t });
   };
 
   const renderItems = (itemList: any[], isAddon = false, level = 0) => {
@@ -462,7 +186,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
         className={`group transition-all duration-200 ${isAddon ? 'ml-4' : ''}`}
       >
         <div 
-          className={`relative p-3 rounded-lg border transition-all hover:shadow-md ${
+          className={`relative ${densityPadding[viewDensity]} rounded-lg border transition-all hover:shadow-md ${
             isAddon 
               ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-600' 
               : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-600'
@@ -472,9 +196,9 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
             <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-4 h-0.5 bg-blue-300 dark:bg-blue-600"></div>
           )}
           
-          <div className="flex justify-between items-start gap-3">
+          <div className={`flex justify-between items-start ${densityGap[viewDensity]}`}>
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-2">
+              <div className={`flex items-center ${densityGap[viewDensity]} mb-2`}>
                 <div className={`p-1.5 rounded-md ${
                   isAddon 
                     ? 'bg-blue-100 dark:bg-blue-800' 
@@ -496,7 +220,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 )}
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-2">
+              <div className={`grid grid-cols-2 md:grid-cols-3 ${densityGap[viewDensity]} mb-2`}>
                 <div className="flex items-center gap-1.5">
                   <Hash className="w-3 h-3 text-gray-400" />
                   <div>
@@ -555,7 +279,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
         </div>
         
         {item.addonItems && item.addonItems.length > 0 && (
-          <div className="mt-2 space-y-2 relative">
+          <div className={`mt-2 space-y-2 relative`}>
             <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-300 to-transparent dark:from-blue-600"></div>
             {renderItems(item.addonItems, true, level + 1)}
           </div>
@@ -565,7 +289,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 dark:bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-3 animate-fadeIn">
+    <div className={`fixed inset-0 dark:bg-black/80 flex items-center justify-center z-50 p-3 animate-fadeIn transition-all duration-300 ${blurOpacity[blurIntensity]} ${blurClasses[blurIntensity]}`}>
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col animate-slideUp">
         {/* Header */}
         <div className="relative bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 px-4 py-3">
@@ -586,6 +310,43 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
             
             <div className="flex items-center gap-1.5">
               <button
+                onClick={() => setShowSettings(!showSettings)}
+                className={`p-1.5 backdrop-blur-sm rounded-md transition-all text-white ${
+                  showSettings ? 'bg-white/30' : 'bg-white/20 hover:bg-white/30'
+                }`}
+                title="Settings"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+              
+              <button
+                onClick={cycleBlurIntensity}
+                className="p-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-md transition-all text-white flex items-center gap-1"
+                title={`Blur: ${blurIntensity}`}
+              >
+                <Droplets className="w-4 h-4" />
+                <span className="text-[10px] font-semibold uppercase">{blurIntensity[0]}</span>
+              </button>
+              
+              <button
+                onClick={cycleFontSize}
+                className="p-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-md transition-all text-white flex items-center gap-1"
+                title={`Font Size: ${fontSize}`}
+              >
+                <Type className="w-4 h-4" />
+                <span className="text-[10px] font-semibold uppercase">{fontSize[0]}</span>
+              </button>
+              
+              <button
+                onClick={cycleViewDensity}
+                className="p-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-md transition-all text-white flex items-center gap-1"
+                title={`Density: ${viewDensity}`}
+              >
+                <Maximize2 className="w-4 h-4" />
+                <span className="text-[10px] font-semibold uppercase">{viewDensity[0]}</span>
+              </button>
+              
+              <button
                 onClick={handlePrint}
                 className="p-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-md transition-all text-white"
                 title="Print Order"
@@ -601,6 +362,67 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
               </button>
             </div>
           </div>
+
+          {/* Settings Panel */}
+          {showSettings && (
+            <div className="mt-3 bg-white/10 backdrop-blur-md rounded-lg p-3 border border-white/20">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Droplets className="w-4 h-4 text-white" />
+                  <span className="text-sm font-semibold text-white">Background Blur</span>
+                </div>
+                <div className="flex gap-1">
+                  {(['none', 'light', 'medium', 'heavy'] as BlurIntensity[]).map((blur) => (
+                    <button
+                      key={blur}
+                      onClick={() => setBlurIntensity(blur)}
+                      className={`px-2 py-1 text-[10px] rounded transition-all ${
+                        blurIntensity === blur
+                          ? 'bg-white/30 text-white font-bold border border-white/40'
+                          : 'bg-white/10 text-white/70 hover:bg-white/20'
+                      }`}
+                    >
+                      {blur}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-sm font-semibold text-white">Section Visibility</h4>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => toggleAllSections(true)}
+                    className="px-2 py-1 text-[10px] bg-white/20 hover:bg-white/30 rounded text-white transition-all"
+                  >
+                    Show All
+                  </button>
+                  <button
+                    onClick={() => toggleAllSections(false)}
+                    className="px-2 py-1 text-[10px] bg-white/20 hover:bg-white/30 rounded text-white transition-all"
+                  >
+                    Hide All
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {Object.entries(sectionVisibility).map(([key, value]) => (
+                  <button
+                    key={key}
+                    onClick={() => toggleSection(key as keyof SectionVisibility)}
+                    className={`px-2 py-1.5 rounded text-xs font-medium transition-all flex items-center gap-1.5 ${
+                      value 
+                        ? 'bg-white/20 text-white border border-white/30' 
+                        : 'bg-white/5 text-white/50 border border-white/10'
+                    }`}
+                  >
+                    {value ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="mt-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -624,122 +446,138 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className={`flex-1 overflow-y-auto ${densityClasses[viewDensity]} ${fontSizeClasses[fontSize]}`}>
           
           {/* Quick Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 p-3 rounded-lg border border-blue-200 dark:border-blue-700 hover:shadow-md transition-all">
-              <Hash className="w-4 h-4 text-blue-600 dark:text-blue-400 mb-1" />
-              <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">{t('ordersManager.OrderTag')}</p>
-              <p className="text-sm font-bold text-gray-900 dark:text-gray-100 font-mono">
-                {order.orderTag}
-              </p>
+          {sectionVisibility.stats && (
+            <div className={`grid grid-cols-2 md:grid-cols-4 ${densityGap[viewDensity]}`}>
+              <div className={`bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 ${densityPadding[viewDensity]} rounded-lg border border-blue-200 dark:border-blue-700 hover:shadow-md transition-all`}>
+                <Hash className="w-4 h-4 text-blue-600 dark:text-blue-400 mb-1" />
+                <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">{t('ordersManager.OrderTag')}</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-gray-100 font-mono">
+                  {order.orderTag}
+                </p>
+              </div>
+              
+              <div className={`bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 ${densityPadding[viewDensity]} rounded-lg border border-purple-200 dark:border-purple-700 hover:shadow-md transition-all`}>
+                <Package className="w-4 h-4 text-purple-600 dark:text-purple-400 mb-1" />
+                <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">{t('ordersManager.ItemCount')}</p>
+                <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                  {(order as any).itemCount || (order as any).items?.length || 0}
+                </p>
+              </div>
+              
+              <div className={`bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 ${densityPadding[viewDensity]} rounded-lg border border-amber-200 dark:border-amber-700 hover:shadow-md transition-all`}>
+                <ShoppingBag className="w-4 h-4 text-amber-600 dark:text-amber-400 mb-1" />
+                <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">{t('ordersManager.quantity')}</p>
+                <p className="text-lg font-bold text-amber-600 dark:text-amber-400">
+                  {(() => {
+                    const items = (order as any).items;
+                    if (items) {
+                      let totalCount = 0;
+                      const countItems = (itemList: any[]) => {
+                        itemList.forEach(item => {
+                          totalCount += item.count || 1;
+                          if (item.addonItems && item.addonItems.length > 0) {
+                            countItems(item.addonItems);
+                          }
+                        });
+                      };
+                      countItems(items);
+                      return totalCount;
+                    }
+                    return 0;
+                  })()}
+                </p>
+              </div>
+              
+              <div className={`bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-800/30 ${densityPadding[viewDensity]} rounded-lg border border-green-200 dark:border-green-700 hover:shadow-md transition-all`}>
+                <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400 mb-1" />
+                <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">{t('ordersManager.total')}</p>
+                <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                  {order.totalPrice.toFixed(2)}
+                </p>
+              </div>
             </div>
-            
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 p-3 rounded-lg border border-purple-200 dark:border-purple-700 hover:shadow-md transition-all">
-              <Package className="w-4 h-4 text-purple-600 dark:text-purple-400 mb-1" />
-              <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">{t('ordersManager.ItemCount')}</p>
-              <p className="text-lg font-bold text-purple-600 dark:text-purple-400">
-                {(order as any).itemCount || (order as any).items?.length || 0}
-              </p>
-            </div>
-            
-            <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 p-3 rounded-lg border border-amber-200 dark:border-amber-700 hover:shadow-md transition-all">
-              <ShoppingBag className="w-4 h-4 text-amber-600 dark:text-amber-400 mb-1" />
-              <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">{t('ordersManager.quantity')}</p>
-              <p className="text-lg font-bold text-amber-600 dark:text-amber-400">
-                {(() => {
-                  const items = (order as any).items;
-                  if (items) {
-                    let totalCount = 0;
-                    const countItems = (itemList: any[]) => {
-                      itemList.forEach(item => {
-                        totalCount += item.count || 1;
-                        if (item.addonItems && item.addonItems.length > 0) {
-                          countItems(item.addonItems);
-                        }
-                      });
-                    };
-                    countItems(items);
-                    return totalCount;
-                  }
-                  return 0;
-                })()}
-              </p>
-            </div>
-            
-            <div className="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-800/30 p-3 rounded-lg border border-green-200 dark:border-green-700 hover:shadow-md transition-all">
-              <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400 mb-1" />
-              <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">{t('ordersManager.total')}</p>
-              <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                {order.totalPrice.toFixed(2)}
-              </p>
-            </div>
-          </div>
+          )}
 
           {/* Customer Information */}
-          <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900/20 dark:via-indigo-900/20 dark:to-purple-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-700">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 bg-blue-100 dark:bg-blue-800 rounded-md">
-                <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                {t('ordersManager.CustomerInformation')}
-              </h4>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div className="flex items-start gap-2 p-2 bg-white dark:bg-gray-800 rounded-md">
-                <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
-                  <User className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+          {sectionVisibility.customer && (
+            <div className={`bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-900/20 dark:via-indigo-900/20 dark:to-purple-900/20 rounded-lg ${densityPadding[viewDensity]} border border-blue-200 dark:border-blue-700`}>
+              <button
+                onClick={() => toggleSection('customer')}
+                className="flex items-center justify-between w-full mb-3 group"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-blue-100 dark:bg-blue-800 rounded-md">
+                    <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                    {t('ordersManager.CustomerInformation')}
+                  </h4>
                 </div>
-                <div>
-                  <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
-                    {t('ordersManager.CustomerName')}
-                  </p>
-                  <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
-                    {order.customerName || 'N/A'}
-                  </p>
-                </div>
-              </div>
-              {(order as any).customerPhone && (
-                <div className="flex items-start gap-2 p-2 bg-white dark:bg-gray-800 rounded-md">
+                <ChevronUp className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors" />
+              </button>
+              <div className={`grid grid-cols-1 md:grid-cols-2 ${densityGap[viewDensity]}`}>
+                <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
                   <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
-                    <Phone className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                    <User className="w-3 h-3 text-gray-600 dark:text-gray-400" />
                   </div>
                   <div>
                     <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
-                      {t('ordersManager.PhoneNumber')}
+                      {t('ordersManager.CustomerName')}
                     </p>
                     <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
-                      {(order as any).customerPhone}
+                      {order.customerName || 'N/A'}
                     </p>
                   </div>
                 </div>
-              )}
+                {(order as any).customerPhone && (
+                  <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
+                    <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
+                      <Phone className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
+                        {t('ordersManager.PhoneNumber')}
+                      </p>
+                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                        {(order as any).customerPhone}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Delivery/Table Information */}
-          {((order as any).deliveryAddress || (order as any).tableName || (order as any).tableId) && (
-            <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-900/20 dark:via-emerald-900/20 dark:to-teal-900/20 rounded-lg p-4 border border-green-200 dark:border-green-700">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="p-1.5 bg-green-100 dark:bg-green-800 rounded-md">
-                  {(order as any).deliveryAddress ? (
-                    <Truck className="w-4 h-4 text-green-600 dark:text-green-400" />
-                  ) : (
-                    <Home className="w-4 h-4 text-green-600 dark:text-green-400" />
-                  )}
+          {sectionVisibility.delivery && ((order as any).deliveryAddress || (order as any).tableName || (order as any).tableId) && (
+            <div className={`bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 dark:from-green-900/20 dark:via-emerald-900/20 dark:to-teal-900/20 rounded-lg ${densityPadding[viewDensity]} border border-green-200 dark:border-green-700`}>
+              <button
+                onClick={() => toggleSection('delivery')}
+                className="flex items-center justify-between w-full mb-3 group"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-green-100 dark:bg-green-800 rounded-md">
+                    {(order as any).deliveryAddress ? (
+                      <Truck className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    ) : (
+                      <Home className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    )}
+                  </div>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                    {(order as any).deliveryAddress 
+                      ? t('ordersManager.DeliveryInformation')
+                      : t('ordersManager.TableInformation')
+                    }
+                  </h4>
                 </div>
-                <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                  {(order as any).deliveryAddress 
-                    ? t('ordersManager.DeliveryInformation')
-                    : t('ordersManager.TableInformation')
-                  }
-                </h4>
-              </div>
-              <div className="space-y-2">
+                <ChevronUp className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-green-600 transition-colors" />
+              </button>
+              <div className={`space-y-2`}>
                 {(order as any).deliveryAddress && (
-                  <div className="flex items-start gap-2 p-2 bg-white dark:bg-gray-800 rounded-md">
+                  <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
                     <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
                       <MapPin className="w-3 h-3 text-gray-600 dark:text-gray-400" />
                     </div>
@@ -754,7 +592,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                   </div>
                 )}
                 {(order as any).tableName && (
-                  <div className="flex items-start gap-2 p-2 bg-white dark:bg-gray-800 rounded-md">
+                  <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
                     <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
                       <Home className="w-3 h-3 text-gray-600 dark:text-gray-400" />
                     </div>
@@ -773,8 +611,8 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
           )}
 
           {/* Order Notes */}
-          {cleanNotes && (
-            <div className="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-lg p-4 border border-amber-200 dark:border-amber-700">
+          {sectionVisibility.notes && cleanNotes && (
+            <div className={`bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-lg ${densityPadding[viewDensity]} border border-amber-200 dark:border-amber-700`}>
               <div className="flex items-start gap-2">
                 <div className="p-1.5 bg-amber-100 dark:bg-amber-800 rounded-md">
                   <MessageSquare className="w-4 h-4 text-amber-600 dark:text-amber-400" />
@@ -792,178 +630,205 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
           )}
 
           {/* Order Items */}
-          <div className="bg-gray-50 dark:bg-gray-900/50 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 bg-indigo-100 dark:bg-indigo-800 rounded-md">
-                <Package className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              </div>
-              <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                {t('ordersManager.orderItems')}
-              </h4>
-            </div>
-            
-            {(() => {
-              const items = (order as any).items;
+          {sectionVisibility.items && (
+            <div className={`bg-gray-50 dark:bg-gray-900/50 rounded-lg ${densityPadding[viewDensity]} border border-gray-200 dark:border-gray-700`}>
+              <button
+                onClick={() => toggleSection('items')}
+                className="flex items-center justify-between w-full mb-3 group"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-indigo-100 dark:bg-indigo-800 rounded-md">
+                    <Package className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  </div>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                    {t('ordersManager.orderItems')}
+                  </h4>
+                </div>
+                <ChevronUp className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-indigo-600 transition-colors" />
+              </button>
               
-              if (!items || items.length === 0) {
-                return (
-                  <div className="p-8 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
-                    <div className="flex flex-col items-center justify-center text-center">
-                      <AlertCircle className="w-12 h-12 text-yellow-600 dark:text-yellow-400 mb-3" />
-                      <p className="text-yellow-900 dark:text-yellow-200 font-semibold text-sm">
-                        No items data available
-                      </p>
-                      <p className="text-yellow-700 dark:text-yellow-300 text-xs mt-1">
-                        This order doesn't contain any items yet
-                      </p>
+              {(() => {
+                const items = (order as any).items;
+                
+                if (!items || items.length === 0) {
+                  return (
+                    <div className="p-8 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
+                      <div className="flex flex-col items-center justify-center text-center">
+                        <AlertCircle className="w-12 h-12 text-yellow-600 dark:text-yellow-400 mb-3" />
+                        <p className="text-yellow-900 dark:text-yellow-200 font-semibold text-sm">
+                          No items data available
+                        </p>
+                        <p className="text-yellow-700 dark:text-yellow-300 text-xs mt-1">
+                          This order doesn't contain any items yet
+                        </p>
+                      </div>
                     </div>
+                  );
+                }
+
+                return (
+                  <div className="space-y-2">
+                    {renderItems(items)}
                   </div>
                 );
-              }
-
-              return (
-                <div className="space-y-2">
-                  {renderItems(items)}
-                </div>
-              );
-            })()}
-          </div>
+              })()}
+            </div>
+          )}
 
           {/* Pricing Breakdown */}
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-lg p-4 border border-gray-200 dark:border-gray-600">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 bg-gray-200 dark:bg-gray-700 rounded-md">
-                <TrendingUp className="w-4 h-4 text-gray-600 dark:text-gray-400" />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <div className="flex justify-between items-center p-2 bg-white dark:bg-gray-800 rounded-md">
-                <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">
-                  {t('ordersManager.subTotal')}
-                </span>
-                <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                  {(order.subTotal || 0).toFixed(2)}
-                </span>
-              </div>
-              
-              {order.serviceFeeApplied !== undefined && order.serviceFeeApplied > 0 && (
-                <div className="flex justify-between items-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+          {sectionVisibility.pricing && (
+            <div className={`bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-lg ${densityPadding[viewDensity]} border border-gray-200 dark:border-gray-600`}>
+              <button
+                onClick={() => toggleSection('pricing')}
+                className="flex items-center justify-between w-full mb-3 group"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-gray-200 dark:bg-gray-700 rounded-md">
+                    <TrendingUp className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                    Pricing
+                  </h4>
+                </div>
+                <ChevronUp className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-gray-900 transition-colors" />
+              </button>
+              <div className="space-y-2">
+                <div className={`flex justify-between items-center ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
                   <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">
-                    {t('ordersManager.serviceFeeApplied')}
+                    {t('ordersManager.subTotal')}
                   </span>
-                  <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                    +{order.serviceFeeApplied.toFixed(2)}
-                  </span>
-                </div>
-              )}
-              
-              {metadata?.MinOrderAmount && (
-                <div className="flex justify-between items-center p-2 bg-gray-100 dark:bg-gray-700 rounded-md">
-                  <span className="text-xs text-gray-600 dark:text-gray-400">
-                    {t('ordersManager.MinOrderAmount')}
-                  </span>
-                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                    {parseFloat(metadata.MinOrderAmount).toFixed(2)}
+                  <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                    {(order.subTotal || 0).toFixed(2)}
                   </span>
                 </div>
-              )}
-              
-              <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent my-2"></div>
-              
-              <div className="flex justify-between items-center p-3 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-md border border-green-200 dark:border-green-700">
-                <span className="text-base font-bold text-gray-900 dark:text-gray-100">
-                  {t('ordersManager.total')}
-                </span>
-                <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                  {order.totalPrice.toFixed(2)}
-                </span>
+                
+                {order.serviceFeeApplied !== undefined && order.serviceFeeApplied > 0 && (
+                  <div className={`flex justify-between items-center ${densityPadding[viewDensity]} bg-blue-50 dark:bg-blue-900/20 rounded-md`}>
+                    <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">
+                      {t('ordersManager.serviceFeeApplied')}
+                    </span>
+                    <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                      +{order.serviceFeeApplied.toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                
+                {metadata?.MinOrderAmount && (
+                  <div className={`flex justify-between items-center ${densityPadding[viewDensity]} bg-gray-100 dark:bg-gray-700 rounded-md`}>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      {t('ordersManager.MinOrderAmount')}
+                    </span>
+                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                      {parseFloat(metadata.MinOrderAmount).toFixed(2)}
+                    </span>
+                  </div>
+                )}
+                
+                <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent my-2"></div>
+                
+                <div className={`flex justify-between items-center ${densityPadding[viewDensity]} bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-md border border-green-200 dark:border-green-700`}>
+                  <span className="text-base font-bold text-gray-900 dark:text-gray-100">
+                    {t('ordersManager.total')}
+                  </span>
+                  <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    {order.totalPrice.toFixed(2)}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Timeline */}
-          <div className="bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/50 dark:to-gray-800/50 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="p-1.5 bg-slate-200 dark:bg-slate-700 rounded-md">
-                <Clock className="w-4 h-4 text-slate-600 dark:text-slate-400" />
-              </div>
-              <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                {t('ordersManager.OrderTimeline')}
-              </h4>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="relative pl-8">
-                <div className="absolute left-0 top-0.5 w-5 h-5 bg-indigo-500 rounded-full border-2 border-white dark:border-gray-800 shadow-md flex items-center justify-center">
-                  <Clock className="w-2.5 h-2.5 text-white" />
-                </div>
-                {(order as any).confirmedAt && (
-                  <div className="absolute left-2.5 top-5 w-0.5 h-full bg-gradient-to-b from-indigo-300 to-green-300 dark:from-indigo-600 dark:to-green-600"></div>
-                )}
-                <div className="bg-white dark:bg-gray-800 rounded-md p-2.5 border border-indigo-200 dark:border-indigo-700">
-                  <div className="flex items-center gap-1.5 mb-0.5">
-                    <Calendar className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
-                    <p className="text-xs font-bold text-indigo-900 dark:text-indigo-200">
-                      {t('ordersManager.createdAt')}
-                    </p>
+          {sectionVisibility.timeline && (
+            <div className={`bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/50 dark:to-gray-800/50 rounded-lg ${densityPadding[viewDensity]} border border-slate-200 dark:border-slate-700`}>
+              <button
+                onClick={() => toggleSection('timeline')}
+                className="flex items-center justify-between w-full mb-3 group"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-slate-200 dark:bg-slate-700 rounded-md">
+                    <Clock className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                   </div>
-                  <p className="text-xs font-mono text-gray-700 dark:text-gray-300">
-                    {new Date(order.createdAt).toLocaleString(
-                      lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US',
-                      { dateStyle: 'short', timeStyle: 'short' }
-                    )}
-                  </p>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                    {t('ordersManager.OrderTimeline')}
+                  </h4>
                 </div>
-              </div>
+                <ChevronUp className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-slate-600 transition-colors" />
+              </button>
               
-              {(order as any).confirmedAt && (
+              <div className="space-y-3">
                 <div className="relative pl-8">
-                  <div className="absolute left-0 top-0.5 w-5 h-5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 shadow-md flex items-center justify-center">
-                    <CheckCircle className="w-2.5 h-2.5 text-white" />
+                  <div className="absolute left-0 top-0.5 w-5 h-5 bg-indigo-500 rounded-full border-2 border-white dark:border-gray-800 shadow-md flex items-center justify-center">
+                    <Clock className="w-2.5 h-2.5 text-white" />
                   </div>
-                  {(order as any).completedAt && (
-                    <div className="absolute left-2.5 top-5 w-0.5 h-full bg-gradient-to-b from-green-300 to-blue-300 dark:from-green-600 dark:to-blue-600"></div>
+                  {(order as any).confirmedAt && (
+                    <div className="absolute left-2.5 top-5 w-0.5 h-full bg-gradient-to-b from-indigo-300 to-green-300 dark:from-indigo-600 dark:to-green-600"></div>
                   )}
-                  <div className="bg-white dark:bg-gray-800 rounded-md p-2.5 border border-green-200 dark:border-green-700">
+                  <div className={`bg-white dark:bg-gray-800 rounded-md ${densityPadding[viewDensity]} border border-indigo-200 dark:border-indigo-700`}>
                     <div className="flex items-center gap-1.5 mb-0.5">
-                      <Calendar className="w-3 h-3 text-green-600 dark:text-green-400" />
-                      <p className="text-xs font-bold text-green-900 dark:text-green-200">
-                        {t('ordersManager.confirmedAt')}
+                      <Calendar className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                      <p className="text-xs font-bold text-indigo-900 dark:text-indigo-200">
+                        {t('ordersManager.createdAt')}
                       </p>
                     </div>
                     <p className="text-xs font-mono text-gray-700 dark:text-gray-300">
-                      {new Date((order as any).confirmedAt).toLocaleString(
+                      {new Date(order.createdAt).toLocaleString(
                         lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US',
                         { dateStyle: 'short', timeStyle: 'short' }
                       )}
                     </p>
                   </div>
                 </div>
-              )}
+                
+                {(order as any).confirmedAt && (
+                  <div className="relative pl-8">
+                    <div className="absolute left-0 top-0.5 w-5 h-5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 shadow-md flex items-center justify-center">
+                      <CheckCircle className="w-2.5 h-2.5 text-white" />
+                    </div>
+                    {(order as any).completedAt && (
+                      <div className="absolute left-2.5 top-5 w-0.5 h-full bg-gradient-to-b from-green-300 to-blue-300 dark:from-green-600 dark:to-blue-600"></div>
+                    )}
+                    <div className={`bg-white dark:bg-gray-800 rounded-md ${densityPadding[viewDensity]} border border-green-200 dark:border-green-700`}>
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <Calendar className="w-3 h-3 text-green-600 dark:text-green-400" />
+                        <p className="text-xs font-bold text-green-900 dark:text-green-200">
+                          {t('ordersManager.confirmedAt')}
+                        </p>
+                      </div>
+                      <p className="text-xs font-mono text-gray-700 dark:text-gray-300">
+                        {new Date((order as any).confirmedAt).toLocaleString(
+                          lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US',
+                          { dateStyle: 'short', timeStyle: 'short' }
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                )}
 
-              {(order as any).completedAt && (
-                <div className="relative pl-8">
-                  <div className="absolute left-0 top-0.5 w-5 h-5 bg-blue-500 rounded-full border-2 border-white dark:border-gray-800 shadow-md flex items-center justify-center">
-                    <CheckCircle className="w-2.5 h-2.5 text-white" />
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 rounded-md p-2.5 border border-blue-200 dark:border-blue-700">
-                    <div className="flex items-center gap-1.5 mb-0.5">
-                      <Calendar className="w-3 h-3 text-blue-600 dark:text-blue-400" />
-                      <p className="text-xs font-bold text-blue-900 dark:text-blue-200">
-                        {t('ordersManager.CompletedAt')}
+                {(order as any).completedAt && (
+                  <div className="relative pl-8">
+                    <div className="absolute left-0 top-0.5 w-5 h-5 bg-blue-500 rounded-full border-2 border-white dark:border-gray-800 shadow-md flex items-center justify-center">
+                      <CheckCircle className="w-2.5 h-2.5 text-white" />
+                    </div>
+                    <div className={`bg-white dark:bg-gray-800 rounded-md ${densityPadding[viewDensity]} border border-blue-200 dark:border-blue-700`}>
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <Calendar className="w-3 h-3 text-blue-600 dark:text-blue-400" />
+                        <p className="text-xs font-bold text-blue-900 dark:text-blue-200">
+                          {t('ordersManager.CompletedAt')}
+                        </p>
+                      </div>
+                      <p className="text-xs font-mono text-gray-700 dark:text-gray-300">
+                        {new Date((order as any).completedAt).toLocaleString(
+                          lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US',
+                          { dateStyle: 'short', timeStyle: 'short' }
+                        )}
                       </p>
                     </div>
-                    <p className="text-xs font-mono text-gray-700 dark:text-gray-300">
-                      {new Date((order as any).completedAt).toLocaleString(
-                        lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US',
-                        { dateStyle: 'short', timeStyle: 'short' }
-                      )}
-                    </p>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
         </div>
       </div>

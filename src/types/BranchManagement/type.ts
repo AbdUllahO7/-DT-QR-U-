@@ -393,6 +393,7 @@ export interface TableCategory {
   isActive: boolean;
   tableCount: number | null;
   description?: string;
+  rowVersion?: string;
 }
 
 // API DTO Types
