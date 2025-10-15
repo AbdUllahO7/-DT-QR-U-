@@ -9,6 +9,7 @@ export interface OrderForm {
   tableId?: number;
   deliveryAddress?: string;
   customerPhone?: string;
+  paymentMethod: string;
 }
 
 export interface OrderTotal {

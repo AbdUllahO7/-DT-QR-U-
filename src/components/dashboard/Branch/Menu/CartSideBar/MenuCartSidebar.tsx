@@ -37,7 +37,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   restaurantPreferences
 }) => {
   const { t } = useLanguage()
-
+  console.log('🌐 Restaurant Preferences:', restaurantPreferences)
   // Toast state
   const [toasts, setToasts] = useState<Toast[]>([])
 
@@ -90,7 +90,8 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     orderTypeId: 0,
     tableId: tableId,
     deliveryAddress: '',
-    customerPhone: ''
+    customerPhone: '',
+    paymentMethod: ''
   })
   const [orderTotal, setOrderTotal] = useState({
     baseAmount: 0,
@@ -608,6 +609,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
                   loading={loading}
                   onBack={() => setShowOrderForm(false)}
                   onCreate={createOrder}
+                  paymentPreferences={restaurantPreferences}
                 />
               ) : (
                 <CartContent

@@ -3527,6 +3527,11 @@ export const ar = {
     form: {
       title: 'تفاصيل الطلب',
       orderType: 'نوع الطلب',
+      paymentMethod: 'طريقة الدفع',
+      selectPaymentMethod: 'اختر طريقة الدفع...',
+      cash: 'نقداً',
+      creditCard: 'بطاقة ائتمان',
+      onlinePayment: 'دفع عبر الإنترنت',
       orderTypeRequired: 'نوع الطلب مطلوب',
       selectOrderType: 'اختر نوع الطلب...',
       customerName: 'اسم العميل',
@@ -3608,6 +3613,8 @@ export const ar = {
 
   ordersManager: {
     total : 'المجموع',
+    clearFilters: 'مسح الفلاتر',
+    filtered: 'تم التصفية',
     OrderType : 'نوع الطلب',
     subTotal: "المجموع الفرعي",
     serviceFeeApplied:"رسوم الخدمة",
