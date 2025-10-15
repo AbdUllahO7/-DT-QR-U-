@@ -1216,7 +1216,6 @@ const ProductsContent: React.FC = () => {
               ))}
             </div>
        
-          )
           
           </SortableContext>
 

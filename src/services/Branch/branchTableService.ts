@@ -184,7 +184,7 @@ class TableService {
   /**
    * Update an existing table category
    */
-  async updateCategory(categoryId: number, data: UpdateTableCategoryDto): Promise<TableCategory> {
+  async updateCategory(categoryId: number , branchId:number, data: UpdateTableCategoryDto): Promise<TableCategory> {
     try {
       logger.info('Kategori güncelleme API çağrısı başlatılıyor', { categoryId, data }, { prefix: 'TableService' });
       
@@ -205,7 +205,7 @@ class TableService {
         throw new Error('İkon sınıfı gereklidir');
       }
       
-      const response = await httpClient.put<TableCategory>(`${this.baseUrl}/table-categories/${categoryId}`, data);
+      const response = await httpClient.put<TableCategory>(`${this.baseUrl}/table-categories/${categoryId}?branchId=${branchId}`, data);
       
       logger.info('Kategori başarıyla güncellendi', response.data, { prefix: 'TableService' });
       
@@ -219,7 +219,7 @@ class TableService {
   /**
    * Delete a table category
    */
-  async deleteCategory(categoryId: number): Promise<void> {
+  async deleteCategory(categoryId: number , branchId?:number): Promise<void> {
     try {
       logger.info('Kategori silme API çağrısı başlatılıyor', { categoryId }, { prefix: 'TableService' });
       
@@ -227,7 +227,7 @@ class TableService {
         throw new Error('Geçerli bir kategori ID gereklidir');
       }
       
-      await httpClient.delete(`${this.baseUrl}/table-categories/${categoryId}`);
+      await httpClient.delete(`${this.baseUrl}/table-categories/${categoryId}?branchId=${branchId || ''}  `);
       
       logger.info('Kategori başarıyla silindi', { categoryId }, { prefix: 'TableService' });
     } catch (error) {
@@ -707,9 +707,9 @@ class TableService {
   async getDeletedTables(branchId?: number): Promise<DeletedTable[]> {
     try {
       logger.info('Silinmiş masalar API çağrısı başlatılıyor', { branchId }, { prefix: 'TableService' });
-      
-      const response = await httpClient.get<DeletedTable[]>(`${this.baseUrl}/tables/deleted`);
-      
+      console.log("branchId getDeletedTables",branchId);
+      const response = await httpClient.get<DeletedTable[]>(`${this.baseUrl}/tables/deleted?branchId=${branchId || ''}`);
+      console.log("response table",response);
       logger.info('Silinmiş masalar alındı', { 
         count: response.data.length 
       }, { prefix: 'TableService' });
@@ -724,7 +724,7 @@ class TableService {
   /**
    * Restore a deleted table
    */
-  async restoreTable(tableId: number): Promise<void> {
+  async restoreTable(tableId: number , branchId?:string): Promise<void> {
     try {
       logger.info('Masa geri yükleme isteği', { tableId }, { prefix: 'TableService' });
       
@@ -732,7 +732,7 @@ class TableService {
         throw new Error('Geçerli bir masa ID gereklidir');
       }
       
-      await httpClient.post(`${this.baseUrl}/tables/${tableId}/restore`);
+      await httpClient.post(`${this.baseUrl}/tables/${tableId}/restore?branchId=${branchId || ''}`);
       
       logger.info('Masa başarıyla geri yüklendi', { tableId }, { prefix: 'TableService' });
     } catch (error) {

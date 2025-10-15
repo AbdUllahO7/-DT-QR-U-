@@ -40,6 +40,8 @@ const RecycleBin: React.FC = () => {
   const source = location.state?.source || 'all';
   const branchId = location.state?.branchId;
 
+  console.log("branchId",branchId)
+
   // Load deleted items based on source parameter
   const loadDeletedItems = async () => {
     setLoading(true);
@@ -136,7 +138,7 @@ const RecycleBin: React.FC = () => {
         await branchService.restoreBranch(item.id);
         showNotification('success', t('recycleBin.restore.successBranch').replace('{name}', item.displayName));
       } else if (item.entityType === 'MenuTable') {
-        await tableService.restoreTable(item.id);
+        await tableService.restoreTable(item.id, branchId);
         showNotification('success', t('recycleBin.restore.successTable').replace('{name}', item.displayName));
       } else if (item.entityType === 'BranchProduct') {
         await branchProductService.restoreBranchProduct(item.id);

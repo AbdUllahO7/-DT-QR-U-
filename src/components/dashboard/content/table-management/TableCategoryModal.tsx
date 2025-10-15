@@ -7,27 +7,32 @@ import {
   FileText, 
   Building2, 
   Users, 
-  Utensils, 
-  Layers, 
-  Table,
-  Armchair,
   Sparkles 
 } from 'lucide-react';
 import { httpClient } from '../../../../utils/http';
 import { restaurantService } from '../../../../services/restaurantService';
 import { logger } from '../../../../utils/logger';
 import { useLanguage } from '../../../../contexts/LanguageContext';
-import { colorPresets, iconOptions, RestaurantBranchDropdownItem, TableCategoryFormData, TableCategoryPayload } from '../../../../types/BranchManagement/type';
+import { colorPresets, iconOptions, RestaurantBranchDropdownItem, TableCategoryFormData, TableCategoryPayload, TableCategory } from '../../../../types/BranchManagement/type';
+import { tableService } from '../../../../services/Branch/branchTableService';
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
   selectedBranch: RestaurantBranchDropdownItem | null;
   onSuccess?: () => void;
+  editingCategory?: TableCategory | null;
+  isEditMode?: boolean;
 }
 
-
-const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, onSuccess }) => {
+const TableCategoryModal: React.FC<Props> = ({ 
+  isOpen, 
+  onClose, 
+  selectedBranch, 
+  onSuccess,
+  editingCategory = null,
+  isEditMode = false
+}) => {
   const { t, isRTL } = useLanguage();
   const [formData, setFormData] = useState<TableCategoryFormData>({
     categoryName: '',
@@ -56,6 +61,34 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  // Initialize form data when modal opens or editing category changes
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (isEditMode && editingCategory) {
+      // Populate form with existing category data
+      setFormData({
+        categoryName: editingCategory.categoryName,
+        description: editingCategory.description || '',
+        colorCode: editingCategory.colorCode || '#3b82f6',
+        iconClass: editingCategory.iconClass || '',
+        displayOrder: editingCategory.displayOrder || 0,
+        isActive: editingCategory.isActive,
+      });
+    } else {
+      // Reset form for new category
+      setFormData({
+        categoryName: '',
+        description: '',
+        colorCode: '#3b82f6',
+        iconClass: '',
+        displayOrder: 0,
+        isActive: true,
+      });
+    }
+    setErrors({});
+  }, [isOpen, isEditMode, editingCategory]);
 
   // Determine branchId or fetch branches if main selected
   useEffect(() => {
@@ -112,41 +145,52 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
     
     setIsSubmitting(true);
     try {
-      // API DTO formatına uygun payload hazırla
-      const payload: TableCategoryPayload = {
-        categoryName: formData.categoryName.trim() || null,
-        description: formData.description?.trim() || null,
-        colorCode: formData.colorCode || null,
-        iconClass: formData.iconClass || null,
-        displayOrder: formData.displayOrder,
-        isActive: formData.isActive
-      };
-      
-      // Debug için payload'ı logla
-      logger.info('Gönderilen payload', { payload, branchId });
-      
-      // LocalStorage'a branchId'yi kaydet
-      if (branchId) {
-        localStorage.setItem('menutable_create_selected_branchId', String(branchId));
-      }
-      
-      // BranchId'yi query parameter olarak kullan
-      const response = await httpClient.post(`/api/branches/table-categories?branchId=${branchId}`, payload);
-      logger.info('Kategori başarıyla eklendi', { data: response.data });
-      
-      // Success callback'i çağır
-      onSuccess && onSuccess();
-      
-      // Kategori oluşturulduktan sonra kategorileri yeniden yükle
-      if (branchId) {
-        try {
-          await httpClient.get(`/api/branches/table-categories?branchId=${branchId}`);
-          logger.info('Kategoriler yeniden yüklendi');
-        } catch (error) {
-          logger.error('Kategoriler yeniden yüklenirken hata', error);
+      if (isEditMode && editingCategory) {
+        // UPDATE existing category
+        await tableService.updateCategory(editingCategory.id,branchId ,   {
+          id: editingCategory.id,
+          categoryName: formData.categoryName.trim(),
+          colorCode: formData.colorCode,
+          iconClass: formData.iconClass,
+          isActive: formData.isActive,
+          rowVersion: editingCategory.rowVersion,
+        });
+        logger.info('Kategori başarıyla güncellendi', { categoryId: editingCategory.id });
+      } else {
+        // CREATE new category
+        const payload: TableCategoryPayload = {
+          categoryName: formData.categoryName.trim() || null,
+          description: formData.description?.trim() || null,
+          colorCode: formData.colorCode || null,
+          iconClass: formData.iconClass || null,
+          displayOrder: formData.displayOrder,
+          isActive: formData.isActive
+        };
+        
+        logger.info('Gönderilen payload', { payload, branchId });
+        
+        // LocalStorage'a branchId'yi kaydet
+        if (branchId) {
+          localStorage.setItem('menutable_create_selected_branchId', String(branchId));
+        }
+        
+        // BranchId'yi query parameter olarak kullan
+        const response = await httpClient.post(`/api/branches/table-categories?branchId=${branchId}`, payload);
+        logger.info('Kategori başarıyla eklendi', { data: response.data });
+        
+        // Kategori oluşturulduktan sonra kategorileri yeniden yükle
+        if (branchId) {
+          try {
+            await httpClient.get(`/api/branches/table-categories?branchId=${branchId}`);
+            logger.info('Kategoriler yeniden yüklendi');
+          } catch (error) {
+            logger.error('Kategoriler yeniden yüklenirken hata', error);
+          }
         }
       }
       
+      // Success callback'i çağır
+      onSuccess && onSuccess();
       onClose();
       
       // Form'u sıfırla
@@ -160,7 +204,7 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
       });
       setErrors({});
     } catch (error: any) {
-      console.error('❌ Kategori eklenirken hata:', error);
+      console.error('❌ Kategori işlemi sırasında hata:', error);
       
       // API'den gelen spesifik hataları işle
       if (error.response?.status === 400) {
@@ -245,8 +289,12 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                     <Sparkles className="w-6 h-6" />
                   </div>
                   <div className={isRTL ? 'text-right' : 'text-left'}>
-                    <h3 className="text-xl font-bold">{t('TableCategoryModal.title')}</h3>
-                    <p className="text-primary-100 text-sm">{t('TableCategoryModal.subtitle')}</p>
+                    <h3 className="text-xl font-bold">
+                      {isEditMode ? 'Edit Category' : t('TableCategoryModal.title')}
+                    </h3>
+                    <p className="text-primary-100 text-sm">
+                      {isEditMode ? 'Update category details' : t('TableCategoryModal.subtitle')}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -417,8 +465,34 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                   )}
                 </div>
 
-                {/* Branch Selection (if needed) */}
-                {!selectedBranch && branches.length > 0 && (
+                {/* Active Status Toggle (only in edit mode) */}
+                {isEditMode && (
+                  <div className={`flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Active Status</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {formData.isActive ? 'Category is active and visible' : 'Category is inactive and hidden'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData(prev => ({ ...prev, isActive: !prev.isActive }))}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        formData.isActive ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'
+                      }`}
+                      aria-label="Toggle active status"
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          formData.isActive ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                )}
+
+                {/* Branch Selection (if needed and not in edit mode) */}
+                {!isEditMode && !selectedBranch && branches.length > 0 && (
                   <div className="space-y-2">
                     <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : ''}`}>
                       <Users className="w-4 h-4 text-primary-600 dark:text-primary-400" />
@@ -465,10 +539,10 @@ const TableCategoryModal: React.FC<Props> = ({ isOpen, onClose, selectedBranch, 
                     {isSubmitting ? (
                       <div className={`flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        {t('TableCategoryModal.saving')}
+                        {isEditMode ? 'Updating...' : t('TableCategoryModal.saving')}
                       </div>
                     ) : (
-                      t('TableCategoryModal.addCategory')
+                      isEditMode ? 'Update Category' : t('TableCategoryModal.addCategory')
                     )}
                   </button>
                 </div>
