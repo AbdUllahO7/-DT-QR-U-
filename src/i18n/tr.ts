@@ -3532,6 +3532,12 @@ export const tr = {
     form: {
       title: 'Sipariş Detayları',
       orderType: 'Sipariş Türü',
+      paymentMethod: 'Ödeme Yöntemi',
+      selectPaymentMethod: 'Ödeme Yöntemini seçin...',
+      cash: 'Nakit',
+      creditCard: 'Kredi Kartı',
+      onlinePayment: 'Online Ödeme',
+      other: 'Diğer',
       orderTypeRequired: 'Sipariş türü gerekli',
       selectOrderType: 'Sipariş türünü seçin...',
       customerName: 'Müşteri Adı',
@@ -3614,6 +3620,8 @@ export const tr = {
   ordersManager: {
       total : 'Toplam',
       subTotal:"Ara Toplam",
+      filtered:"Filtrelenen",
+      clearFilters:"Filtreleri Temizle",
       serviceFeeApplied:"Servis ücreti",
       OrderType : 'Sipariş Türü',
       DeliveryAddress : 'Teslimat Adresi',

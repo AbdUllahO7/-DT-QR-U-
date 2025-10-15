@@ -3527,7 +3527,12 @@ export const en = {
     form: {
       title: 'Order Details',
       orderType: 'Order Type',
+      paymentMethod: 'Payment Method',
+      selectPaymentMethod: 'Select payment method...',
       orderTypeRequired: 'Order type is required',
+      cash: 'Cash',
+      creditCard: 'Credit Card',
+      onlinePayment: 'Online Payment',
       selectOrderType: 'Select order type...',
       customerName: 'Customer Name',
       customerNameRequired: 'Customer name is required',
@@ -3607,7 +3612,9 @@ export const en = {
   },
   ordersManager: {
     total : 'Total',
+    clearFilters:"Clear Filters",
     subTotal:"Sub Total",
+    filtered:"Filtered",
     OrderType : 'Order Type',
     serviceFeeApplied:"Service Charge",
     DeliveryAddress : 'Delivery Address',
