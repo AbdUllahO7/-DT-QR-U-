@@ -654,11 +654,11 @@ class BranchService {
   }
 
 
-  async updateTable(tableId: number, data: UpdateMenuTableDto): Promise<any> {
+  async updateTable(tableId: number, branchId:number,data: UpdateMenuTableDto): Promise<any> {
     try {
       logger.info('Masa güncelleme API çağrısı başlatılıyor', { tableId, data }, { prefix: 'BranchService' });
       
-      const response = await httpClient.put(`/api/branches/tables/${tableId}`, data);
+      const response = await httpClient.put(`/api/branches/tables/${tableId}?branchId=${branchId}`, data);
       
       logger.info('Masa başarıyla güncellendi', response.data, { prefix: 'BranchService' });
       
