@@ -264,7 +264,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
         };
 
         // Pass branch ID to update method to ensure proper branch context
-        await branchService.updateTable(qrData.id, updateData);
+        await branchService.updateTable(qrData.id, branchIdToUse,updateData);
         logger.info('Table updated successfully', { tableId: qrData.id, updateData, branchId: branchIdToUse });
       } else {
         // Create new table
