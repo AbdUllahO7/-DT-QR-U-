@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Users, QrCode, Minus, X } from 'lucide-react';
+import { Plus, Users,  Minus, X } from 'lucide-react';
 import { QRCodeData } from './QRCodeCard';
 import { logger } from '../../../../utils/logger';
 import { branchService, UpdateMenuTableDto } from '../../../../services/branchService';
