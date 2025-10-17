@@ -298,15 +298,20 @@ class BranchService {
   }
   /**
    * Restore a deleted branch
+   * @param branchId - The ID of the branch to restore
+   * @param restoreWithCascade - If true, restores branch with all related data (products, categories, tables, etc.). 
+   *                             If false, restores only general branch information.
    */
-  async restoreBranch(branchId: number): Promise<void> {
+  async restoreBranch(branchId: number, restoreWithCascade: boolean = false): Promise<void> {
     try {
-      logger.info('Şube geri yükleniyor', { branchId }, { prefix: 'BranchService' });
+      logger.info('Şube geri yükleniyor', { branchId, restoreWithCascade }, { prefix: 'BranchService' });
       
-      const response = await httpClient.post(`${this.baseUrl}/${branchId}/restore`);
+      const url = `${this.baseUrl}/${branchId}/restore?restoreWithCascade=${restoreWithCascade}`;
+      const response = await httpClient.post(url);
       
       logger.info('Şube başarıyla geri yüklendi', { 
         branchId,
+        restoreWithCascade,
         response: response.status 
       }, { prefix: 'BranchService' });
     } catch (error: any) {

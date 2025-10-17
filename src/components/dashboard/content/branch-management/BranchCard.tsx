@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Edit2, Trash2, MoreVertical, Building2, Clock, CheckCircle, XCircle, EyeOff } from 'lucide-react';
+import { Edit2, Trash2, MoreVertical, Building2, Clock, CheckCircle, XCircle, EyeOff, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import type { BranchInfo } from '../../../../types/api';
 
@@ -8,10 +8,11 @@ interface BranchCardProps {
   branch: BranchInfo;
   onEdit: (branch: BranchInfo) => void;
   onDelete: (branch: BranchInfo) => void;
+  onPurge: (branch: BranchInfo) => void;
   onToggleTemporaryClose: (branchId: number, isTemporarilyClosed: boolean) => void;
 }
 
-const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onToggleTemporaryClose }) => {
+const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onPurge, onToggleTemporaryClose }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isToggling, setIsToggling] = useState(false);
   const { t, language } = useLanguage();
@@ -88,7 +89,7 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onTog
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.18 }}
-              className={`absolute ${isRTL ? 'right-0' : 'left-0'} top-full mt-2 w-40 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-10`}
+              className={`absolute ${isRTL ? 'right-0' : 'left-0'} top-full mt-2 w-48 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 py-2 z-10`}
             >
               <button
                 onClick={() => { onEdit(branch); setIsMenuOpen(false); }}
@@ -103,6 +104,13 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onTog
               >
                 <Trash2 className="h-4 w-4" />
                 <span>{t('branchCard.actions.delete')}</span>
+              </button>
+              <button
+                onClick={() => { onPurge(branch); setIsMenuOpen(false); }}
+                className={`w-full flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} px-4 py-2 text-sm text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'text-right' : 'text-left'}`}
+              >
+                <AlertTriangle className="h-4 w-4" />
+                <span>{t('branchCard.actions.purge') || 'Permanent Delete'}</span>
               </button>
             </motion.div>
           )}

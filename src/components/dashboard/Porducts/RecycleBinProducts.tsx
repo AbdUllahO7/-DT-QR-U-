@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Trash2, RotateCcw, Search, Calendar, Package, FolderOpen, AlertCircle, CheckCircle, RefreshCw, X, Building2, Table } from 'lucide-react';
+import { Trash2, RotateCcw, Search, Calendar, Package, FolderOpen, AlertCircle, CheckCircle, RefreshCw, X, Building2, Table, Database, FileText } from 'lucide-react';
 import { productService } from '../../../services/productService';
 import { branchService } from '../../../services/branchService';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -35,6 +35,10 @@ const RecycleBin: React.FC = () => {
     type: 'success' | 'error';
     message: string;
   } | null>(null);
+
+  // Branch restore cascade modal state
+  const [showBranchRestoreModal, setShowBranchRestoreModal] = useState(false);
+  const [branchToRestore, setBranchToRestore] = useState<DeletedEntity | null>(null);
 
   // Get the source parameter and branchId from location state
   const source = location.state?.source || 'all';
@@ -104,7 +108,7 @@ const RecycleBin: React.FC = () => {
             branchCategoryService.getDeletedBranchCategories(),
             tableService.getDeletedTableCategories()
           ]);
-          allDeletedItems = [...allCategories, ...allProducts, ...allBranches, ...allTables, ...allBranchProducts, ...allBranchCategories, ...allTableCategories];
+          allDeletedItems = [...allCategories, ...allProducts, ...allBranches, ...allTables, ...allBranchProducts, ...allBranchCategories, ...allTableCategories] as DeletedEntity[];
           break;
       }
 
@@ -123,8 +127,47 @@ const RecycleBin: React.FC = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
+  // Handle restore click - show modal for branches, directly restore others
+  const handleRestoreClick = (item: DeletedEntity) => {
+    if (item.entityType === 'Branch') {
+      setBranchToRestore(item);
+      setShowBranchRestoreModal(true);
+    } else {
+      handleRestore(item, false);
+    }
+  };
+
+  // Handle branch restore with cascade option
+  const handleBranchRestore = async (restoreWithCascade: boolean) => {
+    if (!branchToRestore) return;
+
+    setShowBranchRestoreModal(false);
+    setRestoringIds(prev => new Set([...prev, branchToRestore.id]));
+
+    try {
+      await branchService.restoreBranch(branchToRestore.id, restoreWithCascade);
+      
+      const successMessage = restoreWithCascade
+        ? t('recycleBin.restore.successBranchCascade').replace('{name}', branchToRestore.displayName)
+        : t('recycleBin.restore.successBranch').replace('{name}', branchToRestore.displayName);
+      
+      showNotification('success', successMessage);
+      setDeletedItems(prev => prev.filter(i => i.id !== branchToRestore.id));
+    } catch (error) {
+      console.error('Error restoring branch:', error);
+      showNotification('error', t('recycleBin.restore.error'));
+    } finally {
+      setRestoringIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(branchToRestore.id);
+        return newSet;
+      });
+      setBranchToRestore(null);
+    }
+  };
+
   // Restore item
-  const handleRestore = async (item: DeletedEntity) => {
+  const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false) => {
     setRestoringIds(prev => new Set([...prev, item.id]));
 
     try {
@@ -135,7 +178,7 @@ const RecycleBin: React.FC = () => {
         await productService.restoreProduct(item.id);
         showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
       } else if (item.entityType === 'Branch') {
-        await branchService.restoreBranch(item.id);
+        await branchService.restoreBranch(item.id, cascadeOption);
         showNotification('success', t('recycleBin.restore.successBranch').replace('{name}', item.displayName));
       } else if (item.entityType === 'MenuTable') {
         await tableService.restoreTable(item.id, branchId);
@@ -410,8 +453,6 @@ const RecycleBin: React.FC = () => {
             </div>
           </div>
         </div>
-
-       
       </div>
 
       {/* Items List */}
@@ -498,7 +539,7 @@ const RecycleBin: React.FC = () => {
                     {/* Actions */}
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => handleRestore(item)}
+                        onClick={() => handleRestoreClick(item)}
                         disabled={restoringIds.has(item.id)}
                         className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 
                                  disabled:bg-gray-400 dark:disabled:bg-gray-600
@@ -520,6 +561,107 @@ const RecycleBin: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Branch Restore Modal */}
+      {showBranchRestoreModal && branchToRestore && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full p-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
+                <Building2 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  {t('recycleBin.branchRestore.title') || 'Restore Branch'}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {t('recycleBin.branchRestore.subtitle') || `Choose how to restore "${branchToRestore.displayName}"`}
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowBranchRestoreModal(false);
+                  setBranchToRestore(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              {/* Simple Restore Option */}
+              <button
+                onClick={() => handleBranchRestore(false)}
+                className="w-full p-4 border-2 border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-500 rounded-xl transition-all duration-200 text-left group hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg group-hover:bg-blue-200 dark:group-hover:bg-blue-900/50 transition-colors">
+                    <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                      {t('recycleBin.branchRestore.simpleTitle') || 'Simple Restore (General Info Only)'}
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {t('recycleBin.branchRestore.simpleDesc') || 'Restore only the basic branch information (name, address, contact, working hours)'}
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Full Cascade Restore Option */}
+              <button
+                onClick={() => handleBranchRestore(true)}
+                className="w-full p-4 border-2 border-gray-200 dark:border-gray-700 hover:border-green-500 dark:hover:border-green-500 rounded-xl transition-all duration-200 text-left group hover:bg-green-50 dark:hover:bg-green-900/20"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg group-hover:bg-green-200 dark:group-hover:bg-green-900/50 transition-colors">
+                    <Database className="w-5 h-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
+                      {t('recycleBin.branchRestore.cascadeTitle') || 'Full Restore (With All Data)'}
+                      <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded-full">
+                        {t('recycleBin.branchRestore.recommended') || 'Recommended'}
+                      </span>
+                    </h4>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                      {t('recycleBin.branchRestore.cascadeDesc') || 'Restore the branch with all associated data:'}
+                    </p>
+                    <ul className="text-xs text-gray-500 dark:text-gray-500 space-y-1 ml-4">
+                      <li className="flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                        {t('recycleBin.branchRestore.includeProducts') || 'Branch products and categories'}
+                      </li>
+                      <li className="flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                        {t('recycleBin.branchRestore.includeTables') || 'Tables and table categories'}
+                      </li>
+                      <li className="flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                        {t('recycleBin.branchRestore.includeAll') || 'All related configurations and settings'}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </button>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  setShowBranchRestoreModal(false);
+                  setBranchToRestore(null);
+                }}
+                className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                {t('common.cancel') || 'Cancel'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Notification */}
       {notification && (

@@ -1,3 +1,4 @@
+import { title } from "process";
 
 export const tr = {
   // Common
@@ -1082,7 +1083,8 @@ export const tr = {
     },
     actions: {
       edit: 'Düzenle',
-      delete: 'Sil'
+      delete: 'Sil',
+      purge: 'Verileri Temizle'
     },
     labels: {
       customerVisibility: 'Müşteriye Açık/Kapalı',
@@ -3884,6 +3886,18 @@ export const tr = {
     descriptionBranchProducts: 'Silinmiş şube ürünleri ve kategorileri yönetin',
     descriptionBranchCategories: 'Silinmiş şube kategorilerini yönetin',
     descriptionTableCategories: 'Silinmiş masa kategorilerini yönetin',
+    branchRestore:{
+      title: 'Şube Geri Yükleme Seçenekleri',
+      subtitle: 'Geri yükleme işlemi için tercihlerinizi seçin',
+      simpleTitle: 'Şube Geri Yükle',
+    simpleDesc: 'Bu Şube geri yüklendiğinde yalnızca genel Şube bilgileri geri yüklenir.',
+    cascadeTitle: 'Bu Şube geri yüklendiğinde tüm ilişkili ürünler ve kategoriler de geri yüklenir.',
+    cascadeDesc: 'Yalnızca dalı mı yoksa tüm ilişkili ürünleri ve kategorileri de geri yüklemek ister misiniz?',
+    recommended: 'Recommended',
+    includeProducts: 'Ürünleri ve Kategorileri Dahil Et',
+    includeTables: 'Tabloları Dahil Et',
+    includeAll: 'Tüm İlişkili Verileri Dahil Et',
+    },
     search: 'Öğe ara...',
     filter: {
       all: 'Tümü',
@@ -3961,12 +3975,17 @@ export const tr = {
       subtitle: "Şirket ve yasal detaylar",
       noDataTitle: "Yönetim Bilgisi Yok",
       noDataMessage: "Yönetim bilgileri henüz ayarlanmadı. Başlamak için lütfen restoran detaylarını ekleyin.",
-      
+      dangerZone:{
+        title: "Tehlikeli Bölge",
+        description: "Restoran yönetim bilgilerini kalıcı olarak silme işlemi geri alınamaz. Lütfen dikkatli olun.",
+      },
       buttons: {
         edit: "Düzenle",
         cancel: "İptal",
         save: "Değişiklikleri Kaydet",
-        saving: "Kaydediliyor..."
+        saving: "Kaydediliyor...",
+        delete:" Sil",
+        purge:" Temizle"
       },
 
       sections: {
