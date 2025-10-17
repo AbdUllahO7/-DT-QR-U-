@@ -37,47 +37,47 @@ export const tr = {
   },
 
   filter: {
-      "status": "Durum",
-      "all": "Tümü",
-      "active": "Aktif",
-      "inactive": "Pasif", 
-      "categories": "Kategoriler",
+      status: "Durum",
+      all: "Tümü",
+      active: "Aktif",
+      inactive: "Pasif", 
+      categories: "Kategoriler",
        allergenic:"alerjenik",
       nonallergenic:"alerjenik olmayan",
       specific:{
         allergens : "alerjenler"
       },
-      "price": {
-        "range": "Fiyat Aralığı",
-        "min": "Min Fiyat",
-        "max": "Max Fiyat"
+      price: {
+        range: "Fiyat Aralığı",
+        min: "Min Fiyat",
+        max: "Max Fiyat"
       }
   },
 
   sort: {
-      "title": "Sırala",
-      "name": {
-        "asc": "İsim (A-Z)",
-        "desc": "İsim (Z-A)"
+      title: "Sırala",
+      name: {
+        asc: "İsim (A-Z)",
+        desc: "İsim (Z-A)"
       },
-      "price": {
-        "asc": "Fiyat (Düşükten Yükseğe)",
-        "desc": "Fiyat (Yüksekten Düşüğe)"
+      price: {
+        asc: "Fiyat (Düşükten Yükseğe)",
+        desc: "Fiyat (Yüksekten Düşüğe)"
       },
-      "order": {
-        "asc": "Görüntü Sırası (İlkten Sona)",
-        "desc": "Görüntü Sırası (Sondan İlke)"
+      order: {
+        asc: "Görüntü Sırası (İlkten Sona)",
+        desc: "Görüntü Sırası (Sondan İlke)"
       },
-      "created": {
-        "asc": "Oluşturulma Tarihi (En Eskiden)",
-        "desc": "Oluşturulma Tarihi (En Yeniden)"
+      created: {
+        asc: "Oluşturulma Tarihi (En Eskiden)",
+        desc: "Oluşturulma Tarihi (En Yeniden)"
       },
 
   },
 
   clear: {
-      "filters": "Filtreleri Temizle",
-      "all": "Tümünü Temizle"
+      filters: "Filtreleri Temizle",
+      all: "Tümünü Temizle"
   },
 
   restaurantManagement : {
@@ -1387,7 +1387,7 @@ export const tr = {
   },
 
   productsContent: {
-        branch : {
+    branch : {
     selectAll:"Hepsi",
 
     },
@@ -1910,7 +1910,7 @@ export const tr = {
       // Common titles (can be overridden by props)
       defaultTitle: 'Silmeyi Onayla',
       deleteTitle: 'Öğeyi Sil',
-      
+      deleteTableWarning: "Tabloyu silmeden önce bekleyen bir istek olmadığından emin olun.",
       // Warning message
       warning: 'Bu işlem geri alınamaz. Öğe kalıcı olarak silinecektir.',
       
@@ -2773,12 +2773,12 @@ export const tr = {
 
     // Permission categories
     permissionCategories: {
-      'User Management': 'Kullanıcı Yönetimi',
-      'Restaurant Management': 'Restoran Yönetimi', 
-      'Branch Management': 'Şube Yönetimi',
-      'Order Management': 'Sipariş Yönetimi',
-      'Product Management': 'Ürün Yönetimi',
-      'Analytics': 'Analitik'
+      UserManagement: 'Kullanıcı Yönetimi',
+      RestaurantManagement: 'Restoran Yönetimi', 
+      BranchManagement: 'Şube Yönetimi',
+      OrderManagement: 'Sipariş Yönetimi',
+      ProductManagement: 'Ürün Yönetimi',
+      Analytics: 'Analitik'
     },
 
     // Success messages
@@ -2874,16 +2874,16 @@ export const tr = {
   },
   
   BranchTableManagement: {
-  "clear Table": "Tablo temizleniyor",
-  "refresh Table": "Durumu güncelle",
-   "clearing": "Temizleniyor...",
-             loading : "Yükleniyor...",
-             category: "Kategori",
-             SelectCategory: "Kategori Seçin",
-             Quantity: "Miktar",
-             Capacity: "Kapasite",
-             createTables: "Tablolar Oluşturuluyor...",
-             creatingTables: "Tablolar Oluşturuluyor...",
+    clearTable: "Tablo temizleniyor",
+    refreshTable: "Durumu güncelle",
+    clearin: "Temizleniyor...",
+    loading : "Yükleniyor...",
+    category: "Kategori",
+    SelectCategory: "Kategori Seçin",
+    Quantity: "Miktar",
+    Capacity: "Kapasite",
+    createTables: "Tablolar Oluşturuluyor...",
+    creatingTables: "Tablolar Oluşturuluyor...",
     multiCategory: "Farklı kategorilerde aynı anda birden fazla tablo oluşturun",
     batchCreateTables: "Toplu Tablo Oluştur",
     header: "Category & Table Management",
@@ -2922,10 +2922,10 @@ export const tr = {
     copyQRUrl: "Copy QR URL",
     copied: "Copied!",
     success: {
-      "tableCleared": "{{tableName}} tablosu temizlendi ve artık kullanılabilir",
-"tableOccupied": "{{tableName}} tablosunun durumu 'dolu' olarak güncellendi",
-"tableClearedGeneric": "Tablo başarıyla temizlendi",
-"tableStatusUpdated": "Tablo durumu başarıyla güncellendi",
+      tableCleared: "{{tableName}} tablosu temizlendi ve artık kullanılabilir",
+      tableOccupied: "{{tableName}} tablosunun durumu 'dolu' olarak güncellendi",
+      tableClearedGeneric: "Tablo başarıyla temizlendi",
+      tableStatusUpdated: "Tablo durumu başarıyla güncellendi",
       categoryAdded: "Category added successfully",
       categoryUpdated: "Category updated successfully",
       categoryDeleted: "Category deleted successfully",
@@ -2940,7 +2940,7 @@ export const tr = {
       dataRefreshed: "Data refreshed successfully"
     },
     error: {
-      "clearTableFailed": "Tablo temizlenemedi. Lütfen tekrar deneyin.",
+      clearTableFailed: "Tablo temizlenemedi. Lütfen tekrar deneyin.",
       fetchCategoriesFailed: "Failed to fetch categories",
       fetchTablesFailed: "Failed to fetch tables",
       categoryNameRequired: "Category name is required",
@@ -3273,15 +3273,15 @@ export const tr = {
         systemRole: 'Sistem Rolü'
       },
       categories: {
-        'Category': 'Kategori Yönetimi',
-        'BranchCategory': 'Şube Kategori Yönetimi',
-        'Product': 'Ürün Yönetimi',
-        'BranchProduct': 'Şube Ürün Yönetimi',
-        'BranchQRCode': 'QR Kod Yönetimi',
-        'Order': 'Sipariş Yönetimi',
-        'Restaurant': 'Restoran Yönetimi',
-        'Branch': 'Şube Yönetimi',
-        'Admin': 'Yönetici İşlemleri'
+        Category: 'Kategori Yönetimi',
+        BranchCategory: 'Şube Kategori Yönetimi',
+        Product: 'Ürün Yönetimi',
+        BranchProduct: 'Şube Ürün Yönetimi',
+        BranchQRCode: 'QR Kod Yönetimi',
+        Order: 'Sipariş Yönetimi',
+        Restaurant: 'Restoran Yönetimi',
+        Branch: 'Şube Yönetimi',
+        Admin: 'Yönetici İşlemleri'
       },
       permissionNames: {
         'category.create': 'Kategori Oluşturma',
@@ -3511,7 +3511,7 @@ export const tr = {
       maxQuantityError: '{name} için maksimum miktar {max}',
       decreaseQuantity: 'Miktarı azalt',
       increaseQuantity: 'Miktarı artır',
-        "creating_order": "Sipariş oluşturuluyor...",
+      "creating_order": "Sipariş oluşturuluyor...",
       "order_created_success": "Sipariş başarıyla oluşturuldu!",
       "order_creation_failed": "Sipariş oluşturulamadı. Lütfen tekrar deneyin.",
       "sending_whatsapp": "WhatsApp mesajı gönderiliyor...",
@@ -3586,18 +3586,18 @@ export const tr = {
   },
   
   productModal: {
-      "customizeOrder": "Siparişinizi Özelleştirin",
-      "allergenInformation": "Alerjen Bilgileri",
-      "ingredients": "İçindekiler",
-      "availableAddons": "Mevcut Ekstralar",
-      "add": "Ekle",
-      "recommended": "Önerilen",
-      "min": "Minimum",
-      "max": "Maksimum",
-      "orderSummary": "Sipariş Özeti",
-      "quantity": "Miktar",
-      "total": "Toplam",
-      "addToCart": "Sepete Ekle"
+      customizeOrder: "Siparişinizi Özelleştirin",
+      allergenInformation: "Alerjen Bilgileri",
+      ingredients: "İçindekiler",
+      availableAddons: "Mevcut Ekstralar",
+      add: "Ekle",
+      recommended: "Önerilen",
+      min: "Minimum",
+      max: "Maksimum",
+      orderSummary: "Sipariş Özeti",
+      quantity: "Miktar",
+      total: "Toplam",
+      addToCart: "Sepete Ekle"
   },
 
   errors: {
@@ -3647,54 +3647,54 @@ export const tr = {
       cancelOrder:"Siparişi İptal Et",
       cancelOrderConfirmation:"Siparişi iptal etmek istediğinizden emin misiniz?",
       deletedOrders:"Slienen Siparişler",
-      "title": "Sipariş Yönetimi",
-      "description": "Restoranınızın siparişlerini kolayca yönetin ve takip edin.",
-      "pendingOrders": "Bekleyen Siparişler",
-      "branchOrders": "Şube Siparişleri",
-      "allStatuses": "Tüm Durumlar",
-      "statusFilter": "Durum Filtresi",
-      "noOrders": "Henüz {viewMode} sipariş yok.",
-      "customer": "Müşteri",
-      "orderNumber": "Sipariş No",
-      "status": "Durum",
-      "table": "Masa",
-      "amount": "Tutar",
-      "date": "Tarih",
-      "actions": "İşlemler",
-      "viewDetails": "Detayları Görüntüle",
-      "confirm": "Onayla",
-      "reject": "Reddet",
-      "changeStatus": "Durum Değiştir",
-      "orderItems": "Sipariş Ürünleri",
-      "createdAt": "Oluşturulma",
-      "confirmedAt": "Onaylanma",
-      "rowVersion": "Row Version",
-      "confirmOrderTitle": "Siparişi Onayla",
-      "confirmOrderPrompt": "Bu siparişi onaylamak istediğinizden emin misiniz?",
-      "rejectOrderTitle": "Siparişi Reddet",
-      "rejectOrderPrompt": "Reddetme nedenini girin:",
-      "rejectReasonPlaceholder": "Reddetme nedeni...",
-      "updateStatusTitle": "Durumu Güncelle",
-      "updateStatusPrompt": "Sipariş durumunu {status} olarak güncellemek istediğinizden emin misiniz?",
-      "cancel": "İptal",
-      "confirmAction": "Onayla",
-      "rejectAction": "Reddet",
-      "updateAction": "Güncelle",
-      "confirming": "Onaylanıyor...",
-      "rejecting": "Reddediliyor...",
-      "updating": "Güncelleniyor...",
-      "orderDetailsTitle": "Sipariş Detayları",
-      "successNotification": "İşlem Başarılı",
-      "orderConfirmedSuccess": "Sipariş başarıyla onaylandı!",
-      "orderRejectedSuccess": "Sipariş başarıyla reddedildi!",
-      "orderStatusUpdatedSuccess": "Sipariş durumu başarıyla güncellendi!",
-      "errorInvalidStatusTransition": "Geçersiz durum geçişi: Lütfen önce siparişi onaylayın (Onaylandı durumuna geçin).",
-      "errorCannotConfirm": "Bu sipariş onaylanamaz. Mevcut durum: {currentStatus}.",
-      "quantity": "Miktar",
-      "unitPrice": "Birim Fiyat",
-      "addonPrice": "Ekstra Fiyat",
-      "notes": "Not",
-      "amountLabel": "Toplam Tutar",
+      title: "Sipariş Yönetimi",
+      description: "Restoranınızın siparişlerini kolayca yönetin ve takip edin.",
+      pendingOrders: "Bekleyen Siparişler",
+      branchOrders: "Şube Siparişleri",
+      allStatuses: "Tüm Durumlar",
+      statusFilter: "Durum Filtresi",
+      noOrders: "Henüz {viewMode} sipariş yok.",
+      customer: "Müşteri",
+      orderNumber: "Sipariş No",
+      status: "Durum",
+      table: "Masa",
+      amount: "Tutar",
+      date: "Tarih",
+      actions: "İşlemler",
+      viewDetails: "Detayları Görüntüle",
+      confirm: "Onayla",
+      reject: "Reddet",
+      changeStatus: "Durum Değiştir",
+      orderItems: "Sipariş Ürünleri",
+      createdAt: "Oluşturulma",
+      confirmedAt: "Onaylanma",
+      rowVersion: "Row Version",
+      confirmOrderTitle: "Siparişi Onayla",
+      confirmOrderPrompt: "Bu siparişi onaylamak istediğinizden emin misiniz?",
+      rejectOrderTitle: "Siparişi Reddet",
+      rejectOrderPrompt: "Reddetme nedenini girin:",
+      rejectReasonPlaceholder: "Reddetme nedeni...",
+      updateStatusTitle: "Durumu Güncelle",
+      updateStatusPrompt: "Sipariş durumunu {status} olarak güncellemek istediğinizden emin misiniz?",
+      cancel: "İptal",
+      confirmAction: "Onayla",
+      rejectAction: "Reddet",
+      updateActio: "Güncelle",
+      confirming: "Onaylanıyor...",
+      rejecting: "Reddediliyor...",
+      updating: "Güncelleniyor...",
+      orderDetailsTitle: "Sipariş Detayları",
+      successNotification: "İşlem Başarılı",
+      orderConfirmedSuccess: "Sipariş başarıyla onaylandı!",
+      orderRejectedSuccess: "Sipariş başarıyla reddedildi!",
+      orderStatusUpdatedSuccess: "Sipariş durumu başarıyla güncellendi!",
+      errorInvalidStatusTransition: "Geçersiz durum geçişi: Lütfen önce siparişi onaylayın (Onaylandı durumuna geçin).",
+      errorCannotConfirm: "Bu sipariş onaylanamaz. Mevcut durum: {currentStatus}.",
+      quantity: "Miktar",
+      unitPrice: "Birim Fiyat",
+      addonPrice: "Ekstra Fiyat",
+      notes: "Not",
+      amountLabel: "Toplam Tutar",
       DeliveryInformation: "Teslimat Bilgileri",
       TableInformation: "Masa Bilgileri",
       CustomerInformation: "Müşteri Bilgileri",
@@ -3709,144 +3709,144 @@ export const tr = {
   },
 
   orderService: {
-      "statuses": {
-        "pending": "Bekliyor",
-        "confirmed": "Onaylandı",
-        "preparing": "Hazırlanıyor",
-        "ready": "Hazır",
-        "completed": "Tamamlandı",
-        "delivered": "Teslim Edildi",
-        "cancelled": "İptal Edildi",
-        "rejected": "Reddedildi",
-        "unknown": "Bilinmeyen"
+      statuses: {
+        pending: "Bekliyor",
+        confirmed: "Onaylandı",
+        preparing: "Hazırlanıyor",
+        ready: "Hazır",
+        completed: "Tamamlandı",
+        delivered: "Teslim Edildi",
+        cancelled: "İptal Edildi",
+        rejected: "Reddedildi",
+        unknown: "Bilinmeyen"
       },
-      "errors": {
-        "createSessionOrder": "Session order oluşturulurken hata oluştu",
-        "getPendingOrders": "Pending orders getirilirken hata oluştu",
-        "getTableOrders": "Table orders getirilirken hata oluştu",
-        "getOrder": "Order getirilirken hata oluştu",
-        "getBranchOrders": "Branch orders getirilirken hata oluştu",
-        "confirmOrder": "Order onaylanırken hata oluştu",
-        "rejectOrder": "Order reddedilirken hata oluştu",
-        "updateOrderStatus": "Order status güncellenirken hata oluştu",
-        "trackOrder": "Order tracking getirilirken hata oluştu",
-        "getOrderTrackingQR": "Order tracking QR getirilirken hata oluştu",
-        "smartCreateOrder": "Smart order oluşturulurken hata oluştu",
-        "getTableBasketSummary": "Table basket summary getirilirken hata oluştu",
-        "validationError": "Doğrulama hatası: {errors}",
-        "invalidRequest": "Geçersiz istek. Lütfen verileri kontrol edin.",
-        "sessionExpired": "Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.",
-        "unauthorized": "Bu işlem için yetkiniz bulunmuyor.",
-        "orderNotFound": "Sipariş bulunamadı.",
-        "invalidStatus": "Sipariş durumu bu işleme uygun değil.",
-        "noInternet": "İnternet bağlantınızı kontrol edin.",
-        "unknownError": "Bilinmeyen hata",
-        "getOrderTypeText": "Order type text getirme hatası",
-        "getOrderType": "Order type getirme hatası",
-        "getActiveOrderTypes": "Active order types getirme hatası",
-        "getAllOrderTypes": "All order types getirme hatası",
-        "orderTotalCalculation": "Order total calculation hatası",
-        "getEstimatedTime": "Estimated time getirme hatası",
-        "getOrderTypeByCode": "Order type by code getirme hatası",
-        "getOrderTypesForDisplay": "Order types for display getirme hatası",
-        "unknownOrderType": "Bilinmeyen Sipariş Türü"
+      errors: {
+        createSessionOrder: "Session order oluşturulurken hata oluştu",
+        getPendingOrders: "Pending orders getirilirken hata oluştu",
+        getTableOrders: "Table orders getirilirken hata oluştu",
+        getOrder: "Order getirilirken hata oluştu",
+        getBranchOrders: "Branch orders getirilirken hata oluştu",
+        confirmOrder: "Order onaylanırken hata oluştu",
+        rejectOrder: "Order reddedilirken hata oluştu",
+        updateOrderStatus: "Order status güncellenirken hata oluştu",
+        trackOrder: "Order tracking getirilirken hata oluştu",
+        getOrderTrackingQR: "Order tracking QR getirilirken hata oluştu",
+        smartCreateOrder: "Smart order oluşturulurken hata oluştu",
+        getTableBasketSummary: "Table basket summary getirilirken hata oluştu",
+        validationError: "Doğrulama hatası: {errors}",
+        invalidRequest: "Geçersiz istek. Lütfen verileri kontrol edin.",
+        sessionExpired: "Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.",
+        unauthorized: "Bu işlem için yetkiniz bulunmuyor.",
+        orderNotFound: "Sipariş bulunamadı.",
+        invalidStatus: "Sipariş durumu bu işleme uygun değil.",
+        noInternet: "İnternet bağlantınızı kontrol edin.",
+        unknownError: "Bilinmeyen hata",
+        getOrderTypeText: "Order type text getirme hatası",
+        getOrderType: "Order type getirme hatası",
+        getActiveOrderTypes: "Active order types getirme hatası",
+        getAllOrderTypes: "All order types getirme hatası",
+        orderTotalCalculation: "Order total calculation hatası",
+        getEstimatedTime: "Estimated time getirme hatası",
+        getOrderTypeByCode: "Order type by code getirme hatası",
+        getOrderTypesForDisplay: "Order types for display getirme hatası",
+        unknownOrderType: "Bilinmeyen Sipariş Türü"
       }
   },
   
   branchPreferences: {
-    "title": "Şube Tercihleri",
-    "description": "Şubeye özel ayarları ve tercihleri yapılandırın",
-    "loading": "Şube tercihleri yükleniyor...",
-    "saving": "Kaydediliyor...",
-    "refresh": "Yenile",
-    "saveChanges": "Değişiklikleri Kaydet",
-    "saveSuccess": "Şube tercihleri başarıyla kaydedildi!",
-    "cleanupModes": {
-      "afterTimeout": "Zaman Aşımından Sonra",
-      "afterClosing": "Kapatmadan Sonra",
-      "disabled": "Devre Dışı"
+    title: "Şube Tercihleri",
+    description: "Şubeye özel ayarları ve tercihleri yapılandırın",
+    loading: "Şube tercihleri yükleniyor...",
+    saving: "Kaydediliyor...",
+    refresh: "Yenile",
+    saveChanges: "Değişiklikleri Kaydet",
+    saveSuccess: "Şube tercihleri başarıyla kaydedildi!",
+    cleanupModes: {
+      afterTimeout: "Zaman Aşımından Sonra",
+      afterClosing: "Kapatmadan Sonra",
+      disabled: "Devre Dışı"
     },
-    "sections": {
-      "orderManagement": {
-        "title": "Sipariş Yönetimi",
-        "description": "Siparişlerin nasıl işlendiğini ve yönetildiğini yapılandırın",
-        "autoConfirmOrders": "Siparişleri Otomatik Onayla",
-        "autoConfirmOrdersDesc": "Gelen siparişleri manuel onay olmadan otomatik olarak onaylayın",
-        "useWhatsappForOrders": "Siparişler için WhatsApp",
-        "useWhatsappForOrdersDesc": "Sipariş bildirimleri için WhatsApp entegrasyonunu etkinleştirin"
+    sections: {
+      orderManagement: {
+        title: "Sipariş Yönetimi",
+        description: "Siparişlerin nasıl işlendiğini ve yönetildiğini yapılandırın",
+        autoConfirmOrders: "Siparişleri Otomatik Onayla",
+        autoConfirmOrdersDesc: "Gelen siparişleri manuel onay olmadan otomatik olarak onaylayın",
+        useWhatsappForOrders: "Siparişler için WhatsApp",
+        useWhatsappForOrdersDesc: "Sipariş bildirimleri için WhatsApp entegrasyonunu etkinleştirin"
       },
-      "displaySettings": {
-        "title": "Görüntü Ayarları",
-        "description": "Müşterilere hangi bilgilerin gösterileceğini yapılandırın",
-        "showProductDescriptions": "Ürün Açıklamalarını Göster",
-        "showProductDescriptionsDesc": "Müşterilere detaylı ürün açıklamalarını göster",
-        "enableAllergenDisplay": "Alerjen Bilgilerini Göster",
-        "enableAllergenDisplayDesc": "Alerjen uyarılarını ve bilgilerini göster",
-        "enableIngredientDisplay": "İçerikleri Göster",
-        "enableIngredientDisplayDesc": "Ürünler için içerik listelerini göster"
+      displaySettings: {
+        title: "Görüntü Ayarları",
+        description: "Müşterilere hangi bilgilerin gösterileceğini yapılandırın",
+        showProductDescriptions: "Ürün Açıklamalarını Göster",
+        showProductDescriptionsDesc: "Müşterilere detaylı ürün açıklamalarını göster",
+        enableAllergenDisplay: "Alerjen Bilgilerini Göster",
+        enableAllergenDisplayDesc: "Alerjen uyarılarını ve bilgilerini göster",
+        enableIngredientDisplay: "İçerikleri Göster",
+        enableIngredientDisplayDesc: "Ürünler için içerik listelerini göster"
       },
-      "paymentMethods": {
-        "title": "Ödeme Yöntemleri",
-        "description": "Kabul edilen ödeme yöntemlerini yapılandırın",
-        "acceptCash": "Nakit Ödemeleri Kabul Et",
-        "acceptCashDesc": "Müşterilerin nakit ile ödeme yapmalarına izin ver",
-        "acceptCreditCard": "Kredi Kartlarını Kabul Et",
-        "acceptCreditCardDesc": "Müşterilerin kredi/banka kartları ile ödeme yapmalarına izin ver",
-        "acceptOnlinePayment": "Online Ödemeleri Kabul Et",
-        "acceptOnlinePaymentDesc": "Müşterilerin dijital ödeme yöntemleri ile online ödeme yapmalarına izin ver"
+      paymentMethods: {
+        title: "Ödeme Yöntemleri",
+        description: "Kabul edilen ödeme yöntemlerini yapılandırın",
+        acceptCash: "Nakit Ödemeleri Kabul Et",
+        acceptCashDesc: "Müşterilerin nakit ile ödeme yapmalarına izin ver",
+        acceptCreditCard: "Kredi Kartlarını Kabul Et",
+        acceptCreditCardDesc: "Müşterilerin kredi/banka kartları ile ödeme yapmalarına izin ver",
+        acceptOnlinePayment: "Online Ödemeleri Kabul Et",
+        acceptOnlinePaymentDesc: "Müşterilerin dijital ödeme yöntemleri ile online ödeme yapmalarına izin ver"
       },
-      "localization": {
-        "title": "Yerelleştirme",
-        "description": "Dil ve bölgesel ayarları yapılandırın",
-        "defaultLanguage": "Varsayılan Dil",
-        "defaultCurrency": "Varsayılan Para Birimi",
-        "timeZone": "Saat Dilimi",
-        "supportedLanguages": "Desteklenen Diller"
+      localization: {
+        title: "Yerelleştirme",
+        description: "Dil ve bölgesel ayarları yapılandırın",
+        defaultLanguage: "Varsayılan Dil",
+        defaultCurrency: "Varsayılan Para Birimi",
+        timeZone: "Saat Dilimi",
+        supportedLanguages: "Desteklenen Diller"
       },
-      "sessionManagement": {
-        "title": "Oturum Yönetimi",
-        "description": "Oturum zaman aşımı ve temizleme ayarlarını yapılandırın",
-        "sessionTimeout": "Oturum Zaman Aşımı (Dakika)",
-        "cleanupMode": "Temizleme Modu",
-        "cleanupDelay": "Kapanış Sonrası Temizleme Gecikmesi (Dakika)",
-         "cleanupModeDesc": "Süresi dolan oturumların ne zaman temizleneceğini seçin",
-    "sessionTimeoutDesc": "Hareketsizlik nedeniyle oturumun sona ermesinden önceki dakikalar",
-    "cleanupDelayDesc": "Kapatmadan sonra temizlikten önce beklenecek dakikalar",
-    "cleanupDisabledMessage": "Oturum temizliği devre dışı. Oturumlar otomatik olarak temizlenmeyecek."
+      sessionManagement: {
+        title: "Oturum Yönetimi",
+        description: "Oturum zaman aşımı ve temizleme ayarlarını yapılandırın",
+        sessionTimeout: "Oturum Zaman Aşımı (Dakika)",
+        cleanupMode: "Temizleme Modu",
+        cleanupDelay: "Kapanış Sonrası Temizleme Gecikmesi (Dakika)",
+        cleanupModeDesc: "Süresi dolan oturumların ne zaman temizleneceğini seçin",
+        sessionTimeoutDesc: "Hareketsizlik nedeniyle oturumun sona ermesinden önceki dakikalar",
+        cleanupDelayDesc: "Kapatmadan sonra temizlikten önce beklenecek dakikalar",
+        cleanupDisabledMessage: "Oturum temizliği devre dışı. Oturumlar otomatik olarak temizlenmeyecek."
       }
     },
-    "currencies": {
-      "TRY": "Türk Lirası (₺)",
-      "USD": "Amerikan Doları ($)",
-      "EUR": "Euro (€)"
+    currencies: {
+      TRY: "Türk Lirası (₺)",
+      USD: "Amerikan Doları ($)",
+      EUR: "Euro (€)"
     },
-    "languages": {
-      "tr": "Türkçe",
-      "en": "İngilizce",
-      "ar": "Arapça",
-      "de": "Almanca", 
-      "fr": "Fransızca",
-      "ru": "Rusça",
-      "es": "İspanyolca"
+    languages: {
+      tr: "Türkçe",
+      en: "İngilizce",
+      ar: "Arapça",
+      de: "Almanca", 
+      fr: "Fransızca",
+      ru: "Rusça",
+      es: "İspanyolca"
     },
-    "timezones": {
+    timezones: {
       "Europe/Istanbul": "İstanbul (UTC+3)",
       "Europe/London": "Londra (UTC+0)",
       "America/New_York": "New York (UTC-5)"
     },
-    "errors": {
-      "loadFailed": "Şube tercihleri yüklenemedi",
-      "saveFailed": "Şube tercihleri kaydedilemedi",
-      "validationError": "Doğrulama hatası: {errors}",
-      "invalidRequest": "Geçersiz istek. Lütfen verileri kontrol edin.",
-      "sessionExpired": "Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.",
-      "unauthorized": "Bu işlem için yetkiniz bulunmuyor.",
-      "notFound": "Şube tercihleri bulunamadı.",
-      "conflict": "Veriler güncel değil. Sayfayı yenileyip tekrar deneyin.",
-      "noInternet": "İnternet bağlantınızı kontrol edin.",
-      "unknownError": "Bilinmeyen bir hata oluştu",
-      "invalidPaymentSettings": "Geçersiz ödeme ayarları. En az bir ödeme yöntemi seçilmelidir.",
-      "invalidSessionSettings": "Geçersiz oturum ayarları. Lütfen değerleri kontrol edin."
+    errors: {
+      loadFailed: "Şube tercihleri yüklenemedi",
+      saveFailed: "Şube tercihleri kaydedilemedi",
+      validationError: "Doğrulama hatası: {errors}",
+      invalidRequest: "Geçersiz istek. Lütfen verileri kontrol edin.",
+      sessionExpired: "Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.",
+      unauthorized: "Bu işlem için yetkiniz bulunmuyor.",
+      notFound: "Şube tercihleri bulunamadı.",
+      conflict: "Veriler güncel değil. Sayfayı yenileyip tekrar deneyin.",
+      noInternet: "İnternet bağlantınızı kontrol edin.",
+      unknownError: "Bilinmeyen bir hata oluştu",
+      invalidPaymentSettings: "Geçersiz ödeme ayarları. En az bir ödeme yöntemi seçilmelidir.",
+      invalidSessionSettings: "Geçersiz oturum ayarları. Lütfen değerleri kontrol edin."
     }
   },
 
@@ -3957,74 +3957,74 @@ export const tr = {
   },
 
   management: {
-      "title": "Yönetim Bilgileri",
-      "subtitle": "Şirket ve yasal detaylar",
-      "noDataTitle": "Yönetim Bilgisi Yok",
-      "noDataMessage": "Yönetim bilgileri henüz ayarlanmadı. Başlamak için lütfen restoran detaylarını ekleyin.",
+      title: "Yönetim Bilgileri",
+      subtitle: "Şirket ve yasal detaylar",
+      noDataTitle: "Yönetim Bilgisi Yok",
+      noDataMessage: "Yönetim bilgileri henüz ayarlanmadı. Başlamak için lütfen restoran detaylarını ekleyin.",
       
-      "buttons": {
-        "edit": "Düzenle",
-        "cancel": "İptal",
-        "save": "Değişiklikleri Kaydet",
-        "saving": "Kaydediliyor..."
+      buttons: {
+        edit: "Düzenle",
+        cancel: "İptal",
+        save: "Değişiklikleri Kaydet",
+        saving: "Kaydediliyor..."
       },
 
-      "sections": {
-        "restaurantDetails": "Restoran Detayları",
-        "companyInfo": "Şirket Bilgileri",
-        "taxInfo": "Vergi ve Kayıt",
-        "certificates": "Sertifikalar ve İzinler",
-        "additionalSettings": "Ek Ayarlar"
+      sections: {
+        restaurantDetails: "Restoran Detayları",
+        companyInfo: "Şirket Bilgileri",
+        taxInfo: "Vergi ve Kayıt",
+        certificates: "Sertifikalar ve İzinler",
+        additionalSettings: "Ek Ayarlar"
       },
 
-      "fields": {
-        "restaurantName": "Restoran Adı",
-        "restaurantLogo": "Restoran Logosu",
-        "companyTitle": "Şirket Unvanı",
-        "legalType": "Yasal Tür",
-        "taxNumber": "Vergi Numarası",
-        "taxOffice": "Vergi Dairesi",
-        "mersisNumber": "MERSIS Numarası",
-        "tradeRegistry": "Ticaret Sicil Numarası",
-        "workPermit": "Çalışma İzni",
-        "foodCertificate": "Gıda Sertifikası",
-        "alcoholService": "Alkol Servisi Var",
-        "logo": "Logo"
+      fields: {
+        restaurantName: "Restoran Adı",
+        restaurantLogo: "Restoran Logosu",
+        companyTitle: "Şirket Unvanı",
+        legalType: "Yasal Tür",
+        taxNumber: "Vergi Numarası",
+        taxOffice: "Vergi Dairesi",
+        mersisNumber: "MERSIS Numarası",
+        tradeRegistry: "Ticaret Sicil Numarası",
+        workPermit: "Çalışma İzni",
+        foodCertificate: "Gıda Sertifikası",
+        alcoholService: "Alkol Servisi Var",
+        logo: "Logo"
       },
 
-      "placeholders": {
-        "restaurantName": "Restoran adını girin",
-        "companyTitle": "Şirket unvanını girin",
-        "taxNumber": "Vergi numarasını girin",
-        "taxOffice": "Vergi dairesini girin",
-        "mersisNumber": "MERSIS numarasını girin",
-        "tradeRegistry": "Ticaret sicil numarasını girin",
-        "selectLegalType": "Yasal Tür Seçin"
+      placeholders: {
+        restaurantName: "Restoran adını girin",
+        companyTitle: "Şirket unvanını girin",
+        taxNumber: "Vergi numarasını girin",
+        taxOffice: "Vergi dairesini girin",
+        mersisNumber: "MERSIS numarasını girin",
+        tradeRegistry: "Ticaret sicil numarasını girin",
+        selectLegalType: "Yasal Tür Seçin"
       },
 
-      "legalTypes": {
-        "llc": "Limited Şirket",
-        "corporation": "Anonim Şirket",
-        "partnership": "Ortaklık"
+      legalTypes: {
+        llc: "Limited Şirket",
+        corporation: "Anonim Şirket",
+        partnership: "Ortaklık"
       },
 
-      "status": {
-        "uploaded": "Yüklendi",
-        "notUploaded": "Yüklenmedi",
-        "available": "Mevcut",
-        "notAvailable": "Mevcut Değil",
-        "alcoholService": "Alkol Servisi:"
+      status: {
+        uploaded: "Yüklendi",
+        notUploaded: "Yüklenmedi",
+        available: "Mevcut",
+        notAvailable: "Mevcut Değil",
+        alcoholService: "Alkol Servisi:"
       },
 
-      "common": {
-        "na": "Mevcut Değil"
+      common: {
+        na: "Mevcut Değil"
       }
   },
 
   branches: {
-    "status": {
-      "active": "Aktif",
-      "inactive": "Pasif"
+    status: {
+      active: "Aktif",
+      inactive: "Pasif"
     },
     "fields": {
       "branchType": "Şube Türü",
@@ -4033,50 +4033,50 @@ export const tr = {
   },
 
   restaurants: {
-    "status": {
-      "active": "Aktif",
-      "inactive": "Pasif"
+    status: {
+      active: "Aktif",
+      inactive: "Pasif"
     },
-    "actions": {
-      "edit": "Restoranı Düzenle",
-      "delete": "Restoranı Sil"
+    actions: {
+      edit: "Restoranı Düzenle",
+      delete: "Restoranı Sil"
     },
-    "stats": {
-      "totalBranches": "Toplam Şube",
-      "active": "Aktif",
-      "inactive": "Pasif",
-      "alcohol": "Alkol"
+    stats: {
+      totalBranches: "Toplam Şube",
+      active: "Aktif",
+      inactive: "Pasif",
+      alcohol: "Alkol"
     },
-    "common": {
-      "yes": "Evet",
-      "no": "Hayır"
+    common: {
+      yes: "Evet",
+      no: "Hayır"
     }
   },
 
   restaurantsTab: {
-    "status": {
-      "active": "Aktif",
-      "inactive": "Pasif"
+    status: {
+      active: "Aktif",
+      inactive: "Pasif"
     },
-    "actions": {
-      "edit": "Restoranı Düzenle",
-      "delete": "Restoranı Sil"
+    actions: {
+      edit: "Restoranı Düzenle",
+      delete: "Restoranı Sil"
     },
-    "stats": {
-      "totalBranches": "Toplam Şube",
-      "active": "Aktif",
-      "inactive": "Pasif",
-      "alcohol": "Alkol"
+    stats: {
+      totalBranches: "Toplam Şube",
+      active: "Aktif",
+      inactive: "Pasif",
+      alcohol: "Alkol"
     },
-    "common": {
-      "yes": "Evet",
-      "no": "Hayır"
+    common: {
+      yes: "Evet",
+      no: "Hayır"
     },
-    "modal": {
-      "editTitle": "Restoranı Düzenle",
-      "placeholders": {
-        "restaurantName": "Restoran Adı",
-        "cuisineType": "Mutfak Türü"
+    modal: {
+      editTitle: "Restoranı Düzenle",
+      placeholders: {
+      restaurantName: "Restoran Adı",
+      cuisineType: "Mutfak Türü"
       },
       "labels": {
         "hasAlcoholService": "Alkol Servisi Var"
@@ -4089,68 +4089,68 @@ export const tr = {
   },
 
   tabs: {
-    "restaurants": "Restoranlar",
-    "branches": "Şubeler",
-    "management": "Yönetim Bilgileri",
-    "deleted": "Silinmiş"
+    restaurants: "Restoranlar",
+    branches: "Şubeler",
+    management: "Yönetim Bilgileri",
+    deleted: "Silinmiş"
   },
   
   allergens: {
-    "GLUTEN": {
-      "name": "Gluten",
-      "description": "Buğday, çavdar, arpa, yulaf"
+    GLUTEN: {
+      name: "Gluten",
+      description: "Buğday, çavdar, arpa, yulaf"
     },
-    "CRUSTACEANS": {
-      "name": "Kabuklu Deniz Ürünleri",
-      "description": "Karides, yengeç, ıstakoz"
+    CRUSTACEANS: {
+      name: "Kabuklu Deniz Ürünleri",
+      description: "Karides, yengeç, ıstakoz"
     },
-    "EGGS": {
-      "name": "Yumurta",
-      "description": "Yumurta ve yumurta ürünleri"
+    EGGS: {
+      name: "Yumurta",
+      description: "Yumurta ve yumurta ürünleri"
     },
-    "FISH": {
-      "name": "Balık",
-      "description": "Tüm balık ürünleri"
+    FISH: {
+      name: "Balık",
+      description: "Tüm balık ürünleri"
     },
-    "PEANUTS": {
-      "name": "Yer Fıstığı",
-      "description": "Yer fıstığı ve yer fıstığı ürünleri"
+    PEANUTS: {
+      name: "Yer Fıstığı",
+      description: "Yer fıstığı ve yer fıstığı ürünleri"
     },
-    "SOYBEANS": {
-      "name": "Soya",
-      "description": "Soya ve soya ürünleri"
+    SOYBEANS: {
+      name: "Soya",
+      description: "Soya ve soya ürünleri"
     },
-    "MILK": {
-      "name": "Süt",
-      "description": "Süt ve süt ürünleri"
+    MILK:{
+      name: "Süt",
+      description: "Süt ve süt ürünleri"
     },
-    "NUTS": {
-      "name": "Sert Kabuklu Meyveler",
-      "description": "Badem, fındık, ceviz, kaju vb."
+    NUTS: {
+      name: "Sert Kabuklu Meyveler",
+      description: "Badem, fındık, ceviz, kaju vb."
     },
-    "CELERY": {
-      "name": "Kereviz",
-      "description": "Kereviz ve kereviz kökü"
+    CELERY: {
+      name: "Kereviz",
+      description: "Kereviz ve kereviz kökü"
     },
-    "MUSTARD": {
-      "name": "Hardal",
-      "description": "Hardal ve hardal ürünleri"
+    MUSTARD: {
+      name: "Hardal",
+      description: "Hardal ve hardal ürünleri"
     },
-    "SESAME": {
-      "name": "Susam",
-      "description": "Susam tohumu ve ürünleri"
+    SESAME: {
+      name: "Susam",
+      description: "Susam tohumu ve ürünleri"
     },
-    "SULPHITES": {
-      "name": "Sülfitler",
-      "description": "Kükürt dioksit ve sülfitler (>10mg/kg)"
+    SULPHITES: {
+      name: "Sülfitler",
+      description: "Kükürt dioksit ve sülfitler (>10mg/kg)"
     },
-    "LUPIN": {
-      "name": "Acı Bakla",
-      "description": "Acı bakla ve acı bakla ürünleri"
+    LUPIN: {
+      name: "Acı Bakla",
+      description: "Acı bakla ve acı bakla ürünleri"
     },
-    "MOLLUSCS": {
-      "name": "Yumuşakçalar",
-      "description": "Midye, istiridye, salyangoz, kalamar"
+    MOLLUSCS: {
+      name: "Yumuşakçalar",
+      description: "Midye, istiridye, salyangoz, kalamar"
     }
   }
 }; 

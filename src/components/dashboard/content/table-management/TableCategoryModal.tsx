@@ -304,14 +304,13 @@ return (
                 </div>
                 
                 {/* Close button with better styling */}
-                <button
-                  onClick={onClose}
-                  className={`absolute top-6 p-2.5 hover:bg-white/25 dark:hover:bg-white/15 rounded-xl transition-all duration-300 hover:scale-110 hover:rotate-90 group ${isRTL ? 'left-6' : 'right-6'}`}
-                  aria-label={t('TableCategoryModal.accessibility.close')}
-                >
-                  <X className="w-5 h-5 group-hover:drop-shadow-lg" />
-                </button>
-                
+              <button
+                onClick={onClose}
+                className={`absolute top-6 p-2.5 hover:bg-white/25 dark:hover:bg-white/15 rounded-xl transition-all duration-300 hover:scale-110 hover:rotate-90 group z-10 ${isRTL ? 'left-6' : 'right-6'}`}
+                aria-label={t('TableCategoryModal.accessibility.close')}
+              >
+                <X className="w-5 h-5 group-hover:drop-shadow-lg" />
+              </button>
                 <div className={`flex items-center gap-4 relative ${isRTL ? 'text-right' : ''}`}>
                   <motion.div 
                     initial={{ scale: 0, rotate: -180 }}
