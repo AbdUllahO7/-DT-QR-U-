@@ -244,7 +244,7 @@ const TableCategoryModal: React.FC<Props> = ({
     }
   };
 
-  return (
+return (
     <AnimatePresence>
       {isOpen && (
         <div 
@@ -254,71 +254,114 @@ const TableCategoryModal: React.FC<Props> = ({
           aria-label={t('TableCategoryModal.accessibility.modal')}
           dir={isRTL ? 'rtl' : 'ltr'}
         >
-          {/* Backdrop */}
+          {/* Enhanced Backdrop with gradient overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-gradient-to-br from-purple-900/30 via-blue-900/40 to-indigo-900/30 backdrop-blur-md"
             onClick={onClose}
-          />
+          >
+            {/* Animated background orbs */}
+            <motion.div
+              animate={{
+                scale: [1, 1.2, 1],
+                opacity: [0.2, 0.4, 0.2],
+              }}
+              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+              className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
+            />
+            <motion.div
+              animate={{
+                scale: [1.2, 1, 1.2],
+                opacity: [0.2, 0.4, 0.2],
+              }}
+              transition={{ duration: 8, repeat: Infinity, delay: 2, ease: "easeInOut" }}
+              className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
+            />
+          </motion.div>
           
           {/* Modal */}
           <div className="flex min-h-screen items-center justify-center p-4">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.9, y: 40 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.2 }}
-              className="relative w-full max-w-md bg-white dark:bg-gray-800 backdrop-blur-xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
+              exit={{ opacity: 0, scale: 0.9, y: 40 }}
+              transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
+              className="relative w-full max-w-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/50 overflow-hidden"
               dir={isRTL ? 'rtl' : 'ltr'}
             >
-              {/* Header */}
-              <div className="relative bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-600 dark:to-primary-700 p-6 text-white">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+              {/* Decorative glow effect */}
+              <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-400/30 to-purple-500/30 rounded-full blur-3xl" />
+              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-400/30 to-primary-500/30 rounded-full blur-3xl" />
+              
+              {/* Enhanced Header with mesh gradient */}
+              <div className="relative bg-gradient-to-br from-primary-500 via-primary-600 to-purple-600 dark:from-primary-600 dark:via-primary-700 dark:to-purple-700 p-8 text-white overflow-hidden">
+                {/* Animated mesh pattern */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
+                <div className="absolute inset-0 opacity-30">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
+                </div>
+                
+                {/* Close button with better styling */}
                 <button
                   onClick={onClose}
-                  className={`absolute top-4 p-2 hover:bg-white/20 dark:hover:bg-white/10 rounded-full transition-colors duration-200 ${isRTL ? 'left-4' : 'right-4'}`}
+                  className={`absolute top-6 p-2.5 hover:bg-white/25 dark:hover:bg-white/15 rounded-xl transition-all duration-300 hover:scale-110 hover:rotate-90 group ${isRTL ? 'left-6' : 'right-6'}`}
                   aria-label={t('TableCategoryModal.accessibility.close')}
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5 group-hover:drop-shadow-lg" />
                 </button>
                 
-                <div className={`flex items-center gap-3 relative ${isRTL ? 'text-right' : ''}`}>
-                  <div className="p-3 bg-white/20 rounded-2xl">
-                    <Sparkles className="w-6 h-6" />
-                  </div>
+                <div className={`flex items-center gap-4 relative ${isRTL ? 'text-right' : ''}`}>
+                  <motion.div 
+                    initial={{ scale: 0, rotate: -180 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.2, type: "spring" }}
+                    className="p-4 bg-white/25 backdrop-blur-sm rounded-2xl shadow-lg"
+                  >
+                    <Sparkles className="w-7 h-7 drop-shadow-lg" />
+                  </motion.div>
                   <div className={isRTL ? 'text-right' : 'text-left'}>
-                    <h3 className="text-xl font-bold">
+                    <motion.h3 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 }}
+                      className="text-2xl font-bold drop-shadow-md"
+                    >
                       {isEditMode ? 'Edit Category' : t('TableCategoryModal.title')}
-                    </h3>
-                    <p className="text-primary-100 text-sm">
+                    </motion.h3>
+                    <motion.p 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.2 }}
+                      className="text-primary-50/90 text-sm mt-1 drop-shadow"
+                    >
                       {isEditMode ? 'Update category details' : t('TableCategoryModal.subtitle')}
-                    </p>
+                    </motion.p>
                   </div>
                 </div>
               </div>
 
-              {/* Form */}
-              <form onSubmit={handleSubmit} className="p-6 space-y-6" role="form" aria-label={t('TableCategoryModal.accessibility.form')}>
+              {/* Form with better spacing */}
+              <form onSubmit={handleSubmit} className="relative p-8 space-y-6" role="form" aria-label={t('TableCategoryModal.accessibility.form')}>
                 {/* General Error */}
                 {errors.general && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-sm"
+                    className="p-4 bg-gradient-to-r from-red-50 to-red-100/50 dark:from-red-900/30 dark:to-red-800/20 border-l-4 border-red-500 dark:border-red-400 rounded-xl text-red-700 dark:text-red-300 text-sm font-medium shadow-sm"
                   >
                     {errors.general}
                   </motion.div>
                 )}
 
-                {/* Category Name */}
+                {/* Category Name with floating label effect */}
                 <div className="space-y-2">
-                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : ''}`}>
+                  <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
                     <Tag className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                     {t('TableCategoryModal.categoryName')}
                   </label>
-                  <div className="relative">
+                  <div className="relative group">
                     <input
                       type="text"
                       name="categoryName"
@@ -326,15 +369,15 @@ const TableCategoryModal: React.FC<Props> = ({
                       onChange={handleChange}
                       placeholder={t('TableCategoryModal.categoryNamePlaceholder')}
                       className={`
-                        w-full px-4 py-3 rounded-xl border-2 transition-all duration-200
-                        bg-white dark:bg-gray-900 
+                        w-full px-5 py-3.5 rounded-2xl border-2 transition-all duration-300
+                        bg-white dark:bg-gray-800/50 
                         text-gray-900 dark:text-gray-100
                         placeholder-gray-400 dark:placeholder-gray-500
                         border-gray-200 dark:border-gray-600
-                        hover:border-gray-300 dark:hover:border-gray-500
-                        focus:outline-none focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500
+                        hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg hover:shadow-primary-500/10
+                        focus:outline-none focus:ring-4 focus:ring-primary-500/30 focus:border-primary-500 focus:shadow-xl focus:shadow-primary-500/20
                         ${errors.categoryName 
-                          ? 'border-red-300 dark:border-red-600 focus:border-red-500 focus:ring-red-500/20' 
+                          ? 'border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/30' 
                           : ''
                         }
                         ${isRTL ? 'text-right' : 'text-left'}
@@ -342,209 +385,251 @@ const TableCategoryModal: React.FC<Props> = ({
                       aria-describedby={errors.categoryName ? 'category-name-error' : undefined}
                       dir={isRTL ? 'rtl' : 'ltr'}
                     />
+                    <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary-500/0 via-primary-500/5 to-purple-500/0 rounded-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
                   </div>
                   {errors.categoryName && (
-                    <p id="category-name-error" className="text-red-500 dark:text-red-400 text-xs flex items-center gap-1">
+                    <motion.p 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      id="category-name-error" 
+                      className="text-red-600 dark:text-red-400 text-xs font-medium flex items-center gap-1"
+                    >
                       {errors.categoryName}
-                    </p>
+                    </motion.p>
                   )}
                 </div>
 
-                {/* Description */}
+                {/* Description with better styling */}
                 <div className="space-y-2">
-                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : ''}`}>
+                  <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
                     <FileText className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                     {t('TableCategoryModal.description')}
                   </label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    rows={3}
-                    placeholder={t('TableCategoryModal.descriptionPlaceholder')}
-                    className={`
-                      w-full px-4 py-3 rounded-xl border-2 transition-all duration-200 resize-none
-                      bg-white dark:bg-gray-900 
-                      text-gray-900 dark:text-gray-100
-                      placeholder-gray-400 dark:placeholder-gray-500
-                      border-gray-200 dark:border-gray-600
-                      hover:border-gray-300 dark:hover:border-gray-500
-                      focus:outline-none focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500
-                      ${isRTL ? 'text-right' : 'text-left'}
-                    `}
-                    dir={isRTL ? 'rtl' : 'ltr'}
-                  />
+                  <div className="relative group">
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      rows={3}
+                      placeholder={t('TableCategoryModal.descriptionPlaceholder')}
+                      className={`
+                        w-full px-5 py-3.5 rounded-2xl border-2 transition-all duration-300 resize-none
+                        bg-white dark:bg-gray-800/50 
+                        text-gray-900 dark:text-gray-100
+                        placeholder-gray-400 dark:placeholder-gray-500
+                        border-gray-200 dark:border-gray-600
+                        hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg hover:shadow-primary-500/10
+                        focus:outline-none focus:ring-4 focus:ring-primary-500/30 focus:border-primary-500 focus:shadow-xl focus:shadow-primary-500/20
+                        ${isRTL ? 'text-right' : 'text-left'}
+                      `}
+                      dir={isRTL ? 'rtl' : 'ltr'}
+                    />
+                    <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary-500/0 via-primary-500/5 to-purple-500/0 rounded-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
+                  </div>
                 </div>
 
-                {/* Color Selection */}
+                {/* Color Selection with glassmorphism */}
                 <div className="space-y-3">
-                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : ''}`}>
+                  <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
                     <Palette className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                     {t('TableCategoryModal.colorSelection')}
                   </label>
                   
-                  {/* Color Presets */}
+                  {/* Enhanced Color Presets */}
                   <div 
-                    className="grid grid-cols-8 gap-2"
+                    className="grid grid-cols-8 gap-2.5 p-4 bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-800/30 dark:to-gray-700/30 rounded-2xl backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50"
                     role="group"
                     aria-label={t('TableCategoryModal.accessibility.colorPalette')}
                   >
                     {colorPresets.map((color) => (
-                      <button
+                      <motion.button
                         key={color}
                         type="button"
                         onClick={() => handleColorSelect(color)}
+                        whileHover={{ scale: 1.15, rotate: 5 }}
+                        whileTap={{ scale: 0.95 }}
                         className={`
-                          w-8 h-8 rounded-lg border-2 transition-all duration-200 hover:scale-110
+                          w-9 h-9 rounded-xl border-2 transition-all duration-300 shadow-lg
                           ${formData.colorCode === color 
-                            ? 'border-white dark:border-gray-200 ring-2 ring-gray-400 dark:ring-gray-300' 
-                            : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-400'
+                            ? 'border-white dark:border-gray-200 ring-4 ring-primary-500/50 shadow-2xl scale-110' 
+                            : 'border-gray-300/50 dark:border-gray-600/50 hover:border-white dark:hover:border-gray-300 hover:shadow-2xl'
                           }
                         `}
-                        style={{ backgroundColor: color }}
+                        style={{ 
+                          backgroundColor: color,
+                          boxShadow: `0 4px 20px ${color}40`
+                        }}
                         aria-label={`${t('TableCategoryModal.accessibility.colorPreset')} ${color}`}
                       />
                     ))}
                   </div>
 
-                  {/* Custom Color Picker */}
-                  <div className={`flex items-center gap-3 pt-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <div
-                      className="w-10 h-10 rounded-xl border-2 border-gray-300 dark:border-gray-600 overflow-hidden"
-                      style={{ backgroundColor: formData.colorCode }}
+                  {/* Custom Color Picker with better design */}
+                  <div className={`flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-700/30 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      className="w-12 h-12 rounded-xl border-3 border-white dark:border-gray-600 overflow-hidden shadow-xl"
+                      style={{ 
+                        backgroundColor: formData.colorCode,
+                        boxShadow: `0 8px 25px ${formData.colorCode}60`
+                      }}
                     />
                     <input
                       type="color"
                       name="colorCode"
                       value={formData.colorCode}
                       onChange={handleChange}
-                      className="w-10 h-10 border-0 bg-transparent cursor-pointer rounded-lg"
+                      className="w-12 h-12 border-0 bg-transparent cursor-pointer rounded-xl"
                       aria-label={t('TableCategoryModal.accessibility.customColorPicker')}
                     />
-                    <span className="text-sm text-gray-600 dark:text-gray-400 font-mono">
+                    <span className="text-sm text-gray-700 dark:text-gray-300 font-mono font-semibold bg-white/50 dark:bg-gray-900/50 px-3 py-1.5 rounded-lg">
                       {formData.colorCode}
                     </span>
                   </div>
                 </div>
 
-                {/* Icon Selection */}
+                {/* Icon Selection with cards */}
                 <div className="space-y-3">
-                  <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : ''}`}>
+                  <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
                     <Building2 className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                     {t('TableCategoryModal.iconSelection')}
                   </label>
                   <div 
-                    className="grid grid-cols-5 gap-2"
+                    className="grid grid-cols-4 gap-3"
                     role="group"
                     aria-label={t('TableCategoryModal.accessibility.iconGrid')}
                   >
                     {iconOptions.map((option) => (
-                      <button
+                      <motion.button
                         key={option.value}
                         type="button"
                         onClick={() => setFormData(prev => ({ ...prev, iconClass: option.value }))}
+                        whileHover={{ scale: 1.05, y: -2 }}
+                        whileTap={{ scale: 0.95 }}
                         className={`
-                          p-3 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-1
-                          hover:scale-105 hover:shadow-lg
+                          p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-2 shadow-md
                           ${formData.iconClass === option.value
-                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                            : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-500'
+                            ? 'border-primary-500 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/40 dark:to-primary-800/30 text-primary-700 dark:text-primary-300 shadow-xl shadow-primary-500/30 scale-105'
+                            : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-xl hover:shadow-primary-500/20'
                           }
                         `}
                         aria-label={`${t('TableCategoryModal.accessibility.iconOption')} ${t(option.label)}`}
                       >
-                        <option.icon className="w-5 h-5" />
-                        <span className="text-xs font-medium">{t(option.label)}</span>
-                      </button>
+                        <option.icon className="w-6 h-6" />
+                        <span className="text-xs font-semibold">{t(option.label)}</span>
+                      </motion.button>
                     ))}
                   </div>
                   {errors.iconClass && (
-                    <p className="text-red-500 dark:text-red-400 text-xs flex items-center gap-1">
+                    <motion.p 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="text-red-600 dark:text-red-400 text-xs font-medium flex items-center gap-1"
+                    >
                       {errors.iconClass}
-                    </p>
+                    </motion.p>
                   )}
                 </div>
 
                 {/* Active Status Toggle (only in edit mode) */}
                 {isEditMode && (
-                  <div className={`flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex items-center justify-between p-5 bg-gradient-to-r from-gray-50 to-gray-100/80 dark:from-gray-800/50 dark:to-gray-700/30 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm ${isRTL ? 'flex-row-reverse' : ''}`}
+                  >
                     <div>
-                      <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Active Status</h3>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Active Status</h3>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
                         {formData.isActive ? 'Category is active and visible' : 'Category is inactive and hidden'}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, isActive: !prev.isActive }))}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        formData.isActive ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'
+                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all duration-300 shadow-lg ${
+                        formData.isActive 
+                          ? 'bg-gradient-to-r from-primary-500 to-primary-600 shadow-primary-500/50' 
+                          : 'bg-gray-300 dark:bg-gray-600 shadow-gray-400/30'
                       }`}
                       aria-label="Toggle active status"
                     >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          formData.isActive ? 'translate-x-6' : 'translate-x-1'
+                      <motion.span
+                        layout
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ${
+                          formData.isActive ? 'translate-x-8' : 'translate-x-1'
                         }`}
                       />
                     </button>
-                  </div>
+                  </motion.div>
                 )}
 
                 {/* Branch Selection (if needed and not in edit mode) */}
                 {!isEditMode && !selectedBranch && branches.length > 0 && (
                   <div className="space-y-2">
-                    <label className={`flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : ''}`}>
+                    <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
                       <Users className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                       {t('TableCategoryModal.branchSelection')}
                     </label>
-                    <select
-                      value={branchId ?? ''}
-                      onChange={(e) => setBranchId(Number(e.target.value))}
-                      className={`
-                        w-full px-4 py-3 rounded-xl border-2 transition-all duration-200
-                        bg-white dark:bg-gray-900 
-                        text-gray-900 dark:text-gray-100
-                        border-gray-200 dark:border-gray-600
-                        hover:border-gray-300 dark:hover:border-gray-500
-                        focus:outline-none focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500
-                        ${isRTL ? 'text-right' : 'text-left'}
-                      `}
-                      aria-label={t('TableCategoryModal.accessibility.branchDropdown')}
-                      dir={isRTL ? 'rtl' : 'ltr'}
-                    >
-                      {branches.map(branch => (
-                        <option key={branch.id} value={branch.id} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-                          {branch.name}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="relative group">
+                      <select
+                        value={branchId ?? ''}
+                        onChange={(e) => setBranchId(Number(e.target.value))}
+                        className={`
+                          w-full px-5 py-3.5 rounded-2xl border-2 transition-all duration-300 appearance-none cursor-pointer
+                          bg-white dark:bg-gray-800/50 
+                          text-gray-900 dark:text-gray-100
+                          border-gray-200 dark:border-gray-600
+                          hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg hover:shadow-primary-500/10
+                          focus:outline-none focus:ring-4 focus:ring-primary-500/30 focus:border-primary-500 focus:shadow-xl focus:shadow-primary-500/20
+                          ${isRTL ? 'text-right' : 'text-left'}
+                        `}
+                        aria-label={t('TableCategoryModal.accessibility.branchDropdown')}
+                        dir={isRTL ? 'rtl' : 'ltr'}
+                      >
+                        {branches.map(branch => (
+                          <option key={branch.id} value={branch.id} className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+                            {branch.name}
+                          </option>
+                        ))}
+                      </select>
+                      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary-500/0 via-primary-500/5 to-purple-500/0 rounded-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
+                    </div>
                   </div>
                 )}
 
-                {/* Action Buttons */}
-                <div className={`flex gap-3 pt-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <button
+                {/* Enhanced Action Buttons */}
+                <div className={`flex gap-4 pt-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <motion.button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-xl transition-all duration-200 hover:scale-[1.02] border border-gray-200 dark:border-gray-600"
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="flex-1 px-6 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-2xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-md hover:shadow-lg"
                   >
                     {t('TableCategoryModal.cancel')}
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 px-4 py-3 text-sm font-medium text-white bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 dark:from-primary-500 dark:to-primary-600 dark:hover:from-primary-600 dark:hover:to-primary-700 rounded-xl transition-all duration-200 hover:scale-[1.02] focus:outline-none focus:ring-4 focus:ring-primary-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
+                    whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
+                    whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
+                    className="flex-1 px-6 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-primary-600 via-primary-500 to-purple-600 hover:from-primary-700 hover:via-primary-600 hover:to-purple-700 dark:from-primary-500 dark:via-primary-600 dark:to-purple-600 dark:hover:from-primary-600 dark:hover:via-primary-700 dark:hover:to-purple-700 rounded-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary-500/40 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none shadow-xl hover:shadow-2xl shadow-primary-500/50 hover:shadow-primary-500/60"
                   >
                     {isSubmitting ? (
                       <div className={`flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <motion.div 
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                          className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"
+                        />
                         {isEditMode ? 'Updating...' : t('TableCategoryModal.saving')}
                       </div>
                     ) : (
                       isEditMode ? 'Update Category' : t('TableCategoryModal.addCategory')
                     )}
-                  </button>
+                  </motion.button>
                 </div>
               </form>
             </motion.div>
