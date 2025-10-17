@@ -1,3 +1,4 @@
+import { title } from "process";
 
 
 export const ar = {
@@ -1075,11 +1076,12 @@ export const ar = {
       closed: 'مغلق',
       active: 'نشط',
       inactive: 'غير نشط',
-      hidden: 'مخفي'
+      hidden: 'مخفي',
     },
     actions: {
       edit: 'تعديل',
-      delete: 'حذف'
+      delete: 'حذف',
+      purge: 'تنظيف البيانات'
     },
     labels: {
       customerVisibility: 'الظهور للعملاء',
@@ -3880,6 +3882,18 @@ export const ar = {
     descriptionBranchCategories: 'إدارة فئات الفرع المحذوفة',
     descriptionTableCategories: 'إدارة فئات الطاولات المحذوفة',
     search: 'بحث عن العناصر...',
+    branchRestore: {
+      title: "خيارات استعادة الفرع",
+      subtitle: "اختر كيفية استعادة الفرع المحذوف",
+      simpleTitle: "استعادة الفرع",
+      simpleDesc: "استعادة هذا الفرع ستؤدي فقط إلى استعادة معلومات الفرع العامة",
+      cascadeTitle: "استعادة هذا الفرع ستؤدي أيضًا إلى استعادة جميع المنتجات والفئات المرتبطة به",
+      cascadeDesc: "هل تريد استعادة الفرع فقط أم جميع المنتجات والفئات المرتبطة به أيضًا؟",
+      recommended: "مستحسن",
+      includeProducts: "تضمين المنتجات والفئات",
+      includeTables: "تضمين الجداول",
+      includeAll: "تضمين جميع البيانات المرتبطة",
+    },
     filter: {
       all: 'جميع العناصر',
       group1: 'جميع المجموعة 1',
@@ -3958,12 +3972,17 @@ export const ar = {
     subtitle: "تفاصيل الشركة والقانونية",
     noDataTitle: "لا توجد معلومات إدارية",
     noDataMessage: "لم يتم إعداد معلومات الإدارة بعد. يرجى إضافة تفاصيل المطعم للبدء.",
-    
+    dangerZone: {
+      title : "المنطقة الخطرة",
+      description : "احذر! هذه الإجراءات قد تؤدي إلى فقدان البيانات أو تعطيل وظائف المطعم.",
+    },
     buttons: {
       edit: "تعديل",
       cancel: "إلغاء",
       save: "حفظ التغييرات",
-      saving: "جاري الحفظ..."
+      saving: "جاري الحفظ...",
+      delete: "حذف",
+      purge: "تنظيف",
     },
 
     sections: {

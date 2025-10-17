@@ -1,3 +1,4 @@
+import { title } from "process";
 
 
 export const en = {
@@ -1077,7 +1078,8 @@ export const en = {
     },
     actions: {
       edit: 'Edit',
-      delete: 'Delete'
+      delete: 'Delete',
+      purge:  'Purge Branch Data'
     },
     labels: {
       customerVisibility: 'Customer Visibility',
@@ -3941,6 +3943,18 @@ export const en = {
       successTableCategory: '"{name}" table category has been restored successfully',
       error: 'Restore operation failed'
     },
+    branchRestore:{
+      title: 'Restore Branch Options',
+      subtitle: 'Choose how you want to restore the branch',
+      simpleTitle: 'Restore Branch',
+      simpleDesc: 'Restoring this branch will restore just general branch information.',
+      cascadeTitle: 'Restoring this branch will also restore all associated products and categories.',
+      cascadeDesc: 'Do you want to restore just the branch or also all associated products and categories?',
+      recommended: 'Recommended',
+      includeProducts: 'Include Products and Categories',
+      includeTables: 'Include Tables',
+      includeAll: 'Include All Associated Data',
+    },
     empty: {
       title: 'Recycle bin is empty',
       titleFiltered: 'No results found',
@@ -3957,12 +3971,17 @@ export const en = {
       "subtitle": "Company and legal details",
       "noDataTitle": "No Management Information",
       "noDataMessage": "Management information has not been set up yet. Please add restaurant details to get started.",
-      
+      dangerZone: {
+        title: "Danger Zone",
+        description: "Caution: These actions are irreversible. Please proceed with care.",
+      },
       "buttons": {
         "edit": "Edit",
         "cancel": "Cancel",
         "save": "Save Changes",
-        "saving": "Saving Changes..."
+        "saving": "Saving Changes...",
+        delete:"Delete Restaurant",
+        purge:"Purge Restaurant Data",
       },
 
       "sections": {

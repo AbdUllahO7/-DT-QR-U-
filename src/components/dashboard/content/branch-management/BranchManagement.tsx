@@ -17,6 +17,7 @@ import AddBranchCard from './AddBranchCard';
 import { logger } from '../../../../utils/logger';
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 import { useNavigate } from 'react-router-dom';
+import { purgeService } from '../../../../services/purge/PurgeService';
 
 const BranchManagement: React.FC = () => {
   const { t, isRTL } = useLanguage();
@@ -28,10 +29,16 @@ const BranchManagement: React.FC = () => {
   const [editingBranch, setEditingBranch] = useState<BranchDetailResponse | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate()
+  
   // Delete confirmation modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [branchToDelete, setBranchToDelete] = useState<BranchInfo | null>(null);
   const [isDeletingBranch, setIsDeletingBranch] = useState(false);
+
+  // Purge confirmation modal states
+  const [isPurgeModalOpen, setIsPurgeModalOpen] = useState(false);
+  const [branchToPurge, setBranchToPurge] = useState<BranchInfo | null>(null);
+  const [isPurgingBranch, setIsPurgingBranch] = useState(false);
 
   const defaultWorkingHours: CreateBranchWorkingHourCoreDto[] = [
     { dayOfWeek: 1, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Monday
@@ -349,6 +356,73 @@ const BranchManagement: React.FC = () => {
     setBranchToDelete(null);
   };
 
+  // Purge handler
+  const handlePurgeBranch = (branch: BranchInfo) => {
+    setBranchToPurge(branch);
+    setIsPurgeModalOpen(true);
+  };
+
+  // Actual purge operation called by the confirmation modal
+  const performPurgeBranch = async () => {
+    if (!branchToPurge) {
+      throw new Error(t('branchManagement.error.branchNotFound'));
+    }
+
+    setIsPurgingBranch(true);
+
+    // Store branch backup for potential revert
+    const branchBackup = branchToPurge;
+
+    // Optimistic UI update: Remove branch from UI immediately
+    setBranches(prev => prev.filter(branch => branch.branchId !== branchToPurge.branchId));
+
+    try {
+      await purgeService.purgeBranch(branchToPurge.branchId);
+      logger.info('Branch purged successfully', { branchId: branchToPurge.branchId }, { prefix: 'BranchManagement' });
+      
+      // Reset modal states
+      setBranchToPurge(null);
+      setIsPurgeModalOpen(false);
+
+      // Refresh the list to ensure consistency
+      await fetchBranches();
+
+    } catch (err: any) {
+      logger.error('Error purging branch:', err, { prefix: 'BranchManagement' });
+      
+      // Revert optimistic update on error
+      setBranches(prev => [...prev, branchBackup].sort((a, b) => a.branchId - b.branchId));
+      
+      let errorMessage = t('branchManagement.error.purgeFailed') || 'Failed to permanently delete branch';
+      
+      if (err?.response?.status === 401) {
+        errorMessage = t('branchManagement.error.sessionExpired');
+      } else if (err?.response?.status === 403) {
+        errorMessage = t('branchManagement.error.noPermission');
+      } else if (err?.response?.status === 404) {
+        errorMessage = t('branchManagement.error.branchNotFound');
+      } else if (err?.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+      
+      // Clear error after 5 seconds
+      setTimeout(() => setError(null), 5000);
+      
+      // Re-throw error to be handled by the modal
+      throw new Error(errorMessage);
+    } finally {
+      setIsPurgingBranch(false);
+    }
+  };
+
+  // Close purge modal handler
+  const handlePurgeModalClose = () => {
+    setIsPurgeModalOpen(false);
+    setBranchToPurge(null);
+  };
+
   const handleAddBranch = () => {
     setFormData(getEmptyFormData());
     setIsEditMode(false);
@@ -493,6 +567,7 @@ const BranchManagement: React.FC = () => {
                   branch={branch}
                   onEdit={handleEditBranch}
                   onDelete={() => handleDeleteBranch(branch)}
+                  onPurge={() => handlePurgeBranch(branch)}
                   onToggleTemporaryClose={handleToggleTemporaryClose}
                 />
               </motion.div>
@@ -564,6 +639,18 @@ const BranchManagement: React.FC = () => {
         isSubmitting={isDeletingBranch}
         itemType="branch"
         itemName={branchToDelete?.branchName || ''}
+      />
+
+      {/* Purge Confirmation Modal */}
+      <ConfirmDeleteModal
+        isOpen={isPurgeModalOpen}
+        onClose={handlePurgeModalClose}
+        onConfirm={performPurgeBranch}
+        title={t('branchManagement.purgeConfirm.title') || 'Permanent Deletion Warning'}
+        message={t('branchManagement.purgeConfirm.description') || 'This will PERMANENTLY delete the branch and ALL associated data. This action CANNOT be undone!'}
+        isSubmitting={isPurgingBranch}
+        itemType="branch-purge"
+        itemName={branchToPurge?.branchName || ''}
       />
     </div>
   );

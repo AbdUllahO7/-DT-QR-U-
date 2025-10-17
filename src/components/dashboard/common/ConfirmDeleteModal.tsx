@@ -20,6 +20,7 @@ export const ConfirmDeleteModal: React.FC<{
   title, 
   isSubmitting = false,
   itemType,
+  message,
 }) => {
   const { t, isRTL } = useLanguage();
   const [error, setError] = useState<string | null>(null);
@@ -72,7 +73,10 @@ export const ConfirmDeleteModal: React.FC<{
         </div>
 
         <div className="space-y-4">
-          {/* Message */}
+           <p className="text-sm text-red-700 dark:text-red-300 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                  {message}
+                  </p>
           <div className="space-y-2">
             
            
