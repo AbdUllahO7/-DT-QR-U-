@@ -399,9 +399,8 @@ export const useCartHandlers = ({
     }
   }
 
-  const handlePriceChangeConfirmation = async () => {
+   const handlePriceChangeConfirmation = async () => {
     try {
-      setShowPriceChangeModal(true)
       
       const cleanSessionId = getCleanSessionId(sessionId || basketId)
       
@@ -515,22 +514,9 @@ export const useCartHandlers = ({
 
     } catch (err: any) {
       console.error('❌ Error creating order:', err)
-      
-      if (err?.response?.status === 409) {
-        const errorMessage = err?.response?.data?.message || err?.message || ''
-        
-        if (errorMessage.toLowerCase().includes('unconfirmed price changes') || 
-            errorMessage.toLowerCase().includes('price changes')) {
-          
-          await handlePriceChangeConfirmation()
-          return
-          
-        } else {
-          setError(err.message || 'This order is already being processed')
-        }
-      } else {
-        setError(err.message || 'Failed to create order')
-      }
+        setShowPriceChangeModal(true)
+
+    
     } finally {
       setLoading(false)
     }
@@ -605,6 +591,7 @@ export const useCartHandlers = ({
     refreshAllPendingOrders,
     calculateItemTotalPrice,
     getSelectedOrderType,
+    handlePriceChangeConfirmation,
     sendOrderToWhatsApp
   }
 }

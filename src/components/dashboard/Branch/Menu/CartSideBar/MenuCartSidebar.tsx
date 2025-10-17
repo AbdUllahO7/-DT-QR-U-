@@ -127,7 +127,8 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     refreshAllPendingOrders,
     calculateItemTotalPrice,
     getSelectedOrderType,
-    sendOrderToWhatsApp
+    sendOrderToWhatsApp,
+    handlePriceChangeConfirmation
   } = useCartHandlers({
     cart,
     setCart,
@@ -404,6 +405,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
       toastId = showToast('loading', t('menu.cart.confirming_price_changes') || 'Confirming price changes...')
 
       const cleanSessionId = sessionId || basketId
+      console.log('Confirming price changes for sessionId:', basketId)
       if (!cleanSessionId) {
         const errorMessage = t('menu.cart.session_required') || 'Session ID required'
         setError('Session ID required for price change confirmation')

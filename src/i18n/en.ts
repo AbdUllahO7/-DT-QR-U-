@@ -1903,8 +1903,7 @@ export const en = {
       // Common titles (can be overridden by props)
       defaultTitle: 'Confirm Deletion',
       deleteTitle: 'Delete Item',
-      
-      // Warning message
+      deleteTableWarning: "Ensure there is no pending request before deleting the table.",
       warning: 'This action cannot be undone. The item will be permanently deleted.',
       
       // Item types
@@ -2766,12 +2765,12 @@ export const en = {
 
     // Permission categories
     permissionCategories: {
-      'User Management': 'User Management',
-      'Restaurant Management': 'Restaurant Management', 
-      'Branch Management': 'Branch Management',
-      'Order Management': 'Order Management',
-      'Product Management': 'Product Management',
-      'Analytics': 'Analytics'
+      UserManagement: 'User Management',
+      RestaurantManagement: 'Restaurant Management', 
+      BranchManagement: 'Branch Management',
+      OrderManagement: 'Order Management',
+      ProductManagement: 'Product Management',
+      Analytics: 'Analytics'
     },
 
     // Success messages
