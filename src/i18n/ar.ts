@@ -1906,7 +1906,7 @@ export const ar = {
     // Common titles (can be overridden by props)
     defaultTitle: 'تأكيد الحذف',
     deleteTitle: 'حذف العنصر',
-    
+    deleteTableWarning:"تأكد من عدم وجود طلب معلق قبل حذف الطاولة",
     // Warning message
     warning: 'لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصر نهائياً.',
     
@@ -2769,12 +2769,12 @@ export const ar = {
 
     // Permission categories
     permissionCategories: {
-      'User Management': 'إدارة المستخدمين',
-      'Restaurant Management': 'إدارة المطاعم', 
-      'Branch Management': 'إدارة الفروع',
-      'Order Management': 'إدارة الطلبات',
-      'Product Management': 'إدارة المنتجات',
-      'Analytics': 'التحليلات'
+      UserManagement: 'إدارة المستخدمين',
+      RestaurantManagement: 'إدارة المطاعم', 
+      BranchManagement: 'إدارة الفروع',
+      OrderManagement: 'إدارة الطلبات',
+      ProductManagement: 'إدارة المنتجات',
+      Analytics: 'التحليلات'
     },
 
     // Success messages
