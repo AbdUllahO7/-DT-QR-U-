@@ -261,6 +261,7 @@ export interface CategoriesContentProps {
   getProductPrice: (productId: number, originalPrice: number) => number;
   getCategoryName: (categoryId: number, originalName: string) => string;
   handleShowProductAddons?: (product: DetailedProduct) => void;
+  isCategoryActive: (categoryId: number) => boolean;
 }
 
 
