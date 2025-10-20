@@ -37,7 +37,6 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   restaurantPreferences
 }) => {
   const { t } = useLanguage()
-  console.log('🌐 Restaurant Preferences:', restaurantPreferences)
   // Toast state
   const [toasts, setToasts] = useState<Toast[]>([])
 
@@ -405,7 +404,6 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
       toastId = showToast('loading', t('menu.cart.confirming_price_changes') || 'Confirming price changes...')
 
       const cleanSessionId = sessionId || basketId
-      console.log('Confirming price changes for sessionId:', basketId)
       if (!cleanSessionId) {
         const errorMessage = t('menu.cart.session_required') || 'Session ID required'
         setError('Session ID required for price change confirmation')
@@ -417,7 +415,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
         }
         return
       }
-
+      
       await basketService.confirmSessionPriceChanges(cleanSessionId)
       
       if (toastId) {

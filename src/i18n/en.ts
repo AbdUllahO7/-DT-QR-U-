@@ -3042,7 +3042,7 @@ export const en = {
   branchCategories: {
     // Header and Stats
     header: 'Branch Categories Management',
-    subheader: 'Manage categories and products for Branch {branchId}',
+    subheader: 'Manage categories and products for Branch ',
     lastUpdated: 'Last Updated',
     
     stats: {

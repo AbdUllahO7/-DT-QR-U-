@@ -456,7 +456,6 @@ export const useCartHandlers = ({
       }
       
       const order = await orderService.createSessionOrder(sessionOrderDto)
-      console.log('✅ Order created successfully:', order)
       // Calculate order total for WhatsApp message
       const serviceChargeAmount = selectedOrderType?.serviceCharge || 0
 

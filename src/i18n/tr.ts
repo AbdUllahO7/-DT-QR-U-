@@ -3047,7 +3047,7 @@ export const tr = {
   branchCategories: {
     // Header and Stats
     header: 'Şube Kategori Yönetimi',
-    subheader: '{branchId} Şubesi için kategorileri ve ürünleri yönet',
+    subheader: ' Şubesi için kategorileri ve ürünleri yönet',
     lastUpdated: 'Son Güncelleme',
     
     stats: {
