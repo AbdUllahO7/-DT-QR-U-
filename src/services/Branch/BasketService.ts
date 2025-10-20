@@ -245,7 +245,6 @@ class BasketService {
   async confirmSessionPriceChanges(basketId: string): Promise<void> {
     try {
       logger.info('Session price changes onaylama isteği gönderiliyor', { basketId }, { prefix: 'BasketService' });
-      console.log('Confirming price changes for basketId:', basketId);
       const url = `${this.baseUrl}/${basketId}/confirm-price-changes`;
       await httpClient.post(url);
       

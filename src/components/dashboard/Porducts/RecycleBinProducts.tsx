@@ -44,7 +44,6 @@ const RecycleBin: React.FC = () => {
   const source = location.state?.source || 'all';
   const branchId = location.state?.branchId;
 
-  console.log("branchId",branchId)
 
   // Load deleted items based on source parameter
   const loadDeletedItems = async () => {

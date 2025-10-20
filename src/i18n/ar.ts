@@ -3043,7 +3043,7 @@ export const ar = {
   branchCategories: {
     // Header and Stats
     header: 'إدارة فئات الفرع',
-    subheader: 'إدارة الفئات والمنتجات للفرع {branchId}',
+    subheader: 'إدارة الفئات والمنتجات للفرع ',
     lastUpdated: 'آخر تحديث',
     
     stats: {
