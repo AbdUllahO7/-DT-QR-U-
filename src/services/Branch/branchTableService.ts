@@ -26,10 +26,11 @@ interface DeletedTable {
   categoryName: string;
 }
 export interface UpdateTableCategoryDto {
-  id: number;
   categoryName: string;
+  description?: string;  // Add this field
   colorCode: string;
   iconClass: string;
+  displayOrder: number;  // Remove the optional
   isActive: boolean;
   rowVersion?: string;
 }
@@ -184,37 +185,50 @@ class TableService {
   /**
    * Update an existing table category
    */
-  async updateCategory(categoryId: number , branchId:number, data: UpdateTableCategoryDto): Promise<TableCategory> {
-    try {
-      logger.info('Kategori güncelleme API çağrısı başlatılıyor', { categoryId, data }, { prefix: 'TableService' });
-      
-      // Validate input data
-      if (!data.id || data.id !== categoryId) {
-        throw new Error('Kategori ID uyumsuzluğu');
-      }
-      
-      if (!data.categoryName || !data.categoryName.trim()) {
-        throw new Error('Kategori adı gereklidir');
-      }
-      
-      if (!data.colorCode) {
-        throw new Error('Renk kodu gereklidir');
-      }
-      
-      if (!data.iconClass) {
-        throw new Error('İkon sınıfı gereklidir');
-      }
-      
-      const response = await httpClient.put<TableCategory>(`${this.baseUrl}/table-categories/${categoryId}?branchId=${branchId}`, data);
-      
-      logger.info('Kategori başarıyla güncellendi', response.data, { prefix: 'TableService' });
-      
-      return response.data;
-    } catch (error) {
-      logger.error('Kategori güncellenirken hata oluştu', error, { prefix: 'TableService' });
-      throw error;
+async updateCategory(categoryId: number, data: UpdateTableCategoryDto, branchId?: number): Promise<TableCategory> {
+  try {
+    logger.info('Kategori güncelleme API çağrısı başlatılıyor', { categoryId, data }, { prefix: 'TableService' });
+    
+    // Validate input data
+    if (!data.categoryName || !data.categoryName.trim()) {
+      throw new Error('Kategori adı gereklidir');
     }
+    
+    if (!data.colorCode) {
+      throw new Error('Renk kodu gereklidir');
+    }
+    
+    if (!data.iconClass) {
+      throw new Error('İkon sınıfı gereklidir');
+    }
+
+    // Format the payload to match API schema
+    const payload = {
+      categoryName: data.categoryName,
+      description: data.description || "",
+      colorCode: data.colorCode,
+      iconClass: data.iconClass,
+      displayOrder: data.displayOrder || 0,
+      isActive: data.isActive,
+      rowVersion: data.rowVersion || ""
+    };
+    
+    console.log("Updating category", categoryId, branchId, payload);
+    
+    const url = branchId 
+      ? `${this.baseUrl}/table-categories/${categoryId}?branchId=${branchId}`
+      : `${this.baseUrl}/table-categories/${categoryId}`;
+      
+    const response = await httpClient.put<TableCategory>(url, payload);
+    
+    logger.info('Kategori başarıyla güncellendi', response.data, { prefix: 'TableService' });
+    
+    return response.data;
+  } catch (error) {
+    logger.error('Kategori güncellenirken hata oluştu', error, { prefix: 'TableService' });
+    throw error;
   }
+}
 
   /**
    * Delete a table category

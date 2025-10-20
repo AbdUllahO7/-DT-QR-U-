@@ -470,8 +470,8 @@ const handleClearTable = async (tableId: number): Promise<void> => {
         isActive: newStatus,
         rowVersion: (currentCategory as any).rowVersion || ''
       };
-
-      await tableService.updateCategory(categoryId, updateData);
+      console.log("updateData",updateData)
+      await tableService.updateCategory(categoryId, updateData );
       setSuccessMessage(t(`BranchTableManagement.success.category${newStatus ? 'Activated' : 'Deactivated'}`));
     } catch (err: any) {
       console.error('Error updating category status:', err);

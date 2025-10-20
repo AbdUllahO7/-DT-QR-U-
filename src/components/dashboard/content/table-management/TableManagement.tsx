@@ -47,10 +47,8 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   const [openCategoryMenu, setOpenCategoryMenu] = useState<number | null>(null);
 
   const dropdownRef = React.useRef<HTMLDivElement>(null);
-  const categoryMenuRef = React.useRef<HTMLDivElement>(null);
   
   useClickOutside(dropdownRef, () => setIsBranchDropdownOpen(false));
-  useClickOutside(categoryMenuRef, () => setOpenCategoryMenu(null));
   
   const navigate = useNavigate();
   const token = localStorage.getItem('token') || '';
@@ -369,11 +367,11 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     setEditingCategory(null);
   };
 
-  const handleCategoryModalSuccess = () => {
-    fetchTablesAndCategories();
-    setIsCategoryModalOpen(false);
-    setEditingCategory(null);
-  };
+const handleCategoryModalSuccess = () => {
+  fetchTablesAndCategories();
+  setIsCategoryModalOpen(false);
+  setEditingCategory(null);
+};
 
   const toggleCategoryMenu = (categoryId: number) => {
     setOpenCategoryMenu(openCategoryMenu === categoryId ? null : categoryId);
@@ -565,9 +563,12 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
                     </div>
 
                     {/* Category Actions Menu */}
-                    <div className="relative" ref={categoryMenuRef}>
+                <div className="relative">
                       <button
-                        onClick={() => toggleCategoryMenu(category.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleCategoryMenu(category.id);
+                        }}
                         className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                         aria-label="Category Actions"
                       >
@@ -575,27 +576,35 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
                       </button>
 
                       {openCategoryMenu === category.id && (
-                        <motion.div
-                          initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                          animate={{ opacity: 1, scale: 1, y: 0 }}
-                          exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                          className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50`}
-                        >
-                          <button
-                            onClick={() => handleEditCategory(category)}
-                            className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+                        <>
+                          {/* Backdrop to close menu when clicking outside */}
+                          <div 
+                            className="fixed inset-0 z-40" 
+                            onClick={() => setOpenCategoryMenu(null)}
+                          />
+                          
+                          <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                            className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50`}
                           >
-                            <Edit2 className="h-4 w-4" />
-                            Edit Category
-                          </button>
-                          <button
-                            onClick={() => handleDeleteCategory(category)}
-                            className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Delete Category
-                          </button>
-                        </motion.div>
+                            <button
+                              onClick={() => handleEditCategory(category)}
+                              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                              Edit Category
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCategory(category)}
+                              className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              Delete Category
+                            </button>
+                          </motion.div>
+                        </>
                       )}
                     </div>
                   </div>
