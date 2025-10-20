@@ -137,7 +137,19 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
       setError('Product must be added to branch first before configuring addons');
       return;
     }
-
+  let categoryId: number | null = null;
+    for (const branchCategory of branchCategories) {
+        const foundProduct = branchCategory.products?.find(p => p.branchProductId === product.branchProductId);
+        if (foundProduct) {
+          categoryId = branchCategory.categoryId;
+          break;
+        }
+      }
+      
+      if (categoryId && !isCategoryActive(categoryId)) {
+        setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot configure addons for products in inactive category');
+        return;
+      }
     setSelectedProductForAddons(product);
     setIsProductAddonsModalOpen(true);
     
@@ -208,30 +220,56 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
   }
 };
   // Price editing functions
-  const handleProductPriceEdit = (productId: number, originalPrice: number) => {
-    setEditingProductId(productId);
-    
-    const newEditedPrices = new Map(editedProductPrices);
-    
-    // For existing branch products, use the current branch product price as starting point
-    let currentPrice = originalPrice;
-    if (activeTab === 'manage') {
-      for (const branchCategory of branchCategories) {
-        const product = branchCategory.products?.find(p => p.id === productId && p.isSelected);
-        if (product) {
-          currentPrice = product.price;
-          break;
-        }
+const handleProductPriceEdit = (productId: number, originalPrice: number) => {
+  // Find the category of this product and check if it's active
+  let categoryId: number | null = null;
+  
+  if (activeTab === 'manage') {
+    for (const branchCategory of branchCategories) {
+      const product = branchCategory.products?.find(p => p.id === productId && p.isSelected);
+      if (product) {
+        categoryId = branchCategory.categoryId;
+        break;
       }
     }
-    
-    newEditedPrices.set(productId, {
-      productId,
-      originalPrice,
-      newPrice: currentPrice
-    });
-    setEditedProductPrices(newEditedPrices);
-  };
+  } else {
+    for (const category of categoriesWithProducts) {
+      const product = category.products.find(p => p.id === productId);
+      if (product) {
+        categoryId = category.categoryId;
+        break;
+      }
+    }
+  }
+  
+  if (categoryId && !isCategoryActive(categoryId)) {
+    setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot edit products in inactive category');
+    return;
+  }
+  
+  setEditingProductId(productId);
+  
+  const newEditedPrices = new Map(editedProductPrices);
+  
+  // For existing branch products, use the current branch product price as starting point
+  let currentPrice = originalPrice;
+  if (activeTab === 'manage') {
+    for (const branchCategory of branchCategories) {
+      const product = branchCategory.products?.find(p => p.id === productId && p.isSelected);
+      if (product) {
+        currentPrice = product.price;
+        break;
+      }
+    }
+  }
+  
+  newEditedPrices.set(productId, {
+    productId,
+    originalPrice,
+    newPrice: currentPrice
+  });
+  setEditedProductPrices(newEditedPrices);
+};
 
   const handleProductPriceChange = (productId: number, newPrice: string) => {
     const priceValue = parseFloat(newPrice) || 0;
@@ -273,8 +311,14 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
     }
   };
 
-  // Category name editing functions
+    // Category name editing functions
   const handleCategoryNameEdit = (categoryId: number, originalName: string) => {
+    // Check if category is active before allowing edit
+    if (!isCategoryActive(categoryId)) {
+      setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot edit inactive category');
+      return;
+    }
+    
     setEditingCategoryId(categoryId);
     
     const newEditedNames = new Map(editedCategoryNames);
@@ -882,7 +926,17 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
       setIsLoadingProducts(false);
     }
   };
-
+    const isCategoryActive = (categoryId: number): boolean => {
+      // For manage tab, check branch category status
+      if (activeTab === 'manage') {
+        const branchCategory = branchCategories.find(bc => bc.categoryId === categoryId);
+        return branchCategory?.isActive ?? true;
+      }
+      
+      // For add tab, check original category status
+      const category = categories.find(cat => cat.categoryId === categoryId);
+      return category?.status ?? true;
+    };
   // Navigation functions
   const proceedToProductSelection = async () => {
     if (selectedCategories.size === 0) {
@@ -961,6 +1015,12 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
 
   // Delete functions
   const openDeleteModal = (branchCategoryId: number, categoryName: string) => {
+    const category = branchCategories.find(bc => bc.branchCategoryId === branchCategoryId);
+  
+  if (category && !isCategoryActive(category.categoryId)) {
+    setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot delete inactive category');
+    return;
+  }
     setDeleteModal({
       isOpen: true,
       branchCategoryId,
@@ -1141,7 +1201,16 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
       
       let productToAdd = null;
       let categoryIndex = -1;
-      
+          const category = branchCategories.find(bc => bc.branchCategoryId === branchCategoryId);
+ if (!category) {
+      setError(t('branchCategories.messages.error.categoryNotFound'));
+      return;
+    }
+     if (!isCategoryActive(category.categoryId)) {
+      setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot add products to inactive category');
+      return;
+    }
+
       for (let i = 0; i < branchCategories.length; i++) {
         const product = branchCategories[i].products?.find(p => p.id === productId);
         if (product) {
@@ -1259,7 +1328,10 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
       
       let productToRemove = null;
       let categoryIndex = -1;
-      
+        if (!isCategoryActive(branchCategories[categoryIndex].categoryId)) {
+      setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot remove products from inactive category');
+      return;
+    }
       for (let i = 0; i < branchCategories.length; i++) {
         const product = branchCategories[i].products?.find(p => p.branchProductId === branchProductId);
         if (product) {
@@ -1344,6 +1416,13 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
 
   // Reordering functions
   const handleMoveUp = (index: number) => {
+      const category = branchCategories[index];
+
+    if (!isCategoryActive(category.categoryId)) {
+        setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot reorder inactive category');
+        return;
+      }
+
     if (index > 0) {
       const newCategories = [...branchCategories];
       [newCategories[index], newCategories[index - 1]] = [newCategories[index - 1], newCategories[index]];
@@ -1353,8 +1432,16 @@ const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds
       setBranchCategories(newCategories);
     }
   };
-
+  
   const handleMoveDown = (index: number) => {
+    const category = branchCategories[index];
+  
+  if (!isCategoryActive(category.categoryId)) {
+    setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot reorder inactive category');
+    return;
+  }
+  
+
     if (index < branchCategories.length - 1) {
       const newCategories = [...branchCategories];
       [newCategories[index], newCategories[index + 1]] = [newCategories[index + 1], newCategories[index]];
@@ -1515,68 +1602,69 @@ const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAdd
         )}
 
         {/* Main Content */}
-        <CategoriesContent
-          activeTab={activeTab}
-          branchId={branchId}
-          categories={categories}
-          branchCategories={branchCategories}
-          selectedCategories={selectedCategories}
-          selectedProducts={selectedProducts}
-          categoriesWithProducts={categoriesWithProducts}
-          currentStep={currentStep}
-          expandedCategories={expandedCategories}
-          expandedBranchCategories={expandedBranchCategories}
-          isReorderMode={isReorderMode}
-          hasUnsavedChanges={hasUnsavedChanges}
-          isReordering={isReordering}
-          isLoading={isLoading}
-          isSaving={isSaving}
-          isLoadingProducts={isLoadingProducts}
-          isLoadingBranchProducts={isLoadingBranchProducts}
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          setSelectedCategories={setSelectedCategories}
-          setSelectedProducts={setSelectedProducts}
-          setCurrentStep={setCurrentStep}
-          setExpandedCategories={setExpandedCategories}
-          setExpandedBranchCategories={setExpandedBranchCategories}
-          setIsReorderMode={setIsReorderMode}
-          setEditingProductId={setEditingProductId}
-          setEditingCategoryId={setEditingCategoryId}
-          handleShowProductAddons={handleShowProductAddons}
-          handleShowProductDetails={handleShowProductDetails}
-          onCategorySelect={handleCategorySelect}
-          onProductSelect={handleProductSelect}
-          onSelectAllProducts={handleSelectAllProducts}
-          onClearAllProducts={handleClearAllProducts}
-          onProceedToProductSelection={proceedToProductSelection}
-          onProceedToReview={proceedToReview}
-          onBackToCategorySelection={backToCategorySelection}
-          onBackToProductSelection={backToProductSelection}
-          onSave={handleSave}
-          onMoveUp={handleMoveUp}
-          onMoveDown={handleMoveDown}
-          onSaveOrder={handleSaveOrder}
-          onAddProduct={handleAddProductToCategory}
-          onRemoveProduct={handleRemoveProductFromCategory}
-          onDeleteCategory={openDeleteModal}
-          onRefresh={fetchAvailableCategories}
-          setActiveTab={setActiveTab}
-          editedProductPrices={editedProductPrices}
-          editedCategoryNames={editedCategoryNames}
-          editingProductId={editingProductId}
-          editingCategoryId={editingCategoryId}
-          onProductPriceEdit={handleProductPriceEdit}
-          onProductPriceChange={handleProductPriceChange}
-          onProductPriceSave={handleProductPriceSave}
-          onProductPriceCancel={handleProductPriceCancel}
-          onCategoryNameEdit={handleCategoryNameEdit}
-          onCategoryNameChange={handleCategoryNameChange}
-          onCategoryNameSave={handleCategoryNameSave}
-          onCategoryNameCancel={handleCategoryNameCancel}
-          getProductPrice={getProductPrice}
-          getCategoryName={getCategoryName}
-        />
+     <CategoriesContent
+  activeTab={activeTab}
+  branchId={branchId}
+  categories={categories}
+  branchCategories={branchCategories}
+  selectedCategories={selectedCategories}
+  selectedProducts={selectedProducts}
+  categoriesWithProducts={categoriesWithProducts}
+  currentStep={currentStep}
+  expandedCategories={expandedCategories}
+  expandedBranchCategories={expandedBranchCategories}
+  isReorderMode={isReorderMode}
+  hasUnsavedChanges={hasUnsavedChanges}
+  isReordering={isReordering}
+  isLoading={isLoading}
+  isSaving={isSaving}
+  isLoadingProducts={isLoadingProducts}
+  isLoadingBranchProducts={isLoadingBranchProducts}
+  searchTerm={searchTerm}
+  setSearchTerm={setSearchTerm}
+  setSelectedCategories={setSelectedCategories}
+  setSelectedProducts={setSelectedProducts}
+  setCurrentStep={setCurrentStep}
+  setExpandedCategories={setExpandedCategories}
+  setExpandedBranchCategories={setExpandedBranchCategories}
+  setIsReorderMode={setIsReorderMode}
+  setEditingProductId={setEditingProductId}
+  setEditingCategoryId={setEditingCategoryId}
+  handleShowProductAddons={handleShowProductAddons}
+  handleShowProductDetails={handleShowProductDetails}
+  onCategorySelect={handleCategorySelect}
+  onProductSelect={handleProductSelect}
+  onSelectAllProducts={handleSelectAllProducts}
+  onClearAllProducts={handleClearAllProducts}
+  onProceedToProductSelection={proceedToProductSelection}
+  onProceedToReview={proceedToReview}
+  onBackToCategorySelection={backToCategorySelection}
+  onBackToProductSelection={backToProductSelection}
+  onSave={handleSave}
+  onMoveUp={handleMoveUp}
+  onMoveDown={handleMoveDown}
+  onSaveOrder={handleSaveOrder}
+  onAddProduct={handleAddProductToCategory}
+  onRemoveProduct={handleRemoveProductFromCategory}
+  onDeleteCategory={openDeleteModal}
+  onRefresh={fetchAvailableCategories}
+  setActiveTab={setActiveTab}
+  editedProductPrices={editedProductPrices}
+  editedCategoryNames={editedCategoryNames}
+  editingProductId={editingProductId}
+  editingCategoryId={editingCategoryId}
+  onProductPriceEdit={handleProductPriceEdit}
+  onProductPriceChange={handleProductPriceChange}
+  onProductPriceSave={handleProductPriceSave}
+  onProductPriceCancel={handleProductPriceCancel}
+  onCategoryNameEdit={handleCategoryNameEdit}
+  onCategoryNameChange={handleCategoryNameChange}
+  onCategoryNameSave={handleCategoryNameSave}
+  onCategoryNameCancel={handleCategoryNameCancel}
+  getProductPrice={getProductPrice}
+  getCategoryName={getCategoryName}
+  isCategoryActive={isCategoryActive}  
+/>
 
         {/* Delete Confirmation Modal */}
         <ConfirmDeleteModal

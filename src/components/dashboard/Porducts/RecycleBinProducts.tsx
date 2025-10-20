@@ -151,133 +151,136 @@ const RecycleBin: React.FC = () => {
   };
 
   // Handle branch restore with cascade option
-  const handleBranchRestore = async (restoreWithCascade: boolean) => {
-    if (!branchToRestore) return;
+const handleBranchRestore = async (restoreWithCascade: boolean) => {
+  if (!branchToRestore) return;
 
-    setShowBranchRestoreModal(false);
-    setRestoringIds(prev => new Set([...prev, branchToRestore.id]));
+  setShowBranchRestoreModal(false);
+  setRestoringIds(prev => new Set([...prev, branchToRestore.id]));
 
-    try {
-      await branchService.restoreBranch(branchToRestore.id, restoreWithCascade);
-      
-      const successMessage = restoreWithCascade
-        ? t('recycleBin.restore.successBranchCascade').replace('{name}', branchToRestore.displayName)
-        : t('recycleBin.restore.successBranch').replace('{name}', branchToRestore.displayName);
-      
-      showNotification('success', successMessage);
-      setDeletedItems(prev => prev.filter(i => i.id !== branchToRestore.id));
-    } catch (error) {
-      console.error('Error restoring branch:', error);
-      showNotification('error', t('recycleBin.restore.error'));
-    } finally {
-      setRestoringIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(branchToRestore.id);
-        return newSet;
-      });
-      setBranchToRestore(null);
-    }
-  };
+  try {
+    await branchService.restoreBranch(branchToRestore.id, restoreWithCascade);
+    
+    const successMessage = restoreWithCascade
+      ? t('recycleBin.restore.successBranchCascade').replace('{name}', branchToRestore.displayName)
+      : t('recycleBin.restore.successBranch').replace('{name}', branchToRestore.displayName);
+    
+    showNotification('success', successMessage);
+    // FIX: Filter by both id AND entityType
+    setDeletedItems(prev => prev.filter(i => !(i.id === branchToRestore.id && i.entityType === branchToRestore.entityType)));
+  } catch (error) {
+    console.error('Error restoring branch:', error);
+    showNotification('error', t('recycleBin.restore.error'));
+  } finally {
+    setRestoringIds(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(branchToRestore.id);
+      return newSet;
+    });
+    setBranchToRestore(null);
+  }
+};
 
   // Handle product restore with cascade option
-  const handleProductRestore = async (restoreWithCascade: boolean) => {
-    if (!productToRestore) return;
+const handleProductRestore = async (restoreWithCascade: boolean) => {
+  if (!productToRestore) return;
 
-    setShowProductRestoreModal(false);
-    setRestoringIds(prev => new Set([...prev, productToRestore.id]));
+  setShowProductRestoreModal(false);
+  setRestoringIds(prev => new Set([...prev, productToRestore.id]));
 
-    try {
-      await productService.restoreProduct(productToRestore.id, restoreWithCascade);
-      
-      const successMessage = restoreWithCascade
-        ? t('recycleBin.restore.successProductCascade').replace('{name}', productToRestore.displayName)
-        : t('recycleBin.restore.successProduct').replace('{name}', productToRestore.displayName);
-      
-      showNotification('success', successMessage);
-      setDeletedItems(prev => prev.filter(i => i.id !== productToRestore.id));
-    } catch (error) {
-      console.error('Error restoring product:', error);
-      showNotification('error', t('recycleBin.restore.error'));
-    } finally {
-      setRestoringIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(productToRestore.id);
-        return newSet;
-      });
-      setProductToRestore(null);
-    }
-  };
+  try {
+    await productService.restoreProduct(productToRestore.id, restoreWithCascade);
+    
+    const successMessage = restoreWithCascade
+      ? t('recycleBin.restore.successProductCascade').replace('{name}', productToRestore.displayName)
+      : t('recycleBin.restore.successProduct').replace('{name}', productToRestore.displayName);
+    
+    showNotification('success', successMessage);
+    // FIX: Filter by both id AND entityType
+    setDeletedItems(prev => prev.filter(i => !(i.id === productToRestore.id && i.entityType === productToRestore.entityType)));
+  } catch (error) {
+    console.error('Error restoring product:', error);
+    showNotification('error', t('recycleBin.restore.error'));
+  } finally {
+    setRestoringIds(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(productToRestore.id);
+      return newSet;
+    });
+    setProductToRestore(null);
+  }
+};
 
   // Handle category restore with cascade option
-  const handleCategoryRestore = async (restoreWithCascade: boolean) => {
-    if (!categoryToRestore) return;
+const handleCategoryRestore = async (restoreWithCascade: boolean) => {
+  if (!categoryToRestore) return;
 
-    setShowCategoryRestoreModal(false);
-    setRestoringIds(prev => new Set([...prev, categoryToRestore.id]));
+  setShowCategoryRestoreModal(false);
+  setRestoringIds(prev => new Set([...prev, categoryToRestore.id]));
 
-    try {
-      await productService.restoreCategory(categoryToRestore.id, restoreWithCascade);
-      
-      const successMessage = restoreWithCascade
-        ? t('recycleBin.restore.successCategoryCascade').replace('{name}', categoryToRestore.displayName)
-        : t('recycleBin.restore.successCategory').replace('{name}', categoryToRestore.displayName);
-      
-      showNotification('success', successMessage);
-      setDeletedItems(prev => prev.filter(i => i.id !== categoryToRestore.id));
-    } catch (error) {
-      console.error('Error restoring category:', error);
-      showNotification('error', t('recycleBin.restore.error'));
-    } finally {
-      setRestoringIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(categoryToRestore.id);
-        return newSet;
-      });
-      setCategoryToRestore(null);
-    }
-  };
+  try {
+    await productService.restoreCategory(categoryToRestore.id, restoreWithCascade);
+    
+    const successMessage = restoreWithCascade
+      ? t('recycleBin.restore.successCategoryCascade').replace('{name}', categoryToRestore.displayName)
+      : t('recycleBin.restore.successCategory').replace('{name}', categoryToRestore.displayName);
+    
+    showNotification('success', successMessage);
+    // FIX: Filter by both id AND entityType
+    setDeletedItems(prev => prev.filter(i => !(i.id === categoryToRestore.id && i.entityType === categoryToRestore.entityType)));
+  } catch (error) {
+    console.error('Error restoring category:', error);
+    showNotification('error', t('recycleBin.restore.error'));
+  } finally {
+    setRestoringIds(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(categoryToRestore.id);
+      return newSet;
+    });
+    setCategoryToRestore(null);
+  }
+};
 
   // Restore item
-  const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false) => {
-    setRestoringIds(prev => new Set([...prev, item.id]));
+const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false) => {
+  setRestoringIds(prev => new Set([...prev, item.id]));
 
-    try {
-      if (item.entityType === 'Category') {
-        await productService.restoreCategory(item.id, cascadeOption);
-        showNotification('success', t('recycleBin.restore.successCategory').replace('{name}', item.displayName));
-      } else if (item.entityType === 'Product') {
-        await productService.restoreProduct(item.id, cascadeOption);
-        showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
-      } else if (item.entityType === 'Branch') {
-        await branchService.restoreBranch(item.id, cascadeOption);
-        showNotification('success', t('recycleBin.restore.successBranch').replace('{name}', item.displayName));
-      } else if (item.entityType === 'MenuTable') {
-        await tableService.restoreTable(item.id, branchId);
-        showNotification('success', t('recycleBin.restore.successTable').replace('{name}', item.displayName));
-      } else if (item.entityType === 'BranchProduct') {
-        await branchProductService.restoreBranchProduct(item.id);
-        showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
-      } else if (item.entityType === 'BranchCategory') {
-        await branchCategoryService.restoreBranchCategory(item.id);
-        showNotification('success', t('recycleBin.restore.successBranchCategory').replace('{name}', item.displayName));
-      } else if (item.entityType === 'MenuTableCategory') {
-        await tableService.restoreTableCategory(item.id);
-        showNotification('success', t('recycleBin.restore.successTableCategory').replace('{name}', item.displayName));
-      }
-
-      // Remove from list after successful restore
-      setDeletedItems(prev => prev.filter(i => i.id !== item.id));
-    } catch (error) {
-      console.error('Error restoring item:', error);
-      showNotification('error', t('recycleBin.restore.error'));
-    } finally {
-      setRestoringIds(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(item.id);
-        return newSet;
-      });
+  try {
+    if (item.entityType === 'Category') {
+      await productService.restoreCategory(item.id, cascadeOption);
+      showNotification('success', t('recycleBin.restore.successCategory').replace('{name}', item.displayName));
+    } else if (item.entityType === 'Product') {
+      await productService.restoreProduct(item.id, cascadeOption);
+      showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
+    } else if (item.entityType === 'Branch') {
+      await branchService.restoreBranch(item.id, cascadeOption);
+      showNotification('success', t('recycleBin.restore.successBranch').replace('{name}', item.displayName));
+    } else if (item.entityType === 'MenuTable') {
+      await tableService.restoreTable(item.id, branchId);
+      showNotification('success', t('recycleBin.restore.successTable').replace('{name}', item.displayName));
+    } else if (item.entityType === 'BranchProduct') {
+      await branchProductService.restoreBranchProduct(item.id);
+      showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
+    } else if (item.entityType === 'BranchCategory') {
+      await branchCategoryService.restoreBranchCategory(item.id);
+      showNotification('success', t('recycleBin.restore.successBranchCategory').replace('{name}', item.displayName));
+    } else if (item.entityType === 'MenuTableCategory') {
+      await tableService.restoreTableCategory(item.id);
+      showNotification('success', t('recycleBin.restore.successTableCategory').replace('{name}', item.displayName));
     }
-  };
+
+    // FIX: Filter by both id AND entityType
+    setDeletedItems(prev => prev.filter(i => !(i.id === item.id && i.entityType === item.entityType)));
+  } catch (error) {
+    console.error('Error restoring item:', error);
+    showNotification('error', t('recycleBin.restore.error'));
+  } finally {
+    setRestoringIds(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(item.id);
+      return newSet;
+    });
+  }
+};
 
   // Filter items - only by search term now
   const filteredItems = deletedItems.filter(item => {

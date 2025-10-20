@@ -150,20 +150,24 @@ class BranchCategoryService {
     }
   }
 
-  async getBranchCategories(): Promise<Category[]> {
-    try {
-      const response = await httpClient.get(`${this.baseUrl}`);
-      
-      logger.info('Branch categories retrieved successfully', { 
-        count: response.data 
-      });
-      
-      return response.data;
-    } catch (error: any) {
-      logger.error('Error retrieving branch categories:', error);
-      return [];
-    }
+async getBranchCategories(): Promise<Category[]> {
+  try {
+    const response = await httpClient.get(`${this.baseUrl}`, {
+      params: {
+        includeInactive: true
+      }
+    });
+    
+    logger.info('Branch categories retrieved successfully', { 
+      count: response.data 
+    });
+    console.log('Branch categories data:', response.data);
+    return response.data;
+  } catch (error: any) {
+    logger.error('Error retrieving branch categories:', error);
+    return [];
   }
+}
 
   async getPublicCategoriesForBranch(branchId: number): Promise<Category[]> {
     try {

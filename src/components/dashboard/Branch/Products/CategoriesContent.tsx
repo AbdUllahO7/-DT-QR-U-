@@ -91,6 +91,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   getProductPrice,
   getCategoryName,
   handleShowProductAddons,
+  isCategoryActive,
 }) => {
   const { t, isRTL } = useLanguage();
     const navigate = useNavigate()
@@ -238,68 +239,76 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
     );
   };
 
-  const CategoryNameDisplay: React.FC<{
-    categoryId: number;
-    originalName: string;
-    currentDisplayName: string;
-    showEditButton?: boolean;
-  }> = ({ categoryId, originalName, currentDisplayName, showEditButton = true }) => {
-    const isCurrentlyEditing = editingCategoryId === categoryId;
-    const hasChanged = currentDisplayName !== originalName;
+const CategoryNameDisplay: React.FC<{
+  categoryId: number;
+  originalName: string;
+  currentDisplayName: string;
+  showEditButton?: boolean;
+  isActive?: boolean; // ADD THIS
+}> = ({ categoryId, originalName, currentDisplayName, showEditButton = true, isActive = true }) => { // ADD isActive = true
+  const isCurrentlyEditing = editingCategoryId === categoryId;
+  const hasChanged = currentDisplayName !== originalName;
 
-    if (isCurrentlyEditing) {
-      return (
-        <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-          <input
-            title="editingCategoryName"
-            type="text"
-            value={editingCategoryName}
-            onChange={(e) => setEditingCategoryName(e.target.value)}
-            className="px-3 py-2 border border-blue-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') saveCategoryName(categoryId);
-              if (e.key === 'Escape') cancelCategoryNameEdit(categoryId);
-            }}
-          />
-          <button
-            onClick={() => saveCategoryName(categoryId)}
-            className="p-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
-          >
-            <Check className="h-4 w-4" />
-          </button>
-          <button
-            onClick={() => cancelCategoryNameEdit(categoryId)}
-            className="p-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      );
-    }
-
+  if (isCurrentlyEditing) {
     return (
       <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-        <h4 className={`text-xl font-bold ${hasChanged ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-          {currentDisplayName}
-        </h4>
-        {hasChanged && (
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            (was: {originalName})
-          </span>
-        )}
-        {showEditButton && (
-          <button
-            onClick={() => startEditingCategoryName(categoryId, currentDisplayName)}
-            className="p-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-            title="Edit category name"
-          >
-            <Edit3 className="h-3 w-3" />
-          </button>
-        )}
+        <input
+          title="editingCategoryName"
+          type="text"
+          value={editingCategoryName}
+          onChange={(e) => setEditingCategoryName(e.target.value)}
+          className="px-3 py-2 border border-blue-300 rounded-lg focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          autoFocus
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') saveCategoryName(categoryId);
+            if (e.key === 'Escape') cancelCategoryNameEdit(categoryId);
+          }}
+        />
+        <button
+          onClick={() => saveCategoryName(categoryId)}
+          className="p-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
+        >
+          <Check className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => cancelCategoryNameEdit(categoryId)}
+          className="p-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
     );
-  };
+  }
+
+  return (
+    <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+      <h4 className={`text-xl font-bold ${hasChanged ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+        {currentDisplayName}
+      </h4>
+      {hasChanged && (
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          (was: {originalName})
+        </span>
+      )}
+      {/* ADD isActive check here */}
+      {showEditButton && isActive && (
+        <button
+          onClick={() => startEditingCategoryName(categoryId, currentDisplayName)}
+          className="p-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+          title="Edit category name"
+        >
+          <Edit3 className="h-3 w-3" />
+        </button>
+      )}
+      {/* ADD inactive indicator */}
+      {!isActive && (
+        <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full text-xs font-medium">
+          Inactive
+        </span>
+      )}
+    </div>
+  );
+};
 
   // Step Progress Component
   const StepProgress = () => (
@@ -423,8 +432,21 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   if (isReorderMode || !expandedBranchCategories.has(branchCategory.categoryId) || !branchCategory.products || branchCategory.products.length === 0) {
     return null;
   }
+    const categoryIsActive = isCategoryActive ? isCategoryActive(branchCategory.categoryId) : true;
+
     return (
       <div className="border-t border-gray-200 dark:border-gray-600 p-6 bg-gray-50 dark:bg-gray-700/50">
+        {!categoryIsActive && (
+        <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+          <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <AlertCircle className={`h-5 w-5 text-red-600 dark:text-red-400 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+            <span className="text-red-700 dark:text-red-300 font-medium">
+              This category is inactive. All controls are disabled.
+            </span>
+          </div>
+        </div>
+      )}
+      
         <div className={`flex items-center justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <h5 className="font-medium text-gray-900 dark:text-white">
             {t('branchCategories.products.inCategory')}
@@ -454,168 +476,157 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {branchCategory.products.map((product) => {
-            const isSelected = product.isSelected;
-            const hasDetailedInfo = product.ingredients || product.allergens;
-            const currentPrice = getProductPrice(product.id, product.price);
-            const isEditingPrice = editingProductId === product.id;
-            return (
-              <div 
-                key={product.id} 
-                className={`relative flex flex-col p-4 rounded-xl border-2 transition-all ${
-                  isSelected 
-                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
-                    : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-                } ${isRTL ? 'space-x-reverse' : ''}`}
-              >
-                {/* Status indicator */}
-                <div className={`absolute -top-2 ${isRTL ? '-left-2' : '-right-2'} w-6 h-6 rounded-full flex items-center justify-center ${
-                  isSelected 
-                    ? 'bg-green-600 dark:bg-green-500' 
-                    : 'bg-gray-400 dark:bg-gray-500'
-                }`}>
-                  {isSelected ? (
-                    <Check className="h-4 w-4 text-white" />
-                  ) : (
-                    <Plus className="h-4 w-4 text-white" />
-                  )}
-                
-                </div>
-
-               
-
-                {/* Product header with image and name */}
-                <div className={`flex items-start space-x-3 mb-3 ${isRTL ? 'space-x-reverse' : ''}`}>
-                  {product.imageUrl && (
-                    <img 
-                      src={product.imageUrl} 
-                      alt={product.name}
-                      className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-gray-900 dark:text-white truncate">
-                      <div className="font-medium text-gray-900 dark:text-white truncate flex items-center">
-                          {product.name}
-                         
-                        </div>
-                    </div>
-                    
-                    {product.description && (
-                      <div className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">
-                        {product.description}
-                      </div>
-                    )}
-                    
-                  </div>
-                </div>
-
-                <div className="mb-3">
-                  <PriceEditor
-                    productId={product.id}
-                    originalPrice={product.price}
-                    currentPrice={currentPrice}
-                    isEditing={isEditingPrice}
-                    onEdit={() => onProductPriceEdit(product.id, product.price)}
-                    onSave={() => onProductPriceSave(product.id)}
-                    onCancel={() => onProductPriceCancel(product.id)}
-                    onChange={(value) => onProductPriceChange(product.id, value)}
-                    showEditButton={isSelected}
-                  />
-                </div>
-
-                {hasDetailedInfo && (
-                  <div className={`flex items-center space-x-2 mb-3 ${isRTL ? 'space-x-reverse' : ''}`}>
-                    {product.ingredients && product.ingredients.length > 0 && (
-                      <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-medium">
-                        {product.ingredients.length} {t('branchCategories.products.ingredients')}
-                      </span>
-                    )}
-                    {product.allergens && product.allergens.length > 0 && (
-                      <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full text-xs font-medium">
-                        {product.allergens.length} {t('branchCategories.products.allergens')}
-                      </span>
-                    )}
-                  </div>
+     {branchCategory.products.map((product) => {
+          const isSelected = product.isSelected;
+          const hasDetailedInfo = product.ingredients || product.allergens;
+          const currentPrice = getProductPrice(product.id, product.price);
+          const isEditingPrice = editingProductId === product.id;
+          
+          return (
+            <div 
+              key={product.id} 
+              className={`relative flex flex-col p-4 rounded-xl border-2 transition-all ${
+                isSelected 
+                  ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+                  : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+              } ${!categoryIsActive ? 'opacity-60' : ''} ${isRTL ? 'space-x-reverse' : ''}`}
+            >
+              {/* Status indicator */}
+              <div className={`absolute -top-2 ${isRTL ? '-left-2' : '-right-2'} w-6 h-6 rounded-full flex items-center justify-center ${
+                isSelected 
+                  ? 'bg-green-600 dark:bg-green-500' 
+                  : 'bg-gray-400 dark:bg-gray-500'
+              }`}>
+                {isSelected ? (
+                  <Check className="h-4 w-4 text-white" />
+                ) : (
+                  <Plus className="h-4 w-4 text-white" />
                 )}
-                
-                <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <div className={`flex space-x-1 ${isRTL ? 'space-x-reverse' : ''}`}>
-                    {hasDetailedInfo && (
-                      <button
-                        onClick={() => handleShowProductDetails(product)}
-                        className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
-                        title={t('branchCategories.products.viewDetails')}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                    )}
-                    {product.isSelected && product.branchProductId && handleShowProductAddons && (
-                        <button
-                          onClick={() => handleShowProductAddons(product)}
-                          disabled={isLoading}
-                          className={`p-2 rounded-lg transition-colors flex items-center justify-center ${
-                            product.hasAddons
-                              ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-800/50'
-                              : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
-                          }`}
-                          title={`Configure Addons${product.hasAddons ? ` (${product.addonsCount})` : ''}`}
-                        >
-                          <Puzzle className="h-4 w-4" />
-                          {product.hasAddons && (
-                            <span className="ml-1 text-xs font-medium">{product.addonsCount}</span>
-                          )}
-                        </button>
-                      )}
+              </div>
 
+              {/* Product header with image and name */}
+              <div className={`flex items-start space-x-3 mb-3 ${isRTL ? 'space-x-reverse' : ''}`}>
+                {product.imageUrl && (
+                  <img 
+                    src={product.imageUrl} 
+                    alt={product.name}
+                    className="w-12 h-12 rounded-lg object-cover flex-shrink-0"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-gray-900 dark:text-white truncate">
+                    <div className="font-medium text-gray-900 dark:text-white truncate flex items-center">
+                      {product.name}
+                    </div>
                   </div>
-                 {isSelected ? (
+                  
+                  {product.description && (
+                    <div className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1">
+                      {product.description}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="mb-3">
+                <PriceEditor
+                  productId={product.id}
+                  originalPrice={product.price}
+                  currentPrice={currentPrice}
+                  isEditing={isEditingPrice}
+                  onEdit={() => onProductPriceEdit(product.id, product.price)}
+                  onSave={() => onProductPriceSave(product.id)}
+                  onCancel={() => onProductPriceCancel(product.id)}
+                  onChange={(value) => onProductPriceChange(product.id, value)}
+                  showEditButton={isSelected && categoryIsActive} 
+                />
+              </div>
+
+              {hasDetailedInfo && (
+                <div className={`flex items-center space-x-2 mb-3 ${isRTL ? 'space-x-reverse' : ''}`}>
+                  {product.ingredients && product.ingredients.length > 0 && (
+                    <span className="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full text-xs font-medium">
+                      {product.ingredients.length} {t('branchCategories.products.ingredients')}
+                    </span>
+                  )}
+                  {product.allergens && product.allergens.length > 0 && (
+                    <span className="px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full text-xs font-medium">
+                      {product.allergens.length} {t('branchCategories.products.allergens')}
+                    </span>
+                  )}
+                </div>
+              )}
+              
+              <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex space-x-1 ${isRTL ? 'space-x-reverse' : ''}`}>
+                  {hasDetailedInfo && (
+                    <button
+                      onClick={() => handleShowProductDetails(product)}
+                      className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+                      title={t('branchCategories.products.viewDetails')}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </button>
+                  )}
+                  {product.isSelected && product.branchProductId && handleShowProductAddons && (
+                    <button
+                      onClick={() => handleShowProductAddons(product)}
+                      disabled={isLoading || !categoryIsActive}
+                      className={`p-2 rounded-lg transition-colors flex items-center justify-center ${
+                        product.hasAddons
+                          ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-800/50'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      } ${!categoryIsActive ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      title={`Configure Addons${product.hasAddons ? ` (${product.addonsCount})` : ''}`}
+                    >
+                      <Puzzle className="h-4 w-4" />
+                      {product.hasAddons && (
+                        <span className="ml-1 text-xs font-medium">{product.addonsCount}</span>
+                      )}
+                    </button>
+                  )}
+                </div>
+                
+                {isSelected ? (
                   <button
                     onClick={async () => {
                       const branchProductIdToRemove = product.branchProductId || product.id;
-                      const originalProductId = product.originalProductId || product.id || product.id;
-                      
-                 
-                      
                       await onRemoveProduct(branchProductIdToRemove, product.name);
                       setTimeout(() => {
                         onRefresh();
                       }, 500);
                     }}
-                    disabled={isLoading}
-                    className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50 text-sm font-medium"
-                    title={t('branchCategories.products.removeFromBranch')}
+                    disabled={isLoading || !categoryIsActive} 
+                    className={`px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50 text-sm font-medium ${
+                      !categoryIsActive ? 'cursor-not-allowed' : ''
+                    }`}
+                    title={!categoryIsActive ? 'Cannot remove from inactive category' : t('branchCategories.products.removeFromBranch')}
                   >
                     {isLoading ? 'Removing...' : 'Remove'}
                   </button>
                 ) : (
                   <button
-                   onClick={async () => {
-                        // Use the correct original product ID - prioritize originalProductId, then productId, then id
-                        const originalProductId = product.id;
-                     
-                        
-                        await onAddProduct(originalProductId, branchCategory.branchCategoryId);
-                        setTimeout(() => {
-                          onRefresh();
-                        }, 500);
-                      }}
-                    disabled={isLoading}
-                    className="px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors disabled:opacity-50 text-sm font-medium"
-                    title={t('branchCategories.products.addToBranch')}
+                    onClick={async () => {
+                      const originalProductId = product.id;
+                      await onAddProduct(originalProductId, branchCategory.branchCategoryId);
+                      setTimeout(() => {
+                        onRefresh();
+                      }, 500);
+                    }}
+                    disabled={isLoading || !categoryIsActive} 
+                    className={`px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors disabled:opacity-50 text-sm font-medium ${
+                      !categoryIsActive ? 'cursor-not-allowed' : ''
+                    }`}
+                    title={!categoryIsActive ? 'Cannot add to inactive category' : t('branchCategories.products.addToBranch')}
                   >
                     {isLoading ? 'Adding...' : 'Add'}
                   </button>
                 )}
-                
-                </div>
-             
               </div>
-            );
-            
-          })}
-          
-        </div>
+            </div>
+          );
+        })}
+      </div>
         
         <div className="mt-4 p-4 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600">
           <div className={`flex items-center justify-between text-sm ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -1280,120 +1291,132 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
               </div>
             ) : (
               <div className="space-y-4">
-                {branchCategories.map((branchCategory, index) => (
-                  <div
-                    key={branchCategory.branchCategoryId}
-                    className={`border-2 rounded-2xl transition-all ${
-                      isReorderMode 
-                        ? 'border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 cursor-move' 
-                        : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500'
-                    }`}
-                  >
-                    <div className="p-6">
-                      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
-                          {isReorderMode && (
-                            <GripVertical className="h-6 w-6 text-gray-400 dark:text-gray-500" />
-                          )}
-                          <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center font-bold text-blue-600 dark:text-blue-400">
-                            {branchCategory.displayOrder}
-                          </div>
-                          <div className="flex-1">
-                            <CategoryNameDisplay
-                              categoryId={branchCategory.categoryId}
-                              originalName={branchCategory.category.categoryName}
-                              currentDisplayName={branchCategory.displayName}
-                            />
-                            <p className="text-gray-600 dark:text-gray-300">{t('branchCategories.manage.original')} {branchCategory.category.categoryName}</p>
-                            <div className={`flex items-center space-x-4 mt-1 ${isRTL ? 'space-x-reverse' : ''}`}>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">
-                                <span className="font-medium text-green-600 dark:text-green-400">
-                                  {branchCategory.selectedProductsCount || 0}
-                                </span> {t('branchCategories.manage.added')}
-                              </p>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">
-                                <span className="font-medium text-blue-600 dark:text-blue-400">
-                                  {branchCategory.unselectedProductsCount || 0}
-                                </span> {t('branchCategories.manage.available')}
-                              </p>
-                              <p className="text-sm text-gray-500 dark:text-gray-400">
-                                {t('branchCategories.manage.total')} {branchCategory.products?.length || 0}
-                              </p>
-                            </div>
-                          </div>
-                          {!isReorderMode && branchCategory.products && branchCategory.products.length > 0 && (
-                            <button
-                              onClick={() => toggleBranchCategoryExpansion(branchCategory.categoryId)}
-                              className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-                            >
-                              {expandedBranchCategories.has(branchCategory.categoryId) ? (
-                                <ChevronUp className="h-5 w-5" />
-                              ) : (
-                                <ChevronDown className="h-5 w-5" />
-                              )}
-                            </button>
-                          )}
-                        </div>
-                        
-                        <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            branchCategory.isActive 
-                              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
-                              : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-                          }`}>
-                            {branchCategory.isActive ? t('branchCategories.manage.active') : t('branchCategories.manage.inactive')}
-                          </span>
-                          
-                          {isReorderMode ? (
-                            <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-                              <button
-                                onClick={() => onMoveUp(index)}
-                                disabled={index === 0}
-                                className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                              >
-                                <ArrowUp className="h-4 w-4" />
-                              </button>
-                              <button
-                                onClick={() => onMoveDown(index)}
-                                disabled={index === branchCategories.length - 1}
-                                className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                              >
-                                <ArrowDown className="h-4 w-4" />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-                              {(branchCategory.selectedProductsCount || 0) > 0 && (
-                                <div className={`flex items-center space-x-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-lg text-xs ${isRTL ? 'space-x-reverse' : ''}`}>
-                                  <AlertCircle className="h-3 w-3" />
-                                  <span>{branchCategory.selectedProductsCount} {t('branchCategories.products.products')}</span>
-                                </div>
-                              )}
-                              <button
-                                onClick={() => onDeleteCategory(branchCategory.branchCategoryId, branchCategory.displayName)}
-                                disabled={(branchCategory.selectedProductsCount || 0) > 0}
-                                className={`p-2 rounded-lg transition-colors ${
-                                  (branchCategory.selectedProductsCount || 0) > 0
-                                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50'
-                                    : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
-                                }`}
-                                title={
-                                  (branchCategory.selectedProductsCount || 0) > 0
-                                    ? t('branchCategories.messages.error.cannotDeleteTooltip', { count: branchCategory.selectedProductsCount ?? 0 })
-                                    : t('branchCategories.actions.delete')
-                                }
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            </div>
-                          )}
-                        </div>
+            {branchCategories.map((branchCategory, index) => {
+          // CHECK IF CATEGORY IS ACTIVE
+          const categoryIsActive = isCategoryActive ? isCategoryActive(branchCategory.categoryId) : true;
+          
+          return (
+            <div
+              key={branchCategory.branchCategoryId}
+              className={`border-2 rounded-2xl transition-all ${
+                !categoryIsActive 
+                  ? 'border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10 opacity-75'
+                  : isReorderMode 
+                  ? 'border-orange-200 dark:border-orange-800 bg-orange-50 dark:bg-orange-900/20 cursor-move' 
+                  : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-500'
+              }`}
+            >
+              <div className="p-6">
+                <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
+                    {isReorderMode && categoryIsActive && ( 
+                      <GripVertical className="h-6 w-6 text-gray-400 dark:text-gray-500" />
+                    )}
+                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center font-bold text-blue-600 dark:text-blue-400">
+                      {branchCategory.displayOrder}
+                    </div>
+                    <div className="flex-1">
+                      <CategoryNameDisplay
+                        categoryId={branchCategory.categoryId}
+                        originalName={branchCategory.category.categoryName}
+                        currentDisplayName={branchCategory.displayName}
+                        isActive={categoryIsActive} 
+                      />
+                      <p className="text-gray-600 dark:text-gray-300">{t('branchCategories.manage.original')} {branchCategory.category.categoryName}</p>
+                      <div className={`flex items-center space-x-4 mt-1 ${isRTL ? 'space-x-reverse' : ''}`}>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          <span className="font-medium text-green-600 dark:text-green-400">
+                            {branchCategory.selectedProductsCount || 0}
+                          </span> {t('branchCategories.manage.added')}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          <span className="font-medium text-blue-600 dark:text-blue-400">
+                            {branchCategory.unselectedProductsCount || 0}
+                          </span> {t('branchCategories.manage.available')}
+                        </p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {t('branchCategories.manage.total')} {branchCategory.products?.length || 0}
+                        </p>
                       </div>
                     </div>
-
-                    {renderManageProductsSection(branchCategory)}
+                    {!isReorderMode && branchCategory.products && branchCategory.products.length > 0 && (
+                      <button
+                        onClick={() => toggleBranchCategoryExpansion(branchCategory.categoryId)}
+                        className="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                      >
+                        {expandedBranchCategories.has(branchCategory.categoryId) ? (
+                          <ChevronUp className="h-5 w-5" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5" />
+                        )}
+                      </button>
+                    )}
                   </div>
-                ))}
+                  
+                  <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      branchCategory.isActive 
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
+                        : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+                    }`}>
+                      {branchCategory.isActive ? t('branchCategories.manage.active') : t('branchCategories.manage.inactive')}
+                    </span>
+                    
+                    {isReorderMode ? (
+                      <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+                        <button
+                          onClick={() => onMoveUp(index)}
+                          disabled={index === 0 || !categoryIsActive}
+                          className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          title={!categoryIsActive ? 'Cannot reorder inactive category' : undefined}
+                        >
+                          <ArrowUp className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => onMoveDown(index)}
+                          disabled={index === branchCategories.length - 1 || !categoryIsActive} 
+                          className="p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          title={!categoryIsActive ? 'Cannot reorder inactive category' : undefined}
+                        >
+                          <ArrowDown className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+                        {(branchCategory.selectedProductsCount || 0) > 0 && (
+                          <div className={`flex items-center space-x-1 px-2 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 rounded-lg text-xs ${isRTL ? 'space-x-reverse' : ''}`}>
+                            <AlertCircle className="h-3 w-3" />
+                            <span>{branchCategory.selectedProductsCount} {t('branchCategories.products.products')}</span>
+                          </div>
+                        )}
+                        <button
+                          onClick={() => onDeleteCategory(branchCategory.branchCategoryId, branchCategory.displayName)}
+                          disabled={(branchCategory.selectedProductsCount || 0) > 0 || !categoryIsActive} 
+                          className={`p-2 rounded-lg transition-colors ${
+                            (branchCategory.selectedProductsCount || 0) > 0 || !categoryIsActive
+                              ? 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-50'
+                              : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50'
+                          }`}
+                          title={
+                            !categoryIsActive
+                              ? 'Cannot delete inactive category'
+                              : (branchCategory.selectedProductsCount || 0) > 0
+                              ? t('branchCategories.messages.error.cannotDeleteTooltip', { count: branchCategory.selectedProductsCount ?? 0 })
+                              : t('branchCategories.actions.delete')
+                          }
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {renderManageProductsSection(branchCategory)}
+            </div>
+          );
+        })}
               </div>
             )}
           </div>
