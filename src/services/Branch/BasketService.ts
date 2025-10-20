@@ -242,13 +242,14 @@ class BasketService {
   }
 
   // POST /api/Basket/{basketId}/confirm-price-changes
-  async confirmSessionPriceChanges(basketId: string): Promise<void> {
+  async confirmSessionPriceChanges(sessionId: string): Promise<void> {
     try {
-      logger.info('Session price changes onaylama isteği gönderiliyor', { basketId }, { prefix: 'BasketService' });
-      const url = `${this.baseUrl}/${basketId}/confirm-price-changes`;
-      await httpClient.post(url);
-      
-      logger.info('Session price changes başarıyla onaylandı', { basketId }, { prefix: 'BasketService' });
+      logger.info('Session price changes onaylama isteği gönderiliyor', { sessionId }, { prefix: 'BasketService' });
+      const url = `${this.baseUrl}/session/${sessionId}/confirm-price-changes`;
+      const res = await  httpClient.post(url);
+      console.log('Response from confirmSessionPriceChanges:', res);
+      console.log('Session ID used:', sessionId);
+      logger.info('Session price changes başarıyla onaylandı', { sessionId }, { prefix: 'BasketService' });
     } catch (error: any) {
       logger.error('Session price changes onaylama hatası', error, { prefix: 'BasketService' });
       this.handleError(error, 'Price changes onaylanırken hata oluştu');
