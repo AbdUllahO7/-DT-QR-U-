@@ -707,9 +707,7 @@ class TableService {
   async getDeletedTables(branchId?: number): Promise<DeletedTable[]> {
     try {
       logger.info('Silinmiş masalar API çağrısı başlatılıyor', { branchId }, { prefix: 'TableService' });
-      console.log("branchId getDeletedTables",branchId);
       const response = await httpClient.get<DeletedTable[]>(`${this.baseUrl}/tables/deleted?branchId=${branchId || ''}`);
-      console.log("response table",response);
       logger.info('Silinmiş masalar alındı', { 
         count: response.data.length 
       }, { prefix: 'TableService' });
