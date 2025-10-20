@@ -402,12 +402,14 @@ export const useCartHandlers = ({
    const handlePriceChangeConfirmation = async () => {
     try {
       
-      const cleanSessionId = getCleanSessionId(sessionId || basketId)
-      
+      const cleanSessionId = getCleanSessionId(sessionId)
+      console.log('Confirming price changes for session ID:', cleanSessionId)
       if (cleanSessionId) {
         try {
           const changes = await basketService.confirmSessionPriceChanges(cleanSessionId)
           setPriceChanges(changes)
+          setShowPriceChangeModal(false)
+          await createOrder()
         } catch (err: any) {
           setPriceChanges({
             message: 'Some items in your basket have price changes that need to be confirmed.',
