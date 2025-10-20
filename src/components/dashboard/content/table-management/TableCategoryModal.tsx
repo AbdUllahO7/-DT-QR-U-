@@ -142,19 +142,19 @@ const TableCategoryModal: React.FC<Props> = ({
       setErrors({ general: t('TableCategoryModal.branchRequired') });
       return;
     }
-    
+
     setIsSubmitting(true);
     try {
       if (isEditMode && editingCategory) {
         // UPDATE existing category
-        await tableService.updateCategory(editingCategory.id,branchId ,   {
+        await tableService.updateCategory(editingCategory.id,   {
           id: editingCategory.id,
           categoryName: formData.categoryName.trim(),
           colorCode: formData.colorCode,
           iconClass: formData.iconClass,
           isActive: formData.isActive,
           rowVersion: editingCategory.rowVersion,
-        });
+        },branchId );
         logger.info('Kategori başarıyla güncellendi', { categoryId: editingCategory.id });
       } else {
         // CREATE new category
