@@ -7,7 +7,6 @@ import OrderFormComponent from "./OrderFormComponent"
 import PriceChangeModal from "./PriceChangeModal"
 import { useLanguage } from "../../../../../contexts/LanguageContext"
 import { OrderType, orderTypeService } from "../../../../../services/Branch/BranchOrderTypeService"
-import { basketService } from "../../../../../services/Branch/BasketService"
 import { useCartHandlers } from "../../../../../hooks/useCartHandlers"
 import CartContent from "./CartContent"
 import OrdersTab from "./OrdersTab"
@@ -39,7 +38,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   const { t } = useLanguage()
   // Toast state
   const [toasts, setToasts] = useState<Toast[]>([])
-
+  console.log('CartSidebar rendered with sessionId:', sessionId)
   // Toast functions
   const showToast = (type: 'success' | 'error' | 'loading', message: string, duration?: number): string => {
     const id = Math.random().toString(36).substr(2, 9)
@@ -393,58 +392,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     }
   }
 
-  // Confirm price changes and retry order creation
-  const confirmPriceChanges = async () => {
-    let toastId: string | null = null
-    
-    try {
-      setConfirmingPriceChanges(true)
-      setError(null)
 
-      toastId = showToast('loading', t('menu.cart.confirming_price_changes') || 'Confirming price changes...')
-
-      const cleanSessionId = sessionId || basketId
-      if (!cleanSessionId) {
-        const errorMessage = t('menu.cart.session_required') || 'Session ID required'
-        setError('Session ID required for price change confirmation')
-        
-        if (toastId) {
-          updateToast(toastId, 'error', errorMessage)
-        } else {
-          showToast('error', errorMessage)
-        }
-        return
-      }
-      
-      await basketService.confirmSessionPriceChanges(cleanSessionId)
-      
-      if (toastId) {
-        updateToast(toastId, 'success', t('menu.cart.price_changes_confirmed') || 'Price changes confirmed successfully!')
-      } else {
-        showToast('success', t('menu.cart.price_changes_confirmed') || 'Price changes confirmed successfully!')
-      }
-      
-      setShowPriceChangeModal(false)
-      setPriceChanges(null)
-      setConfirmingPriceChanges(false)
-      
-      await loadBasket()
-      await createOrder()
-      
-    } catch (err: any) {
-      console.error('❌ Error confirming price changes:', err)
-      const errorMessage = err.message || t('menu.cart.price_changes_failed') || 'Failed to confirm price changes'
-      
-      if (toastId) {
-        updateToast(toastId, 'error', errorMessage)
-      } else {
-        showToast('error', errorMessage)
-      }
-      
-      setError(err.message || 'Failed to confirm price changes')
-      setConfirmingPriceChanges(false)
-    }
-  }
 
   // Group cart items by product with correct total calculations
   const groupedItems: GroupedCartItem[] = cart.reduce((groups, item, index) => {
@@ -647,7 +595,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
             setPriceChanges(null)
             setLoading(false)
           }}
-          onConfirm={confirmPriceChanges}
+          onConfirm={handlePriceChangeConfirmation}
         />
 
         <WhatsAppConfirmationModal

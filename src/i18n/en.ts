@@ -3943,6 +3943,31 @@ export const en = {
       successTableCategory: '"{name}" table category has been restored successfully',
       error: 'Restore operation failed'
     },
+      productRestore : {
+          title: 'Restore Product Options',
+          subtitle: 'Choose how you want to restore the product',
+          simpleTitle: 'Restore Product',
+          simpleDesc: 'Restoring this product will restore just general product information.',
+          cascadeTitle: 'Restoring this product will also restore all associated variants and addons.',
+          cascadeDesc: 'Do you want to restore just the product or also all associated variants and addons?',
+          includeOptions: 'Include Variants and Addons',
+          includeImages: 'Include Product Image',
+          includeAll: 'Include All Associated Data',
+          recommended: 'Recommended',
+      },
+    categoryRestore: {
+        title: "Restore Product Options",
+        subtitle: "Choose How to Restore the Product",
+        simpleTitle: "Restore the Product",
+        simpleDesc: "Restoring this product will restore only general product information",
+        cascadeTitle: "Restoring this product will also restore all associated variants and extensions",
+        cascadeDesc: "Do you want to restore just the product or all associated variants and extensions as well?",
+        includeOptions: "Include variants and extensions",
+        includeImages: "Include the product image",
+        includeAll: "Include all associated data",
+        includeProducts: "Include products in the category",
+        recommended: "Recommended",
+        },
     branchRestore:{
       title: 'Restore Branch Options',
       subtitle: 'Choose how you want to restore the branch',
@@ -3965,7 +3990,7 @@ export const en = {
       loadingError: 'Error loading deleted items'
     }
   },
-
+    
   management: {
       "title": "Management Information",
       "subtitle": "Company and legal details",

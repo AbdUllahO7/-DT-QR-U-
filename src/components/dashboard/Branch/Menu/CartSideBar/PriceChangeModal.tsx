@@ -1,7 +1,9 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { AlertTriangle, Loader2 } from 'lucide-react'
 import { useLanguage } from '../../../../../contexts/LanguageContext'
 import { PriceChangeModalProps } from '../../../../../types/menu/carSideBarTypes'
+import { useCartHandlers } from '../../../../../hooks/useCartHandlers'
+import { basketService } from '../../../../../services/Branch/BasketService'
 
 
 const PriceChangeModal: React.FC<PriceChangeModalProps> = ({
@@ -13,6 +15,8 @@ const PriceChangeModal: React.FC<PriceChangeModalProps> = ({
 }) => {
   const { t } = useLanguage()
 
+  const basket =  basketService.getMyBasket()
+  
   if (!isVisible) return null
 
   return (

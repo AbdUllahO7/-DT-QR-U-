@@ -31,6 +31,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
   const [showCart, setShowCart] = useState(false)
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
   const [basketItemCount, setBasketItemCount] = useState(0)
+  const [basketId, setBasketId] = useState<string | null>(null) // Add basketId state
   
   // Modal state
   const [showProductModal, setShowProductModal] = useState(false)
@@ -57,16 +58,20 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
 
     return Array.from(categoryMap.values()).sort((a, b) => a.displayOrder - b.displayOrder)
   }
-
-  // Load basket item count
+  
+  // Load basket item count and basketId
   const loadBasketItemCount = useCallback(async () => {
     try {
       const basket = await basketService.getMyBasket()
       const totalItems = basket.items.reduce((total, item) => total + item.quantity, 0)
       setBasketItemCount(totalItems)
+      console.log('Loaded basket', basket)
+      setBasketId(basket.basketId) // Store basketId
+      
     } catch (err: any) {
       // Ignore errors for item count - basket might not exist yet
       setBasketItemCount(0)
+      setBasketId(null)
     }
   }, [])
 
@@ -155,7 +160,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         })
       }
 
-      // Update basket item count
+      // Update basket item count and basketId
       await loadBasketItemCount()
     } catch (err: any) {
       console.error('Error adding to basket:', err)
@@ -315,11 +320,12 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         </div>
       </div>
 
-      {/* Cart Sidebar with restaurant preferences */}
+      {/* Cart Sidebar with basketId as sessionId */}
       <CartSidebar
         isOpen={showCart}
         onClose={() => setShowCart(false)}
         findProduct={findProduct}
+        sessionId={basketId || ''} // Use basketId, fallback to menuData.sessionId
         restaurantPreferences={menuData.preferences}
       />
 

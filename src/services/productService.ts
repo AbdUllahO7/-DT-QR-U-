@@ -460,16 +460,54 @@ class ProductService {
     }
   }
   /**
+     * Restore a deleted product
+     * @param productId - The ID of the product to restore
+     * @param restoreWithCascade - Optional: Whether to restore with cascade
+     */
+    async restoreProduct(productId: number, restoreWithCascade?: boolean): Promise<void> {
+      try {
+        logger.info('Ürün geri yükleniyor', { productId, restoreWithCascade });
+        
+        const url = `${this.baseUrl}/Products/${productId}/restore`;
+        const params = restoreWithCascade !== undefined ? { restoreWithCascade } : {};
+        
+        const response = await httpClient.post(url, null, { params });
+        
+        logger.info('Ürün başarıyla geri yüklendi', { 
+          productId,
+          restoreWithCascade,
+          response: response.status 
+        });
+      } catch (error: any) {
+        logger.error('❌ Ürün geri yüklenirken hata:', error);
+        
+        if (error.response?.status === 404) {
+          throw new Error('Geri yüklenecek ürün bulunamadı');
+        } else if (error.response?.status === 400) {
+          throw new Error('Geçersiz ürün geri yükleme isteği');
+        } else {
+          throw new Error('Ürün geri yüklenirken bir hata oluştu');
+        }
+      }
+    }
+
+  /**
    * Restore a deleted category
+   * @param categoryId - The ID of the category to restore
+   * @param restoreWithCascade - Optional: Whether to restore with cascade
    */
-  async restoreCategory(categoryId: number): Promise<void> {
+  async restoreCategory(categoryId: number, restoreWithCascade?: boolean): Promise<void> {
     try {
-      logger.info('Kategori geri yükleniyor', { categoryId });
+      logger.info('Kategori geri yükleniyor', { categoryId, restoreWithCascade });
       
-      const response = await httpClient.post(`${this.baseUrl}/Categories/${categoryId}/restore`);
+      const url = `${this.baseUrl}/Categories/${categoryId}/restore`;
+      const params = restoreWithCascade !== undefined ? { restoreWithCascade } : {};
+      
+      const response = await httpClient.post(url, null, { params });
       
       logger.info('Kategori başarıyla geri yüklendi', { 
         categoryId,
+        restoreWithCascade,
         response: response.status 
       });
     } catch (error: any) {
@@ -505,31 +543,7 @@ class ProductService {
     }
   }
 
-  /**
-   * Restore a deleted product
-   */
-  async restoreProduct(productId: number): Promise<void> {
-    try {
-      logger.info('Ürün geri yükleniyor', { productId });
-      
-      const response = await httpClient.post(`${this.baseUrl}/Products/${productId}/restore`);
-      
-      logger.info('Ürün başarıyla geri yüklendi', { 
-        productId,
-        response: response.status 
-      });
-    } catch (error: any) {
-      logger.error('❌ Ürün geri yüklenirken hata:', error);
-      
-      if (error.response?.status === 404) {
-        throw new Error('Geri yüklenecek ürün bulunamadı');
-      } else if (error.response?.status === 400) {
-        throw new Error('Geçersiz ürün geri yükleme isteği');
-      } else {
-        throw new Error('Ürün geri yüklenirken bir hata oluştu');
-      }
-    }
-  }
+
   // Kategori güncelleme
   async updateCategory(categoryId: number, categoryData: {
     categoryName?: string;
