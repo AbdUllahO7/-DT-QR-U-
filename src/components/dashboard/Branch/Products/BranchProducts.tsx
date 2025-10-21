@@ -48,13 +48,12 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
   const [currentStep, setCurrentStep] = useState<AdditionStep>(AdditionStep.SELECT_CATEGORIES);
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
   const [expandedBranchCategories, setExpandedBranchCategories] = useState<Set<number>>(new Set());
-
   // New state for tracking edited values
   const [editedProductPrices, setEditedProductPrices] = useState<Map<number, EditedProductPrice>>(new Map());
   const [editedCategoryNames, setEditedCategoryNames] = useState<Map<number, EditedCategoryName>>(new Map());
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null);
-  
+  console.log("categories",categories)
   // Product details modal state
   const [selectedProductForDetails, setSelectedProductForDetails] = useState<DetailedProduct | null>(null);
   const [isProductDetailsModalOpen, setIsProductDetailsModalOpen] = useState(false);
@@ -145,11 +144,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
           break;
         }
       }
-      
-      if (categoryId && !isCategoryActive(categoryId)) {
-        setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot configure addons for products in inactive category');
-        return;
-      }
+  
     setSelectedProductForAddons(product);
     setIsProductAddonsModalOpen(true);
     
@@ -242,10 +237,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
     }
   }
   
-  if (categoryId && !isCategoryActive(categoryId)) {
-    setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot edit products in inactive category');
-    return;
-  }
+
   
   setEditingProductId(productId);
   
@@ -538,7 +530,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
       const productData = {
         branchProductId: branchProductId,
         price: newPrice,
-        isActive: isActive ?? true, // Default to true if not found
+        isActive: isActive ?? true, 
         displayOrder: displayOrder ?? 0, // Default to 0 if not found
         branchCategoryId: branchCategoryId, // Required field
       };
@@ -626,6 +618,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
     
     try {
       const availableCategories = await branchCategoryService.getAvailableCategoriesForBranch();
+      
       setCategories(availableCategories);
     } catch (err: any) {
       console.error('Error fetching available categories:', err);
@@ -834,7 +827,6 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
           }
         })
       );
-
       setBranchCategories(categoriesWithProducts);
       setOriginalBranchCategories([...categoriesWithProducts]);
     } catch (err: any) {
@@ -868,7 +860,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
       for (const categoryId of selectedCategories) {
         const productsData = await branchCategoryService.getAvailableProductsForBranch({
           categoryId,
-          onlyActive: true,
+          onlyActive: false,
           includes: 'category,ingredients,allergens,addons'
         });
         if (productsData.length > 0) {
@@ -1017,10 +1009,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
   const openDeleteModal = (branchCategoryId: number, categoryName: string) => {
     const category = branchCategories.find(bc => bc.branchCategoryId === branchCategoryId);
   
-  if (category && !isCategoryActive(category.categoryId)) {
-    setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot delete inactive category');
-    return;
-  }
+
     setDeleteModal({
       isOpen: true,
       branchCategoryId,
@@ -1097,7 +1086,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
           const categoryData = {
             categoryId: category.categoryId,
             displayName: editedName, // Use edited name if available
-            isActive: true,
+            isActive: category.status,
             displayOrder: branchCategories.length + createdCount + 1
           };
 
@@ -1146,12 +1135,15 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
             const editedPrice = getProductPrice(productId, productToCreate.price);
             const productData = {
               price: editedPrice,
-              isActive: true,
+              isActive : productToCreate.status,
               productId: productToCreate.id,
               branchCategoryId: branchCategoryId
             };
-            
-            await branchProductService.createBranchProduct(productData);
+              console.log("Creating branch product with data:", productData);
+
+            const res = await branchProductService.createBranchProduct(productData);
+                    console.log("Created branch product:", res);
+
             createdProductsCount++;
             
           } catch (err: any) {
@@ -1206,10 +1198,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
       setError(t('branchCategories.messages.error.categoryNotFound'));
       return;
     }
-     if (!isCategoryActive(category.categoryId)) {
-      setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot add products to inactive category');
-      return;
-    }
+
 
       for (let i = 0; i < branchCategories.length; i++) {
         const product = branchCategories[i].products?.find(p => p.id === productId);
@@ -1249,13 +1238,13 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
       try {
         const productData = {
           price: productToAdd.price,
-          isActive: true,
           productId: productToAdd.id,
+          isActive: productToAdd.status,
           branchCategoryId: branchCategoryId
         };
-        
+        console.log("Creating branch product with data:", productData);
         const createdBranchProduct = await branchProductService.createBranchProduct(productData);
-        
+        console.log("Created branch product:", createdBranchProduct);
         setBranchCategories(prevCategories => {
           const finalUpdatedCategories = [...prevCategories];
           const finalUpdatedProducts = finalUpdatedCategories[categoryIndex].products?.map(product => {
@@ -1328,10 +1317,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
       
       let productToRemove = null;
       let categoryIndex = -1;
-        if (!isCategoryActive(branchCategories[categoryIndex].categoryId)) {
-      setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot remove products from inactive category');
-      return;
-    }
+
       for (let i = 0; i < branchCategories.length; i++) {
         const product = branchCategories[i].products?.find(p => p.branchProductId === branchProductId);
         if (product) {
@@ -1372,6 +1358,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
       setIsLoading(true);
       
       try {
+        console.log("Deleting branch product with ID:", branchProductId);
         await branchProductService.deleteBranchProduct(branchProductId);
         setSuccessMessage(t('branchCategories.messages.success.productRemoved', { name: productName || productToRemove.name }));
         
@@ -1418,10 +1405,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
   const handleMoveUp = (index: number) => {
       const category = branchCategories[index];
 
-    if (!isCategoryActive(category.categoryId)) {
-        setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot reorder inactive category');
-        return;
-      }
+
 
     if (index > 0) {
       const newCategories = [...branchCategories];
@@ -1436,10 +1420,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
   const handleMoveDown = (index: number) => {
     const category = branchCategories[index];
   
-  if (!isCategoryActive(category.categoryId)) {
-    setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot reorder inactive category');
-    return;
-  }
+
   
 
     if (index < branchCategories.length - 1) {
@@ -1603,68 +1584,68 @@ const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAdd
 
         {/* Main Content */}
      <CategoriesContent
-  activeTab={activeTab}
-  branchId={branchId}
-  categories={categories}
-  branchCategories={branchCategories}
-  selectedCategories={selectedCategories}
-  selectedProducts={selectedProducts}
-  categoriesWithProducts={categoriesWithProducts}
-  currentStep={currentStep}
-  expandedCategories={expandedCategories}
-  expandedBranchCategories={expandedBranchCategories}
-  isReorderMode={isReorderMode}
-  hasUnsavedChanges={hasUnsavedChanges}
-  isReordering={isReordering}
-  isLoading={isLoading}
-  isSaving={isSaving}
-  isLoadingProducts={isLoadingProducts}
-  isLoadingBranchProducts={isLoadingBranchProducts}
-  searchTerm={searchTerm}
-  setSearchTerm={setSearchTerm}
-  setSelectedCategories={setSelectedCategories}
-  setSelectedProducts={setSelectedProducts}
-  setCurrentStep={setCurrentStep}
-  setExpandedCategories={setExpandedCategories}
-  setExpandedBranchCategories={setExpandedBranchCategories}
-  setIsReorderMode={setIsReorderMode}
-  setEditingProductId={setEditingProductId}
-  setEditingCategoryId={setEditingCategoryId}
-  handleShowProductAddons={handleShowProductAddons}
-  handleShowProductDetails={handleShowProductDetails}
-  onCategorySelect={handleCategorySelect}
-  onProductSelect={handleProductSelect}
-  onSelectAllProducts={handleSelectAllProducts}
-  onClearAllProducts={handleClearAllProducts}
-  onProceedToProductSelection={proceedToProductSelection}
-  onProceedToReview={proceedToReview}
-  onBackToCategorySelection={backToCategorySelection}
-  onBackToProductSelection={backToProductSelection}
-  onSave={handleSave}
-  onMoveUp={handleMoveUp}
-  onMoveDown={handleMoveDown}
-  onSaveOrder={handleSaveOrder}
-  onAddProduct={handleAddProductToCategory}
-  onRemoveProduct={handleRemoveProductFromCategory}
-  onDeleteCategory={openDeleteModal}
-  onRefresh={fetchAvailableCategories}
-  setActiveTab={setActiveTab}
-  editedProductPrices={editedProductPrices}
-  editedCategoryNames={editedCategoryNames}
-  editingProductId={editingProductId}
-  editingCategoryId={editingCategoryId}
-  onProductPriceEdit={handleProductPriceEdit}
-  onProductPriceChange={handleProductPriceChange}
-  onProductPriceSave={handleProductPriceSave}
-  onProductPriceCancel={handleProductPriceCancel}
-  onCategoryNameEdit={handleCategoryNameEdit}
-  onCategoryNameChange={handleCategoryNameChange}
-  onCategoryNameSave={handleCategoryNameSave}
-  onCategoryNameCancel={handleCategoryNameCancel}
-  getProductPrice={getProductPrice}
-  getCategoryName={getCategoryName}
-  isCategoryActive={isCategoryActive}  
-/>
+        activeTab={activeTab}
+        branchId={branchId}
+        categories={categories}
+        branchCategories={branchCategories}
+        selectedCategories={selectedCategories}
+        selectedProducts={selectedProducts}
+        categoriesWithProducts={categoriesWithProducts}
+        currentStep={currentStep}
+        expandedCategories={expandedCategories}
+        expandedBranchCategories={expandedBranchCategories}
+        isReorderMode={isReorderMode}
+        hasUnsavedChanges={hasUnsavedChanges}
+        isReordering={isReordering}
+        isLoading={isLoading}
+        isSaving={isSaving}
+        isLoadingProducts={isLoadingProducts}
+        isLoadingBranchProducts={isLoadingBranchProducts}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        setSelectedCategories={setSelectedCategories}
+        setSelectedProducts={setSelectedProducts}
+        setCurrentStep={setCurrentStep}
+        setExpandedCategories={setExpandedCategories}
+        setExpandedBranchCategories={setExpandedBranchCategories}
+        setIsReorderMode={setIsReorderMode}
+        setEditingProductId={setEditingProductId}
+        setEditingCategoryId={setEditingCategoryId}
+        handleShowProductAddons={handleShowProductAddons}
+        handleShowProductDetails={handleShowProductDetails}
+        onCategorySelect={handleCategorySelect}
+        onProductSelect={handleProductSelect}
+        onSelectAllProducts={handleSelectAllProducts}
+        onClearAllProducts={handleClearAllProducts}
+        onProceedToProductSelection={proceedToProductSelection}
+        onProceedToReview={proceedToReview}
+        onBackToCategorySelection={backToCategorySelection}
+        onBackToProductSelection={backToProductSelection}
+        onSave={handleSave}
+        onMoveUp={handleMoveUp}
+        onMoveDown={handleMoveDown}
+        onSaveOrder={handleSaveOrder}
+        onAddProduct={handleAddProductToCategory}
+        onRemoveProduct={handleRemoveProductFromCategory}
+        onDeleteCategory={openDeleteModal}
+        onRefresh={fetchAvailableCategories}
+        setActiveTab={setActiveTab}
+        editedProductPrices={editedProductPrices}
+        editedCategoryNames={editedCategoryNames}
+        editingProductId={editingProductId}
+        editingCategoryId={editingCategoryId}
+        onProductPriceEdit={handleProductPriceEdit}
+        onProductPriceChange={handleProductPriceChange}
+        onProductPriceSave={handleProductPriceSave}
+        onProductPriceCancel={handleProductPriceCancel}
+        onCategoryNameEdit={handleCategoryNameEdit}
+        onCategoryNameChange={handleCategoryNameChange}
+        onCategoryNameSave={handleCategoryNameSave}
+        onCategoryNameCancel={handleCategoryNameCancel}
+        getProductPrice={getProductPrice}
+        getCategoryName={getCategoryName}
+        isCategoryActive={isCategoryActive}  
+      />
 
         {/* Delete Confirmation Modal */}
         <ConfirmDeleteModal
@@ -1678,7 +1659,6 @@ const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAdd
           itemName={deleteModal.categoryName}
         />
 
-        {/* Product Details Modal */}
         <ProductDetailsModal
           isOpen={isProductDetailsModalOpen}
           onClose={handleCloseProductDetails}
