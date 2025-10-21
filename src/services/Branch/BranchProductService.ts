@@ -5,7 +5,6 @@ import { logger } from "../../utils/logger";
 // API Request interfaces for BranchProducts
 interface CreateBranchProductRequest {
   price: number;
-  isActive: boolean;
   productId: number;
   branchCategoryId: number;
 }
@@ -125,7 +124,7 @@ class BranchProductService {
     return apiBranchProducts.map(apiBranchProduct => ({
       productId: apiBranchProduct.branchProductId,
       name: apiBranchProduct.product?.name || `Product ${apiBranchProduct.productId}`,
-      description: '', // Description not available in this API structure
+      description: '', 
       price: apiBranchProduct.price,
       imageUrl: apiBranchProduct.product?.imageUrl || '',
       isAvailable: apiBranchProduct.isActive,
@@ -170,7 +169,7 @@ class BranchProductService {
       price: apiBranchProduct.price,
       imageUrl: apiBranchProduct.imageUrl || '',
       isAvailable: apiBranchProduct.isActive ?? apiBranchProduct.status ?? true,
-      status: apiBranchProduct.isActive ?? apiBranchProduct.status ?? true,
+      status:  apiBranchProduct.status ?? true,
       displayOrder: apiBranchProduct.displayOrder || 0,
       categoryId: apiBranchProduct.branchCategoryId,
       branchProductId: apiBranchProduct.branchProductId,
@@ -196,7 +195,7 @@ class BranchProductService {
       
       const response = await httpClient.get<APIBranchProduct[]>(url);
  
-      
+      console.log("response.data",response.data)
       // Determine if response has complex structure (with includes) or simple structure
       const firstItem = response.data[0];
       const hasComplexStructure = firstItem && (
@@ -236,7 +235,7 @@ class BranchProductService {
       const response = await httpClient.get<SimpleBranchProduct>(`${this.baseUrl}/${id}`);
       
       logger.info('Branch product retrieved successfully', { id });
-      
+      console.log("response.data",response.data)
       const transformedProduct = this.transformSingleProduct(response.data);
       return transformedProduct;
     } catch (error: any) {
@@ -285,11 +284,13 @@ class BranchProductService {
       logger.info('Creating branch product', { payload });
       
       try {
+
+        console.log("payload",payload)
         const response = await httpClient.post<SimpleBranchProduct>(`${this.baseUrl}`, payload);
         logger.info('Branch product created successfully', { data: response.data });
-        
+        console.log("response.data",response.data)
         const transformedProduct = this.transformSingleProduct(response.data);
-        
+        console.log("transformedProduct",transformedProduct)
         return transformedProduct;
       } catch (error: any) {
         // Handle potential DTO wrapper requirements similar to other services
