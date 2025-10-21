@@ -3096,6 +3096,7 @@ export const tr = {
       selectAll: 'Tümünü Seç',
       clearAll: 'Tümünü Temizle',
       noProducts: 'Ürün bulunamadı',
+      selected: 'seçildi',
       noProductsInCategories: 'Seçilen kategorilerde herhangi bir ürün yok',
       available: 'mevcut',
       productsSelectedFrom: 'ürün seçildi',
@@ -3200,7 +3201,7 @@ export const tr = {
     // Status
     status: {
       active: 'Aktif',
-      inactive: 'Pasif',
+      inactive: 'Restaurant tarafından devre dışı bırakıldı',
       available: 'Mevcut',
       unavailable: 'Mevcut Değil'
     },
@@ -3655,7 +3656,7 @@ export const tr = {
       branchOrders: "Şube Siparişleri",
       allStatuses: "Tüm Durumlar",
       statusFilter: "Durum Filtresi",
-      noOrders: "Henüz {viewMode} sipariş yok.",
+      noOrders: "Henüz  sipariş yok.",
       customer: "Müşteri",
       orderNumber: "Sipariş No",
       status: "Durum",

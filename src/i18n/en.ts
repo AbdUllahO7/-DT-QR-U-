@@ -3093,6 +3093,7 @@ export const en = {
       noProducts: 'No products found',
       noProductsInCategories: 'Selected categories don\'t have any products',
       available: 'available',
+      selected: 'selected',
       productsSelectedFrom: 'products selected from',
       categories: 'categories',
       reviewSelection: 'Review Selection'
@@ -3195,7 +3196,7 @@ export const en = {
     // Status
     status: {
       active: 'Active',
-      inactive: 'Inactive',
+      inactive: 'Disabled by the restaurant',
       available: 'Available',
       unavailable: 'Unavailable'
     },
@@ -3647,7 +3648,7 @@ export const en = {
     "branchOrders": "Branch Orders",
     "allStatuses": "All Statuses",
     "statusFilter": "Status Filter",
-    "noOrders": "No {viewMode} orders yet.",
+    "noOrders": "No  orders yet.",
     "customer": "Customer",
     "orderNumber": "Order Number",
     "status": "Status",

@@ -136,13 +136,12 @@ class BranchCategoryService {
         includes: "products",
       });
       const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/available-categories?${params.toString()}` );
-      
+      console.log('Available categories for branch data:', response.data);
       logger.info('Available categories for branch retrieved successfully', { 
         count: response.data.length,
       });
 
       const transformedData = this.transformAPIDataToComponentData(response.data);
-
       return transformedData;
     } catch (error: any) {
       logger.error('Error retrieving available categories for branch:', error);
@@ -150,24 +149,24 @@ class BranchCategoryService {
     }
   }
 
-async getBranchCategories(): Promise<Category[]> {
-  try {
-    const response = await httpClient.get(`${this.baseUrl}`, {
-      params: {
-        includeInactive: true
-      }
-    });
-    
-    logger.info('Branch categories retrieved successfully', { 
-      count: response.data 
-    });
-    console.log('Branch categories data:', response.data);
-    return response.data;
-  } catch (error: any) {
-    logger.error('Error retrieving branch categories:', error);
-    return [];
+  async getBranchCategories(): Promise<Category[]> {
+    try {
+      const response = await httpClient.get(`${this.baseUrl}`, {
+        params: {
+          includeInactive: true
+        }
+      });
+      
+      logger.info('Branch categories retrieved successfully', { 
+        count: response.data 
+      });
+      console.log('Branch categories data:', response.data);
+      return response.data;
+    } catch (error: any) {
+      logger.error('Error retrieving branch categories:', error);
+      return [];
+    }
   }
-}
 
   async getPublicCategoriesForBranch(branchId: number): Promise<Category[]> {
     try {
@@ -237,9 +236,10 @@ async getBranchCategories(): Promise<Category[]> {
       logger.info('Creating branch category', { payload });
       
       try {
+        console.log("cat payload",payload)
         const response = await httpClient.post(`${this.baseUrl}`, payload);
         logger.info('Branch category created successfully', { data: response.data });
-  
+        console.log("response.data",response.data)
         return response.data;
       } catch (error: any) {
         if (error.response?.data?.errors && error.response.data.errors.createBranchCategoryDto) {

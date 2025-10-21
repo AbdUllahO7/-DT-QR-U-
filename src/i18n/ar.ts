@@ -3097,6 +3097,7 @@ export const ar = {
       available: 'متاح',
       productsSelectedFrom: 'منتجات محددة من',
       categories: 'فئات',
+      selected: 'محدد',
       reviewSelection: 'مراجعة التحديد'
     },
 
@@ -3197,7 +3198,7 @@ export const ar = {
     // Status
     status: {
       active: 'نشط',
-      inactive: 'غير نشط',
+      inactive: 'تم تعطيله من قبل المطعم',
       available: 'متاح',
       unavailable: 'غير متاح'
     },
@@ -3649,7 +3650,7 @@ export const ar = {
     "branchOrders": "طلبات الفرع",
     "allStatuses": "جميع الحالات",
     "statusFilter": "تصفية الحالة",
-    "noOrders": "لا توجد طلبات {viewMode} بعد.",
+    "noOrders": "لا توجد طلبات  بعد.",
     "customer": "العميل",
     "orderNumber": "رقم الطلب",
     "status": "الحالة",
