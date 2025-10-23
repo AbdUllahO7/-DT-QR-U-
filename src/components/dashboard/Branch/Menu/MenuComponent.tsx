@@ -292,7 +292,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
           onSearchChange={setSearchTerm}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-12 lg:grid-cols-3 gap-6">
           {/* Categories Sidebar */}
           <CategoriesSidebar
             categories={filteredCategories}
@@ -301,7 +301,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
           />
 
           {/* Products Grid */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-2">
             <ProductGrid
               categories={filteredCategories}
               selectedCategory={selectedCategory}

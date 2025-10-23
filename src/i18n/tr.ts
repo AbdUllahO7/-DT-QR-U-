@@ -3600,7 +3600,8 @@ export const tr = {
       orderSummary: "Sipariş Özeti",
       quantity: "Miktar",
       total: "Toplam",
-      addToCart: "Sepete Ekle"
+      addToCart: "Sepete Ekle",
+      addons:"Ekstralar"
   },
 
   errors: {
@@ -4197,5 +4198,57 @@ recommended: "Önerilen",
       name: "Yumuşakçalar",
       description: "Midye, istiridye, salyangoz, kalamar"
     }
-  }
+  },
+  tableQR: {
+    loading: {
+      validatingQR: "QR Kod Doğrulanıyor",
+      fetchingTableInfo: "Masa bilgileri alınıyor..."
+    },
+    error: {
+      title: "Hata",
+      tryAgain: "Tekrar Dene",
+      sessionFeatureComingSoon: "Oturum başlatma özelliği yakında eklenecek.",
+      sessionStartFailed: "Oturum başlatılamadı."
+    },
+    header: {
+      title: "Restoran Menüsü",
+      subtitle: "Dijital Menü Deneyimi",
+      active: "Aktif"
+    },
+    welcome: {
+      greeting: "Hoş Geldiniz!",
+      connectedToTable: "masasına başarıyla bağlandınız",
+      tableStatus: "Masa Durumu",
+      occupied: "Dolu",
+      available: "Müsait",
+      capacity: "Kapasite",
+      person: "Kişi",
+      people: "Kişi",
+      session: "Oturum",
+      sessionActive: "Aktif",
+      sessionPending: "Bekleniyor",
+      welcomeMessage: "Hoş Geldiniz Mesajı"
+    },
+    actions: {
+      viewMenu: "Menüyü Görüntüle",
+      callWaiter: "Garson Çağır"
+    },
+    footer: {
+      connectedViaQR: "QR Kod ile bağlandınız • Güvenli oturum"
+    }
+  },
+  productCard: {
+    chefsPick: "Şefin Seçimi",
+    customizable: "Özelleştirilebilir",
+    addons: "+ekstralar",
+    allergens: "Alerjenler",
+    ingredients: "Malzemeler",
+    inCart: "sepette",
+    customizeOrder: "Siparişi Özelleştir",
+    addToCart: "Sepete Ekle",
+    prepTime: "15-20 dakika",
+    popular: "Popüler",
+    rating: "4.8",
+    more: "daha fazla"
+  },
 }; 

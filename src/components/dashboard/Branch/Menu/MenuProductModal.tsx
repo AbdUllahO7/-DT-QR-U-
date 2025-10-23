@@ -5,6 +5,7 @@ import { useState } from "react"
 import { X, Plus, Minus, ShoppingCart, Utensils, Award } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import {  ProductModalProps, SelectedAddon } from "../../../../types/menu/type"
+import { Allergen } from "../../../../services/allergen"
 
 
 
@@ -19,6 +20,30 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const [quantity, setQuantity] = useState(1)
   
   if (!isOpen || !product) return null
+  
+  const getTranslatedAllergen = (allergen: Allergen) => {
+    try {
+      const nameKey = `allergens.${allergen.code}.name`;
+      const descKey = `allergens.${allergen.code}.description`;
+      
+      // Try to get translation, if it returns the key itself, use original value
+      const translatedName = t(nameKey);
+      const translatedDesc = t(descKey);
+      
+      return {
+        name: translatedName === nameKey ? allergen.name : translatedName,
+        description: translatedDesc === descKey ? allergen.description : translatedDesc
+      };
+    } catch (error) {
+      // Fallback to original values if translation fails
+      return {
+        name: allergen.name,
+        description: allergen.description
+      };
+    }
+  };
+  
+  console.log("product",product)
 
   const handleAddonChange = (addon: any, newQuantity: number) => {
     setSelectedAddons(prev => {
@@ -152,23 +177,26 @@ const ProductModal: React.FC<ProductModalProps> = ({
             </div>
           </div>
 
-          {/* Allergens */}
+          {/* Allergens - FIXED: Now using getTranslatedAllergen */}
           {product.allergens && product.allergens.length > 0 && (
             <div className="mb-6">
               <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">
                 {t('productModal.allergenInformation')}
               </h4>
               <div className="flex flex-wrap gap-2">
-                {product.allergens.map((allergen) => (
-                  <span
-                    key={allergen.allergenId}
-                    className="inline-flex items-center text-xs bg-amber-100/80 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 px-2 py-1 rounded-full border border-amber-200/50 dark:border-amber-800/50"
-                    title={allergen.name}
-                  >
-                    <span className="mr-1">{allergen.icon}</span>
-                    {allergen.name}
-                  </span>
-                ))}
+                {product.allergens.map((allergen : Allergen) => {
+                  const translatedAllergen = getTranslatedAllergen(allergen);
+                  return (
+                    <span
+                      key={allergen.id}
+                      className="inline-flex items-center text-xs bg-amber-100/80 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200 px-2 py-1 rounded-full border border-amber-200/50 dark:border-amber-800/50 cursor-help"
+                      title={`${translatedAllergen.name} - ${translatedAllergen.description}`}
+                    >
+                      <span className="mr-1">{allergen.icon}</span>
+                      {translatedAllergen.name}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -256,21 +284,28 @@ const ProductModal: React.FC<ProductModalProps> = ({
                             </div>
                           </div>
 
-                          {/* Addon Allergens */}
+                          {/* Addon Allergens - FIXED: Now using getTranslatedAllergen */}
                           {addon.allergens && addon.allergens.length > 0 && (
                             <div className="mt-2">
                               <div className="flex flex-wrap gap-1">
-                                {addon.allergens.slice(0, 3).map((allergen: { allergenId: React.Key | null | undefined; name: string | undefined; icon: string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined }) => (
-                                  <span
-                                    key={allergen.allergenId}
-                                    className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded-full"
-                                    title={allergen.name}
-                                  >
-                                    {allergen.icon}
-                                  </span>
-                                ))}
+                                {addon.allergens.slice(0, 3).map((allergen: Allergen) => {
+                                  const translatedAllergen = getTranslatedAllergen(allergen);
+                                  return (
+                                    <span
+                                      key={allergen.id}
+                                      className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 rounded-full cursor-help inline-flex items-center"
+                                      title={`${translatedAllergen.name} - ${translatedAllergen.description}`}
+                                    >
+                                      <span className="mr-0.5">{allergen.icon}</span>
+                                      {translatedAllergen.name}
+                                    </span>
+                                  );
+                                })}
                                 {addon.allergens.length > 3 && (
-                                  <span className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded-full">
+                                  <span 
+                                    className="text-xs text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded-full cursor-help"
+                                    title={addon.allergens.slice(3).map((a: Allergen) => getTranslatedAllergen(a).name).join(', ')}
+                                  >
                                     +{addon.allergens.length - 3}
                                   </span>
                                 )}

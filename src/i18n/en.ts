@@ -3582,18 +3582,19 @@ export const en = {
   },
 
   productModal: {
-    "customizeOrder": "Customize Your Order",
-    "allergenInformation": "Allergen Information",
-    "ingredients": "Ingredients",
-    "availableAddons": "Available Add-ons",
-    "add": "Add",
-    "recommended": "Recommended",
-    "min": "Min",
-    "max": "Max",
-    "orderSummary": "Order Summary",
-    "quantity": "Quantity",
-    "total": "Total",
-    "addToCart": "Add to Cart"
+    customizeOrder: "Customize Your Order",
+    allergenInformation: "Allergen Information",
+    ingredients: "Ingredients",
+    availableAddons: "Available Add-ons",
+    add: "Add",
+    recommended: "Recommended",
+    min: "Min",
+    max: "Max",
+    orderSummary: "Order Summary",
+    quantity: "Quantity",
+    total: "Total",
+    addToCar: "Add to Cart",
+    addons:"Addons"
   },
 
   errors: {
@@ -3642,54 +3643,54 @@ export const en = {
     cancelOrder:"Cancel Order",
     cancelOrderConfirmation :"Are you sure you want to cancel the order?",
     deletedOrders:"Deleted Orders",
-    "title": "Order Management",
-    "description": "Easily manage and track your restaurant's orders.",
-    "pendingOrders": "Pending Orders",
-    "branchOrders": "Branch Orders",
-    "allStatuses": "All Statuses",
-    "statusFilter": "Status Filter",
-    "noOrders": "No  orders yet.",
-    "customer": "Customer",
-    "orderNumber": "Order Number",
-    "status": "Status",
-    "table": "Table",
-    "amount": "Amount",
-    "date": "Date",
-    "actions": "Actions",
-    "viewDetails": "View Details",
-    "confirm": "Confirm",
-    "reject": "Reject",
-    "changeStatus": "Change Status",
-    "orderItems": "Order Items",
-    "createdAt": "Created At",
-    "confirmedAt": "Confirmed At",
-    "rowVersion": "Row Version",
-    "confirmOrderTitle": "Confirm Order",
-    "confirmOrderPrompt": "Are you sure you want to confirm this order?",
-    "rejectOrderTitle": "Reject Order",
-    "rejectOrderPrompt": "Enter the reason for rejection:",
-    "rejectReasonPlaceholder": "Reason for rejection...",
-    "updateStatusTitle": "Update Status",
-    "updateStatusPrompt": "Are you sure you want to update the order status ?",
-    "cancel": "Cancel",
-    "confirmAction": "Confirm",
-    "rejectAction": "Reject",
-    "updateAction": "Update",
-    "confirming": "Confirming...",
-    "rejecting": "Rejecting...",
-    "updating": "Updating...",
-    "orderDetailsTitle": "Order Details",
-    "successNotification": "Operation Successful",
-    "orderConfirmedSuccess": "Order confirmed successfully!",
-    "orderRejectedSuccess": "Order rejected successfully!",
-    "orderStatusUpdatedSuccess": "Order status updated successfully!",
-    "errorInvalidStatusTransition": "Invalid status transition: Please confirm the order first (move to Confirmed status).",
-    "errorCannotConfirm": "This order cannot be confirmed. Current status: {currentStatus}.",
-    "quantity": "Quantity",
-    "unitPrice": "Unit Price",
-    "addonPrice": "Addon Price",
-    "notes": "Notes",
-    "amountLabel": "Total Amount",
+    title: "Order Management",
+    description: "Easily manage and track your restaurant's orders.",
+    pendingOrders: "Pending Orders",
+    branchOrders: "Branch Orders",
+    allStatuses: "All Statuses",
+    statusFilter: "Status Filter",
+    noOrders: "No  orders yet.",
+    customer: "Customer",
+    orderNumber: "Order Number",
+    status: "Status",
+    table: "Table",
+    amount: "Amount",
+    date: "Date",
+    actions: "Actions",
+    viewDetails: "View Details",
+    confirm: "Confirm",
+    reject: "Reject",
+    changeStatus: "Change Status",
+    orderItems: "Order Items",
+    createdAt: "Created At",
+    confirmedA: "Confirmed At",
+    rowVersion: "Row Version",
+    confirmOrderTitle: "Confirm Order",
+    confirmOrderPrompt: "Are you sure you want to confirm this order?",
+    rejectOrderTitle: "Reject Order",
+    rejectOrderPrompt: "Enter the reason for rejection:",
+    rejectReasonPlaceholder: "Reason for rejection...",
+    updateStatusTitle: "Update Status",
+    updateStatusPrompt: "Are you sure you want to update the order status ?",
+    cancel: "Cancel",
+    confirmAction: "Confirm",
+    rejectAction: "Reject",
+    updateAction: "Update",
+    confirming: "Confirming...",
+    rejecting: "Rejecting...",
+    updating: "Updating...",
+    orderDetailsTitle: "Order Details",
+    successNotification: "Operation Successful",
+    orderConfirmedSucces: "Order confirmed successfully!",
+    orderRejectedSuccess: "Order rejected successfully!",
+    orderStatusUpdatedSuccess: "Order status updated successfully!",
+    errorInvalidStatusTransition: "Invalid status transition: Please confirm the order first (move to Confirmed status).",
+    errorCannotConfirm: "This order cannot be confirmed. Current status: {currentStatus}.",
+    quantity: "Quantity",
+    unitPrice: "Unit Price",
+    addonPrice: "Addon Price",
+    notes: "Notes",
+    amountLabel: "Total Amount",
     DeliveryInformation: "Delivery Information",
     TableInformation: "Table Information",
     CustomerInformation: "Customer Information",
@@ -3749,102 +3750,102 @@ export const en = {
   },
 
   branchPreferences: {
-  "title": "Branch Preferences",
-  "description": "Configure branch-specific settings and preferences",
-  "loading": "Loading branch preferences...",
-  "saving": "Saving...",
-  "refresh": "Refresh",
-  "saveChanges": "Save Changes",
-  "saveSuccess": "Branch preferences saved successfully!",
-  "cleanupModes": {
-    "afterTimeout": "After Timeout",
-    "afterClosing": "After Closing", 
-    "disabled": "Disabled"
+  title: "Branch Preferences",
+  description: "Configure branch-specific settings and preferences",
+  loading: "Loading branch preferences...",
+  saving: "Saving...",
+  refresh: "Refresh",
+  saveChanges: "Save Changes",
+  saveSuccess: "Branch preferences saved successfully!",
+  cleanupModes: {
+    afterTimeout: "After Timeout",
+    afterClosing: "After Closing", 
+    disabled: "Disabled"
   },
-  "sections": {
-    "orderManagement": {
-      "title": "Order Management",
-      "description": "Configure how orders are handled and processed",
-      "autoConfirmOrders": "Auto Confirm Orders",
-      "autoConfirmOrdersDesc": "Automatically confirm incoming orders without manual approval",
-      "useWhatsappForOrders": "WhatsApp for Orders",
-      "useWhatsappForOrdersDesc": "Enable WhatsApp integration for order notifications"
+  sections: {
+    orderManagement: {
+      title: "Order Management",
+      description: "Configure how orders are handled and processed",
+      autoConfirmOrders: "Auto Confirm Orders",
+      autoConfirmOrdersDesc: "Automatically confirm incoming orders without manual approval",
+      useWhatsappForOrders: "WhatsApp for Orders",
+      useWhatsappForOrdersDesc: "Enable WhatsApp integration for order notifications"
     },
-    "displaySettings": {
-      "title": "Display Settings",
-      "description": "Configure what information is displayed to customers",
-      "showProductDescriptions": "Show Product Descriptions",
-      "showProductDescriptionsDesc": "Display detailed product descriptions to customers",
-      "enableAllergenDisplay": "Display Allergen Information",
-      "enableAllergenDisplayDesc": "Show allergen warnings and information",
-      "enableIngredientDisplay": "Display Ingredients",
-      "enableIngredientDisplayDesc": "Show ingredient lists for products"
+    displaySettings: {
+      title: "Display Settings",
+      description: "Configure what information is displayed to customers",
+      showProductDescriptions: "Show Product Descriptions",
+      showProductDescriptionsDesc: "Display detailed product descriptions to customers",
+      enableAllergenDisplay: "Display Allergen Information",
+      enableAllergenDisplayDesc: "Show allergen warnings and information",
+      enableIngredientDisplay: "Display Ingredients",
+      enableIngredientDisplayDesc: "Show ingredient lists for products"
     },
-    "paymentMethods": {
-      "title": "Payment Methods",
-      "description": "Configure accepted payment methods",
-      "acceptCash": "Accept Cash Payments",
-      "acceptCashDesc": "Allow customers to pay with cash",
-      "acceptCreditCard": "Accept Credit Cards",
-      "acceptCreditCardDesc": "Allow customers to pay with credit/debit cards",
-      "acceptOnlinePayment": "Accept Online Payments",
-      "acceptOnlinePaymentDesc": "Allow customers to pay online through digital payment methods"
+    paymentMethods: {
+      title: "Payment Methods",
+      description: "Configure accepted payment methods",
+      acceptCash: "Accept Cash Payments",
+      acceptCashDesc: "Allow customers to pay with cash",
+      acceptCreditCard: "Accept Credit Cards",
+      acceptCreditCardDesc: "Allow customers to pay with credit/debit cards",
+      acceptOnlinePayment: "Accept Online Payments",
+      acceptOnlinePaymentDesc: "Allow customers to pay online through digital payment methods"
     },
-    "localization": {
-      "title": "Localization",
-      "description": "Configure language and regional settings",
-      "defaultLanguage": "Default Language",
-      "defaultCurrency": "Default Currency",
-      "timeZone": "Time Zone",
-      "supportedLanguages": "Supported Languages"
+    localization: {
+      title: "Localization",
+      description: "Configure language and regional settings",
+      defaultLanguage: "Default Language",
+      defaultCurrency: "Default Currency",
+      timeZone: "Time Zone",
+      supportedLanguages: "Supported Languages"
     },
-    "sessionManagement": {
-      "title": "Session Management",
-      "description": "Configure session timeout and cleanup settings",
-      "sessionTimeout": "Session Timeout (Minutes)",
-      "cleanupMode": "Cleanup Mode",
-      "cleanupDelay": "Cleanup Delay After Close (Minutes)",
-          "cleanupModeDesc": "Choose when to cleanup expired sessions",
-    "sessionTimeoutDesc": "Minutes before session expires due to inactivity",
-    "cleanupDelayDesc": "Minutes to wait after closing before cleanup",
-    "cleanupDisabledMessage": "Session cleanup is disabled. Sessions will not be automatically cleaned up."
+    sessionManagement: {
+      title: "Session Management",
+      description: "Configure session timeout and cleanup settings",
+      sessionTimeout: "Session Timeout (Minutes)",
+      cleanupMode: "Cleanup Mode",
+      cleanupDela: "Cleanup Delay After Close (Minutes)",
+      cleanupModeDesc: "Choose when to cleanup expired sessions",
+      sessionTimeoutDesc: "Minutes before session expires due to inactivity",
+      cleanupDelayDesc: "Minutes to wait after closing before cleanup",
+      cleanupDisabledMessage: "Session cleanup is disabled. Sessions will not be automatically cleaned up."
     }
   },
-  "currencies": {
-    "TRY": "Turkish Lira (₺)",
-    "USD": "US Dollar ($)",
-    "EUR": "Euro (€)"
+  currencies: {
+    TRY: "Turkish Lira (₺)",
+    USD: "US Dollar ($)",
+    EUR: "Euro (€)"
   },
-  "languages": {
-    "tr": "Turkish",
-    "en": "English",
-    "ar": "Arabic",
-    "de": "German",
-    "fr": "French",
-    "es": "Spanish",
-    "it": "Italian",
-    "ru": "Russian",
-    "zh": "Chinese",
-    "ja": "Japanese"
+  languages: {
+    tr: "Turkish",
+    en: "English",
+    ar: "Arabic",
+    de: "German",
+    fr: "French",
+    es: "Spanish",
+    it: "Italian",
+    ru: "Russian",
+    zh: "Chinese",
+    ja: "Japanese"
   },
-  "timezones": {
+  timezones: {
     "Europe/Istanbul": "Istanbul (UTC+3)",
     "Europe/London": "London (UTC+0)",
     "America/New_York": "New York (UTC-5)"
   },
-  "errors": {
-    "loadFailed": "Failed to load branch preferences",
-    "saveFailed": "Failed to save branch preferences",
-    "validationError": "Validation error: {errors}",
-    "invalidRequest": "Invalid request. Please check the data.",
-    "sessionExpired": "Session expired. Please log in again.",
-    "unauthorized": "You don't have permission for this action.",
-    "notFound": "Branch preferences not found.",
-    "conflict": "Data is not up to date. Please refresh the page and try again.",
-    "noInternet": "Check your internet connection.",
-    "unknownError": "An unknown error occurred",
-    "invalidPaymentSettings": "Invalid payment settings. At least one payment method must be selected.",
-    "invalidSessionSettings": "Invalid session settings. Please check the values."
+  errors: {
+    loadFailed: "Failed to load branch preferences",
+    saveFailed: "Failed to save branch preferences",
+    validationError: "Validation error: {errors}",
+    invalidRequest: "Invalid request. Please check the data.",
+    sessionExpired: "Session expired. Please log in again.",
+    unauthorized: "You don't have permission for this action.",
+    notFound: "Branch preferences not found.",
+    conflict: "Data is not up to date. Please refresh the page and try again.",
+    noInternet: "Check your internet connection.",
+    unknownError: "An unknown error occurred",
+    invalidPaymentSettings: "Invalid payment settings. At least one payment method must be selected.",
+    invalidSessionSettings: "Invalid session settings. Please check the values."
   }
   },
   whatsapp: {
@@ -4171,5 +4172,57 @@ export const en = {
       "name": "Molluscs",
       "description": "Clams, mussels, oysters, snails, squid"
     }
-  }
+  },
+  "tableQR": {
+    "loading": {
+      "validatingQR": "Validating QR Code",
+      "fetchingTableInfo": "Fetching table information..."
+    },
+    "error": {
+      "title": "Error",
+      "tryAgain": "Try Again",
+      "sessionFeatureComingSoon": "Session start feature coming soon.",
+      "sessionStartFailed": "Session could not be started."
+    },
+    "header": {
+      "title": "Restaurant Menu",
+      "subtitle": "Digital Menu Experience",
+      "active": "Active"
+    },
+    "welcome": {
+      "greeting": "Welcome!",
+      "connectedToTable": "Successfully connected to table",
+      "tableStatus": "Table Status",
+      "occupied": "Occupied",
+      "available": "Available",
+      "capacity": "Capacity",
+      "person": "Person",
+      "people": "People",
+      "session": "Session",
+      "sessionActive": "Active",
+      "sessionPending": "Pending",
+      "welcomeMessage": "Welcome Message"
+    },
+    "actions": {
+      "viewMenu": "View Menu",
+      "callWaiter": "Call Waiter"
+    },
+    "footer": {
+      "connectedViaQR": "Connected via QR Code • Secure session"
+    }
+  },
+  "productCard": {
+    "chefsPick": "Chef's Pick",
+    "customizable": "Customizable",
+    "addons": "+addons",
+    "allergens": "Allergens",
+    "ingredients": "Ingredients",
+    "inCart": "in cart",
+    "customizeOrder": "Customize Order",
+    "addToCart": "Add to Cart",
+    "prepTime": "15-20 min",
+    "popular": "Popular",
+    "rating": "4.8",
+    "more": "more"
+  },
 }; 
