@@ -403,7 +403,6 @@ export const useCartHandlers = ({
     try {
       
       const cleanSessionId = getCleanSessionId(sessionId)
-      console.log('Confirming price changes for session ID:', cleanSessionId)
       if (cleanSessionId) {
         try {
           const changes = await basketService.confirmSessionPriceChanges(cleanSessionId)

@@ -38,7 +38,6 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   const { t } = useLanguage()
   // Toast state
   const [toasts, setToasts] = useState<Toast[]>([])
-  console.log('CartSidebar rendered with sessionId:', sessionId)
   // Toast functions
   const showToast = (type: 'success' | 'error' | 'loading', message: string, duration?: number): string => {
     const id = Math.random().toString(36).substr(2, 9)

@@ -43,9 +43,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const [isHovered, setIsHovered] = useState(false)
   const hasAddons = product.availableAddons && product.availableAddons.length > 0
 
-
-  console.log("product add",product)
-
   const handleQuickAdd = () => {
     if (hasAddons && onCustomize) {
       onCustomize(product)

@@ -26,6 +26,7 @@ interface DeletedTable {
   categoryName: string;
 }
 export interface UpdateTableCategoryDto {
+  id?:number
   categoryName: string;
   description?: string;  // Add this field
   colorCode: string;
@@ -213,7 +214,6 @@ async updateCategory(categoryId: number, data: UpdateTableCategoryDto, branchId?
       rowVersion: data.rowVersion || ""
     };
     
-    console.log("Updating category", categoryId, branchId, payload);
     
     const url = branchId 
       ? `${this.baseUrl}/table-categories/${categoryId}?branchId=${branchId}`

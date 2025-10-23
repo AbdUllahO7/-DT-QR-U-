@@ -43,7 +43,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
     }
   };
   
-  console.log("product",product)
 
   const handleAddonChange = (addon: any, newQuantity: number) => {
     setSelectedAddons(prev => {

@@ -96,7 +96,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   const navigate = useNavigate()
   const [editingCategoryName, setEditingCategoryName] = useState('');
 
-  console.log("categories content",categories)
   // Helper functions
   const toggleCategoryExpansion = (categoryId: number) => {
     const newExpanded = new Set(expandedCategories);
@@ -144,7 +143,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
     category?.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  console.log("filteredCategories",filteredCategories)
 
   const filteredCategoriesWithProducts = categoriesWithProducts.filter(category =>
     category?.categoryName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -156,13 +154,10 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   );
 
 
-  console.log("filteredCategoriesWithProducts",filteredCategoriesWithProducts)
-  console.log("categoriesWithProducts",categoriesWithProducts)
   // Get categories that are not already in branch
   const availableCategoriesNotInBranch = filteredCategories.filter(category => 
     !branchCategories.some(bc => bc.categoryId === category.categoryId)
   );
-  console.log("availableCategoriesNotInBranch",availableCategoriesNotInBranch)
   // Get selected categories with their selected products
   const getSelectedCategoriesWithProducts = () => {
     return categoriesWithProducts.map(category => ({
@@ -670,7 +665,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
       </div>
     );
   };
-    console.log("expandedCategories",expandedCategories)
   return (
     <>
       {/* Tab Navigation */}
