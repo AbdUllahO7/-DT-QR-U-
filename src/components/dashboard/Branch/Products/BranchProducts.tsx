@@ -53,7 +53,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
   const [editedCategoryNames, setEditedCategoryNames] = useState<Map<number, EditedCategoryName>>(new Map());
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [editingCategoryId, setEditingCategoryId] = useState<number | null>(null);
-  console.log("categories",categories)
   // Product details modal state
   const [selectedProductForDetails, setSelectedProductForDetails] = useState<DetailedProduct | null>(null);
   const [isProductDetailsModalOpen, setIsProductDetailsModalOpen] = useState(false);
@@ -1139,11 +1138,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
               productId: productToCreate.id,
               branchCategoryId: branchCategoryId
             };
-              console.log("Creating branch product with data:", productData);
-
             const res = await branchProductService.createBranchProduct(productData);
-                    console.log("Created branch product:", res);
-
             createdProductsCount++;
             
           } catch (err: any) {
@@ -1242,9 +1237,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
           isActive: productToAdd.status,
           branchCategoryId: branchCategoryId
         };
-        console.log("Creating branch product with data:", productData);
         const createdBranchProduct = await branchProductService.createBranchProduct(productData);
-        console.log("Created branch product:", createdBranchProduct);
         setBranchCategories(prevCategories => {
           const finalUpdatedCategories = [...prevCategories];
           const finalUpdatedProducts = finalUpdatedCategories[categoryIndex].products?.map(product => {
@@ -1358,7 +1351,6 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
       setIsLoading(true);
       
       try {
-        console.log("Deleting branch product with ID:", branchProductId);
         await branchProductService.deleteBranchProduct(branchProductId);
         setSuccessMessage(t('branchCategories.messages.success.productRemoved', { name: productName || productToRemove.name }));
         

@@ -195,7 +195,6 @@ class BranchProductService {
       
       const response = await httpClient.get<APIBranchProduct[]>(url);
  
-      console.log("response.data",response.data)
       // Determine if response has complex structure (with includes) or simple structure
       const firstItem = response.data[0];
       const hasComplexStructure = firstItem && (
@@ -235,7 +234,6 @@ class BranchProductService {
       const response = await httpClient.get<SimpleBranchProduct>(`${this.baseUrl}/${id}`);
       
       logger.info('Branch product retrieved successfully', { id });
-      console.log("response.data",response.data)
       const transformedProduct = this.transformSingleProduct(response.data);
       return transformedProduct;
     } catch (error: any) {
@@ -285,12 +283,9 @@ class BranchProductService {
       
       try {
 
-        console.log("payload",payload)
         const response = await httpClient.post<SimpleBranchProduct>(`${this.baseUrl}`, payload);
         logger.info('Branch product created successfully', { data: response.data });
-        console.log("response.data",response.data)
         const transformedProduct = this.transformSingleProduct(response.data);
-        console.log("transformedProduct",transformedProduct)
         return transformedProduct;
       } catch (error: any) {
         // Handle potential DTO wrapper requirements similar to other services

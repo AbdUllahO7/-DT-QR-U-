@@ -25,9 +25,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ searchTerm, onSearchChange }) => 
             onChange={(e) => onSearchChange(e.target.value)}
             className="w-full pl-10 pr-4 py-3 bg-transparent border-0 rounded-2xl focus:ring-2 focus:ring-orange-500/50 text-slate-800 dark:text-slate-100 placeholder:text-slate-500 dark:placeholder:text-slate-400 text-sm font-medium outline-none"
           />
-          <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-            <Sparkles className="h-4 w-4 text-orange-500 animate-pulse" />
-          </div>
+         
         </div>
       </div>
     </div>

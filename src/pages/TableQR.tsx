@@ -15,7 +15,9 @@ import {
   MapPin,
   Smartphone,
   Coffee,
-  Utensils
+  Utensils,
+  Globe,
+  ChevronDown
 } from 'lucide-react';
 import MenuComponent from "../components/dashboard/Branch/Menu/MenuComponent";
 
@@ -34,6 +36,73 @@ interface TableInfo {
   };
 }
 
+// Language Selector Component
+const LanguageSelector: React.FC = () => {
+  const { language, setLanguage, t } = useLanguage();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const isRTL = language === 'ar';
+
+  const languages = [
+    { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
+    { code: 'en', name: 'English', flag: '🇺🇸' },
+    { code: 'ar', name: 'العربية', flag: '🇸🇦' }
+  ];
+
+  const currentLanguage = languages.find(lang => lang.code === language);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLanguageChange = (langCode: string) => {
+    setLanguage(langCode as any);
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`p-2 rounded-lg bg-white/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-colors duration-200 flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} border border-gray-200 dark:border-gray-700`}
+      >
+        <Globe className="h-5 w-5" />
+        <span className="text-sm font-medium">{currentLanguage?.flag}</span>
+        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className={`absolute top-full mt-2 ${isRTL ? 'left-0' : 'right-0'} z-50 min-w-[180px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1`}>
+          {languages.map((lang) => (
+            <button
+              key={lang.code}
+              onClick={() => handleLanguageChange(lang.code)}
+              className={`w-full flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
+                language === lang.code ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : ''
+              }`}
+            >
+              <span className="text-lg">{lang.flag}</span>
+              <span className="font-medium">{lang.name}</span>
+              {language === lang.code && (
+                <span className={`${isRTL ? 'mr-auto' : 'ml-auto'} text-blue-600 dark:text-blue-400`}>
+                  ✓
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const TableQR = () => {
   const { qrToken } = useParams();
   const { language, t } = useLanguage();
@@ -43,7 +112,7 @@ const TableQR = () => {
   const [sessionStarted, setSessionStarted] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const hasRun = useRef(false);
-
+  const isRTL = language === 'ar';
 
   useEffect(() => {
     if (hasRun.current) return;
@@ -93,25 +162,25 @@ const TableQR = () => {
           localStorage.setItem('customerSessionToken', sessionData.sessionToken);
           setSessionStarted(true);
         } else if (sessionRes.status === 404) {
-          setError('Oturum başlatma özelliği yakında eklenecek.');
+          setError(t('tableQR.error.sessionFeatureComingSoon'));
         } else {
           const sessionData = await sessionRes.json();
-          setError(sessionData.message || 'Oturum başlatılamadı.');
+          setError(sessionData.message || t('tableQR.error.sessionStartFailed'));
         }
       } catch (e) {
-        setError(error);
+        setError(t('tableQR.error.sessionStartFailed'));
       } finally {
         setLoading(false);
       }
     };
 
     validateAndStartSession();
-  }, [qrToken, language]);
+  }, [qrToken, language, t]);
 
   // Loading State
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 p-8 max-w-md w-full text-center">
           <div className="mb-6">
             <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4">
@@ -119,10 +188,10 @@ const TableQR = () => {
             </div>
             <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-              QR Kod Doğrulanıyor
+              {t('tableQR.loading.validatingQR')}
             </h2>
             <p className="text-gray-600 dark:text-gray-400">
-              Masa bilgileri alınıyor...
+              {t('tableQR.loading.fetchingTableInfo')}
             </p>
           </div>
           <div className="space-y-2">
@@ -138,12 +207,13 @@ const TableQR = () => {
   // Error State
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-orange-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 p-8 max-w-md w-full text-center">
           <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-6">
             <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-400" />
           </div>
           <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">
+            {t('tableQR.error.title')}
           </h2>
           <p className="text-red-600 dark:text-red-400 mb-6 bg-red-50 dark:bg-red-900/20 p-4 rounded-xl border border-red-200 dark:border-red-800">
             {error}
@@ -152,7 +222,7 @@ const TableQR = () => {
             onClick={() => window.location.reload()}
             className="w-full bg-gradient-to-r from-red-500 to-red-600 text-white py-3 px-6 rounded-xl font-medium hover:from-red-600 hover:to-red-700 transition-all duration-200 shadow-lg hover:shadow-xl"
           >
-            Tekrar Dene
+            {t('tableQR.error.tryAgain')}
           </button>
         </div>
       </div>
@@ -167,27 +237,30 @@ const TableQR = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-blue-50 to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
                 <Utensils className="h-5 w-5 text-white" />
               </div>
               <div>
                 <h1 className="text-lg font-bold text-gray-900 dark:text-white">
-                  Restaurant Menu
+                  {t('tableQR.header.title')}
                 </h1>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Dijital Menü Deneyimi
+                  {t('tableQR.header.subtitle')}
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-sm text-green-600 dark:text-green-400 font-medium">Aktif</span>
+            <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
+              <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-green-600 dark:text-green-400 font-medium">{t('tableQR.header.active')}</span>
+              </div>
+              <LanguageSelector />
             </div>
           </div>
         </div>
@@ -201,9 +274,12 @@ const TableQR = () => {
             <div className="mx-auto w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
               <MapPin className="h-10 w-10" />
             </div>
-            <h2 className="text-3xl font-bold mb-2">Hoş Geldiniz!</h2>
+            <h2 className="text-3xl font-bold mb-2">{t('tableQR.welcome.greeting')}</h2>
             <p className="text-blue-100 text-lg">
-              {tableInfo.tableName} masasına başarıyla bağlandınız
+              {isRTL 
+                ? `${t('tableQR.welcome.connectedToTable')} ${tableInfo.tableName}`
+                : `${t('tableQR.welcome.connectedToTable')} ${tableInfo.tableName}`
+              }
             </p>
           </div>
           
@@ -222,13 +298,13 @@ const TableQR = () => {
                     <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
                   )}
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Masa Durumu</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{t('tableQR.welcome.tableStatus')}</h3>
                 <p className={`font-medium ${
                   tableInfo.isOccupied 
                     ? 'text-red-600 dark:text-red-400' 
                     : 'text-green-600 dark:text-green-400'
                 }`}>
-                  {tableInfo.isOccupied ? "Dolu" : "Müsait"}
+                  {tableInfo.isOccupied ? t('tableQR.welcome.occupied') : t('tableQR.welcome.available')}
                 </p>
               </div>
 
@@ -237,9 +313,9 @@ const TableQR = () => {
                 <div className="mx-auto w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mb-4">
                   <Users className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Kapasite</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{t('tableQR.welcome.capacity')}</h3>
                 <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                  {tableInfo.capacity} Kişi
+                  {tableInfo.capacity} {tableInfo.capacity === 1 ? t('tableQR.welcome.person') : t('tableQR.welcome.people')}
                 </p>
               </div>
 
@@ -256,35 +332,19 @@ const TableQR = () => {
                     <Clock className="h-6 w-6 text-orange-600 dark:text-orange-400" />
                   )}
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Oturum</h3>
+                <h3 className="font-semibold text-gray-900 dark:text-white mb-2">{t('tableQR.welcome.session')}</h3>
                 <p className={`font-medium ${
                   sessionStarted 
                     ? 'text-green-600 dark:text-green-400' 
                     : 'text-orange-600 dark:text-orange-400'
                 }`}>
-                  {sessionStarted ? "Aktif" : "Bekleniyor"}
+                  {sessionStarted ? t('tableQR.welcome.sessionActive') : t('tableQR.welcome.sessionPending')}
                 </p>
               </div>
             </div>
 
             {/* Message */}
-            {tableInfo.message && (
-              <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-2xl border border-blue-200 dark:border-blue-800">
-                <div className="flex items-start space-x-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
-                    <Coffee className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">
-                      Hoş Geldiniz Mesajı
-                    </h4>
-                    <p className="text-blue-800 dark:text-blue-200">
-                      {tableInfo.message}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+         
           </div>
         </div>
 
@@ -292,26 +352,24 @@ const TableQR = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <button 
             onClick={() => setShowMenu(true)}
-            className="bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-2xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+            className={`bg-gradient-to-r from-green-500 to-green-600 text-white py-4 px-6 rounded-2xl font-semibold hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
           >
             <Utensils className="h-5 w-5" />
-            <span>Menüyü Görüntüle</span>
+            <span>{t('tableQR.actions.viewMenu')}</span>
           </button>
           
-          <button className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white py-4 px-6 rounded-2xl font-semibold border-2 border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2">
+          <button className={`bg-white dark:bg-gray-800 text-gray-900 dark:text-white py-4 px-6 rounded-2xl font-semibold border-2 border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
             <Smartphone className="h-5 w-5" />
-            <span>Garson Çağır</span>
+            <span>{t('tableQR.actions.callWaiter')}</span>
           </button>
         </div>
 
-    
-
         {/* Footer Info */}
         <div className="text-center">
-          <div className="inline-flex items-center space-x-2 bg-white dark:bg-gray-800 px-6 py-3 rounded-full shadow-lg border border-gray-200 dark:border-gray-700">
+          <div className={`inline-flex items-center bg-white dark:bg-gray-800 px-6 py-3 rounded-full shadow-lg border border-gray-200 dark:border-gray-700 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
             <QrCode className="h-4 w-4 text-gray-600 dark:text-gray-400" />
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              QR Kod ile bağlandınız • Güvenli oturum
+              {t('tableQR.footer.connectedViaQR')}
             </span>
           </div>
         </div>

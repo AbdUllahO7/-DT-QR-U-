@@ -464,13 +464,13 @@ const handleClearTable = async (tableId: number): Promise<void> => {
     try {
       const updateData: UpdateTableCategoryDto = {
         id: currentCategory.id,
+        displayOrder:currentCategory.displayOrder,
         categoryName: currentCategory.categoryName,
         colorCode: currentCategory.colorCode,
         iconClass: currentCategory.iconClass,
         isActive: newStatus,
         rowVersion: (currentCategory as any).rowVersion || ''
       };
-      console.log("updateData",updateData)
       await tableService.updateCategory(categoryId, updateData );
       setSuccessMessage(t(`BranchTableManagement.success.category${newStatus ? 'Activated' : 'Deactivated'}`));
     } catch (err: any) {
@@ -600,6 +600,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
 
       const updateDto: UpdateTableCategoryDto = {
         id: categoryId,
+        displayOrder:currentCategory.displayOrder,
         categoryName: updatedData.categoryName || currentCategory.categoryName,
         colorCode: updatedData.colorCode || currentCategory.colorCode,
         iconClass: updatedData.iconClass || currentCategory.iconClass,

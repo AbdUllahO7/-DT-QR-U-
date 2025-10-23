@@ -3594,7 +3594,8 @@ export const ar = {
     "orderSummary": "ملخص الطلب",
     "quantity": "الكمية",
     "total": "المجموع",
-    "addToCart": "إضافة إلى السلة"
+    "addToCart": "إضافة إلى السلة",
+    addons:"الإضافات"
   },
 
   errors: {
@@ -4173,5 +4174,57 @@ export const ar = {
       name: "الرخويات",
       description: "المحار، بلح البحر، الحلزون، الحبار"
     }
-  }
+  },
+  "tableQR": {
+    "loading": {
+      "validatingQR": "التحقق من رمز الاستجابة السريعة",
+      "fetchingTableInfo": "جاري الحصول على معلومات الطاولة..."
+    },
+    "error": {
+      "title": "خطأ",
+      "tryAgain": "حاول مرة أخرى",
+      "sessionFeatureComingSoon": "ميزة بدء الجلسة قادمة قريبًا.",
+      "sessionStartFailed": "تعذر بدء الجلسة."
+    },
+    "header": {
+      "title": "قائمة المطعم",
+      "subtitle": "تجربة القائمة الرقمية",
+      "active": "نشط"
+    },
+    "welcome": {
+      "greeting": "مرحباً بك!",
+      "connectedToTable": "تم الاتصال بنجاح بالطاولة",
+      "tableStatus": "حالة الطاولة",
+      "occupied": "مشغولة",
+      "available": "متاحة",
+      "capacity": "السعة",
+      "person": "شخص",
+      "people": "أشخاص",
+      "session": "الجلسة",
+      "sessionActive": "نشطة",
+      "sessionPending": "قيد الانتظار",
+      "welcomeMessage": "رسالة الترحيب"
+    },
+    "actions": {
+      "viewMenu": "عرض القائمة",
+      "callWaiter": "استدعاء النادل"
+    },
+    "footer": {
+      "connectedViaQR": "متصل عبر رمز الاستجابة السريعة • جلسة آمنة"
+    }
+  },
+   "productCard": {
+    "chefsPick": "اختيار الشيف",
+    "customizable": "قابل للتخصيص",
+    "addons": "+إضافات",
+    "allergens": "مسببات الحساسية",
+    "ingredients": "المكونات",
+    "inCart": "في السلة",
+    "customizeOrder": "تخصيص الطلب",
+    "addToCart": "أضف إلى السلة",
+    "prepTime": "١٥-٢٠ دقيقة",
+    "popular": "الأكثر شعبية",
+    "rating": "٤.٨",
+    "more": "المزيد"
+  },
 }; 
