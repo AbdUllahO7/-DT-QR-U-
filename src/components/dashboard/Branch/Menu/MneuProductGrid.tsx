@@ -158,12 +158,10 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                 <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
                   {category.categoryName}
                 </h2>
-                <span className="text-sm text-slate-600 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-700/50 px-3 py-1 rounded-full">
-                  {category.products.length} {category.products.length === 1 ? 'item' : 'items'}
-                </span>
+                
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                 {category.products.map((product) => (
                   <ProductCard
                     key={product.branchProductId}

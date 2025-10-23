@@ -247,8 +247,6 @@ class BasketService {
       logger.info('Session price changes onaylama isteği gönderiliyor', { sessionId }, { prefix: 'BasketService' });
       const url = `${this.baseUrl}/session/${sessionId}/confirm-price-changes`;
       const res = await  httpClient.post(url);
-      console.log('Response from confirmSessionPriceChanges:', res);
-      console.log('Session ID used:', sessionId);
       logger.info('Session price changes başarıyla onaylandı', { sessionId }, { prefix: 'BasketService' });
     } catch (error: any) {
       logger.error('Session price changes onaylama hatası', error, { prefix: 'BasketService' });

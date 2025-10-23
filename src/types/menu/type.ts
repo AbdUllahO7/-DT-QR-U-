@@ -1,10 +1,12 @@
 export interface MenuAllergen {
-  allergenId: number
+  id: number
   code: string
   name: string
   icon: string
   presence: number
   note: string
+    displayOrder: number;
+  description: string;
 }
 
 export interface MenuIngredient {
