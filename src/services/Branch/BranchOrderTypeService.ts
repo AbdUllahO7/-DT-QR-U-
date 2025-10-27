@@ -36,6 +36,7 @@ export interface UpdateOrderTypeDto {
   displayOrder: number;
   requiresTable: boolean;
   requiresAddress: boolean;
+  requiresName:boolean;
   requiresPhone: boolean;
   minOrderAmount: number;
   serviceCharge: number;
@@ -201,6 +202,7 @@ class OrderTypeService {
         icon: data.icon?.trim() || '',
         isActive: data.isActive,
         displayOrder: data.displayOrder || 0,
+        requiresName:data.requiresName,
         requiresTable: data.requiresTable,
         requiresAddress: data.requiresAddress,
         requiresPhone: data.requiresPhone,
@@ -210,6 +212,7 @@ class OrderTypeService {
         rowVersion: data.rowVersion,
       };
 
+      console.log('Trimmed Update Data:', updateData);
       const response = await httpClient.put<{ data: OrderType }>(`${this.baseUrl}/${id}`, updateData);
       
       logger.info('OrderType başarıyla güncellendi', response.data, { prefix: 'OrderTypeService' });
@@ -317,17 +320,17 @@ class OrderTypeService {
     }
   }
 
-// Helper method to generate a new rowVersion (simple increment)
-private generateNewRowVersion(currentRowVersion: string): string {
-  try {
-    // If rowVersion is a timestamp or number, increment it
-    const timestamp = Date.now().toString();
-    return timestamp;
-  } catch {
-    // Fallback to current timestamp
-    return Date.now().toString();
+  // Helper method to generate a new rowVersion (simple increment)
+  private generateNewRowVersion(currentRowVersion: string): string {
+    try {
+      // If rowVersion is a timestamp or number, increment it
+      const timestamp = Date.now().toString();
+      return timestamp;
+    } catch {
+      // Fallback to current timestamp
+      return Date.now().toString();
+    }
   }
-}
 
   async getActiveOrderTypesByBranch(branchId: number): Promise<OrderType[]> {
     try {

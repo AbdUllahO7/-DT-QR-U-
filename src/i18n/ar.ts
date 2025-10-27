@@ -231,6 +231,10 @@ export const ar = {
         updateError: "حدث خطأ أثناء تحديث الإعدادات",
         loadingError: "حدث خطأ أثناء تحميل أنواع الطلبات",
         active: "نشط",
+        requiresAddress: "يتطلب عنوان",
+        requiresTable: "يتطلب اختيار طاولة",
+        requiresName: "يتطلب اسم العميل",
+        requiresPhone: "يتطلب رقم الهاتف",
         minutes: "دقيقة",
         requirements: "المتطلبات",
         table: "طاولة",
@@ -2981,6 +2985,7 @@ export const ar = {
       deleting: 'جاري الحذف...',
       confirmDelete: 'تأكيد الحذف',
       deleteWarning: 'هل أنت متأكد من أنك تريد حذف هذا الفرع؟ لا يمكن التراجع عن هذا الإجراء.',
+      onlineMenu: 'عرض القائمة الإلكترونية'
     },
     
     basicInfo: {
