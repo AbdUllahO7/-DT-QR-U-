@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Edit, MapPin, Save, X, Loader2, Upload, Image } from 'lucide-react';
+import { Edit, MapPin, Save, X, Loader2, Upload, Image, Globe } from 'lucide-react';
 import { mediaService } from '../../../../services/mediaService';
 import { BranchHeaderProps, DEFAULT_IMAGE_URL, theme } from '../../../../types/BranchManagement/type';
+import { useNavigate } from 'react-router-dom';
 
 
 // Modern Toggle Switch with sleek design
@@ -95,6 +96,7 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
   const [isUploadingImage, setIsUploadingImage] = useState<boolean>(false);
   const [imageError, setImageError] = useState<string>('');
   const [dragActive, setDragActive] = useState<boolean>(false);
+  const navigate = useNavigate(); 
 
   // Handle image upload
   const uploadImage = async (file: File): Promise<string> => {
@@ -141,7 +143,7 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
     }
   };
 
-  return (
+ return (
     <div className={`${theme.background.card} ${theme.background.cardHover} backdrop-blur-xl 
       rounded-3xl shadow-2xl border border-slate-200/50 dark:border-slate-700/50 
       transition-all duration-500 mb-8 overflow-hidden relative`}>
@@ -171,25 +173,20 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
                   {t('branchManagementBranch.description') || 'Manage your branch information and settings'}
                 </p>
               </div>
-                  {selectedBranch && (
-              <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''} flex-wrap`}>
-                {/* Logo */}
-                <div className="relative group flex-shrink-0">
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
-                  <img
-                    src={selectedBranch.branchLogoPath || DEFAULT_IMAGE_URL}
-                    alt={t('branchManagementBranch.logoAlt') || 'Branch Logo'}
-                    className="relative lg:w-96 lg:h-32 sm:w-20 sm:h-20 object-cover rounded-2xl border-2 border-white dark:border-slate-700 shadow-xl transition-transform duration-300 group-hover:scale-105"
-                  />
+              {selectedBranch && (
+                <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''} flex-wrap`}>
+                  {/* Logo */}
+                  <div className="relative group flex-shrink-0">
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
+                    <img
+                      src={selectedBranch.branchLogoPath || DEFAULT_IMAGE_URL}
+                      alt={t('branchManagementBranch.logoAlt') || 'Branch Logo'}
+                      className="relative lg:w-96 lg:h-32 sm:w-20 sm:h-20 object-cover rounded-2xl border-2 border-white dark:border-slate-700 shadow-xl transition-transform duration-300 group-hover:scale-105"
+                    />
+                  </div>
                 </div>
-                
-                {/* Status Badge */}
-              </div>
-            )}
+              )}
             </div>
-
-            {/* Branch Info */}
-        
           </div>
 
           {/* Controls Section */}
@@ -209,7 +206,10 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
+                {/* Online Menu Button - Always visible */}
+                
+
                 {!isEditing ? (
                   <ModernButton
                     onClick={() => {
@@ -248,7 +248,15 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
                 )}
               </div>
             </div>
-
+       {selectedBranch && (
+  <ModernButton
+    onClick={() => navigate(`/BranchManagement/OnlineMenu/${selectedBranch.id}`)}
+    variant="primary"
+  >
+    <Globe className="w-4 h-4" />
+    <span>{t('branchManagementBranch.actions.onlineMenu') || 'Online Menu'}</span>
+  </ModernButton>
+)}
             {/* Bottom Row - Image Upload (Editing Mode) */}
             {isEditing && (
               <div className="w-full max-w-sm">
@@ -291,7 +299,6 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
                       <p className={`text-sm font-medium ${theme.text.primary}`}>
                         {isUploadingImage ? 'Uploading...' : 'Drop image here or click to browse'}
                       </p>
-                     
                     </div>
                   </div>
                 </div>

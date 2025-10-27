@@ -224,6 +224,10 @@ export const tr = {
       }
     },
     orderType: {
+        requiresPhone: "Telefon Numarası Gerektirir",
+        requiresName: "İsim Gerektirir",
+        requiresTable: "Masa Seçimi Gerektirir",
+        requiresAddress: "Adres Gerektirir",
         title: "Sipariş Türü Ayarları",
         subtitle: "Sipariş türlerinin aktiflik durumu, minimum tutar ve servis ücretlerini yönetin",
         loading: "Sipariş türleri yükleniyor...",
@@ -2985,6 +2989,7 @@ export const tr = {
       deleting: 'Siliniyor...',
       confirmDelete: 'Silmeyi Onayla',
       deleteWarning: 'Bu şubeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+      onlineMenu: 'Çevrimiçi Menüye Git'
     },
     
     basicInfo: {

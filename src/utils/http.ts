@@ -151,179 +151,118 @@ httpClient.interceptors.request.use(
 );
 
 // Response interceptor
-httpClient.interceptors.response.use(
-  async (response) => {
-    // Sadece development'ta ve önemli yanıtlarda detaylı log göster
+// Request interceptor
+httpClient.interceptors.request.use(
+  (config) => {
+    // Network bağlantısını kontrol et
+    if (!checkNetworkConnection()) {
+      const offlineError: ApiError = {
+        status: 0,
+        message: getOfflineErrorMessage(),
+        errors: undefined,
+        response: undefined
+      };
+      return Promise.reject(offlineError);
+    }
+
+    // Sadece development'ta ve önemli isteklerde detaylı log göster
     if (import.meta.env.DEV) {
       // Dashboard endpoint'leri için daha az log
-      if (response.config.url?.includes('/api/Dashboard')) {
-        logger.debug('✅ Dashboard Response:', {
-          status: response.status,
-          url: response.config.url
+      if (config.url?.includes('/api/Dashboard')) {
+        logger.debug('🚀 Dashboard Request:', {
+          method: config.method?.toUpperCase(),
+          url: config.url
         });
       } else {
-        logger.info('✅ Response:', {
-          status: response.status,
-          data: response.data,
-          headers: response.headers,
-          url: response.config.url
+        logger.info('🚀 Request:', {
+          method: config.method?.toUpperCase(),
+          url: config.url,
+          data: config.data,
+          headers: config.headers
         });
       }
     }
     
-    // Users endpoint için özel kontrol
-    if (response.config.url?.includes('/api/Users')) {
+    // Batch işlemler için özel timeout konfigürasyonu
+    if (config.url?.includes('/batch') || config.headers?.['X-Request-Type'] === 'batch-operation') {
+      config.timeout = 120000; // 2 dakika
       if (import.meta.env.DEV) {
-        logger.info('👤 Users endpoint response detected');
-        logger.info('👤 Users response.data:', response.data);
-      }
-      
-      // Users endpoint direkt UserProfileResponse döndürüyor, ApiResponse wrapper'ı yok
-      if (response.data?.appUser && response.data?.appRoles) {
-        return response;
-      }
-      
-      // Nested format
-      if (response.data?.data?.appUser && response.data?.data?.appRoles) {
-        return response;
-      }
-      
-      // Başarısız yanıt
-      if (response.data?.success === false) {
-        const apiError: ApiError = {
-          status: response.status,
-          message: response.data?.message || 'Kullanıcı bilgileri alınamadı',
-          errors: response.data?.errors || undefined,
-          response: response
-        };
-        return Promise.reject(apiError);
+        logger.info('⏱️ Batch işlem için uzun timeout ayarlandı');
       }
     }
     
-    // Login endpoint için özel kontrol
-    if (response.config.url?.includes('/api/Auth/Login')) {
-      if (response.data?.accessToken) {
-        return response;
+    // **ONLINE MENU ENDPOINTS için özel token kontrolü**
+    if (config.url?.includes('/api/online')) {
+      // Public endpoints that don't need authentication
+      const publicEndpoints = [
+        '/start-session',
+        '/menu/'
+      ];
+      
+      const isPublicEndpoint = publicEndpoints.some(endpoint => config.url?.includes(endpoint));
+      
+      if (isPublicEndpoint) {
+        // Public endpoint - no token needed
+        if (import.meta.env.DEV) {
+          logger.info('🌍 Public online menu endpoint, no token required:', config.url);
+        }
+        return config;
       }
       
-      if (response.status === 200 && typeof response.data === 'object' && response.data !== null) {
-        return response;
-      }
-    }
-    
-    // Register endpoint için özel kontrol
-    if (response.config.url?.includes('/api/Auth/Register')) {
-      if (response.status === 201 && response.data?.userId) {
-        return response;
-      }
-    }
-    
-    // Başarılı yanıt ama data içinde success: false varsa hata olarak ele al
-    if (response.data?.success === false) {
-      const apiError: ApiError = {
-        status: response.status,
-        message: response.data?.message || 'İşlem başarısız oldu',
-        errors: response.data?.errors || undefined,
-        response: response
-      };
-      return Promise.reject(apiError);
-    }
-    
-    return response;
-  },
-  async (error) => {
-    // Dashboard endpoint'leri için daha sessiz hata logları
-    if (error.config?.url?.includes('/api/Dashboard')) {
-      if (error.response?.status === 404) {
-        logger.debug('🔍 Dashboard endpoint mevcut değil:', error.config.url);
+      // Protected endpoint - token required
+      const onlineMenuToken = localStorage.getItem('online_menu_token');
+      if (onlineMenuToken) {
+        config.headers.Authorization = `Bearer ${onlineMenuToken}`;
+        if (import.meta.env.DEV) {
+          logger.info('🌐 Online Menu token kullanılıyor:', `Bearer ${onlineMenuToken.substring(0, 15)}...`);
+        }
       } else {
-        logger.error('❌ Dashboard Response Error:', {
-          status: error.response?.status,
-          message: error.message,
-          url: error.config?.url
-        });
+        // Protected endpoint but no token
+        if (import.meta.env.DEV) {
+          logger.warn('⚠️ Protected online menu endpoint için token bulunamadı!', { url: config.url });
+        }
+        const authError: ApiError = {
+          status: 401,
+          message: 'Online menu oturumu başlatılmamış. Lütfen sayfayı yenileyin.',
+          errors: undefined,
+          response: undefined
+        };
+        return Promise.reject(authError);
+      }
+      return config;
+    }
+    
+    // Önce müşteri session token'ı kontrol et (TableQR için)
+    const customerSessionToken = localStorage.getItem('customerSessionToken');
+    if (customerSessionToken) {
+      config.headers.Authorization = `Bearer ${customerSessionToken}`;
+      if (import.meta.env.DEV) {
+        logger.debug('Customer session token kullanılıyor');
       }
     } else {
-      logger.error('❌ Response Error:', {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        url: error.config?.url
-      });
-    }
-    
-    // Login endpoint için özel hata işleme
-    if (error.config?.url?.includes('/api/Auth/Login')) {
-      if (error.response?.status === 200 && error.response.data?.accessToken) {
-        const modifiedResponse = {
-          ...error.response,
-          data: error.response.data
-        };
-        return Promise.resolve(modifiedResponse);
-      }
-    }
-    
-    // Retry mekanizması için orijinal config'i kaydet
-    const originalConfig = error.config;
-    
-    // Network hataları için özel işleme
-    if (error.message && (error.message.includes('Network Error') || error.message.includes('CORS') || error.message.includes('ERR_EMPTY_RESPONSE'))) {
-      logger.warn('⚠️ Network veya CORS hatası, retry yapılmıyor');
-      
-      const apiError: ApiError = {
-        status: 0,
-        message: getUserFriendlyErrorMessage(error),
-        errors: undefined,
-        response: error.response
-      };
-      return Promise.reject(apiError);
-    }
-    
-    // Timeout hatası için özel mesaj
-    if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
-      logger.warn('⚠️ İstek zaman aşımına uğradı');
-      
-      // Batch işlemler için özel timeout mesajı
-      const isBatchOperation = error.config?.url?.includes('/batch') || 
-                              error.config?.headers?.['X-Request-Type'] === 'batch-operation';
-      
-      if (isBatchOperation) {
-        logger.warn('⚠️ Batch işlem zaman aşımına uğradı - daha uzun süre bekleniyor');
-        // Batch işlemler için daha uzun timeout süresi
-        if (originalConfig && !originalConfig._retry) {
-          originalConfig._retry = true;
-          originalConfig.timeout = 180000; // 3 dakika
-          return retryRequest(originalConfig, error);
+      // Normal admin/user token
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+        if (import.meta.env.DEV && !config.url?.includes('/api/Dashboard')) {
+          logger.info('Token eklendi:', `Bearer ${token.substring(0, 15)}...`);
+        }
+        // Token'ın geçerlilik süresini kontrol et
+        const tokenExpiry = localStorage.getItem('tokenExpiry');
+        if (tokenExpiry) {
+          const expiryDate = new Date(tokenExpiry);
+          if (isNaN(expiryDate.getTime()) || expiryDate <= new Date()) {
+            logger.warn('⚠️ Token süresi dolmuş veya geçersiz!');
+          }
         }
       }
-      
-      if (originalConfig && !originalConfig._retry) {
-        originalConfig._retry = true;
-        return retryRequest(originalConfig, error);
-      }
-      
-      const apiError: ApiError = {
-        status: error.response?.status || 408,
-        message: getUserFriendlyErrorMessage(error),
-        errors: undefined,
-        response: error.response
-      };
-      return Promise.reject(apiError);
     }
     
-    // Retry mekanizması için kontrol
-    if (originalConfig && !originalConfig._retry) {
-      originalConfig._retry = true;
-      return retryRequest(originalConfig, error);
-    }
-    
-    const apiError: ApiError = {
-      status: error.response?.status || 0,
-      message: getUserFriendlyErrorMessage(error),
-      errors: error.response?.data?.errors || undefined,
-      response: error.response
-    };
-    return Promise.reject(apiError);
+    return config;
+  },
+  (error) => {
+    logger.error('❌ Request Error:', error);
+    return Promise.reject(error);
   }
 );
 
@@ -386,3 +325,4 @@ export const isBranchOnlyUser = (): boolean => {
     return false;
   }
 }; 
+
