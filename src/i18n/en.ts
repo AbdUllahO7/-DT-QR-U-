@@ -2980,6 +2980,7 @@ export const en = {
       deleting: 'Deleting...',
       confirmDelete: 'Confirm Delete',
       deleteWarning: 'Are you sure you want to delete this branch? This action cannot be undone.',
+      onlineMenu: 'Online Menu URL',
     },
     
     basicInfo: {

@@ -2981,6 +2981,7 @@ export const ar = {
       deleting: 'جاري الحذف...',
       confirmDelete: 'تأكيد الحذف',
       deleteWarning: 'هل أنت متأكد من أنك تريد حذف هذا الفرع؟ لا يمكن التراجع عن هذا الإجراء.',
+      onlineMenu: 'عرض القائمة الإلكترونية'
     },
     
     basicInfo: {

@@ -302,7 +302,7 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
   };
 
   if (!isOpen || !product) return null;
-
+  
   const assignedAddons = filteredAddons.filter(addon => addon.isAssigned);
   const unassignedAddons = filteredAddons.filter(addon => !addon.isAssigned);
   const assignedCount = assignedAddons.length;

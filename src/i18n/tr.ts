@@ -2985,6 +2985,7 @@ export const tr = {
       deleting: 'Siliniyor...',
       confirmDelete: 'Silmeyi Onayla',
       deleteWarning: 'Bu şubeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+      onlineMenu: 'Çevrimiçi Menüye Git'
     },
     
     basicInfo: {
