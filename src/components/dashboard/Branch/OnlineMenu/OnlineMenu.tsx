@@ -226,6 +226,7 @@ const handleAddonToggle = (addon: ProductAddon) => {
       // Add addon with quantity 1
       console.log('Adding addon:', addon.addonName);
       return [...prev, {
+        addonBranchProductId: addon.branchProductAddonId,
         branchProductAddonId: addon.branchProductAddonId,
         quantity: 1,
         addon
@@ -667,104 +668,104 @@ return (
               </div>
 
               {/* Addons */}
-{selectedProduct.availableAddons && selectedProduct.availableAddons.length > 0 && (
-  <div className="space-y-4">
-    <h4 className={`font-bold ${theme.text.primary}`}>Add-ons (Optional)</h4>
-    <div className="space-y-3">
-      {selectedProduct.availableAddons.map((addon) => {
-        // Check if addon is selected using branchProductAddonId
-        const isSelected = selectedAddons.some(
-          a => a.branchProductAddonId === addon.branchProductAddonId
-        );
-        const selectedAddon = selectedAddons.find(
-          a => a.branchProductAddonId === addon.branchProductAddonId
-        );
+                {selectedProduct.availableAddons && selectedProduct.availableAddons.length > 0 && (
+                  <div className="space-y-4">
+                    <h4 className={`font-bold ${theme.text.primary}`}>Add-ons (Optional)</h4>
+                    <div className="space-y-3">
+                      {selectedProduct.availableAddons.map((addon) => {
+                        // Check if addon is selected using branchProductAddonId
+                        const isSelected = selectedAddons.some(
+                          a => a.branchProductAddonId === addon.branchProductAddonId
+                        );
+                        const selectedAddon = selectedAddons.find(
+                          a => a.branchProductAddonId === addon.branchProductAddonId
+                        );
 
-        console.log('Addon:', addon.addonName, 'ID:', addon.branchProductAddonId, 'Selected:', isSelected);
+                        console.log('Addon:', addon.addonName, 'ID:', addon.branchProductAddonId, 'Selected:', isSelected);
 
-        return (
-          <div 
-            key={addon.branchProductAddonId}
-            className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
-              isSelected 
-                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' 
-                : 'border-slate-200 dark:border-slate-700 hover:border-emerald-300'
-            }`}
-            onClick={() => handleAddonToggle(addon)}
-          >
-            <div className="flex items-start gap-3">
-              {/* Addon Image */}
-              <img
-                src={addon.addonImageUrl}
-                alt={addon.addonName}
-                className="w-16 h-16 rounded-lg object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = 'https://www.customcardsandgames.com/assets/images/noImageUploaded.png';
-                }}
-              />
-              
-              {/* Addon Info */}
-              <div className="flex-1">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <h5 className={`font-bold ${theme.text.primary}`}>{addon.addonName}</h5>
-                    {addon.addonDescription && (
-                      <p className={`text-sm ${theme.text.secondary} mt-1`}>{addon.addonDescription}</p>
-                    )}
-                    {addon.marketingText && (
-                      <p className="text-sm text-emerald-600 mt-1">{addon.marketingText}</p>
-                    )}
-                  </div>
-                  <span className="font-bold text-emerald-600 whitespace-nowrap">
-                    {formatPrice(addon.specialPrice || addon.price, menuData?.preferences.defaultCurrency)}
-                  </span>
-                </div>
+                        return (
+                          <div 
+                            key={addon.branchProductAddonId}
+                            className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
+                              isSelected 
+                                ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20' 
+                                : 'border-slate-200 dark:border-slate-700 hover:border-emerald-300'
+                            }`}
+                            onClick={() => handleAddonToggle(addon)}
+                          >
+                            <div className="flex items-start gap-3">
+                              {/* Addon Image */}
+                              <img
+                                src={addon.addonImageUrl}
+                                alt={addon.addonName}
+                                className="w-16 h-16 rounded-lg object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.src = 'https://www.customcardsandgames.com/assets/images/noImageUploaded.png';
+                                }}
+                              />
+                              
+                              {/* Addon Info */}
+                              <div className="flex-1">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div>
+                                    <h5 className={`font-bold ${theme.text.primary}`}>{addon.addonName}</h5>
+                                    {addon.addonDescription && (
+                                      <p className={`text-sm ${theme.text.secondary} mt-1`}>{addon.addonDescription}</p>
+                                    )}
+                                    {addon.marketingText && (
+                                      <p className="text-sm text-emerald-600 mt-1">{addon.marketingText}</p>
+                                    )}
+                                  </div>
+                                  <span className="font-bold text-emerald-600 whitespace-nowrap">
+                                    {formatPrice(addon.specialPrice || addon.price, menuData?.preferences.defaultCurrency)}
+                                  </span>
+                                </div>
 
-                {/* Addon Quantity Controls (shown when selected) */}
-                {isSelected && selectedAddon && (
-                  <div className="flex items-center gap-2 mt-3">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        updateAddonQuantity(addon.branchProductAddonId, -1);
-                      }}
-                      className="p-1 bg-emerald-200 dark:bg-emerald-800 rounded-full hover:bg-emerald-300 dark:hover:bg-emerald-700 transition-colors"
-                    >
-                      <Minus className="w-4 h-4" />
-                    </button>
-                    <span className="font-bold min-w-[2rem] text-center">{selectedAddon.quantity}</span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        updateAddonQuantity(addon.branchProductAddonId, 1);
-                      }}
-                      disabled={selectedAddon.quantity >= addon.maxQuantity}
-                      className="p-1 bg-emerald-200 dark:bg-emerald-800 rounded-full hover:bg-emerald-300 dark:hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Plus className="w-4 h-4" />
-                    </button>
-                    <span className="text-xs text-slate-500 ml-2">
-                      (Max: {addon.maxQuantity})
-                    </span>
+                                {/* Addon Quantity Controls (shown when selected) */}
+                                {isSelected && selectedAddon && (
+                                  <div className="flex items-center gap-2 mt-3">
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        updateAddonQuantity(addon.branchProductAddonId, -1);
+                                      }}
+                                      className="p-1 bg-emerald-200 dark:bg-emerald-800 rounded-full hover:bg-emerald-300 dark:hover:bg-emerald-700 transition-colors"
+                                    >
+                                      <Minus className="w-4 h-4" />
+                                    </button>
+                                    <span className="font-bold min-w-[2rem] text-center">{selectedAddon.quantity}</span>
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        updateAddonQuantity(addon.branchProductAddonId, 1);
+                                      }}
+                                      disabled={selectedAddon.quantity >= addon.maxQuantity}
+                                      className="p-1 bg-emerald-200 dark:bg-emerald-800 rounded-full hover:bg-emerald-300 dark:hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                      <Plus className="w-4 h-4" />
+                                    </button>
+                                    <span className="text-xs text-slate-500 ml-2">
+                                      (Max: {addon.maxQuantity})
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Checkbox Indicator */}
+                              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                                isSelected 
+                                  ? 'bg-emerald-500 border-emerald-500' 
+                                  : 'border-slate-300 dark:border-slate-600'
+                              }`}>
+                                {isSelected && <CheckCircle className="w-4 h-4 text-white" />}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
-              </div>
-
-              {/* Checkbox Indicator */}
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                isSelected 
-                  ? 'bg-emerald-500 border-emerald-500' 
-                  : 'border-slate-300 dark:border-slate-600'
-              }`}>
-                {isSelected && <CheckCircle className="w-4 h-4 text-white" />}
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-)}
 
               {/* Total Price Summary */}
               <div className="border-t-2 border-slate-200 dark:border-slate-700 pt-4 space-y-2">

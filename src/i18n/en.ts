@@ -221,6 +221,10 @@ export const en = {
     },
    orderType: {
         title: "Order Type Settings",
+        requiresName: "Requires Customer Name",
+        requiresTable: "Requires Table Selection",
+        requiresAddress: "Requires Address",
+        requiresPhone: "Requires Phone Number",
         subtitle: "Manage activation status, minimum order amount and service charges for order types",
         loading: "Loading order types...",
         pleaseWait: "Please wait",
