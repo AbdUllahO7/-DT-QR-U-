@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Settings, Save, AlertCircle, CheckCircle, Loader2, Clock, DollarSign, Users, User, MapPin, Phone, Table } from 'lucide-react';
-import { OrderType, orderTypeService, UpdateOrderTypeDto } from '../../../../services/Branch/BranchOrderTypeService';
+import { OrderType, orderTypeService, UpdateOrderTypeDto, UpdateOrderTypeSettingsDto } from '../../../../services/Branch/BranchOrderTypeService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 
 const OrderTypeComponent = () => {
@@ -56,7 +56,8 @@ const OrderTypeComponent = () => {
         rowVersion: orderType.rowVersion
       };
 
-      const updatedOrderType = await orderTypeService.updateOrderType(orderType.id, updateData);
+      // ✅ FIXED: Use updateOrderType instead of updateOrderTypeSettings
+      const updatedOrderType = await orderTypeService.updateOrderTypeSettings(orderType.id, updateData);
       
       // Update local state with the response
       if (updatedOrderType) {
