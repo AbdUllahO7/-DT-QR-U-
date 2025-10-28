@@ -17,6 +17,7 @@ export interface OrderType {
   minOrderAmount: number;
   serviceCharge: number;
   estimatedMinutes: number;
+  requiresName: boolean;
   activeOrderCount: number;
   rowVersion: string;
   // Additional fields from the new API response
@@ -38,19 +39,25 @@ export interface UpdateOrderTypeDto {
   requiresAddress: boolean;
   requiresName:boolean;
   requiresPhone: boolean;
+  
   minOrderAmount: number;
   serviceCharge: number;
   estimatedMinutes: number;
   rowVersion: string;
 }
 
-// Update OrderType Settings DTO
+// ✅ EXPANDED: Update OrderType Settings DTO to include all fields you want to update
 export interface UpdateOrderTypeSettingsDto {
+  id: number;
   isActive: boolean;
   minOrderAmount: number;
   serviceCharge: number;
+  estimatedMinutes: number;
+  requiresName: boolean;
+  requiresTable: boolean;
+  requiresAddress: boolean;
+  requiresPhone: boolean;
   rowVersion: string;
-  id:number,
 }
 
 // Reorder DTO
@@ -209,10 +216,9 @@ class OrderTypeService {
         minOrderAmount: data.minOrderAmount || 0,
         serviceCharge: data.serviceCharge || 0,
         estimatedMinutes: data.estimatedMinutes || 0,
-        rowVersion: data.rowVersion,
+        rowVersion: data.rowVersion
       };
-
-      console.log('Trimmed Update Data:', updateData);
+      
       const response = await httpClient.put<{ data: OrderType }>(`${this.baseUrl}/${id}`, updateData);
       
       logger.info('OrderType başarıyla güncellendi', response.data, { prefix: 'OrderTypeService' });
@@ -241,6 +247,7 @@ class OrderTypeService {
     }
   }
 
+  // ✅ UPDATED: Now accepts expanded UpdateOrderTypeSettingsDto with all fields
   async updateOrderTypeSettings(id: number, data: UpdateOrderTypeSettingsDto): Promise<OrderType> {
     try {
       logger.info('OrderType ayarları güncelleme isteği gönderiliyor', { id, data }, { prefix: 'OrderTypeService' });
@@ -260,7 +267,12 @@ class OrderTypeService {
           isActive: data.isActive,
           minOrderAmount: data.minOrderAmount,
           serviceCharge: data.serviceCharge,
-          rowVersion: this.generateNewRowVersion(data.rowVersion), // Generate a new rowVersion
+          estimatedMinutes: data.estimatedMinutes,
+          requiresName: data.requiresName,
+          requiresTable: data.requiresTable,
+          requiresAddress: data.requiresAddress,
+          requiresPhone: data.requiresPhone,
+          rowVersion: this.generateNewRowVersion(data.rowVersion),
           updatedAt: new Date().toISOString(),
           // These fields won't be updated by this endpoint, so we'll mark them as undefined
           // The component will handle this by refetching if needed
