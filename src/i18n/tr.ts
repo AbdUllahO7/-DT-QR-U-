@@ -3408,7 +3408,13 @@ export const tr = {
 
   menu: {
       title: "Menü",
+      basePrice: "Temel Fiyat",
       loading: "Menü Yükleniyor",
+      allergens: "Alerjen Bilgisi",
+      quantity: "Miktar",
+      addons: "Eklentiler",
+      product: "Ürün",
+      addToBasket: "Sepete Ekle",
       loadingSubtitle: "Lezzetli seçimlerimizi sizin için hazırlıyoruz...",
       error: {
         title: "Menü Mevcut Değil",
@@ -3487,6 +3493,7 @@ export const tr = {
       },
       cart: {
       title: 'Sepet',
+      
       orderType: 'Sipariş Türü:',
       table: 'Masa:',
       notes: 'Notlar:',

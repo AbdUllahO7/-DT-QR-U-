@@ -6,7 +6,6 @@ import CheckoutOrderType from './CheckoutOrderType';
 import { basketService } from '../../../../services/Branch/BasketService';
 import { orderService } from '../../../../services/Branch/OrderService';
 import WhatsAppConfirmationModal from '../Menu/CartSideBar/WhatsAppConfirmationModal';
-import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 
 interface OnlineCartSidebarProps {
@@ -42,6 +41,8 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   // WhatsApp Modal States - NOW SHOWN AFTER ORDER SUCCESS
   const [showWhatsAppConfirmation, setShowWhatsAppConfirmation] = useState<boolean>(false);
 
+  console.log('basket in sidebar:', basket);
+  
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('tr-TR', {
       style: 'currency',
@@ -221,11 +222,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
     try {
       const changes = await basketService.confirmSessionPriceChanges(sessionId);
-      /* if (changes?.requiresConfirmation) {
-        setPriceChangeData(changes);
-        setShowPriceChangeModal(true);
-        return;
-      } */
+
     } catch (err: any) {
       console.warn('Price check failed, proceeding anyway:', err);
     }
