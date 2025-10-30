@@ -3406,6 +3406,12 @@ export const ar = {
   menu: {
       title: "القائمة",
       loading: "تحميل القائمة",
+      basePrice: "السعر الأساسي",
+      quantity: "الكمية",
+      addons  : "الإضافات",
+      product: "المنتج",
+      addToBasket: "أضف إلى السلة",
+      allergens: "مسببات الحساسية",
       loadingSubtitle: "نحضر لك أشهى المأكولات...",
       error: {
         title: "القائمة غير متوفرة",
@@ -3484,6 +3490,7 @@ export const ar = {
       },
       cart: {
       title: 'السلة',
+      basePrice: 'السعر الأساسي',
       newOrder: 'طلب جديد',
       orders: 'الطلبات',
       notes: 'ملاحظات',

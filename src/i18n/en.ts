@@ -3405,7 +3405,13 @@ export const en = {
 
   menu: {
   title: "Menu",
+  basePrice: "Base Price",
   loading: "Loading Menu",
+  allergens: "Allergens",
+  quantity: "Quantity",
+  addons: "Addons",
+  products: "Products",
+  addToBasket: "Add to Basket",
   loadingSubtitle: "Preparing our delicious selections for you...",
   error: {
     title: "Menu Unavailable",
