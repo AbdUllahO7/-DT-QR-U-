@@ -1,3 +1,4 @@
+import { add } from "@dnd-kit/utilities";
 import { title } from "process";
 
 
@@ -8,6 +9,7 @@ export const en = {
     error: 'Error',
     success: 'Success',
     cancel: 'Cancel',
+    change: 'Change',
     save: 'Save',
     delete: 'Delete',
     edit: 'Edit',
@@ -3479,7 +3481,7 @@ export const en = {
       corporateMeals: "Corporate Meals"
     }
   },
-    cart: {
+  cart: {
     title: 'Cart',
     newOrder: 'New Order',
     orders: 'Orders',
@@ -3533,14 +3535,24 @@ export const en = {
   order: {
     form: {
       title: 'Order Details',
+      name:"name",
+      address:"address",
+      phone:"phone",
+      email:"email",
+      orderDetails: 'Order Details',
       orderType: 'Order Type',
       paymentMethod: 'Payment Method',
+      cashDescription: 'Pay with cash upon delivery or pickup',
+      creditCardDescription: 'Pay securely with credit card online',
+      onlinePaymentDescription: 'Pay using online payment methods',
       selectPaymentMethod: 'Select payment method...',
       orderTypeRequired: 'Order type is required',
       cash: 'Cash',
+      information: 'Information',
       creditCard: 'Credit Card',
       onlinePayment: 'Online Payment',
       selectOrderType: 'Select order type...',
+      orderInformation: 'Order Information',
       customerName: 'Customer Name',
       customerNameRequired: 'Customer name is required',
       customerNamePlaceholder: 'Enter customer name',

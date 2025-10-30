@@ -1,3 +1,4 @@
+import { MenuCategory } from "../../../types/menu/type";
 import { httpClient } from "../../../utils/http";
 import { logger } from "../../../utils/logger";
 
@@ -199,7 +200,7 @@ export interface OnlineMenuResponse {
   isTemporarilyClosed: boolean;
   isPreviewMode: boolean;
   statusMessage: string;
-  categories: Category[];
+  categories: MenuCategory[];
   preferences: MenuPreferences;
 }
 export interface AddUnifiedItemDto {
@@ -353,7 +354,7 @@ async getMyBasket(): Promise<BasketResponse> {
     logger.info('Sepet bilgileri getiriliyor', {}, { prefix: 'OnlineMenuService' });
     
     const url = `${this.onlineUrl}/my-basket`;
-    const response = await httpClient.get<BasketResponse>(url);
+    const response = await httpClient.get<BasketResponse>(url); 
     
     logger.info('Sepet bilgileri başarıyla getirildi', { 
       itemCount: response.data.basketItems?.length || 0,
@@ -366,7 +367,7 @@ async getMyBasket(): Promise<BasketResponse> {
       // Map basketItems to items
       items: response.data.basketItems?.map(item => ({
         ...item,
-        productImageUrl: item.imageUrl,
+        productImageUrl: item.imageUrl || undefined,
         unitPrice: item.price,
         addons: item.addonItems?.map(addon => ({
           ...addon,
