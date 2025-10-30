@@ -210,7 +210,7 @@ httpClient.interceptors.request.use(
       }
       
       // Protected endpoint - token required
-      const onlineMenuToken = localStorage.getItem('online_menu_token');
+      const onlineMenuToken = localStorage.getItem('token');
       if (onlineMenuToken) {
         config.headers.Authorization = `Bearer ${onlineMenuToken}`;
         if (import.meta.env.DEV) {
