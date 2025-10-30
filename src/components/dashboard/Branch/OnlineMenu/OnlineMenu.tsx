@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-
   Loader2,
-
   CheckCircle,
-
   X,
   Plus,
   Minus,
@@ -28,6 +25,7 @@ import Header from '../Menu/MenuHeaderComponent';
 import CategoriesSidebar from '../Menu/MenuCategoriesSidebar';
 import Footer from '../Menu/MneuFooter';
 import SearchBar from '../Menu/MenuSearchBar';
+import { useLanguage } from '../../../../contexts/LanguageContext';
 
 interface PublicBranchData {
   branchName: string;
@@ -43,6 +41,7 @@ interface SelectedAddon {
 
 const OnlineMenu: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { t } = useLanguage();
 
   // ───── UI States ─────
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -69,7 +68,7 @@ const OnlineMenu: React.FC = () => {
   const [isSessionInitialized, setIsSessionInitialized] = useState<boolean>(false);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
 
-  console.log("basket",basket)
+  console.log("basket", basket);
 
   // ───── Price Change Detection ─────
   const [showPriceChangeModal, setShowPriceChangeModal] = useState<boolean>(false);
@@ -94,7 +93,7 @@ const OnlineMenu: React.FC = () => {
         await initializeSession(data.publicId);
       }
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch public branch ID');
+      setError(err.message || t('menu.error.fetchPublicId'));
     } finally {
       setIsLoading(false);
     }
@@ -103,27 +102,51 @@ const OnlineMenu: React.FC = () => {
   const initializeSession = async (publicId: string) => {
     try {
       setIsSessionInitialized(false);
-      localStorage.removeItem('token');
+      
+      // ✅ Clear token ONLY on first load (not on refresh)
+      const isFirstLoad = !sessionStorage.getItem('online_menu_initialized');
+      
+      if (isFirstLoad) {
+        console.log('🆕 First load detected - clearing old tokens');
+        localStorage.removeItem('online_menu_session_id');
+        localStorage.removeItem('token');
+        localStorage.removeItem('online_menu_public_id');
+        localStorage.removeItem('tokenExpiry');
+        
+        // Mark that we've initialized once in this browser session
+        sessionStorage.setItem('online_menu_initialized', 'true');
+      } else {
+        console.log('🔄 Page refresh detected - preserving session');
+      }
 
-      // ---- reuse existing session if possible ----
+      // ---- Check for existing session ----
       const existingSessionId = localStorage.getItem('online_menu_session_id');
       const existingToken = localStorage.getItem('token');
       const existingPublicId = localStorage.getItem('online_menu_public_id');
 
+      // If we have a valid existing session for the same publicId, reuse it
       if (existingSessionId && existingToken && existingPublicId === publicId) {
+        console.log('✅ Reusing existing session:', existingSessionId);
         setSessionId(existingSessionId);
         setIsSessionInitialized(true);
+        
         try {
           await loadBasket();
-          return;
-        } catch {
+          console.log('✅ Existing session is valid and basket loaded');
+          return; // Session is valid, we're done!
+        } catch (error: any) {
+          console.warn('⚠️ Existing session failed, creating new session:', error);
+          // Session is invalid, clean up and create new one
           localStorage.removeItem('online_menu_session_id');
           localStorage.removeItem('token');
           localStorage.removeItem('online_menu_public_id');
+          localStorage.removeItem('tokenExpiry');
         }
       }
 
-      // ---- create new session ----
+      // ---- Create new session only if we don't have a valid one ----
+      console.log('🆕 Creating new session...');
+      
       const customerIdentifier =
         localStorage.getItem('customer_identifier') ||
         `guest_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -138,9 +161,10 @@ const OnlineMenu: React.FC = () => {
         preferredLanguage: 'en',
       } as StartSessionDto);
 
+      console.log('✅ New session created:', session.sessionId);
+
       setSessionId(session.sessionId);
       localStorage.setItem('online_menu_session_id', session.sessionId);
-
       localStorage.setItem('token', session.sessionToken);
       localStorage.setItem('online_menu_public_id', publicId);
       localStorage.setItem('online_menu_branch_id', session.branchId.toString());
@@ -148,9 +172,10 @@ const OnlineMenu: React.FC = () => {
 
       setIsSessionInitialized(true);
       await loadBasket();
+      
     } catch (err: any) {
-      console.error('Session init error:', err);
-      setError('Failed to initialize session. Please refresh.');
+      console.error('❌ Session init error:', err);
+      setError(t('menu.error.initializeSession'));
     }
   };
 
@@ -262,7 +287,7 @@ const OnlineMenu: React.FC = () => {
       setPriceChanges(null);
     } catch (err: any) {
       console.error('Failed to confirm price changes:', err);
-      alert('Failed to update prices. Please try again.');
+      alert(t('menu.error.updatePrices'));
     } finally {
       setConfirmingPriceChanges(false);
     }
@@ -278,7 +303,7 @@ const OnlineMenu: React.FC = () => {
   // ───── Product modal helpers ─────
   const openProductModal = (product: MenuProduct) => {
     if (!isSessionInitialized) {
-      alert('Session is being prepared…');
+      alert(t('menu.sessionPreparing'));
       return;
     }
     setSelectedProduct(product);
@@ -339,7 +364,7 @@ const OnlineMenu: React.FC = () => {
     quantity: number,
     addons: SelectedAddon[] = []
   ) => {
-    if (!isSessionInitialized) throw new Error('Session not ready');
+    if (!isSessionInitialized) throw new Error(t('menu.sessionNotReady'));
 
     try {
       setIsAddingToBasket(true);
@@ -388,14 +413,14 @@ const OnlineMenu: React.FC = () => {
     try {
       await addToBasket(selectedProduct, productQuantity, selectedAddons);
     } catch (e: any) {
-      alert(e.message || 'Failed to add to basket');
+      alert(e.message || t('menu.error.addToBasket'));
     }
   };
 
   // ───── ProductGrid Handlers ─────
   const handleProductGridAddToCart = async (product: MenuProduct, addons: SelectedAddon[] = []) => {
     if (!isSessionInitialized) {
-      alert('Session is being prepared…');
+      alert(t('menu.sessionPreparing'));
       return;
     }
 
@@ -409,7 +434,7 @@ const OnlineMenu: React.FC = () => {
     try {
       await addToBasket(product, 1, []);
     } catch (e: any) {
-      alert(e.message || 'Failed to add to basket');
+      alert(e.message || t('menu.error.addToBasket'));
     }
   };
 
@@ -424,7 +449,7 @@ const OnlineMenu: React.FC = () => {
         await loadBasket();
       }
     } catch (e: any) {
-      alert(e.message || 'Failed to remove from basket');
+      alert(e.message || t('menu.error.removeFromBasket'));
     }
   };
 
@@ -479,8 +504,6 @@ const OnlineMenu: React.FC = () => {
     return () => clearInterval(interval);
   }, [basket, menuData]);
 
-
-
   const formatPrice = (price: number, currency: string = 'TRY') =>
     new Intl.NumberFormat('tr-TR', { style: 'currency', currency }).format(
       price
@@ -492,7 +515,7 @@ const OnlineMenu: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className={`text-lg ${theme.text.secondary}`}>Loading online menu…</p>
+          <p className={`text-lg ${theme.text.secondary}`}>{t('menu.loadingOnline')}</p>
         </div>
       </div>
     );
@@ -555,22 +578,17 @@ const OnlineMenu: React.FC = () => {
           <div className={`${theme.background.card} backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-200/50 dark:border-slate-700/50 p-8`}>
             <div className="text-center">
               <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-              <p className={`text-lg ${theme.text.secondary}`}>Loading menu preview…</p>
+              <p className={`text-lg ${theme.text.secondary}`}>{t('menu.loadingPreview')}</p>
             </div>
           </div>
         ) : menuData ? (
           <div className={`${theme.background.card} backdrop-blur-xl rounded-3xl shadow-2xl  dark:border-slate-700/50 overflow-hidden`}>
-
-       
-
             {/* Content with Sidebar Layout */}
             <div className="p-8 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-                   <SearchBar 
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-        />
-
-         
+              <SearchBar 
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+              />
 
               {/* Main Grid Layout: Sidebar + Products */}
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 bg-transparent ">
@@ -601,9 +619,6 @@ const OnlineMenu: React.FC = () => {
                   />
                 </div>
               </div>
-
-              {/* WhatsApp info */}
-            
             </div>
           </div>
         ) : null}
@@ -650,7 +665,7 @@ const OnlineMenu: React.FC = () => {
 
               {/* Base price */}
               <div className="flex items-center justify-between">
-                <span className={`text-lg ${theme.text.secondary}`}>Base Price</span>
+                <span className={`text-lg ${theme.text.secondary}`}>{t('menu.basePrice')}</span>
                 <span className="text-2xl font-bold text-emerald-600">
                   {formatPrice(
                     selectedProduct.price,
@@ -662,7 +677,7 @@ const OnlineMenu: React.FC = () => {
               {/* Ingredients */}
               {selectedProduct.ingredients?.length ? (
                 <div className="space-y-2">
-                  <h4 className={`font-bold ${theme.text.primary}`}>Ingredients</h4>
+                  <h4 className={`font-bold ${theme.text.primary}`}>{t('menu.ingredients')}</h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedProduct.ingredients.map((i) => (
                       <span
@@ -679,7 +694,7 @@ const OnlineMenu: React.FC = () => {
               {/* Allergens */}
               {selectedProduct.allergens?.length ? (
                 <div className="space-y-2">
-                  <h4 className={`font-bold ${theme.text.primary}`}>Allergen Information</h4>
+                  <h4 className={`font-bold ${theme.text.primary}`}>{t('menu.allergens')}</h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedProduct.allergens.map((a) => (
                       <span
@@ -695,7 +710,7 @@ const OnlineMenu: React.FC = () => {
 
               {/* Quantity */}
               <div className="space-y-2">
-                <h4 className={`font-bold ${theme.text.primary}`}>Quantity</h4>
+                <h4 className={`font-bold ${theme.text.primary}`}>{t('menu.quantity')}</h4>
                 <div className="flex items-center gap-4">
                   <button
                     onClick={() => setProductQuantity(Math.max(1, productQuantity - 1))}
@@ -718,7 +733,7 @@ const OnlineMenu: React.FC = () => {
               {/* Add-ons */}
               {selectedProduct.availableAddons?.length ? (
                 <div className="space-y-4">
-                  <h4 className={`font-bold ${theme.text.primary}`}>Add-ons (Optional)</h4>
+                  <h4 className={`font-bold ${theme.text.primary}`}>{t('menu.addons')}</h4>
                   <div className="space-y-3">
                     {selectedProduct.availableAddons.map((addon) => {
                       const isSel = selectedAddons.some(
@@ -798,7 +813,7 @@ const OnlineMenu: React.FC = () => {
                                     <Plus className="w-4 h-4" />
                                   </button>
                                   <span className="text-xs text-slate-500 ml-2">
-                                    (Max: {addon.maxQuantity})
+                                    ({t('menu.cart.max')}: {addon.maxQuantity})
                                   </span>
                                 </div>
                               )}
@@ -825,7 +840,7 @@ const OnlineMenu: React.FC = () => {
               <div className="border-t-2 border-slate-200 dark:border-slate-700 pt-4 space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <span className={theme.text.secondary}>
-                    Product ({productQuantity}x)
+                    {t('menu.product')} ({productQuantity}x)
                   </span>
                   <span className={theme.text.primary}>
                     {formatPrice(
@@ -853,7 +868,7 @@ const OnlineMenu: React.FC = () => {
                 ))}
 
                 <div className="flex items-center justify-between text-lg font-bold pt-2">
-                  <span className={theme.text.primary}>Total</span>
+                  <span className={theme.text.primary}>{t('menu.cart.total')}</span>
                   <span className="text-emerald-600">
                     {formatPrice(
                       calculateTotalPrice(),
@@ -872,12 +887,12 @@ const OnlineMenu: React.FC = () => {
                 {isAddingToBasket ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>Adding to Basket…</span>
+                    <span>{t('menu.addingToBasket')}</span>
                   </>
                 ) : (
                   <>
                     <ShoppingCart className="w-5 h-5" />
-                    <span>Add to Basket</span>
+                    <span>{t('menu.addToBasket')}</span>
                   </>
                 )}
               </button>
@@ -885,8 +900,7 @@ const OnlineMenu: React.FC = () => {
           </div>
         </div>
       )}
-            <Footer />
-
+      <Footer />
     </div>
   );
 };

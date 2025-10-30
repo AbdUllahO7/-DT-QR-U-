@@ -197,7 +197,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Allergens & Ingredients in Tabs */}
         {(product.allergens?.length > 0 || product.ingredients?.length > 0) && (
-          <div className="mb-4">
+          <div className="mb-4" >
             <div className="grid grid-cols-2 gap-3">
               {/* Allergens */}
               {product.allergens && product.allergens.length > 0 && (
