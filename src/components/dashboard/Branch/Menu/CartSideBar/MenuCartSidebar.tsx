@@ -2,7 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { ShoppingCart, X, Trash2, ClipboardList, Loader2, CheckCircle, XCircle } from "lucide-react"
+import { ShoppingCart, X, Trash2, ClipboardList, Loader2} from "lucide-react"
 import OrderFormComponent from "./OrderFormComponent"
 import PriceChangeModal from "./PriceChangeModal"
 import { useLanguage } from "../../../../../contexts/LanguageContext"

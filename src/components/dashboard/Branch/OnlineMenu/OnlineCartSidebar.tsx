@@ -3,6 +3,8 @@ import { X, Plus, Minus, Trash2, ShoppingCart, AlertCircle, Loader2, ChevronDown
 import { theme } from '../../../../types/BranchManagement/type';
 import { BasketResponse, onlineMenuService, BasketItem } from '../../../../services/Branch/Online/OnlineMenuService';
 import CheckoutOrderType, { CheckoutOrderData } from './CheckoutOrderType';
+import { basketService } from '../../../../services/Branch/BasketService';
+import { orderService } from '../../../../services/Branch/OrderService';
 
 interface OnlineCartSidebarProps {
   isOpen: boolean;
@@ -26,9 +28,13 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const [isClearing, setIsClearing] = useState<boolean>(false);
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
   const [addingAddonToItem, setAddingAddonToItem] = useState<number | null>(null);
-  
-  // Checkout modal state
+
+  // Checkout & Price Change States
   const [showCheckoutModal, setShowCheckoutModal] = useState<boolean>(false);
+  const [showPriceChangeModal, setShowPriceChangeModal] = useState<boolean>(false);
+  const [priceChangeData, setPriceChangeData] = useState<any>(null);
+  const [confirmingPrice, setConfirmingPrice] = useState<boolean>(false);
+  const [submittingOrder, setSubmittingOrder] = useState<boolean>(false);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('tr-TR', {
@@ -45,14 +51,14 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
   const getAvailableAddonsForProduct = (item: BasketItem) => {
     if (!menuData?.categories) return [];
-    
+
     for (const category of menuData.categories) {
       const product = category.products.find((p: any) => p.branchProductId === item.branchProductId);
       if (product && product.availableAddons) {
-        const existingAddonIds = (item.addons || item.addonItems || []).map((a: any) => 
+        const existingAddonIds = (item.addons || item.addonItems || []).map((a: any) =>
           a.branchProductId || a.addonBranchProductId
         );
-        return product.availableAddons.filter((addon: any) => 
+        return product.availableAddons.filter((addon: any) =>
           !existingAddonIds.includes(addon.addonBranchProductId)
         );
       }
@@ -74,7 +80,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
   const handleUpdateQuantity = async (basketItemId: number, currentQuantity: number, change: number) => {
     const newQuantity = currentQuantity + change;
-    
     if (newQuantity < 1) {
       await handleDeleteItem(basketItemId);
       return;
@@ -82,7 +87,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
     try {
       setUpdatingItemId(basketItemId);
-      
       const item = items.find(i => i.basketItemId === basketItemId);
       if (!item) return;
 
@@ -103,9 +107,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   };
 
   const handleDeleteItem = async (basketItemId: number) => {
-    if (!confirm('Are you sure you want to remove this item?')) {
-      return;
-    }
+    if (!confirm('Are you sure you want to remove this item?')) return;
 
     try {
       setDeletingItemId(basketItemId);
@@ -121,26 +123,20 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
   const handleUpdateAddonQuantity = async (addonBasketItemId: number, currentQuantity: number, change: number, maxQuantity: number) => {
     const newQuantity = currentQuantity + change;
-    
     if (newQuantity < 1) {
       await handleDeleteAddon(addonBasketItemId);
       return;
     }
-
-    if (newQuantity > maxQuantity) {
-      return;
-    }
+    if (newQuantity > maxQuantity) return;
 
     try {
       setUpdatingItemId(addonBasketItemId);
-      
       await onlineMenuService.updateBasketItem(addonBasketItemId, {
         basketItemId: addonBasketItemId,
         basketId: basket?.basketId || '',
         branchProductId: 0,
         quantity: newQuantity
       });
-
       await onBasketUpdate();
     } catch (err: any) {
       console.error('Failed to update addon quantity:', err);
@@ -151,9 +147,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   };
 
   const handleDeleteAddon = async (addonBasketItemId: number) => {
-    if (!confirm('Remove this add-on?')) {
-      return;
-    }
+    if (!confirm('Remove this add-on?')) return;
 
     try {
       await onlineMenuService.deleteBasketItem(addonBasketItemId);
@@ -167,14 +161,12 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const handleAddAddonToItem = async (parentBasketItemId: number, addon: any, parentQuantity: number) => {
     try {
       setAddingAddonToItem(parentBasketItemId);
-      
       await onlineMenuService.addUnifiedItemToMyBasket({
         branchProductId: addon.addonBranchProductId,
         quantity: parentQuantity,
         parentBasketItemId: parentBasketItemId,
         isAddon: true
       });
-
       await onBasketUpdate();
     } catch (err: any) {
       console.error('Failed to add addon:', err);
@@ -185,9 +177,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   };
 
   const handleClearBasket = async () => {
-    if (!confirm('Are you sure you want to clear your entire basket?')) {
-      return;
-    }
+    if (!confirm('Are you sure you want to clear your entire basket?')) return;
 
     try {
       setIsClearing(true);
@@ -201,36 +191,57 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     }
   };
 
-  const handleCheckout = () => {
-    // Open the checkout modal
+
+  const handleCheckout = async () => {
+    await onBasketUpdate(); // Ensure latest prices
+
+    const sessionId = localStorage.getItem('online_menu_session_id');
+    if (!sessionId) {
+      alert('Session expired. Please refresh.');
+      return;
+    }
+
+    try {
+      const changes = await basketService.confirmSessionPriceChanges(sessionId);
+      if (changes?.requiresConfirmation) {
+        setPriceChangeData(changes);
+        setShowPriceChangeModal(true);
+        return;
+      }
+    } catch (err: any) {
+      console.warn('Price check failed, proceeding anyway:', err);
+    }
+
+    // No price change → go to checkout
     setShowCheckoutModal(true);
   };
 
-  const handleCheckoutSubmit = async (orderData: CheckoutOrderData) => {
+  
+  const confirmPriceAndCreateOrder = async (orderData: CheckoutOrderData) => {
+    setSubmittingOrder(true);
     try {
-      console.log('Order submitted with data:', orderData);
+      const sessionId = localStorage.getItem('online_menu_session_id');
+      if (sessionId && priceChangeData?.requiresConfirmation) {
+        await basketService.confirmSessionPriceChanges(sessionId);
+        await onBasketUpdate();
+      }
       
-      // Here you would typically:
-      // 1. Submit the order to your backend
-      // 2. Clear the basket
-      // 3. Show success message
-      // 4. Redirect to order confirmation page
-      
-      // Example API call (implement based on your API):
-      // await orderService.createOrder({
-      //   basketId: basket?.basketId,
-      //   ...orderData
-      // });
-      
-      alert('Order placed successfully!');
+      const order = await orderService.createSessionOrder(orderData);
+
+      alert(`Order #${order.orderTag} placed successfully!`);
       setShowCheckoutModal(false);
+      setShowPriceChangeModal(false);
       onClose();
-      
-      // Optionally clear basket and refresh
       await onBasketUpdate();
+
+      // Optional: clear session
+      localStorage.removeItem('online_menu_session_id');
+      localStorage.removeItem('token');
+      localStorage.removeItem('online_menu_public_id');
     } catch (err: any) {
-      console.error('Failed to submit order:', err);
-      throw err; // Let CheckoutOrderType handle the error
+      alert(err.message || 'Failed to place order');
+    } finally {
+      setSubmittingOrder(false);
     }
   };
 
@@ -239,10 +250,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity"
-        onClick={onClose}
-      />
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity" onClick={onClose} />
 
       {/* Sidebar */}
       <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[500px] bg-white dark:bg-slate-800 shadow-2xl z-50 flex flex-col overflow-hidden">
@@ -255,10 +263,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
               <p className="text-emerald-100 text-sm">{itemCount} {itemCount === 1 ? 'item' : 'items'}</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white">
             <X className="w-6 h-6" />
           </button>
         </div>
@@ -281,28 +286,18 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                 const isExpanded = expandedItems.has(item.basketItemId);
 
                 return (
-                  <div
-                    key={item.basketItemId}
-                    className="bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden"
-                  >
+                  <div key={item.basketItemId} className="bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                     <div className="p-4">
                       <div className="flex items-start gap-3">
                         {item.image && (
-                          <img
-                            src={item.image}
-                            alt={item.productName}
-                            className="w-20 h-20 object-cover rounded-lg"
-                          />
+                          <img src={item.image} alt={item.productName} className="w-20 h-20 object-cover rounded-lg" />
                         )}
                         <div className="flex-1 min-w-0">
-                          <h3 className={`font-semibold ${theme.text.primary} mb-1`}>
-                            {item.productName}
-                          </h3>
+                          <h3 className={`font-semibold ${theme.text.primary} mb-1`}>{item.productName}</h3>
                           <p className="text-sm text-emerald-600 font-semibold mb-2">
                             {formatPrice(item.specialPrice || item.price)}
                           </p>
 
-                          {/* Quantity Controls */}
                           <div className="flex items-center gap-3">
                             <div className="flex items-center gap-2 bg-white dark:bg-slate-700 rounded-lg p-1">
                               <button
@@ -312,9 +307,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                               >
                                 <Minus className="w-4 h-4" />
                               </button>
-                              <span className="font-bold min-w-[2rem] text-center">
-                                {item.quantity}
-                              </span>
+                              <span className="font-bold min-w-[2rem] text-center">{item.quantity}</span>
                               <button
                                 onClick={() => handleUpdateQuantity(item.basketItemId, item.quantity, 1)}
                                 disabled={updatingItemId === item.basketItemId}
@@ -337,20 +330,17 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                             </button>
                           </div>
 
-                          {/* Item Total */}
                           <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
                             <div className="flex items-center justify-between">
                               <span className={`text-xs ${theme.text.secondary}`}>Item Total:</span>
-                              <span className="font-bold text-emerald-600">
-                                {formatPrice(item.totalPrice)}
-                              </span>
+                              <span className="font-bold text-emerald-600">{formatPrice(item.totalPrice)}</span>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Addons Section - keeping your existing code */}
+                    {/* Addons */}
                     {(itemAddons.length > 0 || availableAddons.length > 0) && (
                       <div className="border-t border-slate-200 dark:border-slate-700">
                         <button
@@ -360,11 +350,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                           <span className={`text-sm font-semibold ${theme.text.primary}`}>
                             Add-ons {itemAddons.length > 0 && `(${itemAddons.length})`}
                           </span>
-                          {isExpanded ? (
-                            <ChevronUp className="w-4 h-4" />
-                          ) : (
-                            <ChevronDown className="w-4 h-4" />
-                          )}
+                          {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                         </button>
 
                         {isExpanded && (
@@ -375,17 +361,10 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                               const addonPrice = addon.specialPrice || addon.price;
 
                               return (
-                                <div 
-                                  key={addonId}
-                                  className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg"
-                                >
+                                <div key={addonId} className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
                                   <div className="flex-1">
-                                    <p className={`text-sm font-semibold ${theme.text.primary}`}>
-                                      {addonName}
-                                    </p>
-                                    <p className="text-xs text-emerald-600 font-semibold">
-                                      {formatPrice(addonPrice)} each
-                                    </p>
+                                    <p className={`text-sm font-semibold ${theme.text.primary}`}>{addonName}</p>
+                                    <p className="text-xs text-emerald-600 font-semibold">{formatPrice(addonPrice)} each</p>
                                   </div>
 
                                   <div className="flex items-center gap-2 bg-white dark:bg-slate-700 rounded-lg p-1">
@@ -396,9 +375,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                     >
                                       <Minus className="w-3 h-3" />
                                     </button>
-                                    <span className="font-bold text-sm min-w-[1.5rem] text-center">
-                                      {addon.quantity}
-                                    </span>
+                                    <span className="font-bold text-sm min-w-[1.5rem] text-center">{addon.quantity}</span>
                                     <button
                                       onClick={() => handleUpdateAddonQuantity(addonId, addon.quantity, 1, addon.maxQuantity || 10)}
                                       disabled={updatingItemId === addonId || addon.quantity >= (addon.maxQuantity || 10)}
@@ -408,10 +385,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                     </button>
                                   </div>
 
-                                  <button
-                                    onClick={() => handleDeleteAddon(addonId)}
-                                    className="p-1.5 hover:bg-red-100 dark:hover:bg-red-950/20 rounded text-red-500"
-                                  >
+                                  <button onClick={() => handleDeleteAddon(addonId)} className="p-1.5 hover:bg-red-100 dark:hover:bg-red-950/20 rounded text-red-500">
                                     <X className="w-4 h-4" />
                                   </button>
                                 </div>
@@ -420,9 +394,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
                             {availableAddons.length > 0 && (
                               <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
-                                <p className={`text-xs font-semibold ${theme.text.secondary} mb-2`}>
-                                  Available Add-ons:
-                                </p>
+                                <p className={`text-xs font-semibold ${theme.text.secondary} mb-2`}>Available Add-ons:</p>
                                 <div className="space-y-2">
                                   {availableAddons.map((addon: any) => (
                                     <button
@@ -433,9 +405,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                     >
                                       <div className="flex items-center gap-2">
                                         <Plus className="w-4 h-4 text-emerald-600" />
-                                        <span className={`text-sm ${theme.text.primary}`}>
-                                          {addon.addonName}
-                                        </span>
+                                        <span className={`text-sm ${theme.text.primary}`}>{addon.addonName}</span>
                                       </div>
                                       <span className="text-sm font-semibold text-emerald-600">
                                         {formatPrice(addon.specialPrice || addon.price)}
@@ -473,7 +443,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
           )}
         </div>
 
-        {/* Footer - Summary & Checkout */}
+        {/* Footer */}
         {itemCount > 0 && (
           <div className="border-t border-slate-200 dark:border-slate-700 p-6 space-y-4">
             <div className="space-y-2">
@@ -503,13 +473,89 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         )}
       </div>
 
-      {/* Checkout Modal */}
+      {/* ──────────────────────── PRICE CHANGE MODAL ──────────────────────── */}
+      {showPriceChangeModal && priceChangeData && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-5 text-white flex items-center justify-between">
+              <h3 className="text-xl font-bold flex items-center gap-2">
+                <AlertCircle className="w-6 h-6" />
+                Price Update Required
+              </h3>
+              <button
+                onClick={() => setShowPriceChangeModal(false)}
+                className="p-1 hover:bg-white/20 rounded transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <p className="text-slate-700 dark:text-slate-300">
+                Some items in your basket have changed price. Please review and confirm to continue.
+              </p>
+
+              <div className="space-y-3">
+                {priceChangeData?.items?.map((it: any) => (
+                  <div key={it.basketItemId} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                    <div>
+                      <p className="font-medium">{it.productName}</p>
+                      {it.addonName && <p className="text-sm text-slate-500">↳ {it.addonName}</p>}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm line-through text-red-500">{formatPrice(it.oldPrice)}</p>
+                      <p className="font-bold text-emerald-600">
+                        {formatPrice(it.newPrice)} <span className="text-xs">new</span>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t pt-3 flex justify-between font-bold">
+                <span>New Total</span>
+                <span className="text-emerald-600">
+                  {formatPrice(priceChangeData?.newBasketTotal || total)}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex gap-3 p-5 border-t">
+              <button
+                onClick={() => setShowPriceChangeModal(false)}
+                className="flex-1 py-2 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowPriceChangeModal(false);
+                  setShowCheckoutModal(true);
+                }}
+                disabled={confirmingPrice}
+                className="flex-1 py-2 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {confirmingPrice ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Confirming…
+                  </>
+                ) : (
+                  'Confirm & Continue'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ──────────────────────── CHECKOUT MODAL ──────────────────────── */}
       <CheckoutOrderType
         isOpen={showCheckoutModal}
         onClose={() => setShowCheckoutModal(false)}
         basketTotal={total}
         currency={currency}
-        onSubmit={handleCheckoutSubmit}
+        onSubmit={confirmPriceAndCreateOrder}
       />
     </>
   );
