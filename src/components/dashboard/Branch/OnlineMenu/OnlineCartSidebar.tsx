@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingCart, AlertCircle, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
-import { theme } from '../../../../types/BranchManagement/type';
+import { CreateSessionOrderDto, theme } from '../../../../types/BranchManagement/type';
 import { BasketResponse, onlineMenuService, BasketItem } from '../../../../services/Branch/Online/OnlineMenuService';
 import CheckoutOrderType, { CheckoutOrderData } from './CheckoutOrderType';
 import { basketService } from '../../../../services/Branch/BasketService';
@@ -203,11 +203,11 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
     try {
       const changes = await basketService.confirmSessionPriceChanges(sessionId);
-      if (changes?.requiresConfirmation) {
+     /*  if (changes?.requiresConfirmation) {
         setPriceChangeData(changes);
         setShowPriceChangeModal(true);
         return;
-      }
+      } */
     } catch (err: any) {
       console.warn('Price check failed, proceeding anyway:', err);
     }
@@ -217,7 +217,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   };
 
   
-  const confirmPriceAndCreateOrder = async (orderData: CheckoutOrderData) => {
+  const confirmPriceAndCreateOrder = async (orderData: CreateSessionOrderDto) => {
     setSubmittingOrder(true);
     try {
       const sessionId = localStorage.getItem('online_menu_session_id');
@@ -289,13 +289,13 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                   <div key={item.basketItemId} className="bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                     <div className="p-4">
                       <div className="flex items-start gap-3">
-                        {item.image && (
-                          <img src={item.image} alt={item.productName} className="w-20 h-20 object-cover rounded-lg" />
+                        {item.imageUrl && (
+                          <img src={item.imageUrl} alt={item.productName} className="w-20 h-20 object-cover rounded-lg" />
                         )}
                         <div className="flex-1 min-w-0">
                           <h3 className={`font-semibold ${theme.text.primary} mb-1`}>{item.productName}</h3>
                           <p className="text-sm text-emerald-600 font-semibold mb-2">
-                            {formatPrice(item.specialPrice || item.price)}
+                            {formatPrice(item.price || item.price)}
                           </p>
 
                           <div className="flex items-center gap-3">
@@ -549,7 +549,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         </div>
       )}
 
-      {/* ──────────────────────── CHECKOUT MODAL ──────────────────────── */}
       <CheckoutOrderType
         isOpen={showCheckoutModal}
         onClose={() => setShowCheckoutModal(false)}

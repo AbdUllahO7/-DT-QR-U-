@@ -1,3 +1,4 @@
+import { Product } from '../BranchManagement/type';
 export interface MenuAllergen {
   id: number
   code: string

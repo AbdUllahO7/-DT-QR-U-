@@ -14,6 +14,7 @@ import {
   Plus,
   Minus,
   ShoppingCart,
+  Search,
 } from 'lucide-react';
 import { theme } from '../../../../types/BranchManagement/type';
 import {
@@ -26,6 +27,10 @@ import {
   BasketResponse,
 } from '../../../../services/Branch/Online/OnlineMenuService';
 import OnlineCartSidebar from './OnlineCartSidebar';
+import ProductGrid from '../Menu/MneuProductGrid';
+import { MenuProduct } from '../../../../types/menu/type';
+import { basketService } from '../../../../services/Branch/BasketService';
+import PriceChangeModal from '../Menu/CartSideBar/PriceChangeModal';
 
 interface PublicBranchData {
   branchName: string;
@@ -51,8 +56,13 @@ const OnlineMenu: React.FC = () => {
   const [menuData, setMenuData] = useState<OnlineMenuResponse | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
 
+  // ───── ProductGrid States ─────
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [favorites, setFavorites] = useState<Set<number>>(new Set());
+
   // ───── Product Modal ─────
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<MenuProduct | null>(null);
   const [productQuantity, setProductQuantity] = useState<number>(1);
   const [selectedAddons, setSelectedAddons] = useState<SelectedAddon[]>([]);
   const [isAddingToBasket, setIsAddingToBasket] = useState<boolean>(false);
@@ -62,6 +72,12 @@ const OnlineMenu: React.FC = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isSessionInitialized, setIsSessionInitialized] = useState<boolean>(false);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+
+  // ───── Price Change Detection ─────
+  const [showPriceChangeModal, setShowPriceChangeModal] = useState<boolean>(false);
+  const [priceChanges, setPriceChanges] = useState<any>(null);
+  const [confirmingPriceChanges, setConfirmingPriceChanges] = useState<boolean>(false);
+  const [productPriceCache, setProductPriceCache] = useState<Map<number, number>>(new Map());
 
   // ───── Load branch id → menu → session ─────
   useEffect(() => {
@@ -142,6 +158,9 @@ const OnlineMenu: React.FC = () => {
     try {
       const data = await onlineMenuService.getMyBasket();
       setBasket(data);
+      
+      // Check for price changes after loading basket
+      await checkBasketPriceChanges(data);
     } catch (err: any) {
       if (err?.response?.status === 401) setIsSessionInitialized(false);
       setBasket(null);
@@ -153,6 +172,9 @@ const OnlineMenu: React.FC = () => {
       setIsLoadingMenu(true);
       const menu = await onlineMenuService.getOnlineMenu(publicId);
       setMenuData(menu);
+      
+      // Build initial price cache
+      buildPriceCache(menu);
     } catch (err: any) {
       console.error('Menu fetch error:', err);
     } finally {
@@ -160,8 +182,101 @@ const OnlineMenu: React.FC = () => {
     }
   };
 
+  // ───── Price Change Detection Logic ─────
+  const buildPriceCache = (menu: OnlineMenuResponse) => {
+    const cache = new Map<number, number>();
+    menu.categories.forEach(cat => {
+      cat.products.forEach(prod => {
+        cache.set(prod.branchProductId, prod.price);
+      });
+    });
+    setProductPriceCache(cache);
+  };
+
+  const checkBasketPriceChanges = async (basketData: BasketResponse) => {
+    if (!menuData || !basketData?.items?.length) return;
+
+    const currentPrices = new Map<number, number>();
+    let hasChanges = false;
+    const changedItems: any[] = [];
+
+    // Get current prices from menu
+    menuData.categories.forEach(cat => {
+      cat.products.forEach(prod => {
+        currentPrices.set(prod.branchProductId, prod.price);
+      });
+    });
+
+    // Check each basket item for price changes
+    basketData.items?.forEach(item => {
+      if (!item.isAddon) {
+        const currentPrice = currentPrices.get(item.branchProductId);
+        const basketItemPrice = item.price;
+
+        if (currentPrice !== undefined && currentPrice !== basketItemPrice) {
+          hasChanges = true;
+          changedItems.push({
+            basketItemId: item.basketItemId,
+            productName: item.productName,
+            oldPrice: basketItemPrice,
+            newPrice: currentPrice,
+            priceDifference: currentPrice - basketItemPrice,
+          });
+        }
+      }
+    });
+
+    if (hasChanges) {
+      // Format price changes for the modal
+      const priceChangeMessage = changedItems.map(item => 
+        `${item.productName}: ${formatPrice(item.oldPrice)} → ${formatPrice(item.newPrice)} (${item.priceDifference > 0 ? '+' : ''}${formatPrice(item.priceDifference)})`
+      ).join('\n');
+
+      setPriceChanges({
+        message: priceChangeMessage,
+        items: changedItems,
+        requiresConfirmation: true
+      });
+      setShowPriceChangeModal(true);
+    }
+  };
+
+  const handlePriceChangeConfirm = async () => {
+    setConfirmingPriceChanges(true);
+    try {
+      const currentSessionId = localStorage.getItem('online_menu_session_id');
+      
+      if (currentSessionId) {
+        // Confirm price changes via API if available
+        try {
+          await basketService.confirmSessionPriceChanges(currentSessionId);
+        } catch (err) {
+          console.warn('Price confirmation API call failed, refreshing basket anyway:', err);
+        }
+      }
+
+      // Refresh basket to get updated prices
+      await loadBasket();
+      
+      setShowPriceChangeModal(false);
+      setPriceChanges(null);
+    } catch (err: any) {
+      console.error('Failed to confirm price changes:', err);
+      alert('Failed to update prices. Please try again.');
+    } finally {
+      setConfirmingPriceChanges(false);
+    }
+  };
+
+  const handlePriceChangeCancel = () => {
+    setShowPriceChangeModal(false);
+    setPriceChanges(null);
+    // Optionally open cart to let user review items
+    setIsCartOpen(true);
+  };
+
   // ───── Product modal helpers ─────
-  const openProductModal = (product: Product) => {
+  const openProductModal = (product: MenuProduct) => {
     if (!isSessionInitialized) {
       alert('Session is being prepared…');
       return;
@@ -170,6 +285,7 @@ const OnlineMenu: React.FC = () => {
     setProductQuantity(1);
     setSelectedAddons([]);
   };
+  
   const closeProductModal = () => {
     setSelectedProduct(null);
     setProductQuantity(1);
@@ -219,7 +335,7 @@ const OnlineMenu: React.FC = () => {
 
   // ───── Add to basket (main + addons) ─────
   const addToBasket = async (
-    product: Product,
+    product: MenuProduct,
     quantity: number,
     addons: SelectedAddon[] = []
   ) => {
@@ -262,8 +378,6 @@ const OnlineMenu: React.FC = () => {
 
       await loadBasket();
       closeProductModal();
-    } catch (e: any) {
-      throw e;
     } finally {
       setIsAddingToBasket(false);
     }
@@ -278,13 +392,100 @@ const OnlineMenu: React.FC = () => {
     }
   };
 
+  // ───── ProductGrid Handlers ─────
+  const handleProductGridAddToCart = async (product: MenuProduct, addons: SelectedAddon[] = []) => {
+    if (!isSessionInitialized) {
+      alert('Session is being prepared…');
+      return;
+    }
+
+    // If product has addons, open the modal for customization
+    if (product.availableAddons && product.availableAddons.length > 0) {
+      openProductModal(product);
+      return;
+    }
+
+    // Otherwise add directly to cart
+    try {
+      await addToBasket(product, 1, []);
+    } catch (e: any) {
+      alert(e.message || 'Failed to add to basket');
+    }
+  };
+
+  const handleRemoveFromCart = async (branchProductId: number) => {
+    try {
+      // Find the basket item for this product
+      const item = basket?.items?.find(
+        (i) => i.branchProductId === branchProductId && !i.isAddon
+      );
+      if (item?.basketItemId) {
+        await onlineMenuService.deleteBasketItem(item.basketItemId);
+        await loadBasket();
+      }
+    } catch (e: any) {
+      alert(e.message || 'Failed to remove from basket');
+    }
+  };
+
+  const handleToggleFavorite = (branchProductId: number) => {
+    setFavorites((prev) => {
+      const newFavorites = new Set(prev);
+      if (newFavorites.has(branchProductId)) {
+        newFavorites.delete(branchProductId);
+      } else {
+        newFavorites.add(branchProductId);
+      }
+      // Persist favorites to localStorage
+      localStorage.setItem('menu_favorites', JSON.stringify([...newFavorites]));
+      return newFavorites;
+    });
+  };
+
+  const handleCategorySelect = (categoryId: number) => {
+    setSelectedCategory(categoryId === selectedCategory ? null : categoryId);
+  };
+
+  const getCartItemQuantity = async (branchProductId: number): Promise<number> => {
+    if (!basket || !basket.items) return 0;
+    
+    const item = basket.items.find(
+      (i) => i.branchProductId === branchProductId && !i.isAddon
+    );
+    return item?.quantity || 0;
+  };
+
+  // Load favorites from localStorage on mount
+  useEffect(() => {
+    const storedFavorites = localStorage.getItem('menu_favorites');
+    if (storedFavorites) {
+      try {
+        const favArray = JSON.parse(storedFavorites);
+        setFavorites(new Set(favArray));
+      } catch (e) {
+        console.error('Failed to load favorites:', e);
+      }
+    }
+  }, []);
+
+  // Periodic price check (every 30 seconds)
+  useEffect(() => {
+    if (!basket || !menuData) return;
+
+    const interval = setInterval(() => {
+      checkBasketPriceChanges(basket);
+    }, 30000); // Check every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [basket, menuData]);
+
   // ───── Misc helpers ─────
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {}
+    } catch { /* empty */ }
   };
 
   const getPublicMenuUrl = () =>
@@ -332,7 +533,7 @@ const OnlineMenu: React.FC = () => {
           </button>
         )}
 
-        {/* Cart sidebar – all props come from component state */}
+        {/* Cart sidebar */}
         <OnlineCartSidebar
           isOpen={isCartOpen}
           onClose={() => setIsCartOpen(false)}
@@ -340,9 +541,15 @@ const OnlineMenu: React.FC = () => {
           onBasketUpdate={loadBasket}
           currency={menuData?.preferences.defaultCurrency ?? 'TRY'}
           menuData={menuData}
-          restaurantPreferences={menuData?.preferences}
-          orderTypes={menuData?.orderTypes ?? []}
-          tableId={undefined} // set if you have a table id elsewhere
+        />
+
+        {/* Price Change Modal - Using your existing component */}
+        <PriceChangeModal
+          isVisible={showPriceChangeModal}
+          priceChanges={priceChanges}
+          confirmingPriceChanges={confirmingPriceChanges}
+          onCancel={handlePriceChangeCancel}
+          onConfirm={handlePriceChangeConfirm}
         />
 
         {/* Menu preview */}
@@ -388,115 +595,70 @@ const OnlineMenu: React.FC = () => {
                 <h3 className={`text-2xl font-bold ${theme.text.primary}`}>Menu</h3>
               </div>
 
-              {/* Categories */}
-              <div className="space-y-8">
-                {menuData.categories.map((cat: Category) => (
-                  <div key={cat.categoryId} className="space-y-4">
-                    <div className="flex items-center gap-2 pb-2 border-b-2 border-emerald-500">
-                      <h4 className={`text-xl font-bold ${theme.text.primary}`}>
-                        {cat.categoryName}
-                      </h4>
-                      <span className={`text-sm ${theme.text.secondary}`}>
-                        ({cat.products.length} items)
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {cat.products.map((prod: Product) => (
-                        <div
-                          key={prod.branchProductId}
-                          onClick={() => openProductModal(prod)}
-                          className="rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer hover:scale-[1.02]"
-                        >
-                          {/* Image */}
-                          <div className="relative h-48 bg-slate-200 dark:bg-slate-700">
-                            <img
-                              src={prod.productImageUrl}
-                              alt={prod.productName}
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                e.currentTarget.src =
-                                  'https://www.customcardsandgames.com/assets/images/noImageUploaded.png';
-                              }}
-                            />
-                            {prod.allergens?.length ? (
-                              <div className="absolute top-2 right-2 flex gap-1">
-                                {prod.allergens.slice(0, 3).map((a) => (
-                                  <span
-                                    key={a.allergenId}
-                                    className="bg-red-500 text-white text-xs px-2 py-1 rounded-full"
-                                    title={a.name}
-                                  >
-                                    {a.icon}
-                                  </span>
-                                ))}
-                              </div>
-                            ) : null}
-                          </div>
-
-                          {/* Info */}
-                          <div className="p-4 space-y-2">
-                            <div className="flex items-start justify-between gap-2">
-                              <h5 className={`font-bold ${theme.text.primary} line-clamp-1`}>
-                                {prod.productName}
-                              </h5>
-                              <span className="text-emerald-600 font-bold whitespace-nowrap">
-                                {formatPrice(
-                                  prod.price,
-                                  menuData.preferences.defaultCurrency
-                                )}
-                              </span>
-                            </div>
-
-                            {prod.productDescription &&
-                              menuData.preferences.showProductDescriptions && (
-                                <p
-                                  className={`text-sm ${theme.text.secondary} line-clamp-2`}
-                                >
-                                  {prod.productDescription}
-                                </p>
-                              )}
-
-                            {/* Ingredients */}
-                            {prod.ingredients?.length &&
-                              menuData.preferences.enableIngredientDisplay && (
-                                <div className="flex flex-wrap gap-1 mt-2">
-                                  {prod.ingredients.slice(0, 3).map((i) => (
-                                    <span
-                                      key={i.ingredientId}
-                                      className="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full"
-                                    >
-                                      {i.ingredientName}
-                                    </span>
-                                  ))}
-                                  {prod.ingredients.length > 3 && (
-                                    <span className="text-xs bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-full">
-                                      +{prod.ingredients.length - 3}
-                                    </span>
-                                  )}
-                                </div>
-                              )}
-
-                            {/* Add-ons badge */}
-                            {prod.availableAddons?.length ? (
-                              <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
-                                <ShoppingBag className="w-3 h-3" />
-                                <span>{prod.availableAddons.length} add-ons available</span>
-                              </div>
-                            ) : null}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+              {/* Search Bar */}
+              <div className="mb-6">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search menu items..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+                  />
+                </div>
               </div>
+
+              {/* Category Filter Pills */}
+              {!searchTerm && menuData.categories.length > 0 && (
+                <div className="mb-6 flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setSelectedCategory(null)}
+                    className={`px-4 py-2 rounded-xl font-medium transition-all ${
+                      selectedCategory === null
+                        ? 'bg-emerald-600 text-white'
+                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                    }`}
+                  >
+                    All
+                  </button>
+                  {menuData.categories.map((cat) => (
+                    <button
+                      key={cat.categoryId}
+                      onClick={() => handleCategorySelect(cat.categoryId)}
+                      className={`px-4 py-2 rounded-xl font-medium transition-all ${
+                        selectedCategory === cat.categoryId
+                          ? 'bg-emerald-600 text-white'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      }`}
+                    >
+                      {cat.categoryName}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* ProductGrid Integration */}
+              <ProductGrid
+                categories={menuData.categories}
+                selectedCategory={selectedCategory}
+                searchTerm={searchTerm}
+                cart={[]}
+                favorites={favorites}
+                onAddToCart={handleProductGridAddToCart}
+                onRemoveFromCart={handleRemoveFromCart}
+                onToggleFavorite={handleToggleFavorite}
+                onCategorySelect={handleCategorySelect}
+                restaurantName={menuData.restaurantName}
+                onCustomize={openProductModal}
+                getCartItemQuantity={getCartItemQuantity}
+              />
 
               {/* WhatsApp info */}
               {menuData.preferences.useWhatsappForOrders && (
                 <div className="mt-8 p-6 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-2xl">
                   <div className="flex items-center gap-3">
-                    <span className="text-3xl">Phone</span>
+                    <span className="text-3xl">📱</span>
                     <div>
                       <p className={`font-semibold ${theme.text.primary}`}>Order via WhatsApp</p>
                       <p className={`text-sm ${theme.text.secondary} mt-1`}>
@@ -584,7 +746,7 @@ const OnlineMenu: React.FC = () => {
                   <div className="flex flex-wrap gap-2">
                     {selectedProduct.allergens.map((a) => (
                       <span
-                        key={a.allergenId}
+                        key={a.id}
                         className="text-sm bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 px-3 py-1.5 rounded-full border border-red-200 dark:border-red-800"
                       >
                         {a.icon} {a.name}

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { X, CheckCircle, Loader2, User, MapPin, Phone, Table, ShoppingBag, AlertCircle, ChevronLeft, ArrowRight, Clock } from 'lucide-react';
 import { OrderType, orderTypeService } from '../../../../services/Branch/BranchOrderTypeService';
+import { CreateSessionOrderDto } from '../../../../types/BranchManagement/type';
 
 interface CheckoutOrderTypeSidebarProps {
   isOpen: boolean;
   onClose: () => void;
   basketTotal: number;
   currency?: string;
-  onSubmit: (orderData: CheckoutOrderData) => void;
+  onSubmit: (orderData: CreateSessionOrderDto) => void;
 }
 
 export interface CheckoutOrderData {
