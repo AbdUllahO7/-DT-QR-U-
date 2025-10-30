@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingCart, AlertCircle, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
-import { theme } from '../../../../types/BranchManagement/type';
+import { CreateSessionOrderDto, theme } from '../../../../types/BranchManagement/type';
 import { BasketResponse, onlineMenuService, BasketItem } from '../../../../services/Branch/Online/OnlineMenuService';
-import CheckoutOrderType, { CheckoutOrderData } from './CheckoutOrderType';
+import CheckoutOrderType from './CheckoutOrderType';
 import { basketService } from '../../../../services/Branch/BasketService';
 import { orderService } from '../../../../services/Branch/OrderService';
+import WhatsAppConfirmationModal from '../Menu/CartSideBar/WhatsAppConfirmationModal';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../../../contexts/LanguageContext';
 
 interface OnlineCartSidebarProps {
   isOpen: boolean;
@@ -28,13 +31,16 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const [isClearing, setIsClearing] = useState<boolean>(false);
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
   const [addingAddonToItem, setAddingAddonToItem] = useState<number | null>(null);
-
+  const {t} = useLanguage();
   // Checkout & Price Change States
   const [showCheckoutModal, setShowCheckoutModal] = useState<boolean>(false);
   const [showPriceChangeModal, setShowPriceChangeModal] = useState<boolean>(false);
   const [priceChangeData, setPriceChangeData] = useState<any>(null);
   const [confirmingPrice, setConfirmingPrice] = useState<boolean>(false);
   const [submittingOrder, setSubmittingOrder] = useState<boolean>(false);
+
+  // WhatsApp Modal States - NOW SHOWN AFTER ORDER SUCCESS
+  const [showWhatsAppConfirmation, setShowWhatsAppConfirmation] = useState<boolean>(false);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('tr-TR', {
@@ -48,6 +54,19 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const total = basket?.total || basket?.totalPrice || 0;
   const subtotal = basket?.subtotal || basket?.productTotal || basket?.totalPrice || 0;
   const tax = basket?.tax || 0;
+
+  // Get restaurant preferences
+  console.log('Menu Data Preferences:', menuData?.preferences);
+  const restaurantPreferences = menuData?.preferences || menuData?.restaurantPreferences || {};
+  const restaurantName = menuData?.restaurantName || restaurantPreferences?.restaurantName || 'Restaurant';
+  const whatsappOrderNumber = restaurantPreferences?.whatsAppPhoneNumber;
+  const enableWhatsAppOrdering = restaurantPreferences?.useWhatsappForOrders;
+
+
+  const acceptCash = restaurantPreferences?.acceptCash;
+  const acceptCreditCard = restaurantPreferences?.acceptCreditCard;
+  const acceptOnlinePayment = restaurantPreferences?.acceptOnlinePayment;
+
 
   const getAvailableAddonsForProduct = (item: BasketItem) => {
     if (!menuData?.categories) return [];
@@ -191,9 +210,8 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     }
   };
 
-
   const handleCheckout = async () => {
-    await onBasketUpdate(); // Ensure latest prices
+    await onBasketUpdate();
 
     const sessionId = localStorage.getItem('online_menu_session_id');
     if (!sessionId) {
@@ -203,22 +221,21 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
     try {
       const changes = await basketService.confirmSessionPriceChanges(sessionId);
-      if (changes?.requiresConfirmation) {
+      /* if (changes?.requiresConfirmation) {
         setPriceChangeData(changes);
         setShowPriceChangeModal(true);
         return;
-      }
+      } */
     } catch (err: any) {
       console.warn('Price check failed, proceeding anyway:', err);
     }
 
-    // No price change → go to checkout
     setShowCheckoutModal(true);
   };
 
-  
-  const confirmPriceAndCreateOrder = async (orderData: CheckoutOrderData) => {
+  const confirmPriceAndCreateOrder = async (orderData: CreateSessionOrderDto) => {
     setSubmittingOrder(true);
+
     try {
       const sessionId = localStorage.getItem('online_menu_session_id');
       if (sessionId && priceChangeData?.requiresConfirmation) {
@@ -226,23 +243,59 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         await onBasketUpdate();
       }
       
-      const order = await orderService.createSessionOrder(orderData);
-
-      alert(`Order #${order.orderTag} placed successfully!`);
+      // CREATE THE ORDER
+      await orderService.createSessionOrder(orderData);
+      
+      // Order created successfully!
       setShowCheckoutModal(false);
       setShowPriceChangeModal(false);
-      onClose();
       await onBasketUpdate();
+      
+      // NOW show WhatsApp confirmation if enabled
+      if (enableWhatsAppOrdering && whatsappOrderNumber) {
+        setShowWhatsAppConfirmation(true);
+      } else {
+        // No WhatsApp - just show success and close
+        alert('Order placed successfully!');
+        onClose();
+      }
 
-      // Optional: clear session
-      localStorage.removeItem('online_menu_session_id');
-      localStorage.removeItem('token');
-      localStorage.removeItem('online_menu_public_id');
     } catch (err: any) {
       alert(err.message || 'Failed to place order');
     } finally {
       setSubmittingOrder(false);
     }
+  };
+
+  const handleWhatsAppConfirm = () => {
+    // User confirmed - they will contact via WhatsApp
+    setShowWhatsAppConfirmation(false);
+    
+    // Open WhatsApp with pre-filled message
+    if (whatsappOrderNumber) {
+      // Remove any non-numeric characters from the phone number
+      const cleanNumber = whatsappOrderNumber.replace(/\D/g, '');
+      
+      // Create the message
+      const message = `Hello ${restaurantName}, I just placed an order and would like to confirm the details.`;
+      
+      // Encode the message for URL
+      const encodedMessage = encodeURIComponent(message);
+      
+      // Construct WhatsApp URL
+      const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
+      
+      // Open WhatsApp in a new window
+      window.open(whatsappUrl, '_blank');
+    }
+    
+    onClose(); // Close the cart
+  };
+
+  const handleWhatsAppCancel = () => {
+    // User chose not to use WhatsApp - just close everything
+    setShowWhatsAppConfirmation(false);
+    onClose(); // Close the cart
   };
 
   if (!isOpen) return null;
@@ -255,12 +308,12 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       {/* Sidebar */}
       <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[500px] bg-white dark:bg-slate-800 shadow-2xl z-50 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-emerald-600 to-green-600 dark:from-emerald-700 dark:to-green-700 px-6 py-4 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-slate-600 to-slate-600 dark:from-slate-700 dark:to-slate-700 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <ShoppingCart className="w-6 h-6 text-white" />
             <div>
-              <h2 className="text-xl font-bold text-white">Your Cart</h2>
-              <p className="text-emerald-100 text-sm">{itemCount} {itemCount === 1 ? 'item' : 'items'}</p>
+              <h2 className="text-xl font-bold text-white">{t('menu.cart.title')}</h2>
+              <p className="text-emerald-100 text-sm">{itemCount} {t('menu.items')}</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white">
@@ -275,8 +328,8 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
               <div className="p-6 bg-slate-100 dark:bg-slate-700 rounded-full mb-4">
                 <ShoppingCart className="w-12 h-12 text-slate-400 dark:text-slate-500" />
               </div>
-              <h3 className={`text-xl font-bold ${theme.text.primary} mb-2`}>Your cart is empty</h3>
-              <p className={theme.text.secondary}>Add items from the menu to get started!</p>
+              <h3 className={`text-xl font-bold ${theme.text.primary} mb-2`}>{t('menu.cart.empty')}</h3>
+              <p className={theme.text.secondary}>{t('menu.cart.emptyDesc')}</p>
             </div>
           ) : (
             <div className="p-4 space-y-4">
@@ -289,13 +342,13 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                   <div key={item.basketItemId} className="bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
                     <div className="p-4">
                       <div className="flex items-start gap-3">
-                        {item.image && (
-                          <img src={item.image} alt={item.productName} className="w-20 h-20 object-cover rounded-lg" />
+                        {item.imageUrl && (
+                          <img src={item.imageUrl} alt={item.productName} className="w-20 h-20 object-cover rounded-lg" />
                         )}
                         <div className="flex-1 min-w-0">
                           <h3 className={`font-semibold ${theme.text.primary} mb-1`}>{item.productName}</h3>
                           <p className="text-sm text-emerald-600 font-semibold mb-2">
-                            {formatPrice(item.specialPrice || item.price)}
+                            {formatPrice(item.price || item.price)}
                           </p>
 
                           <div className="flex items-center gap-3">
@@ -332,7 +385,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
                           <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
                             <div className="flex items-center justify-between">
-                              <span className={`text-xs ${theme.text.secondary}`}>Item Total:</span>
+                              <span className={`text-xs ${theme.text.secondary}`}>{t('menu.cart.total')}</span>
                               <span className="font-bold text-emerald-600">{formatPrice(item.totalPrice)}</span>
                             </div>
                           </div>
@@ -435,7 +488,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                       Clearing...
                     </span>
                   ) : (
-                    'Clear Basket'
+                    t('menu.cart.clear')
                   )}
                 </button>
               )}
@@ -448,7 +501,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
           <div className="border-t border-slate-200 dark:border-slate-700 p-6 space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
-                <span className={theme.text.secondary}>Subtotal:</span>
+                <span className={theme.text.secondary}>{t('order.form.subtotal')}</span>
                 <span className={theme.text.primary}>{formatPrice(subtotal)}</span>
               </div>
               {tax > 0 && (
@@ -458,16 +511,16 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                 </div>
               )}
               <div className="flex items-center justify-between text-lg font-bold pt-2 border-t border-slate-200 dark:border-slate-700">
-                <span className={theme.text.primary}>Total:</span>
+                <span className={theme.text.primary}>{t('menu.cart.total')}</span>
                 <span className="text-emerald-600">{formatPrice(total)}</span>
               </div>
             </div>
 
             <button
               onClick={handleCheckout}
-              className="w-full py-4 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl"
+              className="w-full py-4 bg-gradient-to-r from-slate-600 to-slate-600 hover:from-emerald-700 hover:to-slate-700 text-white rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl"
             >
-              Proceed to Checkout
+              {t('menu.cart.placeOrder')}
             </button>
           </div>
         )}
@@ -480,7 +533,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
             <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-5 text-white flex items-center justify-between">
               <h3 className="text-xl font-bold flex items-center gap-2">
                 <AlertCircle className="w-6 h-6" />
-                Price Update Required
+                 {t('priceChange.title')}
               </h3>
               <button
                 onClick={() => setShowPriceChangeModal(false)}
@@ -492,7 +545,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
             <div className="p-6 space-y-4">
               <p className="text-slate-700 dark:text-slate-300">
-                Some items in your basket have changed price. Please review and confirm to continue.
+                {t('priceChange.description')}
               </p>
 
               <div className="space-y-3">
@@ -525,7 +578,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                 onClick={() => setShowPriceChangeModal(false)}
                 className="flex-1 py-2 border border-slate-300 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
               >
-                Cancel
+                 {t('priceChange.cancel')}
               </button>
               <button
                 onClick={() => {
@@ -541,7 +594,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                     Confirming…
                   </>
                 ) : (
-                  'Confirm & Continue'
+                    t('priceChange.confirm')
                 )}
               </button>
             </div>
@@ -549,13 +602,25 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         </div>
       )}
 
-      {/* ──────────────────────── CHECKOUT MODAL ──────────────────────── */}
+      {/* Checkout Order Type Modal */}
       <CheckoutOrderType
         isOpen={showCheckoutModal}
         onClose={() => setShowCheckoutModal(false)}
         basketTotal={total}
         currency={currency}
         onSubmit={confirmPriceAndCreateOrder}
+        restaurantName={restaurantName}
+        whatsappOrderNumber={whatsappOrderNumber}
+        acceptCash={acceptCash}
+        acceptCreditCard={acceptCreditCard}
+        acceptOnlinePayment={acceptOnlinePayment}
+      />
+
+      <WhatsAppConfirmationModal
+        isVisible={showWhatsAppConfirmation}
+        restaurantName={restaurantName}
+        onConfirm={handleWhatsAppConfirm}
+        onCancel={handleWhatsAppCancel}
       />
     </>
   );

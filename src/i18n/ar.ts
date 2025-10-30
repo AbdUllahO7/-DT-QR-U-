@@ -1,3 +1,4 @@
+import { Phone } from "lucide-react";
 import { title } from "process";
 
 
@@ -6,6 +7,7 @@ export const ar = {
   common: {
     loading: 'جاري التحميل...',
     error: 'خطأ',
+    change: 'تغيير',
     success: 'نجح',
     cancel: 'إلغاء',
     save: 'حفظ',
@@ -3540,10 +3542,18 @@ export const ar = {
       cash: 'نقداً',
       creditCard: 'بطاقة ائتمان',
       onlinePayment: 'دفع عبر الإنترنت',
+      name: 'الاسم',
+      phone: 'رقم الهاتف',
+      address: 'العنوان',
+      cashDescription: 'ادفع نقداً عند التسليم',
+      creditCardDescription: 'ادفع باستخدام بطاقة الائتمان الخاصة بك',
+      onlinePaymentDescription: 'ادفع عبر بوابة الدفع الآمنة لدينا',
       orderTypeRequired: 'نوع الطلب مطلوب',
       selectOrderType: 'اختر نوع الطلب...',
+      orderInformation: 'معلومات الطلب',
       customerName: 'اسم العميل',
       customerNameRequired: 'اسم العميل مطلوب',
+      information: 'معلومات',
       customerNamePlaceholder: 'أدخل اسم العميل',
       deliveryAddress: 'عنوان التوصيل',
       deliveryAddressRequired: 'عنوان التوصيل مطلوب لهذا النوع من الطلبات',

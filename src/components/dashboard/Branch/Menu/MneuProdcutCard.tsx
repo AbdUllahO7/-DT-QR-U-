@@ -314,23 +314,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
 
-        {/* Quick Info Bar */}
-        {isHovered && (
-          <div className="mt-3 flex items-center justify-between text-xs text-slate-600 dark:text-slate-400 animate-fadeIn">
-            <div className="flex items-center gap-1">
-              <Clock className="h-3 w-3" />
-              <span>{t('productCard.prepTime')}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Flame className="h-3 w-3 text-orange-500" />
-              <span>{t('productCard.popular')}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Star className="h-3 w-3 text-yellow-500 fill-yellow-500" />
-              <span>{t('productCard.rating')}</span>
-            </div>
-          </div>
-        )}
+       
       </div>
 
       {/* Shine Effect on Hover */}

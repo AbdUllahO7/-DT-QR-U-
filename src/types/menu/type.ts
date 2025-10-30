@@ -1,3 +1,4 @@
+import { Product } from '../BranchManagement/type';
 export interface MenuAllergen {
   id: number
   code: string
@@ -76,6 +77,7 @@ export interface SelectedAddon {
   price: number
   quantity: number
 }
+
 
 export interface HeaderProps {
   menuData: BranchMenuResponse
