@@ -1,27 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  Globe,
-  Copy,
-  ExternalLink,
+
   Loader2,
-  ArrowLeft,
+
   CheckCircle,
-  AlertCircle,
-  ShoppingBag,
-  UtensilsCrossed,
+
   X,
   Plus,
   Minus,
   ShoppingCart,
-  Search,
 } from 'lucide-react';
 import { theme } from '../../../../types/BranchManagement/type';
 import {
   OnlineMenuResponse,
   onlineMenuService,
-  Product,
-  Category,
   ProductAddon,
   StartSessionDto,
   BasketResponse,
@@ -31,6 +24,10 @@ import ProductGrid from '../Menu/MneuProductGrid';
 import { MenuProduct } from '../../../../types/menu/type';
 import { basketService } from '../../../../services/Branch/BasketService';
 import PriceChangeModal from '../Menu/CartSideBar/PriceChangeModal';
+import Header from '../Menu/MenuHeaderComponent';
+import CategoriesSidebar from '../Menu/MenuCategoriesSidebar';
+import Footer from '../Menu/MneuFooter';
+import SearchBar from '../Menu/MenuSearchBar';
 
 interface PublicBranchData {
   branchName: string;
@@ -46,7 +43,6 @@ interface SelectedAddon {
 
 const OnlineMenu: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
 
   // ───── UI States ─────
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -72,6 +68,8 @@ const OnlineMenu: React.FC = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [isSessionInitialized, setIsSessionInitialized] = useState<boolean>(false);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+
+  console.log("basket",basket)
 
   // ───── Price Change Detection ─────
   const [showPriceChangeModal, setShowPriceChangeModal] = useState<boolean>(false);
@@ -105,6 +103,7 @@ const OnlineMenu: React.FC = () => {
   const initializeSession = async (publicId: string) => {
     try {
       setIsSessionInitialized(false);
+      localStorage.removeItem('token');
 
       // ---- reuse existing session if possible ----
       const existingSessionId = localStorage.getItem('online_menu_session_id');
@@ -141,10 +140,11 @@ const OnlineMenu: React.FC = () => {
 
       setSessionId(session.sessionId);
       localStorage.setItem('online_menu_session_id', session.sessionId);
+
       localStorage.setItem('token', session.sessionToken);
       localStorage.setItem('online_menu_public_id', publicId);
       localStorage.setItem('online_menu_branch_id', session.branchId.toString());
-      localStorage.setItem('online_menu_expires_at', session.expiresAt);
+      localStorage.setItem('tokenExpiry', session.expiresAt);
 
       setIsSessionInitialized(true);
       await loadBasket();
@@ -479,19 +479,7 @@ const OnlineMenu: React.FC = () => {
     return () => clearInterval(interval);
   }, [basket, menuData]);
 
-  // ───── Misc helpers ─────
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch { /* empty */ }
-  };
 
-  const getPublicMenuUrl = () =>
-    publicBranchData
-      ? `${window.location.origin}/menu/${publicBranchData.publicId}`
-      : '';
 
   const formatPrice = (price: number, currency: string = 'TRY') =>
     new Intl.NumberFormat('tr-TR', { style: 'currency', currency }).format(
@@ -512,8 +500,18 @@ const OnlineMenu: React.FC = () => {
 
   // ───── Main render ─────
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      {/* Header */}
+      {menuData && (
+        <Header 
+          menuData={menuData}
+          totalItems={basket?.itemCount || 0}
+          onCartToggle={() => setIsCartOpen(true)}
+        />
+      )}
+
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto">
 
         {/* Floating basket button */}
         {basket && basket.totalPrice > 0 && (
@@ -543,7 +541,7 @@ const OnlineMenu: React.FC = () => {
           menuData={menuData}
         />
 
-        {/* Price Change Modal - Using your existing component */}
+        {/* Price Change Modal */}
         <PriceChangeModal
           isVisible={showPriceChangeModal}
           priceChanges={priceChanges}
@@ -561,116 +559,55 @@ const OnlineMenu: React.FC = () => {
             </div>
           </div>
         ) : menuData ? (
-          <div className={`${theme.background.card} backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-200/50 dark:border-slate-700/50 overflow-hidden`}>
+          <div className={`${theme.background.card} backdrop-blur-xl rounded-3xl shadow-2xl  dark:border-slate-700/50 overflow-hidden`}>
 
-            {/* Header */}
-            <div className="bg-gradient-to-r from-emerald-600 to-green-600 p-8 text-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold">{menuData.restaurantName}</h2>
-                  <p className="text-emerald-100 mt-1">{menuData.branchName}</p>
-                  {menuData.branchAddress && (
-                    <p className="text-emerald-100 text-sm mt-1">{menuData.branchAddress}</p>
-                  )}
-                </div>
-                <div
-                  className={`px-4 py-2 rounded-xl font-semibold ${
-                    menuData.isOpen && !menuData.isTemporarilyClosed
-                      ? 'bg-green-500/30 text-white'
-                      : 'bg-red-500/30 text-white'
-                  }`}
-                >
-                  {menuData.isOpen && !menuData.isTemporarilyClosed ? 'Open' : 'Closed'}
-                </div>
-              </div>
-              {menuData.statusMessage && (
-                <p className="text-emerald-100 mt-4">{menuData.statusMessage}</p>
-              )}
-            </div>
+       
 
-            {/* Content */}
-            <div className="p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <UtensilsCrossed className="w-6 h-6 text-emerald-600" />
-                <h3 className={`text-2xl font-bold ${theme.text.primary}`}>Menu</h3>
-              </div>
+            {/* Content with Sidebar Layout */}
+            <div className="p-8 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+                   <SearchBar 
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
 
-              {/* Search Bar */}
-              <div className="mb-6">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Search menu items..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+         
+
+              {/* Main Grid Layout: Sidebar + Products */}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 bg-transparent ">
+                {/* Categories Sidebar - Only show when not searching */}
+                {!searchTerm && menuData.categories.length > 0 && (
+                  <CategoriesSidebar
+                    categories={menuData.categories}
+                    selectedCategory={selectedCategory}
+                    onCategorySelect={handleCategorySelect}
+                  />
+                )}
+
+                {/* Products Grid */}
+                <div className={!searchTerm ? "lg:col-span-3" : "lg:col-span-4"}>
+                  <ProductGrid
+                    categories={menuData.categories}
+                    selectedCategory={selectedCategory}
+                    searchTerm={searchTerm}
+                    cart={[]}
+                    favorites={favorites}
+                    onAddToCart={handleProductGridAddToCart}
+                    onRemoveFromCart={handleRemoveFromCart}
+                    onToggleFavorite={handleToggleFavorite}
+                    onCategorySelect={handleCategorySelect}
+                    restaurantName={menuData.restaurantName}
+                    onCustomize={openProductModal}
+                    getCartItemQuantity={getCartItemQuantity}
                   />
                 </div>
               </div>
 
-              {/* Category Filter Pills */}
-              {!searchTerm && menuData.categories.length > 0 && (
-                <div className="mb-6 flex flex-wrap gap-2">
-                  <button
-                    onClick={() => setSelectedCategory(null)}
-                    className={`px-4 py-2 rounded-xl font-medium transition-all ${
-                      selectedCategory === null
-                        ? 'bg-emerald-600 text-white'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                    }`}
-                  >
-                    All
-                  </button>
-                  {menuData.categories.map((cat) => (
-                    <button
-                      key={cat.categoryId}
-                      onClick={() => handleCategorySelect(cat.categoryId)}
-                      className={`px-4 py-2 rounded-xl font-medium transition-all ${
-                        selectedCategory === cat.categoryId
-                          ? 'bg-emerald-600 text-white'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      {cat.categoryName}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* ProductGrid Integration */}
-              <ProductGrid
-                categories={menuData.categories}
-                selectedCategory={selectedCategory}
-                searchTerm={searchTerm}
-                cart={[]}
-                favorites={favorites}
-                onAddToCart={handleProductGridAddToCart}
-                onRemoveFromCart={handleRemoveFromCart}
-                onToggleFavorite={handleToggleFavorite}
-                onCategorySelect={handleCategorySelect}
-                restaurantName={menuData.restaurantName}
-                onCustomize={openProductModal}
-                getCartItemQuantity={getCartItemQuantity}
-              />
-
               {/* WhatsApp info */}
-              {menuData.preferences.useWhatsappForOrders && (
-                <div className="mt-8 p-6 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-2xl">
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">📱</span>
-                    <div>
-                      <p className={`font-semibold ${theme.text.primary}`}>Order via WhatsApp</p>
-                      <p className={`text-sm ${theme.text.secondary} mt-1`}>
-                        Contact: {menuData.preferences.whatsAppPhoneNumber}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
+            
             </div>
           </div>
         ) : null}
+      </div>
       </div>
 
       {/* ───── Product Detail Modal ───── */}
@@ -948,6 +885,8 @@ const OnlineMenu: React.FC = () => {
           </div>
         </div>
       )}
+            <Footer />
+
     </div>
   );
 };

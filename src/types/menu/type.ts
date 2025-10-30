@@ -78,6 +78,7 @@ export interface SelectedAddon {
   quantity: number
 }
 
+
 export interface HeaderProps {
   menuData: BranchMenuResponse
   totalItems: number
