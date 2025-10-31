@@ -223,6 +223,9 @@ export const tr = {
         avgOrderValue: 'Ortalama Sipariş Değeri'
       }
     },
+        moneyCase : {
+      title : "Para Kasası Yönetimi"
+    },
     orderType: {
         requiresPhone: "Telefon Numarası Gerektirir",
         requiresName: "İsim Gerektirir",
@@ -4274,4 +4277,114 @@ recommended: "Önerilen",
     rating: "4.8",
     more: "daha fazla"
   },
+   "moneyCase": {
+    "title": "Kasa Yönetimi",
+    "subtitle": "Şube nakit işlemlerinizi yönetin",
+    "selectBranch": "Bir şube seçin",
+    "selectBranchToView": "Şube Seçin",
+    "branchSelector": "Şube Seçici",
+    "noBranches": "Şube bulunamadı",
+    
+    "status": "Durum",
+    "open": "Açık",
+    "closed": "Kapalı",
+    "todaySales": "Bugünkü Satışlar",
+    "todayCash": "Bugünkü Nakit",
+    "todayCard": "Bugünkü Kart",
+    "currentBalance": "Güncel Bakiye",
+    "transactionCount": "İşlem Sayısı",
+    "transactions": "İşlem",
+    
+    "openCase": "Kasa Aç",
+    "closeCase": "Kasa Kapat",
+    "viewZReport": "Z Raporu Görüntüle",
+    "history": "Kasa Geçmişi",
+    "records": "Kayıt",
+    "noHistory": "Geçmiş bulunamadı",
+    "noHistoryDescription": "Kasa işlemleri burada görünecek",
+    
+    "openingBalance": "Açılış Bakiyesi",
+    "openingBalanceDescription": "Kasadaki başlangıç nakit tutarını girin",
+    "closingBalance": "Kapanış Bakiyesi",
+    "actualCash": "Gerçek Nakit",
+    "expectedCash": "Beklenen Nakit",
+    "difference": "Fark",
+    "surplus": "Fazlalık",
+    "shortage": "Eksiklik",
+    "notes": "Notlar",
+    "notesPlaceholder": "Bu kasa seansı hakkında not veya yorum ekleyin...",
+    
+    "date": "Tarih & Saat",
+    "openedAt": "Açılış Zamanı",
+    "closedAt": "Kapanış Zamanı",
+    "lastUpdated": "Son Güncelleme",
+    "caseId": "Kasa No",
+    
+    "confirm": "Onayla",
+    "confirmClose": "Kapanışı Onayla",
+    "cancel": "İptal",
+    "close": "Kapat",
+    "print": "Yazdır",
+    "download": "İndir",
+    
+    "zReport": "Z Raporu",
+    "reportDate": "Rapor Tarihi",
+    "openingInformation": "Açılış Bilgileri",
+    "salesSummary": "Satış Özeti",
+    "closingInformation": "Kapanış Bilgileri",
+    "totalSales": "Toplam Satış",
+    "cashSales": "Nakit Satış",
+    "cardSales": "Kart Satış",
+    "refunds": "İadeler",
+    "expenses": "Giderler",
+     "avgOrderValue": "Ortalama Sipariş Değeri",
+    "totalDiscrepancy": "Toplam Fark",
+    "totalShifts": "Toplam Vardiya",
+    "avgShiftDuration": "Ortalama Vardiya Süresi",
+    "shiftsWithIssues": "Problemi Olan Vardiyalar",
+    "period": "Rapor Dönemi",
+      "todayTotalSales": "Bugünün Toplam Satışları",
+    "currentShiftRevenue": "Mevcut Vardiya Geliri",
+    "closedShifts": "Kapalı Vardiyalar",
+    "ordersToday": "Bugünkü Siparişler",
+    "weekToDate": "Hafta Başından Bugüne",
+    "monthToDate": "Ay Başından Bugüne",
+    "shifts": "Vardiyalar",
+    "orders": "Siparişler",
+    "noReportData": "Rapor verisi bulunamadı",
+    serviceFee: "Servis Ücreti",
+    "success": {
+      "opened": "Kasa başarıyla açıldı!",
+      "closed": "Kasa başarıyla kapatıldı!",
+      "closedWithDifference": "Kasa başarıyla kapatıldı! Fark: {{difference}}"
+    },
+    
+    "error": {
+      "fetchBranches": "Şubeler getirilemedi",
+      "fetchActiveCase": "Aktif kasa bilgisi getirilemedi",
+      "fetchHistory": "Kasa geçmişi getirilemedi",
+      "fetchZReport": "Z raporu getirilemedi",
+      "openCase": "Kasa açılamadı",
+      "closeCase": "Kasa kapatılamadı",
+      "noBranchSelected": "Lütfen önce bir şube seçin"
+    },
+    
+    "validation": {
+      "openingBalanceRequired": "Açılış bakiyesi gereklidir",
+      "openingBalanceMin": "Açılış bakiyesi 0 veya daha büyük olmalıdır",
+      "actualCashRequired": "Gerçek nakit tutarı gereklidir",
+      "actualCashMin": "Gerçek nakit 0 veya daha büyük olmalıdır",
+      "notesMaxLength": "Notlar 500 karakteri geçemez"
+    },
+    
+    "modal": {
+      "openTitle": "Kasa Aç",
+      "openDescription": "Yeni bir kasa seansı başlat",
+      "closeTitle": "Kasa Kapat",
+      "closeDescription": "Mevcut kasa seansını sonlandır ve nakit sayımı yap",
+      "zReportTitle": "Z Raporu - Detaylı Özet",
+      "confirmOpenMessage": "Yeni bir kasa açmak istediğinizden emin misiniz?",
+      "confirmCloseMessage": "Mevcut kasayı kapatmak istediğinizden emin misiniz? Bu işlem geri alınamaz."
+    }
+  }
 }; 
