@@ -34,8 +34,6 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
   basketTotal,
   currency = 'TRY',
   onSubmit,
-  restaurantName = 'Restaurant',
-  whatsappOrderNumber,
   acceptCash = true,
   acceptCreditCard = false,
   acceptOnlinePayment = false
@@ -174,13 +172,13 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
 
     setSubmitting(true);
 
-    const orderData: CheckoutOrderData = {
+    const orderData: CreateSessionOrderDto = {
       orderTypeId: selectedOrderType!.id,
-      ...(selectedOrderType!.requiresName && { customerName: customerName.trim() }),
-      ...(selectedOrderType!.requiresTable && { tableNumber: tableNumber.trim() }),
-      ...(selectedOrderType!.requiresAddress && { deliveryAddress: deliveryAddress.trim() }),
-      ...(selectedOrderType!.requiresPhone && { customerPhone: customerPhone.trim() }),
-      ...(paymentMethod && { paymentMethod }),
+      customerName: selectedOrderType!.requiresName ? customerName.trim() : '',
+      tableNumber: selectedOrderType!.requiresTable ? tableNumber.trim() : '',
+      deliveryAddress: selectedOrderType!.requiresAddress ? deliveryAddress.trim() : '',
+      customerPhone: selectedOrderType!.requiresPhone ? customerPhone.trim() : '',
+      paymentMethod: paymentMethod || 'cash'
     };
 
     try {

@@ -554,7 +554,7 @@ const OnlineMenu: React.FC = () => {
           </button>
         )}
 
-        {/* Cart sidebar */}
+        {/* Cart sidebar - Now includes checkout flow */}
         <OnlineCartSidebar
           isOpen={isCartOpen}
           onClose={() => setIsCartOpen(false)}
