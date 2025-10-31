@@ -957,6 +957,11 @@ export interface CreateSessionOrderDto {
   customerName: string;
   notes?: string;
   orderTypeId: number;
+  tableNumber?: string;
+  deliveryAddress?: string;
+  customerPhone?: string;
+  paymentMethod: string;
+
 }
 
 export interface ConfirmOrderDto {
