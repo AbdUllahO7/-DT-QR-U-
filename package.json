@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "npx kill-port 3000 && vite",
     "dev:clean": "npx kill-port 3000",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },

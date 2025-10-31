@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { ApiError } from '../types/api';
 import { logger } from './logger';
-import { getUserFriendlyErrorMessage, shouldRetryRequest } from './errorHandler';
+import { shouldRetryRequest } from './errorHandler';
 
 const BASE_URL = import.meta.env.DEV ? 'http://api.mertcode.com' : 'http://api.mertcode.com';
 

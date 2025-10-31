@@ -249,7 +249,10 @@ export const en = {
         activeTypes: "Active Types",
         totalActiveOrders: "Total Active Orders",
         estimatedTime: "Estimated Time"
-      },
+    },
+    moneyCase : {
+      title : "Money Case Management"
+    },
     products: {
       title: 'Products',
       description: 'View and manage your products.'
@@ -4248,4 +4251,115 @@ export const en = {
     "rating": "4.8",
     "more": "more"
   },
+  "moneyCase": {
+    "title": "Money Case Management",
+    "subtitle": "Manage your branch cash operations",
+    "selectBranch": "Select a branch",
+    "selectBranchToView": "Select Branch",
+    "branchSelector": "Branch Selector",
+    "noBranches": "No branches available",
+    
+    "status": "Status",
+    "open": "Open",
+    "closed": "Closed",
+    "todaySales": "Today's Sales",
+    "todayCash": "Today's Cash",
+    "todayCard": "Today's Card",
+    "currentBalance": "Current Balance",
+    "transactionCount": "Transaction Count",
+    "transactions": "Transactions",
+    
+    "openCase": "Open Money Case",
+    "closeCase": "Close Money Case",
+    "viewZReport": "View Z Report",
+    "history": "Money Case History",
+    "records": "Records",
+    "noHistory": "No history available",
+    "noHistoryDescription": "Money case operations will appear here",
+    
+    "openingBalance": "Opening Balance",
+    "openingBalanceDescription": "Enter the initial cash amount in the register",
+    "closingBalance": "Closing Balance",
+    "actualCash": "Actual Cash",
+    "expectedCash": "Expected Cash",
+    "difference": "Difference",
+    "surplus": "Surplus",
+    "shortage": "Shortage",
+    "notes": "Notes",
+    "notesPlaceholder": "Add any notes or comments about this money case session...",
+    
+    "date": "Date & Time",
+    "openedAt": "Opened At",
+    "closedAt": "Closed At",
+    "lastUpdated": "Last Updated",
+    "caseId": "Money Case ID",
+    
+    "confirm": "Confirm",
+    "confirmClose": "Confirm Close",
+    "cancel": "Cancel",
+    "close": "Close",
+    "print": "Print",
+    "download": "Download",
+    serviceFee: "Service Fee",
+      "periodSummary": "Period Summary",
+    "avgOrderValue": "Avg. Order Value",
+    "totalDiscrepancy": "Total Discrepancy",
+    "totalShifts": "Total Shifts",
+    "avgShiftDuration": "Avg. Shift Duration",
+    "shiftsWithIssues": "Shifts with Issues",
+    "period": "Period",
+      "todayTotalSales": "Today's Total Sales",
+    "currentShiftRevenue": "Current Shift Revenue",
+    "closedShifts": "Closed Shifts",
+    "ordersToday": "Orders Today",
+    "weekToDate": "Week to Date",
+    "monthToDate": "Month to Date",
+    "shifts": "Shifts",
+    "orders": "Orders",
+    "zReport": "Z Report",
+    "reportDate": "Report Date",
+    "openingInformation": "Opening Information",
+    "salesSummary": "Sales Summary",
+    "closingInformation": "Closing Information",
+    "totalSales": "Total Sales",
+    "cashSales": "Cash Sales",
+    "cardSales": "Card Sales",
+    "refunds": "Refunds",
+    "expenses": "Expenses",
+    "noReportData": "No report data available",
+    
+    "success": {
+      "opened": "Money case opened successfully!",
+      "closed": "Money case closed successfully!",
+      "closedWithDifference": "Money case closed successfully! Difference: {{difference}}"
+    },
+    
+    "error": {
+      "fetchBranches": "Failed to fetch branches",
+      "fetchActiveCase": "Failed to fetch active money case",
+      "fetchHistory": "Failed to fetch money case history",
+      "fetchZReport": "Failed to fetch Z report",
+      "openCase": "Failed to open money case",
+      "closeCase": "Failed to close money case",
+      "noBranchSelected": "Please select a branch first"
+    },
+    
+    "validation": {
+      "openingBalanceRequired": "Opening balance is required",
+      "openingBalanceMin": "Opening balance must be 0 or greater",
+      "actualCashRequired": "Actual cash amount is required",
+      "actualCashMin": "Actual cash must be 0 or greater",
+      "notesMaxLength": "Notes cannot exceed 500 characters"
+    },
+    
+    "modal": {
+      "openTitle": "Open Money Case",
+      "openDescription": "Start a new money case session",
+      "closeTitle": "Close Money Case",
+      "closeDescription": "End the current money case session and reconcile cash",
+      "zReportTitle": "Z Report - Detailed Summary",
+      "confirmOpenMessage": "Are you sure you want to open a new money case?",
+      "confirmCloseMessage": "Are you sure you want to close the current money case? This action cannot be undone."
+    }
+  }
 }; 
