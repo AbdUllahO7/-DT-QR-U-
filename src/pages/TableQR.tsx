@@ -3,11 +3,11 @@ import { useParams } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { nanoid } from 'nanoid';
-import { 
-  Users, 
-  CheckCircle, 
-  XCircle, 
-  Loader2, 
+import {
+  Users,
+  CheckCircle,
+  XCircle,
+  Loader2,
   AlertTriangle,
   QrCode,
   Wifi,
@@ -20,6 +20,7 @@ import {
   ChevronDown
 } from 'lucide-react';
 import MenuComponent from "../components/dashboard/Branch/Menu/MenuComponent";
+import { httpClient } from "../utils/http";
 
 interface TableInfo {
   valid: boolean;
@@ -125,8 +126,8 @@ const TableQR = () => {
 
       try {
         // 1. QR doğrulama
-        const res = await fetch(`/api/table/qr/${qrToken}`);
-        const data = await res.json();
+        const res = await httpClient.get(`/api/table/qr/${qrToken}`);
+        const data = res.data;
         if (!data.valid) {
           setError(data.message);
           setLoading(false);
@@ -146,29 +147,30 @@ const TableQR = () => {
         }
 
         // 3. Session başlat
-        const sessionRes = await fetch('/api/session/start', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            qrToken,
-            deviceFingerprint,
-            preferredLanguage,
-            customerIdentifier,
-          }),
+        const sessionRes = await httpClient.post('/api/session/start', {
+          qrToken,
+          deviceFingerprint,
+          preferredLanguage,
+          customerIdentifier,
         });
-        
-        if (sessionRes.ok) {
-          const sessionData = await sessionRes.json();
+
+        if (sessionRes.status === 200) {
+          const sessionData = sessionRes.data;
           localStorage.setItem('customerSessionToken', sessionData.sessionToken);
           setSessionStarted(true);
         } else if (sessionRes.status === 404) {
           setError(t('tableQR.error.sessionFeatureComingSoon'));
         } else {
-          const sessionData = await sessionRes.json();
+          const sessionData = sessionRes.data;
           setError(sessionData.message || t('tableQR.error.sessionStartFailed'));
         }
-      } catch (e) {
-        setError(t('tableQR.error.sessionStartFailed'));
+      } catch (e: any) {
+        console.error('TableQR error:', e);
+        if (e?.response?.status === 404) {
+          setError(t('tableQR.error.sessionFeatureComingSoon'));
+        } else {
+          setError(e?.response?.data?.message || t('tableQR.error.sessionStartFailed'));
+        }
       } finally {
         setLoading(false);
       }
