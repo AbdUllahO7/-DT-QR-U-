@@ -5,7 +5,6 @@ import { shouldRetryRequest } from './errorHandler';
 
 const BASE_URL = import.meta.env.DEV ? 'http://api.mertcode.com' : 'http://api.mertcode.com';
 
-
 // Network bağlantısı kontrolü
 const checkNetworkConnection = (): boolean => {
   return navigator.onLine;
