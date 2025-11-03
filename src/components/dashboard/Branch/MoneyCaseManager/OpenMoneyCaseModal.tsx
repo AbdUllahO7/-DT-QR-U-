@@ -1,5 +1,7 @@
 import React from 'react';
-import { X, Unlock } from 'lucide-react';
+// Import Info icon and the new type
+import { X, Unlock, Info } from 'lucide-react';
+import { PreviousCloseInfo } from '../../../../types/BranchManagement/MoneyCase';
 
 interface Props {
   show: boolean;
@@ -10,6 +12,8 @@ interface Props {
   onClose: () => void;
   t: (key: string) => string;
   isRTL: boolean;
+  // Add new prop to receive previous close data
+  previousCloseInfo: PreviousCloseInfo | null;
 }
 
 const OpenMoneyCaseModal: React.FC<Props> = ({
@@ -20,7 +24,8 @@ const OpenMoneyCaseModal: React.FC<Props> = ({
   onConfirm,
   onClose,
   t,
-  isRTL
+  isRTL,
+  previousCloseInfo,
 }) => {
   if (!show) return null;
 
@@ -55,6 +60,28 @@ const OpenMoneyCaseModal: React.FC<Props> = ({
 
           {/* Body */}
           <div className="px-6 py-4">
+            
+            {/* NEW: Previous Close Info Box */}
+            {previousCloseInfo && previousCloseInfo.hasPreviousClose && (
+              <div className={`mb-4 p-3 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg ${isRTL ? 'text-right' : 'text-left'}`}>
+                <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <Info className={`h-5 w-5 text-blue-600 dark:text-blue-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                  <h4 className="font-semibold text-blue-800 dark:text-blue-300">
+                    {t('moneyCase.previousCloseInfo')}
+                  </h4>
+                </div>
+                <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                  {t('moneyCase.suggestedBalance')}:{' '}
+                  <strong className="font-bold text-gray-900 dark:text-white">
+                    {previousCloseInfo.suggestedOpeningBalance.toFixed(2)}
+                  </strong>
+                </p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  ({t('moneyCase.lastClosed')}: {new Date(previousCloseInfo.previousClosedAt).toLocaleString()})
+                </p>
+              </div>
+            )}
+
             <div className="mb-4">
               <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
                 {t('moneyCase.openingBalance')}

@@ -19,6 +19,9 @@ export interface ActiveMoneyCase {
   currentBalance?: number;
   transactionCount?: number;
   status: string;
+  subTotalAmount?: number;
+  serviceFeeAmount?: number;
+  totalAmount?: number;
 }
 
 export interface MoneyCaseHistoryItem {
@@ -37,6 +40,7 @@ export interface MoneyCaseHistoryItem {
   status: string;
   transactionCount?: number;
   shiftDuration?: string;
+  discrepancy?: number;
 }
 
 export interface ZReportApiResponse {
@@ -178,6 +182,7 @@ export interface ActiveMoneyCaseResponse {
   closedBy: string | null;
   closedByEmail: string | null;
   branch: any | null;
+  
 }
 export interface MoneyCaseHistoryItemResponse {
   id: number;
@@ -278,4 +283,15 @@ export interface QuickSummaryApiResponse {
     shiftCount: number;
     orderCount: number;
   };
+
+
 }
+
+export  interface PreviousCloseInfo  {
+    hasPreviousClose: boolean,
+    previousClosedAt: string,
+    previousExpectedBalance: number,
+    previousActualCash: number,
+    suggestedOpeningBalance: number,
+    previousDiscrepancy: number
+  }

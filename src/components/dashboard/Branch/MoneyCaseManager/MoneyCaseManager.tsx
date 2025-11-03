@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Users, DollarSign, TrendingUp, Clock, AlertCircle } from 'lucide-react';
+import { ChevronDown, Users, DollarSign} from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useMoneyCaseManager } from '../../../../hooks/useMoneyCaseManager/useMoneyCaseManager';
 import { useClickOutside } from '../../../../hooks';
@@ -14,13 +14,14 @@ import OpenMoneyCaseModal from './OpenMoneyCaseModal';
 import MoneyCaseHistoryTable from './MoneyCaseHistoryTable';
 import ErrorNotification from './ErrorNotification';
 import SuccessNotification from './SuccessNotification';
-import { MoneyCaseSummary } from '../../../../types/BranchManagement/MoneyCase';
+// Import the new type
+import { MoneyCaseSummary, PreviousCloseInfo } from '../../../../types/BranchManagement/MoneyCase';
 import { moneyCaseService } from '../../../../services/Branch/MoneyCaseService';
 import MoneyCaseSummaryCard from './MoneyCaseSummaryCard';
 
 
 const MoneyCaseManager: React.FC = () => {
-  const { t, language, isRTL } = useLanguage();
+  const { t,  isRTL } = useLanguage();
 
   const {
     state,
@@ -33,7 +34,7 @@ const MoneyCaseManager: React.FC = () => {
       handleOpenCase,
       handleCloseCase,
       fetchZReport,
-      openOpenModal,
+      openOpenModal, // We will wrap this
       openCloseModal,
       closeModals,
       clearError,
@@ -64,22 +65,25 @@ const MoneyCaseManager: React.FC = () => {
 
 
   const [showSummary, setShowSummary] = useState(false);
-const [branchSummary, setBranchSummary] = useState<MoneyCaseSummary | null>(null);
+  const [branchSummary, setBranchSummary] = useState<MoneyCaseSummary | null>(null);
+  // Add state for previous close info
+  const [previousCloseInfo, setPreviousCloseInfo] = useState<PreviousCloseInfo | null>(null);
 
-const fetchBranchSummary = async () => {
-  if (!state.selectedBranch) return;
-  
-  try {
-    const summary = await moneyCaseService.getBranchSummary({
-      branchId: state.selectedBranch.branchId,
-      fromDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // Last 30 days
-      toDate: new Date().toISOString()
-    });
-    setBranchSummary(summary);
-  } catch (error) {
-    console.error('Failed to fetch branch summary:', error);
-  }
-};
+
+  const fetchBranchSummary = async () => {
+    if (!state.selectedBranch) return;
+    
+    try {
+      const summary = await moneyCaseService.getBranchSummary({
+        branchId: state.selectedBranch.branchId,
+        fromDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // Last 30 days
+        toDate: new Date().toISOString()
+      });
+      setBranchSummary(summary);
+    } catch (error) {
+      console.error('Failed to fetch branch summary:', error);
+    }
+  };
 
   const toggleBranchDropdown = () => {
     setState(prev => ({ 
@@ -87,6 +91,36 @@ const fetchBranchSummary = async () => {
       isBranchDropdownOpen: !prev.isBranchDropdownOpen 
     }));
   };
+
+  // New function to fetch data before opening modal
+  const handleShowOpenModal = async () => {
+    if (!state.selectedBranch) return; // Guard
+    
+    try {
+      // 1. Fetch the previous close info
+      const info = await moneyCaseService.getPreviousCloseInfo(state.selectedBranch.branchId);
+      setPreviousCloseInfo(info);
+      
+      // 2. Set the openingBalance in the hook's state to the suggested value
+      const suggestedBalance = info?.suggestedOpeningBalance || 0;
+      setState(prev => ({
+        ...prev,
+        openingBalance: suggestedBalance,
+        showOpenModal: true // 3. Show the modal
+      }));
+      
+    } catch (error) {
+      console.error("Failed to get previous close info", error);
+      // Still open the modal, but with 0 balance and no info
+      setPreviousCloseInfo(null);
+      setState(prev => ({
+        ...prev,
+        openingBalance: 0,
+        showOpenModal: true
+      }));
+    }
+  };
+
 
   // Show branch selection if no branch is selected
   if (!state.selectedBranch && !state.loading) {
@@ -214,7 +248,7 @@ const fetchBranchSummary = async () => {
               }}
               className="mb-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
             >
-              {showSummary ? 'Hide' : 'Show'} Summary
+              {showSummary ? t('moneyCase.hideSummary'): t('moneyCase.showSummary')} 
             </button>
 
             {showSummary && (
@@ -230,7 +264,7 @@ const fetchBranchSummary = async () => {
         <MoneyCaseActions
           activeCase={state.activeCase}
           loading={state.loading}
-          onOpenCase={openOpenModal}
+          onOpenCase={handleShowOpenModal} // Use the new wrapped function
           onCloseCase={openCloseModal}
           t={t}
           isRTL={isRTL}
@@ -247,6 +281,7 @@ const fetchBranchSummary = async () => {
 
         {/* Modals */}
         <OpenMoneyCaseModal
+          previousCloseInfo={previousCloseInfo} // Pass the fetched info as a prop
           show={state.showOpenModal}
           loading={state.loading}
           openingBalance={state.openingBalance}

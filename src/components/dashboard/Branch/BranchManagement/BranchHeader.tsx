@@ -3,6 +3,7 @@ import { Edit, MapPin, Save, X, Loader2, Upload, Image, Globe } from 'lucide-rea
 import { mediaService } from '../../../../services/mediaService';
 import { BranchHeaderProps, DEFAULT_IMAGE_URL, theme } from '../../../../types/BranchManagement/type';
 import { useNavigate } from 'react-router-dom';
+import { onlineMenuService } from '../../../../services/Branch/Online/OnlineMenuService';
 
 
 // Modern Toggle Switch with sleek design
@@ -97,6 +98,32 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
   const [imageError, setImageError] = useState<string>('');
   const [dragActive, setDragActive] = useState<boolean>(false);
   const navigate = useNavigate(); 
+  const [isLoadingPublicId, setIsLoadingPublicId] = useState<boolean>(false);
+
+const handleNavigateToOnlineMenu = async () => {
+    if (!selectedBranch) return;
+    
+    try {
+      setIsLoadingPublicId(true);
+          localStorage.removeItem('token');
+      // Fetch the public ID
+      const { publicId, branchName } = await onlineMenuService.getPublicBranchId(selectedBranch.id);
+      
+      // Navigate with public ID as the route parameter
+      navigate(`/OnlineMenu/${publicId}`, {
+        state: { 
+          branchName,
+          branchId: selectedBranch.id // Optional, in case you need it later
+        }
+      });
+      
+    } catch (error: any) {
+      console.error('Failed to get public ID:', error);
+      alert(t('branchManagementBranch.errors.failedToGetPublicId') || 'Failed to get online menu link');
+    } finally {
+      setIsLoadingPublicId(false);
+    }
+  };
 
   // Handle image upload
   const uploadImage = async (file: File): Promise<string> => {
@@ -212,10 +239,8 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
 
                 {!isEditing ? (
                   <ModernButton
-                    onClick={() => {
-                      setIsEditing(true);
-                      if (selectedBranch) initializeEditData(selectedBranch);
-                    }}
+                             onClick={handleNavigateToOnlineMenu}
+
                     variant="primary"
                   >
                     <Edit className="w-4 h-4" />
@@ -249,14 +274,16 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
               </div>
             </div>
        {selectedBranch && (
-  <ModernButton
-    onClick={() => navigate(`/BranchManagement/OnlineMenu/${selectedBranch.id}`)}
-    variant="primary"
-  >
-    <Globe className="w-4 h-4" />
-    <span>{t('branchManagementBranch.actions.onlineMenu') || 'Online Menu'}</span>
-  </ModernButton>
-)}
+    <ModernButton
+          onClick={handleNavigateToOnlineMenu}
+          variant="primary"
+          disabled={isLoadingPublicId}
+          isLoading={isLoadingPublicId}
+        >
+          <Globe className="w-4 h-4" />
+          <span>{t('branchManagementBranch.actions.onlineMenu') || 'Online Menu'}</span>
+        </ModernButton>
+        )}
             {/* Bottom Row - Image Upload (Editing Mode) */}
             {isEditing && (
               <div className="w-full max-w-sm">

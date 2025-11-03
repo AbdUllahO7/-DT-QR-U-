@@ -7,7 +7,6 @@ import Sidebar from '../components/dashboard/layout/Sidebar';
 import BranchManagement from '../components/dashboard/content/branch-management/BranchManagement';
 import UserManagement from '../components/dashboard/content/UserManagement';
 import Profile from '../components/dashboard/content/Profile';
-import Settings from '../components/dashboard/content/Settings/ResturantSettings';
 import Subscription from '../components/dashboard/content/Subscription';
 import ProductsContent from '../components/dashboard/Porducts/ProductsContent';
 import RestaurantManagement from '../components/dashboard/content/RestaurantManagement';
@@ -34,6 +33,7 @@ import RecycleBin from '../components/dashboard/Porducts/RecycleBinProducts';
 import RestaurantManagementSetting from '../components/dashboard/content/RestaurantManagement/RestaurantManagement';
 import BranchManagementBranch from '../components/dashboard/Branch/BranchManagement/BranchManagement';
 import MoneyCaseManager from '../components/dashboard/Branch/MoneyCaseManager/MoneyCaseManager';
+import RestaurantSummaryPage from '../components/dashboard/MoneyCase/page';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();
@@ -129,25 +129,7 @@ const Dashboard: React.FC = () => {
     setSelectedBranch(null);
   };
 
-  // Handle restaurant setup completion
-  const handleRestaurantSetup = () => {
-    // Refetch restaurant info after setup
-    setInfoLoading(true);
-    restaurantService
-      .getRestaurantManagementInfo()
-      .then(data => {
-        setRestaurantInfo(data);
-        setInfoLoading(false);
-        setInfoError(null);
-        // Navigate to overview after successful setup
-        navigate('/dashboard/overview');
-      })
-      .catch(err => {
-        logger.error('Restaurant bilgileri alınırken hata', err);
-        setInfoError('Restaurant bilgileri alınamadı');
-        setInfoLoading(false);
-      });
-  };
+
 
   return (
     <div className="flex h-screen bg-gray-100 dark:bg-gray-900">
@@ -202,6 +184,7 @@ const Dashboard: React.FC = () => {
               {activeTab === 'ingredients' && <IngredientsContent />}
               {activeTab === 'branches' && <BranchManagement />}
               {activeTab === 'tables' && <TableManagement selectedBranch={selectedBranch} />}
+              {activeTab === 'moneyCaseResturant' && <RestaurantSummaryPage />}
               {activeTab === 'restaurant-management' && <RestaurantManagement />}
               {activeTab === 'users' && <UserManagement />}
               {activeTab === 'profile' && <Profile />}

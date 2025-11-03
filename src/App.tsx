@@ -31,7 +31,7 @@ const App: React.FC = () => {
             <Route path="/selection" element={<SelectionScreen />} />
             <Route path="/dashboard/*" element={<Dashboard />} />
             <Route path="/table/qr/:qrToken" element={<TableQR />} />
-            <Route path="/BranchManagement/OnlineMenu/:id" element={<OnlineMenu />} />
+            <Route path="/OnlineMenu/:publicId" element={<OnlineMenu />} />
             <Route path="*" element={<Navigate to="/" replace />} />
 
           </Routes>

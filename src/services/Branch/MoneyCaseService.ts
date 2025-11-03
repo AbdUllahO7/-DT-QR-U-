@@ -19,7 +19,8 @@ import {
   ZReportApiResponse,
   BranchSummaryApiResponse,
   RestaurantSummaryApiResponse,
-  QuickSummaryApiResponse
+  QuickSummaryApiResponse,
+  PreviousCloseInfo,
 } from "../../types/BranchManagement/MoneyCase";
 
 // API Response wrapper type
@@ -145,28 +146,28 @@ class MoneyCaseService {
     averageShiftDuration: apiSummary.averageShiftDuration,
     shiftsWithDiscrepancy: apiSummary.shiftsWithDiscrepancy
   };
-}
+  }
 
-private transformQuickSummary(apiSummary: QuickSummaryApiResponse): QuickSummary {
-  return {
-    branchId: apiSummary.branchId || undefined,
-    branchName: apiSummary.branchName || undefined,
-    activeCaseId: apiSummary.today.activeCaseId || undefined,
-    isOpen: apiSummary.today.hasActiveShift,
-    todaySales: apiSummary.today.totalRevenueToday,
-    todayCash: apiSummary.today.currentRevenue, // Current shift revenue
-    todayCard: apiSummary.today.closedShiftsRevenue, // Closed shifts revenue
-    currentBalance: apiSummary.today.currentRevenue,
-    transactionCount: apiSummary.today.ordersToday,
-    lastUpdated: new Date().toISOString(),
-    ordersToday: apiSummary.today.ordersToday,
-    shiftStartTime: apiSummary.today.shiftStartTime || undefined,
-    currentShiftDuration: apiSummary.today.currentShiftDuration || undefined,
-    closedShiftsRevenue: apiSummary.today.closedShiftsRevenue,
-    weekToDate: apiSummary.weekToDate,
-    monthToDate: apiSummary.monthToDate
-  };
-}
+  private transformQuickSummary(apiSummary: QuickSummaryApiResponse): QuickSummary {
+    return {
+      branchId: apiSummary.branchId || undefined,
+      branchName: apiSummary.branchName || undefined,
+      activeCaseId: apiSummary.today.activeCaseId || undefined,
+      isOpen: apiSummary.today.hasActiveShift,
+      todaySales: apiSummary.today.totalRevenueToday,
+      todayCash: apiSummary.today.currentRevenue, // Current shift revenue
+      todayCard: apiSummary.today.closedShiftsRevenue, // Closed shifts revenue
+      currentBalance: apiSummary.today.currentRevenue,
+      transactionCount: apiSummary.today.ordersToday,
+      lastUpdated: new Date().toISOString(),
+      ordersToday: apiSummary.today.ordersToday,
+      shiftStartTime: apiSummary.today.shiftStartTime || undefined,
+      currentShiftDuration: apiSummary.today.currentShiftDuration || undefined,
+      closedShiftsRevenue: apiSummary.today.closedShiftsRevenue,
+      weekToDate: apiSummary.weekToDate,
+      monthToDate: apiSummary.monthToDate
+    };
+  }
 
 
 
@@ -196,63 +197,59 @@ private transformQuickSummary(apiSummary: QuickSummaryApiResponse): QuickSummary
     }
   }
 
+
   /**
    * Kasa kapatma işlemi
    */
-// In MoneyCaseService class, update closeMoneyCase method:
-
-/**
- * Kasa kapatma işlemi
- */
-async closeMoneyCase(request: CloseMoneyCaseRequest): Promise<MoneyCaseHistoryItem> {
-  try {
-    logger.info('Kasa kapatılıyor', { 
-      branchId: request.branchId, 
-      actualCash: request.actualCash 
-    });
-    
-    const response = await httpClient.post<{
-      message: string;
-      data: any;
-    }>(
-      `${this.baseUrl}/close`, 
-      request
-    );
-    
-    logger.info('✅ Kasa başarıyla kapatıldı', { 
-      response: response.data
-    });
-    
-    // Transform the response to ensure it has the expected structure
-    const closedCase = response.data.data || response.data;
-    
-    // Create a properly structured MoneyCaseHistoryItem
-    const historyItem: MoneyCaseHistoryItem = {
-      id: closedCase.id || closedCase.branchMoneyCaseId || 0,
-      branchId: closedCase.branchId,
-      branchName: closedCase.branchName,
-      openingBalance: closedCase.subTotalAmount || closedCase.openingBalance || 0,
-      closingBalance: closedCase.totalAmount || closedCase.closingBalance || 0,
-      actualCash: closedCase.actualCash || 0,
-      difference: closedCase.discrepancy ?? closedCase.difference ?? 0,
-      openedAt: closedCase.openedAt,
-      closedAt: closedCase.closedAt,
-      openedBy: closedCase.openedByEmail || closedCase.openedBy,
-      closedBy: closedCase.closedByEmail || closedCase.closedBy,
-      notes: closedCase.notes || '',
-      status: 'CLOSED',
-      transactionCount: closedCase.transactionCount || 0,
-      shiftDuration: closedCase.shiftDuration
-    };
-    
-    logger.info('✅ Transformed closed case:', historyItem);
-    
-    return historyItem;
-  } catch (error: any) {
-    logger.error('❌ Kasa kapatılırken hata:', error);
-    throw new Error(error?.response?.data?.message || 'Failed to close money case');
+  async closeMoneyCase(request: CloseMoneyCaseRequest): Promise<MoneyCaseHistoryItem> {
+    try {
+      logger.info('Kasa kapatılıyor', { 
+        branchId: request.branchId, 
+        actualCash: request.actualCash 
+      });
+      
+      const response = await httpClient.post<{
+        message: string;
+        data: any;
+      }>(
+        `${this.baseUrl}/close`, 
+        request
+      );
+      
+      logger.info('✅ Kasa başarıyla kapatıldı', { 
+        response: response.data
+      });
+      
+      // Transform the response to ensure it has the expected structure
+      const closedCase = response.data.data || response.data;
+      
+      // Create a properly structured MoneyCaseHistoryItem
+      const historyItem: MoneyCaseHistoryItem = {
+        id: closedCase.id || closedCase.branchMoneyCaseId || 0,
+        branchId: closedCase.branchId,
+        branchName: closedCase.branchName,
+        openingBalance: closedCase.subTotalAmount || closedCase.openingBalance || 0,
+        closingBalance: closedCase.totalAmount || closedCase.closingBalance || 0,
+        actualCash: closedCase.actualCash || 0,
+        difference: closedCase.discrepancy ?? closedCase.difference ?? 0,
+        openedAt: closedCase.openedAt,
+        closedAt: closedCase.closedAt,
+        openedBy: closedCase.openedByEmail || closedCase.openedBy,
+        closedBy: closedCase.closedByEmail || closedCase.closedBy,
+        notes: closedCase.notes || '',
+        status: 'CLOSED',
+        transactionCount: closedCase.transactionCount || 0,
+        shiftDuration: closedCase.shiftDuration
+      };
+      
+      logger.info('✅ Transformed closed case:', historyItem);
+      
+      return historyItem;
+    } catch (error: any) {
+      logger.error('❌ Kasa kapatılırken hata:', error);
+      throw new Error(error?.response?.data?.message || 'Failed to close money case');
+    }
   }
-}
 
   /**
    * Aktif kasayı getir
@@ -297,197 +294,237 @@ async closeMoneyCase(request: CloseMoneyCaseRequest): Promise<MoneyCaseHistoryIt
   }
 
   /**
+   * En son kapanan kasa bilgisini getirir (yeni kasa açma için)
+   */
+  async getPreviousCloseInfo(branchId?: number): Promise<PreviousCloseInfo | null> {
+    try {
+      logger.info('Önceki kasa kapanış bilgisi getiriliyor', { branchId });
+      
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.get<ApiResponse<PreviousCloseInfo>>(
+        `${this.baseUrl}/previous-close-info`,
+        { params }
+      );
+      
+      logger.info('✅ Önceki kapanış bilgisi API response:', { 
+        response: response.data
+      });
+      
+      if (!response.data || !response.data.data) {
+        logger.info('Önceki kapanış bilgisi bulunamadı');
+        return null;
+      }
+      
+      // No transformation needed, data matches UI type
+      return response.data.data;
+      
+    } catch (error: any) {
+      logger.error('❌ Önceki kapanış bilgisi getirilirken hata:', error);
+      
+      // If no previous close (404 or other errors), return null to allow opening
+      if (error?.response?.status === 404) {
+        logger.info('No previous close info (404)');
+      }
+      
+      // Don't throw, just return null so the open case modal can
+      // still function, just without suggested values.
+      return null;
+    }
+  }
+
+
+  /**
    * Kasa geçmişini getir
    */
-async getMoneyCaseHistory(params: MoneyCaseHistoryParams = {}): Promise<MoneyCaseHistoryResponse> {
-  try {
-    logger.info('Kasa geçmişi getiriliyor', params);
-    
-    const queryParams = {
-      ...params,
-      pageSize: params.pageSize || 30
-    };
-    
-    // API returns array directly in data, not wrapped in items
-    const response = await httpClient.get<{
-      message: string;
-      data: MoneyCaseHistoryItemResponse[];
-      count: number;
-    }>(
-      `${this.baseUrl}/history`,
-      { params: queryParams }
-    );
-    
-    logger.info('✅ Kasa geçmişi API response:', { 
-      response: response.data
-    });
-    
-    // Transform the response
-    const items = (response.data.data || []).map(item => this.transformHistoryItem(item));
-    const totalCount = response.data.count || 0;
-    const pageSize = queryParams.pageSize;
-    
-    const result: MoneyCaseHistoryResponse = {
-      items,
-      totalCount,
-      pageSize,
-      currentPage: 1,
-      totalPages: Math.ceil(totalCount / pageSize)
-    };
-    
-    logger.info('✅ Transformed history:', result);
-    
-    return result;
-  } catch (error: any) {
-    logger.error('❌ Kasa geçmişi getirilirken hata:', error);
-    
-    // Return empty result on error
-    return {
-      items: [],
-      totalCount: 0,
-      pageSize: params.pageSize || 30,
-      currentPage: 1,
-      totalPages: 0
-    };
+  async getMoneyCaseHistory(params: MoneyCaseHistoryParams = {}): Promise<MoneyCaseHistoryResponse> {
+    try {
+      logger.info('Kasa geçmişi getiriliyor', params);
+      
+      const queryParams = {
+        ...params,
+        pageSize: params.pageSize || 30
+      };
+      
+      // API returns array directly in data, not wrapped in items
+      const response = await httpClient.get<{
+        message: string;
+        data: MoneyCaseHistoryItemResponse[];
+        count: number;
+      }>(
+        `${this.baseUrl}/history`,
+        { params: queryParams }
+      );
+      
+      logger.info('✅ Kasa geçmişi API response:', { 
+        response: response.data
+      });
+      
+      // Transform the response
+      const items = (response.data.data || []).map(item => this.transformHistoryItem(item));
+      const totalCount = response.data.count || 0;
+      const pageSize = queryParams.pageSize;
+      
+      const result: MoneyCaseHistoryResponse = {
+        items,
+        totalCount,
+        pageSize,
+        currentPage: 1,
+        totalPages: Math.ceil(totalCount / pageSize)
+      };
+      
+      logger.info('✅ Transformed history:', result);
+      
+      return result;
+    } catch (error: any) {
+      logger.error('❌ Kasa geçmişi getirilirken hata:', error);
+      
+      // Return empty result on error
+      return {
+        items: [],
+        totalCount: 0,
+        pageSize: params.pageSize || 30,
+        currentPage: 1,
+        totalPages: 0
+      };
+    }
   }
-}
 
   /**
    * Z raporu getir
    */
-async getZReport(moneyCaseId: number): Promise<ZReport> {
-  try {
-    logger.info('Z raporu getiriliyor', { moneyCaseId });
-    
-    const response = await httpClient.get<{
-      message: string;
-      zReport: ZReportApiResponse;
-    }>(
-      `${this.baseUrl}/${moneyCaseId}/z-report`
-    );
-    
-    logger.info('✅ Z raporu API response:', { 
-      response: response.data
-    });
-    
-    const transformed = this.transformZReport(response.data.zReport);
-    logger.info('✅ Transformed Z report:', transformed);
-    
-    return transformed;
-  } catch (error: any) {
-    logger.error('❌ Z raporu getirilirken hata:', error);
-    throw new Error(error?.response?.data?.message || 'Failed to fetch Z report');
+  async getZReport(moneyCaseId: number): Promise<ZReport> {
+    try {
+      logger.info('Z raporu getiriliyor', { moneyCaseId });
+      
+      const response = await httpClient.get<{
+        message: string;
+        zReport: ZReportApiResponse;
+      }>(
+        `${this.baseUrl}/${moneyCaseId}/z-report`
+      );
+      
+      logger.info('✅ Z raporu API response:', { 
+        response: response.data
+      });
+      
+      const transformed = this.transformZReport(response.data.zReport);
+      logger.info('✅ Transformed Z report:', transformed);
+      
+      return transformed;
+    } catch (error: any) {
+      logger.error('❌ Z raporu getirilirken hata:', error);
+      throw new Error(error?.response?.data?.message || 'Failed to fetch Z report');
+    }
   }
-}
 
   /**
    * Şube bazında özet rapor getir
    */
-async getBranchSummary(params: BranchSummaryParams = {}): Promise<MoneyCaseSummary> {
-  try {
-    logger.info('Şube özet raporu getiriliyor', params);
-    
-    const response = await httpClient.get<{
-      message: string;
-      data: BranchSummaryApiResponse;
-    }>(
-      `${this.baseUrl}/summary/branch`,
-      { params }
-    );
-    
-    logger.info('✅ Şube özet raporu API response:', { 
-      response: response.data
-    });
-    
-    const transformed = this.transformBranchSummary(response.data.data);
-    logger.info('✅ Transformed branch summary:', transformed);
-    
-    return transformed;
-  } catch (error: any) {
-    logger.error('❌ Şube özet raporu getirilirken hata:', error);
-    throw new Error(error?.response?.data?.message || 'Failed to fetch branch summary');
+  async getBranchSummary(params: BranchSummaryParams = {}): Promise<MoneyCaseSummary> {
+    try {
+      logger.info('Şube özet raporu getiriliyor', params);
+      
+      const response = await httpClient.get<{
+        message: string;
+        data: BranchSummaryApiResponse;
+      }>(
+        `${this.baseUrl}/summary/branch`,
+        { params }
+      );
+      
+      logger.info('✅ Şube özet raporu API response:', { 
+        response: response.data
+      });
+      
+      const transformed = this.transformBranchSummary(response.data.data);
+      logger.info('✅ Transformed branch summary:', transformed);
+      
+      return transformed;
+    } catch (error: any) {
+      logger.error('❌ Şube özet raporu getirilirken hata:', error);
+      throw new Error(error?.response?.data?.message || 'Failed to fetch branch summary');
+    }
   }
-}
   /**
    * Restoran bazında özet rapor getir
    */
-async getRestaurantSummary(params: RestaurantSummaryParams = {}): Promise<MoneyCaseSummary> {
-  try {
-    logger.info('Restoran özet raporu getiriliyor', params);
-    
-    const response = await httpClient.get<{
-      message: string;
-      data: RestaurantSummaryApiResponse;
-    }>(
-      `${this.baseUrl}/summary/restaurant`,
-      { params }
-    );
-    
-    logger.info('✅ Restoran özet raporu API response:', { 
-      response: response.data
-    });
-    
-    const transformed = this.transformRestaurantSummary(response.data.data);
-    logger.info('✅ Transformed restaurant summary:', transformed);
-    
-    return transformed;
-  } catch (error: any) {
-    logger.error('❌ Restoran özet raporu getirilirken hata:', error);
-    throw new Error(error?.response?.data?.message || 'Failed to fetch restaurant summary');
+  async getRestaurantSummary(params: RestaurantSummaryParams = {}): Promise<MoneyCaseSummary> {
+    try {
+      logger.info('Restoran özet raporu getiriliyor', params);
+      
+      const response = await httpClient.get<{
+        message: string;
+        data: RestaurantSummaryApiResponse;
+      }>(
+        `${this.baseUrl}/summary/restaurant`,
+        { params }
+      );
+      
+      logger.info('✅ Restoran özet raporu API response:', { 
+        response: response.data
+      });
+      
+      const transformed = this.transformRestaurantSummary(response.data.data);
+      logger.info('✅ Transformed restaurant summary:', transformed);
+      
+      return transformed;
+    } catch (error: any) {
+      logger.error('❌ Restoran özet raporu getirilirken hata:', error);
+      throw new Error(error?.response?.data?.message || 'Failed to fetch restaurant summary');
+    }
   }
-}
 
   /**
    * Hızlı özet getir (günlük durum)
    */
-async getQuickSummary(branchId?: number): Promise<QuickSummary> {
-  try {
-    logger.info('Hızlı özet getiriliyor', { branchId });
-    
-    const params = branchId ? { branchId } : {};
-    const response = await httpClient.get<{
-      message: string;
-      data: QuickSummaryApiResponse;
-    }>(
-      `${this.baseUrl}/summary/quick`,
-      { params }
-    );
-    
-    logger.info('✅ Hızlı özet API response:', { 
-      response: response.data
-    });
-    
-    const transformed = this.transformQuickSummary(response.data.data);
-    logger.info('✅ Transformed quick summary:', transformed);
-    
-    return transformed;
-  } catch (error: any) {
-    logger.error('❌ Hızlı özet getirilirken hata:', error);
-    
-    // Return default values if API fails
-    return {
-      isOpen: false,
-      todaySales: 0,
-      todayCash: 0,
-      todayCard: 0,
-      currentBalance: 0,
-      transactionCount: 0,
-      lastUpdated: new Date().toISOString(),
-      ordersToday: 0,
-      closedShiftsRevenue: 0,
-      weekToDate: {
-        totalRevenue: 0,
-        shiftCount: 0,
-        orderCount: 0
-      },
-      monthToDate: {
-        totalRevenue: 0,
-        shiftCount: 0,
-        orderCount: 0
-      }
-    };
+  async getQuickSummary(branchId?: number): Promise<QuickSummary> {
+    try {
+      logger.info('Hızlı özet getiriliyor', { branchId });
+      
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.get<{
+        message: string;
+        data: QuickSummaryApiResponse;
+      }>(
+        `${this.baseUrl}/summary/quick`,
+        { params }
+      );
+      
+      logger.info('✅ Hızlı özet API response:', { 
+        response: response.data
+      });
+      
+      const transformed = this.transformQuickSummary(response.data.data);
+      logger.info('✅ Transformed quick summary:', transformed);
+      
+      return transformed;
+    } catch (error: any) {
+      logger.error('❌ Hızlı özet getirilirken hata:', error);
+      
+      // Return default values if API fails
+      return {
+        isOpen: false,
+        todaySales: 0,
+        todayCash: 0,
+        todayCard: 0,
+        currentBalance: 0,
+        transactionCount: 0,
+        lastUpdated: new Date().toISOString(),
+        ordersToday: 0,
+        closedShiftsRevenue: 0,
+        weekToDate: {
+          totalRevenue: 0,
+          shiftCount: 0,
+          orderCount: 0
+        },
+        monthToDate: {
+          totalRevenue: 0,
+          shiftCount: 0,
+          orderCount: 0
+        }
+      };
+    }
   }
-}
 
   /**
    * Kasanın açık olup olmadığını kontrol et

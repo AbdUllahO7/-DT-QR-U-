@@ -18,8 +18,8 @@ import CategoriesContent from './CategoriesContent';
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 import { BranchProductAddon } from '../../../../services/Branch/BranchService';
 import { branchProductAddonsService } from '../../../../services/Branch/BranchAddonsService';
-import BranchProductAddonsModal from './BranchProductAddonsModal';
 import { BranchCategory, Category, DetailedProduct, EditedCategoryName, EditedProductPrice, ProductAddonData } from '../../../../types/BranchManagement/type';
+import BranchProductAddonsModal from './BranchProductAddonsModal';
 
 interface BranchCategoriesProps {
   branchId?: number;
@@ -156,62 +156,32 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     setIsProductAddonsModalOpen(false);
   };
 
-let isProcessing = false; // Module-level lock to prevent multiple executions
+const handleSaveProductAddons = (branchProductId: number, selectedAddonIds: number[]) => {
+  // The modal (BranchProductAddonsModal) handles the actual API calls
+  // for adding/removing addons individually.
+  // This function's only job is to receive the updated list of
+  // assigned addons and update the parent component's state
+  // (specifically the addonsCount) to reflect the change in the UI.
+  
+  const newAddonCount = selectedAddonIds.length;
 
-const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds: number[], customizations: any) => {
-  if (isLoading || isProcessing) {
-    return; // Prevent multiple executions
-  }
-
-  const invocationId = Math.random().toString(36).substring(2, 15);
-
-  try {
-    isProcessing = true; // Set lock
-    setIsLoading(true);
-
-    // Process addon assignments sequentially
-    for (const addonBranchProductId of selectedAddonIds) {
-      const customization = customizations[addonBranchProductId] || {};
-
-      const addonData = {
-        mainBranchProductId: branchProductId,
-        addonBranchProductId,
-        isActive: true,
-        specialPrice: customization.specialPrice || 0,
-        marketingText: customization.marketingText || '',
-        maxQuantity: customization.maxQuantity || 10,
-        minQuantity: customization.minQuantity || 0,
-        groupTag: customization.groupTag || '',
-        isGroupRequired: customization.isGroupRequired || false,
-      };
-
-      await branchProductAddonsService.createBranchProductAddon(addonData);
-    }
-
-    // Update the product addons count in the UI
-    setBranchCategories(prev =>
-      prev.map(category => ({
-        ...category,
-        products: category.products?.map(product =>
-          product.branchProductId === branchProductId
-            ? {
-                ...product,
-                addonsCount: selectedAddonIds.length,
-                hasAddons: selectedAddonIds.length > 0,
-              }
-            : product
-        ),
-      }))
-    );
-
-    setSuccessMessage(`Successfully configured ${selectedAddonIds.length} addons for the product`);
-    handleCloseProductAddons();
-  } catch (err: any) {
-    setError(`Failed to save product addons: ${err.message || 'Unknown error'}`);
-  } finally {
-    setIsLoading(false);
-    isProcessing = false; // Release lock
-  }
+  setBranchCategories(prev =>
+    prev.map(category => ({
+      ...category,
+      products: category.products?.map(product =>
+        product.branchProductId === branchProductId
+          ? {
+              ...product,
+              addonsCount: newAddonCount,
+              hasAddons: newAddonCount > 0,
+            }
+          : product
+      ),
+    }))
+  );
+  
+  // We don't close the modal here anymore, as this is called on every toggle.
+  // We also don't set loading/processing flags as this is just a state update.
 };
   // Price editing functions
 const handleProductPriceEdit = (productId: number, originalPrice: number) => {

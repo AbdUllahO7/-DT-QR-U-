@@ -292,7 +292,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
           onSearchChange={setSearchTerm}
         />
 
-        <div className="grid grid-cols-12 lg:grid-cols-3 gap-6">
+        <div className="grid xl:grid-cols-3 lg:grid-cols-3 gap-6">
           {/* Categories Sidebar */}
           <CategoriesSidebar
             categories={filteredCategories}

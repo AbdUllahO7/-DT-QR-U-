@@ -1,5 +1,7 @@
 export const API_CONFIG = {
+
   BASE_URL: import.meta.env.DEV ? 'http://localhost:7001/api' : 'https://api.mertcode.com/api',
+  
   ENDPOINTS: {
     AUTH: {
       REGISTER: '/Auth/Register',

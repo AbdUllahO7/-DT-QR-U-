@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
   Loader2,
   CheckCircle,
@@ -40,7 +40,14 @@ interface SelectedAddon {
 }
 
 const OnlineMenu: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { publicId } = useParams<{ publicId: string }>(); // Changed from 'id' to 'publicId'
+  const location = useLocation();
+  const locationState = location.state as  { 
+    branchName?: string; 
+    branchId?: number;
+  } | null;
+
+
   const { t } = useLanguage();
 
   // ───── UI States ─────
@@ -68,7 +75,6 @@ const OnlineMenu: React.FC = () => {
   const [isSessionInitialized, setIsSessionInitialized] = useState<boolean>(false);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
 
-  console.log("basket", basket);
 
   // ───── Price Change Detection ─────
   const [showPriceChangeModal, setShowPriceChangeModal] = useState<boolean>(false);
@@ -76,28 +82,30 @@ const OnlineMenu: React.FC = () => {
   const [confirmingPriceChanges, setConfirmingPriceChanges] = useState<boolean>(false);
   const [productPriceCache, setProductPriceCache] = useState<Map<number, number>>(new Map());
 
-  // ───── Load branch id → menu → session ─────
-  useEffect(() => {
-    if (id) fetchPublicBranchId();
-  }, [id]);
 
-  const fetchPublicBranchId = async () => {
+  useEffect(() => {
+    if (publicId) {
+      initializeMenuAndSession();
+    }
+  }, [publicId]);
+
+  const initializeMenuAndSession = async () => {
     try {
       setIsLoading(true);
       setError('');
-      const data = await onlineMenuService.getPublicBranchId(Number(id));
-      setPublicBranchData(data);
-
-      if (data.publicId) {
-        await fetchOnlineMenu(data.publicId);
-        await initializeSession(data.publicId);
-      }
+      
+      // Fetch menu and initialize session in parallel
+      await Promise.all([
+        fetchOnlineMenu(publicId!),
+        initializeSession(publicId!)
+      ]);
     } catch (err: any) {
-      setError(err.message || t('menu.error.fetchPublicId'));
+      setError(err.message || t('menu.error.initialization'));
     } finally {
       setIsLoading(false);
     }
   };
+  
 
   const initializeSession = async (publicId: string) => {
     try {

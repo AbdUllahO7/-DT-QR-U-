@@ -1,5 +1,3 @@
-import { Phone } from "lucide-react";
-import { title } from "process";
 
 
 export const ar = {
@@ -7,6 +5,7 @@ export const ar = {
   common: {
     loading: 'جاري التحميل...',
     error: 'خطأ',
+    actions: 'الإجراءات',
     change: 'تغيير',
     success: 'نجح',
     cancel: 'إلغاء',
@@ -4258,7 +4257,35 @@ export const ar = {
     "selectBranchToView": "اختر الفرع",
     "branchSelector": "محدد الفرع",
     "noBranches": "لا توجد فروع متاحة",
-    
+    totalRevenue: "إجمالي الإيرادات",
+    periodSummary: "ملخص الفترة",
+    totalOrders: "إجمالي الطلبات",
+    totalTransactions: "إجمالي المعاملات",
+    openedBy: "تم الفتح بواسطة",
+    closedBy: "تم الإغلاق بواسطة",
+    shiftDuration: "مدة الوردية",
+    showSummary: "عرض الملخص",
+    hideSummary: "إخفاء الملخص",
+
+    netCash: "صافي النقد",
+    netCashDesc: "النقد الداخل مطروحاً منه النقد الخارج",
+    serviceFeeDesc: "إجمالي رسوم الخدمة المحصلة خلال الوردية",
+    avgOrderValueDesc: "متوسط قيمة الطلبات خلال الوردية",
+    totalShiftsDesc: "إجمالي عدد الورديات المغلقة في الفترة المحددة",
+    cashDiscrepancyDesc : "إجمالي الفارق بين النقد الفعلي والمتوقع خلال الوردية", 
+    cashDiscrepancy: "فارق النقد",
+    totalOrdersDesc: "إجمالي عدد الطلبات المكتملة خلال الوردية",
+    showingResults: "عرض النتائج لـ",
+    from: "من",
+    to: "إلى",
+    grossSalesDesc: "إجمالي المبيعات قبل أي خصومات أو مرتجعات",
+    operationalMetrics: "المقاييس التشغيلية",
+    loadingSummary: "جاري تحميل ملخص الصندوق...",
+    pleaseWait: "يرجى الانتظار",
+    financialOverview: "نظرة عامة مالية",
+    suggestedBalance: "الرصيد المقترح",
+    previousCloseInfo: "معلومات الإغلاق السابقة",
+    lastClosed: "آخر إغلاق في", 
     "status": "الحالة",
     "open": "مفتوح",
     "closed": "مغلق",
