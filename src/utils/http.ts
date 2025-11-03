@@ -1,9 +1,9 @@
 import axios from 'axios';
 import type { ApiError } from '../types/api';
 import { logger } from './logger';
-import { getUserFriendlyErrorMessage, shouldRetryRequest } from './errorHandler';
+import { shouldRetryRequest } from './errorHandler';
 
-const BASE_URL = import.meta.env.DEV ? 'http://localhost:7001' : 'http://localhost:7001';
+const BASE_URL = import.meta.env.DEV ? 'http://localhost:7001' : 'https://api.mertcode.com';
 
 // Network bağlantısı kontrolü
 const checkNetworkConnection = (): boolean => {

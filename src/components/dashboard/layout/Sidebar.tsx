@@ -17,7 +17,6 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import BranchSelector from '../common/BranchSelector';
 import { SidebarProps } from '../../../types/BranchManagement/type';
 
 

@@ -52,11 +52,12 @@ export const useNetworkStatus = (): NetworkStatus => {
   const testConnection = async (): Promise<boolean> => {
     try {
       setNetworkStatus(prev => ({ ...prev, isConnecting: true }));
-      
+
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      
-      const response = await fetch('http://localhost:7001/api/health', { 
+
+      const apiUrl = import.meta.env.DEV ? 'http://localhost:7001' : 'https://api.mertcode.com';
+      const response = await fetch(`${apiUrl}/api/health`, { 
         method: 'HEAD',
         cache: 'no-cache',
         signal: controller.signal

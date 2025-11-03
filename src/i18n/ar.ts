@@ -220,6 +220,8 @@ export const ar = {
         pendingOrders: 'الطلبات المعلقة',
         avgOrderValue: 'متوسط قيمة الطلب'
       }
+    },        moneyCase : {
+      title : "إدارة الصندوق النقدي",
     },
     ingredients : {
       title : "المكونات"
@@ -4249,4 +4251,115 @@ export const ar = {
     "rating": "٤.٨",
     "more": "المزيد"
   },
+   "moneyCase": {
+    "title": "إدارة الصندوق النقدي",
+    "subtitle": "إدارة العمليات النقدية للفرع",
+    "selectBranch": "اختر فرعاً",
+    "selectBranchToView": "اختر الفرع",
+    "branchSelector": "محدد الفرع",
+    "noBranches": "لا توجد فروع متاحة",
+    
+    "status": "الحالة",
+    "open": "مفتوح",
+    "closed": "مغلق",
+    "todaySales": "مبيعات اليوم",
+    "todayCash": "نقد اليوم",
+    "todayCard": "بطاقات اليوم",
+    "currentBalance": "الرصيد الحالي",
+    "transactionCount": "عدد المعاملات",
+    "transactions": "معاملات",
+
+     "avgOrderValue": "متوسط قيمة الطلب",
+    "totalDiscrepancy": "إجمالي الفارق",
+    "totalShifts": "إجمالي الورديات",
+    "avgShiftDuration": "متوسط مدة الوردية",
+    "shiftsWithIssues": "الورديات ذات المشاكل",
+    "period": "الفترة",
+      "todayTotalSales": "إجمالي مبيعات اليوم",
+    "currentShiftRevenue": "إيرادات الوردية الحالية",
+    "closedShifts": "الورديات المغلقة",
+    "ordersToday": "طلبات اليوم",
+    "weekToDate": "من بداية الأسبوع حتى اليوم",
+    "monthToDate": "من بداية الشهر حتى اليوم",
+    "shifts": "الورديات",
+    "orders": "الطلبات",
+    
+    "openCase": "فتح الصندوق",
+    "closeCase": "إغلاق الصندوق",
+    "viewZReport": "عرض تقرير Z",
+    "history": "سجل الصندوق",
+    "records": "سجلات",
+    "noHistory": "لا يوجد سجل",
+    "noHistoryDescription": "ستظهر عمليات الصندوق هنا",
+    serviceFee: "رسوم الخدمة",
+    "openingBalance": "الرصيد الافتتاحي",
+    "openingBalanceDescription": "أدخل المبلغ النقدي الأولي في الصندوق",
+    "closingBalance": "رصيد الإغلاق",
+    "actualCash": "النقد الفعلي",
+    "expectedCash": "النقد المتوقع",
+    "difference": "الفرق",
+    "surplus": "فائض",
+    "shortage": "عجز",
+    "notes": "ملاحظات",
+    "notesPlaceholder": "أضف أي ملاحظات أو تعليقات حول جلسة الصندوق هذه...",
+    
+    "date": "التاريخ والوقت",
+    "openedAt": "وقت الفتح",
+    "closedAt": "وقت الإغلاق",
+    "lastUpdated": "آخر تحديث",
+    "caseId": "رقم الصندوق",
+    
+    "confirm": "تأكيد",
+    "confirmClose": "تأكيد الإغلاق",
+    "cancel": "إلغاء",
+    "close": "إغلاق",
+    "print": "طباعة",
+    "download": "تحميل",
+    
+    "zReport": "تقرير Z",
+    "reportDate": "تاريخ التقرير",
+    "openingInformation": "معلومات الفتح",
+    "salesSummary": "ملخص المبيعات",
+    "closingInformation": "معلومات الإغلاق",
+    "totalSales": "إجمالي المبيعات",
+    "cashSales": "المبيعات النقدية",
+    "cardSales": "مبيعات البطاقات",
+    "refunds": "المرتجعات",
+    "expenses": "المصروفات",
+    "noReportData": "لا توجد بيانات التقرير",
+    
+    "success": {
+      "opened": "تم فتح الصندوق بنجاح!",
+      "closed": "تم إغلاق الصندوق بنجاح!",
+      "closedWithDifference": "تم إغلاق الصندوق بنجاح! الفرق: {{difference}}"
+    },
+    
+    "error": {
+      "fetchBranches": "فشل في جلب الفروع",
+      "fetchActiveCase": "فشل في جلب بيانات الصندوق النشط",
+      "fetchHistory": "فشل في جلب سجل الصندوق",
+      "fetchZReport": "فشل في جلب تقرير Z",
+      "openCase": "فشل في فتح الصندوق",
+      "closeCase": "فشل في إغلاق الصندوق",
+      "noBranchSelected": "الرجاء اختيار فرع أولاً"
+    },
+    
+    "validation": {
+      "openingBalanceRequired": "الرصيد الافتتاحي مطلوب",
+      "openingBalanceMin": "يجب أن يكون الرصيد الافتتاحي 0 أو أكثر",
+      "actualCashRequired": "مبلغ النقد الفعلي مطلوب",
+      "actualCashMin": "يجب أن يكون النقد الفعلي 0 أو أكثر",
+      "notesMaxLength": "لا يمكن أن تتجاوز الملاحظات 500 حرف"
+    },
+    
+    "modal": {
+      "openTitle": "فتح الصندوق النقدي",
+      "openDescription": "بدء جلسة صندوق جديدة",
+      "closeTitle": "إغلاق الصندوق النقدي",
+      "closeDescription": "إنهاء جلسة الصندوق الحالية ومطابقة النقد",
+      "zReportTitle": "تقرير Z - ملخص تفصيلي",
+      "confirmOpenMessage": "هل أنت متأكد من رغبتك في فتح صندوق جديد؟",
+      "confirmCloseMessage": "هل أنت متأكد من رغبتك في إغلاق الصندوق الحالي؟ لا يمكن التراجع عن هذا الإجراء."
+    }
+  }
 }; 

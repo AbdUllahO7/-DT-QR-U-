@@ -33,6 +33,7 @@ import ResturantSettings from '../components/dashboard/content/Settings/Resturan
 import RecycleBin from '../components/dashboard/Porducts/RecycleBinProducts';
 import RestaurantManagementSetting from '../components/dashboard/content/RestaurantManagement/RestaurantManagement';
 import BranchManagementBranch from '../components/dashboard/Branch/BranchManagement/BranchManagement';
+import MoneyCaseManager from '../components/dashboard/Branch/MoneyCaseManager/MoneyCaseManager';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();
@@ -195,7 +196,7 @@ const Dashboard: React.FC = () => {
         
          
               {activeTab === 'overview' && <Overview />}
-                            {activeTab === 'RestaurantManagement' && <RestaurantManagementSetting />}
+              {activeTab === 'RestaurantManagement' && <RestaurantManagementSetting />}
               {activeTab === 'ResturantOrders' && <OrdersManagerResturant />}
               {activeTab === 'products' && <ProductsContent  />}
               {activeTab === 'ingredients' && <IngredientsContent />}
@@ -216,6 +217,7 @@ const Dashboard: React.FC = () => {
               {activeTab === 'orderType' && <OrderTypeComponeent />}
               {activeTab === 'Branchorders' && <OrdersManager/>}
               {activeTab === 'BranchSettings' && <BranchSettings />}
+              {activeTab === 'moneyCase' && <MoneyCaseManager />}
 
       
         </main>
