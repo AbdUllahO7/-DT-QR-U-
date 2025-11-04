@@ -2,15 +2,15 @@
 
 // app/restaurant-summary/page.tsx
 // Redesigned with dark mode, improved UI, and using the production service.
-// Added Branch Selector functionality.
+// Added Branch Selector functionality and comprehensive filtering system.
 // Now using the app's native useLanguage hook.
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, ChevronDown } from 'lucide-react';
+import { Users, ChevronDown, Calendar, Filter, X, Check } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { branchService } from '../../../services/branchService';
 import { moneyCaseService } from '../../../services/Branch/MoneyCaseService';
-import type { MoneyCaseSummary } from '../../../types/BranchManagement/MoneyCase';
+import type { MoneyCaseSummary, RestaurantSummaryParams } from '../../../types/BranchManagement/MoneyCase';
 import { BranchData } from '../../../types/BranchManagement/type';
 
 /**
@@ -152,6 +152,84 @@ const NoDataState: React.FC = () => {
   );
 };
 
+/**
+ * Date preset options
+ */
+const getDatePresets = (t: any) => [
+  {
+    label: t('moneyCase.filters.today'),
+    getValue: () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return {
+        fromDate: today.toISOString().split('T')[0],
+        toDate: new Date().toISOString().split('T')[0]
+      };
+    }
+  },
+  {
+    label: t('moneyCase.filters.yesterday'),
+    getValue: () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
+      return {
+        fromDate: yesterday.toISOString().split('T')[0],
+        toDate: yesterday.toISOString().split('T')[0]
+      };
+    }
+  },
+  {
+    label: t('moneyCase.filters.last7Days'),
+    getValue: () => {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - 6);
+      start.setHours(0, 0, 0, 0);
+      return {
+        fromDate: start.toISOString().split('T')[0],
+        toDate: end.toISOString().split('T')[0]
+      };
+    }
+  },
+  {
+    label: t('moneyCase.filters.last30Days'),
+    getValue: () => {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - 29);
+      start.setHours(0, 0, 0, 0);
+      return {
+        fromDate: start.toISOString().split('T')[0],
+        toDate: end.toISOString().split('T')[0]
+      };
+    }
+  },
+  {
+    label: t('moneyCase.filters.thisMonth'),
+    getValue: () => {
+      const today = new Date();
+      const start = new Date(today.getFullYear(), today.getMonth(), 1);
+      return {
+        fromDate: start.toISOString().split('T')[0],
+        toDate: today.toISOString().split('T')[0]
+      };
+    }
+  },
+  {
+    label: t('moneyCase.filters.lastMonth'),
+    getValue: () => {
+      const today = new Date();
+      const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const end = new Date(today.getFullYear(), today.getMonth(), 0);
+      return {
+        fromDate: start.toISOString().split('T')[0],
+        toDate: end.toISOString().split('T')[0]
+      };
+    }
+  }
+];
+
 export default function RestaurantSummaryPage() {
   const { t, isRTL } = useLanguage();
 
@@ -165,6 +243,13 @@ export default function RestaurantSummaryPage() {
   const [loadingBranches, setLoadingBranches] = useState<boolean>(true);
   const [branchError, setBranchError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Filter states
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [fromDate, setFromDate] = useState<string>('');
+  const [toDate, setToDate] = useState<string>('');
+  const [appliedFilters, setAppliedFilters] = useState<RestaurantSummaryParams>({});
+  const [hasActiveFilters, setHasActiveFilters] = useState<boolean>(false);
 
   // Fetch Branches on component mount
   useEffect(() => {
@@ -186,7 +271,7 @@ export default function RestaurantSummaryPage() {
     fetchBranches();
   }, [t]);
 
-  // Fetch Summary data when selectedBranch changes
+  // Fetch Summary data when selectedBranch or appliedFilters change
   useEffect(() => {
     const fetchSummary = async () => {
       if (!selectedBranch) return;
@@ -194,7 +279,7 @@ export default function RestaurantSummaryPage() {
       try {
         setLoading(true);
         setError(null);
-        const data = await moneyCaseService.getRestaurantSummary({ });
+        const data = await moneyCaseService.getRestaurantSummary(appliedFilters);
         console.log("Fetched restaurant summary:", data); 
         setSummary(data);
       } catch (e: any) {
@@ -206,7 +291,7 @@ export default function RestaurantSummaryPage() {
     };
 
     fetchSummary();
-  }, [selectedBranch, t]);
+  }, [selectedBranch, appliedFilters, t]);
 
   // Click-outside handler to close dropdown
   useEffect(() => {
@@ -230,6 +315,34 @@ export default function RestaurantSummaryPage() {
   const handleBranchSelect = (branch: BranchData) => {
     setSelectedBranch(branch);
     setIsBranchDropdownOpen(false);
+  };
+
+  const handleApplyFilters = () => {
+    const filters: RestaurantSummaryParams = {};
+    
+    if (fromDate) {
+      filters.fromDate = new Date(fromDate).toISOString();
+    }
+    if (toDate) {
+      filters.toDate = new Date(toDate).toISOString();
+    }
+
+    setAppliedFilters(filters);
+    setHasActiveFilters(fromDate !== '' || toDate !== '');
+    setShowFilters(false);
+  };
+
+  const handleClearFilters = () => {
+    setFromDate('');
+    setToDate('');
+    setAppliedFilters({});
+    setHasActiveFilters(false);
+  };
+
+  const handlePresetSelect = (preset: any) => {
+    const dates = preset.getValue();
+    setFromDate(dates.fromDate);
+    setToDate(dates.toDate);
   };
 
   if (loading && !summary) {
@@ -266,63 +379,201 @@ export default function RestaurantSummaryPage() {
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen p-4 sm:p-8 relative">
       <div className="container mx-auto max-w-7xl">
+        {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">
             💰 {t('moneyCase.financialOverview')}
           </h1>
           
-          <div className="relative w-full sm:w-auto" ref={dropdownRef}>
-            <button
-              onClick={toggleBranchDropdown}
-              disabled={loadingBranches}
-              className={`flex items-center justify-between w-full min-w-[250px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 dark:focus:ring-offset-gray-900 focus:ring-blue-500 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed ${isRTL ? 'flex-row-reverse' : ''}`}
-              aria-label={t('moneyCase.branchSelector')}
-            >
-              <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                {loadingBranches ? t('moneyCase.loadingBranches') : selectedBranch ? selectedBranch.branchName : t('moneyCase.selectBranch')}
-              </span>
-              <ChevronDown 
-                className={`h-4 w-4 transition-transform duration-200 ${
-                  isBranchDropdownOpen ? 'transform rotate-180' : ''
-                } ${isRTL ? 'mr-2' : 'ml-2'}`} 
-              />
-            </button>
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            {/* Branch Selector */}
+            <div className="relative w-full sm:w-auto" ref={dropdownRef}>
+              <button
+                onClick={toggleBranchDropdown}
+                disabled={loadingBranches}
+                className={`flex items-center justify-between w-full min-w-[250px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 dark:focus:ring-offset-gray-900 focus:ring-blue-500 shadow-sm disabled:opacity-60 disabled:cursor-not-allowed ${isRTL ? 'flex-row-reverse' : ''}`}
+                aria-label={t('moneyCase.branchSelector')}
+              >
+                <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                  {loadingBranches ? t('moneyCase.loadingBranches') : selectedBranch ? selectedBranch.branchName : t('moneyCase.selectBranch')}
+                </span>
+                <ChevronDown 
+                  className={`h-4 w-4 transition-transform duration-200 ${
+                    isBranchDropdownOpen ? 'transform rotate-180' : ''
+                  } ${isRTL ? 'mr-2' : 'ml-2'}`} 
+                />
+              </button>
 
-            {isBranchDropdownOpen && (
-              <div className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'}`}>
-                {branchError ? (
-                  <div className="px-4 py-3 text-center text-sm text-red-500 dark:text-red-400">
-                    {branchError}
-                  </div>
-                ) : branches.length === 0 ? (
-                  <div className="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
-                    {t('moneyCase.noBranches')}
-                  </div>
-                ) : (
-                  branches.map(branch => (
-                    <button
-                      key={branch.branchId}
-                      onClick={() => handleBranchSelect(branch)}
-                      className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                        selectedBranch?.branchId === branch.branchId
-                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium'
-                          : 'text-gray-700 dark:text-gray-200'
-                      } ${isRTL ? 'text-right' : 'text-left'}`}
-                    >
-                      {branch.branchName}
-                    </button>
-                  ))
-                )}
-              </div>
-            )}
+              {isBranchDropdownOpen && (
+                <div className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'}`}>
+                  {branchError ? (
+                    <div className="px-4 py-3 text-center text-sm text-red-500 dark:text-red-400">
+                      {branchError}
+                    </div>
+                  ) : branches.length === 0 ? (
+                    <div className="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                      {t('moneyCase.noBranches')}
+                    </div>
+                  ) : (
+                    branches.map(branch => (
+                      <button
+                        key={branch.branchId}
+                        onClick={() => handleBranchSelect(branch)}
+                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
+                          selectedBranch?.branchId === branch.branchId
+                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-medium'
+                            : 'text-gray-700 dark:text-gray-200'
+                        } ${isRTL ? 'text-right' : 'text-left'}`}
+                      >
+                        {branch.branchName}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Filter Toggle Button */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${
+                hasActiveFilters
+                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700'
+                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+            >
+              <Filter className="h-4 w-4" />
+              {t('moneyCase.filters.title')}
+              {hasActiveFilters && (
+                <span className="flex items-center justify-center w-5 h-5 text-xs font-bold bg-blue-500 text-white rounded-full">
+                  !
+                </span>
+              )}
+            </button>
           </div>
         </div>
+
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6 border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                <Filter className="h-5 w-5" />
+                {t('moneyCase.filters.title')}
+              </h2>
+              <button
+                onClick={() => setShowFilters(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Date Presets */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                {t('moneyCase.filters.quickSelect')}
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                {getDatePresets(t).map((preset, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handlePresetSelect(preset)}
+                    className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Date Range Inputs */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <Calendar className="inline h-4 w-4 mr-1" />
+                  {t('moneyCase.filters.fromDate')}
+                </label>
+                <input
+                title='From Date'
+                  type="date"
+                  value={fromDate}
+                  onChange={(e) => setFromDate(e.target.value)}
+                  max={toDate || undefined}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <Calendar className="inline h-4 w-4 mr-1" />
+                  {t('moneyCase.filters.toDate')}
+                </label>
+                <input
+                  title='To Date'
+                  type="date"
+                  value={toDate}
+                  onChange={(e) => setToDate(e.target.value)}
+                  min={fromDate || undefined}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleApplyFilters}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                <Check className="h-4 w-4" />
+                {t('moneyCase.filters.apply')}
+              </button>
+              <button
+                onClick={handleClearFilters}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                <X className="h-4 w-4" />
+                {t('moneyCase.filters.clear')}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Active Filters Display */}
+        {hasActiveFilters && (
+          <div className="mb-6 flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+              {t('moneyCase.filters.active')}:
+            </span>
+            {fromDate && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm rounded-full">
+                <Calendar className="h-3 w-3" />
+                {t('moneyCase.filters.from')}: {new Date(fromDate).toLocaleDateString()}
+              </span>
+            )}
+            {toDate && (
+              <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm rounded-full">
+                <Calendar className="h-3 w-3" />
+                {t('moneyCase.filters.to')}: {new Date(toDate).toLocaleDateString()}
+              </span>
+            )}
+            <button
+              onClick={handleClearFilters}
+              className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm rounded-full hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+            >
+              <X className="h-3 w-3" />
+              {t('moneyCase.filters.clearAll')}
+            </button>
+          </div>
+        )}
           
+        {/* Summary Information */}
         <p className="text-lg text-gray-500 dark:text-gray-400 mb-8">
-          {t('moneyCase.showingResults')} <span className="font-semibold text-gray-700 dark:text-gray-200">{summary?.restaurantName || t('moneyCase.yourRestaurant')}</span> {t('moneyCase.from')} <span className="font-semibold text-gray-700 dark:text-gray-200">{new Date(summary!.fromDate).toLocaleDateString()}</span> {t('moneyCase.to')} <span className="font-semibold text-gray-700 dark:text-gray-200">{new Date(summary!.toDate).toLocaleDateString()}</span>
+          {t('moneyCase.showingResults')} <span className="font-semibold text-gray-700 dark:text-gray-200">{summary?.restaurantName || t('moneyCase.yourRestaurant')}</span> {t('moneyCase.from')} <span className="font-semibold text-gray-700 dark:text-gray-200">{summary?.fromDate ? new Date(summary.fromDate).toLocaleDateString() : '-'}</span> {t('moneyCase.to')} <span className="font-semibold text-gray-700 dark:text-gray-200">{summary?.toDate ? new Date(summary.toDate).toLocaleDateString() : '-'}</span>
         </p>
         
+        {/* Summary Cards */}
         <div className={`relative transition-opacity duration-300 ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             <SummaryCard 

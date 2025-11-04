@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Users, DollarSign} from 'lucide-react';
+import { ChevronDown, Users, DollarSign, Calendar, RefreshCw, Filter, X, Check } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useMoneyCaseManager } from '../../../../hooks/useMoneyCaseManager/useMoneyCaseManager';
 import { useClickOutside } from '../../../../hooks';
@@ -14,14 +14,97 @@ import OpenMoneyCaseModal from './OpenMoneyCaseModal';
 import MoneyCaseHistoryTable from './MoneyCaseHistoryTable';
 import ErrorNotification from './ErrorNotification';
 import SuccessNotification from './SuccessNotification';
-// Import the new type
-import { MoneyCaseSummary, PreviousCloseInfo } from '../../../../types/BranchManagement/MoneyCase';
+import { MoneyCaseSummary, PreviousCloseInfo, BranchSummaryParams } from '../../../../types/BranchManagement/MoneyCase';
 import { moneyCaseService } from '../../../../services/Branch/MoneyCaseService';
 import MoneyCaseSummaryCard from './MoneyCaseSummaryCard';
 
+/**
+ * Format date for input fields (YYYY-MM-DD)
+ */
+const formatDateForInput = (date: Date) => {
+  return date.toISOString().split('T')[0];
+};
+
+/**
+ * Date preset options
+ */
+const getDatePresets = (t: any) => [
+  {
+    label: t('moneyCase.filters.today'),
+    getValue: () => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return {
+        fromDate: today.toISOString().split('T')[0],
+        toDate: new Date().toISOString().split('T')[0]
+      };
+    }
+  },
+  {
+    label: t('moneyCase.filters.yesterday'),
+    getValue: () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
+      return {
+        fromDate: yesterday.toISOString().split('T')[0],
+        toDate: yesterday.toISOString().split('T')[0]
+      };
+    }
+  },
+  {
+    label: t('moneyCase.filters.last7Days'),
+    getValue: () => {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - 6);
+      start.setHours(0, 0, 0, 0);
+      return {
+        fromDate: start.toISOString().split('T')[0],
+        toDate: end.toISOString().split('T')[0]
+      };
+    }
+  },
+  {
+    label: t('moneyCase.filters.last30Days'),
+    getValue: () => {
+      const end = new Date();
+      const start = new Date();
+      start.setDate(start.getDate() - 29);
+      start.setHours(0, 0, 0, 0);
+      return {
+        fromDate: start.toISOString().split('T')[0],
+        toDate: end.toISOString().split('T')[0]
+      };
+    }
+  },
+  {
+    label: t('moneyCase.filters.thisMonth'),
+    getValue: () => {
+      const today = new Date();
+      const start = new Date(today.getFullYear(), today.getMonth(), 1);
+      return {
+        fromDate: start.toISOString().split('T')[0],
+        toDate: today.toISOString().split('T')[0]
+      };
+    }
+  },
+  {
+    label: t('moneyCase.filters.lastMonth'),
+    getValue: () => {
+      const today = new Date();
+      const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const end = new Date(today.getFullYear(), today.getMonth(), 0);
+      return {
+        fromDate: start.toISOString().split('T')[0],
+        toDate: end.toISOString().split('T')[0]
+      };
+    }
+  }
+];
 
 const MoneyCaseManager: React.FC = () => {
-  const { t,  isRTL } = useLanguage();
+  const { t, isRTL } = useLanguage();
 
   const {
     state,
@@ -34,7 +117,7 @@ const MoneyCaseManager: React.FC = () => {
       handleOpenCase,
       handleCloseCase,
       fetchZReport,
-      openOpenModal, // We will wrap this
+      openOpenModal,
       openCloseModal,
       closeModals,
       clearError,
@@ -47,6 +130,32 @@ const MoneyCaseManager: React.FC = () => {
   useClickOutside(dropdownRef, () => 
     setState(prev => ({ ...prev, isBranchDropdownOpen: false }))
   );
+
+  // Summary state
+  const [showSummary, setShowSummary] = useState(false);
+  const [branchSummary, setBranchSummary] = useState<MoneyCaseSummary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [previousCloseInfo, setPreviousCloseInfo] = useState<PreviousCloseInfo | null>(null);
+
+  // Filter states
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [fromDate, setFromDate] = useState<string>(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 30); // Default: last 30 days
+    return formatDateForInput(date);
+  });
+  const [toDate, setToDate] = useState<string>(() => {
+    return formatDateForInput(new Date()); // Default: today
+  });
+  const [appliedFilters, setAppliedFilters] = useState<BranchSummaryParams>(() => {
+    const date = new Date();
+    date.setDate(date.getDate() - 30);
+    return {
+      fromDate: date.toISOString(),
+      toDate: new Date().toISOString()
+    };
+  });
+  const [hasActiveFilters, setHasActiveFilters] = useState<boolean>(true); // True by default since we have default dates
 
   // Initial fetch on mount
   useEffect(() => {
@@ -63,25 +172,20 @@ const MoneyCaseManager: React.FC = () => {
     }
   }, [state.selectedBranch, fetchActiveCase, fetchQuickSummary, fetchHistory]);
 
-
-  const [showSummary, setShowSummary] = useState(false);
-  const [branchSummary, setBranchSummary] = useState<MoneyCaseSummary | null>(null);
-  // Add state for previous close info
-  const [previousCloseInfo, setPreviousCloseInfo] = useState<PreviousCloseInfo | null>(null);
-
-
   const fetchBranchSummary = async () => {
     if (!state.selectedBranch) return;
     
     try {
+      setSummaryLoading(true);
       const summary = await moneyCaseService.getBranchSummary({
         branchId: state.selectedBranch.branchId,
-        fromDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(), // Last 30 days
-        toDate: new Date().toISOString()
+        ...appliedFilters
       });
       setBranchSummary(summary);
     } catch (error) {
       console.error('Failed to fetch branch summary:', error);
+    } finally {
+      setSummaryLoading(false);
     }
   };
 
@@ -92,26 +196,21 @@ const MoneyCaseManager: React.FC = () => {
     }));
   };
 
-  // New function to fetch data before opening modal
   const handleShowOpenModal = async () => {
-    if (!state.selectedBranch) return; // Guard
+    if (!state.selectedBranch) return;
     
     try {
-      // 1. Fetch the previous close info
       const info = await moneyCaseService.getPreviousCloseInfo(state.selectedBranch.branchId);
       setPreviousCloseInfo(info);
       
-      // 2. Set the openingBalance in the hook's state to the suggested value
       const suggestedBalance = info?.suggestedOpeningBalance || 0;
       setState(prev => ({
         ...prev,
         openingBalance: suggestedBalance,
-        showOpenModal: true // 3. Show the modal
+        showOpenModal: true
       }));
-      
     } catch (error) {
       console.error("Failed to get previous close info", error);
-      // Still open the modal, but with 0 balance and no info
       setPreviousCloseInfo(null);
       setState(prev => ({
         ...prev,
@@ -121,6 +220,61 @@ const MoneyCaseManager: React.FC = () => {
     }
   };
 
+  const handleToggleSummary = () => {
+    const newShowState = !showSummary;
+    setShowSummary(newShowState);
+    if (newShowState) {
+      fetchBranchSummary();
+    }
+  };
+
+  const handleApplyFilters = () => {
+    const filters: BranchSummaryParams = {};
+    
+    if (fromDate) {
+      filters.fromDate = new Date(fromDate).toISOString();
+    }
+    if (toDate) {
+      filters.toDate = new Date(toDate).toISOString();
+    }
+
+    setAppliedFilters(filters);
+    setHasActiveFilters(fromDate !== '' || toDate !== '');
+    setShowFilters(false);
+    
+    // Auto-refresh if summary is visible
+    if (showSummary) {
+      fetchBranchSummary();
+    }
+  };
+
+  const handleClearFilters = () => {
+    // Reset to default (last 30 days)
+    const date = new Date();
+    date.setDate(date.getDate() - 30);
+    const defaultFromDate = formatDateForInput(date);
+    const defaultToDate = formatDateForInput(new Date());
+    
+    setFromDate(defaultFromDate);
+    setToDate(defaultToDate);
+    
+    setAppliedFilters({
+      fromDate: new Date(defaultFromDate).toISOString(),
+      toDate: new Date(defaultToDate).toISOString()
+    });
+    setHasActiveFilters(true); // Still active with default dates
+    
+    // Auto-refresh if summary is visible
+    if (showSummary) {
+      fetchBranchSummary();
+    }
+  };
+
+  const handlePresetSelect = (preset: any) => {
+    const dates = preset.getValue();
+    setFromDate(dates.fromDate);
+    setToDate(dates.toDate);
+  };
 
   // Show branch selection if no branch is selected
   if (!state.selectedBranch && !state.loading) {
@@ -134,7 +288,6 @@ const MoneyCaseManager: React.FC = () => {
                 {t('moneyCase.selectBranch') || 'Select a branch to manage money case'}
               </p>
               
-              {/* Branch Selector */}
               <div className="relative inline-block" ref={dropdownRef}>
                 <button
                   onClick={toggleBranchDropdown}
@@ -185,7 +338,6 @@ const MoneyCaseManager: React.FC = () => {
         <div className={`flex items-center justify-between mb-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <MoneyCaseHeader t={t} />
           
-          {/* Branch Selector */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={toggleBranchDropdown}
@@ -241,30 +393,189 @@ const MoneyCaseManager: React.FC = () => {
           t={t}
           isRTL={isRTL}
         />
-        <button
-            onClick={() => {
-                setShowSummary(!showSummary);
-                if (!showSummary) fetchBranchSummary();
-              }}
-              className="mb-4 px-4 py-2 bg-blue-600 text-white rounded-lg"
+
+        {/* Branch Summary Section with Enhanced Filtering */}
+        <div className="mb-6">
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <button
+              onClick={handleToggleSummary}
+              className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 font-medium flex items-center justify-center gap-2"
             >
-              {showSummary ? t('moneyCase.hideSummary'): t('moneyCase.showSummary')} 
+              <DollarSign className="h-4 w-4" />
+              {showSummary ? t('moneyCase.hideSummary') : t('moneyCase.showSummary')}
             </button>
 
             {showSummary && (
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg border transition-colors ${
+                  hasActiveFilters
+                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-700'
+                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700'
+                } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
+              >
+                <Filter className="h-4 w-4" />
+                {t('moneyCase.filters.title')}
+                {hasActiveFilters && (
+                  <span className="flex items-center justify-center w-5 h-5 text-xs font-bold bg-blue-500 text-white rounded-full">
+                    !
+                  </span>
+                )}
+              </button>
+            )}
+          </div>
+
+          {showSummary && (
+            <div className="space-y-4">
+              {/* Filter Panel */}
+              {showFilters && (
+                <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                      <Filter className="h-5 w-5" />
+                      {t('moneyCase.filters.title')}
+                    </h2>
+                    <button
+                      onClick={() => setShowFilters(false)}
+                      className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+                  </div>
+
+                  {/* Date Presets */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                      {t('moneyCase.filters.quickSelect')}
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                      {getDatePresets(t).map((preset, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handlePresetSelect(preset)}
+                          className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-colors"
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Date Range Inputs */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <Calendar className="inline h-4 w-4 mr-1" />
+                        {t('moneyCase.filters.fromDate')}
+                      </label>
+                      <input
+                      title='From Date'
+                        type="date"
+                        value={fromDate}
+                        onChange={(e) => setFromDate(e.target.value)}
+                        max={toDate || undefined}
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <Calendar className="inline h-4 w-4 mr-1" />
+                        {t('moneyCase.filters.toDate')}
+                      </label>
+                      <input
+                      title='To Date'
+                        type="date"
+                        value={toDate}
+                        onChange={(e) => setToDate(e.target.value)}
+                        min={fromDate || undefined}
+                        max={formatDateForInput(new Date())}
+                        className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={handleApplyFilters}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    >
+                      <Check className="h-4 w-4" />
+                      {t('moneyCase.filters.apply')}
+                    </button>
+                    <button
+                      onClick={handleClearFilters}
+                      className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                    >
+                      <X className="h-4 w-4" />
+                      {t('moneyCase.filters.clear')}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Active Filters Display */}
+              {hasActiveFilters && (
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    {t('moneyCase.filters.active')}:
+                  </span>
+                  {fromDate && (
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm rounded-full">
+                      <Calendar className="h-3 w-3" />
+                      {t('moneyCase.filters.from')}: {new Date(fromDate).toLocaleDateString()}
+                    </span>
+                  )}
+                  {toDate && (
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-sm rounded-full">
+                      <Calendar className="h-3 w-3" />
+                      {t('moneyCase.filters.to')}: {new Date(toDate).toLocaleDateString()}
+                    </span>
+                  )}
+                  <button
+                    onClick={handleClearFilters}
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-sm rounded-full hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+                  >
+                    <X className="h-3 w-3" />
+                    {t('moneyCase.filters.clearAll')}
+                  </button>
+                </div>
+              )}
+
+              {/* Summary Info Text */}
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {t('moneyCase.showingDataFor')} 
+                  <span className="font-semibold text-gray-700 dark:text-gray-200">
+                    {' '}{state.selectedBranch?.branchName}{' '}
+                  </span>
+                  {t('moneyCase.from')}{' '}
+                  <span className="font-semibold text-gray-700 dark:text-gray-200">
+                    {appliedFilters.fromDate ? new Date(appliedFilters.fromDate).toLocaleDateString() : '-'}
+                  </span>
+                  {' '}{t('moneyCase.to')}{' '}
+                  <span className="font-semibold text-gray-700 dark:text-gray-200">
+                    {appliedFilters.toDate ? new Date(appliedFilters.toDate).toLocaleDateString() : '-'}
+                  </span>
+                </p>
+              </div>
+
+              {/* Summary Card */}
               <MoneyCaseSummaryCard
                 summary={branchSummary}
-                loading={false}
+                loading={summaryLoading}
                 t={t}
                 isRTL={isRTL}
               />
-            )}
+            </div>
+          )}
+        </div>
 
         {/* Action Buttons */}
         <MoneyCaseActions
           activeCase={state.activeCase}
           loading={state.loading}
-          onOpenCase={handleShowOpenModal} // Use the new wrapped function
+          onOpenCase={handleShowOpenModal}
           onCloseCase={openCloseModal}
           t={t}
           isRTL={isRTL}
@@ -281,7 +592,7 @@ const MoneyCaseManager: React.FC = () => {
 
         {/* Modals */}
         <OpenMoneyCaseModal
-          previousCloseInfo={previousCloseInfo} // Pass the fetched info as a prop
+          previousCloseInfo={previousCloseInfo}
           show={state.showOpenModal}
           loading={state.loading}
           openingBalance={state.openingBalance}
