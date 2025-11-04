@@ -3653,6 +3653,7 @@ export const en = {
     searchPlaceholder:"Write here",
     showAdvancedFilter:"Show Advanced Filters",
     hideAdvancedFilter:"Hide Advanced Filters",
+    confirmedAt:"Confirmed At",
     of:"of",
     orders:"orders",
     clearFilter:"Clear Filters",

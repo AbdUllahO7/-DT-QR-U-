@@ -2,7 +2,6 @@
 
 // app/restaurant-summary/page.tsx
 // Redesigned with dark mode, improved UI, and using the production service.
-// Mocks added to resolve build errors in a single-file environment.
 // Added Branch Selector functionality.
 // Now using the app's native useLanguage hook.
 
@@ -10,81 +9,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Users, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { branchService } from '../../../services/branchService';
-
-// --- Mock Data and Service (to fix build error) ---
-// Simulating the types and services the component depends on.
-
-// Simulating: ../../../types/BranchManagement/MoneyCase
-export type MoneyCaseSummary = {
-  restaurantName: string;
-  fromDate: string; // ISO date string
-  toDate: string; // ISO date string
-  totalSales: number;
-  totalCash: number;
-  totalCard: number;
-  totalOrders: number;
-  averageOrderValue: number;
-  totalCases: number;
-  totalDifference: number;
-  shiftsWithDiscrepancy: number;
-};
-
-// Mock data to be returned by the service
-const mockSummaryData: MoneyCaseSummary = {
-  restaurantName: "The Gourmet Llama",
-  fromDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days ago
-  toDate: new Date().toISOString(),
-  totalSales: 42500.75,
-  totalCash: 18200.50,
-  totalCard: 24300.25,
-  totalOrders: 850,
-  averageOrderValue: 50.00,
-  totalCases: 42,
-  totalDifference: -15.20,
-  shiftsWithDiscrepancy: 3,
-};
-
-// Simulating: ../../../services/Branch/MoneyCaseService
-export const moneyCaseService = {
-  getRestaurantSummary: (params: { branchId?: number }): Promise<MoneyCaseSummary> => {
-    console.log("Mock: Fetching restaurant summary with params:", params);
-    // Simulate network delay
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // To test error, uncomment this line:
-        // reject(new Error("Network connection failed."));
-        
-        // To test no data, uncomment this line:
-        // resolve(null as any); 
-
-        // Simulate different data per branch
-        const branchBonus = params.branchId ? params.branchId * 10000 : 0;
-        const branchData = {
-          ...mockSummaryData,
-          restaurantName: `Branch ${params.branchId || 'All'} Summary`,
-          totalSales: mockSummaryData.totalSales + branchBonus,
-          totalCash: mockSummaryData.totalCash + (branchBonus / 2),
-          totalOrders: mockSummaryData.totalOrders + (params.branchId ? params.branchId * 100 : 0),
-        };
-        
-        resolve(branchData);
-      }, 1500); // 1.5 second delay
-    });
-  }
-};
-
-// --- Mock Branch Service ---
-// Simulating types and service for the new branch selector
-export interface BranchData {
-  branchId: number;
-  branchName: string;
-  // Add other fields if needed by the component
-}
-
-
-
-// --- End of Mock Data ---
-
+import { moneyCaseService } from '../../../services/Branch/MoneyCaseService';
+import type { MoneyCaseSummary } from '../../../types/BranchManagement/MoneyCase';
+import { BranchData } from '../../../types/BranchManagement/type';
 
 /**
  * A simple icon wrapper for inline SVGs.
@@ -129,7 +56,6 @@ const CardIcon: React.FC<{ icon: 'dollar' | 'bank' | 'card' | 'cart' | 'scale' |
     ),
   };
   
-  // Using blue as an accent color
   return (
     <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400">
       {iconMap[icon] || null}
@@ -137,9 +63,8 @@ const CardIcon: React.FC<{ icon: 'dollar' | 'bank' | 'card' | 'cart' | 'scale' |
   );
 };
 
-
 /**
- * Formats a number as USD currency (from original prompt).
+ * Formats a number as USD currency.
  */
 const formatCurrency = (amount: number | undefined) => {
   if (amount === undefined || amount === null) return '$0';
@@ -147,7 +72,7 @@ const formatCurrency = (amount: number | undefined) => {
     style: 'currency', 
     currency: 'USD',
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0, // Changed from 0 to 0 to match original
+    maximumFractionDigits: 0,
   }).format(amount);
 }
 
@@ -159,7 +84,7 @@ const SummaryCard: React.FC<{
   value: string; 
   description: string;
   icon: React.ComponentProps<typeof CardIcon>['icon'];
-  className?: string; // For special styling, like the discrepancy card
+  className?: string;
 }> = ({ title, value, description, icon, className = '' }) => (
   <div className={`bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-6 transition-all duration-300 hover:shadow-xl dark:hover:bg-gray-700/70 hover:-translate-y-1 ${className}`}>
     <div className="flex items-center justify-between mb-4">
@@ -227,18 +152,13 @@ const NoDataState: React.FC = () => {
   );
 };
 
-
-// --- Main Client Component (Corrected) ---
-
 export default function RestaurantSummaryPage() {
   const { t, isRTL } = useLanguage();
 
-  // 1. Set up state for data, loading, and errors
   const [summary, setSummary] = useState<MoneyCaseSummary | null>(null);
-  const [loading, setLoading] = useState<boolean>(true); // This is for the summary
-  const [error, setError] = useState<string | null>(null); // This is for the summary
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // -- New State for Branch Selector --
   const [branches, setBranches] = useState<BranchData[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<BranchData | null>(null);
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState<boolean>(false);
@@ -246,7 +166,7 @@ export default function RestaurantSummaryPage() {
   const [branchError, setBranchError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // 2. Fetch Branches on component mount
+  // Fetch Branches on component mount
   useEffect(() => {
     const fetchBranches = async () => {
       try {
@@ -255,7 +175,7 @@ export default function RestaurantSummaryPage() {
         const data = await branchService.getBranches();
         setBranches(data);
         if (data.length > 0) {
-          setSelectedBranch(data[0]); // Select the first branch by default
+          setSelectedBranch(data[0]);
         }
       } catch (e: any) {
         setBranchError(e.message || t('moneyCase.error.fetchBranches'));
@@ -264,18 +184,18 @@ export default function RestaurantSummaryPage() {
       }
     };
     fetchBranches();
-  }, [t]); // Add t as dependency
+  }, [t]);
 
-  // 3. Fetch Summary data when selectedBranch changes
+  // Fetch Summary data when selectedBranch changes
   useEffect(() => {
-    // Define an async function inside the effect
     const fetchSummary = async () => {
-      if (!selectedBranch) return; // Don't fetch if no branch is selected
+      if (!selectedBranch) return;
 
       try {
         setLoading(true);
-        setError(null); // Clear previous errors
-        const data = await moneyCaseService.getRestaurantSummary({ branchId: selectedBranch.branchId });
+        setError(null);
+        const data = await moneyCaseService.getRestaurantSummary({ });
+        console.log("Fetched restaurant summary:", data); 
         setSummary(data);
       } catch (e: any) {
         console.error("Failed to fetch restaurant summary:", e);
@@ -286,9 +206,9 @@ export default function RestaurantSummaryPage() {
     };
 
     fetchSummary();
-  }, [selectedBranch, t]); // The dependency array now includes selectedBranch and t
+  }, [selectedBranch, t]);
 
-  // 4. Click-outside handler to close dropdown
+  // Click-outside handler to close dropdown
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -301,7 +221,6 @@ export default function RestaurantSummaryPage() {
     };
   }, []);
 
-  // -- New Event Handlers for Branch Selector --
   const toggleBranchDropdown = () => {
     if (!loadingBranches) {
       setIsBranchDropdownOpen(prev => !prev);
@@ -313,8 +232,7 @@ export default function RestaurantSummaryPage() {
     setIsBranchDropdownOpen(false);
   };
 
-  // 5. Render loading state (for summary)
-  if (loading && !summary) { // Only show full page loader on initial summary load
+  if (loading && !summary) {
     return (
       <div className="bg-gray-50 dark:bg-gray-900 min-h-screen p-8">
         <LoadingState />
@@ -322,7 +240,6 @@ export default function RestaurantSummaryPage() {
     );
   }
 
-  // 6. Render error state (for summary)
   if (error) {
      return (
       <div className="bg-gray-50 dark:bg-gray-900 min-h-screen p-8">
@@ -331,7 +248,6 @@ export default function RestaurantSummaryPage() {
     );
   }
 
-  // 7. Render "no data" state (for summary)
   if (!summary && !loading) {
     return (
       <div className="bg-gray-50 dark:bg-gray-900 min-h-screen p-8">
@@ -340,13 +256,12 @@ export default function RestaurantSummaryPage() {
     );
   }
 
-  // 8. Render the Fetched Data (Successful)
   const discrepancyAmount = summary?.totalDifference || 0;
   const discrepancyColorClass = discrepancyAmount < 0 
     ? 'bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500' 
     : discrepancyAmount > 0
     ? 'bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-500'
-    : 'border-l-4 border-green-500'; // Positive or zero
+    : 'border-l-4 border-green-500';
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen p-4 sm:p-8 relative">
@@ -356,7 +271,6 @@ export default function RestaurantSummaryPage() {
             💰 {t('moneyCase.financialOverview')}
           </h1>
           
-          {/* --- Branch Selector --- */}
           <div className="relative w-full sm:w-auto" ref={dropdownRef}>
             <button
               onClick={toggleBranchDropdown}
@@ -409,9 +323,7 @@ export default function RestaurantSummaryPage() {
           {t('moneyCase.showingResults')} <span className="font-semibold text-gray-700 dark:text-gray-200">{summary?.restaurantName || t('moneyCase.yourRestaurant')}</span> {t('moneyCase.from')} <span className="font-semibold text-gray-700 dark:text-gray-200">{new Date(summary!.fromDate).toLocaleDateString()}</span> {t('moneyCase.to')} <span className="font-semibold text-gray-700 dark:text-gray-200">{new Date(summary!.toDate).toLocaleDateString()}</span>
         </p>
         
-        {/* Loading overlay for summary refetch */}
         <div className={`relative transition-opacity duration-300 ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-          {/* --- Main Financial Cards --- */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             <SummaryCard 
               title={t('moneyCase.totalRevenue')}
@@ -433,7 +345,6 @@ export default function RestaurantSummaryPage() {
             />
           </div>
 
-          {/* --- Operational Metrics --- */}
           <h2 className="text-2xl font-bold mb-5 text-gray-800 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2">
             {t('moneyCase.operationalMetrics')}
           </h2>
@@ -461,7 +372,7 @@ export default function RestaurantSummaryPage() {
               value={formatCurrency(summary?.totalDifference)} 
               description={t('moneyCase.cashDiscrepancyDesc', { count: summary?.shiftsWithDiscrepancy || 0 })}
               icon="alert"
-              className={discrepancyColorClass} // Special highlight for this card
+              className={discrepancyColorClass}
             />
           </div>
         </div>
@@ -469,4 +380,3 @@ export default function RestaurantSummaryPage() {
     </div>
   );
 }
-
