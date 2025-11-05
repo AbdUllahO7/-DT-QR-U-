@@ -8,6 +8,7 @@ import { OrderType, orderTypeService } from '../../../../services/Branch/BranchO
 import { basketService } from '../../../../services/Branch/BasketService';
 import { orderService } from '../../../../services/Branch/OrderService';
 import WhatsAppConfirmationModal from '../Menu/CartSideBar/WhatsAppConfirmationModal';
+import { WhatsAppService } from '../../../../services/WhatsAppService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import ToastComponent from '../Menu/CartSideBar/ToastComponenet';
 
@@ -70,6 +71,9 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const [confirmingPrice, setConfirmingPrice] = useState<boolean>(false);
   const [submittingOrder, setSubmittingOrder] = useState<boolean>(false);
   const [showWhatsAppConfirmation, setShowWhatsAppConfirmation] = useState<boolean>(false);
+  const [pendingWhatsAppData, setPendingWhatsAppData] = useState<any>(null);
+  const [whatsappSending, setWhatsappSending] = useState<boolean>(false);
+  const [createdOrderTag, setCreatedOrderTag] = useState<string | null>(null);
 
   // Toast States
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -93,11 +97,30 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   // Get restaurant preferences
   const restaurantPreferences = menuData?.preferences || menuData?.restaurantPreferences || {};
   const restaurantName = menuData?.restaurantName || restaurantPreferences?.restaurantName || 'Restaurant';
-  const whatsappOrderNumber = restaurantPreferences?.whatsAppPhoneNumber;
-  const enableWhatsAppOrdering = restaurantPreferences?.useWhatsappForOrders;
+  const whatsAppPhoneNumber = restaurantPreferences?.whatsAppPhoneNumber;
+  const useWhatsappForOrders = restaurantPreferences?.useWhatsappForOrders;
   const acceptCash = restaurantPreferences?.acceptCash;
   const acceptCreditCard = restaurantPreferences?.acceptCreditCard;
   const acceptOnlinePayment = restaurantPreferences?.acceptOnlinePayment;
+
+  // ADDED: WhatsApp Service function - same as useCartHandlers
+  const sendOrderToWhatsApp = async (whatsappData: any) => {
+    try {
+      console.log('📱 Sending WhatsApp message...');
+      console.log('  - Restaurant preferences:', restaurantPreferences);
+      console.log('  - WhatsApp number:', whatsAppPhoneNumber);
+      
+      const whatsappNumber = WhatsAppService.formatWhatsAppNumber(whatsAppPhoneNumber);
+      console.log('  - Formatted number:', whatsappNumber);
+      
+      await WhatsAppService.sendOrderToWhatsApp(whatsappNumber, whatsappData);
+      console.log('✅ WhatsApp message sent successfully');
+      
+    } catch (error) {
+      console.error('❌ Error sending WhatsApp notification:', error);
+      throw error;
+    }
+  };
 
   // Reset to cart view when sidebar opens
   useEffect(() => {
@@ -115,6 +138,9 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     setPaymentMethod('');
     setValidationErrors({});
     setSelectedOrderType(null);
+    setPendingWhatsAppData(null);
+    setShowWhatsAppConfirmation(false);
+    setCreatedOrderTag(null);
   };
 
   const formatPrice = (price: number) => {
@@ -175,7 +201,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       await onBasketUpdate();
     } catch (err: any) {
       console.error('Failed to update quantity:', err);
-      alert(err.message || 'Failed to update quantity');
+      addToast(err.message || 'Failed to update quantity', 'error', 3000);
     } finally {
       setUpdatingItemId(null);
     }
@@ -190,7 +216,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       await onBasketUpdate();
     } catch (err: any) {
       console.error('Failed to delete item:', err);
-      alert(err.message || 'Failed to delete item');
+      addToast(err.message || 'Failed to delete item', 'error', 3000);
     } finally {
       setDeletingItemId(null);
     }
@@ -215,7 +241,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       await onBasketUpdate();
     } catch (err: any) {
       console.error('Failed to update addon quantity:', err);
-      alert(err.message || 'Failed to update addon quantity');
+      addToast(err.message || 'Failed to update addon quantity', 'error', 3000);
     } finally {
       setUpdatingItemId(null);
     }
@@ -229,7 +255,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       await onBasketUpdate();
     } catch (err: any) {
       console.error('Failed to delete addon:', err);
-      alert(err.message || 'Failed to delete addon');
+      addToast(err.message || 'Failed to delete addon', 'error', 3000);
     }
   };
 
@@ -245,7 +271,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       await onBasketUpdate();
     } catch (err: any) {
       console.error('Failed to add addon:', err);
-      alert(err.message || 'Failed to add addon');
+      addToast(err.message || 'Failed to add addon', 'error', 3000);
     } finally {
       setAddingAddonToItem(null);
     }
@@ -273,7 +299,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
     const sessionId = localStorage.getItem('online_menu_session_id');
     if (!sessionId) {
-      alert('Session expired. Please refresh.');
+      addToast('Session expired. Please refresh.', 'error', 3000);
       return;
     }
 
@@ -283,7 +309,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       console.warn('Price check failed, proceeding anyway:', err);
     }
 
-    // Fetch order types
     try {
       setLoadingOrderTypes(true);
       setOrderTypeError(null);
@@ -369,6 +394,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     return Object.keys(errors).length === 0;
   };
 
+  // UPDATED: handleSubmitOrder with WhatsApp integration matching useCartHandlers
   const handleSubmitOrder = async () => {
     if (!validateForm()) return;
 
@@ -378,7 +404,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       orderTypeId: selectedOrderType!.id,
     } as CreateSessionOrderDto;
 
-    // Add optional fields based on order type requirements
     if (selectedOrderType!.requiresName && customerName.trim()) {
       orderData.customerName = customerName.trim();
     }
@@ -402,48 +427,137 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         await onBasketUpdate();
       }
       
-      await orderService.createSessionOrder(orderData);
+      console.log('📦 Creating order with data:', orderData);
+      const order = await orderService.createSessionOrder(orderData);
+      console.log('✅ Order created:', order);
+      
+      if (order.orderTag) {
+        setCreatedOrderTag(order.orderTag);
+      }
       
       await onBasketUpdate();
       
-      // Show success toast
       addToast(t('menu.cart.order_created_success') || 'Order placed successfully! 🎉', 'success', 5000);
       
-      if (enableWhatsAppOrdering && whatsappOrderNumber) {
-        // Wait a moment for the toast to be visible before showing WhatsApp modal
-        setTimeout(() => {
-          setShowWhatsAppConfirmation(true);
-        }, 500);
+      // Calculate service charge
+      const serviceChargeAmount = selectedOrderType!.serviceCharge || 0;
+
+      // DEBUG: Log WhatsApp checks
+      console.log('🔍 WhatsApp Debug Info:');
+      console.log('  - order object:', order);
+      console.log('  - order.orderTag:', order.orderTag);
+      console.log('  - enableWhatsAppOrdering:', useWhatsappForOrders);
+      console.log('  - whatsAppPhoneNumber:', whatsAppPhoneNumber);
+      console.log('  - restaurantPreferences:', restaurantPreferences);
+      
+      // Create WhatsApp preferences object matching useCartHandlers format
+      const whatsappPreferences = {
+        useWhatsappForOrders: useWhatsappForOrders,
+        whatsAppPhoneNumber: whatsAppPhoneNumber
+      };
+      
+      console.log('  - whatsappPreferences:', whatsappPreferences);
+      console.log("WhatsAppService.isWhatsAppEnabled(whatsappPreferences)",WhatsAppService.isWhatsAppEnabled(whatsappPreferences))
+      // Check if WhatsApp should be shown - same logic as useCartHandlers
+      const shouldShowWhatsApp = order.orderTag && WhatsAppService.isWhatsAppEnabled(whatsappPreferences);
+      console.log('  - shouldShowWhatsApp:', shouldShowWhatsApp);
+      
+      if (shouldShowWhatsApp) {
+        console.log('✅ Preparing WhatsApp data...');
+        
+        // Prepare WhatsApp data matching useCartHandlers format
+        const whatsappData = {
+          orderTag: order.orderTag,
+          customerName: customerName || 'Customer',
+          cart: items.map(item => ({
+            productName: item.productName,
+            price: item.price,
+            quantity: item.quantity,
+            addons: (item.addons || item.addonItems || []).map((addon: any) => ({
+              addonName: addon.addonName || addon.productName,
+              price: addon.specialPrice || addon.price,
+              quantity: addon.quantity
+            }))
+          })),
+          totalPrice: total,
+          orderType: selectedOrderType!.name,
+          notes: '',
+          tableNumber: tableNumber || undefined,
+          deliveryAddress: deliveryAddress || undefined,
+          estimatedTime: selectedOrderType!.estimatedMinutes,
+          serviceCharge: serviceChargeAmount
+        };
+        
+        console.log('📱 WhatsApp data prepared:', whatsappData);
+        
+        setPendingWhatsAppData(whatsappData);
+        setShowWhatsAppConfirmation(true);
+        setSubmittingOrder(false);
+        
+        // Exit early - let WhatsApp handlers handle cleanup
+        return;
       } else {
-        // Close sidebar after showing toast
+        console.log('ℹ️ WhatsApp not enabled, closing sidebar');
         setTimeout(() => {
+          resetForm();
           onClose();
         }, 2000);
       }
     } catch (err: any) {
+      console.error('❌ Error creating order:', err);
       addToast(err.message || t('menu.cart.order_creation_failed') || 'Failed to place order', 'error', 5000);
     } finally {
       setSubmittingOrder(false);
     }
   };
 
-  const handleWhatsAppConfirm = () => {
-    setShowWhatsAppConfirmation(false);
+  // UPDATED: WhatsApp confirmation handler matching CartSidebar
+  const handleWhatsAppConfirm = async () => {
+    if (!pendingWhatsAppData) return;
     
-    if (whatsappOrderNumber) {
-      const cleanNumber = whatsappOrderNumber.replace(/\D/g, '');
-      const message = `Hello ${restaurantName}, I just placed an order and would like to confirm the details.`;
-      const encodedMessage = encodeURIComponent(message);
-      const whatsappUrl = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
-      window.open(whatsappUrl, '_blank');
+    let toastId: string | null = null;
+    
+    try {
+      setWhatsappSending(true);
+      toastId = Math.random().toString(36).substring(7);
+      addToast(t('menu.cart.sending_whatsapp') || 'Sending WhatsApp message...', 'loading');
+
+      // Use the sendOrderToWhatsApp function that matches useCartHandlers
+      await sendOrderToWhatsApp(pendingWhatsAppData);
+      
+      if (toastId) removeToast(toastId);
+      addToast(t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!', 'success', 3000);
+
+    } catch (error) {
+      console.error('❌ Error sending WhatsApp message:', error);
+      
+      if (toastId) removeToast(toastId);
+      addToast(t('menu.cart.whatsapp_send_failed') || 'Failed to send WhatsApp message', 'error', 3000);
+    } finally {
+      setWhatsappSending(false);
+      
+      // Clean up - matching CartSidebar behavior
+      setShowWhatsAppConfirmation(false);
+      setPendingWhatsAppData(null);
+      
+      // Reset form and close sidebar
+      setTimeout(() => {
+        resetForm();
+        onClose();
+      }, 1000);
     }
-    
-    onClose();
   };
 
+  // UPDATED: WhatsApp cancel handler matching CartSidebar
   const handleWhatsAppCancel = () => {
     setShowWhatsAppConfirmation(false);
-    onClose();
+    setPendingWhatsAppData(null);
+    setWhatsappSending(false);
+    
+    setTimeout(() => {
+      resetForm();
+      onClose();
+    }, 500);
   };
 
   // Available payment methods
@@ -1183,11 +1297,13 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         ))}
       </div>
 
-      <WhatsAppConfirmationModal
+     <WhatsAppConfirmationModal
         isVisible={showWhatsAppConfirmation}
         restaurantName={restaurantName}
+        whatsappNumber={whatsAppPhoneNumber}
         onConfirm={handleWhatsAppConfirm}
         onCancel={handleWhatsAppCancel}
+        loading={whatsappSending}
       />
     </>
   );

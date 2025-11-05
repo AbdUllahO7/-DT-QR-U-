@@ -130,39 +130,43 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     }
   };
 
-  const handleShowProductAddons = async (product: DetailedProduct) => {
-    if (!product.branchProductId) {
-      setError('Product must be added to branch first before configuring addons');
-      return;
-    }
+const handleShowProductAddons = async (product: DetailedProduct) => {
+  if (!product.branchProductId) {
+    setError('Product must be added to branch first before configuring addons');
+    return;
+  }
+
   let categoryId: number | null = null;
-    for (const branchCategory of branchCategories) {
-        const foundProduct = branchCategory.products?.find(p => p.branchProductId === product.branchProductId);
-        if (foundProduct) {
-          categoryId = branchCategory.categoryId;
-          break;
-        }
-      }
-  
-    setSelectedProductForAddons(product);
-    setIsProductAddonsModalOpen(true);
-    
-    // Fetch existing addons for this product
-    await fetchProductAddons(product.branchProductId);
-  };
+  for (const branchCategory of branchCategories) {
+    const foundProduct = branchCategory.products?.find(p => p.branchProductId === product.branchProductId);
+    if (foundProduct) {
+      categoryId = branchCategory.categoryId;
+      break;
+    }
+  }
 
-  const handleCloseProductAddons = () => {
-    setSelectedProductForAddons(null);
-    setIsProductAddonsModalOpen(false);
-  };
-
-const handleSaveProductAddons = (branchProductId: number, selectedAddonIds: number[]) => {
-  // The modal (BranchProductAddonsModal) handles the actual API calls
-  // for adding/removing addons individually.
-  // This function's only job is to receive the updated list of
-  // assigned addons and update the parent component's state
-  // (specifically the addonsCount) to reflect the change in the UI.
+  setSelectedProductForAddons(product);
+  setIsProductAddonsModalOpen(true);
   
+  // ✅ Refresh available addons to ensure we have the latest list
+  await fetchAvailableAddons();
+  
+  // ✅ Fetch existing addons for this specific product
+  await fetchProductAddons(product.branchProductId);
+};
+
+const handleCloseProductAddons = async () => {
+  setSelectedProductForAddons(null);
+  setIsProductAddonsModalOpen(false);
+  
+  // ✅ Refresh branch categories to get updated addon counts
+  if (activeTab === 'manage') {
+    await fetchBranchCategoriesWithProducts();
+  }
+};
+
+const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds: number[]) => {
+  // The modal handles the actual API calls
   const newAddonCount = selectedAddonIds.length;
 
   setBranchCategories(prev =>
@@ -180,8 +184,8 @@ const handleSaveProductAddons = (branchProductId: number, selectedAddonIds: numb
     }))
   );
   
-  // We don't close the modal here anymore, as this is called on every toggle.
-  // We also don't set loading/processing flags as this is just a state update.
+  // ✅ Optionally refetch the product addons to ensure sync
+  await fetchProductAddons(branchProductId);
 };
   // Price editing functions
 const handleProductPriceEdit = (productId: number, originalPrice: number) => {

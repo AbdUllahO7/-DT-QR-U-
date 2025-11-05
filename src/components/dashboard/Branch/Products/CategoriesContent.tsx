@@ -27,7 +27,7 @@ import {
   Puzzle
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
-import { AdditionStep, BranchCategory, CategoriesContentProps, Product } from '../../../../types/BranchManagement/type';
+import { AdditionStep, BranchCategory, CategoriesContentProps } from '../../../../types/BranchManagement/type';
 import { useNavigate } from 'react-router-dom';
 
 
@@ -597,28 +597,22 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
           </div>
           
           {isSelected ? (
-            <button
+         <button
               onClick={async () => {
                 const branchProductIdToRemove = product.branchProductId || product.id;
                 await onRemoveProduct(branchProductIdToRemove, product.name);
-                setTimeout(() => {
-                  onRefresh();
-                }, 500);
               }}
-              disabled={isLoading}
+              disabled={isLoading || isLoadingBranchProducts} // <--- FIX
               className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50 text-sm font-medium"
               title={t('branchCategories.products.removeFromBranch')}
             >
               {isLoading ? 'Removing...' : 'Remove'}
             </button>
           ) : (
-            <button
+          <button
               onClick={async () => {
                 const originalProductId = product.id;
                 await onAddProduct(originalProductId, branchCategory.branchCategoryId);
-                setTimeout(() => {
-                  onRefresh();
-                }, 500);
               }}
               disabled={isLoading}
               className="px-3 py-2 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors disabled:opacity-50 text-sm font-medium"

@@ -76,6 +76,8 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   const [showWhatsAppConfirmation, setShowWhatsAppConfirmation] = useState(false)
   const [pendingWhatsAppData, setPendingWhatsAppData] = useState<any>(null)
   const [whatsappSending, setWhatsappSending] = useState(false)
+
+  console.log("showWhatsAppConfirmation",showWhatsAppConfirmation)
   
   // Order creation states
   const [showOrderForm, setShowOrderForm] = useState(false)
@@ -87,6 +89,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     orderTypeId: 0,
     tableId: tableId,
     deliveryAddress: '',
+    tableNumber: '', 
     customerPhone: '',
     paymentMethod: ''
   })
@@ -125,7 +128,8 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     calculateItemTotalPrice,
     getSelectedOrderType,
     sendOrderToWhatsApp,
-    handlePriceChangeConfirmation
+    handlePriceChangeConfirmation,
+    cleanupAfterOrder
   } = useCartHandlers({
     cart,
     setCart,
@@ -148,6 +152,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     tableId,
     restaurantPreferences,
     setPendingWhatsAppData,
+    
     setShowWhatsAppConfirmation
   })
 
@@ -186,47 +191,62 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     }
   }
 
-  const handleWhatsAppConfirm = async () => {
-    if (!pendingWhatsAppData) return
-    
-    let toastId: string | null = null
-    
-    try {
-      setWhatsappSending(true)
-      toastId = showToast('loading', t('menu.cart.sending_whatsapp') || 'Sending WhatsApp message...')
+const handleWhatsAppConfirm = async () => {
+  if (!pendingWhatsAppData) return
+  
+  let toastId: string | null = null
+  
+  try {
+    setWhatsappSending(true)
+    toastId = showToast('loading', t('menu.cart.sending_whatsapp') || 'Sending WhatsApp message...')
 
-      await sendOrderToWhatsApp(pendingWhatsAppData)
-      
-      if (toastId) {
-        updateToast(toastId, 'success', t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!')
-      } else {
-        showToast('success', t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!')
-      }
-
-      setShowWhatsAppConfirmation(false)
-      setPendingWhatsAppData(null)
-    } catch (error) {
-      console.error('Error sending WhatsApp message:', error)
-      
-      const errorMessage = t('menu.cart.whatsapp_send_failed') || 'Failed to send WhatsApp message'
-      
-      if (toastId) {
-        updateToast(toastId, 'error', errorMessage)
-      } else {
-        showToast('error', errorMessage)
-      }
-      
-      setError('Failed to send WhatsApp message')
-    } finally {
-      setWhatsappSending(false)
+    await sendOrderToWhatsApp(pendingWhatsAppData)
+    
+    if (toastId) {
+      updateToast(toastId, 'success', t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!')
+    } else {
+      showToast('success', t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!')
     }
-  }
 
-  const handleWhatsAppCancel = () => {
+  } catch (error) {
+    console.error('Error sending WhatsApp message:', error)
+    
+    const errorMessage = t('menu.cart.whatsapp_send_failed') || 'Failed to send WhatsApp message'
+    
+    if (toastId) {
+      updateToast(toastId, 'error', errorMessage)
+    } else {
+      showToast('error', errorMessage)
+    }
+    
+    // Don't block order completion on WhatsApp failure
+  } finally {
+    setWhatsappSending(false)
+    
+    // Clean up regardless of success/failure
     setShowWhatsAppConfirmation(false)
     setPendingWhatsAppData(null)
-    setWhatsappSending(false)
+    
+    // Now clean up the cart and form using the cleanup function
+    cleanupAfterOrder()
+    
+    // Switch to orders tab
+    setActiveTab('orders')
   }
+}
+
+const handleWhatsAppCancel = () => {
+  // User chose to skip WhatsApp
+  setShowWhatsAppConfirmation(false)
+  setPendingWhatsAppData(null)
+  setWhatsappSending(false)
+  
+  // Still clean up the cart and form
+  cleanupAfterOrder()
+  
+  // Switch to orders tab
+  setActiveTab('orders')
+}
 
   // Enhanced clearBasket with toast
   const handleClearBasket = async () => {

@@ -1,6 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, AlertCircle, CheckCircle, Loader2, Clock, DollarSign, Users, ChevronDown } from 'lucide-react';
-import { OrderType, orderTypeService, UpdateOrderTypeSettingsDto } from '../../../../services/Branch/BranchOrderTypeService';
+import { 
+  Settings, 
+  Save, 
+  AlertCircle, 
+  CheckCircle, 
+  Loader2, 
+  Clock, 
+  DollarSign, 
+  Users, 
+  ChevronDown,
+  // --- Icons added from OrderTypeComponent ---
+  User, 
+  MapPin, 
+  Phone, 
+  Table 
+} from 'lucide-react';
+import { 
+  OrderType, 
+  orderTypeService, 
+  // --- DTO updated to send full object ---
+  UpdateOrderTypeDto 
+} from '../../../../services/Branch/BranchOrderTypeService';
 import { branchService } from '../../../../services/branchService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../../hooks';
@@ -43,7 +63,7 @@ const OrderTypeRestaurantComponent = () => {
     };
 
     fetchBranches();
-  }, [t]);
+  }, [t]); // Removed selectedBranch dependency to prevent re-fetch on select
 
   // Fetch order types when selected branch changes
   useEffect(() => {
@@ -75,59 +95,48 @@ const OrderTypeRestaurantComponent = () => {
     setSuccessMessage('');
   };
 
-  const updateSettings = async (orderType: OrderType, newSettings: Partial<UpdateOrderTypeSettingsDto>) => {
+  // --- MODIFIED: updateSettings now sends the full OrderType object ---
+  const updateSettings = async (orderType: OrderType) => {
     try {
       setUpdating(prev => ({ ...prev, [orderType.id]: true }));
       setError(null);
       setSuccessMessage('');
 
-      if (
-        typeof newSettings.isActive !== 'boolean' ||
-        typeof newSettings.minOrderAmount !== 'number' ||
-        typeof newSettings.serviceCharge !== 'number'
-      ) {
-        throw new Error(t('dashboard.orderType.invalidSettings'));
-      }
-
-      const updateData: UpdateOrderTypeSettingsDto = {
+      // Prepare update data with all fields
+      const updateData: UpdateOrderTypeDto = {
         id: orderType.id,
-        isActive: newSettings.isActive,
-        minOrderAmount: newSettings.minOrderAmount,
-        serviceCharge: newSettings.serviceCharge,
+        name: orderType.name,
+        code: orderType.code,
+        description: orderType.description,
+        icon: orderType.icon,
+        isActive: orderType.isActive,
+        displayOrder: orderType.displayOrder,
+        requiresName: orderType.requiresName ?? false,
+        requiresTable: orderType.requiresTable,
+        requiresAddress: orderType.requiresAddress,
+        requiresPhone: orderType.requiresPhone,
+        minOrderAmount: orderType.minOrderAmount,
+        serviceCharge: orderType.serviceCharge,
+        estimatedMinutes: orderType.estimatedMinutes,
         rowVersion: orderType.rowVersion
       };
 
+      // Use updateOrderTypeSettings but send the full DTO
       const updatedOrderType = await orderTypeService.updateOrderTypeSettings(orderType.id, updateData);
 
-      if (!updatedOrderType) {
-        throw new Error('Invalid response from server');
-      }
-
-      // If the response doesn't have all required fields, refetch the data
-      if (!updatedOrderType.rowVersion || !updatedOrderType.name) {
+      // --- MODIFIED: State update logic to match OrderTypeComponent ---
+      if (updatedOrderType) {
+        setOrderTypes(prev => 
+          prev.map(ot => 
+            ot.id === orderType.id ? updatedOrderType : ot
+          )
+        );
+      } else {
+        // If no response, refetch all data for the current branch
         await fetchOrderTypes();
-        setSuccessMessage(` ${t('dashboard.orderType.settingsUpdated')}`);
-        setTimeout(() => setSuccessMessage(''), 3000);
-        return;
       }
 
-      // Update local state with new data
-      setOrderTypes(prev => 
-        prev.map(ot => 
-          ot.id === orderType.id 
-            ? { 
-                ...ot, 
-                isActive: updatedOrderType.isActive ?? newSettings.isActive,
-                minOrderAmount: updatedOrderType.minOrderAmount ?? newSettings.minOrderAmount,
-                serviceCharge: updatedOrderType.serviceCharge ?? newSettings.serviceCharge,
-                rowVersion: updatedOrderType.rowVersion ?? ot.rowVersion,
-                updatedAt: updatedOrderType.updatedAt ?? new Date().toISOString()
-              }
-            : ot
-        )
-      );
-
-      setSuccessMessage(` ${t('dashboard.orderType.settingsUpdated')}`);
+      setSuccessMessage(t('dashboard.orderType.settingsUpdated'));
       setTimeout(() => setSuccessMessage(''), 3000);
       
     } catch (err: any) {
@@ -138,6 +147,7 @@ const OrderTypeRestaurantComponent = () => {
     }
   };
 
+  // This function is generic and already supports the new fields
   const handleSettingChange = (orderTypeId: number, field: keyof OrderType, value: any) => {
     setOrderTypes(prev =>
       prev.map(ot =>
@@ -148,13 +158,9 @@ const OrderTypeRestaurantComponent = () => {
     );
   };
 
+  // --- MODIFIED: handleSave now passes the full orderType ---
   const handleSave = (orderType: OrderType) => {
-    const newSettings = {
-      isActive: orderType.isActive,
-      minOrderAmount: orderType.minOrderAmount,
-      serviceCharge: orderType.serviceCharge
-    };
-    updateSettings(orderType, newSettings);
+    updateSettings(orderType);
   };
 
   if (!selectedBranch) {
@@ -189,7 +195,7 @@ const OrderTypeRestaurantComponent = () => {
   return (
     <div className={`min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header Section with Branch Selector */}
+        {/* Header Section with Branch Selector (Retained from RestaurantComponent) */}
         <div className="mb-12">
           <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''} mb-6`}>
             <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -247,19 +253,25 @@ const OrderTypeRestaurantComponent = () => {
           </div>
         </div>
 
-        {/* Success Message */}
+        {/* --- MODIFIED: Success Message styling to match OrderTypeComponent --- */}
         {successMessage && (
-          <div className="mb-8 p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl flex items-center gap-3 shadow-sm animate-in slide-in-from-top-1 duration-300">
-            <CheckCircle className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-            <span className="text-emerald-800 dark:text-emerald-200 font-medium">{successMessage}</span>
+          <div className={`mb-8 p-4 rounded-xl border-l-4 border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 shadow-lg animate-fade-in ${isRTL ? 'border-r-4 border-l-0' : ''}`}>
+            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+              <p className="text-emerald-800 dark:text-emerald-200 font-medium">
+                {successMessage}
+              </p>
+            </div>
           </div>
         )}
 
-        {/* Error Message */}
+        {/* --- MODIFIED: Error Message styling to match OrderTypeComponent --- */}
         {error && (
-          <div className="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3 shadow-sm animate-in slide-in-from-top-1 duration-300">
-            <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
-            <span className="text-red-800 dark:text-red-200 font-medium">{error}</span>
+          <div className={`mb-8 p-4 rounded-xl border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20 shadow-lg ${isRTL ? 'border-r-4 border-l-0' : ''}`}>
+            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+              <p className="text-red-800 dark:text-red-200 font-medium">{error}</p>
+            </div>
           </div>
         )}
 
@@ -276,26 +288,19 @@ const OrderTypeRestaurantComponent = () => {
             {orderTypes.map((orderType) => (
               <div
                 key={orderType.id}
-                className={`group relative bg-white dark:bg-gray-800 rounded-2xl shadow-xl dark:shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] ${
-                  orderType.isActive 
-                    ? 'ring-2 ring-emerald-500 dark:ring-emerald-400 shadow-emerald-100 dark:shadow-emerald-900/20' 
-                    : 'hover:ring-2 hover:ring-gray-300 dark:hover:ring-gray-600'
-                }`}
+                // --- MODIFIED: Card styling to match OrderTypeComponent ---
+                className="group bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-200 dark:border-gray-700 overflow-hidden"
               >
-                {/* Status Indicator */}
-                <div className={`absolute top-0 left-0 w-full h-1 ${
-                  orderType.isActive 
-                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' 
-                    : 'bg-gradient-to-r from-gray-400 to-gray-500'
-                }`} />
+                {/* Removed the top status bar div */}
 
                 <div className="p-8">
                   {/* Header */}
                   <div className={`flex items-center justify-between mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <div className={`p-4 rounded-2xl text-3xl ${
-                        orderType.isActive 
-                          ? 'bg-emerald-50 dark:bg-emerald-900/30' 
+                      {/* --- MODIFIED: Icon styling to match OrderTypeComponent --- */}
+                      <div className={`p-4 rounded-xl text-3xl shadow-md ${
+                        orderType.isActive
+                          ? 'bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-400 dark:to-purple-500 text-white' // Added text-white for gradient
                           : 'bg-gray-50 dark:bg-gray-700'
                       } transition-colors duration-300`}>
                         {orderType.icon}
@@ -347,6 +352,95 @@ const OrderTypeRestaurantComponent = () => {
                       </label>
                     </div>
 
+                    {/* --- NEW: Requirements Section added from OrderTypeComponent --- */}
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 p-4 rounded-xl border border-blue-200 dark:border-gray-600">
+                      <h4 className={`text-sm font-bold text-gray-900 dark:text-white mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('dashboard.orderType.requirements') || 'Required Information'}
+                      </h4>
+                      <div className="space-y-3">
+                        {/* Requires Name */}
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              {t('dashboard.orderType.requiresName') || 'Requires Name'}
+                            </label>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              title={t('dashboard.orderType.requiresName') || 'Requires Name'}
+                              type="checkbox"
+                              checked={orderType.requiresName ?? false}
+                              onChange={(e) => handleSettingChange(orderType.id, 'requiresName', e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer transition-all duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-blue-600 dark:peer-checked:bg-blue-500"></div>
+                          </label>
+                        </div>
+
+                        {/* Requires Table */}
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <Table className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              {t('dashboard.orderType.requiresTable') || 'Requires Table'}
+                            </label>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              title={t('dashboard.orderType.requiresTable') || 'Requires Table'}
+                              type="checkbox"
+                              checked={orderType.requiresTable}
+                              onChange={(e) => handleSettingChange(orderType.id, 'requiresTable', e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer transition-all duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-green-600 dark:peer-checked:bg-green-500"></div>
+                          </label>
+                        </div>
+
+                        {/* Requires Address */}
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <MapPin className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              {t('dashboard.orderType.requiresAddress') || 'Requires Address'}
+                            </label>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              title={t('dashboard.orderType.requiresAddress') || 'Requires Address'}
+                              type="checkbox"
+                              checked={orderType.requiresAddress}
+                              onChange={(e) => handleSettingChange(orderType.id, 'requiresAddress', e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer transition-all duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-purple-600 dark:peer-checked:bg-purple-500"></div>
+                          </label>
+                        </div>
+
+                        {/* Requires Phone */}
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <Phone className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              {t('dashboard.orderType.requiresPhone') || 'Requires Phone'}
+                            </label>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              title={t('dashboard.orderType.requiresPhone') || 'Requires Phone'}
+                              type="checkbox"
+                              checked={orderType.requiresPhone}
+                              onChange={(e) => handleSettingChange(orderType.id, 'requiresPhone', e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 rounded-full peer transition-all duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-orange-600 dark:peer-checked:bg-orange-500"></div>
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                    {/* --- END of new Requirements Section --- */}
+
                     {/* Min Order Amount */}
                     <div className="space-y-2">
                       <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300`}>
@@ -394,7 +488,7 @@ const OrderTypeRestaurantComponent = () => {
                       className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-semibold text-white transition-all duration-300 transform ${
                         updating[orderType.id]
                           ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed scale-95'
-                          : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 dark:from-indigo-500 dark:to-purple-500 dark:hover:from-indigo-600 dark:hover:to-purple-600 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95'
+                          : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-7A00 dark:from-indigo-500 dark:to-purple-500 dark:hover:from-indigo-600 dark:hover:to-purple-600 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95'
                       } ${isRTL ? 'flex-row-reverse' : ''}`}
                     >
                       {updating[orderType.id] ? (
@@ -416,7 +510,7 @@ const OrderTypeRestaurantComponent = () => {
           </div>
         )}
 
-        {/* Summary Stats */}
+        {/* Summary Stats (Retained from RestaurantComponent) */}
         {orderTypes.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 p-6 rounded-2xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">

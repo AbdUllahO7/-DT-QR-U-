@@ -34,6 +34,7 @@ interface OrderForm {
   deliveryAddress?: string
   customerPhone?: string
   paymentMethod: string
+  tableNumber?: string
 }
 
 interface TrackedOrder {
@@ -131,7 +132,7 @@ export const useCartHandlers = ({
   const sendOrderToWhatsApp = async (whatsappData: any) => {
     try {
       const whatsappNumber = WhatsAppService.formatWhatsAppNumber(
-        restaurantPreferences.whatsappOrderNumber
+        restaurantPreferences.whatsAppPhoneNumber
       )
 
       await WhatsAppService.sendOrderToWhatsApp(whatsappNumber, whatsappData)
@@ -354,33 +355,40 @@ export const useCartHandlers = ({
     return errors
   }
 
-  const validateOrderForm = (): string[] => {
-    const errors: string[] = []
-    
-    if (!orderForm.customerName.trim()) {
-      errors.push('Customer name is required')
-    }
-    
-    if (!orderForm.orderTypeId) {
-      errors.push('Please select an order type')
-    }
-    
-    const selectedOrderType = getSelectedOrderType()
-    const minOrderErrors = validateMinimumOrder()
-    errors.push(...minOrderErrors)
-    
-    if (selectedOrderType?.requiresAddress && !orderForm.deliveryAddress?.trim()) {
-      errors.push('Delivery address is required for this order type')
-    }
-    
-    if (selectedOrderType?.requiresPhone) {
-      if (!orderForm.customerPhone?.trim()) {
-        errors.push('Phone number is required for this order type')
-      }
-    }
-    
-    return errors
+// In useCartHandlers.ts - Update validateOrderForm function
+const validateOrderForm = (): string[] => {
+  const errors: string[] = []
+  
+  if (!orderForm.orderTypeId) {
+    errors.push('Please select an order type')
+    return errors // Return early if no order type selected
   }
+  
+  const selectedOrderType = getSelectedOrderType()
+  
+  // Validate required fields based on order type
+  if (selectedOrderType?.requiresName && !orderForm.customerName?.trim()) {
+    errors.push('Customer name is required for this order type')
+  }
+  
+  if (selectedOrderType?.requiresAddress && !orderForm.deliveryAddress?.trim()) {
+    errors.push('Delivery address is required for this order type')
+  }
+  
+  if (selectedOrderType?.requiresPhone && !orderForm.customerPhone?.trim()) {
+    errors.push('Phone number is required for this order type')
+  }
+  
+  if (selectedOrderType?.requiresTable && !(orderForm as any).tableNumber?.trim()) {
+    errors.push('Table number is required for this order type')
+  }
+  
+  // Validate minimum order
+  const minOrderErrors = validateMinimumOrder()
+  errors.push(...minOrderErrors)
+  
+  return errors
+}
 
   // Order creation and tracking functions
   const addOrderToTracking = async (orderTag: string) => {
@@ -429,98 +437,105 @@ export const useCartHandlers = ({
   }
 
   // FIXED: Create order function with proper WhatsApp confirmation
-  const createOrder = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      setValidationErrors([])
+// FIXED: Create order function with proper WhatsApp confirmation
+const createOrder = async () => {
+  try {
+    setLoading(true)
+    setError(null)
+    setValidationErrors([])
 
-      const cartErrors = validateCart()
-      const formErrors = validateOrderForm()
-      const allErrors = [...cartErrors, ...formErrors]
-      
-      if (allErrors.length > 0) {
-        setValidationErrors(allErrors)
-        setLoading(false)
-        return
-      }
-
-      const selectedOrderType = getSelectedOrderType()
-      
-      const sessionOrderDto: CreateSessionOrderDto = {
-        customerName: orderForm.customerName.trim(),
-        notes: orderForm.notes.trim() || undefined,
-        orderTypeId: orderForm.orderTypeId,
-        ...(orderForm.tableId && { tableId: orderForm.tableId }),
-        ...(selectedOrderType?.requiresAddress || orderForm.deliveryAddress?.trim() ? { deliveryAddress: orderForm.deliveryAddress?.trim() } : {}),
-        ...(selectedOrderType?.requiresPhone || orderForm.customerPhone?.trim() ? { customerPhone: orderForm.customerPhone?.trim() } : {})
-      }
-      
-      const order = await orderService.createSessionOrder(sessionOrderDto)
-      // Calculate order total for WhatsApp message
-      const serviceChargeAmount = selectedOrderType?.serviceCharge || 0
-
-      // FIXED: Check if WhatsApp confirmation should be shown
-      if (order.orderTag && WhatsAppService.isWhatsAppEnabled(restaurantPreferences)) {
-        
-        const whatsappData = {
-          orderTag: order.orderTag,
-          customerName: orderForm.customerName,
-          cart,
-          totalPrice,
-          orderType: selectedOrderType?.name || 'Standard',
-          notes: orderForm.notes,
-          tableId: orderForm.tableId,
-          deliveryAddress: orderForm.deliveryAddress,
-          estimatedTime: selectedOrderType?.estimatedMinutes,
-          serviceCharge: serviceChargeAmount
-        }
-
-        
-        // FIXED: Check if functions are available before calling
-        if (setPendingWhatsAppData && setShowWhatsAppConfirmation) {
-          setPendingWhatsAppData(whatsappData)
-          setShowWhatsAppConfirmation(true)
-        } else {
-          console.warn('WhatsApp confirmation functions not available - setPendingWhatsAppData:', !!setPendingWhatsAppData, 'setShowWhatsAppConfirmation:', !!setShowWhatsAppConfirmation)
-        }
-      } else {
-        console.log('WhatsApp not enabled or no order tag, skipping confirmation')
-      }
-        
-      if (order.orderTag) {
-        await addOrderToTracking(order.orderTag)
-      }
-
-      setCart([])
-      setBasketId(null)
-      setShowOrderForm(false)
-      
-      setOrderForm({
-        customerName: '',
-        notes: '',
-        orderTypeId: 0,
-        tableId: tableId,
-        deliveryAddress: '',
-        customerPhone: '',
-        paymentMethod: ''
-      })
-      
-      if (onOrderCreated) {
-        onOrderCreated(order.orderId)
-      }
-
-      setError(null)
-
-    } catch (err: any) {
-      console.error('❌ Error creating order:', err)
-        setShowPriceChangeModal(true)
-
+    const cartErrors = validateCart()
+    const formErrors = validateOrderForm()
+    const allErrors = [...cartErrors, ...formErrors]
     
-    } finally {
+    if (allErrors.length > 0) {
+      setValidationErrors(allErrors)
       setLoading(false)
+      return
     }
+
+    const selectedOrderType = getSelectedOrderType()
+    
+    const sessionOrderDto: CreateSessionOrderDto = {
+      customerName: orderForm.customerName.trim(),
+      notes: orderForm.notes.trim() || undefined,
+      orderTypeId: orderForm.orderTypeId,
+      ...(orderForm.tableId && { tableId: orderForm.tableId }),
+      ...(orderForm.tableNumber?.trim() && { tableNumber: orderForm.tableNumber.trim() }),
+      ...(selectedOrderType?.requiresAddress || orderForm.deliveryAddress?.trim() ? { deliveryAddress: orderForm.deliveryAddress?.trim() } : {}),
+      ...(selectedOrderType?.requiresPhone || orderForm.customerPhone?.trim() ? { customerPhone: orderForm.customerPhone?.trim() } : {})
+    }
+    
+    const order = await orderService.createSessionOrder(sessionOrderDto)
+    console.log('✅ Order created with ID:', order)
+    // Add order to tracking immediately
+    if (order.orderTag) {
+      await addOrderToTracking(order.orderTag)
+    }
+    // Calculate order total for WhatsApp message
+    const serviceChargeAmount = selectedOrderType?.serviceCharge || 0
+    if (order.orderTag && WhatsAppService.isWhatsAppEnabled(restaurantPreferences)) {
+      
+      const whatsappData = {
+        orderTag: order.orderTag,
+        customerName: orderForm.customerName,
+        cart,
+        totalPrice,
+        orderType: selectedOrderType?.name || 'Standard',
+        notes: orderForm.notes,
+        tableId: orderForm.tableId,
+        tableNumber: orderForm.tableNumber,
+        deliveryAddress: orderForm.deliveryAddress,
+        estimatedTime: selectedOrderType?.estimatedMinutes,
+        serviceCharge: serviceChargeAmount
+      }
+
+      // Set WhatsApp data and show modal
+      if (setPendingWhatsAppData && setShowWhatsAppConfirmation) {
+        console.log('✅ Setting WhatsApp data and showing modal')
+        setPendingWhatsAppData(whatsappData)
+        setShowWhatsAppConfirmation(true)
+        
+        // DON'T clear cart and form here - let the WhatsApp handlers do it
+        setLoading(false)
+        return // Exit early to let WhatsApp modal show
+      } else {
+        console.warn('❌ WhatsApp confirmation functions not available')
+      }
+    } else {
+      console.log('ℹ️ WhatsApp not enabled or no order tag')
+    }
+    
+    // If we reach here, WhatsApp is not enabled or not available
+    // Clean up and complete the order
+    setCart([])
+    setBasketId(null)
+    setShowOrderForm(false)
+    
+    setOrderForm({
+      customerName: '',
+      notes: '',
+      orderTypeId: 0,
+      tableId: tableId,
+      deliveryAddress: '',
+      customerPhone: '',
+      paymentMethod: '',
+      tableNumber: ''
+    })
+    
+    if (onOrderCreated) {
+      onOrderCreated(order.orderId)
+    }
+
+    setError(null)
+
+  } catch (err: any) {
+    console.error('❌ Error creating order:', err)
+    setShowPriceChangeModal(true)
+  } finally {
+      setLoading(false)
   }
+}
 
   // Order tracking functions
   const loadOrderTracking = async (orderTag: string) => {
@@ -575,23 +590,43 @@ export const useCartHandlers = ({
     }
   }
 
-  return {
-    loadBasket,
-    clearBasket,
-    removeFromBasket,
-    handleQuantityIncrease,
-    handleQuantityDecrease,
-    handleAddonQuantityIncrease,
-    canIncreaseAddonQuantity,
-    canDecreaseAddonQuantity,
-    getAddonQuantityError,
-    createOrder,
-    loadOrderTracking,
-    removeOrderFromTracking,
-    refreshAllPendingOrders,
-    calculateItemTotalPrice,
-    getSelectedOrderType,
-    handlePriceChangeConfirmation,
-    sendOrderToWhatsApp
-  }
+  // Add this new function to clean up after order
+const cleanupAfterOrder = () => {
+  setCart([])
+  setBasketId(null)
+  setShowOrderForm(false)
+  
+  setOrderForm({
+    customerName: '',
+    notes: '',
+    orderTypeId: 0,
+    tableId: tableId,
+    deliveryAddress: '',
+    customerPhone: '',
+    paymentMethod: '',
+    tableNumber: ''
+  })
+}
+
+// Add cleanupAfterOrder to the return statement
+return {
+  loadBasket,
+  clearBasket,
+  removeFromBasket,
+  handleQuantityIncrease,
+  handleQuantityDecrease,
+  handleAddonQuantityIncrease,
+  canIncreaseAddonQuantity,
+  canDecreaseAddonQuantity,
+  getAddonQuantityError,
+  createOrder,
+  loadOrderTracking,
+  removeOrderFromTracking,
+  refreshAllPendingOrders,
+  calculateItemTotalPrice,
+  getSelectedOrderType,
+  handlePriceChangeConfirmation,
+  sendOrderToWhatsApp,
+  cleanupAfterOrder 
+}
 }
