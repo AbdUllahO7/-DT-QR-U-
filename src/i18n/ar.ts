@@ -2562,7 +2562,19 @@ export const ar = {
 
   userManagementPage: {
     // Page header and navigation
+  systemRoleInfo:"لايمكن التعديل على هذا الدور",
+    confirmation: {
+      deleteRoleTitle: "حذف الدور",
+      deleteRoleMessage: "هل أنت متأكد أنك تريد حذف هذا الدور؟ لا يمكن التراجع عن هذا الإجراء."
+    },
+    editRole :{
+      title:"تحديث الدور",
+      save:"حفظ"
+    },
 
+    rolePermissionsModal:{
+      title:"عرض الإذونات",
+    },
 
     title: 'إدارة المستخدمين',
     loading: 'جاري التحميل...',

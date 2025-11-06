@@ -1375,7 +1375,7 @@ const UserManagement: React.FC = () => {
                                   className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(role)}`}
                                 >
                                   {getRoleIcon(role)}
-                                  {t(`userManagementPage.roleTypes.${role}`)}
+                                  {role}
                                 </span>
                               ))}
                             </div>

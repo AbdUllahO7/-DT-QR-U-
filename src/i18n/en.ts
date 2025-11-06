@@ -2558,7 +2558,20 @@ export const en = {
   },
 
   userManagementPage: {
+    systemRoleInfo:"You can't do cahnges on this",
+    rolePermissionsModal:{
+      title:"View Permissons",
+    },
 
+    editRole :{
+      title:"Editing Role",
+      save:"Save"
+    },
+    confirmation: {
+        deleteRoleTitle: "Delete Role",
+        deleteRoleMessage: "Are you sure you want to delete this role? This action cannot be undone."
+        
+      },
     title: 'User Management',
     loading: 'Loading...',
     error: {
