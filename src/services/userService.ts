@@ -1,22 +1,9 @@
 import { apiRequest } from '../utils/apiRequest';
 import { logger } from '../utils/logger';
 import type { 
-  UserData, 
-  ApiResponse, 
-  CreateRoleDto, 
-  CreateRoleResponse, 
-  Role, 
-  CreateUserDto, 
-  CreateUserResponse,
-  UserProfile,
-  GetAllUsersParams,
-  UserDetails,
-  SearchUsersParams,
-  UpdateUserDto,
-  UpdateUserRolesDto,
-  AssignBranchDto,     
-  ChangePasswordDto    
+  ApiResponse 
 } from '../types/api';
+import { AssignBranchDto, ChangePasswordDto, CreateRoleDto, CreateRoleResponse, CreateUserDto, CreateUserResponse, GetAllUsersParams, Role, SearchUsersParams, UpdateUserDto, UpdateUserRolesDto, UserData, UserDetails, UserProfile } from '../types/users/users.type';
 
 class UserService {
 

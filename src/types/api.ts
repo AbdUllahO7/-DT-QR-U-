@@ -1,6 +1,5 @@
 import { BranchData } from "./BranchManagement/type";
 
-// API Response Types
 export interface ApiResponse<T> {
   data?: T;
   message?: string;
@@ -12,7 +11,7 @@ export interface ApiError {
   status: number;
   message: string;
   errors?: Record<string, string[]>;
-  response?: any; // Orijinal yanıtı saklamak için
+  response?: any; 
 }
 
 // Auth Types
@@ -29,7 +28,7 @@ export interface RegisterDto {
   password: string;
   passwordConfirm: string;
   phoneNumber: string;
-  profileImagePath: string; // Required field - API'de zorunlu
+  profileImagePath: string; 
   termsofUserService: boolean;
 }
 
@@ -68,13 +67,6 @@ export interface CreateRestaurantResponse {
   message: string;
   restaurantId: number;
 }
-
-// Restaurant Branch Dropdown Types
-
-
-
-
-// Branch Types
 export interface CreateBranchWithDetailsDto {
   branchName: string | null;
   whatsappOrderNumber: string | null;
@@ -133,7 +125,6 @@ export interface CreateBranchResponse {
   message: string;
 }
 
-// Media Types
 export interface MediaUploadResponse {
   url: string;
   publicId?: string;
@@ -142,7 +133,6 @@ export interface MediaUploadResponse {
   uploadedAt?: string;
 }
 
-// Restaurant Management Types
 export enum CuisineType {
   Turkish = 0,
   Italian = 1,
@@ -175,14 +165,11 @@ export enum CuisineType {
   FastFood = 28
 }
 
-
-// Media Upload Types
 export interface MediaUploadRequest {
   file: File;
   uploadType?: 'restaurant-logo' | 'work-permit' | 'food-certificate' | 'branch-logo' | 'other';
 }
 
-// Branch Management Types
 export interface Branch {
   id: string;
   name: string;
@@ -196,7 +183,6 @@ export interface Branch {
   createdAt: string;
   updatedAt: string;
 }
-
 export interface CreateBranchDto {
   name: string;
   address: string;
@@ -208,10 +194,6 @@ export interface CreateBranchDto {
   longitude?: number;
 }
 
-
-
-
-
 export interface SelectionScreenData {
   restaurantId: string;
   restaurantName: string;
@@ -222,7 +204,6 @@ export interface SelectionScreenData {
   availableBranches: BranchData[];
 }
 
-// Restaurant Management Info Types
 export interface RestaurantManagementInfo {
   restaurantId: number;
   restaurantName: string;
@@ -242,7 +223,6 @@ export interface RestaurantManagementInfo {
   about: string | null;
 }
 
-// Update DTOs
 export interface UpdateRestaurantDto {
   restaurantId: number;
   restaurantName?: string | null;
@@ -260,35 +240,9 @@ export interface UpdateRestaurantDto {
   restaurantStatus?: boolean | null;
   restaurantDateModified?: string | null;
 }
-export interface Role {
-  appRoleId: string;
-  name: string;
-  description: string | null;
-  restaurantId: number | null;
-  branchId: string | null;
-  category: string;
-  isSystemRole: boolean;
-  roleScope: number;
-  isActive: boolean;
-  createdDate: string;
-  modifiedDate: string | null;
-  permissions: Permission[]; // Or AppPermission[] if you have it defined
-}
 
-// Assumed response for GET /api/Roles/{roleId}
-// We can reuse the Role type, assuming it returns the same detailed object.
-export type RoleDetails = Role;
 
-// From POST /api/Roles payload
-export interface CreateRoleDto {
-  name: string;
-  description?: string | null;
-  restaurantId?: number | null;
-  branchId: number ;
-  category?: string | null;
-}
 
-// From PUT /api/Roles/{roleId} payload
 export interface UpdateRoleDto {
   name: string;
   description?: string | null;
@@ -296,15 +250,11 @@ export interface UpdateRoleDto {
   branchId?:string
 }
 
-// From POST /api/Roles/{roleId}/permissions payload
 export interface UpdateRolePermissionsDto {
   permissionIds: number[];
 }
-
-// This type from your UserManagement file is now different from the API spec
-// You will need to refactor your component to use the new `Role` type above
 export interface OldRoleType {
-  id: string; // This is now appRoleId
+  id: string; 
   name: string;
   description?: string;
   category: string;
@@ -324,228 +274,12 @@ export interface UpdateRestaurantManagementRequest {
   updateAboutDto: UpdateAboutDto;
 }
 
-// User Profile Types
-export interface AppUser {
-  appUserId: string;
-  name: string;
-  surname: string;
-  userName: string;
-  email: string;
-  restaurantId: number;
-  restaurant: {
-    restaurantId: number;
-    restaurantName: string;
-    restaurantLogoPath: string;
-    restaurantStatus: boolean;
-  };
-  branchId: string | null;
-  branch: any | null;
-  profileImage: string;
-  isActive: boolean;
-  createdDate: string;
-  modifiedDate: string;
-}
-
-
-export interface UpdateUserDto {
-  appUserId: string;
-  name: string;
-  surname: string;
-  userName: string;
-  email: string;
-  restaurantId?: number | null;
-  branchId?: number | null;
-  profileImage?: string | null;
-  
-  isActive: boolean;
-}
-// --- Add these types for User Actions ---
-
-// For PUT /api/Users/{id}/branch
-export interface AssignBranchDto {
-  newBranchId: number;
-}
-
-// For PUT /api/Users/{id}/password
-export interface ChangePasswordDto {
-  appUserId: string;
-  currentPassword: string;
-  newPassword: string;
-  newPasswordConfirm: string;
-}
-// For PUT /api/Users/{id}/roles
-export interface UpdateUserRolesDto {
-  roleIds: string[];
-}
-export interface SearchUsersParams {
-  SearchTerm?: string;
-  IsActive?: boolean;
-  Page?: number;
-  PageSize?: number;
-  Includes?: string;
-}
-export interface UserProfileResponse {
-  appUser: AppUser;
-  appRoles: AppRole[];
-}
-
-// Table Management Types
 
 
 
 
-// User Management Types
-export interface UserData {
-  id: string;
-  userName: string;
-  email: string;
-  fullName: string;
-  phoneNumber: string;
-  isActive: boolean;
-  createdDate: string;
-  roles: string[];
-  permissions?: Permission[]; // Added this based on your sample
-  restaurantId: number | null; // Changed to nullable
-  restaurantName: string;
-  branchId: number | null;
-  profileImage?: string | null;
-  branchName: string | null;
-}
-export interface CreateUserDto {
-  name: string;
-  surName: string;
-  email: string;
-  password: string;
-  passwordConfirm: string;
-  phoneNumber?: string | null;
-  restaurantId?: number | null;
-  branchId?: number | null;
-  profileImage?: string | null;
-  userCreatorId: string;
-  roleIdsList: string[];
-  isActive: boolean;
-}
-
-export interface UsersResponse {
-  users: UserData[];
-}
-export interface AppUserData {
-  appUserId: string;
-  name: string;
-  surname: string;
-  userName: string;
-  email: string;
-  restaurantId: number | null;
-  restaurant: any | null; // Or be more specific if you have a Restaurant type
-  branchId: number;
-  branch: ProfileBranchInfo;
-  profileImage: string | null;
-  isActive: boolean;
-  createdDate: string;
-  modifiedDate: string | null;
-}
-export interface ProfileBranchInfo {
-  branchId: number;
-  branchName: string;
-  branchStatus: boolean;
-  isTemporarilyClosed: boolean;
-  isOpenNow: boolean;
-  branchLogoPath: string;
-  restaurantId: number;
-}
-export interface GetAllUsersParams {
-  BranchId?: number;
-  RoleName?: string;
-  IsActive?: boolean;
-  Page?: number;
-  PageSize?: number;
-  Includes?: string;
-}
-export interface UserProfile {
-  appUser: AppUserData;
-  appRoles: AppRole[];
-}
-export interface CreateUserResponse {
-  userId: string;
-  message: string;
-}
-// Role Management Types
-// Add these interfaces to your types/api.ts file
-
-export interface Permission {
-  permissionId: number;
-  permissionName: string;
-  key: string;
-  description: string;
-  category: string;
-  isActive: boolean;
-  createdDate: string;
-  modifiedDate: string | null;
-}
-export interface RolePermission {
-  permissionId: number;
-  name: string;
-  description: string;
-  category: string;
-}
-export interface PermissionCatalog {
-  category: string;
-  permissions: Permission[];
-}
-
-export interface PermissionOption {
-  id: number;
-  name: string;
-  description: string;
-  category: string;
-}
-
-export interface CreateRoleResponse {
-  roleId: number;
-  message: string;
-}
-
-// User Creation Types
 
 
-export interface AppPermission {
-  permissionId: number;
-  name: string;
-  description: string;
-  category: string;
-}
-
-export interface AppRole {
-  appRoleId: string;
-  name: string;
-  description: string;
-  restaurantId: number | null;
-  branchId: number | null;
-  category: string;
-  isSystemRole: boolean;
-  roleScope: number;
-  createdDate: string;
-  modifiedDate: string | null;
-  permissions: AppPermission[];
-}
-
-// This is the new type for the /api/Users/{email} response
-export interface UserDetails {
-  appUserId: string;
-  name: string;
-  surname: string;
-  userName: string;
-  fullName: string;
-  email: string;
-  restaurantId: number | null;
-  branchId: number;
-  profileImage: string | null;
-  isActive: boolean;
-  createdDate: string;
-  modifiedDate: string | null;
-  phoneNumber: string | null;
-  roles: AppRole[];
-}
 
 // About Types
 export interface CreateAboutDto {
@@ -571,33 +305,7 @@ export interface CreateAboutResponse {
   aboutId?: number;
 }
 
-// Role List Types
 
-
-// New User Profile API Types (for /api/Users/profile endpoint)
-export interface UserProfileApiResponse {
-  id: string;
-  userName: string;
-  email: string;
-  name: string;
-  surname: string;
-  fullName: string;
-  phoneNumber: string;
-  profileImage: string;
-  restaurantId: number;
-  branchId: number | null;
-  isActive: boolean;
-  createdDate: string;
-  modifiedDate: string;
-  userCreator: number;
-  onboardingStatus: number;
-  roles: string[];
-  permissions: string[];
-  restaurantName: string;
-  branchName: string | null;
-}
-
-// New Branches API Response Types
 export interface BranchInfo {
   branchId: string;
   branchName: string;
@@ -613,10 +321,6 @@ export interface BranchesResponseItem {
 }
 
 export type BranchesResponse = BranchesResponseItem[]; 
-
-
-
-// Updated types for branch API responses with includes
 
 export interface BranchAddress {
   addressId: number;
@@ -644,16 +348,15 @@ export interface BranchContact {
 
 export interface BranchWorkingHour {
   id: number;
-  dayOfWeek: number; // 0-6 (Sunday = 0, Monday = 1, etc.)
-  openTime: string; // "HH:mm:ss" format
-  closeTime: string; // "HH:mm:ss" format
+  dayOfWeek: number; 
+  openTime: string; 
+  closeTime: string; 
   isWorkingDay: boolean;
 }
 
-// Updated BranchDetailResponse to match the new API structure
 export interface BranchDetailResponse {
   id: number;
-  branchId: number; // Keep both for compatibility
+  branchId: number; 
   branchName: string;
   branchTag?: string | null;
   branchStatus: boolean;
@@ -673,7 +376,6 @@ export interface BranchDetailResponse {
   activeOrders?: any | null;
 }
 
-// Form data structure for editing (maps to CreateBranchWithDetailsDto)
 export interface BranchEditFormData {
   branchName: string;
   restaurantId: number;
@@ -701,7 +403,6 @@ export interface BranchEditFormData {
   createBranchWorkingHourCoreDto: CreateBranchWorkingHourCoreDto[];
 }
 
-// Helper function to convert BranchDetailResponse to BranchEditFormData
 export function convertBranchDetailToFormData(
   branchDetail: BranchDetailResponse,
   defaultWorkingHours: CreateBranchWorkingHourCoreDto[]
@@ -745,8 +446,8 @@ export interface BatchUpdateAddressDto {
   country?: string | null;
   city?: string | null;
   street?: string | null;
-  adressLine1?: string | null;  // Note: API uses single 'd' in 'adressLine'
-  adressLine2?: string | null;  // Note: API uses single 'd' in 'adressLine'
+  adressLine1?: string | null;  
+  adressLine2?: string | null;  
   zipCode?: string | null;
 }
 
