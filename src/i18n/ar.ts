@@ -941,6 +941,7 @@ export const ar = {
   userManagement: {
     loading: 'جاري تحميل المستخدمين...',
     title: 'إدارة المستخدمين',
+    noBranch: 'لم يتم اختيار فرع بعد',
     description: 'إدارة المستخدمين والأدوار والأذونات',
     error: {
       loadFailed: 'حدث خطأ أثناء تحميل المستخدمين',
@@ -2561,6 +2562,8 @@ export const ar = {
 
   userManagementPage: {
     // Page header and navigation
+
+
     title: 'إدارة المستخدمين',
     loading: 'جاري التحميل...',
     error: {
@@ -2634,7 +2637,9 @@ export const ar = {
     roleTypes: {
       RestaurantOwner: 'مالك',
       BranchManager: 'مدير',
-      Staff: 'موظف'
+      Staff: 'موظف',
+      SuperAdmin:"المشرف الأعلى",
+      BranchStaff:"موظف الفرع"
     },
 
     // Actions menu
@@ -2642,7 +2647,21 @@ export const ar = {
       viewDetails: 'عرض التفاصيل',
       edit: 'تعديل',
       activate: 'تفعيل',
-      deactivate: 'إلغاء التفعيل'
+      deactivate: 'إلغاء التفعيل',
+      delete: 'حذف',
+      updateRoles: 'تحديث الأدوار',
+      assignBranch: 'تعيين الفرع',
+    viewPermissions: "عرض الأذونات"  
+
+    },
+       updateRoles:{
+        title:"تحديث أدوار المستخدم",
+      update : "تحديث",
+    },
+
+    permissionsModal:{
+      title:"الأذونات",
+      close:"إغلاق"
     },
 
     // No results messages
@@ -2659,11 +2678,17 @@ export const ar = {
     createRole: {
       title: 'إنشاء دور جديد',
       basicInfo: 'المعلومات الأساسية',
+      branch: 'الفرع',
+      selectBranch: 'اختر الفرع',
+      noBranch: 'لا يوجد فروع متاحة',
+      branchHint: 'تعيين الدور لفرع معين. تركه فارغاً يعني أن الدور سيكون متاحاً لجميع الفروع.',
+      selectAll: 'تحديد الجميع',
       roleName: 'اسم الدور',
       roleNamePlaceholder: 'مثال: مدير الفرع',
       category: 'الفئة',
       categoryPlaceholder: 'مثال: الإدارة',
       description: 'الوصف',
+      deselectAll:"إلفاء الكل",
       descriptionPlaceholder: 'وصف مهام ومسؤوليات الدور...',
       restaurantId: 'رقم المطعم',
       restaurantIdPlaceholder: 'الافتراضي: المطعم الحالي',
@@ -2691,6 +2716,13 @@ export const ar = {
       passwordInfo: 'معلومات كلمة المرور',
       locationInfo: 'معلومات الموقع',
       roleAssignment: 'تعيين السلطة والدور',
+
+
+      phoneNumber: 'رقم الهاتف',
+      confirmPassword: 'تأكيد كلمة المرور',
+      location: 'الموقع',
+      roles: 'الأدوار',
+      userIsActive: 'المستخدم يجب أن يكون نشطاً',
       
       // Form fields
       firstName: 'الاسم الأول',
@@ -2721,7 +2753,7 @@ export const ar = {
       profileImagePlaceholder: 'https://example.com/avatar.jpg',
       userCreatorId: 'رقم منشئ المستخدم',
       userCreatorIdPlaceholder: 'رقم المستخدم الحالي',
-      
+      systemRoleInfo: 'معلومات دور النظام',
       // Role assignment
       assignmentType: 'نوع التعيين',
       rolesSelection: 'اختيار من الأدوار الموجودة (مُستحسن)',
@@ -2773,7 +2805,11 @@ export const ar = {
       branch: 'الفرع',
       noDescription: 'لا يوجد وصف متاح',
       users: 'مستخدمين',
-      permissions: 'صلاحيات'
+      permissions: 'صلاحيات',
+        created: 'تم الإنشاء في',
+      system: 'دور النظام',
+            branchSpecific: 'فرع محدد',
+
     },
 
     // Permission categories

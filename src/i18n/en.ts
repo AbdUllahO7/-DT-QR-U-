@@ -1,3 +1,4 @@
+import ViewPermissionsModal from "../components/dashboard/content/UserManagement/ViewPermissionsModal";
 
 
 export const en = {
@@ -941,6 +942,7 @@ export const en = {
   userManagement: {
     loading: 'Loading users...',
     title: 'User Management',
+    noBranch: 'No branch selected. Please select a branch to manage users.',
     description: 'Manage users, roles and permissions',
     error: {
       loadFailed: 'An error occurred while loading users',
@@ -2556,7 +2558,7 @@ export const en = {
   },
 
   userManagementPage: {
-    // Page header and navigation
+
     title: 'User Management',
     loading: 'Loading...',
     error: {
@@ -2567,6 +2569,7 @@ export const en = {
       createUserFailed: 'Failed to create user',
       createRoleFailed: 'Failed to create role'
     },
+    systemRoleInfo : 'System roles are predefined and cannot be modified or deleted.',
 
     // Statistics
     stats: {
@@ -2630,15 +2633,29 @@ export const en = {
     roleTypes: {
       RestaurantOwner: 'Owner',
       BranchManager: 'Manager',
-      Staff: 'Staff'
+      Staff: 'Staff',
+      SuperAdmin:"Super Admin",
+      BranchStaff:"Branch Staff"
     },
-
+   permissionsModal:{
+      title:"Permissions",
+      close:"Close"
+    },
     // Actions menu
     actions: {
       viewDetails: 'View Details',
       edit: 'Edit',
       activate: 'Activate',
-      deactivate: 'Deactivate'
+      deactivate: 'Deactivate',
+      delete: 'Delete',
+      updateRoles: 'Update Roles',
+      assignBranch: 'Assign Branches',
+      viewPermissions: "View Permissions"  
+    },
+
+    updateRoles:{
+      title:"Update User Roles",
+      update : "Update",
     },
 
     // No results messages
@@ -2655,6 +2672,11 @@ export const en = {
     createRole: {
       title: 'Create New Role',
       basicInfo: 'Basic Information',
+      noBranch: 'No Branch Assignment ',
+      branch: 'Restaurant and Branch Assignment',
+      selectBranch: 'Select Branches',
+      branchHint: 'If no branch is selected, the role will apply to all branches of the restaurant.',
+      selectAll:  'Select All',
       roleName: 'Role Name',
       roleNamePlaceholder: 'e.g.: Branch Manager',
       category: 'Category',
@@ -2671,6 +2693,7 @@ export const en = {
       cancel: 'Cancel',
       create: 'Create Role',
       creating: 'Creating...',
+      deselectAll:"Un Select",
       validation: {
         nameRequired: 'Role name must be at least 3 characters',
         nameMaxLength: 'Role name can be maximum 50 characters',
@@ -2687,7 +2710,11 @@ export const en = {
       passwordInfo: 'Password Information',
       locationInfo: 'Location Information',
       roleAssignment: 'Authority and Role Assignment',
-      
+      phoneNumber: 'Phone Number',
+      confirmPassword: 'Confirm Password',
+      location: 'Restaurant/Branch Location',
+      roles: 'Roles',
+      userIsActive: 'User is Active',
       // Form fields
       firstName: 'First Name',
       firstNamePlaceholder: 'e.g.: John',
@@ -2768,8 +2795,12 @@ export const en = {
       restaurant: 'Restaurant',
       branch: 'Branch',
       noDescription: 'No description available',
+       created:  'Created',
+      system: 'System',
       users: 'users',
-      permissions: 'permissions'
+      permissions: 'permissions',
+            branchSpecific: 'Branch Specific',
+
     },
 
     // Permission categories
@@ -4406,5 +4437,8 @@ export const en = {
       "confirmOpenMessage": "Are you sure you want to open a new money case?",
       "confirmCloseMessage": "Are you sure you want to close the current money case? This action cannot be undone."
     }
-  }
+  },
+            user:{
+      read: 'okuma',
+    },
 }; 

@@ -1,3 +1,4 @@
+import { RoleDetails } from '../types/api';
 
 export const tr = {
   // Common
@@ -2564,7 +2565,8 @@ export const tr = {
   },
 
   userManagementPage: {
-    // Page header and navigation
+
+
     title: 'Kullanıcı Yönetimi',
     loading: 'Yükleniyor...',
     error: {
@@ -2646,8 +2648,12 @@ export const tr = {
       viewDetails: 'Detayları Görüntüle',
       edit: 'Düzenle',
       activate: 'Aktifleştir',
-      deactivate: 'Devre Dışı Bırak'
+      deactivate: 'Devre Dışı Bırak',
+      delete: 'Sil',
+              updateRoles: 'Rolleri Güncelle',
+      assignBranch: 'Şube Ata'
     },
+
 
     // No results messages
     noResults: {
@@ -2659,10 +2665,17 @@ export const tr = {
       searchEmptyRoles: 'Arama kriterlerinize uygun rol bulunamadı.'
     },
 
+
+
     // Create Role Modal
     createRole: {
       title: 'Yeni Rol Oluştur',
       basicInfo: 'Temel Bilgiler',
+      selectBranch: 'Şube Seçimi',
+      branch: 'Şube',
+      selectAll: 'Tüm Şubeler',
+      noBranch: 'Şube Yok',
+      branchHint: 'Bu rolü belirli bir şubeye atayın veya tüm şubelerde geçerli olsun',
       roleName: 'Rol Adı',
       roleNamePlaceholder: 'Örn: Şube Müdürü',
       category: 'Kategori',
@@ -2686,6 +2699,7 @@ export const tr = {
         categoryMaxLength: 'Kategori en fazla 50 karakter olabilir'
       }
     },
+    
 
     // Create User Modal
     createUser: {
@@ -2695,6 +2709,12 @@ export const tr = {
       passwordInfo: 'Şifre Bilgileri',
       locationInfo: 'Konum Bilgileri',
       roleAssignment: 'Yetki ve Rol Ataması',
+
+         phoneNumber: 'Telefon Numarası',
+      confirmPassword: 'Şifreyi Onayla',
+      location: 'Konum',
+      roles: 'Roller',
+      userIsActive: 'Kullanıcı Aktif',
       
       // Form fields
       firstName: 'Ad',
@@ -2712,7 +2732,7 @@ export const tr = {
       passwordPlaceholder: 'En az 6 karakter',
       passwordConfirm: 'Şifre Tekrarı',
       passwordConfirmPlaceholder: 'Şifrenizi tekrar giriniz',
-      
+      systemRoleInfo: 'Sistem rolleri önceden tanımlanmıştır ve değiştirilemez.',
       // Location
       locationType: 'Konum Türü',
       restaurant: 'Restoran',
@@ -2774,10 +2794,14 @@ export const tr = {
       userCount: 'Kullanıcı Sayısı',
       permissionCount: 'İzin Sayısı',
       restaurant: 'Restoran',
+      created: "Oluşturulma Tarihi",
+      system: "Sistem Rolü",
       branch: 'Şube',
       noDescription: 'Açıklama bulunmuyor',
       users: 'kullanıcı',
-      permissions: 'izin'
+      permissions: 'izin',
+            branchSpecific: 'Şube Spesifik',
+
     },
 
     // Permission categories

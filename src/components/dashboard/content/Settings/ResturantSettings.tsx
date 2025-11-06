@@ -1,30 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Bell, 
   Check, 
-  Mail, 
   MoonStar, 
   Sun, 
   Settings as SettingsIcon,
-  Shield,
   Palette,
-  Smartphone,
-  Volume2,
   Eye,
-  Lock,
-  Download,
-  Upload,
-  Trash2,
-  Save,
-  Info,
-  Languages,
-  Clock,
-  Calendar,
   Zap,
-  Database,
-  HardDrive,
-  Wifi,
   ChevronDown,
   Building2,
   AlertCircle
@@ -52,7 +35,7 @@ const ResturantSettings: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
-const [activeTab, setActiveTab] = useState<'general' | 'branch' | 'notifications' | 'privacy' | 'appearance' | 'data'>('branch');
+  const [activeTab, setActiveTab] = useState<'general' | 'branch' | 'notifications' | 'privacy' | 'appearance' | 'data'>('branch');
   const [settings, setSettings] = useState<UserSettingsState>({
     notificationsEnabled: true,
     emailNotificationsEnabled: true,

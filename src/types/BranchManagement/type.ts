@@ -6,7 +6,7 @@ import { OrderStatusEnums } from "../Orders/type";
 
 export interface BranchData {
   id: number;
-  branchId: number;
+  branchId: string;
   branchName: string;
   whatsappOrderNumber: string | null;
   email: string | null;
