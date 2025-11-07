@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Shield, Loader2 } from 'lucide-react';
-import { Role, UpdateUserRolesDto, UserData } from '../../../../types/api';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { roleService } from '../../../../services/RoleService'; // <-- Import roleService
 import { logger } from '../../../../utils/logger';
+import { Role, UpdateUserRolesDto, UserData } from '../../../../types/users/users.type';
 
 export interface UpdateUserRolesModalProps {
   isOpen: boolean;
@@ -71,7 +71,7 @@ const UpdateUserRolesModal: React.FC<UpdateUserRolesModalProps> = ({
       // Map role names (user.roles) to role IDs (displayRoles)
       const activeRoleIds = displayRoles
         .filter(role => user.roles.includes(role.name))
-        .map(role => role.appRoleId);
+        .map(role => role.roleId);
       setSelectedRoles(activeRoleIds);
     } else {
       setSelectedRoles([]); // Clear selection if no user or roles
@@ -143,13 +143,13 @@ const UpdateUserRolesModal: React.FC<UpdateUserRolesModalProps> = ({
               ) : (
                 displayRoles.filter(role => role.isActive).map(role => (
                   <label
-                    key={role.appRoleId}
+                    key={role.roleId}
                     className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 cursor-pointer"
                   >
                     <input
                       type="checkbox"
-                      checked={selectedRoles.includes(role.appRoleId)}
-                      onChange={() => handleRoleToggle(role.appRoleId)}
+                      checked={selectedRoles.includes(role.roleId)}
+                      onChange={() => handleRoleToggle(role.roleId)}
                       className="mt-0.5 h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                     />
                     <div className="flex-1 min-w-0">

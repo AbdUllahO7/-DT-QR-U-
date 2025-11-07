@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { UserPlus, Shield, Building, ChevronDown, Loader2 } from 'lucide-react'; // Added Loader2
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../../hooks';
-import type { CreateUserDto, Role, BranchInfo } from '../../../../types/api';
+import type {  BranchInfo } from '../../../../types/api';
+import { CreateUserDto, Role } from '../../../../types/users/users.type';
 
 export interface CreateUserModalProps {
   isOpen: boolean;
@@ -54,7 +55,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
   // Get selected branch name
   const selectedBranchName = formData.branchId 
-    ? branches.find(b => b.branchId === formData.branchId)?.branchName 
+    ? branches.find(b => Number(b.branchId) === Number(formData.branchId))?.branchName 
     : null;
 
   const validateForm = (): boolean => {
@@ -532,13 +533,13 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     <div className="space-y-2">
                       {roles.filter(role => role.isActive).map((role) => (
                         <label
-                          key={role.appRoleId}
+                          key={role.roleId}
                           className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 cursor-pointer"
                         >
                           <input
                             type="checkbox"
-                            checked={selectedRoles.includes(role.appRoleId)}
-                            onChange={() => handleRoleToggle(role.appRoleId)}
+                            checked={selectedRoles.includes(role.roleId)}
+                            onChange={() => handleRoleToggle(role.roleId)}
                             className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
                           <div className="flex-1 min-w-0">

@@ -243,16 +243,9 @@ export interface UpdateRestaurantDto {
 
 
 
-export interface UpdateRoleDto {
-  name: string;
-  description?: string | null;
-  category?: string | null;
-  branchId?:string
-}
 
-export interface UpdateRolePermissionsDto {
-  permissionIds: number[];
-}
+
+
 export interface OldRoleType {
   id: string; 
   name: string;

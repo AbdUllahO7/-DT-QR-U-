@@ -68,12 +68,13 @@ export interface AppUserData {
 
 export interface Permission {
   permissionId: number;
-  permissionName: string;
+  name: string;
   key: string;
   description: string;
   category: string;
   isActive: boolean;
   createdDate: string;
+  permissionName?:string,
   modifiedDate: string | null;
 }
 export interface RolePermission {
@@ -107,7 +108,7 @@ export interface AppPermission {
 }
 
 export interface AppRole {
-  appRoleId: string;
+  roleId: string;
   name: string;
   description: string;
   restaurantId: number | null;
@@ -199,7 +200,7 @@ export interface Role {
   isActive: boolean;
   createdDate: string;
   modifiedDate: string | null;
-  permissions: Permission[]; // Or AppPermission[] if you have it defined
+  permissions: Permission[]; 
 }
 
 export type RoleDetails = Role;
@@ -235,7 +236,7 @@ export interface CreateRoleDto {
   name: string;
   description?: string | null;
   restaurantId?: number | null;
-  branchId: number ;
+  branchId?: number ;
   category?: string | null;
 }
 
@@ -256,4 +257,15 @@ export interface ChangePasswordDto {
   currentPassword: string;
   newPassword: string;
   newPasswordConfirm: string;
+}
+
+export interface UpdateRoleDto {
+  name: string;
+  description?: string | null;
+  category?: string | null;
+  branchId?:string
+}
+
+export interface UpdateRolePermissionsDto {
+  permissionIds: number[];
 }

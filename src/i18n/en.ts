@@ -2582,7 +2582,6 @@ export const en = {
       createUserFailed: 'Failed to create user',
       createRoleFailed: 'Failed to create role'
     },
-    systemRoleInfo : 'System roles are predefined and cannot be modified or deleted.',
 
     // Statistics
     stats: {
@@ -2684,6 +2683,21 @@ export const en = {
     // Create Role Modal
     createRole: {
       title: 'Create New Role',
+      step1Title: "Step 1: Basic Information",
+      step2Title: "Step 2: Select Permissions",
+      stepBasicInfo: "Basic Info",
+      stepPermissions: "Permissions",
+      step1Info: "Create Role",
+      step1Description: "Enter the basic information for the new role",
+      roleCreatedSuccess: "Role Created Successfully!",
+      step2Description: "Now you can select permissions for this role",
+      continue: "Continue to Permissions",
+      back: "Back",
+      skipPermissions: "Skip (Add Later)",
+      finish: "Finish",
+      creating: "Creating...",
+      saving: "Saving...",
+      loadingPermissions: "Loading permissions...",
       basicInfo: 'Basic Information',
       noBranch: 'No Branch Assignment ',
       branch: 'Restaurant and Branch Assignment',
@@ -2705,7 +2719,6 @@ export const en = {
       permissionsSelected: 'selected',
       cancel: 'Cancel',
       create: 'Create Role',
-      creating: 'Creating...',
       deselectAll:"Un Select",
       validation: {
         nameRequired: 'Role name must be at least 3 characters',

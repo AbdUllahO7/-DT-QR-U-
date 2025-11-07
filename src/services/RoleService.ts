@@ -3,16 +3,9 @@
 import { apiRequest } from '../utils/apiRequest';
 import { logger } from '../utils/logger';
 import type { 
-  ApiResponse, 
-  Role, 
-  CreateRoleDto,
-  RoleDetails,
-  UpdateRoleDto,
-  UpdateRolePermissionsDto,
-  PermissionCatalog, 
-  RolePermission, // <-- Import the new type
-
+  ApiResponse,
 } from '../types/api';
+import { CreateRoleDto, PermissionCatalog, Role, RoleDetails, RolePermission, UpdateRoleDto, UpdateRolePermissionsDto } from '../types/users/users.type';
 
 /**
  * Interface for optional parameters when fetching roles.
@@ -35,10 +28,11 @@ class RoleService {
       // Set defaults: includePermissions is true unless explicitly set to false
       const apiParams: GetRolesParams = {
         includePermissions: true,
-        ...params, // User-provided params will override the default
+        ...params, 
       };
 
       logger.info('🔍 getRoles çağrılıyor...', apiParams, { prefix: 'RoleService' });
+
       
       const response = await apiRequest<Role[]>({
         method: 'GET',
@@ -64,14 +58,25 @@ class RoleService {
    * GET /api/Roles/{roleId}
    * Fetches a single role by its ID.
    */
-  async getRoleById(roleId: string): Promise<ApiResponse<RoleDetails>> {
+  async getRoleById(params: GetRolesParams = {}, roleId: string): Promise<ApiResponse<RoleDetails>> {
     try {
       logger.info(`🔍 getRoleById çağrılıyor: ${roleId}`, null, { prefix: 'RoleService' });
-      
+
+
+       const apiParams: GetRolesParams = {
+        includePermissions: true,
+        ...params, 
+      };
+
+
       const response = await apiRequest<RoleDetails>({
         method: 'GET',
-        url: `/api/Roles/${roleId}`
+        url: `/api/Roles/${roleId}`,
+        params: apiParams
+
       });
+
+      console.log("get role", response)
 
       logger.info('✅ getRoleById başarılı', response, { prefix: 'RoleService' });
       
@@ -93,10 +98,18 @@ class RoleService {
     try {
       logger.info('🔍 createRole çağrılıyor...', roleData, { prefix: 'RoleService' });
       
+      // Create a copy of the data to send
+      const apiData = { ...roleData };
+
+      // If branchId is 0, null, or undefined, remove it from the object
+      if (!apiData.branchId) {
+        delete apiData.branchId;
+      }
+      console.log("apiData",apiData)
       const response = await apiRequest<Role>({
         method: 'POST',
         url: '/api/Roles',
-        data: roleData
+        data: apiData // Send the modified copy
       });
 
       logger.info('✅ createRole başarılı', response, { prefix: 'RoleService' });
@@ -110,7 +123,6 @@ class RoleService {
       throw error;
     }
   }
-
   /**
    * PUT /api/Roles/{roleId}
    * Updates an existing role's details.
@@ -144,7 +156,7 @@ class RoleService {
   async deleteRole(roleId: string): Promise<ApiResponse<any>> {
     try {
       logger.info(`🔍 deleteRole çağrılıyor: ${roleId}`, null, { prefix: 'RoleService' });
-      
+      console.log("roleId",roleId)
       const response = await apiRequest<any>({
         method: 'DELETE',
         url: `/api/Roles/${roleId}`

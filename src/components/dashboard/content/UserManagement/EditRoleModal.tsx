@@ -6,11 +6,9 @@ import { useClickOutside } from '../../../../hooks';
 import { roleService } from '../../../../services/RoleService';
 import { logger } from '../../../../utils/logger';
 import type {
-  Role,
-  UpdateRoleDto,
-  PermissionCatalog,
   BranchInfo,
 } from '../../../../types/api';
+import { PermissionCatalog, Role, UpdateRoleDto } from '../../../../types/users/users.type';
 
 export interface EditRoleModalProps {
   isOpen: boolean;
@@ -34,6 +32,8 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
   isLoading,
 }) => {
   const { t, isRTL } = useLanguage();
+
+  console.log("role",)
 
   // Form state
   const [formData, setFormData] = useState<UpdateRoleDto>({
@@ -83,23 +83,25 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
             const allPermissionsMap = new Map<string, number>();
             for (const category of response.data) {
               for (const perm of category.permissions) {
-                allPermissionsMap.set(perm.permissionName, perm.permissionId);
+                if (perm.permissionName) {
+                  allPermissionsMap.set(perm.permissionName, perm.permissionId);
+                }
               }
             }
 
             // Get the names of the permissions this role already has
-            const rolePermissionNames = new Set(
-              role.permissions.map((p) => p.permissionName)
-            );
+          const rolePermissionNames = new Set(
+          role.permissions.map((p) => p.name)
+        );
 
             // Find the corresponding IDs from the catalog
             const initialSelectedIds: number[] = [];
-            for (const name of rolePermissionNames) {
-              if (allPermissionsMap.has(name)) {
-                initialSelectedIds.push(allPermissionsMap.get(name)!);
+              for (const name of rolePermissionNames) {
+                if (allPermissionsMap.has(name)) {
+                  initialSelectedIds.push(allPermissionsMap.get(name)!);
+                }
               }
-            }
-            setSelectedPermissions(initialSelectedIds);
+              setSelectedPermissions(initialSelectedIds);
           } else {
             logger.error('Failed to fetch permission catalog', response, {
               prefix: 'EditRoleModal',
@@ -150,7 +152,7 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
     };
 
     try {
-      await onSubmit(role.appRoleId, submitData, selectedPermissions);
+      await onSubmit(role.roleId, submitData, selectedPermissions);
     } catch (error) {
       console.error('Error updating role:', error);
     }

@@ -6,7 +6,6 @@ import {
   Shield,
   User,
   Search,
-  Filter,
   Grid,
   List,
   Users,
@@ -15,7 +14,6 @@ import {
   UserCheck,
   UserX,
   Phone,
-  Mail,
   Calendar,
   Building,
   MapPin,
@@ -30,17 +28,7 @@ import { userService } from '../../../services/userService';
 import { roleService } from '../../../services/RoleService';
 import { logger } from '../../../utils/logger';
 import type {
-  UserData,
-  CreateRoleDto,
-  PermissionCatalog,
-  Role,
-  CreateUserDto,
-  UpdateUserDto,
-  UpdateUserRolesDto,
-  AssignBranchDto,
-  Branch,
   BranchInfo,
-  UpdateRoleDto,
 } from '../../../types/api';
 import EditUserModal from './UserManagement/EditUserModal';
 import UpdateUserRolesModal from './UserManagement/UpdateUserRolesModal';
@@ -52,6 +40,7 @@ import EditRoleModal from './UserManagement/EditRoleModal';
 import { branchService } from '../../../services/branchService';
 import ViewPermissionsModal from './UserManagement/ViewPermissionsModal';
 import ViewRolePermissionsModal from './UserManagement/ViewRolePermissionsModal';
+import { AssignBranchDto, CreateUserDto, PermissionCatalog, Role, UpdateRoleDto, UpdateUserDto, UpdateUserRolesDto, UserData } from '../../../types/users/users.type';
 
 type ViewMode = 'grid' | 'list';
 type FilterMode =
@@ -74,7 +63,6 @@ const UserManagement: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [activeTab, setActiveTab] = useState<TabMode>('users');
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterMode, setFilterMode] = useState<FilterMode>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
@@ -82,7 +70,6 @@ const UserManagement: React.FC = () => {
 
   // Create Role Modal States
   const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
-  const [isCreatingRole, setIsCreatingRole] = useState(false);
 
   // Create User Modal States
   const [isUserModalOpen, setIsUserModalOpen] = useState(false);
@@ -133,7 +120,8 @@ const UserManagement: React.FC = () => {
   useClickOutside(dropdownRef, () => {
     setActiveDropdown(null);
   });
-
+const containerRef = useRef<HTMLDivElement>(null);
+useClickOutside(containerRef, () => setActiveDropdown(null));
   // Fetch Users
   const fetchUsers = useCallback(async () => {
     try {
@@ -164,25 +152,27 @@ const UserManagement: React.FC = () => {
   }, [t]);
 
   // Fetch Roles
-  const fetchRoles = useCallback(async () => {
-    try {
-      // By default, this now includes permissions
-      const response = await roleService.getRoles();
-      if (response.success && response.data) {
-        const rolesData = Array.isArray(response.data) ? response.data : [];
-        setRoles(rolesData);
-        setRolesForModal(rolesData);
-        logger.info('Roller başarıyla yüklendi', rolesData, {
-          prefix: 'UserManagement',
-        });
-      } else {
-        throw new Error(t('userManagementPage.error.rolesLoadFailed'));
-      }
-    } catch (err: any) {
-      logger.error('Roller yüklenirken hata', err, { prefix: 'UserManagement' });
-      setRoles([]);
+// Fetch Roles
+const fetchRoles = useCallback(async () => {
+  try {
+    // Explicitly include permissions
+    const response = await roleService.getRoles({
+    });
+    if (response.success && response.data) {
+      const rolesData = Array.isArray(response.data) ? response.data : [];
+      setRoles(rolesData);
+      setRolesForModal(rolesData);
+      logger.info('Roller başarıyla yüklendi', rolesData, {
+        prefix: 'UserManagement',
+      });
+    } else {
+      throw new Error(t('userManagementPage.error.rolesLoadFailed'));
     }
-  }, [t]);
+  } catch (err: any) {
+    logger.error('Roller yüklenirken hata', err, { prefix: 'UserManagement' });
+    setRoles([]);
+  }
+}, [t]);
 
   // Fetch Branches
   const fetchBranches = useCallback(async () => {
@@ -280,58 +270,47 @@ const UserManagement: React.FC = () => {
     return filtered;
   }, [roles, selectedCategory, searchTerm]);
 
-  // Create Role Handler
-  const handleCreateRole = useCallback(
-    async (roleData: CreateRoleDto, permissionIds: number[]) => {
-      try {
-        setIsCreatingRole(true);
-        const createResponse = await roleService.createRole(roleData);
-        if (!createResponse.success || !createResponse.data) {
-          throw new Error(t('userManagementPage.error.createRoleFailed'));
-        }
-        logger.info('Rol başarıyla oluşturuldu', createResponse.data, {
-          prefix: 'UserManagement',
-        });
-        if (permissionIds.length > 0) {
-          const roleId = createResponse.data.appRoleId;
-          const permissionsResponse = await roleService.updateRolePermissions(
-            roleId,
-            { permissionIds: permissionIds }
-          );
-          if (!permissionsResponse.success) {
-            logger.warn(
-              'Rol izinleri eklenirken uyarı',
-              permissionsResponse,
-              { prefix: 'UserManagement' }
-            );
-          } else {
-            logger.info(
-              'Rol izinleri başarıyla eklendi',
-              permissionsResponse.data,
-              { prefix: 'UserManagement' }
-            );
-          }
-        }
-        setIsRoleModalOpen(false);
-        await fetchRoles(); // Refetch all roles
-      } catch (err: any) {
-        logger.error('Rol oluşturulurken hata', err, {
-          prefix: 'UserManagement',
-        });
-        throw err;
-      } finally {
-        setIsCreatingRole(false);
-      }
-    },
-    [fetchRoles, t]
-  );
+
+  console.log("filteredRoles",filteredRoles)
+
+// Create Role Handler - Creates role then opens edit modal for permissions
+// Create Role Handler - Creates role with permissions in one call
+const handleRoleCreated = useCallback(async () => {
+  // Just refresh the roles list
+  await fetchRoles();
+}, [fetchRoles]);
+
 
   // Edit Role Handlers
-  const handleOpenEditRole = useCallback((role: Role) => {
+// Edit Role Handlers
+const handleOpenEditRole = useCallback(async (role: Role) => {
+  setActiveDropdown(null);
+  
+  // Fetch the complete role data with permissions
+  try {
+    const response = await roleService.getRoleById( {
+    },role.appRoleId,);
+    
+    if (response.success && response.data) {
+      setSelectedRoleForEdit(response.data);
+      setIsEditRoleModalOpen(true);
+    } else {
+      logger.error('Failed to fetch role details', response, {
+        prefix: 'UserManagement',
+      });
+      // Fallback to the role we have (might not have permissions)
+      setSelectedRoleForEdit(role);
+      setIsEditRoleModalOpen(true);
+    }
+  } catch (error) {
+    logger.error('Error fetching role details', error, {
+      prefix: 'UserManagement',
+    });
+    // Fallback to the role we have
     setSelectedRoleForEdit(role);
     setIsEditRoleModalOpen(true);
-    setActiveDropdown(null);
-  }, []);
+  }
+}, []);
 
   const handleEditRole = useCallback(
     async (roleId: string, roleData: UpdateRoleDto, permissionIds: number[]) => {
@@ -757,11 +736,11 @@ const UserManagement: React.FC = () => {
 
   // Render User Actions Dropdown
   const renderUserActionsDropdown = (user: UserData) => (
-    <div
-      className={`absolute ${
-        isRTL ? 'left-0' : 'right-0'
-      } mt-2 w-52 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-10`}
-    >
+      <div
+        className={`absolute ${
+          isRTL ? 'left-0' : 'right-0'
+        } mt-2 w-52 rounded-md shadow-lg bg-white dark:bg-gray-700 ring-1 ring-black ring-opacity-5 z-50`}  // Added z-50
+      >
       <div className="py-1">
         <button
           onClick={() => handleOpenEditUser(user)}
@@ -899,7 +878,7 @@ const UserManagement: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'} ref={containerRef}>
       {/* Header with Stats */}
       <div
         className={`flex flex-col lg:flex-row lg:items-center ${
@@ -1247,7 +1226,7 @@ const UserManagement: React.FC = () => {
                           {user.email}
                         </p>
                       </div>
-                      <div className="relative" ref={dropdownRef}>
+                      <div className="relative" >
                         <button
                           onClick={() => setActiveDropdown(activeDropdown === user.id ? null : user.id)}
                           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -1396,7 +1375,7 @@ const UserManagement: React.FC = () => {
                             {formatDate(user.createdDate)}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div className="relative" ref={dropdownRef}>
+                            <div className="relative" >
                               <button
                                 onClick={() => setActiveDropdown(activeDropdown === user.id ? null : user.id)}
                                 className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
@@ -1437,9 +1416,9 @@ const UserManagement: React.FC = () => {
           {viewMode === 'grid' && filteredRoles.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <AnimatePresence>
-                {filteredRoles.map((role) => (
+                {filteredRoles.map((role, index) => (
                   <motion.div
-                    key={role.appRoleId}
+                   key={role.appRoleId}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
@@ -1461,7 +1440,7 @@ const UserManagement: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      <div className="relative" ref={dropdownRef}>
+                      <div className="relative" >
                         <button
                           onClick={() => setActiveDropdown(activeDropdown === role.appRoleId ? null : role.appRoleId)}
                           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -1554,7 +1533,7 @@ const UserManagement: React.FC = () => {
                   </thead>
                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     <AnimatePresence>
-                      {filteredRoles.map((role) => (
+                      {filteredRoles.map((role , index) => (
                         <motion.tr
                           key={role.appRoleId}
                           initial={{ opacity: 0 }}
@@ -1608,7 +1587,7 @@ const UserManagement: React.FC = () => {
                             {t('userManagementPage.roleDetails.permissionsCount')}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div className="relative" ref={dropdownRef}>
+                            <div className="relative" >
                               <button
                                 onClick={() => setActiveDropdown(activeDropdown === role.appRoleId ? null : role.appRoleId)}
                                 className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
@@ -1630,15 +1609,14 @@ const UserManagement: React.FC = () => {
       )}
 
       {/* Modals */}
-      {isRoleModalOpen && (
-        <CreateRoleModal
-          isOpen={isRoleModalOpen}
-          onClose={() => setIsRoleModalOpen(false)}
-          onSubmit={handleCreateRole}
-          branches={branches}
-          isLoading={isCreatingRole}
-        />
-      )}
+{isRoleModalOpen && (
+  <CreateRoleModal
+    isOpen={isRoleModalOpen}
+    onClose={() => setIsRoleModalOpen(false)}
+    onSuccess={handleRoleCreated}
+    branches={branches}
+  />
+)}
       {isUserModalOpen && (
         <CreateUserModal
           branches={branches}
