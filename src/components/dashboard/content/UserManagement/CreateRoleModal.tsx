@@ -132,7 +132,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
       });
       console.log("response",response)
       // Store the created role ID
-      setCreatedRoleId(response.data.roleId);
+      setCreatedRoleId(response.data.roleId ?? null);
 
       setCurrentStep(2);
       
@@ -150,6 +150,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
 
   // Step 2: Assign permissions to the created role (FIXED)
   const handleStep2Submit = async () => {
+    console.log("createdRoleId",createdRoleId)
     if (!createdRoleId) {
       logger.error('No role ID available', {}, { prefix: 'CreateRoleModal' });
       return;
@@ -635,11 +636,9 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                                     />
                                     <div className="flex-1 min-w-0">
                                       <div className="font-medium text-sm text-gray-900 dark:text-white">
-                                        {permission.permissionName}
-                                      </div>
-                                      <div className="text-xs text-gray-500 dark:text-gray-400">
                                         {permission.description}
                                       </div>
+                                      
                                     </div>
                                   </label>
                                 ))}

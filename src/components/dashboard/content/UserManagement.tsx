@@ -43,13 +43,7 @@ import ViewRolePermissionsModal from './UserManagement/ViewRolePermissionsModal'
 import { AssignBranchDto, CreateUserDto, PermissionCatalog, Role, UpdateRoleDto, UpdateUserDto, UpdateUserRolesDto, UserData } from '../../../types/users/users.type';
 
 type ViewMode = 'grid' | 'list';
-type FilterMode =
-  | 'all'
-  | 'RestaurantOwner'
-  | 'BranchManager'
-  | 'Staff'
-  | 'active'
-  | 'inactive';
+
 type TabMode = 'users' | 'roles';
 type ActionType = 'delete' | 'lock' | 'unlock' | 'generic';
 
@@ -537,36 +531,57 @@ const handleOpenEditRole = useCallback(async (role: Role) => {
   );
 
   // Toggle User Active Status
+// Toggle User Active Status (REFACTORED)
   const handleToggleUserStatus = useCallback(
     (user: UserData) => {
       setActiveDropdown(null);
-      const willLock = user.isActive;
+      const newIsActive = !user.isActive; // The new status we want to set
+      
       setConfirmationConfig({
-        title: willLock
-          ? t('userManagementPage.confirmation.deactivateTitle')
-          : t('userManagementPage.confirmation.activateTitle'),
-        message: willLock
-          ? t('userManagementPage.confirmation.deactivateMessage', { name: user.fullName })
-          : t('userManagementPage.confirmation.activateMessage', { name: user.fullName }),
-        confirmText: willLock
-          ? t('userManagementPage.actions.deactivate')
-          : t('userManagementPage.actions.activate'),
-        actionType: willLock ? 'lock' : 'unlock',
+        title: newIsActive
+          ? t('userManagementPage.confirmation.activateTitle')
+          : t('userManagementPage.confirmation.deactivateTitle'),
+        message: newIsActive
+          ? t('userManagementPage.confirmation.activateMessage', { name: user.fullName })
+          : t('userManagementPage.confirmation.deactivateMessage', { name: user.fullName }),
+        confirmText: newIsActive
+          ? t('userManagementPage.actions.activate')
+          : t('userManagementPage.actions.deactivate'),
+        actionType: newIsActive ? 'unlock' : 'lock',
         onConfirm: async () => {
           try {
             setIsConfirmationLoading(true);
-            const response = willLock
-              ? await userService.lockUser(user.id)
-              : await userService.unlockUser(user.id);
+
+            // 1. We must construct the full UpdateUserDto, as the 'updateUser' 
+            // endpoint likely expects the whole object.
+            // We'll mimic the logic from your EditUserModal's useEffect.
+            const [name, ...surnameParts] = user.fullName.split(' ');
+            const surname = surnameParts.join(' ');
+
+            const updateData: UpdateUserDto = {
+              appUserId: user.id,
+              name: name || '',
+              surname: surname || '',
+              userName: user.userName,
+              email: user.email,
+              restaurantId: user.restaurantId,
+              branchId: user.branchId,
+              profileImage: user.profileImage || null,
+              isActive: newIsActive, // <-- Here is the only change
+            };
+
+            // 2. Call 'updateUser' instead of 'lockUser' or 'unlockUser'
+            const response = await userService.updateUser(user.id, updateData);
+
             if (response.success) {
               logger.info(
-                `Kullanıcı ${willLock ? 'kilitlendi' : 'kilidi açıldı'}`,
+                `Kullanıcı durumu güncellendi: ${newIsActive}`,
                 response.data,
                 { prefix: 'UserManagement' }
               );
               setIsConfirmationModalOpen(false);
               setConfirmationConfig(null);
-              await fetchUsers();
+              await fetchUsers(); // This will now fetch the updated data
             } else {
               throw new Error(t('userManagementPage.error.toggleStatusFailed'));
             }
@@ -1654,8 +1669,9 @@ const handleOpenEditRole = useCallback(async (role: Role) => {
           isLoading={isUpdatingRoles}
         />
       )}
-      {isAssignBranchModalOpen && selectedUserForBranch && (
+     {/*  {isAssignBranchModalOpen && selectedUserForBranch && (
         <AssignBranchModal
+          branches={branches}
           isOpen={isAssignBranchModalOpen}
           onClose={() => {
             setIsAssignBranchModalOpen(false);
@@ -1665,7 +1681,7 @@ const handleOpenEditRole = useCallback(async (role: Role) => {
           user={selectedUserForBranch}
           isLoading={isAssigningBranch}
         />
-      )}
+      )} */}
       {isConfirmationModalOpen && confirmationConfig && (
         <ConfirmationModal
           isOpen={isConfirmationModalOpen}

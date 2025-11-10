@@ -1,4 +1,3 @@
-import { RoleDetails } from '../types/api';
 
 export const tr = {
   // Common
@@ -2565,7 +2564,20 @@ export const tr = {
   },
 
   userManagementPage: {
+   rolePermissionsModal:{
+      title:"Görüntüleme izinleri",
+    },
+   editRole :{
+      title:"Rol Güncellemesi",
+      save:"kaydet"
+    },
+  confirmation: {
+        deleteRoleTitle: "Rolü Sil",
+        deleteRoleMessage: "Bu rolü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+        deactivateTitle:"Kullanıcıyı Devre Dışı Bırak?",
+        deactivateMessage:"{name} adlı kullanıcıyı devre dışı bırakmak istediğinizden emin misiniz? Sisteme erişimini kaybedecek."
 
+      },
 
     title: 'Kullanıcı Yönetimi',
     loading: 'Yükleniyor...',
@@ -2650,11 +2662,56 @@ export const tr = {
       activate: 'Aktifleştir',
       deactivate: 'Devre Dışı Bırak',
       delete: 'Sil',
-              updateRoles: 'Rolleri Güncelle',
-      assignBranch: 'Şube Ata'
+      updateRoles: 'Rolleri Güncelle',
+      assignBranch: 'Şube Ata',
+      viewPermissions:"İzinleri Görüntüle"
     },
 
+    updateRoles:{
+      title:"Kullanıcı Rollerini Güncelle",
+      update : "Güncelleme",
+    },
 
+    "assignBranchModal": {
+      "title": "Yeni Şube Ata",
+      "assigningTo": "Şu kullanıcıya",
+      "toNewBranch": "yeni bir şube atanıyor.",
+      "currentBranch": "Mevcut Şube",
+      "branchIdDisplay": "(ID: {id})",
+      "newBranchLabel": "Yeni Şube",
+      "selectBranchPlaceholder": "Yeni bir şube seçin",
+      "submitButton": "Şubeyi Ata",
+      "submitButtonLoading": "Atanıyor...",
+      "validation": {
+        "branchRequired": "Lütfen bir şube seçin."
+      }
+    },
+    
+   permissionsModal:{
+      title:"İzinler",
+      close:"Kapat",
+      userRoles: "Kullanıcı Rolleri", 
+      permissions:"İzinler",
+      permissionsCount:"Sayı",
+    },
+
+    "editUserModal": {
+      "title": "Kullanıcıyı Düzenle",
+      "firstNameLabel": "Ad",
+      "lastNameLabel": "Soyad",
+      "emailLabel": "E-posta",
+      "usernameLabel": "Kullanıcı Adı",
+      "isActiveLabel": "Kullanıcı Aktif",
+      "saveButton": "Değişiklikleri Kaydet",
+      "saveButtonLoading": "Kaydediliyor...",
+      "validation": {
+        "firstNameRequired": "Ad alanı zorunludur",
+        "lastNameRequired": "Soyad alanı zorunludur",
+        "emailRequired": "E-posta alanı zorunludur",
+        "usernameRequired": "Kullanıcı adı zorunludur"
+      }
+    },
+     
     // No results messages
     noResults: {
       usersNotFound: 'Kullanıcı Bulunamadı',
@@ -2666,17 +2723,29 @@ export const tr = {
     },
 
 
+      systemRoleInfo: 'Sistem rolleri önceden tanımlanmıştır ve değiştirilemez.',
 
     // Create Role Modal
     createRole: {
       title: 'Yeni Rol Oluştur',
-      basicInfo: 'Temel Bilgiler',
+      stepBasicInfo: 'Temel Bilgiler',
+      stepPermissions:"İzinler",
       selectBranch: 'Şube Seçimi',
+      step1Info: "Rol Oluştur",
+      step1Description: "Yeni rol için temel bilgileri girin",
+      continue: "İzinlere Devam Et",
       branch: 'Şube',
       selectAll: 'Tüm Şubeler',
       noBranch: 'Şube Yok',
+      finish: "Bitir",
+      creating: "Oluşturuluyor...",
+      saving: "Kaydediliyor...",
+      step2Info: "Kullanıcı izinlerini seçin",
+      step2Description: "Artık bu rol için izinleri tanımlayabilirsiniz.",
       branchHint: 'Bu rolü belirli bir şubeye atayın veya tüm şubelerde geçerli olsun',
       roleName: 'Rol Adı',
+      back:"Dön",
+        skipPermissions: "Atla (Daha Sonra Ekle)",
       roleNamePlaceholder: 'Örn: Şube Müdürü',
       category: 'Kategori',
       categoryPlaceholder: 'Örn: Yönetim',
@@ -2691,7 +2760,6 @@ export const tr = {
       permissionsSelected: 'seçildi',
       cancel: 'İptal',
       create: 'Rol Oluştur',
-      creating: 'Oluşturuluyor...',
       validation: {
         nameRequired: 'Rol adı en az 3 karakter olmalıdır',
         nameMaxLength: 'Rol adı en fazla 50 karakter olabilir',
@@ -2710,7 +2778,7 @@ export const tr = {
       locationInfo: 'Konum Bilgileri',
       roleAssignment: 'Yetki ve Rol Ataması',
 
-         phoneNumber: 'Telefon Numarası',
+        honeNumber: 'Telefon Numarası',
       confirmPassword: 'Şifreyi Onayla',
       location: 'Konum',
       roles: 'Roller',
@@ -3919,7 +3987,7 @@ export const tr = {
     noteDescription: 'Bu işlem cihazınızda WhatsApp\'ı açacaktır. WhatsApp\'a göndermemeyi seçseniz bile siparişiniz işlenecektir.',
     skipWhatsApp: 'WhatsApp\'ı Atla',
     sendToWhatsApp: 'WhatsApp\'a Gönder',
-    sending: 'Gönderiliyor...'
+    sending: 'Gönderiliyor...',
   }
   },
 

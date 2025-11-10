@@ -2569,7 +2569,9 @@ export const en = {
     },
     confirmation: {
         deleteRoleTitle: "Delete Role",
-        deleteRoleMessage: "Are you sure you want to delete this role? This action cannot be undone."
+        deleteRoleMessage: "Are you sure you want to delete this role? This action cannot be undone.",
+        deactivateTitle:"Deactivate User?",
+        deactivateMessage:"Are you sure you want to deactivate {name}? They will lose access to the system."
         
       },
     title: 'User Management',
@@ -2651,7 +2653,26 @@ export const en = {
     },
    permissionsModal:{
       title:"Permissions",
-      close:"Close"
+      close:"Close",
+      userRoles: "User Roles", 
+      permissions:"Permissions",
+      permissionsCount:"Count",
+    },
+    "editUserModal": {
+      "title": "Edit User",
+      "firstNameLabel": "First Name",
+      "lastNameLabel": "Last Name",
+      "emailLabel": "Email",
+      "usernameLabel": "Username",
+      "isActiveLabel": "User is Active",
+      "saveButton": "Save Changes",
+      "saveButtonLoading": "Saving...",
+      "validation": {
+        "firstNameRequired": "First name is required",
+        "lastNameRequired": "Last name is required",
+        "emailRequired": "Email is required",
+        "usernameRequired": "Username is required"
+      }
     },
     // Actions menu
     actions: {
@@ -2663,6 +2684,21 @@ export const en = {
       updateRoles: 'Update Roles',
       assignBranch: 'Assign Branches',
       viewPermissions: "View Permissions"  
+    },
+
+    "assignBranchModal": {
+      "title": "Assign New Branch",
+      "assigningTo": "Assigning",
+      "toNewBranch": "to a new branch.",
+      "currentBranch": "Current Branch",
+      "branchIdDisplay": "(ID: {id})",
+      "newBranchLabel": "New Branch",
+      "selectBranchPlaceholder": "Select a new branch",
+      "submitButton": "Assign Branch",
+      "submitButtonLoading": "Assigning...",
+      "validation": {
+        "branchRequired": "Please select a branch."
+      }
     },
 
     updateRoles:{
@@ -2688,6 +2724,7 @@ export const en = {
       stepBasicInfo: "Basic Info",
       stepPermissions: "Permissions",
       step1Info: "Create Role",
+      step2Info: "Select user permissions",
       step1Description: "Enter the basic information for the new role",
       roleCreatedSuccess: "Role Created Successfully!",
       step2Description: "Now you can select permissions for this role",
@@ -2731,6 +2768,7 @@ export const en = {
     // Create User Modal
     createUser: {
       title: 'Create New User',
+      
       personalInfo: 'Personal Information',
       contactInfo: 'Contact Information',
       passwordInfo: 'Password Information',

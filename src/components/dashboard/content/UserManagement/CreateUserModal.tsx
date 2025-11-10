@@ -14,7 +14,7 @@ export interface CreateUserModalProps {
   branches: BranchInfo[];
   isLoading: boolean;
   isRolesLoading: boolean; // <-- NEW: Prop to show role loading state
-  onBranchChange: (branchId: number | null) => void; // <-- NEW: Callback for branch change
+  onBranchChange: (branchId: string | null) => void; // <-- NEW: Callback for branch change
 }
 
 const CreateUserModal: React.FC<CreateUserModalProps> = ({
@@ -24,8 +24,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   roles,
   branches,
   isLoading,
-  isRolesLoading, // <-- Destructured
-  onBranchChange, // <-- Destructured
+  isRolesLoading, 
+  onBranchChange, 
 }) => {
   const { t, isRTL } = useLanguage();
   const [formData, setFormData] = useState<CreateUserDto>({
@@ -36,7 +36,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     passwordConfirm: '',
     phoneNumber: '',
     restaurantId: null,
-    branchId: null,
+    branchId: '',
     profileImage: '',
     userCreatorId: '',
     roleIdsList: [],
@@ -533,13 +533,13 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     <div className="space-y-2">
                       {roles.filter(role => role.isActive).map((role) => (
                         <label
-                          key={role.roleId}
+                          key={role.appRoleId}
                           className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 cursor-pointer"
                         >
                           <input
                             type="checkbox"
-                            checked={selectedRoles.includes(role.roleId)}
-                            onChange={() => handleRoleToggle(role.roleId)}
+                            checked={selectedRoles.includes(role.appRoleId)}
+                            onChange={() => handleRoleToggle(role.appRoleId)}
                             className="mt-0.5 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                           />
                           <div className="flex-1 min-w-0">

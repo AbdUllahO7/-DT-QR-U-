@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { User } from 'lucide-react';
-import { UpdateUserDto, UserData } from '../../../../types/api';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { UpdateUserDto, UserData } from '../../../../types/users/users.type';
 
 export interface EditUserModalProps {
   isOpen: boolean;
@@ -45,10 +45,14 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
   const validateForm = (): boolean => {
     if (!formData) return false;
     const newErrors: Record<string, string> = {};
-    if (!formData.name) newErrors.name = 'First name is required';
-    if (!formData.surname) newErrors.surname = 'Last name is required';
-    if (!formData.email) newErrors.email = 'Email is required';
-    if (!formData.userName) newErrors.userName = 'Username is required';
+    if (!formData.name)
+      newErrors.name = t('userManagementPage.editUserModal.validation.firstNameRequired');
+    if (!formData.surname)
+      newErrors.surname = t('userManagementPage.editUserModal.validation.lastNameRequired');
+    if (!formData.email)
+      newErrors.email = t('userManagementPage.editUserModal.validation.emailRequired');
+    if (!formData.userName)
+      newErrors.userName = t('userManagementPage.editUserModal.validation.usernameRequired');
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -61,7 +65,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
     const submitData: UpdateUserDto = {
         ...formData,
         restaurantId: formData.restaurantId || null,
-        branchId: formData.branchId || null,
+        branchId: formData.branchId ,
         profileImage: formData.profileImage || null,
     };
     
@@ -84,7 +88,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
           <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <User className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              Edit User: {user?.fullName}
+              {t('userManagementPage.editUserModal.title')}: {user?.fullName}
             </h3>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
               ✕
@@ -95,53 +99,53 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  First Name <span className="text-red-500">*</span>
+                  {t('userManagementPage.editUserModal.firstNameLabel')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev!, name: e.target.value }))}
-                  className={`w-full rounded-lg border px-4 py-2 dark:bg-gray-700 ${errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
+                  className={`w-full dark:text-white rounded-lg border px-4 py-2 dark:bg-gray-700 ${errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
                 />
               </div>
               <div>
                 <label htmlFor="surname" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Last Name <span className="text-red-500">*</span>
+                  {t('userManagementPage.editUserModal.lastNameLabel')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   id="surname"
                   value={formData.surname}
                   onChange={(e) => setFormData(prev => ({ ...prev!, surname: e.target.value }))}
-                  className={`w-full rounded-lg border px-4 py-2 dark:bg-gray-700 ${errors.surname ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
+                  className={`w-full dark:text-white rounded-lg border px-4 py-2 dark:bg-gray-700 ${errors.surname ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
                 />
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Email <span className="text-red-500">*</span>
+                  {t('userManagementPage.editUserModal.emailLabel')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="email"
                   id="email"
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev!, email: e.target.value }))}
-                  className={`w-full rounded-lg border px-4 py-2 dark:bg-gray-700 ${errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
+                  className={`w-full rounded-lg dark:text-white border px-4 py-2 dark:bg-gray-700 ${errors.email ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
                 />
               </div>
               <div>
                 <label htmlFor="userName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Username <span className="text-red-500">*</span>
+                  {t('userManagementPage.editUserModal.usernameLabel')} <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   id="userName"
                   value={formData.userName}
                   onChange={(e) => setFormData(prev => ({ ...prev!, userName: e.target.value }))}
-                  className={`w-full rounded-lg border px-4 py-2 dark:bg-gray-700 ${errors.userName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
-                />
+                  className={`w-full rounded-lg dark:text-white border px-4 py-2 dark:bg-gray-700 ${errors.userName ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
+                /> 
               </div>
             </div>
              <div className="flex items-center">
@@ -153,7 +157,7 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                     className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                 />
                 <label htmlFor="isActiveEdit" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                    User is Active
+                    {t('userManagementPage.editUserModal.isActiveLabel')}
                 </label>
              </div>
 
@@ -166,7 +170,10 @@ const EditUserModal: React.FC<EditUserModalProps> = ({
                 disabled={isLoading}
                 className="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm disabled:opacity-50"
               >
-                {isLoading ? 'Saving...' : 'Save Changes'}
+                {isLoading 
+                  ? t('userManagementPage.editUserModal.saveButtonLoading') 
+                  : t('userManagementPage.editUserModal.saveButton')
+                }
               </button>
             </div>
           </form>

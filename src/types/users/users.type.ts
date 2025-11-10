@@ -5,7 +5,7 @@ export interface UpdateUserDto {
   userName: string;
   email: string;
   restaurantId?: number | null;
-  branchId?: number | null;
+  branchId?: string;
   profileImage?: string | null;
   
   isActive: boolean;
@@ -27,7 +27,7 @@ export interface UserData {
   permissions?: Permission[]; // Added this based on your sample
   restaurantId: number | null; // Changed to nullable
   restaurantName: string;
-  branchId: number | null;
+  branchId: string ;
   profileImage?: string | null;
   branchName: string | null;
 }
@@ -39,7 +39,7 @@ export interface CreateUserDto {
   passwordConfirm: string;
   phoneNumber?: string | null;
   restaurantId?: number | null;
-  branchId?: number | null;
+  branchId?: string | null;
   profileImage?: string | null;
   userCreatorId: string;
   roleIdsList: string[];
@@ -191,6 +191,7 @@ export interface CreateUserResponse {
 export interface Role {
   appRoleId: string;
   name: string;
+  roleId?:string,
   description: string | null;
   restaurantId: number | null;
   branchId: string | null;
@@ -238,6 +239,7 @@ export interface CreateRoleDto {
   restaurantId?: number | null;
   branchId?: number ;
   category?: string | null;
+  
 }
 
 export interface SearchUsersParams {

@@ -152,7 +152,7 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
     };
 
     try {
-      await onSubmit(role.roleId, submitData, selectedPermissions);
+      await onSubmit(role.appRoleId, submitData, selectedPermissions);
     } catch (error) {
       console.error('Error updating role:', error);
     }
@@ -455,11 +455,9 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
                               />
                               <div className="flex-1 min-w-0">
                                 <div className="font-medium text-sm text-gray-900 dark:text-white">
-                                  {permission.permissionName}
-                                </div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">
                                   {permission.description}
                                 </div>
+                            
                               </div>
                             </label>
                           ))}

@@ -2563,15 +2563,18 @@ export const ar = {
   userManagementPage: {
     // Page header and navigation
   systemRoleInfo:"لايمكن التعديل على هذا الدور",
-    confirmation: {
-      deleteRoleTitle: "حذف الدور",
-      deleteRoleMessage: "هل أنت متأكد أنك تريد حذف هذا الدور؟ لا يمكن التراجع عن هذا الإجراء."
-    },
+  
     editRole :{
       title:"تحديث الدور",
       save:"حفظ"
     },
+  confirmation: {
+      deleteRoleTitle: "حذف الدور",
+      deleteRoleMessage: "هل أنت متأكد من رغبتك في حذف هذا الدور؟ لا يمكن التراجع عن هذا الإجراء",
+      deactivateTitle: "إلغاء تنشيط المستخدم؟",
+      deactivateMessage: "هل أنت متأكد من رغبتك في إلغاء تنشيط {name}؟ سيفقدون الوصول إلى النظام",
 
+      },
     rolePermissionsModal:{
       title:"عرض الإذونات",
     },
@@ -2663,17 +2666,50 @@ export const ar = {
       delete: 'حذف',
       updateRoles: 'تحديث الأدوار',
       assignBranch: 'تعيين الفرع',
-    viewPermissions: "عرض الأذونات"  
+      viewPermissions: "عرض الأذونات"  
+    },
 
+    "assignBranchModal": {
+      "title": "تعيين فرع جديد",
+      "assigningTo": "يتم الآن تعيين",
+      "toNewBranch": "إلى فرع جديد.",
+      "currentBranch": "الفرع الحالي",
+      "branchIdDisplay": "(المعرف: {id})",
+      "newBranchLabel": "الفرع الجديد",
+      "selectBranchPlaceholder": "اختر فرعًا جديدًا",
+      "submitButton": "تعيين الفرع",
+      "submitButtonLoading": "جارٍ التعيين...",
+      "validation": {
+        "branchRequired": "يرجى اختيار فرع."
+      }
     },
        updateRoles:{
         title:"تحديث أدوار المستخدم",
-      update : "تحديث",
+        update : "تحديث",
     },
 
     permissionsModal:{
       title:"الأذونات",
-      close:"إغلاق"
+      close:"إغلاق",
+      userRoles: "أدوار المستخدم ", 
+      permissions:"الأذونات",
+      permissionsCount:"العدد",
+    },
+    "editUserModal": {
+      "title": "تعديل المستخدم",
+      "firstNameLabel": "الاسم الأول",
+      "lastNameLabel": "اسم العائلة",
+      "emailLabel": "البريد الإلكتروني",
+      "usernameLabel": "اسم المستخدم",
+      "isActiveLabel": "المستخدم نشط",
+      "saveButton": "حفظ التغييرات",
+      "saveButtonLoading": "جارٍ الحفظ...",
+      "validation": {
+        "firstNameRequired": "الاسم الأول مطلوب",
+        "lastNameRequired": "اسم العائلة مطلوب",
+        "emailRequired": "البريد الإلكتروني مطلوب",
+        "usernameRequired": "اسم المستخدم مطلوب"
+      }
     },
 
     // No results messages
@@ -2699,6 +2735,7 @@ export const ar = {
       step2Description: "يمكنك الآن تحديد الأذونات لهذا الدور",
       continue: "الانتقال إلى الأذونات",
       back: "رجوع",
+            step2Info: "تحديد أذونات المستخدم",
       skipPermissions: "تخطي (إضافة لاحقًا)",
       finish: "إنهاء",
       createing: "جارٍ الإنشاء...",

@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin } from 'lucide-react';
-import { AssignBranchDto, UserData } from '../../../../types/api';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { AssignBranchDto, UserData } from '../../../../types/users/users.type';
+import { BranchInfo } from '../../../../types/api';
 
+// Define a simple Branch type for the prop
+interface Branch {
+  id: string | number;
+  name: string;
+}
 
 export interface AssignBranchModalProps {
   isOpen: boolean;
@@ -11,6 +17,7 @@ export interface AssignBranchModalProps {
   onSubmit: (id: string, branchData: AssignBranchDto) => Promise<void>;
   user: UserData | null;
   isLoading: boolean;
+  branches: BranchInfo[]; // <-- NEW PROP: Pass the list of all branches here
 }
 
 const AssignBranchModal: React.FC<AssignBranchModalProps> = ({
@@ -19,6 +26,7 @@ const AssignBranchModal: React.FC<AssignBranchModalProps> = ({
   onSubmit,
   user,
   isLoading,
+  branches, // <-- NEW PROP
 }) => {
   const { t } = useLanguage();
   const [newBranchId, setNewBranchId] = useState<string>('');
@@ -26,16 +34,33 @@ const AssignBranchModal: React.FC<AssignBranchModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const branchIdNum = parseInt(newBranchId, 10);
-    if (!branchIdNum || branchIdNum <= 0) {
-      setError('Please enter a valid Branch ID.');
+    
+    // Updated validation for the select dropdown
+    if (!newBranchId) {
+      setError(t('userManagementPage.assignBranchModal.validation.branchRequired'));
       return;
     }
     if (!user) return;
     
+    // Parse the ID (from select value) before submitting
+    const branchIdNum = parseInt(newBranchId, 10);
+    if (isNaN(branchIdNum)) {
+       setError(t('userManagementPage.assignBranchModal.validation.branchRequired'));
+       return;
+    }
+
     setError('');
     onSubmit(user.id, { newBranchId: branchIdNum });
   };
+  
+  // Reset state when modal opens or user changes
+  useEffect(() => {
+    if (isOpen) {
+      setNewBranchId('');
+      setError('');
+    }
+  }, [isOpen]);
+
 
   if (!isOpen) return null;
 
@@ -53,7 +78,7 @@ const AssignBranchModal: React.FC<AssignBranchModalProps> = ({
           <div className="flex items-center justify-between border-b border-gray-200 dark:border-gray-700 px-6 py-4">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <MapPin className="h-5 w-5 text-green-600 dark:text-green-400" />
-              Assign New Branch
+              {t('userManagementPage.assignBranchModal.title')}
             </h3>
             <button onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
               ✕
@@ -62,24 +87,40 @@ const AssignBranchModal: React.FC<AssignBranchModalProps> = ({
 
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <p className="text-sm text-gray-600 dark:text-gray-300">
-              Assigning <strong className="text-gray-900 dark:text-white">{user?.fullName}</strong> to a new branch.
+              {t('userManagementPage.assignBranchModal.assigningTo')}{' '}
+              <strong className="text-gray-900 dark:text-white">{user?.fullName}</strong>{' '}
+              {t('userManagementPage.assignBranchModal.toNewBranch')}
             </p>
              <p className="text-sm text-gray-500 dark:text-gray-400">
-              Current Branch: {user?.branchName} (ID: {user?.branchId})
+              {t('userManagementPage.assignBranchModal.currentBranch')}: {user?.branchName}{' '}
+              {user?.branchId && t('userManagementPage.assignBranchModal.branchIdDisplay', { id: user.branchId })}
             </p>
             <div>
               <label htmlFor="branchId" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                New Branch ID <span className="text-red-500">*</span>
+                {t('userManagementPage.assignBranchModal.newBranchLabel')} <span className="text-red-500">*</span>
               </label>
-              <input
-                type="number"
+              
+              {/* --- REPLACED INPUT WITH SELECT --- */}
+              <select
                 id="branchId"
-                min="1"
                 value={newBranchId}
                 onChange={(e) => setNewBranchId(e.target.value)}
-                className={`w-full rounded-lg border px-4 py-2 dark:bg-gray-700 ${error ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
-                placeholder="Enter new Branch ID"
-              />
+                className={`w-full rounded-lg dark:text-white border px-4 py-2 dark:bg-gray-700 ${error ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
+              >
+                <option className='dark:text-white' value="" disabled>
+                  {t('userManagementPage.assignBranchModal.selectBranchPlaceholder')}
+                </option>
+                {branches
+                  // Optionally filter out the user's current branch from the list
+                  .filter(branch => branch.branchId !== user?.branchId) 
+                  .map((branch) => (
+                    <option className='dark:text-white' key={branch.branchId} value={branch.branchId}>
+                      {branch.branchName}
+                    </option>
+                ))}
+              </select>
+              {/* --- END OF REPLACEMENT --- */}
+
                {error && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>}
             </div>
             
@@ -92,7 +133,9 @@ const AssignBranchModal: React.FC<AssignBranchModalProps> = ({
                 disabled={isLoading}
                 className="px-6 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow-sm disabled:opacity-50"
               >
-                {isLoading ? 'Assigning...' : 'Assign Branch'}
+                {isLoading 
+                  ? t('userManagementPage.assignBranchModal.submitButtonLoading') 
+                  : t('userManagementPage.assignBranchModal.submitButton')}
               </button>
             </div>
           </form>
