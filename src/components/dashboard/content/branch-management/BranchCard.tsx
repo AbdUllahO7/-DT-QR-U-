@@ -18,6 +18,8 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onPur
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
 
+  console.log("branch",branch)
+
   // Status helpers
   const getStatusBadge = () => {
     if (branch.isTemporarilyClosed) {
@@ -141,10 +143,9 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onPur
             </span>
           </div>
         </div>
-        {/* Geçici Kapalı Switch */}
         <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} mt-2`}>
          
-          <label className="relative inline-flex items-center cursor-pointer">
+        <label className="relative inline-flex items-center cursor-pointer">
             <input
               title='isTemporarilyClosed'
               type="checkbox"
@@ -153,8 +154,10 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onPur
               onChange={e => handleSwitch(e.target.checked)}
               disabled={isToggling}
             />
-            <div className={`w-11 h-6 bg-gray-200 dark:bg-gray-700 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 transition-colors duration-200 ${branch.isTemporarilyClosed ? 'bg-amber-500 dark:bg-amber-600' : 'bg-emerald-500 dark:bg-emerald-600'}`}></div>
-            <div className={`absolute ${isRTL ? 'right-1' : 'left-1'} top-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ${branch.isTemporarilyClosed ? (isRTL ? '-translate-x-5' : 'translate-x-5') : ''} ${isToggling ? 'animate-pulse' : ''}`}></div>
+        
+            <div className="w-11 h-6 bg-blue-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 transition-colors duration-200 peer-checked:bg-gray-200 dark:peer-checked:bg-gray-700"></div>
+
+            <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 peer-checked:translate-x-5 rtl:right-1 rtl:left-auto rtl:peer-checked:-translate-x-5 ${isToggling ? 'animate-pulse' : ''}`}></div>
           </label>
           {branch.isTemporarilyClosed && (
             <span className={`text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center ${isRTL ? 'space-x-reverse space-x-1' : 'space-x-1'} ${isRTL ? 'mr-1' : 'ml-1'}`}>
@@ -164,17 +167,7 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onPur
         </div>
       </div>
       {/* Alt bilgi: Aktiflik */}
-      <div className="flex items-center justify-center pb-4 flex-col gap-1">
-        <div className={`rounded-full px-3 py-1 text-xs font-semibold ${activeBadge}`}>
-          {branch.branchStatus ? t('branchCard.status.active') : t('branchCard.status.inactive')}
-        </div>
-        {/* API'den dönen BranchIsOpen bilgisi */}
-        {branch.BranchIsOpen !== undefined && (
-          <div className="mt-1 text-xs text-blue-600 dark:text-blue-300 font-semibold">
-            {t('branchCard.labels.apiBranchOpen')} {String(branch.BranchIsOpen)}
-          </div>
-        )}
-      </div>
+  
     </motion.div>
   );
 };

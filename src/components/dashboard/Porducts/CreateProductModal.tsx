@@ -73,11 +73,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
       newErrors.name = t('createProductModal.validation.nameMaxLength');
     }
     
-    if (!formData.description.trim()) {
-      newErrors.description = t('createProductModal.errors.descriptionRequired');
-    } else if (formData.description.trim().length < 5) {
-      newErrors.description = t('createProductModal.validation.descriptionMinLength');
-    } else if (formData.description.trim().length > 500) {
+    if (formData.description.trim().length > 500) {
       newErrors.description = t('createProductModal.validation.descriptionMaxLength');
     }
     
@@ -253,7 +249,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
     }
   };
 
-  const isFormValid = formData.name.trim() && formData.description.trim() && formData.price > 0 && formData.categoryId > 0;
+  const isFormValid = formData.name.trim()  && formData.price > 0 && formData.categoryId > 0;
 
   return (
     <AnimatePresence>
@@ -622,7 +618,6 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
                     <label htmlFor="description" className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                       <span>{t('createProductModal.form.description.label')}</span>
-                      <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <textarea
@@ -641,7 +636,6 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
                             : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400'
                         } focus:outline-none`}
                         placeholder={t('createProductModal.form.description.placeholder')}
-                        aria-required="true"
                       />
                       <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} bottom-3 text-xs text-gray-400`}>
                         {formData.description.length}/500

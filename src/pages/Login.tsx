@@ -38,7 +38,7 @@ const Login: React.FC = () => {
     if (token) {
       // Token'ın geçerlilik süresini kontrol et
       if (tokenExpiry && new Date(tokenExpiry) > new Date()) {
-        navigate('/selection');
+        navigate('/dashboard');
       } else {
         // Token süresi dolmuşsa token'ı temizle
         localStorage.removeItem('token');
@@ -139,8 +139,7 @@ const Login: React.FC = () => {
           return;
         }
         
-        // Normal giriş, selection screen'e yönlendir
-        navigate('/selection');
+        navigate('/dashboard');
       } else {
         logger.error('Invalid login response - no access token');
         throw new Error('Geçersiz giriş yanıtı');
@@ -189,8 +188,7 @@ const Login: React.FC = () => {
               return;
             }
             
-            // Normal giriş, selection screen'e yönlendir
-            navigate('/selection');
+            navigate('/dashboard');
             return;
           }
         } catch (innerError) {

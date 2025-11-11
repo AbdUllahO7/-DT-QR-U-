@@ -1,8 +1,8 @@
 import { Armchair, Layers, Table, Tag, Utensils } from "lucide-react";
 import { BranchProductAddon } from "../../services/Branch/BranchService";
-import { CreateRoleDto, CreateUserDto, PermissionOption, Role } from "../api";
 import { ReactNode } from "react";
 import { OrderStatusEnums } from "../Orders/type";
+import { CreateRoleDto, CreateUserDto, PermissionOption, Role } from "../users/users.type";
 
 export interface BranchData {
   id: number;
@@ -105,17 +105,17 @@ export interface DetailedProduct{
   allergens?: APIAllergen[];
   orderDetails?: any;
   isSelected?: boolean;
-  addonsCount?: number; // New field for addon count
-  hasAddons?: boolean;   // New field to indicate if product has addons
-  price: number; // Branch-specific price
-  imageUrl?: string; // Branch-specific image URL
-  name: string; // Branch-specific name
-  description?: string; // Branch-specific description
-  status: boolean; // Branch-specific status
-  displayOrder: number; // Branch-specific display order
-  editedPrice?: number; // For tracking price edits
-  editedName?: string; // For tracking name edits
-  editedDescription?: string; // For tracking description edits
+  addonsCount?: number; 
+  hasAddons?: boolean;   
+  price: number; 
+  imageUrl?: string; 
+  name: string; 
+  description?: string; 
+  status: boolean; 
+  displayOrder: number; 
+  editedPrice?: number; 
+  editedName?: string; 
+  editedDescription?: string; 
 }
 
 export interface BranchCategory {

@@ -8,8 +8,8 @@ import type {
   RegisterResponse,
   ApiResponse,
   SelectionScreenData,
-  UserProfileResponse
 } from '../types/api';
+import { UserProfileResponse } from '../types/users/users.type';
 
 interface ChangePasswordDto {
   currentPassword: string;
@@ -256,6 +256,7 @@ class AuthService {
   }
 
   async changePassword(data: ChangePasswordDto): Promise<ApiResponse<void>> {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiRequest<ApiResponse<void>>({
         method: 'POST',
@@ -269,6 +270,7 @@ class AuthService {
   }
 
   async changeEmail(data: ChangeEmailDto): Promise<ApiResponse<void>> {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiRequest<ApiResponse<void>>({
         method: 'POST',
@@ -282,6 +284,7 @@ class AuthService {
   }
 
   async forgotPassword(email: string): Promise<ApiResponse<void>> {
+    // eslint-disable-next-line no-useless-catch
     try {
       const response = await apiRequest<ApiResponse<void>>({
         method: 'POST',

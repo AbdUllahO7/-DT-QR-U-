@@ -904,6 +904,10 @@ export const en = {
   tableManagement: {
     loading: 'Loading tables...',
     title: 'Table Management',
+    ActiveStatus :"Active Status",
+    descriptionActive : "Category is active and visible", 
+    descriptionInActive : "Category is inactive and hidden", 
+
     description: 'Manage your QR codes and tables',
             noCategories :"Not Found Categories",
     createFirstCategory: "Create First Category",
@@ -921,11 +925,11 @@ export const en = {
       deleteTable: 'Delete Table'
     },
     categories: {
-      title: 'Category Management',
-      addCategory: 'Add Category',
-      editCategory: 'Edit Category',
-      deleteCategory: 'Delete Category',
-      categoryName: 'Category Name',
+      title: 'Area Management',
+      addCategory: 'Add Area',
+      editCategory: 'Edit Area',
+      deleteCategory: 'Delete Area',
+      categoryName: 'Area Name',
       tableCount: 'Table Count'
     },
     qrCodes: {
@@ -2456,10 +2460,10 @@ export const en = {
     tableName: 'Table Name',
     tableNamePlaceholder: 'e.g. Table 1',
     autoNameNote: 'Automatic name will be given if left empty',
-    tableCategory: 'Table Category',
-    selectCategory: 'Select Category',
-    loadingCategories: 'Loading categories...',
-    noCategories: 'No categories found',
+    tableCategory: 'Table Area',
+    selectCategory: 'Select Area',
+    loadingCategories: 'Loading Areas...',
+    noCategories: 'No Area found',
     capacity: 'Capacity',
     capacityPlaceholder: 'Number of people',
     displayOrder: 'Display Order',
@@ -2489,13 +2493,13 @@ export const en = {
     
     // Validation
     branchRequiredValidation: 'Branch selection is required',
-    categoryRequired: 'At least one category is required',
+    categoryRequired: 'At least one Area is required',
     
     accessibility: {
       modal: 'Table creation modal',
       stepSelection: 'Table creation method selection',
       branchSelector: 'Branch selection dropdown',
-      categorySelector: 'Table category selection',
+      categorySelector: 'Table Area selection',
       tableForm: 'Table creation form',
       bulkForm: 'Bulk table creation form',
       backButton: 'Go back to previous step',
@@ -2504,18 +2508,18 @@ export const en = {
   },
 
   TableCategoryModal: {
-    title: 'Add Table Category',
-    subtitle: 'Create a new table category',
-    categoryName: 'Category Name',
+    title: 'Add Table Area',
+    subtitle: 'Create a new table Area',
+    categoryName: 'Area Name',
     categoryNamePlaceholder: 'e.g. VIP Tables, Garden Tables',
     description: 'Description (Optional)',
-    descriptionPlaceholder: 'Brief description about the category...',
+    descriptionPlaceholder: 'Brief description about the Area...',
     colorSelection: 'Color Selection',
     customColor: 'Custom color',
     iconSelection: 'Icon Selection',
     branchSelection: 'Branch Selection',
     cancel: 'Cancel',
-    addCategory: 'Add Category',
+    addCategory: 'Add Area',
     saving: 'Saving...',
     
     // Icons
@@ -2537,14 +2541,14 @@ export const en = {
     unexpectedError: 'An unexpected error occurred while adding category',
     
     accessibility: {
-      modal: 'Table category creation modal',
+      modal: 'Table Area creation modal',
       colorPalette: 'Color selection palette',
       colorPreset: 'Preset color option',
       customColorPicker: 'Custom color picker',
       iconGrid: 'Icon selection grid',
       iconOption: 'Icon selection option',
       branchDropdown: 'Branch selection dropdown',
-      form: 'Category creation form'
+      form: 'Area creation form'
     }
   },
 
@@ -2561,6 +2565,7 @@ export const en = {
     systemRoleInfo:"You can't do cahnges on this",
     rolePermissionsModal:{
       title:"View Permissons",
+      noPermissions:"No Permissions"
     },
 
     editRole :{
@@ -2973,6 +2978,8 @@ export const en = {
   },
 
   BranchTableManagement: {
+        "capacityLabel": "Capacity",
+    "tableNameLabel": "Table Name",
     header: "Category & Table Management",
     "clearTable": "Clear Table",
     "refreshTable": "Refresh Status", 
@@ -3327,8 +3334,8 @@ export const en = {
 
     // Delete Modal
     deleteModal: {
-      title: 'Delete Category',
-      message: 'Are you sure you want to delete the category "{name}"? This action cannot be undone.',
+      title: 'Delete Area',
+      message: 'Are you sure you want to delete the Area "{name}"? This action cannot be undone.',
       confirm: 'Delete',
       cancel: 'Cancel'
     },
@@ -4045,7 +4052,7 @@ export const en = {
       table: 'Table',
       branchProduct: 'Branch Product',
       branchCategory: 'Branch Category',
-      tableCategory: 'Table Category',
+      tableCategory: 'Table Area',
       other: 'Other'
     },
     contextInfo: {
@@ -4062,7 +4069,7 @@ export const en = {
       successBranch: '"{name}" branch has been restored successfully',
       successTable: '"{name}" table has been restored successfully',
       successBranchCategory: '"{name}" branch category has been restored successfully',
-      successTableCategory: '"{name}" table category has been restored successfully',
+      successTableCategory: '"{name}" table Area has been restored successfully',
       error: 'Restore operation failed'
     },
       productRestore : {

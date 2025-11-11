@@ -898,6 +898,9 @@ export const ar = {
 
   // Table Management
   tableManagement: {
+    ActiveStatus :"الحالة النشطة",
+      descriptionActive: "الفئة نشطة ومرئية",
+      descriptionInActive: "الفئة غير نشطة ومخفية",
     loading: 'جاري تحميل الطاولات...',
     title: 'إدارة الطاولات',
     description: 'إدارة رموز QR والطاولات الخاصة بك',
@@ -919,11 +922,11 @@ export const ar = {
       title : "تأكيد الحذف"
     },
     categories: {
-      title: 'إدارة الفئات',
-      addCategory: 'إضافة فئة',
-      editCategory: 'تعديل الفئة',
-      deleteCategory: 'حذف الفئة',
-      categoryName: 'اسم الفئة',
+      title: 'إدارة منطقة',
+      addCategory: 'إضافة منطقة',
+      editCategory: 'تعديل منطقة',
+      deleteCategory: 'حذف منطقة',
+      categoryName: 'اسم منطقة',
       tableCount: 'عدد الطاولات'
     },
     qrCodes: {
@@ -1439,7 +1442,8 @@ export const ar = {
     noCategories: {
       title: 'لا توجد فئات قائمة بعد',
       description: 'ابدأ في إنشاء قائمة مطعمك عن طريق إضافة الفئة الأولى. على سبيل المثال "الأطباق الرئيسية"، "المشروبات" أو "الحلويات".',
-      addFirstCategory: 'إضافة الفئة الأولى'
+      addFirstCategory: 'إضافة الفئة الأولى',
+
     }
   },
 
@@ -2459,7 +2463,7 @@ export const ar = {
     tableName: 'اسم الطاولة',
     tableNamePlaceholder: 'مثال: طاولة 1',
     autoNameNote: 'سيتم إعطاء اسم تلقائي إذا تُرك فارغاً',
-    tableCategory: 'فئة الطاولة',
+    tableCategory: 'منطقة الطاولة',
     selectCategory: 'اختر الفئة',
     loadingCategories: 'جاري تحميل الفئات...',
     noCategories: 'لم يتم العثور على فئات',
@@ -2492,13 +2496,13 @@ export const ar = {
     
     // Validation
     branchRequiredValidation: 'اختيار الفرع مطلوب',
-    categoryRequired: 'مطلوب فئة واحدة على الأقل',
+    categoryRequired: 'مطلوب منطقة واحدة على الأقل',
     
     accessibility: {
       modal: 'نافذة إنشاء الطاولة',
       stepSelection: 'اختيار طريقة إنشاء الطاولة',
       branchSelector: 'قائمة اختيار الفرع',
-      categorySelector: 'اختيار فئة الطاولة',
+      categorySelector: 'اختيار منطقة الطاولة',
       tableForm: 'نموذج إنشاء الطاولة',
       bulkForm: 'نموذج إنشاء طاولات متعددة',
       backButton: 'العودة للخطوة السابقة',
@@ -2507,9 +2511,9 @@ export const ar = {
   },
 
   TableCategoryModal: {
-    title: 'إضافة فئة طاولة',
-    subtitle: 'إنشاء فئة طاولة جديدة',
-    categoryName: 'اسم الفئة',
+    title: 'إضافة منطقة طاولة',
+    subtitle: 'إنشاء منطقة طاولة جديدة',
+    categoryName: 'اسم المنطقة',
     categoryNamePlaceholder: 'مثال: طاولات VIP، طاولات الحديقة',
     description: 'الوصف (اختياري)',
     descriptionPlaceholder: 'وصف قصير عن الفئة...',
@@ -2518,9 +2522,8 @@ export const ar = {
     iconSelection: 'اختيار الأيقونة',
     branchSelection: 'اختيار الفرع',
     cancel: 'إلغاء',
-    addCategory: 'إضافة فئة',
+    addCategory: 'إضافة منطقة',
     saving: 'جاري الحفظ...',
-    
     // Icons
     table: 'طاولة',
     chair: 'كرسي',
@@ -2540,7 +2543,7 @@ export const ar = {
     unexpectedError: 'حدث خطأ غير متوقع أثناء إضافة الفئة',
     
     accessibility: {
-      modal: 'نافذة إنشاء فئة الطاولة',
+      modal: 'نافذة إنشاء منطقة الطاولة',
       colorPalette: 'لوحة اختيار الألوان',
       colorPreset: 'خيار لون جاهز',
       customColorPicker: 'منتقي الألوان المخصص',
@@ -2577,6 +2580,7 @@ export const ar = {
       },
     rolePermissionsModal:{
       title:"عرض الإذونات",
+      noPermissions:"لا أذونات"
     },
 
     title: 'إدارة المستخدمين',
@@ -2613,7 +2617,7 @@ export const ar = {
     // Controls and filters
     controls: {
       search: 'البحث عن مستخدم أو بريد إلكتروني أو هاتف...',
-      searchRoles: 'البحث عن دور أو وصف أو فئة...',
+      searchRoles: 'البحث عن دور أو وصف أو منطقة...',
       filterAll: 'جميع الفئات',
       filterOwner: 'مالك المطعم',
       filterManager: 'مدير الفرع',
@@ -2979,6 +2983,8 @@ export const ar = {
   },
 
   BranchTableManagement: {
+        "capacityLabel": "السعة",
+    "tableNameLabel": "اسم الطاولة",
       clearTable: " تنضيف الطاولة",
       refreshTable: " تحديث الحالة",
       clearing: "جارٍ المسح...",
@@ -2986,8 +2992,8 @@ export const ar = {
       multiCategory : "إنشاء جداول متعددة عبر فئات مختلفة في وقت واحد",
       category: "الفئة",
       SelectCategory: "اختر فئة",
-      Quantity: "الكمية",
-      Capacity: "السعة",
+      Quantity: "عدد الطاولات",
+      Capacity: " سعة الطاولة (عدد الأشخاص)",
       createTables: "إنشاء الطاولات",
       creatingTables: "جارٍ إنشاء الطاولات...",
       batchCreateTables: "إنشاء جداول دفعة واحدة",
@@ -4086,7 +4092,7 @@ export const ar = {
       table: 'طاولة',
       branchProduct: 'منتج الفرع',
       branchCategory: 'فئة الفرع',
-      tableCategory: 'فئة الطاولة',
+      tableCategory: 'منطقة الطاولة',
       other: 'أخرى'
     },
     contextInfo: {
@@ -4103,7 +4109,7 @@ export const ar = {
       successBranch: 'تم استعادة الفرع "{name}" بنجاح',
       successTable: 'تم استعادة الطاولة "{name}" بنجاح',
       successBranchCategory: 'تم استعادة فئة الفرع "{name}" بنجاح',
-      successTableCategory: 'تم استعادة فئة الطاولة "{name}" بنجاح',
+      successTableCategory: 'تم استعادة منطقة الطاولة "{name}" بنجاح',
       error: 'فشلت عملية الاستعادة'
     },
     empty: {

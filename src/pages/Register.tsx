@@ -1,23 +1,70 @@
 import React, { useState, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+// import { Link, useNavigate } from 'react-router-dom'; // Mocked below
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, AlertCircle, User, Mail, Phone, Lock, ArrowLeft } from 'lucide-react';
-import { authService } from '../services/authService';
-import { useLanguage } from '../contexts/LanguageContext';
-import type { RegisterDto } from '../types/api';
+ import { authService } from '../services/authService'; // Mocked below
+ import { useLanguage } from '../contexts/LanguageContext'; // Mocked below
+ import type { RegisterDto } from '../types/api'; // Mocked below
+import { Link, useNavigate } from 'react-router-dom';
+import { logger } from '../utils/logger';
+
+
+
+
+
+
+
+const countries = [
+  { name: 'TR', code: '+90' },
+  { name: 'US', code: '+1' },
+  { name: 'GB', code: '+44' },
+  { name: 'DE', code: '+49' },
+  { name: 'FR', code: '+33' },
+  { name: 'ES', code: '+34' },
+  { name: 'IT', code: '+39' },
+  { name: 'NL', code: '+31' },
+  { name: 'GR', code: '+30' },
+  { name: 'JP', code: '+81' },
+  { name: 'KR', code: '+82' },
+  { name: 'CN', code: '+86' },
+  { name: 'IN', code: '+91' },
+  { name: 'BR', code: '+55' },
+  { name: 'RU', code: '+7' },
+  { name: 'AU', code: '+61' },
+  { name: 'CA', code: '+1' },
+  { name: 'MX', code: '+52' },
+  { name: 'AR', code: '+54' },
+  { name: 'ZA', code: '+27' },
+  { name: 'EG', code: '+20' },
+  { name: 'SA', code: '+966' },
+  { name: 'AE', code: '+971' },
+  { name: 'AT', code: '+43' },
+  { name: 'BE', code: '+32' },
+  { name: 'SE', code: '+46' },
+  { name: 'NO', code: '+47' },
+  { name: 'DK', code: '+45' },
+  { name: 'PL', code: '+48' },
+  { name: 'PT', code: '+351' },
+  { name: 'IE', code: '+353' },
+  { name: 'UA', code: '+380' },
+  { name: 'CZ', code: '+420' },
+  { name: 'HU', code: '+36' },
+  { name: 'RO', code: '+40' },
+];
 
 const Register: React.FC = () => {
   const navigate = useNavigate();
   const { t, isRTL } = useLanguage();
   
-  const [formData, setFormData] = useState<RegisterDto>({
+  const [formData, setFormData] = useState({
     name: '',
     surName: '',
     email: '',
     password: '',
     passwordConfirm: '',
-    phoneNumber: '',
-    profileImagePath: ' ', // API required field - boş string olarak gönderiyoruz
+    phoneNumber: '', // This will now store the NATIONAL number
+    countryCode: '+90', // Default country code
+    profileImagePath: ' ', // API required field
     termsofUserService: false
   });
 
@@ -27,20 +74,26 @@ const Register: React.FC = () => {
     email?: string;
     password?: string;
     passwordConfirm?: string;
-    phoneNumber?: string;
+    phoneNumber?: string; 
     termsofUserService?: string;
     general?: string;
   }>({});
+
+  console.log("errors",errors)
 
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
-    const { name, value, type, checked } = e.target;
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+    const { name, value, type } = e.target;
+    // Handle checkbox
+    const isCheckbox = type === 'checkbox';
+    const checked = (e.target as HTMLInputElement).checked;
+
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: isCheckbox ? checked : value
     }));
     
     // Clear error when user starts typing
@@ -51,6 +104,26 @@ const Register: React.FC = () => {
       }));
     }
   }, [errors]);
+
+  // Special handler for the national phone number to only allow digits
+  const handleNationalPhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
+    const { value } = e.target;
+    const digitsOnly = value.replace(/\D/g, ''); // Allow only digits
+    
+    setFormData(prev => ({
+      ...prev,
+      phoneNumber: digitsOnly
+    }));
+    
+    // Clear error when user starts typing
+    if (errors.phoneNumber) {
+      setErrors(prev => ({
+        ...prev,
+        phoneNumber: undefined
+      }));
+    }
+  }, [errors.phoneNumber]);
+
 
   const validateForm = (): boolean => {
     const newErrors: typeof errors = {};
@@ -92,11 +165,12 @@ const Register: React.FC = () => {
       newErrors.passwordConfirm = t('pages.register.validation.passwordMismatch');
     }
 
-    // Phone number validation
+    // Phone number validation (now for the national part)
     if (!formData.phoneNumber?.trim()) {
       newErrors.phoneNumber = t('pages.register.validation.phoneRequired');
     } else {
-      const phoneRegex = /^(\+90|0)?[5-9][0-9]{9}$/;
+      // Generic regex for 7-15 digits. This can be adjusted.
+      const phoneRegex = /^\d{7,15}$/; 
       const cleanPhone = formData.phoneNumber.replace(/[\s\-\(\)]/g, '');
       if (!phoneRegex.test(cleanPhone)) {
         newErrors.phoneNumber = t('pages.register.validation.phoneInvalid');
@@ -112,7 +186,7 @@ const Register: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -123,21 +197,27 @@ const Register: React.FC = () => {
     setErrors({});
 
     try {
-      // Clean phone number before sending
-      const cleanedData = {
-        ...formData,
-        phoneNumber: formData.phoneNumber.replace(/[\s\-\(\)]/g, ''),
+      // Combine country code and national number
+      const fullPhoneNumber = `${formData.countryCode}${formData.phoneNumber.replace(/\D/g, '')}`;
+
+      // Prepare data for the API, matching the RegisterDto
+      const cleanedData: RegisterDto = {
         name: formData.name.trim(),
         surName: formData.surName.trim(),
         email: formData.email.trim().toLowerCase(),
+        password: formData.password,
+        passwordConfirm: formData.passwordConfirm,
+        phoneNumber: fullPhoneNumber, // Send the combined number
         profileImagePath: ' ', // API required - boş string gönderiyoruz
+        termsofUserService: formData.termsofUserService,
       };
 
       const response = await authService.register(cleanedData);
 
       // API response kontrolü
       if (!response?.success || !response.data?.userId) {
-        throw new Error('Sunucudan geçersiz yanıt alındı');
+        // Use a generic error message if response is malformed
+        throw new Error(response.message || 'Sunucudan geçersiz yanıt alındı');
       }
 
       // Store userId for onboarding and future use
@@ -151,15 +231,30 @@ const Register: React.FC = () => {
           userId: response.data.userId 
         } 
       });
+
     } catch (error: any) {
-      const { logger } = await import('../utils/logger');
-      logger.error('Register error:', error);
+      // const { logger } = await import('../utils/logger'); // Mocked above
+      logger.error('Register error:', error.response || error); // Log the response object if it exists
+
+      // --- START: MODIFIED ERROR HANDLING ---
+
+      // CHANGED: Get status from error.response
+      const status = error.response?.status;
       
-      if (error.status === 400) {
+      // CHANGED: Get validation errors from error.response.data
+      const validationErrorsFromApi = error.response?.data?.errors;
+      
+      // CHANGED: Get server messages from error.response.data
+      const detailedMessage = error.response?.data?.details?.message;
+      const dataMessage = error.response?.data?.message;
+
+      if (status === 400) {
         // Validation errors
         const validationErrors: typeof errors = {};
-        if (error.errors) {
-          Object.entries(error.errors).forEach(([key, value]) => {
+        
+        // CHANGED: Use validationErrorsFromApi
+        if (validationErrorsFromApi) {
+          Object.entries(validationErrorsFromApi).forEach(([key, value]) => {
             // ProfileImagePath hatasını gösterme
             if (key !== 'profileImagePath' && key !== 'ProfileImagePath') {
               validationErrors[key as keyof typeof errors] = Array.isArray(value) 
@@ -172,67 +267,47 @@ const Register: React.FC = () => {
             setErrors(validationErrors);
           } else {
             setErrors({
-              general: error.message || t('pages.register.errors.validation')
+              // CHANGED: Use dataMessage as fallback
+              general: dataMessage || error.message || t('pages.register.errors.validation')
             });
           }
         } else {
           setErrors({
-            general: error.message || t('pages.register.errors.validation')
+            general: dataMessage || error.message || t('pages.register.errors.validation')
           });
         }
-      } else if (error.status === 409) {
+      } else if (status === 409) {
         setErrors({
           email: t('pages.register.validation.emailExists')
         });
-      } else if (error.status === 422) {
+      } else if (status === 422) {
         setErrors({
           general: t('pages.register.errors.invalidData')
         });
       } else {
-        setErrors({
-          general: error.message || t('pages.register.errors.general')
-        });
+        // This is the new logic to handle 500 errors and other cases
+        
+        // 1. Get the generic axios message
+        const genericMessage = error.message;
+
+        // 2. Check if the detailed message is the "already taken" error
+        if (detailedMessage && (detailedMessage.includes('is already taken') || detailedMessage.includes('zaten alınmış'))) {
+          setErrors({
+            email: t('pages.register.validation.emailExists')
+          });
+        } else {
+          // 3. Show the best available message as a general error
+          setErrors({
+            general: detailedMessage || dataMessage || genericMessage || t('pages.register.errors.general')
+          });
+        }
       }
+      // --- END: MODIFIED ERROR HANDLING ---
+
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  // Auto-format phone number
-  const formatPhoneNumber = (value: string): string => {
-    const cleaned = value.replace(/\D/g, '');
-    const match = cleaned.match(/^(\d{0,1})(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})$/);
-    
-    if (!match) return value;
-    
-    let formatted = '';
-    if (match[1]) formatted += match[1];
-    if (match[2]) formatted += match[2];
-    if (match[3]) formatted += ` ${match[3]}`;
-    if (match[4]) formatted += ` ${match[4]}`;
-    if (match[5]) formatted += ` ${match[5]}`;
-    
-    return formatted;
-  };
-
-  // Enhanced phone input handler
-  const handlePhoneInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
-    const { value } = e.target;
-    const formattedValue = formatPhoneNumber(value);
-    
-    setFormData(prev => ({
-      ...prev,
-      phoneNumber: formattedValue
-    }));
-    
-    // Clear error when user starts typing
-    if (errors.phoneNumber) {
-      setErrors(prev => ({
-        ...prev,
-        phoneNumber: undefined
-      }));
-    }
-  }, [errors.phoneNumber]);
 
   // Password strength indicator
   const getPasswordStrength = (password: string): { score: number; text: string; color: string } => {
@@ -241,7 +316,7 @@ const Register: React.FC = () => {
     if (password.length >= 8) score++;
     if (/[a-z]/.test(password)) score++;
     if (/[A-Z]/.test(password)) score++;
-    if (/\d/.test(password)) score++;
+    if (/\d/.test(password)) score++; // Corrected regex (was /\d]/)
     if (/[^a-zA-Z\d]/.test(password)) score++;
     
     const levels = [
@@ -423,6 +498,7 @@ const Register: React.FC = () => {
               )}
             </div>
 
+            {/* UPDATED PHONE NUMBER SECTION */}
             <div>
               <label
                 htmlFor="phoneNumber"
@@ -430,30 +506,61 @@ const Register: React.FC = () => {
               >
                 {t('pages.register.phone')}
               </label>
-              <div className="relative">
-                <Phone className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-                <input
-                  id="phoneNumber"
-                  name="phoneNumber"
-                  type="tel"
-                  autoComplete="tel"
-                  value={formData.phoneNumber}
-                  onChange={handlePhoneInputChange}
-                  onBlur={() => handleBlur('phoneNumber')}
-                  className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
-                    errors.phoneNumber 
-                      ? 'border-red-500 dark:border-red-500' 
-                      : touched.phoneNumber && formData.phoneNumber.trim() && /^(\+90|0)?[5-9][0-9\s]{9,}$/.test(formData.phoneNumber.replace(/\s/g, ''))
-                        ? 'border-green-500 dark:border-green-400'
-                        : 'border-gray-300 dark:border-gray-600'
-                  }`}
-                  placeholder={t('pages.register.placeholders.phone')}
-                />
+              <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+                {/* Country Code Selector */}
+                <div className="relative">
+                  <select
+                    id="countryCode"
+                    name="countryCode"
+                    value={formData.countryCode}
+                    onChange={handleInputChange}
+                    className={`h-full py-3 ${isRTL ? 'pr-8 pl-3' : 'pl-3 pr-8'} border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 appearance-none`}
+                    aria-label={t('pages.register.countryCode')}
+                  >
+                    {countries.map(country => (
+                      <option key={country.name} value={country.code}>
+                        {country.name} ({country.code})
+                      </option>
+                    ))}
+                  </select>
+                  {/* Chevron for select */}
+                  <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-2' : 'right-0 pr-2'} flex items-center pointer-events-none`}>
+                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Phone Number Input */}
+                <div className="relative flex-1">
+                  <Phone className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10`} />
+                  <input
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    type="tel" // Use tel type
+                    autoComplete="tel-national"
+                    value={formData.phoneNumber}
+                    onChange={handleNationalPhoneChange} // Use new handler
+                    onBlur={() => handleBlur('phoneNumber')}
+                    className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
+                      errors.phoneNumber 
+                        ? 'border-red-500 dark:border-red-500' 
+                        // Updated validation check for green border
+                        : touched.phoneNumber && formData.phoneNumber.trim() && /^\d{7,15}$/.test(formData.phoneNumber.trim())
+                          ? 'border-green-500 dark:border-green-400'
+                          : 'border-gray-300 dark:border-gray-600'
+                    }`}
+                    // Assuming this placeholder is for the national part, e.g., "555 123 4567"
+                    placeholder={t('pages.register.placeholders.phone')} 
+                  />
+                </div>
               </div>
               {errors.phoneNumber && (
                 <p className="mt-1 text-sm text-red-500">{errors.phoneNumber}</p>
               )}
             </div>
+            {/* END OF UPDATED PHONE SECTION */}
+
 
             <div>
               <label
@@ -472,7 +579,7 @@ const Register: React.FC = () => {
                   value={formData.password}
                   onChange={handleInputChange}
                   onBlur={() => handleBlur('password')}
-                  className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-12'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
+                  className={`w-full ${isRTL ? 'pr-10 pl-12' : 'pl-12 pr-12'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
                     errors.password 
                       ? 'border-red-500 dark:border-red-500' 
                       : 'border-gray-300 dark:border-gray-600'
@@ -540,7 +647,7 @@ const Register: React.FC = () => {
                   autoComplete="new-password"
                   value={formData.passwordConfirm}
                   onChange={handleInputChange}
-                  className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-12'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
+                  className={`w-full ${isRTL ? 'pr-10 pl-12' : 'pl-12 pr-12'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
                     errors.passwordConfirm 
                       ? 'border-red-500 dark:border-red-500' 
                       : 'border-gray-300 dark:border-gray-600'
@@ -687,4 +794,4 @@ const Register: React.FC = () => {
   );
 };
 
-export default Register; 
+export default Register;

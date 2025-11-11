@@ -14,7 +14,13 @@ import {
   Save,
   XCircle,
   Copy,
-  Trash2
+  Trash2,
+  Users,
+  Utensils,
+  Coffee,
+  Wine,
+  Store,
+  Home
 } from 'lucide-react';
 import { 
   CreateMenuTableDto, 
@@ -30,7 +36,68 @@ import CategorySection from './CategorySection';
 import { CategoryData, TableData } from '../../../../types/BranchManagement/type';
 import { useNavigate } from 'react-router-dom';
 
-// QR Code Modal Component
+const IconSelector: React.FC<{
+  selectedIcon: string;
+  onSelect: (icon: string) => void;
+  isRTL: boolean;
+}> = ({ selectedIcon, onSelect, isRTL }) => {
+  const { t } = useLanguage();
+  
+  const iconMapping: Record<string, { component: React.ComponentType<any>, label: string }> = {
+    table: { component: Grid, label: 'Table' },
+    users: { component: Users, label: 'Users' },
+    grid: { component: Grid, label: 'Grid' },
+    building: { component: Building, label: 'Building' },
+    settings: { component: RefreshCw, label: 'Settings' },
+    utensils: { component: Utensils, label: 'Utensils' },
+    coffee: { component: Coffee, label: 'Coffee' },
+    wine: { component: Wine, label: 'Wine' },
+    store: { component: Store, label: 'Store' },
+    home: { component: Home, label: 'Home' }
+  };
+
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        {t('BranchTableManagement.iconLabel')}
+      </label>
+      <div className="grid grid-cols-5 gap-2">
+        {Object.entries(iconMapping).map(([key, { component: IconComponent, label }]) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onSelect(key)}
+            className={`
+              p-3 rounded-lg border-2 transition-all duration-200
+              flex flex-col items-center gap-1
+              ${selectedIcon === key 
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' 
+                : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700'
+              }
+            `}
+            title={label}
+          >
+            <IconComponent 
+              className={`h-5 w-5 ${
+                selectedIcon === key 
+                  ? 'text-blue-600 dark:text-blue-400' 
+                  : 'text-gray-600 dark:text-gray-400'
+              }`} 
+            />
+            <span className={`text-xs ${
+              selectedIcon === key 
+                ? 'text-blue-600 dark:text-blue-400 font-medium' 
+                : 'text-gray-500 dark:text-gray-400'
+            }`}>
+              {label}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const QRCodeModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
@@ -43,7 +110,6 @@ const QRCodeModal: React.FC<{
 
   if (!isOpen) return null;
 
-  // Generate the table URL that the QR code points to
   const getTableUrl = (): string => {
     const baseUrl = window.location.origin;
     return `${baseUrl}/table/qr/${table.qrCode}`;
@@ -152,7 +218,6 @@ const QRCodeModal: React.FC<{
 const BranchTableManagement: React.FC = () => {
   const { t, isRTL } = useLanguage();
   
-  // State management
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [tables, setTables] = useState<TableData[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
@@ -166,6 +231,8 @@ const BranchTableManagement: React.FC = () => {
   const [showAddCategory, setShowAddCategory] = useState<boolean>(false);
   const [showAddTable, setShowAddTable] = useState<number | null>(null);
   const [showBatchCreate, setShowBatchCreate] = useState<boolean>(false);
+  const [addCategoryError, setAddCategoryError] = useState<string | null>(null);
+  const [batchCreateError, setBatchCreateError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const [qrModal, setQrModal] = useState<{
@@ -217,11 +284,8 @@ const BranchTableManagement: React.FC = () => {
     }
   ]);
   const [isBatchCreating, setIsBatchCreating] = useState<boolean>(false);
-const [clearLoading, setClearLoading] = useState<Set<number>>(new Set());
+  const [clearLoading, setClearLoading] = useState<Set<number>>(new Set());
 
-  const iconOptions: string[] = ['table', 'users', 'grid', 'building', 'settings'];
-
-  // Effects
   useEffect(() => {
     fetchCategories();
     fetchTables();
@@ -244,7 +308,6 @@ const [clearLoading, setClearLoading] = useState<Set<number>>(new Set());
     const baseUrl = window.location.origin;
     const tableUrl = `${baseUrl}/table/qr/${qrCode}`;
     
-    // Using QR Server API to generate QR code image
     return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(tableUrl)}`;
   };
 
@@ -270,61 +333,42 @@ const [clearLoading, setClearLoading] = useState<Set<number>>(new Set());
   const removeBatchItem = (index: number) => {
     setBatchItems(prev => prev.filter((_, i) => i !== index));
   };
-const handleClearTable = async (tableId: number): Promise<void> => {
-  setClearLoading(prev => new Set(prev).add(tableId));
 
-  try {
-    const result = await tableService.clearTable(tableId);
-    
-    
-    setTables(prev => prev.map(table => 
-      table.id === tableId 
-        ? { ...table, isOccupied: false } // Assuming clear makes table available
-        : table
-    ));
-    
-    // Show success message from server
-    setSuccessMessage(result.message || 'Table cleared successfully');
-    
+  const handleClearTable = async (tableId: number): Promise<void> => {
+    setClearLoading(prev => new Set(prev).add(tableId));
 
-    
-    // Optionally refresh categories to update counts
-    await fetchCategories();
-    
-    // Alternative approach: If you're unsure about the final state,
-    // you can fetch the updated table data:
-    // try {
-    //   const updatedTable = await tableService.getTableById(tableId);
-    //   if (updatedTable) {
-    //     setTables(prev => prev.map(table => 
-    //       table.id === tableId ? updatedTable : table
-    //     ));
-    //   }
-    // } catch (fetchError) {
-    //   console.error('Error fetching updated table:', fetchError);
-    // }
-    
-  } catch (err: any) {
-    console.error('Error clearing table:', err);
-    
-    // More specific error handling based on status code
-    if (err.status === 415) {
-      setError('Server configuration error. Please contact support.');
-    } else if (err.status === 404) {
-      setError('Table not found. Please refresh the page.');
-    } else if (err.status === 400) {
-      setError('Invalid table operation. Please try again.');
-    } else {
-      setError('Failed to clear table. Please try again.');
+    try {
+      const result = await tableService.clearTable(tableId);
+      
+      setTables(prev => prev.map(table => 
+        table.id === tableId 
+          ? { ...table, isOccupied: false }
+          : table
+      ));
+      
+      setSuccessMessage(result.message || 'Table cleared successfully');
+      await fetchCategories();
+      
+    } catch (err: any) {
+      console.error('Error clearing table:', err);
+      
+      if (err.status === 415) {
+        setError('Server configuration error. Please contact support.');
+      } else if (err.status === 404) {
+        setError('Table not found. Please refresh the page.');
+      } else if (err.status === 400) {
+        setError('Invalid table operation. Please try again.');
+      } else {
+        setError('Failed to clear table. Please try again.');
+      }
+    } finally {
+      setClearLoading(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(tableId);
+        return newSet;
+      });
     }
-  } finally {
-    setClearLoading(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(tableId);
-      return newSet;
-    });
-  }
-};
+  };
 
   const updateBatchItem = (index: number, field: keyof BatchCreateMenuTableItemDto, value: any) => {
     setBatchItems(prev => prev.map((item, i) => 
@@ -345,7 +389,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
       }
     } catch (err: any) {
       console.error('Error fetching categories:', err);
-      setError(t('BranchTableManagement.error.fetchCategoriesFailed'));
+      setError(err.response.data.message);
     } finally {
       setIsLoading(false);
     }
@@ -357,21 +401,17 @@ const handleClearTable = async (tableId: number): Promise<void> => {
     try {
       const tablesData = await tableService.getTables(undefined, false, true);
       
-      // Process tables and ensure QR code data is properly set
       const processedTables = tablesData.map(table => ({
         ...table,
-        // Ensure we have the qrCode token from the API response
         qrCode: table.qrCode || '',
-        // Generate the QR code image URL using the token
         qrCodeImageUrl: table.qrCode ? generateQRCodeImageUrl(table.qrCode) : '',
-        // Ensure displayOrder is a number (not null)
         displayOrder: table.displayOrder ?? 0
       }));
       
       setTables(processedTables);
     } catch (err: any) {
       console.error('Error fetching tables:', err);
-      setError(t('BranchTableManagement.error.tableUpdated'));
+      setError(err.response.data.message);
     }
   };
 
@@ -381,7 +421,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
       await Promise.all([fetchCategories(), fetchTables()]);
       setSuccessMessage(t('BranchTableManagement.success.dataRefreshed'));
     } catch (err: any) {
-      setError(t('BranchTableManagement.error.updateTableStatusFailed'));
+      setError(err.response.data.message);
     } finally {
       setIsLoading(false);
     }
@@ -397,9 +437,11 @@ const handleClearTable = async (tableId: number): Promise<void> => {
 
     if (validItems.length === 0) {
       setError(t('BranchTableManagement.error.addTableFailed'));
+      setBatchCreateError(t('BranchTableManagement.error.addTableFailed')); 
       return;
     }
 
+    setBatchCreateError(null);
     setIsBatchCreating(true);
     try {
       const batchData: CreateBatchMenuTableDto = {
@@ -422,7 +464,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
       setSuccessMessage(t('BranchTableManagement.success.tableAdded'));
     } catch (err: any) {
       console.error('Error creating batch tables:', err);
-      setError(t('BranchTableManagement.error.batchCreateFailed'));
+      setBatchCreateError(err.response.data.message);
     } finally {
       setIsBatchCreating(false);
     }
@@ -476,7 +518,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
     } catch (err: any) {
       console.error('Error updating category status:', err);
       setCategories(previousCategories);
-      setError(t('BranchTableManagement.error.updateCategoryStatusFailed'));
+      setError(err.response.data.message);
     } finally {
       setToggleLoading(prev => {
         const newSet = new Set(prev.categories);
@@ -519,7 +561,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
       setSuccessMessage(t(`BranchTableManagement.success.table${newStatus ? 'Activated' : 'Deactivated'}`));
     } catch (err: any) {
       console.error('Error updating table status:', err);
-      setError(t('BranchTableManagement.error.updateTableStatusFailed'));
+      setError(err.response.data.message);
     } finally {
       setToggleLoading(prev => {
         const newSet = new Set(prev.tables);
@@ -546,7 +588,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
     } catch (err: any) {
       console.error('Error updating table occupation:', err);
       setTables(previousTables);
-      setError(t('BranchTableManagement.error.updateTableOccupationFailed'));
+      setError(err.response.data.message);
     } finally {
       setToggleLoading(prev => {
         const newSet = new Set(prev.tables);
@@ -571,6 +613,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
     };
 
     setIsSaving(true);
+    setAddCategoryError(null);
     try {
       await tableService.createCategory(categoryData);
       await fetchCategories();
@@ -584,7 +627,18 @@ const handleClearTable = async (tableId: number): Promise<void> => {
       setSuccessMessage(t('BranchTableManagement.success.categoryAdded'));
     } catch (err: any) {
       console.error('Error adding category:', err);
-      setError(t('BranchTableManagement.error.addCategoryFailed'));
+
+      console.log("err",err)
+      const status = err.status || err.response?.status;
+
+      if (status === 409) {
+        setAddCategoryError(err.response.data.message);
+        setError(err.response.data.message);
+      } else {
+        setError(err.response.data.message);
+        setAddCategoryError(err.response.data.message);
+      }
+      
     } finally {
       setIsSaving(false);
     }
@@ -614,7 +668,8 @@ const handleClearTable = async (tableId: number): Promise<void> => {
       setSuccessMessage(t('BranchTableManagement.success.categoryUpdated'));
     } catch (err: any) {
       console.error('Error updating category:', err);
-      setError(t('BranchTableManagement.error.updateCategoryFailed'));
+        setError(err.response.data.message);
+
     }
   };
 
@@ -631,7 +686,8 @@ const handleClearTable = async (tableId: number): Promise<void> => {
       setSuccessMessage(t('BranchTableManagement.success.categoryDeleted'));
     } catch (err: any) {
       console.error('Error deleting category:', err);
-      setError(t('BranchTableManagement.error.deleteCategoryFailed'));
+        setError(err.response.data.message);
+
     }
   };
 
@@ -650,7 +706,8 @@ const handleClearTable = async (tableId: number): Promise<void> => {
     };
 
     try {
-      await tableService.createTable(tableData);
+      const res = await tableService.createTable(tableData);
+      console.log("res",res)
       await fetchTables();
       await fetchCategories();
       setNewTable({
@@ -662,7 +719,9 @@ const handleClearTable = async (tableId: number): Promise<void> => {
       setSuccessMessage(t('BranchTableManagement.success.tableAdded'));
     } catch (err: any) {
       console.error('Error adding table:', err);
-      setError(t('BranchTableManagement.error.addTableFailed'));
+      setError(err.response.data.message);
+
+      
     }
   };
 
@@ -690,7 +749,8 @@ const handleClearTable = async (tableId: number): Promise<void> => {
       setSuccessMessage(t('BranchTableManagement.success.tableUpdated'));
     } catch (err: any) {
       console.error('Error updating table:', err);
-      setError(t('BranchTableManagement.error.updateTableFailed'));
+        setError(err.response.data.message);
+
     }
   };
 
@@ -702,7 +762,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
       setSuccessMessage(t('BranchTableManagement.success.tableDeleted'));
     } catch (err: any) {
       console.error('Error deleting table:', err);
-      setError(t('BranchTableManagement.error.deleteTableFailed'));
+      setError(err.response.data.message);
     }
   };
 
@@ -823,16 +883,21 @@ const handleClearTable = async (tableId: number): Promise<void> => {
                 {t('BranchTableManagement.refresh')}
               </button>
               
-              <button
-                onClick={() => setShowBatchCreate(true)}
+            <button
+                onClick={() => {
+                  setShowBatchCreate(true);
+                  setBatchCreateError(null); // <-- ADD THIS
+                }}
                 className={`px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 flex items-center gap-2 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
               >
                 <Copy className="h-4 w-4" />
                 {t('BranchTableManagement.batchCreateTables')}
               </button>
-              
-              <button
-                onClick={() => setShowAddCategory(true)}
+          <button
+                onClick={() => {
+                  setShowAddCategory(true);
+                  setAddCategoryError(null); // <-- ADD THIS
+                }}
                 className={`px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 flex items-center gap-2 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
               >
                 <Plus className="h-4 w-4" />
@@ -880,12 +945,26 @@ const handleClearTable = async (tableId: number): Promise<void> => {
           </div>
         )}
 
+        {/* Add Category Form */}
         {showAddCategory && (
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               {t('BranchTableManagement.addCategoryTitle')}
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {addCategoryError && (
+              <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <AlertCircle className={`h-5 w-5 text-red-600 dark:text-red-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    <span className="text-red-700 dark:text-red-300">{addCategoryError}</span>
+                  </div>
+                  <button onClick={() => setAddCategoryError(null)} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+            <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {t('BranchTableManagement.categoryNameLabel')}
@@ -921,21 +1000,12 @@ const handleClearTable = async (tableId: number): Promise<void> => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t('BranchTableManagement.iconLabel')}
-                </label>
-                <select
-                  title='iconClass'
-                  value={newCategory.iconClass}
-                  onChange={(e) => setNewCategory(prev => ({ ...prev, iconClass: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  {iconOptions.map(icon => (
-                    <option key={icon} value={icon}>{icon}</option>
-                  ))}
-                </select>
-              </div>
+              {/* Enhanced Icon Selector */}
+              <IconSelector
+                selectedIcon={newCategory.iconClass}
+                onSelect={(icon) => setNewCategory(prev => ({ ...prev, iconClass: icon }))}
+                isRTL={isRTL}
+              />
 
               <div className={`flex items-end gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <button
@@ -973,6 +1043,19 @@ const handleClearTable = async (tableId: number): Promise<void> => {
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                       {t('BranchTableManagement.batchCreateTables')}
                     </h3>
+                    {batchCreateError && (
+                  <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+                    <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <AlertCircle className={`h-5 w-5 text-red-600 dark:text-red-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        <span className="text-red-700 dark:text-red-300">{batchCreateError}</span>
+                      </div>
+                      <button onClick={() => setBatchCreateError(null)} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                       {t('BranchTableManagement.multiCategory')}
                     </p>
@@ -1013,7 +1096,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
                             onChange={(e) => updateBatchItem(index, 'categoryId', parseInt(e.target.value))}
                             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-600 text-gray-900 dark:text-white"
                           >
-                            <option value={0}>                            {t("BranchTableManagement.SelectCategory")} </option>
+                            <option value={0}>{t("BranchTableManagement.SelectCategory")}</option>
                             {categories.filter(cat => cat.isActive).map(category => (
                               <option key={category.id} value={category.id}>
                                 {category.categoryName}
@@ -1024,10 +1107,10 @@ const handleClearTable = async (tableId: number): Promise<void> => {
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                              {t("BranchTableManagement.Quantity")}
+                            {t("BranchTableManagement.Quantity")}
                           </label>
                           <input
-                          title='quantity'
+                            title='quantity'
                             type="number"
                             min="1"
                             max="50"
@@ -1042,7 +1125,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
                             {t("BranchTableManagement.Capacity")}
                           </label>
                           <input
-                          title='capacity'
+                            title='capacity'
                             type="number"
                             min="1"
                             max="20"
@@ -1064,8 +1147,6 @@ const handleClearTable = async (tableId: number): Promise<void> => {
                     <Plus className="h-4 w-4" />
                     {t('BranchTableManagement.addCategoryTitle')}
                   </button>
-
-                  
                 </div>
 
                 <div className="flex gap-3 justify-end">
@@ -1086,7 +1167,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
                     ) : (
                       <Grid className="h-4 w-4" />
                     )}
-                    {isBatchCreating ? t('BranchTableManagement.creatingTables') :  t('BranchTableManagement.createTables')}
+                    {isBatchCreating ? t('BranchTableManagement.creatingTables') : t('BranchTableManagement.createTables')}
                   </button>
                 </div>
               </div>
@@ -1105,7 +1186,7 @@ const handleClearTable = async (tableId: number): Promise<void> => {
             {filteredCategories.map((category) => (
               <CategorySection
                 key={category.id}
-                  onClearTable={handleClearTable}
+                onClearTable={handleClearTable}
                 category={category}
                 tables={getTablesForCategory(category.id)}
                 isExpanded={expandedCategories.has(category.id)}

@@ -3,8 +3,6 @@ import {
   Plus,
   Edit,
   Trash2,
-  ToggleLeft,
-  ToggleRight,
   ChevronDown,
   ChevronRight,
   Save,
@@ -29,8 +27,6 @@ interface CategoryData {
   branchId: number;
   tableCount?: number;
 }
-
-
 
 interface CategorySectionProps {
   category: CategoryData;
@@ -59,7 +55,7 @@ interface CategorySectionProps {
   onToggleTableOccupation: (tableId: number, isOccupied: boolean) => Promise<void>;
   onShowQRCode: (table: TableData) => void;
   onTableChange: (tableId: number, updatedData: Partial<TableData>) => void;
-   onClearTable: (tableId: number) => Promise<void>;
+  onClearTable: (tableId: number) => Promise<void>;
   newTable: {
     menuTableName: string;
     capacity: number;
@@ -71,6 +67,101 @@ interface CategorySectionProps {
     isActive: boolean;
   }>) => void;
 }
+
+// Modern Toggle Switch Component
+const ToggleSwitch: React.FC<{
+  isOn: boolean;
+  onToggle: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  size?: 'sm' | 'md' | 'lg';
+  showLabel?: boolean;
+  onLabel?: string;
+  offLabel?: string;
+}> = ({ 
+  isOn, 
+  onToggle, 
+  disabled = false, 
+  loading = false, 
+  size = 'md',
+  showLabel = false,
+  onLabel = 'Active',
+  offLabel = 'Inactive'
+}) => {
+  const sizes = {
+    sm: {
+      switch: 'w-9 h-5',
+      knob: 'w-4 h-4',
+      translate: 'translate-x-4'
+    },
+    md: {
+      switch: 'w-11 h-6',
+      knob: 'w-5 h-5',
+      translate: 'translate-x-5'
+    },
+    lg: {
+      switch: 'w-14 h-7',
+      knob: 'w-6 h-6',
+      translate: 'translate-x-7'
+    }
+  };
+
+  const currentSize = sizes[size];
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      disabled={disabled || loading}
+      className="flex items-center gap-2 group"
+      title={isOn ? onLabel : offLabel}
+    >
+      <div
+        className={`
+          ${currentSize.switch}
+          relative inline-flex items-center rounded-full
+          transition-colors duration-300 ease-in-out
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+          ${isOn 
+            ? 'bg-green-500 dark:bg-green-600' 
+            : 'bg-gray-300 dark:bg-gray-600'
+          }
+        `}
+      >
+        {/* Sliding Knob */}
+        <span
+          className={`
+            ${currentSize.knob}
+            inline-block rounded-full bg-white
+            shadow-lg transform transition-transform duration-300 ease-in-out
+            flex items-center justify-center
+            ${isOn ? currentSize.translate : 'translate-x-0.5'}
+          `}
+        >
+          {loading && (
+            <Loader2 className="h-3 w-3 animate-spin text-gray-400" />
+          )}
+        </span>
+      </div>
+      
+      {showLabel && (
+        <span
+          className={`
+            text-xs font-medium transition-colors
+            ${isOn 
+              ? 'text-green-600 dark:text-green-400' 
+              : 'text-gray-500 dark:text-gray-400'
+            }
+            ${disabled ? 'opacity-50' : ''}
+          `}
+        >
+          {isOn ? onLabel : offLabel}
+        </span>
+      )}
+    </button>
+  );
+};
 
 const CategorySection: React.FC<CategorySectionProps> = ({
   category,
@@ -127,9 +218,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
               {isExpanded ? (
-                <ChevronDown className="h-5 w-5 text-gray-500" />
+                <ChevronDown className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               ) : (
-                <ChevronRight className="h-5 w-5 text-gray-500" />
+                <ChevronRight className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               )}
               <div 
                 className="p-2 rounded-lg flex items-center justify-center"
@@ -154,7 +245,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                   type="color"
                   value={category.colorCode}
                   onChange={(e) => onCategoryChange(category.id, { colorCode: e.target.value })}
-                  className="w-8 h-8 border border-gray-300 dark:border-gray-600 rounded"
+                  className="w-8 h-8 border border-gray-300 dark:border-gray-600 rounded cursor-pointer"
                   onClick={(e) => e.stopPropagation()}
                 />
               </div>
@@ -170,24 +261,23 @@ const CategorySection: React.FC<CategorySectionProps> = ({
             )}
           </div>
 
-          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleCategoryStatus(category.id, !category.isActive);
-              }}
-              disabled={isToggling}
-              className="flex items-center gap-1"
-              title={category.isActive ? t('BranchTableManagement.deactivate') : t('BranchTableManagement.activate')}
+          <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            {/* Enhanced Toggle Switch for Category Status */}
+            <div 
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center"
             >
-              {isToggling ? (
-                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-              ) : category.isActive ? (
-                <ToggleRight className="h-5 w-5 text-green-500" />
-              ) : (
-                <ToggleLeft className="h-5 w-5 text-gray-400" />
-              )}
-            </button>
+              <ToggleSwitch
+                isOn={category.isActive}
+                onToggle={() => onToggleCategoryStatus(category.id, !category.isActive)}
+                disabled={isToggling}
+                loading={isToggling}
+                size="md"
+                showLabel={true}
+                onLabel={t('BranchTableManagement.active')}
+                offLabel={t('BranchTableManagement.inactive')}
+              />
+            </div>
 
             {isEditing ? (
               <div className={`flex gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -196,20 +286,20 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                     e.stopPropagation();
                     onUpdateCategory(category.id, category);
                   }}
-                  className="p-1 text-green-600 hover:text-green-800"
+                  className="p-1.5 text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/30 rounded transition-colors"
                   title={t('BranchTableManagement.save')}
                 >
-                  <Save className="h-4 w-4" />
+                  <Save className="h-5 w-5" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onCancelEditing();
                   }}
-                  className="p-1 text-gray-600 hover:text-gray-800"
+                  className="p-1.5 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
                   title={t('BranchTableManagement.cancel')}
                 >
-                  <XCircle className="h-4 w-4" />
+                  <XCircle className="h-5 w-5" />
                 </button>
               </div>
             ) : (
@@ -219,20 +309,20 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                     e.stopPropagation();
                     onStartEditing(category.id);
                   }}
-                  className="p-1 text-yellow-600 hover:text-yellow-800"
+                  className="p-1.5 text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/30 rounded transition-colors"
                   title={t('BranchTableManagement.edit')}
                 >
-                  <Edit className="h-4 w-4" />
+                  <Edit className="h-5 w-5" />
                 </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onDeleteCategory(category.id);
                   }}
-                  className="p-1 text-red-600 hover:text-red-800"
+                  className="p-1.5 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 rounded transition-colors"
                   title={t('BranchTableManagement.delete')}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-5 w-5" />
                 </button>
               </div>
             )}
@@ -245,7 +335,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           <div className="p-4 border-b border-gray-200 dark:border-gray-700">
             <button
               onClick={() => onShowAddTable(category.id)}
-              className={`px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2 text-sm ${isRTL ? 'flex-row-reverse' : ''}`}
+              className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 flex items-center gap-2 text-sm transition-colors shadow-sm ${isRTL ? 'flex-row-reverse' : ''}`}
             >
               <Plus className="h-4 w-4" />
               {t('BranchTableManagement.addTable')}
@@ -256,6 +346,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
             <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-blue-50 dark:bg-blue-900/20">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t('BranchTableManagement.tableNameLabel')}
+                  </label>
                   <input
                     type="text"
                     value={newTable.menuTableName}
@@ -265,6 +358,9 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                   />
                 </div>
                 <div>
+                  <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t('BranchTableManagement.capacityLabel')}
+                  </label>
                   <input
                     type="number"
                     value={newTable.capacity}
@@ -274,17 +370,17 @@ const CategorySection: React.FC<CategorySectionProps> = ({
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   />
                 </div>
-                <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex gap-2 items-end ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <button
                     onClick={() => onAddTable(category.id)}
-                    className={`px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                    className={`px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 dark:bg-green-700 dark:hover:bg-green-600 flex items-center gap-2 transition-colors shadow-sm ${isRTL ? 'flex-row-reverse' : ''}`}
                   >
                     <Save className="h-4 w-4" />
                     {t('BranchTableManagement.save')}
                   </button>
                   <button
                     onClick={onHideAddTable}
-                    className={`px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                    className={`px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-500 flex items-center gap-2 transition-colors shadow-sm ${isRTL ? 'flex-row-reverse' : ''}`}
                   >
                     <XCircle className="h-4 w-4" />
                     {t('BranchTableManagement.cancel')}
@@ -297,7 +393,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
           <div className="p-4">
             {tables.length === 0 ? (
               <div className="text-center py-8">
-                <Grid className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <Grid className="h-8 w-8 text-gray-400 dark:text-gray-500 mx-auto mb-2" />
                 <p className="text-gray-500 dark:text-gray-400">{t('BranchTableManagement.noTables')}</p>
               </div>
             ) : (

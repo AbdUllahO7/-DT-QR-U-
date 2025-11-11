@@ -891,12 +891,7 @@ const ProductsContent: React.FC = () => {
             {t('productsContent.emptyState.noCategories.title')}
           </h3>
           
-          <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
-            {selectedBranch?.branchId === SELECT_ALL_BRANCH_ID 
-              ? t('productsContent.emptyState.noCategories.descriptionAllBranches') || 'No categories found across all branches. Start by creating your first category.'
-              : t('productsContent.emptyState.noCategories.description')
-            }
-          </p>
+       
           
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
@@ -907,10 +902,7 @@ const ProductsContent: React.FC = () => {
               {t('productsContent.emptyState.noCategories.addFirstCategory')}
             </button>
             
-            <button className="flex items-center gap-2 px-6 py-3 text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg font-medium transition-colors duration-200">
-              <Package className="h-5 w-5" />
-              {t('productsContent.actions.importSampleMenu')}
-            </button>
+         
           </div>
         </div>
 

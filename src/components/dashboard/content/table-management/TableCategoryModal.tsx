@@ -327,7 +327,7 @@ return (
                       transition={{ delay: 0.1 }}
                       className="text-2xl font-bold drop-shadow-md"
                     >
-                      {isEditMode ? 'Edit Category' : t('TableCategoryModal.title')}
+                      {isEditMode ?  t('TableCategoryModal.title') : ''}
                     </motion.h3>
                     <motion.p 
                       initial={{ opacity: 0 }}
@@ -335,7 +335,7 @@ return (
                       transition={{ delay: 0.2 }}
                       className="text-primary-50/90 text-sm mt-1 drop-shadow"
                     >
-                      {isEditMode ? 'Update category details' : t('TableCategoryModal.subtitle')}
+                      {isEditMode ?  t('TableCategoryModal.subtitle') : ''}
                     </motion.p>
                   </div>
                 </div>
@@ -538,9 +538,9 @@ return (
                     className={`flex items-center justify-between p-5 bg-gradient-to-r from-gray-50 to-gray-100/80 dark:from-gray-800/50 dark:to-gray-700/30 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm ${isRTL ? 'flex-row-reverse' : ''}`}
                   >
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Active Status</h3>
+                      <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200"> {t('tableManagement.categories.deleteCategory')}</h3>
                       <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                        {formData.isActive ? 'Category is active and visible' : 'Category is inactive and hidden'}
+                        {formData.isActive ? t('tableManagement.descriptionActive') : t('tableManagement.descriptionInActive')}
                       </p>
                     </div>
                     <button
@@ -553,11 +553,13 @@ return (
                       }`}
                       aria-label="Toggle active status"
                     >
-                      <motion.span
+                    <motion.span
                         layout
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
                         className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ${
-                          formData.isActive ? 'translate-x-8' : 'translate-x-1'
+                          isRTL
+                            ? (formData.isActive ? 'translate-x-1' : 'translate-x-8') // RTL logic (On = left, Off = right)
+                            : (formData.isActive ? 'translate-x-8' : 'translate-x-1') // LTR logic (On = right, Off = left)
                         }`}
                       />
                     </button>

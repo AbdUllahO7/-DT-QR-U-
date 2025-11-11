@@ -594,14 +594,14 @@ const handleCategoryModalSuccess = () => {
                               className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
                             >
                               <Edit2 className="h-4 w-4" />
-                              Edit Category
+                             {t('tableManagement.categories.editCategory')}
                             </button>
                             <button
                               onClick={() => handleDeleteCategory(category)}
                               className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
                             >
                               <Trash2 className="h-4 w-4" />
-                              Delete Category
+                              {t('tableManagement.categories.deleteCategory')}
                             </button>
                           </motion.div>
                         </>
@@ -693,8 +693,8 @@ const handleCategoryModalSuccess = () => {
         isOpen={isCategoryDeleteModalOpen}
         onClose={handleCategoryDeleteModalClose}
         onConfirm={performDeleteCategory}
-        title="Delete Category"
-        message={`Are you sure you want to delete the category "${categoryToDelete?.categoryName}"? This action cannot be undone.`}
+        title={t('branchCategories.deleteModal.title')}
+        message={t('branchCategories.deleteModal.message')}
         isSubmitting={isDeletingCategory}
         itemType="category"
         itemName={categoryToDelete?.categoryName || ''}

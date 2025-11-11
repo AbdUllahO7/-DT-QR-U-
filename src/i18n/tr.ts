@@ -267,7 +267,7 @@ export const tr = {
       description: 'Masa yönetimi işlemleri.',
       loading: 'Masalar yükleniyor...',
       selectBranch: 'Masa yönetimi için lütfen bir şube seçin',
-      noCategories: 'Bu şubede henüz masa kategorisi bulunmuyor',
+      noCategories: 'Bu şubede henüz masa Alanı bulunmuyor',
       tableCount: 'masa',
       newTable: 'Yeni Masa Ekle'
     },
@@ -902,11 +902,14 @@ export const tr = {
 
   // Table Management
   tableManagement: {
+  ActiveStatus :"Aktif Durum", 
+  descriptionActive : "Kategori etkin ve görünür", 
+  descriptionInActive : "Kategori etkin değil ve gizli",
     loading: 'Masalar yükleniyor...',
-    title: 'Masa Yönetimi',
+    title: 'Masa Alan',
     description: 'QR kodlarınızı ve masalarınızı yönetin',
-        noCategories :"Kategoriler Bulunmadı",
-    createFirstCategory: "Birinci Kategori Oluştur",
+    noCategories :"Alan Bulunmadı",
+    createFirstCategory: "Birinci Alan Oluştur",
     error: {
       loadFailed: 'Şube listesi yüklenemedi',
       dataLoadFailed: 'Veriler yüklenirken bir hata oluştu'
@@ -922,17 +925,17 @@ export const tr = {
       deleteTable: 'Masa Sil'
     },
     categories: {
-      title: 'Kategori Yönetimi',
-      addCategory: 'Kategori Ekle',
-      editCategory: 'Kategori Düzenle',
-      deleteCategory: 'Kategori Sil',
-      categoryName: 'Kategori Adı',
+      title: 'Alan Yönetimi',
+      addCategory: 'Alan Ekle',
+      editCategory: 'Alan Düzenle',
+      deleteCategory: 'Alan Sil',
+      categoryName: 'Alan Adı',
       tableCount: 'Masa Sayısı'
     },
     qrCodes: {
       title: 'QR Kodlar',
       tableNumber: 'Masa Numarası',
-      category: 'Kategori',
+      category: 'Alan',
       status: 'Durum',
       actions: 'İşlemler',
       active: 'Aktif',
@@ -2462,10 +2465,10 @@ export const tr = {
     tableName: 'Masa Adı',
     tableNamePlaceholder: 'Örn: Masa 1',
     autoNameNote: 'Boş bırakılırsa otomatik isim verilir',
-    tableCategory: 'Masa Kategorisi',
-    selectCategory: 'Kategori Seçin',
+    tableCategory: 'Masa Alanı',
+    selectCategory: 'Alan Seçin',
     loadingCategories: 'Kategoriler yükleniyor...',
-    noCategories: 'Kategori bulunamadı',
+    noCategories: 'Alan bulunamadı',
     capacity: 'Kapasite',
     capacityPlaceholder: 'Kişi sayısı',
     displayOrder: 'Görünüm Sırası',
@@ -2475,9 +2478,9 @@ export const tr = {
     
     // Bulk table form
     addBulkTables: 'Toplu Masa Ekle',
-    categoryQuantities: 'Kategori Bazında Masa Miktarları',
-    addCategory: 'Kategori Ekle',
-    category: 'Kategori',
+    categoryQuantities: 'Alan Bazında Masa Miktarları',
+    addCategory: 'Alan Ekle',
+    category: 'Alan',
     tableCount: 'Masa Sayısı',
     allTablesActive: 'Tüm masalar aktif olsun',
     tableSummary: 'Oluşturulacak Masalar Özeti:',
@@ -2501,7 +2504,7 @@ export const tr = {
       modal: 'Masa oluşturma modalı',
       stepSelection: 'Masa oluşturma yöntemi seçimi',
       branchSelector: 'Şube seçimi dropdown',
-      categorySelector: 'Masa kategorisi seçimi',
+      categorySelector: 'Masa Alanı seçimi',
       tableForm: 'Masa oluşturma formu',
       bulkForm: 'Toplu masa oluşturma formu',
       backButton: 'Önceki adıma dön',
@@ -2510,18 +2513,18 @@ export const tr = {
   },
 
   TableCategoryModal: {
-    title: 'Masa Kategorisi Ekle',
-    subtitle: 'Yeni masa kategorisi oluşturun',
-    categoryName: 'Kategori Adı',
+    title: 'Masa Alan Ekle',
+    subtitle: 'Yeni masa Alan oluşturun',
+    categoryName: 'Alan Adı',
     categoryNamePlaceholder: 'Örn: VIP Masalar, Bahçe Masaları',
     description: 'Açıklama (Opsiyonel)',
-    descriptionPlaceholder: 'Kategori hakkında kısa açıklama...',
+    descriptionPlaceholder: 'Alan hakkında kısa açıklama...',
     colorSelection: 'Renk Seçimi',
     customColor: 'Özel renk',
     iconSelection: 'Icon Seçimi',
     branchSelection: 'Şube Seçimi',
     cancel: 'İptal',
-    addCategory: 'Kategori Ekle',
+    addCategory: 'Alan Ekle',
     saving: 'Kaydediliyor...',
     
     // Icons
@@ -2532,7 +2535,7 @@ export const tr = {
     layer: 'Katman',
     
     // Validation errors
-    categoryNameRequired: 'Kategori adı gereklidir',
+    categoryNameRequired: 'Alan adı gereklidir',
     iconRequired: 'Bir icon seçmelisiniz',
     branchRequired: 'Şube seçimi gereklidir',
     invalidData: 'Geçersiz veri gönderildi',
@@ -2540,17 +2543,17 @@ export const tr = {
     forbidden: 'Bu işlem için yetkiniz bulunmuyor.',
     branchNotFound: 'Seçilen şube bulunamadı.',
     serverError: 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.',
-    unexpectedError: 'Kategori eklenirken beklenmeyen bir hata oluştu',
+    unexpectedError: 'Alan eklenirken beklenmeyen bir hata oluştu',
     
     accessibility: {
-      modal: 'Masa kategorisi oluşturma modalı',
+      modal: 'Masa Alanı oluşturma modalı',
       colorPalette: 'Renk seçimi paleti',
       colorPreset: 'Hazır renk seçeneği',
       customColorPicker: 'Özel renk seçici',
       iconGrid: 'Icon seçimi grid',
       iconOption: 'Icon seçeneği',
       branchDropdown: 'Şube seçimi dropdown',
-      form: 'Kategori oluşturma formu'
+      form: 'Alan oluşturma formu'
     }
   },
 
@@ -2566,6 +2569,7 @@ export const tr = {
   userManagementPage: {
    rolePermissionsModal:{
       title:"Görüntüleme izinleri",
+      noPermissions:"İzin Yok"
     },
    editRole :{
       title:"Rol Güncellemesi",
@@ -2895,6 +2899,7 @@ export const tr = {
 
   title: "Masa Yönetimi",
   subtitle: "Restoran masalarınızı ve kategorilerinizi yönetin",
+
   tabs: {
     tables: "Masalar",
     categories: "Kategoriler", 
@@ -2975,6 +2980,8 @@ export const tr = {
   },
   
   BranchTableManagement: {
+      "tableNameLabel": "Masa Adı",
+  "capacityLabel": "Kapasite",
     clearTable: "Tablo temizleniyor",
     refreshTable: "Durumu güncelle",
     clearin: "Temizleniyor...",
@@ -3329,8 +3336,8 @@ export const tr = {
 
     // Delete Modal
     deleteModal: {
-      title: 'Kategoriyi Sil',
-      message: '"{name}" kategorisini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+      title: 'Alan Sil',
+      message: '"{name}" Alanısını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
       confirm: 'Sil',
       cancel: 'İptal'
     },
@@ -4075,7 +4082,7 @@ recommended: "Önerilen",
       deletedTable: 'Silinmiş Masa',
       deletedBranchProduct: 'Silinmiş Şube Ürünü',
       deletedBranchCategory: 'Silinmiş Şube Kategorisi',
-      deletedTableCategory: 'Silinmiş Masa Kategorisi'
+      deletedTableCategory: 'Silinmiş Masa Alanı'
     },
     entityTypes: {
       category: 'Kategori',
@@ -4084,7 +4091,7 @@ recommended: "Önerilen",
       table: 'Masa',
       branchProduct: 'Şube Ürünü',
       branchCategory: 'Şube Kategorisi',
-      tableCategory: 'Masa Kategorisi',
+      tableCategory: 'Masa Alanı',
       other: 'Diğer'
     },
     contextInfo: {
@@ -4101,7 +4108,7 @@ recommended: "Önerilen",
       successBranch: '"{name}" şubesi başarıyla geri yüklendi',
       successTable: '"{name}" masası başarıyla geri yüklendi',
       successBranchCategory: '"{name}" şube kategorisi başarıyla geri yüklendi',
-      successTableCategory: '"{name}" masa kategorisi başarıyla geri yüklendi',
+      successTableCategory: '"{name}" masa Alanı başarıyla geri yüklendi',
       error: 'Geri yükleme işlemi başarısız oldu'
     },
     empty: {

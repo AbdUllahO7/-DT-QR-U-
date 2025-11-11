@@ -54,6 +54,8 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
   loading 
 }) => {
   const { t } = useLanguage();
+
+  console.log("info",info)
   
   const [formData, setFormData] = useState<RestaurantManagementInfo>(
     info || {
@@ -145,6 +147,12 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
         {/* Decorative gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
         
+          <img
+              src={info.restaurantLogoPath}
+              alt={`${info.restaurantName} ${t('branchCard.alt.logo')}`}
+              className="w-12 h-12 object-cover rounded-2xl bg-white/10"
+            />
+
         {/* Header */}
         <div className="relative border-b border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
           <div className="flex justify-between items-center p-6">
