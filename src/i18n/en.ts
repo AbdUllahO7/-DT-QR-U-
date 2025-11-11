@@ -2662,6 +2662,7 @@ export const en = {
       userRoles: "User Roles", 
       permissions:"Permissions",
       permissionsCount:"Count",
+            noPermissions:"No Permissions"
     },
     "editUserModal": {
       "title": "Edit User",

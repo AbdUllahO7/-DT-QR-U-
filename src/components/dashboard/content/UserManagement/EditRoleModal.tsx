@@ -33,8 +33,6 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
 }) => {
   const { t, isRTL } = useLanguage();
 
-  console.log("role",)
-
   // Form state
   const [formData, setFormData] = useState<UpdateRoleDto>({
     name: '',
@@ -52,6 +50,9 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
     []
   );
   const [isFetchingPermissions, setIsFetchingPermissions] = useState(false);
+  
+  // Ref to prevent re-fetch on initial load
+  const isInitialLoad = useRef(true);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setIsBranchDropdownOpen(false));
@@ -62,11 +63,24 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
   // Effect to populate form when modal opens or role changes
   useEffect(() => {
     if (isOpen && role) {
+      isInitialLoad.current = true; // Mark as initial load
+
       // 1. Fetch the full permission catalog
       const fetchPermissions = async () => {
         setIsFetchingPermissions(true);
+        
+        // --- MODIFIED: Prepare params with role's branchId ---
+        const params: { branchId?: number } = {};
+        if (role.branchId && Number(role.branchId) > 0) {
+          params.branchId = Number(role.branchId);
+        }
+        // --- END MODIFIED ---
+
         try {
-          const response = await roleService.getPermissionCatalog();
+          // --- MODIFIED: Pass params to service ---
+          const response = await roleService.getPermissionCatalog(params);
+          // --- END MODIFIED ---
+
           if (response.success && response.data) {
             setPermissionCatalog(response.data);
 
@@ -90,18 +104,18 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
             }
 
             // Get the names of the permissions this role already has
-          const rolePermissionNames = new Set(
-          role.permissions.map((p) => p.name)
-        );
+            const rolePermissionNames = new Set(
+              role.permissions.map((p) => p.name)
+            );
 
             // Find the corresponding IDs from the catalog
             const initialSelectedIds: number[] = [];
-              for (const name of rolePermissionNames) {
-                if (allPermissionsMap.has(name)) {
-                  initialSelectedIds.push(allPermissionsMap.get(name)!);
-                }
+            for (const name of rolePermissionNames) {
+              if (allPermissionsMap.has(name)) {
+                initialSelectedIds.push(allPermissionsMap.get(name)!);
               }
-              setSelectedPermissions(initialSelectedIds);
+            }
+            setSelectedPermissions(initialSelectedIds);
           } else {
             logger.error('Failed to fetch permission catalog', response, {
               prefix: 'EditRoleModal',
@@ -113,6 +127,7 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
           });
         } finally {
           setIsFetchingPermissions(false);
+          isInitialLoad.current = false; // Mark initial load as complete
         }
       };
 
@@ -123,8 +138,54 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
       setSelectedPermissions([]);
       setErrors({});
       setPermissionCatalog([]);
+      isInitialLoad.current = true; // Reset for next open
     }
   }, [isOpen, role]);
+
+
+  // --- NEW EFFECT ---
+  // Re-fetch permission catalog if branchId changes *after* initial load
+  useEffect(() => {
+    // Don't run on initial load or if modal is closed
+    if (isInitialLoad.current || !isOpen) {
+      return;
+    }
+
+    const fetchCatalogForNewBranch = async () => {
+      setIsFetchingPermissions(true);
+      
+      const params: { branchId?: number } = {};
+      if (formData.branchId && Number(formData.branchId) > 0) {
+        params.branchId = Number(formData.branchId);
+      }
+      
+      try {
+        const response = await roleService.getPermissionCatalog(params);
+        if (response.success && response.data) {
+          setPermissionCatalog(response.data);
+          // Note: We keep existing selected permissions.
+          // User can manually de-select any that are no longer relevant.
+        } else {
+          logger.warn('Failed to re-fetch permission catalog for new branch', response, {
+            prefix: 'EditRoleModal',
+          });
+          setPermissionCatalog([]); // Clear catalog on failure
+        }
+      } catch (error) {
+         logger.error('Error re-fetching permission catalog', error, {
+            prefix: 'EditRoleModal',
+          });
+         setPermissionCatalog([]); // Clear catalog on error
+      } finally {
+        setIsFetchingPermissions(false);
+      }
+    };
+
+    fetchCatalogForNewBranch();
+    
+  }, [formData.branchId]); // Dependency: only the branchId from form state
+  // --- END NEW EFFECT ---
+
 
   // Get selected branch name
   const selectedBranchName = formData.branchId
@@ -147,9 +208,15 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
     const submitData: UpdateRoleDto = {
       name: formData.name,
       description: formData.description || null,
-      branchId: formData.branchId,
+      branchId: formData.branchId || "", // Send "" if no branch
       category: formData.category || null,
     };
+    
+    // Fix: Ensure branchId is null if empty string, if API requires
+    // Based on CreateRoleModal, API handles empty/falsy values
+    if (!submitData.branchId) {
+      delete (submitData as any).branchId; // Or set to null if API prefers
+    }
 
     try {
       await onSubmit(role.appRoleId, submitData, selectedPermissions);
@@ -492,9 +559,9 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
                 disabled={isBusy}
                 className="px-6 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {isLoading && (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                )}
+                {isLoading ? (
+                  <Loader2 className="animate-spin h-4 w-4" />
+                ) : null }
                 {isLoading
                   ? t('userManagementPage.editRole.saving')
                   : t('userManagementPage.editRole.save')}

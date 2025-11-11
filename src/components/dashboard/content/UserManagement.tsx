@@ -32,7 +32,6 @@ import type {
 } from '../../../types/api';
 import EditUserModal from './UserManagement/EditUserModal';
 import UpdateUserRolesModal from './UserManagement/UpdateUserRolesModal';
-import AssignBranchModal from './UserManagement/AssignBranchModal';
 import ConfirmationModal from './UserManagement/ConfirmationModal';
 import CreateUserModal from './UserManagement/CreateUserModal';
 import CreateRoleModal from './UserManagement/CreateRoleModal';
@@ -53,6 +52,7 @@ const UserManagement: React.FC = () => {
   const [roles, setRoles] = useState<Role[]>([]); // Master list of GLOBAL roles
   const [branches, setBranches] = useState<BranchInfo[]>([]);
   const [permissionCatalog, setPermissionCatalog] = useState<PermissionCatalog[]>([]);
+
 
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [activeTab, setActiveTab] = useState<TabMode>('users');
@@ -81,10 +81,6 @@ const UserManagement: React.FC = () => {
   const [selectedUserForRoles, setSelectedUserForRoles] = useState<UserData | null>(null);
   const [isUpdatingRoles, setIsUpdatingRoles] = useState(false);
 
-  // Assign Branch Modal States
-  const [isAssignBranchModalOpen, setIsAssignBranchModalOpen] = useState(false);
-  const [selectedUserForBranch, setSelectedUserForBranch] = useState<UserData | null>(null);
-  const [isAssigningBranch, setIsAssigningBranch] = useState(false);
 
   // Confirmation Modal States
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
@@ -265,7 +261,6 @@ const fetchRoles = useCallback(async () => {
   }, [roles, selectedCategory, searchTerm]);
 
 
-  console.log("filteredRoles",filteredRoles)
 
 // Create Role Handler - Creates role then opens edit modal for permissions
 // Create Role Handler - Creates role with permissions in one call
@@ -448,36 +443,8 @@ const handleOpenEditRole = useCallback(async (role: Role) => {
     [fetchUsers, t]
   );
 
-  // Assign Branch Handlers
-  const handleOpenAssignBranch = useCallback((user: UserData) => {
-    setSelectedUserForBranch(user);
-    setIsAssignBranchModalOpen(true);
-    setActiveDropdown(null);
-  }, []);
 
-  const handleAssignBranch = useCallback(
-    async (id: string, branchData: AssignBranchDto) => {
-      try {
-        setIsAssigningBranch(true);
-        const response = await userService.assignBranchToUser(id, branchData);
-        if (response.success) {
-          logger.info('Şube başarıyla atandı', response.data, {
-            prefix: 'UserManagement',
-          });
-          setIsAssignBranchModalOpen(false);
-          setSelectedUserForBranch(null);
-          await fetchUsers();
-        } else {
-          throw new Error(t('userManagementPage.error.assignBranchFailed'));
-        }
-      } catch (err: any) {
-        logger.error('Şube atanırken hata', err, { prefix: 'UserManagement' });
-      } finally {
-        setIsAssigningBranch(false);
-      }
-    },
-    [fetchUsers, t]
-  );
+
 
   // View User Permissions Handlers
   const handleOpenPermissions = useCallback((user: UserData) => {
@@ -778,13 +745,7 @@ const handleOpenEditRole = useCallback(async (role: Role) => {
           <Key className="h-4 w-4" />
           {t('userManagementPage.actions.viewPermissions')}
         </button>
-        <button
-          onClick={() => handleOpenAssignBranch(user)}
-          className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
-        >
-          <Building className="h-4 w-4" />
-          {t('userManagementPage.actions.assignBranch')}
-        </button>
+     
         <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
         <button
           onClick={() => handleToggleUserStatus(user)}
@@ -1624,14 +1585,14 @@ const handleOpenEditRole = useCallback(async (role: Role) => {
       )}
 
       {/* Modals */}
-{isRoleModalOpen && (
-  <CreateRoleModal
-    isOpen={isRoleModalOpen}
-    onClose={() => setIsRoleModalOpen(false)}
-    onSuccess={handleRoleCreated}
-    branches={branches}
-  />
-)}
+      {isRoleModalOpen && (
+        <CreateRoleModal
+          isOpen={isRoleModalOpen}
+          onClose={() => setIsRoleModalOpen(false)}
+          onSuccess={handleRoleCreated}
+          branches={branches}
+        />
+      )}
       {isUserModalOpen && (
         <CreateUserModal
           branches={branches}
@@ -1669,19 +1630,7 @@ const handleOpenEditRole = useCallback(async (role: Role) => {
           isLoading={isUpdatingRoles}
         />
       )}
-     {/*  {isAssignBranchModalOpen && selectedUserForBranch && (
-        <AssignBranchModal
-          branches={branches}
-          isOpen={isAssignBranchModalOpen}
-          onClose={() => {
-            setIsAssignBranchModalOpen(false);
-            setSelectedUserForBranch(null);
-          }}
-          onSubmit={handleAssignBranch}
-          user={selectedUserForBranch}
-          isLoading={isAssigningBranch}
-        />
-      )} */}
+   
       {isConfirmationModalOpen && confirmationConfig && (
         <ConfirmationModal
           isOpen={isConfirmationModalOpen}

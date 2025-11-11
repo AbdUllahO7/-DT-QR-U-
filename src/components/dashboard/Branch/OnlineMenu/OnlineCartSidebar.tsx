@@ -106,15 +106,10 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   // ADDED: WhatsApp Service function - same as useCartHandlers
   const sendOrderToWhatsApp = async (whatsappData: any) => {
     try {
-      console.log('📱 Sending WhatsApp message...');
-      console.log('  - Restaurant preferences:', restaurantPreferences);
-      console.log('  - WhatsApp number:', whatsAppPhoneNumber);
-      
+
       const whatsappNumber = WhatsAppService.formatWhatsAppNumber(whatsAppPhoneNumber);
-      console.log('  - Formatted number:', whatsappNumber);
       
       await WhatsAppService.sendOrderToWhatsApp(whatsappNumber, whatsappData);
-      console.log('✅ WhatsApp message sent successfully');
       
     } catch (error) {
       console.error('❌ Error sending WhatsApp notification:', error);
@@ -427,9 +422,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         await onBasketUpdate();
       }
       
-      console.log('📦 Creating order with data:', orderData);
       const order = await orderService.createSessionOrder(orderData);
-      console.log('✅ Order created:', order);
       
       if (order.orderTag) {
         setCreatedOrderTag(order.orderTag);
@@ -442,13 +435,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       // Calculate service charge
       const serviceChargeAmount = selectedOrderType!.serviceCharge || 0;
 
-      // DEBUG: Log WhatsApp checks
-      console.log('🔍 WhatsApp Debug Info:');
-      console.log('  - order object:', order);
-      console.log('  - order.orderTag:', order.orderTag);
-      console.log('  - enableWhatsAppOrdering:', useWhatsappForOrders);
-      console.log('  - whatsAppPhoneNumber:', whatsAppPhoneNumber);
-      console.log('  - restaurantPreferences:', restaurantPreferences);
+  
       
       // Create WhatsApp preferences object matching useCartHandlers format
       const whatsappPreferences = {
@@ -456,14 +443,10 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         whatsAppPhoneNumber: whatsAppPhoneNumber
       };
       
-      console.log('  - whatsappPreferences:', whatsappPreferences);
-      console.log("WhatsAppService.isWhatsAppEnabled(whatsappPreferences)",WhatsAppService.isWhatsAppEnabled(whatsappPreferences))
-      // Check if WhatsApp should be shown - same logic as useCartHandlers
       const shouldShowWhatsApp = order.orderTag && WhatsAppService.isWhatsAppEnabled(whatsappPreferences);
-      console.log('  - shouldShowWhatsApp:', shouldShowWhatsApp);
+
       
       if (shouldShowWhatsApp) {
-        console.log('✅ Preparing WhatsApp data...');
         
         // Prepare WhatsApp data matching useCartHandlers format
         const whatsappData = {
@@ -488,7 +471,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
           serviceCharge: serviceChargeAmount
         };
         
-        console.log('📱 WhatsApp data prepared:', whatsappData);
         
         setPendingWhatsAppData(whatsappData);
         setShowWhatsAppConfirmation(true);
@@ -497,7 +479,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         // Exit early - let WhatsApp handlers handle cleanup
         return;
       } else {
-        console.log('ℹ️ WhatsApp not enabled, closing sidebar');
         setTimeout(() => {
           resetForm();
           onClose();

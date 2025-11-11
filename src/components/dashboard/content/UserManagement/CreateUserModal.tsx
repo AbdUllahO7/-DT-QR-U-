@@ -13,8 +13,8 @@ export interface CreateUserModalProps {
   roles: Role[];
   branches: BranchInfo[];
   isLoading: boolean;
-  isRolesLoading: boolean; // <-- NEW: Prop to show role loading state
-  onBranchChange: (branchId: string | null) => void; // <-- NEW: Callback for branch change
+  isRolesLoading: boolean; 
+  onBranchChange: (branchId: number | null | undefined) => void;
 }
 
 const CreateUserModal: React.FC<CreateUserModalProps> = ({
@@ -43,13 +43,13 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     isActive: true
   });
 
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [locationType, setLocationType] = useState<'restaurant' | 'branch'>('restaurant');
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
-  console.log("roles",roles)
   const branchDropdownRef = useRef<HTMLDivElement>(null);
   useClickOutside(branchDropdownRef, () => setIsBranchDropdownOpen(false));
 
@@ -102,6 +102,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     }
 
     // Location validation
+    // **MODIFIED**: Only validate branchId if locationType is 'branch'
+    // (This check is implicitly correct because locationType will only be 'branch' if branches exist)
     if (locationType === 'branch') {
       if (!formData.branchId) {
         newErrors.branchId = 'Branch is required';
@@ -139,6 +141,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     const submitData: CreateUserDto = {
       ...formData,
       name: formData.name || `${formData.name.toLowerCase()}.${formData.surName.toLowerCase()}`.replace(/[^a-z.]/g, ''),
+      // **MODIFIED**: This logic remains correct. If no branches, locationType stays 'restaurant'
       restaurantId: locationType === 'restaurant' ? formData.restaurantId : null,
       branchId: locationType === 'branch' ? formData.branchId : null,
       profileImage: formData.profileImage || '',
@@ -166,10 +169,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
       setFormData(prev => ({ ...prev, restaurantId: null, branchId: null }));
     }
     
-    // **MODIFIED**: Tell the parent component to reset the roles to default
     onBranchChange(null);
     
-    // Clear any location-based errors
     setErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors.restaurantId;
@@ -179,6 +180,9 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   };
 
   if (!isOpen) return null;
+
+  // **NEW**: Check if branches exist
+  const hasBranches = branches && branches.length > 0;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -376,122 +380,121 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               </div>
             </div>
 
-            {/* Location Selection */}
-            <div>
-              <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">
-                {t('userManagementPage.createUser.location') || 'Location'}
-              </h4>
-              
-              {/* Location Type Selector */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t('userManagementPage.createUser.locationType') || 'Location Type'} <span className="text-red-500">*</span>
-                </label>
-                <div className="flex gap-4">
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="locationType"
-                      value="restaurant"
-                      checked={locationType === 'restaurant'}
-                      onChange={() => handleLocationTypeChange('restaurant')}
-                      className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                    />
-                    <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-sm text-gray-700 dark:text-gray-300`}>
-                      {t('userManagementPage.createUser.restaurant') || 'Restaurant'}
-                    </span>
+            {/* **MODIFIED**: Location Selection (Conditional) */}
+            {hasBranches && (
+              <div>
+                <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">
+                  {t('userManagementPage.createUser.location') || 'Location'}
+                </h4>
+                
+                {/* Location Type Selector */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {t('userManagementPage.createUser.locationType') || 'Location Type'} <span className="text-red-500">*</span>
                   </label>
-                  <label className="flex items-center">
-                    <input
-                      type="radio"
-                      name="locationType"
-                      value="branch"
-                      checked={locationType === 'branch'}
-                      onChange={() => handleLocationTypeChange('branch')}
-                      className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-                    />
-                    <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-sm text-gray-700 dark:text-gray-300`}>
-                      {t('userManagementPage.createUser.branch') || 'Branch'}
-                    </span>
-                  </label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="locationType"
+                        value="restaurant"
+                        checked={locationType === 'restaurant'}
+                        onChange={() => handleLocationTypeChange('restaurant')}
+                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-sm text-gray-700 dark:text-gray-300`}>
+                        {t('userManagementPage.createUser.restaurant') || 'Restaurant'}
+                      </span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="locationType"
+                        value="branch"
+                        checked={locationType === 'branch'}
+                        onChange={() => handleLocationTypeChange('branch')}
+                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-sm text-gray-700 dark:text-gray-300`}>
+                        {t('userManagementPage.createUser.branch') || 'Branch'}
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Conditional Input Based on Location Type */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {locationType === 'restaurant' ? (
+                  ""
+                  ) : (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        {t('userManagementPage.createUser.branch') || 'Branch'} <span className="text-red-500">*</span>
+                      </label>
+                      <div className="relative" ref={branchDropdownRef}>
+                        <button
+                          type="button"
+                          onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
+                          disabled={isLoading || branches.length === 0}
+                          className={`flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${
+                            errors.branchId 
+                              ? 'border-red-500 dark:border-red-400' 
+                              : 'border-gray-300 dark:border-gray-600'
+                          } ${isRTL ? 'flex-row-reverse' : ''}`}
+                        >
+                          <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <Building className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                            {selectedBranchName || t('userManagementPage.createUser.selectBranch') || 'Select Branch'}
+                          </span>
+                          <ChevronDown 
+                            className={`h-4 w-4 transition-transform duration-200 ${
+                              isBranchDropdownOpen ? 'transform rotate-180' : ''
+                            } ${isRTL ? 'mr-2' : 'ml-2'}`} 
+                          />
+                        </button>
+
+                        {isBranchDropdownOpen && (
+                          <div className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-700 rounded-md shadow-lg border border-gray-200 dark:border-gray-600 py-1 max-h-60 overflow-auto ${
+                            isRTL ? 'right-0' : 'left-0'
+                          }`}>
+                            {branches.length === 0 ? (
+                              <div className="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
+                                {t('userManagementPage.createUser.noBranches') || 'No branches available'}
+                              </div>
+                            ) : (
+                              branches.map((branch) => (
+                                <button
+                                  key={branch.branchId}
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData(prev => ({ ...prev, branchId: branch.branchId }));
+                                    setIsBranchDropdownOpen(false);
+                                    setErrors(prev => {
+                                      const newErrors = { ...prev };
+                                      delete newErrors.branchId;
+                                      return newErrors;
+                                    });
+                                    onBranchChange(Number(branch.branchId));
+                                  }}
+                                  className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 ${
+                                    formData.branchId === branch.branchId
+                                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                                      : 'text-gray-700 dark:text-gray-200'
+                                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                                >
+                                  {branch.branchName}
+                                </button>
+                              ))
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {errors.branchId && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.branchId}</p>}
+                    </div>
+                  )}
                 </div>
               </div>
-
-              {/* Conditional Input Based on Location Type */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {locationType === 'restaurant' ? (
-                 ""
-                ) : (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      {t('userManagementPage.createUser.branch') || 'Branch'} <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative" ref={branchDropdownRef}>
-                      <button
-                        type="button"
-                        onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
-                        disabled={isLoading || branches.length === 0}
-                        className={`flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${
-                          errors.branchId 
-                            ? 'border-red-500 dark:border-red-400' 
-                            : 'border-gray-300 dark:border-gray-600'
-                        } ${isRTL ? 'flex-row-reverse' : ''}`}
-                      >
-                        <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <Building className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                          {selectedBranchName || t('userManagementPage.createUser.selectBranch') || 'Select Branch'}
-                        </span>
-                        <ChevronDown 
-                          className={`h-4 w-4 transition-transform duration-200 ${
-                            isBranchDropdownOpen ? 'transform rotate-180' : ''
-                          } ${isRTL ? 'mr-2' : 'ml-2'}`} 
-                        />
-                      </button>
-
-                      {isBranchDropdownOpen && (
-                        <div className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-700 rounded-md shadow-lg border border-gray-200 dark:border-gray-600 py-1 max-h-60 overflow-auto ${
-                          isRTL ? 'right-0' : 'left-0'
-                        }`}>
-                          {branches.length === 0 ? (
-                            <div className="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
-                              {t('userManagementPage.createUser.noBranches') || 'No branches available'}
-                            </div>
-                          ) : (
-                            branches.map((branch) => (
-                              <button
-                                key={branch.branchId}
-                                type="button"
-                                onClick={() => {
-                                  setFormData(prev => ({ ...prev, branchId: branch.branchId }));
-                                  setIsBranchDropdownOpen(false);
-                                  setErrors(prev => {
-                                    const newErrors = { ...prev };
-                                    delete newErrors.branchId;
-                                    return newErrors;
-                                  });
-                                  // **MODIFIED**: Tell parent component branch has changed
-                                  onBranchChange(branch.branchId);
-                                }}
-                                className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 ${
-                                  formData.branchId === branch.branchId
-                                    ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                                    : 'text-gray-700 dark:text-gray-200'
-                                } ${isRTL ? 'text-right' : 'text-left'}`}
-                              >
-                                {branch.branchName}
-                              </button>
-                            ))
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    {errors.branchId && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.branchId}</p>}
-                  </div>
-                )}
-
-           
-              </div>
-            </div>
+            )}
 
             {/* Role Selection */}
             <div>
@@ -505,7 +508,6 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 </label>
                 <div className="max-h-48 min-h-[10rem] overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50">
                   
-                  {/* **MODIFIED**: Added loading state for roles */}
                   {isRolesLoading ? (
                     <div className="flex items-center justify-center h-full min-h-[8rem]">
                       <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
@@ -519,12 +521,13 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     <div className="text-center py-6 flex flex-col items-center justify-center h-full min-h-[8rem]">
                       <Shield className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                       <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">
-                        {locationType === 'branch' && !formData.branchId
+                        {/* **MODIFIED**: Simplified this check */}
+                        {hasBranches && locationType === 'branch' && !formData.branchId
                           ? t('userManagementPage.createUser.selectBranchForRoles') || 'Select a branch'
                           : t('userManagementPage.createUser.noRoles') || 'No roles available'}
                       </p>
                       <p className="text-gray-400 dark:text-gray-500 text-xs text-center">
-                        {locationType === 'branch' && !formData.branchId
+                        {hasBranches && locationType === 'branch' && !formData.branchId
                           ? t('userManagementPage.createUser.selectBranchForRolesDesc') || 'Select a branch to see available roles.'
                           : t('userManagementPage.createUser.createRolesFirst') || 'No roles found for this location.'}
                       </p>
@@ -590,7 +593,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               </button>
               <button
                 type="submit"
-                disabled={isLoading || isRolesLoading || roles.length === 0} // **MODIFIED**: Also disable while roles are loading
+                disabled={isLoading || isRolesLoading || roles.length === 0}
                 className="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isLoading && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}

@@ -4,7 +4,6 @@ import { logger } from './logger';
 import { shouldRetryRequest } from './errorHandler';
 
 const BASE_URL = import.meta.env.DEV ? 'http://localhost:7001' : 'https://api.mertcode.com';
-console.log('API Base URL:', BASE_URL); 
 // Network bağlantısı kontrolü
 const checkNetworkConnection = (): boolean => {
   return navigator.onLine;

@@ -115,16 +115,10 @@ const OnlineMenu: React.FC = () => {
       const isFirstLoad = !sessionStorage.getItem('online_menu_initialized');
       
       if (isFirstLoad) {
-        console.log('🆕 First load detected - clearing old tokens');
-        localStorage.removeItem('online_menu_session_id');
-        localStorage.removeItem('token');
-        localStorage.removeItem('online_menu_public_id');
-        localStorage.removeItem('tokenExpiry');
+
         
         // Mark that we've initialized once in this browser session
         sessionStorage.setItem('online_menu_initialized', 'true');
-      } else {
-        console.log('🔄 Page refresh detected - preserving session');
       }
 
       // ---- Check for existing session ----
@@ -134,13 +128,11 @@ const OnlineMenu: React.FC = () => {
 
       // If we have a valid existing session for the same publicId, reuse it
       if (existingSessionId && existingToken && existingPublicId === publicId) {
-        console.log('✅ Reusing existing session:', existingSessionId);
         setSessionId(existingSessionId);
         setIsSessionInitialized(true);
         
         try {
           await loadBasket();
-          console.log('✅ Existing session is valid and basket loaded');
           return; // Session is valid, we're done!
         } catch (error: any) {
           console.warn('⚠️ Existing session failed, creating new session:', error);
@@ -152,9 +144,6 @@ const OnlineMenu: React.FC = () => {
         }
       }
 
-      // ---- Create new session only if we don't have a valid one ----
-      console.log('🆕 Creating new session...');
-      
       const customerIdentifier =
         localStorage.getItem('customer_identifier') ||
         `guest_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -169,7 +158,6 @@ const OnlineMenu: React.FC = () => {
         preferredLanguage: 'en',
       } as StartSessionDto);
 
-      console.log('✅ New session created:', session.sessionId);
 
       setSessionId(session.sessionId);
       localStorage.setItem('online_menu_session_id', session.sessionId);

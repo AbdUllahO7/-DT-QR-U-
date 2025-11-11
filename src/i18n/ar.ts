@@ -2698,6 +2698,8 @@ export const ar = {
       userRoles: "أدوار المستخدم ", 
       permissions:"الأذونات",
       permissionsCount:"العدد",
+      noPermissions:"لا أذونات"
+
     },
     "editUserModal": {
       "title": "تعديل المستخدم",

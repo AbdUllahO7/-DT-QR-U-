@@ -2697,6 +2697,7 @@ export const tr = {
       userRoles: "Kullanıcı Rolleri", 
       permissions:"İzinler",
       permissionsCount:"Sayı",
+      noPermissions :"Izin Yok"
     },
 
     "editUserModal": {

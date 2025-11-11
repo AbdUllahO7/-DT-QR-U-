@@ -151,7 +151,6 @@ export class WhatsAppService {
    */
   static isWhatsAppEnabled(preferences: any): boolean {
 
-    console.log('Checking WhatsApp enabled status with preferences:', preferences);
     return preferences?.useWhatsappForOrders === true && 
            preferences?.whatsAppPhoneNumber && 
            preferences.whatsAppPhoneNumber.trim().length > 0

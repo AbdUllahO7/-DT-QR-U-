@@ -19,7 +19,6 @@ const PriceChangeModal: React.FC<PriceChangeModalProps> = ({
   const basket =  basketService.getMyBasket()
   
   if (!isVisible) return null
-  console.log("Price Change Modal Rendered", priceChanges, basket);
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
       <div className="bg-white dark:bg-slate-900 rounded-xl p-6 max-w-md w-full border border-slate-200 dark:border-slate-700 shadow-xl">

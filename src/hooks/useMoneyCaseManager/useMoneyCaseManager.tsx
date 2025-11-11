@@ -92,7 +92,7 @@ export const useMoneyCaseManager = () => {
       
       // Transform BranchData[] to Branch[] format
       const branches: Branch[] = branchData.map(branch => ({
-        branchId: branch.branchId,
+        branchId: typeof branch.branchId === 'string' ? parseInt(branch.branchId, 10) : branch.branchId,
         branchName: branch.branchName
       }));
       
@@ -244,7 +244,6 @@ const handleCloseCase = useCallback(async () => {
       notes: state.closingNotes
     });
     
-    console.log('Close money case result:', result);
     
     // Safely access difference with multiple fallbacks
     const difference = result?.difference ?? result?.discrepancy ?? 0;

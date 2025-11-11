@@ -320,7 +320,6 @@ class BasketService {
   async addUnifiedItemToMyBasket(data: AddUnifiedItemDto): Promise<BasketItem> {
     try {
       logger.info('My basket unified item ekleme isteği gönderiliyor', { data }, { prefix: 'BasketService' });
-      console.log('Adding unified item to my basket with data:', data);
       const url = `${this.baseUrl}/my-basket/unified-items`;
       const response = await httpClient.post<BasketItem>(url, data);
       

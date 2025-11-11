@@ -11,7 +11,7 @@ import { CreateRoleDto, PermissionCatalog } from '../../../../types/users/users.
 export interface CreateRoleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void; // Called when role creation is complete
+  onSuccess: () => void; 
   branches: BranchInfo[];
 }
 
@@ -22,17 +22,18 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
   branches,
 }) => {
   const { t, isRTL } = useLanguage();
-
   // Step state
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
 
   // Form state - Basic information
+  // --- MODIFIED ---
   const [formData, setFormData] = useState<CreateRoleDto>({
     name: '',
     description: '',
-    branchId: undefined,
+    branchId: undefined, 
     category: '',
   });
+  // --- END MODIFIED ---
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
@@ -55,14 +56,12 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
   // Combined loading state
   const isBusy = isCreatingRole || isAssigningPermissions || isFetchingPermissions;
 
-  // --- MODIFIED ---
   // Fetch permissions when moving to step 2 or if branchId changes
   useEffect(() => {
     if (currentStep === 2) {
       fetchPermissions();
     }
-  }, [currentStep, formData.branchId]); // Re-fetch if branchId changes
-  // --- END MODIFIED ---
+  }, [currentStep, formData.branchId]); 
 
   // Reset state when modal closes
   useEffect(() => {
@@ -81,7 +80,6 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
     }
   }, [isOpen]);
 
-  // --- MODIFIED ---
   const fetchPermissions = async () => {
     setIsFetchingPermissions(true);
     
@@ -112,7 +110,6 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
       setIsFetchingPermissions(false);
     }
   };
-  // --- END MODIFIED ---
 
   // Get selected branch name
   const selectedBranchName = formData.branchId
@@ -135,8 +132,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
     try {
       setIsCreatingRole(true);
       
-      // Create the role
-      const response = await roleService.createRole(formData);
+      const response = await roleService.createRole(formData); 
       
       if (!response.success || !response.data) {
         throw new Error(t('userManagementPage.error.createRoleFailed'));
@@ -145,8 +141,6 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
       logger.info('Rol başarıyla oluşturuldu', response.data, {
         prefix: 'CreateRoleModal',
       });
-      console.log("response",response)
-      // Store the created role ID
       setCreatedRoleId(response.data.roleId ?? null);
 
       setCurrentStep(2);
@@ -165,7 +159,6 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
 
   // Step 2: Assign permissions to the created role (FIXED)
   const handleStep2Submit = async () => {
-    console.log("createdRoleId",createdRoleId)
     if (!createdRoleId) {
       logger.error('No role ID available', {}, { prefix: 'CreateRoleModal' });
       return;
@@ -505,12 +498,12 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                                 onClick={() => {
                                   setFormData({
                                     ...formData,
-                                    branchId: Number(branch.branchId),
+                                    branchId: Number(branch.branchId), // Ensure it's a number
                                   });
                                   setIsBranchDropdownOpen(false);
                                 }}
                                 className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 ${
-                                  formData.branchId === Number(branch.branchId)
+                                  formData.branchId === Number(branch.branchId) // Compare numbers
                                     ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
                                     : 'text-gray-700 dark:text-gray-200'
                                 } ${isRTL ? 'text-right' : 'text-left'}`}

@@ -79,7 +79,6 @@ const Register: React.FC = () => {
     general?: string;
   }>({});
 
-  console.log("errors",errors)
 
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);

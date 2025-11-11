@@ -77,7 +77,6 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   const [pendingWhatsAppData, setPendingWhatsAppData] = useState<any>(null)
   const [whatsappSending, setWhatsappSending] = useState(false)
 
-  console.log("showWhatsAppConfirmation",showWhatsAppConfirmation)
   
   // Order creation states
   const [showOrderForm, setShowOrderForm] = useState(false)

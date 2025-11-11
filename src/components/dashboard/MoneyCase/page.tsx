@@ -280,7 +280,6 @@ export default function RestaurantSummaryPage() {
         setLoading(true);
         setError(null);
         const data = await moneyCaseService.getRestaurantSummary(appliedFilters);
-        console.log("Fetched restaurant summary:", data); 
         setSummary(data);
       } catch (e: any) {
         console.error("Failed to fetch restaurant summary:", e);

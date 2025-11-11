@@ -55,7 +55,6 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
 }) => {
   const { t } = useLanguage();
 
-  console.log("info",info)
   
   const [formData, setFormData] = useState<RestaurantManagementInfo>(
     info || {

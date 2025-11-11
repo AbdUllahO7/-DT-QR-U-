@@ -60,7 +60,6 @@ export const useAuth = () => {
 
       // Check if token has expired
       if (expiryDate <= now) {
-        console.log('Token expired, redirecting to login...');
         clearAuth();
         navigate('/login', { replace: true });
         return false;
@@ -102,7 +101,6 @@ export const useAuth = () => {
           
           if (timeUntilExpiry > 0) {
             window.setTimeout(() => {  // Using window.setTimeout for clarity
-              console.log('Token expired, auto-logout triggered');
               clearAuth();
               navigate('/login', { replace: true });
             }, timeUntilExpiry);

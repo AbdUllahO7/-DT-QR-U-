@@ -459,6 +459,7 @@ const createOrder = async () => {
     const sessionOrderDto: CreateSessionOrderDto = {
       customerName: orderForm.customerName.trim(),
       notes: orderForm.notes.trim() || undefined,
+      paymentMethod:"",
       orderTypeId: orderForm.orderTypeId,
       ...(orderForm.tableId && { tableId: orderForm.tableId }),
       ...(orderForm.tableNumber?.trim() && { tableNumber: orderForm.tableNumber.trim() }),
@@ -467,7 +468,6 @@ const createOrder = async () => {
     }
     
     const order = await orderService.createSessionOrder(sessionOrderDto)
-    console.log('✅ Order created with ID:', order)
     // Add order to tracking immediately
     if (order.orderTag) {
       await addOrderToTracking(order.orderTag)
@@ -492,7 +492,6 @@ const createOrder = async () => {
 
       // Set WhatsApp data and show modal
       if (setPendingWhatsAppData && setShowWhatsAppConfirmation) {
-        console.log('✅ Setting WhatsApp data and showing modal')
         setPendingWhatsAppData(whatsappData)
         setShowWhatsAppConfirmation(true)
         
@@ -502,9 +501,7 @@ const createOrder = async () => {
       } else {
         console.warn('❌ WhatsApp confirmation functions not available')
       }
-    } else {
-      console.log('ℹ️ WhatsApp not enabled or no order tag')
-    }
+    } 
     
     // If we reach here, WhatsApp is not enabled or not available
     // Clean up and complete the order
@@ -545,13 +542,14 @@ const createOrder = async () => {
       
       const trackingInfo = await orderService.trackOrder(orderTag)
       
-      setTrackedOrders((prev: any[]) => 
-        prev.map(order => 
+      setTrackedOrders(
+        trackedOrders.map(order => 
           order.orderTag === orderTag 
             ? { ...order, trackingInfo }
             : order
         )
       )
+
       
     } catch (err: any) {
       console.error('Error loading order tracking:', err)
@@ -562,8 +560,8 @@ const createOrder = async () => {
   }
 
   const removeOrderFromTracking = (orderTag: string) => {
-    setTrackedOrders(prev => prev.filter(order => order.orderTag !== orderTag))
     const updated = trackedOrders.filter(order => order.orderTag !== orderTag)
+    setTrackedOrders(updated)
     if (updated.length === 0) {
       localStorage.removeItem('trackedOrders')
     }
@@ -577,9 +575,9 @@ const createOrder = async () => {
     for (const order of pendingOrders) {
       try {
         const updatedInfo = await orderService.trackOrder(order.orderTag)
-        setTrackedOrders(prev => 
-          prev.map(tracked => 
-            tracked.orderTag === order.orderTag 
+        setTrackedOrders(
+          trackedOrders.map(tracked => 
+            tracked.orderTag === order.orderTag
               ? { ...tracked, trackingInfo: updatedInfo }
               : tracked
           )

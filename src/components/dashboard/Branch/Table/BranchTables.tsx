@@ -628,7 +628,6 @@ const BranchTableManagement: React.FC = () => {
     } catch (err: any) {
       console.error('Error adding category:', err);
 
-      console.log("err",err)
       const status = err.status || err.response?.status;
 
       if (status === 409) {
@@ -707,7 +706,6 @@ const BranchTableManagement: React.FC = () => {
 
     try {
       const res = await tableService.createTable(tableData);
-      console.log("res",res)
       await fetchTables();
       await fetchCategories();
       setNewTable({

@@ -18,7 +18,6 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onPur
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
 
-  console.log("branch",branch)
 
   // Status helpers
   const getStatusBadge = () => {
@@ -54,7 +53,7 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onPur
   const handleSwitch = async (checked: boolean) => {
     setIsToggling(true);
     try {
-      await onToggleTemporaryClose(branch.branchId, checked);
+      await onToggleTemporaryClose(Number(branch.branchId), checked);
     } finally {
       setIsToggling(false);
     }

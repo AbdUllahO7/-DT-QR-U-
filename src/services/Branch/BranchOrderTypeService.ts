@@ -227,7 +227,6 @@ class OrderTypeService {
           estimatedMinutes: ot.estimatedMinutes
         }))
       }, { prefix: 'OrderTypeService' });
-      console.log('Online Session Order Types Fetched:', orderTypes);
       return orderTypes;
     } catch (error: any) {
       logger.error('Online Session OrderType listesi getirme hatası', error, { prefix: 'OrderTypeService' });

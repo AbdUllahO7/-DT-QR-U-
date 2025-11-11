@@ -44,7 +44,6 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
   // Font size state
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
 
-  console.log('Rendering OrderDetailsModal with order:', order);
   
   // View density state
   const [viewDensity, setViewDensity] = useState<ViewDensity>('comfortable');

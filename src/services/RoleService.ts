@@ -76,7 +76,6 @@ class RoleService {
 
       });
 
-      console.log("get role", response)
 
       logger.info('✅ getRoleById başarılı', response, { prefix: 'RoleService' });
       
@@ -100,12 +99,10 @@ class RoleService {
       
       // Create a copy of the data to send
       const apiData = { ...roleData };
-
       // If branchId is 0, null, or undefined, remove it from the object
       if (!apiData.branchId) {
         delete apiData.branchId;
       }
-      console.log("apiData",apiData)
       const response = await apiRequest<Role>({
         method: 'POST',
         url: '/api/Roles',
@@ -156,7 +153,6 @@ class RoleService {
   async deleteRole(roleId: string): Promise<ApiResponse<any>> {
     try {
       logger.info(`🔍 deleteRole çağrılıyor: ${roleId}`, null, { prefix: 'RoleService' });
-      console.log("roleId",roleId)
       const response = await apiRequest<any>({
         method: 'DELETE',
         url: `/api/Roles/${roleId}`

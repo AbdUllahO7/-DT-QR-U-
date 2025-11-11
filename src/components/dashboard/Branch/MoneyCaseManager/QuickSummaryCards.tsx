@@ -19,10 +19,7 @@ const QuickSummaryCards: React.FC<Props> = ({
   t, 
   isRTL 
 }) => {
-  // Debug logs
-  console.log('QuickSummaryCards - activeCase:', activeCase);
-  console.log('QuickSummaryCards - quickSummary:', quickSummary);
-  console.log('QuickSummaryCards - loading:', loading);
+
 
   if (loading && !activeCase && !quickSummary) {
     return (
@@ -53,13 +50,7 @@ const QuickSummaryCards: React.FC<Props> = ({
   const closedRevenue = quickSummary?.closedShiftsRevenue ?? 0;
   const ordersToday = quickSummary?.ordersToday ?? 0;
 
-  console.log('Calculated values:', { 
-    isOpen, 
-    todaySales, 
-    currentRevenue, 
-    closedRevenue, 
-    ordersToday 
-  });
+
 
   return (
     <div className="space-y-6 mb-6">

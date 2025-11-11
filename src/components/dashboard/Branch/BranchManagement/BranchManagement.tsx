@@ -43,7 +43,6 @@ const BranchManagementBranch: React.FC = () => {
     createBranchWorkingHourCoreDto: [],
   });
 
-  console.log("selectedBranch",selectedBranch)
 
   useEffect(() => {
     loadBranches();

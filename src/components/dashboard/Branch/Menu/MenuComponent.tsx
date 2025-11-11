@@ -65,7 +65,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       const basket = await basketService.getMyBasket()
       const totalItems = basket.items.reduce((total, item) => total + item.quantity, 0)
       setBasketItemCount(totalItems)
-      console.log('Loaded basket', basket)
       setBasketId(basket.basketId) // Store basketId
       
     } catch (err: any) {
