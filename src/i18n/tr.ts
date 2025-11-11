@@ -1226,7 +1226,9 @@ export const tr = {
       addressLine1: 'Adres satırı 1 gereklidir',
       phone: 'Telefon numarası gereklidir',
       email: 'E-posta adresi gereklidir',
-      location: 'Konum bilgisi gereklidir'
+      location: 'Konum bilgisi gereklidir',
+      branchModal: "Logo gerekli",
+      addressLine2: "Ayrıntılı adres gerekli"
     },
     buttons: {
       cancel: 'İptal',

@@ -1224,7 +1224,9 @@ export const ar = {
       addressLine1: 'سطر العنوان 1 مطلوب',
       phone: 'رقم الهاتف مطلوب',
       email: 'عنوان البريد الإلكتروني مطلوب',
-      location: 'معلومات الموقع مطلوبة'
+      location: 'معلومات الموقع مطلوبة',
+      branchModal : "الشعار مطلوب",
+      addressLine2:"العنوان التفصيلي مطلوب"
     },
     buttons: {
       cancel: 'إلغاء',

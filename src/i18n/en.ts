@@ -1224,7 +1224,9 @@ export const en = {
       addressLine1: 'Address line 1 is required',
       phone: 'Phone number is required',
       email: 'Email address is required',
-      location: 'Location information is required'
+      location: 'Location information is required',
+      branchModal: "Logo required",
+      addressLine2: "Detailed address required"
     },
     buttons: {
       cancel: 'Cancel',

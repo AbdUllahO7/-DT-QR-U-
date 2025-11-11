@@ -48,7 +48,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
   const [branchLogo, setBranchLogo] = useState<File | null>(null);
   const [branchLogoPreview, setBranchLogoPreview] = useState<string | null>(formData.branchLogoPath || null);
   const [isUploadingLogo, setIsUploadingLogo] = useState<boolean>(false);
-
+  const [isCurrentStepValid, setIsCurrentStepValid] = useState<boolean>(false);
   const dayNamesDisplay = Array.isArray(t('branchModal.workingHours.days'))
     ? t('branchModal.workingHours.days')
     : language === 'ar'
@@ -56,9 +56,13 @@ const BranchModal: React.FC<BranchModalProps> = ({
     : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   // Update branchLogoPreview when formData.branchLogoPath changes
-  useEffect(() => {
+useEffect(() => {
     setBranchLogoPreview(formData.branchLogoPath || null);
   }, [formData.branchLogoPath]);
+
+  useEffect(() => {
+    setIsCurrentStepValid(checkStepValidity(currentStep));
+  }, [formData, currentStep]);
 
   // Helper functions
   const formatTimeForInput = (timeStr: string): string => {
@@ -87,7 +91,33 @@ const BranchModal: React.FC<BranchModalProps> = ({
     </button>
   );
 
-  // Form validation
+const checkStepValidity = (step: number): boolean => {
+    switch (step) {
+      case 1:
+        return (
+          !!formData.branchName?.trim() &&
+          !!formData.whatsappOrderNumber?.trim() &&
+          !!formData.branchLogoPath // Check that logo is uploaded
+        );
+      case 2:
+        return (
+          !!formData.createAddressDto.country?.trim() &&
+          !!formData.createAddressDto.city?.trim() &&
+          !!formData.createAddressDto.street?.trim() &&
+          !!formData.createAddressDto.addressLine1?.trim() &&
+          !!formData.createAddressDto.zipCode?.trim() &&
+          !!formData.createAddressDto.addressLine2?.trim() // Check address line 2
+        );
+      case 3:
+        return (
+          !!formData.createContactDto.phone?.trim() &&
+          !!formData.createContactDto.mail?.trim() &&
+          !!formData.createContactDto.location?.trim()
+        );
+      default:
+        return false;
+    }
+  };
   const validateStep = (step: number): boolean => {
     const errors: { [key: string]: string } = {};
 
@@ -98,6 +128,11 @@ const BranchModal: React.FC<BranchModalProps> = ({
       if (!formData.whatsappOrderNumber?.trim()) {
         errors.whatsappOrderNumber = t('branchModal.errors.whatsappNumber');
       }
+      // --- ADDED THIS ---
+      if (!formData.branchLogoPath) {
+        errors.branchLogoPath = t('branchModal.errors.branchLogo'); // Add this translation
+      }
+      // --- END ---
     } else if (step === 2) {
       if (!formData.createAddressDto.country?.trim()) {
         errors['address.country'] = t('branchModal.errors.country');
@@ -114,6 +149,11 @@ const BranchModal: React.FC<BranchModalProps> = ({
       if (!formData.createAddressDto.zipCode?.trim()) {
         errors['address.zipCode'] = t('branchModal.errors.zipCode');
       }
+      // --- ADDED THIS ---
+      if (!formData.createAddressDto.addressLine2?.trim()) {
+        errors['address.addressLine2'] = t('branchModal.errors.addressLine2'); 
+      }
+      // --- END ---
     } else if (step === 3) {
       if (!formData.createContactDto.phone?.trim()) {
         errors['contact.phone'] = t('branchModal.errors.phone');
@@ -216,7 +256,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
     }
   };
 
-  const handleLogoUpload = async (file?: File): Promise<void> => {
+const handleLogoUpload = async (file?: File): Promise<void> => {
     const uploadFile = file || branchLogo;
     if (!uploadFile) return;
 
@@ -228,6 +268,16 @@ const BranchModal: React.FC<BranchModalProps> = ({
         ...prev,
         branchLogoPath: responseUrl
       }));
+
+      // --- ADDED THIS ---
+      // Clear the error message on successful upload
+      if (formErrors.branchLogoPath) {
+        setFormErrors(prev => ({
+          ...prev,
+          branchLogoPath: ''
+        }));
+      }
+      // --- END ---
 
       setBranchLogo(null);
     } catch (error) {
@@ -316,51 +366,50 @@ const BranchModal: React.FC<BranchModalProps> = ({
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.branchLogo.label')}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {t('branchModal.fields.branchLogo.label')}
+        </label>
+        <div className="space-y-4">
+          {/* ... (image preview code) ... */}
+
+          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
+            <input
+              type="file"
+              id="branchLogo"
+              accept="image/*"
+              onChange={handleLogoChange}
+              className="hidden"
+              disabled={isUploadingLogo}
+            />
+            <label
+              htmlFor="branchLogo"
+              className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 ${
+                isUploadingLogo ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+              } ${
+                // --- MODIFIED THIS LINE ---
+                formErrors.branchLogoPath
+                  ? 'border-red-500' // Add red border on error
+                  : 'border-gray-300 dark:border-gray-600' // Default border
+                // --- END ---
+              }`}
+            >
+              <Upload className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+              {isUploadingLogo ? t('branchModal.fields.branchLogo.uploading') : t('branchModal.fields.branchLogo.select')}
             </label>
-            <div className="space-y-4">
-              {(branchLogoPreview || formData.branchLogoPath) && (
-                <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
-                  <img
-                    src={branchLogoPreview || formData.branchLogoPath || ''}
-                    alt={t('branchModal.fields.branchLogo.preview')}
-                    className="w-24 h-24 object-cover rounded-lg border-2 border-gray-300 dark:border-gray-600"
-                  />
-                  {formData.branchLogoPath && (
-                    <div className="text-sm text-green-600 dark:text-green-400">
-                      {t('branchModal.fields.branchLogo.success')}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
-                <input
-                  type="file"
-                  id="branchLogo"
-                  accept="image/*"
-                  onChange={handleLogoChange}
-                  className="hidden"
-                  disabled={isUploadingLogo}
-                />
-                <label
-                  htmlFor="branchLogo"
-                  className={`inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 ${
-                    isUploadingLogo ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                  }`}
-                >
-                  <Upload className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                  {isUploadingLogo ? t('branchModal.fields.branchLogo.uploading') : t('branchModal.fields.branchLogo.select')}
-                </label>
-              </div>
-
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {t('branchModal.fields.branchLogo.supportText')}
-              </p>
-            </div>
           </div>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {t('branchModal.fields.branchLogo.supportText')}
+          </p>
+
+          {/* --- ADDED THIS --- */}
+          {formErrors.branchLogoPath && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.branchLogoPath}</p>
+          )}
+          {/* --- END --- */}
+        </div>
+      </div>
         </div>
       </div>
     </div>
@@ -498,23 +547,30 @@ const BranchModal: React.FC<BranchModalProps> = ({
             )}
           </div>
 
-          <div>
-            <label htmlFor="addressLine2" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.addressLine2.label')}
-            </label>
-            <div className="relative">
-              <Home className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                id="addressLine2"
-                name="address.addressLine2"
-                value={formData.createAddressDto.addressLine2 || ''}
-                onChange={handleInputChange}
-                className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder={t('branchModal.fields.addressLine2.placeholder')}
-              />
-            </div>
-          </div>
+      <div>
+        <label htmlFor="addressLine2" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {t('branchModal.fields.addressLine2.label')}
+        </label>
+        <div className="relative">
+          <Home className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <input
+            type="text"
+            id="addressLine2"
+            name="address.addressLine2"
+            value={formData.createAddressDto.addressLine2 || ''}
+            onChange={handleInputChange}
+            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+              formErrors['address.addressLine2']
+                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
+            placeholder={t('branchModal.fields.addressLine2.placeholder')}
+          />
+        </div>
+        {formErrors['address.addressLine2'] && (
+          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.addressLine2']}</p>
+        )}
+      </div>
         </div>
       </div>
     </div>
@@ -913,7 +969,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
             type="button"
             onClick={currentStep === 3 ? handleSubmit : handleNextStep}
             className="inline-flex items-center px-4 py-2 text-sm fonßt-medium rounded-md bg-primary-600 text-white hover:bg-primary-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isCurrentStepValid}
           >
             {currentStep === 3 ? (isSubmitting ? t('branchModal.buttons.saving') : t('branchModal.buttons.save')) : t('branchModal.buttons.next')}
             {currentStep === 3 ? <></> : (isRTL ? <ArrowLeft className="w-4 h-4 ml-2" /> : <ArrowRight className="w-4 h-4 ml-2" />)}
