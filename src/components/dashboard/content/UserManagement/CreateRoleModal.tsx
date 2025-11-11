@@ -25,15 +25,14 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
   // Step state
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
 
-  // Form state - Basic information
-  // --- MODIFIED ---
   const [formData, setFormData] = useState<CreateRoleDto>({
     name: '',
     description: '',
-    branchId: undefined, 
+    branchId: 0,
     category: '',
   });
-  // --- END MODIFIED ---
+
+
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
@@ -42,6 +41,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
   const [permissionCatalog, setPermissionCatalog] = useState<PermissionCatalog[]>([]);
   const [isFetchingPermissions, setIsFetchingPermissions] = useState(false);
+    const [chooseBranchId, setChooseBranchId] = useState(0);
 
   // Loading states
   const [isCreatingRole, setIsCreatingRole] = useState(false);
@@ -132,7 +132,21 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
     try {
       setIsCreatingRole(true);
       
-      const response = await roleService.createRole(formData); 
+      // Prepare payload - only include branchId if it's a valid number
+      const payload: CreateRoleDto = {
+        name: formData.name,
+        description: formData.description,
+        category: formData.category,
+      };
+
+      // Only add branchId if it's defined and greater than 0
+      if (formData.branchId && Number(formData.branchId) > 0) {
+        payload.branchId = Number(formData.branchId);
+      }
+
+      console.log("form data payload", payload);
+
+      const response = await roleService.createRole(payload); 
       
       if (!response.success || !response.data) {
         throw new Error(t('userManagementPage.error.createRoleFailed'));
@@ -498,8 +512,9 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                                 onClick={() => {
                                   setFormData({
                                     ...formData,
-                                    branchId: Number(branch.branchId), // Ensure it's a number
+                                    branchId: Number(branch.branchId), 
                                   });
+                                                                  setChooseBranchId(Number(branch.branchId))
                                   setIsBranchDropdownOpen(false);
                                 }}
                                 className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 ${

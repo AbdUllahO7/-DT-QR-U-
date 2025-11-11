@@ -230,7 +230,6 @@ class UserService {
     }
   }
 
-  // --- NEW FUNCTIONS ---
 
   async assignBranchToUser(id: string, branchData: AssignBranchDto): Promise<ApiResponse<any>> {
     try {

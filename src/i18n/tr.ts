@@ -2591,7 +2591,46 @@ export const tr = {
       rolesLoadFailed: 'Roller yüklenirken hata oluştu',
       retry: 'Tekrar Dene',
       createUserFailed: 'Kullanıcı oluşturulamadı',
-      createRoleFailed: 'Rol oluşturulamadı'
+      createRoleFailed: 'Rol oluşturulamadı',
+       "changePasswordFailed": "Şifre değiştirilemedi",
+      "assignBranchFailed": "Şube ataması başarısız"
+    },
+     "changePasswordModal": {
+      "title": "Şifre Değiştir",
+      "info": "Bu kullanıcı için yeni bir şifre girin. Yeni şifre ile hemen giriş yapabilecektir.",
+      "newPassword": "Yeni Şifre",
+      currentPassword: "Mevcut şifre", 
+      currentPasswordPlaceholder: "Mevcut şifreyi girin",
+      currentPasswordEntered:"Mevcut şifre",
+      "newPasswordPlaceholder": "Yeni şifre girin",
+      "confirmPassword": "Şifre Onayı",
+      "confirmPasswordPlaceholder": "Yeni şifreyi onaylayın",
+      "requirements": "Şifre Gereksinimleri:",
+      "minLength": "En az 6 karakter",
+      "passwordsMatch": "Şifreler eşleşiyor",
+      "submit": "Şifreyi Değiştir",
+      "cancel": "İptal",
+      "changing": "Değiştiriliyor...",
+      "validation": {
+        "passwordRequired": "Şifre gereklidir",
+        "passwordMinLength": "Şifre en az 6 karakter olmalıdır",
+        "confirmPasswordRequired": "Lütfen şifreyi onaylayın",
+        "passwordMismatch": "Şifreler eşleşmiyor"
+      }
+    },
+    "assignBranchModal": {
+      "title": "Şube Ata",
+      "assigningTo": "Atanıyor",
+      "toNewBranch": "yeni bir şubeye",
+      "currentBranch": "Mevcut Şube",
+      "branchIdDisplay": "(ID: {{id}})",
+      "newBranchLabel": "Yeni Şube",
+      "selectBranchPlaceholder": "Bir şube seçin",
+      "submitButton": "Şube Ata",
+      "submitButtonLoading": "Atanıyor...",
+      "validation": {
+        "branchRequired": "Lütfen bir şube seçin"
+      }
     },
 
     // Statistics
@@ -2668,7 +2707,8 @@ export const tr = {
       delete: 'Sil',
       updateRoles: 'Rolleri Güncelle',
       assignBranch: 'Şube Ata',
-      viewPermissions:"İzinleri Görüntüle"
+      viewPermissions:"İzinleri Görüntüle",
+       "changePassword": "Şifre Değiştir",
     },
 
     updateRoles:{
@@ -2676,20 +2716,7 @@ export const tr = {
       update : "Güncelleme",
     },
 
-    "assignBranchModal": {
-      "title": "Yeni Şube Ata",
-      "assigningTo": "Şu kullanıcıya",
-      "toNewBranch": "yeni bir şube atanıyor.",
-      "currentBranch": "Mevcut Şube",
-      "branchIdDisplay": "(ID: {id})",
-      "newBranchLabel": "Yeni Şube",
-      "selectBranchPlaceholder": "Yeni bir şube seçin",
-      "submitButton": "Şubeyi Ata",
-      "submitButtonLoading": "Atanıyor...",
-      "validation": {
-        "branchRequired": "Lütfen bir şube seçin."
-      }
-    },
+
     
    permissionsModal:{
       title:"İzinler",

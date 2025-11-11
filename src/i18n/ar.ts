@@ -2576,7 +2576,6 @@ export const ar = {
       deleteRoleMessage: "هل أنت متأكد من رغبتك في حذف هذا الدور؟ لا يمكن التراجع عن هذا الإجراء",
       deactivateTitle: "إلغاء تنشيط المستخدم؟",
       deactivateMessage: "هل أنت متأكد من رغبتك في إلغاء تنشيط {name}؟ سيفقدون الوصول إلى النظام",
-
       },
     rolePermissionsModal:{
       title:"عرض الإذونات",
@@ -2591,7 +2590,47 @@ export const ar = {
       rolesLoadFailed: 'فشل في تحميل الأدوار',
       retry: 'حاول مرة أخرى',
       createUserFailed: 'فشل في إنشاء المستخدم',
-      createRoleFailed: 'فشل في إنشاء الدور'
+      createRoleFailed: 'فشل في إنشاء الدور',
+        "changePasswordFailed": "فشل تغيير كلمة المرور",
+      "assignBranchFailed": "فشل تعيين الفرع"
+    },
+
+    "changePasswordModal": {
+      "title": "تغيير كلمة المرور",
+      "info": "أدخل كلمة مرور جديدة لهذا المستخدم. سيتمكن من تسجيل الدخول بكلمة المرور الجديدة فوراً.",
+      "newPassword": "كلمة المرور الجديدة",
+      "newPasswordPlaceholder": "أدخل كلمة المرور الجديدة",
+            currentPassword:"كلمة المرور الحالية",
+      currentPasswordPlaceholder:"أدخل كلمة المرور الحالية",
+      currentPasswordEntered:"كلمة المرور الحالية",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "confirmPasswordPlaceholder": "أكد كلمة المرور الجديدة",
+      "requirements": "متطلبات كلمة المرور:",
+      "minLength": "6 أحرف على الأقل",
+      "passwordsMatch": "كلمات المرور متطابقة",
+      "submit": "تغيير كلمة المرور",
+      "cancel": "إلغاء",
+      "changing": "جاري التغيير...",
+      "validation": {
+        "passwordRequired": "كلمة المرور مطلوبة",
+        "passwordMinLength": "يجب أن تكون كلمة المرور 6 أحرف على الأقل",
+        "confirmPasswordRequired": "يرجى تأكيد كلمة المرور",
+        "passwordMismatch": "كلمات المرور غير متطابقة"
+      }
+    },
+    "assignBranchModal": {
+      "title": "تعيين الفرع",
+      "assigningTo": "تعيين",
+      "toNewBranch": "إلى فرع جديد",
+      "currentBranch": "الفرع الحالي",
+      "branchIdDisplay": "(المعرف: {{id}})",
+      "newBranchLabel": "الفرع الجديد",
+      "selectBranchPlaceholder": "اختر فرعاً",
+      "submitButton": "تعيين الفرع",
+      "submitButtonLoading": "جاري التعيين...",
+      "validation": {
+        "branchRequired": "يرجى اختيار فرع"
+      }
     },
 
     // Statistics
@@ -2670,23 +2709,11 @@ export const ar = {
       delete: 'حذف',
       updateRoles: 'تحديث الأدوار',
       assignBranch: 'تعيين الفرع',
-      viewPermissions: "عرض الأذونات"  
+      viewPermissions: "عرض الأذونات"  ,
+       "changePassword": "تغيير كلمة المرور",
     },
 
-    "assignBranchModal": {
-      "title": "تعيين فرع جديد",
-      "assigningTo": "يتم الآن تعيين",
-      "toNewBranch": "إلى فرع جديد.",
-      "currentBranch": "الفرع الحالي",
-      "branchIdDisplay": "(المعرف: {id})",
-      "newBranchLabel": "الفرع الجديد",
-      "selectBranchPlaceholder": "اختر فرعًا جديدًا",
-      "submitButton": "تعيين الفرع",
-      "submitButtonLoading": "جارٍ التعيين...",
-      "validation": {
-        "branchRequired": "يرجى اختيار فرع."
-      }
-    },
+
        updateRoles:{
         title:"تحديث أدوار المستخدم",
         update : "تحديث",
@@ -2991,14 +3018,14 @@ export const ar = {
       refreshTable: " تحديث الحالة",
       clearing: "جارٍ المسح...",
       loading : "جارٍ التحميل...",
-      multiCategory : "إنشاء جداول متعددة عبر فئات مختلفة في وقت واحد",
+      multiCategory : "إنشاء طاولات متعددة عبر فئات مختلفة في وقت واحد",
       category: "الفئة",
       SelectCategory: "اختر فئة",
       Quantity: "عدد الطاولات",
       Capacity: " سعة الطاولة (عدد الأشخاص)",
       createTables: "إنشاء الطاولات",
       creatingTables: "جارٍ إنشاء الطاولات...",
-      batchCreateTables: "إنشاء جداول دفعة واحدة",
+      batchCreateTables: "إنشاء طاولات دفعة واحدة",
       header: "إدارة الفئات والطاولات",
       subheader: "إدارة فئات المطعم والطاولات مع عرض الأكورديون",
       totalCategories: "إجمالي الفئات",
@@ -4024,7 +4051,7 @@ export const ar = {
       cascadeDesc: "هل تريد استعادة الفرع فقط أم جميع المنتجات والفئات المرتبطة به أيضًا؟",
       recommended: "مستحسن",
       includeProducts: "تضمين المنتجات والفئات",
-      includeTables: "تضمين الجداول",
+      includeTables: "تضمين الطاولات",
       includeAll: "تضمين جميع البيانات المرتبطة",
     },
     productRestore: {

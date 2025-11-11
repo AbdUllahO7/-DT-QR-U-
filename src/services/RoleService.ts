@@ -103,10 +103,12 @@ class RoleService {
       if (!apiData.branchId) {
         delete apiData.branchId;
       }
+
+      console.log("apiData",apiData)
       const response = await apiRequest<Role>({
         method: 'POST',
-        url: '/api/Roles',
-        data: apiData // Send the modified copy
+        url: `/api/Roles`,
+        data: apiData 
       });
 
       logger.info('✅ createRole başarılı', response, { prefix: 'RoleService' });
@@ -181,7 +183,7 @@ class RoleService {
       
       // Create a copy to ensure we only send valid parameters
       const apiParams = { ...params };
-
+      console.log("params",params)
       // If branchId is falsy (0, null, undefined), don't send it.
       if (!apiParams.branchId) {
         delete apiParams.branchId;

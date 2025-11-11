@@ -949,19 +949,7 @@ const BranchTableManagement: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
               {t('BranchTableManagement.addCategoryTitle')}
             </h3>
-            {addCategoryError && (
-              <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <AlertCircle className={`h-5 w-5 text-red-600 dark:text-red-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                    <span className="text-red-700 dark:text-red-300">{addCategoryError}</span>
-                  </div>
-                  <button onClick={() => setAddCategoryError(null)} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200">
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            )}
+          
             <div className="grid grid-cols-1 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">

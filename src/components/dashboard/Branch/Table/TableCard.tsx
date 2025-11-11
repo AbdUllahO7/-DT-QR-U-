@@ -22,32 +22,37 @@ const ToggleSwitch: React.FC<{
   label?: string;
   size?: 'sm' | 'md' | 'lg';
 }> = ({ isOn, onToggle, disabled = false, loading = false, label, size = 'md' }) => {
+  const { isRTL } = useLanguage();
+  
   const sizes = {
-    sm: {
-      switch: 'w-10 h-5',
-      knob: 'w-4 h-4',
-      translate: 'translate-x-5'
-    },
-    md: {
-      switch: 'w-12 h-6',
-      knob: 'w-5 h-5',
-      translate: 'translate-x-6'
-    },
-    lg: {
-      switch: 'w-14 h-7',
-      knob: 'w-6 h-6',
-      translate: 'translate-x-7'
-    }
+    sm: { switch: 'w-10 h-5', knob: 'w-4 h-4', translateX: 20 },
+    md: { switch: 'w-12 h-6', knob: 'w-5 h-5', translateX: 24 },
+    lg: { switch: 'w-14 h-7', knob: 'w-6 h-6', translateX: 28 }
   };
 
   const currentSize = sizes[size];
+
+  // Calculate transform for knob based on state and direction
+  const getKnobTransform = () => {
+    if (isRTL) {
+      // RTL: flip the whole switch, so active means knob on left
+      return isOn 
+        ? `scaleX(-1) translateX(${currentSize.translateX}px)` 
+        : 'scaleX(-1) translateX(2px)';
+    } else {
+      // LTR: normal behavior
+      return isOn 
+        ? `translateX(${currentSize.translateX}px)` 
+        : 'translateX(2px)';
+    }
+  };
 
   return (
     <button
       type="button"
       onClick={onToggle}
       disabled={disabled || loading}
-      className="flex items-center gap-2 group"
+      className={`flex items-center gap-2 group ${isRTL ? 'flex-row-reverse' : ''}`}
     >
       <div
         className={`
@@ -61,15 +66,17 @@ const ToggleSwitch: React.FC<{
             : 'bg-gray-300 dark:bg-gray-600'
           }
         `}
+        style={isRTL ? { transform: 'scaleX(-1)' } : undefined}
       >
         {/* Sliding Knob */}
         <span
           className={`
             ${currentSize.knob}
             inline-block rounded-full bg-white
-            shadow-lg transform transition-transform duration-300 ease-in-out
-            ${isOn ? currentSize.translate : 'translate-x-0.5'}
+            shadow-lg transition-transform duration-300 ease-in-out
+            flex items-center justify-center
           `}
+          style={{ transform: getKnobTransform() }}
         >
           {loading && (
             <Loader2 className="h-full w-full p-0.5 animate-spin text-gray-400" />
@@ -80,7 +87,7 @@ const ToggleSwitch: React.FC<{
       {label && (
         <span
           className={`
-            text-sm font-medium transition-colors
+            text-sm font-medium transition-colors whitespace-nowrap
             ${isOn 
               ? 'text-green-600 dark:text-green-400' 
               : 'text-gray-500 dark:text-gray-400'

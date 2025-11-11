@@ -39,9 +39,11 @@ import EditRoleModal from './UserManagement/EditRoleModal';
 import { branchService } from '../../../services/branchService';
 import ViewPermissionsModal from './UserManagement/ViewPermissionsModal';
 import ViewRolePermissionsModal from './UserManagement/ViewRolePermissionsModal';
-import { AssignBranchDto, CreateUserDto, PermissionCatalog, Role, UpdateRoleDto, UpdateUserDto, UpdateUserRolesDto, UserData } from '../../../types/users/users.type';
-
-type ViewMode = 'grid' | 'list';
+import {  AssignBranchDto, CreateUserDto, PermissionCatalog, Role, UpdateRoleDto, UpdateUserDto, UpdateUserRolesDto, UserData } from '../../../types/users/users.type';
+import ChangePasswordModal from './UserManagement/ChangePasswordModal';
+import AssignBranchModal from './UserManagement/AssignBranchModal';
+import { ChangePasswordDto } from '../../../types/users/users.type';
+type ViewMode = 'grid' ;
 
 type TabMode = 'users' | 'roles';
 type ActionType = 'delete' | 'lock' | 'unlock' | 'generic';
@@ -75,6 +77,16 @@ const UserManagement: React.FC = () => {
   const [isEditUserModalOpen, setIsEditUserModalOpen] = useState(false);
   const [selectedUserForEdit, setSelectedUserForEdit] = useState<UserData | null>(null);
   const [isEditingUser, setIsEditingUser] = useState(false);
+
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
+  const [selectedUserForPassword, setSelectedUserForPassword] = useState<UserData | null>(null);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Assign Branch Modal States
+  const [isAssignBranchModalOpen, setIsAssignBranchModalOpen] = useState(false);
+  const [selectedUserForBranch, setSelectedUserForBranch] = useState<UserData | null>(null);
+  const [isAssigningBranch, setIsAssigningBranch] = useState(false);
+
 
   // Update Roles Modal States
   const [isUpdateRolesModalOpen, setIsUpdateRolesModalOpen] = useState(false);
@@ -140,6 +152,75 @@ useClickOutside(containerRef, () => setActiveDropdown(null));
       setIsLoading(false);
     }
   }, [t]);
+
+  // Change Password Handlers
+  const handleOpenChangePassword = useCallback((user: UserData) => {
+    setSelectedUserForPassword(user);
+    setIsChangePasswordModalOpen(true);
+    setActiveDropdown(null);
+  }, []);
+
+  const handleChangePassword = useCallback(
+    async (id: string, passwordData: ChangePasswordDto) => {
+      try {
+        setIsChangingPassword(true);
+        const response = await userService.changeUserPassword(id, passwordData);
+        if (response.success) {
+          logger.info('Kullanıcı şifresi başarıyla değiştirildi', response.data, {
+            prefix: 'UserManagement',
+          });
+          setIsChangePasswordModalOpen(false);
+          setSelectedUserForPassword(null);
+          // Optionally show a success toast/notification here
+        } else {
+          throw new Error(t('userManagementPage.error.changePasswordFailed'));
+        }
+      } catch (err: any) {
+        logger.error('Kullanıcı şifresi değiştirilirken hata', err, {
+          prefix: 'UserManagement',
+        });
+        // Error is logged, you can show an error toast here
+        throw err;
+      } finally {
+        setIsChangingPassword(false);
+      }
+    },
+    [t]
+  );
+
+  // Assign Branch Handlers
+  const handleOpenAssignBranch = useCallback((user: UserData) => {
+    setSelectedUserForBranch(user);
+    setIsAssignBranchModalOpen(true);
+    setActiveDropdown(null);
+  }, []);
+
+  const handleAssignBranch = useCallback(
+    async (id: string, branchData: AssignBranchDto) => {
+      try {
+        setIsAssigningBranch(true);
+        const response = await userService.assignBranchToUser(id, branchData);
+        if (response.success) {
+          logger.info('Kullanıcı şubesi başarıyla değiştirildi', response.data, {
+            prefix: 'UserManagement',
+          });
+          setIsAssignBranchModalOpen(false);
+          setSelectedUserForBranch(null);
+          await fetchUsers(); // Refresh the users list
+        } else {
+          throw new Error(t('userManagementPage.error.assignBranchFailed'));
+        }
+      } catch (err: any) {
+        logger.error('Kullanıcı şubesi değiştirilirken hata', err, {
+          prefix: 'UserManagement',
+        });
+        throw err;
+      } finally {
+        setIsAssigningBranch(false);
+      }
+    },
+    [fetchUsers, t]
+  );
 
   // Fetch Roles
 // Fetch Roles
@@ -745,6 +826,20 @@ const handleOpenEditRole = useCallback(async (role: Role) => {
           <Key className="h-4 w-4" />
           {t('userManagementPage.actions.viewPermissions')}
         </button>
+        <button
+          onClick={() => handleOpenChangePassword(user)}
+          className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+        >
+          <Key className="h-4 w-4" />
+          {t('userManagementPage.actions.changePassword')}
+        </button>
+        <button
+          onClick={() => handleOpenAssignBranch(user)}
+          className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+        >
+          <MapPin className="h-4 w-4" />
+          {t('userManagementPage.actions.assignBranch')}
+        </button>
      
         <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
         <button
@@ -1144,16 +1239,7 @@ const handleOpenEditRole = useCallback(async (role: Role) => {
             >
               <Grid className="h-4 w-4" />
             </button>
-            <button
-              onClick={() => setViewMode('list')}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === 'list'
-                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-              }`}
-            >
-              <List className="h-4 w-4" />
-            </button>
+          
           </div>
         </div>
       </div>
@@ -1263,112 +1349,7 @@ const handleOpenEditRole = useCallback(async (role: Role) => {
             </div>
           )}
 
-          {/* List View - Users */}
-          {viewMode === 'list' && filteredUsers.length > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-700/50">
-                    <tr>
-                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
-                        {t('userManagementPage.table.user')}
-                      </th>
-                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
-                        {t('userManagementPage.table.contact')}
-                      </th>
-                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
-                        {t('userManagementPage.table.roles')}
-                      </th>
-                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
-                        {t('userManagementPage.table.location')}
-                      </th>
-                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
-                        {t('userManagementPage.table.status')}
-                      </th>
-                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
-                        {t('userManagementPage.table.registrationDate')}
-                      </th>
-                      <th scope="col" className="relative px-6 py-3">
-                        <span className="sr-only">{t('userManagementPage.table.actions')}</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    <AnimatePresence>
-                      {filteredUsers.map((user) => (
-                        <motion.tr
-                          key={user.id}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
-                                {user.fullName.split(' ').map((n) => n[0]).join('').slice(0, 2)}
-                              </div>
-                              <div className={`${isRTL ? 'mr-4' : 'ml-4'}`}>
-                                <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {user.fullName}
-                                </div>
-                                <div className="text-sm text-gray-500 dark:text-gray-400">
-                                  {user.userName}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 dark:text-white">{user.email}</div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">{user.phoneNumber}</div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex flex-wrap gap-1">
-                              {user.roles.map((role, index) => (
-                                <span
-                                  key={index}
-                                  className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(role)}`}
-                                >
-                                  {getRoleIcon(role)}
-                                  {role}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 dark:text-white">{user.restaurantName}</div>
-                            {user.branchName && (
-                              <div className="text-sm text-gray-500 dark:text-gray-400">{user.branchName}</div>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.isActive)}`}>
-                              {user.isActive ? <UserCheck className="h-3 w-3" /> : <UserX className="h-3 w-3" />}
-                              {user.isActive ? t('userManagementPage.status.active') : t('userManagementPage.status.inactive')}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {formatDate(user.createdDate)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div className="relative" >
-                              <button
-                                onClick={() => setActiveDropdown(activeDropdown === user.id ? null : user.id)}
-                                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                              >
-                                <MoreVertical className="h-5 w-5" />
-                              </button>
-                              {activeDropdown === user.id && renderUserActionsDropdown(user)}
-                            </div>
-                          </td>
-                        </motion.tr>
-                      ))}
-                    </AnimatePresence>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+         
         </>
       ) : (
         /* Roles Tab Content */
@@ -1477,110 +1458,7 @@ const handleOpenEditRole = useCallback(async (role: Role) => {
             </div>
           )}
 
-          {/* List View - Roles */}
-          {viewMode === 'list' && filteredRoles.length > 0 && (
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-700/50">
-                    <tr>
-                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
-                        {t('userManagementPage.table.role')}
-                      </th>
-                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
-                        {t('userManagementPage.table.description')}
-                      </th>
-                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
-                        {t('userManagementPage.table.category')}
-                      </th>
-                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
-                        {t('userManagementPage.table.type')}
-                      </th>
-                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
-                        {t('userManagementPage.table.status')}
-                      </th>
-                      <th scope="col" className={`px-6 py-3 ${isRTL ? 'text-right' : 'text-left'} text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider`}>
-                        {t('userManagementPage.table.permissions')}
-                      </th>
-                      <th scope="col" className="relative px-6 py-3">
-                        <span className="sr-only">{t('userManagementPage.table.actions')}</span>
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    <AnimatePresence>
-                      {filteredRoles.map((role , index) => (
-                        <motion.tr
-                          key={role.appRoleId}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <div className={`h-8 w-8 rounded-lg flex items-center justify-center ${getRoleColor(role.name)}`}>
-                                {getRoleIcon(role.name)}
-                              </div>
-                              <div className={`${isRTL ? 'mr-3' : 'ml-3'}`}>
-                                <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {role.name}
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900 dark:text-white max-w-xs truncate">
-                              {role.description || 'No description'}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900 dark:text-white">
-                              {role.category || '-'}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            {role.isSystemRole ? (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-                                <Shield className="h-3 w-3" />
-                                {t('userManagementPage.roleDetails.system')}
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                                <Star className="h-3 w-3" />
-                                {t('userManagementPage.roleDetails.custom')}
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(role.isActive)}`}>
-                              {role.isActive ? <UserCheck className="h-3 w-3" /> : <UserX className="h-3 w-3" />}
-                              {role.isActive ? t('userManagementPage.status.active') : t('userManagementPage.status.inactive')}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                            {role.permissions?.length || 0}{' '}
-                            {t('userManagementPage.roleDetails.permissionsCount')}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <div className="relative" >
-                              <button
-                                onClick={() => setActiveDropdown(activeDropdown === role.appRoleId ? null : role.appRoleId)}
-                                className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-                              >
-                                <MoreVertical className="h-5 w-5" />
-                              </button>
-                              {activeDropdown === role.appRoleId && renderRoleActionsDropdown(role)}
-                            </div>
-                          </td>
-                        </motion.tr>
-                      ))}
-                    </AnimatePresence>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
+    
         </>
       )}
 
@@ -1677,6 +1555,34 @@ const handleOpenEditRole = useCallback(async (role: Role) => {
           role={selectedRoleForEdit}
           branches={branches}
           isLoading={isEditingRole}
+        />
+      )}
+      {/* Change Password Modal */}
+      {isChangePasswordModalOpen && selectedUserForPassword && (
+        <ChangePasswordModal
+          isOpen={isChangePasswordModalOpen}
+          onClose={() => {
+            setIsChangePasswordModalOpen(false);
+            setSelectedUserForPassword(null);
+          }}
+          onSubmit={handleChangePassword}
+          user={selectedUserForPassword}
+          isLoading={isChangingPassword}
+        />
+      )}
+
+      {/* Assign Branch Modal */}
+      {isAssignBranchModalOpen && selectedUserForBranch && (
+        <AssignBranchModal
+          isOpen={isAssignBranchModalOpen}
+          onClose={() => {
+            setIsAssignBranchModalOpen(false);
+            setSelectedUserForBranch(null);
+          }}
+          onSubmit={handleAssignBranch}
+          user={selectedUserForBranch}
+          branches={branches}
+          isLoading={isAssigningBranch}
         />
       )}
     </div>

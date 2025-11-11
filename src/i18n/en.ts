@@ -2587,7 +2587,48 @@ export const en = {
       rolesLoadFailed: 'Failed to load roles',
       retry: 'Try Again',
       createUserFailed: 'Failed to create user',
-      createRoleFailed: 'Failed to create role'
+      createRoleFailed: 'Failed to create role',
+      "changePasswordFailed": "Failed to change password",
+      "assignBranchFailed": "Failed to assign branch"
+    },
+
+     "changePasswordModal": {
+      "title": "Change Password",
+      "info": "Enter a new password for this user. They will be able to log in with this new password.",
+      "newPassword": "New Password",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPassword": "Confirm Password",
+      "confirmPasswordPlaceholder": "Confirm new password",
+      "requirements": "Password Requirements:",
+      "minLength": "At least 6 characters",
+      "passwordsMatch": "Passwords match",
+      "submit": "Change Password",
+      "cancel": "Cancel",
+      currentPassword:"Current Password",
+      currentPasswordPlaceholder:"Enter your cuurent password",
+      currentPasswordEntered:"Current password",
+      "changing": "Changing...",
+      "validation": {
+        "passwordRequired": "Password is required",
+        "passwordMinLength": "Password must be at least 6 characters",
+        "confirmPasswordRequired": "Please confirm the password",
+        "passwordMismatch": "Passwords do not match"
+      }
+    },
+
+    "assignBranchModal": {
+      "title": "Assign Branch",
+      "assigningTo": "Assigning",
+      "toNewBranch": "to a new branch",
+      "currentBranch": "Current Branch",
+      "branchIdDisplay": "(ID: {{id}})",
+      "newBranchLabel": "New Branch",
+      "selectBranchPlaceholder": "Select a branch",
+      "submitButton": "Assign Branch",
+      "submitButtonLoading": "Assigning...",
+      "validation": {
+        "branchRequired": "Please select a branch"
+      }
     },
 
     // Statistics
@@ -2689,23 +2730,11 @@ export const en = {
       delete: 'Delete',
       updateRoles: 'Update Roles',
       assignBranch: 'Assign Branches',
-      viewPermissions: "View Permissions"  
+      viewPermissions: "View Permissions",
+      "changePassword": "Change Password",
     },
 
-    "assignBranchModal": {
-      "title": "Assign New Branch",
-      "assigningTo": "Assigning",
-      "toNewBranch": "to a new branch.",
-      "currentBranch": "Current Branch",
-      "branchIdDisplay": "(ID: {id})",
-      "newBranchLabel": "New Branch",
-      "selectBranchPlaceholder": "Select a new branch",
-      "submitButton": "Assign Branch",
-      "submitButtonLoading": "Assigning...",
-      "validation": {
-        "branchRequired": "Please select a branch."
-      }
-    },
+
 
     updateRoles:{
       title:"Update User Roles",

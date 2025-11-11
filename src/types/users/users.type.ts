@@ -258,7 +258,7 @@ export interface ChangePasswordDto {
   appUserId: string;
   currentPassword: string;
   newPassword: string;
-  newPasswordConfirm: string;
+  confirmPassword:string,
 }
 
 export interface UpdateRoleDto {
