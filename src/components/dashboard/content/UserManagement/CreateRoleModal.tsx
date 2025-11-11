@@ -55,12 +55,14 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
   // Combined loading state
   const isBusy = isCreatingRole || isAssigningPermissions || isFetchingPermissions;
 
-  // Fetch permissions when moving to step 2
+  // --- MODIFIED ---
+  // Fetch permissions when moving to step 2 or if branchId changes
   useEffect(() => {
-    if (currentStep === 2 && permissionCatalog.length === 0) {
+    if (currentStep === 2) {
       fetchPermissions();
     }
-  }, [currentStep]);
+  }, [currentStep, formData.branchId]); // Re-fetch if branchId changes
+  // --- END MODIFIED ---
 
   // Reset state when modal closes
   useEffect(() => {
@@ -79,25 +81,38 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
     }
   }, [isOpen]);
 
+  // --- MODIFIED ---
   const fetchPermissions = async () => {
     setIsFetchingPermissions(true);
+    
+    // Create params object
+    const params: { branchId?: number } = {};
+    // Only add branchId if it's a valid number (not 0, null, or undefined)
+    if (formData.branchId && Number(formData.branchId) > 0) {
+      params.branchId = Number(formData.branchId);
+    }
+
     try {
-      const response = await roleService.getPermissionCatalog();
+      // Pass params to the service call
+      const response = await roleService.getPermissionCatalog(params);
       if (response.success && response.data) {
         setPermissionCatalog(response.data);
       } else {
         logger.error('Failed to fetch permission catalog', response, {
           prefix: 'CreateRoleModal',
         });
+        setPermissionCatalog([]); // Clear old data on failure
       }
     } catch (error) {
       logger.error('Error fetching permission catalog', error, {
         prefix: 'CreateRoleModal',
       });
+      setPermissionCatalog([]); // Clear old data on error
     } finally {
       setIsFetchingPermissions(false);
     }
   };
+  // --- END MODIFIED ---
 
   // Get selected branch name
   const selectedBranchName = formData.branchId

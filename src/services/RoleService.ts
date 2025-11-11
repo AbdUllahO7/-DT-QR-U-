@@ -177,14 +177,24 @@ class RoleService {
   /**
    * GET /api/Permissions/catalog
    * Fetches the catalog of all available permissions, grouped by category.
+   * Optionally filters by branchId.
    */
-  async getPermissionCatalog(): Promise<ApiResponse<PermissionCatalog[]>> {
+  async getPermissionCatalog(params: { branchId?: number } = {}): Promise<ApiResponse<PermissionCatalog[]>> {
     try {
-      logger.info('🔍 getPermissionCatalog çağrılıyor...', null, { prefix: 'RoleService' });
+      logger.info('🔍 getPermissionCatalog çağrılıyor...', params, { prefix: 'RoleService' });
       
+      // Create a copy to ensure we only send valid parameters
+      const apiParams = { ...params };
+
+      // If branchId is falsy (0, null, undefined), don't send it.
+      if (!apiParams.branchId) {
+        delete apiParams.branchId;
+      }
+
       const response = await apiRequest<PermissionCatalog[]>({
         method: 'GET',
-        url: '/api/Permissions/catalog'
+        url: '/api/Permissions/catalog',
+        params: apiParams // Send the cleaned params
       });
 
       logger.info('✅ getPermissionCatalog başarılı', response, { prefix: 'RoleService' });
