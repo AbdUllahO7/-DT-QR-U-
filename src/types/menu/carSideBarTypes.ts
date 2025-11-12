@@ -1,5 +1,6 @@
 import { OrderType } from "../../services/Branch/BranchOrderTypeService";
 import { OrderTrackingInfo } from "../BranchManagement/type";
+import { UpdatableOrder } from "../Orders/type";
 import { MenuProduct } from "./type";
 
 export interface OrderForm {
@@ -46,6 +47,8 @@ export interface OrdersTabProps {
   trackingLoading: boolean
   onLoadOrderTracking: (orderTag: string) => Promise<void>
   onRemoveOrderFromTracking: (orderTag: string) => void
+    updatableOrders: UpdatableOrder[] 
+  onRefreshUpdatableOrders: () => Promise<void> // NEW: Handler to refresh updatable orders
 }
 
 export interface OrderCardProps {

@@ -1,5 +1,5 @@
 import { OrderType } from "../../services/Branch/BranchOrderTypeService";
-import { BranchDropdownItem, BranchOrder, Order, PendingOrder, TableBasketSummary } from "../BranchManagement/type";
+import { BranchDropdownItem, BranchOrder, Order, OrderItem, PendingOrder, TableBasketSummary } from "../BranchManagement/type";
 
 export enum OrderStatusEnums {
   Pending = 0,
@@ -12,6 +12,40 @@ export enum OrderStatusEnums {
   Delivered = 4
 }
 
+export interface UpdatableOrder {
+  orderId: number;
+  orderTag: string;
+  totalPrice: number;
+  itemCount: number;
+  createdAt: string; // or Date
+  isUpdatable: boolean;
+  isCancellable: boolean;
+  // updateDeadline: string; // or Date <-- REMOVED
+  hasBeenModified: boolean;
+  lastModifiedAt: string; // or Date
+  modificationCount: number;
+  items: OrderItem[]; // <-- ADDED
+  rowVersion: string;
+  updateDeadline:string,
+}
+
+export interface UpdatePendingOrderItemDto {
+  orderDetailId: number; // Use 0 for new items
+  branchProductId: number;
+  count: number;
+  note: string | null;
+  isAddon: boolean;
+  parentOrderDetailId: number | null; // Null for base items, ID for addons
+}
+
+
+export interface UpdatePendingOrderDto {
+  orderId: number;
+  items: UpdatePendingOrderItemDto[];
+  updateReason: string;
+  priceChangesConfirmed: boolean;
+  rowVersion: string;
+}
 
 // Enhanced filtering interface
 export interface FilterOptions {
@@ -37,7 +71,11 @@ export interface PaginationState {
   totalItems: number;
   totalPages: number;
 }
-
+export interface CancelOrderDto {
+  orderId: number;
+  cancellationReason: string;
+  rowVersion: string;
+}
 // Enhanced component state
 export interface OrdersManagerState {
   pendingOrders: PendingOrder[];
