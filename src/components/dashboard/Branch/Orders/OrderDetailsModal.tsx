@@ -44,7 +44,6 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
   // Font size state
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
 
-  
   // View density state
   const [viewDensity, setViewDensity] = useState<ViewDensity>('comfortable');
   
@@ -191,7 +190,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
             isAddon 
               ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-600' 
               : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-600'
-          }`}
+          } ${item.isProductDeleted ? 'opacity-60 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700' : ''}`} // <<< ADDED DELETED STYLING TO WRAPPER
         >
           {isAddon && (
             <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-4 h-0.5 bg-blue-300 dark:bg-blue-600"></div>
@@ -199,6 +198,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
           
           <div className={`flex justify-between items-start ${densityGap[viewDensity]}`}>
             <div className="flex-1 min-w-0">
+              {/* <<< MODIFIED PRODUCT NAME RENDERING >>> */}
               <div className={`flex items-center ${densityGap[viewDensity]} mb-2`}>
                 <div className={`p-1.5 rounded-md ${
                   isAddon 
@@ -211,15 +211,24 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                       : 'text-indigo-600 dark:text-indigo-300'
                   }`} />
                 </div>
-                <h5 className="font-semibold text-gray-900 dark:text-gray-100 text-sm truncate">
+                <h5 className={`font-semibold text-gray-900 dark:text-gray-100 text-sm truncate ${
+                  item.isProductDeleted ? 'line-through text-red-600 dark:text-red-400' : ''
+                }`}>
                   {item.productName}
                 </h5>
-                {isAddon && (
-                  <span className="px-1.5 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 text-[10px] rounded-full font-medium">
+                {item.isProductDeleted && (
+                  <span className="ml-2 px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-[10px] rounded-full font-medium">
+                    {t('ordersManager.deleted') || 'Deleted'}
+                  </span>
+                )}
+                {isAddon && !item.isProductDeleted && (
+                  <span className="ml-2 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 text-[10px] rounded-full font-medium">
                     Add-on
                   </span>
                 )}
               </div>
+              {/* <<< END MODIFICATION >>> */}
+
               
               <div className={`grid grid-cols-2 md:grid-cols-3 ${densityGap[viewDensity]} mb-2`}>
                 <div className="flex items-center gap-1.5">
@@ -268,6 +277,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                   </div>
                 </div>
               )}
+              
             </div>
             
             <div className="flex flex-col items-end">
@@ -673,6 +683,129 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                   </div>
                 );
               })()}
+            </div>
+          )}
+
+          {/* Modification History */}
+          {sectionVisibility.timeline && (order as any).lastModifiedAt && (
+            <div className={`bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-lg ${densityPadding[viewDensity]} border border-amber-200 dark:border-amber-700`}>
+              <button
+                onClick={() => toggleSection('timeline')}
+                className="flex items-center justify-between w-full mb-3 group"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 bg-amber-100 dark:bg-amber-800 rounded-md">
+                    <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                    {t('ordersManager.modificationHistory') || 'Modification History'}
+                  </h4>
+                </div>
+                <ChevronUp className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-amber-600 transition-colors" />
+              </button>
+
+              <div className="space-y-2">
+                <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
+                  <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
+                    <Calendar className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
+                      {t('ordersManager.lastModifiedAt') || 'Last Modified'}
+                    </p>
+                    <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 font-mono">
+                      {new Date((order as any).lastModifiedAt).toLocaleString(
+                        lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US',
+                        { dateStyle: 'short', timeStyle: 'short' }
+                      )}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
+                  <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
+                    <User className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
+                      {t('ordersManager.modifiedBy') || 'Modified By'}
+                    </p>
+                    <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 break-all">
+                      {(order as any).lastModifiedBy}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Parsed Log */}
+                {(() => {
+                  try {
+                    const logs = JSON.parse((order as any).modificationLog);
+                    if (Array.isArray(logs) && logs.length > 0) {
+                      return (
+                        <div className="space-y-2">
+                          <h5 className="text-xs font-bold text-gray-700 dark:text-gray-300 mt-2">
+                            {t('ordersManager.modificationDetails') || 'Modification Details'}
+                          </h5>
+                          {logs.map((log, index) => (
+                            <div key={index} className={`p-2 rounded-md bg-amber-50 dark:bg-amber-900/30 ${densityPadding[viewDensity]} border border-amber-200 dark:border-amber-700`}>
+                              <div className="flex items-center gap-1.5 mb-1">
+                                <Calendar className="w-3 h-3 text-amber-700 dark:text-amber-400" />
+                                <p className="text-xs font-semibold text-amber-800 dark:text-amber-300 font-mono">
+                                  {new Date(log.Timestamp).toLocaleString(
+                                    lang === 'tr' ? 'tr-TR' : lang === 'ar' ? 'ar-SA' : 'en-US',
+                                    { dateStyle: 'short', timeStyle: 'short' }
+                                  )}
+                                </p>
+                              </div>
+                              {log.ModifiedBy && (
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <User className="w-3 h-3 text-amber-700 dark:text-amber-400" />
+                                  <p className="text-xs font-semibold text-amber-800 dark:text-amber-300">
+                                    {t('ordersManager.modifiedBy') || 'By'}: {log.ModifiedBy}
+                                  </p>
+                                </div>
+                              )}
+                              {log.Reason && (
+                                <div className="flex items-start gap-1.5 mb-1">
+                                  <MessageSquare className="w-3 h-3 text-amber-700 dark:text-amber-400 mt-0.5" />
+                                  <p className="text-xs text-amber-800 dark:text-amber-300">
+                                    {t('ordersManager.reason') || 'Reason'}: {log.Reason || 'N/A'}
+                                  </p>
+                                </div>
+                              )}
+                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 pt-2 border-t border-amber-200 dark:border-amber-600">
+                                <p className="text-xs text-amber-800 dark:text-amber-300">
+                                  {t('ordersManager.total') || 'Total'}: <span className="font-semibold">{log.OldTotalPrice?.toFixed(2)} → {log.NewTotalPrice?.toFixed(2)}</span>
+                                </p>
+                                <p className="text-xs text-amber-800 dark:text-amber-300">
+                                  {t('ordersManager.items') || 'Items'}: <span className="font-semibold">{log.OldItemCount} → {log.NewItemCount}</span>
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }
+                  } catch (e) {
+                    // Fallback for non-JSON or malformed log
+                    return (
+                      <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
+                        <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
+                          <AlertCircle className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
+                            {t('ordersManager.modificationLog') || 'Raw Log'}
+                          </p>
+                          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 break-all">
+                            {(order as any).modificationLog}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  }
+                })()}
+              </div>
             </div>
           )}
 

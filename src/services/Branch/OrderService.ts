@@ -72,6 +72,7 @@ class OrderService {
         
       logger.info('Pending orders getirme isteği gönderiliyor', { branchId }, { prefix: 'OrderService' });
       const response = await httpClient.get<PendingOrder[]>(url);
+      console.log("response Pending",response)
       const orders = Array.isArray(response.data) ? response.data : [];
 
       logger.info('Pending orders başarıyla alındı', { 

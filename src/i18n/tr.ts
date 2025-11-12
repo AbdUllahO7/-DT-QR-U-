@@ -3806,6 +3806,11 @@ export const tr = {
   ordersManager: {
       total : 'Toplam',
       subTotal:"Ara Toplam",
+      modificationHistory:"değişiklik Geçmişi",
+      lastModifiedAt:"Son Değiştirilme Tarihi",
+      modifiedBy:"Değiştiren",
+      modificationDetails:"DeğişiklikAyrıntıları",
+      items:"öğeler",
       filtered:"Filtrelenen",
       clearFilters:"Filtreleri Temizle",
       serviceFeeApplied:"Servis ücreti",
