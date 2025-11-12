@@ -1,5 +1,5 @@
 import { BranchOrder, ConfirmOrderDto, CreateSessionOrderDto, Order, OrderItem, OrderTrackingInfo, PendingOrder, QRTrackingInfo, RejectOrderDto, SmartCreateOrderDto, TableBasketSummary, UpdateOrderStatusDto, OrderStatus } from '../../types/BranchManagement/type';
-import { OrderStatusEnums } from '../../types/Orders/type';
+import { CancelOrderDto, OrderStatusEnums, UpdatableOrder, UpdatePendingOrderDto } from '../../types/Orders/type';
 import { httpClient } from '../../utils/http';
 import { logger } from '../../utils/logger';
 import { OrderType, orderTypeService } from './BranchOrderTypeService';
@@ -271,6 +271,29 @@ class OrderService {
     }
   }
 
+  async cancelOrder(data: CancelOrderDto, branchId?: number): Promise<Order> {
+    try {
+      logger.info('Order iptal etme isteği gönderiliyor', { orderId: data.orderId, data, branchId }, { prefix: 'OrderService' });
+      
+      const url = branchId 
+        ? `${this.baseUrl}/cancel?branchId=${branchId}`
+        : `${this.baseUrl}/cancel`;
+        
+      const response = await httpClient.post<Order>(url, data);
+      
+      logger.info('Order başarıyla iptal edildi', { 
+        orderId: data.orderId,
+        branchId,
+        cancellationReason: data.cancellationReason
+      }, { prefix: 'OrderService' });
+      
+      return response.data;
+    } catch (error: any) {
+      logger.error('Order iptal etme hatası', error, { prefix: 'OrderService' });
+      this.handleError(error, 'Order iptal edilirken hata oluştu');
+    }
+  }
+
   async updateOrderStatus(orderId: string, data: UpdateOrderStatusDto, branchId?: number): Promise<Order> {
     try {
       logger.info('Order status güncelleme isteği gönderiliyor', { orderId, data, branchId }, { prefix: 'OrderService' });
@@ -328,7 +351,7 @@ class OrderService {
     }
   }
 
-  /*   async smartCreateOrder(data: SmartCreateOrderDto, branchId?: number): Promise<Order> {
+  /* async smartCreateOrder(data: SmartCreateOrderDto, branchId?: number): Promise<Order> {
     try {
       logger.info('Smart order oluşturma isteği gönderiliyor', { data, branchId }, { prefix: 'OrderService' });
       
@@ -592,6 +615,66 @@ class OrderService {
     logger.info('Order types cache temizlendi', {}, { prefix: 'OrderService' });
   }
 
+
+
+  // <<< NEW METHOD ADDED HERE >>>
+  async updatePendingOrder(data: UpdatePendingOrderDto, branchId?: number): Promise<Order> {
+    try {
+      logger.info('Pending order güncelleme isteği gönderiliyor', { 
+        orderId: data.orderId, 
+        branchId 
+      }, { prefix: 'OrderService' });
+      
+      const url = branchId 
+        ? `${this.baseUrl}/updatepending?branchId=${branchId}`
+        : `${this.baseUrl}/updatepending`;
+        
+      const response = await httpClient.put<Order>(url, data);
+      
+      logger.info('Pending order başarıyla güncellendi', { 
+        orderId: response.data.orderId,
+        branchId,
+        newStatus: response.data.status
+      }, { prefix: 'OrderService' });
+      
+      return response.data;
+    } catch (error: any) {
+      logger.error('Pending order güncelleme hatası', error, { prefix: 'OrderService' });
+      this.handleError(error, 'Pending order güncellenirken hata oluştu');
+    }
+  }
+
+  // <<< UPDATED METHOD HERE >>>
+  async getUpdatableOrders(branchId?: number): Promise<UpdatableOrder[]> {
+    try {
+      const params: any = {
+        includeItems: true // <-- ADDED PARAM
+      };
+      if (branchId) {
+        params.branchId = branchId;
+      }
+        
+      logger.info('Updatable orders getirme isteği gönderiliyor', { branchId, params }, { prefix: 'OrderService' });
+      
+      // Updated to use params object
+      const response = await httpClient.get<UpdatableOrder[]>(`${this.baseUrl}/updatable`, {
+         params 
+      });
+      
+      const orders = Array.isArray(response.data) ? response.data : [];
+
+      logger.info('Updatable orders başarıyla alındı', { 
+        branchId,
+        ordersCount: orders.length 
+      }, { prefix: 'OrderService' });
+
+      return orders;
+    } catch (error: any) {
+      this.handleError(error, 'Updatable orders getirilirken hata oluştu');
+    }
+  }
+
+
   private handleError(error: any, defaultMessage: string): never {
     if (error?.response?.status === 400) {
       const errorData = error?.response?.data;
@@ -626,3 +709,4 @@ class OrderService {
 }
 
 export const orderService = new OrderService();
+

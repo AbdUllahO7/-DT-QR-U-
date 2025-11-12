@@ -894,6 +894,8 @@ export interface OrderItem {
   isAddon: boolean;
   parentOrderItemId?: number | null;
   addonItems: OrderItem[];
+  parentOrderDetailId:number;
+    orderDetailId:number
   addonPrice?: number | null;
   addonNote?: string | null;
 }

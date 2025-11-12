@@ -13,6 +13,8 @@ import OrdersTab from "./OrdersTab"
 import { CartItem, CartSidebarProps, GroupedCartItem, OrderForm, TrackedOrder } from "../../../../../types/menu/carSideBarTypes"
 import WhatsAppConfirmationModal from "./WhatsAppConfirmationModal"
 import ToastComponent from "./ToastComponenet"
+import { UpdatableOrder } from "../../../../../types/Orders/type"
+import { orderService } from "../../../../../services/Branch/OrderService"
 
 interface UpdatedCartSidebarProps extends CartSidebarProps {
   restaurantPreferences?: any
@@ -76,6 +78,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   const [showWhatsAppConfirmation, setShowWhatsAppConfirmation] = useState(false)
   const [pendingWhatsAppData, setPendingWhatsAppData] = useState<any>(null)
   const [whatsappSending, setWhatsappSending] = useState(false)
+  const [updatableOrders, setUpdatableOrders] = useState<UpdatableOrder[]>([])
 
   
   // Order creation states
@@ -234,6 +237,27 @@ const handleWhatsAppConfirm = async () => {
   }
 }
 
+  // Fetch updatable orders handler
+  const fetchUpdatableOrders = async () => {
+    try {
+      if (trackedOrders.length === 0) {
+        setUpdatableOrders([])
+        return
+      }
+      
+      const orders = await orderService.getUpdatableOrders()
+      setUpdatableOrders(orders)
+    } catch (error) {
+      console.error("Failed to fetch updatable orders:", error)
+      setUpdatableOrders([])
+    }
+  }
+
+  // Fetch updatable orders when tracked orders change
+  useEffect(() => {
+    fetchUpdatableOrders()
+  }, [trackedOrders])
+
 const handleWhatsAppCancel = () => {
   // User chose to skip WhatsApp
   setShowWhatsAppConfirmation(false)
@@ -306,6 +330,7 @@ const handleWhatsAppCancel = () => {
     if (activeTab === 'orders' && pendingOrders.length > 0) {
       interval = setInterval(() => {
         refreshAllPendingOrders()
+        fetchUpdatableOrders() // Also refresh updatable orders
       }, 15000)
     }
     
@@ -599,6 +624,8 @@ const handleWhatsAppCancel = () => {
                 trackingLoading={trackingLoading}
                 onLoadOrderTracking={loadOrderTracking}
                 onRemoveOrderFromTracking={removeOrderFromTracking}
+                updatableOrders={updatableOrders}
+                onRefreshUpdatableOrders={fetchUpdatableOrders}
               />
             )}
           </div>
