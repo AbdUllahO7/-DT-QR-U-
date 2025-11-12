@@ -3596,7 +3596,6 @@ export const en = {
     brand: "MenuHub",
     description: "Discover exceptional dining experiences with our curated selection of restaurants and delicious cuisines.",
     quickLinks: "Quick Links",
-    services: "Services",
     getInTouch: "Get in Touch",
     visitUs: "Visit Us",
     callUs: "Call Us",

@@ -3597,7 +3597,6 @@ export const tr = {
         brand: "MenuHub",
         description: "Seçkin restoran ve lezzetli mutfak seçkimizle olağanüstü yemek deneyimleri keşfedin.",
         quickLinks: "Hızlı Bağlantılar",
-        services: "Hizmetler",
         getInTouch: "İletişime Geçin",
         visitUs: "Bizi Ziyaret Edin",
         callUs: "Bizi Arayın",

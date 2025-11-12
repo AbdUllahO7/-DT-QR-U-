@@ -94,9 +94,9 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         if (branchList.length > 0 && !selectedBranchForTables) {
           setSelectedBranchForTables(branchList[0]);
         }
-      } catch (error) {
+      } catch (error:any) {
         logger.error('Şube listesi yüklenirken hata:', error);
-        setError(t('TableManagement.error.loadFailed'));
+         setError(error.response.data.message);
       }
     };
 
@@ -133,9 +133,10 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         tablesCount: tablesData.length,
         categoriesCount: categoriesData.length
       });
-    } catch (error) {
+    } catch (error:any) {
       logger.error('Masalar ve kategoriler yüklenirken hata:', error);
-      setError(t('TableManagement.error.dataLoadFailed'));
+               setError(error.response.data.message);
+
     } finally {
       setIsLoading(false);
     }
@@ -228,7 +229,8 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         errorMessage = error.message;
       }
       
-      setError(errorMessage);
+               setError(error.response.data.message);
+
       
       setTimeout(() => setError(null), 5000);
       
@@ -259,9 +261,10 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     try {
       await branchService.toggleTableStatus(id, selectedBranchForTables?.branchId ?? 0, newStatus);
       logger.info('Table status updated:', { id, newStatus });
-    } catch (error) {
+    } catch (error:any) {
       logger.error('Masa durumu güncellenirken hata:', error);
-      setError(t('TableManagement.error.statusUpdateFailed'));
+               setError(error.response.data.message);
+
       
       setTables(prev => prev.map(table =>
         table.id === id ? { ...table, isActive: !newStatus } : table
@@ -348,7 +351,8 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         errorMessage = error.message;
       }
       
-      setError(errorMessage);
+               setError(error.response.data.message);
+
       setTimeout(() => setError(null), 5000);
       
       throw new Error(errorMessage);

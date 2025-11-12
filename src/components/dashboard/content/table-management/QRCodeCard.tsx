@@ -1,20 +1,111 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { 
-  QrCode, 
-  Users, 
-  Download, 
+import {
+  QrCode,
+  Users,
+  Download,
   Edit,
   Trash2,
-  ToggleLeft,
-  ToggleRight,
+  // Removed old toggles
   UserX,
   UserCheck,
-  Circle,
-  Loader2
+  // Added for new switch
+  Loader2,
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { TableData } from '../../../../types/BranchManagement/type';
+
+// --- Modern Toggle Switch Component (Copied from your second file) ---
+
+const ToggleSwitch: React.FC<{
+  isOn: boolean;
+  onToggle: () => void;
+  disabled?: boolean;
+  loading?: boolean;
+  label?: string;
+  size?: 'sm' | 'md' | 'lg';
+}> = ({ isOn, onToggle, disabled = false, loading = false, label, size = 'md' }) => {
+  const { isRTL } = useLanguage();
+
+  const sizes = {
+    sm: { switch: 'w-10 h-5', knob: 'w-4 h-4', translateX: 20 },
+    md: { switch: 'w-12 h-6', knob: 'w-5 h-5', translateX: 24 },
+    lg: { switch: 'w-14 h-7', knob: 'w-6 h-6', translateX: 28 },
+  };
+
+  const currentSize = sizes[size];
+
+  // Calculate transform for knob based on state and direction
+  const getKnobTransform = () => {
+    if (isRTL) {
+      // RTL: flip the whole switch, so active means knob on left
+      return isOn
+        ? `scaleX(-1) translateX(${currentSize.translateX}px)`
+        : 'scaleX(-1) translateX(2px)';
+    } else {
+      // LTR: normal behavior
+      return isOn
+        ? `translateX(${currentSize.translateX}px)`
+        : 'translateX(2px)';
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      disabled={disabled || loading}
+      className={`flex items-center gap-2 group ${isRTL ? 'flex-row-reverse' : ''}`}
+    >
+      <div
+        className={`
+          ${currentSize.switch}
+          relative inline-flex items-center rounded-full
+          transition-colors duration-300 ease-in-out
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+          ${isOn
+            ? 'bg-green-500 dark:bg-green-600'
+            : 'bg-gray-300 dark:bg-gray-600'
+          }
+        `}
+        style={isRTL ? { transform: 'scaleX(-1)' } : undefined}
+      >
+        {/* Sliding Knob */}
+        <span
+          className={`
+            ${currentSize.knob}
+            inline-block rounded-full bg-white
+            shadow-lg transition-transform duration-300 ease-in-out
+            flex items-center justify-center
+          `}
+          style={{ transform: getKnobTransform() }}
+        >
+          {loading && (
+            <Loader2 className="h-full w-full p-0.5 animate-spin text-gray-400" />
+          )}
+        </span>
+      </div>
+
+      {label && (
+        <span
+          className={`
+            text-sm font-medium transition-colors whitespace-nowrap
+            ${isOn
+              ? 'text-green-600 dark:text-green-400'
+              : 'text-gray-500 dark:text-gray-400'
+            }
+            ${disabled ? 'opacity-50' : 'group-hover:text-gray-700 dark:group-hover:text-gray-300'}
+          `}
+        >
+          {label}
+        </span>
+      )}
+    </button>
+  );
+};
+
+// --- Updated TableCard (QRCodeCard) ---
 
 interface TableCardProps {
   table: TableData;
@@ -25,21 +116,15 @@ interface TableCardProps {
   isToggling?: boolean;
 }
 
-const TableCard: React.FC<TableCardProps> = ({ 
-  table, 
-  onEdit, 
-  onDelete, 
-  onToggleStatus, 
+const TableCard: React.FC<TableCardProps> = ({
+  table,
+  onEdit,
+  onDelete,
+  onToggleStatus,
   onDownload,
-  isToggling = false
+  isToggling = false,
 }) => {
   const { t, isRTL } = useLanguage();
-
-  const getStatusColor = (isActive: boolean) => {
-    return isActive
-      ? 'text-green-600 dark:text-green-400'
-      : 'text-gray-500 dark:text-gray-400';
-  };
 
   const getOccupancyColor = (isOccupied: boolean) => {
     return isOccupied
@@ -56,7 +141,7 @@ const TableCard: React.FC<TableCardProps> = ({
   };
 
   const getCapacityText = (capacity: number) => {
-    return capacity === 1 
+    return capacity === 1
       ? `${capacity} ${t('TableCard.capacity')}`
       : `${capacity} ${t('TableCard.capacityPlural')}`;
   };
@@ -69,7 +154,7 @@ const TableCard: React.FC<TableCardProps> = ({
       role="article"
       aria-label={t('TableCard.accessibility.tableCard')}
     >
-      {/* Header Section */}
+      {/* Header Section (Unchanged) */}
       <div className={`flex items-start justify-between mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
           <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
@@ -85,7 +170,7 @@ const TableCard: React.FC<TableCardProps> = ({
           </div>
         </div>
 
-        {/* Action Buttons */}
+        {/* Action Buttons (Unchanged) */}
         <div className={`flex gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <button
             onClick={() => onDownload(table)}
@@ -93,7 +178,7 @@ const TableCard: React.FC<TableCardProps> = ({
             title={t('TableCard.downloadQR')}
             aria-label={t('TableCard.accessibility.downloadButton')}
           >
-            <Download className="h-3 w-3" />
+            <Download className="h-5 w-5" />
           </button>
           <button
             onClick={() => onEdit(table)}
@@ -101,7 +186,7 @@ const TableCard: React.FC<TableCardProps> = ({
             title={t('TableCard.edit')}
             aria-label={t('TableCard.accessibility.editButton')}
           >
-            <Edit className="h-3 w-3" />
+            <Edit className="h-5 w-5" />
           </button>
           <button
             onClick={() => onDelete(table.id)}
@@ -109,12 +194,12 @@ const TableCard: React.FC<TableCardProps> = ({
             title={t('TableCard.delete')}
             aria-label={t('TableCard.accessibility.deleteButton')}
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-5 w-5" />
           </button>
         </div>
       </div>
 
-      {/* QR Code Preview */}
+      {/* QR Code Preview (Unchanged) */}
       <div className="mb-3">
         <a
           href={`/table/qr/${table.qrCode}`}
@@ -132,7 +217,7 @@ const TableCard: React.FC<TableCardProps> = ({
         </a>
       </div>
 
-      {/* Capacity Info */}
+      {/* Capacity Info (Unchanged) */}
       <div className={`flex items-center mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
         <Users className={`h-4 w-4 text-gray-400 ${isRTL ? 'ml-1' : 'mr-1'}`} />
         <span className="text-sm text-gray-600 dark:text-gray-400">
@@ -140,37 +225,35 @@ const TableCard: React.FC<TableCardProps> = ({
         </span>
       </div>
 
-      {/* Status Controls */}
+      {/* --- REFACTORED Status Controls --- */}
       <div className="space-y-2">
-        {/* Active/Inactive Toggle */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => onToggleStatus(table.id)}
+        {/* Active Status Toggle - Enhanced with Modern Switch */}
+        <div className={`flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('BranchTableManagement.status')} {/* Assumes this translation exists */}
+          </span>
+          <ToggleSwitch
+            isOn={table.isActive}
+            onToggle={() => onToggleStatus(table.id)}
             disabled={isToggling}
-            className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}
-          >
-            {isToggling ? (
-              <Loader2 className="h-3 w-3 animate-spin text-gray-400" />
-            ) : table.isActive ? (
-              <ToggleRight className="h-4 w-4 text-green-500" />
-            ) : (
-              <ToggleLeft className="h-4 w-4 text-gray-400" />
-            )}
-            <span className={`text-xs ${getStatusColor(table.isActive)}`}>
-              {getStatusText(table.isActive)}
-            </span>
-          </button>
+            loading={isToggling}
+            label={getStatusText(table.isActive)}
+            size="md"
+          />
         </div>
 
-        {/* Occupancy Status */}
-        <div className="flex items-center justify-between">
-          <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        {/* Occupancy Status - Restyled */}
+        <div className={`flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('BranchTableManagement.occupation')} {/* Assumes this translation exists */}
+          </span>
+          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
             {table.isOccupied ? (
               <UserX className="h-4 w-4 text-red-500" />
             ) : (
               <UserCheck className="h-4 w-4 text-green-500" />
             )}
-            <span className={`text-xs ${getOccupancyColor(table.isOccupied)}`}>
+            <span className={`text-sm font-medium ${getOccupancyColor(table.isOccupied)}`}>
               {getOccupancyText(table.isOccupied)}
             </span>
           </div>

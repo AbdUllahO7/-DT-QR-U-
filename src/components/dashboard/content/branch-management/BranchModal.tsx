@@ -97,7 +97,7 @@ const checkStepValidity = (step: number): boolean => {
         return (
           !!formData.branchName?.trim() &&
           !!formData.whatsappOrderNumber?.trim() &&
-          !!formData.branchLogoPath // Check that logo is uploaded
+          !!formData.branchLogoPath 
         );
       case 2:
         return (
@@ -106,7 +106,7 @@ const checkStepValidity = (step: number): boolean => {
           !!formData.createAddressDto.street?.trim() &&
           !!formData.createAddressDto.addressLine1?.trim() &&
           !!formData.createAddressDto.zipCode?.trim() &&
-          !!formData.createAddressDto.addressLine2?.trim() // Check address line 2
+          !!formData.createAddressDto.addressLine2?.trim() 
         );
       case 3:
         return (
