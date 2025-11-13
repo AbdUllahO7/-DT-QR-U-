@@ -4714,7 +4714,7 @@ recommended: "Önerilen",
       "other": "Diğer"
     }
   },
-"onboardingBranch": {
+ "onboardingBranch": {
     "header": {
       "backLink": "Restoran Bilgilerine Geri Dön",
       "title": "Şube Bilgileri",
@@ -4809,10 +4809,21 @@ recommended: "Önerilen",
           "useCurrentLocation": "Mevcut Konumumu Kullan",
           "latitude": "Enlem",
           "longitude": "Boylam",
+          "googleMapsLink": "Google Haritalar Linki (Opsiyonel)",
+          "googleMapsLinkPlaceholder": "Google Haritalar linkini buraya yapıştırın...",
+          "googleMapsLinkHelper": "Google Haritalar linki yapıştırın, koordinatlar otomatik olarak çıkarılacak",
+          "invalidLink": "Bu linkten koordinatlar çıkarılamadı. Farklı bir format deneyin.",
+          "interactiveMap": "Etkileşimli Harita",
+          "clickToPin": "Konum seçmek için haritaya tıklayın",
+          "markerPosition": "İşaretleyici Konumu",
+          "openFullMap": "Tam haritada aç",
+          "manualCoordinates": "Manuel Koordinatlar",
+          "selectedCoordinates": "Seçilen Koordinatlar:",
           "mapHelp": "Harita nasıl kullanılır:",
-          "mapHelp1": "• Konumunuzu otomatik olarak almak için \"Mevcut Konumumu Kullan\" butonuna tıklayın",
-          "mapHelp2": "• Veya enlem ve boylam değerlerini manuel olarak girin",
-          "mapHelp3": "• Google Haritalar'dan koordinatları kopyalayabilirsiniz",
+          "mapHelp1": "Yukarıdaki alana Google Haritalar linkini yapıştırın",
+          "mapHelp2": "Veya \"Mevcut Konumumu Kullan\" butonuna tıklayın",
+          "mapHelp3": "Veya koordinatları manuel olarak girin",
+          "mapHelp4": "Konumu hassas bir şekilde belirlemek için tam haritayı açın",
           "geolocationError": "Konumunuz alınamadı. Lütfen manuel olarak seçin.",
           "geolocationNotSupported": "Konum belirleme özelliği tarayıcınız tarafından desteklenmiyor."
         },

@@ -500,6 +500,7 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                     value={formData.phoneNumber}
                     onChange={handleNationalPhoneChange} // Use new handler
                     onBlur={() => handleBlur('phoneNumber')}
+                    maxLength={10}
                     className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
                       errors.phoneNumber 
                         ? 'border-red-500 dark:border-red-500' 
