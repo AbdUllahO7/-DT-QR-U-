@@ -32,6 +32,7 @@ const OnboardingBranch: React.FC = () => {
     'createAddressDto.city'?: string;
     'createAddressDto.street'?: string;
     'createAddressDto.addressLine1'?: string;
+    'createAddressDto.addressLine2'?: string;
     'createAddressDto.zipCode'?: string;
     'createContactDto.phone'?: string;
     'createContactDto.mail'?: string;
@@ -58,6 +59,8 @@ const OnboardingBranch: React.FC = () => {
     lat: 41.0082, // Default to Istanbul
     lng: 28.9784
   });
+  const [googleMapsLink, setGoogleMapsLink] = useState<string>('');
+  const [linkError, setLinkError] = useState<string>('');
 
   // Form data state
   const [formData, setFormData] = useState<CreateBranchWithDetailsDto>({
@@ -279,6 +282,72 @@ const OnboardingBranch: React.FC = () => {
     setContactCountryCode(e.target.value);
   };
 
+  // Function to extract coordinates from Google Maps link
+  const extractCoordinatesFromLink = (link: string): { lat: number; lng: number } | null => {
+    try {
+      // Pattern 1: google.com/maps/@lat,lng,zoom
+      const pattern1 = /@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match1 = link.match(pattern1);
+      if (match1) {
+        return {
+          lat: parseFloat(match1[1]),
+          lng: parseFloat(match1[2])
+        };
+      }
+
+      // Pattern 2: google.com/maps?q=lat,lng
+      const pattern2 = /q=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match2 = link.match(pattern2);
+      if (match2) {
+        return {
+          lat: parseFloat(match2[1]),
+          lng: parseFloat(match2[2])
+        };
+      }
+
+      // Pattern 3: google.com/maps/place/.../@lat,lng
+      const pattern3 = /place\/[^@]*@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match3 = link.match(pattern3);
+      if (match3) {
+        return {
+          lat: parseFloat(match3[1]),
+          lng: parseFloat(match3[2])
+        };
+      }
+
+      // Pattern 4: ll=lat,lng or !3d lat !4d lng
+      const pattern4 = /!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/;
+      const match4 = link.match(pattern4);
+      if (match4) {
+        return {
+          lat: parseFloat(match4[1]),
+          lng: parseFloat(match4[2])
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error extracting coordinates:', error);
+      return null;
+    }
+  };
+
+  const handleGoogleMapsLinkChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const link = e.target.value;
+    setGoogleMapsLink(link);
+    setLinkError('');
+
+    if (link.trim()) {
+      const coords = extractCoordinatesFromLink(link);
+      if (coords) {
+        setSelectedLatLng(coords);
+        setLinkError('');
+      } else if (link.includes('google.com/maps') || link.includes('maps.app.goo.gl')) {
+        setLinkError(t('onboardingBranch.form.step3.location.invalidLink') || 'Could not extract coordinates from this link. Please try a different format.');
+      }
+    }
+  };
+
   // Map modal handlers
   const handleOpenMapModal = (): void => {
     // Parse existing location if available
@@ -464,6 +533,7 @@ const OnboardingBranch: React.FC = () => {
           newErrors['createContactDto.location'] = t('onboardingBranch.form.step3.location.error');
         }
         
+        // eslint-disable-next-line no-case-declarations
         const workingDays = formData.createBranchWorkingHourCoreDto?.filter(day => day.isWorkingDay) || [];
         if (workingDays.length === 0) {
           newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.minOneDay');
@@ -554,9 +624,8 @@ const OnboardingBranch: React.FC = () => {
         });
       }
     }
-    
-    const fullWhatsappNumber = `${whatsappCountryCode}${formData.whatsappOrderNumber.replace(/\D/g, '')}`;
-    const fullContactPhone = `${contactCountryCode}${formData.createContactDto.phone.replace(/\D/g, '')}`;
+    const fullWhatsappNumber = `${whatsappCountryCode}${(formData.whatsappOrderNumber || '').replace(/\D/g, '')}`;
+    const fullContactPhone = `${contactCountryCode}${(formData.createContactDto.phone || '').replace(/\D/g, '')}`;
 
     const finalFormData: CreateBranchWithDetailsDto = {
       branchName: formData.branchName?.trim() || null,
@@ -679,7 +748,7 @@ const OnboardingBranch: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden"
+              className="relative w-full max-w-5xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
             >
               {/* Header */}
               <div className={`flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -697,13 +766,41 @@ const OnboardingBranch: React.FC = () => {
                 </button>
               </div>
 
-              {/* Content */}
-              <div className="p-6 space-y-4">
+              {/* Content - Scrollable */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {/* Google Maps Link Input */}
+                <div className="space-y-2">
+                  <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.googleMapsLink') || 'رابط خرائط جوجل (اختياري)'}
+                  </label>
+                  <div className="relative">
+                    <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+                    <input
+                      type="text"
+                      value={googleMapsLink}
+                      onChange={handleGoogleMapsLinkChange}
+                      placeholder={t('onboardingBranch.form.step3.location.googleMapsLinkPlaceholder') || 'https://maps.google.com/...'}
+                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${
+                        linkError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
+                      } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                      dir="ltr"
+                    />
+                  </div>
+                  {linkError && (
+                    <p className={`text-xs text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {linkError}
+                    </p>
+                  )}
+                  <p className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.googleMapsLinkHelper') || 'الصق رابط خرائط جوجل وسيتم استخراج الإحداثيات تلقائيًا'}
+                  </p>
+                </div>
+
                 {/* Current Location Button */}
                 <button
                   type="button"
                   onClick={handleGetCurrentLocation}
-                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all duration-200 border border-blue-200 dark:border-blue-700 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
                 >
                   <Navigation className="h-5 w-5" />
                   <span className="font-medium">
@@ -711,63 +808,141 @@ const OnboardingBranch: React.FC = () => {
                   </span>
                 </button>
 
-                {/* Map Container */}
-                <div className="relative w-full h-96 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border-2 border-gray-300 dark:border-gray-600">
-                  <iframe
-                    title="Location Map"
-                    width="100%"
-                    height="100%"
-                    frameBorder="0"
-                    style={{ border: 0 }}
-                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${selectedLatLng.lng - 0.01},${selectedLatLng.lat - 0.01},${selectedLatLng.lng + 0.01},${selectedLatLng.lat + 0.01}&layer=mapnik&marker=${selectedLatLng.lat},${selectedLatLng.lng}`}
-                    allowFullScreen
-                  />
+                {/* Interactive Map Container */}
+                <div className="space-y-2">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <label className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.interactiveMap') || 'الخريطة التفاعلية'}
+                    </label>
+                    <span className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.clickToPin') || 'اضغط على الخريطة لتحديد الموقع'}
+                    </span>
+                  </div>
+                  <div className="relative w-full h-[400px] bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 shadow-inner">
+                    {/* OpenStreetMap Embed with marker */}
+                    <iframe
+                      title="Location Map"
+                      width="100%"
+                      height="100%"
+                      frameBorder="0"
+                      style={{ border: 0 }}
+                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${selectedLatLng.lng - 0.01},${selectedLatLng.lat - 0.01},${selectedLatLng.lng + 0.01},${selectedLatLng.lat + 0.01}&layer=mapnik&marker=${selectedLatLng.lat},${selectedLatLng.lng}`}
+                      allowFullScreen
+                    />
+                    
+                    {/* Overlay with instructions */}
+                    <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-10 pointer-events-none">
+                      <div className="bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-600">
+                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-primary-600" />
+                          {t('onboardingBranch.form.step3.location.markerPosition') || 'موقع العلامة'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* External Map Link */}
+                  <a
+                    href={`https://www.openstreetmap.org/?mlat=${selectedLatLng.lat}&mlon=${selectedLatLng.lng}#map=15/${selectedLatLng.lat}/${selectedLatLng.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 ${isRTL ? 'flex-row-reverse' : ''}`}
+                  >
+                    <span>{t('onboardingBranch.form.step3.location.openFullMap') || 'فتح في خريطة كاملة'}</span>
+                    <ArrowRight className={`h-3 w-3 ${isRTL ? 'mr-1 rotate-180' : 'ml-1'}`} />
+                  </a>
                 </div>
 
                 {/* Coordinate Inputs */}
-                <div className={`grid grid-cols-2 gap-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {t('onboardingBranch.form.step3.location.latitude') || 'خط العرض (Latitude)'}
-                    </label>
-                    <input
-                      type="number"
-                      step="0.000001"
-                      value={selectedLatLng.lat}
-                      onChange={(e) => setSelectedLatLng(prev => ({ ...prev, lat: parseFloat(e.target.value) || 0 }))}
-                      className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
-                      dir="ltr"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {t('onboardingBranch.form.step3.location.longitude') || 'خط الطول (Longitude)'}
-                    </label>
-                    <input
-                      type="number"
-                      step="0.000001"
-                      value={selectedLatLng.lng}
-                      onChange={(e) => setSelectedLatLng(prev => ({ ...prev, lng: parseFloat(e.target.value) || 0 }))}
-                      className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
-                      dir="ltr"
-                    />
+                <div className="space-y-3">
+                  <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.manualCoordinates') || 'الإحداثيات اليدوية'}
+                  </label>
+                  <div className={`grid grid-cols-2 gap-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    <div>
+                      <label className={`block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('onboardingBranch.form.step3.location.latitude') || 'خط العرض'}
+                      </label>
+                      <input
+                      title='number'
+                        type="number"
+                        step="1"
+                        value={selectedLatLng.lat}
+                        onChange={(e) => {
+                          const newLat = parseFloat(e.target.value) || 0;
+                          if (newLat >= -90 && newLat <= 90) {
+                            setSelectedLatLng(prev => ({ ...prev, lat: newLat }));
+                          }
+                        }}
+                        className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                        dir="ltr"
+                        min="-90"
+                        max="90"
+                      />
+                    </div>
+                    <div>
+                      <label className={`block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('onboardingBranch.form.step3.location.longitude') || 'خط الطول'}
+                      </label>
+                      <input
+                        title='bumber2'
+                        type="number"
+                        step="1"
+                        value={selectedLatLng.lng}
+                        onChange={(e) => {
+                          const newLng = parseFloat(e.target.value) || 0;
+                          if (newLng >= -180 && newLng <= 180) {
+                            setSelectedLatLng(prev => ({ ...prev, lng: newLng }));
+                          }
+                        }}
+                        className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                        dir="ltr"
+                        min="-180"
+                        max="180"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 {/* Info Box */}
-                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-xl">
                   <div className={`flex items-start space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
                     <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                     <div className={`text-sm text-blue-700 dark:text-blue-300 ${isRTL ? 'text-right' : 'text-left'}`}>
-                      <p className="font-medium mb-1">
+                      <p className="font-medium mb-2">
                         {t('onboardingBranch.form.step3.location.mapHelp') || 'كيفية استخدام الخريطة:'}
                       </p>
-                      <ul className={`space-y-1 ${isRTL ? 'mr-4' : 'ml-4'}`}>
-                        <li>{t('onboardingBranch.form.step3.location.mapHelp1') || '• اضغط على "استخدم موقعي الحالي" للحصول على موقعك تلقائيًا'}</li>
-                        <li>{t('onboardingBranch.form.step3.location.mapHelp2') || '• أو أدخل خطوط العرض والطول يدويًا'}</li>
-                        <li>{t('onboardingBranch.form.step3.location.mapHelp3') || '• يمكنك نسخ الإحداثيات من خرائط جوجل'}</li>
+                      <ul className={`space-y-1.5 ${isRTL ? 'mr-4' : 'ml-4'}`}>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">①</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp1') || 'الصق رابط خرائط جوجل في الحقل أعلاه'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">②</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp2') || 'أو اضغط "استخدم موقعي الحالي"'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">③</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp3') || 'أو أدخل الإحداثيات يدويًا'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">④</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp4') || 'افتح الخريطة الكاملة لتحديد الموقع بدقة'}</span>
+                        </li>
                       </ul>
                     </div>
+                  </div>
+                </div>
+
+                {/* Current Selected Coordinates Display */}
+                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <span className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.selectedCoordinates') || 'الإحداثيات المحددة:'}
+                    </span>
+                    <code className="text-sm font-mono text-primary-600 dark:text-primary-400" dir="ltr">
+                      {selectedLatLng.lat.toFixed(6)}, {selectedLatLng.lng.toFixed(6)}
+                    </code>
                   </div>
                 </div>
               </div>
@@ -777,16 +952,16 @@ const OnboardingBranch: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleCloseMapModal}
-                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                  className="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium"
                 >
                   {t('onboardingBranch.buttons.cancel') || 'إلغاء'}
                 </button>
                 <button
                   type="button"
                   onClick={handleConfirmLocation}
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                  className="px-5 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium shadow-sm"
                 >
-                  {t('onboardingBranch.buttons.confirm') || 'تأكيد'}
+                  {t('onboardingBranch.buttons.confirm') || 'تأكيد الموقع'}
                 </button>
               </div>
             </motion.div>
@@ -854,6 +1029,7 @@ const OnboardingBranch: React.FC = () => {
               id="whatsappCountryCode"
               name="whatsappCountryCode"
               value={whatsappCountryCode}
+           
               onChange={handleWhatsappCountryCodeChange}
               className={`h-full py-3 pl-3 pr-8 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
               aria-label={t('onboardingBranch.form.step1.whatsappNumber.ariaLabel')}
@@ -880,7 +1056,8 @@ const OnboardingBranch: React.FC = () => {
               name="whatsappOrderNumber"
               type="tel"
               autoComplete="tel-national"
-              value={formData.whatsappOrderNumber || '' }
+              maxLength={10}
+              value={formData.whatsappOrderNumber || ''}
               onChange={handleWhatsappNationalPhoneChange}
               className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
                 errors.whatsappOrderNumber
@@ -1163,7 +1340,8 @@ const OnboardingBranch: React.FC = () => {
               name="contact.phone"
               type="tel"
               autoComplete="tel-national"
-              value={formData.createContactDto.phone || ''}
+              maxLength={10}
+              value={formData.createContactDto.phone ||  ''}
               onChange={handleContactNationalPhoneChange}
               className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
                 errors['createContactDto.phone']

@@ -387,7 +387,7 @@ const OnboardingRestaurant: React.FC = () => {
     }
   };
 
-  const renderStep1 = () => (
+const renderStep1 = () => (
     <div className="space-y-6">
       <div className="text-center mb-8">
         <Store className="h-12 w-12 mx-auto text-primary-600 mb-4" />
@@ -401,9 +401,16 @@ const OnboardingRestaurant: React.FC = () => {
 
       {/* Restaurant Name */}
       <div>
-        <label htmlFor="restaurantName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {t('onboardingRestaurant.step1.nameLabel')}
-        </label>
+        {/* --- MODIFIED: Added flex container for label and counter --- */}
+        <div className={`flex justify-between items-center mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <label htmlFor="restaurantName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('onboardingRestaurant.step1.nameLabel')}
+          </label>
+          {/* --- ADDED: Character counter --- */}
+          <span className="text-sm text-gray-500 dark:text-gray-400" aria-live="polite">
+            {formData.restaurantName.length} / 50
+          </span>
+        </div>
         <div className="relative">
           <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
@@ -412,6 +419,7 @@ const OnboardingRestaurant: React.FC = () => {
             name="restaurantName"
             value={formData.restaurantName}
             onChange={handleInputChange}
+            maxLength={50} 
             className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.restaurantName
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
@@ -677,6 +685,7 @@ const OnboardingRestaurant: React.FC = () => {
             name="taxNumber"
             value={formData.taxNumber}
             onChange={handleInputChange}
+            maxLength={10}
             className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.taxNumber
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
