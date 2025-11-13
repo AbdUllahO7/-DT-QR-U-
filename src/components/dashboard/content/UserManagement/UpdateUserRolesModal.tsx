@@ -65,18 +65,18 @@ const UpdateUserRolesModal: React.FC<UpdateUserRolesModalProps> = ({
     }
   }, [user, allRoles, isOpen]); // Rerun when modal opens or user/global roles change
 
-  // Hook 2: Set the user's current roles as "selected"
-  useEffect(() => {
-    if (user && displayRoles) {
-      // Map role names (user.roles) to role IDs (displayRoles)
-      const activeRoleIds = displayRoles
-        .filter(role => user.roles.includes(role.name))
-        .map(role => role.roleId);
-      setSelectedRoles(activeRoleIds);
-    } else {
-      setSelectedRoles([]); // Clear selection if no user or roles
-    }
-  }, [user, displayRoles]); // Rerun when user or the list of displayable roles changes
+// Hook 2: Set the user's current roles as "selected"
+useEffect(() => {
+  if (user && displayRoles) {
+    // Map role names (user.roles) to role IDs (displayRoles)
+    const activeRoleIds = displayRoles
+      .filter(role => user.roles.includes(role.name))
+      .map(role => role.appRoleId); // <-- FIX: Use appRoleId here, not roleId
+    setSelectedRoles(activeRoleIds);
+  } else {
+    setSelectedRoles([]); // Clear selection if no user or roles
+  }
+}, [user, displayRoles]); // Rerun when user or the list of displayable roles changes
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,8 +148,8 @@ const UpdateUserRolesModal: React.FC<UpdateUserRolesModalProps> = ({
                   >
                     <input
                       type="checkbox"
-                      checked={selectedRoles.includes(role.roleId)}
-                      onChange={() => handleRoleToggle(role.roleId)}
+                      checked={selectedRoles.includes(role.appRoleId)}
+                      onChange={() => handleRoleToggle(role.appRoleId)}
                       className="mt-0.5 h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                     />
                     <div className="flex-1 min-w-0">
