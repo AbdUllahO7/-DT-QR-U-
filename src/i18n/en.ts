@@ -3631,6 +3631,13 @@ export const en = {
       price_change_title : "Price Change",
       confirm:"Confirm",
       cancel:"Cancel",
+      cancel_Reason_prompt_title:"Cancellation Reason", 
+      reason:"Reason Extension Box", 
+      submit: "Send",
+      confirm_cancel_title: "The reason you wrote will reach the restaurant.",
+      cancel_order_confirm: "Are you sure you want to cancel the order?", 
+            order_cancelled_success:"Your order has been successfully canceled.",
+
       success:"Success",
     order_can_be_updated: 'Order can be updated',
         time_remaining: 'Time remaining',

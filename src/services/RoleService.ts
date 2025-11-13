@@ -93,23 +93,31 @@ class RoleService {
    * POST /api/Roles
    * Creates a new role.
    */
-  async createRole(roleData: CreateRoleDto): Promise<ApiResponse<Role>> {
+async createRole(roleData: CreateRoleDto): Promise<ApiResponse<Role>> {
     try {
       logger.info('🔍 createRole çağrılıyor...', roleData, { prefix: 'RoleService' });
       
-      // Create a copy of the data to send
-      const apiData = { ...roleData };
-      // If branchId is 0, null, or undefined, remove it from the object
-      if (!apiData.branchId) {
-        delete apiData.branchId;
-      }
+      // 1. Destructure to separate branchId from the rest of the data
+      const { branchId, ...roleBodyData } = roleData;
 
-      console.log("apiData",apiData)
-      const response = await apiRequest<Role>({
-        method: 'POST',
+      // 2. Create the request configuration object
+      const requestConfig = {
+        method: 'POST' as const,
         url: `/api/Roles`,
-        data: apiData 
-      });
+        data: roleBodyData, // Send the rest of the data as the request body
+        params: {} as { branchId?: number } // Initialize params object
+      };
+
+      // 3. Conditionally add branchId to the query parameters
+      if (branchId) {
+        requestConfig.params.branchId = branchId;
+      }
+      
+      // This will log the final config, e.g., { ..., data: { roleName: ... }, params: { branchId: 123 } }
+      console.log("apiData ve params:", requestConfig);
+        
+      // 4. Send the request with the new configuration
+      const response = await apiRequest<Role>(requestConfig);
 
       logger.info('✅ createRole başarılı', response, { prefix: 'RoleService' });
       
