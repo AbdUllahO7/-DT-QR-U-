@@ -100,7 +100,7 @@ export const validateBranchForm = (formData: any): ValidationErrors => {
     errors['address.street'] = 'Sokak gereklidir';
   }
   if (!formData.createAddressDto?.addressLine1?.trim()) {
-    errors['address.addressLine1'] = 'Adres satırı 1 gereklidir';
+    errors['address.addressLine1'] = 'Adres satırı  gereklidir';
   }
   if (!formData.createAddressDto?.zipCode?.trim()) {
     errors['address.zipCode'] = 'Posta kodu gereklidir';
