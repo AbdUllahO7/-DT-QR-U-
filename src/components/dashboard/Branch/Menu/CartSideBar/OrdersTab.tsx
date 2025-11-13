@@ -4,7 +4,7 @@ import type React from "react"
 import { useState } from "react" // Removed useEffect as it wasn't used
 import { Clock, CheckCircle, ClipboardList, Loader2, Edit, X, Save, AlertCircle, RefreshCw, Plus, Minus, Trash2 } from "lucide-react"
 import { useLanguage } from "../../../../../contexts/LanguageContext"
-import { OrderCardProps, OrdersTabProps, TrackedOrder } from "../../../../../types/menu/carSideBarTypes"
+import { OrderCardProps, OrdersTabProps } from "../../../../../types/menu/carSideBarTypes"
 import { orderService } from "../../../../../services/Branch/OrderService"
 import { UpdatableOrder, UpdatePendingOrderDto, UpdatePendingOrderItemDto, CancelOrderDto } from "../../../../../types/Orders/type"
 import { OrderItem } from "../../../../../types/BranchManagement/type"
@@ -293,7 +293,6 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
         ...updateDto,
         priceChangesConfirmed: true
       };
-      
       await orderService.updatePendingOrder(dtoWithConfirm)
       setAlertModal({ isOpen: true, title: t('menu.cart.success') || 'Success', message: t('menu.cart.order_updated_success') || 'Order updated successfully!'});
       handleCancelEdit()

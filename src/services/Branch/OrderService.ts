@@ -629,7 +629,6 @@ class OrderService {
       const url = branchId 
         ? `${this.baseUrl}/updatepending?branchId=${branchId}`
         : `${this.baseUrl}/updatepending`;
-        
       const response = await httpClient.put<Order>(url, data);
       
       logger.info('Pending order başarıyla güncellendi', { 

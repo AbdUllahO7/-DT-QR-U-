@@ -1,8 +1,10 @@
+"use client" // Added this based on your other files
+
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingCart, AlertCircle, Loader2, ChevronDown, ChevronUp, 
          User, MapPin, Phone, Table, CheckCircle, ChevronLeft, ChevronRight, ArrowRight, ArrowLeft, 
-         Clock, CreditCard, Banknote, Smartphone } from 'lucide-react';
-import { CreateSessionOrderDto, theme } from '../../../../types/BranchManagement/type';
+         Clock, CreditCard, Banknote, Smartphone, ClipboardList } from 'lucide-react'; // Added ClipboardList
+import { CreateSessionOrderDto, theme, Order } from '../../../../types/BranchManagement/type'; // Added Order
 import { BasketResponse, onlineMenuService, BasketItem } from '../../../../services/Branch/Online/OnlineMenuService';
 import { OrderType, orderTypeService } from '../../../../services/Branch/BranchOrderTypeService';
 import { basketService } from '../../../../services/Branch/BasketService';
@@ -11,6 +13,10 @@ import WhatsAppConfirmationModal from '../Menu/CartSideBar/WhatsAppConfirmationM
 import { WhatsAppService } from '../../../../services/WhatsAppService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import ToastComponent from '../Menu/CartSideBar/ToastComponenet';
+// --- ADDED IMPORTS ---
+import { TrackedOrder } from '../../../../types/menu/carSideBarTypes'; // Assuming path
+import { UpdatableOrder } from '../../../../types/Orders/type'; // Assuming path
+import OrdersTab from '../Menu/CartSideBar/OrdersTab'; // Assuming path
 
 export interface Toast {
   id: string;
@@ -28,7 +34,8 @@ interface OnlineCartSidebarProps {
   menuData?: any;
 }
 
-type CheckoutStep = 'cart' | 'order-type' | 'information';
+type CartStep = 'cart' | 'order-type' | 'information';
+type ActiveTab = 'cart' | 'orders'; // <-- NEW
 
 const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   isOpen,
@@ -41,6 +48,9 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
   
+  // --- TAB MANAGEMENT ---
+  const [activeTab, setActiveTab] = useState<ActiveTab>('cart');
+  
   // Cart States
   const [updatingItemId, setUpdatingItemId] = useState<number | null>(null);
   const [deletingItemId, setDeletingItemId] = useState<number | null>(null);
@@ -49,7 +59,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const [addingAddonToItem, setAddingAddonToItem] = useState<number | null>(null);
   
   // Checkout Step Management
-  const [currentStep, setCurrentStep] = useState<CheckoutStep>('cart');
+  const [cartStep, setCartStep] = useState<CartStep>('cart'); // <-- Renamed from currentStep
   
   // Order Type States
   const [orderTypes, setOrderTypes] = useState<OrderType[]>([]);
@@ -75,17 +85,27 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const [whatsappSending, setWhatsappSending] = useState<boolean>(false);
   const [createdOrderTag, setCreatedOrderTag] = useState<string | null>(null);
 
+  // --- NEW ORDER TRACKING STATES ---
+  const [trackedOrders, setTrackedOrders] = useState<TrackedOrder[]>([]);
+  const [trackingLoading, setTrackingLoading] = useState(false);
+  const [updatableOrders, setUpdatableOrders] = useState<UpdatableOrder[]>([]);
+
   // Toast States
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   // Toast Functions
   const addToast = (message: string, type: Toast['type'], duration?: number) => {
     const id = Math.random().toString(36).substring(7);
-    setToasts(prev => [...prev, { id, message, type, duration }]);
+    setToasts(prev => [...prev, { id, message, type, duration: duration || (type === 'loading' ? 0 : 3000) }]);
+    return id;
   };
 
   const removeToast = (id: string) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
+  
+  const updateToast = (id: string, message: string, type: Toast['type'], duration?: number) => {
+    setToasts(prev => prev.map(t => t.id === id ? { ...t, message, type, duration: duration || 3000 } : t));
   };
 
   const items = basket?.items || basket?.basketItems || [];
@@ -106,11 +126,8 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   // ADDED: WhatsApp Service function - same as useCartHandlers
   const sendOrderToWhatsApp = async (whatsappData: any) => {
     try {
-
       const whatsappNumber = WhatsAppService.formatWhatsAppNumber(whatsAppPhoneNumber);
-      
       await WhatsAppService.sendOrderToWhatsApp(whatsappNumber, whatsappData);
-      
     } catch (error) {
       console.error('❌ Error sending WhatsApp notification:', error);
       throw error;
@@ -120,10 +137,151 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   // Reset to cart view when sidebar opens
   useEffect(() => {
     if (isOpen) {
-      setCurrentStep('cart');
+      // Don't reset tab, user might want to see orders
+      setCartStep('cart');
       resetForm();
     }
   }, [isOpen]);
+
+  // --- ALL NEW TRACKING LOGIC ---
+
+  // Load tracked orders from localStorage on mount
+  useEffect(() => {
+    const savedOrders = localStorage.getItem('onlineTrackedOrders'); // Use a different key
+    if (savedOrders) {
+      try {
+        const parsed = JSON.parse(savedOrders) as TrackedOrder[];
+        setTrackedOrders(parsed.map(order => ({
+          ...order,
+          createdAt: new Date(order.createdAt)
+        })));
+      } catch (err) {
+        console.error('Error parsing saved orders:', err);
+        localStorage.removeItem('onlineTrackedOrders');
+      }
+    }
+  }, []);
+
+  // Save tracked orders to localStorage whenever it changes
+  useEffect(() => {
+    if (trackedOrders.length > 0) {
+      localStorage.setItem('onlineTrackedOrders', JSON.stringify(trackedOrders));
+    } else {
+      localStorage.removeItem('onlineTrackedOrders');
+    }
+  }, [trackedOrders]);
+
+  // Fetch updatable orders
+  const fetchUpdatableOrders = async () => {
+    try {
+      if (trackedOrders.length === 0) {
+        setUpdatableOrders([]);
+        return;
+      }
+      
+      // We assume getUpdatableOrders works for the current user session
+      const orders = await orderService.getUpdatableOrders();
+      setUpdatableOrders(orders);
+    } catch (error) {
+      console.error("Failed to fetch updatable orders:", error);
+      // Don't show toast, this runs in background
+      setUpdatableOrders([]);
+    }
+  };
+
+  // Auto-refresh all pending orders
+  useEffect(() => {
+    let interval: ReturnType<typeof setInterval> | null = null;
+    
+    const hasPending = trackedOrders.some(order => 
+      order.trackingInfo.orderStatus.toLowerCase() === 'pending'
+    );
+    
+    if (activeTab === 'orders' && hasPending) {
+      interval = setInterval(() => {
+        refreshAllPendingOrders();
+        fetchUpdatableOrders(); // Also refresh updatable orders
+      }, 15000); // 15 seconds
+    }
+    
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [activeTab, trackedOrders]);
+
+  // Fetch updatable orders when tracked orders change
+  useEffect(() => {
+    if (activeTab === 'orders') {
+      fetchUpdatableOrders();
+    }
+  }, [trackedOrders, activeTab]);
+
+  const loadOrderTracking = async (orderTag: string) => {
+    let toastId = addToast(t('menu.cart.refreshing_order') || 'Refreshing order...', 'loading');
+    try {
+      setTrackingLoading(true);
+      const trackingInfo = await orderService.trackOrder(orderTag);
+      
+      setTrackedOrders(prev =>
+        prev.map(order =>
+          order.orderTag === orderTag ? { ...order, trackingInfo } : order
+        )
+      );
+      updateToast(toastId, t('menu.cart.order_refreshed') || 'Order status updated!', 'success');
+    } catch (error: any) {
+      console.error('Error loading order tracking:', error);
+      updateToast(toastId, error.message || t('menu.cart.order_refresh_failed') || 'Failed to refresh order', 'error');
+    } finally {
+      setTrackingLoading(false);
+    }
+  };
+  
+  const removeOrderFromTracking = (orderTag: string) => {
+    setTrackedOrders(prev => prev.filter(order => order.orderTag !== orderTag));
+    setUpdatableOrders(prev => prev.filter(order => order.orderTag !== orderTag));
+    addToast(t('menu.cart.order_removed') || 'Order removed from list', 'success');
+  };
+
+  const refreshAllPendingOrders = async () => {
+    const pendingOrders = trackedOrders.filter(
+      order => order.trackingInfo.orderStatus.toLowerCase() === 'pending'
+    );
+    
+    if (pendingOrders.length === 0) return;
+
+    setTrackingLoading(true);
+    try {
+      const updates = pendingOrders.map(order => 
+        orderService.trackOrder(order.orderTag)
+      );
+      const results = await Promise.allSettled(updates);
+
+      setTrackedOrders(prev => {
+        const newTrackedOrders = [...prev];
+        results.forEach((result, index) => {
+          if (result.status === 'fulfilled') {
+            const updatedTag = pendingOrders[index].orderTag;
+            const orderIndex = newTrackedOrders.findIndex(o => o.orderTag === updatedTag);
+            if (orderIndex > -1) {
+              newTrackedOrders[orderIndex] = {
+                ...newTrackedOrders[orderIndex],
+                trackingInfo: result.value
+              };
+            }
+          }
+        });
+        return newTrackedOrders;
+      });
+
+    } catch (error) {
+      console.error('Error during auto-refresh:', error);
+    } finally {
+      setTrackingLoading(false);
+    }
+  };
+
+  // --- END OF NEW TRACKING LOGIC ---
+
 
   const resetForm = () => {
     setCustomerName('');
@@ -136,6 +294,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     setPendingWhatsAppData(null);
     setShowWhatsAppConfirmation(false);
     setCreatedOrderTag(null);
+    // Do NOT reset tracked orders
   };
 
   const formatPrice = (price: number) => {
@@ -322,7 +481,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       }
       
       setOrderTypes(availableTypes);
-      setCurrentStep('order-type');
+      setCartStep('order-type');
     } catch (err: any) {
       setOrderTypeError(err.message || t('order.form.failedToLoadOrderTypes'));
     } finally {
@@ -339,17 +498,36 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     if (!orderType.requiresAddress) setDeliveryAddress('');
     if (!orderType.requiresPhone) setCustomerPhone('');
 
-    setCurrentStep('information');
+    setCartStep('information');
   };
 
   const handleBackToCart = () => {
-    setCurrentStep('cart');
+    setCartStep('cart');
     resetForm();
   };
 
   const handleBackToOrderTypes = () => {
-    setCurrentStep('order-type');
+    setCartStep('order-type');
     setValidationErrors({});
+  };
+  
+  // --- NEW: Function to add order to tracking ---
+  const addOrderToTracking = (order: Order) => {
+    const newTrackedOrder: TrackedOrder = {
+      orderTag: order.orderTag || '',
+      createdAt: new Date(order.createdAt),
+     // Around line 609
+        trackingInfo: {
+          orderTag: order.orderTag || '',
+          orderId: order.orderId,
+         orderStatus: order.status, 
+          totalPrice: order.totalPrice,
+          orderTypeName: selectedOrderType?.name || '',
+          customerName: order.customerName || customerName || '',
+          notes: order.notes || '',
+        }
+    };
+    setTrackedOrders(prev => [newTrackedOrder, ...prev.filter(o => o.orderTag !== newTrackedOrder.orderTag)]);
   };
 
   const validateForm = (): boolean => {
@@ -426,6 +604,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       
       if (order.orderTag) {
         setCreatedOrderTag(order.orderTag);
+        addOrderToTracking(order); // <-- ADDED
       }
       
       await onBasketUpdate();
@@ -434,8 +613,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       
       // Calculate service charge
       const serviceChargeAmount = selectedOrderType!.serviceCharge || 0;
-
-  
       
       // Create WhatsApp preferences object matching useCartHandlers format
       const whatsappPreferences = {
@@ -444,10 +621,8 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       };
       
       const shouldShowWhatsApp = order.orderTag && WhatsAppService.isWhatsAppEnabled(whatsappPreferences);
-
       
       if (shouldShowWhatsApp) {
-        
         // Prepare WhatsApp data matching useCartHandlers format
         const whatsappData = {
           orderTag: order.orderTag,
@@ -471,7 +646,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
           serviceCharge: serviceChargeAmount
         };
         
-        
         setPendingWhatsAppData(whatsappData);
         setShowWhatsAppConfirmation(true);
         setSubmittingOrder(false);
@@ -479,10 +653,14 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         // Exit early - let WhatsApp handlers handle cleanup
         return;
       } else {
+        // --- UPDATED ---
+        // No WhatsApp, just clean up and switch to orders tab
         setTimeout(() => {
           resetForm();
-          onClose();
-        }, 2000);
+          setCartStep('cart'); // Reset cart step
+          setActiveTab('orders'); // Switch to orders tab
+          // onClose(); // Don't close, show the orders tab
+        }, 1000);
       }
     } catch (err: any) {
       console.error('❌ Error creating order:', err);
@@ -500,20 +678,17 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     
     try {
       setWhatsappSending(true);
-      toastId = Math.random().toString(36).substring(7);
-      addToast(t('menu.cart.sending_whatsapp') || 'Sending WhatsApp message...', 'loading');
+      toastId = addToast(t('menu.cart.sending_whatsapp') || 'Sending WhatsApp message...', 'loading');
 
       // Use the sendOrderToWhatsApp function that matches useCartHandlers
       await sendOrderToWhatsApp(pendingWhatsAppData);
       
-      if (toastId) removeToast(toastId);
-      addToast(t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!', 'success', 3000);
+      if (toastId) updateToast(toastId, t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!', 'success');
 
     } catch (error) {
       console.error('❌ Error sending WhatsApp message:', error);
       
-      if (toastId) removeToast(toastId);
-      addToast(t('menu.cart.whatsapp_send_failed') || 'Failed to send WhatsApp message', 'error', 3000);
+      if (toastId) updateToast(toastId, t('menu.cart.whatsapp_send_failed') || 'Failed to send WhatsApp message', 'error');
     } finally {
       setWhatsappSending(false);
       
@@ -521,10 +696,12 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       setShowWhatsAppConfirmation(false);
       setPendingWhatsAppData(null);
       
-      // Reset form and close sidebar
+      // Reset form and switch to orders tab
       setTimeout(() => {
         resetForm();
-        onClose();
+        setCartStep('cart');
+        setActiveTab('orders');
+        // onClose(); // Don't close
       }, 1000);
     }
   };
@@ -537,7 +714,9 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     
     setTimeout(() => {
       resetForm();
-      onClose();
+      setCartStep('cart');
+      setActiveTab('orders');
+      // onClose(); // Don't close
     }, 500);
   };
 
@@ -573,8 +752,10 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
   if (!isOpen) return null;
 
+  // --- UPDATED TITLE ---
   const getStepTitle = () => {
-    switch (currentStep) {
+    if (activeTab === 'orders') return t('menu.cart.orders');
+    switch (cartStep) {
       case 'cart':
         return t('menu.cart.title');
       case 'order-type':
@@ -596,12 +777,18 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         {/* Header */}
         <div className="bg-gradient-to-r from-slate-600 to-slate-600 dark:from-slate-700 dark:to-slate-700 px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <ShoppingCart className="w-6 h-6 text-white" />
+            {activeTab === 'cart' ? (
+              <ShoppingCart className="w-6 h-6 text-white" />
+            ) : (
+              <ClipboardList className="w-6 h-6 text-white" />
+            )}
             <div>
               <h2 className="text-xl font-bold text-white">{getStepTitle()}</h2>
-              <p className="text-emerald-100 text-sm">
-                {currentStep === 'cart' && `${itemCount} ${t('menu.items')}`}
-              </p>
+              {activeTab === 'cart' && (
+                <p className="text-emerald-100 text-sm">
+                  {itemCount} {t('menu.items')}
+                </p>
+              )}
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white">
@@ -609,605 +796,666 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
           </button>
         </div>
 
-        {/* Step Indicators - Only show during checkout */}
-        {currentStep !== 'cart' && (
-          <div className="flex border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50">
-            <button
-              onClick={handleBackToCart}
-              className="flex-1 py-3 px-4 text-sm font-medium transition-colors text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold bg-slate-300 dark:bg-slate-600 text-slate-600 dark:text-slate-300">
-                  ✓
+        {/* --- NEW TABS --- */}
+        <div className="flex border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50">
+          <button
+            onClick={() => {
+              setActiveTab('cart');
+              setCartStep('cart');
+            }}
+            className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
+              activeTab === 'cart'
+                ? 'text-orange-600 border-b-2 border-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+          >
+            <div className="flex items-center justify-center space-x-2">
+              <ShoppingCart className="h-4 w-4" />
+              <span>{t('menu.cart.newOrder')}</span>
+              {itemCount > 0 && (
+                <span className="bg-orange-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {itemCount}
                 </span>
-                <span>{t('menu.cart.title')}</span>
-              </div>
-            </button>
-            <button
-              onClick={currentStep === 'information' ? handleBackToOrderTypes : undefined}
-              disabled={currentStep === 'order-type'}
-              className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                currentStep === 'order-type'
-                  ? 'text-orange-600 border-b-2 border-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer'
-              }`}
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-                  currentStep === 'order-type' 
-                    ? 'bg-orange-500 text-white' 
-                    : 'bg-slate-300 dark:bg-slate-600 text-slate-600 dark:text-slate-300'
-                }`}>
-                  1
+              )}
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
+              activeTab === 'orders'
+                ? 'text-orange-600 border-b-2 border-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+            }`}
+          >
+            <div className="flex items-center justify-center space-x-2">
+              <ClipboardList className="h-4 w-4" />
+              <span>{t('menu.cart.orders')}</span>
+              {trackedOrders.filter(o => o.trackingInfo.orderStatus.toLowerCase() === 'pending').length > 0 && (
+                <span className="bg-yellow-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {trackedOrders.filter(o => o.trackingInfo.orderStatus.toLowerCase() === 'pending').length}
                 </span>
-                <span>{t('order.form.orderType')}</span>
-              </div>
-            </button>
-            <button
-              disabled
-              className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-                currentStep === 'information'
-                  ? 'text-orange-600 border-b-2 border-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400'
-                  : 'text-slate-400 dark:text-slate-600'
-              }`}
-            >
-              <div className="flex items-center justify-center space-x-2">
-                <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-                  currentStep === 'information' 
-                    ? 'bg-orange-500 text-white' 
-                    : 'bg-slate-300 dark:bg-slate-600 text-slate-400'
-                }`}>
-                  2
-                </span>
-                <span>{t('order.form.information')}</span>
-              </div>
-            </button>
-          </div>
-        )}
+              )}
+            </div>
+          </button>
+        </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          {currentStep === 'cart' && (
-            /* CART VIEW */
-            itemCount === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full px-6 text-center">
-                <div className="p-6 bg-slate-100 dark:bg-slate-700 rounded-full mb-4">
-                  <ShoppingCart className="w-12 h-12 text-slate-400 dark:text-slate-500" />
+          {activeTab === 'cart' && (
+            <>
+              {/* Step Indicators - Only show during checkout */}
+              {cartStep !== 'cart' && (
+                <div className="flex border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50">
+                  <button
+                    onClick={handleBackToCart}
+                    className="flex-1 py-3 px-4 text-sm font-medium transition-colors text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                  >
+                    <div className="flex items-center justify-center space-x-2">
+                      <span className="flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold bg-slate-300 dark:bg-slate-600 text-slate-600 dark:text-slate-300">
+                        ✓
+                      </span>
+                      <span>{t('menu.cart.title')}</span>
+                    </div>
+                  </button>
+                  <button
+                    onClick={cartStep === 'information' ? handleBackToOrderTypes : undefined}
+                    disabled={cartStep === 'order-type'}
+                    className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
+                      cartStep === 'order-type'
+                        ? 'text-orange-600 border-b-2 border-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 cursor-pointer'
+                    }`}
+                  >
+                    <div className="flex items-center justify-center space-x-2">
+                      <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
+                        cartStep === 'order-type' 
+                          ? 'bg-orange-500 text-white' 
+                          : 'bg-slate-300 dark:bg-slate-600 text-slate-600 dark:text-slate-300'
+                      }`}>
+                        1
+                      </span>
+                      <span>{t('order.form.orderType')}</span>
+                    </div>
+                  </button>
+                  <button
+                    disabled
+                    className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
+                      cartStep === 'information'
+                        ? 'text-orange-600 border-b-2 border-orange-600 bg-orange-50 dark:bg-orange-900/20 dark:text-orange-400'
+                        : 'text-slate-400 dark:text-slate-600'
+                    }`}
+                  >
+                    <div className="flex items-center justify-center space-x-2">
+                      <span className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
+                        cartStep === 'information' 
+                          ? 'bg-orange-500 text-white' 
+                          : 'bg-slate-300 dark:bg-slate-600 text-slate-400'
+                      }`}>
+                        2
+                      </span>
+                      <span>{t('order.form.information')}</span>
+                    </div>
+                  </button>
                 </div>
-                <h3 className={`text-xl font-bold ${theme.text.primary} mb-2`}>{t('menu.cart.empty')}</h3>
-                <p className={theme.text.secondary}>{t('menu.cart.emptyDesc')}</p>
-              </div>
-            ) : (
-              <div className="p-4 space-y-4">
-                {items.map((item) => {
-                  const itemAddons = item.addons || item.addonItems || [];
-                  const availableAddons = getAvailableAddonsForProduct(item);
-                  const isExpanded = expandedItems.has(item.basketItemId);
+              )}
 
-                  return (
-                    <div key={item.basketItemId} className="bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
-                      <div className="p-4">
-                        <div className="flex items-start gap-3">
-                          {item.imageUrl && (
-                            <img src={item.imageUrl} alt={item.productName} className="w-20 h-20 object-cover rounded-lg" />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <h3 className={`font-semibold ${theme.text.primary} mb-1`}>{item.productName}</h3>
-                            <p className="text-sm text-emerald-600 font-semibold mb-2">
-                              {formatPrice(item.price || item.price)}
-                            </p>
+              {cartStep === 'cart' && (
+                /* CART VIEW */
+                itemCount === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full px-6 text-center">
+                    <div className="p-6 bg-slate-100 dark:bg-slate-700 rounded-full mb-4">
+                      <ShoppingCart className="w-12 h-12 text-slate-400 dark:text-slate-500" />
+                    </div>
+                    <h3 className={`text-xl font-bold ${theme.text.primary} mb-2`}>{t('menu.cart.empty')}</h3>
+                    <p className={theme.text.secondary}>{t('menu.cart.emptyDesc')}</p>
+                  </div>
+                ) : (
+                  <div className="p-4 space-y-4">
+                    {items.map((item) => {
+                      const itemAddons = item.addons || item.addonItems || [];
+                      const availableAddons = getAvailableAddonsForProduct(item);
+                      const isExpanded = expandedItems.has(item.basketItemId);
 
-                            <div className="flex items-center gap-3">
-                              <div className="flex items-center gap-2 bg-white dark:bg-slate-700 rounded-lg p-1">
-                                <button
-                                  onClick={() => handleUpdateQuantity(item.basketItemId, item.quantity, -1)}
-                                  disabled={updatingItemId === item.basketItemId}
-                                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
-                                >
-                                  <Minus className="w-4 h-4" />
-                                </button>
-                                <span className="font-bold min-w-[2rem] text-center">{item.quantity}</span>
-                                <button
-                                  onClick={() => handleUpdateQuantity(item.basketItemId, item.quantity, 1)}
-                                  disabled={updatingItemId === item.basketItemId}
-                                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
-                                >
-                                  <Plus className="w-4 h-4" />
-                                </button>
-                              </div>
+                      return (
+                        <div key={item.basketItemId} className="bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                          <div className="p-4">
+                            <div className="flex items-start gap-3">
+                              {item.imageUrl && (
+                                <img src={item.imageUrl} alt={item.productName} className="w-20 h-20 object-cover rounded-lg" />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <h3 className={`font-semibold ${theme.text.primary} mb-1`}>{item.productName}</h3>
+                                <p className="text-sm text-emerald-600 font-semibold mb-2">
+                                  {formatPrice(item.price || item.price)}
+                                </p>
 
-                              <button
-                                onClick={() => handleDeleteItem(item.basketItemId)}
-                                disabled={deletingItemId === item.basketItemId}
-                                className="ml-auto p-2 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg text-red-500 transition-colors disabled:opacity-50"
-                              >
-                                {deletingItemId === item.basketItemId ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                  <Trash2 className="w-4 h-4" />
-                                )}
-                              </button>
-                            </div>
+                                <div className="flex items-center gap-3">
+                                  <div className="flex items-center gap-2 bg-white dark:bg-slate-700 rounded-lg p-1">
+                                    <button
+                                      onClick={() => handleUpdateQuantity(item.basketItemId, item.quantity, -1)}
+                                      disabled={updatingItemId === item.basketItemId}
+                                      className="p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
+                                    >
+                                      <Minus className="w-4 h-4" />
+                                    </button>
+                                    <span className="font-bold min-w-[2rem] text-center">{item.quantity}</span>
+                                    <button
+                                      onClick={() => handleUpdateQuantity(item.basketItemId, item.quantity, 1)}
+                                      disabled={updatingItemId === item.basketItemId}
+                                      className="p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
+                                    >
+                                      <Plus className="w-4 h-4" />
+                                    </button>
+                                  </div>
 
-                            <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
-                              <div className="flex items-center justify-between">
-                                <span className={`text-xs ${theme.text.secondary}`}>{t('menu.cart.total')}</span>
-                                <span className="font-bold text-emerald-600">{formatPrice(item.totalPrice)}</span>
+                                  <button
+                                    onClick={() => handleDeleteItem(item.basketItemId)}
+                                    disabled={deletingItemId === item.basketItemId}
+                                    className="ml-auto p-2 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg text-red-500 transition-colors disabled:opacity-50"
+                                  >
+                                    {deletingItemId === item.basketItemId ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <Trash2 className="w-4 h-4" />
+                                    )}
+                                  </button>
+                                </div>
+
+                                <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
+                                  <div className="flex items-center justify-between">
+                                    <span className={`text-xs ${theme.text.secondary}`}>{t('menu.cart.total')}</span>
+                                    <span className="font-bold text-emerald-600">{formatPrice(item.totalPrice)}</span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
 
-                      {/* Addons */}
-                      {(itemAddons.length > 0 || availableAddons.length > 0) && (
-                        <div className="border-t border-slate-200 dark:border-slate-700">
-                          <button
-                            onClick={() => toggleItemExpanded(item.basketItemId)}
-                            className="w-full px-4 py-2 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                          >
-                            <span className={`text-sm font-semibold ${theme.text.primary}`}>
-                              Add-ons {itemAddons.length > 0 && `(${itemAddons.length})`}
-                            </span>
-                            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                          </button>
+                          {/* Addons */}
+                          {(itemAddons.length > 0 || availableAddons.length > 0) && (
+                            <div className="border-t border-slate-200 dark:border-slate-700">
+                              <button
+                                onClick={() => toggleItemExpanded(item.basketItemId)}
+                                className="w-full px-4 py-2 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                              >
+                                <span className={`text-sm font-semibold ${theme.text.primary}`}>
+                                  Add-ons {itemAddons.length > 0 && `(${itemAddons.length})`}
+                                </span>
+                                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                              </button>
 
-                          {isExpanded && (
-                            <div className="px-4 pb-4 space-y-3">
-                              {itemAddons.map((addon) => {
-                                const addonId = addon.addonBasketItemId || addon.basketItemId;
-                                const addonName = addon.addonName || addon.productName;
-                                const addonPrice = addon.specialPrice || addon.price;
+                              {isExpanded && (
+                                <div className="px-4 pb-4 space-y-3">
+                                  {itemAddons.map((addon) => {
+                                    const addonId = addon.addonBasketItemId || addon.basketItemId;
+                                    const addonName = addon.addonName || addon.productName;
+                                    const addonPrice = addon.specialPrice || addon.price;
 
-                                return (
-                                  <div key={addonId} className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
-                                    <div className="flex-1">
-                                      <p className={`text-sm font-semibold ${theme.text.primary}`}>{addonName}</p>
-                                      <p className="text-xs text-emerald-600 font-semibold">{formatPrice(addonPrice)} each</p>
-                                    </div>
-
-                                    <div className="flex items-center gap-2 bg-white dark:bg-slate-700 rounded-lg p-1">
-                                      <button
-                                        onClick={() => handleUpdateAddonQuantity(addonId, addon.quantity, -1, addon.maxQuantity || 10)}
-                                        disabled={updatingItemId === addonId}
-                                        className="p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
-                                      >
-                                        <Minus className="w-3 h-3" />
-                                      </button>
-                                      <span className="font-bold text-sm min-w-[1.5rem] text-center">{addon.quantity}</span>
-                                      <button
-                                        onClick={() => handleUpdateAddonQuantity(addonId, addon.quantity, 1, addon.maxQuantity || 10)}
-                                        disabled={updatingItemId === addonId || addon.quantity >= (addon.maxQuantity || 10)}
-                                        className="p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
-                                      >
-                                        <Plus className="w-3 h-3" />
-                                      </button>
-                                    </div>
-
-                                    <button onClick={() => handleDeleteAddon(addonId)} className="p-1.5 hover:bg-red-100 dark:hover:bg-red-950/20 rounded text-red-500">
-                                      <X className="w-4 h-4" />
-                                    </button>
-                                  </div>
-                                );
-                              })}
-
-                              {availableAddons.length > 0 && (
-                                <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
-                                  <p className={`text-xs font-semibold ${theme.text.secondary} mb-2`}>Available Add-ons:</p>
-                                  <div className="space-y-2">
-                                    {availableAddons.map((addon: any) => (
-                                      <button
-                                        key={addon.branchProductAddonId}
-                                        onClick={() => handleAddAddonToItem(item.basketItemId, addon, item.quantity)}
-                                        disabled={addingAddonToItem === item.basketItemId}
-                                        className="w-full flex items-center justify-between p-2 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 rounded-lg transition-colors disabled:opacity-50"
-                                      >
-                                        <div className="flex items-center gap-2">
-                                          <Plus className="w-4 h-4 text-emerald-600" />
-                                          <span className={`text-sm ${theme.text.primary}`}>{addon.addonName}</span>
+                                    return (
+                                      <div key={addonId} className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
+                                        <div className="flex-1">
+                                          <p className={`text-sm font-semibold ${theme.text.primary}`}>{addonName}</p>
+                                          <p className="text-xs text-emerald-600 font-semibold">{formatPrice(addonPrice)} each</p>
                                         </div>
-                                        <span className="text-sm font-semibold text-emerald-600">
-                                          {formatPrice(addon.specialPrice || addon.price)}
-                                        </span>
-                                      </button>
-                                    ))}
-                                  </div>
+
+                                        <div className="flex items-center gap-2 bg-white dark:bg-slate-700 rounded-lg p-1">
+                                          <button
+                                            onClick={() => handleUpdateAddonQuantity(addonId, addon.quantity, -1, addon.maxQuantity || 10)}
+                                            disabled={updatingItemId === addonId}
+                                            className="p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
+                                          >
+                                            <Minus className="w-3 h-3" />
+                                          </button>
+                                          <span className="font-bold text-sm min-w-[1.5rem] text-center">{addon.quantity}</span>
+                                          <button
+                                            onClick={() => handleUpdateAddonQuantity(addonId, addon.quantity, 1, addon.maxQuantity || 10)}
+                                            disabled={updatingItemId === addonId || addon.quantity >= (addon.maxQuantity || 10)}
+                                            className="p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
+                                          >
+                                            <Plus className="w-3 h-3" />
+                                          </button>
+                                        </div>
+
+                                        <button onClick={() => handleDeleteAddon(addonId)} className="p-1.5 hover:bg-red-100 dark:hover:bg-red-950/20 rounded text-red-500">
+                                          <X className="w-4 h-4" />
+                                        </button>
+                                      </div>
+                                    );
+                                  })}
+
+                                  {availableAddons.length > 0 && (
+                                    <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+                                      <p className={`text-xs font-semibold ${theme.text.secondary} mb-2`}>Available Add-ons:</p>
+                                      <div className="space-y-2">
+                                        {availableAddons.map((addon: any) => (
+                                          <button
+                                            key={addon.branchProductAddonId}
+                                            onClick={() => handleAddAddonToItem(item.basketItemId, addon, item.quantity)}
+                                            disabled={addingAddonToItem === item.basketItemId}
+                                            className="w-full flex items-center justify-between p-2 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 rounded-lg transition-colors disabled:opacity-50"
+                                          >
+                                            <div className="flex items-center gap-2">
+                                              <Plus className="w-4 h-4 text-emerald-600" />
+                                              <span className={`text-sm ${theme.text.primary}`}>{addon.addonName}</span>
+                                            </div>
+                                            <span className="text-sm font-semibold text-emerald-600">
+                                              {formatPrice(addon.specialPrice || addon.price)}
+                                            </span>
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </div>
                           )}
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
+                      );
+                    })}
 
-                {itemCount > 0 && (
-                  <button
-                    onClick={handleClearBasket}
-                    disabled={isClearing}
-                    className="w-full py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    {isClearing ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Clearing...
-                      </span>
-                    ) : (
-                      t('menu.cart.clear')
-                    )}
-                  </button>
-                )}
-              </div>
-            )
-          )}
-
-          {currentStep === 'order-type' && (
-            /* ORDER TYPE SELECTION */
-            <div className="p-6">
-              {orderTypeError && (
-                <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="font-semibold text-red-900 dark:text-red-200">{t('common.error')}</p>
-                      <p className="text-sm text-red-700 dark:text-red-300 mt-1">{orderTypeError}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {loadingOrderTypes ? (
-                <div className="flex items-center justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
-                  <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-slate-600 dark:text-slate-400`}>
-                    {t('order.form.loadingOrderTypes')}
-                  </span>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {orderTypes.map((orderType) => {
-                    const calculatedTotal = total + orderType.serviceCharge;
-                    const isSelected = selectedOrderType?.id === orderType.id;
-                    
-                    return (
+                    {itemCount > 0 && (
                       <button
-                        key={orderType.id}
-                        onClick={() => handleOrderTypeSelect(orderType)}
-                        className={`w-full text-${isRTL ? 'right' : 'left'} p-4 border-2 rounded-lg transition-all ${
-                          isSelected
-                            ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                            : 'border-slate-300 dark:border-slate-600 hover:border-orange-300 dark:hover:border-orange-700'
-                        }`}
+                        onClick={handleClearBasket}
+                        disabled={isClearing}
+                        className="w-full py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors disabled:opacity-50"
                       >
-                        <div className="flex items-start gap-4">
-                          <div className="text-3xl flex-shrink-0">
-                            {orderType.icon}
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2 mb-2">
-                              <div>
-                                <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">
-                                  {orderType.name}
-                                </h3>
-                                <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                                  {orderType.description}
-                                </p>
-                              </div>
-                              {isSelected && (
-                                <CheckCircle className="w-5 h-5 text-orange-500 flex-shrink-0" />
-                              )}
-                            </div>
-
-                            <div className={`flex flex-wrap gap-2 mb-3 ${isRTL ? 'justify-end' : 'justify-start'}`}>
-                              {orderType.requiresName && (
-                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs rounded-full">
-                                  <User className="w-3 h-3" />
-                                  {t('order.form.name')}
-                                </span>
-                              )}
-                              {orderType.requiresTable && (
-                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-pink-100 dark:bg-pink-950/30 text-pink-700 dark:text-pink-300 text-xs rounded-full">
-                                  <Table className="w-3 h-3" />
-                                  {t('order.form.table')}
-                                </span>
-                              )}
-                              {orderType.requiresAddress && (
-                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 text-xs rounded-full">
-                                  <MapPin className="w-3 h-3" />
-                                  {t('order.form.address')}
-                                </span>
-                              )}
-                              {orderType.requiresPhone && (
-                                <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-300 text-xs rounded-full">
-                                  <Phone className="w-3 h-3" />
-                                  {t('order.form.phone')}
-                                </span>
-                              )}
-                            </div>
-
-                            <div className="space-y-1 text-xs">
-                              {orderType.minOrderAmount > 0 && (
-                                <p className="text-blue-600 dark:text-blue-400">
-                                  {t('order.form.minimumOrder')}: {formatPrice(orderType.minOrderAmount)}
-                                </p>
-                              )}
-                              {orderType.serviceCharge > 0 && (
-                                <p className="text-orange-600 dark:text-orange-400">
-                                  {t('order.form.serviceCharge')}: +{formatPrice(orderType.serviceCharge)}
-                                </p>
-                              )}
-                              {orderType.estimatedMinutes > 0 && (
-                                <p className="text-green-600 dark:text-green-400">
-                                  {t('order.form.estimatedTime')}: {orderType.estimatedMinutes} {t('order.form.minutes')}
-                                </p>
-                              )}
-                              <p className="text-lg font-bold text-orange-600 dark:text-orange-400 mt-2">
-                                {t('menu.cart.total')}: {formatPrice(calculatedTotal)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+                        {isClearing ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Clearing...
+                          </span>
+                        ) : (
+                          t('menu.cart.clear')
+                        )}
                       </button>
-                    );
-                  })}
-                </div>
+                    )}
+                  </div>
+                )
               )}
-            </div>
-          )}
 
-          {currentStep === 'information' && selectedOrderType && (
-            /* INFORMATION FORM */
-            <div className="p-6 space-y-6">
-              {/* Selected Order Type Display */}
-              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <div className="text-2xl">{selectedOrderType.icon}</div>
-                    <div>
-                      <h4 className="font-bold text-slate-900 dark:text-slate-100">
-                        {selectedOrderType.name}
-                      </h4>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">
-                        {selectedOrderType.description}
-                      </p>
+              {cartStep === 'order-type' && (
+                /* ORDER TYPE SELECTION */
+                <div className="p-6">
+                  {orderTypeError && (
+                    <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold text-red-900 dark:text-red-200">{t('common.error')}</p>
+                          <p className="text-sm text-red-700 dark:text-red-300 mt-1">{orderTypeError}</p>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <button
-                    onClick={handleBackToOrderTypes}
-                    className="text-sm text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 font-medium"
-                  >
-                    {t('common.change')}
-                  </button>
-                </div>
-                
-                <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-600 space-y-1 text-xs">
-                  {selectedOrderType.minOrderAmount > 0 && (
-                    <p className="text-blue-600 dark:text-blue-400">
-                      {t('order.form.minimumOrder')}: {formatPrice(selectedOrderType.minOrderAmount)}
-                    </p>
                   )}
-                  {selectedOrderType.serviceCharge > 0 && (
-                    <p className="text-orange-600 dark:text-orange-400">
-                      {t('order.form.serviceCharge')}: +{formatPrice(selectedOrderType.serviceCharge)}
-                    </p>
-                  )}
-                  {selectedOrderType.estimatedMinutes > 0 && (
-                    <p className="text-green-600 dark:text-green-400">
-                      {t('order.form.estimatedTime')}: {selectedOrderType.estimatedMinutes} {t('order.form.minutes')}
-                    </p>
-                  )}
-                </div>
-              </div>
 
-              {/* Form Fields */}
-              <div className="space-y-4">
-                {selectedOrderType.requiresName && (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      <User className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                      {t('order.form.customerName')} *
-                    </label>
-                    <input
-                      type="text"
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      className={`w-full p-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
-                        validationErrors.customerName
-                          ? 'border-red-500 focus:ring-red-500'
-                          : 'border-slate-300 dark:border-slate-600 focus:ring-orange-500'
-                      } focus:outline-none focus:ring-2 transition-all`}
-                      placeholder={t('order.form.customerNamePlaceholder')}
-                    />
-                    {validationErrors.customerName && (
-                      <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-                        {validationErrors.customerName}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {selectedOrderType.requiresTable && (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      <Table className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                      {t('order.form.tableNumber')} *
-                    </label>
-                    <input
-                      type="text"
-                      value={tableNumber}
-                      onChange={(e) => setTableNumber(e.target.value)}
-                      className={`w-full p-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
-                        validationErrors.tableNumber
-                          ? 'border-red-500 focus:ring-red-500'
-                          : 'border-slate-300 dark:border-slate-600 focus:ring-orange-500'
-                      } focus:outline-none focus:ring-2 transition-all`}
-                      placeholder={t('order.form.tableNumberPlaceholder')}
-                    />
-                    {validationErrors.tableNumber && (
-                      <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-                        {validationErrors.tableNumber}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {selectedOrderType.requiresPhone && (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      <Phone className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                      {t('order.form.phoneNumber')} *
-                    </label>
-                    <input
-                      type="tel"
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      className={`w-full p-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
-                        validationErrors.customerPhone
-                          ? 'border-red-500 focus:ring-red-500'
-                          : 'border-slate-300 dark:border-slate-600 focus:ring-orange-500'
-                      } focus:outline-none focus:ring-2 transition-all`}
-                      placeholder={t('order.form.phoneNumberPlaceholder')}
-                    />
-                    {validationErrors.customerPhone && (
-                      <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-                        {validationErrors.customerPhone}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {selectedOrderType.requiresAddress && (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      <MapPin className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                      {t('order.form.deliveryAddress')} *
-                    </label>
-                    <textarea
-                      value={deliveryAddress}
-                      onChange={(e) => setDeliveryAddress(e.target.value)}
-                      rows={3}
-                      className={`w-full p-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
-                        validationErrors.deliveryAddress
-                          ? 'border-red-500 focus:ring-red-500'
-                          : 'border-slate-300 dark:border-slate-600 focus:ring-orange-500'
-                      } focus:outline-none focus:ring-2 transition-all resize-none`}
-                      placeholder={t('order.form.deliveryAddressPlaceholder')}
-                    />
-                    {validationErrors.deliveryAddress && (
-                      <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-                        {validationErrors.deliveryAddress}
-                      </p>
-                    )}
-                  </div>
-                )}
-
-                {/* Payment Method Selection */}
-                {availablePaymentMethods.length > 0 && (
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
-                      {t('order.form.paymentMethod')} *
-                    </label>
-                    <div className="space-y-2">
-                      {availablePaymentMethods.map((method) => {
-                        const Icon = method.icon;
-                        const isSelected = paymentMethod === method.id;
+                  {loadingOrderTypes ? (
+                    <div className="flex items-center justify-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-orange-500" />
+                      <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-slate-600 dark:text-slate-400`}>
+                        {t('order.form.loadingOrderTypes')}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {orderTypes.map((orderType) => {
+                        const calculatedTotal = total + orderType.serviceCharge;
+                        const isSelected = selectedOrderType?.id === orderType.id;
                         
                         return (
                           <button
-                            key={method.id}
-                            type="button"
-                            onClick={() => setPaymentMethod(method.id as any)}
-                            className={`w-full p-4 border-2 rounded-lg transition-all text-${isRTL ? 'right' : 'left'} ${
+                            key={orderType.id}
+                            onClick={() => handleOrderTypeSelect(orderType)}
+                            className={`w-full text-${isRTL ? 'right' : 'left'} p-4 border-2 rounded-lg transition-all ${
                               isSelected
                                 ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
                                 : 'border-slate-300 dark:border-slate-600 hover:border-orange-300 dark:hover:border-orange-700'
                             }`}
                           >
-                            <div className="flex items-center gap-3">
-                              <Icon className={`w-6 h-6 ${isSelected ? 'text-orange-500' : 'text-slate-600 dark:text-slate-400'}`} />
-                              <div className="flex-1">
-                                <h4 className="font-semibold text-slate-900 dark:text-slate-100">
-                                  {method.name}
-                                </h4>
-                                <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                                  {method.description}
-                                </p>
+                            <div className="flex items-start gap-4">
+                              <div className="text-3xl flex-shrink-0">
+                                {orderType.icon}
                               </div>
-                              {isSelected && (
-                                <CheckCircle className="w-5 h-5 text-orange-500 flex-shrink-0" />
-                              )}
+
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                  <div>
+                                    <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">
+                                      {orderType.name}
+                                    </h3>
+                                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                                      {orderType.description}
+                                    </p>
+                                  </div>
+                                  {isSelected && (
+                                    <CheckCircle className="w-5 h-5 text-orange-500 flex-shrink-0" />
+                                  )}
+                                </div>
+
+                                <div className={`flex flex-wrap gap-2 mb-3 ${isRTL ? 'justify-end' : 'justify-start'}`}>
+                                  {orderType.requiresName && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 text-xs rounded-full">
+                                      <User className="w-3 h-3" />
+                                      {t('order.form.name')}
+                                    </span>
+                                  )}
+                                  {orderType.requiresTable && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-pink-100 dark:bg-pink-950/30 text-pink-700 dark:text-pink-300 text-xs rounded-full">
+                                      <Table className="w-3 h-3" />
+                                      {t('order.form.table')}
+                                    </span>
+                                  )}
+                                  {orderType.requiresAddress && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 dark:bg-purple-950/30 text-purple-700 dark:text-purple-300 text-xs rounded-full">
+                                      <MapPin className="w-3 h-3" />
+                                      {t('order.form.address')}
+                                    </span>
+                                  )}
+                                  {orderType.requiresPhone && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-300 text-xs rounded-full">
+                                      <Phone className="w-3 h-3" />
+                                      {t('order.form.phone')}
+                                    </span>
+                                  )}
+                                </div>
+
+                                <div className="space-y-1 text-xs">
+                                  {orderType.minOrderAmount > 0 && (
+                                    <p className="text-blue-600 dark:text-blue-400">
+                                      {t('order.form.minimumOrder')}: {formatPrice(orderType.minOrderAmount)}
+                                    </p>
+                                  )}
+                                  {orderType.serviceCharge > 0 && (
+                                    <p className="text-orange-600 dark:text-orange-400">
+                                      {t('order.form.serviceCharge')}: +{formatPrice(orderType.serviceCharge)}
+                                    </p>
+                                  )}
+                                  {orderType.estimatedMinutes > 0 && (
+                                    <p className="text-green-600 dark:text-green-400">
+                                      {t('order.form.estimatedTime')}: {orderType.estimatedMinutes} {t('order.form.minutes')}
+                                    </p>
+                                  )}
+                                  <p className="text-lg font-bold text-orange-600 dark:text-orange-400 mt-2">
+                                    {t('menu.cart.total')}: {formatPrice(calculatedTotal)}
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           </button>
                         );
                       })}
                     </div>
-                    {validationErrors.paymentMethod && (
-                      <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-                        {validationErrors.paymentMethod}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Order Summary */}
-              <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg">
-                <h4 className="font-medium text-slate-800 dark:text-slate-200 mb-3">
-                  {t('order.form.orderSummary')}
-                </h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-600 dark:text-slate-400">{t('order.form.subtotal')}:</span>
-                    <span className="text-slate-800 dark:text-slate-200">
-                      {formatPrice(total)}
-                    </span>
-                  </div>
-
-                  {selectedOrderType.serviceCharge > 0 && (
-                    <div className="flex justify-between">
-                      <span className="text-slate-600 dark:text-slate-400">{t('order.form.serviceCharge')}:</span>
-                      <span className="text-slate-800 dark:text-slate-200">
-                        +{formatPrice(selectedOrderType.serviceCharge)}
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="flex justify-between font-bold border-t border-slate-200 dark:border-slate-600 pt-2">
-                    <span className="text-slate-800 dark:text-slate-200">{t('menu.cart.total')}:</span>
-                    <span className="text-orange-600 dark:text-orange-400">
-                      {formatPrice(total + selectedOrderType.serviceCharge)}
-                    </span>
-                  </div>
-
-                  {selectedOrderType.estimatedMinutes > 0 && (
-                    <div className="flex items-center text-slate-600 dark:text-slate-400 mt-2">
-                      <Clock className={`h-4 w-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                      <span>
-                        {t('order.form.estimatedTime')}: {selectedOrderType.estimatedMinutes} {t('order.form.minutes')}
-                      </span>
-                    </div>
-                  )}
-
-                  {paymentMethod && (
-                    <div className="flex items-center text-slate-600 dark:text-slate-400 mt-2 pt-2 border-t border-slate-200 dark:border-slate-600">
-                      {paymentMethod === 'cash' && <Banknote className={`h-4 w-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />}
-                      {paymentMethod === 'credit_card' && <CreditCard className={`h-4 w-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />}
-                      {paymentMethod === 'online' && <Smartphone className={`h-4 w-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />}
-                      <span>
-                        {t('order.form.payment')}: {availablePaymentMethods.find(m => m.id === paymentMethod)?.name}
-                      </span>
-                    </div>
                   )}
                 </div>
-              </div>
+              )}
+
+              {cartStep === 'information' && selectedOrderType && (
+                /* INFORMATION FORM */
+                <div className="p-6 space-y-6">
+                  {/* Selected Order Type Display */}
+                  <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-3">
+                        <div className="text-2xl">{selectedOrderType.icon}</div>
+                        <div>
+                          <h4 className="font-bold text-slate-900 dark:text-slate-100">
+                            {selectedOrderType.name}
+                          </h4>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                            {selectedOrderType.description}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleBackToOrderTypes}
+                        className="text-sm text-orange-600 hover:text-orange-700 dark:text-orange-400 dark:hover:text-orange-300 font-medium"
+                      >
+                        {t('common.change')}
+                      </button>
+                    </div>
+                    
+                    <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-600 space-y-1 text-xs">
+                      {selectedOrderType.minOrderAmount > 0 && (
+                        <p className="text-blue-600 dark:text-blue-400">
+                          {t('order.form.minimumOrder')}: {formatPrice(selectedOrderType.minOrderAmount)}
+                        </p>
+                      )}
+                      {selectedOrderType.serviceCharge > 0 && (
+                        <p className="text-orange-600 dark:text-orange-400">
+                          {t('order.form.serviceCharge')}: +{formatPrice(selectedOrderType.serviceCharge)}
+                        </p>
+                      )}
+                      {selectedOrderType.estimatedMinutes > 0 && (
+                        <p className="text-green-600 dark:text-green-400">
+                          {t('order.form.estimatedTime')}: {selectedOrderType.estimatedMinutes} {t('order.form.minutes')}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Form Fields */}
+                  <div className="space-y-4">
+                    {selectedOrderType.requiresName && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                          <User className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                          {t('order.form.customerName')} *
+                        </label>
+                        <input
+                          type="text"
+                          value={customerName}
+                          onChange={(e) => setCustomerName(e.target.value)}
+                          className={`w-full p-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
+                            validationErrors.customerName
+                              ? 'border-red-500 focus:ring-red-500'
+                              : 'border-slate-300 dark:border-slate-600 focus:ring-orange-500'
+                          } focus:outline-none focus:ring-2 transition-all`}
+                          placeholder={t('order.form.customerNamePlaceholder')}
+                        />
+                        {validationErrors.customerName && (
+                          <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+                            {validationErrors.customerName}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedOrderType.requiresTable && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                          <Table className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                          {t('order.form.tableNumber')} *
+                        </label>
+                        <input
+                          type="text"
+                          value={tableNumber}
+                          onChange={(e) => setTableNumber(e.target.value)}
+                          className={`w-full p-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
+                            validationErrors.tableNumber
+                              ? 'border-red-500 focus:ring-red-500'
+                              : 'border-slate-300 dark:border-slate-600 focus:ring-orange-500'
+                          } focus:outline-none focus:ring-2 transition-all`}
+                          placeholder={t('order.form.tableNumberPlaceholder')}
+                        />
+                        {validationErrors.tableNumber && (
+                          <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+                            {validationErrors.tableNumber}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedOrderType.requiresPhone && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                          <Phone className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                          {t('order.form.phoneNumber')} *
+                        </label>
+                        <input
+                          type="tel"
+                          value={customerPhone}
+                          onChange={(e) => setCustomerPhone(e.target.value)}
+                          className={`w-full p-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
+                            validationErrors.customerPhone
+                              ? 'border-red-500 focus:ring-red-500'
+                              : 'border-slate-300 dark:border-slate-600 focus:ring-orange-500'
+                          } focus:outline-none focus:ring-2 transition-all`}
+                          placeholder={t('order.form.phoneNumberPlaceholder')}
+                        />
+                        {validationErrors.customerPhone && (
+                          <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+                            {validationErrors.customerPhone}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {selectedOrderType.requiresAddress && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                          <MapPin className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                          {t('order.form.deliveryAddress')} *
+                        </label>
+                        <textarea
+                          value={deliveryAddress}
+                          onChange={(e) => setDeliveryAddress(e.target.value)}
+                          rows={3}
+                          className={`w-full p-3 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 ${
+                            validationErrors.deliveryAddress
+                              ? 'border-red-500 focus:ring-red-500'
+                              : 'border-slate-300 dark:border-slate-600 focus:ring-orange-500'
+                          } focus:outline-none focus:ring-2 transition-all resize-none`}
+                          placeholder={t('order.form.deliveryAddressPlaceholder')}
+                        />
+                        {validationErrors.deliveryAddress && (
+                          <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+                            {validationErrors.deliveryAddress}
+                          </p>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Payment Method Selection */}
+                    {availablePaymentMethods.length > 0 && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+                          {t('order.form.paymentMethod')} *
+                        </label>
+                        <div className="space-y-2">
+                          {availablePaymentMethods.map((method) => {
+                            const Icon = method.icon;
+                            const isSelected = paymentMethod === method.id;
+                            
+                            return (
+                              <button
+                                key={method.id}
+                                type="button"
+                                onClick={() => setPaymentMethod(method.id as any)}
+                                className={`w-full p-4 border-2 rounded-lg transition-all text-${isRTL ? 'right' : 'left'} ${
+                                  isSelected
+                                    ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
+                                    : 'border-slate-300 dark:border-slate-600 hover:border-orange-300 dark:hover:border-orange-700'
+                                }`}
+                              >
+                                <div className="flex items-center gap-3">
+                                  <Icon className={`w-6 h-6 ${isSelected ? 'text-orange-500' : 'text-slate-600 dark:text-slate-400'}`} />
+                                  <div className="flex-1">
+                                    <h4 className="font-semibold text-slate-900 dark:text-slate-100">
+                                      {method.name}
+                                    </h4>
+                                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                                      {method.description}
+                                    </p>
+                                  </div>
+                                  {isSelected && (
+                                    <CheckCircle className="w-5 h-5 text-orange-500 flex-shrink-0" />
+                                  )}
+                                </div>
+                              </button>
+                            );
+                          })}
+                        </div>
+                        {validationErrors.paymentMethod && (
+                          <p className="text-xs text-red-500 dark:text-red-400 mt-1">
+                            {validationErrors.paymentMethod}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Order Summary */}
+                  <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg">
+                    <h4 className="font-medium text-slate-800 dark:text-slate-200 mb-3">
+                      {t('order.form.orderSummary')}
+                    </h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-slate-600 dark:text-slate-400">{t('order.form.subtotal')}:</span>
+                        <span className="text-slate-800 dark:text-slate-200">
+                          {formatPrice(total)}
+                        </span>
+                      </div>
+
+                      {selectedOrderType.serviceCharge > 0 && (
+                        <div className="flex justify-between">
+                          <span className="text-slate-600 dark:text-slate-400">{t('order.form.serviceCharge')}:</span>
+                          <span className="text-slate-800 dark:text-slate-200">
+                            +{formatPrice(selectedOrderType.serviceCharge)}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between font-bold border-t border-slate-200 dark:border-slate-600 pt-2">
+                        <span className="text-slate-800 dark:text-slate-200">{t('menu.cart.total')}:</span>
+                        <span className="text-orange-600 dark:text-orange-400">
+                          {formatPrice(total + selectedOrderType.serviceCharge)}
+                        </span>
+                      </div>
+
+                      {selectedOrderType.estimatedMinutes > 0 && (
+                        <div className="flex items-center text-slate-600 dark:text-slate-400 mt-2">
+                          <Clock className={`h-4 w-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                          <span>
+                            {t('order.form.estimatedTime')}: {selectedOrderType.estimatedMinutes} {t('order.form.minutes')}
+                          </span>
+                        </div>
+                      )}
+
+                      {paymentMethod && (
+                        <div className="flex items-center text-slate-600 dark:text-slate-400 mt-2 pt-2 border-t border-slate-200 dark:border-slate-600">
+                          {paymentMethod === 'cash' && <Banknote className={`h-4 w-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />}
+                          {paymentMethod === 'credit_card' && <CreditCard className={`h-4 w-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />}
+                          {paymentMethod === 'online' && <Smartphone className={`h-4 w-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />}
+                          <span>
+                            {t('order.form.payment')}: {availablePaymentMethods.find(m => m.id === paymentMethod)?.name}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* --- NEWLY ADDED ORDERS TAB RENDER --- */}
+          {activeTab === 'orders' && (
+            <div className="p-6">
+              <OrdersTab
+                trackedOrders={trackedOrders}
+                trackingLoading={trackingLoading}
+                onLoadOrderTracking={loadOrderTracking}
+                onRemoveOrderFromTracking={removeOrderFromTracking}
+                updatableOrders={updatableOrders}
+                onRefreshUpdatableOrders={fetchUpdatableOrders}
+              />
             </div>
           )}
         </div>
 
         {/* Footer - Different for each step */}
-        {currentStep === 'cart' && itemCount > 0 && (
+        {activeTab === 'cart' && cartStep === 'cart' && itemCount > 0 && (
           <div className="border-t border-slate-200 dark:border-slate-700 p-6 space-y-4">
             <div className="space-y-2">
               <div className="flex items-center justify-between text-sm">
@@ -1235,7 +1483,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
           </div>
         )}
 
-        {currentStep === 'information' && (
+        {activeTab === 'cart' && cartStep === 'information' && (
           <div className="border-t border-slate-200 dark:border-slate-700 p-6">
             <div className="flex space-x-3">
               <button
