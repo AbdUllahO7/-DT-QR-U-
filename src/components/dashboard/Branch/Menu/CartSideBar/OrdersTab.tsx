@@ -1,5 +1,7 @@
+"use client" // Assuming this is needed as per your other file
+
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState } from "react" // Removed useEffect as it wasn't used
 import { Clock, CheckCircle, ClipboardList, Loader2, Edit, X, Save, AlertCircle, RefreshCw, Plus, Minus, Trash2 } from "lucide-react"
 import { useLanguage } from "../../../../../contexts/LanguageContext"
 import { OrderCardProps, OrdersTabProps, TrackedOrder } from "../../../../../types/menu/carSideBarTypes"
@@ -35,6 +37,8 @@ const OrdersTab: React.FC<ExtendedOrdersTabProps> = ({
     await onRefreshUpdatableOrders()
     await onLoadOrderTracking(orderTag)
   }
+
+  console.log("updatableOrders",updatableOrders)
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -91,8 +95,6 @@ const OrdersTab: React.FC<ExtendedOrdersTabProps> = ({
   return (
     <div className="space-y-4">
       {trackedOrders.map((order) => {
-        const updatableOrder = updatableOrders.find(u => u.orderTag === order.orderTag)
-        
         return (
           <OrderCard
             key={order.orderTag}
@@ -128,7 +130,6 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
   const [updateReason, setUpdateReason] = useState('')
   const [editableItems, setEditableItems] = useState<EditableOrderItem[]>([])
   
-  // <<< ADDED MODAL STATE >>>
   const [alertModal, setAlertModal] = useState<{ isOpen: boolean, title: string, message: string }>({ isOpen: false, title: '', message: '' });
   const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean, title: string, message: string, onConfirm: () => void }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
   const [promptModal, setPromptModal] = useState<{ isOpen: boolean, title: string, message: string, onConfirm: (value: string) => void }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
@@ -156,19 +157,40 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
 
   const handleEdit = () => {
     if (!updatableOrder?.items) {
-      // <<< USE MODAL >>>
       setAlertModal({ isOpen: true, title: t('menu.cart.error') || 'Error', message: t('menu.cart.order_items_not_available') || 'Order items not available' });
       return
     }
 
     // Initialize editable items from updatableOrder.items
-    const items: EditableOrderItem[] = updatableOrder.items.map(item => ({
-      ...item,
-      originalCount: item.count,
-      editedNote: item.note || ''
-    }))
+    const items: EditableOrderItem[] = []
+    updatableOrder.items.forEach(item => {
+      // 1. Add the parent item
+      items.push({
+        ...item,
+        orderDetailId: item.id, // <-- ** ADD THIS LINE FOR THE PARENT **
+        originalCount: item.count,
+        editedNote: item.note || ''
+      })
+      
+      // 2. Add its addon items
+      if (item.addonItems && item.addonItems.length > 0) {
+        item.addonItems.forEach(addon => {
+          items.push({
+            ...addon,
+            orderDetailId: addon.id, // The addon's own unique OrderItem ID
+            
+            // --- THIS IS THE CRITICAL FIX ---
+            parentOrderDetailId: addon.parentOrderItemId, 
+            // --- END OF FIX ---
+
+            originalCount: addon.count,
+            editedNote: addon.note || ''
+          })
+        })
+      }
+    })
     
-    console.log('Initialized editable items:', items)
+    console.log('Initialized editable items (with correct parent links):', items)
     setEditableItems(items)
     setIsEditing(true)
   }
@@ -198,23 +220,64 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
     }))
   }
 
+  // --- *** FIXED DELETE LOGIC *** ---
   const handleDeleteItem = (itemId: number) => {
-    setEditableItems(prev => prev.map(item => {
-      if (item.orderDetailId === itemId) {
-        return { ...item, isDeleted: true, count: 0 }
-      }
-      return item
-    }))
-  }
+    setEditableItems(prev => {
+      const itemToDelete = prev.find(item => item.orderDetailId === itemId);
+      // Check if it's a parent item
+      const isParent = itemToDelete && !itemToDelete.parentOrderDetailId;
 
+      return prev.map(item => {
+        // Case 1: The item itself
+        if (item.orderDetailId === itemId) {
+          return { ...item, isDeleted: true, count: 0 };
+        }
+        // Case 2: A child of the item being deleted
+        if (isParent && item.parentOrderDetailId === itemId) {
+          return { ...item, isDeleted: true, count: 0 };
+        }
+        return item;
+      });
+    });
+  };
+
+  // --- *** FIXED RESTORE LOGIC *** ---
   const handleRestoreItem = (itemId: number) => {
-    setEditableItems(prev => prev.map(item => {
-      if (item.orderDetailId === itemId) {
-        return { ...item, isDeleted: false, count: item.originalCount || 1 }
+    setEditableItems(prev => {
+      const itemToRestore = prev.find(item => item.orderDetailId === itemId);
+      if (!itemToRestore) return prev;
+
+      let parentIdToRestore: number | null = null;
+      // If restoring a child, also restore its parent if deleted
+      if (itemToRestore.parentOrderDetailId) {
+        const parent = prev.find(p => p.orderDetailId === itemToRestore.parentOrderDetailId);
+        if (parent && parent.isDeleted) {
+          parentIdToRestore = parent.orderDetailId;
+        }
       }
-      return item
-    }))
-  }
+      
+      // Check if restoring a parent
+      const isParentRestore = !itemToRestore.parentOrderDetailId;
+
+      return prev.map(item => {
+        // Restore the clicked item
+        if (item.orderDetailId === itemId) {
+          return { ...item, isDeleted: false, count: item.originalCount || 1 };
+        }
+        // Restore its parent if needed
+        if (parentIdToRestore && item.orderDetailId === parentIdToRestore) {
+          return { ...item, isDeleted: false, count: item.originalCount || 1 };
+        }
+        // Restore its children if it's a parent
+        if (isParentRestore && item.parentOrderDetailId === itemId) {
+          // Only restore children that weren't *individually* deleted
+          // (This logic assumes restoring parent restores all children)
+          return { ...item, isDeleted: false, count: item.originalCount || 1 };
+        }
+        return item;
+      });
+    });
+  };
 
   const hasChanges = () => {
     return editableItems.some(item => 
@@ -224,7 +287,6 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
     )
   }
 
-  // <<< EXTRACTED RETRY LOGIC FOR MODAL >>>
   const handleUpdateRetry = async (updateDto: UpdatePendingOrderDto) => {
     try {
       const dtoWithConfirm: UpdatePendingOrderDto = {
@@ -242,39 +304,24 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
   }
 
   const handleUpdate = async () => {
-    console.log('=== Starting Update ===')
-    console.log('updatableOrder:', updatableOrder)
-    console.log('editableItems:', editableItems)
-    console.log('updateReason:', updateReason)
-
     if (!updatableOrder) {
-      // <<< USE MODAL >>>
       setAlertModal({ isOpen: true, title: t('menu.cart.error') || 'Error', message: 'Updatable order information not found' });
       return
     }
     
-    // <<< REMOVED REASON CHECK >>>
-    /*
-    if (!updateReason.trim()) {
-      alert(t('menu.cart.update_reason_required') || 'Please provide a reason for the update')
-      return
-    }
-    */
-
     if (!hasChanges()) {
-      // <<< USE MODAL >>>
       setAlertModal({ isOpen: true, title: t('menu.cart.info') || 'Info', message: t('menu.cart.no_changes_detected') || 'No changes detected. Please modify items before updating.'});
       return
     }
 
-    // <<< Pre-build DTO for potential use in retry modal >>>
     const items: UpdatePendingOrderItemDto[] = editableItems
       .filter(item => {
+        // We send items that are NOT deleted AND have a count > 0
         const shouldInclude = !item.isDeleted && item.count && item.count > 0
-        console.log(`Item ${item.productName}: isDeleted=${item.isDeleted}, count=${item.count}, shouldInclude=${shouldInclude}`)
         return shouldInclude
       })
       .map(item => ({
+        // Map all properties, ensuring correct types
         orderDetailId: item.orderDetailId || 0,
         branchProductId: item.branchProductId,
         count: item.count || 0,
@@ -296,29 +343,24 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
       console.log('Update DTO:', updateDto)
       await orderService.updatePendingOrder(updateDto)
       
-      // <<< USE MODAL >>>
       setAlertModal({ isOpen: true, title: t('menu.cart.success') || 'Success', message: t('menu.cart.order_updated_success') || 'Order updated successfully!'});
       handleCancelEdit()
       await onUpdateOrder(order.orderTag)
       
     } catch (error: any) {
       console.error('Failed to update order:', error)
-      console.error('Error response:', error?.response?.data)
       
-      // Handle price change confirmation
       if (error?.response?.status === 409 && 
           error?.response?.data?.message?.toLowerCase().includes('price changes')) {
         
-        // <<< USE MODAL >>>
         setConfirmModal({
           isOpen: true,
           title: t('menu.cart.price_change_title') || 'Price Change',
           message: t('menu.cart.price_change_confirm') || 'Some prices have changed since you placed the order. Do you want to proceed with the update?',
-          onConfirm: () => handleUpdateRetry(updateDto) // Pass the base DTO
+          onConfirm: () => handleUpdateRetry(updateDto)
         });
 
       } else {
-        // <<< USE MODAL >>>
         setAlertModal({ isOpen: true, title: t('menu.cart.error') || 'Error', message: error.message || (t('menu.cart.order_update_failed') || 'Failed to update order')});
       }
     } finally {
@@ -326,29 +368,26 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
     }
   }
 
-  // <<< EXTRACTED CANCELLATION LOGIC FOR MODAL FLOW >>>
   const executeCancelOrder = async (reason: string) => {
-    if (!updatableOrder) return; // Safeguard
+    if (!updatableOrder) return;
 
     try {
       setUpdating(true);
 
       const cancelDto: CancelOrderDto = {
         orderId: updatableOrder.orderId,
-        cancellationReason: reason.trim(), // Trim, but it's optional
+        cancellationReason: reason.trim(),
         rowVersion: updatableOrder.rowVersion
       };
 
       await orderService.cancelOrder(cancelDto);
       
-      // <<< USE MODAL >>>
       setAlertModal({ isOpen: true, title: t('menu.cart.success') || 'Success', message: t('menu.cart.order_cancelled_success') || 'Order cancelled successfully!'});
       
       await onUpdateOrder(order.orderTag);
 
     } catch (error: any) {
       console.error('Failed to cancel order:', error);
-      // <<< USE MODAL >>>
       setAlertModal({ isOpen: true, title: t('menu.cart.error') || 'Error', message: error.message || (t('menu.cart.order_cancel_failed') || 'Failed to cancel order.')});
     } finally {
       setUpdating(false);
@@ -357,25 +396,20 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
 
   const handleCancelOrder = async () => {
     if (!updatableOrder) {
-      // <<< USE MODAL >>>
       setAlertModal({ isOpen: true, title: t('menu.cart.error') || 'Error', message: t('menu.cart.order_data_unavailable') || 'Order data not available for cancellation.'});
       return;
     }
-
-    // <<< MODIFIED MODAL FLOW >>>
     
-    // 1. Prompt for optional reason
     setPromptModal({
       isOpen: true,
       title: t('menu.cart.cancel_reason_prompt_title') || 'Cancel Order',
       message: t('menu.cart.cancel_reason_prompt_msg') || 'Please provide a reason for cancellation (optional).',
       onConfirm: (reason) => {
-        // 2. Confirm cancellation
         setConfirmModal({
           isOpen: true,
           title: t('menu.cart.confirm_cancel_title') || 'Confirm Cancellation',
           message: t('menu.cart.cancel_order_confirm') || 'Are you sure you want to cancel this order?',
-          onConfirm: () => executeCancelOrder(reason) // Pass reason to final func
+          onConfirm: () => executeCancelOrder(reason)
         })
       }
     });
@@ -395,7 +429,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
           </div>
         </div>
         <div className="text-xs text-slate-500 dark:text-slate-400">
-          {order.createdAt.toLocaleString()}
+          {new Date(order.createdAt).toLocaleString()}
         </div>
       </div>
 
@@ -445,6 +479,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
             {/* Items List */}
             {editableItems.length > 0 && (
               <div className="space-y-2 max-h-96 overflow-y-auto">
+                {/* 1. Loop over PARENT items only */}
                 {editableItems.filter(item => !item.parentOrderDetailId).map((item) => (
                   <div
                     key={item.orderDetailId}
@@ -454,6 +489,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
                         : 'border-slate-200 dark:border-slate-600'
                     }`}
                   >
+                    {/* --- Start of Parent Item --- */}
                     <div className="flex items-start gap-3">
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
@@ -526,6 +562,94 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
                         )}
                       </button>
                     </div>
+                    {/* --- End of Parent Item --- */}
+
+                    {/* 2. Find and render all addons for THIS parent item */}
+                    {editableItems.filter(addon => addon.parentOrderDetailId === item.orderDetailId).length > 0 && (
+                      <div className="pl-6 mt-3 space-y-2 border-l-2 border-slate-200 dark:border-slate-600 ml-2 pt-3">
+                        {editableItems
+                          .filter(addon => addon.parentOrderDetailId === item.orderDetailId)
+                          .map((addon) => (
+                            <div
+                              key={addon.orderDetailId}
+                              className={`relative ${addon.isDeleted ? 'opacity-50' : ''}`}
+                            >
+                              {/* Indent line visual */}
+                              <div className="absolute -left-[18px] top-2.5 h-px w-3 bg-slate-300 dark:bg-slate-500"></div>
+                              
+                              <div className="flex items-start gap-3">
+                                <div className="flex-1">
+                                  {/* Addon Name & Price */}
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
+                                      {addon.productName} 
+                                      <span className="text-xs text-slate-500 dark:text-slate-400"> (Addon)</span>
+                                    </span>
+                                    <span className="text-sm font-semibold text-green-600 dark:text-green-400">
+                                      ${(addon.price * (addon.count || 0)).toFixed(2)}
+                                    </span>
+                                  </div>
+
+                                  {/* Addon Controls (if not deleted) */}
+                                  {!addon.isDeleted && (
+                                    <>
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <button
+                                          onClick={() => handleQuantityChange(addon.orderDetailId, -1)}
+                                          disabled={addon.count === 0}
+                                          className="p-1 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 disabled:opacity-30 disabled:cursor-not-allowed"
+                                        >
+                                          <Minus className="h-3 w-3" />
+                                        </button>
+                                        <span className="text-sm font-medium min-w-[2rem] text-center">
+                                          {addon.count}
+                                        </span>
+                                        <button
+                                          onClick={() => handleQuantityChange(addon.orderDetailId, 1)}
+                                          className="p-1 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500"
+                                        >
+                                          <Plus className="h-3 w-3" />
+                                        </button>
+                                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                                          ({t('menu.cart.was') || 'was'}: {addon.originalCount})
+                                        </span>
+                                      </div>
+                                      
+                                      <input
+                                        type="text"
+                                        value={addon.editedNote}
+                                        onChange={(e) => handleNoteChange(addon.orderDetailId, e.target.value)}
+                                        placeholder={t('menu.cart.add_note') || 'Add note...'}
+                                        className="w-full px-2 py-1 text-xs border border-slate-200 dark:border-slate-600 rounded bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                                        maxLength={200}
+                                      />
+                                    </>
+                                  )}
+                                  {addon.isDeleted && (
+                                    <div className="text-xs text-red-600 dark:text-red-400 font-medium">
+                                      {t('menu.cart.marked_for_deletion') || 'Marked for deletion'}
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Addon Delete/Restore Button */}
+                                <button
+                                  onClick={() => addon.isDeleted ? handleRestoreItem(addon.orderDetailId) : handleDeleteItem(addon.orderDetailId)}
+                                  className={`p-2 rounded-lg transition-colors ${
+                                    addon.isDeleted
+                                      ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200'
+                                      : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200'
+                                  }`}
+                                  title={addon.isDeleted ? (t('menu.cart.restore_item') || 'Restore item') : (t('menu.cart.delete_item') || 'Delete item')}
+                                >
+                                  {addon.isDeleted ? <RefreshCw className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                    
                   </div>
                 ))}
               </div>
@@ -538,9 +662,8 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
               </div>
             )}
 
-            {/* Update Reason */}
+{/* Update Reason */}
             <div>
-              {/* <<< REMOVED * from label >>> */}
               <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
                 {t('menu.cart.update_reason') || 'Update Reason'}
               </label>
@@ -563,7 +686,6 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
             <div className="flex gap-2">
               <button
                 onClick={handleUpdate}
-                // <<< UPDATED disabled logic >>>
                 disabled={updating || !hasChanges()}
                 className="flex-1 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed text-white py-2 px-4 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
               >
@@ -680,7 +802,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
         )}
       </div>
 
-      {/* <<< RENDER MODALS >>> */}
+      {/* Modals */}
       {alertModal.isOpen && (
         <AlertModal
           title={alertModal.title}
@@ -711,7 +833,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
 
 export default OrdersTab
 
-// <<< MODAL COMPONENTS ADDED HERE >>>
+// --- MODAL COMPONENTS ---
 
 interface ModalProps {
   title: string;
@@ -798,7 +920,7 @@ const PromptModal: React.FC<PromptModalProps> = ({ title, message, onClose, onCo
             {promptLabel || (t('menu.cart.reason') || 'Reason')}
           </label>
           <textarea
-              title="value"
+            title="value" // Added title for accessibility
             value={value}
             onChange={(e) => setValue(e.target.value)}
             className="w-full px-3 py-2 text-sm border border-slate-300 dark:border-slate-600 rounded-lg 
