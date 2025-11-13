@@ -225,6 +225,10 @@ const OnboardingRestaurant: React.FC = () => {
         if (!formData.restaurantName?.trim()) {
           newErrors.restaurantName = 'Restaurant adı gereklidir';
         }
+        // <<< MODIFIED: Added check for restaurant logo path >>>
+        if (!formData.restaurantLogoPath) {
+          newErrors.restaurantLogoPath = 'Restaurant logosu gereklidir';
+        }
         if (formData.cuisineType === undefined || formData.cuisineType === null) {
           newErrors.cuisineType = 'Mutfak türü seçiniz' as any;
         }
@@ -270,9 +274,43 @@ const OnboardingRestaurant: React.FC = () => {
     setApiError('');
     setSuccessMessage('');
     
-    if (!validateStep(3)) {
+    // <<< MODIFIED: Validate all steps before submitting >>>
+    // Run all validations
+    const step1Valid = validateStep(1);
+    const step2Valid = validateStep(2);
+    const step3Valid = validateStep(3);
+    
+    // If any step is invalid, set errors and stop
+    if (!step1Valid || !step2Valid || !step3Valid) {
+      // Re-run validateStep to set combined errors
+      // (This assumes validateStep only sets errors for the given step, 
+      // so we merge them)
+      setErrors(prev => ({
+        ...prev,
+        ...validateStep(1) ? {} : (validateStep as any)(1).newErrors, // Bit hacky, better to refactor validateStep
+        ...validateStep(2) ? {} : (validateStep as any)(2).newErrors,
+        ...validateStep(3) ? {} : (validateStep as any)(3).newErrors
+      }));
+      
+      // Re-run validateStep for the current step to display its errors
+      validateStep(currentStep); 
+      
+      // A full validation check is safer
+      if (!validateStep(1)) {
+        setCurrentStep(1);
+        return;
+      }
+      if (!validateStep(2)) {
+        setCurrentStep(2);
+        return;
+      }
+      if (!validateStep(3)) {
+        setCurrentStep(3);
+        return;
+      }
       return;
     }
+    // <<< END MODIFICATION >>>
 
     if (!userId) {
       setApiError('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
@@ -388,6 +426,7 @@ const OnboardingRestaurant: React.FC = () => {
             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.restaurantName
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
             } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
             placeholder="Restaurant adınızı girin"
@@ -400,8 +439,9 @@ const OnboardingRestaurant: React.FC = () => {
 
       {/* Restaurant Logo */}
       <div>
+        {/* <<< MODIFIED: Added * to label >>> */}
         <label htmlFor="restaurantLogo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Restaurant Logosu
+          Restaurant Logosu *
         </label>
         <div className="relative">
           <Camera className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -418,6 +458,7 @@ const OnboardingRestaurant: React.FC = () => {
             } ${
               errors.restaurantLogoPath
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
             } text-gray-900 dark:text-white`}
           />
@@ -477,6 +518,7 @@ const OnboardingRestaurant: React.FC = () => {
             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.cuisineType
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
             } text-gray-900 dark:text-white`}
           >
@@ -538,6 +580,7 @@ const OnboardingRestaurant: React.FC = () => {
             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.companyTitle
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
             } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
             placeholder="Şirket unvanınızı girin"
@@ -563,6 +606,7 @@ const OnboardingRestaurant: React.FC = () => {
             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.legalType
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
             } text-gray-900 dark:text-white`}
           >
@@ -647,6 +691,7 @@ const OnboardingRestaurant: React.FC = () => {
             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.taxNumber
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
             } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
             placeholder="Vergi numaranızı girin"
@@ -673,6 +718,7 @@ const OnboardingRestaurant: React.FC = () => {
             className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.taxOffice
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
             } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
             placeholder="Vergi dairenizi girin"
@@ -703,6 +749,7 @@ const OnboardingRestaurant: React.FC = () => {
             } ${
               errors.workPermitFilePath
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
             } text-gray-900 dark:text-white`}
           />
@@ -753,6 +800,7 @@ const OnboardingRestaurant: React.FC = () => {
             } ${
               errors.foodCertificateFilePath
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
             } text-gray-900 dark:text-white`}
           />
@@ -941,4 +989,4 @@ const OnboardingRestaurant: React.FC = () => {
   );
 };
 
-export default OnboardingRestaurant; 
+export default OnboardingRestaurant;

@@ -142,17 +142,7 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50 dark:bg-gray-700/50 border-b-2 border-gray-200 dark:border-gray-600">
-                <th className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'} text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider`}>
-                  <button
-                    onClick={() => onSort('customerName')}
-                    className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''} hover:text-blue-600 dark:hover:text-blue-400 transition-colors group`}
-                  >
-                    <span>{t('ordersManager.customer')}</span>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                      {getSortIcon('customerName')}
-                    </div>
-                  </button>
-                </th>
+               
                 <th className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'} text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider`}>
                   {t('ordersManager.orderNumber')}
                 </th>

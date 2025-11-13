@@ -917,7 +917,7 @@ export interface TableBasketSummary {
 }
 
 export interface OrderTrackingInfo {
-  orderId: number;
+  orderId: string;
   orderTag: string;
   totalPrice: number;
   orderStatus: string;

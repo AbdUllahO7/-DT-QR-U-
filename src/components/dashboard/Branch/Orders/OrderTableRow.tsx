@@ -55,20 +55,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
 
   return (
     <tr className={`${rowBgClass} hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 border-b border-gray-100 dark:border-gray-700`}>
-      {/* Customer Column */}
-      <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-        <div className="flex flex-col gap-1">
-          <div className="text-sm font-bold text-gray-900 dark:text-gray-100">
-            {order.customerName}
-          </div>
-          {(order as any).customerPhone && (
-            <div className={`flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <Phone className="w-3 h-3" />
-              <span>{(order as any).customerPhone}</span>
-            </div>
-          )}
-        </div>
-      </td>
+      
       
       {/* Order Number */}
       <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
