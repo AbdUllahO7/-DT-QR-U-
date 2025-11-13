@@ -9,7 +9,7 @@ import { useLanguage } from "../../../../../contexts/LanguageContext"
 import { OrderType, orderTypeService } from "../../../../../services/Branch/BranchOrderTypeService"
 import { useCartHandlers } from "../../../../../hooks/useCartHandlers"
 import CartContent from "./CartContent"
-import OrdersTab from "./OrdersTab"
+import OrdersTab from "./OrdersTab" // This now imports the fixed component
 import { CartItem, CartSidebarProps, GroupedCartItem, OrderForm, TrackedOrder } from "../../../../../types/menu/carSideBarTypes"
 import WhatsAppConfirmationModal from "./WhatsAppConfirmationModal"
 import ToastComponent from "./ToastComponenet"
@@ -435,9 +435,6 @@ const handleWhatsAppCancel = () => {
     }
   }
 
-
-
-  // Group cart items by product with correct total calculations
   const groupedItems: GroupedCartItem[] = cart.reduce((groups, item, index) => {
     const existingGroup = groups.find(g => g.product.branchProductId === item.branchProductId)
     
