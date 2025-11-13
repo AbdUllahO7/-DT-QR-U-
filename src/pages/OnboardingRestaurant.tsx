@@ -21,10 +21,12 @@ import type { CreateRestaurantDto, ApiError } from '../types/api';
 import { restaurantService } from '../services/restaurantService';
 import { mediaService } from '../services/mediaService';
 import { logger } from '../utils/logger';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const OnboardingRestaurant: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, isRTL } = useLanguage();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errors, setErrors] = useState<Partial<CreateRestaurantDto>>({});
@@ -71,7 +73,7 @@ const OnboardingRestaurant: React.FC = () => {
     
     if (!storedUserId) {
       logger.error('UserId bulunamadı!');
-      setApiError('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+      setApiError(t('onboardingRestaurant.messages.errors.sessionNotFound'));
       // Redirect to register after 2 seconds
       setTimeout(() => {
         navigate('/register');
@@ -83,47 +85,47 @@ const OnboardingRestaurant: React.FC = () => {
     // Update formData with userId
     setFormData(prev => ({ ...prev, userId: storedUserId }));
     logger.info('UserId yüklendi', { storedUserId });
-  }, [navigate]);
+  }, [navigate, t]);
 
   const cuisineOptions = [
-    { value: 0, label: 'Türk Mutfağı' },
-    { value: 1, label: 'İtalyan Mutfağı' },
-    { value: 2, label: 'Çin Mutfağı' },
-    { value: 3, label: 'Japon Mutfağı' },
-    { value: 4, label: 'Meksika Mutfağı' },
-    { value: 5, label: 'Hint Mutfağı' },
-    { value: 6, label: 'Fransız Mutfağı' },
-    { value: 7, label: 'Amerikan Mutfağı' },
-    { value: 8, label: 'Akdeniz Mutfağı' },
-    { value: 9, label: 'Tayland Mutfağı' },
-    { value: 10, label: 'Kore Mutfağı' },
-    { value: 11, label: 'Vietnam Mutfağı' },
-    { value: 12, label: 'Yunan Mutfağı' },
-    { value: 13, label: 'İspanyol Mutfağı' },
-    { value: 14, label: 'Lübnan Mutfağı' },
-    { value: 15, label: 'Brezilya Mutfağı' },
-    { value: 16, label: 'Alman Mutfağı' },
-    { value: 17, label: 'Rus Mutfağı' },
-    { value: 18, label: 'İngiliz Mutfağı' },
-    { value: 19, label: 'Etiyopya Mutfağı' },
-    { value: 20, label: 'Fas Mutfağı' },
-    { value: 21, label: 'Arjantin Mutfağı' },
-    { value: 22, label: 'Peru Mutfağı' },
-    { value: 23, label: 'Karayip Mutfağı' },
-    { value: 24, label: 'Fusion Mutfağı' },
-    { value: 25, label: 'Vegan Mutfağı' },
-    { value: 26, label: 'Deniz Ürünleri' },
-    { value: 27, label: 'Et Restoranı' },
-    { value: 28, label: 'Fast Food' }
+    { value: 0, label: t('onboardingRestaurant.cuisineTypes.0') },
+    { value: 1, label: t('onboardingRestaurant.cuisineTypes.1') },
+    { value: 2, label: t('onboardingRestaurant.cuisineTypes.2') },
+    { value: 3, label: t('onboardingRestaurant.cuisineTypes.3') },
+    { value: 4, label: t('onboardingRestaurant.cuisineTypes.4') },
+    { value: 5, label: t('onboardingRestaurant.cuisineTypes.5') },
+    { value: 6, label: t('onboardingRestaurant.cuisineTypes.6') },
+    { value: 7, label: t('onboardingRestaurant.cuisineTypes.7') },
+    { value: 8, label: t('onboardingRestaurant.cuisineTypes.8') },
+    { value: 9, label: t('onboardingRestaurant.cuisineTypes.9') },
+    { value: 10, label: t('onboardingRestaurant.cuisineTypes.10') },
+    { value: 11, label: t('onboardingRestaurant.cuisineTypes.11') },
+    { value: 12, label: t('onboardingRestaurant.cuisineTypes.12') },
+    { value: 13, label: t('onboardingRestaurant.cuisineTypes.13') },
+    { value: 14, label: t('onboardingRestaurant.cuisineTypes.14') },
+    { value: 15, label: t('onboardingRestaurant.cuisineTypes.15') },
+    { value: 16, label: t('onboardingRestaurant.cuisineTypes.16') },
+    { value: 17, label: t('onboardingRestaurant.cuisineTypes.17') },
+    { value: 18, label: t('onboardingRestaurant.cuisineTypes.18') },
+    { value: 19, label: t('onboardingRestaurant.cuisineTypes.19') },
+    { value: 20, label: t('onboardingRestaurant.cuisineTypes.20') },
+    { value: 21, label: t('onboardingRestaurant.cuisineTypes.21') },
+    { value: 22, label: t('onboardingRestaurant.cuisineTypes.22') },
+    { value: 23, label: t('onboardingRestaurant.cuisineTypes.23') },
+    { value: 24, label: t('onboardingRestaurant.cuisineTypes.24') },
+    { value: 25, label: t('onboardingRestaurant.cuisineTypes.25') },
+    { value: 26, label: t('onboardingRestaurant.cuisineTypes.26') },
+    { value: 27, label: t('onboardingRestaurant.cuisineTypes.27') },
+    { value: 28, label: t('onboardingRestaurant.cuisineTypes.28') }
   ];
 
   const legalTypeOptions = [
-    'Anonim Şirket (A.Ş.)',
-    'Limited Şirket (Ltd. Şti.)',
-    'Kollektif Şirket',
-    'Komandit Şirket',
-    'Şahıs İşletmesi',
-    'Diğer'
+    t('onboardingRestaurant.legalTypes.as'),
+    t('onboardingRestaurant.legalTypes.ltd'),
+    t('onboardingRestaurant.legalTypes.collective'),
+    t('onboardingRestaurant.legalTypes.partnership'),
+    t('onboardingRestaurant.legalTypes.sole'),
+    t('onboardingRestaurant.legalTypes.other')
   ];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
@@ -190,14 +192,14 @@ const OnboardingRestaurant: React.FC = () => {
 
           logger.info(`${fieldName} başarıyla yüklendi`, { filePath });
         } else {
-          throw new Error('Dosya yükleme başarısız: Dosya yolu alınamadı');
+          throw new Error(t('onboardingRestaurant.messages.errors.filePathError'));
         }
 
       } catch (error: any) {
         logger.error(`${fieldName} yükleme hatası`, error);
         
         // Set error message
-        const errorMessage = error.message || 'Dosya yüklenirken hata oluştu';
+        const errorMessage = error.message || t('onboardingRestaurant.messages.errors.fileUploadGeneric');
         setErrors(prev => ({
           ...prev,
           [fieldName]: errorMessage
@@ -223,32 +225,31 @@ const OnboardingRestaurant: React.FC = () => {
     switch (step) {
       case 1: // Basic Info
         if (!formData.restaurantName?.trim()) {
-          newErrors.restaurantName = 'Restaurant adı gereklidir';
+          newErrors.restaurantName = t('onboardingRestaurant.step1.errors.nameRequired');
         }
-        // <<< MODIFIED: Added check for restaurant logo path >>>
         if (!formData.restaurantLogoPath) {
-          newErrors.restaurantLogoPath = 'Restaurant logosu gereklidir';
+          newErrors.restaurantLogoPath = t('onboardingRestaurant.step1.errors.logoRequired');
         }
         if (formData.cuisineType === undefined || formData.cuisineType === null) {
-          newErrors.cuisineType = 'Mutfak türü seçiniz' as any;
+          newErrors.cuisineType = t('onboardingRestaurant.step1.errors.cuisineRequired') as any;
         }
         break;
         
       case 2: // Company Info
         if (!formData.companyTitle?.trim()) {
-          newErrors.companyTitle = 'Şirket unvanı gereklidir';
+          newErrors.companyTitle = t('onboardingRestaurant.step2.errors.companyTitleRequired');
         }
         if (!formData.legalType?.trim()) {
-          newErrors.legalType = 'Hukuki yapı seçiniz';
+          newErrors.legalType = t('onboardingRestaurant.step2.errors.legalTypeRequired');
         }
         break;
         
       case 3: // Legal Info
         if (!formData.taxNumber?.trim()) {
-          newErrors.taxNumber = 'Vergi numarası gereklidir';
+          newErrors.taxNumber = t('onboardingRestaurant.step3.errors.taxNumberRequired');
         }
         if (!formData.taxOffice?.trim()) {
-          newErrors.taxOffice = 'Vergi dairesi gereklidir';
+          newErrors.taxOffice = t('onboardingRestaurant.step3.errors.taxOfficeRequired');
         }
         break;
     }
@@ -274,8 +275,7 @@ const OnboardingRestaurant: React.FC = () => {
     setApiError('');
     setSuccessMessage('');
     
-    // <<< MODIFIED: Validate all steps before submitting >>>
-    // Run all validations
+    // Validate all steps before submitting
     const step1Valid = validateStep(1);
     const step2Valid = validateStep(2);
     const step3Valid = validateStep(3);
@@ -283,16 +283,6 @@ const OnboardingRestaurant: React.FC = () => {
     // If any step is invalid, set errors and stop
     if (!step1Valid || !step2Valid || !step3Valid) {
       // Re-run validateStep to set combined errors
-      // (This assumes validateStep only sets errors for the given step, 
-      // so we merge them)
-      setErrors(prev => ({
-        ...prev,
-        ...validateStep(1) ? {} : (validateStep as any)(1).newErrors, // Bit hacky, better to refactor validateStep
-        ...validateStep(2) ? {} : (validateStep as any)(2).newErrors,
-        ...validateStep(3) ? {} : (validateStep as any)(3).newErrors
-      }));
-      
-      // Re-run validateStep for the current step to display its errors
       validateStep(currentStep); 
       
       // A full validation check is safer
@@ -310,10 +300,9 @@ const OnboardingRestaurant: React.FC = () => {
       }
       return;
     }
-    // <<< END MODIFICATION >>>
 
     if (!userId) {
-      setApiError('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
+      setApiError(t('onboardingRestaurant.messages.errors.sessionNotFound'));
       setTimeout(() => {
         navigate('/register');
       }, 2000);
@@ -332,23 +321,23 @@ const OnboardingRestaurant: React.FC = () => {
         cuisineType: parseInt(formData.cuisineType.toString(), 10)
       };
       
-              logger.info('Processed data with userId and integer cuisineType', { processedData });
+      logger.info('Processed data with userId and integer cuisineType', { processedData });
       
       const response = await restaurantService.createRestaurant(processedData);
-              logger.info('Restaurant Creation Response', { response });
+      logger.info('Restaurant Creation Response', { response });
       
       if (response && response.restaurantId !== undefined) {
-        setSuccessMessage('Restaurant bilgileriniz başarıyla kaydedildi! Şube bilgilerinizi girmeniz için yönlendiriliyorsunuz...');
+        setSuccessMessage(t('onboardingRestaurant.messages.success'));
         
         // Clear onboarding data
         localStorage.removeItem('onboarding_userId');
         
         // Store restaurantId for branch creation
         const restaurantId = response.restaurantId;
-                  logger.info('Oluşturulan Restaurant ID', { restaurantId });
+        logger.info('Oluşturulan Restaurant ID', { restaurantId });
         
         localStorage.setItem('onboarding_restaurantId', restaurantId.toString());
-                  logger.info('RestaurantId localStorage\'a kaydedildi', { restaurantId });
+        logger.info('RestaurantId localStorage\'a kaydedildi', { restaurantId });
 
         // Store restaurant logo path for branch creation
         if (formData.restaurantLogoPath) {
@@ -360,14 +349,14 @@ const OnboardingRestaurant: React.FC = () => {
         setTimeout(() => {
           navigate('/onboarding/branch', { 
             state: { 
-              message: 'Restaurant bilgileriniz başarıyla kaydedildi. Şimdi şube bilgilerinizi girebilirsiniz.',
+              message: t('onboardingRestaurant.messages.welcome'),
               restaurantId: restaurantId.toString()
             } 
           });
         }, 2000);
       } else {
         console.error('RestaurantId alınamadı! Response:', response);
-        setApiError('Restaurant ID alınamadı. Lütfen tekrar deneyin.');
+        setApiError(t('onboardingRestaurant.messages.errors.idNotFound'));
       }
     } catch (error: any) {
       console.error('Restaurant creation error:', error);
@@ -387,11 +376,11 @@ const OnboardingRestaurant: React.FC = () => {
         }
         setApiError(errorMessages.join('\n'));
       } else if (apiErr.status === 409) {
-        setApiError('Bu restaurant adı zaten kullanımda. Lütfen farklı bir ad deneyin.');
+        setApiError(t('onboardingRestaurant.messages.errors.nameInUse'));
       } else if (apiErr.status === 0) {
-        setApiError('Sunucuya bağlanılamıyor. Lütfen internet bağlantınızı kontrol edin.');
+        setApiError(t('onboardingRestaurant.messages.errors.serverConnection'));
       } else {
-        setApiError(apiErr.message || 'Restaurant kaydı sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+        setApiError(apiErr.message || t('onboardingRestaurant.messages.errors.genericCreate'));
       }
     } finally {
       setIsSubmitting(false);
@@ -403,67 +392,65 @@ const OnboardingRestaurant: React.FC = () => {
       <div className="text-center mb-8">
         <Store className="h-12 w-12 mx-auto text-primary-600 mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          Restaurant Bilgileri
+          {t('onboardingRestaurant.step1.title')}
         </h2>
         <p className="text-gray-600 dark:text-gray-400">
-          Restaurant'ınızın temel bilgilerini girin
+          {t('onboardingRestaurant.step1.subtitle')}
         </p>
       </div>
 
       {/* Restaurant Name */}
       <div>
         <label htmlFor="restaurantName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Restaurant Adı *
+          {t('onboardingRestaurant.step1.nameLabel')}
         </label>
         <div className="relative">
-          <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="restaurantName"
             name="restaurantName"
             value={formData.restaurantName}
             onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.restaurantName
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder="Restaurant adınızı girin"
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingRestaurant.step1.namePlaceholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
         {errors.restaurantName && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.restaurantName}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.restaurantName}</p>
         )}
       </div>
 
       {/* Restaurant Logo */}
       <div>
-        {/* <<< MODIFIED: Added * to label >>> */}
         <label htmlFor="restaurantLogo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Restaurant Logosu *
+          {t('onboardingRestaurant.step1.logoLabel')}
         </label>
         <div className="relative">
-          <Camera className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Camera className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="file"
             id="restaurantLogo"
             accept="image/*"
             onChange={handleFileUpload('restaurantLogoPath')}
             disabled={isUploadingLogo}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               isUploadingLogo 
                 ? 'opacity-50 cursor-not-allowed' 
                 : ''
             } ${
               errors.restaurantLogoPath
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
             } text-gray-900 dark:text-white`}
           />
           {isUploadingLogo && (
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+            <div className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2`}>
               <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
@@ -471,31 +458,31 @@ const OnboardingRestaurant: React.FC = () => {
         
         {/* Upload Status */}
         {isUploadingLogo && (
-          <p className="mt-1 text-sm text-blue-600 dark:text-blue-400">
-            Logo yükleniyor...
+          <p className={`mt-1 text-sm text-blue-600 dark:text-blue-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('onboardingRestaurant.step1.logoUploading')}
           </p>
         )}
         
         {/* Error Message */}
         {errors.restaurantLogoPath && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.restaurantLogoPath}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.restaurantLogoPath}</p>
         )}
         
         {/* Success Preview */}
         {formData.restaurantLogoPath && !isUploadingLogo && (
           <div className="mt-3">
-            <div className="flex items-center space-x-3">
+            <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
               <img 
                 src={formData.restaurantLogoPath} 
                 alt="Restaurant Logo Preview" 
                 className="h-16 w-16 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
               />
               <div>
-                <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                  ✓ Logo başarıyla yüklendi
+                <p className={`text-sm text-green-600 dark:text-green-400 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('onboardingRestaurant.step1.logoSuccess')}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Cloudinary URL alındı
+                <p className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('onboardingRestaurant.step1.logoSuccessSub')}
                 </p>
               </div>
             </div>
@@ -506,21 +493,21 @@ const OnboardingRestaurant: React.FC = () => {
       {/* Cuisine Type */}
       <div>
         <label htmlFor="cuisineType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Mutfak Türü *
+          {t('onboardingRestaurant.step1.cuisineLabel')}
         </label>
         <div className="relative">
-          <Utensils className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Utensils className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <select
             id="cuisineType"
             name="cuisineType"
             value={formData.cuisineType}
             onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.cuisineType
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white`}
+            } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
+            dir={isRTL ? 'rtl' : 'ltr'}
           >
             {cuisineOptions.map(option => (
               <option key={option.value} value={option.value}>
@@ -530,12 +517,12 @@ const OnboardingRestaurant: React.FC = () => {
           </select>
         </div>
         {errors.cuisineType && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.cuisineType}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.cuisineType}</p>
         )}
       </div>
 
       {/* Alcohol Service */}
-      <div className="flex items-center space-x-3">
+      <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
         <input
           type="checkbox"
           id="hasAlcoholService"
@@ -544,9 +531,9 @@ const OnboardingRestaurant: React.FC = () => {
           onChange={handleInputChange}
           className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
         />
-        <label htmlFor="hasAlcoholService" className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center">
-          <Wine className="h-4 w-4 mr-2" />
-          Alkol servisi yapıyoruz
+        <label htmlFor="hasAlcoholService" className={`text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <Wine className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+          {t('onboardingRestaurant.step1.alcoholLabel')}
         </label>
       </div>
     </div>
@@ -557,60 +544,60 @@ const OnboardingRestaurant: React.FC = () => {
       <div className="text-center mb-8">
         <Building className="h-12 w-12 mx-auto text-primary-600 mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          Şirket Bilgileri
+          {t('onboardingRestaurant.step2.title')}
         </h2>
         <p className="text-gray-600 dark:text-gray-400">
-          Şirket bilgilerinizi girin
+          {t('onboardingRestaurant.step2.subtitle')}
         </p>
       </div>
 
       {/* Company Title */}
       <div>
         <label htmlFor="companyTitle" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Şirket Unvanı *
+          {t('onboardingRestaurant.step2.companyTitleLabel')}
         </label>
         <div className="relative">
-          <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Building className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="companyTitle"
             name="companyTitle"
             value={formData.companyTitle}
             onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.companyTitle
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder="Şirket unvanınızı girin"
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingRestaurant.step2.companyTitlePlaceholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
         {errors.companyTitle && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.companyTitle}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.companyTitle}</p>
         )}
       </div>
 
       {/* Legal Type */}
       <div>
         <label htmlFor="legalType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Hukuki Yapı *
+          {t('onboardingRestaurant.step2.legalTypeLabel')}
         </label>
         <div className="relative">
-          <Shield className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Shield className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <select
             id="legalType"
             name="legalType"
             value={formData.legalType}
             onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.legalType
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white`}
+            } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
+            dir={isRTL ? 'rtl' : 'ltr'}
           >
-            <option value="">Hukuki yapı seçiniz</option>
+            <option value="">{t('onboardingRestaurant.step2.legalTypePlaceholder')}</option>
             {legalTypeOptions.map(option => (
               <option key={option} value={option}>
                 {option}
@@ -619,25 +606,26 @@ const OnboardingRestaurant: React.FC = () => {
           </select>
         </div>
         {errors.legalType && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.legalType}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.legalType}</p>
         )}
       </div>
 
       {/* MERSİS Number */}
       <div>
         <label htmlFor="mersisNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          MERSİS Numarası
+          {t('onboardingRestaurant.step2.mersisLabel')}
         </label>
         <div className="relative">
-          <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Hash className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="mersisNumber"
             name="mersisNumber"
             value={formData.mersisNumber}
             onChange={handleInputChange}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            placeholder="MERSİS numaranızı girin"
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingRestaurant.step2.mersisPlaceholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
       </div>
@@ -645,18 +633,19 @@ const OnboardingRestaurant: React.FC = () => {
       {/* Trade Registry Number */}
       <div>
         <label htmlFor="tradeRegistryNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Ticaret Sicil Numarası
+          {t('onboardingRestaurant.step2.tradeRegistryLabel')}
         </label>
         <div className="relative">
-          <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Hash className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="tradeRegistryNumber"
             name="tradeRegistryNumber"
             value={formData.tradeRegistryNumber}
             onChange={handleInputChange}
-            className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            placeholder="Ticaret sicil numaranızı girin"
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingRestaurant.step2.tradeRegistryPlaceholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
       </div>
@@ -668,93 +657,92 @@ const OnboardingRestaurant: React.FC = () => {
       <div className="text-center mb-8">
         <FileText className="h-12 w-12 mx-auto text-primary-600 mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          Yasal Belgeler
+          {t('onboardingRestaurant.step3.title')}
         </h2>
         <p className="text-gray-600 dark:text-gray-400">
-          Vergi ve belge bilgilerinizi girin
+          {t('onboardingRestaurant.step3.subtitle')}
         </p>
       </div>
 
       {/* Tax Number */}
       <div>
         <label htmlFor="taxNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Vergi Numarası *
+          {t('onboardingRestaurant.step3.taxNumberLabel')}
         </label>
         <div className="relative">
-          <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Hash className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="taxNumber"
             name="taxNumber"
             value={formData.taxNumber}
             onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.taxNumber
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder="Vergi numaranızı girin"
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingRestaurant.step3.taxNumberPlaceholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
         {errors.taxNumber && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.taxNumber}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.taxNumber}</p>
         )}
       </div>
 
       {/* Tax Office */}
       <div>
         <label htmlFor="taxOffice" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Vergi Dairesi *
+          {t('onboardingRestaurant.step3.taxOfficeLabel')}
         </label>
         <div className="relative">
-          <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Building className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="taxOffice"
             name="taxOffice"
             value={formData.taxOffice}
             onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.taxOffice
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder="Vergi dairenizi girin"
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingRestaurant.step3.taxOfficePlaceholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
         {errors.taxOffice && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.taxOffice}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.taxOffice}</p>
         )}
       </div>
 
       {/* Work Permit File */}
       <div>
         <label htmlFor="workPermitFile" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Çalışma İzni Belgesi
+          {t('onboardingRestaurant.step3.workPermitLabel')}
         </label>
         <div className="relative">
-          <Upload className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Upload className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="file"
             id="workPermitFile"
             accept=".pdf,.jpg,.jpeg,.png"
             onChange={handleFileUpload('workPermitFilePath')}
             disabled={isUploadingWorkPermit}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               isUploadingWorkPermit 
                 ? 'opacity-50 cursor-not-allowed' 
                 : ''
             } ${
               errors.workPermitFilePath
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
             } text-gray-900 dark:text-white`}
           />
           {isUploadingWorkPermit && (
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+            <div className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2`}>
               <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
@@ -762,20 +750,20 @@ const OnboardingRestaurant: React.FC = () => {
         
         {/* Upload Status */}
         {isUploadingWorkPermit && (
-          <p className="mt-1 text-sm text-blue-600 dark:text-blue-400">
-            Çalışma izni belgesi yükleniyor...
+          <p className={`mt-1 text-sm text-blue-600 dark:text-blue-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('onboardingRestaurant.step3.workPermitUploading')}
           </p>
         )}
         
         {/* Error Message */}
         {errors.workPermitFilePath && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.workPermitFilePath}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.workPermitFilePath}</p>
         )}
         
         {/* Success Message */}
         {formData.workPermitFilePath && !isUploadingWorkPermit && (
-          <p className="mt-1 text-sm text-green-600 dark:text-green-400 font-medium">
-            ✓ Çalışma izni belgesi başarıyla yüklendi
+          <p className={`mt-1 text-sm text-green-600 dark:text-green-400 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('onboardingRestaurant.step3.workPermitSuccess')}
           </p>
         )}
       </div>
@@ -783,29 +771,28 @@ const OnboardingRestaurant: React.FC = () => {
       {/* Food Certificate File */}
       <div>
         <label htmlFor="foodCertificateFile" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Gıda Belgesi
+          {t('onboardingRestaurant.step3.foodCertificateLabel')}
         </label>
         <div className="relative">
-          <Upload className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Upload className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="file"
             id="foodCertificateFile"
             accept=".pdf,.jpg,.jpeg,.png"
             onChange={handleFileUpload('foodCertificateFilePath')}
             disabled={isUploadingFoodCertificate}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               isUploadingFoodCertificate 
                 ? 'opacity-50 cursor-not-allowed' 
                 : ''
             } ${
               errors.foodCertificateFilePath
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                // ... (rest of the class)
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
             } text-gray-900 dark:text-white`}
           />
           {isUploadingFoodCertificate && (
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+            <div className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2`}>
               <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
@@ -813,20 +800,20 @@ const OnboardingRestaurant: React.FC = () => {
         
         {/* Upload Status */}
         {isUploadingFoodCertificate && (
-          <p className="mt-1 text-sm text-blue-600 dark:text-blue-400">
-            Gıda belgesi yükleniyor...
+          <p className={`mt-1 text-sm text-blue-600 dark:text-blue-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('onboardingRestaurant.step3.foodCertificateUploading')}
           </p>
         )}
         
         {/* Error Message */}
         {errors.foodCertificateFilePath && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.foodCertificateFilePath}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.foodCertificateFilePath}</p>
         )}
         
         {/* Success Message */}
         {formData.foodCertificateFilePath && !isUploadingFoodCertificate && (
-          <p className="mt-1 text-sm text-green-600 dark:text-green-400 font-medium">
-            ✓ Gıda belgesi başarıyla yüklendi
+          <p className={`mt-1 text-sm text-green-600 dark:text-green-400 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('onboardingRestaurant.step3.foodCertificateSuccess')}
           </p>
         )}
       </div>
@@ -834,21 +821,21 @@ const OnboardingRestaurant: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="max-w-3xl mx-auto">
         {/* Back Button */}
         <motion.div
-          initial={{ opacity: 0, x: -20 }}
+          initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
           <Link
             to="/register"
-            className="inline-flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200"
+            className={`inline-flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
           >
-            <ArrowLeft className="h-4 w-4" />
-            <span>Kayıt Sayfasına Dön</span>
+            <ArrowLeft className={`h-4 w-4 ${isRTL ? 'rotate-180' : ''}`} />
+            <span>{t('onboardingRestaurant.backLink')}</span>
           </Link>
         </motion.div>
 
@@ -859,9 +846,9 @@ const OnboardingRestaurant: React.FC = () => {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between">
+          <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''} justify-between`}>
             {[1, 2, 3].map((step) => (
-              <div key={step} className="flex items-center">
+              <div key={step} className={`flex items-center ${isRTL && step < 3 ? 'flex-row-reverse' : ''}`}>
                 <div className={`
                   w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium
                   ${currentStep >= step 
@@ -873,7 +860,7 @@ const OnboardingRestaurant: React.FC = () => {
                 </div>
                 {step < 3 && (
                   <div className={`
-                    w-full h-1 ml-4
+                    w-full h-1 ${isRTL ? 'mr-4' : 'ml-4'}
                     ${currentStep > step 
                       ? 'bg-primary-600' 
                       : 'bg-gray-300 dark:bg-gray-600'
@@ -883,10 +870,10 @@ const OnboardingRestaurant: React.FC = () => {
               </div>
             ))}
           </div>
-          <div className="flex justify-between mt-2 text-xs text-gray-600 dark:text-gray-400">
-            <span>Temel Bilgiler</span>
-            <span>Şirket Bilgileri</span>
-            <span>Yasal Belgeler</span>
+          <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} justify-between mt-2 text-xs text-gray-600 dark:text-gray-400`}>
+            <span>{t('onboardingRestaurant.progress.step1')}</span>
+            <span>{t('onboardingRestaurant.progress.step2')}</span>
+            <span>{t('onboardingRestaurant.progress.step3')}</span>
           </div>
         </motion.div>
 
@@ -898,8 +885,8 @@ const OnboardingRestaurant: React.FC = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
           >
-            <div className="flex items-center">
-              <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
+            <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <CheckCircle className={`h-5 w-5 text-green-600 dark:text-green-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
               <p className="text-green-800 dark:text-green-200">{location.state.message}</p>
             </div>
           </motion.div>
@@ -916,8 +903,8 @@ const OnboardingRestaurant: React.FC = () => {
             {/* Error Message */}
             {apiError && (
               <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                <div className="flex items-center">
-                  <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mr-2" />
+                <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <AlertCircle className={`h-5 w-5 text-red-600 dark:text-red-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                   <p className="text-red-800 dark:text-red-200">{apiError}</p>
                 </div>
               </div>
@@ -926,8 +913,8 @@ const OnboardingRestaurant: React.FC = () => {
             {/* Success Message */}
             {successMessage && (
               <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-                <div className="flex items-center">
-                  <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 mr-2" />
+                <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <CheckCircle className={`h-5 w-5 text-green-600 dark:text-green-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                   <p className="text-green-800 dark:text-green-200">{successMessage}</p>
                 </div>
               </div>
@@ -939,14 +926,14 @@ const OnboardingRestaurant: React.FC = () => {
             {currentStep === 3 && renderStep3()}
 
             {/* Navigation Buttons */}
-            <div className="flex justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} justify-between mt-8 pt-6 border-t border-gray-200 dark:border-gray-700`}>
               {currentStep > 1 && (
                 <button
                   type="button"
                   onClick={handlePreviousStep}
                   className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
                 >
-                  Önceki Adım
+                  {t('onboardingRestaurant.navigation.previous')}
                 </button>
               )}
               
@@ -958,26 +945,26 @@ const OnboardingRestaurant: React.FC = () => {
                   onClick={handleNextStep}
                   className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200"
                 >
-                  Sonraki Adım
+                  {t('onboardingRestaurant.navigation.next')}
                 </button>
               ) : (
                 <button
                   type="submit"
                   disabled={isSubmitting || isUploadingLogo || isUploadingWorkPermit || isUploadingFoodCertificate}
-                  className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center space-x-2"
+                  className={`px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
                 >
                   {isSubmitting ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Kaydediliyor...</span>
+                      <span>{t('onboardingRestaurant.navigation.submitting')}</span>
                     </>
                   ) : (isUploadingLogo || isUploadingWorkPermit || isUploadingFoodCertificate) ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Dosyalar Yükleniyor...</span>
+                      <span>{t('onboardingRestaurant.navigation.uploading')}</span>
                     </>
                   ) : (
-                    <span>Restaurant'ı Kaydet</span>
+                    <span>{t('onboardingRestaurant.navigation.submit')}</span>
                   )}
                 </button>
               )}

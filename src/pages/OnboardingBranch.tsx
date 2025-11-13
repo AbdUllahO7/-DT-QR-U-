@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Store, Building2, Phone, Mail, MapPin, Clock, 
   ArrowLeft, AlertCircle, CheckCircle, Globe, 
-  MapPinned, FileText, Home, Info, ArrowRight, Upload 
+  MapPinned, FileText, Home, Info, ArrowRight, Upload, X, Navigation
 } from 'lucide-react';
 import type { 
   CreateBranchWithDetailsDto, 
@@ -15,10 +15,14 @@ import { branchService } from '../services/branchService';
 import { mediaService } from '../services/mediaService';
 import { restaurantService } from '../services/restaurantService';
 import { logger } from '../utils/logger';
+import { countries } from '../data/mockData';
+import { useLanguage } from '../contexts/LanguageContext';
+
 
 const OnboardingBranch: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, isRTL } = useLanguage();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errors, setErrors] = useState<{
@@ -43,6 +47,17 @@ const OnboardingBranch: React.FC = () => {
   const [branchLogo, setBranchLogo] = useState<File | null>(null);
   const [branchLogoPreview, setBranchLogoPreview] = useState<string | null>(null);
   const [isUploadingLogo, setIsUploadingLogo] = useState<boolean>(false);
+
+  // Phone country codes
+  const [whatsappCountryCode, setWhatsappCountryCode] = useState<string>('+90');
+  const [contactCountryCode, setContactCountryCode] = useState<string>('+90');
+
+  // Map modal state
+  const [isMapModalOpen, setIsMapModalOpen] = useState<boolean>(false);
+  const [selectedLatLng, setSelectedLatLng] = useState<{ lat: number; lng: number }>({
+    lat: 41.0082, // Default to Istanbul
+    lng: 28.9784
+  });
 
   // Form data state
   const [formData, setFormData] = useState<CreateBranchWithDetailsDto>({
@@ -70,13 +85,13 @@ const OnboardingBranch: React.FC = () => {
       openHours: ''
     },
     createBranchWorkingHourCoreDto: [
-      { dayOfWeek: 1, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true }, // Pazartesi
-      { dayOfWeek: 2, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true }, // Salı
-      { dayOfWeek: 3, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true }, // Çarşamba
-      { dayOfWeek: 4, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true }, // Perşembe
-      { dayOfWeek: 5, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true }, // Cuma
-      { dayOfWeek: 6, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true }, // Cumartesi
-      { dayOfWeek: 0, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: false }  // Pazar - varsayılan olarak kapalı
+      { dayOfWeek: 1, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
+      { dayOfWeek: 2, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
+      { dayOfWeek: 3, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
+      { dayOfWeek: 4, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
+      { dayOfWeek: 5, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
+      { dayOfWeek: 6, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
+      { dayOfWeek: 0, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: false }
     ]
   });
 
@@ -95,23 +110,24 @@ const OnboardingBranch: React.FC = () => {
     const open = new Date(`2000-01-01T${openTime}`);
     const close = new Date(`2000-01-01T${closeTime}`);
     
-    // If close time is earlier than open time, it means it crosses midnight
-    // This is valid (e.g., 23:00 - 02:00)
     if (close <= open) {
-      // For cross-midnight scenarios, we need to check if it's a reasonable span
-      // We'll allow up to 12 hours across midnight
       const nextDayClose = new Date(`2000-01-02T${closeTime}`);
       const hoursSpan = (nextDayClose.getTime() - open.getTime()) / (1000 * 60 * 60);
       return hoursSpan <= 12 && hoursSpan > 0;
     }
     
-    // Normal same-day operation
     return close > open;
   };
 
-  // Günlerin Türkçe isimleri - Görünüm sırası: Pazartesi-Pazar
-  const dayNamesDisplay = ['Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi', 'Pazar'];
-  const dayNamesMapping = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi'];
+  const dayNamesDisplay = [
+    t('onboardingBranch.form.step3.workingHours.dayNames.0'),
+    t('onboardingBranch.form.step3.workingHours.dayNames.1'),
+    t('onboardingBranch.form.step3.workingHours.dayNames.2'),
+    t('onboardingBranch.form.step3.workingHours.dayNames.3'),
+    t('onboardingBranch.form.step3.workingHours.dayNames.4'),
+    t('onboardingBranch.form.step3.workingHours.dayNames.5'),
+    t('onboardingBranch.form.step3.workingHours.dayNames.6')
+  ];
 
   // Get restaurantId from location state or localStorage and fetch restaurant info
   useEffect(() => {
@@ -152,21 +168,18 @@ const OnboardingBranch: React.FC = () => {
         restaurantId: finalRestaurantId
       }));
 
-      // Restaurant bilgilerini al ve logo path'ini sakla
       fetchRestaurantInfo(finalRestaurantId);
     } else {
       logger.warn('RestaurantId bulunamadı! OnboardingRestaurant sayfasına yönlendirilecek.');
     }
   }, [location.state]);
 
-  // Restaurant bilgilerini al ve logo path'ini sakla
   const fetchRestaurantInfo = async (restaurantId: number): Promise<void> => {
     try {
       if (import.meta.env.DEV) {
         logger.info('Restaurant bilgileri alınıyor', { restaurantId });
       }
 
-      // Önce localStorage'dan restaurant logo path'ini kontrol et
       const storedRestaurantLogoPath = localStorage.getItem('restaurantLogoPath');
       if (storedRestaurantLogoPath) {
         setRestaurantLogoPath(storedRestaurantLogoPath);
@@ -176,7 +189,6 @@ const OnboardingBranch: React.FC = () => {
         return;
       }
 
-      // localStorage'da yoksa API'den al
       const restaurantInfo = await restaurantService.getRestaurantManagementInfo();
       
       if (restaurantInfo && restaurantInfo.restaurantLogoPath) {
@@ -193,7 +205,6 @@ const OnboardingBranch: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const { name, value } = e.target;
     
-    // Handle nested objects (address and contact)
     if (name.startsWith('address.')) {
       const addressField = name.split('.')[1];
       setFormData(prev => ({
@@ -219,12 +230,106 @@ const OnboardingBranch: React.FC = () => {
       }));
     }
     
-    // Clear error when user starts typing
     if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({
         ...prev,
         [name]: null
       }));
+    }
+  };
+
+  // Handlers for WhatsApp Number
+  const handleWhatsappNationalPhoneChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const { value } = e.target;
+    const digitsOnly = value.replace(/\D/g, '');
+    
+    setFormData(prev => ({
+      ...prev,
+      whatsappOrderNumber: digitsOnly
+    }));
+    
+    if (errors.whatsappOrderNumber) {
+      setErrors(prev => ({ ...prev, whatsappOrderNumber: undefined }));
+    }
+  };
+
+  const handleWhatsappCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    setWhatsappCountryCode(e.target.value);
+  };
+
+  // Handlers for Contact Phone Number
+  const handleContactNationalPhoneChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const { value } = e.target;
+    const digitsOnly = value.replace(/\D/g, '');
+    
+    setFormData(prev => ({
+      ...prev,
+      createContactDto: {
+        ...prev.createContactDto,
+        phone: digitsOnly
+      }
+    }));
+    
+    if (errors['createContactDto.phone']) {
+      setErrors(prev => ({ ...prev, 'createContactDto.phone': undefined }));
+    }
+  };
+
+  const handleContactCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
+    setContactCountryCode(e.target.value);
+  };
+
+  // Map modal handlers
+  const handleOpenMapModal = (): void => {
+    // Parse existing location if available
+    if (formData.createContactDto.location) {
+      const coords = formData.createContactDto.location.split(',');
+      if (coords.length === 2) {
+        const lat = parseFloat(coords[0].trim());
+        const lng = parseFloat(coords[1].trim());
+        if (!isNaN(lat) && !isNaN(lng)) {
+          setSelectedLatLng({ lat, lng });
+        }
+      }
+    }
+    setIsMapModalOpen(true);
+  };
+
+  const handleCloseMapModal = (): void => {
+    setIsMapModalOpen(false);
+  };
+
+  const handleConfirmLocation = (): void => {
+    const locationString = `${selectedLatLng.lat.toFixed(6)},${selectedLatLng.lng.toFixed(6)}`;
+    setFormData(prev => ({
+      ...prev,
+      createContactDto: {
+        ...prev.createContactDto,
+        location: locationString
+      }
+    }));
+    setIsMapModalOpen(false);
+    if (errors['createContactDto.location']) {
+      setErrors(prev => ({ ...prev, 'createContactDto.location': undefined }));
+    }
+  };
+
+  const handleGetCurrentLocation = (): void => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setSelectedLatLng({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          alert(t('onboardingBranch.form.step3.location.geolocationError') || 'Could not get your location. Please select manually.');
+        }
+      );
+    } else {
+      alert(t('onboardingBranch.form.step3.location.geolocationNotSupported') || 'Geolocation is not supported by your browser.');
     }
   };
 
@@ -249,20 +354,17 @@ const OnboardingBranch: React.FC = () => {
     }));
   };
 
-  // Logo upload handlers
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const file = e.target.files?.[0];
     if (file) {
       setBranchLogo(file);
       
-      // Create preview
       const reader = new FileReader();
       reader.onload = (event) => {
         setBranchLogoPreview(event.target?.result as string);
       };
       reader.readAsDataURL(file);
       
-      // Otomatik upload başlat
       await handleLogoUpload(file);
     }
   };
@@ -288,12 +390,11 @@ const OnboardingBranch: React.FC = () => {
         branchLogoPath: responseUrl
       }));
       
-      // Reset file input
       setBranchLogo(null);
       
     } catch (error) {
       console.error('Logo yükleme hatası:', error);
-      setApiError('Logo yüklenirken hata oluştu. Lütfen tekrar deneyin.');
+      setApiError(t('onboardingBranch.messages.api.logoUploadError'));
     } finally {
       setIsUploadingLogo(false);
     }
@@ -307,6 +408,7 @@ const OnboardingBranch: React.FC = () => {
       'createAddressDto.city'?: string;
       'createAddressDto.street'?: string;
       'createAddressDto.addressLine1'?: string;
+      'createAddressDto.addressLine2'?: string;
       'createAddressDto.zipCode'?: string;
       'createContactDto.phone'?: string;
       'createContactDto.mail'?: string;
@@ -317,64 +419,75 @@ const OnboardingBranch: React.FC = () => {
     switch (step) {
       case 1: // Basic Info
         if (!formData.branchName?.trim()) {
-          newErrors.branchName = 'Şube adı gereklidir';
+          newErrors.branchName = t('onboardingBranch.form.step1.branchName.error');
         }
+        
         if (!formData.whatsappOrderNumber?.trim()) {
-          newErrors.whatsappOrderNumber = 'WhatsApp sipariş numarası gereklidir';
+          newErrors.whatsappOrderNumber = t('onboardingBranch.form.step1.whatsappNumber.errorRequired');
+        } else if (!/^\d{7,15}$/.test(formData.whatsappOrderNumber.trim())) {
+          newErrors.whatsappOrderNumber = t('onboardingBranch.form.step1.whatsappNumber.errorInvalid');
         }
         break;
         
       case 2: // Address Info
         if (!formData.createAddressDto.country?.trim()) {
-          newErrors['createAddressDto.country'] = 'Ülke gereklidir';
+          newErrors['createAddressDto.country'] = t('onboardingBranch.form.step2.country.error');
         }
         if (!formData.createAddressDto.city?.trim()) {
-          newErrors['createAddressDto.city'] = 'Şehir gereklidir';
+          newErrors['createAddressDto.city'] = t('onboardingBranch.form.step2.city.error');
         }
         if (!formData.createAddressDto.street?.trim()) {
-          newErrors['createAddressDto.street'] = 'Sokak gereklidir';
+          newErrors['createAddressDto.street'] = t('onboardingBranch.form.step2.street.error');
         }
         if (!formData.createAddressDto.addressLine1?.trim()) {
-          newErrors['createAddressDto.addressLine1'] = 'Adres satırı 1 gereklidir';
+          newErrors['createAddressDto.addressLine1'] = t('onboardingBranch.form.step2.addressLine1.error');
+        }
+        if (!formData.createAddressDto.addressLine2?.trim()) {
+          newErrors['createAddressDto.addressLine2'] = t('onboardingBranch.form.step2.addressLine2.error');
         }
         if (!formData.createAddressDto.zipCode?.trim()) {
-          newErrors['createAddressDto.zipCode'] = 'Posta kodu gereklidir';
+          newErrors['createAddressDto.zipCode'] = t('onboardingBranch.form.step2.zipCode.error');
         }
         break;
         
       case 3: // Contact Info & Working Hours
         if (!formData.createContactDto.phone?.trim()) {
-          newErrors['createContactDto.phone'] = 'Telefon numarası gereklidir';
-        }
-        if (!formData.createContactDto.mail?.trim()) {
-          newErrors['createContactDto.mail'] = 'E-posta adresi gereklidir';
-        }
-        if (!formData.createContactDto.location?.trim()) {
-          newErrors['createContactDto.location'] = 'Konum bilgisi gereklidir';
+          newErrors['createContactDto.phone'] = t('onboardingBranch.form.step3.phone.errorRequired');
+        } else if (!/^\d{7,15}$/.test(formData.createContactDto.phone.trim())) {
+          newErrors['createContactDto.phone'] = t('onboardingBranch.form.step3.phone.errorInvalid');
         }
         
-        // Çalışma saatleri validation - Updated to handle cross-midnight scenarios
+        if (!formData.createContactDto.mail?.trim()) {
+          newErrors['createContactDto.mail'] = t('onboardingBranch.form.step3.email.error');
+        }
+        if (!formData.createContactDto.location?.trim()) {
+          newErrors['createContactDto.location'] = t('onboardingBranch.form.step3.location.error');
+        }
+        
         const workingDays = formData.createBranchWorkingHourCoreDto?.filter(day => day.isWorkingDay) || [];
         if (workingDays.length === 0) {
-          newErrors.workingHours = 'En az bir gün için çalışma saati belirtmelisiniz';
+          newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.minOneDay');
         } else {
-          // Çalışma saatlerinin doğru format olduğunu kontrol et
           for (const day of workingDays) {
             if (!day.openTime || !day.closeTime) {
-              newErrors.workingHours = 'Tüm çalışma günleri için açılış ve kapanış saati belirtmelisiniz';
+              newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.allTimesRequired');
               break;
             }
             
-            // Updated validation to handle cross-midnight scenarios
             if (!isValidTimeRange(day.openTime, day.closeTime)) {
               const openTimeFormatted = formatTimeForInput(day.openTime);
               const closeTimeFormatted = formatTimeForInput(day.closeTime);
               
               if (day.closeTime <= day.openTime) {
-                // Cross-midnight scenario - check if it's reasonable
-                newErrors.workingHours = `Geçersiz çalışma saati aralığı: ${openTimeFormatted} - ${closeTimeFormatted}. Gece boyunca açık kalma süresi 12 saati geçemez.`;
+                newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.invalidRange', {
+                  openTime: openTimeFormatted,
+                  closeTime: closeTimeFormatted
+                });
               } else {
-                newErrors.workingHours = `Açılış saati (${openTimeFormatted}) kapanış saatinden (${closeTimeFormatted}) önce olmalıdır`;
+                newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.openBeforeClose', {
+                  openTime: openTimeFormatted,
+                  closeTime: closeTimeFormatted
+                });
               }
               break;
             }
@@ -390,17 +503,18 @@ const OnboardingBranch: React.FC = () => {
   const handleNextStep = (): void => {
     if (validateStep(currentStep)) {
       setCurrentStep(prev => prev + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
   const handlePreviousStep = (): void => {
     setCurrentStep(prev => prev - 1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     
-    // Clear previous errors
     setApiError('');
     setSuccessMessage('');
     
@@ -409,33 +523,28 @@ const OnboardingBranch: React.FC = () => {
     }
 
     if (!restaurantId) {
-      setApiError('Restaurant bilgisi bulunamadı. Lütfen tekrar restaurant oluşturun.');
+      setApiError(t('onboardingBranch.messages.api.restaurantNotFound'));
       setTimeout(() => {
         navigate('/onboarding/restaurant');
       }, 2000);
       return;
     }
 
-    // FIXED: Include ALL working hours (both working and non-working days)
-    // Only validate that working days have proper times, but send all days to database
     const allWorkingHours = formData.createBranchWorkingHourCoreDto || [];
     
-    // Validate working days have proper times
     const workingDays = allWorkingHours.filter(day => day.isWorkingDay);
     if (workingDays.length === 0) {
-      setApiError('En az bir gün için çalışma saati belirtmelisiniz.');
+      setApiError(t('onboardingBranch.form.step3.workingHours.error.minOneDay'));
       return;
     }
 
-    // Validate that working days have times
     for (const day of workingDays) {
       if (!day.openTime || !day.closeTime) {
-        setApiError('Tüm çalışma günleri için açılış ve kapanış saati belirtmelisiniz.');
+        setApiError(t('onboardingBranch.form.step3.workingHours.error.allTimesRequired'));
         return;
       }
     }
 
-    // Şube profil fotoğrafı yüklenmezse restaurant logo path'ini kullan
     let finalBranchLogoPath = formData.branchLogoPath;
     if (!finalBranchLogoPath && restaurantLogoPath) {
       finalBranchLogoPath = restaurantLogoPath;
@@ -445,11 +554,13 @@ const OnboardingBranch: React.FC = () => {
         });
       }
     }
+    
+    const fullWhatsappNumber = `${whatsappCountryCode}${formData.whatsappOrderNumber.replace(/\D/g, '')}`;
+    const fullContactPhone = `${contactCountryCode}${formData.createContactDto.phone.replace(/\D/g, '')}`;
 
-    // RestaurantId'nin formData'ya kesinlikle set edildiğinden emin ol ve null değerleri temizle
     const finalFormData: CreateBranchWithDetailsDto = {
       branchName: formData.branchName?.trim() || null,
-      whatsappOrderNumber: formData.whatsappOrderNumber?.trim() || null,
+      whatsappOrderNumber: fullWhatsappNumber,
       restaurantId: restaurantId,
       branchLogoPath: finalBranchLogoPath,
       createAddressDto: {
@@ -461,7 +572,7 @@ const OnboardingBranch: React.FC = () => {
         addressLine2: formData.createAddressDto.addressLine2?.trim() || null
       },
       createContactDto: {
-        phone: formData.createContactDto.phone?.trim() || null,
+        phone: fullContactPhone,
         mail: formData.createContactDto.mail?.trim() || null,
         location: formData.createContactDto.location?.trim() || null,
         contactHeader: formData.createContactDto.contactHeader?.trim() || null,
@@ -471,7 +582,6 @@ const OnboardingBranch: React.FC = () => {
         openDays: formData.createContactDto.openDays?.trim() || null,
         openHours: formData.createContactDto.openHours?.trim() || null
       },
-      // FIXED: Send ALL working hours (including closed days) to database
       createBranchWorkingHourCoreDto: allWorkingHours
     };
     
@@ -488,16 +598,14 @@ const OnboardingBranch: React.FC = () => {
       }
       
       if (response.branchId) {
-        setSuccessMessage('Şube bilgileriniz başarıyla kaydedildi! Yönlendiriliyorsunuz...');
+        setSuccessMessage(t('onboardingBranch.messages.successMessage'));
         
-        // Store branchId for future use
         const branchId = response.branchId;
         if (import.meta.env.DEV) {
           logger.info('Oluşturulan Branch ID', { branchId });
         }
         localStorage.setItem('onboarding_branchId', branchId.toString());
         
-        // Redirect to complete page
         setTimeout(() => {
           navigate('/onboarding/complete');
         }, 2000);
@@ -505,7 +613,7 @@ const OnboardingBranch: React.FC = () => {
         if (import.meta.env.DEV) {
           console.error('BranchId alınamadı! Response:', response);
         }
-        setApiError('Şube ID alınamadı. Lütfen tekrar deneyin.');
+        setApiError(t('onboardingBranch.messages.api.branchIdMissing'));
       }
     } catch (error) {
       if (import.meta.env.DEV) {
@@ -515,7 +623,6 @@ const OnboardingBranch: React.FC = () => {
       const apiErr = error as ApiError;
       
       if (apiErr.status === 400 && apiErr.errors) {
-        // Handle validation errors from API
         const errorMessages = [];
         for (const field in apiErr.errors) {
           const fieldErrors = apiErr.errors[field];
@@ -527,20 +634,168 @@ const OnboardingBranch: React.FC = () => {
         }
         setApiError(errorMessages.join('\n'));
       } else if (apiErr.status === 409) {
-        setApiError('Bu şube adı zaten kullanımda. Lütfen farklı bir ad deneyin.');
+        setApiError(t('onboardingBranch.messages.api.nameInUse'));
       } else if (apiErr.status === 0) {
-        setApiError('Sunucuya bağlanılamıyor. Lütfen internet bağlantınızı kontrol edin.');
+        setApiError(t('onboardingBranch.messages.api.connectionError'));
       } else if (apiErr.status === 500) {
-        setApiError('Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin veya form verilerinizi kontrol edin.');
+        setApiError(t('onboardingBranch.messages.api.serverError'));
       } else {
-        setApiError(apiErr.message || 'Şube kaydı sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+        setApiError(apiErr.message || t('onboardingBranch.messages.api.genericCreateError'));
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Switch component
+  const MapPickerModal = () => {
+    useEffect(() => {
+      if (isMapModalOpen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'unset';
+      }
+      return () => {
+        document.body.style.overflow = 'unset';
+      };
+    }, [isMapModalOpen]);
+
+    if (!isMapModalOpen) return null;
+
+    return (
+      <AnimatePresence>
+        <div className="fixed inset-0 z-50 overflow-y-auto" dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className="flex min-h-screen items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleCloseMapModal}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            />
+
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden"
+            >
+              {/* Header */}
+              <div className={`flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                  <MapPin className="h-6 w-6 text-primary-600" />
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    {t('onboardingBranch.form.step3.location.mapTitle') || 'حدد الموقع'}
+                  </h3>
+                </div>
+                <button
+                  onClick={handleCloseMapModal}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="p-6 space-y-4">
+                {/* Current Location Button */}
+                <button
+                  type="button"
+                  onClick={handleGetCurrentLocation}
+                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+                >
+                  <Navigation className="h-5 w-5" />
+                  <span className="font-medium">
+                    {t('onboardingBranch.form.step3.location.useCurrentLocation') || 'استخدم موقعي الحالي'}
+                  </span>
+                </button>
+
+                {/* Map Container */}
+                <div className="relative w-full h-96 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden border-2 border-gray-300 dark:border-gray-600">
+                  <iframe
+                    title="Location Map"
+                    width="100%"
+                    height="100%"
+                    frameBorder="0"
+                    style={{ border: 0 }}
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${selectedLatLng.lng - 0.01},${selectedLatLng.lat - 0.01},${selectedLatLng.lng + 0.01},${selectedLatLng.lat + 0.01}&layer=mapnik&marker=${selectedLatLng.lat},${selectedLatLng.lng}`}
+                    allowFullScreen
+                  />
+                </div>
+
+                {/* Coordinate Inputs */}
+                <div className={`grid grid-cols-2 gap-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {t('onboardingBranch.form.step3.location.latitude') || 'خط العرض (Latitude)'}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.000001"
+                      value={selectedLatLng.lat}
+                      onChange={(e) => setSelectedLatLng(prev => ({ ...prev, lat: parseFloat(e.target.value) || 0 }))}
+                      className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                      dir="ltr"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {t('onboardingBranch.form.step3.location.longitude') || 'خط الطول (Longitude)'}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.000001"
+                      value={selectedLatLng.lng}
+                      onChange={(e) => setSelectedLatLng(prev => ({ ...prev, lng: parseFloat(e.target.value) || 0 }))}
+                      className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                      dir="ltr"
+                    />
+                  </div>
+                </div>
+
+                {/* Info Box */}
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
+                  <div className={`flex items-start space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                    <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                    <div className={`text-sm text-blue-700 dark:text-blue-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      <p className="font-medium mb-1">
+                        {t('onboardingBranch.form.step3.location.mapHelp') || 'كيفية استخدام الخريطة:'}
+                      </p>
+                      <ul className={`space-y-1 ${isRTL ? 'mr-4' : 'ml-4'}`}>
+                        <li>{t('onboardingBranch.form.step3.location.mapHelp1') || '• اضغط على "استخدم موقعي الحالي" للحصول على موقعك تلقائيًا'}</li>
+                        <li>{t('onboardingBranch.form.step3.location.mapHelp2') || '• أو أدخل خطوط العرض والطول يدويًا'}</li>
+                        <li>{t('onboardingBranch.form.step3.location.mapHelp3') || '• يمكنك نسخ الإحداثيات من خرائط جوجل'}</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className={`flex items-center justify-end space-x-3 px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                <button
+                  type="button"
+                  onClick={handleCloseMapModal}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  {t('onboardingBranch.buttons.cancel') || 'إلغاء'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmLocation}
+                  className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
+                >
+                  {t('onboardingBranch.buttons.confirm') || 'تأكيد'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </AnimatePresence>
+    );
+  };
+
   const Toggle = ({ checked, onChange, disabled }: { checked: boolean; onChange: (checked: boolean) => void; disabled?: boolean }) => (
     <button
       type="button"
@@ -549,6 +804,7 @@ const OnboardingBranch: React.FC = () => {
       className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
         checked ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
       }`}
+      dir="ltr"
     >
       <span
         className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -562,78 +818,107 @@ const OnboardingBranch: React.FC = () => {
     <div className="space-y-6">
       <div>
         <label htmlFor="branchName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Şube Adı *
+          {t('onboardingBranch.form.step1.branchName.label')}
         </label>
         <div className="relative">
-          <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="branchName"
             name="branchName"
             value={formData.branchName || ''}
             onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.branchName
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder="Şube adını girin"
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingBranch.form.step1.branchName.placeholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
         {errors.branchName && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.branchName}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.branchName}</p>
         )}
       </div>
 
+      {/* WhatsApp Phone Input */}
       <div>
         <label htmlFor="whatsappOrderNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          WhatsApp Sipariş Numarası *
+          {t('onboardingBranch.form.step1.whatsappNumber.label')}
         </label>
-        <div className="relative">
-          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="tel"
-            id="whatsappOrderNumber"
-            name="whatsappOrderNumber"
-            value={formData.whatsappOrderNumber || ''}
-            onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors.whatsappOrderNumber
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder="WhatsApp sipariş numarasını girin"
-          />
+        <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+          {/* Country Code Selector */}
+          <div className="relative">
+            <select
+              id="whatsappCountryCode"
+              name="whatsappCountryCode"
+              value={whatsappCountryCode}
+              onChange={handleWhatsappCountryCodeChange}
+              className={`h-full py-3 pl-3 pr-8 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
+              aria-label={t('onboardingBranch.form.step1.whatsappNumber.ariaLabel')}
+              dir={isRTL ? 'rtl' : 'ltr'}
+            >
+              {countries.map(country => (
+                <option key={country.name} value={country.code}>
+                  {country.name} ({country.code})
+                </option>
+              ))}
+            </select>
+            <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-2' : 'right-0 pr-2'} flex items-center pointer-events-none`}>
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Phone Number Input */}
+          <div className="relative flex-1">
+            <Phone className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10`} />
+            <input
+              id="whatsappOrderNumber"
+              name="whatsappOrderNumber"
+              type="tel"
+              autoComplete="tel-national"
+              value={formData.whatsappOrderNumber || '' }
+              onChange={handleWhatsappNationalPhoneChange}
+              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+                errors.whatsappOrderNumber
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+              placeholder={t('onboardingBranch.form.step1.whatsappNumber.placeholder')}
+              dir={isRTL ? 'rtl' : 'ltr'}
+            />
+          </div>
         </div>
         {errors.whatsappOrderNumber && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.whatsappOrderNumber}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.whatsappOrderNumber}</p>
         )}
       </div>
 
       {/* Branch Logo Upload */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Şube Logosu (Opsiyonel)
+          {t('onboardingBranch.form.step1.branchLogo.label')}
         </label>
         <div className="space-y-4">
-          {/* Logo Preview */}
           {(branchLogoPreview || formData.branchLogoPath) && (
-            <div className="flex items-center space-x-4">
+            <div className={`flex items-center space-x-4 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
               <img
                 src={branchLogoPreview || formData.branchLogoPath || ''}
                 alt="Şube logosu önizleme"
                 className="w-24 h-24 object-cover rounded-lg border-2 border-gray-300 dark:border-gray-600"
               />
               {formData.branchLogoPath && (
-                <div className="text-sm text-green-600 dark:text-green-400">
-                  ✓ Logo başarıyla yüklendi
+                <div className={`text-sm text-green-600 dark:text-green-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('onboardingBranch.form.step1.branchLogo.success')}
                 </div>
               )}
             </div>
           )}
 
-          {/* File Input */}
-          <div className="flex items-center space-x-4">
+          <div className={`flex items-center space-x-4 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
             <input
               type="file"
               id="branchLogo"
@@ -646,28 +931,27 @@ const OnboardingBranch: React.FC = () => {
               htmlFor="branchLogo"
               className={`inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 ${
                 isUploadingLogo ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-              }`}
+              } ${isRTL ? 'flex-row-reverse' : ''}`}
             >
-              <Upload className="h-4 w-4 mr-2" />
-              {isUploadingLogo ? 'Yükleniyor...' : 'Logo Seç'}
+              <Upload className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+              {isUploadingLogo ? t('onboardingBranch.form.step1.branchLogo.buttonUploading') : t('onboardingBranch.form.step1.branchLogo.button')}
             </label>
           </div>
 
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            PNG, JPG, GIF formatları desteklenir. Maksimum dosya boyutu: 5MB
+          <p className={`text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('onboardingBranch.form.step1.branchLogo.helper')}
           </p>
 
-          {/* Restaurant logo path bilgisi */}
           {restaurantLogoPath && !formData.branchLogoPath && (
             <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
-              <div className="flex items-start space-x-3">
+              <div className={`flex items-start space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
                 <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                 <div className="space-y-1">
-                  <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                    Otomatik Logo Kullanımı
+                  <h4 className={`text-sm font-medium text-blue-900 dark:text-blue-100 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step1.branchLogo.infoTitle')}
                   </h4>
-                  <p className="text-sm text-blue-700 dark:text-blue-300">
-                    Şube logosu yüklemezseniz, restaurant logosu otomatik olarak şube logosu olarak kullanılacaktır.
+                  <p className={`text-sm text-blue-700 dark:text-blue-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step1.branchLogo.infoDescription')}
                   </p>
                 </div>
               </div>
@@ -682,341 +966,405 @@ const OnboardingBranch: React.FC = () => {
     <div className="space-y-6">
       <div>
         <label htmlFor="address.country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Ülke *
+          {t('onboardingBranch.form.step2.country.label')}
         </label>
         <div className="relative">
-          <Globe className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="address.country"
             name="address.country"
             value={formData.createAddressDto.country || ''}
             onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors['createAddressDto.country']
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder="Ülke adını girin"
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingBranch.form.step2.country.placeholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
         {errors['createAddressDto.country'] && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors['createAddressDto.country']}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors['createAddressDto.country']}</p>
         )}
       </div>
 
       <div>
         <label htmlFor="address.city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Şehir *
+          {t('onboardingBranch.form.step2.city.label')}
         </label>
         <div className="relative">
-          <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="address.city"
             name="address.city"
             value={formData.createAddressDto.city || ''}
             onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors['createAddressDto.city']
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder="Şehir adını girin"
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingBranch.form.step2.city.placeholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
         {errors['createAddressDto.city'] && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors['createAddressDto.city']}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors['createAddressDto.city']}</p>
         )}
       </div>
 
       <div>
         <label htmlFor="address.street" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Sokak *
+          {t('onboardingBranch.form.step2.street.label')}
         </label>
         <div className="relative">
-          <MapPinned className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <MapPinned className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="address.street"
             name="address.street"
             value={formData.createAddressDto.street || ''}
             onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors['createAddressDto.street']
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder="Sokak adını girin"
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingBranch.form.step2.street.placeholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
         {errors['createAddressDto.street'] && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors['createAddressDto.street']}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors['createAddressDto.street']}</p>
         )}
       </div>
 
       <div>
         <label htmlFor="address.zipCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Posta Kodu *
+          {t('onboardingBranch.form.step2.zipCode.label')}
         </label>
         <div className="relative">
-          <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <FileText className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="address.zipCode"
             name="address.zipCode"
             value={formData.createAddressDto.zipCode || ''}
             onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors['createAddressDto.zipCode']
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder="Posta kodunu girin"
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingBranch.form.step2.zipCode.placeholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
         {errors['createAddressDto.zipCode'] && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors['createAddressDto.zipCode']}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors['createAddressDto.zipCode']}</p>
         )}
       </div>
 
       <div>
         <label htmlFor="address.addressLine1" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Adres Satırı 1 *
+          {t('onboardingBranch.form.step2.addressLine1.label')}
         </label>
         <div className="relative">
-          <Home className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Home className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="address.addressLine1"
             name="address.addressLine1"
             value={formData.createAddressDto.addressLine1 || ''}
             onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors['createAddressDto.addressLine1']
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder="Detaylı adres bilgisi girin"
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingBranch.form.step2.addressLine1.placeholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
         {errors['createAddressDto.addressLine1'] && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors['createAddressDto.addressLine1']}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors['createAddressDto.addressLine1']}</p>
         )}
       </div>
 
       <div>
         <label htmlFor="address.addressLine2" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Adres Satırı 2 (Opsiyonel)
+          {t('onboardingBranch.form.step2.addressLine2.label')}
         </label>
         <div className="relative">
-          <Home className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Home className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="address.addressLine2"
             name="address.addressLine2"
             value={formData.createAddressDto.addressLine2 || ''}
             onChange={handleInputChange}
-            className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            placeholder="Ek adres bilgisi girin (opsiyonel)"
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+              errors['createAddressDto.addressLine2']
+                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingBranch.form.step2.addressLine2.placeholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
+        {errors['createAddressDto.addressLine2'] && (
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors['createAddressDto.addressLine2']}</p>
+        )}
       </div>
     </div>
   );
 
   const renderStep3 = () => (
     <div className="space-y-6">
+      
+      {/* Contact Phone Input */}
       <div>
         <label htmlFor="contact.phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Telefon Numarası *
+          {t('onboardingBranch.form.step3.phone.label')}
         </label>
-        <div className="relative">
-          <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="tel"
-            id="contact.phone"
-            name="contact.phone"
-            value={formData.createContactDto.phone || ''}
-            onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors['createContactDto.phone']
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder="Telefon numarasını girin"
-          />
+        <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+          {/* Country Code Selector */}
+          <div className="relative">
+            <select
+              id="contactCountryCode"
+              name="contactCountryCode"
+              value={contactCountryCode}
+              onChange={handleContactCountryCodeChange}
+              className={`h-full py-3 pl-3 pr-8 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
+              aria-label={t('onboardingBranch.form.step3.phone.ariaLabel')}
+              dir={isRTL ? 'rtl' : 'ltr'}
+            >
+              {countries.map(country => (
+                <option key={country.name} value={country.code}>
+                  {country.name} ({country.code})
+                </option>
+              ))}
+            </select>
+            <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-2' : 'right-0 pr-2'} flex items-center pointer-events-none`}>
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Phone Number Input */}
+          <div className="relative flex-1">
+            <Phone className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10`} />
+            <input
+              id="contact.phone"
+              name="contact.phone"
+              type="tel"
+              autoComplete="tel-national"
+              value={formData.createContactDto.phone || ''}
+              onChange={handleContactNationalPhoneChange}
+              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+                errors['createContactDto.phone']
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+              placeholder={t('onboardingBranch.form.step3.phone.placeholder')}
+              dir={isRTL ? 'rtl' : 'ltr'}
+            />
+          </div>
         </div>
         {errors['createContactDto.phone'] && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors['createContactDto.phone']}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors['createContactDto.phone']}</p>
         )}
       </div>
 
       <div>
         <label htmlFor="contact.mail" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          E-posta Adresi *
+          {t('onboardingBranch.form.step3.email.label')}
         </label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Mail className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="email"
             id="contact.mail"
             name="contact.mail"
             value={formData.createContactDto.mail || ''}
             onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors['createContactDto.mail']
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder="E-posta adresini girin"
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingBranch.form.step3.email.placeholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
         {errors['createContactDto.mail'] && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors['createContactDto.mail']}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors['createContactDto.mail']}</p>
         )}
       </div>
 
       <div>
         <label htmlFor="contact.location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Konum Bilgisi *
+          {t('onboardingBranch.form.step3.location.label')}
         </label>
-        <div className="relative">
-          <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            id="contact.location"
-            name="contact.location"
-            value={formData.createContactDto.location || ''}
-            onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors['createContactDto.location']
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder="Konum bilgisini girin (Örn: 40.9795,28.7225)"
-          />
+        <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} gap-2`}>
+          <div className="relative flex-1">
+            <MapPin className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+            <input
+              type="text"
+              id="contact.location"
+              name="contact.location"
+              value={formData.createContactDto.location || ''}
+              onChange={handleInputChange}
+              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+                errors['createContactDto.location']
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+              placeholder={t('onboardingBranch.form.step3.location.placeholder')}
+              dir="ltr"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={handleOpenMapModal}
+            className={`px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 flex items-center space-x-2 whitespace-nowrap ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+          >
+            <MapPinned className="h-5 w-5" />
+            <span className="hidden sm:inline">{t('onboardingBranch.form.step3.location.selectOnMap') || 'اختر من الخريطة'}</span>
+          </button>
         </div>
         {errors['createContactDto.location'] && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors['createContactDto.location']}</p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors['createContactDto.location']}</p>
         )}
       </div>
 
       <div>
         <label htmlFor="contact.contactHeader" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          İletişim Başlığı (Opsiyonel)
+          {t('onboardingBranch.form.step3.contactHeader.label')}
         </label>
         <div className="relative">
-          <Info className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Info className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="contact.contactHeader"
             name="contact.contactHeader"
             value={formData.createContactDto.contactHeader || ''}
             onChange={handleInputChange}
-            className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            placeholder="İletişim başlığını girin (opsiyonel)"
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingBranch.form.step3.contactHeader.placeholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
       </div>
 
       <div>
         <label htmlFor="contact.footerTitle" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Footer Başlığı (Opsiyonel)
+          {t('onboardingBranch.form.step3.footerTitle.label')}
         </label>
         <div className="relative">
-          <Info className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Info className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="contact.footerTitle"
             name="contact.footerTitle"
             value={formData.createContactDto.footerTitle || ''}
             onChange={handleInputChange}
-            className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            placeholder="Footer başlığını girin (opsiyonel)"
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingBranch.form.step3.footerTitle.placeholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
       </div>
 
       <div>
         <label htmlFor="contact.footerDescription" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Footer Açıklaması (Opsiyonel)
+          {t('onboardingBranch.form.step3.footerDescription.label')}
         </label>
         <div className="relative">
-          <Info className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Info className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-5 w-5 text-gray-400`} />
           <textarea
             id="contact.footerDescription"
             name="contact.footerDescription"
             value={formData.createContactDto.footerDescription || ''}
             onChange={handleInputChange}
             rows={3}
-            className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            placeholder="Footer açıklamasını girin (opsiyonel)"
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingBranch.form.step3.footerDescription.placeholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
       </div>
 
       <div>
         <label htmlFor="contact.openTitle" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Çalışma Saatleri Başlığı (Opsiyonel)
+          {t('onboardingBranch.form.step3.openTitle.label')}
         </label>
         <div className="relative">
-          <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Clock className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="contact.openTitle"
             name="contact.openTitle"
             value={formData.createContactDto.openTitle || ''}
             onChange={handleInputChange}
-            className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            placeholder="Çalışma saatleri başlığını girin (opsiyonel)"
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingBranch.form.step3.openTitle.placeholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
       </div>
 
       <div>
         <label htmlFor="contact.openDays" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Açık Günler (Opsiyonel)
+          {t('onboardingBranch.form.step3.openDays.label')}
         </label>
         <div className="relative">
-          <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Clock className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="contact.openDays"
             name="contact.openDays"
             value={formData.createContactDto.openDays || ''}
             onChange={handleInputChange}
-            className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            placeholder="Açık günleri girin (opsiyonel)"
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingBranch.form.step3.openDays.placeholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
       </div>
 
       <div>
         <label htmlFor="contact.openHours" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Açık Saatler (Opsiyonel)
+          {t('onboardingBranch.form.step3.openHours.label')}
         </label>
         <div className="relative">
-          <Clock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Clock className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
           <input
             type="text"
             id="contact.openHours"
             name="contact.openHours"
             value={formData.createContactDto.openHours || ''}
             onChange={handleInputChange}
-            className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-            placeholder="Açık saatleri girin (opsiyonel)"
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingBranch.form.step3.openHours.placeholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
       </div>
 
       <div className="space-y-6">
-        <div className="flex items-center space-x-2">
+        <div className={`flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
           <Clock className="h-6 w-6 text-primary-600" />
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Çalışma Saatleri</h3>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+            {t('onboardingBranch.form.step3.workingHours.title')}
+          </h3>
         </div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          İşletmenizin çalışma saatlerini belirleyin. Gece boyunca açık kalabilirsiniz (örn: 23:00 - 02:00).
+        <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+          {t('onboardingBranch.form.step3.workingHours.description')}
         </p>
         
         <div className="space-y-3">
@@ -1029,15 +1377,17 @@ const OnboardingBranch: React.FC = () => {
                   : 'bg-gray-50 dark:bg-gray-800/50'
               }`}
             >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
+              {/* Mobile/Tablet: Stack vertically */}
+              <div className="flex flex-col space-y-4">
+                {/* Day name and toggle */}
+                <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className="min-w-[100px]">
-                    <span className="text-base font-medium text-gray-900 dark:text-gray-100">
+                    <span className={`text-base font-medium text-gray-900 dark:text-gray-100 ${isRTL ? 'text-right' : 'text-left'}`}>
                       {dayNamesDisplay[index]}
                     </span>
                   </div>
                   
-                  <div className="flex items-center space-x-3">
+                  <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
                     <Toggle
                       checked={day.isWorkingDay}
                       onChange={(checked) => handleWorkingHourChange(index, 'isWorkingDay', checked)}
@@ -1047,17 +1397,18 @@ const OnboardingBranch: React.FC = () => {
                         ? 'text-green-700 dark:text-green-400' 
                         : 'text-gray-500 dark:text-gray-400'
                     }`}>
-                      {day.isWorkingDay ? 'Açık' : 'Kapalı'}
+                      {day.isWorkingDay ? t('onboardingBranch.form.step3.workingHours.toggleOpen') : t('onboardingBranch.form.step3.workingHours.toggleClosed')}
                     </span>
                   </div>
                 </div>
 
-                <div className={`flex items-center space-x-3 transition-opacity ${
+                {/* Time inputs - Now in a separate row */}
+                <div className={`flex items-center justify-center gap-3 transition-opacity ${
                   !day.isWorkingDay ? 'opacity-40' : ''
-                }`}>
-                  <div className="flex items-center space-x-2">
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                      Açılış
+                } ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.workingHours.openLabel')}
                     </label>
                     <input
                       title='time'
@@ -1067,17 +1418,18 @@ const OnboardingBranch: React.FC = () => {
                       disabled={!day.isWorkingDay}
                       className={`px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                         !day.isWorkingDay ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : 'hover:border-primary-300'
-                      }`}
+                      } ${isRTL ? 'text-right' : 'text-left'}`}
+                      dir="ltr"
                     />
                   </div>
                   
                   <div className="flex items-center justify-center">
-                    <div className="w-6 h-px bg-gray-300 dark:bg-gray-600"></div>
+                    <div className="w-4 h-px bg-gray-300 dark:bg-gray-600"></div>
                   </div>
                   
-                  <div className="flex items-center space-x-2">
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                      Kapanış
+                  <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.workingHours.closeLabel')}
                     </label>
                     <input
                       title='time'
@@ -1087,20 +1439,20 @@ const OnboardingBranch: React.FC = () => {
                       disabled={!day.isWorkingDay}
                       className={`px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                         !day.isWorkingDay ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : 'hover:border-primary-300'
-                      }`}
+                      } ${isRTL ? 'text-right' : 'text-left'}`}
+                      dir="ltr"
                     />
                   </div>
                 </div>
               </div>
               
-              {/* İşletme açık durumunda ek bilgi */}
               {day.isWorkingDay && (
                 <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-700/50">
-                  <p className="text-xs text-green-600 dark:text-green-400">
-                    ✓ Bu gün müşteriler sipariş verebilecek
+                  <p className={`text-xs text-green-600 dark:text-green-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.workingHours.workingDayNote')}
                     {formatTimeForInput(day.closeTime) <= formatTimeForInput(day.openTime) && (
-                      <span className="ml-2 text-blue-600 dark:text-blue-400">
-                        (Gece boyunca açık)
+                      <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-blue-600 dark:text-blue-400`}>
+                        {t('onboardingBranch.form.step3.workingHours.overnightNote')}
                       </span>
                     )}
                   </p>
@@ -1110,12 +1462,11 @@ const OnboardingBranch: React.FC = () => {
           ))}
         </div>
         
-        {/* Çalışma saatleri hata mesajı */}
         {errors.workingHours && (
           <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
-            <div className="flex items-start space-x-3">
+            <div className={`flex items-start space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
               <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-red-700 dark:text-red-300">
+              <p className={`text-sm text-red-700 dark:text-red-300 ${isRTL ? 'text-right' : 'text-left'}`}>
                 {errors.workingHours}
               </p>
             </div>
@@ -1123,17 +1474,17 @@ const OnboardingBranch: React.FC = () => {
         )}
         
         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
-          <div className="flex items-start space-x-3">
+          <div className={`flex items-start space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
             <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
             <div className="space-y-1">
-              <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100">
-                Çalışma Saatleri Hakkında
+              <h4 className={`text-sm font-medium text-blue-900 dark:text-blue-100 ${isRTL ? 'text-right' : 'text-left'}`}>
+                {t('onboardingBranch.form.step3.workingHours.infoBox.title')}
               </h4>
-              <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-                <li>• Burada belirlediğiniz saatler, müşterilerin QR menünüz üzerinden sipariş verebileceği zamanları belirler.</li>
-                <li>• Kapalı günlerde sipariş alınmaz, ancak kapalı günler de veritabanında saklanır.</li>
-                <li>• Gece boyunca açık kalabilirsiniz (örn: 23:00 - 02:00). Bu durumda kapanış saati ertesi güne geçer.</li>
-                <li>• Gece boyunca açık kalma süresi maksimum 12 saat olabilir.</li>
+              <ul className={`text-sm text-blue-700 dark:text-blue-300 space-y-1 ${isRTL ? 'text-right' : 'text-left'}`}>
+                <li>{t('onboardingBranch.form.step3.workingHours.infoBox.item1')}</li>
+                <li>{t('onboardingBranch.form.step3.workingHours.infoBox.item2')}</li>
+                <li>{t('onboardingBranch.form.step3.workingHours.infoBox.item3')}</li>
+                <li>{t('onboardingBranch.form.step3.workingHours.infoBox.item4')}</li>
               </ul>
             </div>
           </div>
@@ -1143,24 +1494,25 @@ const OnboardingBranch: React.FC = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
-      {/* Header */}
+    <>
+      <MapPickerModal />
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800" dir={isRTL ? 'rtl' : 'ltr'}>
       <header className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
           <div className="md:flex md:items-center md:justify-between">
             <div className="flex-1 min-w-0">
               <Link
                 to="/onboarding/restaurant"
-                className="inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-2"
+                className={`inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}
               >
-                <ArrowLeft className="w-4 h-4 mr-1" />
-                Restaurant Bilgilerine Geri Dön
+                <ArrowLeft className={`w-4 h-4 ${isRTL ? 'ml-1 rotate-180' : 'mr-1'}`} />
+                {t('onboardingBranch.header.backLink')}
               </Link>
-              <h2 className="text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate">
-                Şube Bilgileri
+              <h2 className={`text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate ${isRTL ? 'text-right' : 'text-left'}`}>
+                {t('onboardingBranch.header.title')}
               </h2>
-              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-                Restoranınızın şube bilgilerini adım adım girebilirsiniz
+              <p className={`mt-1 text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                {t('onboardingBranch.header.subtitle')}
               </p>
             </div>
           </div>
@@ -1168,22 +1520,21 @@ const OnboardingBranch: React.FC = () => {
       </header>
 
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        {/* Progress Steps */}
         <div className="px-4 sm:px-0 mb-8">
           <nav aria-label="Progress">
-            <ol role="list" className="flex items-center">
+            <ol role="list" className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
               {[
-                { id: 1, name: 'Temel Bilgiler', icon: Store },
-                { id: 2, name: 'Adres Bilgileri', icon: MapPinned },
-                { id: 3, name: 'İletişim Bilgileri', icon: Phone }
+                { id: 1, name: t('onboardingBranch.steps.basic'), icon: Store },
+                { id: 2, name: t('onboardingBranch.steps.address'), icon: MapPinned },
+                { id: 3, name: t('onboardingBranch.steps.contact'), icon: Phone }
               ].map((step, stepIdx) => {
                 const StepIcon = step.icon;
                 return (
                   <li
                     key={step.name}
-                    className={`relative ${stepIdx !== 2 ? 'pr-8 sm:pr-20' : ''}`}
+                    className={`relative ${stepIdx !== 2 ? (isRTL ? 'pl-8 sm:pl-20' : 'pr-8 sm:pr-20') : ''}`}
                   >
-                    <div className="flex items-center">
+                    <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <div
                         className={`${
                           currentStep >= step.id
@@ -1200,13 +1551,13 @@ const OnboardingBranch: React.FC = () => {
                       <div
                         className={`hidden sm:block text-sm font-medium ${
                           currentStep >= step.id ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'
-                        } ml-2`}
+                        } ${isRTL ? 'mr-2' : 'ml-2'}`}
                       >
                         {step.name}
                       </div>
                       {stepIdx !== 2 && (
                         <div
-                          className={`hidden sm:block absolute top-4 right-0 w-16 h-0.5 transition-colors duration-200 ${
+                          className={`hidden sm:block absolute top-4 ${isRTL ? 'left-0' : 'right-0'} w-16 h-0.5 transition-colors duration-200 ${
                             currentStep > step.id ? 'bg-primary-600 dark:bg-primary-400' : 'bg-gray-300 dark:bg-gray-600'
                           }`}
                         />
@@ -1219,20 +1570,21 @@ const OnboardingBranch: React.FC = () => {
           </nav>
         </div>
 
-        {/* Error/Success Messages */}
         {apiError && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             className="mb-4 rounded-md bg-red-50 dark:bg-red-900/20 p-4 mx-4 sm:mx-0"
           >
-            <div className="flex">
+            <div className={`flex ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className="flex-shrink-0">
                 <AlertCircle className="h-5 w-5 text-red-400" />
               </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-800 dark:text-red-200">Hata</h3>
-                <div className="mt-2 text-sm text-red-700 dark:text-red-300 whitespace-pre-line">
+              <div className={`${isRTL ? 'mr-3' : 'ml-3'}`}>
+                <h3 className={`text-sm font-medium text-red-800 dark:text-red-200 ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('onboardingBranch.messages.errorTitle')}
+                </h3>
+                <div className={`mt-2 text-sm text-red-700 dark:text-red-300 whitespace-pre-line ${isRTL ? 'text-right' : 'text-left'}`}>
                   {apiError}
                 </div>
               </div>
@@ -1246,71 +1598,68 @@ const OnboardingBranch: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             className="mb-4 rounded-md bg-green-50 dark:bg-green-900/20 p-4 mx-4 sm:mx-0"
           >
-            <div className="flex">
+            <div className={`flex ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div className="flex-shrink-0">
                 <CheckCircle className="h-5 w-5 text-green-400" />
               </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-green-800 dark:text-green-200">Başarılı</h3>
-                <div className="mt-2 text-sm text-green-700 dark:text-green-300">{successMessage}</div>
+              <div className={`${isRTL ? 'mr-3' : 'ml-3'}`}>
+                <h3 className={`text-sm font-medium text-green-800 dark:text-green-200 ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('onboardingBranch.messages.successTitle')}
+                </h3>
+                <div className={`mt-2 text-sm text-green-700 dark:text-green-300 ${isRTL ? 'text-right' : 'text-left'}`}>{successMessage}</div>
               </div>
             </div>
           </motion.div>
         )}
 
-        {/* Form */}
         <div className="bg-white dark:bg-gray-800 shadow rounded-lg mx-4 sm:mx-0">
           <form onSubmit={handleSubmit} className="space-y-8 divide-y divide-gray-200 dark:divide-gray-700">
-            {/* Step 1: Basic Info */}
             {currentStep === 1 && (
               <div className="p-8">
                 <div className="text-center mb-8">
                   <Store className="h-12 w-12 mx-auto text-primary-600 mb-4" />
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    Şube Bilgileri
+                    {t('onboardingBranch.form.step1.title')}
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Şubenizin temel bilgilerini girin
+                    {t('onboardingBranch.form.step1.description')}
                   </p>
                 </div>
                 {renderStep1()}
               </div>
             )}
 
-            {/* Step 2: Address Info */}
             {currentStep === 2 && (
               <div className="p-8">
                 <div className="text-center mb-8">
                   <MapPin className="h-12 w-12 mx-auto text-primary-600 mb-4" />
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    Adres Bilgileri
+                    {t('onboardingBranch.form.step2.title')}
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Şubenizin adres bilgilerini girin
+                    {t('onboardingBranch.form.step2.description')}
                   </p>
                 </div>
                 {renderStep2()}
               </div>
             )}
 
-            {/* Step 3: Contact Info */}
             {currentStep === 3 && (
               <div className="p-8">
                 <div className="text-center mb-8">
                   <Phone className="h-12 w-12 mx-auto text-primary-600 mb-4" />
                   <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    İletişim Bilgileri
+                    {t('onboardingBranch.form.step3.title')}
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Şubenizin iletişim bilgilerini girin
+                    {t('onboardingBranch.form.step3.description')}
                   </p>
                 </div>
                 {renderStep3()}
               </div>
             )}
 
-            {/* Form Actions */}
-            <div className="px-8 py-4 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between">
+            <div className={`px-8 py-4 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <button
                 type="button"
                 onClick={handlePreviousStep}
@@ -1319,20 +1668,20 @@ const OnboardingBranch: React.FC = () => {
                   currentStep === 1
                     ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
                     : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600'
-                }`}
+                } ${isRTL ? 'flex-row-reverse' : ''}`}
               >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Geri
+                <ArrowLeft className={`w-4 h-4 ${isRTL ? 'ml-2 rotate-180' : 'mr-2'}`} />
+                {t('onboardingBranch.buttons.back')}
               </button>
 
               {currentStep < 3 ? (
                 <button
                   type="button"
                   onClick={handleNextStep}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                  className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${isRTL ? 'flex-row-reverse' : ''}`}
                 >
-                  İleri
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  {t('onboardingBranch.buttons.next')}
+                  <ArrowRight className={`w-4 h-4 ${isRTL ? 'mr-2 rotate-180' : 'ml-2'}`} />
                 </button>
               ) : (
                 <button
@@ -1342,15 +1691,15 @@ const OnboardingBranch: React.FC = () => {
                     isSubmitting
                       ? 'bg-primary-400 cursor-not-allowed'
                       : 'bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
-                  }`}
+                  } ${isRTL ? 'flex-row-reverse' : ''}`}
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                      Kaydediliyor...
+                      <div className={`w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin ${isRTL ? 'ml-2' : 'mr-2'}`}></div>
+                      {t('onboardingBranch.buttons.saving')}
                     </>
                   ) : (
-                    'Kaydet'
+                    t('onboardingBranch.buttons.save')
                   )}
                 </button>
               )}
@@ -1359,6 +1708,7 @@ const OnboardingBranch: React.FC = () => {
         </div>
       </main>
     </div>
+    </>
   );
 };
 
