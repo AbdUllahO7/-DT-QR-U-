@@ -4577,4 +4577,306 @@ export const en = {
             user:{
       read: 'okuma',
     },
+
+    "onboardingRestaurant": {
+    "backLink": "Back to Register Page",
+    "progress": {
+      "step1": "Basic Info",
+      "step2": "Company Info",
+      "step3": "Legal Documents"
+    },
+    "messages": {
+      "welcome": "Your restaurant information was saved successfully. You can now enter your branch information.",
+      "success": "Your restaurant information was saved successfully! Redirecting you to enter branch information...",
+      "errors": {
+        "sessionNotFound": "Session information not found. Please log in again.",
+        "serverConnection": "Cannot connect to the server. Please check your internet connection.",
+        "nameInUse": "This restaurant name is already in use. Please try a different name.",
+        "genericCreate": "An error occurred during restaurant registration. Please try again.",
+        "idNotFound": "Restaurant ID could not be retrieved. Please try again.",
+        "fileUploadGeneric": "An error occurred while uploading the file",
+        "filePathError": "File upload failed: File path not received"
+      }
+    },
+    "step1": {
+      "title": "Restaurant Information",
+      "subtitle": "Enter your restaurant's basic information",
+      "nameLabel": "Restaurant Name *",
+      "namePlaceholder": "Enter your restaurant name",
+      "logoLabel": "Restaurant Logo *",
+      "logoUploading": "Logo uploading...",
+      "logoSuccess": "✓ Logo uploaded successfully",
+      "logoSuccessSub": "Cloudinary URL received",
+      "cuisineLabel": "Cuisine Type *",
+      "alcoholLabel": "We serve alcohol",
+      "errors": {
+        "nameRequired": "Restaurant name is required",
+        "logoRequired": "Restaurant logo is required",
+        "cuisineRequired": "Select a cuisine type"
+      }
+    },
+    "step2": {
+      "title": "Company Information",
+      "subtitle": "Enter your company information",
+      "companyTitleLabel": "Company Title *",
+      "companyTitlePlaceholder": "Enter your company title",
+      "legalTypeLabel": "Legal Type *",
+      "legalTypePlaceholder": "Select a legal type",
+      "mersisLabel": "MERSIS Number",
+      "mersisPlaceholder": "Enter your MERSIS number",
+      "tradeRegistryLabel": "Trade Registry Number",
+      "tradeRegistryPlaceholder": "Enter your trade registry number",
+      "errors": {
+        "companyTitleRequired": "Company title is required",
+        "legalTypeRequired": "Select a legal type"
+      }
+    },
+    "step3": {
+      "title": "Legal Documents",
+      "subtitle": "Enter your tax and document information",
+      "taxNumberLabel": "Tax Number *",
+      "taxNumberPlaceholder": "Enter your tax number",
+      "taxOfficeLabel": "Tax Office *",
+      "taxOfficePlaceholder": "Enter your tax office",
+      "workPermitLabel": "Work Permit Document",
+      "workPermitUploading": "Work permit document uploading...",
+      "workPermitSuccess": "✓ Work permit document uploaded successfully",
+      "foodCertificateLabel": "Food Certificate",
+      "foodCertificateUploading": "Food certificate uploading...",
+      "foodCertificateSuccess": "✓ Food certificate uploaded successfully",
+      "errors": {
+        "taxNumberRequired": "Tax number is required",
+        "taxOfficeRequired": "Tax office is required"
+      }
+    },
+    "navigation": {
+      "previous": "Previous Step",
+      "next": "Next Step",
+      "submit": "Save Restaurant",
+      "submitting": "Saving...",
+      "uploading": "Files Uploading..."
+    },
+    "cuisineTypes": {
+      "0": "Turkish Cuisine",
+      "1": "Italian Cuisine",
+      "2": "Chinese Cuisine",
+      "3": "Japanese Cuisine",
+      "4": "Mexican Cuisine",
+      "5": "Indian Cuisine",
+      "6": "French Cuisine",
+      "7": "American Cuisine",
+      "8": "Mediterranean Cuisine",
+      "9": "Thai Cuisine",
+      "10": "Korean Cuisine",
+      "11": "Vietnamese Cuisine",
+      "12": "Greek Cuisine",
+      "13": "Spanish Cuisine",
+      "14": "Lebanese Cuisine",
+      "15": "Brazilian Cuisine",
+      "16": "German Cuisine",
+      "17": "Russian Cuisine",
+      "18": "British Cuisine",
+      "19": "Ethiopian Cuisine",
+      "20": "Moroccan Cuisine",
+      "21": "Argentinian Cuisine",
+      "22": "Peruvian Cuisine",
+      "23": "Caribbean Cuisine",
+      "24": "Fusion Cuisine",
+      "25": "Vegan Cuisine",
+      "26": "Seafood",
+      "27": "Steakhouse",
+      "28": "Fast Food"
+    },
+    "legalTypes": {
+      "as": "Incorporated (A.Ş.)",
+      "ltd": "Limited Liability (Ltd. Şti.)",
+      "collective": "Collective Company",
+      "partnership": "Limited Partnership",
+      "sole": "Sole Proprietorship",
+      "other": "Other"
+    }
+  },
+"onboardingBranch": {
+    "header": {
+      "backLink": "Back to Restaurant Information",
+      "title": "Branch Information",
+      "subtitle": "Enter your restaurant branch information step by step"
+    },
+    "steps": {
+      "basic": "Basic Information",
+      "address": "Address Information",
+      "contact": "Contact Information"
+    },
+    "form": {
+      "step1": {
+        "title": "Branch Information",
+        "description": "Enter the basic information of your branch",
+        "branchName": {
+          "label": "Branch Name *",
+          "placeholder": "Enter branch name",
+          "error": "Branch name is required"
+        },
+        "whatsappNumber": {
+          "label": "WhatsApp Order Number *",
+          "placeholder": "555 123 4567",
+          "ariaLabel": "Country Code",
+          "errorRequired": "WhatsApp order number is required",
+          "errorInvalid": "Invalid phone number format (7-15 digits)."
+        },
+        "branchLogo": {
+          "label": "Branch Logo (Optional)",
+          "success": "✓ Logo uploaded successfully",
+          "button": "Choose Logo",
+          "buttonUploading": "Uploading...",
+          "helper": "Supported formats: PNG, JPG, GIF. Maximum file size: 5MB",
+          "infoTitle": "Automatic Logo Usage",
+          "infoDescription": "If you don't upload a branch logo, the restaurant logo will be used automatically."
+        }
+      },
+      "step2": {
+        "title": "Address Information",
+        "description": "Enter your branch address details",
+        "country": {
+          "label": "Country *",
+          "placeholder": "Enter country name",
+          "error": "Country is required"
+        },
+        "city": {
+          "label": "City *",
+          "placeholder": "Enter city name",
+          "error": "City is required"
+        },
+        "street": {
+          "label": "Street *",
+          "placeholder": "Enter street name",
+          "error": "Street is required"
+        },
+        "zipCode": {
+          "label": "Zip Code *",
+          "placeholder": "Enter zip code",
+          "error": "Zip code is required"
+        },
+        "addressLine1": {
+          "label": "Address Line 1 *",
+          "placeholder": "Enter detailed address",
+          "error": "Address line 1 is required"
+        },
+        "addressLine2": {
+          "label": "Address Line 2 *",
+          "placeholder": "Enter additional address information",
+          "error": "Address line 2 is required"
+        }
+      },
+      "step3": {
+        "title": "Contact Information",
+        "description": "Enter your branch contact details",
+        "phone": {
+          "label": "Phone Number *",
+          "placeholder": "212 123 4567",
+          "ariaLabel": "Country Code",
+          "errorRequired": "Phone number is required",
+          "errorInvalid": "Invalid phone number format (7-15 digits)."
+        },
+        "email": {
+          "label": "Email Address *",
+          "placeholder": "Enter email address",
+          "error": "Email address is required"
+        },
+        "location": {
+          "label": "Location Information *",
+          "placeholder": "Enter location info (e.g., 40.9795, 28.7225)",
+          "error": "Location information is required",
+          "selectOnMap": "Select on Map",
+          "mapTitle": "Select Location on Map",
+          "useCurrentLocation": "Use My Current Location",
+          "latitude": "Latitude",
+          "longitude": "Longitude",
+          "mapHelp": "How to use the map:",
+          "mapHelp1": "• Click \"Use My Current Location\" to get your location automatically",
+          "mapHelp2": "• Or enter latitude and longitude manually",
+          "mapHelp3": "• You can copy coordinates from Google Maps",
+          "geolocationError": "Could not get your location. Please select manually.",
+          "geolocationNotSupported": "Geolocation is not supported by your browser."
+        },
+        "contactHeader": {
+          "label": "Contact Header (Optional)",
+          "placeholder": "Enter contact header (optional)"
+        },
+        "footerTitle": {
+          "label": "Footer Title (Optional)",
+          "placeholder": "Enter footer title (optional)"
+        },
+        "footerDescription": {
+          "label": "Footer Description (Optional)",
+          "placeholder": "Enter footer description (optional)"
+        },
+        "openTitle": {
+          "label": "Opening Hours Title (Optional)",
+          "placeholder": "Enter opening hours title (optional)"
+        },
+        "openDays": {
+          "label": "Open Days (Optional)",
+          "placeholder": "Enter open days (optional)"
+        },
+        "openHours": {
+          "label": "Open Hours (Optional)",
+          "placeholder": "Enter open hours (optional)"
+        },
+        "workingHours": {
+          "title": "Working Hours",
+          "description": "Set your working hours. You can stay open overnight (e.g., 23:00 - 02:00).",
+          "openLabel": "Opening Time",
+          "closeLabel": "Closing Time",
+          "dayNames": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+          ],
+          "toggleOpen": "Open",
+          "toggleClosed": "Closed",
+          "workingDayNote": "✓ Customers can order on this day",
+          "overnightNote": "(Open overnight)",
+          "error": {
+            "minOneDay": "You must specify working hours for at least one day",
+            "allTimesRequired": "You must specify opening and closing times for all working days",
+            "invalidRange": "Invalid time range: {openTime} - {closeTime}. Overnight period cannot exceed 12 hours.",
+            "openBeforeClose": "Opening time ({openTime}) must be before closing time ({closeTime})"
+          },
+          "infoBox": {
+            "title": "About Working Hours",
+            "item1": "• The hours you set here determine when customers can place orders via your QR menu.",
+            "item2": "• Orders are not accepted on closed days, but closed days are also saved in the database.",
+            "item3": "• You can stay open overnight (e.g., 23:00 - 02:00). The closing time will apply to the next day.",
+            "item4": "• Maximum overnight opening period is 12 hours."
+          }
+        }
+      }
+    },
+    "buttons": {
+      "back": "Back",
+      "next": "Next",
+      "save": "Save",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
+    "messages": {
+      "errorTitle": "Error",
+      "successTitle": "Success",
+      "successMessage": "Branch information saved successfully! Redirecting...",
+      "api": {
+        "restaurantNotFound": "Restaurant information not found. Please create a restaurant again.",
+        "branchIdMissing": "Could not get branch ID. Please try again.",
+        "nameInUse": "This branch name is already in use. Please try a different name.",
+        "connectionError": "Cannot connect to server. Please check your internet connection.",
+        "serverError": "Server error occurred. Please try again later or check your form data.",
+        "genericCreateError": "An error occurred while registering the branch. Please try again.",
+        "logoUploadError": "An error occurred while uploading the logo. Please try again."
+      }
+    }
+  }
 }; 
