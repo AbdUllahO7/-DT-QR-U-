@@ -38,7 +38,7 @@ export const useSignalR = (
         // Yeni branch'e katıl
         await signalRService.joinBranchGroup(branchId);
         
-        // Tablo durumu iste (ilk yükleme için)
+        // Masa durumu iste (ilk yükleme için)
         await signalRService.requestTableStatus(branchId);
         
         // Event listener'ları kaydet
@@ -114,7 +114,7 @@ export const useSignalR = (
           // Yeni branch'e katıl
           await signalRService.joinBranchGroup(branchId);
           
-          // Tablo durumu iste
+          // Masa durumu iste
           await signalRService.requestTableStatus(branchId);
           
           currentBranchId.current = branchId;

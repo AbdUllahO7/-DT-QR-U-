@@ -136,12 +136,12 @@ class SignalRService {
     if (this.connection?.state === signalR.HubConnectionState.Connected) {
       try {
         await this.connection.invoke("RequestTableStatus", branchId);
-        logger.signalR('info', "Tablo durumu istendi", { branchId });
+        logger.signalR('info', "Masa durumu istendi", { branchId });
       } catch (error) {
-        logger.signalR('error', "Tablo durumu isteme hatası", { branchId, error });
+        logger.signalR('error', "Masa durumu isteme hatası", { branchId, error });
       }
     } else {
-      logger.signalR('warn', "Bağlı değil, tablo durumu istenemiyor", { branchId });
+      logger.signalR('warn', "Bağlı değil, Masa durumu istenemiyor", { branchId });
     }
   }
 
@@ -149,7 +149,7 @@ class SignalRService {
   onTableChanged(callback: (data: any) => void) {
     if (this.connection) {
       this.connection.on("TableChanged", (data) => {
-        logger.signalR('info', "Tablo değişikliği alındı", data);
+        logger.signalR('info', "Masa değişikliği alındı", data);
         callback(data);
       });
     }
@@ -158,7 +158,7 @@ class SignalRService {
   onTablesBatchCreated(callback: (data: any) => void) {
     if (this.connection) {
       this.connection.on("TablesBatchCreated", (data) => {
-        logger.signalR('info', "Toplu tablo oluşturma alındı", data);
+        logger.signalR('info', "Toplu Masa oluşturma alındı", data);
         callback(data);
       });
     }
@@ -167,7 +167,7 @@ class SignalRService {
   onTableCategoryChanged(callback: (data: any) => void) {
     if (this.connection) {
       this.connection.on("TableCategoryChanged", (data) => {
-        logger.signalR('info', "Tablo kategorisi değişikliği alındı", data);
+        logger.signalR('info', "Masa kategorisi değişikliği alındı", data);
         callback(data);
       });
     }
@@ -176,7 +176,7 @@ class SignalRService {
   onTableStatusChanged(callback: (data: any) => void) {
     if (this.connection) {
       this.connection.on("TableStatusChanged", (data) => {
-        logger.signalR('info', "Tablo durumu değişikliği alındı", data);
+        logger.signalR('info', "Masa durumu değişikliği alındı", data);
         callback(data);
       });
     }
@@ -185,7 +185,7 @@ class SignalRService {
   onRefreshTableList(callback: (data: any) => void) {
     if (this.connection) {
       this.connection.on("RefreshTableList", (data) => {
-        logger.signalR('info', "Tablo listesi yenileme sinyali alındı", data);
+        logger.signalR('info', "Masa listesi yenileme sinyali alındı", data);
         callback(data);
       });
     }

@@ -402,7 +402,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
     setPromptModal({
       isOpen: true,
       title: t('menu.cart.cancel_reason_prompt_title') || 'Cancel Order',
-      message: t('menu.cart.cancel_reason_prompt_msg') || 'Please provide a reason for cancellation (optional).',
+      message: "",
       onConfirm: (reason) => {
         setConfirmModal({
           isOpen: true,
