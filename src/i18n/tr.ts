@@ -2629,6 +2629,8 @@ export const tr = {
       "newBranchLabel": "Yeni Şube",
       "selectBranchPlaceholder": "Bir şube seçin",
       "submitButton": "Şube Ata",
+      assignedToRestaurant:"Restorana Atandı",
+      assignToRestaurant:"Restoran ataması",
       "submitButtonLoading": "Atanıyor...",
       "validation": {
         "branchRequired": "Lütfen bir şube seçin"

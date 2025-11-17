@@ -2628,6 +2628,8 @@ export const en = {
       "selectBranchPlaceholder": "Select a branch",
       "submitButton": "Assign Branch",
       "submitButtonLoading": "Assigning...",
+      assignedToRestaurant:"Assigned To Restaurant",
+      assignToRestaurant:"Restaurant assignment",
       "validation": {
         "branchRequired": "Please select a branch"
       }

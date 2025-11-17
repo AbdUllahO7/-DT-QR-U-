@@ -2631,7 +2631,9 @@ export const ar = {
       "submitButton": "تعيين الفرع",
       "submitButtonLoading": "جاري التعيين...",
       "validation": {
-        "branchRequired": "يرجى اختيار فرع"
+        "branchRequired": "يرجى اختيار فرع",
+        assignedToRestaurant :"مُخصص للمطعم",
+        assignToRestaurant : "تعيين للمطعم",
       }
     },
 

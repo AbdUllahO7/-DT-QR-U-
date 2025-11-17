@@ -251,7 +251,7 @@ export interface SearchUsersParams {
 }
 
 export interface AssignBranchDto {
-  newBranchId: number;
+  targetBranchId: number;
 }
 
 export interface ChangePasswordDto {
