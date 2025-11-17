@@ -231,14 +231,23 @@ class UserService {
   }
 
 
-  async assignBranchToUser(id: string, branchData: AssignBranchDto): Promise<ApiResponse<any>> {
+async assignBranchToUser(id: string, branchData: AssignBranchDto): Promise<ApiResponse<any>> {
     try {
       logger.info(`🔍 assignBranchToUser çağrılıyor: ${id}`, branchData, { prefix: 'UserService' });
       
+
+      let apiPayload: { targetBranchId: number | null } = { ...branchData };
+
+
+      if (branchData.targetBranchId === 0) {
+        apiPayload.targetBranchId = null;
+        logger.info('🔄 newBranchId 0 olarak algılandı, API için null olarak değiştirildi.', { prefix: 'UserService' });
+      }
+      console.log("apiPayload",apiPayload)
       const response = await apiRequest<any>({
         method: 'PUT',
         url: `/api/Users/${id}/branch`,
-        data: branchData
+        data: apiPayload 
       });
 
       logger.info('✅ assignBranchToUser başarılı', response, { prefix: 'UserService' });

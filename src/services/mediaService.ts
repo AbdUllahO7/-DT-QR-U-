@@ -27,8 +27,9 @@ class MediaService {
   }
 
   async deleteFile(filePath: string): Promise<void> {
-    await httpClient.delete(`/api/Media/${encodeURIComponent(filePath)}`);
+    // Send the file path as a query parameter to avoid 404 errors
+    await httpClient.delete(`/api/Media?filePath=${encodeURIComponent(filePath)}`);
   }
 }
 
-export const mediaService = new MediaService(); 
+export const mediaService = new MediaService();

@@ -63,40 +63,6 @@ const RestaurantManagement: React.FC = () => {
   }, []);
 
 
-  const handleUpdateRestaurant = async (id: string, formData: FormData): Promise<void> => {
-    try {
-      setLoading(true);
-      const data: Partial<CreateRestaurantDto> = {
-        restaurantName: formData.get('name') as string,
-        description: (formData.get('description') as string) || undefined,
-      };
-
-      await restaurantService.updateRestaurant(id, data);
-      showNotification('Restaurant updated successfully!');
-      await fetchData();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      showNotification('Failed to update restaurant: ' + errorMessage, 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDeleteRestaurant = async (id: string): Promise<void> => {
-    if (!window.confirm('Are you sure you want to delete this restaurant?')) return;
-    
-    try {
-      setLoading(true);
-      await restaurantService.deleteRestaurant(id);
-      showNotification('Restaurant deleted successfully!');
-      await fetchData();
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
-      showNotification('Failed to delete restaurant: ' + errorMessage, 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleRestoreRestaurant = async (id: string): Promise<void> => {
     try {
@@ -120,6 +86,7 @@ const RestaurantManagement: React.FC = () => {
       setEditingManagement(false);
       await fetchData();
     } catch (err) {
+      console.log("errr",err)
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       showNotification('Failed to update management info: ' + errorMessage, 'error');
     } finally {

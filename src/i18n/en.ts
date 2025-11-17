@@ -2628,6 +2628,8 @@ export const en = {
       "selectBranchPlaceholder": "Select a branch",
       "submitButton": "Assign Branch",
       "submitButtonLoading": "Assigning...",
+      assignedToRestaurant:"Assigned To Restaurant",
+      assignToRestaurant:"Restaurant assignment",
       "validation": {
         "branchRequired": "Please select a branch"
       }
@@ -4208,6 +4210,8 @@ export const en = {
         "saving": "Saving Changes...",
         delete:"Delete Restaurant",
         purge:"Purge Restaurant Data",
+        viewFile:"View File",
+        viewLogo:"View Logo"
       },
 
       "sections": {
