@@ -6,6 +6,8 @@ export const tr = {
     change: 'Değiştir',
     error: 'Hata',
     success: 'Başarılı',
+     "emailAddress": "E-posta Adresi",
+      "emailPlaceholder": "you@example.com",
     cancel: 'İptal',
     save: 'Kaydet',
     delete: 'Sil',
@@ -4201,6 +4203,9 @@ recommended: "Önerilen",
         title: "Tehlikeli Bölge",
         description: "Restoran yönetim bilgilerini kalıcı olarak silme işlemi geri alınamaz. Lütfen dikkatli olun.",
       },
+            messages : {
+      purgeSuccess : "نجاح إزالة المحذوفات"
+    },
       buttons: {
         edit: "Düzenle",
         cancel: "İptal",
@@ -4724,6 +4729,51 @@ recommended: "Önerilen",
       "other": "Diğer"
     }
   },
+
+   "resetPassword": {
+      "submitted": {
+        "title": "E-postanızı Kontrol Edin",
+        "line1": "Şu adrese bir şifre sıfırlama bağlantısı gönderdik:",
+        "line2": "Lütfen gelen kutunuzu (ve spam klasörünü!) kontrol edin."
+      },
+      "form": {
+        "title": "Şifreyi Sıfırla",
+        "subtitle": "Sıfırlama bağlantısı almak için e-postanızı girin.",
+        "button": "Sıfırlama Bağlantısı Gönder",
+        "emailAddress": "E-posta Adresi",
+        "emailPlaceholder": "you@example.com"
+      }
+    },
+
+    "setNewPassword": {
+      "form": {
+        "title": "Yeni Şifre Belirle",
+        "subtitle": "Aşağıya yeni şifrenizi girin.",
+        "newPassword": "Yeni Şifre",
+        "confirmPassword": "Yeni Şifreyi Onayla",
+        "button": "Yeni Şifreyi Kaydet",
+        "errorMatch": "Şifreler eşleşmiyor.",
+        "errorLength": "Şifre en az 8 karakter olmalıdır."
+      },
+      "submitted": {
+        "title": "Şifre Güncellendi!",
+        "message": "Şifreniz başarıyla güncellendi. Şimdi giriş yapabilirsiniz."
+      }
+    },
+    
+    "confirmMail": {
+      "submitted": {
+        "title": "E-postanızı Kontrol Edin",
+        "line1": "Şu adrese yeni bir onay bağlantısı gönderdik:",
+        "line2": "Lütfen gelen kutunuzu (ve spam klasörünü!) kontrol edin."
+      },
+      "form": {
+        "title": "E-postanızı Onaylayın",
+        "subtitle": "Onay bağlantısını yeniden göndermek için e-postanızı girin.",
+        "button": "Onay E-postasını Yeniden Gönder"
+      }
+    },
+
  "onboardingBranch": {
     "header": {
       "backLink": "Restoran Bilgilerine Geri Dön",

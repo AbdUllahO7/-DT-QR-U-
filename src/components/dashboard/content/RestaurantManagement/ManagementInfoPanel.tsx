@@ -22,8 +22,16 @@ import {
  import { purgeService } from '../../../../services/purge/PurgeService';
  import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
  import { mediaService } from '../../../../services/mediaService';
+import { useAuth } from '../../../../hooks';
+import { useNavigate } from 'react-router-dom';
+import ToastComponent from '../../Branch/Menu/CartSideBar/ToastComponenet';
 
-
+export interface Toast {
+  id: string;
+  message: string;
+  type: 'success' | 'error' | 'loading';
+  duration?: number;
+}
 
 interface RestaurantManagementInfo {
   restaurantId: string;
@@ -64,7 +72,9 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
   const logoInputRef = useRef<HTMLInputElement>(null);
   const workPermitInputRef = useRef<HTMLInputElement>(null);
   const foodCertificateInputRef = useRef<HTMLInputElement>(null);
-  
+  const {  clearAuth } = useAuth();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState<RestaurantManagementInfo>(
     info || {
       restaurantId: '',
@@ -89,9 +99,19 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
   const [showPurgeModal, setShowPurgeModal] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [purgeLoading, setPurgeLoading] = useState(false);
-
+  const [toasts, setToasts] = useState<Toast[]>([]);
   const [uploadingField, setUploadingField] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<{ field: string, message: string } | null>(null);
+
+
+  const addToast = (message: string, type: Toast['type'], duration = 4000) => {
+    const id = Date.now().toString();
+    setToasts(prev => [...prev, { id, message, type, duration }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  };
 
   useEffect(() => {
     if (info) setFormData(info);
@@ -157,36 +177,46 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
   };
 
   const handleDelete = async () => {
-    if (!info?.restaurantId) return;
-    
-    setDeleteLoading(true);
-    try {
-      await restaurantService.deleteRestaurant(info.restaurantId);
-      alert(t('management.messages.deleteSuccess') || 'Restaurant successfully deleted');
-      window.location.reload(); 
-    } catch (error) {
-      console.error('Delete error:', error);
-      throw error; 
-    } finally {
-      setDeleteLoading(false);
-    }
-  };
+      if (!info?.restaurantId) return;
+      
+      setDeleteLoading(true);
+      try {
+        await restaurantService.deleteRestaurant(info.restaurantId);
+        addToast(t('management.messages.deleteSuccess') || 'Restaurant successfully deleted', 'success'); // --- UPDATED ---
+        window.location.reload(); 
+      } catch (error) {
+        console.error('Delete error:', error);
+        addToast(t('management.messages.deleteError') || 'Failed to delete restaurant', 'error'); // --- UPDATED ---
+      } finally {
+        setDeleteLoading(false);
+        setShowDeleteModal(false); // --- NEW ---
+      }
+    };
 
   const handlePurge = async () => {
-    if (!info?.restaurantId) return;
-    
-    setPurgeLoading(true);
-    try {
-      await purgeService.purgeRestaurant(Number(info.restaurantId));
-      alert(t('management.messages.purgeSuccess') || 'Restaurant permanently deleted');
-      window.location.reload(); 
-    } catch (error) {
-      console.error('Purge error:', error);
-      throw error; 
-    } finally {
-      setPurgeLoading(false);
-    }
-  };
+      if (!info?.restaurantId) return;
+      
+      setPurgeLoading(true);
+      try {
+        await purgeService.purgeRestaurant(Number(info.restaurantId));
+        addToast(t('management.messages.purgeSuccess') || 'Restaurant permanently deleted', 'success'); // --- UPDATED ---
+
+        // --- NEW: Delay navigation so toast can be seen ---
+        setTimeout(() => {
+          localStorage.removeItem('itek key token');
+          clearAuth();
+          navigate('/');
+        }, 2000); // 2-second delay
+
+      } catch (error) {
+        console.error('Purge error:', error);
+        addToast(t('management.messages.purgeError') || 'Failed to permanently delete restaurant', 'error'); // --- UPDATED ---
+      } finally {
+        // Don't set loading to false immediately, as we are navigating
+        // setPurgeLoading(false); // We can remove this
+        setShowPurgeModal(false); // --- NEW ---
+      }
+    };
 
   if (!info) {
     return (
@@ -209,7 +239,11 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
       <div className="relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
         
-     
+     <div className="fixed top-6 right-6 z-[100] w-full max-w-sm">
+        {toasts.map(toast => (
+          <ToastComponent key={toast.id} toast={toast} onClose={removeToast} />
+        ))}
+      </div>
 
         {/* Header */}
         <div className="relative border-b border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">

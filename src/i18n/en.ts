@@ -12,6 +12,8 @@ export const en = {
     save: 'Save',
     delete: 'Delete',
     edit: 'Edit',
+      "emailAddress": "Email Address",
+      "emailPlaceholder": "you@example.com",
     add: 'Add',
     search: 'Search',
     filter: 'Filter',
@@ -4203,6 +4205,9 @@ export const en = {
         title: "Danger Zone",
         description: "Caution: These actions are irreversible. Please proceed with care.",
       },
+      messages : {
+      purgeSuccess : "Purge Deleted Success"
+    },
       "buttons": {
         "edit": "Edit",
         "cancel": "Cancel",
@@ -4265,6 +4270,47 @@ export const en = {
         "na": "N/A"
       }
   },
+  "resetPassword": {
+      "submitted": {
+        "title": "Check Your Email",
+        "line1": "We've sent a password reset link to",
+        "line2": "Please check your inbox (and spam folder!)."
+      },
+      "form": {
+        "title": "Reset Password",
+        "subtitle": "Enter your email to get a reset link.",
+        "button": "Send Reset Link",
+        "emailAddress": "Email Address",
+        "emailPlaceholder": "you@example.com"
+      }
+    },
+    "setNewPassword": {
+      "form": {
+        "title": "Set New Password",
+        "subtitle": "Enter your new password below.",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm New Password",
+        "button": "Save New Password",
+        "errorMatch": "Passwords do not match.",
+        "errorLength": "Password must be at least 8 characters."
+      },
+      "submitted": {
+        "title": "Password Updated!",
+        "message": "Your password has been successfully updated. You can now log in."
+      }
+    },
+    "confirmMail": {
+      "submitted": {
+        "title": "Check Your Email",
+        "line1": "We've sent a new confirmation link to",
+        "line2": "Please check your inbox (and spam folder!)."
+      },
+      "form": {
+        "title": "Confirm Your Email",
+        "subtitle": "Enter your email to resend the confirmation link.",
+        "button": "Resend Confirmation"
+      }
+    },
   branches: {
   "status": {
     "active": "Active",
