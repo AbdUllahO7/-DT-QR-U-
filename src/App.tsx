@@ -14,6 +14,9 @@ import Dashboard from './pages/Dashboard';
 import TableQR from './pages/TableQR';
 import RecycleBin from './components/dashboard/Porducts/RecycleBinProducts';
 import OnlineMenu from './components/dashboard/Branch/OnlineMenu/OnlineMenu';
+import ResetPassword from './pages/Pass/ResetPassword';
+import ConfirmMail from './pages/Pass/ConfirimMail';
+import SetNewPassword from './pages/Pass/SetNewPassword';
 
 const App: React.FC = () => {
   return (
@@ -23,6 +26,10 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
+             <Route path="/resetPassword" element={<ResetPassword />} />
+            <Route path="/confirmMail" element={<ConfirmMail />} />
+            <Route path="/setNewPassword" element={<SetNewPassword />} />
+
             <Route path="/register" element={<Register />} />
             <Route path="/forgotpassword" element={<ForgotPassword />} />
             <Route path="/onboarding/restaurant" element={<OnboardingRestaurant />} />
