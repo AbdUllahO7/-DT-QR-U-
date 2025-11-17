@@ -3013,7 +3013,7 @@ export const tr = {
       "tableNameLabel": "Masa Adı",
   "capacityLabel": "Kapasite",
     clearTable: "Masayı temizleniyor",
-    refreshTable: "Durumu güncelle",
+    refreshTable: "Masa  güncelle",
     clearin: "Temizleniyor...",
     loading : "Yükleniyor...",
     category: "Kategori",
@@ -4205,7 +4205,9 @@ recommended: "Önerilen",
         save: "Değişiklikleri Kaydet",
         saving: "Kaydediliyor...",
         delete:" Sil",
-        purge:" Temizle"
+        purge:" Temizle",
+        viewFile:"Dosya Aç",
+        viewLogo:"View Logo"
       },
 
       sections: {

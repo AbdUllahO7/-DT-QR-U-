@@ -3631,10 +3631,9 @@ export const ar = {
       price_change_title : "إشعار تغير الاسعار",
       confirm:"قبول",
       cancel:"رفض",
-               confirm_cancel_title:"السبب الذي كتبته سيصل إلى المطعم.",
+      confirm_cancel_title:"السبب الذي كتبته سيصل إلى المطعم.",
       cancel_order_confirm :"هل أنت متأكد أنك تريد إلغاء الطلب؟ ",
-            order_cancelled_success:"لقد تم إلغاء طلبك بنجاح.",
-
+      order_cancelled_success:"لقد تم إلغاء طلبك بنجاح.",
       success:"ناجح",
       newOrder: 'طلب جديد',
       orders: 'الطلبات',
@@ -4209,6 +4208,8 @@ export const ar = {
       saving: "جاري الحفظ...",
       delete: "حذف",
       purge: "تنظيف",
+      viewFile:"مشاهدة الملف",
+      viewLogo:"مشاهدة الشعار"
     },
 
     sections: {

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { isAxiosError } from 'axios';
 import { 
   Edit3, 
   Save, 
@@ -13,12 +14,16 @@ import {
   Image as ImageIcon,
   CheckCircle2,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
+  Loader2
 } from 'lucide-react';
-import { useLanguage } from '../../../../contexts/LanguageContext';
-import { restaurantService } from '../../../../services/restaurantService';
-import { purgeService } from '../../../../services/purge/PurgeService';
-import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
+ import { useLanguage } from '../../../../contexts/LanguageContext';
+ import { restaurantService } from '../../../../services/restaurantService';
+ import { purgeService } from '../../../../services/purge/PurgeService';
+ import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
+ import { mediaService } from '../../../../services/mediaService';
+
+
 
 interface RestaurantManagementInfo {
   restaurantId: string;
@@ -55,6 +60,10 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
 }) => {
   const { t } = useLanguage();
 
+  // --- Add Refs for file inputs ---
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const workPermitInputRef = useRef<HTMLInputElement>(null);
+  const foodCertificateInputRef = useRef<HTMLInputElement>(null);
   
   const [formData, setFormData] = useState<RestaurantManagementInfo>(
     info || {
@@ -81,14 +90,69 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [purgeLoading, setPurgeLoading] = useState(false);
 
+  const [uploadingField, setUploadingField] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<{ field: string, message: string } | null>(null);
+
   useEffect(() => {
     if (info) setFormData(info);
   }, [info]);
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>, field: keyof RestaurantManagementInfo) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: keyof RestaurantManagementInfo) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setFormData(prev => ({ ...prev, [field]: file.name }));
+    if (!file) return;
+
+    setUploadingField(field);
+    setUploadError(null);
+
+    try {
+      const previousUrl = formData[field] as string | undefined;
+      const newFilePath = await mediaService.uploadFile(file, previousUrl);
+      setFormData(prev => ({ ...prev, [field]: newFilePath }));
+
+    } catch (err) {
+      console.error(`File upload error for ${field}:`, err);
+      let errorMessage = 'Unknown upload error occurred';
+      if (isAxiosError(err) && err.response) {
+        if (err.response.data?.details?.message) {
+          errorMessage = err.response.data.details.message;
+        } else if (err.response.data?.message) {
+          errorMessage = err.response.data.message;
+        } else if (typeof err.response.data === 'string' && err.response.data) {
+          errorMessage = err.response.data;
+        } else {
+          errorMessage = err.message;
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      setUploadError({ field, message: errorMessage });
+      
+    } finally {
+      setUploadingField(null);
+      e.target.value = '';
+    }
+  };
+
+  const handleFileDelete = async (field: keyof RestaurantManagementInfo) => {
+    const filePath = formData[field] as string;
+    if (!filePath) return;
+
+    setUploadingField(field); // Show spinner while deleting
+    setUploadError(null);
+    try {
+      await mediaService.deleteFile(filePath);
+      setFormData(prev => ({ ...prev, [field]: '' })); // Clear the path
+    } catch (err) {
+      console.error(`File delete error for ${field}:`, err);
+      let errorMessage = 'Failed to delete file';
+      if (isAxiosError(err) && err.response) {
+        errorMessage = err.response.data?.details?.message || err.response.data?.message || err.message;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      setUploadError({ field, message: errorMessage });
+    } finally {
+      setUploadingField(null);
     }
   };
 
@@ -99,10 +163,10 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
     try {
       await restaurantService.deleteRestaurant(info.restaurantId);
       alert(t('management.messages.deleteSuccess') || 'Restaurant successfully deleted');
-      window.location.reload(); // Or use a callback to refresh
+      window.location.reload(); 
     } catch (error) {
       console.error('Delete error:', error);
-      throw error; // Let ConfirmDeleteModal handle the error
+      throw error; 
     } finally {
       setDeleteLoading(false);
     }
@@ -115,10 +179,10 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
     try {
       await purgeService.purgeRestaurant(Number(info.restaurantId));
       alert(t('management.messages.purgeSuccess') || 'Restaurant permanently deleted');
-      window.location.reload(); // Or use a callback to refresh
+      window.location.reload(); 
     } catch (error) {
       console.error('Purge error:', error);
-      throw error; // Let ConfirmDeleteModal handle the error
+      throw error; 
     } finally {
       setPurgeLoading(false);
     }
@@ -143,14 +207,9 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
   return (
     <>
       <div className="relative bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
-        {/* Decorative gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-pink-500/5 pointer-events-none" />
         
-          <img
-              src={info.restaurantLogoPath}
-              alt={`${info.restaurantName} ${t('branchCard.alt.logo')}`}
-              className="w-12 h-12 object-cover rounded-2xl bg-white/10"
-            />
+     
 
         {/* Header */}
         <div className="relative border-b border-gray-200/50 dark:border-gray-700/50 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm">
@@ -168,6 +227,13 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
                 </p>
               </div>
             </div>
+               {info.restaurantLogoPath && (
+                <img
+                    src={info.restaurantLogoPath}
+                    alt={`${info.restaurantName} ${t('branchCard.alt.logo')}`}
+                    className="w-24 h-24 object-cover rounded-2xl bg-white/10"
+                  />
+              )}
             <button
               onClick={onEdit}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium transition-all duration-200 shadow-md hover:shadow-lg ${
@@ -213,22 +279,78 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
                       className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                     />
                   </div>
+                  
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('management.fields.restaurantLogo')}
                     </label>
-                    <div className="relative">
-                      <input
-                        title='restaurantLogoPath'
-                        type="file"
-                        id="restaurantLogo"
-                        onChange={(e) => handleFileUpload(e, 'restaurantLogoPath')}
-                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 dark:file:bg-blue-900/30 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50 transition-all"
-                      />
-                      {formData.restaurantLogoPath && (
-                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
-                      )}
-                    </div>
+                    {formData.restaurantLogoPath ? (
+                      <div className="flex items-center justify-between gap-2 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700">
+                        <a
+                          href={formData.restaurantLogoPath}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline truncate"
+                        >
+                          {t('management.buttons.viewLogo') || 'View Logo'}
+                        </a>
+                        <div className="flex items-center gap-2">
+                          {/* --- EDIT BUTTON --- */}
+                          <button
+                            type="button"
+                            onClick={() => logoInputRef.current?.click()}
+                            disabled={uploadingField === 'restaurantLogoPath'}
+                            className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 rounded-full"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          {/* --- DELETE BUTTON --- */}
+                          <button
+                            type="button"
+                            onClick={() => handleFileDelete('restaurantLogoPath')}
+                            disabled={uploadingField === 'restaurantLogoPath'}
+                            className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 rounded-full"
+                          >
+                            {uploadingField === 'restaurantLogoPath' ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        {/* --- This input is now only for when no file is set --- */}
+                        <input
+                          title='restaurantLogoPath'
+                          type="file"
+                          id="restaurantLogo"
+                          accept="image/*"
+                          onChange={(e) => handleFileUpload(e, 'restaurantLogoPath')}
+                          disabled={uploadingField === 'restaurantLogoPath'}
+                          className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-blue-50 dark:file:bg-blue-900/30 file:text-blue-700 dark:file:text-blue-300 hover:file:bg-blue-100 dark:hover:file:bg-blue-900/50 transition-all disabled:opacity-50"
+                        />
+                        {uploadingField === 'restaurantLogoPath' && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {/* --- HIDDEN INPUT for edit --- */}
+                    <input
+                      title='restaurantLogoPathEdit'
+                      type="file"
+                      ref={logoInputRef}
+                      accept="image/*"
+                      onChange={(e) => handleFileUpload(e, 'restaurantLogoPath')}
+                      disabled={uploadingField === 'restaurantLogoPath'}
+                      className="hidden"
+                    />
+                    {uploadError && uploadError.field === 'restaurantLogoPath' && (
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">{uploadError.message}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -336,39 +458,147 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
                   {t('management.sections.certificates')}
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  
+                  {/* === UPDATED: Work Permit Input === */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('management.fields.workPermit')}
                     </label>
-                    <div className="relative">
-                      <input
-                        title='workPermitFilePath'
-                        type="file"
-                        id="workPermit"
-                        onChange={(e) => handleFileUpload(e, 'workPermitFilePath')}
-                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-orange-50 dark:file:bg-orange-900/30 file:text-orange-700 dark:file:text-orange-300 hover:file:bg-orange-100 dark:hover:file:bg-orange-900/50 transition-all"
-                      />
-                      {formData.workPermitFilePath && (
-                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
-                      )}
-                    </div>
+                    {formData.workPermitFilePath ? (
+                      <div className="flex items-center justify-between gap-2 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700">
+                        <a
+                          href={formData.workPermitFilePath}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline truncate"
+                        >
+                          {t('management.buttons.viewFile') || 'View File'}
+                        </a>
+                        <div className="flex items-center gap-2">
+                          {/* --- EDIT BUTTON --- */}
+                          <button
+                            type="button"
+                            onClick={() => workPermitInputRef.current?.click()}
+                            disabled={uploadingField === 'workPermitFilePath'}
+                            className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 rounded-full"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          {/* --- DELETE BUTTON --- */}
+                          <button
+                            type="button"
+                            onClick={() => handleFileDelete('workPermitFilePath')}
+                            disabled={uploadingField === 'workPermitFilePath'}
+                            className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 rounded-full"
+                          >
+                            {uploadingField === 'workPermitFilePath' ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <input
+                          title='workPermitFilePath'
+                          type="file"
+                          id="workPermit"
+                          onChange={(e) => handleFileUpload(e, 'workPermitFilePath')}
+                          disabled={uploadingField === 'workPermitFilePath'}
+                          className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-orange-50 dark:file:bg-orange-900/30 file:text-orange-700 dark:file:text-orange-300 hover:file:bg-orange-100 dark:hover:file:bg-orange-900/50 transition-all disabled:opacity-50"
+                        />
+                        {uploadingField === 'workPermitFilePath' && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {/* --- HIDDEN INPUT for edit --- */}
+                    <input
+                      title='workPermitFilePathEdit'
+                      type="file"
+                      ref={workPermitInputRef}
+                      onChange={(e) => handleFileUpload(e, 'workPermitFilePath')}
+                      disabled={uploadingField === 'workPermitFilePath'}
+                      className="hidden"
+                    />
+                    {uploadError && uploadError.field === 'workPermitFilePath' && (
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">{uploadError.message}</p>
+                    )}
                   </div>
+
+                  {/* === UPDATED: Food Certificate Input === */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('management.fields.foodCertificate')}
                     </label>
-                    <div className="relative">
-                      <input
-                        title='foodCertificateFilePath'
-                        type="file"
-                        id="foodCertificate"
-                        onChange={(e) => handleFileUpload(e, 'foodCertificateFilePath')}
-                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-orange-50 dark:file:bg-orange-900/30 file:text-orange-700 dark:file:text-orange-300 hover:file:bg-orange-100 dark:hover:file:bg-orange-900/50 transition-all"
-                      />
-                      {formData.foodCertificateFilePath && (
-                        <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-500" />
-                      )}
-                    </div>
+                    {formData.foodCertificateFilePath ? (
+                      <div className="flex items-center justify-between gap-2 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700">
+                        <a
+                          href={formData.foodCertificateFilePath}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:underline truncate"
+                        >
+                          {t('management.buttons.viewFile') || 'View File'}
+                        </a>
+                        <div className="flex items-center gap-2">
+                          {/* --- EDIT BUTTON --- */}
+                          <button
+                            type="button"
+                            onClick={() => foodCertificateInputRef.current?.click()}
+                            disabled={uploadingField === 'foodCertificateFilePath'}
+                            className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 rounded-full"
+                          >
+                            <Edit3 className="w-4 h-4" />
+                          </button>
+                          {/* --- DELETE BUTTON --- */}
+                          <button
+                            type="button"
+                            onClick={() => handleFileDelete('foodCertificateFilePath')}
+                            disabled={uploadingField === 'foodCertificateFilePath'}
+                            className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 rounded-full"
+                          >
+                            {uploadingField === 'foodCertificateFilePath' ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="w-4 h-4" />
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <input
+                          title='foodCertificateFilePath'
+                          type="file"
+                          id="foodCertificate"
+                          onChange={(e) => handleFileUpload(e, 'foodCertificateFilePath')}
+                          disabled={uploadingField === 'foodCertificateFilePath'}
+                          className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-orange-50 dark:file:bg-orange-900/30 file:text-orange-700 dark:file:text-orange-300 hover:file:bg-orange-100 dark:hover:file:bg-orange-900/50 transition-all disabled:opacity-50"
+                        />
+                        {uploadingField === 'foodCertificateFilePath' && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                            <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    {/* --- HIDDEN INPUT for edit --- */}
+                    <input
+                      title='foodCertificateFilePathEdit'
+                      type="file"
+                      ref={foodCertificateInputRef}
+                      onChange={(e) => handleFileUpload(e, 'foodCertificateFilePath')}
+                      disabled={uploadingField === 'foodCertificateFilePath'}
+                      className="hidden"
+                    />
+                    {uploadError && uploadError.field === 'foodCertificateFilePath' && (
+                      <p className="mt-1 text-xs text-red-600 dark:text-red-400">{uploadError.message}</p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -386,16 +616,17 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loading || uploadingField !== null} // Disable save if an upload is in progress
                   className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed"
                 >
                   <Save className="w-5 h-5" />
-                  {loading ? t('management.buttons.saving') : t('management.buttons.save')}
+                  {loading ? t('management.buttons.saving') : (uploadingField ? t('management.buttons.uploading') : t('management.buttons.save'))}
                 </button>
                 <button
                   type="button"
                   onClick={onEdit}
-                  className="flex items-center gap-2 px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium rounded-xl transition-all duration-200"
+                  disabled={uploadingField !== null} // Disable cancel if an upload is in progress
+                  className="flex items-center gap-2 px-6 py-3 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium rounded-xl transition-all duration-200 disabled:opacity-50"
                 >
                   <X className="w-5 h-5" />
                   {t('management.buttons.cancel')}
@@ -414,7 +645,8 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
                   <InfoItem label={t('management.fields.restaurantName')} value={info.restaurantName} />
                   <InfoItem 
                     label={t('management.fields.logo')} 
-                    value={info.restaurantLogoPath ? t('management.status.uploaded') : t('management.status.notUploaded')} 
+                    value={info.restaurantLogoPath} 
+                    isFile={true}
                   />
                 </div>
               </div>
@@ -454,11 +686,13 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <InfoItem 
                     label={t('management.fields.workPermit')} 
-                    value={info.workPermitFilePath ? t('management.status.uploaded') : t('management.status.notUploaded')} 
+                    value={info.workPermitFilePath}
+                    isFile={true}
                   />
                   <InfoItem 
                     label={t('management.fields.foodCertificate')} 
-                    value={info.foodCertificateFilePath ? t('management.status.uploaded') : t('management.status.notUploaded')} 
+                    value={info.foodCertificateFilePath}
+                    isFile={true}
                   />
                 </div>
               </div>
@@ -516,7 +750,7 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
         onClose={() => setShowPurgeModal(false)}
         onConfirm={handlePurge}
         title={t('management.dangerZone.title') || 'Delete Restaurant'}
-                message={t('management.dangerZone.description') || 'Are you sure you want to delete this restaurant? This action can be restored later.'}
+                message={t('management.dangerZone.description') || 'Are you sure you want to delete this restaurant? This action can beRECTLY...'}
 
         isSubmitting={purgeLoading}
         itemType="restaurant-purge"
@@ -526,16 +760,37 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
   );
 };
 
-// Helper component for displaying information
-const InfoItem: React.FC<{ label: string; value: string | undefined }> = ({ label, value }) => {
+// UPDATED: Helper component for displaying information
+const InfoItem: React.FC<{ label: string; value: string | undefined | null; isFile?: boolean }> = ({ 
+  label, 
+  value, 
+  isFile = false 
+}) => {
   const { t } = useLanguage();
   
   return (
     <div className="group">
       <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">{label}</p>
-      <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-        {value || t('management.common.na')}
-      </p>
+      {isFile ? (
+        value ? (
+          <a
+            href={value}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline transition-colors"
+          >
+            {t('management.buttons.viewFile') || 'View File'}
+          </a>
+        ) : (
+          <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            {t('management.common.na') || 'N/A'}
+          </p>
+        )
+      ) : (
+        <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          {value || t('management.common.na') || 'N/A'}
+        </p>
+      )}
     </div>
   );
 };

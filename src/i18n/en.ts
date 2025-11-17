@@ -4208,6 +4208,8 @@ export const en = {
         "saving": "Saving Changes...",
         delete:"Delete Restaurant",
         purge:"Purge Restaurant Data",
+        viewFile:"View File",
+        viewLogo:"View Logo"
       },
 
       "sections": {
