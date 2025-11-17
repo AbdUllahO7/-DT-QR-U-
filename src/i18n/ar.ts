@@ -4214,6 +4214,10 @@ export const ar = {
       viewLogo:"مشاهدة الشعار"
     },
 
+    messages : {
+      purgeSuccess : "نجاح الحذف"
+    },
+
     sections: {
       restaurantDetails: "تفاصيل المطعم",
       companyInfo: "معلومات الشركة",

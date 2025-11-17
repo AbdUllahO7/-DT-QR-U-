@@ -4201,6 +4201,9 @@ recommended: "Önerilen",
         title: "Tehlikeli Bölge",
         description: "Restoran yönetim bilgilerini kalıcı olarak silme işlemi geri alınamaz. Lütfen dikkatli olun.",
       },
+            messages : {
+      purgeSuccess : "نجاح إزالة المحذوفات"
+    },
       buttons: {
         edit: "Düzenle",
         cancel: "İptal",

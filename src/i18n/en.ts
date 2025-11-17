@@ -4203,6 +4203,9 @@ export const en = {
         title: "Danger Zone",
         description: "Caution: These actions are irreversible. Please proceed with care.",
       },
+      messages : {
+      purgeSuccess : "Purge Deleted Success"
+    },
       "buttons": {
         "edit": "Edit",
         "cancel": "Cancel",
