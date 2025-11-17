@@ -45,7 +45,6 @@ export interface CategoryStatusToggleDto {
   isActive: boolean;
 }
 
-// Table management interfaces
 export interface CreateMenuTableDto {
   menuTableName: string | null;
   menuTableCategoryId: number;

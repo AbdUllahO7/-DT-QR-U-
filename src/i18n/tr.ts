@@ -2629,6 +2629,8 @@ export const tr = {
       "newBranchLabel": "Yeni Şube",
       "selectBranchPlaceholder": "Bir şube seçin",
       "submitButton": "Şube Ata",
+      assignedToRestaurant:"Restorana Atandı",
+      assignToRestaurant:"Restoran ataması",
       "submitButtonLoading": "Atanıyor...",
       "validation": {
         "branchRequired": "Lütfen bir şube seçin"
@@ -3013,7 +3015,7 @@ export const tr = {
       "tableNameLabel": "Masa Adı",
   "capacityLabel": "Kapasite",
     clearTable: "Masayı temizleniyor",
-    refreshTable: "Durumu güncelle",
+    refreshTable: "Masa  güncelle",
     clearin: "Temizleniyor...",
     loading : "Yükleniyor...",
     category: "Kategori",
@@ -4205,7 +4207,9 @@ recommended: "Önerilen",
         save: "Değişiklikleri Kaydet",
         saving: "Kaydediliyor...",
         delete:" Sil",
-        purge:" Temizle"
+        purge:" Temizle",
+        viewFile:"Dosya Aç",
+        viewLogo:"View Logo"
       },
 
       sections: {
