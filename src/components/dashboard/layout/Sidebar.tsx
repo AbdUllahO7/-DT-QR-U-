@@ -31,11 +31,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   branchName,
   isBranchOnly,
   onLogout,
-  onSelectBranch,
-  onBackToMain
+
 }) => {
   const navigate = useNavigate();
-  const { isDark } = useTheme();
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
 
