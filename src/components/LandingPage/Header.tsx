@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+// Import useLocation here
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, Moon, Sun, QrCode, LogIn, UserPlus, LayoutDashboard, LogOut } from 'lucide-react';
+// Reverting imports to not use .jsx extension, as in your original file
 import { useTheme } from '../../contexts/ThemeContext';
-import { useAuth, useScrollSpy } from '../../hooks';
+import { useAuth, useScrollSpy } from '../../hooks'; 
 import { useLanguage } from '../../contexts/LanguageContext';
 import { NavItem } from '../../types';
 import LanguageSelector from '../LanguageSelector';
@@ -10,6 +12,9 @@ import LanguageSelector from '../LanguageSelector';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation(); // Get current location
+  const isHomePage = location.pathname === '/'; // Check if we are on the home page
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
   const { isDark, toggleTheme } = useTheme();
@@ -25,7 +30,30 @@ const Header: React.FC = () => {
     { id: 'contact', label: t('nav.contact'), href: '#contact' },
   ];
   
-  const activeSection = useScrollSpy(navItems.map(item => item.id), 100);
+  // Only activate scroll spy if on the home page
+  const activeSection = useScrollSpy(
+    isHomePage ? navItems.map(item => item.id) : [], 
+    100
+  );
+
+  // --- ADD THIS NEW useEffect FOR SCROLLING ---
+  // This hook handles scrolling when the URL hash changes,
+  // especially when navigating from another page.
+  useEffect(() => {
+    // Check if there's a hash and we are on the home page
+    if (location.hash && isHomePage) {
+      const id = location.hash.substring(1); // Get "features" from "#features"
+      
+      // Use setTimeout to give the Home component time to render its sections
+      setTimeout(() => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100); // 100ms delay. You can adjust this if needed.
+    }
+  }, [isHomePage, location.hash]); // Run when path or hash changes
+
 
   // Component mount olduğunda auth durumunu kontrol et
   useEffect(() => {
@@ -41,17 +69,20 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // --- SIMPLIFIED NAVIGATION LOGIC ---
   const handleNavClick = (href: string): void => {
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-    setIsOpen(false);
+    setIsOpen(false); // Close mobile menu regardless
+
+    // We simply navigate to the path with the hash.
+    // The new useEffect hook will handle the scrolling.
+    // This works whether we are on the home page or not.
+    navigate(`/${href}`); 
   };
 
   const handleLogin = (): void => {
-    // Token kontrolü
+    // ... (rest of your existing function)
     const token = localStorage.getItem('token');
+// ... (rest of your existing code)
     const tokenExpiry = localStorage.getItem('tokenExpiry');
 
     if (token && tokenExpiry) {
@@ -111,7 +142,8 @@ const Header: React.FC = () => {
                 key={item.id}
                 onClick={() => handleNavClick(item.href)}
                 className={`text-sm font-medium transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-400 ${
-                  activeSection === item.id
+                  // Only show active section highlighting on the home page
+                  activeSection === item.id && isHomePage
                     ? 'text-primary-600 dark:text-primary-400'
                     : 'text-gray-700 dark:text-gray-300'
                 }`}
@@ -201,7 +233,8 @@ const Header: React.FC = () => {
                   key={item.id}
                   onClick={() => handleNavClick(item.href)}
                   className={`block w-full ${isRTL ? 'text-right' : 'text-left'} px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 ${
-                    activeSection === item.id
+                    // Only show active section highlighting on the home page
+                    activeSection === item.id && isHomePage
                       ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
                       : 'text-gray-700 dark:text-gray-300'
                   }`}
@@ -258,4 +291,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header; 
+export default Header;

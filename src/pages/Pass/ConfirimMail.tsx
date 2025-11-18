@@ -12,20 +12,19 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { userService } from '../../services/userService';
 
-// --- NEW ---
 const COOLDOWN_SECONDS = 60;
 const COOLDOWN_KEY = 'confirmMailCooldown';
-// --- END NEW ---
 
 const ConfirmMail = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [cooldownTime, setCooldownTime] = useState(0); // --- NEW ---
+  const [cooldownTime, setCooldownTime] = useState(0); 
   const { t, isRTL } = useLanguage();
-
-  // --- NEW: Cooldown Timer Logic ---
+    useEffect(() => {
+      window.scrollTo(0, 0);
+    }, []);
   useEffect(() => {
    let interval: number;
 
@@ -54,13 +53,12 @@ const ConfirmMail = () => {
     };
 
     checkCooldown();
-    return () => clearInterval(interval); // Cleanup interval on component unmount
+    return () => clearInterval(interval); 
   }, []);
-  // --- END NEW ---
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading || cooldownTime > 0) return; // --- UPDATED ---
+    if (loading || cooldownTime > 0) return; 
 
     setLoading(true);
     setError(null);
@@ -69,10 +67,8 @@ const ConfirmMail = () => {
       await userService.resendConfirmation(email);
       setSubmitted(true);
       
-      // --- NEW: Set cooldown on success ---
       localStorage.setItem(COOLDOWN_KEY, Date.now().toString());
       setCooldownTime(COOLDOWN_SECONDS);
-      // Start countdown interval immediately
       const interval = setInterval(() => {
         setCooldownTime((prevTime) => {
           if (prevTime <= 1) {
@@ -83,7 +79,6 @@ const ConfirmMail = () => {
           return prevTime - 1;
         });
       }, 1000);
-      // --- END NEW ---
 
     } catch (err : any) {
       console.error('Failed to resend confirmation:', err);
@@ -116,7 +111,6 @@ const ConfirmMail = () => {
         </motion.div>
 
         {submitted ? (
-          // ... (Submitted success message - no change) ...
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 text-center">
             <Mail className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
@@ -134,7 +128,6 @@ const ConfirmMail = () => {
             onSubmit={handleSubmit}
             className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 space-y-6"
           >
-            {/* ... (Form header - no change) ... */}
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full mb-4">
                 <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
@@ -147,7 +140,6 @@ const ConfirmMail = () => {
               </p>
             </div>
             
-            {/* ... (Error message block - no change) ... */}
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -159,7 +151,6 @@ const ConfirmMail = () => {
               </motion.div>
             )}
 
-            {/* ... (Email input - no change) ... */}
             <div className="relative">
               <label
                 htmlFor="email-confirm"
@@ -185,10 +176,9 @@ const ConfirmMail = () => {
 
             <button
               type="submit"
-              disabled={loading || cooldownTime > 0} // --- UPDATED ---
+              disabled={loading || cooldownTime > 0} 
               className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {/* --- UPDATED: Show correct button state --- */}
               {loading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
               ) : cooldownTime > 0 ? (
