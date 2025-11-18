@@ -1,26 +1,122 @@
-import React, { useState } from 'react';
-import { Mail, Send, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react'; // --- UPDATED ---
+import { 
+  Mail, 
+  Send, 
+  CheckCircle, 
+  ArrowLeft, 
+  Loader2,
+  AlertCircle 
+} from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
+import { userService } from '../../services/userService';
+
+// --- NEW ---
+const COOLDOWN_SECONDS = 60;
+const COOLDOWN_KEY = 'confirmMailCooldown';
+// --- END NEW ---
 
 const ConfirmMail = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const { t, isRTL } = useLanguage(); // --- NEW ---
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [cooldownTime, setCooldownTime] = useState(0); // --- NEW ---
+  const { t, isRTL } = useLanguage();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // --- NEW: Cooldown Timer Logic ---
+  useEffect(() => {
+   let interval: number;
+
+    const checkCooldown = () => {
+      const lastSubmitTime = localStorage.getItem(COOLDOWN_KEY);
+      if (lastSubmitTime) {
+        const timePassed = (Date.now() - parseInt(lastSubmitTime, 10)) / 1000;
+        const timeLeft = COOLDOWN_SECONDS - timePassed;
+
+        if (timeLeft > 0) {
+          setCooldownTime(Math.ceil(timeLeft));
+          interval = setInterval(() => {
+            setCooldownTime((prevTime) => {
+              if (prevTime <= 1) {
+                clearInterval(interval);
+                localStorage.removeItem(COOLDOWN_KEY);
+                return 0;
+              }
+              return prevTime - 1;
+            });
+          }, 1000);
+        } else {
+          localStorage.removeItem(COOLDOWN_KEY);
+        }
+      }
+    };
+
+    checkCooldown();
+    return () => clearInterval(interval); // Cleanup interval on component unmount
+  }, []);
+  // --- END NEW ---
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle confirmation logic here
-    console.log('Confirmation link requested for:', email);
-    setSubmitted(true);
+    if (loading || cooldownTime > 0) return; // --- UPDATED ---
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await userService.resendConfirmation(email);
+      setSubmitted(true);
+      
+      // --- NEW: Set cooldown on success ---
+      localStorage.setItem(COOLDOWN_KEY, Date.now().toString());
+      setCooldownTime(COOLDOWN_SECONDS);
+      // Start countdown interval immediately
+      const interval = setInterval(() => {
+        setCooldownTime((prevTime) => {
+          if (prevTime <= 1) {
+            clearInterval(interval);
+            localStorage.removeItem(COOLDOWN_KEY);
+            return 0;
+          }
+          return prevTime - 1;
+        });
+      }, 1000);
+      // --- END NEW ---
+
+    } catch (err : any) {
+      console.error('Failed to resend confirmation:', err);
+      setError(err.response.data.details.message); 
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div
       className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900 p-4"
-      dir={isRTL ? 'rtl' : 'ltr'} // --- NEW ---
+      dir={isRTL ? 'rtl' : 'ltr'}
     >
       <div className="w-full max-w-md">
+
+         <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-8"
+        >
+          <Link
+            to="/"
+            className={`inline-flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200`}
+          >
+            <ArrowLeft className={`h-4 w-4 ${isRTL ? 'rotate-180' : ''}`} />
+            <span>{t('pages.login.backToHome')}</span>
+          </Link>
+        </motion.div>
+
         {submitted ? (
+          // ... (Submitted success message - no change) ...
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 text-center">
             <Mail className="w-16 h-16 text-green-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
@@ -38,6 +134,7 @@ const ConfirmMail = () => {
             onSubmit={handleSubmit}
             className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 space-y-6"
           >
+            {/* ... (Form header - no change) ... */}
             <div className="text-center">
               <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 dark:bg-green-900/50 rounded-full mb-4">
                 <CheckCircle className="w-8 h-8 text-green-600 dark:text-green-400" />
@@ -50,6 +147,19 @@ const ConfirmMail = () => {
               </p>
             </div>
             
+            {/* ... (Error message block - no change) ... */}
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="flex items-center gap-2 rounded-lg border border-red-500 bg-red-50 dark:bg-red-900/20 p-3 text-sm text-red-600 dark:text-red-400"
+              >
+                <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                <span>{error}</span>
+              </motion.div>
+            )}
+
+            {/* ... (Email input - no change) ... */}
             <div className="relative">
               <label
                 htmlFor="email-confirm"
@@ -75,10 +185,21 @@ const ConfirmMail = () => {
 
             <button
               type="submit"
-              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
+              disabled={loading || cooldownTime > 0} // --- UPDATED ---
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Send className="w-5 h-5" />
-              {t('confirmMail.form.button')}
+              {/* --- UPDATED: Show correct button state --- */}
+              {loading ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : cooldownTime > 0 ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  {t('common.wait')} ({cooldownTime}s)
+                </>
+              ) : (
+                <Send className="w-5 h-5" />
+              )}
+              {!loading && cooldownTime <= 0 && t('confirmMail.form.button')}
             </button>
           </form>
         )}
