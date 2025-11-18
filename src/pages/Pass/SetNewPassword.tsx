@@ -80,7 +80,6 @@ const SetNewPassword = () => {
       return;
     }
 
-    // --- Get Params from URL ---
     const token = searchParams.get('token');
     const userId = searchParams.get('userId');
 
