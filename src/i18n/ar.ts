@@ -551,6 +551,7 @@ export const ar = {
       password: 'كلمة المرور',
       rememberMe: 'تذكرني',
       forgotPassword: 'نسيت كلمة المرور',
+      confirimEmail : "تأكيد  البريد الإلكتروني",
       signIn: 'تسجيل الدخول',
       signingIn: 'جاري تسجيل الدخول...',
       noAccount: 'ليس لديك حساب؟',

@@ -5,7 +5,6 @@ import { LanguageProvider } from './contexts/LanguageContext';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import ForgotPassword from './pages/ForgotPassword';
 import OnboardingRestaurant from './pages/OnboardingRestaurant';
 import OnboardingBranch from './pages/OnboardingBranch';
 import OnboardingComplete from './pages/OnboardingComplete';
@@ -28,10 +27,9 @@ const App: React.FC = () => {
             <Route path="/login" element={<Login />} />
              <Route path="/resetPassword" element={<ResetPassword />} />
             <Route path="/confirmMail" element={<ConfirmMail />} />
-            <Route path="/setNewPassword" element={<SetNewPassword />} />
+            <Route path="/setnewpassword" element={<SetNewPassword />} />
 
             <Route path="/register" element={<Register />} />
-            <Route path="/forgotpassword" element={<ForgotPassword />} />
             <Route path="/onboarding/restaurant" element={<OnboardingRestaurant />} />
             <Route path="/onboarding/branch" element={<OnboardingBranch />} />
             <Route path="/onboarding/complete" element={<OnboardingComplete />} />

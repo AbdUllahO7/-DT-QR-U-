@@ -118,6 +118,7 @@ export const tr = {
     password: 'Şifre',
     confirmPassword: 'Şifre Onayı',
     forgotPassword: 'Şifremi Unuttum',
+
     rememberMe: 'Beni Hatırla',
     alreadyHaveAccount: 'Zaten hesabınız var mı?',
     dontHaveAccount: 'Hesabınız yok mu?',
@@ -555,6 +556,7 @@ export const tr = {
       password: 'Şifre',
       rememberMe: 'Beni Hatırla',
       forgotPassword: 'Şifremi Unuttum',
+          confirimEmail : "E-posta Onayla",
       signIn: 'Giriş Yap',
       signingIn: 'Giriş Yapılıyor...',
       noAccount: 'Hesabınız yok mu?',

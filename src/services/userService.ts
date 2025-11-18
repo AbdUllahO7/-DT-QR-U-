@@ -3,7 +3,23 @@ import { logger } from '../utils/logger';
 import type { 
   ApiResponse 
 } from '../types/api';
-import { AssignBranchDto, ChangePasswordDto, CreateRoleDto, CreateRoleResponse, CreateUserDto, CreateUserResponse, GetAllUsersParams, Role, SearchUsersParams, UpdateUserDto, UpdateUserRolesDto, UserData, UserDetails, UserProfile } from '../types/users/users.type';
+import { 
+  AssignBranchDto, 
+  ChangePasswordDto, 
+  CreateRoleDto, 
+  CreateRoleResponse, 
+  CreateUserDto, 
+  CreateUserResponse, 
+  GetAllUsersParams, 
+  Role, 
+  SearchUsersParams, 
+  UpdateUserDto, 
+  UpdateUserRolesDto, 
+  UserData, 
+  UserDetails, 
+  UserProfile,
+  ResetPasswordDto // <-- Added this type for the new endpoint
+} from '../types/users/users.type';
 
 class UserService {
 
@@ -283,6 +299,75 @@ async assignBranchToUser(id: string, branchData: AssignBranchDto): Promise<ApiRe
       throw error;
     }
   }
+
+
+  async resendConfirmation(email: string): Promise<ApiResponse<any>> {
+    try {
+      logger.info(`🔍 resendConfirmation çağrılıyor: ${email}`, null, { prefix: 'UserService' });
+      
+      const response = await apiRequest<any>({
+        method: 'POST',
+        url: '/api/Users/resend-confirmation',
+        params: { email } // Sent as query parameter
+      });
+
+      logger.info('✅ resendConfirmation başarılı', response, { prefix: 'UserService' });
+      
+      return {
+        success: true,
+        data: response
+      };
+    } catch (error) {
+      logger.error('❌ resendConfirmation hatası', error, { prefix: 'UserService' });
+      throw error;
+    }
+  }
+
+  async sendResetPasswordEmail(email: string): Promise<ApiResponse<any>> {
+    try {
+      logger.info(`🔍 sendResetPasswordEmail çağrılıyor: ${email}`, null, { prefix: 'UserService' });
+      
+      const response = await apiRequest<any>({
+        method: 'GET',
+        url: '/api/Users/SendResetPasswordEmail',
+        params: { email } // Sent as query parameter
+      });
+
+      logger.info('✅ sendResetPasswordEmail başarılı', response, { prefix: 'UserService' });
+      
+      return {
+        success: true,
+        data: response
+      };
+    } catch (error) {
+      logger.error('❌ sendResetPasswordEmail hatası', error, { prefix: 'UserService' });
+      throw error;
+    }
+  }
+
+
+  async resetPassword(payload: ResetPasswordDto): Promise<ApiResponse<any>> {
+      try {
+        logger.info('🔍 resetPassword çağrılıyor...', 'payload (hidden)', { prefix: 'UserService' });
+        
+        const response = await apiRequest<any>({
+          method: 'POST', // <--- MAKE SURE THIS IS POST, NOT PUT OR GET
+          url: '/api/Users/reset-password',
+          data: payload
+        });
+
+        logger.info('✅ resetPassword başarılı', response, { prefix: 'UserService' });
+        
+        return {
+          success: true,
+          data: response
+        };
+      } catch (error) {
+        logger.error('❌ resetPassword hatası', error, { prefix: 'UserService' });
+        throw error;
+      }
+    }
+
 
   async lockUser(id: string): Promise<ApiResponse<any>> {
     try {
