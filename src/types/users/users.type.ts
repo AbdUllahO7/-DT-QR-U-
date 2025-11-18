@@ -15,6 +15,14 @@ export interface UpdateUserRolesDto {
   roleIds: string[];
 }
 
+
+export interface ResetPasswordDto {
+  userId: string,
+  token: string,
+  newPassword: string,
+  newPasswordConfirmation: string
+}
+
 export interface UserData {
   id: string;
   userName: string;

@@ -555,6 +555,8 @@ export const en = {
       password: 'Password',
       rememberMe: 'Remember Me',
       forgotPassword: 'Forgot Password',
+          confirimEmail : "Confirm Email",
+
       signIn: 'Sign In',
       signingIn: 'Signing In...',
       noAccount: 'Don\'t have an account?',

@@ -374,10 +374,18 @@ const Login: React.FC = () => {
 
               <div className="text-sm">
                 <Link
-                  to="/forgotpassword"
+                  to="/resetPassword"
                   className="font-medium text-primary-600 dark:text-primary-400 hover:underline"
                 >
                   {t('pages.login.forgotPassword')}
+                </Link>
+              </div>
+               <div className="text-sm">
+                <Link
+                  to="/confirmMail"
+                  className="font-medium text-primary-600 dark:text-primary-400 hover:underline"
+                >
+                  {t('pages.login.confirimEmail')}
                 </Link>
               </div>
             </div>
