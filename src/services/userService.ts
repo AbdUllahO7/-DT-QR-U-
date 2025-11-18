@@ -346,14 +346,18 @@ async assignBranchToUser(id: string, branchData: AssignBranchDto): Promise<ApiRe
   }
 
 
+// In UserService.ts
+
   async resetPassword(payload: ResetPasswordDto): Promise<ApiResponse<any>> {
       try {
         logger.info('🔍 resetPassword çağrılıyor...', 'payload (hidden)', { prefix: 'UserService' });
         
         const response = await apiRequest<any>({
-          method: 'POST', // <--- MAKE SURE THIS IS POST, NOT PUT OR GET
-          url: '/api/Users/reset-password',
-          data: payload
+          method: 'PUT',  // Matches [HttpPut]
+          url: '/api/Users/resetpassword', // Matches ("resetpassword")
+          data: payload,
+          // IMPORTANT: If your apiRequest allows it, disable authentication headers
+          headers: { Authorization: '' } 
         });
 
         logger.info('✅ resetPassword başarılı', response, { prefix: 'UserService' });
