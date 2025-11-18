@@ -30,11 +30,14 @@ const SetNewPassword = () => {
   
   const { t, isRTL } = useLanguage();
   const [searchParams] = useSearchParams();
-  // const navigate = useNavigate(); // Not used currently, but good to have
 
-  // --- Cooldown Timer Logic ---
   useEffect(() => {
-    let interval: number; // FIXED: Changed from NodeJS.Timeout to number for browser compatibility
+    window.scrollTo(0, 0);
+  }, []);
+
+
+  useEffect(() => {
+    let interval: number; 
 
     const checkCooldown = () => {
       const lastSubmitTime = localStorage.getItem(COOLDOWN_KEY);
@@ -70,7 +73,6 @@ const SetNewPassword = () => {
 
     if (loading || cooldownTime > 0) return;
 
-    // --- Validation ---
     if (newPassword.length < 8) {
       setError(t('setNewPassword.form.errorLength'));
       return;
@@ -100,7 +102,6 @@ const SetNewPassword = () => {
       
       setSubmitted(true);
       
-      // --- Set cooldown on success ---
       localStorage.setItem(COOLDOWN_KEY, Date.now().toString());
       setCooldownTime(COOLDOWN_SECONDS);
       

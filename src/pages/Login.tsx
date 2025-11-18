@@ -30,17 +30,18 @@ const Login: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Token kontrolü
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     const tokenExpiry = localStorage.getItem('tokenExpiry');
 
     if (token) {
-      // Token'ın geçerlilik süresini kontrol et
       if (tokenExpiry && new Date(tokenExpiry) > new Date()) {
         navigate('/dashboard');
       } else {
-        // Token süresi dolmuşsa token'ı temizle
         localStorage.removeItem('token');
         localStorage.removeItem('tokenExpiry');
         localStorage.removeItem('userId');
@@ -54,7 +55,6 @@ const Login: React.FC = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-    // Clear error when user starts typing
     if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({
         ...prev,
@@ -92,7 +92,6 @@ const Login: React.FC = () => {
     setIsSubmitting(true);
     setErrors({});
 
-    // Network bağlantısını kontrol et
     if (!isOnline) {
       logger.warn('Network bağlantısı yok, bağlantı test ediliyor...');
       const isConnected = await testConnection();
@@ -110,21 +109,17 @@ const Login: React.FC = () => {
       const response = await authService.login(formData);
       logger.info('Login response received', { response });
       
-      // AccessToken kontrolü - response direkt LoginResponse formatında geliyor
       if (response.accessToken) {
-        // JWT'den userId çıkarma
         const tokenParts = response.accessToken.split('.');
         const payload = JSON.parse(atob(tokenParts[1]));
         const userId = payload.user_id;
 
         logger.info('Login successful, saving token and redirecting');
         
-        // Token ve kullanıcı bilgilerini kaydet
         localStorage.setItem('token', response.accessToken);
         localStorage.setItem('userId', userId);
         localStorage.setItem('tokenExpiry', response.expiresAt);
         
-        // Onboarding sürecinde mi kontrol et
         const onboardingUserId = localStorage.getItem('onboarding_userId');
         if (onboardingUserId) {
           logger.info('Onboarding süreci devam ediyor, restaurant onboarding sayfasına yönlendiriliyor');
@@ -147,33 +142,27 @@ const Login: React.FC = () => {
     } catch (error: any) {
       logError(error, 'Login error');
 
-      // Kullanıcı dostu hata mesajını al
       const userFriendlyMessage = getUserFriendlyErrorMessage(error);
       setErrors({
         general: userFriendlyMessage
       });
       setIsSubmitting(false);
       
-      // Başarılı yanıt ama hata mesajı varsa
       if (error.message === 'Sunucudan geçersiz yanıt alındı' && error.response?.status === 200) {
         try {
           logger.info('Trying to parse successful response with error', { data: error.response?.data });
-          // API başarılı yanıt vermiş olabilir
           const accessToken = error.response?.data?.accessToken;
           if (accessToken) {
-            // JWT'den userId çıkarma
             const tokenParts = accessToken.split('.');
             const payload = JSON.parse(atob(tokenParts[1]));
             const userId = payload.user_id;
             
             logger.info('Found access token in error response, saving and redirecting');
             
-            // Token ve kullanıcı bilgilerini kaydet
             localStorage.setItem('token', accessToken);
             localStorage.setItem('userId', userId);
             localStorage.setItem('tokenExpiry', error.response.data.expiresAt);
             
-            // Onboarding sürecinde mi kontrol et
             const onboardingUserId = localStorage.getItem('onboarding_userId');
             if (onboardingUserId) {
               logger.info('Onboarding süreci devam ediyor, restaurant onboarding sayfasına yönlendiriliyor');
@@ -181,7 +170,6 @@ const Login: React.FC = () => {
               return;
             }
             
-            // Kullanıcı tipini kontrol et
             if (isBranchOnlyUser()) {
               logger.info('Branch-only user detected, redirecting to dashboard');
               navigate('/dashboard');
@@ -197,7 +185,6 @@ const Login: React.FC = () => {
       }
       
       if (error.status === 400) {
-        // Validation errors
         if (error.errors) {
           const validationErrors: typeof errors = {};
           Object.entries(error.errors).forEach(([key, value]) => {
@@ -228,12 +215,11 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
-        {/* Back Button */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-8"
+          className="mb-8 pt-10"
         >
           <Link
             to="/"
@@ -244,7 +230,6 @@ const Login: React.FC = () => {
           </Link>
         </motion.div>
 
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -259,7 +244,6 @@ const Login: React.FC = () => {
           </p>
         </motion.div>
 
-        {/* Form */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
