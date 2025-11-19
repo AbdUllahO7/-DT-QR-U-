@@ -3747,6 +3747,8 @@ pricing: {
       specialInstructions: 'تعليمات خاصة',
       specialInstructionsPlaceholder: 'أي تعليمات خاصة لطلبك...',
       orderSummary: 'ملخص الطلب',
+            notes: "ملاحظات الطلب",
+      notesPlaceholder: "هل لديك أي طلبات خاصة؟ (مثلًا: لا بصل)",
       subtotal: 'المجموع الفرعي',
       serviceCharge: 'رسوم الخدمة',
       minimumRequired: 'الحد الأدنى المطلوب',

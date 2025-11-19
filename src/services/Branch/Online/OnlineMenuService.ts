@@ -73,7 +73,7 @@ export interface BasketItem {
   addonNote: string | null;
   minQuantity: number | null;
   maxQuantity: number | null;
-  
+  customerPhone?: string;
   // Computed/mapped fields for compatibility
   productImageUrl?: string;
   unitPrice?: number;
@@ -98,6 +98,7 @@ export interface BasketResponse {
   menuTable: any | null;
   branchId: number;
   branch: any | null;
+  customerPhone:string,
   hasUnconfirmedPriceChange: boolean;
   lastPriceChangeAt: string | null;
   totalPriceDifference: number | null;

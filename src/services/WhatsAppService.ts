@@ -1,43 +1,45 @@
 // services/WhatsAppService.ts
 
-interface CartItem {
-  basketItemId?: number
-  branchProductId: number
-  productName: string
-  price: number
-  quantity: number
-  productImageUrl?: string
-  addons?: CartItemAddon[]
-  totalItemPrice: number
-}
-
 interface CartItemAddon {
-  branchProductAddonId: number
+  branchProductAddonId?: number
   addonName: string
   price: number
   quantity: number
 }
 
-interface OrderForm {
-  customerName: string
-  notes: string
-  orderTypeId: number
-  tableId?: number
-  deliveryAddress?: string
-  customerPhone?: string
+interface CartItem {
+  basketItemId?: number
+  branchProductId?: number
+  productName: string
+  price: number
+  quantity: number
+  productImageUrl?: string
+  addons?: CartItemAddon[]
+  totalItemPrice?: number // Optional, sometimes calculated
 }
 
-interface WhatsAppOrderData {
+// Updated to include ALL fields sent from OnlineCartSidebar
+export interface WhatsAppOrderData {
   orderTag: string
+  restaurantName?: string
   customerName: string
+  customerPhone?: string    // <--- Added
+  paymentMethod?: string    // <--- Added
+  
   cart: CartItem[]
+  
+  // Financials
+  subtotal?: number         // <--- Added
+  tax?: number              // <--- Added
+  serviceCharge?: number
   totalPrice: number
+  
+  // Meta
   orderType: string
   notes?: string
-  tableId?: number
+  tableNumber?: string      // Changed from tableId to match Sidebar
   deliveryAddress?: string
   estimatedTime?: number
-  serviceCharge?: number
 }
 
 export class WhatsAppService {
@@ -46,24 +48,28 @@ export class WhatsAppService {
    * Format cart items for WhatsApp message
    */
   private static formatCartItems(cart: CartItem[]): string {
-    let message = "*🛒 ORDER DETAILS:*\n\n"
+    let message = "*🛒 ORDER DETAILS:*"
     
     cart.forEach((item, index) => {
-      // Main product line
-      message += `${index + 1}. *${item.productName}* x${item.quantity}\n`
-      message += `   💰 ${item.price.toFixed(2)} TRY each\n`
+      // Main product line: 1. Burger x1
+      message += `\n\n${index + 1}. *${item.productName}* x${item.quantity}`
+      
+      // Unit Price
+      message += `\n   💰 ${item.price.toFixed(2)} TRY each`
       
       // Add addons if any
       if (item.addons && item.addons.length > 0) {
-        message += "   📎 *Add-ons:*\n"
         item.addons.forEach(addon => {
-          message += `      • ${addon.addonName} x${addon.quantity} (+${addon.price.toFixed(2)} TRY each)\n`
+          message += `\n   ➕ ${addon.addonName} (${addon.quantity}x) - ${addon.price.toFixed(2)} TRY`
         })
       }
       
-      // Item total
-      const itemTotal = item.totalItemPrice * item.quantity
-      message += `   💵 *Item Total: ${itemTotal.toFixed(2)} TRY*\n\n`
+      // Item total (Use provided total or calculate)
+      const finalItemPrice = item.totalItemPrice 
+        ? item.totalItemPrice 
+        : (item.price * item.quantity); // Fallback calculation
+        
+      message += `\n   👉 *Item Total: ${finalItemPrice.toFixed(2)} TRY*`
     })
     
     return message
@@ -73,71 +79,102 @@ export class WhatsAppService {
    * Format order summary for WhatsApp
    */
   private static formatOrderSummary(data: WhatsAppOrderData): string {
-    let message = `*🎯 NEW ORDER RECEIVED!*\n\n`
+    const date = new Date().toLocaleString('tr-TR');
+    let message = `*🚨 NEW ORDER RECEIVED!*\n`
     
-    // Order info
-    message += `*📋 Order Tag:* ${data.orderTag}\n`
-    message += `*👤 Customer:* ${data.customerName}\n`
-    message += `*🔄 Order Type:* ${data.orderType}\n`
+    // 1. Header Info
+    message += `\n*🏷 Order Tag:* ${data.orderTag}`
+    message += `\n*👤 Customer:* ${data.customerName}`
     
-    if (data.tableId) {
-      message += `*🪑 Table:* ${data.tableId}\n`
+    if (data.customerPhone) {
+      message += `\n*📞 Phone:* ${data.customerPhone}`
+    }
+    
+    message += `\n*🚚 Order Type:* ${data.orderType}`
+
+    if (data.paymentMethod) {
+      message += `\n*💳 Payment Method:* ${data.paymentMethod}`
+    }
+    
+    if (data.tableNumber) {
+      message += `\n*🍽 Table:* ${data.tableNumber}`
     }
     
     if (data.deliveryAddress) {
-      message += `*📍 Delivery Address:* ${data.deliveryAddress}\n`
+      message += `\n*📍 Delivery Address:* ${data.deliveryAddress}`
     }
     
     if (data.estimatedTime) {
-      message += `*⏱️ Estimated Time:* ${data.estimatedTime} minutes\n`
+      message += `\n*⏳ Estimated Time:* ${data.estimatedTime} minutes`
     }
     
     message += `\n`
     
-    // Cart details
+    // 2. Cart Details
     message += this.formatCartItems(data.cart)
     
-    // Pricing summary
-    const subtotal = data.totalPrice - (data.serviceCharge || 0)
-    message += `*💰 PRICE BREAKDOWN:*\n`
-    message += `Subtotal: ${subtotal.toFixed(2)} TRY\n`
+    message += `\n\n`
+    
+    // 3. Price Breakdown
+    message += `*💰 PRICE BREAKDOWN:*`
+    
+    if (data.subtotal !== undefined) {
+      message += `\nSubtotal: ${data.subtotal.toFixed(2)} TRY`
+    }
+    
+    if (data.tax && data.tax > 0) {
+      message += `\nTax: ${data.tax.toFixed(2)} TRY`
+    }
     
     if (data.serviceCharge && data.serviceCharge > 0) {
-      message += `Service Charge: ${data.serviceCharge.toFixed(2)} TRY\n`
+      message += `\nService Charge: ${data.serviceCharge.toFixed(2)} TRY`
     }
     
-    message += `*TOTAL: ${data.totalPrice.toFixed(2)} TRY*\n\n`
+    message += `\n*TOTAL: ${data.totalPrice.toFixed(2)} TRY*`
     
-    // Notes
+    // 4. Notes
     if (data.notes && data.notes.trim()) {
-      message += `*📝 Special Notes:*\n${data.notes}\n\n`
+      message += `\n\n*📝 Special Notes:*\n${data.notes}`
     }
     
-    // Footer
-    message += `*🕐 Order Time:* ${new Date().toLocaleString('tr-TR')}\n`
-    message += `\n_This order was automatically sent from your QR Menu system._`
+    // 5. Footer
+    message += `\n\n*📅 Order Time:* ${date}`
+    message += `\n\n_This order was automatically sent from your QR Menu system._`
     
     return message
   }
 
   /**
    * Send order to WhatsApp
+   * Handles Mobile vs Desktop URLs for better UX
    */
   static async sendOrderToWhatsApp(
-    whatsappNumber: string, 
+    phoneNumber: string, 
     orderData: WhatsAppOrderData
   ): Promise<void> {
     try {
+      const formattedPhone = this.formatWhatsAppNumber(phoneNumber);
+      
       // Format the message
       const message = this.formatOrderSummary(orderData)
       
       // Encode the message for URL
       const encodedMessage = encodeURIComponent(message)
       
-      // Create WhatsApp URL
-      const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`
+      // Detect Device
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       
-      // Open WhatsApp in new window/tab
+      let whatsappUrl = '';
+      
+      if (isMobile) {
+        // Use App Scheme for Mobile (Opens App directly)
+        whatsappUrl = `whatsapp://send?phone=${formattedPhone}&text=${encodedMessage}`;
+      } else {
+        // Use Web URL for Desktop
+        whatsappUrl = `https://web.whatsapp.com/send?phone=${formattedPhone}&text=${encodedMessage}`;
+      }
+      
+      // Open WhatsApp
       window.open(whatsappUrl, '_blank')
       
     } catch (error) {
@@ -150,7 +187,6 @@ export class WhatsAppService {
    * Check if WhatsApp orders are enabled
    */
   static isWhatsAppEnabled(preferences: any): boolean {
-
     return preferences?.useWhatsappForOrders === true && 
            preferences?.whatsAppPhoneNumber && 
            preferences.whatsAppPhoneNumber.trim().length > 0
@@ -159,7 +195,9 @@ export class WhatsAppService {
   /**
    * Get formatted WhatsApp number (remove non-digits and ensure international format)
    */
-  static formatWhatsAppNumber(phoneNumber: string): string {
+  static formatWhatsAppNumber(phoneNumber: string | undefined): string {
+    if (!phoneNumber) return '';
+    
     // Remove all non-digit characters
     const digitsOnly = phoneNumber.replace(/\D/g, '')
     
@@ -169,38 +207,11 @@ export class WhatsAppService {
     }
     
     // If it doesn't start with country code, add Turkey code
+    // Basic check: if length is 10, assume it's a local number without country code
     if (!digitsOnly.startsWith('90') && digitsOnly.length === 10) {
       return '90' + digitsOnly
     }
     
     return digitsOnly
-  }
-
-  /**
-   * Create a simple text-only version for SMS or other messaging
-   */
-  static formatSimpleOrderText(orderData: WhatsAppOrderData): string {
-    let message = `NEW ORDER: ${orderData.orderTag}\n`
-    message += `Customer: ${orderData.customerName}\n`
-    message += `Type: ${orderData.orderType}\n\n`
-    
-    message += `ITEMS:\n`
-    orderData.cart.forEach((item, index) => {
-      message += `${index + 1}. ${item.productName} x${item.quantity} - ${(item.totalItemPrice * item.quantity).toFixed(2)} TRY\n`
-      
-      if (item.addons && item.addons.length > 0) {
-        item.addons.forEach(addon => {
-          message += `   + ${addon.addonName} x${addon.quantity}\n`
-        })
-      }
-    })
-    
-    message += `\nTOTAL: ${orderData.totalPrice.toFixed(2)} TRY\n`
-    
-    if (orderData.notes) {
-      message += `Notes: ${orderData.notes}\n`
-    }
-    
-    return message
   }
 }
