@@ -13,7 +13,6 @@ import WhatsAppConfirmationModal from '../Menu/CartSideBar/WhatsAppConfirmationM
 import { WhatsAppService } from '../../../../services/WhatsAppService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import ToastComponent from '../Menu/CartSideBar/ToastComponenet';
-// --- ADDED IMPORTS ---
 import { TrackedOrder } from '../../../../types/menu/carSideBarTypes'; // Assuming path
 import { UpdatableOrder } from '../../../../types/Orders/type'; // Assuming path
 import OrdersTab from '../Menu/CartSideBar/OrdersTab'; // Assuming path
@@ -50,6 +49,9 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   
   // --- TAB MANAGEMENT ---
   const [activeTab, setActiveTab] = useState<ActiveTab>('cart');
+
+
+
   
   // Cart States
   const [updatingItemId, setUpdatingItemId] = useState<number | null>(null);
@@ -59,7 +61,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const [addingAddonToItem, setAddingAddonToItem] = useState<number | null>(null);
   
   // Checkout Step Management
-  const [cartStep, setCartStep] = useState<CartStep>('cart'); // <-- Renamed from currentStep
+  const [cartStep, setCartStep] = useState<CartStep>('cart'); 
   
   // Order Type States
   const [orderTypes, setOrderTypes] = useState<OrderType[]>([]);
@@ -74,18 +76,15 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const [customerPhone, setCustomerPhone] = useState<string>('');
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'credit_card' | 'online' | ''>('');
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  
+  const [orderNotes, setOrderNotes] = useState<string>('');
   // Checkout States
-  const [showPriceChangeModal, setShowPriceChangeModal] = useState<boolean>(false);
   const [priceChangeData, setPriceChangeData] = useState<any>(null);
-  const [confirmingPrice, setConfirmingPrice] = useState<boolean>(false);
   const [submittingOrder, setSubmittingOrder] = useState<boolean>(false);
   const [showWhatsAppConfirmation, setShowWhatsAppConfirmation] = useState<boolean>(false);
   const [pendingWhatsAppData, setPendingWhatsAppData] = useState<any>(null);
   const [whatsappSending, setWhatsappSending] = useState<boolean>(false);
   const [createdOrderTag, setCreatedOrderTag] = useState<string | null>(null);
 
-  // --- NEW ORDER TRACKING STATES ---
   const [trackedOrders, setTrackedOrders] = useState<TrackedOrder[]>([]);
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [updatableOrders, setUpdatableOrders] = useState<UpdatableOrder[]>([]);
@@ -122,6 +121,9 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const acceptCash = restaurantPreferences?.acceptCash;
   const acceptCreditCard = restaurantPreferences?.acceptCreditCard;
   const acceptOnlinePayment = restaurantPreferences?.acceptOnlinePayment;
+  // Available payment methods
+  const availablePaymentMethods: { id: any; name: any; icon: any; description: any; }[] = [];
+
 
   // ADDED: WhatsApp Service function - same as useCartHandlers
   const sendOrderToWhatsApp = async (whatsappData: any) => {
@@ -280,7 +282,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     }
   };
 
-  // --- END OF NEW TRACKING LOGIC ---
 
 
   const resetForm = () => {
@@ -289,6 +290,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     setDeliveryAddress('');
     setCustomerPhone('');
     setPaymentMethod('');
+    setOrderNotes('');
     setValidationErrors({});
     setSelectedOrderType(null);
     setPendingWhatsAppData(null);
@@ -520,7 +522,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         trackingInfo: {
           orderTag: order.orderTag || '',
           orderId: order.orderId,
-         orderStatus: order.status, 
+          orderStatus: order.status, 
           totalPrice: order.totalPrice,
           orderTypeName: selectedOrderType?.name || '',
           customerName: order.customerName || customerName || '',
@@ -567,7 +569,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     return Object.keys(errors).length === 0;
   };
 
-  // UPDATED: handleSubmitOrder with WhatsApp integration matching useCartHandlers
   const handleSubmitOrder = async () => {
     if (!validateForm()) return;
 
@@ -610,10 +611,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       await onBasketUpdate();
       
       addToast(t('menu.cart.order_created_success') || 'Order placed successfully! 🎉', 'success', 5000);
-      
-      // Calculate service charge
-      const serviceChargeAmount = selectedOrderType!.serviceCharge || 0;
-      
+
       // Create WhatsApp preferences object matching useCartHandlers format
       const whatsappPreferences = {
         useWhatsappForOrders: useWhatsappForOrders,
@@ -621,45 +619,60 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       };
       
       const shouldShowWhatsApp = order.orderTag && WhatsAppService.isWhatsAppEnabled(whatsappPreferences);
+      const serviceChargeAmount = selectedOrderType!.serviceCharge || 0;
+      const finalTotal = total + serviceChargeAmount;
+
+      // 3. Get Payment Method Name (for display)
+      const selectedPaymentMethodName = availablePaymentMethods.find(m => m.id === paymentMethod)?.name || paymentMethod;
+
       
       if (shouldShowWhatsApp) {
         // Prepare WhatsApp data matching useCartHandlers format
-        const whatsappData = {
+     const whatsappData = {
           orderTag: order.orderTag,
+          restaurantName: restaurantName,
           customerName: customerName || 'Customer',
+          customerPhone: customerPhone,
+          tableNumber: tableNumber || undefined,
+          deliveryAddress: deliveryAddress || undefined,
+          
+          // Order Details
+          orderType: selectedOrderType!.name,
+          paymentMethod: selectedPaymentMethodName,
+          notes: orderNotes,
+          estimatedTime: selectedOrderType!.estimatedMinutes,
+
+          // Cart Items with detailed addons
           cart: items.map(item => ({
             productName: item.productName,
             price: item.price,
             quantity: item.quantity,
+            totalItemPrice: item.totalPrice,
             addons: (item.addons || item.addonItems || []).map((addon: any) => ({
               addonName: addon.addonName || addon.productName,
               price: addon.specialPrice || addon.price,
               quantity: addon.quantity
             }))
           })),
-          totalPrice: total,
-          orderType: selectedOrderType!.name,
-          notes: '',
-          tableNumber: tableNumber || undefined,
-          deliveryAddress: deliveryAddress || undefined,
-          estimatedTime: selectedOrderType!.estimatedMinutes,
-          serviceCharge: serviceChargeAmount
+
+          // Financials
+          subtotal: subtotal,
+          tax: tax,
+          serviceCharge: serviceChargeAmount,
+          totalPrice: finalTotal, // Grand Total
         };
-        
+
+        console.log("Full WhatsApp Data:", whatsappData);
         setPendingWhatsAppData(whatsappData);
         setShowWhatsAppConfirmation(true);
         setSubmittingOrder(false);
         
-        // Exit early - let WhatsApp handlers handle cleanup
         return;
       } else {
-        // --- UPDATED ---
-        // No WhatsApp, just clean up and switch to orders tab
         setTimeout(() => {
           resetForm();
-          setCartStep('cart'); // Reset cart step
-          setActiveTab('orders'); // Switch to orders tab
-          // onClose(); // Don't close, show the orders tab
+          setCartStep('cart'); 
+          setActiveTab('orders'); 
         }, 1000);
       }
     } catch (err: any) {
@@ -720,8 +733,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     }, 500);
   };
 
-  // Available payment methods
-  const availablePaymentMethods = [];
+
   if (acceptCash) {
     availablePaymentMethods.push({
       id: 'cash',
@@ -1333,7 +1345,21 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                           </p>
                         )}
                       </div>
+                      
                     )}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                        <ClipboardList className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                        {t('order.form.notes') || 'Order Notes'}
+                      </label>
+                      <textarea
+                        value={orderNotes}
+                        onChange={(e) => setOrderNotes(e.target.value)}
+                        rows={2}
+                        className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all resize-none"
+                        placeholder={t('order.form.notesPlaceholder') || 'Any special requests? (e.g. No onions)'}
+                      />
+                    </div>
 
                     {/* Payment Method Selection */}
                     {availablePaymentMethods.length > 0 && (

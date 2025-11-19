@@ -3747,6 +3747,8 @@ export const en = {
       specialInstructions: 'Special Instructions',
       specialInstructionsPlaceholder: 'Any special instructions for your order...',
       orderSummary: 'Order Summary',
+      notes:"Order Notes",
+      notesPlaceholder:"Any special requests? (e.g. No onions)",
       subtotal: 'Subtotal',
       serviceCharge: 'Service Charge',
       minimumRequired: 'Minimum required',

@@ -23,6 +23,10 @@ const ResetPassword = () => {
   const [cooldownTime, setCooldownTime] = useState(0);
   const { t, isRTL } = useLanguage();
 
+      useEffect(() => {
+        window.scrollTo(0, 0);
+      }, []);
+
   useEffect(() => {
     let interval: number;
 

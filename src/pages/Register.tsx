@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 // import { Link, useNavigate } from 'react-router-dom'; // Mocked below
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, AlertCircle, User, Mail, Phone, Lock, ArrowLeft } from 'lucide-react';
@@ -43,9 +43,12 @@ const Register: React.FC = () => {
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+useEffect(() => {
+  window.scrollTo(0, 0);
+}, []);
+
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value, type } = e.target;
-    // Handle checkbox
     const isCheckbox = type === 'checkbox';
     const checked = (e.target as HTMLInputElement).checked;
 
@@ -53,6 +56,9 @@ const Register: React.FC = () => {
       ...prev,
       [name]: isCheckbox ? checked : value
     }));
+
+
+
     
     // Clear error when user starts typing
     if (errors[name as keyof typeof errors]) {
@@ -303,7 +309,7 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
           initial={{ opacity: 0, x: isRTL ? 20 : -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-8"
+          className="mb-8 pt-10"
         >
           <Link
             to="/"

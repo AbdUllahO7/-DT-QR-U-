@@ -3749,6 +3749,8 @@ export const tr = {
       phoneNumberPlaceholder: 'Telefon numarasını girin',
       specialInstructionsPlaceholder: 'Siparişiniz için özel talimatlar...',
       orderSummary: 'Sipariş Özeti',
+      notes: "Sipariş Notları",
+      notesPlaceholder: "Özel bir isteğiniz var mı? (Örneğin soğan yok)",
       subtotal: 'Ara Toplam',
       serviceCharge: 'Servis Ücreti',
       minimumRequired: 'Minimum gerekli',
