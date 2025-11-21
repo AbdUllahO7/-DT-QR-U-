@@ -1,10 +1,35 @@
-import React from 'react';
-import { QrCode, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { QrCode, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, MessageCircle, PhoneCall } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 const Footer: React.FC = () => {
   const { t, isRTL } = useLanguage();
+  const [showPhoneMenu, setShowPhoneMenu] = useState(false);
+  const phoneMenuRef = useRef<HTMLDivElement>(null);
   const currentYear = new Date().getFullYear();
+
+  // --- Data Helpers ---
+  
+  // 1. Phone
+  const rawPhoneNumber = t('footer.contact.phone');
+  const cleanPhoneNumber = rawPhoneNumber.replace(/[^\d+]/g, '');
+  
+  // 2. Address & Map Link
+  const address = t('footer.contact.address');
+  // Encodes the address to work safely in a URL
+  const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+
+  // Close phone menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (phoneMenuRef.current && !phoneMenuRef.current.contains(event.target as Node)) {
+        setShowPhoneMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const footerLinks = {
     product: [
@@ -67,17 +92,61 @@ const Footer: React.FC = () => {
 
             {/* Contact Info */}
             <div className="space-y-3">
-              <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
-                <Phone className="h-4 w-4 text-primary-400" />
-                <span className="text-gray-400">{t('footer.contact.phone')}</span>
+              {/* Phone Interaction */}
+              <div className="relative" ref={phoneMenuRef}>
+                <button 
+                  onClick={() => setShowPhoneMenu(!showPhoneMenu)}
+                  className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} group hover:text-primary-400 transition-colors duration-200`}
+                >
+                  <Phone className="h-4 w-4 text-primary-400 group-hover:text-primary-300" />
+                  <span dir='ltr' className="text-gray-400 group-hover:text-primary-400">{rawPhoneNumber}</span>
+                </button>
+
+                {/* Phone Options Dropdown (Opens Upwards) */}
+                {showPhoneMenu && (
+                  <div className={`absolute bottom-full mb-2 ${isRTL ? 'right-0' : 'left-0'} w-48 bg-gray-800 rounded-lg shadow-xl border border-gray-700 overflow-hidden z-50`}>
+                    <a 
+                      href={`tel:${cleanPhoneNumber}`}
+                      className="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors space-x-3 rtl:space-x-reverse"
+                    >
+                      <PhoneCall className="h-4 w-4" />
+                      <span>Call</span>
+                    </a>
+                    <a 
+                      href={`https://wa.me/${cleanPhoneNumber}`}
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors space-x-3 rtl:space-x-reverse"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      <span>WhatsApp</span>
+                    </a>
+                  </div>
+                )}
               </div>
-              <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
-                <Mail className="h-4 w-4 text-primary-400" />
-                <span className="text-gray-400">{t('footer.contact.email')}</span>
+
+              {/* Email Link */}
+              <div>
+                <a 
+                  href={`mailto:${t('footer.contact.email')}`}
+                  className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} group hover:text-primary-400 transition-colors duration-200`}
+                >
+                  <Mail className="h-4 w-4 text-primary-400 group-hover:text-primary-300" />
+                  <span className="text-gray-400 group-hover:text-primary-400">{t('footer.contact.email')}</span>
+                </a>
               </div>
-              <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
-                <MapPin className="h-4 w-4 text-primary-400" />
-                <span className="text-gray-400">{t('footer.contact.address')}</span>
+
+              {/* Address Link (Click to Map) */}
+              <div>
+                <a 
+                  href={mapLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} group hover:text-primary-400 transition-colors duration-200`}
+                >
+                  <MapPin className="h-4 w-4 text-primary-400 group-hover:text-primary-300" />
+                  <span className="text-gray-400 group-hover:text-primary-400">{address}</span>
+                </a>
               </div>
             </div>
 
@@ -164,32 +233,6 @@ const Footer: React.FC = () => {
         </div>
       </div>
 
-      {/* Newsletter Section */}
-      <div className="bg-gray-800 border-t border-gray-700">
-        <div className="container-max py-8">
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-            <div>
-              <h3 className="text-xl font-semibold mb-2">{t('footer.newsletter.title')}</h3>
-              <p className="text-gray-400">{t('footer.newsletter.subtitle')}</p>
-            </div>
-            <div className="flex w-full md:w-auto">
-              <input
-                type="email"
-                placeholder={t('footer.newsletter.placeholder')}
-                className={`flex-1 md:w-80 px-4 py-3 bg-gray-700 border border-gray-600 ${
-                  isRTL ? 'rounded-r-lg' : 'rounded-l-lg'
-                } focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500`}
-              />
-              <button className={`px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white ${
-                isRTL ? 'rounded-l-lg' : 'rounded-r-lg'
-              } transition-colors duration-300`}>
-                {t('footer.newsletter.button')}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Bottom Footer */}
       <div className="bg-gray-950 border-t border-gray-800">
         <div className="container-max py-6">
@@ -207,4 +250,4 @@ const Footer: React.FC = () => {
   );
 };
 
-export default Footer; 
+export default Footer;

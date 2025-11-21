@@ -8,6 +8,7 @@ import { ManagementInfoPanel } from './ManagementInfoPanel';
 import { BranchesTab } from './BranchesTab';
 import { DeletedTab } from './DeletedTab';
 import { LoadingOverlay } from './LoadingOverlay';
+import { useLanguage } from '../../../../contexts/LanguageContext';
 
 
 
@@ -21,7 +22,7 @@ const RestaurantManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ActiveTab>('branches');
   const [loading, setLoading] = useState<boolean>(false);
   const [notification, setNotification] = useState<NotificationState | null>(null);
-
+  const {t} = useLanguage()
   // Data state
   const [branches, setBranches] = useState<RestaurantBranchDropdownItem[]>([]);
   const [managementInfo, setManagementInfo] = useState<RestaurantManagementInfo | null>(null);
@@ -99,14 +100,14 @@ const RestaurantManagement: React.FC = () => {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-            Restaurant Management
+            {t('dashboard.restaurant.title')}
           </h1>
           <button
             onClick={fetchData}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
-            Refresh
+            {t('dashboard.restaurant.refresh')}
           </button>
         </div>
 

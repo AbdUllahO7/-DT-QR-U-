@@ -4,7 +4,6 @@ import {
   Building2,
   BarChart3,
   Store,
-  FileText,
   ShoppingCart,
   Users,
   Settings,
@@ -12,11 +11,11 @@ import {
   X,
   FolderPlus,
   Type,
-  ImportIcon,
   Settings2,
   DollarSign,
+  Table,
+  HardHat,
 } from 'lucide-react';
-import { useTheme } from '../../../contexts/ThemeContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { SidebarProps } from '../../../types/BranchManagement/type';
 
@@ -92,7 +91,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             </h2>
           
 
-            {/* Branch Selector - Only for non-branch-only users */}
          
           </div>
 
@@ -143,7 +141,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               } ${isRTL ? 'text-right' : 'text-left'}`}
             >
-              <FileText className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+              <HardHat className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.orders.title')}</span>
             </button>
 
@@ -178,7 +176,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               } ${isRTL ? 'text-right' : 'text-left'}`}
             >
-              <BarChart3 className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+              <Table className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.tables.title')}</span>
             </button>
               <button
@@ -189,8 +187,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               } ${isRTL ? 'text-right' : 'text-left'}`}
             >
-              <DollarSign className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-              <span>{t('dashboard.moneyCase.title')}</span>
+                <DollarSign className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                <span>{t('dashboard.moneyCase.title')}</span>
             </button>
           <button
               onClick={() => handleNavigate('orderTypeResturant', 'orderTypeResturant')}

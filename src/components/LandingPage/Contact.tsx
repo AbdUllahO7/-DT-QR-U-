@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, MessageCircle, PhoneCall } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface FormData {
@@ -21,6 +21,28 @@ const Contact: React.FC = () => {
   
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
+  
+  // Phone menu state
+  const [showPhoneMenu, setShowPhoneMenu] = useState(false);
+  const phoneMenuRef = useRef<HTMLDivElement>(null);
+
+  // Data helpers
+  const rawPhoneNumber = t('footer.contact.phone');
+  const cleanPhoneNumber = rawPhoneNumber.replace(/[^\d+]/g, '');
+  const address = t('footer.contact.address');
+  const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+
+  // Close phone menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (phoneMenuRef.current && !phoneMenuRef.current.contains(event.target as Node)) {
+        setShowPhoneMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
     const { name, value } = e.target;
@@ -64,6 +86,7 @@ const Contact: React.FC = () => {
         </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
+          {/* Left Column: Contact Info & Map */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -78,40 +101,99 @@ const Contact: React.FC = () => {
             </div>
 
             <div className="space-y-6">
-              <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
-                <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+              {/* Phone Section */}
+              <div className={`flex items-start space-x-4 ${isRTL ? 'space-x-reverse' : ''}`} >
+                <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center shrink-0">
                   <Phone className="h-6 w-6 text-primary-600 dark:text-primary-400" />
                 </div>
-                <div>
+                <div className="relative" ref={phoneMenuRef}>
                   <h4 className="font-semibold text-gray-900 dark:text-white">{t('contact.info.phone')}</h4>
-                  <p className="text-gray-600 dark:text-gray-400">{t('footer.contact.phone')}</p>
+                  <button 
+                    onClick={() => setShowPhoneMenu(!showPhoneMenu)}
+                    className="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 text-left rtl:text-right"
+                    dir="ltr"
+                  >
+                    {rawPhoneNumber}
+                  </button>
+
+                  {/* Phone Dropdown */}
+                  {showPhoneMenu && (
+                    <div className={`absolute top-full mt-2 ${isRTL ? 'right-0' : 'left-0'} w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden z-20`}>
+                      <a 
+                        href={`tel:${cleanPhoneNumber}`}
+                        className="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-primary-600 dark:hover:text-primary-400 transition-colors space-x-3 rtl:space-x-reverse"
+                      >
+                        <PhoneCall className="h-4 w-4" />
+                        <span>Call</span>
+                      </a>
+                      <a 
+                        href={`https://wa.me/${cleanPhoneNumber}`}
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center px-4 py-3 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 hover:text-green-600 dark:hover:text-green-400 transition-colors space-x-3 rtl:space-x-reverse"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        <span>WhatsApp</span>
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
-                <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+              {/* Email Section */}
+              <div className={`flex items-start space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
+                <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center shrink-0">
                   <Mail className="h-6 w-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-900 dark:text-white">{t('contact.info.email')}</h4>
-                  <p className="text-gray-600 dark:text-gray-400">{t('footer.contact.email')}</p>
+                  <a 
+                    href={`mailto:${t('footer.contact.email')}`}
+                    className="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 block"
+                  >
+                    {t('footer.contact.email')}
+                  </a>
                 </div>
               </div>
 
-              <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
-                <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+              {/* Address Section */}
+              <div className={`flex items-start space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
+                <div className="w-12 h-12 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center shrink-0">
                   <MapPin className="h-6 w-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-gray-900 dark:text-white">{t('contact.info.address')}</h4>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {t('footer.contact.address')}
-                  </p>
+                  <a 
+                    href={mapLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 block"
+                  >
+                    {address}
+                  </a>
                 </div>
+              </div>
+            </div>
+
+            {/* Map Iframe */}
+            <div className="mt-8 pt-6 border-t border-gray-100 dark:border-gray-800">
+              <div className="rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3006.1776449310637!2d28.754581876316873!3d41.108811213228044!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14caafc44acaaab1%3A0xdcc4e8667013e001!2siDIGITEK%20(Dijital%20Eser)!5e0!3m2!1sen!2str!4v1763711788125!5m2!1sen!2str" 
+                  width="100%" 
+                  height="300" 
+                  style={{ border: 0, display: 'block' }} 
+                  allowFullScreen 
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Office Location"
+                  className="w-full"
+                ></iframe>
               </div>
             </div>
           </motion.div>
 
+          {/* Right Column: Contact Form */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -202,7 +284,7 @@ const Contact: React.FC = () => {
                       placeholder={t('contact.form.messagePlaceholder')}
                     />
                   </div>
-
+                  
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -230,4 +312,4 @@ const Contact: React.FC = () => {
   );
 };
 
-export default Contact; 
+export default Contact;

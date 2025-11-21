@@ -147,36 +147,54 @@ export const en = {
 
   // Dashboard Navigation
   dashboard: {
-    overview: {
-      title: 'Overview',
-      description: 'View the general status of your restaurant.',
-      kpis: {
-        totalViews: 'Total Views',
-        qrScans: 'QR Code Scans',
-        totalOrders: 'Total Orders',
-        customerRating: 'Customer Rating',
-        changeTexts: {
-          lastWeek: 'vs last week',
-          lastMonth: 'vs last month',
-          thisWeek: 'this week'
-        }
-      },
-      quickStats: {
-        thisMonth: 'This Month',
-        totalOrders: 'Total orders',
-        average: 'Average',
-        dailyOrders: 'Daily orders',
-        new: 'New',
-        customers: 'Customers',
-        rating: 'Rating',
-        totalCount: 'Total count'
-      },
-      charts: {
-        weeklyActivity: 'Weekly Activity',
-        popularProducts: 'Popular Products',
-        monthlyRevenue: 'Monthly Revenue'
-      }
-    },
+overview: {
+  title: 'Overview',
+  description: 'View the financial and operational status of your restaurant.',
+  loading: 'Loading dashboard data...',
+  refresh: 'Refresh',
+  errorTitle: 'Failed to load dashboard data',
+  kpis: {
+    totalViews: 'Total Views',
+    qrScans: 'QR Scans',
+    totalOrders: 'Total Orders',
+    customerRating: 'Customer Rating',
+    todaySales: 'Today Sales',
+    currentBalance: 'Current Balance',
+    weekRevenue: 'Weekly Revenue',
+    monthRevenue: 'Monthly Revenue',
+    avgOrderValue: 'Avg. Order Value',
+    totalShifts: 'Total Shifts',
+    changeTexts: {
+      lastWeek: 'vs Last Week',
+      lastMonth: 'vs Last Month',
+      thisWeek: 'This Week',
+      today: 'Today'
+    }
+  },
+  quickStats: {
+    thisMonth: 'This Month',
+    totalOrders: 'Total Orders',
+    average: 'Average',
+    dailyOrders: 'Daily Orders',
+    new: 'New',
+    customers: 'Customers',
+    rating: 'Rating',
+    totalCount: 'Total Count',
+    cashSales: 'Cash Sales',
+    cardSales: 'Card Sales',
+    status: 'Status',
+    open: 'Open',
+    closed: 'Closed'
+  },
+  charts: {
+    weeklyActivity: 'Weekly Activity',
+    popularProducts: 'Popular Products',
+    monthlyRevenue: 'Monthly Revenue',
+    paymentMethods: 'Payment Methods',
+    revenueComparison: 'Revenue Comparison',
+    noData: 'No data available'
+  }
+},
     branches: {
       title: 'Branch Management',
       description: 'Manage your branches and add new branches.',
@@ -308,6 +326,7 @@ export const en = {
     },
     restaurant: {
       title: 'Restaurant Management',
+      refresh: "Refresh",
       description: 'Manage your restaurant information and settings.',
       loading: 'Loading restaurant information...',
       restaurantName: 'Restaurant Name',
@@ -491,9 +510,9 @@ export const en = {
   footer: {
     description: 'Modern, fast and secure digital menu solution for restaurants. Enhance customer experience and digitize your business.',
     contact: {
-      phone: '+90 212 345 67 89',
-      email: 'info@qrmenu.com',
-      address: 'Maslak, Istanbul'
+      phone: '+90 531 732 47 31',
+      email: 'services@idigitek.com',
+      address: 'Istanbul , KayaŞehir'
     },
     sections: {
       product: {

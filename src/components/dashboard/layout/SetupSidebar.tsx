@@ -2,7 +2,6 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Building2,
-  BarChart3,
   ShoppingCart,
   Users,
   Settings,
@@ -10,11 +9,12 @@ import {
   X,
   Type,
   DollarSign,
+  Table,
+  HardHat,
+  Store,
 } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { SetupSidebarProps } from '../../../types/BranchManagement/type';
-
-
 
 const SetupSidebar: React.FC<SetupSidebarProps> = ({
   isOpen,
@@ -118,7 +118,7 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               } ${isRTL ? 'text-right' : 'text-left'}`}
             >
-              <BarChart3 className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+              <Table className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.tables.title')}</span>
             </button>
 
@@ -130,7 +130,7 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               } ${isRTL ? 'text-right' : 'text-left'}`}
             >
-              <BarChart3 className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+              <Store className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.branchManagementTitle')}</span>
             </button>
             <button
@@ -141,7 +141,7 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               } ${isRTL ? 'text-right' : 'text-left'}`}
             >
-              <BarChart3 className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+              <HardHat className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.orders.title')}</span>
             </button>
             <button
@@ -157,11 +157,12 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
             </button>
               <button
               onClick={() => handleNavigate('moneyCase', 'moneyCase')}
-              className={`w-full flex items-center px-1 py-2 rounded-md transition-colors duration-200 ${
+               className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
                 activeTab === 'moneyCase'
                   ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               } ${isRTL ? 'text-right' : 'text-left'}`}
+            
             >
               <DollarSign className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.moneyCase.title')}</span>
