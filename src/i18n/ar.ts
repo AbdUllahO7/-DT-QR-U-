@@ -147,36 +147,54 @@ export const ar = {
 
   // Dashboard Navigation
   dashboard: {
-    overview: {
-      title: 'نظرة عامة',
-      description: 'اعرض الحالة العامة لمطعمك.',
-      kpis: {
-        totalViews: 'إجمالي المشاهدات',
-        qrScans: 'مسح رموز QR',
-        totalOrders: 'إجمالي الطلبات',
-        customerRating: 'تقييم العملاء',
-        changeTexts: {
-          lastWeek: 'مقارنة بالأسبوع الماضي',
-          lastMonth: 'مقارنة بالشهر الماضي',
-          thisWeek: 'هذا الأسبوع'
-        }
-      },
-      quickStats: {
-        thisMonth: 'هذا الشهر',
-        totalOrders: 'إجمالي الطلبات',
-        average: 'متوسط',
-        dailyOrders: 'الطلبات اليومية',
-        new: 'جديد',
-        customers: 'العملاء',
-        rating: 'التقييم',
-        totalCount: 'العدد الإجمالي'
-      },
-      charts: {
-        weeklyActivity: 'النشاط الأسبوعي',
-        popularProducts: 'المنتجات الشائعة',
-        monthlyRevenue: 'الإيرادات الشهرية'
-      }
-    },
+overview: {
+  title: 'نظرة عامة',
+  description: 'اعرض الحالة المالية والتشغيلية لمطعمك.',
+  loading: 'جاري تحميل البيانات...',
+  refresh: 'تحديث',
+  errorTitle: 'فشل تحميل بيانات لوحة التحكم',
+  kpis: {
+    totalViews: 'إجمالي المشاهدات',
+    qrScans: 'مسح رموز QR',
+    totalOrders: 'إجمالي الطلبات',
+    customerRating: 'تقييم العملاء',
+    todaySales: 'مبيعات اليوم',
+    currentBalance: 'الرصيد الحالي',
+    weekRevenue: 'إيرادات الأسبوع',
+    monthRevenue: 'إيرادات الشهر',
+    avgOrderValue: 'متوسط قيمة الطلب',
+    totalShifts: 'إجمالي الورديات',
+    changeTexts: {
+      lastWeek: 'مقارنة بالأسبوع الماضي',
+      lastMonth: 'مقارنة بالشهر الماضي',
+      thisWeek: 'هذا الأسبوع',
+      today: 'اليوم'
+    }
+  },
+  quickStats: {
+    thisMonth: 'هذا الشهر',
+    totalOrders: 'إجمالي الطلبات',
+    average: 'متوسط',
+    dailyOrders: 'الطلبات اليومية',
+    new: 'جديد',
+    customers: 'العملاء',
+    rating: 'التقييم',
+    totalCount: 'العدد الإجمالي',
+    cashSales: 'المبيعات النقدية',
+    cardSales: 'مبيعات البطاقة',
+    status: 'الحالة',
+    open: 'مفتوح',
+    closed: 'مغلق'
+  },
+  charts: {
+    weeklyActivity: 'النشاط الأسبوعي',
+    popularProducts: 'المنتجات الشائعة',
+    monthlyRevenue: 'الإيرادات الشهرية',
+    paymentMethods: 'طرق الدفع',
+    revenueComparison: 'مقارنة الإيرادات',
+    noData: 'لا توجد بيانات متاحة'
+  }
+},
     branches: {
       title: 'إدارة الفروع',
       description: 'إدارة فروعك وإضافة فروع جديدة.',
@@ -221,7 +239,8 @@ export const ar = {
         pendingOrders: 'الطلبات المعلقة',
         avgOrderValue: 'متوسط قيمة الطلب'
       }
-    },        moneyCase : {
+    },        
+    moneyCase : {
       title : "إدارة الصندوق النقدي",
     },
     ingredients : {
@@ -314,6 +333,7 @@ export const ar = {
       restaurantLogo: 'شعار المطعم',
       companyInfo: 'معلومات الشركة',
       addAboutInfo: 'إضافة معلومات حول المطعم',
+      refresh : "تحديث",
       placeholders: {
         restaurantName: 'أدخل اسم المطعم',
         aboutStory: 'قصة مطعمنا',
@@ -4280,7 +4300,7 @@ contact: {
       legalType: "النوع القانوني",
       taxNumber: "الرقم الضريبي",
       taxOffice: "مكتب الضرائب",
-      mersisNumbe: "رقم MERSIS",
+      mersisNumber: "رقم MERSIS",
       tradeRegistry: "رقم السجل التجاري",
       workPermit: "تصريح العمل",
       foodCertificate: "شهادة الغذاء",
@@ -4367,7 +4387,7 @@ contact: {
     restaurants: "المطاعم",
     branches: "الفروع",
     management: "معلومات الإدارة",
-    deleted: "المحذوفة"
+    deleted: "المحذوفات"
   },
   
   allergens: {

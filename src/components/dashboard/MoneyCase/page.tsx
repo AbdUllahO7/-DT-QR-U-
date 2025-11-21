@@ -1,22 +1,42 @@
 'use client';
 
-// app/restaurant-summary/page.tsx
-// Redesigned with dark mode, improved UI, and using the production service.
-// Added Branch Selector functionality and comprehensive filtering system.
-// Now using the app's native useLanguage hook.
-
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Users, ChevronDown, Calendar, Filter, X, Check } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { branchService } from '../../../services/branchService';
 import { moneyCaseService } from '../../../services/Branch/MoneyCaseService';
-import type { MoneyCaseSummary, RestaurantSummaryParams } from '../../../types/BranchManagement/MoneyCase';
-import { BranchData } from '../../../types/BranchManagement/type';
 
-/**
- * A simple icon wrapper for inline SVGs.
- * This makes the SummaryCard cleaner.
- */
+// --- MOCK TYPES & INTERFACES (Replaces external imports) ---
+
+interface BranchData {
+  branchId: string;
+  branchName: string;
+}
+
+interface MoneyCaseSummary {
+  restaurantName: string;
+  fromDate: string;
+  toDate: string;
+  totalSales: number;
+  totalCash: number;
+  totalCard: number;
+  totalOrders: number;
+  totalDifference: number;
+  totalCases: number;
+  averageOrderValue: number;
+  shiftsWithDiscrepancy: number;
+  moneyCases: any[]; // Array of individual cases for filtering
+}
+
+interface RestaurantSummaryParams {
+  fromDate?: string;
+  toDate?: string;
+  branchId?: string;
+}
+
+
+
+
 const CardIcon: React.FC<{ icon: 'dollar' | 'bank' | 'card' | 'cart' | 'scale' | 'clock' | 'alert' }> = ({ icon }) => {
   const iconMap = {
     dollar: (
@@ -63,9 +83,6 @@ const CardIcon: React.FC<{ icon: 'dollar' | 'bank' | 'card' | 'cart' | 'scale' |
   );
 };
 
-/**
- * Formats a number as USD currency.
- */
 const formatCurrency = (amount: number | undefined) => {
   if (amount === undefined || amount === null) return '$0';
   return new Intl.NumberFormat('en-US', { 
@@ -76,9 +93,6 @@ const formatCurrency = (amount: number | undefined) => {
   }).format(amount);
 }
 
-/**
- * A redesigned, reusable summary card component.
- */
 const SummaryCard: React.FC<{ 
   title: string; 
   value: string; 
@@ -96,9 +110,6 @@ const SummaryCard: React.FC<{
   </div>
 );
 
-/**
- * Loading state component
- */
 const LoadingState: React.FC = () => {
   const { t } = useLanguage();
   return (
@@ -113,9 +124,6 @@ const LoadingState: React.FC = () => {
   );
 };
 
-/**
- * Error state component
- */
 const ErrorState: React.FC<{ error: string }> = ({ error }) => {
   const { t } = useLanguage();
   return (
@@ -136,9 +144,6 @@ const ErrorState: React.FC<{ error: string }> = ({ error }) => {
   );
 };
 
-/**
- * No data state component
- */
 const NoDataState: React.FC = () => {
   const { t } = useLanguage();
   return (
@@ -152,9 +157,6 @@ const NoDataState: React.FC = () => {
   );
 };
 
-/**
- * Date preset options
- */
 const getDatePresets = (t: any) => [
   {
     label: t('moneyCase.filters.today'),
@@ -233,10 +235,12 @@ const getDatePresets = (t: any) => [
 export default function RestaurantSummaryPage() {
   const { t, isRTL } = useLanguage();
 
-  const [summary, setSummary] = useState<MoneyCaseSummary | null>(null);
+  // Raw Data from API (contains everything, including list of cases)
+  const [rawSummary, setRawSummary] = useState<MoneyCaseSummary | null>(null);
+  
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [rawSummary, setRawSummary] = useState<MoneyCaseSummary | null>(null);
+
   const [branches, setBranches] = useState<BranchData[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<BranchData | null>(null);
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState<boolean>(false);
@@ -250,7 +254,6 @@ export default function RestaurantSummaryPage() {
   const [toDate, setToDate] = useState<string>('');
   const [appliedFilters, setAppliedFilters] = useState<RestaurantSummaryParams>({});
   const [hasActiveFilters, setHasActiveFilters] = useState<boolean>(false);
-
 
   // Fetch Branches on component mount
   useEffect(() => {
@@ -272,37 +275,81 @@ export default function RestaurantSummaryPage() {
     fetchBranches();
   }, [t]);
 
-  // Fetch Summary data when selectedBranch or appliedFilters change
+  // 1. Fetch Raw Data (Depends ONLY on Date Filters, NOT branch)
   useEffect(() => {
-      const fetchSummary = async () => {
-        try {
-          setLoading(true);
-          setError(null);
-          // We do NOT send branchId here, we get everything
-          const data = await moneyCaseService.getRestaurantSummary(appliedFilters);
-          setRawSummary(data);
-        } catch (e: any) {
-          console.error("Failed to fetch restaurant summary:", e);
-          setError(e.message || t('moneyCase.error.unknown'));
-        } finally {
-          setLoading(false);
-        }
-      };
+    const fetchSummary = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        // Fetch ALL data (without branchId in params)
+        const data = await moneyCaseService.getRestaurantSummary(appliedFilters);
+        setRawSummary(data);
+      } catch (e: any) {
+        console.error("Failed to fetch restaurant summary:", e);
+        setError(e.message || t('moneyCase.error.unknown'));
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      fetchSummary();
-    }, [appliedFilters, t]); // Removed selectedBranch from dependencies
-    // Click-outside handler to close dropdown
-    useEffect(() => {
-      const handleClickOutside = (event: MouseEvent) => {
-        if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-          setIsBranchDropdownOpen(false);
-        }
-      };
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-      };
-    }, []);
+    fetchSummary();
+  }, [appliedFilters, t]);
+
+  // 2. Calculate Filtered Summary (Frontend Filtering by Branch)
+  const summary = useMemo(() => {
+    if (!rawSummary) return null;
+    if (!selectedBranch) return rawSummary;
+
+    // 1. Access the list of individual money cases.
+    const allCases = rawSummary.moneyCases || [];
+
+    // If no list exists, we cannot frontend filter. Return raw data.
+    if (!Array.isArray(allCases) || allCases.length === 0) {
+      return rawSummary;
+    }
+
+    // 2. Filter by Branch ID
+    const filteredCases = allCases.filter((item: any) => item.branchId === selectedBranch.branchId);
+
+    // 3. Recalculate Totals
+    const newTotalSales = filteredCases.reduce((sum: number, item: any) => sum + (item.totalSales || item.totalAmount || 0), 0);
+    const newTotalCash = filteredCases.reduce((sum: number, item: any) => sum + (item.totalCash || item.cashAmount || 0), 0);
+    const newTotalCard = filteredCases.reduce((sum: number, item: any) => sum + (item.totalCard || item.creditCardAmount || 0), 0);
+    const newTotalOrders = filteredCases.reduce((sum: number, item: any) => sum + (item.totalOrders || item.orderCount || 0), 0);
+    const newTotalDifference = filteredCases.reduce((sum: number, item: any) => sum + (item.totalDifference || item.difference || 0), 0);
+    
+    const newTotalCases = filteredCases.length;
+    const newAverageOrderValue = newTotalOrders > 0 ? newTotalSales / newTotalOrders : 0;
+    const newShiftsWithDiscrepancy = filteredCases.filter((item: any) => (item.difference || item.totalDifference) !== 0).length;
+
+    // 4. Return new Summary object
+    return {
+      ...rawSummary,
+      totalSales: newTotalSales,
+      totalCash: newTotalCash,
+      totalCard: newTotalCard,
+      totalOrders: newTotalOrders,
+      totalDifference: newTotalDifference,
+      totalCases: newTotalCases,
+      averageOrderValue: newAverageOrderValue,
+      shiftsWithDiscrepancy: newShiftsWithDiscrepancy,
+      moneyCases: filteredCases // Update the list in the filtered object too
+    };
+
+  }, [rawSummary, selectedBranch]);
+
+  // Click-outside handler to close dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsBranchDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const toggleBranchDropdown = () => {
     if (!loadingBranches) {
@@ -343,7 +390,7 @@ export default function RestaurantSummaryPage() {
     setToDate(dates.toDate);
   };
 
-  if (loading && !summary) {
+  if (loading && !rawSummary) {
     return (
       <div className="bg-gray-50 dark:bg-gray-900 min-h-screen p-8">
         <LoadingState />
@@ -359,7 +406,7 @@ export default function RestaurantSummaryPage() {
     );
   }
 
-  if (!summary && !loading) {
+  if (!rawSummary && !loading) {
     return (
       <div className="bg-gray-50 dark:bg-gray-900 min-h-screen p-8">
         <NoDataState />
@@ -367,7 +414,10 @@ export default function RestaurantSummaryPage() {
     );
   }
 
-  const discrepancyAmount = summary?.totalDifference || 0;
+  // If filtering resulted in null summary (shouldn't happen based on logic, but for safety)
+  const displaySummary = summary || rawSummary;
+
+  const discrepancyAmount = displaySummary?.totalDifference || 0;
   const discrepancyColorClass = discrepancyAmount < 0 
     ? 'bg-red-50 dark:bg-red-900/30 border-l-4 border-red-500' 
     : discrepancyAmount > 0
@@ -568,7 +618,7 @@ export default function RestaurantSummaryPage() {
           
         {/* Summary Information */}
         <p className="text-lg text-gray-500 dark:text-gray-400 mb-8">
-          {t('moneyCase.showingResults')} <span className="font-semibold text-gray-700 dark:text-gray-200">{summary?.restaurantName || t('moneyCase.yourRestaurant')}</span> {t('moneyCase.from')} <span className="font-semibold text-gray-700 dark:text-gray-200">{summary?.fromDate ? new Date(summary.fromDate).toLocaleDateString() : '-'}</span> {t('moneyCase.to')} <span className="font-semibold text-gray-700 dark:text-gray-200">{summary?.toDate ? new Date(summary.toDate).toLocaleDateString() : '-'}</span>
+          {t('moneyCase.showingResults')} <span className="font-semibold text-gray-700 dark:text-gray-200">{displaySummary?.restaurantName || t('moneyCase.yourRestaurant')}</span> {t('moneyCase.from')} <span className="font-semibold text-gray-700 dark:text-gray-200">{displaySummary?.fromDate ? new Date(displaySummary.fromDate).toLocaleDateString() : '-'}</span> {t('moneyCase.to')} <span className="font-semibold text-gray-700 dark:text-gray-200">{displaySummary?.toDate ? new Date(displaySummary.toDate).toLocaleDateString() : '-'}</span>
         </p>
         
         {/* Summary Cards */}
@@ -576,19 +626,19 @@ export default function RestaurantSummaryPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
             <SummaryCard 
               title={t('moneyCase.totalRevenue')}
-              value={formatCurrency(summary?.totalSales)} 
+              value={formatCurrency(displaySummary?.totalSales)} 
               description={t('moneyCase.grossSalesDesc')}
               icon="dollar"
             />
             <SummaryCard 
               title={t('moneyCase.netCash')}
-              value={formatCurrency(summary?.totalCash)} 
+              value={formatCurrency(displaySummary?.totalCash)} 
               description={t('moneyCase.netCashDesc')}
               icon="bank"
             />
             <SummaryCard 
               title={t('moneyCase.serviceFee')}
-              value={formatCurrency(summary?.totalCard)} 
+              value={formatCurrency(displaySummary?.totalCard)} 
               description={t('moneyCase.serviceFeeDesc')}
               icon="card"
             />
@@ -600,26 +650,26 @@ export default function RestaurantSummaryPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <SummaryCard 
               title={t('moneyCase.totalOrders')}
-              value={summary?.totalOrders.toString() || '0'} 
+              value={displaySummary?.totalOrders.toString() || '0'} 
               description={t('moneyCase.totalOrdersDesc')}
               icon="cart"
             />
             <SummaryCard 
               title={t('moneyCase.avgOrderValue')}
-              value={formatCurrency(summary?.averageOrderValue)} 
+              value={formatCurrency(displaySummary?.averageOrderValue)} 
               description={t('moneyCase.avgOrderValueDesc')}
               icon="scale"
             />
             <SummaryCard 
               title={t('moneyCase.totalShifts')}
-              value={summary?.totalCases.toString() || '0'} 
+              value={displaySummary?.totalCases.toString() || '0'} 
               description={t('moneyCase.totalShiftsDesc')}
               icon="clock"
             />
             <SummaryCard 
               title={t('moneyCase.cashDiscrepancy')}
-              value={formatCurrency(summary?.totalDifference)} 
-              description={t('moneyCase.cashDiscrepancyDesc', { count: summary?.shiftsWithDiscrepancy || 0 })}
+              value={formatCurrency(displaySummary?.totalDifference)} 
+              description={t('moneyCase.cashDiscrepancyDesc', { count: displaySummary?.shiftsWithDiscrepancy || 0 })}
               icon="alert"
               className={discrepancyColorClass}
             />
