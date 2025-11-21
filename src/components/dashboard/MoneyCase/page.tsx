@@ -236,7 +236,7 @@ export default function RestaurantSummaryPage() {
   const [summary, setSummary] = useState<MoneyCaseSummary | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-
+  const [rawSummary, setRawSummary] = useState<MoneyCaseSummary | null>(null);
   const [branches, setBranches] = useState<BranchData[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<BranchData | null>(null);
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState<boolean>(false);
@@ -250,6 +250,7 @@ export default function RestaurantSummaryPage() {
   const [toDate, setToDate] = useState<string>('');
   const [appliedFilters, setAppliedFilters] = useState<RestaurantSummaryParams>({});
   const [hasActiveFilters, setHasActiveFilters] = useState<boolean>(false);
+
 
   // Fetch Branches on component mount
   useEffect(() => {
@@ -273,37 +274,35 @@ export default function RestaurantSummaryPage() {
 
   // Fetch Summary data when selectedBranch or appliedFilters change
   useEffect(() => {
-    const fetchSummary = async () => {
-      if (!selectedBranch) return;
+      const fetchSummary = async () => {
+        try {
+          setLoading(true);
+          setError(null);
+          // We do NOT send branchId here, we get everything
+          const data = await moneyCaseService.getRestaurantSummary(appliedFilters);
+          setRawSummary(data);
+        } catch (e: any) {
+          console.error("Failed to fetch restaurant summary:", e);
+          setError(e.message || t('moneyCase.error.unknown'));
+        } finally {
+          setLoading(false);
+        }
+      };
 
-      try {
-        setLoading(true);
-        setError(null);
-        const data = await moneyCaseService.getRestaurantSummary(appliedFilters);
-        setSummary(data);
-      } catch (e: any) {
-        console.error("Failed to fetch restaurant summary:", e);
-        setError(e.message || t('moneyCase.error.unknown'));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSummary();
-  }, [selectedBranch, appliedFilters, t]);
-
-  // Click-outside handler to close dropdown
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsBranchDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
+      fetchSummary();
+    }, [appliedFilters, t]); // Removed selectedBranch from dependencies
+    // Click-outside handler to close dropdown
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+          setIsBranchDropdownOpen(false);
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }, []);
 
   const toggleBranchDropdown = () => {
     if (!loadingBranches) {

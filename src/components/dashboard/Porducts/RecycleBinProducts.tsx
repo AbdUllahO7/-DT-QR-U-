@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { Trash2, RotateCcw, Search, Calendar, Package, FolderOpen, AlertCircle, CheckCircle, RefreshCw, X, Building2, Table, Database, FileText } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Trash2, RotateCcw, Search, Calendar, Package, FolderOpen, AlertCircle, CheckCircle, RefreshCw, X, Building2, Table, Database, FileText, ArrowLeft } from 'lucide-react';
 import { productService } from '../../../services/productService';
 import { branchService } from '../../../services/branchService';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -35,8 +35,11 @@ const RecycleBin: React.FC = () => {
     type: 'success' | 'error';
     message: string;
   } | null>(null);
-
+  const navigate = useNavigate();
   // Branch restore cascade modal state
+
+
+  
   const [showBranchRestoreModal, setShowBranchRestoreModal] = useState(false);
   const [branchToRestore, setBranchToRestore] = useState<DeletedEntity | null>(null);
 
@@ -126,6 +129,10 @@ const RecycleBin: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleBack = () => {
+      navigate(-1); // This navigates to the previous entry in the history stack
   };
 
   // Show notification
@@ -445,6 +452,13 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
           {getHeaderDescription()}
         </p>
       </div>
+        <button
+            onClick={handleBack}
+            className="p-2 mr-2  mb-5 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 text-gray-700 dark:text-gray-300"
+            title={t('common.back') || 'Go Back'}
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
 
       {/* Controls */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">

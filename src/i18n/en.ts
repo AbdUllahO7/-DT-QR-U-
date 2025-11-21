@@ -491,9 +491,9 @@ export const en = {
   footer: {
     description: 'Modern, fast and secure digital menu solution for restaurants. Enhance customer experience and digitize your business.',
     contact: {
-      phone: '+90 212 345 67 89',
-      email: 'info@qrmenu.com',
-      address: 'Maslak, Istanbul'
+      phone: '+90 531 732 47 31',
+      email: 'services@idigitek.com',
+      address: 'Istanbul , KayaŞehir'
     },
     sections: {
       product: {
