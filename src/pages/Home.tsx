@@ -11,7 +11,6 @@ import Header from '../components/LandingPage/Header';
 const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-300">
-      <Header />
       <main>
         <Hero />
         <Features />
@@ -20,7 +19,6 @@ const Home: React.FC = () => {
         <FAQ />
         <Contact />
       </main>
-      <Footer />
     </div>
   );
 };

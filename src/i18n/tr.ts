@@ -151,36 +151,54 @@ export const tr = {
 
   // Dashboard Navigation
   dashboard: {
-    overview: {
-      title: 'Genel Bakış',
-      description: 'Restoranınızın genel durumunu görüntüleyin.',
-      kpis: {
-        totalViews: 'Toplam Görüntülenme',
-        qrScans: 'QR Kod Taramaları',
-        totalOrders: 'Toplam Sipariş',
-        customerRating: 'Müşteri Puanı',
-        changeTexts: {
-          lastWeek: 'geçen haftaya göre',
-          lastMonth: 'geçen aya göre',
-          thisWeek: 'bu hafta'
-        }
-      },
-      quickStats: {
-        thisMonth: 'Bu Ay',
-        totalOrders: 'Toplam sipariş',
-        average: 'Ortalama',
-        dailyOrders: 'Günlük sipariş',
-        new: 'Yeni',
-        customers: 'Müşteriler',
-        rating: 'Değerlendirme',
-        totalCount: 'Toplam sayı'
-      },
-      charts: {
-        weeklyActivity: 'Haftalık Aktivite',
-        popularProducts: 'Popüler Ürünler',
-        monthlyRevenue: 'Aylık Gelir'
-      }
-    },
+overview: {
+  title: 'Genel Bakış',
+  description: 'Restoranınızın finansal ve operasyonel durumunu görüntüleyin.',
+  loading: 'Panel verileri yükleniyor...',
+  refresh: 'Yenile',
+  errorTitle: 'Panel verileri yüklenemedi',
+  kpis: {
+    totalViews: 'Toplam Görüntüleme',
+    qrScans: 'QR Taramaları',
+    totalOrders: 'Toplam Sipariş',
+    customerRating: 'Müşteri Puanı',
+    todaySales: 'Bugünkü Satışlar',
+    currentBalance: 'Güncel Bakiye',
+    weekRevenue: 'Haftalık Gelir',
+    monthRevenue: 'Aylık Gelir',
+    avgOrderValue: 'Ort. Sipariş Değeri',
+    totalShifts: 'Toplam Vardiyalar',
+    changeTexts: {
+      lastWeek: 'Geçen Haftaya Göre',
+      lastMonth: 'Geçen Aya Göre',
+      thisWeek: 'Bu Hafta',
+      today: 'Bugün'
+    }
+  },
+  quickStats: {
+    thisMonth: 'Bu Ay',
+    totalOrders: 'Toplam Sipariş',
+    average: 'Ortalama',
+    dailyOrders: 'Günlük Siparişler',
+    new: 'Yeni',
+    customers: 'Müşteriler',
+    rating: 'Puan',
+    totalCount: 'Toplam Sayı',
+    cashSales: 'Nakit Satış',
+    cardSales: 'Kartlı Satış',
+    status: 'Durum',
+    open: 'Açık',
+    closed: 'Kapalı'
+  },
+  charts: {
+    weeklyActivity: 'Haftalık Aktivite',
+    popularProducts: 'Popüler Ürünler',
+    monthlyRevenue: 'Aylık Gelir',
+    paymentMethods: 'Ödeme Yöntemleri',
+    revenueComparison: 'Gelir Karşılaştırması',
+    noData: 'Veri mevcut değil'
+  }
+},
     branches: {
       title: 'Şube Yönetimi',
       description: 'Şubelerinizi yönetin ve yeni şubeler ekleyin.',
@@ -312,6 +330,7 @@ export const tr = {
     },
     restaurant: {
       title: 'Restorant Yönetimi',
+      refresh:"Yenile",
       description: 'Restorant bilgilerinizi ve ayarlarınızı yönetin.',
       loading: 'Restoran bilgileri yükleniyor...',
       restaurantName: 'Restoran Adı',
@@ -492,8 +511,8 @@ export const tr = {
   footer: {
     description: 'Restoranlar için modern, hızlı ve güvenli dijital menü çözümü. Müşteri deneyimini artırın, işletmenizi dijitalleştirin.',
     contact: {
-      phone: '+90 212 345 67 89',
-      email: 'info@qrmenu.com',
+      phone: '+90 531 732 47 31',
+      email: 'services@idigitek.com',
       address: 'Maslak, İstanbul'
     },
     sections: {

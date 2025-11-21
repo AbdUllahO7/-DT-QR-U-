@@ -101,7 +101,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
       setAvailableAddons(addons);
     } catch (err: any) {
       console.error('Error fetching available addons:', err);
-      setError('Failed to load available addons');
+       setError(err.response.data.message); 
     } finally {
       setIsLoadingAddons(false);
     }
@@ -125,116 +125,116 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
       return existingAddons;
     } catch (err: any) {
       console.error('Error fetching product addons:', err);
-      setError('Failed to load product addons');
+       setError(err.response.data.message); 
       return [];
     }
   };
 
-const handleShowProductAddons = async (product: DetailedProduct) => {
-  if (!product.branchProductId) {
-    setError('Product must be added to branch first before configuring addons');
-    return;
-  }
-
-  let categoryId: number | null = null;
-  for (const branchCategory of branchCategories) {
-    const foundProduct = branchCategory.products?.find(p => p.branchProductId === product.branchProductId);
-    if (foundProduct) {
-      categoryId = branchCategory.categoryId;
-      break;
+  const handleShowProductAddons = async (product: DetailedProduct) => {
+    if (!product.branchProductId) {
+      setError('Product must be added to branch first before configuring addons');
+      return;
     }
-  }
 
-  setSelectedProductForAddons(product);
-  setIsProductAddonsModalOpen(true);
-  
-  // ✅ Refresh available addons to ensure we have the latest list
-  await fetchAvailableAddons();
-  
-  // ✅ Fetch existing addons for this specific product
-  await fetchProductAddons(product.branchProductId);
-};
-
-const handleCloseProductAddons = async () => {
-  setSelectedProductForAddons(null);
-  setIsProductAddonsModalOpen(false);
-  
-  // ✅ Refresh branch categories to get updated addon counts
-  if (activeTab === 'manage') {
-    await fetchBranchCategoriesWithProducts();
-  }
-};
-
-const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds: number[]) => {
-  // The modal handles the actual API calls
-  const newAddonCount = selectedAddonIds.length;
-
-  setBranchCategories(prev =>
-    prev.map(category => ({
-      ...category,
-      products: category.products?.map(product =>
-        product.branchProductId === branchProductId
-          ? {
-              ...product,
-              addonsCount: newAddonCount,
-              hasAddons: newAddonCount > 0,
-            }
-          : product
-      ),
-    }))
-  );
-  
-  // ✅ Optionally refetch the product addons to ensure sync
-  await fetchProductAddons(branchProductId);
-};
-  // Price editing functions
-const handleProductPriceEdit = (productId: number, originalPrice: number) => {
-  // Find the category of this product and check if it's active
-  let categoryId: number | null = null;
-  
-  if (activeTab === 'manage') {
+    let categoryId: number | null = null;
     for (const branchCategory of branchCategories) {
-      const product = branchCategory.products?.find(p => p.id === productId && p.isSelected);
-      if (product) {
+      const foundProduct = branchCategory.products?.find(p => p.branchProductId === product.branchProductId);
+      if (foundProduct) {
         categoryId = branchCategory.categoryId;
         break;
       }
     }
-  } else {
-    for (const category of categoriesWithProducts) {
-      const product = category.products.find(p => p.id === productId);
-      if (product) {
-        categoryId = category.categoryId;
-        break;
-      }
-    }
-  }
-  
 
-  
-  setEditingProductId(productId);
-  
-  const newEditedPrices = new Map(editedProductPrices);
-  
-  // For existing branch products, use the current branch product price as starting point
-  let currentPrice = originalPrice;
-  if (activeTab === 'manage') {
-    for (const branchCategory of branchCategories) {
-      const product = branchCategory.products?.find(p => p.id === productId && p.isSelected);
-      if (product) {
-        currentPrice = product.price;
-        break;
+    setSelectedProductForAddons(product);
+    setIsProductAddonsModalOpen(true);
+    
+    // ✅ Refresh available addons to ensure we have the latest list
+    await fetchAvailableAddons();
+    
+    // ✅ Fetch existing addons for this specific product
+    await fetchProductAddons(product.branchProductId);
+  };
+
+  const handleCloseProductAddons = async () => {
+    setSelectedProductForAddons(null);
+    setIsProductAddonsModalOpen(false);
+    
+    // ✅ Refresh branch categories to get updated addon counts
+    if (activeTab === 'manage') {
+      await fetchBranchCategoriesWithProducts();
+    }
+  };
+
+  const handleSaveProductAddons = async (branchProductId: number, selectedAddonIds: number[]) => {
+    // The modal handles the actual API calls
+    const newAddonCount = selectedAddonIds.length;
+
+    setBranchCategories(prev =>
+      prev.map(category => ({
+        ...category,
+        products: category.products?.map(product =>
+          product.branchProductId === branchProductId
+            ? {
+                ...product,
+                addonsCount: newAddonCount,
+                hasAddons: newAddonCount > 0,
+              }
+            : product
+        ),
+      }))
+    );
+    
+    // ✅ Optionally refetch the product addons to ensure sync
+    await fetchProductAddons(branchProductId);
+  };
+  // Price editing functions
+  const handleProductPriceEdit = (productId: number, originalPrice: number) => {
+    // Find the category of this product and check if it's active
+    let categoryId: number | null = null;
+    
+    if (activeTab === 'manage') {
+      for (const branchCategory of branchCategories) {
+        const product = branchCategory.products?.find(p => p.id === productId && p.isSelected);
+        if (product) {
+          categoryId = branchCategory.categoryId;
+          break;
+        }
+      }
+    } else {
+      for (const category of categoriesWithProducts) {
+        const product = category.products.find(p => p.id === productId);
+        if (product) {
+          categoryId = category.categoryId;
+          break;
+        }
       }
     }
-  }
-  
-  newEditedPrices.set(productId, {
-    productId,
-    originalPrice,
-    newPrice: currentPrice
-  });
-  setEditedProductPrices(newEditedPrices);
-};
+    
+
+    
+    setEditingProductId(productId);
+    
+    const newEditedPrices = new Map(editedProductPrices);
+    
+    // For existing branch products, use the current branch product price as starting point
+    let currentPrice = originalPrice;
+    if (activeTab === 'manage') {
+      for (const branchCategory of branchCategories) {
+        const product = branchCategory.products?.find(p => p.id === productId && p.isSelected);
+        if (product) {
+          currentPrice = product.price;
+          break;
+        }
+      }
+    }
+    
+    newEditedPrices.set(productId, {
+      productId,
+      originalPrice,
+      newPrice: currentPrice
+    });
+    setEditedProductPrices(newEditedPrices);
+  };
 
   const handleProductPriceChange = (productId: number, newPrice: string) => {
     const priceValue = parseFloat(newPrice) || 0;
@@ -465,7 +465,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
 
     } catch (err: any) {
       console.error('Error updating category name:', err);
-      setError('Failed to update category name');
+       setError(err.response.data.message); 
     } finally {
       setIsLoading(false);
     }
@@ -535,7 +535,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
       setEditedProductPrices(newEditedPrices);
     } catch (err: any) {
       console.error('Error updating product price:', err);
-      setError('Failed to update product price');
+    setError(err.response.data.message); 
     } finally {
       setIsLoading(false);
     }
@@ -613,7 +613,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
       setOriginalBranchCategories([...sortedCategories]);
     } catch (err: any) {
       console.error('Error fetching existing branch categories:', err);
-      setError(t('branchCategories.messages.error.loadingCategories'));
+      setError(err.response.data.message); 
     } finally {
       setIsLoading(false);
     }
@@ -886,7 +886,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
       setExpandedCategories(new Set(categoriesWithProductsData.map(cat => cat.categoryId)));
     } catch (err: any) {
       console.error('Error fetching products for categories:', err);
-      setError(t('branchCategories.messages.error.loadingProducts'));
+       setError(err.response.data.message); 
     } finally {
       setIsLoadingProducts(false);
     }
@@ -1021,7 +1021,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
       
     } catch (err: any) {
       console.error('Error deleting branch category:', err);
-      setError(t('branchCategories.messages.error.deletingCategory'));
+       setError(err.response.data.message); 
     } finally {
       setIsDeleting(false);
     }
@@ -1117,6 +1117,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
             
           } catch (err: any) {
             console.error('Error creating branch product:', productId, err);
+            setError(err.response.data.message)
           }
         }
       }
@@ -1149,7 +1150,7 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
       
     } catch (err: any) {
       console.error('Error saving branch categories and products:', err);
-      setError(err.message || 'Failed to add categories and products to branch');
+       setError(err.response.data.message); 
     } finally {
       setIsSaving(false);
     }
@@ -1163,10 +1164,10 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
       let productToAdd = null;
       let categoryIndex = -1;
           const category = branchCategories.find(bc => bc.branchCategoryId === branchCategoryId);
- if (!category) {
-      setError(t('branchCategories.messages.error.categoryNotFound'));
-      return;
-    }
+    if (!category) {
+          setError(t('branchCategories.messages.error.categoryNotFound'));
+          return;
+        }
 
 
       for (let i = 0; i < branchCategories.length; i++) {
@@ -1272,100 +1273,118 @@ const handleProductPriceEdit = (productId: number, originalPrice: number) => {
       
     } catch (err: any) {
       console.error('Error adding product to category:', err);
-      setError(t('branchCategories.messages.error.addingProduct'));
+      setError(err.response.data.message); 
       setIsLoading(false);
     }
   };
 
-  // Add function to handle removing products from categories
-  const handleRemoveProductFromCategory = async (branchProductId: number, productName?: string) => {
+const handleRemoveProductFromCategory = async (branchProductId: number, productName?: string) => {
     try {
-      const scrollPosition = window.scrollY;
-      
-      let productToRemove = null;
-      let categoryIndex = -1;
+        const scrollPosition = window.scrollY;
 
-      for (let i = 0; i < branchCategories.length; i++) {
-        const product = branchCategories[i].products?.find(p => p.branchProductId === branchProductId);
-        if (product) {
-          productToRemove = product;
-          categoryIndex = i;
-          break;
+        let productToRemove = null;
+        let categoryIndex = -1;
+
+        for (let i = 0; i < branchCategories.length; i++) {
+            const product = branchCategories[i].products?.find(p => p.branchProductId === branchProductId);
+            if (product) {
+                productToRemove = product;
+                categoryIndex = i;
+                break;
+            }
         }
-      }
-      
-      if (!productToRemove || categoryIndex === -1) {
-        setError(t('branchCategories.messages.error.productNotFound'));
-        return;
-      }
-      
-      // Optimistic update
-      const updatedCategories = [...branchCategories];
-      const updatedProducts = updatedCategories[categoryIndex].products?.map(product => {
-        if (product.branchProductId === branchProductId) {
-          return {
-            ...product,
-            isSelected: false,
-            branchProductId: undefined,
-            addonsCount: 0,
-            hasAddons: false
-          };
+
+        if (!productToRemove || categoryIndex === -1) {
+            setError(t('branchCategories.messages.error.productNotFound'));
+            return;
         }
-        return product;
-      }) || [];
-      
-      updatedCategories[categoryIndex] = {
-        ...updatedCategories[categoryIndex],
-        products: updatedProducts,
-        selectedProductsCount: Math.max(0, (updatedCategories[categoryIndex].selectedProductsCount || 1) - 1),
-        unselectedProductsCount: (updatedCategories[categoryIndex].unselectedProductsCount || 0) + 1
-      };
-      
-      setBranchCategories(updatedCategories);
-      setIsLoading(true);
-      
-      try {
-        await branchProductService.deleteBranchProduct(branchProductId);
-        setSuccessMessage(t('branchCategories.messages.success.productRemoved', { name: productName || productToRemove.name }));
-        
-      } catch (apiError) {
-        console.error('API call failed, reverting optimistic update:', apiError);
-        
-        // Revert optimistic update on API failure
-        const revertedCategories = [...branchCategories];
-        const revertedProducts = revertedCategories[categoryIndex].products?.map(product => {
-          if (product.id === productToRemove.id) {
-            return {
-              ...product,
-              isSelected: true,
-              branchProductId: branchProductId
-            };
-          }
-          return product;
+
+        // ✅ Store the product's base ID for filtering later
+        const productId = productToRemove.id;
+
+        // 1. Optimistic Update (Set to isSelected: false)
+        const updatedCategoriesOptimistic = [...branchCategories];
+        const updatedProductsOptimistic = updatedCategoriesOptimistic[categoryIndex].products?.map(product => {
+            if (product.branchProductId === branchProductId) {
+                return {
+                    ...product,
+                    isSelected: false,
+                    branchProductId: undefined,
+                    addonsCount: 0,
+                    hasAddons: false
+                };
+            }
+            return product;
         }) || [];
-        
-        revertedCategories[categoryIndex] = {
-          ...revertedCategories[categoryIndex],
-          products: revertedProducts,
-          selectedProductsCount: (revertedCategories[categoryIndex].selectedProductsCount || 0) + 1,
-          unselectedProductsCount: Math.max(0, (revertedCategories[categoryIndex].unselectedProductsCount || 1) - 1)
+
+        updatedCategoriesOptimistic[categoryIndex] = {
+            ...updatedCategoriesOptimistic[categoryIndex],
+            products: updatedProductsOptimistic,
+            selectedProductsCount: Math.max(0, (updatedCategoriesOptimistic[categoryIndex].selectedProductsCount || 1) - 1),
+            unselectedProductsCount: (updatedCategoriesOptimistic[categoryIndex].unselectedProductsCount || 0) + 1
         };
-        
-        setBranchCategories(revertedCategories);
-        setError(t('branchCategories.messages.error.removingProduct'));
-      } finally {
-        setIsLoading(false);
-        setTimeout(() => {
-          window.scrollTo(0, scrollPosition);
-        }, 100);
-      }
-      
+
+        setBranchCategories(updatedCategoriesOptimistic);
+        setIsLoading(true);
+
+        try {
+            // 2. API Call to Delete
+            await branchProductService.deleteBranchProduct(branchProductId);
+            
+            // 3. ✅ Final State Update - Filter by product.id instead of branchProductId
+            setBranchCategories(prevCategories => {
+                const finalCategories = prevCategories.map(cat => {
+                    if (cat.branchCategoryId === updatedCategoriesOptimistic[categoryIndex].branchCategoryId) {
+                        return {
+                            ...cat,
+                            products: cat.products ? cat.products.filter(p => p.id !== productId) : [],
+                        };
+                    }
+                    return cat;
+                });
+                return finalCategories;
+            });
+
+            setSuccessMessage(t('branchCategories.messages.success.productRemoved', { name: productName || productToRemove.name }));
+            
+        } catch (apiError: any) {
+            console.error('API call failed, reverting optimistic update:', apiError);
+
+            // 4. Revert optimistic update on API failure
+            const revertedCategories = [...branchCategories];
+            const revertedProducts = revertedCategories[categoryIndex].products?.map(product => {
+                if (product.id === productId) {  // ✅ Also use productId here for consistency
+                    return {
+                        ...product,
+                        isSelected: true,
+                        branchProductId: branchProductId
+                    };
+                }
+                return product;
+            }) || [];
+
+            revertedCategories[categoryIndex] = {
+                ...revertedCategories[categoryIndex],
+                products: revertedProducts,
+                selectedProductsCount: (revertedCategories[categoryIndex].selectedProductsCount || 0) + 1,
+                unselectedProductsCount: Math.max(0, (revertedCategories[categoryIndex].unselectedProductsCount || 1) - 1)
+            };
+
+            setBranchCategories(revertedCategories);
+            setError(apiError?.response?.data?.message || t('branchCategories.messages.error.removingProduct'));
+        } finally {
+            setIsLoading(false);
+            setTimeout(() => {
+                window.scrollTo(0, scrollPosition);
+            }, 100);
+        }
+
     } catch (err: any) {
-      console.error('Error removing product from category:', err);
-      setError(t('branchCategories.messages.error.removingProduct'));
-      setIsLoading(false);
+        console.error('Error removing product from category:', err);
+        setError(err.response.data.message);
+        setIsLoading(false);
     }
-  };
+};
 
   // Reordering functions
   const handleMoveUp = (index: number) => {
@@ -1419,7 +1438,7 @@ const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAdd
       
     } catch (err: any) {
       console.error('Error saving category order:', err);
-      setError(t('branchCategories.messages.error.savingOrder'));
+      setError(err.response.data.message); 
     } finally {
       setIsReordering(false);
     }

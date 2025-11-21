@@ -436,16 +436,16 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
 
     return (
       <div className="border-t border-gray-200 dark:border-gray-600 p-6 bg-gray-50 dark:bg-gray-700/50">
-        {!categoryIsActive && (
-        <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-          <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <AlertCircle className={`h-5 w-5 text-red-600 dark:text-red-400 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-            <span className="text-red-700 dark:text-red-300 font-medium">
-              This category is inactive
-            </span>
+          {!categoryIsActive && (
+          <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+            <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <AlertCircle className={`h-5 w-5 text-red-600 dark:text-red-400 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+              <span className="text-red-700 dark:text-red-300 font-medium">
+                This category is inactive
+              </span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
       
         <div className={`flex items-center justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <h5 className="font-medium text-gray-900 dark:text-white">
@@ -602,7 +602,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                 const branchProductIdToRemove = product.branchProductId || product.id;
                 await onRemoveProduct(branchProductIdToRemove, product.name);
               }}
-              disabled={isLoading || isLoadingBranchProducts} // <--- FIX
+              disabled={isLoading || isLoadingBranchProducts} 
               className="px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50 text-sm font-medium"
               title={t('branchCategories.products.removeFromBranch')}
             >
