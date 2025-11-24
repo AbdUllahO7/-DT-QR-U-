@@ -513,7 +513,7 @@ overview: {
     contact: {
       phone: '+90 531 732 47 31',
       email: 'services@idigitek.com',
-      address: 'Maslak, İstanbul'
+      address: 'Istanbul , Kayaşehir'
     },
     sections: {
       product: {

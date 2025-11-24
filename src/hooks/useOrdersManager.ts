@@ -50,11 +50,11 @@ export const useOrdersManager = () => {
       tableName: ''
     },
     pagination: {
-      currentPage: 1,
-      itemsPerPage: 10,
-      totalItems: 0,
-      totalPages: 0
-    },
+    currentPage: 1,
+    itemsPerPage: 10,
+    totalItems: 0,  
+    totalPages: 0   
+  },
     showAdvancedFilters: false,
     filteredOrders: []
   });
@@ -112,17 +112,112 @@ export const useOrdersManager = () => {
     }
   };
 
-  // Fetch branch orders with branch filter
-  const fetchBranchOrders = async (branchId?: number) => {
-    const targetBranchId = branchId || getCurrentBranchId();
-    setState(prev => ({ ...prev, loading: true, error: null }));
-    try {
-      const orders = await orderService.getBranchOrders(targetBranchId);
-      setState(prev => ({ ...prev, branchOrders: orders, loading: false }));
-    } catch (error: any) {
-      setState(prev => ({ ...prev, error: error.message, loading: false }));
+const fetchBranchOrders = async (branchId?: number, page?: number, pageSize?: number) => {
+  const targetBranchId = branchId || getCurrentBranchId();
+  const targetPage = page !== undefined ? page : state.pagination.currentPage;
+  const targetPageSize = pageSize !== undefined ? pageSize : state.pagination.itemsPerPage;
+  
+  console.log('🚀 fetchBranchOrders called:', { branchId: targetBranchId, page: targetPage, pageSize: targetPageSize });
+  
+  setState(prev => ({ ...prev, loading: true, error: null }));
+  
+  try {
+    const result = await orderService.getBranchOrders(targetBranchId, targetPage, targetPageSize);
+    
+    console.log('✅ API Fetch result:', {
+      ordersCount: result.orders.length,
+      totalItems: result.totalItems,
+      totalPages: result.totalPages,
+      currentPage: targetPage,
+      pageSize: targetPageSize
+    });
+    
+    setState(prev => {
+      const newState = {
+        ...prev, 
+        branchOrders: result.orders, 
+        loading: false,
+        pagination: {
+          currentPage: targetPage,
+          itemsPerPage: targetPageSize,
+          totalItems: result.totalItems,
+          totalPages: result.totalPages
+        }
+      };
+      
+      console.log('✅ State updated with:', {
+        branchOrdersLength: newState.branchOrders.length,
+        paginationTotalItems: newState.pagination.totalItems,
+        paginationTotalPages: newState.pagination.totalPages
+      });
+      
+      return newState;
+    });
+  } catch (error: any) {
+    console.error('❌ fetchBranchOrders error:', error);
+    setState(prev => ({ 
+      ...prev, 
+      error: error.message, 
+      loading: false,
+      branchOrders: [],
+      pagination: {
+        ...prev.pagination,
+        totalItems: 0,
+        totalPages: 0
+      }
+    }));
+  }
+};
+
+// Handle page change for branch orders
+// Handle page change for branch orders
+const handleBranchPageChange = (newPage: number) => {
+  console.log('🔄 Changing page to:', newPage);
+  
+  fetchBranchOrders(undefined, newPage, state.pagination.itemsPerPage);
+};
+
+// Handle items per page change for branch orders
+// Handle items per page change for branch orders
+const handleBranchItemsPerPageChange = (newItemsPerPage: number) => {
+  console.log('Changing items per page to:', newItemsPerPage);
+  
+  // First update the state
+  setState(prev => ({
+    ...prev,
+    pagination: { 
+      ...prev.pagination, 
+      itemsPerPage: newItemsPerPage, 
+      currentPage: 1 
     }
-  };
+  }));
+  
+  fetchBranchOrders(undefined, 1, newItemsPerPage);
+
+};
+    // Handle page change
+    const handlePageChange = (newPage: number) => {
+      setState(prev => ({
+        ...prev,
+        pagination: { ...prev.pagination, currentPage: newPage }
+      }));
+      
+      if (state.viewMode === 'branch') {
+        fetchBranchOrders(undefined, newPage, state.pagination.itemsPerPage);
+      }
+    };
+
+    // Handle items per page change
+    const handleItemsPerPageChange = (newItemsPerPage: number) => {
+      setState(prev => ({
+        ...prev,
+        pagination: { ...prev.pagination, itemsPerPage: newItemsPerPage, currentPage: 1 }
+      }));
+      
+      if (state.viewMode === 'branch') {
+        fetchBranchOrders(undefined, 1, newItemsPerPage);
+      }
+    };
 
   // Fetch table basket summary with branch filter
   const fetchTableBasketSummary = async (): Promise<TableBasketSummary[]> => {
@@ -270,7 +365,6 @@ export const useOrdersManager = () => {
     }
   };
 
-  // NEW: Handle cancel order
   const handleCancelOrder = async () => {
     if (!state.activeOrderId || !state.activeRowVersion) return;
     
@@ -417,21 +511,27 @@ export const useOrdersManager = () => {
     }
   };
 
-  // Switch view mode
-  const switchViewMode = (mode: 'pending' | 'branch' | 'deletedOrders') => {
-    setState(prev => ({ 
-      ...prev, 
-      viewMode: mode,
-      pagination: { ...prev.pagination, currentPage: 1 }
-    }));
-    if (mode === 'pending') {
-      fetchPendingOrders();
-    } else if (mode === 'branch') {
-      fetchBranchOrders();
-    } else {
-      return null
+// Switch view mode
+// Switch view mode
+const switchViewMode = (mode: 'pending' | 'branch' | 'deletedOrders') => {
+  setState(prev => ({ 
+    ...prev, 
+    viewMode: mode,
+    pagination: { 
+      currentPage: 1,
+      itemsPerPage: prev.pagination.itemsPerPage, // Keep the items per page
+      totalItems: 0,
+      totalPages: 0
     }
-  };
+  }));
+  
+  if (mode === 'pending') {
+    fetchPendingOrders();
+  } else if (mode === 'branch') {
+    // Fetch with current itemsPerPage
+    fetchBranchOrders(undefined, 1, state.pagination.itemsPerPage);
+  }
+};
 
   // Modal handlers
   const openConfirmModal = (orderId: string, rowVersion: string) => {
@@ -547,7 +647,11 @@ export const useOrdersManager = () => {
     closeModals,
     toggleRowExpansion,
     handleSort,
-    setState
+    setState,
+    handlePageChange,
+    handleItemsPerPageChange,
+    handleBranchPageChange,
+    handleBranchItemsPerPageChange
   };
 
   return { state, actions };
