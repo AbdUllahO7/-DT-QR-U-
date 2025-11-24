@@ -79,7 +79,8 @@ export const useOrdersManager = () => {
   };
 
   // Handle branch selection
- const handleBranchSelect = useCallback((branch: BranchDropdownItem) => {
+const handleBranchSelect = (branch: BranchDropdownItem) => {
+  console.log('🏢 handleBranchSelect called:', branch.branchName);
   setState(prev => ({ 
     ...prev, 
     selectedBranch: branch,
@@ -88,12 +89,11 @@ export const useOrdersManager = () => {
     pagination: { ...prev.pagination, currentPage: 1 }
   }));
   
-  // Clear order types cache when switching branches
   orderService.clearOrderTypesCache();
   
-  // DON'T fetch here - let the useEffect in the component handle it
-  // This prevents double fetching
-}, []);
+  // DON'T FETCH HERE - let useEffect handle it
+  console.log('✋ handleBranchSelect: NOT fetching, letting useEffect handle it');
+};
 
   // Fetch pending orders with branch filter
  const fetchPendingOrders = useCallback(async (branchId?: number) => {
@@ -111,7 +111,13 @@ export const useOrdersManager = () => {
     const targetBranchId = branchId || getCurrentBranchId();
     const targetPage = page !== undefined ? page : state.pagination.currentPage;
     const targetPageSize = pageSize !== undefined ? pageSize : state.pagination.itemsPerPage;
-    
+    console.log('🔥 fetchBranchOrders CALLED:', {
+    branchId: targetBranchId,
+    page: targetPage,
+    pageSize: targetPageSize,
+    timestamp: new Date().toISOString(),
+    stackTrace: new Error().stack // This shows WHERE it was called from
+  });
     setState(prev => ({ ...prev, loading: true, error: null }));
     
     try {
@@ -486,26 +492,22 @@ const handleBranchItemsPerPageChange = (newItemsPerPage: number) => {
     }
   };
 
-// Switch view mode
-// Switch view mode
 const switchViewMode = (mode: 'pending' | 'branch' | 'deletedOrders') => {
+  console.log('🔀 switchViewMode called:', mode);
+  
   setState(prev => ({ 
     ...prev, 
     viewMode: mode,
     pagination: { 
       currentPage: 1,
-      itemsPerPage: prev.pagination.itemsPerPage, // Keep the items per page
+      itemsPerPage: prev.pagination.itemsPerPage,
       totalItems: 0,
       totalPages: 0
     }
   }));
   
-  if (mode === 'pending') {
-    fetchPendingOrders();
-  } else if (mode === 'branch') {
-    // Fetch with current itemsPerPage
-    fetchBranchOrders(undefined, 1, state.pagination.itemsPerPage);
-  }
+  // DON'T fetch here - let useEffect in component handle it
+  console.log('✋ switchViewMode: NOT fetching, letting useEffect handle it');
 };
 
   // Modal handlers

@@ -111,7 +111,7 @@ export interface OrdersManagerActions {
   fetchBranches: () => Promise<void>;
   handleBranchSelect: (branch: BranchDropdownItem) => void;
   fetchPendingOrders: (branchId?: number) => Promise<void>;
-  fetchBranchOrders: (branchId?: number) => Promise<void>;
+  fetchBranchOrders: (branchId?: number , page?: number, pageSize?: number) => Promise<void>;
   fetchTableBasketSummary: () => Promise<TableBasketSummary[]>;
   getOrderTypesForCurrentBranch: () => Promise<OrderType[]>;
   getOrderTypeText: (orderTypeId: number) => Promise<string>;
