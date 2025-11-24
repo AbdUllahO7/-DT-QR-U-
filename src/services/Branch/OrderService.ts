@@ -86,97 +86,60 @@ class OrderService {
     }
   }
 
-  async getBranchOrders(branchId?: number): Promise<BranchOrder[]> {
-    try {
-      const allOrders: BranchOrder[] = [];
-      let currentPage = 1;
-      const pageSize = 20;
-      let totalPages = 1;
-      
-      logger.info('Branch orders getirme isteği başlatılıyor', { branchId }, { prefix: 'OrderService' });
-      
-      while (currentPage <= totalPages) {
-        try {
-          const params: any = {
-            page: currentPage,
-            pageSize: pageSize,
-            includeItems: true
-          };
-          
-          // Add branchId if provided
-          if (branchId) {
-            params.branchId = branchId;
-          }
-          
-          const response = await httpClient.get(`${this.baseUrl}/branch`, {
-            params
-          });
-          
-          // Extract pagination info from response
-          const responseData = response.data;
-          let pageOrders: BranchOrder[] = [];
-          
-          // Check for direct structure with items array
-          if (responseData && typeof responseData === 'object' && 'items' in responseData) {
-            pageOrders = Array.isArray(responseData.items) ? responseData.items : [];
-            totalPages = responseData.totalPages || 1;
-          } 
-          // Check if response has nested structure with data.items
-          else if (responseData && typeof responseData === 'object' && 'data' in responseData) {
-            const nestedData = responseData.data;
-            if (nestedData && 'items' in nestedData) {
-              pageOrders = Array.isArray(nestedData.items) ? nestedData.items : [];
-              totalPages = nestedData.totalPages || 1;
-            }
-          } 
-          // Fallback: direct array response
-          else if (Array.isArray(responseData)) {
-            pageOrders = responseData;
-          }
-          
-          logger.info('Branch orders sayfa alındı', { 
-            branchId,
-            page: currentPage,
-            totalPages: totalPages,
-            ordersCount: pageOrders.length,
-            totalSoFar: allOrders.length + pageOrders.length
-          }, { prefix: 'OrderService' });
-          
-          // Add orders from this page to the total
-          allOrders.push(...pageOrders);
-          
-          // Move to next page
-          currentPage++;
-          
-          // Add delay between requests
-          if (currentPage <= totalPages) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-          }
-          
-        } catch (pageError: any) {
-          // If it's a 404, we might have reached the end
-          if (pageError?.response?.status === 404) {
-            break;
-          } else {
-            throw pageError;
-          }
-        }
-      }
-      
-      logger.info('Branch orders tamamlandı', { 
-        branchId,
-        totalOrders: allOrders.length,
-        totalPages
-      }, { prefix: 'OrderService' });
-      
-      return allOrders;
-      
-    } catch (error: any) {
-      logger.error('Branch orders getirme hatası', error, { prefix: 'OrderService' });
-      this.handleError(error, 'Branch orders getirilirken hata oluştu');
-      return [];
+async getBranchOrders(
+  branchId?: number, 
+  page: number = 1, 
+  pageSize: number = 10
+): Promise<{ orders: BranchOrder[], totalItems: number, totalPages: number }> {
+  try {
+    logger.info('Branch orders getirme isteği başlatılıyor', { branchId, page, pageSize }, { prefix: 'OrderService' });
+    
+    const params: any = {
+      page: page,
+      pageSize: pageSize,
+      includeItems: true
+    };
+    
+    if (branchId) {
+      params.branchId = branchId;
     }
+    
+    console.log("📤 API Request params:", params);
+    const response = await httpClient.get(`${this.baseUrl}/branch`, { params });
+    
+    const responseData = response.data;
+    let orders: BranchOrder[] = [];
+    let totalItems = 0;
+    let totalPages = 1;
+    
+    // Your API structure: { items: [...], currentPage, pageSize, totalCount, totalPages }
+    if (responseData && typeof responseData === 'object' && 'items' in responseData) {
+      orders = Array.isArray(responseData.items) ? responseData.items : [];
+      totalPages = responseData.totalPages || 1;
+      // FIXED: Use totalCount instead of totalItems
+      totalItems = responseData.totalCount || responseData.totalItems || 0;
+    }
+    
+    console.log("🎯 OrderService Final result:", {
+      ordersLength: orders.length,
+      totalItems,
+      totalPages,
+      page,
+      pageSize
+    });
+    
+    return {
+      orders,
+      totalItems,
+      totalPages
+    };
+    
+  } catch (error: any) {
+    logger.error('Branch orders getirme hatası', error, { prefix: 'OrderService' });
+    this.handleError(error, 'Branch orders getirilirken hata oluştu');
+    return { orders: [], totalItems: 0, totalPages: 0 };
   }
+}
 
   async getTableOrders(tableId: number, branchId?: number): Promise<Order[]> {
     try {

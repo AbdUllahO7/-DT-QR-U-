@@ -42,10 +42,13 @@ const OrdersManager: React.FC = () => {
       toggleRowExpansion,
       handleSort,
       fetchBranchOrders,
+      handleBranchPageChange,
+      handleBranchItemsPerPageChange,
       setState
     }
   } = useOrdersManager();
 
+  // Client-side filtering only for pending orders
   const {
     filteredOrders,
     updateFilter,
@@ -54,11 +57,36 @@ const OrdersManager: React.FC = () => {
     hasActiveFilters
   } = useFiltering(state, setState);
 
+  // Client-side pagination only for pending orders
+  // Create a separate state updater that only runs for pending mode
+  const pendingSetState = React.useCallback((newState: any) => {
+    if (state.viewMode === 'pending') {
+      setState(newState);
+    }
+  }, [state.viewMode, setState]);
+
   const {
     paginatedOrders,
     changePage,
     changeItemsPerPage
-  } = usePagination(filteredOrders, state.pagination, setState);
+  } = usePagination(filteredOrders, state.pagination, pendingSetState);
+
+  // Determine which orders to display and which handlers to use based on view mode
+  const displayOrders = state.viewMode === 'branch' 
+    ? state.branchOrders  // Server-side paginated
+    : paginatedOrders;     // Client-side paginated
+
+  const displayTotalFiltered = state.viewMode === 'branch' 
+    ? state.pagination.totalItems  // From API
+    : filteredOrders.length;       // From client-side filtering
+
+  const handlePageChangeInternal = state.viewMode === 'branch' 
+    ? handleBranchPageChange      // Server-side
+    : changePage;                 // Client-side
+
+  const handleItemsPerPageChangeInternal = state.viewMode === 'branch' 
+    ? handleBranchItemsPerPageChange  // Server-side
+    : changeItemsPerPage;             // Client-side
 
   // Initial fetch on mount
   useEffect(() => {
@@ -97,44 +125,47 @@ const OrdersManager: React.FC = () => {
         <ViewModeToggle 
           viewMode={state.viewMode}
           pendingCount={state.pendingOrders.length}
-          branchCount={state.branchOrders.length}
+          branchCount={state.viewMode === 'branch' ? state.pagination.totalItems : state.branchOrders.length}
           onModeChange={switchViewMode}
           t={t}
         />
 
-        <FilterSection
-          filters={state.filters}
-          showAdvancedFilters={state.showAdvancedFilters}
-          hasActiveFilters={hasActiveFilters}
-          viewMode={state.viewMode}
-          lang={lang}
-          filteredCount={filteredOrders.length}
-          totalCount={state.viewMode === 'pending' ? state.pendingOrders.length : state.branchOrders.length}
-          onUpdateFilter={updateFilter}
-          onUpdateNestedFilter={updateNestedFilter}
-          onClearFilters={clearFilters}
-          onToggleAdvanced={() => setState(prev => ({ ...prev, showAdvancedFilters: !prev.showAdvancedFilters }))}
-          t={t}
-        />
+        {/* Filter Section - Only for pending orders */}
+        {state.viewMode === 'pending' && (
+          <FilterSection
+            filters={state.filters}
+            showAdvancedFilters={state.showAdvancedFilters}
+            hasActiveFilters={hasActiveFilters}
+            viewMode={state.viewMode}
+            lang={lang}
+            filteredCount={filteredOrders.length}
+            totalCount={state.pendingOrders.length}
+            onUpdateFilter={updateFilter}
+            onUpdateNestedFilter={updateNestedFilter}
+            onClearFilters={clearFilters}
+            onToggleAdvanced={() => setState(prev => ({ ...prev, showAdvancedFilters: !prev.showAdvancedFilters }))}
+            t={t}
+          />
+        )}
 
         <PaginationControls
           pagination={state.pagination}
-          totalFiltered={filteredOrders.length}
-          onPageChange={changePage}
-          onItemsPerPageChange={changeItemsPerPage}
+          totalFiltered={displayTotalFiltered}
+          onPageChange={handlePageChangeInternal}
+          onItemsPerPageChange={handleItemsPerPageChangeInternal}
           t={t}
         />
 
         <ErrorNotification error={state.error} />
 
         <OrdersTable
-          orders={paginatedOrders}
+          orders={displayOrders}
           viewMode={state.viewMode}
           loading={state.loading}
           expandedRows={state.expandedRows}
           sortField={state.sortField}
           sortDirection={state.sortDirection}
-          hasActiveFilters={hasActiveFilters}
+          hasActiveFilters={state.viewMode === 'pending' ? hasActiveFilters : false}
           lang={lang}
           onSort={handleSort}
           onToggleExpansion={toggleRowExpansion}

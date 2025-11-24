@@ -1,6 +1,6 @@
 'use client';
 
-import React, {  useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { ChevronDown, Users } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../../hooks';
@@ -46,10 +46,13 @@ const OrdersManagerRestaurant: React.FC = () => {
       setState,
       handleCancelOrder,
       openCancelModal,
-      fetchBranchOrders
+      fetchBranchOrders,
+      handleBranchPageChange,
+      handleBranchItemsPerPageChange
     }
   } = useOrdersManager();
 
+  // Client-side filtering only for pending orders
   const {
     filteredOrders,
     updateFilter,
@@ -58,11 +61,19 @@ const OrdersManagerRestaurant: React.FC = () => {
     hasActiveFilters
   } = useFiltering(state, setState);
 
+  // Client-side pagination only for pending orders
+  // Create a separate state updater that only runs for pending mode
+  const pendingSetState = React.useCallback((newState: any) => {
+    if (state.viewMode === 'pending') {
+      setState(newState);
+    }
+  }, [state.viewMode, setState]);
+
   const {
     paginatedOrders,
     changePage,
     changeItemsPerPage
-  } = usePagination(filteredOrders, state.pagination, setState);
+  } = usePagination(filteredOrders, state.pagination, pendingSetState);
 
   // Dropdown ref for click outside
   const dropdownRef = React.useRef<HTMLDivElement>(null);
@@ -71,20 +82,18 @@ const OrdersManagerRestaurant: React.FC = () => {
   // Initial fetch on mount
   useEffect(() => {
     fetchBranches();
-      fetchBranchOrders();
-      fetchBranchOrders();
   }, []);
 
-  // Fetch orders when branch is selected
+  // Fetch orders when branch is selected or view mode changes
   useEffect(() => {
     if (state.selectedBranch) {
       if (state.viewMode === 'pending') {
         fetchPendingOrders();
-      } else {
-        fetchBranchOrders();
+      } else if (state.viewMode === 'branch') {
+        fetchBranchOrders(state.selectedBranch.branchId);
       }
     }
-  }, [state.selectedBranch]);
+  }, [state.selectedBranch, state.viewMode]);
 
   const toggleBranchDropdown = () => {
     setState(prev => ({ 
@@ -96,6 +105,30 @@ const OrdersManagerRestaurant: React.FC = () => {
   const handleBranchSelectInternal = (branch: any) => {
     handleBranchSelect(branch);
   };
+
+  // Determine which orders to display and which handlers to use based on view mode
+  const displayOrders = state.viewMode === 'branch' 
+    ? state.branchOrders  // Server-side paginated
+    : paginatedOrders;     // Client-side paginated
+
+  const displayTotalFiltered = state.viewMode === 'branch' 
+    ? state.pagination.totalItems  // From API
+    : filteredOrders.length;       // From client-side filtering
+
+  const handlePageChangeInternal = state.viewMode === 'branch' 
+    ? handleBranchPageChange      // Server-side
+    : changePage;                 // Client-side
+
+  const handleItemsPerPageChangeInternal = state.viewMode === 'branch' 
+    ? handleBranchItemsPerPageChange  // Server-side
+    : changeItemsPerPage;             // Client-side
+
+  console.log('🎨 OrdersManagerRestaurant render:', {
+    viewMode: state.viewMode,
+    branchOrdersLength: state.branchOrders.length,
+    paginationTotalItems: state.pagination.totalItems,
+    paginationTotalPages: state.pagination.totalPages
+  });
 
   // Show branch selection if no branch is selected
   if (!state.selectedBranch && !state.loading) {
@@ -194,51 +227,56 @@ const OrdersManagerRestaurant: React.FC = () => {
               </div>
             )}
           </div>
-
-
         </div>
 
+        {/* View Mode Toggle */}
         <ViewModeToggle 
           viewMode={state.viewMode}
           pendingCount={state.pendingOrders.length}
-          branchCount={state.branchOrders.length}
+          branchCount={state.pagination.totalItems || state.branchOrders.length}
           onModeChange={switchViewMode}
           t={t}
         />
 
-        <FilterSection
-          filters={state.filters}
-          showAdvancedFilters={state.showAdvancedFilters}
-          hasActiveFilters={hasActiveFilters}
-          viewMode={state.viewMode}
-          lang={lang}
-          filteredCount={filteredOrders.length}
-          totalCount={state.viewMode === 'pending' ? state.pendingOrders.length : state.branchOrders.length}
-          onUpdateFilter={updateFilter}
-          onUpdateNestedFilter={updateNestedFilter}
-          onClearFilters={clearFilters}
-          onToggleAdvanced={() => setState(prev => ({ ...prev, showAdvancedFilters: !prev.showAdvancedFilters }))}
-          t={t}
-        />
+        {/* Filter Section - Only for pending orders */}
+        {state.viewMode === 'pending' && (
+          <FilterSection
+            filters={state.filters}
+            showAdvancedFilters={state.showAdvancedFilters}
+            hasActiveFilters={hasActiveFilters}
+            viewMode={state.viewMode}
+            lang={lang}
+            filteredCount={filteredOrders.length}
+            totalCount={state.pendingOrders.length}
+            onUpdateFilter={updateFilter}
+            onUpdateNestedFilter={updateNestedFilter}
+            onClearFilters={clearFilters}
+            onToggleAdvanced={() => setState(prev => ({ ...prev, showAdvancedFilters: !prev.showAdvancedFilters }))}
+            t={t}
+          />
+        )}
 
+        {/* Pagination Controls */}
         <PaginationControls
           pagination={state.pagination}
-          totalFiltered={filteredOrders.length}
-          onPageChange={changePage}
-          onItemsPerPageChange={changeItemsPerPage}
+          totalFiltered={displayTotalFiltered}
+          onPageChange={handlePageChangeInternal}
+          onItemsPerPageChange={handleItemsPerPageChangeInternal}
           t={t}
         />
 
+        {/* Error Notification */}
         <ErrorNotification error={state.error} />
 
+        {/* Orders Table */}
         <OrdersTable
-          orders={paginatedOrders}
+          orders={displayOrders}
           viewMode={state.viewMode}
           loading={state.loading}
           expandedRows={state.expandedRows}
           sortField={state.sortField}
           sortDirection={state.sortDirection}
-          hasActiveFilters={hasActiveFilters}
+          hasActiveFilters={state.viewMode === 'pending' ? hasActiveFilters : false}
           lang={lang}
           onSort={handleSort}
           onToggleExpansion={toggleRowExpansion}
@@ -251,6 +289,7 @@ const OrdersManagerRestaurant: React.FC = () => {
           t={t}
         />
 
+        {/* Modals */}
         <CancelModal
           show={state.showCancelModal}
           loading={state.loading}
@@ -259,7 +298,6 @@ const OrdersManagerRestaurant: React.FC = () => {
           t={t}
         />
 
-        {/* Modals */}
         <ConfirmModal
           show={state.showConfirmModal}
           loading={state.loading}

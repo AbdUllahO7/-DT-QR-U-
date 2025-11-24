@@ -145,4 +145,8 @@ export interface OrdersManagerActions {
   toggleRowExpansion: (orderId: string) => void;
   handleSort: (field: string) => void;
   setState: React.Dispatch<React.SetStateAction<OrdersManagerState>>;
+  handlePageChange: (newPage: number) => void;
+  handleItemsPerPageChange: (newItemsPerPage: number) => void;
+  handleBranchPageChange : (newPage: number) => void;
+  handleBranchItemsPerPageChange : (newItemsPerPage: number) => void;
 }
