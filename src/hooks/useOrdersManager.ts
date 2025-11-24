@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { OrdersManagerActions, OrdersManagerState, OrderStatusEnums } from '../types/Orders/type';
 import { orderService } from '../services/Branch/OrderService';
 import { branchService } from '../services/branchService';
@@ -79,29 +79,24 @@ export const useOrdersManager = () => {
   };
 
   // Handle branch selection
-  const handleBranchSelect = (branch: BranchDropdownItem) => {
-    setState(prev => ({ 
-      ...prev, 
-      selectedBranch: branch,
-      isBranchDropdownOpen: false,
-      error: null,
-      // Reset pagination when switching branches
-      pagination: { ...prev.pagination, currentPage: 1 }
-    }));
-    
-    // Clear order types cache when switching branches to force refresh
-    orderService.clearOrderTypesCache();
-    
-    // Refetch orders for the new branch
-    if (state.viewMode === 'pending') {
-      fetchPendingOrders(branch.branchId);
-    } else {
-      fetchBranchOrders(branch.branchId);
-    }
-  };
+ const handleBranchSelect = useCallback((branch: BranchDropdownItem) => {
+  setState(prev => ({ 
+    ...prev, 
+    selectedBranch: branch,
+    isBranchDropdownOpen: false,
+    error: null,
+    pagination: { ...prev.pagination, currentPage: 1 }
+  }));
+  
+  // Clear order types cache when switching branches
+  orderService.clearOrderTypesCache();
+  
+  // DON'T fetch here - let the useEffect in the component handle it
+  // This prevents double fetching
+}, []);
 
   // Fetch pending orders with branch filter
-  const fetchPendingOrders = async (branchId?: number) => {
+ const fetchPendingOrders = useCallback(async (branchId?: number) => {
     const targetBranchId = branchId || getCurrentBranchId();
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
@@ -110,30 +105,19 @@ export const useOrdersManager = () => {
     } catch (error: any) {
       setState(prev => ({ ...prev, error: error.message, loading: false }));
     }
-  };
+  }, [getCurrentBranchId]);
 
-const fetchBranchOrders = async (branchId?: number, page?: number, pageSize?: number) => {
-  const targetBranchId = branchId || getCurrentBranchId();
-  const targetPage = page !== undefined ? page : state.pagination.currentPage;
-  const targetPageSize = pageSize !== undefined ? pageSize : state.pagination.itemsPerPage;
-  
-  console.log('🚀 fetchBranchOrders called:', { branchId: targetBranchId, page: targetPage, pageSize: targetPageSize });
-  
-  setState(prev => ({ ...prev, loading: true, error: null }));
-  
-  try {
-    const result = await orderService.getBranchOrders(targetBranchId, targetPage, targetPageSize);
+  const fetchBranchOrders = useCallback(async (branchId?: number, page?: number, pageSize?: number) => {
+    const targetBranchId = branchId || getCurrentBranchId();
+    const targetPage = page !== undefined ? page : state.pagination.currentPage;
+    const targetPageSize = pageSize !== undefined ? pageSize : state.pagination.itemsPerPage;
     
-    console.log('✅ API Fetch result:', {
-      ordersCount: result.orders.length,
-      totalItems: result.totalItems,
-      totalPages: result.totalPages,
-      currentPage: targetPage,
-      pageSize: targetPageSize
-    });
+    setState(prev => ({ ...prev, loading: true, error: null }));
     
-    setState(prev => {
-      const newState = {
+    try {
+      const result = await orderService.getBranchOrders(targetBranchId, targetPage, targetPageSize);
+      
+      setState(prev => ({
         ...prev, 
         branchOrders: result.orders, 
         loading: false,
@@ -143,31 +127,22 @@ const fetchBranchOrders = async (branchId?: number, page?: number, pageSize?: nu
           totalItems: result.totalItems,
           totalPages: result.totalPages
         }
-      };
-      
-      console.log('✅ State updated with:', {
-        branchOrdersLength: newState.branchOrders.length,
-        paginationTotalItems: newState.pagination.totalItems,
-        paginationTotalPages: newState.pagination.totalPages
-      });
-      
-      return newState;
-    });
-  } catch (error: any) {
-    console.error('❌ fetchBranchOrders error:', error);
-    setState(prev => ({ 
-      ...prev, 
-      error: error.message, 
-      loading: false,
-      branchOrders: [],
-      pagination: {
-        ...prev.pagination,
-        totalItems: 0,
-        totalPages: 0
-      }
-    }));
-  }
-};
+      }));
+    } catch (error: any) {
+      setState(prev => ({ 
+        ...prev, 
+        error: error.message, 
+        loading: false,
+        branchOrders: [],
+        pagination: {
+          ...prev.pagination,
+          totalItems: 0,
+          totalPages: 0
+        }
+      }));
+    }
+  }, [getCurrentBranchId, state.pagination.currentPage, state.pagination.itemsPerPage]);
+
 
 // Handle page change for branch orders
 // Handle page change for branch orders

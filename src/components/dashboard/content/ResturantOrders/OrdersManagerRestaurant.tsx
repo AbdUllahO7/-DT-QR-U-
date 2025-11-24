@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { ChevronDown, Users } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../../hooks';
@@ -63,7 +63,7 @@ const OrdersManagerRestaurant: React.FC = () => {
 
   // Client-side pagination only for pending orders
   // Create a separate state updater that only runs for pending mode
-  const pendingSetState = React.useCallback((newState: any) => {
+  const pendingSetState = useCallback((newState: any) => {
     if (state.viewMode === 'pending') {
       setState(newState);
     }
@@ -79,22 +79,39 @@ const OrdersManagerRestaurant: React.FC = () => {
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setState(prev => ({ ...prev, isBranchDropdownOpen: false })));
 
+    const initialFetchDone = React.useRef(false);
+
+      useEffect(() => {
+    if (!initialFetchDone.current) {
+      initialFetchDone.current = true;
+      fetchBranches();
+    }
+  }, []); // Empty dependency array - run only once
+    const lastFetchRef = useRef<string>('');
+
   // Initial fetch on mount
   useEffect(() => {
     fetchBranches();
   }, []);
 
-  // Fetch orders when branch is selected or view mode changes
-  useEffect(() => {
-    if (state.selectedBranch) {
-      if (state.viewMode === 'pending') {
-        fetchPendingOrders();
-      } else if (state.viewMode === 'branch') {
-        fetchBranchOrders(state.selectedBranch.branchId);
-      }
-    }
-  }, [state.selectedBranch, state.viewMode]);
+   useEffect(() => {
+    if (!state.selectedBranch) return;
 
+    const fetchKey = `${state.selectedBranch.branchId}-${state.viewMode}`;
+    
+    // Prevent duplicate fetches
+    if (lastFetchRef.current === fetchKey) return;
+    lastFetchRef.current = fetchKey;
+
+    if (state.viewMode === 'pending') {
+      fetchPendingOrders(state.selectedBranch.branchId);
+    } else if (state.viewMode === 'branch') {
+      fetchBranchOrders(state.selectedBranch.branchId);
+    }
+  }, [state.selectedBranch?.branchId, state.viewMode]); // Only depend on IDs, not entire objects
+
+
+  
   const toggleBranchDropdown = () => {
     setState(prev => ({ 
       ...prev, 
