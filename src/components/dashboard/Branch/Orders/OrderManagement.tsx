@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useOrdersManager } from '../../../../hooks/useOrdersManager';
 import { useFiltering } from '../../../../hooks/useFiltering';
@@ -57,19 +57,24 @@ const OrdersManager: React.FC = () => {
     hasActiveFilters
   } = useFiltering(state, setState);
 
-  // Client-side pagination only for pending orders
   // Create a separate state updater that only runs for pending mode
-  const pendingSetState = React.useCallback((newState: any) => {
+  const pendingSetState = useCallback((newState: any) => {
     if (state.viewMode === 'pending') {
       setState(newState);
     }
   }, [state.viewMode, setState]);
 
+  // Client-side pagination only for pending orders
   const {
     paginatedOrders,
     changePage,
     changeItemsPerPage
   } = usePagination(filteredOrders, state.pagination, pendingSetState);
+
+  // Refs to track what's been fetched to prevent duplicates
+  const fetchedInitially = useRef(false);
+  const isFetchingRef = useRef(false);
+  const lastFetchedConfig = useRef<{viewMode: string, page: number, pageSize: number} | null>(null);
 
   // Determine which orders to display and which handlers to use based on view mode
   const displayOrders = state.viewMode === 'branch' 
@@ -88,11 +93,80 @@ const OrdersManager: React.FC = () => {
     ? handleBranchItemsPerPageChange  // Server-side
     : changeItemsPerPage;             // Client-side
 
-  // Initial fetch on mount
+  // Initial fetch on mount - only once
   useEffect(() => {
-    fetchPendingOrders();
-    fetchBranchOrders();
-  }, []);
+    console.log('🎬 Initial mount effect running');
+    if (!fetchedInitially.current) {
+      fetchedInitially.current = true;
+      console.log('📋 Initial fetch of pending and branch orders...');
+      fetchPendingOrders();
+      // Don't fetch branch orders here - let the main effect handle it
+    }
+  }, []); // Run only once on mount
+
+  // Main fetch effect - handles view mode and pagination changes
+  useEffect(() => {
+    console.log('📊 Orders fetch effect triggered:', {
+      viewMode: state.viewMode,
+      currentPage: state.pagination.currentPage,
+      itemsPerPage: state.pagination.itemsPerPage,
+      isFetching: isFetchingRef.current
+    });
+
+    // Skip if already fetching
+    if (isFetchingRef.current) {
+      console.log('⏭️ Skipping fetch - already fetching');
+      return;
+    }
+
+    const currentConfig = {
+      viewMode: state.viewMode,
+      page: state.pagination.currentPage,
+      pageSize: state.pagination.itemsPerPage
+    };
+
+    // Check if this exact configuration has already been fetched
+    if (lastFetchedConfig.current &&
+        lastFetchedConfig.current.viewMode === currentConfig.viewMode &&
+        lastFetchedConfig.current.page === currentConfig.page &&
+        lastFetchedConfig.current.pageSize === currentConfig.pageSize) {
+      console.log('✋ Same config already fetched, skipping:', currentConfig);
+      return;
+    }
+
+    console.log('✅ New config, fetching orders:', currentConfig);
+    
+    // Set fetching flag BEFORE updating ref
+    isFetchingRef.current = true;
+    lastFetchedConfig.current = currentConfig;
+
+    const fetchData = async () => {
+      try {
+        if (state.viewMode === 'pending') {
+          console.log('📥 Calling fetchPendingOrders');
+          await fetchPendingOrders();
+        } else if (state.viewMode === 'branch') {
+          console.log('📥 Calling fetchBranchOrders');
+          await fetchBranchOrders(
+            undefined, // branchId (for branch users, it's handled internally)
+            state.pagination.currentPage,
+            state.pagination.itemsPerPage
+          );
+        }
+      } finally {
+        // Clear fetching flag after completion
+        isFetchingRef.current = false;
+      }
+    };
+
+    fetchData();
+  }, [
+    state.viewMode,
+    state.pagination.currentPage,
+    state.pagination.itemsPerPage,
+    fetchPendingOrders,
+    fetchBranchOrders
+  ]);
 
   // Auto-refresh pending orders every 30 seconds
   useEffect(() => {
@@ -103,7 +177,8 @@ const OrdersManager: React.FC = () => {
 
     // Only set up auto-refresh if we're in pending view mode
     if (state.viewMode === 'pending') {
-      intervalRef.current = setInterval(() => {
+      intervalRef.current = window.setInterval(() => {
+        console.log('🔄 Auto-refreshing pending orders...');
         fetchPendingOrders();
       }, 30000); // 30 seconds
     }
@@ -125,7 +200,7 @@ const OrdersManager: React.FC = () => {
         <ViewModeToggle 
           viewMode={state.viewMode}
           pendingCount={state.pendingOrders.length}
-          branchCount={state.viewMode === 'branch' ? state.pagination.totalItems : state.branchOrders.length}
+          branchCount={state.pagination.totalItems || state.branchOrders.length}
           onModeChange={switchViewMode}
           t={t}
         />

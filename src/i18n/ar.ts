@@ -3844,6 +3844,7 @@ contact: {
     serviceFeeApplied:"رسوم الخدمة",
     modificationHistory:"تاريخ التعديل",
     DeliveryAddress : 'عنوان التسليم',
+    loadingOrders:"جاري تحميل الطلبات...",
         lastModifiedAt : "آخر تعديل",
     modifiedBy : "تم التعديل بواسطة",
     modificationDetails:"تفاصيل التعديل",

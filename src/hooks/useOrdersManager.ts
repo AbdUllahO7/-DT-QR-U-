@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { OrdersManagerActions, OrdersManagerState, OrderStatusEnums } from '../types/Orders/type';
 import { orderService } from '../services/Branch/OrderService';
 import { branchService } from '../services/branchService';
@@ -79,29 +79,24 @@ export const useOrdersManager = () => {
   };
 
   // Handle branch selection
-  const handleBranchSelect = (branch: BranchDropdownItem) => {
-    setState(prev => ({ 
-      ...prev, 
-      selectedBranch: branch,
-      isBranchDropdownOpen: false,
-      error: null,
-      // Reset pagination when switching branches
-      pagination: { ...prev.pagination, currentPage: 1 }
-    }));
-    
-    // Clear order types cache when switching branches to force refresh
-    orderService.clearOrderTypesCache();
-    
-    // Refetch orders for the new branch
-    if (state.viewMode === 'pending') {
-      fetchPendingOrders(branch.branchId);
-    } else {
-      fetchBranchOrders(branch.branchId);
-    }
-  };
+const handleBranchSelect = (branch: BranchDropdownItem) => {
+  console.log('🏢 handleBranchSelect called:', branch.branchName);
+  setState(prev => ({ 
+    ...prev, 
+    selectedBranch: branch,
+    isBranchDropdownOpen: false,
+    error: null,
+    pagination: { ...prev.pagination, currentPage: 1 }
+  }));
+  
+  orderService.clearOrderTypesCache();
+  
+  // DON'T FETCH HERE - let useEffect handle it
+  console.log('✋ handleBranchSelect: NOT fetching, letting useEffect handle it');
+};
 
   // Fetch pending orders with branch filter
-  const fetchPendingOrders = async (branchId?: number) => {
+ const fetchPendingOrders = useCallback(async (branchId?: number) => {
     const targetBranchId = branchId || getCurrentBranchId();
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
@@ -110,90 +105,73 @@ export const useOrdersManager = () => {
     } catch (error: any) {
       setState(prev => ({ ...prev, error: error.message, loading: false }));
     }
-  };
+  }, [getCurrentBranchId]);
 
-const fetchBranchOrders = async (branchId?: number, page?: number, pageSize?: number) => {
-  const targetBranchId = branchId || getCurrentBranchId();
+const fetchBranchOrders = useCallback(async (branchId?: number, page?: number, pageSize?: number) => {
+  const targetBranchId = branchId || state.selectedBranch?.branchId;
   const targetPage = page !== undefined ? page : state.pagination.currentPage;
   const targetPageSize = pageSize !== undefined ? pageSize : state.pagination.itemsPerPage;
   
-  console.log('🚀 fetchBranchOrders called:', { branchId: targetBranchId, page: targetPage, pageSize: targetPageSize });
+  console.log('🔥 fetchBranchOrders CALLED:', {
+    branchId: targetBranchId,
+    page: targetPage,
+    pageSize: targetPageSize,
+    timestamp: new Date().toISOString()
+  });
   
   setState(prev => ({ ...prev, loading: true, error: null }));
   
   try {
     const result = await orderService.getBranchOrders(targetBranchId, targetPage, targetPageSize);
     
-    console.log('✅ API Fetch result:', {
-      ordersCount: result.orders.length,
-      totalItems: result.totalItems,
-      totalPages: result.totalPages,
-      currentPage: targetPage,
-      pageSize: targetPageSize
-    });
-    
-    setState(prev => {
-      const newState = {
-        ...prev, 
-        branchOrders: result.orders, 
-        loading: false,
-        pagination: {
-          currentPage: targetPage,
-          itemsPerPage: targetPageSize,
-          totalItems: result.totalItems,
-          totalPages: result.totalPages
-        }
-      };
-      
-      console.log('✅ State updated with:', {
-        branchOrdersLength: newState.branchOrders.length,
-        paginationTotalItems: newState.pagination.totalItems,
-        paginationTotalPages: newState.pagination.totalPages
-      });
-      
-      return newState;
-    });
+    // ✅ FIXED: Don't update currentPage/itemsPerPage here - only update the results
+    setState(prev => ({
+      ...prev, 
+      branchOrders: result.orders, 
+      loading: false,
+      pagination: {
+        ...prev.pagination, // ✅ Preserve current pagination state
+        totalItems: result.totalItems,
+        totalPages: result.totalPages
+      }
+    }));
   } catch (error: any) {
-    console.error('❌ fetchBranchOrders error:', error);
     setState(prev => ({ 
       ...prev, 
       error: error.message, 
       loading: false,
       branchOrders: [],
       pagination: {
-        ...prev.pagination,
+        ...prev.pagination, // ✅ Preserve current pagination state
         totalItems: 0,
         totalPages: 0
       }
     }));
   }
-};
+}, []); // ✅ Empty dependencies
 
-// Handle page change for branch orders
-// Handle page change for branch orders
 const handleBranchPageChange = (newPage: number) => {
   console.log('🔄 Changing page to:', newPage);
   
-  fetchBranchOrders(undefined, newPage, state.pagination.itemsPerPage);
+  // ✅ Update state first - useEffect will trigger fetch
+  setState(prev => ({
+    ...prev,
+    pagination: { ...prev.pagination, currentPage: newPage }
+  }));
 };
 
-// Handle items per page change for branch orders
-// Handle items per page change for branch orders
 const handleBranchItemsPerPageChange = (newItemsPerPage: number) => {
-  console.log('Changing items per page to:', newItemsPerPage);
+  console.log('📏 Changing items per page to:', newItemsPerPage);
   
-  // First update the state
+  // ✅ Update state first - useEffect will trigger fetch
   setState(prev => ({
     ...prev,
     pagination: { 
       ...prev.pagination, 
       itemsPerPage: newItemsPerPage, 
-      currentPage: 1 
+      currentPage: 1 // Reset to page 1
     }
   }));
-  
-  fetchBranchOrders(undefined, 1, newItemsPerPage);
-
 };
     // Handle page change
     const handlePageChange = (newPage: number) => {
@@ -511,26 +489,22 @@ const handleBranchItemsPerPageChange = (newItemsPerPage: number) => {
     }
   };
 
-// Switch view mode
-// Switch view mode
 const switchViewMode = (mode: 'pending' | 'branch' | 'deletedOrders') => {
+  console.log('🔀 switchViewMode called:', mode);
+  
   setState(prev => ({ 
     ...prev, 
     viewMode: mode,
     pagination: { 
       currentPage: 1,
-      itemsPerPage: prev.pagination.itemsPerPage, // Keep the items per page
+      itemsPerPage: prev.pagination.itemsPerPage,
       totalItems: 0,
       totalPages: 0
     }
   }));
   
-  if (mode === 'pending') {
-    fetchPendingOrders();
-  } else if (mode === 'branch') {
-    // Fetch with current itemsPerPage
-    fetchBranchOrders(undefined, 1, state.pagination.itemsPerPage);
-  }
+  // DON'T fetch here - let useEffect in component handle it
+  console.log('✋ switchViewMode: NOT fetching, letting useEffect handle it');
 };
 
   // Modal handlers

@@ -3842,6 +3842,7 @@ overview: {
     lastModifiedAt : "Last Modified At",
     modifiedBy : "ModifiedBy",
     modificationDetails:"Modification Details",
+    loadingOrders:"Loading Orders...",
     items:"items",
     OrderType : 'Order Type',
     serviceFeeApplied:"Service Charge",
