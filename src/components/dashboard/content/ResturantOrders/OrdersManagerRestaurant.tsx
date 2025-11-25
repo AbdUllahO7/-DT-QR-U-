@@ -74,8 +74,9 @@ const OrdersManagerRestaurant: React.FC = () => {
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setState(prev => ({ ...prev, isBranchDropdownOpen: false })));
 
-  // Use refs to track what's been fetched to prevent duplicates
+  // Refs to track what's been fetched to prevent duplicates
   const fetchedBranches = useRef(false);
+  const isFetchingRef = useRef(false);
   const lastFetchedConfig = useRef<{branchId?: number, viewMode: string, page: number, pageSize: number} | null>(null);
 
   // Initial fetch - ONLY fetchBranches, nothing else
@@ -94,11 +95,12 @@ const OrdersManagerRestaurant: React.FC = () => {
       selectedBranch: state.selectedBranch?.branchId,
       viewMode: state.viewMode,
       currentPage: state.pagination.currentPage,
-      itemsPerPage: state.pagination.itemsPerPage
+      itemsPerPage: state.pagination.itemsPerPage,
+      isFetching: isFetchingRef.current
     });
 
-    if (!state.selectedBranch) {
-      console.log('⏭️ No branch selected, skipping fetch');
+    if (!state.selectedBranch || isFetchingRef.current) {
+      console.log('⏭️ Skipping fetch - no branch or already fetching');
       return;
     }
 
@@ -120,24 +122,38 @@ const OrdersManagerRestaurant: React.FC = () => {
     }
 
     console.log('✅ New config, fetching orders:', currentConfig);
+    
+    // Set fetching flag BEFORE updating ref
+    isFetchingRef.current = true;
     lastFetchedConfig.current = currentConfig;
 
-    if (state.viewMode === 'pending') {
-      console.log('📥 Calling fetchPendingOrders');
-      fetchPendingOrders(state.selectedBranch.branchId);
-    } else if (state.viewMode === 'branch') {
-      console.log('📥 Calling fetchBranchOrders');
-      fetchBranchOrders(
-        state.selectedBranch.branchId,
-        state.pagination.currentPage,
-        state.pagination.itemsPerPage
-      );
-    }
+    const fetchData = async () => {
+      try {
+        if (state.viewMode === 'pending') {
+          console.log('📥 Calling fetchPendingOrders');
+          await fetchPendingOrders(state.selectedBranch!.branchId);
+        } else if (state.viewMode === 'branch') {
+          console.log('📥 Calling fetchBranchOrders');
+          await fetchBranchOrders(
+            state.selectedBranch!.branchId,
+            state.pagination.currentPage,
+            state.pagination.itemsPerPage
+          );
+        }
+      } finally {
+        // Clear fetching flag after completion
+        isFetchingRef.current = false;
+      }
+    };
+
+    fetchData();
   }, [
     state.selectedBranch?.branchId,
     state.viewMode,
     state.pagination.currentPage,
-    state.pagination.itemsPerPage
+    state.pagination.itemsPerPage,
+    fetchPendingOrders,
+    fetchBranchOrders
   ]);
 
   const toggleBranchDropdown = () => {
@@ -151,6 +167,7 @@ const OrdersManagerRestaurant: React.FC = () => {
     console.log('🏢 Branch selected:', branch.branchName);
     // Reset the fetch tracker when branch changes
     lastFetchedConfig.current = null;
+    isFetchingRef.current = false;
     handleBranchSelect(branch);
   };
 

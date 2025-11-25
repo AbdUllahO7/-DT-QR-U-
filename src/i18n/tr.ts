@@ -151,54 +151,54 @@ export const tr = {
 
   // Dashboard Navigation
   dashboard: {
-overview: {
-  title: 'Genel Bakış',
-  description: 'Restoranınızın finansal ve operasyonel durumunu görüntüleyin.',
-  loading: 'Panel verileri yükleniyor...',
-  refresh: 'Yenile',
-  errorTitle: 'Panel verileri yüklenemedi',
-  kpis: {
-    totalViews: 'Toplam Görüntüleme',
-    qrScans: 'QR Taramaları',
-    totalOrders: 'Toplam Sipariş',
-    customerRating: 'Müşteri Puanı',
-    todaySales: 'Bugünkü Satışlar',
-    currentBalance: 'Güncel Bakiye',
-    weekRevenue: 'Haftalık Gelir',
-    monthRevenue: 'Aylık Gelir',
-    avgOrderValue: 'Ort. Sipariş Değeri',
-    totalShifts: 'Toplam Vardiyalar',
-    changeTexts: {
-      lastWeek: 'Geçen Haftaya Göre',
-      lastMonth: 'Geçen Aya Göre',
-      thisWeek: 'Bu Hafta',
-      today: 'Bugün'
-    }
-  },
-  quickStats: {
-    thisMonth: 'Bu Ay',
-    totalOrders: 'Toplam Sipariş',
-    average: 'Ortalama',
-    dailyOrders: 'Günlük Siparişler',
-    new: 'Yeni',
-    customers: 'Müşteriler',
-    rating: 'Puan',
-    totalCount: 'Toplam Sayı',
-    cashSales: 'Nakit Satış',
-    cardSales: 'Kartlı Satış',
-    status: 'Durum',
-    open: 'Açık',
-    closed: 'Kapalı'
-  },
-  charts: {
-    weeklyActivity: 'Haftalık Aktivite',
-    popularProducts: 'Popüler Ürünler',
-    monthlyRevenue: 'Aylık Gelir',
-    paymentMethods: 'Ödeme Yöntemleri',
-    revenueComparison: 'Gelir Karşılaştırması',
-    noData: 'Veri mevcut değil'
-  }
-},
+    overview: {
+      title: 'Genel Bakış',
+      description: 'Restoranınızın finansal ve operasyonel durumunu görüntüleyin.',
+      loading: 'Panel verileri yükleniyor...',
+      refresh: 'Yenile',
+      errorTitle: 'Panel verileri yüklenemedi',
+      kpis: {
+        totalViews: 'Toplam Görüntüleme',
+        qrScans: 'QR Taramaları',
+        totalOrders: 'Toplam Sipariş',
+        customerRating: 'Müşteri Puanı',
+        todaySales: 'Bugünkü Satışlar',
+        currentBalance: 'Güncel Bakiye',
+        weekRevenue: 'Haftalık Gelir',
+        monthRevenue: 'Aylık Gelir',
+        avgOrderValue: 'Ort. Sipariş Değeri',
+        totalShifts: 'Toplam Vardiyalar',
+        changeTexts: {
+          lastWeek: 'Geçen Haftaya Göre',
+          lastMonth: 'Geçen Aya Göre',
+          thisWeek: 'Bu Hafta',
+          today: 'Bugün'
+        }
+      },
+      quickStats: {
+        thisMonth: 'Bu Ay',
+        totalOrders: 'Toplam Sipariş',
+        average: 'Ortalama',
+        dailyOrders: 'Günlük Siparişler',
+        new: 'Yeni',
+        customers: 'Müşteriler',
+        rating: 'Puan',
+        totalCount: 'Toplam Sayı',
+        cashSales: 'Nakit Satış',
+        cardSales: 'Kartlı Satış',
+        status: 'Durum',
+        open: 'Açık',
+        closed: 'Kapalı'
+      },
+      charts: {
+        weeklyActivity: 'Haftalık Aktivite',
+        popularProducts: 'Popüler Ürünler',
+        monthlyRevenue: 'Aylık Gelir',
+        paymentMethods: 'Ödeme Yöntemleri',
+        revenueComparison: 'Gelir Karşılaştırması',
+        noData: 'Veri mevcut değil'
+      }
+    },
     branches: {
       title: 'Şube Yönetimi',
       description: 'Şubelerinizi yönetin ve yeni şubeler ekleyin.',
@@ -244,7 +244,7 @@ overview: {
         avgOrderValue: 'Ortalama Sipariş Değeri'
       }
     },
-        moneyCase : {
+    moneyCase : {
       title : "Para Kasası Yönetimi"
     },
     orderType: {
@@ -275,7 +275,7 @@ overview: {
         activeTypes: "Aktif Türler",
         totalActiveOrders: "Toplam Aktif Sipariş",
         estimatedTime: "Tahmini Süre"
-      },
+    },
     products: {
       title: 'Ürünler',
       description: 'Ürünlerinizi görüntüleyin ve yönetin.'
@@ -3844,6 +3844,7 @@ overview: {
       modifiedBy:"Değiştiren",
       modificationDetails:"DeğişiklikAyrıntıları",
       items:"öğeler",
+      loadingOrders:"Siparişler Yükleniyor...",
       filtered:"Filtrelenen",
       clearFilters:"Filtreleri Temizle",
       serviceFeeApplied:"Servis ücreti",
@@ -4753,242 +4754,242 @@ recommended: "Önerilen",
     }
   },
 
-   "resetPassword": {
-      "submitted": {
-        "title": "E-postanızı Kontrol Edin",
-        "line1": "Şu adrese bir şifre sıfırlama bağlantısı gönderdik:",
-        "line2": "Lütfen gelen kutunuzu (ve spam klasörünü!) kontrol edin."
-      },
-      "form": {
-        "title": "Şifreyi Sıfırla",
-        "subtitle": "Sıfırlama bağlantısı almak için e-postanızı girin.",
-        "button": "Sıfırlama Bağlantısı Gönder",
-        "emailAddress": "E-posta Adresi",
-        "emailPlaceholder": "you@example.com"
-      }
-    },
-
-    "setNewPassword": {
-      "form": {
-        "title": "Yeni Şifre Belirle",
-        "subtitle": "Aşağıya yeni şifrenizi girin.",
-        "newPassword": "Yeni Şifre",
-        "confirmPassword": "Yeni Şifreyi Onayla",
-        "button": "Yeni Şifreyi Kaydet",
-        "errorMatch": "Şifreler eşleşmiyor.",
-        "errorLength": "Şifre en az 8 karakter olmalıdır."
-      },
-      "submitted": {
-        "title": "Şifre Güncellendi!",
-        "message": "Şifreniz başarıyla güncellendi. Şimdi giriş yapabilirsiniz."
-      }
-    },
-    
-    "confirmMail": {
-      "submitted": {
-        "title": "E-postanızı Kontrol Edin",
-        "line1": "Şu adrese yeni bir onay bağlantısı gönderdik:",
-        "line2": "Lütfen gelen kutunuzu (ve spam klasörünü!) kontrol edin."
-      },
-      "form": {
-        "title": "E-postanızı Onaylayın",
-        "subtitle": "Onay bağlantısını yeniden göndermek için e-postanızı girin.",
-        "button": "Onay E-postasını Yeniden Gönder"
-      }
-    },
-
- "onboardingBranch": {
-    "header": {
-      "backLink": "Restoran Bilgilerine Geri Dön",
-      "title": "Şube Bilgileri",
-      "subtitle": "Restoranınızın şube bilgilerini adım adım girebilirsiniz"
-    },
-    "steps": {
-      "basic": "Temel Bilgiler",
-      "address": "Adres Bilgileri",
-      "contact": "İletişim Bilgileri"
+  "resetPassword": {
+    "submitted": {
+      "title": "E-postanızı Kontrol Edin",
+      "line1": "Şu adrese bir şifre sıfırlama bağlantısı gönderdik:",
+      "line2": "Lütfen gelen kutunuzu (ve spam klasörünü!) kontrol edin."
     },
     "form": {
-      "step1": {
-        "title": "Şube Bilgileri",
-        "description": "Şubenizin temel bilgilerini girin",
-        "branchName": {
-          "label": "Şube Adı *",
-          "placeholder": "Şube adını girin",
-          "error": "Şube adı gereklidir"
-        },
-        "whatsappNumber": {
-          "label": "WhatsApp Sipariş Numarası *",
-          "placeholder": "555 123 4567",
-          "ariaLabel": "Ülke Kodu",
-          "errorRequired": "WhatsApp sipariş numarası gereklidir",
-          "errorInvalid": "Geçersiz telefon numarası formatı (7-15 hane)."
-        },
-        "branchLogo": {
-          "label": "Şube Logosu (Opsiyonel)",
-          "success": "✓ Logo başarıyla yüklendi",
-          "button": "Logo Seç",
-          "buttonUploading": "Yükleniyor...",
-          "helper": "Desteklenen formatlar: PNG, JPG, GIF. Maksimum dosya boyutu: 5MB",
-          "infoTitle": "Otomatik Logo Kullanımı",
-          "infoDescription": "Şube logosu yüklemezseniz, restaurant logosu otomatik olarak şube logosu olarak kullanılacaktır."
-        }
+      "title": "Şifreyi Sıfırla",
+      "subtitle": "Sıfırlama bağlantısı almak için e-postanızı girin.",
+      "button": "Sıfırlama Bağlantısı Gönder",
+      "emailAddress": "E-posta Adresi",
+      "emailPlaceholder": "you@example.com"
+    }
+  },
+
+  "setNewPassword": {
+    "form": {
+      "title": "Yeni Şifre Belirle",
+      "subtitle": "Aşağıya yeni şifrenizi girin.",
+      "newPassword": "Yeni Şifre",
+      "confirmPassword": "Yeni Şifreyi Onayla",
+      "button": "Yeni Şifreyi Kaydet",
+      "errorMatch": "Şifreler eşleşmiyor.",
+      "errorLength": "Şifre en az 8 karakter olmalıdır."
+    },
+    "submitted": {
+      "title": "Şifre Güncellendi!",
+      "message": "Şifreniz başarıyla güncellendi. Şimdi giriş yapabilirsiniz."
+    }
+  },
+  
+  "confirmMail": {
+    "submitted": {
+      "title": "E-postanızı Kontrol Edin",
+      "line1": "Şu adrese yeni bir onay bağlantısı gönderdik:",
+      "line2": "Lütfen gelen kutunuzu (ve spam klasörünü!) kontrol edin."
+    },
+    "form": {
+      "title": "E-postanızı Onaylayın",
+      "subtitle": "Onay bağlantısını yeniden göndermek için e-postanızı girin.",
+      "button": "Onay E-postasını Yeniden Gönder"
+    }
+  },
+
+  "onboardingBranch": {
+  "header": {
+    "backLink": "Restoran Bilgilerine Geri Dön",
+    "title": "Şube Bilgileri",
+    "subtitle": "Restoranınızın şube bilgilerini adım adım girebilirsiniz"
+  },
+  "steps": {
+    "basic": "Temel Bilgiler",
+    "address": "Adres Bilgileri",
+    "contact": "İletişim Bilgileri"
+  },
+  "form": {
+    "step1": {
+      "title": "Şube Bilgileri",
+      "description": "Şubenizin temel bilgilerini girin",
+      "branchName": {
+        "label": "Şube Adı *",
+        "placeholder": "Şube adını girin",
+        "error": "Şube adı gereklidir"
       },
-      "step2": {
-        "title": "Adres Bilgileri",
-        "description": "Şubenizin adres bilgilerini girin",
-        "country": {
-          "label": "Ülke *",
-          "placeholder": "Ülke adını girin",
-          "error": "Ülke gereklidir"
-        },
-        "city": {
-          "label": "Şehir *",
-          "placeholder": "Şehir adını girin",
-          "error": "Şehir gereklidir"
-        },
-        "street": {
-          "label": "Sokak *",
-          "placeholder": "Sokak adını girin",
-          "error": "Sokak gereklidir"
-        },
-        "zipCode": {
-          "label": "Posta Kodu *",
-          "placeholder": "Posta kodunu girin",
-          "error": "Posta kodu gereklidir"
-        },
-        "addressLine1": {
-          "label": "Adres Satırı 1 *",
-          "placeholder": "Detaylı adres bilgisi girin",
-          "error": "Adres satırı 1 gereklidir"
-        },
-        "addressLine2": {
-          "label": "Adres Satırı 2 *",
-          "placeholder": "Ek adres bilgisi girin",
-          "error": "Adres satırı 2 gereklidir"
-        }
+      "whatsappNumber": {
+        "label": "WhatsApp Sipariş Numarası *",
+        "placeholder": "555 123 4567",
+        "ariaLabel": "Ülke Kodu",
+        "errorRequired": "WhatsApp sipariş numarası gereklidir",
+        "errorInvalid": "Geçersiz telefon numarası formatı (7-15 hane)."
       },
-      "step3": {
-        "title": "İletişim Bilgileri",
-        "description": "Şubenizin iletişim bilgilerini girin",
-        "phone": {
-          "label": "Telefon Numarası *",
-          "placeholder": "212 123 4567",
-          "ariaLabel": "Ülke Kodu",
-          "errorRequired": "Telefon numarası gereklidir",
-          "errorInvalid": "Geçersiz telefon numarası formatı (7-15 hane)."
-        },
-        "email": {
-          "label": "E-posta Adresi *",
-          "placeholder": "E-posta adresini girin",
-          "error": "E-posta adresi gereklidir"
-        },
-        "location": {
-          "label": "Konum Bilgisi *",
-          "placeholder": "Konum bilgisini girin (Örn: 40.9795, 28.7225)",
-          "error": "Konum bilgisi gereklidir",
-          "selectOnMap": "Haritadan Seç",
-          "mapTitle": "Harita Üzerinden Konum Seçin",
-          "useCurrentLocation": "Mevcut Konumumu Kullan",
-          "latitude": "Enlem",
-          "longitude": "Boylam",
-          "googleMapsLink": "Google Haritalar Linki (Opsiyonel)",
-          "googleMapsLinkPlaceholder": "Google Haritalar linkini buraya yapıştırın...",
-          "googleMapsLinkHelper": "Google Haritalar linki yapıştırın, koordinatlar otomatik olarak çıkarılacak",
-          "invalidLink": "Bu linkten koordinatlar çıkarılamadı. Farklı bir format deneyin.",
-          "interactiveMap": "Etkileşimli Harita",
-          "clickToPin": "Konum seçmek için haritaya tıklayın",
-          "markerPosition": "İşaretleyici Konumu",
-          "openFullMap": "Tam haritada aç",
-          "manualCoordinates": "Manuel Koordinatlar",
-          "selectedCoordinates": "Seçilen Koordinatlar:",
-          "mapHelp": "Harita nasıl kullanılır:",
-          "mapHelp1": "Yukarıdaki alana Google Haritalar linkini yapıştırın",
-          "mapHelp2": "Veya \"Mevcut Konumumu Kullan\" butonuna tıklayın",
-          "mapHelp3": "Veya koordinatları manuel olarak girin",
-          "mapHelp4": "Konumu hassas bir şekilde belirlemek için tam haritayı açın",
-          "geolocationError": "Konumunuz alınamadı. Lütfen manuel olarak seçin.",
-          "geolocationNotSupported": "Konum belirleme özelliği tarayıcınız tarafından desteklenmiyor."
-        },
-        "contactHeader": {
-          "label": "İletişim Başlığı (Opsiyonel)",
-          "placeholder": "İletişim başlığını girin (opsiyonel)"
-        },
-        "footerTitle": {
-          "label": "Footer Başlığı (Opsiyonel)",
-          "placeholder": "Footer başlığını girin (opsiyonel)"
-        },
-        "footerDescription": {
-          "label": "Footer Açıklaması (Opsiyonel)",
-          "placeholder": "Footer açıklamasını girin (opsiyonel)"
-        },
-        "openTitle": {
-          "label": "Çalışma Saatleri Başlığı (Opsiyonel)",
-          "placeholder": "Çalışma saatleri başlığını girin (opsiyonel)"
-        },
-        "openDays": {
-          "label": "Açık Günler (Opsiyonel)",
-          "placeholder": "Açık günleri girin (opsiyonel)"
-        },
-        "openHours": {
-          "label": "Açık Saatler (Opsiyonel)",
-          "placeholder": "Açık saatleri girin (opsiyonel)"
-        },
-        "workingHours": {
-          "title": "Çalışma Saatleri",
-          "description": "İşletmenizin çalışma saatlerini belirleyin. Gece boyunca açık kalabilirsiniz (örn: 23:00 - 02:00).",
-          "openLabel": "Açılış Saati",
-          "closeLabel": "Kapanış Saati",
-          "dayNames": [
-            "Pazartesi",
-            "Salı",
-            "Çarşamba",
-            "Perşembe",
-            "Cuma",
-            "Cumartesi",
-            "Pazar"
-          ],
-          "toggleOpen": "Açık",
-          "toggleClosed": "Kapalı",
-          "workingDayNote": "✓ Bu gün müşteriler sipariş verebilecek",
-          "overnightNote": "(Gece boyunca açık)",
-          "error": {
-            "minOneDay": "En az bir gün için çalışma saati belirtmelisiniz",
-            "allTimesRequired": "Tüm çalışma günleri için açılış ve kapanış saati belirtmelisiniz",
-            "invalidRange": "Geçersiz çalışma saati aralığı: {openTime} - {closeTime}. Gece boyunca açık kalma süresi 12 saati geçemez.",
-            "openBeforeClose": "Açılış saati ({openTime}) kapanış saatinden ({closeTime}) önce olmalıdır"
-          },
-          "infoBox": {
-            "title": "Çalışma Saatleri Hakkında",
-            "item1": "• Burada belirlediğiniz saatler, müşterilerin QR menünüz üzerinden sipariş verebileceği zamanları belirler.",
-            "item2": "• Kapalı günlerde sipariş alınmaz, ancak kapalı günler de veritabanında saklanır.",
-            "item3": "• Gece boyunca açık kalabilirsiniz (örn: 23:00 - 02:00). Bu durumda kapanış saati ertesi güne geçer.",
-            "item4": "• Gece boyunca açık kalma süresi maksimum 12 saat olabilir."
-          }
-        }
+      "branchLogo": {
+        "label": "Şube Logosu (Opsiyonel)",
+        "success": "✓ Logo başarıyla yüklendi",
+        "button": "Logo Seç",
+        "buttonUploading": "Yükleniyor...",
+        "helper": "Desteklenen formatlar: PNG, JPG, GIF. Maksimum dosya boyutu: 5MB",
+        "infoTitle": "Otomatik Logo Kullanımı",
+        "infoDescription": "Şube logosu yüklemezseniz, restaurant logosu otomatik olarak şube logosu olarak kullanılacaktır."
       }
     },
-    "buttons": {
-      "back": "Geri",
-      "next": "İleri",
-      "save": "Kaydet",
-      "saving": "Kaydediliyor...",
-      "cancel": "İptal",
-      "confirm": "Onayla"
+    "step2": {
+      "title": "Adres Bilgileri",
+      "description": "Şubenizin adres bilgilerini girin",
+      "country": {
+        "label": "Ülke *",
+        "placeholder": "Ülke adını girin",
+        "error": "Ülke gereklidir"
+      },
+      "city": {
+        "label": "Şehir *",
+        "placeholder": "Şehir adını girin",
+        "error": "Şehir gereklidir"
+      },
+      "street": {
+        "label": "Sokak *",
+        "placeholder": "Sokak adını girin",
+        "error": "Sokak gereklidir"
+      },
+      "zipCode": {
+        "label": "Posta Kodu *",
+        "placeholder": "Posta kodunu girin",
+        "error": "Posta kodu gereklidir"
+      },
+      "addressLine1": {
+        "label": "Adres Satırı 1 *",
+        "placeholder": "Detaylı adres bilgisi girin",
+        "error": "Adres satırı 1 gereklidir"
+      },
+      "addressLine2": {
+        "label": "Adres Satırı 2 *",
+        "placeholder": "Ek adres bilgisi girin",
+        "error": "Adres satırı 2 gereklidir"
+      }
     },
-    "messages": {
-      "errorTitle": "Hata",
-      "successTitle": "Başarılı",
-      "successMessage": "Şube bilgileriniz başarıyla kaydedildi! Yönlendiriliyorsunuz...",
-      "api": {
-        "restaurantNotFound": "Restaurant bilgisi bulunamadı. Lütfen tekrar restaurant oluşturun.",
-        "branchIdMissing": "Şube ID alınamadı. Lütfen tekrar deneyin.",
-        "nameInUse": "Bu şube adı zaten kullanımda. Lütfen farklı bir ad deneyin.",
-        "connectionError": "Sunucuya bağlanılamıyor. Lütfen internet bağlantınızı kontrol edin.",
-        "serverError": "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin veya form verilerinizi kontrol edin.",
-        "genericCreateError": "Şube kaydı sırasında bir hata oluştu. Lütfen tekrar deneyin.",
-        "logoUploadError": "Logo yüklenirken hata oluştu. Lütfen tekrar deneyin."
+    "step3": {
+      "title": "İletişim Bilgileri",
+      "description": "Şubenizin iletişim bilgilerini girin",
+      "phone": {
+        "label": "Telefon Numarası *",
+        "placeholder": "212 123 4567",
+        "ariaLabel": "Ülke Kodu",
+        "errorRequired": "Telefon numarası gereklidir",
+        "errorInvalid": "Geçersiz telefon numarası formatı (7-15 hane)."
+      },
+      "email": {
+        "label": "E-posta Adresi *",
+        "placeholder": "E-posta adresini girin",
+        "error": "E-posta adresi gereklidir"
+      },
+      "location": {
+        "label": "Konum Bilgisi *",
+        "placeholder": "Konum bilgisini girin (Örn: 40.9795, 28.7225)",
+        "error": "Konum bilgisi gereklidir",
+        "selectOnMap": "Haritadan Seç",
+        "mapTitle": "Harita Üzerinden Konum Seçin",
+        "useCurrentLocation": "Mevcut Konumumu Kullan",
+        "latitude": "Enlem",
+        "longitude": "Boylam",
+        "googleMapsLink": "Google Haritalar Linki (Opsiyonel)",
+        "googleMapsLinkPlaceholder": "Google Haritalar linkini buraya yapıştırın...",
+        "googleMapsLinkHelper": "Google Haritalar linki yapıştırın, koordinatlar otomatik olarak çıkarılacak",
+        "invalidLink": "Bu linkten koordinatlar çıkarılamadı. Farklı bir format deneyin.",
+        "interactiveMap": "Etkileşimli Harita",
+        "clickToPin": "Konum seçmek için haritaya tıklayın",
+        "markerPosition": "İşaretleyici Konumu",
+        "openFullMap": "Tam haritada aç",
+        "manualCoordinates": "Manuel Koordinatlar",
+        "selectedCoordinates": "Seçilen Koordinatlar:",
+        "mapHelp": "Harita nasıl kullanılır:",
+        "mapHelp1": "Yukarıdaki alana Google Haritalar linkini yapıştırın",
+        "mapHelp2": "Veya \"Mevcut Konumumu Kullan\" butonuna tıklayın",
+        "mapHelp3": "Veya koordinatları manuel olarak girin",
+        "mapHelp4": "Konumu hassas bir şekilde belirlemek için tam haritayı açın",
+        "geolocationError": "Konumunuz alınamadı. Lütfen manuel olarak seçin.",
+        "geolocationNotSupported": "Konum belirleme özelliği tarayıcınız tarafından desteklenmiyor."
+      },
+      "contactHeader": {
+        "label": "İletişim Başlığı (Opsiyonel)",
+        "placeholder": "İletişim başlığını girin (opsiyonel)"
+      },
+      "footerTitle": {
+        "label": "Footer Başlığı (Opsiyonel)",
+        "placeholder": "Footer başlığını girin (opsiyonel)"
+      },
+      "footerDescription": {
+        "label": "Footer Açıklaması (Opsiyonel)",
+        "placeholder": "Footer açıklamasını girin (opsiyonel)"
+      },
+      "openTitle": {
+        "label": "Çalışma Saatleri Başlığı (Opsiyonel)",
+        "placeholder": "Çalışma saatleri başlığını girin (opsiyonel)"
+      },
+      "openDays": {
+        "label": "Açık Günler (Opsiyonel)",
+        "placeholder": "Açık günleri girin (opsiyonel)"
+      },
+      "openHours": {
+        "label": "Açık Saatler (Opsiyonel)",
+        "placeholder": "Açık saatleri girin (opsiyonel)"
+      },
+      "workingHours": {
+        "title": "Çalışma Saatleri",
+        "description": "İşletmenizin çalışma saatlerini belirleyin. Gece boyunca açık kalabilirsiniz (örn: 23:00 - 02:00).",
+        "openLabel": "Açılış Saati",
+        "closeLabel": "Kapanış Saati",
+        "dayNames": [
+          "Pazartesi",
+          "Salı",
+          "Çarşamba",
+          "Perşembe",
+          "Cuma",
+          "Cumartesi",
+          "Pazar"
+        ],
+        "toggleOpen": "Açık",
+        "toggleClosed": "Kapalı",
+        "workingDayNote": "✓ Bu gün müşteriler sipariş verebilecek",
+        "overnightNote": "(Gece boyunca açık)",
+        "error": {
+          "minOneDay": "En az bir gün için çalışma saati belirtmelisiniz",
+          "allTimesRequired": "Tüm çalışma günleri için açılış ve kapanış saati belirtmelisiniz",
+          "invalidRange": "Geçersiz çalışma saati aralığı: {openTime} - {closeTime}. Gece boyunca açık kalma süresi 12 saati geçemez.",
+          "openBeforeClose": "Açılış saati ({openTime}) kapanış saatinden ({closeTime}) önce olmalıdır"
+        },
+        "infoBox": {
+          "title": "Çalışma Saatleri Hakkında",
+          "item1": "• Burada belirlediğiniz saatler, müşterilerin QR menünüz üzerinden sipariş verebileceği zamanları belirler.",
+          "item2": "• Kapalı günlerde sipariş alınmaz, ancak kapalı günler de veritabanında saklanır.",
+          "item3": "• Gece boyunca açık kalabilirsiniz (örn: 23:00 - 02:00). Bu durumda kapanış saati ertesi güne geçer.",
+          "item4": "• Gece boyunca açık kalma süresi maksimum 12 saat olabilir."
+        }
       }
     }
+  },
+  "buttons": {
+    "back": "Geri",
+    "next": "İleri",
+    "save": "Kaydet",
+    "saving": "Kaydediliyor...",
+    "cancel": "İptal",
+    "confirm": "Onayla"
+  },
+  "messages": {
+    "errorTitle": "Hata",
+    "successTitle": "Başarılı",
+    "successMessage": "Şube bilgileriniz başarıyla kaydedildi! Yönlendiriliyorsunuz...",
+    "api": {
+      "restaurantNotFound": "Restaurant bilgisi bulunamadı. Lütfen tekrar restaurant oluşturun.",
+      "branchIdMissing": "Şube ID alınamadı. Lütfen tekrar deneyin.",
+      "nameInUse": "Bu şube adı zaten kullanımda. Lütfen farklı bir ad deneyin.",
+      "connectionError": "Sunucuya bağlanılamıyor. Lütfen internet bağlantınızı kontrol edin.",
+      "serverError": "Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin veya form verilerinizi kontrol edin.",
+      "genericCreateError": "Şube kaydı sırasında bir hata oluştu. Lütfen tekrar deneyin.",
+      "logoUploadError": "Logo yüklenirken hata oluştu. Lütfen tekrar deneyin."
+    }
   }
+}
 }; 

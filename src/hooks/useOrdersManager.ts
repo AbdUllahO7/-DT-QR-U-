@@ -107,74 +107,71 @@ const handleBranchSelect = (branch: BranchDropdownItem) => {
     }
   }, [getCurrentBranchId]);
 
-  const fetchBranchOrders = useCallback(async (branchId?: number, page?: number, pageSize?: number) => {
-    const targetBranchId = branchId || getCurrentBranchId();
-    const targetPage = page !== undefined ? page : state.pagination.currentPage;
-    const targetPageSize = pageSize !== undefined ? pageSize : state.pagination.itemsPerPage;
-    console.log('🔥 fetchBranchOrders CALLED:', {
+const fetchBranchOrders = useCallback(async (branchId?: number, page?: number, pageSize?: number) => {
+  const targetBranchId = branchId || state.selectedBranch?.branchId;
+  const targetPage = page !== undefined ? page : state.pagination.currentPage;
+  const targetPageSize = pageSize !== undefined ? pageSize : state.pagination.itemsPerPage;
+  
+  console.log('🔥 fetchBranchOrders CALLED:', {
     branchId: targetBranchId,
     page: targetPage,
     pageSize: targetPageSize,
-    timestamp: new Date().toISOString(),
-    stackTrace: new Error().stack // This shows WHERE it was called from
+    timestamp: new Date().toISOString()
   });
-    setState(prev => ({ ...prev, loading: true, error: null }));
+  
+  setState(prev => ({ ...prev, loading: true, error: null }));
+  
+  try {
+    const result = await orderService.getBranchOrders(targetBranchId, targetPage, targetPageSize);
     
-    try {
-      const result = await orderService.getBranchOrders(targetBranchId, targetPage, targetPageSize);
-      
-      setState(prev => ({
-        ...prev, 
-        branchOrders: result.orders, 
-        loading: false,
-        pagination: {
-          currentPage: targetPage,
-          itemsPerPage: targetPageSize,
-          totalItems: result.totalItems,
-          totalPages: result.totalPages
-        }
-      }));
-    } catch (error: any) {
-      setState(prev => ({ 
-        ...prev, 
-        error: error.message, 
-        loading: false,
-        branchOrders: [],
-        pagination: {
-          ...prev.pagination,
-          totalItems: 0,
-          totalPages: 0
-        }
-      }));
-    }
-  }, [getCurrentBranchId, state.pagination.currentPage, state.pagination.itemsPerPage]);
+    // ✅ FIXED: Don't update currentPage/itemsPerPage here - only update the results
+    setState(prev => ({
+      ...prev, 
+      branchOrders: result.orders, 
+      loading: false,
+      pagination: {
+        ...prev.pagination, // ✅ Preserve current pagination state
+        totalItems: result.totalItems,
+        totalPages: result.totalPages
+      }
+    }));
+  } catch (error: any) {
+    setState(prev => ({ 
+      ...prev, 
+      error: error.message, 
+      loading: false,
+      branchOrders: [],
+      pagination: {
+        ...prev.pagination, // ✅ Preserve current pagination state
+        totalItems: 0,
+        totalPages: 0
+      }
+    }));
+  }
+}, []); // ✅ Empty dependencies
 
-
-// Handle page change for branch orders
-// Handle page change for branch orders
 const handleBranchPageChange = (newPage: number) => {
   console.log('🔄 Changing page to:', newPage);
   
-  fetchBranchOrders(undefined, newPage, state.pagination.itemsPerPage);
+  // ✅ Update state first - useEffect will trigger fetch
+  setState(prev => ({
+    ...prev,
+    pagination: { ...prev.pagination, currentPage: newPage }
+  }));
 };
 
-// Handle items per page change for branch orders
-// Handle items per page change for branch orders
 const handleBranchItemsPerPageChange = (newItemsPerPage: number) => {
-  console.log('Changing items per page to:', newItemsPerPage);
+  console.log('📏 Changing items per page to:', newItemsPerPage);
   
-  // First update the state
+  // ✅ Update state first - useEffect will trigger fetch
   setState(prev => ({
     ...prev,
     pagination: { 
       ...prev.pagination, 
       itemsPerPage: newItemsPerPage, 
-      currentPage: 1 
+      currentPage: 1 // Reset to page 1
     }
   }));
-  
-  fetchBranchOrders(undefined, 1, newItemsPerPage);
-
 };
     // Handle page change
     const handlePageChange = (newPage: number) => {
