@@ -847,16 +847,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                   </div>
                 )}
                 
-                {metadata?.MinOrderAmount && (
-                  <div className={`flex justify-between items-center ${densityPadding[viewDensity]} bg-gray-100 dark:bg-gray-700 rounded-md`}>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">
-                      {t('ordersManager.MinOrderAmount')}
-                    </span>
-                    <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                      {parseFloat(metadata.MinOrderAmount).toFixed(2)}
-                    </span>
-                  </div>
-                )}
+             
                 
                 <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent my-2"></div>
                 
