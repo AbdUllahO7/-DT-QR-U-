@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams,  useLocation } from 'react-router-dom';
 import {
   Loader2,
   CheckCircle,
@@ -27,10 +27,7 @@ import Footer from '../Menu/MneuFooter';
 import SearchBar from '../Menu/MenuSearchBar';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 
-interface PublicBranchData {
-  branchName: string;
-  publicId: string;
-}
+
 
 interface SelectedAddon {
   addonBranchProductId: number;
@@ -40,12 +37,8 @@ interface SelectedAddon {
 }
 
 const OnlineMenu: React.FC = () => {
-  const { publicId } = useParams<{ publicId: string }>(); // Changed from 'id' to 'publicId'
+  const { publicId } = useParams<{ publicId: string }>(); 
   const location = useLocation();
-  const locationState = location.state as  { 
-    branchName?: string; 
-    branchId?: number;
-  } | null;
 
 
   const { t } = useLanguage();
@@ -54,9 +47,7 @@ const OnlineMenu: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingMenu, setIsLoadingMenu] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  const [publicBranchData, setPublicBranchData] = useState<PublicBranchData | null>(null);
   const [menuData, setMenuData] = useState<OnlineMenuResponse | null>(null);
-  const [copied, setCopied] = useState<boolean>(false);
 
   // ───── ProductGrid States ─────
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -83,22 +74,20 @@ const OnlineMenu: React.FC = () => {
   const [productPriceCache, setProductPriceCache] = useState<Map<number, number>>(new Map());
 
 
+  // ✅ CHANGED: Only fetch menu on mount, not session
   useEffect(() => {
     if (publicId) {
-      initializeMenuAndSession();
+      initializeMenu();
     }
   }, [publicId]);
 
-  const initializeMenuAndSession = async () => {
+  const initializeMenu = async () => {
     try {
       setIsLoading(true);
       setError('');
       
-      // Fetch menu and initialize session in parallel
-      await Promise.all([
-        fetchOnlineMenu(publicId!),
-        initializeSession(publicId!)
-      ]);
+      // Only fetch menu on mount
+      await fetchOnlineMenu(publicId!);
     } catch (err: any) {
       setError(err.message || t('menu.error.initialization'));
     } finally {
@@ -115,8 +104,6 @@ const OnlineMenu: React.FC = () => {
       const isFirstLoad = !sessionStorage.getItem('online_menu_initialized');
       
       if (isFirstLoad) {
-
-        
         // Mark that we've initialized once in this browser session
         sessionStorage.setItem('online_menu_initialized', 'true');
       }
@@ -171,7 +158,7 @@ const OnlineMenu: React.FC = () => {
       
     } catch (err: any) {
       console.error('❌ Session init error:', err);
-      setError(t('menu.error.initializeSession'));
+      throw new Error(t('menu.error.initializeSession'));
     }
   };
 
@@ -298,10 +285,6 @@ const OnlineMenu: React.FC = () => {
 
   // ───── Product modal helpers ─────
   const openProductModal = (product: MenuProduct) => {
-    if (!isSessionInitialized) {
-      alert(t('menu.sessionPreparing'));
-      return;
-    }
     setSelectedProduct(product);
     setProductQuantity(1);
     setSelectedAddons([]);
@@ -354,16 +337,19 @@ const OnlineMenu: React.FC = () => {
     return total;
   };
 
-  // ───── Add to basket (main + addons) ─────
+  // ✅ CHANGED: Add to basket now initializes session if needed
   const addToBasket = async (
     product: MenuProduct,
     quantity: number,
     addons: SelectedAddon[] = []
   ) => {
-    if (!isSessionInitialized) throw new Error(t('menu.sessionNotReady'));
-
     try {
       setIsAddingToBasket(true);
+
+      // ✅ Initialize session if not already initialized
+      if (!isSessionInitialized) {
+        await initializeSession(publicId!);
+      }
 
       if (addons.length) {
         // ---- main product ----
@@ -399,6 +385,8 @@ const OnlineMenu: React.FC = () => {
 
       await loadBasket();
       closeProductModal();
+    } catch (err: any) {
+      throw new Error(err.message || t('menu.error.addToBasket'));
     } finally {
       setIsAddingToBasket(false);
     }
@@ -415,11 +403,6 @@ const OnlineMenu: React.FC = () => {
 
   // ───── ProductGrid Handlers ─────
   const handleProductGridAddToCart = async (product: MenuProduct, addons: SelectedAddon[] = []) => {
-    if (!isSessionInitialized) {
-      alert(t('menu.sessionPreparing'));
-      return;
-    }
-
     // If product has addons, open the modal for customization
     if (product.availableAddons && product.availableAddons.length > 0) {
       openProductModal(product);

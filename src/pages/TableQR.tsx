@@ -146,7 +146,6 @@ const TableQR = () => {
           localStorage.setItem('customerIdentifier', customerIdentifier);
         }
 
-        // 3. Session başlat
         const sessionRes = await httpClient.post('/api/session/start', {
           qrToken,
           deviceFingerprint,
