@@ -528,7 +528,7 @@ overview: {
         title: 'Company',
         links: {
           about: 'About Us',
-          blog: 'Blog',
+          pricing: 'Pricing',
           careers: 'Careers',
           contact: 'Contact'
         }
@@ -3211,7 +3211,10 @@ overview: {
     header: 'Branch Categories Management',
     subheader: 'Manage categories and products for Branch ',
     lastUpdated: 'Last Updated',
-    
+    status :{
+      active: 'Active',
+      inactive : "Pasif"
+    },
     stats: {
       availableCategories: 'Available Categories',
       readyToAdd: 'Ready to add',

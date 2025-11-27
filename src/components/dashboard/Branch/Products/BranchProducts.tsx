@@ -1371,7 +1371,7 @@ const handleRemoveProductFromCategory = async (branchProductId: number, productN
             };
 
             setBranchCategories(revertedCategories);
-            setError(apiError?.response?.data?.message || t('branchCategories.messages.error.removingProduct'));
+            setError(apiError?.response?.data || t('branchCategories.messages.error.removingProduct'));
         } finally {
             setIsLoading(false);
             setTimeout(() => {

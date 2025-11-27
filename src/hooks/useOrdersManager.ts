@@ -91,8 +91,7 @@ const handleBranchSelect = (branch: BranchDropdownItem) => {
   
   orderService.clearOrderTypesCache();
   
-  // DON'T FETCH HERE - let useEffect handle it
-  console.log('✋ handleBranchSelect: NOT fetching, letting useEffect handle it');
+
 };
 
   // Fetch pending orders with branch filter
@@ -112,13 +111,7 @@ const fetchBranchOrders = useCallback(async (branchId?: number, page?: number, p
   const targetPage = page !== undefined ? page : state.pagination.currentPage;
   const targetPageSize = pageSize !== undefined ? pageSize : state.pagination.itemsPerPage;
   
-  console.log('🔥 fetchBranchOrders CALLED:', {
-    branchId: targetBranchId,
-    page: targetPage,
-    pageSize: targetPageSize,
-    timestamp: new Date().toISOString()
-  });
-  
+
   setState(prev => ({ ...prev, loading: true, error: null }));
   
   try {

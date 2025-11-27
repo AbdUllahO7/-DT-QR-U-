@@ -529,7 +529,7 @@ export const tr = {
         title: 'Şirket',
         links: {
           about: 'Hakkımızda',
-          blog: 'Blog',
+          pricing: 'Fiyatlandırma',
           careers: 'Kariyer',
           contact: 'İletişim'
         }
@@ -3207,7 +3207,6 @@ export const tr = {
   },
 
   branchCategories: {
-    // Header and Stats
     header: 'Şube Kategori Yönetimi',
     subheader: ' Şubesi için kategorileri ve ürünleri yönet',
     lastUpdated: 'Son Güncelleme',
@@ -3222,6 +3221,11 @@ export const tr = {
       selectedProducts: 'Seçilen Ürünler',
       fromCategories: 'Kategorilerden',
       avalibleAddons: 'Mevcut Eklentiler',
+    },
+
+    status :{
+      active: 'Aktif',
+      inactive : "Pasif"
     },
 
     // Tab Navigation

@@ -8,18 +8,12 @@ const Footer: React.FC = () => {
   const phoneMenuRef = useRef<HTMLDivElement>(null);
   const currentYear = new Date().getFullYear();
 
-  // --- Data Helpers ---
-  
-  // 1. Phone
   const rawPhoneNumber = t('footer.contact.phone');
   const cleanPhoneNumber = rawPhoneNumber.replace(/[^\d+]/g, '');
   
-  // 2. Address & Map Link
   const address = t('footer.contact.address');
-  // Encodes the address to work safely in a URL
   const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 
-  // Close phone menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (phoneMenuRef.current && !phoneMenuRef.current.contains(event.target as Node)) {
@@ -36,26 +30,17 @@ const Footer: React.FC = () => {
       { label: t('footer.sections.product.links.features'), href: '#features' },
       { label: t('footer.sections.product.links.pricing'), href: '#pricing' },
       { label: t('footer.sections.product.links.demo'), href: '#contact' },
-      { label: t('footer.sections.product.links.api'), href: '#' }
     ],
     company: [
-      { label: t('footer.sections.company.links.about'), href: '#' },
-      { label: t('footer.sections.company.links.blog'), href: '#' },
-      { label: t('footer.sections.company.links.careers'), href: '#' },
+      { label: t('footer.sections.company.links.about'), href: '#testimonials' },
+      { label: t('footer.sections.company.links.pricing'), href: '#pricing' },
       { label: t('footer.sections.company.links.contact'), href: '#contact' }
     ],
     support: [
-      { label: t('footer.sections.support.links.helpCenter'), href: '#' },
       { label: t('footer.sections.support.links.faq'), href: '#faq' },
-      { label: t('footer.sections.support.links.liveSupport'), href: '#' },
-      { label: t('footer.sections.support.links.tutorials'), href: '#' }
+
     ],
-    legal: [
-      { label: t('footer.sections.legal.links.privacy'), href: '#' },
-      { label: t('footer.sections.legal.links.terms'), href: '#' },
-      { label: t('footer.sections.legal.links.cookies'), href: '#' },
-      { label: t('footer.sections.legal.links.gdpr'), href: '#' }
-    ]
+  
   };
 
   const socialLinks = [
@@ -216,19 +201,7 @@ const Footer: React.FC = () => {
               ))}
             </ul>
 
-            <h3 className="text-lg font-semibold mb-6 mt-8">{t('footer.sections.legal.title')}</h3>
-            <ul className="space-y-3">
-              {footerLinks.legal.map((link, index) => (
-                <li key={index}>
-                  <button
-                    onClick={() => handleLinkClick(link.href)}
-                    className="text-gray-400 hover:text-white transition-colors duration-200"
-                  >
-                    {link.label}
-                  </button>
-                </li>
-              ))}
-            </ul>
+           
           </div>
         </div>
       </div>

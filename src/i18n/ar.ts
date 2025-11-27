@@ -525,7 +525,7 @@ features: {
         title: 'الشركة',
         links: {
           about: 'معلومات عنا',
-          blog: 'المدونة',
+          pricing: 'الأسعار',
           careers: 'الوظائف',
           contact: 'اتصل بنا'
         }
@@ -3215,7 +3215,10 @@ contact: {
     header: 'إدارة فئات الفرع',
     subheader: 'إدارة الفئات والمنتجات للفرع ',
     lastUpdated: 'آخر تحديث',
-    
+    status :{
+      active: 'نشط',
+      inactive : "غير نشط"
+    },
     stats: {
       availableCategories: 'الفئات المتاحة',
       readyToAdd: 'جاهزة للإضافة',
