@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Trash2, RotateCcw, Search, Calendar, Package, FolderOpen, AlertCircle, CheckCircle, RefreshCw, X, Building2, Table, Database, FileText, ArrowLeft } from 'lucide-react';
+import { Trash2, RotateCcw, Search, Calendar, Package, FolderOpen, AlertCircle, CheckCircle, RefreshCw, X, Building2, Table, Database, FileText, ArrowLeft, Plus } from 'lucide-react';
 import { productService } from '../../../services/productService';
 import { branchService } from '../../../services/branchService';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { branchProductService } from '../../../services/Branch/BranchProductService';
 import { branchCategoryService } from '../../../services/Branch/BranchCategoryService';
 import { tableService } from '../../../services/Branch/branchTableService';
+import { extraCategoriesService } from '../../../services/Extras/ExtraCategoriesService';
+import { extrasService } from '../../../services/Extras/ExtrasService';
+
 
 interface DeletedEntity {
   id: number;
   displayName: string;
   description: string | null;
   code: string | null;
-  entityType: 'Category' | 'Product' | 'Branch' | 'MenuTable' | 'BranchProduct' | 'BranchCategory' | 'MenuTableCategory';
+  entityType: 'Category' | 'Product' | 'Branch' | 'MenuTable' | 'BranchProduct' | 'BranchCategory' | 'MenuTableCategory' | 'ExtraCategory' | 'Extra';
   deletedAt: string;
   deletedBy: string;
   branchId: number | null;
@@ -36,10 +39,8 @@ const RecycleBin: React.FC = () => {
     message: string;
   } | null>(null);
   const navigate = useNavigate();
-  // Branch restore cascade modal state
-
-
   
+  // Branch restore cascade modal state
   const [showBranchRestoreModal, setShowBranchRestoreModal] = useState(false);
   const [branchToRestore, setBranchToRestore] = useState<DeletedEntity | null>(null);
 
@@ -54,7 +55,6 @@ const RecycleBin: React.FC = () => {
   // Get the source parameter and branchId from location state
   const source = location.state?.source || 'all';
   const branchId = location.state?.branchId;
-
 
   // Load deleted items based on source parameter
   const loadDeletedItems = async () => {
@@ -106,19 +106,30 @@ const RecycleBin: React.FC = () => {
           allDeletedItems = [...deletedTableCategories, ...deletedTableItems] as DeletedEntity[];
           break;
 
+        case 'extras':
+          // eslint-disable-next-line no-case-declarations
+          const [deletedExtraCategories, deletedExtras] = await Promise.all([
+            extraCategoriesService.getDeletedExtraCategories(),
+            extrasService.getDeletedExtras(),
+          ]);
+          allDeletedItems = [...deletedExtraCategories, ...deletedExtras] as unknown as DeletedEntity[];
+          break;
+
         case 'all':
         default:
           // eslint-disable-next-line no-case-declarations
-          const [allCategories, allProducts, allBranches, allTables, allBranchProducts, allBranchCategories, allTableCategories] = await Promise.all([
+          const [allCategories, allProducts, allBranches, allTables, allBranchProducts, allBranchCategories, allTableCategories, allExtraCategories, allExtras] = await Promise.all([
             productService.getDeletedCategories(),
             productService.getDeletedProducts(),
             branchService.getDeletedBranches(),
             tableService.getDeletedTables(),
             branchProductService.getDeletedBranchProducts(),
             branchCategoryService.getDeletedBranchCategories(),
-            tableService.getDeletedTableCategories()
+            tableService.getDeletedTableCategories(),
+            extraCategoriesService.getDeletedExtraCategories(),
+            extrasService.getDeletedExtras()
           ]);
-          allDeletedItems = [...allCategories, ...allProducts, ...allBranches, ...allTables, ...allBranchProducts, ...allBranchCategories, ...allTableCategories] as DeletedEntity[];
+          allDeletedItems = [...allCategories, ...allProducts, ...allBranches, ...allTables, ...allBranchProducts, ...allBranchCategories, ...allTableCategories, ...allExtraCategories, ...allExtras] as DeletedEntity[];
           break;
       }
 
@@ -132,7 +143,7 @@ const RecycleBin: React.FC = () => {
   };
 
   const handleBack = () => {
-      navigate(-1); // This navigates to the previous entry in the history stack
+    navigate(-1);
   };
 
   // Show notification
@@ -158,136 +169,138 @@ const RecycleBin: React.FC = () => {
   };
 
   // Handle branch restore with cascade option
-const handleBranchRestore = async (restoreWithCascade: boolean) => {
-  if (!branchToRestore) return;
+  const handleBranchRestore = async (restoreWithCascade: boolean) => {
+    if (!branchToRestore) return;
 
-  setShowBranchRestoreModal(false);
-  setRestoringIds(prev => new Set([...prev, branchToRestore.id]));
+    setShowBranchRestoreModal(false);
+    setRestoringIds(prev => new Set([...prev, branchToRestore.id]));
 
-  try {
-    await branchService.restoreBranch(branchToRestore.id, restoreWithCascade);
-    
-    const successMessage = restoreWithCascade
-      ? t('recycleBin.restore.successBranchCascade').replace('{name}', branchToRestore.displayName)
-      : t('recycleBin.restore.successBranch').replace('{name}', branchToRestore.displayName);
-    
-    showNotification('success', successMessage);
-    // FIX: Filter by both id AND entityType
-    setDeletedItems(prev => prev.filter(i => !(i.id === branchToRestore.id && i.entityType === branchToRestore.entityType)));
-  } catch (error) {
-    console.error('Error restoring branch:', error);
-    showNotification('error', t('recycleBin.restore.error'));
-  } finally {
-    setRestoringIds(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(branchToRestore.id);
-      return newSet;
-    });
-    setBranchToRestore(null);
-  }
-};
+    try {
+      await branchService.restoreBranch(branchToRestore.id, restoreWithCascade);
+      
+      const successMessage = restoreWithCascade
+        ? t('recycleBin.restore.successBranchCascade').replace('{name}', branchToRestore.displayName)
+        : t('recycleBin.restore.successBranch').replace('{name}', branchToRestore.displayName);
+      
+      showNotification('success', successMessage);
+      setDeletedItems(prev => prev.filter(i => !(i.id === branchToRestore.id && i.entityType === branchToRestore.entityType)));
+    } catch (error) {
+      console.error('Error restoring branch:', error);
+      showNotification('error', t('recycleBin.restore.error'));
+    } finally {
+      setRestoringIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(branchToRestore.id);
+        return newSet;
+      });
+      setBranchToRestore(null);
+    }
+  };
 
   // Handle product restore with cascade option
-const handleProductRestore = async (restoreWithCascade: boolean) => {
-  if (!productToRestore) return;
+  const handleProductRestore = async (restoreWithCascade: boolean) => {
+    if (!productToRestore) return;
 
-  setShowProductRestoreModal(false);
-  setRestoringIds(prev => new Set([...prev, productToRestore.id]));
+    setShowProductRestoreModal(false);
+    setRestoringIds(prev => new Set([...prev, productToRestore.id]));
 
-  try {
-    await productService.restoreProduct(productToRestore.id, restoreWithCascade);
-    
-    const successMessage = restoreWithCascade
-      ? t('recycleBin.restore.successProductCascade').replace('{name}', productToRestore.displayName)
-      : t('recycleBin.restore.successProduct').replace('{name}', productToRestore.displayName);
-    
-    showNotification('success', successMessage);
-    // FIX: Filter by both id AND entityType
-    setDeletedItems(prev => prev.filter(i => !(i.id === productToRestore.id && i.entityType === productToRestore.entityType)));
-  } catch (error) {
-    console.error('Error restoring product:', error);
-    showNotification('error', t('recycleBin.restore.error'));
-  } finally {
-    setRestoringIds(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(productToRestore.id);
-      return newSet;
-    });
-    setProductToRestore(null);
-  }
-};
+    try {
+      await productService.restoreProduct(productToRestore.id, restoreWithCascade);
+      
+      const successMessage = restoreWithCascade
+        ? t('recycleBin.restore.successProductCascade').replace('{name}', productToRestore.displayName)
+        : t('recycleBin.restore.successProduct').replace('{name}', productToRestore.displayName);
+      
+      showNotification('success', successMessage);
+      setDeletedItems(prev => prev.filter(i => !(i.id === productToRestore.id && i.entityType === productToRestore.entityType)));
+    } catch (error) {
+      console.error('Error restoring product:', error);
+      showNotification('error', t('recycleBin.restore.error'));
+    } finally {
+      setRestoringIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(productToRestore.id);
+        return newSet;
+      });
+      setProductToRestore(null);
+    }
+  };
 
   // Handle category restore with cascade option
-const handleCategoryRestore = async (restoreWithCascade: boolean) => {
-  if (!categoryToRestore) return;
+  const handleCategoryRestore = async (restoreWithCascade: boolean) => {
+    if (!categoryToRestore) return;
 
-  setShowCategoryRestoreModal(false);
-  setRestoringIds(prev => new Set([...prev, categoryToRestore.id]));
+    setShowCategoryRestoreModal(false);
+    setRestoringIds(prev => new Set([...prev, categoryToRestore.id]));
 
-  try {
-    await productService.restoreCategory(categoryToRestore.id, restoreWithCascade);
-    
-    const successMessage = restoreWithCascade
-      ? t('recycleBin.restore.successCategoryCascade').replace('{name}', categoryToRestore.displayName)
-      : t('recycleBin.restore.successCategory').replace('{name}', categoryToRestore.displayName);
-    
-    showNotification('success', successMessage);
-    // FIX: Filter by both id AND entityType
-    setDeletedItems(prev => prev.filter(i => !(i.id === categoryToRestore.id && i.entityType === categoryToRestore.entityType)));
-  } catch (error) {
-    console.error('Error restoring category:', error);
-    showNotification('error', t('recycleBin.restore.error'));
-  } finally {
-    setRestoringIds(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(categoryToRestore.id);
-      return newSet;
-    });
-    setCategoryToRestore(null);
-  }
-};
+    try {
+      await productService.restoreCategory(categoryToRestore.id, restoreWithCascade);
+      
+      const successMessage = restoreWithCascade
+        ? t('recycleBin.restore.successCategoryCascade').replace('{name}', categoryToRestore.displayName)
+        : t('recycleBin.restore.successCategory').replace('{name}', categoryToRestore.displayName);
+      
+      showNotification('success', successMessage);
+      setDeletedItems(prev => prev.filter(i => !(i.id === categoryToRestore.id && i.entityType === categoryToRestore.entityType)));
+    } catch (error) {
+      console.error('Error restoring category:', error);
+      showNotification('error', t('recycleBin.restore.error'));
+    } finally {
+      setRestoringIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(categoryToRestore.id);
+        return newSet;
+      });
+      setCategoryToRestore(null);
+    }
+  };
 
   // Restore item
-const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false) => {
-  setRestoringIds(prev => new Set([...prev, item.id]));
+  const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false) => {
+    setRestoringIds(prev => new Set([...prev, item.id]));
 
-  try {
-    if (item.entityType === 'Category') {
-      await productService.restoreCategory(item.id, cascadeOption);
-      showNotification('success', t('recycleBin.restore.successCategory').replace('{name}', item.displayName));
-    } else if (item.entityType === 'Product') {
-      await productService.restoreProduct(item.id, cascadeOption);
-      showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
-    } else if (item.entityType === 'Branch') {
-      await branchService.restoreBranch(item.id, cascadeOption);
-      showNotification('success', t('recycleBin.restore.successBranch').replace('{name}', item.displayName));
-    } else if (item.entityType === 'MenuTable') {
-      await tableService.restoreTable(item.id, branchId);
-      showNotification('success', t('recycleBin.restore.successTable').replace('{name}', item.displayName));
-    } else if (item.entityType === 'BranchProduct') {
-      await branchProductService.restoreBranchProduct(item.id);
-      showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
-    } else if (item.entityType === 'BranchCategory') {
-      await branchCategoryService.restoreBranchCategory(item.id);
-      showNotification('success', t('recycleBin.restore.successBranchCategory').replace('{name}', item.displayName));
-    } else if (item.entityType === 'MenuTableCategory') {
-      await tableService.restoreTableCategory(item.id);
-      showNotification('success', t('recycleBin.restore.successTableCategory').replace('{name}', item.displayName));
+    try {
+      if (item.entityType === 'Category') {
+        await productService.restoreCategory(item.id, cascadeOption);
+        showNotification('success', t('recycleBin.restore.successCategory').replace('{name}', item.displayName));
+      } else if (item.entityType === 'Product') {
+        await productService.restoreProduct(item.id, cascadeOption);
+        showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
+      } else if (item.entityType === 'Branch') {
+        await branchService.restoreBranch(item.id, cascadeOption);
+        showNotification('success', t('recycleBin.restore.successBranch').replace('{name}', item.displayName));
+      } else if (item.entityType === 'MenuTable') {
+        await tableService.restoreTable(item.id, branchId);
+        showNotification('success', t('recycleBin.restore.successTable').replace('{name}', item.displayName));
+      } else if (item.entityType === 'BranchProduct') {
+        await branchProductService.restoreBranchProduct(item.id);
+        showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
+      } else if (item.entityType === 'BranchCategory') {
+        await branchCategoryService.restoreBranchCategory(item.id);
+        showNotification('success', t('recycleBin.restore.successBranchCategory').replace('{name}', item.displayName));
+      } else if (item.entityType === 'MenuTableCategory') {
+        await tableService.restoreTableCategory(item.id);
+        showNotification('success', t('recycleBin.restore.successTableCategory').replace('{name}', item.displayName));
+      } else if (item.entityType === 'ExtraCategory') {
+        await extraCategoriesService.restoreExtraCategory(item.id);
+        showNotification('success', t('recycleBin.restore.successExtraCategory').replace('{name}', item.displayName));
+      } else if (item.entityType === 'Extra') {
+        await extrasService.restoreExtra(item.id);
+        showNotification('success', t('recycleBin.restore.successExtra').replace('{name}', item.displayName));
+      }
+
+      setDeletedItems(prev => prev.filter(i => !(i.id === item.id && i.entityType === item.entityType)));
+    } catch (error) {
+      console.error('Error restoring item:', error);
+      showNotification('error', t('recycleBin.restore.error'));
+    } finally {
+      setRestoringIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(item.id);
+        return newSet;
+      });
     }
-
-    // FIX: Filter by both id AND entityType
-    setDeletedItems(prev => prev.filter(i => !(i.id === item.id && i.entityType === item.entityType)));
-  } catch (error) {
-    console.error('Error restoring item:', error);
-    showNotification('error', t('recycleBin.restore.error'));
-  } finally {
-    setRestoringIds(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(item.id);
-      return newSet;
-    });
-  }
-};
+  };
 
   // Filter items - only by search term now
   const filteredItems = deletedItems.filter(item => {
@@ -303,6 +316,10 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
 
   const group2Count = deletedItems.filter(item => 
     ['BranchProduct', 'BranchCategory', 'MenuTableCategory'].includes(item.entityType)
+  ).length;
+
+  const extrasCount = deletedItems.filter(item => 
+    ['ExtraCategory', 'Extra'].includes(item.entityType)
   ).length;
 
   // Format date
@@ -383,6 +400,24 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
           badgeClass: 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300',
           label: t('recycleBin.entityTypes.tableCategory')
         };
+      case 'ExtraCategory':
+        return {
+          icon: FolderOpen,
+          color: 'pink',
+          bgClass: 'bg-pink-100 dark:bg-pink-900/20',
+          textClass: 'text-pink-600 dark:text-pink-400',
+          badgeClass: 'bg-pink-100 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300',
+          label: t('recycleBin.entityTypes.extraCategory')
+        };
+      case 'Extra':
+        return {
+          icon: Plus,
+          color: 'rose',
+          bgClass: 'bg-rose-100 dark:bg-rose-900/20',
+          textClass: 'text-rose-600 dark:text-rose-400',
+          badgeClass: 'bg-rose-100 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300',
+          label: t('recycleBin.entityTypes.extra')
+        };
       default:
         return {
           icon: Package,
@@ -408,6 +443,8 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
         return t('recycleBin.titleBranchProducts');
       case 'tableCategories':
         return t('recycleBin.titleTableCategories');
+      case 'extras':
+        return t('recycleBin.title');
       default:
         return t('recycleBin.title');
     }
@@ -426,6 +463,8 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
         return t('recycleBin.descriptionBranchProducts');
       case 'tableCategories':
         return t('recycleBin.descriptionTableCategories');
+      case 'extras':
+        return t('recycleBin.description');
       default:
         return t('recycleBin.description');
     }
@@ -452,13 +491,14 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
           {getHeaderDescription()}
         </p>
       </div>
-        <button
-            onClick={handleBack}
-            className="p-2 mr-2  mb-5 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 text-gray-700 dark:text-gray-300"
-            title={t('common.back') || 'Go Back'}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+      
+      <button
+        onClick={handleBack}
+        className="p-2 mr-2 mb-5 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 text-gray-700 dark:text-gray-300"
+        title={t('common.back') || 'Go Back'}
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </button>
 
       {/* Controls */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
@@ -522,6 +562,22 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
               </p>
               <p className="text-sm text-purple-700 dark:text-purple-300">{t('recycleBin.stats.group2')}</p>
               <p className="text-xs text-purple-600 dark:text-purple-400">{t('recycleBin.stats.group2Desc')}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Extras Group */}
+        <div className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 rounded-xl shadow-sm border border-pink-200 dark:border-pink-700 p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-pink-200 dark:bg-pink-800/50 rounded-lg">
+              <Plus className="w-5 h-5 text-pink-700 dark:text-pink-300" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-pink-900 dark:text-pink-100">
+                {extrasCount}
+              </p>
+              <p className="text-sm text-pink-700 dark:text-pink-300">{t('recycleBin.stats.extras')}</p>
+              <p className="text-xs text-pink-600 dark:text-pink-400">{t('recycleBin.stats.extrasDesc')}</p>
             </div>
           </div>
         </div>
@@ -598,7 +654,7 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
 
                         {/* Additional context information */}
                         <div className="flex flex-col gap-1 mb-2">
-                          {(item.entityType === 'Product' || item.entityType === 'BranchProduct' || item.entityType === 'MenuTable') && item.categoryName && (
+                          {(item.entityType === 'Product' || item.entityType === 'BranchProduct' || item.entityType === 'MenuTable' || item.entityType === 'Extra') && item.categoryName && (
                             <p className="text-sm text-gray-500 dark:text-gray-500">
                               {t('recycleBin.contextInfo.category')} {item.categoryName}
                             </p>
@@ -924,7 +980,6 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
                         <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
                         {t('recycleBin.categoryRestore.includeProducts') || 'All products in this category'}
                       </li>
-                   
                       <li className="flex items-center gap-1">
                         <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
                         {t('recycleBin.categoryRestore.includeAll') || 'All related configurations'}

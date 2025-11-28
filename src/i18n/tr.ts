@@ -283,6 +283,9 @@ export const tr = {
     ingredients : {
       title : "İçerik"
     },
+    extras : {
+      title : "Ekstralar",
+    },
     tables: {
       title: 'Masa Yönetimi',
       description: 'Masa yönetimi işlemleri.',
@@ -4170,6 +4173,8 @@ recommended: "Önerilen",
     stats: {
       group1: 'Restoran Seviyesi',
       group1Desc: 'Şubeler, Ürünler, Masalar',
+      extras: 'Ekstralar',
+      extrasDesc: 'Ekstra Ürünler ve Kategoriler',
       group2: 'Şube Seviyesi',
       group2Desc: 'Şube Ürünleri ve Kategorileri',
       totalDeleted: 'Toplam Silinmiş',
@@ -4190,6 +4195,8 @@ recommended: "Önerilen",
       branch: 'Şube',
       table: 'Masa',
       branchProduct: 'Şube Ürünü',
+      extraCategory:"Ekstra Kategori",
+      extra: 'Ekstra',
       branchCategory: 'Şube Kategorisi',
       tableCategory: 'Masa Alanı',
       other: 'Diğer'
@@ -4994,6 +5001,100 @@ recommended: "Önerilen",
       "genericCreateError": "Şube kaydı sırasında bir hata oluştu. Lütfen tekrar deneyin.",
       "logoUploadError": "Logo yüklenirken hata oluştu. Lütfen tekrar deneyin."
     }
+  }
+},
+extrasManagement: {
+  title: 'Ekstra Yönetimi',
+  description: 'Değiştirici gruplarını ve öğelerini yönetin',
+  searchPlaceholder: 'Kategorileri veya ekstraları ara...',
+  
+  loading: 'Yükleniyor...',
+  processing: 'İşleniyor...',
+  
+  buttons: {
+    add: 'Ekle',
+    edit: 'Düzenle',
+    delete: 'Sil',
+    save: 'Değişiklikleri Kaydet',
+    create: 'Oluştur',
+    cancel: 'İptal',
+    close: 'Kapat',
+    addItem: 'Öğe Ekle',
+    createFirst: 'İlk öğeyi oluştur'
+  },
+
+  deleteModal: {
+    titleCategory: 'Kategoriyi Sil?',
+    titleItem: 'Öğeyi Sil?',
+    confirmMessage: '"{name}" öğesini silmek istediğinize emin misiniz?',
+    warningMessage: 'Bu işlem geri alınamaz. Öğe geri dönüşüm kutusuna taşınacak.',
+    confirmButton: 'Sil',
+    processingButton: 'Siliniyor...',
+    cancelButton: 'İptal'
+  },
+  
+  categories: {
+    title: 'Ekstra Kategorileri',
+    addNew: '+ Yeni Kategori Ekle',
+    addCategory: 'Yeni Kategori Ekle',
+    editCategory: 'Kategori Düzenle',
+    
+    // Empty States
+    noCategories: 'Kategori bulunamadı',
+    tryAdjusting: 'Aramanızı değiştirmeyi veya yeni bir kategori eklemeyi deneyin.',
+    
+    // Card Info
+    select: 'Seçim:',
+    qtyLimit: 'Miktar Limiti:',
+    active: 'Aktif',
+    inactive: 'Pasif',
+    required: 'Zorunlu',
+
+    fields: {
+      categoryName: 'Kategori Adı',
+      categoryNamePlaceholder: 'örn. Pizza Malzemeleri',
+      statusLabel: 'Aktif Durum',
+      requiredLabel: 'Zorunlu mu?',
+      selectionRules: 'SEÇİM KURALLARI',
+      minSelection: 'Min Seçim',
+      maxSelection: 'Max Seçim',
+      minQuantity: 'Min Toplam Miktar',
+      maxQuantity: 'Max Toplam Miktar'
+    }
+  },
+
+  extras: {
+    title: 'Ekstralar',
+    addExtra: 'Yeni Ekstra Ekle',
+    editExtra: 'Ekstra Düzenle',
+    
+    // Empty States
+    noItems: 'Bu kategoride henüz öğe yok.',
+    noDescription: 'Açıklama yok',
+
+    fields: {
+      parentCategory: 'Üst Kategori',
+      selectCategory: 'Kategori Seçin...',
+      itemName: 'Öğe Adı',
+      itemNamePlaceholder: 'Öğe Adı',
+      price: 'Fiyat',
+      description: 'Açıklama',
+      descriptionPlaceholder: 'İsteğe bağlı detaylar...',
+      imageLabel: 'Öğe Resmi',
+      uploadText: 'Resim yüklemek için tıklayın',
+      activeLabel: 'Aktif',
+      removalLabel: 'Çıkarma Öğesi',
+    }
+  },
+
+  recycleBin: {
+    title: 'Geri Dönüşüm Kutusu',
+  },
+
+  errors: {
+    loadCategories: 'Kategoriler yüklenirken hata',
+    uploadImage: 'Resim yükleme hatası',
+    deleteFailed: 'Öğe silinemedi'
   }
 }
 }; 

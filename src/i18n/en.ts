@@ -147,54 +147,54 @@ export const en = {
 
   // Dashboard Navigation
   dashboard: {
-overview: {
-  title: 'Overview',
-  description: 'View the financial and operational status of your restaurant.',
-  loading: 'Loading dashboard data...',
-  refresh: 'Refresh',
-  errorTitle: 'Failed to load dashboard data',
-  kpis: {
-    totalViews: 'Total Views',
-    qrScans: 'QR Scans',
-    totalOrders: 'Total Orders',
-    customerRating: 'Customer Rating',
-    todaySales: 'Today Sales',
-    currentBalance: 'Current Balance',
-    weekRevenue: 'Weekly Revenue',
-    monthRevenue: 'Monthly Revenue',
-    avgOrderValue: 'Avg. Order Value',
-    totalShifts: 'Total Shifts',
-    changeTexts: {
-      lastWeek: 'vs Last Week',
-      lastMonth: 'vs Last Month',
-      thisWeek: 'This Week',
-      today: 'Today'
-    }
-  },
-  quickStats: {
-    thisMonth: 'This Month',
-    totalOrders: 'Total Orders',
-    average: 'Average',
-    dailyOrders: 'Daily Orders',
-    new: 'New',
-    customers: 'Customers',
-    rating: 'Rating',
-    totalCount: 'Total Count',
-    cashSales: 'Cash Sales',
-    cardSales: 'Card Sales',
-    status: 'Status',
-    open: 'Open',
-    closed: 'Closed'
-  },
-  charts: {
-    weeklyActivity: 'Weekly Activity',
-    popularProducts: 'Popular Products',
-    monthlyRevenue: 'Monthly Revenue',
-    paymentMethods: 'Payment Methods',
-    revenueComparison: 'Revenue Comparison',
-    noData: 'No data available'
-  }
-},
+    overview: {
+      title: 'Overview',
+      description: 'View the financial and operational status of your restaurant.',
+      loading: 'Loading dashboard data...',
+      refresh: 'Refresh',
+      errorTitle: 'Failed to load dashboard data',
+      kpis: {
+        totalViews: 'Total Views',
+        qrScans: 'QR Scans',
+        totalOrders: 'Total Orders',
+        customerRating: 'Customer Rating',
+        todaySales: 'Today Sales',
+        currentBalance: 'Current Balance',
+        weekRevenue: 'Weekly Revenue',
+        monthRevenue: 'Monthly Revenue',
+        avgOrderValue: 'Avg. Order Value',
+        totalShifts: 'Total Shifts',
+        changeTexts: {
+          lastWeek: 'vs Last Week',
+          lastMonth: 'vs Last Month',
+          thisWeek: 'This Week',
+          today: 'Today'
+        }
+      },
+      quickStats: {
+        thisMonth: 'This Month',
+        totalOrders: 'Total Orders',
+        average: 'Average',
+        dailyOrders: 'Daily Orders',
+        new: 'New',
+        customers: 'Customers',
+        rating: 'Rating',
+        totalCount: 'Total Count',
+        cashSales: 'Cash Sales',
+        cardSales: 'Card Sales',
+        status: 'Status',
+        open: 'Open',
+        closed: 'Closed'
+      },
+      charts: {
+        weeklyActivity: 'Weekly Activity',
+        popularProducts: 'Popular Products',
+        monthlyRevenue: 'Monthly Revenue',
+        paymentMethods: 'Payment Methods',
+        revenueComparison: 'Revenue Comparison',
+        noData: 'No data available'
+      }
+    },
     branches: {
       title: 'Branch Management',
       description: 'Manage your branches and add new branches.',
@@ -278,6 +278,9 @@ overview: {
     },
     ingredients : {
       title : "Ingredients"
+    },
+    extras : {
+      title : "Extras",
     },
     tables: {
       title: 'Table Management',
@@ -4136,6 +4139,8 @@ overview: {
       group2: 'Branch Level',
       group2Desc: 'Branch Products & Categories',
       totalDeleted: 'Total Deleted',
+      extras:" Deleted Extras",
+      extrasDesc: "All deleted extras",
       totalDesc: 'All deleted items',
       filtered: 'Showing',
       filteredDesc: 'Current filter results',
@@ -4152,10 +4157,13 @@ overview: {
       category: 'Category',
       product: 'Product',
       branch: 'Branch',
+      
       table: 'Table',
       branchProduct: 'Branch Product',
       branchCategory: 'Branch Category',
       tableCategory: 'Table Area',
+      extraCategory:" Extra Category",
+      extra: 'Extra',
       other: 'Other'
     },
     contextInfo: {
@@ -4973,5 +4981,99 @@ overview: {
         "logoUploadError": "An error occurred while uploading the logo. Please try again."
       }
     }
+  },
+extrasManagement: {
+  title: 'Extras Management',
+  description: 'Manage modifier groups and their items',
+  searchPlaceholder: 'Search categories or extras...',
+  
+  loading: 'Loading...',
+  processing: 'Processing...',
+  
+  buttons: {
+    add: 'Add',
+    edit: 'Edit',
+    delete: 'Delete',
+    save: 'Save Changes',
+    create: 'Create',
+    cancel: 'Cancel',
+    close: 'Close',
+    addItem: 'Add Item',
+    createFirst: 'Create first item'
+  },
+
+  deleteModal: {
+    titleCategory: 'Delete Category?',
+    titleItem: 'Delete Item?',
+    confirmMessage: 'Are you sure you want to delete "{name}"?',
+    warningMessage: 'This action cannot be undone. The item will be moved to the recycle bin.',
+    confirmButton: 'Delete',
+    processingButton: 'Deleting...',
+    cancelButton: 'Cancel'
+  },
+  
+  categories: {
+    title: 'Extra Categories',
+    addNew: '+ Add New Category',
+    addCategory: 'Add New Category',
+    editCategory: 'Edit Category',
+    
+    // Empty States
+    noCategories: 'No categories found',
+    tryAdjusting: 'Try adjusting your search or add a new category.',
+    
+    // Card Info
+    select: 'Select:',
+    qtyLimit: 'Qty Limit:',
+    active: 'Active',
+    inactive: 'Inactive',
+    required: 'Required',
+
+    fields: {
+      categoryName: 'Category Name',
+      categoryNamePlaceholder: 'e.g. Pizza Toppings',
+      statusLabel: 'Active Status',
+      requiredLabel: 'Required?',
+      selectionRules: 'SELECTION RULES',
+      minSelection: 'Min Selection',
+      maxSelection: 'Max Selection',
+      minQuantity: 'Min Total Qty',
+      maxQuantity: 'Max Total Qty'
+    }
+  },
+
+  extras: {
+    title: 'Extras',
+    addExtra: 'Add New Extra',
+    editExtra: 'Edit Extra',
+    
+    // Empty States
+    noItems: 'No items in this category yet.',
+    noDescription: 'No description',
+
+    fields: {
+      parentCategory: 'Parent Category',
+      selectCategory: 'Select Category...',
+      itemName: 'Item Name',
+      itemNamePlaceholder: 'Item Name',
+      price: 'Price',
+      description: 'Description',
+      descriptionPlaceholder: 'Optional details...',
+      imageLabel: 'Item Image',
+      uploadText: 'Click to upload image',
+      activeLabel: 'Active',
+      removalLabel: 'Is Removal Item',
+    }
+  },
+
+  recycleBin: {
+    title: 'Recycle Bin',
+  },
+
+  errors: {
+    loadCategories: 'Error loading categories',
+    uploadImage: 'Error uploading image',
+    deleteFailed: 'Failed to delete item'
   }
+}
 }; 
