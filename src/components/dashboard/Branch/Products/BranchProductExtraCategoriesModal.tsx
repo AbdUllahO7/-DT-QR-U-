@@ -111,18 +111,18 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
       }));
 
       // Add existing categories if they aren't in the available list
-      existingCategoriesData.forEach((existingCat) => {
+        existingCategoriesData.forEach((existingCat) => {
         const exists = mergedCategories.some(c => c.productExtraCategoryId === existingCat.productExtraCategoryId);
         if (!exists) {
           mergedCategories.push({
             productExtraCategoryId: existingCat.productExtraCategoryId,
-            extraCategoryName: existingCat.extraCategoryName,
-            extraCategoryId: existingCat.extraCategoryId,
-            isRequired: existingCat.effectiveIsRequired, 
-            minSelectionCount: existingCat.effectiveMinSelectionCount,
-            maxSelectionCount: existingCat.effectiveMaxSelectionCount,
-            minTotalQuantity: existingCat.effectiveMinTotalQuantity,
-            maxTotalQuantity: existingCat.effectiveMaxTotalQuantity,
+            extraCategoryName: existingCat.extraCategoryName ?? '',
+            extraCategoryId: existingCat.extraCategoryId ?? 0,
+            isRequired: !!(existingCat.isRequiredOverride ?? existingCat.isRequired ?? false),
+            minSelectionCount: existingCat.minSelectionCount ?? 0,
+            maxSelectionCount: existingCat.maxSelectionCount ?? 0,
+            minTotalQuantity: existingCat.minTotalQuantity ?? 0,
+            maxTotalQuantity: existingCat.maxTotalQuantity ?? 0,
             activeExtrasCount: 0,
             isExpanded: false,
             extras: []
@@ -146,15 +146,14 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
           const exists = combinedExtras.some(c => c.productExtraId === existing.productExtraId);
           if (!exists) {
             const mappedExtra: AvailableProductExtra = {
-              productExtraId: existing.productExtraId,
-              extraName: existing.extraName,
-              categoryName: existing.categoryName,
-              unitPrice: existing.unitPrice,
-              productExtraCategoryId: category.productExtraCategoryId,
-              extraId: existing.extraId,
-              isActive: existing.isActive,
-              branchId: 0, 
-              currency: 'USD' 
+              productExtraId: existing.productExtraId ?? 0,
+              extraName: existing.extraName ?? '',
+              categoryName: existing.categoryName ?? '',
+              unitPrice: existing.unitPrice ?? 0,
+              extraId: existing.extraId ?? 0,
+                selectionMode: existing.selectionMode ?? 0,
+                isRemoval: existing.isRemoval ?? false,
+
             };
             combinedExtras.push(mappedExtra);
           }
@@ -213,7 +212,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
       }
     } catch (err: any) {
       console.error('Error fetching data:', err);
-      setError(err.response?.data?.message || 'Failed to load available categories and extras');
+      setError(err.response?.data?.message || t('extrasManagement.categoryConfigModal.errors.loadFailed'));
     } finally {
       setIsLoadingData(false);
     }
@@ -368,7 +367,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
       // Create a master set of all currently selected extra IDs from the UI config
       const allCurrentlySelectedExtraIds = new Set<number>();
       Object.values(extrasConfig).forEach(config => {
-        config.selectedExtras.forEach(id => allCurrentlySelectedExtraIds.add(id));
+        config.selectedExtras.forEach((id: number) => allCurrentlySelectedExtraIds.add(id));
       });
 
       // Loop through known database relations
@@ -443,7 +442,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
       onClose();
     } catch (err: any) {
       console.error('Error saving:', err);
-      setError(err.response?.data?.message || 'Failed to save configuration');
+      setError(err.response?.data?.message || t('extrasManagement.categoryConfigModal.errors.saveFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -481,10 +480,10 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Configure Extra Categories
+                  {t('extrasManagement.categoryConfigModal.title')}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                  Product: <span className="font-medium">{productName}</span>
+                  {t('extrasManagement.categoryConfigModal.productLabel')} <span className="font-medium">{productName}</span>
                 </p>
               </div>
               <button
@@ -502,7 +501,9 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
               <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">Selected Categories</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {t('extrasManagement.categoryConfigModal.stats.selectedCategories')}
+                    </p>
                     <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                       {selectedCategories.size}
                     </p>
@@ -514,7 +515,9 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
               <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">Selected Extras</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {t('extrasManagement.categoryConfigModal.stats.selectedExtras')}
+                    </p>
                     <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                       {getTotalSelectedExtras()}
                     </p>
@@ -526,7 +529,9 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
               <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-600">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">Available</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
+                      {t('extrasManagement.categoryConfigModal.stats.available')}
+                    </p>
                     <p className="text-2xl font-bold text-gray-600 dark:text-gray-400">
                       {availableCategories.length}
                     </p>
@@ -543,7 +548,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
               <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5`} />
               <input
                 type="text"
-                placeholder="Search categories..."
+                placeholder={t('extrasManagement.categoryConfigModal.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
@@ -566,12 +571,19 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
             {isLoadingData ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-blue-600 dark:text-blue-400 mb-4" />
-                <p className="text-gray-500 dark:text-gray-400">Loading available categories...</p>
+                <p className="text-gray-500 dark:text-gray-400">
+                  {t('extrasManagement.categoryConfigModal.loading.categories')}
+                </p>
               </div>
             ) : filteredCategories.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12">
                 <Package className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />
-                <p className="text-gray-500 dark:text-gray-400">No categories available</p>
+                <p className="text-gray-500 dark:text-gray-400">
+                  {searchTerm 
+                    ? t('extrasManagement.categoryConfigModal.empty.noResults')
+                    : t('extrasManagement.categoryConfigModal.empty.noCategories')
+                  }
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -591,7 +603,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                       {/* Category Header */}
                       <div className="p-4">
                         <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <div className="flex items-center space-x-3">
+                          <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-3`}>
                             <button
                               onClick={() => handleCategoryToggle(category.productExtraCategoryId)}
                               className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-colors ${
@@ -606,16 +618,19 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                               <h4 className="font-bold text-gray-900 dark:text-white">
                                 {category.extraCategoryName}
                               </h4>
-                              <div className="flex items-center space-x-2 mt-1">
+                              <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 mt-1`}>
                                 <span className={`text-xs px-2 py-1 rounded-full ${
                                   category.isRequired
                                     ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                                     : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
                                 }`}>
-                                  {category.isRequired ? 'Required' : 'Optional'}
+                                  {category.isRequired 
+                                    ? t('extrasManagement.categoryConfigModal.badges.required')
+                                    : t('extrasManagement.categoryConfigModal.badges.optional')
+                                  }
                                 </span>
                                 <span className="text-xs text-gray-600 dark:text-gray-400">
-                                  {category.extras.length} available extras
+                                  {category.extras.length} {t('extrasManagement.categoryConfigModal.category.availableExtras')}
                                 </span>
                               </div>
                             </div>
@@ -639,17 +654,20 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                         {/* Configuration for selected category */}
                         {isSelected && config && category.isExpanded && (
                           <div className="mt-4 p-4 bg-white dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600">
-                            <div className="flex items-center space-x-2 mb-3">
+                            <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 mb-3`}>
                               <Settings className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                              <h5 className="font-medium text-gray-900 dark:text-white">Category Configuration</h5>
+                              <h5 className="font-medium text-gray-900 dark:text-white">
+                                {t('extrasManagement.categoryConfigModal.category.configurationTitle')}
+                              </h5>
                             </div>
                             
                             <div className="grid grid-cols-2 gap-4">
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                  Min Selection
+                                  {t('extrasManagement.categoryConfigModal.fields.minSelection')}
                                 </label>
                                 <input
+                                    title='minSelectionCount'
                                   type="number"
                                   min="0"
                                   value={config.minSelectionCount}
@@ -666,9 +684,10 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
 
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                  Max Selection
+                                  {t('extrasManagement.categoryConfigModal.fields.maxSelection')}
                                 </label>
                                 <input
+                                title="maxSelectionCount"
                                   type="number"
                                   min="0"
                                   value={config.maxSelectionCount}
@@ -685,9 +704,10 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
 
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                  Min Quantity
+                                  {t('extrasManagement.categoryConfigModal.fields.minQuantity')}
                                 </label>
                                 <input
+                                title='Minimum Total Quantity'
                                   type="number"
                                   min="0"
                                   value={config.minTotalQuantity}
@@ -704,9 +724,10 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
 
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                  Max Quantity
+                                  {t('extrasManagement.categoryConfigModal.fields.maxQuantity')}
                                 </label>
                                 <input
+                                title='Max Total Quantity'
                                   type="number"
                                   min="0"
                                   value={config.maxTotalQuantity}
@@ -722,7 +743,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                               </div>
                             </div>
                             
-                            <div className="mt-3 flex items-center space-x-2">
+                            <div className={`mt-3 flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2`}>
                                 <input
                                   type="checkbox"
                                   id={`required-${category.productExtraCategoryId}`}
@@ -740,7 +761,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                   htmlFor={`required-${category.productExtraCategoryId}`}
                                   className="text-sm text-gray-700 dark:text-gray-300"
                                 >
-                                  Override Required Setting
+                                  {t('extrasManagement.categoryConfigModal.fields.overrideRequired')}
                                 </label>
                               </div>
                           </div>
@@ -751,10 +772,12 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                       {category.isExpanded && category.extras.length > 0 && (
                         <div className="border-t border-gray-200 dark:border-gray-600 p-4 bg-gray-50 dark:bg-gray-700/30">
                           <h5 className="font-medium text-gray-900 dark:text-white mb-3">
-                            Select Extras
+                            {t('extrasManagement.categoryConfigModal.category.selectExtrasTitle')}
                           </h5>
                           {!isSelected && (
-                              <p className="text-xs text-amber-600 mb-2">Select the category above to enable extras</p>
+                              <p className="text-xs text-amber-600 mb-2">
+                                {t('extrasManagement.categoryConfigModal.category.selectCategoryWarning')}
+                              </p>
                           )}
                           <div className="grid grid-cols-2 gap-3">
                             {category.extras.map((extra) => {
@@ -808,13 +831,26 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
           <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
              <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                <div className="text-sm text-gray-600 dark:text-gray-400">
-                 <span className="font-medium">{selectedCategories.size}</span> categories selected
+                 <span className="font-medium">{selectedCategories.size}</span> {t('extrasManagement.categoryConfigModal.footer.categoriesSelected')}
                </div>
-               <div className={`flex space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
-                 <button onClick={onClose} disabled={isSaving} className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50">Cancel</button>
-                 <button onClick={handleSave} disabled={isSaving} className="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-xl hover:bg-blue-700 dark:hover:bg-blue-600 flex items-center gap-2 disabled:opacity-50">
+               <div className={`flex ${isRTL ? 'space-x-reverse' : ''} space-x-3`}>
+                 <button 
+                   onClick={onClose} 
+                   disabled={isSaving} 
+                   className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+                 >
+                   {t('extrasManagement.categoryConfigModal.footer.cancel')}
+                 </button>
+                 <button 
+                   onClick={handleSave} 
+                   disabled={isSaving} 
+                   className="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-xl hover:bg-blue-700 dark:hover:bg-blue-600 flex items-center gap-2 disabled:opacity-50"
+                 >
                     {isSaving ? <Loader2 className="animate-spin h-4 w-4" /> : <Check className="h-4 w-4" />}
-                    {isSaving ? 'Saving...' : 'Save Configuration'}
+                    {isSaving 
+                      ? t('extrasManagement.categoryConfigModal.footer.saving')
+                      : t('extrasManagement.categoryConfigModal.footer.save')
+                    }
                  </button>
                </div>
              </div>

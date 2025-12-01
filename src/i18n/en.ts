@@ -5122,6 +5122,59 @@ extrasManagement: {
     extraUpdated: 'Extra updated successfully',
     extraDeleted: 'Extra deleted successfully',
     restored: 'Restored successfully'
+  },
+
+  categoryConfigModal: {
+    title: 'Configure Extra Categories',
+    productLabel: 'Product:',
+    searchPlaceholder: 'Search categories...',
+    
+    stats: {
+      selectedCategories: 'Selected Categories',
+      selectedExtras: 'Selected Extras',
+      available: 'Available'
+    },
+
+    loading: {
+      categories: 'Loading available categories...'
+    },
+
+    empty: {
+      noCategories: 'No categories available',
+      noResults: 'No categories match your search'
+    },
+
+    badges: {
+      required: 'Required',
+      optional: 'Optional'
+    },
+
+    category: {
+      availableExtras: 'available extras',
+      configurationTitle: 'Category Configuration',
+      selectExtrasTitle: 'Select Extras',
+      selectCategoryWarning: 'Select the category above to enable extras'
+    },
+
+    fields: {
+      minSelection: 'Min Selection',
+      maxSelection: 'Max Selection',
+      minQuantity: 'Min Quantity',
+      maxQuantity: 'Max Quantity',
+      overrideRequired: 'Override Required Setting'
+    },
+
+    footer: {
+      categoriesSelected: 'categories selected',
+      cancel: 'Cancel',
+      save: 'Save Configuration',
+      saving: 'Saving...'
+    },
+
+    errors: {
+      loadFailed: 'Failed to load available categories and extras',
+      saveFailed: 'Failed to save configuration'
+    }
   }
 }
 }; 

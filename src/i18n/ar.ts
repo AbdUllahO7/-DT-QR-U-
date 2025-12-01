@@ -4976,10 +4976,10 @@ recycleBin: {
   },
 extrasManagement: {
   title: 'إدارة الإضافات',
-  description: 'إدارة مجموعات الإضافات وعناصرها',
-  searchPlaceholder: 'بحث عن الفئات أو الإضافات...',
-  loading: 'جاري التحميل...',
-  processing: 'جاري المعالجة...',
+  description: 'إدارة فئات الإضافات والعناصر الخاصة بها',
+  searchPlaceholder: 'البحث عن الفئات أو الإضافات...',
+  loading: 'جارٍ التحميل...',
+  processing: 'جارٍ المعالجة...',
   
   buttons: {
     add: 'إضافة',
@@ -4997,10 +4997,10 @@ extrasManagement: {
   deleteModal: {
     titleCategory: 'حذف الفئة؟',
     titleItem: 'حذف العنصر؟',
-    confirmMessage: 'هل أنت متأكد من أنك تريد حذف "{name}"؟',
+    confirmMessage: 'هل أنت متأكد من حذف "{name}"؟',
     warningMessage: 'لا يمكن التراجع عن هذا الإجراء. سيتم نقل العنصر إلى سلة المحذوفات.',
     confirmButton: 'حذف',
-    processingButton: 'جاري الحذف...',
+    processingButton: 'جارٍ الحذف...',
     cancelButton: 'إلغاء'
   },
   
@@ -5011,16 +5011,16 @@ extrasManagement: {
     editCategory: 'تعديل الفئة',
     noCategories: 'لم يتم العثور على فئات',
     tryAdjusting: 'حاول تعديل البحث أو إضافة فئة جديدة.',
-    select: 'تحديد:',
+    select: 'اختيار:',
     qtyLimit: 'حد الكمية:',
     active: 'نشط',
     inactive: 'غير نشط',
-    required: 'إلزامي',
+    required: 'مطلوب',
     fields: {
       categoryName: 'اسم الفئة',
       categoryNamePlaceholder: 'مثال: إضافات البيتزا',
-      statusLabel: 'حالة النشاط',
-      requiredLabel: 'هل هي إلزامية؟',
+      statusLabel: 'الحالة النشطة',
+      requiredLabel: 'هل هو مطلوب؟',
       selectionRules: 'قواعد الاختيار',
       minSelection: 'الحد الأدنى للاختيار',
       maxSelection: 'الحد الأقصى للاختيار',
@@ -5036,7 +5036,7 @@ extrasManagement: {
     noItems: 'لا توجد عناصر في هذه الفئة بعد.',
     noDescription: 'لا يوجد وصف',
     fields: {
-      parentCategory: 'الفئة الأصل',
+      parentCategory: 'الفئة الأصلية',
       selectCategory: 'اختر الفئة...',
       itemName: 'اسم العنصر',
       itemNamePlaceholder: 'اسم العنصر',
@@ -5044,7 +5044,7 @@ extrasManagement: {
       description: 'الوصف',
       descriptionPlaceholder: 'تفاصيل اختيارية...',
       imageLabel: 'صورة العنصر',
-      uploadText: 'اضغط لرفع صورة',
+      uploadText: 'انقر لتحميل الصورة',
       activeLabel: 'نشط',
       removalLabel: 'عنصر إزالة (طرح)'
     }
@@ -5056,40 +5056,40 @@ extrasManagement: {
     addCategory: 'إضافة فئة',
     addExtra: 'إضافة إضافة',
     selectCategory: 'اختر الفئة',
-    chooseCategory: 'اختر فئة...',
+    chooseCategory: 'اختر الفئة...',
     selectExtra: 'اختر الإضافة',
-    chooseExtra: 'اختر إضافة...',
-    noCategoriesYet: 'لا توجد فئات مضافة بعد',
-    noExtrasYet: 'لا توجد إضافات مضافة بعد',
+    chooseExtra: 'اختر الإضافة...',
+    noCategoriesYet: 'لم تتم إضافة فئات بعد',
+    noExtrasYet: 'لم تتم إضافة إضافات بعد',
     confirmDelete: 'هل أنت متأكد من حذف هذه الفئة؟',
     confirmDeleteExtra: 'هل أنت متأكد من حذف هذه الإضافة؟',
     unknownCategory: 'فئة غير معروفة',
     unknownExtra: 'إضافة غير معروفة',
     confirm: 'تأكيد',
-    selection: 'الاختيار',
-    quantity: 'الكمية',
-    required: 'إلزامي',
+    selection: 'اختيار',
+    quantity: 'كمية',
+    required: 'مطلوب',
     optional: 'اختياري',
     basePrice: 'السعر الأساسي',
     unitPrice: 'سعر الوحدة',
     selectionMode: 'وضع الاختيار',
-    single: 'فردي',
+    single: 'مفرد',
     multiple: 'متعدد',
-    requiredExtra: 'إضافة إلزامية',
+    requiredExtra: 'إضافة مطلوبة',
     defaultQty: 'الكمية الافتراضية',
-    minQty: 'أقل كمية',
-    maxQty: 'أقصى كمية',
+    minQty: 'الحد الأدنى',
+    maxQty: 'الحد الأقصى',
     qty: 'الكمية',
-    minSelection: 'أقل اختيار',
-    maxSelection: 'أقصى اختيار',
-    minQuantity: 'أقل كمية',
-    maxQuantity: 'أقصى كمية',
+    minSelection: 'الحد الأدنى للاختيار',
+    maxSelection: 'الحد الأقصى للاختيار',
+    minQuantity: 'الحد الأدنى للكمية',
+    maxQuantity: 'الحد الأقصى للكمية',
     selectionLimits: 'حدود الاختيار',
     quantityLimits: 'حدود الكمية',
-    minSelectLabel: 'أقل اختيار',
+    minSelectLabel: 'أدنى اختيار',
     maxSelectLabel: 'أقصى اختيار',
-    minTotalLabel: 'أقل إجمالي',
-    maxTotalLabel: 'أقصى إجمالي'
+    minTotalLabel: 'الحد الأدنى الإجمالي',
+    maxTotalLabel: 'الحد الأقصى الإجمالي'
   },
   
   recycleBin: {
@@ -5104,22 +5104,75 @@ extrasManagement: {
   errors: {
     loadCategories: 'خطأ في تحميل الفئات',
     loadExtras: 'خطأ في تحميل الإضافات',
-    uploadImage: 'خطأ في رفع الصورة',
+    uploadImage: 'خطأ في تحميل الصورة',
     deleteFailed: 'فشل حذف العنصر',
     loadFailed: 'فشل تحميل البيانات',
     saveFailed: 'فشل حفظ البيانات',
     updateFailed: 'فشل تحديث البيانات',
-    restoreFailed: 'فشل استعادة العنصر'
+    restoreFailed: 'فشلت استعادة العنصر'
   },
 
   success: {
-    categoryAdded: 'تم إضافة الفئة بنجاح',
+    categoryAdded: 'تمت إضافة الفئة بنجاح',
     categoryUpdated: 'تم تحديث الفئة بنجاح',
     categoryDeleted: 'تم حذف الفئة بنجاح',
-    extraAdded: 'تم إضافة الإضافة بنجاح',
+    extraAdded: 'تمت إضافة الإضافة بنجاح',
     extraUpdated: 'تم تحديث الإضافة بنجاح',
     extraDeleted: 'تم حذف الإضافة بنجاح',
-    restored: 'تم الاستعادة بنجاح'
+    restored: 'تمت الاستعادة بنجاح'
+  },
+
+  categoryConfigModal: {
+    title: 'تكوين فئات الإضافات',
+    productLabel: 'المنتج:',
+    searchPlaceholder: 'البحث عن الفئات...',
+    
+    stats: {
+      selectedCategories: 'الفئات المختارة',
+      selectedExtras: 'الإضافات المختارة',
+      available: 'متاح'
+    },
+
+    loading: {
+      categories: 'جارٍ تحميل الفئات المتاحة...'
+    },
+
+    empty: {
+      noCategories: 'لا توجد فئات متاحة',
+      noResults: 'لا توجد فئات تطابق بحثك'
+    },
+
+    badges: {
+      required: 'مطلوب',
+      optional: 'اختياري'
+    },
+
+    category: {
+      availableExtras: 'إضافات متاحة',
+      configurationTitle: 'تكوين الفئة',
+      selectExtrasTitle: 'اختر الإضافات',
+      selectCategoryWarning: 'اختر الفئة أعلاه لتمكين الإضافات'
+    },
+
+    fields: {
+      minSelection: 'الحد الأدنى للاختيار',
+      maxSelection: 'الحد الأقصى للاختيار',
+      minQuantity: 'الحد الأدنى للكمية',
+      maxQuantity: 'الحد الأقصى للكمية',
+      overrideRequired: 'تجاوز الإعداد المطلوب'
+    },
+
+    footer: {
+      categoriesSelected: 'فئات مختارة',
+      cancel: 'إلغاء',
+      save: 'حفظ التكوين',
+      saving: 'جارٍ الحفظ...'
+    },
+
+    errors: {
+      loadFailed: 'فشل تحميل الفئات والإضافات المتاحة',
+      saveFailed: 'فشل حفظ التكوين'
+    }
   }
 }
 
