@@ -529,7 +529,7 @@ const renderStep1 = () => (
         )}
       </div>
 
-      {/* Alcohol Service */}
+     
      
     </div>
   );

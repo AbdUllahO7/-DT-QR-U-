@@ -4273,7 +4273,6 @@ export const en = {
         "tradeRegistry": "Trade Registry Number",
         "workPermit": "Work Permit",
         "foodCertificate": "Food Certificate",
-        "alcoholService": "Has Alcohol Service",
         "logo": "Logo"
       },
 
@@ -4298,7 +4297,6 @@ export const en = {
         "notUploaded": "Not uploaded",
         "available": "Available",
         "notAvailable": "Not Available",
-        "alcoholService": "Alcohol Service:"
       },
 
       "common": {
@@ -4370,7 +4368,6 @@ export const en = {
       "totalBranches": "Total Branches",
       "active": "Active",
       "inactive": "Inactive",
-      "alcohol": "Alcohol"
     },
     "common": {
       "yes": "Yes",
@@ -4698,7 +4695,6 @@ export const en = {
       "logoSuccess": "✓ Logo uploaded successfully",
       "logoSuccessSub": "Cloudinary URL received",
       "cuisineLabel": "Cuisine Type *",
-      "alcoholLabel": "We serve alcohol",
       "errors": {
         "nameRequired": "Restaurant name is required",
         "logoRequired": "Restaurant logo is required",

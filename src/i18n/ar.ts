@@ -4314,7 +4314,6 @@ recycleBin: {
       tradeRegistry: "رقم السجل التجاري",
       workPermit: "تصريح العمل",
       foodCertificate: "شهادة الغذاء",
-      alcoholService: "يوجد خدمة كحول",
       logo: "الشعار"
     },
 
@@ -4339,7 +4338,6 @@ recycleBin: {
       "notUploaded": "لم يتم الرفع",
       "available": "متاح",
       "notAvailable": "غير متاح",
-      "alcoholService": "خدمة الكحول:"
     },
 
     "common": {
@@ -4371,7 +4369,6 @@ recycleBin: {
       totalBranches: "إجمالي الفروع",
       active: "نشط",
       inactive: "غير نشط",
-      alcohol: "كحول"
     },
     common: {
       yes: "نعم",
@@ -4696,7 +4693,6 @@ recycleBin: {
       "logoSuccess": "✓ تم تحميل الشعار بنجاح",
       "logoSuccessSub": "تم استلام رابط Cloudinary",
       "cuisineLabel": "نوع المطبخ *",
-      "alcoholLabel": "نقدم المشروبات الكحولية",
       "errors": {
         "nameRequired": "اسم المطعم مطلوب",
         "logoRequired": "شعار المطعم مطلوب",
