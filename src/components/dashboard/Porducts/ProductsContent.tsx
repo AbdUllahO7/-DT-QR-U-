@@ -39,6 +39,7 @@ import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { Category, Product } from '../../../types/BranchManagement/type';
 import { useNavigate } from 'react-router-dom';
+import ProductExtrasModal from './ProductExtrasModal';
 
 // Branch dropdown item interface
 interface BranchDropdownItem {
@@ -127,6 +128,34 @@ const ProductsContent: React.FC = () => {
     productId: number;
     productName: string;
   } | null>(null);
+  const [isProductExtrasModalOpen, setIsProductExtrasModalOpen] = useState(false);
+const [selectedProductForExtras, setSelectedProductForExtras] = useState<{
+  productId: number;
+  productName: string;
+} | null>(null);
+
+const handleOpenProductExtras = (productId: number, productName: string) => {
+
+  console.log("Opening Extras Modal for Product ID:", productId, "Name:", productName);
+
+  if (!productId || productId === 0 || isNaN(productId)) {
+    console.error('❌ Invalid productId provided:', productId);
+    alert(t('productsContent.error.invalidData'));
+    return;
+  }
+  
+  if (!productName || productName.trim() === '') {
+    console.error('❌ Invalid productName provided:', productName);
+    alert(t('productsContent.error.invalidData'));
+    return;
+  }
+  
+  setSelectedProductForExtras({ 
+    productId: productId, 
+    productName: productName 
+  });
+  setIsProductExtrasModalOpen(true);
+};
   
   const [deleteConfig, setDeleteConfig] = useState<{
     type: 'product' | 'category';
@@ -1191,20 +1220,21 @@ const ProductsContent: React.FC = () => {
             <div className="space-y-4">
               {processedCategories.map((category) => (
                 <SortableCategory
-                  key={category.categoryId}
-                  category={category}
-                  isDark={isDark}
-                  onToggle={toggleCategory}
-                  onEditProduct={handleEditProduct}
-                  onDeleteProduct={handleDeleteProduct}
-                  onEditCategory={handleEditCategory}
-                  onDeleteCategory={handleDeleteCategory}
-                  activeId={activeId}
-                  onOpenAddonsManagement={handleOpenAddonsManagement}
-                  allCategories={categories}
-                  isReorderingProducts={isReorderingProducts && reorderingCategoryId === category.categoryId}
-                  viewMode="list"
-                />
+                    key={category.categoryId}
+                    category={category}
+                    isDark={isDark}
+                    onToggle={toggleCategory}
+                    onEditProduct={handleEditProduct}
+                    onDeleteProduct={handleDeleteProduct}
+                    onEditCategory={handleEditCategory}
+                    onDeleteCategory={handleDeleteCategory}
+                    activeId={activeId}
+                    onOpenAddonsManagement={handleOpenAddonsManagement}
+                    onOpenProductExtras={handleOpenProductExtras}
+                    allCategories={categories}
+                    isReorderingProducts={isReorderingProducts && reorderingCategoryId === category.categoryId}
+                    viewMode="list"
+                  />
               ))}
             </div>
        
@@ -1352,6 +1382,19 @@ const ProductsContent: React.FC = () => {
           onSuccess={loadCategories}
           productId={selectedProductForIngredients.productId}
           productName={selectedProductForIngredients.productName}
+        />
+      )}
+
+      {isProductExtrasModalOpen && selectedProductForExtras && (
+        <ProductExtrasModal
+          isOpen={isProductExtrasModalOpen}
+          onClose={() => {
+            setIsProductExtrasModalOpen(false);
+            setSelectedProductForExtras(null);
+          }}
+          onSuccess={loadCategories}
+          productId={selectedProductForExtras.productId}
+          productName={selectedProductForExtras.productName}
         />
       )}
     </DndContext>

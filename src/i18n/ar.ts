@@ -4980,11 +4980,10 @@ recycleBin: {
       }
     }
   },
- extrasManagement: {
+extrasManagement: {
   title: 'إدارة الإضافات',
   description: 'إدارة مجموعات الإضافات وعناصرها',
   searchPlaceholder: 'بحث عن الفئات أو الإضافات...',
-  
   loading: 'جاري التحميل...',
   processing: 'جاري المعالجة...',
   
@@ -4995,6 +4994,8 @@ recycleBin: {
     save: 'حفظ',
     cancel: 'إلغاء',
     close: 'إغلاق',
+    back: 'رجوع',
+    done: 'تم',
     addItem: 'إضافة عنصر',
     createFirst: 'إنشاء أول عنصر'
   },
@@ -5014,18 +5015,13 @@ recycleBin: {
     addNew: '+ إضافة فئة جديدة',
     addCategory: 'إضافة فئة جديدة',
     editCategory: 'تعديل الفئة',
-    
-    // Empty States
     noCategories: 'لم يتم العثور على فئات',
     tryAdjusting: 'حاول تعديل البحث أو إضافة فئة جديدة.',
-    
-    // Card Info
     select: 'تحديد:',
     qtyLimit: 'حد الكمية:',
     active: 'نشط',
     inactive: 'غير نشط',
     required: 'إلزامي',
-
     fields: {
       categoryName: 'اسم الفئة',
       categoryNamePlaceholder: 'مثال: إضافات البيتزا',
@@ -5043,11 +5039,8 @@ recycleBin: {
     title: 'الإضافات',
     addExtra: 'إضافة إضافة جديدة',
     editExtra: 'تعديل الإضافة',
-    
-    // Empty States
     noItems: 'لا توجد عناصر في هذه الفئة بعد.',
     noDescription: 'لا يوجد وصف',
-
     fields: {
       parentCategory: 'الفئة الأصل',
       selectCategory: 'اختر الفئة...',
@@ -5059,18 +5052,81 @@ recycleBin: {
       imageLabel: 'صورة العنصر',
       uploadText: 'اضغط لرفع صورة',
       activeLabel: 'نشط',
-      removalLabel: 'عنصر إزالة (طرح)',
+      removalLabel: 'عنصر إزالة (طرح)'
     }
+  },
+
+  productExtras: {
+    manageCategories: 'إدارة فئات المنتج',
+    manageExtras: 'إدارة الإضافات',
+    addCategory: 'إضافة فئة',
+    addExtra: 'إضافة إضافة',
+    selectCategory: 'اختر الفئة',
+    chooseCategory: 'اختر فئة...',
+    selectExtra: 'اختر الإضافة',
+    chooseExtra: 'اختر إضافة...',
+    noCategoriesYet: 'لا توجد فئات مضافة بعد',
+    noExtrasYet: 'لا توجد إضافات مضافة بعد',
+    confirmDelete: 'هل أنت متأكد من حذف هذه الفئة؟',
+    confirmDeleteExtra: 'هل أنت متأكد من حذف هذه الإضافة؟',
+    unknownCategory: 'فئة غير معروفة',
+    unknownExtra: 'إضافة غير معروفة',
+    confirm: 'تأكيد',
+    selection: 'الاختيار',
+    quantity: 'الكمية',
+    required: 'إلزامي',
+    optional: 'اختياري',
+    basePrice: 'السعر الأساسي',
+    unitPrice: 'سعر الوحدة',
+    selectionMode: 'وضع الاختيار',
+    single: 'فردي',
+    multiple: 'متعدد',
+    requiredExtra: 'إضافة إلزامية',
+    defaultQty: 'الكمية الافتراضية',
+    minQty: 'أقل كمية',
+    maxQty: 'أقصى كمية',
+    qty: 'الكمية',
+    minSelection: 'أقل اختيار',
+    maxSelection: 'أقصى اختيار',
+    minQuantity: 'أقل كمية',
+    maxQuantity: 'أقصى كمية',
+    selectionLimits: 'حدود الاختيار',
+    quantityLimits: 'حدود الكمية',
+    minSelectLabel: 'أقل اختيار',
+    maxSelectLabel: 'أقصى اختيار',
+    minTotalLabel: 'أقل إجمالي',
+    maxTotalLabel: 'أقصى إجمالي'
   },
   
   recycleBin: {
     title: 'سلة المحذوفات',
+    empty: 'سلة المحذوفات فارغة',
+    restore: 'استعادة',
+    permanentDelete: 'حذف نهائي',
+    confirmRestore: 'هل تريد استعادة "{name}"؟',
+    confirmPermanentDelete: 'هل تريد حذف "{name}" نهائياً؟ لا يمكن التراجع عن هذا الإجراء.'
   },
 
   errors: {
     loadCategories: 'خطأ في تحميل الفئات',
+    loadExtras: 'خطأ في تحميل الإضافات',
     uploadImage: 'خطأ في رفع الصورة',
-    deleteFailed: 'فشل حذف العنصر'
+    deleteFailed: 'فشل حذف العنصر',
+    loadFailed: 'فشل تحميل البيانات',
+    saveFailed: 'فشل حفظ البيانات',
+    updateFailed: 'فشل تحديث البيانات',
+    restoreFailed: 'فشل استعادة العنصر'
+  },
+
+  success: {
+    categoryAdded: 'تم إضافة الفئة بنجاح',
+    categoryUpdated: 'تم تحديث الفئة بنجاح',
+    categoryDeleted: 'تم حذف الفئة بنجاح',
+    extraAdded: 'تم إضافة الإضافة بنجاح',
+    extraUpdated: 'تم تحديث الإضافة بنجاح',
+    extraDeleted: 'تم حذف الإضافة بنجاح',
+    restored: 'تم الاستعادة بنجاح'
   }
 }
+
 }; 

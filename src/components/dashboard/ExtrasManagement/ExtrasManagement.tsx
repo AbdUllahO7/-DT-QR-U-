@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -138,19 +136,36 @@ export default function ExtrasManagement() {
   };
 
   // --- Create / Update Handlers ---
-  const handleCreateCategory = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setLoading(true);
-      await extraCategoriesService.createExtraCategory(categoryForm);
-      await loadData();
-      closeModal();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+    const handleCreateCategory = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null); // Clear previous errors on new submit
+        try {
+          setLoading(true);
+          await extraCategoriesService.createExtraCategory(categoryForm);
+          await loadData();
+          closeModal();
+        } catch (err: any) {
+          console.error(err);
+          
+          // --- Handle Axios Error ---
+          if (err.response) {
+            if (err.response.status === 409) {
+                // Specific message for Conflict (Duplicate)
+                setError(err.response.data.message || t('extrasManagement.errors.duplicateCategory'));
+            } else if (err.response.data && err.response.data.message) {
+                // Message from backend
+                setError(err.response.data.message);
+            } else {
+                // Fallback
+                setError(t('extrasManagement.errors.createFailed') || "An error occurred while creating.");
+            }
+          } else {
+            setError(err.message || "Network Error");
+          }
+        } finally {
+          setLoading(false);
+        }
+      };
 
   const handleUpdateCategory = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -258,6 +273,7 @@ export default function ExtrasManagement() {
   };
 
   const resetForms = () => {
+    setError(null); // <--- ADD THIS
     setSelectedCategory(null);
     setSelectedExtra(null);
     setSelectedFile(null);
@@ -509,7 +525,21 @@ export default function ExtrasManagement() {
 
               {/* Modal Content - Forms */}
               <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
-                {/* CATEGORY FORM */}
+                {error && (
+                  <div className="mb-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-lg">
+                    <div className="flex items-start">
+                      <div className="flex-shrink-0">
+                        <AlertTriangle className="h-5 w-5 text-red-500 dark:text-red-400" />
+                      </div>
+                      <div className="ml-3">
+                       
+                        <div className="mt-1 text-sm text-red-700 dark:text-red-400">
+                          {error}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {(modalType === 'add-category' || modalType === 'edit-category') && (
                   <form id="categoryForm" onSubmit={modalType === 'add-category' ? handleCreateCategory : handleUpdateCategory} className="space-y-5">
                     <div>
@@ -617,7 +647,8 @@ export default function ExtrasManagement() {
                   <form id="extraForm" onSubmit={modalType === 'add-extra' ? handleCreateExtra : handleUpdateExtra} className="space-y-5">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{t('extrasManagement.extras.fields.parentCategory')}</label>
-                      <select 
+                      <select
+                      title='Parent Category' 
                         value={extraForm.extraCategoryId}
                         onChange={(e) => setExtraForm({...extraForm, extraCategoryId: parseInt(e.target.value)})}
                         className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5"
@@ -638,6 +669,7 @@ export default function ExtrasManagement() {
                            <div className="relative">
                               <span className="absolute left-3 top-2.5 text-gray-500">$</span>
                               <input 
+                              title='Price'
                                 type="text" 
                                 inputMode="decimal"
                                 required 

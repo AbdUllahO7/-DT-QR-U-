@@ -5005,9 +5005,8 @@ recommended: "Önerilen",
 },
 extrasManagement: {
   title: 'Ekstra Yönetimi',
-  description: 'Değiştirici gruplarını ve öğelerini yönetin',
-  searchPlaceholder: 'Kategorileri veya ekstraları ara...',
-  
+  description: 'Ekstra kategorilerini ve öğelerini yönetin',
+  searchPlaceholder: 'Kategori veya ekstra ara...',
   loading: 'Yükleniyor...',
   processing: 'İşleniyor...',
   
@@ -5015,18 +5014,19 @@ extrasManagement: {
     add: 'Ekle',
     edit: 'Düzenle',
     delete: 'Sil',
-    save: 'Değişiklikleri Kaydet',
-    create: 'Oluştur',
+    save: 'Kaydet',
     cancel: 'İptal',
     close: 'Kapat',
+    back: 'Geri',
+    done: 'Tamam',
     addItem: 'Öğe Ekle',
-    createFirst: 'İlk öğeyi oluştur'
+    createFirst: 'İlk Öğeyi Oluştur'
   },
 
   deleteModal: {
     titleCategory: 'Kategoriyi Sil?',
     titleItem: 'Öğeyi Sil?',
-    confirmMessage: '"{name}" öğesini silmek istediğinize emin misiniz?',
+    confirmMessage: '"{name}" öğesini silmek istediğinizden emin misiniz?',
     warningMessage: 'Bu işlem geri alınamaz. Öğe geri dönüşüm kutusuna taşınacak.',
     confirmButton: 'Sil',
     processingButton: 'Siliniyor...',
@@ -5037,29 +5037,24 @@ extrasManagement: {
     title: 'Ekstra Kategorileri',
     addNew: '+ Yeni Kategori Ekle',
     addCategory: 'Yeni Kategori Ekle',
-    editCategory: 'Kategori Düzenle',
-    
-    // Empty States
+    editCategory: 'Kategoriyi Düzenle',
     noCategories: 'Kategori bulunamadı',
     tryAdjusting: 'Aramanızı değiştirmeyi veya yeni bir kategori eklemeyi deneyin.',
-    
-    // Card Info
     select: 'Seçim:',
     qtyLimit: 'Miktar Limiti:',
     active: 'Aktif',
     inactive: 'Pasif',
     required: 'Zorunlu',
-
     fields: {
       categoryName: 'Kategori Adı',
-      categoryNamePlaceholder: 'örn. Pizza Malzemeleri',
-      statusLabel: 'Aktif Durum',
+      categoryNamePlaceholder: 'Örn: Pizza Malzemeleri',
+      statusLabel: 'Aktiflik Durumu',
       requiredLabel: 'Zorunlu mu?',
-      selectionRules: 'SEÇİM KURALLARI',
-      minSelection: 'Min Seçim',
-      maxSelection: 'Max Seçim',
-      minQuantity: 'Min Toplam Miktar',
-      maxQuantity: 'Max Toplam Miktar'
+      selectionRules: 'Seçim Kuralları',
+      minSelection: 'Minimum Seçim',
+      maxSelection: 'Maksimum Seçim',
+      minQuantity: 'Minimum Miktar',
+      maxQuantity: 'Maksimum Miktar'
     }
   },
 
@@ -5067,34 +5062,94 @@ extrasManagement: {
     title: 'Ekstralar',
     addExtra: 'Yeni Ekstra Ekle',
     editExtra: 'Ekstra Düzenle',
-    
-    // Empty States
     noItems: 'Bu kategoride henüz öğe yok.',
     noDescription: 'Açıklama yok',
-
     fields: {
       parentCategory: 'Üst Kategori',
-      selectCategory: 'Kategori Seçin...',
+      selectCategory: 'Kategori Seç...',
       itemName: 'Öğe Adı',
-      itemNamePlaceholder: 'Öğe Adı',
+      itemNamePlaceholder: 'Öğe adı',
       price: 'Fiyat',
       description: 'Açıklama',
       descriptionPlaceholder: 'İsteğe bağlı detaylar...',
       imageLabel: 'Öğe Resmi',
       uploadText: 'Resim yüklemek için tıklayın',
       activeLabel: 'Aktif',
-      removalLabel: 'Çıkarma Öğesi',
+      removalLabel: 'Çıkarma Öğesi (Eksiltme)'
     }
   },
 
+  productExtras: {
+    manageCategories: 'Ürün Kategorilerini Yönet',
+    manageExtras: 'Ekstraları Yönet',
+    addCategory: 'Kategori Ekle',
+    addExtra: 'Ekstra Ekle',
+    selectCategory: 'Kategori Seç',
+    chooseCategory: 'Kategori Seçin...',
+    selectExtra: 'Ekstra Seç',
+    chooseExtra: 'Ekstra Seçin...',
+    noCategoriesYet: 'Henüz kategori eklenmedi',
+    noExtrasYet: 'Henüz ekstra eklenmedi',
+    confirmDelete: 'Bu kategoriyi silmek istediğinizden emin misiniz?',
+    confirmDeleteExtra: 'Bu ekstrayı silmek istediğinizden emin misiniz?',
+    unknownCategory: 'Bilinmeyen Kategori',
+    unknownExtra: 'Bilinmeyen Ekstra',
+    confirm: 'Onayla',
+    selection: 'Seçim',
+    quantity: 'Miktar',
+    required: 'Zorunlu',
+    optional: 'İsteğe Bağlı',
+    basePrice: 'Baz Fiyat',
+    unitPrice: 'Birim Fiyat',
+    selectionMode: 'Seçim Modu',
+    single: 'Tekli',
+    multiple: 'Çoklu',
+    requiredExtra: 'Zorunlu Ekstra',
+    defaultQty: 'Varsayılan Miktar',
+    minQty: 'Min Miktar',
+    maxQty: 'Maks Miktar',
+    qty: 'Mkt',
+    minSelection: 'Min Seçim',
+    maxSelection: 'Maks Seçim',
+    minQuantity: 'Min Miktar',
+    maxQuantity: 'Maks Miktar',
+    selectionLimits: 'Seçim Limitleri',
+    quantityLimits: 'Miktar Limitleri',
+    minSelectLabel: 'Min Seçim',
+    maxSelectLabel: 'Maks Seçim',
+    minTotalLabel: 'Min Toplam',
+    maxTotalLabel: 'Maks Toplam'
+  },
+  
   recycleBin: {
     title: 'Geri Dönüşüm Kutusu',
+    empty: 'Geri dönüşüm kutusu boş',
+    restore: 'Geri Yükle',
+    permanentDelete: 'Kalıcı Olarak Sil',
+    confirmRestore: '"{name}" öğesini geri yüklemek istiyor musunuz?',
+    confirmPermanentDelete: '"{name}" öğesini kalıcı olarak silmek istiyor musunuz? Bu işlem geri alınamaz.'
   },
 
   errors: {
     loadCategories: 'Kategoriler yüklenirken hata',
-    uploadImage: 'Resim yükleme hatası',
-    deleteFailed: 'Öğe silinemedi'
+    loadExtras: 'Ekstralar yüklenirken hata',
+    uploadImage: 'Resim yüklenirken hata',
+    deleteFailed: 'Öğe silinemedi',
+    loadFailed: 'Veri yüklenemedi',
+    saveFailed: 'Veri kaydedilemedi',
+    updateFailed: 'Veri güncellenemedi',
+    restoreFailed: 'Öğe geri yüklenemedi'
+  },
+
+  success: {
+    categoryAdded: 'Kategori başarıyla eklendi',
+    categoryUpdated: 'Kategori başarıyla güncellendi',
+    categoryDeleted: 'Kategori başarıyla silindi',
+    extraAdded: 'Ekstra başarıyla eklendi',
+    extraUpdated: 'Ekstra başarıyla güncellendi',
+    extraDeleted: 'Ekstra başarıyla silindi',
+    restored: 'Başarıyla geri yüklendi'
   }
 }
+
 }; 

@@ -4984,9 +4984,8 @@ export const en = {
   },
 extrasManagement: {
   title: 'Extras Management',
-  description: 'Manage modifier groups and their items',
-  searchPlaceholder: 'Search categories or extras...',
-  
+  description: 'Manage extra categories and their items',
+  searchPlaceholder: 'Search for categories or extras...',
   loading: 'Loading...',
   processing: 'Processing...',
   
@@ -4994,12 +4993,13 @@ extrasManagement: {
     add: 'Add',
     edit: 'Edit',
     delete: 'Delete',
-    save: 'Save Changes',
-    create: 'Create',
+    save: 'Save',
     cancel: 'Cancel',
     close: 'Close',
+    back: 'Back',
+    done: 'Done',
     addItem: 'Add Item',
-    createFirst: 'Create first item'
+    createFirst: 'Create First Item'
   },
 
   deleteModal: {
@@ -5017,28 +5017,23 @@ extrasManagement: {
     addNew: '+ Add New Category',
     addCategory: 'Add New Category',
     editCategory: 'Edit Category',
-    
-    // Empty States
     noCategories: 'No categories found',
     tryAdjusting: 'Try adjusting your search or add a new category.',
-    
-    // Card Info
     select: 'Select:',
     qtyLimit: 'Qty Limit:',
     active: 'Active',
     inactive: 'Inactive',
     required: 'Required',
-
     fields: {
       categoryName: 'Category Name',
-      categoryNamePlaceholder: 'e.g. Pizza Toppings',
+      categoryNamePlaceholder: 'e.g., Pizza Toppings',
       statusLabel: 'Active Status',
-      requiredLabel: 'Required?',
-      selectionRules: 'SELECTION RULES',
-      minSelection: 'Min Selection',
-      maxSelection: 'Max Selection',
-      minQuantity: 'Min Total Qty',
-      maxQuantity: 'Max Total Qty'
+      requiredLabel: 'Is it required?',
+      selectionRules: 'Selection Rules',
+      minSelection: 'Minimum Selection',
+      maxSelection: 'Maximum Selection',
+      minQuantity: 'Minimum Quantity',
+      maxQuantity: 'Maximum Quantity'
     }
   },
 
@@ -5046,34 +5041,93 @@ extrasManagement: {
     title: 'Extras',
     addExtra: 'Add New Extra',
     editExtra: 'Edit Extra',
-    
-    // Empty States
     noItems: 'No items in this category yet.',
     noDescription: 'No description',
-
     fields: {
       parentCategory: 'Parent Category',
       selectCategory: 'Select Category...',
       itemName: 'Item Name',
-      itemNamePlaceholder: 'Item Name',
+      itemNamePlaceholder: 'Item name',
       price: 'Price',
       description: 'Description',
       descriptionPlaceholder: 'Optional details...',
       imageLabel: 'Item Image',
       uploadText: 'Click to upload image',
       activeLabel: 'Active',
-      removalLabel: 'Is Removal Item',
+      removalLabel: 'Removal Item (Subtraction)'
     }
   },
 
+  productExtras: {
+    manageCategories: 'Manage Product Categories',
+    manageExtras: 'Manage Extras',
+    addCategory: 'Add Category',
+    addExtra: 'Add Extra',
+    selectCategory: 'Select Category',
+    chooseCategory: 'Choose Category...',
+    selectExtra: 'Select Extra',
+    chooseExtra: 'Choose Extra...',
+    noCategoriesYet: 'No categories added yet',
+    noExtrasYet: 'No extras added yet',
+    confirmDelete: 'Are you sure you want to delete this category?',
+    confirmDeleteExtra: 'Are you sure you want to delete this extra?',
+    unknownCategory: 'Unknown Category',
+    unknownExtra: 'Unknown Extra',
+    confirm: 'Confirm',
+    selection: 'Selection',
+    quantity: 'Quantity',
+    required : 'Required',
+    optional: 'Optional',
+    basePrice: 'Base Price',
+    unitPrice: 'Unit Price',
+    selectionMode: 'Selection Mode',
+    single: 'Single',
+    multiple: 'Multiple',
+    requiredExtra: 'Required Extra',
+    defaultQty: 'Default Qty',
+    minQty: 'Min Qty',
+    maxQty: 'Max Qty',
+    qty: 'Qty',
+    minSelection: 'Min Selection',
+    maxSelection: 'Max Selection',
+    minQuantity: 'Min Quantity',
+    maxQuantity: 'Max Quantity',
+    selectionLimits: 'Selection Limits',
+    quantityLimits: 'Quantity Limits',
+    minSelectLabel: 'Min Select',
+    maxSelectLabel: 'Max Select',
+    minTotalLabel: 'Min Total',
+    maxTotalLabel: 'Max Total'
+  },
+  
   recycleBin: {
     title: 'Recycle Bin',
+    empty: 'Recycle bin is empty',
+    restore: 'Restore',
+    permanentDelete: 'Delete Permanently',
+    confirmRestore: 'Do you want to restore "{name}"?',
+    confirmPermanentDelete: 'Do you want to permanently delete "{name}"? This action cannot be undone.'
   },
 
   errors: {
     loadCategories: 'Error loading categories',
+    loadExtras: 'Error loading extras',
     uploadImage: 'Error uploading image',
-    deleteFailed: 'Failed to delete item'
+    deleteFailed: 'Failed to delete item',
+    loadFailed: 'Failed to load data',
+    saveFailed: 'Failed to save data',
+    updateFailed: 'Failed to update data',
+    restoreFailed: 'Failed to restore item'
+  },
+
+  success: {
+    categoryAdded: 'Category added successfully',
+    categoryUpdated: 'Category updated successfully',
+    categoryDeleted: 'Category deleted successfully',
+    extraAdded: 'Extra added successfully',
+    extraUpdated: 'Extra updated successfully',
+    extraDeleted: 'Extra deleted successfully',
+    restored: 'Restored successfully'
   }
 }
 }; 

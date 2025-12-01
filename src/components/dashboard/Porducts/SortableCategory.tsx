@@ -1,7 +1,7 @@
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import { CSS } from "@dnd-kit/utilities";
-import { Edit2, GripVertical, Loader2, Package, Trash2, Plus, Eye, EyeOff, ChevronDown, ChevronUp, Sparkles } from "lucide-react";
+import { Edit2, GripVertical, Loader2, Package, Trash2, Plus, Eye, EyeOff, ChevronDown, ChevronUp, Sparkles, Layers } from "lucide-react";
 import { SortableProduct } from "./SortableProduct";
 import { Category } from "../../../types/BranchManagement/type";
 
@@ -16,7 +16,8 @@ export const SortableCategory: React.FC<{
   activeId: number | null;
   allCategories: Category[];
   isReorderingProducts?: boolean;
-  onOpenAddonsManagement?: (productId: number, productName: string) => void;
+  onOpenAddonsManagement: (productId: number, productName: string) => void;
+  onOpenProductExtras: (productId: number, productName: string) => void;
   viewMode?: 'list' | 'grid';
 }> = ({ 
   category, 
@@ -28,7 +29,8 @@ export const SortableCategory: React.FC<{
   onDeleteCategory, 
   isReorderingProducts = false,
   onOpenAddonsManagement,
-  viewMode = 'list'
+  viewMode = 'list',
+  onOpenProductExtras
 }) => {
   const { t, isRTL } = useLanguage();
   const {
@@ -39,6 +41,8 @@ export const SortableCategory: React.FC<{
     transition,
     isDragging
   } = useSortable({ id: category.categoryId });
+
+  console.log("onOpenProductExtras",onOpenProductExtras)
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -53,7 +57,6 @@ export const SortableCategory: React.FC<{
     return `${count} ${t('SortableCategory.products')}`;
   };
 
-  // Modern Grid Product Card
   const GridProductCard = ({ product }: { product: any }) => {
     const hasValidImage = product.imageUrl && product.imageUrl !== 'string' && product.imageUrl.trim() !== '';
     
@@ -113,6 +116,7 @@ export const SortableCategory: React.FC<{
                 <Plus className="w-4 h-4" />
               </button>
             )}
+         
             <button
               onClick={() => onDeleteProduct(product.id)}
               className="p-3 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200"
@@ -266,6 +270,7 @@ export const SortableCategory: React.FC<{
                     product={product}
                     isDark={isDark}
                     onEdit={onEditProduct}
+                    onOpenProductExtras={onOpenProductExtras}
                     onDelete={onDeleteProduct}
                     onOpenAddonsManagement={onOpenAddonsManagement}
                   />
