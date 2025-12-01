@@ -4271,7 +4271,6 @@ recommended: "Önerilen",
         tradeRegistry: "Ticaret Sicil Numarası",
         workPermit: "Çalışma İzni",
         foodCertificate: "Gıda Sertifikası",
-        alcoholService: "Alkol Servisi Var",
         logo: "Logo"
       },
 
@@ -4296,7 +4295,6 @@ recommended: "Önerilen",
         notUploaded: "Yüklenmedi",
         available: "Mevcut",
         notAvailable: "Mevcut Değil",
-        alcoholService: "Alkol Servisi:"
       },
 
       common: {
@@ -4328,7 +4326,6 @@ recommended: "Önerilen",
       totalBranches: "Toplam Şube",
       active: "Aktif",
       inactive: "Pasif",
-      alcohol: "Alkol"
     },
     common: {
       yes: "Evet",
@@ -4349,7 +4346,6 @@ recommended: "Önerilen",
       totalBranches: "Toplam Şube",
       active: "Aktif",
       inactive: "Pasif",
-      alcohol: "Alkol"
     },
     common: {
       yes: "Evet",
@@ -4674,7 +4670,6 @@ recommended: "Önerilen",
       "logoSuccess": "✓ Logo başarıyla yüklendi",
       "logoSuccessSub": "Cloudinary URL alındı",
       "cuisineLabel": "Mutfak Türü *",
-      "alcoholLabel": "Alkol servisi yapıyoruz",
       "errors": {
         "nameRequired": "Restaurant adı gereklidir",
         "logoRequired": "Restaurant logosu gereklidir",
