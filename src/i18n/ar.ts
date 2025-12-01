@@ -4383,9 +4383,7 @@ recycleBin: {
         restaurantName: "اسم المطعم",
         cuisineType: "نوع المطبخ"
       },
-      labels: {
-        hasAlcoholService: "يقدم خدمة الكحول"
-      },
+  
       buttons: {
         update: "تحديث المطعم",
         updating: "جاري التحديث..."

@@ -104,7 +104,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
 
   const handleAddExtra = async () => {
     if (!formData.extraId) {
-      setError(t('productExtras.selectExtra'));
+      setError(t('extrasManagement.productExtras.selectExtra'));
       return;
     }
 
@@ -204,7 +204,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
 
   const getExtraName = (extraId: number): string => {
     const extra = allExtras.find(e => e.id === extraId);
-    return extra ? extra.name : t('productExtras.unknownExtra');
+    return extra ? extra.name : t('extrasManagement.productExtras.unknownExtra');
   };
 
   const getExtraDetails = (extraId: number) => {
@@ -251,7 +251,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
               <div>
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   <Layers className="h-6 w-6 text-primary-600" />
-                  {t('productExtras.manageExtras')}
+                  {t('extrasManagement.productExtras.manageExtras')}
                 </h2>
                 <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
                   <span>{productName}</span>
@@ -292,7 +292,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                     <div className="bg-gray-200 dark:bg-gray-700 rounded-full p-1 group-hover:bg-primary-100 dark:group-hover:bg-primary-900 transition-colors">
                       <Plus className="h-5 w-5" />
                     </div>
-                    <span className="font-medium text-lg">{t('productExtras.addExtra')}</span>
+                    <span className="font-medium text-lg">{t('extrasManagement.productExtras.addExtra')}</span>
                   </button>
                 )}
 
@@ -301,7 +301,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                   <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg animate-in fade-in slide-in-from-bottom-4">
                      <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 dark:border-gray-700">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {t('productExtras.addExtra')}
+                        {t('extrasManagement.productExtras.addExtra')}
                       </h3>
                       <button onClick={() => setShowAddForm(false)} className="text-gray-400 hover:text-gray-600">
                         <X className="h-5 w-5" />
@@ -313,7 +313,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                       <div className="space-y-5">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                            {t('productExtras.selectExtra')} <span className="text-red-500">*</span>
+                            {t('extrasManagement.productExtras.selectExtra')} <span className="text-red-500">*</span>
                           </label>
                           <select
                             title='Select Extra'
@@ -321,10 +321,10 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                             onChange={(e) => handleExtraSelect(parseInt(e.target.value))}
                             className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
                           >
-                            <option value={0}>{t('productExtras.chooseExtra')}</option>
+                            <option value={0}>{t('extrasManagement.productExtras.chooseExtra')}</option>
                             {getAvailableExtrasToAdd().map(extra => (
                               <option key={extra.id} value={extra.id}>
-                                {extra.name} ({t('productExtras.basePrice')}: ${extra.basePrice.toFixed(2)})
+                                {extra.name} ({t('extrasManagement.productExtras.basePrice')}: ${extra.basePrice.toFixed(2)})
                               </option>
                             ))}
                           </select>
@@ -337,7 +337,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
 
                         <div>
                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            {t('productExtras.unitPrice')} <span className="text-red-500">*</span>
+                            {t('extrasManagement.productExtras.unitPrice')} <span className="text-red-500">*</span>
                           </label>
                           <div className="relative">
                             <DollarSign className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
@@ -362,7 +362,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                               className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                             />
                             <span className="ml-3 text-sm font-medium text-gray-900 dark:text-white">
-                              {t('productExtras.requiredExtra')}
+                              {t('extrasManagement.productExtras.requiredExtra')}
                             </span>
                           </label>
                         </div>
@@ -372,7 +372,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                       <div className="space-y-5">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            {t('productExtras.selectionMode')}
+                            {t('extrasManagement.productExtras.selectionMode')}
                           </label>
                           <div className="grid grid-cols-2 gap-3">
                             <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${formData.selectionMode === 0 ? 'bg-primary-50 border-primary-500 text-primary-700' : 'border-gray-200 hover:border-gray-300'}`}>
@@ -383,7 +383,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                 onChange={() => setFormData({ ...formData, selectionMode: 0 })}
                                 className="hidden"
                               />
-                              <span className="font-medium">{t('productExtras.single')}</span>
+                              <span className="font-medium">{t('extrasManagement.productExtras.single')}</span>
                             </label>
                             <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${formData.selectionMode === 1 ? 'bg-primary-50 border-primary-500 text-primary-700' : 'border-gray-200 hover:border-gray-300'}`}>
                               <input
@@ -393,7 +393,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                 onChange={() => setFormData({ ...formData, selectionMode: 1 })}
                                 className="hidden"
                               />
-                              <span className="font-medium">{t('productExtras.multiple')}</span>
+                              <span className="font-medium">{t('extrasManagement.productExtras.multiple')}</span>
                             </label>
                           </div>
                         </div>
@@ -475,7 +475,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                       <Package className="h-8 w-8 text-gray-400" />
                     </div>
                     <p className="text-gray-500 dark:text-gray-400 font-medium">
-                      {t('productExtras.noExtrasYet')}
+                      {t('extrasManagement.productExtras.noExtrasYet')}
                     </p>
                     <p className="text-sm text-gray-400 mt-1">Add extras to this category using the button above.</p>
                   </div>
@@ -508,7 +508,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                     className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                                   />
                                   <label htmlFor={`edit-req-${extra.id}`} className="ml-2 text-sm text-gray-700 dark:text-gray-300 font-medium cursor-pointer">
-                                    {t('productExtras.requiredExtra')}
+                                    {t('extrasManagement.productExtras.requiredExtra')}
                                   </label>
                                 </div>
                               </div>

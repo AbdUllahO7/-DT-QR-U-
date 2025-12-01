@@ -4361,9 +4361,7 @@ recommended: "Önerilen",
       restaurantName: "Restoran Adı",
       cuisineType: "Mutfak Türü"
       },
-      "labels": {
-        "hasAlcoholService": "Alkol Servisi Var"
-      },
+
       "buttons": {
         "update": "Restoranı Güncelle",
         "updating": "Güncelleniyor..."

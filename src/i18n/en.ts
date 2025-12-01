@@ -4382,9 +4382,7 @@ export const en = {
         "restaurantName": "Restaurant Name",
         "cuisineType": "Cuisine Type"
       },
-      "labels": {
-        "hasAlcoholService": "Has Alcohol Service"
-      },
+  
       "buttons": {
         "update": "Update Restaurant",
         "updating": "Updating..."
