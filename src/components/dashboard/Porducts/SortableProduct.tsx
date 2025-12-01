@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Edit2,  GripVertical, Package, Trash2, AlertCircle, Loader2, Plus, Sparkles, ChefHat } from "lucide-react";
+import { Edit2,  GripVertical, Package, Trash2, AlertCircle, Loader2, Plus, Sparkles, ChefHat, Layers } from "lucide-react";
 import { productService } from "../../../services/productService";
 import { logger } from "../../../utils/logger";
 import { productAddonsService } from "../../../services/ProductAddonsService";
@@ -14,7 +14,9 @@ export const SortableProduct: React.FC<{
   onEdit: (productId: number) => void;
   onDelete: (productId: number) => void;
   onOpenAddonsManagement?: (productId: number, productName: string) => void; 
-}> = ({ product, onEdit, onDelete, onOpenAddonsManagement }) => {
+    onOpenProductExtras: (productId: number, productName: string) => void;
+
+}> = ({ product, onEdit, onDelete, onOpenAddonsManagement , onOpenProductExtras }) => {
   const { t, isRTL } = useLanguage();
   const [imageError, setImageError] = useState(false);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -30,7 +32,8 @@ export const SortableProduct: React.FC<{
     setNodeRef,
     transform,
     transition,
-    isDragging
+    isDragging,
+    
   } = useSortable({ id: product.id });
 
   const style = {
@@ -284,7 +287,13 @@ export const SortableProduct: React.FC<{
                   >
                     <Edit2 className="h-4 w-4" />
                   </button>
-                  
+                      <button
+                  onClick={() => onOpenProductExtras(product.id, product.name)}
+                  className="p-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
+                  title={t('productsContent.actions.manageExtras')}
+                >
+                  <Layers className="h-4 w-4" />
+                </button>
                   <button
                     onClick={() => onDelete(product.id)}
                     className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 hover:scale-110"

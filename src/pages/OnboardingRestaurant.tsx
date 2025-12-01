@@ -530,20 +530,7 @@ const renderStep1 = () => (
       </div>
 
       {/* Alcohol Service */}
-      <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
-        <input
-          type="checkbox"
-          id="hasAlcoholService"
-          name="hasAlcoholService"
-          checked={formData.hasAlcoholService}
-          onChange={handleInputChange}
-          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
-        />
-        <label htmlFor="hasAlcoholService" className={`text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <Wine className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-          {t('onboardingRestaurant.step1.alcoholLabel')}
-        </label>
-      </div>
+     
     </div>
   );
 

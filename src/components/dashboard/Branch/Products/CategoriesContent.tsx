@@ -1008,7 +1008,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                                                 ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' 
                                                 : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
                                             }`}>
-                                              {product.status ? t('branchCategories.status.Aktif') : t('branchCategories.status.inactive')}
+                                              {product.status ? t('branchCategories.status.active') : t('branchCategories.status.inactive')}
                                             </span>
                                           </div>
                                           <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
@@ -1170,10 +1170,10 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                 <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div>
                     <div className="text-lg font-medium text-gray-900 dark:text-white">
-                      {t('branchCategories.review.readyToAdd')} {selectedCategories.size} {t('branchCategories.manage.categories')}
+                      {t('branchCategories.review.readyToAdd')} {selectedCategories.size} 
                       {selectedProducts.size > 0 && ` ${t('branchCategories.review.with')} ${selectedProducts.size} ${t('branchCategories.products.products')}`}
                     </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                    <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">30
                       {t('branchCategories.review.availableInBranch')} {branchId}
                       {(editedCategoryNames.size > 0 || editedProductPrices.size > 0) && (
                         <span className="ml-2">

@@ -239,8 +239,7 @@ const handleNavigateToOnlineMenu = async () => {
 
                 {!isEditing ? (
                   <ModernButton
-                             onClick={handleNavigateToOnlineMenu}
-
+                    onClick={() => setIsEditing(true)}
                     variant="primary"
                   >
                     <Edit className="w-4 h-4" />
