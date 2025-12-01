@@ -1053,10 +1053,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
   };
 
   const handleSave = async () => {
-    if (!branchId) {
-      setError(t('branchCategories.error.branchIdRequired') || 'Branch ID is required');
-      return;
-    }
+  
 
     if (selectedCategories.size === 0) {
       setError(t('branchCategories.error.selectAtLeastOne') || 'Please select at least one category');
