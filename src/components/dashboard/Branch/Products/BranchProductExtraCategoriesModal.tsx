@@ -11,6 +11,8 @@ import {
   ChevronUp,
   Grid3X3,
   Settings,
+  Edit3,
+  DollarSign,
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { 
@@ -49,6 +51,17 @@ interface ExtrasConfig {
   };
 }
 
+interface ExtraSpecificConfig {
+  specialUnitPrice: number;
+  minQuantity: number;
+  maxQuantity: number;
+  isRequiredOverride: boolean;
+}
+
+interface ExtrasSpecificConfig {
+  [extraId: number]: ExtraSpecificConfig;
+}
+
 const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesModalProps> = ({
   isOpen,
   onClose,
@@ -66,10 +79,12 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
   const [selectedCategories, setSelectedCategories] = useState<Set<number>>(new Set());
   const [extrasConfig, setExtrasConfig] = useState<ExtrasConfig>({});
   
+  // Extra-specific configuration
+  const [extrasSpecificConfig, setExtrasSpecificConfig] = useState<ExtrasSpecificConfig>({});
+  const [editingExtraId, setEditingExtraId] = useState<number | null>(null);
+  
   // Tracking Database IDs for Deletion/Update
-  // Categories: Map<productExtraCategoryId, relationId (PK)>
   const [existingRelationIds, setExistingRelationIds] = useState<Map<number, number>>(new Map());
-  // Extras: Map<productExtraId, relationId (PK)>
   const [existingExtraRelationIds, setExistingExtraRelationIds] = useState<Map<number, number>>(new Map());
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -89,7 +104,6 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
     setError(null);
 
     try {
-      // 1. FETCH EVERYTHING IN PARALLEL
       const [allAvailableCategories, allAvailableExtras, existingCategoriesData, existingExtrasData] = await Promise.all([
         branchProductExtraCategoriesService.getAvailableExtraCategories({
           branchProductId: branchProductId,
@@ -103,15 +117,13 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
         branchProductExtrasService.getBranchProductExtrasByBranchProductId(branchProductId)
       ]);
 
-      // 2. MERGE CATEGORIES
       const mergedCategories: CategoryWithExtras[] = allAvailableCategories.map((category) => ({
         ...category,
         isExpanded: false, 
         extras: [] 
       }));
 
-      // Add existing categories if they aren't in the available list
-        existingCategoriesData.forEach((existingCat) => {
+      existingCategoriesData.forEach((existingCat) => {
         const exists = mergedCategories.some(c => c.productExtraCategoryId === existingCat.productExtraCategoryId);
         if (!exists) {
           mergedCategories.push({
@@ -130,7 +142,6 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
         }
       });
 
-      // 3. MERGE EXTRAS INTO CATEGORIES
       mergedCategories.forEach(category => {
         const relevantAvailableExtras = allAvailableExtras.filter(
           (e) => e.categoryName === category.extraCategoryName
@@ -151,9 +162,8 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
               categoryName: existing.categoryName ?? '',
               unitPrice: existing.unitPrice ?? 0,
               extraId: existing.extraId ?? 0,
-                selectionMode: existing.selectionMode ?? 0,
-                isRemoval: existing.isRemoval ?? false,
-
+              selectionMode: existing.selectionMode ?? 0,
+              isRemoval: existing.isRemoval ?? false,
             };
             combinedExtras.push(mappedExtra);
           }
@@ -166,13 +176,12 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
       setAvailableCategories(mergedCategories);
 
       try {
-        // 4. PRE-FILL STATE (Selection & Config)
         const initialSelectedCats = new Set<number>();
         const initialConfig: ExtrasConfig = {};
+        const initialExtrasConfig: ExtrasSpecificConfig = {};
         const relationMap = new Map<number, number>();
-        const extraRelationMap = new Map<number, number>(); // Map for Extra Relations
+        const extraRelationMap = new Map<number, number>();
 
-        // A. Process Categories Configuration
         existingCategoriesData.forEach((cat) => {
           initialSelectedCats.add(cat.productExtraCategoryId);
           relationMap.set(cat.productExtraCategoryId, cat.id);
@@ -187,25 +196,32 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
           };
         });
 
-        // B. Process Selected Extras
         existingExtrasData.forEach((existingExtra) => {
-          // Store the database ID for deletion later
           extraRelationMap.set(existingExtra.productExtraId, existingExtra.id);
+
+          // Store extra-specific configuration
+          initialExtrasConfig[existingExtra.productExtraId] = {
+            specialUnitPrice: existingExtra.specialUnitPrice ?? 0,
+            minQuantity: existingExtra.minQuantity ?? 0,
+            maxQuantity: existingExtra.maxQuantity ?? 0,
+            isRequiredOverride: existingExtra.isRequiredOverride ?? false,
+          };
 
           const parentCategory = mergedCategories.find(c => c.extraCategoryName === existingExtra.categoryName);
 
           if (parentCategory) {
             const catId = parentCategory.productExtraCategoryId;
             if (initialConfig[catId]) {
-               initialConfig[catId].selectedExtras.add(existingExtra.productExtraId);
+              initialConfig[catId].selectedExtras.add(existingExtra.productExtraId);
             }
           }
         });
 
         setSelectedCategories(initialSelectedCats);
         setExtrasConfig(initialConfig);
+        setExtrasSpecificConfig(initialExtrasConfig);
         setExistingRelationIds(relationMap);
-        setExistingExtraRelationIds(extraRelationMap); // Set the extra relations
+        setExistingExtraRelationIds(extraRelationMap);
 
       } catch (err) {
         console.warn('Could not load existing configuration, starting fresh', err);
@@ -271,6 +287,23 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
         newSelectedExtras.delete(extraId);
       } else {
         newSelectedExtras.add(extraId);
+        
+        // Initialize extra-specific config if not exists
+        if (!extrasSpecificConfig[extraId]) {
+          const extra = availableCategories
+            .flatMap(c => c.extras)
+            .find(e => e.productExtraId === extraId);
+          
+          setExtrasSpecificConfig(prevConfig => ({
+            ...prevConfig,
+            [extraId]: {
+              specialUnitPrice: extra?.unitPrice ?? 0,
+              minQuantity: 0,
+              maxQuantity: 0,
+              isRequiredOverride: false,
+            }
+          }));
+        }
       }
 
       return {
@@ -297,31 +330,47 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
     }));
   };
 
+  const handleExtraConfigChange = (
+    extraId: number,
+    field: keyof ExtraSpecificConfig,
+    value: number | boolean
+  ) => {
+    setExtrasSpecificConfig((prev) => ({
+      ...prev,
+      [extraId]: {
+        ...prev[extraId],
+        [field]: value,
+      },
+    }));
+  };
+
+  const toggleExtraEdit = (extraId: number) => {
+    setEditingExtraId(editingExtraId === extraId ? null : extraId);
+  };
+
   const handleSave = async () => {
     setIsSaving(true);
     setError(null);
 
     try {
-
+      // PHASE 1: DELETE UNSELECTED CATEGORIES
       const categoriesToDelete: number[] = []; 
       
       for (const [productExtraCategoryId, relationId] of existingRelationIds.entries()) {
         if (!selectedCategories.has(productExtraCategoryId)) {
-            categoriesToDelete.push(relationId);
+          categoriesToDelete.push(relationId);
         }
       }
 
       for (const relationId of categoriesToDelete) {
-          try {
-              await branchProductExtraCategoriesService.deleteBranchProductExtraCategory(relationId);
-          } catch (err) {
-              console.error(`Failed to delete category relation ${relationId}`, err);
-          }
+        try {
+          await branchProductExtraCategoriesService.deleteBranchProductExtraCategory(relationId);
+        } catch (err) {
+          console.error(`Failed to delete category relation ${relationId}`, err);
+        }
       }
 
-      // ===============================================
       // PHASE 2: CREATE OR UPDATE CATEGORIES
-      // ===============================================
       for (const categoryId of selectedCategories) {
         const config = extrasConfig[categoryId];
         if (!config) continue;
@@ -329,54 +378,44 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
         const existingRelationId = existingRelationIds.get(categoryId);
 
         if (existingRelationId) {
-            // UPDATE EXISTING
-            const updateData: UpdateBranchProductExtraCategoryData = {
-                id: existingRelationId,
-                isRequiredOverride: config.isRequiredOverride,
-                minSelectionCount: config.minSelectionCount,
-                maxSelectionCount: config.maxSelectionCount,
-                minTotalQuantity: config.minTotalQuantity,
-                maxTotalQuantity: config.maxTotalQuantity,
-                isActive: true
-            };
-            await branchProductExtraCategoriesService.updateBranchProductExtraCategory(updateData);
+          const updateData: UpdateBranchProductExtraCategoryData = {
+            id: existingRelationId,
+            isRequiredOverride: config.isRequiredOverride,
+            minSelectionCount: config.minSelectionCount,
+            maxSelectionCount: config.maxSelectionCount,
+            minTotalQuantity: config.minTotalQuantity,
+            maxTotalQuantity: config.maxTotalQuantity,
+            isActive: true
+          };
+          await branchProductExtraCategoriesService.updateBranchProductExtraCategory(updateData);
         } else {
-            // CREATE NEW
-            const createData: CreateBranchProductExtraCategoryData = {
-                branchProductId,
-                productExtraCategoryId: categoryId,
-                isRequiredOverride: config.isRequiredOverride,
-                minSelectionCount: config.minSelectionCount,
-                maxSelectionCount: config.maxSelectionCount,
-                minTotalQuantity: config.minTotalQuantity,
-                maxTotalQuantity: config.maxTotalQuantity,
-                isActive: true,
-            };
-            await branchProductExtraCategoriesService.createBranchProductExtraCategory(createData);
+          const createData: CreateBranchProductExtraCategoryData = {
+            branchProductId,
+            productExtraCategoryId: categoryId,
+            isRequiredOverride: config.isRequiredOverride,
+            minSelectionCount: config.minSelectionCount,
+            maxSelectionCount: config.maxSelectionCount,
+            minTotalQuantity: config.minTotalQuantity,
+            maxTotalQuantity: config.maxTotalQuantity,
+            isActive: true,
+          };
+          await branchProductExtraCategoriesService.createBranchProductExtraCategory(createData);
         }
       }
 
-      // ===============================================
       // PHASE 3: DELETE UNSELECTED EXTRAS
-      // ===============================================
-      // We check all previously existing extras. If an extra is not currently selected in its category's config, delete it.
       const extrasToDelete: number[] = [];
-
-      // Create a master set of all currently selected extra IDs from the UI config
       const allCurrentlySelectedExtraIds = new Set<number>();
       Object.values(extrasConfig).forEach(config => {
         config.selectedExtras.forEach((id: number) => allCurrentlySelectedExtraIds.add(id));
       });
 
-      // Loop through known database relations
       for (const [productExtraId, relationId] of existingExtraRelationIds.entries()) {
-        // If the database extra is NOT in the currently selected set, mark for deletion
         if (!allCurrentlySelectedExtraIds.has(productExtraId)) {
           extrasToDelete.push(relationId);
         }
       }
 
-      // Execute deletions
       for (const relationId of extrasToDelete) {
         try {
           await branchProductExtrasService.deleteBranchProductExtra(relationId);
@@ -385,9 +424,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
         }
       }
 
-      // ===============================================
       // PHASE 4: CREATE OR UPDATE EXTRAS
-      // ===============================================
       const allSelectedExtras: number[] = [];
       
       for (const [categoryId, config] of Object.entries(extrasConfig)) {
@@ -396,41 +433,52 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
         for (const extraId of config.selectedExtras) {
           allSelectedExtras.push(extraId);
 
-          // Check if this extra already exists in the database
           const existingExtraId = existingExtraRelationIds.get(extraId);
+          const extraConfig = extrasSpecificConfig[extraId] || {
+            specialUnitPrice: 0,
+            minQuantity: 0,
+            maxQuantity: 0,
+            isRequiredOverride: false,
+          };
+
+          // Check if the extra is a removal type
+          const extra = availableCategories
+            .flatMap(c => c.extras)
+            .find(e => e.productExtraId === extraId);
+          
+          const isRemoval = extra?.isRemoval ?? false;
 
           if (existingExtraId) {
-             // UPDATE: Extra exists. We can update it if needed (e.g. price/quantity changes)
-             // For now, we update to ensure properties are synced, or skip if unnecessary.
-             const updateData: UpdateBranchProductExtraData = {
-               id: existingExtraId,
-               isActive: true,
-               specialUnitPrice: 0,
-               minQuantity: 0,
-               maxQuantity: 0,
-               isRequiredOverride: false,
-             };
-             try {
-                await branchProductExtrasService.updateBranchProductExtra(updateData);
-             } catch(err) {
-               console.error(`Error updating extra ${extraId}`, err);
-             }
+            const updateData: UpdateBranchProductExtraData = {
+              id: existingExtraId,
+              isActive: true,
+              // Don't send specialUnitPrice for removal extras
+              specialUnitPrice: isRemoval ? 0 : extraConfig.specialUnitPrice,
+              minQuantity: extraConfig.minQuantity,
+              maxQuantity: extraConfig.maxQuantity,
+              isRequiredOverride: extraConfig.isRequiredOverride,
+            };
+            try {
+              await branchProductExtrasService.updateBranchProductExtra(updateData);
+            } catch(err) {
+              console.error(`Error updating extra ${extraId}`, err);
+            }
           } else {
-             // CREATE: Extra does not exist. Create it.
-             const extraData: CreateBranchProductExtraData = {
+            const extraData: CreateBranchProductExtraData = {
               branchProductId,
               productExtraId: extraId,
               isActive: true,
-              specialUnitPrice: 0,
-              minQuantity: 0,
-              maxQuantity: 0,
-              isRequiredOverride: false,
+              // Don't send specialUnitPrice for removal extras
+              specialUnitPrice: isRemoval ? 0 : extraConfig.specialUnitPrice,
+              minQuantity: extraConfig.minQuantity,
+              maxQuantity: extraConfig.maxQuantity,
+              isRequiredOverride: extraConfig.isRequiredOverride,
             };
   
             try {
               await branchProductExtrasService.createBranchProductExtra(extraData);
             } catch (err) {
-               console.error(`Error creating extra ${extraId}:`, err);
+              console.error(`Error creating extra ${extraId}:`, err);
             }
           }
         }
@@ -453,10 +501,10 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
   const getTotalSelectedExtras = () => {
     return Object.entries(extrasConfig).reduce(
       (sum, [catId, config]) => {
-          if(selectedCategories.has(Number(catId))) {
-              return sum + config.selectedExtras.size;
-          }
-          return sum;
+        if(selectedCategories.has(Number(catId))) {
+          return sum + config.selectedExtras.size;
+        }
+        return sum;
       },
       0
     );
@@ -634,7 +682,6 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                             </div>
                           </div>
 
-                          {/* Show chevron if selected or has extras */}
                           {category.extras.length > 0 && (
                             <button
                               onClick={() => handleCategoryExpand(category.productExtraCategoryId)}
@@ -665,7 +712,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                   {t('extrasManagement.categoryConfigModal.fields.minSelection')}
                                 </label>
                                 <input
-                                    title='minSelectionCount'
+                                  title='minSelectionCount'
                                   type="number"
                                   min="0"
                                   value={config.minSelectionCount}
@@ -685,7 +732,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                   {t('extrasManagement.categoryConfigModal.fields.maxSelection')}
                                 </label>
                                 <input
-                                title="maxSelectionCount"
+                                  title="maxSelectionCount"
                                   type="number"
                                   min="0"
                                   value={config.maxSelectionCount}
@@ -705,7 +752,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                   {t('extrasManagement.categoryConfigModal.fields.minQuantity')}
                                 </label>
                                 <input
-                                title='Minimum Total Quantity'
+                                  title='Minimum Total Quantity'
                                   type="number"
                                   min="0"
                                   value={config.minTotalQuantity}
@@ -725,7 +772,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                   {t('extrasManagement.categoryConfigModal.fields.maxQuantity')}
                                 </label>
                                 <input
-                                title='Max Total Quantity'
+                                  title='Max Total Quantity'
                                   type="number"
                                   min="0"
                                   value={config.maxTotalQuantity}
@@ -742,76 +789,237 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                             </div>
                             
                             <div className={`mt-3 flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2`}>
-                                <input
-                                  type="checkbox"
-                                  id={`required-${category.productExtraCategoryId}`}
-                                  checked={config.isRequiredOverride}
-                                  onChange={(e) =>
-                                    handleConfigChange(
-                                      category.productExtraCategoryId,
-                                      'isRequiredOverride',
-                                      e.target.checked
-                                    )
-                                  }
-                                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                />
-                                <label
-                                  htmlFor={`required-${category.productExtraCategoryId}`}
-                                  className="text-sm text-gray-700 dark:text-gray-300"
-                                >
-                                  {t('extrasManagement.categoryConfigModal.fields.overrideRequired')}
-                                </label>
-                              </div>
+                              <input
+                                type="checkbox"
+                                id={`required-${category.productExtraCategoryId}`}
+                                checked={config.isRequiredOverride}
+                                onChange={(e) =>
+                                  handleConfigChange(
+                                    category.productExtraCategoryId,
+                                    'isRequiredOverride',
+                                    e.target.checked
+                                  )
+                                }
+                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                              />
+                              <label
+                                htmlFor={`required-${category.productExtraCategoryId}`}
+                                className="text-sm text-gray-700 dark:text-gray-300"
+                              >
+                                {t('extrasManagement.categoryConfigModal.fields.overrideRequired')}
+                              </label>
+                            </div>
                           </div>
                         )}
                       </div>
 
-                      {/* Extras list - Show if Expanded */}
+                      {/* Extras list */}
                       {category.isExpanded && category.extras.length > 0 && (
                         <div className="border-t border-gray-200 dark:border-gray-600 p-4 bg-gray-50 dark:bg-gray-700/30">
                           <h5 className="font-medium text-gray-900 dark:text-white mb-3">
                             {t('extrasManagement.categoryConfigModal.category.selectExtrasTitle')}
                           </h5>
                           {!isSelected && (
-                              <p className="text-xs text-amber-600 mb-2">
-                                {t('extrasManagement.categoryConfigModal.category.selectCategoryWarning')}
-                              </p>
+                            <p className="text-xs text-amber-600 mb-2">
+                              {t('extrasManagement.categoryConfigModal.category.selectCategoryWarning')}
+                            </p>
                           )}
-                          <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-3">
                             {category.extras.map((extra) => {
                               const isExtraSelected = config?.selectedExtras.has(extra.productExtraId);
+                              const extraConfig = extrasSpecificConfig[extra.productExtraId] || {
+                                specialUnitPrice: extra.unitPrice,
+                                minQuantity: 0,
+                                maxQuantity: 0,
+                                isRequiredOverride: false,
+                              };
+                              const isEditing = editingExtraId === extra.productExtraId;
+                              const isRemoval = extra.isRemoval;
 
                               return (
                                 <div
                                   key={extra.productExtraId}
-                                  onClick={() =>
-                                    handleExtraToggle(category.productExtraCategoryId, extra.productExtraId)
-                                  }
-                                  className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                                  className={`rounded-lg border-2 transition-all ${
                                     isExtraSelected
                                       ? 'border-green-300 dark:border-green-600 bg-green-50 dark:bg-green-900/20'
                                       : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800'
-                                  } ${!isSelected ? 'opacity-50 cursor-not-allowed' : 'hover:border-gray-300 dark:hover:border-gray-500'}`}
+                                  } ${!isSelected ? 'opacity-50' : ''}`}
                                 >
-                                  <div className="flex items-center justify-between">
+                                  <div
+                                    onClick={() => !isEditing && handleExtraToggle(category.productExtraCategoryId, extra.productExtraId)}
+                                    className={`p-3 flex items-center justify-between ${!isSelected || isEditing ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50'}`}
+                                  >
                                     <div className="flex-1">
-                                      <p className="font-medium text-gray-900 dark:text-white">
-                                        {extra.extraName}
-                                      </p>
+                                      <div className="flex items-center gap-2">
+                                        <p className="font-medium text-gray-900 dark:text-white">
+                                          {extra.extraName}
+                                        </p>
+                                        {isRemoval && (
+                                          <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
+                                            Removal
+                                          </span>
+                                        )}
+                                      </div>
                                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        ${extra.unitPrice.toFixed(2)}
+                                        {!isRemoval && (
+                                          <>
+                                            ${(extraConfig.specialUnitPrice || extra.unitPrice).toFixed(2)}
+                                            {extraConfig.specialUnitPrice > 0 && extraConfig.specialUnitPrice !== extra.unitPrice && (
+                                              <span className="ml-1 text-xs text-blue-600 dark:text-blue-400">
+                                                (Original: ${extra.unitPrice.toFixed(2)})
+                                              </span>
+                                            )}
+                                          </>
+                                        )}
+                                        {isRemoval && (
+                                          <span className="text-xs text-gray-500 dark:text-gray-400">
+                                            Removes ingredient
+                                          </span>
+                                        )}
                                       </p>
                                     </div>
-                                    <div
-                                      className={`w-5 h-5 rounded flex items-center justify-center ml-3 mr-3 ${
-                                        isExtraSelected
-                                          ? 'bg-green-600 dark:bg-green-500'
-                                          : 'bg-gray-200 dark:bg-gray-600'
-                                      }`}
-                                    >
-                                      {isExtraSelected && <Check className="h-3 w-3 text-white " />}
+                                    <div className="flex items-center gap-2">
+                                      {isExtraSelected && isSelected && (
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            toggleExtraEdit(extra.productExtraId);
+                                          }}
+                                          className={`p-2 rounded-lg transition-colors ${
+                                            isEditing
+                                              ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                                              : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 dark:text-gray-400'
+                                          }`}
+                                          title="Edit extra configuration"
+                                        >
+                                          <Edit3 className="h-4 w-4" />
+                                        </button>
+                                      )}
+                                      <div
+                                        className={`w-5 h-5 rounded flex items-center justify-center ${
+                                          isExtraSelected
+                                            ? 'bg-green-600 dark:bg-green-500'
+                                            : 'bg-gray-200 dark:bg-gray-600'
+                                        }`}
+                                      >
+                                        {isExtraSelected && <Check className="h-3 w-3 text-white" />}
+                                      </div>
                                     </div>
                                   </div>
+
+                                  {/* Extra Configuration Panel */}
+                                  {isEditing && isExtraSelected && (
+                                    <div className="border-t border-gray-200 dark:border-gray-600 p-4 bg-white dark:bg-gray-700/50">
+                                      <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 mb-3`}>
+                                        <DollarSign className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                                        <h6 className="font-medium text-sm text-gray-900 dark:text-white">
+                                          Extra Configuration
+                                        </h6>
+                                      </div>
+                                      
+                                      <div className="grid grid-cols-2 gap-3">
+                                        {!isRemoval && (
+                                          <div>
+                                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                              Special Price
+                                            </label>
+                                            <input
+                                              type="number"
+                                              min="0"
+                                              step="0.01"
+                                              value={extraConfig.specialUnitPrice}
+                                              onChange={(e) =>
+                                                handleExtraConfigChange(
+                                                  extra.productExtraId,
+                                                  'specialUnitPrice',
+                                                  parseFloat(e.target.value) || 0
+                                                )
+                                              }
+                                              onClick={(e) => e.stopPropagation()}
+                                              className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                              placeholder={`Default: ${extra.unitPrice}`}
+                                            />
+                                          </div>
+                                        )}
+                                        
+                                        {isRemoval && (
+                                          <div className="col-span-2">
+                                            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                                              <p className="text-xs text-amber-700 dark:text-amber-400 flex items-center">
+                                                <AlertCircle className="inline h-3 w-3 mr-1" />
+                                                Price cannot be set for removal extras
+                                              </p>
+                                            </div>
+                                          </div>
+                                        )}
+
+                                        <div>
+                                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Min Quantity
+                                          </label>
+                                          <input
+                                          title='max'
+                                            type="number"
+                                            min="0"
+                                            value={extraConfig.minQuantity}
+                                            onChange={(e) =>
+                                              handleExtraConfigChange(
+                                                extra.productExtraId,
+                                                'minQuantity',
+                                                parseInt(e.target.value) || 0
+                                              )
+                                            }
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                          />
+                                        </div>
+
+                                        <div>
+                                          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            Max Quantity
+                                          </label>
+                                          <input
+                                          title='Max Quantity'
+                                            type="number"
+                                            min="0"
+                                            value={extraConfig.maxQuantity}
+                                            onChange={(e) =>
+                                              handleExtraConfigChange(
+                                                extra.productExtraId,
+                                                'maxQuantity',
+                                                parseInt(e.target.value) || 0
+                                              )
+                                            }
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                                          />
+                                        </div>
+
+                                        <div className="flex items-center">
+                                          <input
+                                            type="checkbox"
+                                            id={`extra-required-${extra.productExtraId}`}
+                                            checked={extraConfig.isRequiredOverride}
+                                            onChange={(e) => {
+                                              e.stopPropagation();
+                                              handleExtraConfigChange(
+                                                extra.productExtraId,
+                                                'isRequiredOverride',
+                                                e.target.checked
+                                              );
+                                            }}
+                                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                          />
+                                          <label
+                                            htmlFor={`extra-required-${extra.productExtraId}`}
+                                            className="ml-2 text-xs text-gray-700 dark:text-gray-300"
+                                          >
+                                            Required
+                                          </label>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               );
                             })}
@@ -827,31 +1035,31 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
 
           {/* Footer */}
           <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50">
-             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-               <div className="text-sm text-gray-600 dark:text-gray-400">
-                 <span className="font-medium">{selectedCategories.size}</span> {t('extrasManagement.categoryConfigModal.footer.categoriesSelected')}
-               </div>
-               <div className={`flex ${isRTL ? 'space-x-reverse' : ''} space-x-3`}>
-                 <button 
-                   onClick={onClose} 
-                   disabled={isSaving} 
-                   className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
-                 >
-                   {t('extrasManagement.categoryConfigModal.footer.cancel')}
-                 </button>
-                 <button 
-                   onClick={handleSave} 
-                   disabled={isSaving} 
-                   className="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-xl hover:bg-blue-700 dark:hover:bg-blue-600 flex items-center gap-2 disabled:opacity-50"
-                 >
-                    {isSaving ? <Loader2 className="animate-spin h-4 w-4" /> : <Check className="h-4 w-4" />}
-                    {isSaving 
-                      ? t('extrasManagement.categoryConfigModal.footer.saving')
-                      : t('extrasManagement.categoryConfigModal.footer.save')
-                    }
-                 </button>
-               </div>
-             </div>
+            <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                <span className="font-medium">{selectedCategories.size}</span> {t('extrasManagement.categoryConfigModal.footer.categoriesSelected')}
+              </div>
+              <div className={`flex ${isRTL ? 'space-x-reverse' : ''} space-x-3`}>
+                <button 
+                  onClick={onClose} 
+                  disabled={isSaving} 
+                  className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+                >
+                  {t('extrasManagement.categoryConfigModal.footer.cancel')}
+                </button>
+                <button 
+                  onClick={handleSave} 
+                  disabled={isSaving} 
+                  className="px-6 py-3 bg-blue-600 dark:bg-blue-500 text-white rounded-xl hover:bg-blue-700 dark:hover:bg-blue-600 flex items-center gap-2 disabled:opacity-50"
+                >
+                  {isSaving ? <Loader2 className="animate-spin h-4 w-4" /> : <Check className="h-4 w-4" />}
+                  {isSaving 
+                    ? t('extrasManagement.categoryConfigModal.footer.saving')
+                    : t('extrasManagement.categoryConfigModal.footer.save')
+                  }
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

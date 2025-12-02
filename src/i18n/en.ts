@@ -5175,6 +5175,12 @@ extrasManagement: {
       loadFailed: 'Failed to load available categories and extras',
       saveFailed: 'Failed to save configuration'
     }
-  }
-}
+  },
+
+},
+    onboardingComplete: {
+    "title": "Registration Complete!",
+    "message": "Your restaurant and branch information has been successfully saved. You are being redirected to the login page...",
+    "redirectingIn": "seconds until redirection"
+  },
 }; 

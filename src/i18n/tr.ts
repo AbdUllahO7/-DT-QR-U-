@@ -5195,7 +5195,12 @@ extrasManagement: {
       loadFailed: 'Mevcut kategoriler ve ekstralar yüklenemedi',
       saveFailed: 'Yapılandırma kaydedilemedi'
     }
-  }
-}
+  },
 
+},
+      onboardingComplete: {
+      "title": "Kayıt İşlemi Tamamlandı!",
+      "message": "Restaurant ve şube bilgileriniz başarıyla kaydedildi. Giriş sayfasına yönlendiriliyorsunuz...",
+      "redirectingIn": "saniye içinde yönlendirileceksiniz"
+    },
 }; 
