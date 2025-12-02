@@ -22,6 +22,16 @@ export interface BasketAddonItem {
   maxQuantity:number;
 }
 
+export interface BasketExtraItem {
+  branchProductExtraId: number;
+  extraId: number;
+  extraName: string;
+  quantity: number;
+  price: number;
+  isRemoval: boolean;
+  categoryName?: string;
+}
+
 // Main basket item interface based on your API response
 export interface BasketItem {
   id: number;
@@ -35,6 +45,7 @@ export interface BasketItem {
   imageUrl: string | null;
   description: string | null;
   isAddon: boolean;
+  extras?: BasketExtraItem[];
   parentBasketItemId: number | null;
   addonItems: BasketAddonItem[];
   addonPrice: number | null;
@@ -73,10 +84,19 @@ export interface TableSummary {
   tables?: any[];
 }
 
-// Add unified item interface
+// FIXED: Add product extra interface
+export interface ProductExtraDto {
+  branchProductExtraId: number;
+  extraId: number;
+  quantity: number;
+  isRemoval: boolean;
+}
+
+// FIXED: Add unified item interface - now includes extras
 export interface AddUnifiedItemDto {
   branchProductId: number;
   quantity: number;
+  productExtras?: ProductExtraDto[];  // Added extras field
 }
 
 // Batch add items interface
@@ -169,8 +189,7 @@ class BasketService {
       
       const url = `${this.baseUrl}/my-basket`;
       const response = await httpClient.get(url);
-      
-
+      console.log('My basket response:', response);
       
       // Try to access the basket data safely
       let basketData;
@@ -299,11 +318,10 @@ class BasketService {
     }
   }
 
-  // POST /api/Basket/{basketId}/unified-items
   async addUnifiedItemToBasket(basketId: string, data: AddUnifiedItemDto): Promise<BasketItem> {
     try {
       logger.info('Unified item ekleme isteği gönderiliyor', { basketId, data }, { prefix: 'BasketService' });
-      
+      console.log('Adding unified item to basket:', basketId, data);
       const url = `${this.baseUrl}/${basketId}/unified-items`;
       const response = await httpClient.post<BasketItem>(url, data);
       
@@ -320,6 +338,7 @@ class BasketService {
   async addUnifiedItemToMyBasket(data: AddUnifiedItemDto): Promise<BasketItem> {
     try {
       logger.info('My basket unified item ekleme isteği gönderiliyor', { data }, { prefix: 'BasketService' });
+      console.log('Adding unified item to my basket:', data);
       const url = `${this.baseUrl}/my-basket/unified-items`;
       const response = await httpClient.post<BasketItem>(url, data);
       
@@ -338,7 +357,7 @@ class BasketService {
       logger.info('My basket batch items ekleme isteği gönderiliyor', { 
         itemsCount: items.length 
       }, { prefix: 'BasketService' });
-      
+      console.log('Batch adding items to my basket:', items);
       const url = `${this.baseUrl}/my-basket/items/batch`;
       const response = await httpClient.post(url, items);
       

@@ -1,229 +1,123 @@
-// Product Extra Categories Types
-export interface ProductExtraCategory {
-  id: number;
-  productId: number;
-  extraCategoryId: number;
-  isRequiredOverride: boolean;
-  minSelectionCount: number;
-  maxSelectionCount: number;
-  minTotalQuantity: number;
-  maxTotalQuantity: number;
-  displayOrder?: number;
-  isDeleted?: boolean;
+
+export interface MenuAllergen {
+  id: number
+  code: string
+  name: string
+  icon: string
+  presence: number
+  note: string
+  displayOrder: number
+  description: string
 }
 
-export interface APIProductExtraCategory {
-  id: number;
-  productId: number;
-  extraCategoryId: number;
-  isRequiredOverride: boolean;
-  minSelectionCount: number;
-  maxSelectionCount: number;
-  minTotalQuantity: number;
-  maxTotalQuantity: number;
-  displayOrder?: number;
-  isDeleted?: boolean;
+export interface MenuIngredient {
+  id: number
+  productId: number
+  ingredientId: number
+  ingredientName: string
+  quantity: number
+  unit: string
+  isAllergenic: boolean
+  isAvailable: boolean
+  allergenIds: number[]
+  allergens: MenuAllergen[]
 }
-
-export interface CreateProductExtraCategoryData {
-  productId: number;
-  extraCategoryId: number;
-  isRequiredOverride: boolean;
-  minSelectionCount: number;
-  maxSelectionCount: number;
-  minTotalQuantity: number;
-  maxTotalQuantity: number;
+export interface ProductExtraMenu {
+  branchProductExtraId: number
+  productExtraId: number
+  extraId: number
+  extraName: string
+  categoryName: string
+  selectionMode: number 
+  unitPrice: number
+  finalPrice: number
+  minQuantity?: number
+  maxQuantity?: number
+  isRequired: boolean
+  quantity: number
+  isRemoval: boolean
+  displayOrder: number
 }
-
-export interface UpdateProductExtraCategoryData {
-  id: number;
-  isRequiredOverride: boolean;
-  minSelectionCount: number;
-  maxSelectionCount: number;
-  minTotalQuantity: number;
-  maxTotalQuantity: number;
-}
-
-export interface ProductExtraCategoryOrderItem {
-  id: number;
-  displayOrder: number;
-}
-
-export interface ReorderProductExtraCategoriesData {
-  items: ProductExtraCategoryOrderItem[];
-}
-
-// Product Extras Types
-export interface ProductExtra {
-  id: number;
-  productId: number;
-  extraId: number;
-  selectionMode: number;
-  defaultQuantity: number;
-  defaultMinQuantity: number;
-  defaultMaxQuantity: number;
-  unitPrice: number;
-  isRequired: boolean;
-  displayOrder?: number;
-  isDeleted?: boolean;
-}
-
-export interface APIProductExtra {
-  id: number;
-  productId: number;
-  extraId: number;
-  selectionMode: number;
-  defaultQuantity: number;
-  defaultMinQuantity: number;
-  defaultMaxQuantity: number;
-  unitPrice: number;
-  isRequired: boolean;
-  displayOrder?: number;
-  isDeleted?: boolean;
-}
-
-export interface CreateProductExtraData {
-  productId: number;
-  extraId: number;
-  selectionMode: number;
-  defaultQuantity: number;
-  defaultMinQuantity: number;
-  defaultMaxQuantity: number;
-  unitPrice: number;
-  isRequired: boolean;
-}
-
-export interface UpdateProductExtraData {
-  id: number;
-  selectionMode: number;
-  defaultQuantity: number;
-  defaultMinQuantity: number;
-  defaultMaxQuantity: number;
-  unitPrice: number;
-  isRequired: boolean;
-}
-
-export interface ProductExtraOrderItem {
-  productExtraId: number;
-  newDisplayOrder: number;
-}
-
-export interface ReorderProductExtrasData {
-  productId: number;
-  extraOrders: ProductExtraOrderItem[];
-}
-
-// Extra Categories Types (from your provided types)
 export interface ExtraCategory {
-  id: number;
-  categoryName: string;
-  status: boolean;
-  isRequired: boolean;
-  defaultMinSelectionCount: number;
-  defaultMaxSelectionCount: number;
-  defaultMinTotalQuantity: number;
-  defaultMaxTotalQuantity: number;
-  displayOrder?: number;
-  isDeleted?: boolean;
+  categoryId: number
+  categoryName: string
+  extras: ProductExtraMenu[]
+  isRequired: boolean
+  minSelectionCount: number
+  maxSelectionCount: number
+  minTotalQuantity: number
+  maxTotalQuantity: number
 }
 
-export interface APIExtraCategory {
-  id: number;
-  categoryName: string;
-  status: boolean;
-  isRequired: boolean;
-  defaultMinSelectionCount: number;
-  defaultMaxSelectionCount: number;
-  defaultMinTotalQuantity: number;
-  defaultMaxTotalQuantity: number;
-  displayOrder?: number;
-  isDeleted?: boolean;
+export interface MenuProduct {
+  branchProductId: number
+  productId: number
+  productName: string
+  productDescription: string
+  productImageUrl: string
+  price: number
+  isRecommended: boolean
+  ingredients: MenuIngredient[]
+  allergens: MenuAllergen[]
+  availableAddons: any[]
+  availableExtras?: ExtraCategory[]
 }
 
-export interface CreateExtraCategoryData {
-  categoryName: string;
-  status: boolean;
-  isRequired: boolean;
-  defaultMinSelectionCount: number;
-  defaultMaxSelectionCount: number;
-  defaultMinTotalQuantity: number;
-  defaultMaxTotalQuantity: number;
+export interface MenuCategory {
+  categoryId: number
+  categoryName: string
+  displayOrder: number
+  products: MenuProduct[]
 }
 
-export interface UpdateExtraCategoryData {
-  id: number;
-  categoryName: string;
-  status: boolean;
-  isRequired: boolean;
-  defaultMinSelectionCount: number;
-  defaultMaxSelectionCount: number;
-  defaultMinTotalQuantity: number;
-  defaultMaxTotalQuantity: number;
+export interface BranchMenuResponse {
+  branchId: number
+  branchName: string
+  restaurantName: string
+  branchAddress: string
+  isOpen: boolean
+  categories: MenuCategory[]
+  statusMessage?: string
+  preferences?: any
 }
 
-export interface CategoryOrderItem {
-  extraCategoryId: number;
-  newDisplayOrder: number;
+export interface CartItem {
+  branchProductId: number
+  productName: string
+  price: number
+  quantity: number
+  productImageUrl?: string
+  addons?: SelectedAddon[]
+  extras?: ProductExtraMenu[]
 }
 
-export interface ReorderCategoriesData {
-  categoryOrders: CategoryOrderItem[];
+export interface MenuComponentProps {
+  branchId: number
 }
 
-// Extras Types (from your provided types)
-export interface Extra {
-  id: number;
-  extraCategoryId: number;
-  name: string;
-  description: string;
-  basePrice: number;
-  isRemoval: boolean;
-  imageUrl: string;
-  status: boolean;
-  displayOrder?: number;
-  isDeleted?: boolean;
+export interface CategoriesSidebarProps {
+  categories: MenuCategory[]
+  selectedCategory: number | null
+  onCategorySelect: (categoryId: number) => void
 }
 
-export interface APIExtra {
-  id: number;
-  extraCategoryId: number;
-  name: string;
-  description: string;
-  basePrice: number;
-  isRemoval: boolean;
-  imageUrl: string;
-  status: boolean;
-  displayOrder?: number;
-  isDeleted?: boolean;
+export interface SelectedAddon {
+  branchProductAddonId: number
+  addonName: string
+  price: number
+  quantity: number
 }
 
-export interface CreateExtraData {
-  extraCategoryId: number;
-  name: string;
-  description: string;
-  basePrice: number;
-  isRemoval: boolean;
-  imageUrl: string;
-  status: boolean;
+export interface HeaderProps {
+  menuData: BranchMenuResponse
+  totalItems: number
+  onCartToggle: () => void
 }
 
-export interface UpdateExtraData {
-  id: number;
-  extraCategoryId: number;
-  name: string;
-  description: string;
-  basePrice: number;
-  isRemoval: boolean;
-  imageUrl: string;
-  status: boolean;
-}
-
-export interface ExtraOrderItem {
-  extraId: number;
-  newDisplayOrder: number;
-}
-
-export interface ReorderExtrasData {
-  extraCategoryId: number;
-  extraOrders: ExtraOrderItem[];
+// FIXED: ProductModalProps with correct signature
+export interface ProductModalProps {
+  isOpen: boolean
+  product: MenuProduct | null
+  onClose: () => void
+  onAddToCart: (product: MenuProduct, addons: SelectedAddon[], extras: ProductExtraMenu[]) => void
 }

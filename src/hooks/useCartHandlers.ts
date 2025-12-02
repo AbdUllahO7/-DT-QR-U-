@@ -1,6 +1,6 @@
 // hooks/useCartHandlers.ts (Fixed version)
 
-import { basketService } from "../services/Branch/BasketService"
+import { BasketExtraItem, basketService } from "../services/Branch/BasketService"
 import { orderService } from "../services/Branch/OrderService"
 import { WhatsAppService } from "../services/WhatsAppService"
 import { CreateSessionOrderDto } from "../types/BranchManagement/type"
@@ -15,15 +15,16 @@ interface CartItemAddon {
   basketItemId?: number
 }
 
-interface CartItem {
-  basketItemId?: number
-  branchProductId: number
-  productName: string
-  price: number
-  quantity: number
-  productImageUrl?: string
-  addons?: CartItemAddon[]
-  totalItemPrice: number
+export interface CartItem {
+  basketItemId: number;
+  branchProductId: number;
+  productName: string;
+  price: number;
+  quantity: number;
+  productImageUrl?: string;
+  addons?: any[];
+  extras?: BasketExtraItem[];  
+  totalItemPrice: number;
 }
 
 interface OrderForm {
@@ -144,45 +145,60 @@ export const useCartHandlers = ({
   }
 
   // Load basket
-  const loadBasket = async () => {
-    try {
-      setLoading(true)
-      setError(null)
+const loadBasket = async () => {
+  try {
+    setLoading(true)
+    setError(null)
+    
+    const basket = await basketService.getMyBasket()
+    console.log("basket", basket)
+    setBasketId(basket.basketId)
+    
+    const cartItems: CartItem[] = basket.items.map((item) => {
+      // Map addons
+      const mappedAddons = item.addonItems?.map(addon => ({
+        branchProductAddonId: addon.branchProductId,
+        addonName: addon.productName || '',
+        price: addon.price || 0,
+        quantity: addon.quantity,
+        minQuantity: addon.minQuantity, 
+        maxQuantity: addon.maxQuantity, 
+        basketItemId: addon.basketItemId
+      }))
       
-      const basket = await basketService.getMyBasket()
-      setBasketId(basket.basketId)
+      // ✅ ADD THIS: Map extras
+      const mappedExtras = item.extras?.map(extra => ({
+        branchProductExtraId: extra.branchProductExtraId,
+        extraId: extra.extraId,
+        extraName: extra.extraName,
+        quantity: extra.quantity,
+        price: extra.price,
+        isRemoval: extra.isRemoval,
+        categoryName: extra.categoryName
+      })) || []
       
-      const cartItems: CartItem[] = basket.items.map((item) => {
-        const mappedAddons = item.addonItems?.map(addon => ({
-          branchProductAddonId: addon.branchProductId,
-          addonName: addon.productName || '',
-          price: addon.price || 0,
-          quantity: addon.quantity,
-          minQuantity: addon.minQuantity, 
-          maxQuantity: addon.maxQuantity, 
-          basketItemId: addon.basketItemId
-        }))
-        
-        return {
-          basketItemId: item.basketItemId,
-          branchProductId: item.branchProductId,
-          productName: item.productName || '',
-          price: item.price || 0,
-          quantity: item.quantity,
-          productImageUrl: item.imageUrl ?? undefined,
-          addons: mappedAddons,
-          totalItemPrice: item.totalPrice || 0
-        }
-      })
-      
-      setCart(cartItems)
-    } catch (err: any) {
-      console.error('Error loading basket:', err)
-      setError('Failed to load basket')
-    } finally {
-      setLoading(false)
-    }
+      return {
+        basketItemId: item.basketItemId,
+        branchProductId: item.branchProductId,
+        productName: item.productName || '',
+        price: item.price || 0,
+        quantity: item.quantity,
+        productImageUrl: item.imageUrl ?? undefined,
+        addons: mappedAddons,
+        extras: mappedExtras,  // ✅ ADD THIS
+        totalItemPrice: item.totalPrice || 0
+      }
+    })
+    
+    console.log("Mapped cart items with extras:", cartItems)
+    setCart(cartItems)
+  } catch (err: any) {
+    console.error('Error loading basket:', err)
+    setError('Failed to load basket')
+  } finally {
+    setLoading(false)
   }
+}
 
   // Clear basket
   const clearBasket = async () => {

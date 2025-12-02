@@ -302,9 +302,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
     setError(null);
 
     try {
-      // ===============================================
-      // PHASE 1: DELETE UNSELECTED CATEGORIES
-      // ===============================================
+
       const categoriesToDelete: number[] = []; 
       
       for (const [productExtraCategoryId, relationId] of existingRelationIds.entries()) {
@@ -805,13 +803,13 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                       </p>
                                     </div>
                                     <div
-                                      className={`w-5 h-5 rounded flex items-center justify-center ${
+                                      className={`w-5 h-5 rounded flex items-center justify-center ml-3 mr-3 ${
                                         isExtraSelected
                                           ? 'bg-green-600 dark:bg-green-500'
                                           : 'bg-gray-200 dark:bg-gray-600'
                                       }`}
                                     >
-                                      {isExtraSelected && <Check className="h-3 w-3 text-white" />}
+                                      {isExtraSelected && <Check className="h-3 w-3 text-white " />}
                                     </div>
                                   </div>
                                 </div>

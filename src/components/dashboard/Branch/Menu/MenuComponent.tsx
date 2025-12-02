@@ -1,4 +1,4 @@
-// MenuComponent.tsx - Simple restaurant status check
+// MenuComponent.tsx - FIXED for required extras validation
 
 "use client"
 
@@ -18,6 +18,7 @@ import ProductGrid from "./MneuProductGrid"
 import CartSidebar from "./CartSideBar/MenuCartSidebar"
 import ProductModal from "./MenuProductModal"
 import { basketService } from "../../../../services/Branch/BasketService"
+import { ProductExtraMenu } from "../../../../types/Extras/type"
 
 const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
   const { t, isRTL } = useLanguage()
@@ -31,7 +32,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
   const [showCart, setShowCart] = useState(false)
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
   const [basketItemCount, setBasketItemCount] = useState(0)
-  const [basketId, setBasketId] = useState<string | null>(null) // Add basketId state
+  const [basketId, setBasketId] = useState<string | null>(null)
   
   // Modal state
   const [showProductModal, setShowProductModal] = useState(false)
@@ -65,7 +66,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       const basket = await basketService.getMyBasket()
       const totalItems = basket.items.reduce((total, item) => total + item.quantity, 0)
       setBasketItemCount(totalItems)
-      setBasketId(basket.basketId) // Store basketId
+      setBasketId(basket.basketId)
       
     } catch (err: any) {
       // Ignore errors for item count - basket might not exist yet
@@ -91,6 +92,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         "ingredients",
         "allergens",
         "availableAddons",
+        "availableExtras",
       ])
       
       if (Array.isArray(menuResponse)) {
@@ -124,61 +126,108 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
     }
   }
 
-  // Add to basket function
-  const addToBasket = async (product: MenuProduct, addons: SelectedAddon[] = []) => {
+  // Check if product has required extras
+  const hasRequiredExtras = (product: MenuProduct): boolean => {
+    if (!product.availableExtras || product.availableExtras.length === 0) {
+      return false
+    }
+    return product.availableExtras.some(category => category.isRequired)
+  }
+
+  // FIXED: Add to basket function - handles products with required extras
+  const addToBasket = async (
+    product: MenuProduct, 
+    addons: SelectedAddon[] = [], 
+    extras: ProductExtraMenu[] = []
+  ) => {
+
+
     try {
-      if (addons.length > 0) {
-        // First, add the main product
-        const mainItem = await basketService.addUnifiedItemToMyBasket({
-          branchProductId: product.branchProductId,
-          quantity: 1
+      // Prepare the main item request
+      const mainItemRequest: any = {
+        branchProductId: product.branchProductId,
+        quantity: 1
+      }
+
+      
+      if (extras.length > 0) {
+        // Option 1: Try adding extras as a field in the main request
+        mainItemRequest.extras = extras.map(extra => {
+          // 1. Create the base object with properties that are always required
+          const extraPayload: any = {
+            branchProductExtraId: extra.branchProductExtraId,
+            extraId: extra.extraId,
+            isRemoval: extra.isRemoval
+          }
+
+          // 2. Only add quantity if it is NOT a removal
+          if (!extra.isRemoval) {
+            extraPayload.quantity = extra.quantity
+          }
+
+          return extraPayload
+        })
+        
+        console.log('Main item request with extras:', mainItemRequest)
+      }
+
+      // Add the main product
+      const mainItem = await basketService.addUnifiedItemToMyBasket(mainItemRequest)
+
+      // If we have addons, add them as child items
+      if (mainItem.basketItemId && addons.length > 0) {
+        console.log('Processing addons...')
+        const addonItems = addons.map(addon => {
+          const availableAddon = product.availableAddons?.find(
+            a => a.branchProductAddonId === addon.branchProductAddonId
+          )
+          
+          
+          
+          return {
+            branchProductId: availableAddon?.addonBranchProductId || addon.branchProductAddonId,
+            quantity: addon.quantity,
+            parentBasketItemId: mainItem.basketItemId
+          }
         })
 
-        // Then add addons with the main item as parent
-        if (mainItem.basketItemId) {
-          const addonItems = addons.map(addon => {
-            // Find the corresponding available addon to get the correct branchProductId
-            const availableAddon = product.availableAddons?.find(
-              a => a.branchProductAddonId === addon.branchProductAddonId
-            )
-            
-            return {
-              branchProductId: availableAddon?.addonBranchProductId || addon.branchProductAddonId,
-              quantity: addon.quantity,
-              parentBasketItemId: mainItem.basketItemId
+        if (addonItems.length > 0) {
+          try {
+            await basketService.batchAddItemsToMyBasket(addonItems)
+            console.log('✅ Addons added successfully')
+          } catch (batchError: any) {
+            console.error('❌ Error in batch add:', batchError)
+            if (batchError.response) {
+              console.error('Error response:', batchError.response.data)
             }
-          })
-          
-          await basketService.batchAddItemsToMyBasket(addonItems)
+            throw batchError
+          }
         }
-      } else {
-        // Simple add for items without addons
-        await basketService.addUnifiedItemToMyBasket({
-          branchProductId: product.branchProductId,
-          quantity: 1
-        })
       }
 
       // Update basket item count and basketId
       await loadBasketItemCount()
+      console.log('✅ Basket updated successfully')
+      
     } catch (err: any) {
-      console.error('Error adding to basket:', err)
+      console.error('❌ Error adding to basket:', err)
+      if (err.response) {
+        setError( err.response.data)
+      }
     }
   }
 
   // Remove from basket function
   const removeFromBasket = async (branchProductId: number) => {
     try {
-      // Get current basket to find the item to remove
       const basket = await basketService.getMyBasket()
       const itemToRemove = basket.items.find(item => 
         item.branchProductId === branchProductId &&
-        (!item.addonItems || item.addonItems.length === 0) // Prefer plain items
+        (!item.addonItems || item.addonItems.length === 0)
       )
       
       if (itemToRemove) {
         if (itemToRemove.quantity > 1) {
-          // Update quantity if more than 1
           await basketService.updateMyBasketItem(itemToRemove.basketItemId, {
             basketItemId: itemToRemove.basketItemId,
             basketId: basket.basketId,
@@ -186,11 +235,9 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
             quantity: itemToRemove.quantity - 1
           })
         } else {
-          // Remove item if quantity is 1
           await basketService.deleteMyBasketItem(itemToRemove.basketItemId)
         }
 
-        // Update basket item count
         await loadBasketItemCount()
       }
     } catch (err: any) {
@@ -243,14 +290,30 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       .sort((a, b) => a.displayOrder - b.displayOrder)
   }
 
+  // MODIFIED: Check if product needs customization before adding
+  const handleQuickAddToCart = async (product: MenuProduct) => {
+    // If product has required extras or any addons, open modal
+    if (hasRequiredExtras(product) || (product.availableAddons && product.availableAddons.length > 0)) {
+      handleCustomizeProduct(product)
+    } else {
+      // Simple product, add directly
+      await addToBasket(product, [], [])
+    }
+  }
+
   // Handle product customization
   const handleCustomizeProduct = (product: MenuProduct) => {
     setSelectedProduct(product)
     setShowProductModal(true)
   }
 
-  const handleModalAddToCart = async (product: MenuProduct, addons: SelectedAddon[]) => {
-    await addToBasket(product, addons)
+  // Handle modal add to cart with extras
+  const handleModalAddToCart = async (
+    product: MenuProduct, 
+    addons: SelectedAddon[], 
+    extras: ProductExtraMenu[]
+  ) => {
+    await addToBasket(product, addons, extras)
     setShowProductModal(false)
     setSelectedProduct(null)
   }
@@ -305,9 +368,9 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
               categories={filteredCategories}
               selectedCategory={selectedCategory}
               searchTerm={searchTerm}
-              cart={[]} // No longer needed since we're using basket service
+              cart={[]} 
               favorites={favorites}
-              onAddToCart={addToBasket}
+              onAddToCart={handleQuickAddToCart}
               onRemoveFromCart={removeFromBasket}
               onToggleFavorite={toggleFavorite}
               onCategorySelect={setSelectedCategory}
@@ -324,7 +387,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         isOpen={showCart}
         onClose={() => setShowCart(false)}
         findProduct={findProduct}
-        sessionId={basketId || ''} // Use basketId, fallback to menuData.sessionId
+        sessionId={basketId || ''}
         restaurantPreferences={menuData.preferences}
       />
 
