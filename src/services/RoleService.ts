@@ -113,8 +113,6 @@ async createRole(roleData: CreateRoleDto): Promise<ApiResponse<Role>> {
         requestConfig.params.branchId = branchId;
       }
       
-      // This will log the final config, e.g., { ..., data: { roleName: ... }, params: { branchId: 123 } }
-      console.log("apiData ve params:", requestConfig);
         
       // 4. Send the request with the new configuration
       const response = await apiRequest<Role>(requestConfig);
@@ -191,7 +189,6 @@ async createRole(roleData: CreateRoleDto): Promise<ApiResponse<Role>> {
       
       // Create a copy to ensure we only send valid parameters
       const apiParams = { ...params };
-      console.log("params",params)
       // If branchId is falsy (0, null, undefined), don't send it.
       if (!apiParams.branchId) {
         delete apiParams.branchId;

@@ -78,12 +78,10 @@ class OrderService {
     const requestKey = `branch-${branchId}-${validPage}-${validPageSize}`;
     
     if (this.pendingConfigs.has(requestKey)) {
-      console.log('⏸️ Request already pending:', requestKey);
       return { orders: [], totalItems: 0, totalPages: 0 };
     }
     
     if (this.activeRequests.has(requestKey)) {
-      console.log('🔄 Reusing existing request:', requestKey);
       return this.activeRequests.get(requestKey)!;
     }
 
@@ -106,7 +104,6 @@ class OrderService {
         params.branchId = branchId;
       }
       
-      console.log("📤 API Request params:", params);
       
       const requestPromise = httpClient.get(`${this.baseUrl}/branch`, { params })
         .then(response => {
@@ -121,14 +118,7 @@ class OrderService {
             totalItems = responseData.totalCount || responseData.totalItems || 0;
           }
           
-          console.log("🎯 OrderService Final result:", {
-            ordersLength: orders.length,
-            totalItems,
-            totalPages,
-            page: validPage,
-            pageSize: validPageSize
-          });
-          
+     
           return {
             orders,
             totalItems,
@@ -157,7 +147,6 @@ class OrderService {
     const requestKey = `pending-${branchId}`;
     
     if (this.activeRequests.has(requestKey)) {
-      console.log('🔄 Reusing existing pending request:', requestKey);
       return this.activeRequests.get(requestKey)!;
     }
 
@@ -170,7 +159,6 @@ class OrderService {
       
       const requestPromise = httpClient.get<PendingOrder[]>(url)
         .then(response => {
-          console.log("response Pending", response);
           const orders = Array.isArray(response.data) ? response.data : [];
           logger.info('Pending orders başarıyla alındı', { 
             branchId,

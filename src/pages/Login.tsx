@@ -143,7 +143,6 @@ const Login: React.FC = () => {
       logError(error, 'Login error');
 
       const userFriendlyMessage = getUserFriendlyErrorMessage(error);
-      console.log("Login error:", error, "Friendly message:", userFriendlyMessage);
       setErrors({
         general: error.response.data.errorMessage
       });

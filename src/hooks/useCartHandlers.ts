@@ -151,7 +151,6 @@ export const useCartHandlers = ({
       setError(null)
       
       const basket = await basketService.getMyBasket()
-      console.log("basket", basket)
       setBasketId(basket.basketId)
       
       const cartItems: CartItem[] = basket.items.map((item) => {
@@ -195,7 +194,6 @@ export const useCartHandlers = ({
         }
       })
       
-      console.log("Mapped cart items with extras:", cartItems)
       setCart(cartItems)
     } catch (err: any) {
       console.error('Error loading basket:', err)
@@ -402,11 +400,6 @@ const handleExtraToggle = async (branchProductExtraId: number, basketItemId: num
       return extraPayload
     }) || []
 
-    console.log('Toggle extra payload:', {
-      branchProductId: cartItem.branchProductId,
-      quantity: cartItem.quantity,
-      extras: updatedExtras
-    })
 
     await basketService.addUnifiedItemToMyBasket({
       branchProductId: cartItem.branchProductId,

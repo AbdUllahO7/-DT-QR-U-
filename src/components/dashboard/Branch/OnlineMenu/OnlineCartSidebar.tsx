@@ -662,7 +662,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
           totalPrice: finalTotal, // Grand Total
         };
 
-        console.log("Full WhatsApp Data:", whatsappData);
         setPendingWhatsAppData(whatsappData);
         setShowWhatsAppConfirmation(true);
         setSubmittingOrder(false);

@@ -25,7 +25,6 @@ const CartContent: React.FC<CartContentProps> = ({
 }) => {
   const { t } = useLanguage()
 
-  console.log("Rendering CartContent", groupedItems)
 
   if (cart.length === 0) {
     return <EmptyCartComponent />

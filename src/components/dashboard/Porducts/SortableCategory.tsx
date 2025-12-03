@@ -42,7 +42,6 @@ export const SortableCategory: React.FC<{
     isDragging
   } = useSortable({ id: category.categoryId });
 
-  console.log("onOpenProductExtras",onOpenProductExtras)
 
   const style = {
     transform: CSS.Transform.toString(transform),

@@ -86,7 +86,6 @@ const RestaurantManagement: React.FC = () => {
       setEditingManagement(false);
       await fetchData();
     } catch (err) {
-      console.log("errr",err)
       const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
       showNotification('Failed to update management info: ' + errorMessage, 'error');
     } finally {

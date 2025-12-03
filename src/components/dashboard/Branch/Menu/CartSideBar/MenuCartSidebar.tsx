@@ -323,7 +323,6 @@ const handleWhatsAppCancel = () => {
   }, [trackedOrders])
 
 
-  console.log("Rendering CartSidebar" , cart)
 
   // Auto-refresh all pending orders
   useEffect(() => {

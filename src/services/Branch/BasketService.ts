@@ -195,7 +195,6 @@ class BasketService {
       
       const url = `${this.baseUrl}/my-basket`;
       const response = await httpClient.get(url);
-      console.log('My basket response:', response);
       
       // Try to access the basket data safely
       let basketData;
@@ -327,7 +326,6 @@ class BasketService {
   async addUnifiedItemToBasket(basketId: string, data: AddUnifiedItemDto): Promise<BasketItem> {
     try {
       logger.info('Unified item ekleme isteği gönderiliyor', { basketId, data }, { prefix: 'BasketService' });
-      console.log('Adding unified item to basket:', basketId, data);
       const url = `${this.baseUrl}/${basketId}/unified-items`;
       const response = await httpClient.post<BasketItem>(url, data);
       
@@ -344,9 +342,7 @@ class BasketService {
   async addUnifiedItemToMyBasket(data: AddUnifiedItemDto): Promise<BasketItem> {
     try {
       logger.info('My basket unified item ekleme isteği gönderiliyor', { data }, { prefix: 'BasketService' });
-      console.log('Adding unified item to my basket:', data);
       const url = `${this.baseUrl}/my-basket/unified-items`;
-      console.log("addUnifiedItemToMyBasket",data)
       const response = await httpClient.post<BasketItem>(url, data);
       
       logger.info('My basket unified item başarıyla eklendi', {}, { prefix: 'BasketService' });
@@ -364,7 +360,6 @@ class BasketService {
       logger.info('My basket batch items ekleme isteği gönderiliyor', { 
         itemsCount: items.length 
       }, { prefix: 'BasketService' });
-      console.log('Batch adding items to my basket:', items);
       const url = `${this.baseUrl}/my-basket/items/batch`;
       const response = await httpClient.post(url, items);
       

@@ -52,7 +52,6 @@ class ExtraCategoriesService {
       };
       
       logger.info('Extra kategori ekleme isteği gönderiliyor', { payload });
-      console.log("Creating Extra Category with payload:", payload);
       
       const response = await httpClient.post<APIExtraCategory>(`${this.baseUrl}`, payload);
       
@@ -82,7 +81,6 @@ class ExtraCategoriesService {
         id: categoryData.id, 
         payload 
       });
-      console.log("Updating Extra Category with payload:", { id: categoryData.id, payload });
       
       const response = await httpClient.put<APIExtraCategory>(
         `${this.baseUrl}/${categoryData.id}`, 

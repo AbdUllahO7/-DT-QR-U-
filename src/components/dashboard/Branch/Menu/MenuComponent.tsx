@@ -168,7 +168,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
           return extraPayload
         })
         
-        console.log('Main item request with extras:', mainItemRequest)
       }
 
       // Add the main product
@@ -176,7 +175,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
 
       // If we have addons, add them as child items
       if (mainItem.basketItemId && addons.length > 0) {
-        console.log('Processing addons...')
         const addonItems = addons.map(addon => {
           const availableAddon = product.availableAddons?.find(
             a => a.branchProductAddonId === addon.branchProductAddonId
@@ -194,7 +192,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         if (addonItems.length > 0) {
           try {
             await basketService.batchAddItemsToMyBasket(addonItems)
-            console.log('✅ Addons added successfully')
           } catch (batchError: any) {
             console.error('❌ Error in batch add:', batchError)
             if (batchError.response) {
@@ -207,7 +204,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
 
       // Update basket item count and basketId
       await loadBasketItemCount()
-      console.log('✅ Basket updated successfully')
       
     } catch (err: any) {
       console.error('❌ Error adding to basket:', err)

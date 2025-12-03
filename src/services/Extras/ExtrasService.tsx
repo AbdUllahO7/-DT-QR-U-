@@ -59,7 +59,6 @@ class ExtrasService {
       };
       
       logger.info('Extra ekleme isteği gönderiliyor', { payload });
-      console.log("Creating Extra with payload:", payload);
       
       const response = await httpClient.post<APIExtra>(`${this.baseUrl}`, payload);
       

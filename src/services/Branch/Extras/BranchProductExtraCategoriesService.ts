@@ -93,7 +93,6 @@ class BranchProductExtraCategoriesService {
     try {
       logger.info('Mevcut extra categories listesi getiriliyor', { params });
 
-      console.log('Fetching available extra categories with params:', params);
 
       const response = await httpClient.get<AvailableExtraCategory[]>(`${this.baseUrl}/available`, {
           params: {
@@ -103,12 +102,10 @@ class BranchProductExtraCategoriesService {
           },
       });
       
-      console.log('Available Extra Categories Response:', response);
       
       logger.info('Mevcut extra categories listesi başarıyla getirildi', {
         count: response.data.length,
       });
-      console.log('Available Extra Categories Data:', response.data);
       return response.data;
     } catch (error: any) {
       logger.error('❌ Mevcut extra categories listesi getirilirken hata:', error);

@@ -39,7 +39,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   const [productQuantities, setProductQuantities] = useState<Map<number, number>>(new Map())
   const [loadingQuantities, setLoadingQuantities] = useState(false)
 
-  console.log('ProductGrid rendered with categories:', categories)
 
   // Load quantities for all visible products
   const loadQuantities = async (products: MenuProduct[]) => {

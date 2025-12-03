@@ -19,7 +19,6 @@ class BranchProductExtrasService {
       logger.info('Branch product extras listesi başarıyla getirildi', {
         count: response.data.length,
       });
-      console.log('Fetched branch product extras:', response.data);
       return response.data;
     } catch (error: any) {
       logger.error('❌ Branch product extras listesi getirilirken hata:', error);
@@ -143,7 +142,6 @@ class BranchProductExtrasService {
   }): Promise<AvailableProductExtra[]> {
     try {
       logger.info('Mevcut product extras listesi getiriliyor', { params });
-        console.log('Fetching available product extras with params:', params);
       const response = await httpClient.get<AvailableProductExtra[]>(`${this.baseUrl}/available`, {
         params: {
           branchProductId: params?.branchProductId,
@@ -154,7 +152,6 @@ class BranchProductExtrasService {
       logger.info('Mevcut product extras listesi başarıyla getirildi', {
         count: response.data.length,
       });
-      console.log('Fetched available product extras:', response.data);
 
       return response.data;
     } catch (error: any) {

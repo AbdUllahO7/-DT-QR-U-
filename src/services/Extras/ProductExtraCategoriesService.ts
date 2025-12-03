@@ -77,7 +77,6 @@ class ProductExtraCategoriesService {
         isDeleted: item.isDeleted,
       }));
 
-      console.log('transformed', response.data);
       
       return transformed;
     } catch (error: any) {
