@@ -732,7 +732,7 @@ export default function ExtrasManagement() {
                   disabled={loading || uploading}
                   className="inline-flex justify-center rounded-lg border border-transparent shadow-sm px-5 py-2.5 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading || uploading ? t('extrasManagement.processing') : (modalType?.startsWith('add') ? t('extrasManagement.buttons.create') : t('extrasManagement.buttons.save'))}
+                  {loading || uploading ? t('extrasManagement.processing') : (modalType?.startsWith('add') ? t('extrasManagement.buttons.add') : t('extrasManagement.buttons.save'))}
                 </button>
                 <button
                   type="button"

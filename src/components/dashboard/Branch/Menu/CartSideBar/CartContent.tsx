@@ -1,3 +1,4 @@
+// CartContent.tsx
 import type React from "react"
 import { ArrowRight, Loader2 } from "lucide-react"
 import CartItemComponent from "./CartItemComponent"
@@ -18,9 +19,13 @@ const CartContent: React.FC<CartContentProps> = ({
   onRemoveFromBasket,
   canIncreaseAddonQuantity,
   canDecreaseAddonQuantity,
-  getAddonQuantityError
+  getAddonQuantityError,
+  onExtraToggle ,onExtraQuantityDecrease
+, onExtraQuantityIncrease
 }) => {
   const { t } = useLanguage()
+
+  console.log("Rendering CartContent", groupedItems)
 
   if (cart.length === 0) {
     return <EmptyCartComponent />
@@ -30,18 +35,21 @@ const CartContent: React.FC<CartContentProps> = ({
     <>
       <div className="space-y-6 mb-6">
         {groupedItems.map((group) => (
-          <CartItemComponent
-            key={group.product.branchProductId}
-            group={group}
-            loading={loading}
-            onQuantityIncrease={onQuantityIncrease}
-            onQuantityDecrease={onQuantityDecrease}
-            onAddonQuantityIncrease={onAddonQuantityIncrease}
-            onRemoveFromBasket={onRemoveFromBasket}
-            canIncreaseAddonQuantity={canIncreaseAddonQuantity}
-            canDecreaseAddonQuantity={canDecreaseAddonQuantity}
-            getAddonQuantityError={getAddonQuantityError}
-          />
+         <CartItemComponent
+          key={group.product.branchProductId}
+          group={group}
+          loading={loading}
+          onQuantityIncrease={onQuantityIncrease}
+          onQuantityDecrease={onQuantityDecrease}
+          onAddonQuantityIncrease={onAddonQuantityIncrease}
+          onRemoveFromBasket={onRemoveFromBasket}
+          canIncreaseAddonQuantity={canIncreaseAddonQuantity}
+          canDecreaseAddonQuantity={canDecreaseAddonQuantity}
+          getAddonQuantityError={getAddonQuantityError}
+          onExtraToggle={onExtraToggle}
+          onExtraQuantityIncrease={onExtraQuantityIncrease}
+          onExtraQuantityDecrease={onExtraQuantityDecrease}
+        />
         ))}
       </div>
 

@@ -24,12 +24,18 @@ export interface BasketAddonItem {
 
 export interface BasketExtraItem {
   branchProductExtraId: number;
+  productExtraId?: number;
   extraId: number;
   extraName: string;
-  quantity: number;
-  price: number;
+  extraCategoryName?: string; 
+  selectionMode?: number;
+  isRequired?: boolean;
   isRemoval: boolean;
-  categoryName?: string;
+  unitPrice: number;
+  quantity: number;
+  minQuantity?: number;
+  maxQuantity?: number;
+  note?: string | null;
 }
 
 // Main basket item interface based on your API response
@@ -96,7 +102,7 @@ export interface ProductExtraDto {
 export interface AddUnifiedItemDto {
   branchProductId: number;
   quantity: number;
-  productExtras?: ProductExtraDto[];  // Added extras field
+  extras?: ProductExtraDto[];  // Added extras field
 }
 
 // Batch add items interface
@@ -340,6 +346,7 @@ class BasketService {
       logger.info('My basket unified item ekleme isteği gönderiliyor', { data }, { prefix: 'BasketService' });
       console.log('Adding unified item to my basket:', data);
       const url = `${this.baseUrl}/my-basket/unified-items`;
+      console.log("addUnifiedItemToMyBasket",data)
       const response = await httpClient.post<BasketItem>(url, data);
       
       logger.info('My basket unified item başarıyla eklendi', {}, { prefix: 'BasketService' });

@@ -131,7 +131,10 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     getSelectedOrderType,
     sendOrderToWhatsApp,
     handlePriceChangeConfirmation,
-    cleanupAfterOrder
+    cleanupAfterOrder,
+    handleExtraToggle,
+  handleExtraQuantityIncrease,
+  handleExtraQuantityDecrease
   } = useCartHandlers({
     cart,
     setCart,
@@ -319,6 +322,9 @@ const handleWhatsAppCancel = () => {
     }
   }, [trackedOrders])
 
+
+  console.log("Rendering CartSidebar" , cart)
+
   // Auto-refresh all pending orders
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null
@@ -435,40 +441,42 @@ const handleWhatsAppCancel = () => {
     }
   }
 
-  const groupedItems: GroupedCartItem[] = cart.reduce((groups, item, index) => {
-    const existingGroup = groups.find(g => g.product.branchProductId === item.branchProductId)
-    
-    const variantItemTotal = calculateItemTotalPrice(item)
-    
-    const variant = {
-      basketItemId: item.basketItemId,
-      cartIndex: index,
-      quantity: item.quantity,
-      addons: item.addons,
-      totalItemPrice: variantItemTotal,
-      isPlain: !item.addons || item.addons.length === 0
-    }
+// In CartSidebar.tsx, update the groupedItems calculation:
+const groupedItems: GroupedCartItem[] = cart.reduce((groups, item, index) => {
+  const existingGroup = groups.find(g => g.product.branchProductId === item.branchProductId)
+  
+  const variantItemTotal = calculateItemTotalPrice(item)
+  
+  const variant = {
+    basketItemId: item.basketItemId,
+    cartIndex: index,
+    quantity: item.quantity,
+    addons: item.addons,
+    extras: item.extras, // ✅ ADD THIS
+    totalItemPrice: variantItemTotal,
+    isPlain: (!item.addons || item.addons.length === 0) && (!item.extras || item.extras.length === 0) // ✅ UPDATE THIS
+  }
 
-    if (existingGroup) {
-      existingGroup.variants.push(variant)
-      existingGroup.totalQuantity += item.quantity
-      existingGroup.totalPrice += variantItemTotal * item.quantity
-    } else {
-      groups.push({
-        product: {
-          branchProductId: item.branchProductId,
-          productName: item.productName,
-          price: item.price,
-          productImageUrl: item.productImageUrl
-        },
-        variants: [variant],
-        totalQuantity: item.quantity,
-        totalPrice: variantItemTotal * item.quantity
-      })
-    }
+  if (existingGroup) {
+    existingGroup.variants.push(variant)
+    existingGroup.totalQuantity += item.quantity
+    existingGroup.totalPrice += variantItemTotal * item.quantity
+  } else {
+    groups.push({
+      product: {
+        branchProductId: item.branchProductId,
+        productName: item.productName,
+        price: item.price,
+        productImageUrl: item.productImageUrl
+      },
+      variants: [variant],
+      totalQuantity: item.quantity,
+      totalPrice: variantItemTotal * item.quantity
+    })
+  }
 
-    return groups
-  }, [] as GroupedCartItem[])
+  return groups
+}, [] as GroupedCartItem[])
 
   if (!isOpen) return null
 
@@ -600,20 +608,69 @@ const handleWhatsAppCancel = () => {
                   paymentPreferences={restaurantPreferences}
                 />
               ) : (
+              // In CartSidebar.tsx, update the CartContent component call:
                 <CartContent
-                  cart={cart}
-                  groupedItems={groupedItems}
-                  totalPrice={totalPrice}
-                  loading={loading}
-                  onProceedToOrder={() => setShowOrderForm(true)}
-                  onQuantityIncrease={handleQuantityIncrease}
-                  onQuantityDecrease={handleQuantityDecrease}
-                  onAddonQuantityIncrease={handleAddonQuantityIncrease}
-                  onRemoveFromBasket={removeFromBasket}
-                  canIncreaseAddonQuantity={canIncreaseAddonQuantity}
-                  canDecreaseAddonQuantity={canDecreaseAddonQuantity}
-                  getAddonQuantityError={getAddonQuantityError}
-                />
+              cart={cart}
+              groupedItems={groupedItems}
+              totalPrice={totalPrice}
+              loading={loading}
+              onProceedToOrder={() => setShowOrderForm(true)}
+              onQuantityIncrease={handleQuantityIncrease}
+              onQuantityDecrease={handleQuantityDecrease}
+              onAddonQuantityIncrease={handleAddonQuantityIncrease}
+              onRemoveFromBasket={removeFromBasket}
+              canIncreaseAddonQuantity={canIncreaseAddonQuantity}
+              canDecreaseAddonQuantity={canDecreaseAddonQuantity}
+              getAddonQuantityError={getAddonQuantityError}
+              onExtraToggle={async (branchProductExtraId, basketItemId, currentIsRemoval) => {
+                let toastId: string | null = null
+                try {
+                  toastId = showToast('loading', 'Updating extra...')
+                  await handleExtraToggle(branchProductExtraId, basketItemId , currentIsRemoval)
+                  if (toastId) {
+                    updateToast(toastId, 'success', 'Extra updated successfully!')
+                  }
+                } catch (error) {
+                  if (toastId) {
+                    updateToast(toastId, 'error', 'Failed to update extra')
+                  } else {
+                    showToast('error', 'Failed to update extra')
+                  }
+                }
+              }}
+              onExtraQuantityIncrease={async (branchProductExtraId, basketItemId) => {
+                let toastId: string | null = null
+                try {
+                  toastId = showToast('loading', 'Increasing quantity...')
+                  await handleExtraQuantityIncrease(branchProductExtraId, basketItemId)
+                  if (toastId) {
+                    updateToast(toastId, 'success', 'Quantity increased!')
+                  }
+                } catch (error) {
+                  if (toastId) {
+                    updateToast(toastId, 'error', 'Failed to increase quantity')
+                  } else {
+                    showToast('error', 'Failed to increase quantity')
+                  }
+                }
+              }}
+              onExtraQuantityDecrease={async (branchProductExtraId, basketItemId) => {
+                let toastId: string | null = null
+                try {
+                  toastId = showToast('loading', 'Decreasing quantity...')
+                  await handleExtraQuantityDecrease(branchProductExtraId, basketItemId)
+                  if (toastId) {
+                    updateToast(toastId, 'success', 'Quantity decreased!')
+                  }
+                } catch (error) {
+                  if (toastId) {
+                    updateToast(toastId, 'error', 'Failed to decrease quantity')
+                  } else {
+                    showToast('error', 'Failed to decrease quantity')
+                  }
+                }
+              }}
+            />
               )
             ) : (
               <OrdersTab

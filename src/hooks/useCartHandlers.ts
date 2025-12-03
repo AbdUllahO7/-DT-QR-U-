@@ -1,6 +1,6 @@
 // hooks/useCartHandlers.ts (Fixed version)
 
-import { BasketExtraItem, basketService } from "../services/Branch/BasketService"
+import { BasketExtraItem, basketService, ProductExtraDto } from "../services/Branch/BasketService"
 import { orderService } from "../services/Branch/OrderService"
 import { WhatsAppService } from "../services/WhatsAppService"
 import { CreateSessionOrderDto } from "../types/BranchManagement/type"
@@ -145,60 +145,119 @@ export const useCartHandlers = ({
   }
 
   // Load basket
-const loadBasket = async () => {
+  const loadBasket = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const basket = await basketService.getMyBasket()
+      console.log("basket", basket)
+      setBasketId(basket.basketId)
+      
+      const cartItems: CartItem[] = basket.items.map((item) => {
+        // Map addons
+        const mappedAddons = item.addonItems?.map(addon => ({
+          branchProductAddonId: addon.branchProductId,
+          addonName: addon.productName || '',
+          price: addon.price || 0,
+          quantity: addon.quantity,
+          minQuantity: addon.minQuantity, 
+          maxQuantity: addon.maxQuantity, 
+          basketItemId: addon.basketItemId
+        }))
+        
+          const mappedExtras = item.extras?.map(extra => ({
+          branchProductExtraId: extra.branchProductExtraId,
+          productExtraId: extra.productExtraId,
+          extraId: extra.extraId,
+          extraName: extra.extraName,
+          extraCategoryName: extra.extraCategoryName,
+          selectionMode: extra.selectionMode,
+          isRequired: extra.isRequired,
+          isRemoval: extra.isRemoval,
+          unitPrice: extra.unitPrice,
+          quantity: extra.quantity,
+          minQuantity: extra.minQuantity,
+          maxQuantity: extra.maxQuantity,
+          note: extra.note
+        })) || []
+        
+        return {
+          basketItemId: item.basketItemId,
+          branchProductId: item.branchProductId,
+          productName: item.productName || '',
+          price: item.price || 0,
+          quantity: item.quantity,
+          productImageUrl: item.imageUrl ?? undefined,
+          addons: mappedAddons,
+          extras: mappedExtras,  
+          totalItemPrice: item.totalPrice || 0
+        }
+      })
+      
+      console.log("Mapped cart items with extras:", cartItems)
+      setCart(cartItems)
+    } catch (err: any) {
+      console.error('Error loading basket:', err)
+      setError('Failed to load basket')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+
+const handleAddExtraBack = async (branchProductExtraId: number, basketItemId: number) => {
   try {
     setLoading(true)
     setError(null)
-    
-    const basket = await basketService.getMyBasket()
-    console.log("basket", basket)
-    setBasketId(basket.basketId)
-    
-    const cartItems: CartItem[] = basket.items.map((item) => {
-      // Map addons
-      const mappedAddons = item.addonItems?.map(addon => ({
-        branchProductAddonId: addon.branchProductId,
-        addonName: addon.productName || '',
-        price: addon.price || 0,
-        quantity: addon.quantity,
-        minQuantity: addon.minQuantity, 
-        maxQuantity: addon.maxQuantity, 
-        basketItemId: addon.basketItemId
-      }))
-      
-      // ✅ ADD THIS: Map extras
-      const mappedExtras = item.extras?.map(extra => ({
-        branchProductExtraId: extra.branchProductExtraId,
-        extraId: extra.extraId,
-        extraName: extra.extraName,
-        quantity: extra.quantity,
-        price: extra.price,
-        isRemoval: extra.isRemoval,
-        categoryName: extra.categoryName
-      })) || []
-      
-      return {
-        basketItemId: item.basketItemId,
-        branchProductId: item.branchProductId,
-        productName: item.productName || '',
-        price: item.price || 0,
-        quantity: item.quantity,
-        productImageUrl: item.imageUrl ?? undefined,
-        addons: mappedAddons,
-        extras: mappedExtras,  // ✅ ADD THIS
-        totalItemPrice: item.totalPrice || 0
-      }
+
+    const cartItem = cart.find(item => item.basketItemId === basketItemId)
+    if (!cartItem) {
+      console.error('Cart item not found')
+      return
+    }
+
+    const extra = cartItem.extras?.find(e => e.branchProductExtraId === branchProductExtraId)
+    if (!extra || !extra.isRemoval) {
+      console.error('Can only add back removal extras')
+      return
+    }
+
+    await basketService.deleteMyBasketItem(basketItemId)
+
+    // Remove this extra entirely from the payload (don't send it)
+    const updatedExtras: ProductExtraDto[] = cartItem.extras
+      ?.filter(e => e.branchProductExtraId !== branchProductExtraId)
+      ?.map(e => {
+        const extraPayload: any = {
+          branchProductExtraId: e.branchProductExtraId,
+          extraId: e.extraId,
+          isRemoval: e.isRemoval
+        }
+        
+        if (!e.isRemoval) {
+          extraPayload.quantity = e.quantity
+        }
+        
+        return extraPayload
+      }) || []
+
+    await basketService.addUnifiedItemToMyBasket({
+      branchProductId: cartItem.branchProductId,
+      quantity: cartItem.quantity,
+      extras: updatedExtras.length > 0 ? updatedExtras : undefined
     })
-    
-    console.log("Mapped cart items with extras:", cartItems)
-    setCart(cartItems)
+
+    await loadBasket()
+
   } catch (err: any) {
-    console.error('Error loading basket:', err)
-    setError('Failed to load basket')
+    console.error('Error adding extra back:', err)
+    setError('Failed to add extra back')
   } finally {
     setLoading(false)
   }
 }
+
 
   // Clear basket
   const clearBasket = async () => {
@@ -233,33 +292,277 @@ const loadBasket = async () => {
     }
   }
 
-  // Handle quantity increase
-  const handleQuantityIncrease = async (basketItemId?: number) => {
-    if (!basketItemId) return
-    
-    try {
-      setLoading(true)
-      setError(null)
+// Handle quantity increase - Send ALL extras properly
+const handleQuantityIncrease = async (basketItemId?: number) => {
+  if (!basketItemId) return
+  
+  try {
+    setLoading(true)
+    setError(null)
 
-      const cartItem = cart.find(item => item.basketItemId === basketItemId)
-      if (!cartItem) {
-        console.error('Cart item not found')
-        return
-      }
-
-      await basketService.addUnifiedItemToMyBasket({
-        branchProductId: cartItem.branchProductId,
-        quantity: 1
-      })
-
-      await loadBasket()
-    } catch (err: any) {
-      console.error('Error increasing parent item quantity:', err)
-      setError('Failed to increase item quantity')
-    } finally {
-      setLoading(false)
+    const cartItem = cart.find(item => item.basketItemId === basketItemId)
+    if (!cartItem) {
+      console.error('Cart item not found')
+      return
     }
+
+    // ✅ Map extras properly: omit quantity for removals with quantity > 0
+    const productExtras: ProductExtraDto[] = cartItem.extras?.map(extra => {
+      const extraPayload: any = {
+        branchProductExtraId: extra.branchProductExtraId,
+        extraId: extra.extraId,
+        isRemoval: extra.isRemoval
+      }
+      
+      if (extra.isRemoval) {
+        // For removal extras:
+        // quantity: 1 → Don't send quantity field (user doesn't want it)
+        // quantity: 0 → Send quantity: 0 (user wants it)
+        if (extra.quantity === 0) {
+          extraPayload.quantity = 0
+        }
+        // If quantity is 1, don't add quantity field at all
+      } else {
+        // For addition extras: always send quantity
+        extraPayload.quantity = extra.quantity
+      }
+      
+      return extraPayload
+    }) || []
+
+    await basketService.addUnifiedItemToMyBasket({
+      branchProductId: cartItem.branchProductId,
+      quantity: 1,
+      extras: productExtras.length > 0 ? productExtras : undefined
+    })
+
+    await loadBasket()
+  } catch (err: any) {
+    console.error('Error increasing parent item quantity:', err)
+    setError('Failed to increase item quantity')
+  } finally {
+    setLoading(false)
   }
+}
+
+// Handle extra toggle - SIMPLIFIED AND CORRECTED
+const handleExtraToggle = async (branchProductExtraId: number, basketItemId: number, currentIsRemoval: boolean) => {
+  if (!currentIsRemoval) {
+    console.warn('Toggle should only be used for removed items (isRemoval: true)')
+    return
+  }
+
+  try {
+    setLoading(true)
+    setError(null)
+
+    const cartItem = cart.find(item => item.basketItemId === basketItemId)
+    if (!cartItem) {
+      console.error('Cart item not found')
+      return
+    }
+
+    const extra = cartItem.extras?.find(e => e.branchProductExtraId === branchProductExtraId)
+    if (!extra) {
+      console.error('Extra not found')
+      return
+    }
+
+    await basketService.deleteMyBasketItem(basketItemId)
+
+    // ✅ CORRECTED: Send ALL extras and toggle the clicked one
+    const updatedExtras: ProductExtraDto[] = cartItem.extras?.map(e => {
+      const extraPayload: any = {
+        branchProductExtraId: e.branchProductExtraId,
+        extraId: e.extraId,
+        isRemoval: e.isRemoval
+      }
+      
+      if (e.isRemoval) {
+        if (e.branchProductExtraId === branchProductExtraId) {
+          // Toggle the clicked removal extra
+          // quantity: 1 → set to 0 (add it back)
+          // quantity: 0 → don't add field (remove it)
+          if (e.quantity === 1) {
+            extraPayload.quantity = 0
+          }
+          // If quantity is 0, don't add quantity field
+        } else {
+          // Keep other removal extras as they are
+          if (e.quantity === 0) {
+            extraPayload.quantity = 0
+          }
+          // If quantity is 1, don't add quantity field
+        }
+      } else {
+        // For addition extras: always send quantity
+        extraPayload.quantity = e.quantity
+      }
+      
+      return extraPayload
+    }) || []
+
+    console.log('Toggle extra payload:', {
+      branchProductId: cartItem.branchProductId,
+      quantity: cartItem.quantity,
+      extras: updatedExtras
+    })
+
+    await basketService.addUnifiedItemToMyBasket({
+      branchProductId: cartItem.branchProductId,
+      quantity: cartItem.quantity,
+      extras: updatedExtras.length > 0 ? updatedExtras : undefined
+    })
+
+    await loadBasket()
+
+  } catch (err: any) {
+    console.error('Error toggling extra:', err)
+    setError('Failed to update extra')
+  } finally {
+    setLoading(false)
+  }
+}
+
+// Handle extra quantity increase - For addition extras only
+const handleExtraQuantityIncrease = async (branchProductExtraId: number, basketItemId: number) => {
+  try {
+    setLoading(true)
+    setError(null)
+
+    const cartItem = cart.find(item => item.basketItemId === basketItemId)
+    if (!cartItem) {
+      console.error('Cart item not found')
+      return
+    }
+
+    const extra = cartItem.extras?.find(e => e.branchProductExtraId === branchProductExtraId)
+    if (!extra) {
+      console.error('Extra not found')
+      return
+    }
+
+    if (extra.isRemoval) {
+      console.error('Cannot increase quantity of removal extra')
+      return
+    }
+
+    if (extra.maxQuantity && extra.quantity >= extra.maxQuantity) {
+      setError(`Maximum quantity for ${extra.extraName} is ${extra.maxQuantity}`)
+      setLoading(false)
+      return
+    }
+
+    await basketService.deleteMyBasketItem(basketItemId)
+
+    const updatedExtras: ProductExtraDto[] = cartItem.extras?.map(e => {
+      const extraPayload: any = {
+        branchProductExtraId: e.branchProductExtraId,
+        extraId: e.extraId,
+        isRemoval: e.isRemoval
+      }
+      
+      if (e.isRemoval) {
+        // For removal extras: handle quantity properly
+        if (e.quantity === 0) {
+          extraPayload.quantity = 0
+        }
+        // If quantity is 1, don't add quantity field
+      } else {
+        // For addition extras: always send quantity
+        extraPayload.quantity = e.branchProductExtraId === branchProductExtraId 
+          ? e.quantity + 1 
+          : e.quantity
+      }
+      
+      return extraPayload
+    }) || []
+
+    await basketService.addUnifiedItemToMyBasket({
+      branchProductId: cartItem.branchProductId,
+      quantity: cartItem.quantity,
+      extras: updatedExtras.length > 0 ? updatedExtras : undefined
+    })
+
+    await loadBasket()
+
+  } catch (err: any) {
+    console.error('Error increasing extra quantity:', err)
+    setError('Failed to increase extra quantity')
+  } finally {
+    setLoading(false)
+  }
+}
+
+// Handle extra quantity decrease - For addition extras only
+const handleExtraQuantityDecrease = async (branchProductExtraId: number, basketItemId: number) => {
+  try {
+    setLoading(true)
+    setError(null)
+
+    const cartItem = cart.find(item => item.basketItemId === basketItemId)
+    if (!cartItem) {
+      console.error('Cart item not found')
+      return
+    }
+
+    const extra = cartItem.extras?.find(e => e.branchProductExtraId === branchProductExtraId)
+    if (!extra) {
+      console.error('Extra not found')
+      return
+    }
+
+    if (extra.isRemoval) {
+      console.error('Cannot decrease quantity of removal extra')
+      return
+    }
+
+    if (extra.minQuantity && extra.quantity <= extra.minQuantity) {
+      setError(`Minimum quantity for ${extra.extraName} is ${extra.minQuantity}`)
+      setLoading(false)
+      return
+    }
+
+    await basketService.deleteMyBasketItem(basketItemId)
+
+    const updatedExtras: ProductExtraDto[] = cartItem.extras?.map(e => {
+      const extraPayload: any = {
+        branchProductExtraId: e.branchProductExtraId,
+        extraId: e.extraId,
+        isRemoval: e.isRemoval
+      }
+      
+      if (e.isRemoval) {
+        // For removal extras: handle quantity properly
+        if (e.quantity === 0) {
+          extraPayload.quantity = 0
+        }
+        // If quantity is 1, don't add quantity field
+      } else {
+        // For addition extras: always send quantity
+        extraPayload.quantity = e.branchProductExtraId === branchProductExtraId 
+          ? Math.max(0, e.quantity - 1)
+          : e.quantity
+      }
+      
+      return extraPayload
+    }) || []
+
+    await basketService.addUnifiedItemToMyBasket({
+      branchProductId: cartItem.branchProductId,
+      quantity: cartItem.quantity,
+      extras: updatedExtras.length > 0 ? updatedExtras : undefined
+    })
+
+    await loadBasket()
+
+  } catch (err: any) {
+    console.error('Error decreasing extra quantity:', err)
+    setError('Failed to decrease extra quantity')
+  } finally {
+    setLoading(false)
+  }
+}
 
   // Handle quantity decrease
   const handleQuantityDecrease = async (basketItemId?: number) => {
@@ -641,6 +944,9 @@ return {
   getSelectedOrderType,
   handlePriceChangeConfirmation,
   sendOrderToWhatsApp,
-  cleanupAfterOrder 
+  cleanupAfterOrder,
+  handleExtraToggle,
+  handleExtraQuantityIncrease,
+  handleExtraQuantityDecrease 
 }
 }

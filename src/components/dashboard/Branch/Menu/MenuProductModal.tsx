@@ -199,7 +199,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
       const categoryExtras = category.extras.filter(extra => 
         extra && selectedExtras.has(extra.branchProductExtraId)
       )
-      
+
       const selectedCount = categoryExtras.length
       const totalQuantity = categoryExtras.reduce((sum, extra) => 
         sum + (selectedExtras.get(extra.branchProductExtraId) || 0), 0
@@ -211,13 +211,17 @@ const ProductModal: React.FC<ProductModalProps> = ({
       }
 
       // Check min selection count
-      if (category.minSelectionCount > 0 && selectedCount < category.minSelectionCount) {
+      if ((category.isRequired || selectedCount > 0) && category.minSelectionCount > 0 && selectedCount < category.minSelectionCount) {
         const availableCount = category.extras.length
         if (availableCount < category.minSelectionCount) {
-          // Impossible to satisfy - need more extras in this category
+          // Impossible to satisfy
           newErrors.set(
             category.categoryId,
-            `${category.categoryName}: Cannot satisfy requirement (requires ${category.minSelectionCount} selections but only ${availableCount} available)`
+            t('productModal.cannotSatisfyError', { 
+              name: category.categoryName,
+              min: category.minSelectionCount,
+              available: availableCount
+            })
           )
         } else {
           newErrors.set(
@@ -242,10 +246,14 @@ const ProductModal: React.FC<ProductModalProps> = ({
       }
 
       // Check min total quantity
-      if (category.minTotalQuantity > 0 && totalQuantity < category.minTotalQuantity) {
+      if ((category.isRequired || totalQuantity > 0) && category.minTotalQuantity > 0 && totalQuantity < category.minTotalQuantity) {
         newErrors.set(
           category.categoryId,
-          `${category.categoryName}: Need at least ${category.minTotalQuantity} total items (currently ${totalQuantity})`
+          t('productModal.minTotalError', { 
+             name: category.categoryName,
+             min: category.minTotalQuantity,
+             current: totalQuantity
+          })
         )
       }
 
@@ -253,7 +261,11 @@ const ProductModal: React.FC<ProductModalProps> = ({
       if (category.maxTotalQuantity > 0 && totalQuantity > category.maxTotalQuantity) {
         newErrors.set(
           category.categoryId,
-          `${category.categoryName}: Maximum ${category.maxTotalQuantity} total items allowed (currently ${totalQuantity})`
+           t('productModal.maxTotalError', { 
+             name: category.categoryName,
+             max: category.maxTotalQuantity,
+             current: totalQuantity
+          })
         )
       }
 
@@ -286,11 +298,17 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
     if (errors.has(category.categoryId)) return 'invalid'
     
+    // 1. If required and nothing selected -> Invalid
     if (category.isRequired && selectedCount === 0) return 'invalid'
+
+    // 2. If NOT required and nothing selected -> Partial (Neutral/Valid state for optional)
+    if (!category.isRequired && selectedCount === 0) return 'partial'
     
+    // 3. If selection started, check constraints
     if (category.minSelectionCount > 0 && selectedCount < category.minSelectionCount) return 'invalid'
     if (category.minTotalQuantity > 0 && totalQuantity < category.minTotalQuantity) return 'invalid'
     
+    // 4. If we have selections and constraints passed -> Valid
     if (selectedCount > 0) return 'valid'
     
     return 'partial'
@@ -340,9 +358,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
         }
       })
     }
-
-    console.log('Selected extras:', extras)
-    console.log('Selected addons:', selectedAddons)
 
     onAddToCart(product, selectedAddons, extras)
     

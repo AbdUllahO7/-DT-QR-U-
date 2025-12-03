@@ -134,7 +134,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
             minSelectionCount: existingCat.minSelectionCount ?? 0,
             maxSelectionCount: existingCat.maxSelectionCount ?? 0,
             minTotalQuantity: existingCat.minTotalQuantity ?? 0,
-            maxTotalQuantity: existingCat.maxTotalQuantity ?? 0,
+            maxTotalQuantity: existingCat.maxTotalQuantity ?? 1,
             activeExtrasCount: 0,
             isExpanded: false,
             extras: []
@@ -203,7 +203,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
           initialExtrasConfig[existingExtra.productExtraId] = {
             specialUnitPrice: existingExtra.specialUnitPrice ?? 0,
             minQuantity: existingExtra.minQuantity ?? 0,
-            maxQuantity: existingExtra.maxQuantity ?? 0,
+            maxQuantity: existingExtra.maxQuantity ?? 1,
             isRequiredOverride: existingExtra.isRequiredOverride ?? false,
           };
 
@@ -299,7 +299,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
             [extraId]: {
               specialUnitPrice: extra?.unitPrice ?? 0,
               minQuantity: 0,
-              maxQuantity: 0,
+              maxQuantity: 1,
               isRequiredOverride: false,
             }
           }));
@@ -437,7 +437,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
           const extraConfig = extrasSpecificConfig[extraId] || {
             specialUnitPrice: 0,
             minQuantity: 0,
-            maxQuantity: 0,
+            maxQuantity: 1,
             isRequiredOverride: false,
           };
 
@@ -829,8 +829,8 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                               const isExtraSelected = config?.selectedExtras.has(extra.productExtraId);
                               const extraConfig = extrasSpecificConfig[extra.productExtraId] || {
                                 specialUnitPrice: extra.unitPrice,
-                                minQuantity: 0,
-                                maxQuantity: 0,
+                                minQuantity: 1,
+                                maxQuantity: 1,
                                 isRequiredOverride: false,
                               };
                               const isEditing = editingExtraId === extra.productExtraId;
@@ -926,13 +926,13 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                             <input
                                               type="number"
                                               min="0"
-                                              step="0.01"
+                                              step="1"
                                               value={extraConfig.specialUnitPrice}
                                               onChange={(e) =>
                                                 handleExtraConfigChange(
                                                   extra.productExtraId,
                                                   'specialUnitPrice',
-                                                  parseFloat(e.target.value) || 0
+                                                  parseFloat(e.target.value) || 1
                                                 )
                                               }
                                               onClick={(e) => e.stopPropagation()}
@@ -966,7 +966,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                               handleExtraConfigChange(
                                                 extra.productExtraId,
                                                 'minQuantity',
-                                                parseInt(e.target.value) || 0
+                                                parseInt(e.target.value) || 1
                                               )
                                             }
                                             onClick={(e) => e.stopPropagation()}
@@ -987,7 +987,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                               handleExtraConfigChange(
                                                 extra.productExtraId,
                                                 'maxQuantity',
-                                                parseInt(e.target.value) || 0
+                                                parseInt(e.target.value) ||1
                                               )
                                             }
                                             onClick={(e) => e.stopPropagation()}

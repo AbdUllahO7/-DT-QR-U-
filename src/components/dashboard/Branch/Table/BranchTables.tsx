@@ -213,8 +213,6 @@ const QRCodeModal: React.FC<{
   );
 };
 
-
-
 const BranchTableManagement: React.FC = () => {
   const { t, isRTL } = useLanguage();
   
@@ -883,10 +881,16 @@ const BranchTableManagement: React.FC = () => {
               
             <button
                 onClick={() => {
+                   // ✅ ADDED VALIDATION HERE
+                  if (categories.length === 0) {
+                    setError(t('BranchTableManagement.error.createCategoryFirst') || 'Please create a category first.');
+                    return;
+                  }
                   setShowBatchCreate(true);
-                  setBatchCreateError(null); // <-- ADD THIS
+                  setBatchCreateError(null);
                 }}
-                className={`px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 flex items-center gap-2 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+                disabled={isLoading}
+                className={`px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isRTL ? 'flex-row-reverse' : ''}`}
               >
                 <Copy className="h-4 w-4" />
                 {t('BranchTableManagement.batchCreateTables')}
@@ -894,9 +898,10 @@ const BranchTableManagement: React.FC = () => {
           <button
                 onClick={() => {
                   setShowAddCategory(true);
-                  setAddCategoryError(null); // <-- ADD THIS
+                  setAddCategoryError(null);
                 }}
-                className={`px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 flex items-center gap-2 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+                disabled={isLoading}
+                className={`px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isRTL ? 'flex-row-reverse' : ''}`}
               >
                 <Plus className="h-4 w-4" />
                 {t('BranchTableManagement.addCategory')}

@@ -1,123 +1,426 @@
+// ===== Base Extra Types =====
 
-export interface MenuAllergen {
-  id: number
-  code: string
-  name: string
-  icon: string
-  presence: number
-  note: string
-  displayOrder: number
-  description: string
+export interface Extra {
+  id: number;
+  extraCategoryId: number;
+  name: string;
+  description?: string;
+  basePrice: number;
+  isRemoval: boolean;
+  imageUrl?: string;
+  status: boolean;
+  displayOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string;
 }
 
-export interface MenuIngredient {
-  id: number
-  productId: number
-  ingredientId: number
-  ingredientName: string
-  quantity: number
-  unit: string
-  isAllergenic: boolean
-  isAvailable: boolean
-  allergenIds: number[]
-  allergens: MenuAllergen[]
+export interface CreateExtraData {
+  extraCategoryId: number;
+  name: string;
+  description?: string;
+  basePrice: number;
+  isRemoval: boolean;
+  imageUrl?: string;
+  status: boolean;
 }
-export interface ProductExtraMenu {
-  branchProductExtraId: number
-  productExtraId: number
-  extraId: number
-  extraName: string
-  categoryName: string
-  selectionMode: number 
-  unitPrice: number
-  finalPrice: number
-  minQuantity?: number
-  maxQuantity?: number
-  isRequired: boolean
-  quantity: number
-  isRemoval: boolean
-  displayOrder: number
+
+export interface UpdateExtraData {
+  id: number;
+  extraCategoryId: number;
+  name: string;
+  description?: string;
+  basePrice: number;
+  isRemoval: boolean;
+  imageUrl?: string;
+  status: boolean;
 }
+
+export interface ReorderExtraItem {
+  id: number;
+  displayOrder: number;
+}
+
+export interface ReorderExtrasData {
+  extraCategoryId: number;
+  items: ReorderExtraItem[];
+}
+
+// ===== Extra Category Types =====
+
 export interface ExtraCategory {
-  categoryId: number
-  categoryName: string
-  extras: ProductExtraMenu[]
-  isRequired: boolean
-  minSelectionCount: number
-  maxSelectionCount: number
-  minTotalQuantity: number
-  maxTotalQuantity: number
+  id: number;
+  categoryName: string;
+  description?: string;
+  isRequired: boolean;
+  defaultMinSelectionCount: number;
+  defaultMaxSelectionCount: number;
+  defaultMinTotalQuantity: number;
+  defaultMaxTotalQuantity: number;
+  status: boolean;
+  displayOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string;
 }
 
-export interface MenuProduct {
-  branchProductId: number
-  productId: number
-  productName: string
-  productDescription: string
-  productImageUrl: string
-  price: number
-  isRecommended: boolean
-  ingredients: MenuIngredient[]
-  allergens: MenuAllergen[]
-  availableAddons: any[]
-  availableExtras?: ExtraCategory[]
+export interface CreateExtraCategoryData {
+  categoryName: string;
+  description?: string;
+  isRequired: boolean;
+  defaultMinSelectionCount: number;
+  defaultMaxSelectionCount: number;
+  defaultMinTotalQuantity: number;
+  defaultMaxTotalQuantity: number;
+  status: boolean;
 }
 
-export interface MenuCategory {
-  categoryId: number
-  categoryName: string
-  displayOrder: number
-  products: MenuProduct[]
+export interface UpdateExtraCategoryData {
+  id: number;
+  categoryName: string;
+  description?: string;
+  isRequired: boolean;
+  defaultMinSelectionCount: number;
+  defaultMaxSelectionCount: number;
+  defaultMinTotalQuantity: number;
+  defaultMaxTotalQuantity: number;
+  status: boolean;
 }
 
-export interface BranchMenuResponse {
-  branchId: number
-  branchName: string
-  restaurantName: string
-  branchAddress: string
-  isOpen: boolean
-  categories: MenuCategory[]
-  statusMessage?: string
-  preferences?: any
+// ===== Product Extra Types =====
+
+export interface ProductExtra {
+  id: number;
+  productId: number;
+  extraId: number;
+  selectionMode: number; // 0: Single, 1: Multiple
+  defaultQuantity: number;
+  defaultMinQuantity: number;
+  defaultMaxQuantity: number;
+  unitPrice: number;
+  isRequired: boolean;
+  displayOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-export interface CartItem {
-  branchProductId: number
-  productName: string
-  price: number
-  quantity: number
-  productImageUrl?: string
-  addons?: SelectedAddon[]
-  extras?: ProductExtraMenu[]
+export interface CreateProductExtraData {
+  productId: number;
+  extraId: number;
+  selectionMode: number;
+  defaultQuantity: number;
+  defaultMinQuantity: number;
+  defaultMaxQuantity: number;
+  unitPrice: number;
+  isRequired: boolean;
 }
 
-export interface MenuComponentProps {
-  branchId: number
+export interface UpdateProductExtraData {
+  id: number;
+  selectionMode: number;
+  defaultQuantity: number;
+  defaultMinQuantity: number;
+  defaultMaxQuantity: number;
+  unitPrice: number;
+  isRequired: boolean;
 }
 
-export interface CategoriesSidebarProps {
-  categories: MenuCategory[]
-  selectedCategory: number | null
-  onCategorySelect: (categoryId: number) => void
+export interface ReorderProductExtraItem {
+  id: number;
+  displayOrder: number;
 }
 
-export interface SelectedAddon {
-  branchProductAddonId: number
-  addonName: string
-  price: number
-  quantity: number
+export interface ReorderProductExtrasData {
+  productId: number;
+  extraCategoryId: number;
+  items: ReorderProductExtraItem[];
 }
 
-export interface HeaderProps {
-  menuData: BranchMenuResponse
-  totalItems: number
-  onCartToggle: () => void
+// ===== Product Extra Category Types =====
+
+export interface ProductExtraCategory {
+  id: number;
+  productId: number;
+  extraCategoryId: number;
+  isRequiredOverride: boolean;
+  minSelectionCount: number;
+  maxSelectionCount: number;
+  minTotalQuantity: number;
+  maxTotalQuantity: number;
+  displayOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
-// FIXED: ProductModalProps with correct signature
-export interface ProductModalProps {
-  isOpen: boolean
-  product: MenuProduct | null
-  onClose: () => void
-  onAddToCart: (product: MenuProduct, addons: SelectedAddon[], extras: ProductExtraMenu[]) => void
+export interface CreateProductExtraCategoryData {
+  productId: number;
+  extraCategoryId: number;
+  isRequiredOverride: boolean;
+  minSelectionCount: number;
+  maxSelectionCount: number;
+  minTotalQuantity: number;
+  maxTotalQuantity: number;
+}
+
+export interface UpdateProductExtraCategoryData {
+  id: number;
+  isRequiredOverride: boolean;
+  minSelectionCount: number;
+  maxSelectionCount: number;
+  minTotalQuantity: number;
+  maxTotalQuantity: number;
+}
+
+export interface ReorderProductExtraCategoryItem {
+  id: number;
+  displayOrder: number;
+}
+
+export interface ReorderProductExtraCategoriesData {
+  productId: number;
+  items: ReorderProductExtraCategoryItem[];
+}
+
+// ===== BranchProductExtraCategories Types =====
+
+export interface BranchProductExtraCategory {
+  effectiveIsRequired: boolean;
+  id: number;
+  branchProductId: number;
+  productExtraCategoryId: number;
+  extraCategoryId?: number;
+  extraCategoryName?: string;
+  isRequired?: boolean;
+  isRequiredOverride: boolean;
+  minSelectionCount: number;
+  maxSelectionCount: number;
+  minTotalQuantity: number;
+  maxTotalQuantity: number;
+  isActive: boolean;
+  displayOrder?: number;
+  activeExtrasCount?: number;
+}
+
+export interface CreateBranchProductExtraCategoryData {
+  branchProductId: number;
+  productExtraCategoryId: number;
+  isRequiredOverride: boolean;
+  minSelectionCount: number;
+  maxSelectionCount: number;
+  minTotalQuantity: number;
+  maxTotalQuantity: number;
+  isActive: boolean;
+}
+
+export interface UpdateBranchProductExtraCategoryData {
+  id: number;
+  isRequiredOverride: boolean;
+  minSelectionCount: number;
+  maxSelectionCount: number;
+  minTotalQuantity: number;
+  maxTotalQuantity: number;
+  isActive: boolean;
+}
+
+export interface BatchBranchProductExtraCategoryItem {
+  productExtraCategoryId: number;
+  isRequiredOverride: boolean;
+  minSelectionCount: number;
+  maxSelectionCount: number;
+  minTotalQuantity: number;
+  maxTotalQuantity: number;
+  isActive: boolean;
+  displayOrder: number;
+}
+
+export interface BatchBranchProductExtraCategoryData {
+  branchProductId: number;
+  items: BatchBranchProductExtraCategoryItem[];
+}
+
+export interface AvailableExtraCategory {
+  productExtraCategoryId: number;
+  extraCategoryId: number;
+  extraCategoryName: string;
+  isRequired: boolean;
+  minSelectionCount: number;
+  maxSelectionCount: number;
+  minTotalQuantity: number;
+  maxTotalQuantity: number;
+  activeExtrasCount: number;
+}
+
+// ===== BranchProductExtras Types =====
+
+export interface BranchProductExtra {
+  id: number;
+  branchProductId: number;
+  productExtraId: number;
+  extraId?: number;
+  extraName?: string;
+  categoryName?: string;
+  selectionMode?: number;
+  unitPrice?: number;
+  isActive: boolean;
+  specialUnitPrice: number;
+  minQuantity: number;
+  maxQuantity: number;
+  isRequiredOverride: boolean;
+  displayOrder?: number;
+  isRemoval?: boolean;
+  isRemovalAllowed?: boolean;
+}
+
+export interface CreateBranchProductExtraData {
+  branchProductId: number;
+  productExtraId: number;
+  isActive: boolean;
+  specialUnitPrice: number;
+  minQuantity: number;
+  maxQuantity: number;
+  isRequiredOverride: boolean;
+}
+
+export interface UpdateBranchProductExtraData {
+  id: number;
+  isActive: boolean;
+  specialUnitPrice: number;
+  minQuantity: number;
+  maxQuantity: number;
+  isRequiredOverride: boolean;
+}
+
+export interface BatchUpdateBranchProductExtraItem {
+  productExtraId: number;
+  isActive: boolean;
+  specialUnitPrice: number;
+  minQuantity: number;
+  maxQuantity: number;
+  isRequiredOverride: boolean;
+  displayOrder: number;
+  isRemovalAllowed: boolean;
+}
+
+export interface BatchUpdateBranchProductExtraData {
+  branchProductId: number;
+  extras: BatchUpdateBranchProductExtraItem[];
+}
+
+export interface ReorderBranchProductExtraItem {
+  id: number;
+  displayOrder: number;
+}
+
+export interface AvailableProductExtra {
+  productExtraId: number;
+  extraId: number;
+  extraName: string;
+  categoryName: string;
+  selectionMode: number;
+  unitPrice: number;
+  isRemoval: boolean;
+}
+
+export interface GroupedBranchProductExtra {
+  categoryId: number;
+  categoryName: string;
+  extras: BranchProductExtra[];
+}
+
+// ===== API Response Types =====
+
+export interface APIExtra {
+  id: number;
+  extraCategoryId: number;
+  name: string;
+  description?: string;
+  basePrice: number;
+  isRemoval: boolean;
+  imageUrl?: string;
+  status: boolean;
+  displayOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string;
+}
+
+export interface APIExtraCategory {
+  id: number;
+  categoryName: string;
+  description?: string;
+  isRequired: boolean;
+  defaultMinSelectionCount: number;
+  defaultMaxSelectionCount: number;
+  defaultMinTotalQuantity: number;
+  defaultMaxTotalQuantity: number;
+  status: boolean;
+  displayOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
+  deletedAt?: string;
+}
+
+export interface APIProductExtra {
+  id: number;
+  productId: number;
+  extraId: number;
+  selectionMode: number;
+  defaultQuantity: number;
+  defaultMinQuantity: number;
+  defaultMaxQuantity: number;
+  unitPrice: number;
+  isRequired: boolean;
+  displayOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface APIProductExtraCategory {
+  id: number;
+  productId: number;
+  extraCategoryId: number;
+  isRequiredOverride: boolean;
+  minSelectionCount: number;
+  maxSelectionCount: number;
+  minTotalQuantity: number;
+  maxTotalQuantity: number;
+  displayOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface APIBranchProductExtraCategory {
+  id: number;
+  branchProductId: number;
+  productExtraCategoryId: number;
+  extraCategoryId?: number;
+  extraCategoryName?: string;
+  isRequired?: boolean;
+  isRequiredOverride: boolean;
+  minSelectionCount: number;
+  maxSelectionCount: number;
+  minTotalQuantity: number;
+  maxTotalQuantity: number;
+  isActive: boolean;
+  displayOrder?: number;
+  activeExtrasCount?: number;
+}
+
+export interface APIBranchProductExtra {
+  id: number;
+  branchProductId: number;
+  productExtraId: number;
+  extraId?: number;
+  extraName?: string;
+  categoryName?: string;
+  selectionMode?: number;
+  unitPrice?: number;
+  isActive: boolean;
+  specialUnitPrice: number;
+  minQuantity: number;
+  maxQuantity: number;
+  isRequiredOverride: boolean;
+  displayOrder?: number;
+  isRemoval?: boolean;
+  isRemovalAllowed?: boolean;
 }

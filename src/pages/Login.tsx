@@ -143,8 +143,9 @@ const Login: React.FC = () => {
       logError(error, 'Login error');
 
       const userFriendlyMessage = getUserFriendlyErrorMessage(error);
+      console.log("Login error:", error, "Friendly message:", userFriendlyMessage);
       setErrors({
-        general: userFriendlyMessage
+        general: error.response.data.errorMessage
       });
       setIsSubmitting(false);
       
@@ -195,16 +196,16 @@ const Login: React.FC = () => {
           setErrors(validationErrors);
         } else {
           setErrors({
-            general: error.message || t('pages.login.errors.generalError')
+            general: error.response.data.errorMessage || t('pages.login.errors.generalError')
           });
         }
       } else if (error.status === 401) {
         setErrors({
-          general: t('pages.login.errors.invalidCredentials')
+          general: error.response.data.errorMessage
         });
       } else {
         setErrors({
-          general: error.message || t('pages.login.errors.generalError')
+          general:  error.response.data.errorMessage || t('pages.login.errors.generalError')
         });
       }
     } finally {

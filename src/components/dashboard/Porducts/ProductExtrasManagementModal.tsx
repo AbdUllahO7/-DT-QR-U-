@@ -6,10 +6,10 @@ import {
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { logger } from '../../../utils/logger';
-import { CreateProductExtraData, ProductExtra, UpdateProductExtraData, Extra } from '../../../types/Extras/type';
 import { productExtrasService } from '../../../services/Extras/ProductExtrasService';
 import { extrasService } from '../../../services/Extras/ExtrasService';
 import { ConfirmationModal } from './ConfirmationModal';
+import { CreateProductExtraData, Extra, ProductExtra, UpdateProductExtraData } from '../../../types/Extras/type';
 // Import ConfirmationModal here
 
 interface ProductExtrasManagementModalProps {
@@ -55,7 +55,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
     selectionMode: 0, // 0: Single, 1: Multiple
     defaultQuantity: 1,
     defaultMinQuantity: 0,
-    defaultMaxQuantity: 10,
+    defaultMaxQuantity: 1,
     unitPrice: 0,
     isRequired: false
   });
@@ -64,7 +64,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
     selectionMode: 0,
     defaultQuantity: 1,
     defaultMinQuantity: 0,
-    defaultMaxQuantity: 10,
+    defaultMaxQuantity: 1,
     unitPrice: 0,
     isRequired: false
   });
@@ -130,14 +130,14 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
         selectionMode: 0,
         defaultQuantity: 1,
         defaultMinQuantity: 0,
-        defaultMaxQuantity: 10,
+        defaultMaxQuantity: 1,
         unitPrice: 0,
         isRequired: false
       });
       setShowAddForm(false);
-    } catch (error) {
+    } catch (error:any) {
       logger.error('Failed to add product extra:', error);
-      setError(t('error.saveFailed'));
+      setError(error.response?.data?.message );
     } finally {
       setIsSubmitting(false);
     }
@@ -565,7 +565,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                         title='Min'
                                         type="number"
                                         value={editFormData.defaultMinQuantity}
-                                        onChange={(e) => setEditFormData({ ...editFormData, defaultMinQuantity: parseInt(e.target.value) || 0 })}
+                                        onChange={(e) => setEditFormData({ ...editFormData, defaultMinQuantity: parseInt(e.target.value) || 1 })}
                                         className="w-full px-2 py-1.5 text-sm border rounded"
                                       />
                                     </div>
@@ -575,7 +575,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                         title='Max'
                                         type="number"
                                         value={editFormData.defaultMaxQuantity}
-                                        onChange={(e) => setEditFormData({ ...editFormData, defaultMaxQuantity: parseInt(e.target.value) || 10 })}
+                                        onChange={(e) => setEditFormData({ ...editFormData, defaultMaxQuantity: parseInt(e.target.value) || 1 })}
                                         className="w-full px-2 py-1.5 text-sm border rounded"
                                       />
                                     </div>
