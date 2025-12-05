@@ -91,7 +91,6 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     orderTypeId: 0,
     tableId: tableId,
     deliveryAddress: '',
-    tableNumber: '', 
     customerPhone: '',
     paymentMethod: ''
   })

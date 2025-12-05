@@ -88,9 +88,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
     if (selectedOrderType.requiresPhone && !orderForm.customerPhone?.trim()) {
       return true;
     }
-    if (selectedOrderType.requiresTable && !orderForm.tableNumber?.trim()) {
-      return true;
-    }
+   
     
     // Check payment method only if there are available payment methods
     if (availablePaymentMethods.length > 0 && !orderForm.paymentMethod) {
@@ -257,30 +255,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
         </div>
       )}
 
-      {/* Table Number - Only show if required */}
-      {selectedOrderType?.requiresTable && (
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            <Hash className="h-4 w-4 inline mr-1" />
-            {t('order.form.tableNumber')} *
-          </label>
-          <input
-            type="text"
-            value={orderForm.tableNumber || ''}
-            onChange={(e) =>
-              setOrderForm((prev) => ({ ...prev, tableNumber: e.target.value }))
-            }
-            className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-            placeholder={t('order.form.tableNumberPlaceholder')}
-            required
-          />
-          {!orderForm.tableNumber?.trim() && (
-            <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-              {t('order.form.tableNumberRequired') || 'Table number is required'}
-            </p>
-          )}
-        </div>
-      )}
+      
 
       {/* Delivery Address - Only show if required */}
       {selectedOrderType?.requiresAddress && (

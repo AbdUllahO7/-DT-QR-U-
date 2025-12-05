@@ -115,6 +115,24 @@ export interface CreateProductExtraData {
   isRequired: boolean;
 }
 
+export interface ProductExtraMenu {
+  branchProductExtraId: number;
+  categoryName?: string
+  displayOrder: number
+  extraId:number
+  extraName?: string
+  finalPrice: number
+  isRemoval: true
+  isRemovalAllowed: true
+  isRequired: false
+  quantity: number
+  maxQuantity: number
+  minQuantity: number
+  productExtraId: number
+  selectionMode?: number
+  unitPrice?: number
+  }
+
 export interface UpdateProductExtraData {
   id: number;
   selectionMode: number;

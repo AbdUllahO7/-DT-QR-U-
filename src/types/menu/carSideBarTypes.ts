@@ -11,7 +11,6 @@ export interface OrderForm {
   deliveryAddress?: string;
   customerPhone?: string;
   paymentMethod: string;
-  tableNumber?: string;
 }
 
 export interface OrderTotal {
@@ -25,7 +24,6 @@ export interface OrderFormProps {
   setOrderForm: React.Dispatch<React.SetStateAction<OrderForm>>;
   orderTypes: OrderType[];
   loadingOrderTypes: boolean;
-   tableNumber?: string;
   orderTotal: OrderTotal;
   estimatedTime: number;
   totalPrice: number;

@@ -691,10 +691,7 @@ const validateOrderForm = (): string[] => {
     errors.push('Phone number is required for this order type')
   }
   
-  if (selectedOrderType?.requiresTable && !(orderForm as any).tableNumber?.trim()) {
-    errors.push('Table number is required for this order type')
-  }
-  
+
   // Validate minimum order
   const minOrderErrors = validateMinimumOrder()
   errors.push(...minOrderErrors)

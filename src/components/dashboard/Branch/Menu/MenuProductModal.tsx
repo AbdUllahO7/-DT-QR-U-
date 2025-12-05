@@ -18,9 +18,23 @@ import {
   Check
 } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
-import { ProductModalProps, SelectedAddon, ExtraCategory } from "../../../../types/menu/type"
+import { ProductModalProps, SelectedAddon } from "../../../../types/menu/type"
 import { Allergen } from "../../../../services/allergen"
 import { ProductExtraMenu } from "../../../../types/Extras/type"
+
+// Define the proper ExtraCategory type for menu context
+interface MenuExtraCategory {
+  categoryId: number
+  categoryName: string
+  isRequired: boolean
+  minSelectionCount: number
+  maxSelectionCount: number
+  minTotalQuantity: number
+  maxTotalQuantity: number
+  extras: ProductExtraMenu[]
+}
+
+type CategoryStatus = 'valid' | 'invalid' | 'partial'
 
 const ProductModal: React.FC<ProductModalProps> = ({
   isOpen,
@@ -37,9 +51,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
   
   // Initialize expanded categories when product changes
   useEffect(() => {
-    if (product?.availableExtras) {
+    if (product?.availableExtras && Array.isArray(product.availableExtras)) {
       const requiredCategories = product.availableExtras
-        .filter(cat => cat?.isRequired)
+        .filter((cat): cat is MenuExtraCategory => cat !== null && cat !== undefined && cat.isRequired)
         .map(cat => cat.categoryId)
       setExpandedCategories(new Set(requiredCategories))
     }
@@ -76,27 +90,29 @@ const ProductModal: React.FC<ProductModalProps> = ({
     return total + addonsPrice
   }, [product, selectedAddons, selectedExtras, quantity])
 
-  const hasExtras = product?.availableExtras && Array.isArray(product.availableExtras) && product.availableExtras.length > 0
+  const hasExtras = product?.availableExtras && 
+                    Array.isArray(product.availableExtras) && 
+                    product.availableExtras.length > 0
   
   const getTranslatedAllergen = (allergen: Allergen) => {
     try {
-      const nameKey = `allergens.${allergen.code}.name`;
-      const descKey = `allergens.${allergen.code}.description`;
+      const nameKey = `allergens.${allergen.code}.name`
+      const descKey = `allergens.${allergen.code}.description`
       
-      const translatedName = t(nameKey);
-      const translatedDesc = t(descKey);
+      const translatedName = t(nameKey)
+      const translatedDesc = t(descKey)
       
       return {
         name: translatedName === nameKey ? allergen.name : translatedName,
         description: translatedDesc === descKey ? allergen.description : translatedDesc
-      };
+      }
     } catch (error) {
       return {
         name: allergen.name || '',
         description: allergen.description || ''
-      };
+      }
     }
-  };
+  }
 
   // Addons Management
   const handleAddonChange = (addon: any, newQuantity: number) => {
@@ -205,71 +221,80 @@ const ProductModal: React.FC<ProductModalProps> = ({
         sum + (selectedExtras.get(extra.branchProductExtraId) || 0), 0
       )
 
-      // Check required category
+      // 1. Check required category - must have at least one selection
       if (category.isRequired && selectedCount === 0) {
-        newErrors.set(category.categoryId, t('productModal.categoryRequired', { name: category.categoryName }))
+        newErrors.set(
+          category.categoryId, 
+          t('productModal.categoryRequired', { name: category.categoryName })
+        )
+        return // Skip other checks if required but nothing selected
       }
 
-      // Check min selection count
-      if ((category.isRequired || selectedCount > 0) && category.minSelectionCount > 0 && selectedCount < category.minSelectionCount) {
-        const availableCount = category.extras.length
-        if (availableCount < category.minSelectionCount) {
-          // Impossible to satisfy
+      // Only validate other constraints if selections have been made OR category is required
+      const shouldValidate = category.isRequired || selectedCount > 0
+
+      if (shouldValidate) {
+        // 2. Check minSelectionCount constraint
+        if (category.minSelectionCount > 0 && selectedCount < category.minSelectionCount) {
+          const availableCount = category.extras.length
+          if (availableCount < category.minSelectionCount) {
+            // Impossible to satisfy - not enough extras available
+            newErrors.set(
+              category.categoryId,
+              t('productModal.cannotSatisfyError', { 
+                name: category.categoryName,
+                min: category.minSelectionCount,
+                available: availableCount
+              })
+            )
+          } else {
+            newErrors.set(
+              category.categoryId,
+              t('productModal.minSelectionError', { 
+                min: category.minSelectionCount, 
+                name: category.categoryName 
+              })
+            )
+          }
+        }
+
+        // 3. Check maxSelectionCount constraint
+        if (category.maxSelectionCount > 0 && selectedCount > category.maxSelectionCount) {
           newErrors.set(
             category.categoryId,
-            t('productModal.cannotSatisfyError', { 
-              name: category.categoryName,
-              min: category.minSelectionCount,
-              available: availableCount
+            t('productModal.maxSelectionError', { 
+              max: category.maxSelectionCount, 
+              name: category.categoryName 
             })
           )
-        } else {
+        }
+
+        // 4. Check minTotalQuantity constraint
+        if (category.minTotalQuantity > 0 && totalQuantity < category.minTotalQuantity) {
           newErrors.set(
             category.categoryId,
-            t('productModal.minSelectionError', { 
-              min: category.minSelectionCount, 
-              name: category.categoryName 
+            t('productModal.minTotalError', { 
+              name: category.categoryName,
+              min: category.minTotalQuantity,
+              current: totalQuantity
+            })
+          )
+        }
+
+        // 5. Check maxTotalQuantity constraint
+        if (category.maxTotalQuantity > 0 && totalQuantity > category.maxTotalQuantity) {
+          newErrors.set(
+            category.categoryId,
+            t('productModal.maxTotalError', { 
+              name: category.categoryName,
+              max: category.maxTotalQuantity,
+              current: totalQuantity
             })
           )
         }
       }
 
-      // Check max selection count
-      if (category.maxSelectionCount > 0 && selectedCount > category.maxSelectionCount) {
-        newErrors.set(
-          category.categoryId,
-          t('productModal.maxSelectionError', { 
-            max: category.maxSelectionCount, 
-            name: category.categoryName 
-          })
-        )
-      }
-
-      // Check min total quantity
-      if ((category.isRequired || totalQuantity > 0) && category.minTotalQuantity > 0 && totalQuantity < category.minTotalQuantity) {
-        newErrors.set(
-          category.categoryId,
-          t('productModal.minTotalError', { 
-             name: category.categoryName,
-             min: category.minTotalQuantity,
-             current: totalQuantity
-          })
-        )
-      }
-
-      // Check max total quantity
-      if (category.maxTotalQuantity > 0 && totalQuantity > category.maxTotalQuantity) {
-        newErrors.set(
-          category.categoryId,
-           t('productModal.maxTotalError', { 
-             name: category.categoryName,
-             max: category.maxTotalQuantity,
-             current: totalQuantity
-          })
-        )
-      }
-
-      // Check individual extra requirements
+      // 6. Check individual extra requirements
       category.extras.forEach(extra => {
         if (extra && extra.isRequired && !selectedExtras.has(extra.branchProductExtraId)) {
           newErrors.set(
@@ -285,7 +310,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
   }
 
   // Get category validation status
-  const getCategoryStatus = (category: ExtraCategory): 'valid' | 'invalid' | 'partial' => {
+  const getCategoryStatus = (category: MenuExtraCategory): CategoryStatus => {
     if (!category || !Array.isArray(category.extras)) return 'partial'
     
     const categoryExtras = category.extras.filter(extra => 
@@ -296,33 +321,45 @@ const ProductModal: React.FC<ProductModalProps> = ({
       sum + (selectedExtras.get(extra.branchProductExtraId) || 0), 0
     )
 
+    // If there's an error for this category, it's invalid
     if (errors.has(category.categoryId)) return 'invalid'
     
-    // 1. If required and nothing selected -> Invalid
+    // If required and nothing selected -> Invalid
     if (category.isRequired && selectedCount === 0) return 'invalid'
 
-    // 2. If NOT required and nothing selected -> Partial (Neutral/Valid state for optional)
+    // If NOT required and nothing selected -> Partial (neutral state)
     if (!category.isRequired && selectedCount === 0) return 'partial'
     
-    // 3. If selection started, check constraints
-    if (category.minSelectionCount > 0 && selectedCount < category.minSelectionCount) return 'invalid'
-    if (category.minTotalQuantity > 0 && totalQuantity < category.minTotalQuantity) return 'invalid'
-    
-    // 4. If we have selections and constraints passed -> Valid
-    if (selectedCount > 0) return 'valid'
+    // If something is selected, validate constraints
+    if (selectedCount > 0) {
+      // Check if any constraint is violated
+      const violatesMinSelection = category.minSelectionCount > 0 && selectedCount < category.minSelectionCount
+      const violatesMaxSelection = category.maxSelectionCount > 0 && selectedCount > category.maxSelectionCount
+      const violatesMinTotal = category.minTotalQuantity > 0 && totalQuantity < category.minTotalQuantity
+      const violatesMaxTotal = category.maxTotalQuantity > 0 && totalQuantity > category.maxTotalQuantity
+      
+      if (violatesMinSelection || violatesMaxSelection || violatesMinTotal || violatesMaxTotal) {
+        return 'invalid'
+      }
+      
+      // All constraints satisfied
+      return 'valid'
+    }
     
     return 'partial'
   }
 
   // Toggle category expansion
   const toggleCategory = (categoryId: number) => {
-    const newSet = new Set(expandedCategories)
-    if (newSet.has(categoryId)) {
-      newSet.delete(categoryId)
-    } else {
-      newSet.add(categoryId)
-    }
-    setExpandedCategories(newSet)
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(categoryId)) {
+        newSet.delete(categoryId)
+      } else {
+        newSet.add(categoryId)
+      }
+      return newSet
+    })
   }
 
   // Handle add to cart
@@ -353,7 +390,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
             isRequired: extra.isRequired || false,
             quantity: qty,
             isRemoval: extra.isRemoval || false,
-            displayOrder: extra.displayOrder || 0
+            isRemovalAllowed: extra.isRemovalAllowed || false,
+            displayOrder: extra.displayOrder || 0,
+            minQuantity: extra.minQuantity,
+            maxQuantity: extra.maxQuantity
           })
         }
       })
@@ -433,7 +473,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
               <div className="flex flex-wrap gap-2">
                 {product.allergens.map((allergen: Allergen) => {
                   if (!allergen) return null
-                  const translatedAllergen = getTranslatedAllergen(allergen);
+                  const translatedAllergen = getTranslatedAllergen(allergen)
                   return (
                     <span
                       key={allergen.id}
@@ -443,7 +483,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                       <span className="mr-1">{allergen.icon}</span>
                       {translatedAllergen.name}
                     </span>
-                  );
+                  )
                 })}
               </div>
             </div>
@@ -521,18 +561,20 @@ const ProductModal: React.FC<ProductModalProps> = ({
                               </div>
                               
                               {/* Quantity constraints info */}
-                              <div className="flex items-center space-x-2 mt-1">
-                                {addon.minQuantity > 1 && (
-                                  <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded-full">
-                                    {t('productModal.min')}: {addon.minQuantity}
-                                  </span>
-                                )}
-                                {addon.maxQuantity && addon.maxQuantity < 999 && (
-                                  <span className="text-xs text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 px-1.5 py-0.5 rounded-full">
-                                    {t('productModal.max')}: {addon.maxQuantity}
-                                  </span>
-                                )}
-                              </div>
+                              {(addon.minQuantity > 1 || (addon.maxQuantity && addon.maxQuantity < 999)) && (
+                                <div className="flex items-center space-x-2 mt-1">
+                                  {addon.minQuantity > 1 && (
+                                    <span className="text-xs text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-1.5 py-0.5 rounded-full">
+                                      {t('productModal.min')}: {addon.minQuantity}
+                                    </span>
+                                  )}
+                                  {addon.maxQuantity && addon.maxQuantity < 999 && (
+                                    <span className="text-xs text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 px-1.5 py-0.5 rounded-full">
+                                      {t('productModal.max')}: {addon.maxQuantity}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </div>
 
@@ -542,7 +584,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                               <div className="flex flex-wrap gap-1">
                                 {addon.allergens.slice(0, 3).map((allergen: Allergen) => {
                                   if (!allergen) return null
-                                  const translatedAllergen = getTranslatedAllergen(allergen);
+                                  const translatedAllergen = getTranslatedAllergen(allergen)
                                   return (
                                     <span
                                       key={allergen.id}
@@ -552,7 +594,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                                       <span className="mr-0.5">{allergen.icon}</span>
                                       {translatedAllergen.name}
                                     </span>
-                                  );
+                                  )
                                 })}
                                 {addon.allergens.length > 3 && (
                                   <span 
@@ -574,12 +616,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                           <div className="flex items-center space-x-2 bg-white dark:bg-slate-700 rounded-lg p-1 border border-slate-200 dark:border-slate-600">
                             <button
                               onClick={() => handleDecreaseAddon(addon, addonQuantity)}
-                              className={`w-7 h-7 ${
-                                addonQuantity <= minQty 
-                                  ? 'bg-gray-400 cursor-not-allowed' 
-                                  : 'bg-red-500 hover:bg-red-600'
-                              } text-white rounded-md flex items-center justify-center transition-colors`}
-                              disabled={addonQuantity <= minQty}
+                              className="w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-md flex items-center justify-center transition-colors"
                             >
                               <Minus className="h-3 w-3" />
                             </button>
@@ -632,7 +669,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   if (!category) return null
                   
                   const isExpanded = expandedCategories.has(category.categoryId)
-                  const status = getCategoryStatus(category)
+                  const status = getCategoryStatus(category as MenuExtraCategory)
                   const error = errors.get(category.categoryId)
                   
                   const categoryExtras = (category.extras || []).filter(extra => 
@@ -709,9 +746,14 @@ const ProductModal: React.FC<ProductModalProps> = ({
                               {(category.minTotalQuantity > 0 || category.maxTotalQuantity > 0) && (
                                 <span className="text-xs text-slate-600 dark:text-slate-400">
                                   ({t('productModal.qty')}: {totalQuantity}
-                                  {category.minTotalQuantity > 0 && `/${category.minTotalQuantity}`}
-                                  {category.maxTotalQuantity > 0 && category.minTotalQuantity === 0 && `/${category.maxTotalQuantity}`}
-                                  {category.maxTotalQuantity > 0 && category.minTotalQuantity > 0 && `-${category.maxTotalQuantity}`})
+                                  {category.minTotalQuantity > 0 && category.maxTotalQuantity > 0
+                                    ? `/${category.minTotalQuantity}-${category.maxTotalQuantity}`
+                                    : category.minTotalQuantity > 0
+                                    ? `/${category.minTotalQuantity}+`
+                                    : category.maxTotalQuantity > 0
+                                    ? `/${category.maxTotalQuantity}`
+                                    : ''
+                                  })
                                 </span>
                               )}
                             </div>
