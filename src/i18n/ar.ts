@@ -254,6 +254,7 @@ export const ar = {
         subtitle: "إدارة حالة التفعيل والحد الأدنى لقيمة الطلب ورسوم الخدمة لأنواع الطلبات",
         loading: "جاري تحميل أنواع الطلبات...",
         pleaseWait: "يرجى الانتظار",
+        estimatedMinutes: "دقائق مقدرة",
         settingsUpdated: "تم تحديث الإعدادات بنجاح",
         updateError: "حدث خطأ أثناء تحديث الإعدادات",
         loadingError: "حدث خطأ أثناء تحميل أنواع الطلبات",
@@ -924,6 +925,7 @@ contact: {
 
   // Table Management
   tableManagement: {
+    addTable: 'إضافة طاولة',
     ActiveStatus :"الحالة النشطة",
       descriptionActive: "الفئة نشطة ومرئية",
       descriptionInActive: "الفئة غير نشطة ومخفية",
@@ -2843,7 +2845,7 @@ contact: {
       passwordInfo: 'معلومات كلمة المرور',
       locationInfo: 'معلومات الموقع',
       roleAssignment: 'تعيين السلطة والدور',
-
+      selectBranch: 'اختر الفرع',
 
       phoneNumber: 'رقم الهاتف',
       confirmPassword: 'تأكيد كلمة المرور',
@@ -5044,7 +5046,8 @@ extrasManagement: {
       minSelection: 'الحد الأدنى للاختيار',
       maxSelection: 'الحد الأقصى للاختيار',
       minQuantity: 'الحد الأدنى للكمية',
-      maxQuantity: 'الحد الأقصى للكمية'
+      maxQuantity: 'الحد الأقصى للكمية',
+      removalCategoryLabel: 'فئة إزالة (طرح)'
     }
   },
 

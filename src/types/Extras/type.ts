@@ -66,8 +66,9 @@ export interface ExtraCategory {
 
 export interface CreateExtraCategoryData {
   categoryName: string;
-  description?: string;
+  description: string;
   isRequired: boolean;
+  isRemovalCategory?: boolean;
   defaultMinSelectionCount: number;
   defaultMaxSelectionCount: number;
   defaultMinTotalQuantity: number;
@@ -83,6 +84,7 @@ export interface UpdateExtraCategoryData {
   defaultMinSelectionCount: number;
   defaultMaxSelectionCount: number;
   defaultMinTotalQuantity: number;
+  isRemovalCategory: boolean;
   defaultMaxTotalQuantity: number;
   status: boolean;
 }

@@ -9,7 +9,6 @@ import {
   DollarSign, 
   Users, 
   ChevronDown,
-  // --- Icons added from OrderTypeComponent ---
   User, 
   MapPin, 
   Phone, 
@@ -18,7 +17,6 @@ import {
 import { 
   OrderType, 
   orderTypeService, 
-  // --- DTO updated to send full object ---
   UpdateOrderTypeDto 
 } from '../../../../services/Branch/BranchOrderTypeService';
 import { branchService } from '../../../../services/branchService';
@@ -63,7 +61,7 @@ const OrderTypeRestaurantComponent = () => {
     };
 
     fetchBranches();
-  }, [t]); // Removed selectedBranch dependency to prevent re-fetch on select
+  }, [t]); 
 
   // Fetch order types when selected branch changes
   useEffect(() => {
@@ -95,14 +93,12 @@ const OrderTypeRestaurantComponent = () => {
     setSuccessMessage('');
   };
 
-  // --- MODIFIED: updateSettings now sends the full OrderType object ---
   const updateSettings = async (orderType: OrderType) => {
     try {
       setUpdating(prev => ({ ...prev, [orderType.id]: true }));
       setError(null);
       setSuccessMessage('');
 
-      // Prepare update data with all fields
       const updateData: UpdateOrderTypeDto = {
         id: orderType.id,
         name: orderType.name,
@@ -121,10 +117,8 @@ const OrderTypeRestaurantComponent = () => {
         rowVersion: orderType.rowVersion
       };
 
-      // Use updateOrderTypeSettings but send the full DTO
       const updatedOrderType = await orderTypeService.updateOrderTypeSettings(orderType.id, updateData);
 
-      // --- MODIFIED: State update logic to match OrderTypeComponent ---
       if (updatedOrderType) {
         setOrderTypes(prev => 
           prev.map(ot => 
@@ -132,7 +126,6 @@ const OrderTypeRestaurantComponent = () => {
           )
         );
       } else {
-        // If no response, refetch all data for the current branch
         await fetchOrderTypes();
       }
 
@@ -147,7 +140,6 @@ const OrderTypeRestaurantComponent = () => {
     }
   };
 
-  // This function is generic and already supports the new fields
   const handleSettingChange = (orderTypeId: number, field: keyof OrderType, value: any) => {
     setOrderTypes(prev =>
       prev.map(ot =>
@@ -158,7 +150,6 @@ const OrderTypeRestaurantComponent = () => {
     );
   };
 
-  // --- MODIFIED: handleSave now passes the full orderType ---
   const handleSave = (orderType: OrderType) => {
     updateSettings(orderType);
   };
@@ -195,7 +186,7 @@ const OrderTypeRestaurantComponent = () => {
   return (
     <div className={`min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header Section with Branch Selector (Retained from RestaurantComponent) */}
+        {/* Header Section */}
         <div className="mb-12">
           <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''} mb-6`}>
             <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -253,7 +244,7 @@ const OrderTypeRestaurantComponent = () => {
           </div>
         </div>
 
-        {/* --- MODIFIED: Success Message styling to match OrderTypeComponent --- */}
+        {/* Success Message */}
         {successMessage && (
           <div className={`mb-8 p-4 rounded-xl border-l-4 border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 shadow-lg animate-fade-in ${isRTL ? 'border-r-4 border-l-0' : ''}`}>
             <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -265,7 +256,7 @@ const OrderTypeRestaurantComponent = () => {
           </div>
         )}
 
-        {/* --- MODIFIED: Error Message styling to match OrderTypeComponent --- */}
+        {/* Error Message */}
         {error && (
           <div className={`mb-8 p-4 rounded-xl border-l-4 border-red-500 bg-red-50 dark:bg-red-900/20 shadow-lg ${isRTL ? 'border-r-4 border-l-0' : ''}`}>
             <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -288,19 +279,15 @@ const OrderTypeRestaurantComponent = () => {
             {orderTypes.map((orderType) => (
               <div
                 key={orderType.id}
-                // --- MODIFIED: Card styling to match OrderTypeComponent ---
                 className="group bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:scale-[1.02] border border-gray-200 dark:border-gray-700 overflow-hidden"
               >
-                {/* Removed the top status bar div */}
-
                 <div className="p-8">
                   {/* Header */}
                   <div className={`flex items-center justify-between mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      {/* --- MODIFIED: Icon styling to match OrderTypeComponent --- */}
                       <div className={`p-4 rounded-xl text-3xl shadow-md ${
                         orderType.isActive
-                          ? 'bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-400 dark:to-purple-500 text-white' // Added text-white for gradient
+                          ? 'bg-gradient-to-br from-indigo-500 to-purple-600 dark:from-indigo-400 dark:to-purple-500 text-white'
                           : 'bg-gray-50 dark:bg-gray-700'
                       } transition-colors duration-300`}>
                         {orderType.icon}
@@ -352,7 +339,7 @@ const OrderTypeRestaurantComponent = () => {
                       </label>
                     </div>
 
-                    {/* --- NEW: Requirements Section added from OrderTypeComponent --- */}
+                    {/* Requirements Section */}
                     <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-700 dark:to-gray-600 p-4 rounded-xl border border-blue-200 dark:border-gray-600">
                       <h4 className={`text-sm font-bold text-gray-900 dark:text-white mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
                         {t('dashboard.orderType.requirements') || 'Required Information'}
@@ -439,11 +426,30 @@ const OrderTypeRestaurantComponent = () => {
                         </div>
                       </div>
                     </div>
-                    {/* --- END of new Requirements Section --- */}
+
+                    {/* --- ADDED: Estimated Minutes --- */}
+                    <div className="space-y-2">
+                      <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <Clock className="w-4 h-4" />
+                        {t('dashboard.orderType.estimatedMinutes') || 'Estimated Minutes'}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          step="1"
+                          value={orderType.estimatedMinutes}
+                          onChange={(e) => handleSettingChange(orderType.id, 'estimatedMinutes', parseInt(e.target.value) || 0)}
+                          className={`w-full px-4 py-3 ${isRTL ? 'pl-10 text-right' : 'pr-10'} border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all duration-200 shadow-sm`}
+                          placeholder="0"
+                        />
+                       
+                      </div>
+                    </div>
 
                     {/* Min Order Amount */}
                     <div className="space-y-2">
-                      <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300`}>
+                      <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <DollarSign className="w-4 h-4" />
                         {t('dashboard.orderType.minOrderAmount')}
                       </label>
@@ -463,7 +469,7 @@ const OrderTypeRestaurantComponent = () => {
 
                     {/* Service Charge */}
                     <div className="space-y-2">
-                      <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300`}>
+                      <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <DollarSign className="w-4 h-4" />
                         {t('dashboard.orderType.serviceCharge')}
                       </label>
@@ -488,7 +494,7 @@ const OrderTypeRestaurantComponent = () => {
                       className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-semibold text-white transition-all duration-300 transform ${
                         updating[orderType.id]
                           ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed scale-95'
-                          : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-7A00 dark:from-indigo-500 dark:to-purple-500 dark:hover:from-indigo-600 dark:hover:to-purple-600 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95'
+                          : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 dark:from-indigo-500 dark:to-purple-500 dark:hover:from-indigo-600 dark:hover:to-purple-600 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95'
                       } ${isRTL ? 'flex-row-reverse' : ''}`}
                     >
                       {updating[orderType.id] ? (
@@ -510,7 +516,7 @@ const OrderTypeRestaurantComponent = () => {
           </div>
         )}
 
-        {/* Summary Stats (Retained from RestaurantComponent) */}
+        {/* Summary Stats */}
         {orderTypes.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 p-6 rounded-2xl text-white shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105">

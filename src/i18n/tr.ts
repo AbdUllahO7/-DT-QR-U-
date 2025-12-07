@@ -251,6 +251,7 @@ export const tr = {
         requiresPhone: "Telefon Numarası Gerektirir",
         requiresName: "İsim Gerektirir",
         requiresTable: "Masa Seçimi Gerektirir",
+        estimatedMinutes: "Tahmini Dakika",
         requiresAddress: "Adres Gerektirir",
         title: "Sipariş Türü Ayarları",
         subtitle: "Sipariş türlerinin aktiflik durumu, minimum tutar ve servis ücretlerini yönetin",
@@ -928,6 +929,7 @@ export const tr = {
 
   // Table Management
   tableManagement: {
+    addTable: 'Masa Ekle',
   ActiveStatus :"Aktif Durum", 
   descriptionActive : "Kategori etkin ve görünür", 
   descriptionInActive : "Kategori etkin değil ve gizli",
@@ -2836,6 +2838,7 @@ export const tr = {
       title: 'Yeni Kullanıcı Oluştur',
       personalInfo: 'Kişisel Bilgiler',
       contactInfo: 'İletişim Bilgileri',
+      selectBranch: 'Şube Seçimi',
       passwordInfo: 'Şifre Bilgileri',
       locationInfo: 'Konum Bilgileri',
       roleAssignment: 'Yetki ve Rol Ataması',
@@ -5065,6 +5068,7 @@ extrasManagement: {
       selectionRules: 'Seçim Kuralları',
       minSelection: 'Minimum Seçim',
       maxSelection: 'Maksimum Seçim',
+      removalCategoryLabel: 'Çıkarma Kategorisi',
       minQuantity: 'Minimum Miktar',
       maxQuantity: 'Maksimum Miktar'
     }

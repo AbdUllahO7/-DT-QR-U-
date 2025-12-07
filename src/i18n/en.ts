@@ -246,6 +246,7 @@ export const en = {
         requiresTable: "Requires Table Selection",
         requiresAddress: "Requires Address",
         requiresPhone: "Requires Phone Number",
+        estimatedMinutes: "Estimated Minutes",
         subtitle: "Manage activation status, minimum order amount and service charges for order types",
         loading: "Loading order types...",
         pleaseWait: "Please wait",
@@ -928,6 +929,7 @@ export const en = {
 
   // Table Management
   tableManagement: {
+    addTable: "Add Table",
     loading: 'Loading tables...',
     title: 'Table Management',
     ActiveStatus :"Active Status",
@@ -935,8 +937,8 @@ export const en = {
     descriptionInActive : "Category is inactive and hidden", 
 
     description: 'Manage your QR codes and tables',
-            noCategories :"Not Found Categories",
-    createFirstCategory: "Create First Category",
+            noCategories :"Not Found Area",
+    createFirstCategory: "Create First Area",
     error: {
       loadFailed: 'Failed to load branch list',
       dataLoadFailed: 'An error occurred while loading data'
@@ -2833,7 +2835,7 @@ export const en = {
     // Create User Modal
     createUser: {
       title: 'Create New User',
-      
+      selectBranch: 'Select Branch',
       personalInfo: 'Personal Information',
       contactInfo: 'Contact Information',
       passwordInfo: 'Password Information',
@@ -5042,6 +5044,7 @@ extrasManagement: {
       statusLabel: 'Active Status',
       requiredLabel: 'Is it required?',
       selectionRules: 'Selection Rules',
+      removalCategoryLabel: 'Removal Category',
       minSelection: 'Minimum Selection',
       maxSelection: 'Maximum Selection',
       minQuantity: 'Minimum Quantity',

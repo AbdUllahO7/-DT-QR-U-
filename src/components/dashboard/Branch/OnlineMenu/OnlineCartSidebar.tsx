@@ -1,21 +1,21 @@
-"use client" // Added this based on your other files
+"use client"
 
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Minus, Trash2, ShoppingCart, AlertCircle, Loader2, ChevronDown, ChevronUp, 
          User, MapPin, Phone, Table, CheckCircle, ChevronLeft, ChevronRight, ArrowRight, ArrowLeft, 
-         Clock, CreditCard, Banknote, Smartphone, ClipboardList } from 'lucide-react'; // Added ClipboardList
-import { CreateSessionOrderDto, theme, Order } from '../../../../types/BranchManagement/type'; // Added Order
+         Clock, CreditCard, Banknote, Smartphone, ClipboardList } from 'lucide-react';
+import { CreateSessionOrderDto, theme, Order } from '../../../../types/BranchManagement/type';
 import { BasketResponse, onlineMenuService, BasketItem } from '../../../../services/Branch/Online/OnlineMenuService';
 import { OrderType, orderTypeService } from '../../../../services/Branch/BranchOrderTypeService';
-import { basketService } from '../../../../services/Branch/BasketService';
+import { basketService, BasketExtraItem, ProductExtraDto } from '../../../../services/Branch/BasketService';
 import { orderService } from '../../../../services/Branch/OrderService';
 import WhatsAppConfirmationModal from '../Menu/CartSideBar/WhatsAppConfirmationModal';
 import { WhatsAppService } from '../../../../services/WhatsAppService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import ToastComponent from '../Menu/CartSideBar/ToastComponenet';
-import { TrackedOrder } from '../../../../types/menu/carSideBarTypes'; // Assuming path
-import { UpdatableOrder } from '../../../../types/Orders/type'; // Assuming path
-import OrdersTab from '../Menu/CartSideBar/OrdersTab'; // Assuming path
+import { TrackedOrder } from '../../../../types/menu/carSideBarTypes';
+import { UpdatableOrder } from '../../../../types/Orders/type';
+import OrdersTab from '../Menu/CartSideBar/OrdersTab';
 
 export interface Toast {
   id: string;
@@ -34,7 +34,7 @@ interface OnlineCartSidebarProps {
 }
 
 type CartStep = 'cart' | 'order-type' | 'information';
-type ActiveTab = 'cart' | 'orders'; // <-- NEW
+type ActiveTab = 'cart' | 'orders';
 
 const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   isOpen,
@@ -50,15 +50,15 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   // --- TAB MANAGEMENT ---
   const [activeTab, setActiveTab] = useState<ActiveTab>('cart');
 
-
-
-  
   // Cart States
   const [updatingItemId, setUpdatingItemId] = useState<number | null>(null);
   const [deletingItemId, setDeletingItemId] = useState<number | null>(null);
   const [isClearing, setIsClearing] = useState<boolean>(false);
   const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
   const [addingAddonToItem, setAddingAddonToItem] = useState<number | null>(null);
+  
+  // Extras state
+  const [updatingExtraId, setUpdatingExtraId] = useState<number | null>(null);
   
   // Checkout Step Management
   const [cartStep, setCartStep] = useState<CartStep>('cart'); 
@@ -77,6 +77,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'credit_card' | 'online' | ''>('');
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [orderNotes, setOrderNotes] = useState<string>('');
+  
   // Checkout States
   const [priceChangeData, setPriceChangeData] = useState<any>(null);
   const [submittingOrder, setSubmittingOrder] = useState<boolean>(false);
@@ -121,11 +122,11 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const acceptCash = restaurantPreferences?.acceptCash;
   const acceptCreditCard = restaurantPreferences?.acceptCreditCard;
   const acceptOnlinePayment = restaurantPreferences?.acceptOnlinePayment;
+  
   // Available payment methods
   const availablePaymentMethods: { id: any; name: any; icon: any; description: any; }[] = [];
 
-
-  // ADDED: WhatsApp Service function - same as useCartHandlers
+  // WhatsApp Service function
   const sendOrderToWhatsApp = async (whatsappData: any) => {
     try {
       const whatsappNumber = WhatsAppService.formatWhatsAppNumber(whatsAppPhoneNumber);
@@ -139,17 +140,14 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   // Reset to cart view when sidebar opens
   useEffect(() => {
     if (isOpen) {
-      // Don't reset tab, user might want to see orders
       setCartStep('cart');
       resetForm();
     }
   }, [isOpen]);
 
-  // --- ALL NEW TRACKING LOGIC ---
-
-  // Load tracked orders from localStorage on mount
+  // --- ALL TRACKING LOGIC ---
   useEffect(() => {
-    const savedOrders = localStorage.getItem('onlineTrackedOrders'); // Use a different key
+    const savedOrders = localStorage.getItem('onlineTrackedOrders');
     if (savedOrders) {
       try {
         const parsed = JSON.parse(savedOrders) as TrackedOrder[];
@@ -164,7 +162,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     }
   }, []);
 
-  // Save tracked orders to localStorage whenever it changes
   useEffect(() => {
     if (trackedOrders.length > 0) {
       localStorage.setItem('onlineTrackedOrders', JSON.stringify(trackedOrders));
@@ -173,7 +170,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     }
   }, [trackedOrders]);
 
-  // Fetch updatable orders
   const fetchUpdatableOrders = async () => {
     try {
       if (trackedOrders.length === 0) {
@@ -181,17 +177,14 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         return;
       }
       
-      // We assume getUpdatableOrders works for the current user session
       const orders = await orderService.getUpdatableOrders();
       setUpdatableOrders(orders);
     } catch (error) {
       console.error("Failed to fetch updatable orders:", error);
-      // Don't show toast, this runs in background
       setUpdatableOrders([]);
     }
   };
 
-  // Auto-refresh all pending orders
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
     
@@ -202,8 +195,8 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     if (activeTab === 'orders' && hasPending) {
       interval = setInterval(() => {
         refreshAllPendingOrders();
-        fetchUpdatableOrders(); // Also refresh updatable orders
-      }, 15000); // 15 seconds
+        fetchUpdatableOrders();
+      }, 15000);
     }
     
     return () => {
@@ -211,7 +204,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     };
   }, [activeTab, trackedOrders]);
 
-  // Fetch updatable orders when tracked orders change
   useEffect(() => {
     if (activeTab === 'orders') {
       fetchUpdatableOrders();
@@ -282,8 +274,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     }
   };
 
-
-
   const resetForm = () => {
     setCustomerName('');
     setTableNumber('');
@@ -296,7 +286,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     setPendingWhatsAppData(null);
     setShowWhatsAppConfirmation(false);
     setCreatedOrderTag(null);
-    // Do NOT reset tracked orders
   };
 
   const formatPrice = (price: number) => {
@@ -317,6 +306,29 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         );
         return product.availableAddons.filter((addon: any) =>
           !existingAddonIds.includes(addon.addonBranchProductId)
+        );
+      }
+    }
+    return [];
+  };
+
+  const getAvailableExtrasForProduct = (item: BasketItem) => {
+    if (!menuData?.categories) return [];
+
+    for (const category of menuData.categories) {
+      const product = category.products.find((p: any) => p.branchProductId === item.branchProductId);
+      if (product && product.availableExtras) {
+        const existingExtraIds = (item.extras || []).map((e: BasketExtraItem) => e.branchProductExtraId);
+        
+        const allExtras: any[] = [];
+        product.availableExtras.forEach((extraCategory: any) => {
+          if (extraCategory.extras && Array.isArray(extraCategory.extras)) {
+            allExtras.push(...extraCategory.extras);
+          }
+        });
+        
+        return allExtras.filter((extra: any) =>
+          !existingExtraIds.includes(extra.branchProductExtraId)
         );
       }
     }
@@ -433,6 +445,175 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     }
   };
 
+  const handleToggleExtra = async (item: BasketItem, extra: any) => {
+    try {
+      setUpdatingExtraId(extra.branchProductExtraId);
+
+      // Get current extras
+      const currentExtras = item.extras || [];
+      
+      // Check if extra is already added
+      const existingIndex = currentExtras.findIndex(
+        (e) => e.branchProductExtraId === extra.branchProductExtraId
+      );
+
+      let newExtras: ProductExtraDto[];
+
+      if (existingIndex >= 0) {
+        // Extra exists - remove it
+        newExtras = currentExtras
+          .filter((e) => e.branchProductExtraId !== extra.branchProductExtraId)
+          .map((e) => ({
+            branchProductExtraId: e.branchProductExtraId,
+            extraId: e.extraId,
+            quantity: e.quantity,
+            isRemoval: e.isRemoval,
+          }));
+      } else {
+        // Extra doesn't exist - add it
+        newExtras = [
+          ...currentExtras.map((e) => ({
+            branchProductExtraId: e.branchProductExtraId,
+            extraId: e.extraId,
+            quantity: e.quantity,
+            isRemoval: e.isRemoval,
+          })),
+          {
+            branchProductExtraId: extra.branchProductExtraId,
+            extraId: extra.extraId,
+            quantity: 1,
+            isRemoval: extra.isRemoval,
+          },
+        ];
+      }
+
+      // Update basket item with new extras
+      await onlineMenuService.updateBasketItemExtras(
+        item.basketItemId,
+        item.branchProductId,
+        item.quantity,
+        newExtras
+      );
+
+      await onBasketUpdate();
+      
+      // FIX: Changed from toast.success to addToast
+      addToast(
+        existingIndex >= 0
+          ? t('menu.cart.extraRemoved') || 'Extra removed'
+          : t('menu.cart.extraAdded') || 'Extra added',
+        'success'
+      );
+    } catch (error: any) {
+      console.error('Toggle extra error:', error);
+      // FIX: Changed from toast.error to addToast
+      addToast(error.message || t('menu.error.updateBasket'), 'error');
+    } finally {
+      setUpdatingExtraId(null);
+    }
+  };
+
+  const handleUpdateExtraQuantity = async (
+    item: BasketItem,
+    extraId: number,
+    delta: number
+  ) => {
+    try {
+      setUpdatingExtraId(extraId);
+
+      // Get current extras
+      const currentExtras = item.extras || [];
+      
+      // Find the extra to update
+      const extraIndex = currentExtras.findIndex(
+        (e) => e.branchProductExtraId === extraId
+      );
+
+      if (extraIndex === -1) {
+        throw new Error('Extra not found');
+      }
+
+      const extra = currentExtras[extraIndex];
+      const newQuantity = Math.max(
+        extra.minQuantity || 1,
+        Math.min(extra.maxQuantity || 10, extra.quantity + delta)
+      );
+
+      // If quantity hasn't changed, return
+      if (newQuantity === extra.quantity) {
+        setUpdatingExtraId(null);
+        return;
+      }
+
+      // Create new extras array with updated quantity
+      const newExtras: ProductExtraDto[] = currentExtras.map((e) => ({
+        branchProductExtraId: e.branchProductExtraId,
+        extraId: e.extraId,
+        quantity:
+          e.branchProductExtraId === extraId ? newQuantity : e.quantity,
+        isRemoval: e.isRemoval,
+      }));
+
+      // Update basket item with new extras
+      await onlineMenuService.updateBasketItemExtras(
+        item.basketItemId,
+        item.branchProductId,
+        item.quantity,
+        newExtras
+      );
+
+      await onBasketUpdate();
+      // FIX: Changed from toast.success to addToast
+      addToast(t('menu.cart.extraUpdated') || 'Extra quantity updated', 'success');
+    } catch (error: any) {
+      console.error('Update extra quantity error:', error);
+      // FIX: Changed from toast.error to addToast
+      addToast(error.message || t('menu.error.updateBasket'), 'error');
+    } finally {
+      setUpdatingExtraId(null);
+    }
+  };
+
+  const handleDeleteExtra = async (item: BasketItem, extraId: number) => {
+    try {
+      const confirmed = window.confirm(t('menu.cart.confirmDeleteExtra'));
+      if (!confirmed) return;
+
+      setUpdatingExtraId(extraId);
+
+      // Get current extras
+      const currentExtras = item.extras || [];
+
+      // Create new extras array without the deleted extra
+      const newExtras: ProductExtraDto[] = currentExtras
+        .filter((e) => e.branchProductExtraId !== extraId)
+        .map((e) => ({
+          branchProductExtraId: e.branchProductExtraId,
+          extraId: e.extraId,
+          quantity: e.quantity,
+          isRemoval: e.isRemoval,
+        }));
+
+      // Update basket item with new extras
+      await onlineMenuService.updateBasketItemExtras(
+        item.basketItemId,
+        item.branchProductId,
+        item.quantity,
+        newExtras
+      );
+
+      await onBasketUpdate();
+      // FIX: Changed from toast.success to addToast
+      addToast(t('menu.cart.extraDeleted') || 'Extra removed', 'success');
+    } catch (error: any) {
+      console.error('Delete extra error:', error);
+      // FIX: Changed from toast.error to addToast
+      addToast(error.message || t('menu.error.deleteExtra'), 'error');
+    } finally {
+      setUpdatingExtraId(null);
+    }
+  };
+
   const handleClearBasket = async () => {
     if (!confirm('Are you sure you want to clear your entire basket?')) return;
 
@@ -513,21 +694,19 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     setValidationErrors({});
   };
   
-  // --- NEW: Function to add order to tracking ---
   const addOrderToTracking = (order: Order) => {
     const newTrackedOrder: TrackedOrder = {
       orderTag: order.orderTag || '',
       createdAt: new Date(order.createdAt),
-     // Around line 609
-        trackingInfo: {
-          orderTag: order.orderTag || '',
-          orderId: order.orderId,
-          orderStatus: order.status, 
-          totalPrice: order.totalPrice,
-          orderTypeName: selectedOrderType?.name || '',
-          customerName: order.customerName || customerName || '',
-          notes: order.notes || '',
-        }
+      trackingInfo: {
+        orderTag: order.orderTag || '',
+        orderId: order.orderId,
+        orderStatus: order.status, 
+        totalPrice: order.totalPrice,
+        orderTypeName: selectedOrderType?.name || '',
+        customerName: order.customerName || customerName || '',
+        notes: order.notes || '',
+      }
     };
     setTrackedOrders(prev => [newTrackedOrder, ...prev.filter(o => o.orderTag !== newTrackedOrder.orderTag)]);
   };
@@ -605,14 +784,13 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       
       if (order.orderTag) {
         setCreatedOrderTag(order.orderTag);
-        addOrderToTracking(order); // <-- ADDED
+        addOrderToTracking(order);
       }
       
       await onBasketUpdate();
       
       addToast(t('menu.cart.order_created_success') || 'Order placed successfully! 🎉', 'success', 5000);
 
-      // Create WhatsApp preferences object matching useCartHandlers format
       const whatsappPreferences = {
         useWhatsappForOrders: useWhatsappForOrders,
         whatsAppPhoneNumber: whatsAppPhoneNumber
@@ -622,13 +800,10 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       const serviceChargeAmount = selectedOrderType!.serviceCharge || 0;
       const finalTotal = total + serviceChargeAmount;
 
-      // 3. Get Payment Method Name (for display)
       const selectedPaymentMethodName = availablePaymentMethods.find(m => m.id === paymentMethod)?.name || paymentMethod;
 
-      
       if (shouldShowWhatsApp) {
-        // Prepare WhatsApp data matching useCartHandlers format
-     const whatsappData = {
+        const whatsappData = {
           orderTag: order.orderTag,
           restaurantName: restaurantName,
           customerName: customerName || 'Customer',
@@ -636,13 +811,11 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
           tableNumber: tableNumber || undefined,
           deliveryAddress: deliveryAddress || undefined,
           
-          // Order Details
           orderType: selectedOrderType!.name,
           paymentMethod: selectedPaymentMethodName,
           notes: orderNotes,
           estimatedTime: selectedOrderType!.estimatedMinutes,
 
-          // Cart Items with detailed addons
           cart: items.map(item => ({
             productName: item.productName,
             price: item.price,
@@ -652,14 +825,19 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
               addonName: addon.addonName || addon.productName,
               price: addon.specialPrice || addon.price,
               quantity: addon.quantity
+            })),
+            extras: (item.extras || []).map((extra: BasketExtraItem) => ({
+              extraName: extra.extraName,
+              isRemoval: extra.isRemoval,
+              quantity: extra.quantity,
+              price: extra.unitPrice
             }))
           })),
 
-          // Financials
           subtotal: subtotal,
           tax: tax,
           serviceCharge: serviceChargeAmount,
-          totalPrice: finalTotal, // Grand Total
+          totalPrice: finalTotal,
         };
 
         setPendingWhatsAppData(whatsappData);
@@ -682,7 +860,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     }
   };
 
-  // UPDATED: WhatsApp confirmation handler matching CartSidebar
   const handleWhatsAppConfirm = async () => {
     if (!pendingWhatsAppData) return;
     
@@ -692,7 +869,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       setWhatsappSending(true);
       toastId = addToast(t('menu.cart.sending_whatsapp') || 'Sending WhatsApp message...', 'loading');
 
-      // Use the sendOrderToWhatsApp function that matches useCartHandlers
       await sendOrderToWhatsApp(pendingWhatsAppData);
       
       if (toastId) updateToast(toastId, t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!', 'success');
@@ -704,21 +880,17 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     } finally {
       setWhatsappSending(false);
       
-      // Clean up - matching CartSidebar behavior
       setShowWhatsAppConfirmation(false);
       setPendingWhatsAppData(null);
       
-      // Reset form and switch to orders tab
       setTimeout(() => {
         resetForm();
         setCartStep('cart');
         setActiveTab('orders');
-        // onClose(); // Don't close
       }, 1000);
     }
   };
 
-  // UPDATED: WhatsApp cancel handler matching CartSidebar
   const handleWhatsAppCancel = () => {
     setShowWhatsAppConfirmation(false);
     setPendingWhatsAppData(null);
@@ -728,10 +900,8 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       resetForm();
       setCartStep('cart');
       setActiveTab('orders');
-      // onClose(); // Don't close
     }, 500);
   };
-
 
   if (acceptCash) {
     availablePaymentMethods.push({
@@ -763,7 +933,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
   if (!isOpen) return null;
 
-  // --- UPDATED TITLE ---
   const getStepTitle = () => {
     if (activeTab === 'orders') return t('menu.cart.orders');
     switch (cartStep) {
@@ -780,6 +949,18 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
   return (
     <>
+      {/* Toast Container - Moved to top level for better Z-Index handling */}
+      <div className={`fixed top-4 ${isRTL ? 'left-4' : 'right-4'} z-[60] space-y-2 max-w-md pointer-events-none`}>
+        {toasts.map(toast => (
+          <div key={toast.id} className="pointer-events-auto">
+            <ToastComponent 
+              toast={toast} 
+              onClose={removeToast} 
+            />
+          </div>
+        ))}
+      </div>
+
       {/* Backdrop */}
       <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity" onClick={onClose} />
 
@@ -807,7 +988,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
           </button>
         </div>
 
-        {/* --- NEW TABS --- */}
+        {/* Tabs */}
         <div className="flex border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50">
           <button
             onClick={() => {
@@ -924,7 +1105,9 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                   <div className="p-4 space-y-4">
                     {items.map((item) => {
                       const itemAddons = item.addons || item.addonItems || [];
+                      const itemExtras = item.extras || [];
                       const availableAddons = getAvailableAddonsForProduct(item);
+                      const availableExtras = getAvailableExtrasForProduct(item);
                       const isExpanded = expandedItems.has(item.basketItemId);
 
                       return (
@@ -982,21 +1165,76 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                             </div>
                           </div>
 
-                          {/* Addons */}
-                          {(itemAddons.length > 0 || availableAddons.length > 0) && (
+                          {/* Addons & Extras */}
+                          {(itemAddons.length > 0 || itemExtras.length > 0 || availableAddons.length > 0 || availableExtras.length > 0) && (
                             <div className="border-t border-slate-200 dark:border-slate-700">
                               <button
                                 onClick={() => toggleItemExpanded(item.basketItemId)}
                                 className="w-full px-4 py-2 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                               >
                                 <span className={`text-sm font-semibold ${theme.text.primary}`}>
-                                  Add-ons {itemAddons.length > 0 && `(${itemAddons.length})`}
+                                  {t('menu.customizations') || 'Customizations'} 
+                                  {(itemAddons.length + itemExtras.length) > 0 && ` (${itemAddons.length + itemExtras.length})`}
                                 </span>
                                 {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                               </button>
 
                               {isExpanded && (
                                 <div className="px-4 pb-4 space-y-3">
+                                  {/* Extras Section */}
+                                  {itemExtras.length > 0 && (
+                                    <div className="space-y-2">
+                                      <h5 className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
+                                        {t('menu.extras') || 'Extras'}
+                                      </h5>
+                                      {itemExtras.map((extra) => (
+                                        <div key={extra.branchProductExtraId} className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                                          <div className="flex-1">
+                                            <p className={`text-sm font-semibold ${theme.text.primary}`}>
+                                              {extra.isRemoval ? (
+                                                <span className="text-red-600 dark:text-red-400">
+                                                  {t('menu.no') || 'No'} {extra.extraName}
+                                                </span>
+                                              ) : (
+                                                extra.extraName
+                                              )}
+                                            </p>
+                                            {!extra.isRemoval && (
+                                              <p className="text-xs text-blue-600 font-semibold">
+                                                {formatPrice(extra.unitPrice)} {t('menu.each') || 'each'}
+                                              </p>
+                                            )}
+                                          </div>
+
+                                          {!extra.isRemoval && (
+                                            <div className="flex items-center gap-2 bg-white dark:bg-slate-700 rounded-lg p-1">
+                                              <button
+                                                onClick={() => handleUpdateExtraQuantity(extra.branchProductExtraId, extra.quantity, -1, extra.maxQuantity || 10)}
+                                                disabled={updatingExtraId === extra.branchProductExtraId}
+                                                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
+                                              >
+                                                <Minus className="w-3 h-3" />
+                                              </button>
+                                              <span className="font-bold text-sm min-w-[1.5rem] text-center">{extra.quantity}</span>
+                                              <button
+                                                onClick={() => handleUpdateExtraQuantity(extra.branchProductExtraId, extra.quantity, 1, extra.maxQuantity || 10)}
+                                                disabled={updatingExtraId === extra.branchProductExtraId || extra.quantity >= (extra.maxQuantity || 10)}
+                                                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
+                                              >
+                                                <Plus className="w-3 h-3" />
+                                              </button>
+                                            </div>
+                                          )}
+
+                                          <button onClick={() => handleDeleteExtra(extra.branchProductExtraId)} className="p-1.5 hover:bg-red-100 dark:hover:bg-red-950/20 rounded text-red-500">
+                                            <X className="w-4 h-4" />
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  {/* Addons Section */}
                                   {itemAddons.map((addon) => {
                                     const addonId = addon.addonBasketItemId || addon.basketItemId;
                                     const addonName = addon.addonName || addon.productName;
@@ -1034,6 +1272,43 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                     );
                                   })}
 
+                                  {/* Available Extras */}
+                                  {availableExtras.length > 0 && (
+                                    <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+                                      <p className={`text-xs font-semibold ${theme.text.secondary} mb-2`}>
+                                        {t('menu.availableExtras') || 'Available Extras'}:
+                                      </p>
+                                      <div className="space-y-2">
+                                        {availableExtras.map((extra: any) => (
+                                          <button
+                                            key={extra.branchProductExtraId}
+                                            onClick={() => handleToggleExtra(item, extra)}
+                                            className="w-full flex items-center justify-between p-2 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 rounded-lg transition-colors"
+                                          >
+                                            <div className="flex items-center gap-2">
+                                              <Plus className="w-4 h-4 text-blue-600" />
+                                              <span className={`text-sm ${theme.text.primary}`}>
+                                                {extra.isRemoval ? (
+                                                  <span className="text-red-600">
+                                                    {t('menu.remove') || 'Remove'} {extra.extraName}
+                                                  </span>
+                                                ) : (
+                                                  extra.extraName
+                                                )}
+                                              </span>
+                                            </div>
+                                            {!extra.isRemoval && (
+                                              <span className="text-sm font-semibold text-blue-600">
+                                                {formatPrice(extra.unitPrice)}
+                                              </span>
+                                            )}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Available Addons */}
                                   {availableAddons.length > 0 && (
                                     <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
                                       <p className={`text-xs font-semibold ${theme.text.secondary} mb-2`}>Available Add-ons:</p>
@@ -1344,8 +1619,9 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                           </p>
                         )}
                       </div>
-                      
                     )}
+
+                    {/* Order Notes */}
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         <ClipboardList className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
@@ -1356,7 +1632,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                         onChange={(e) => setOrderNotes(e.target.value)}
                         rows={2}
                         className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all resize-none"
-                        placeholder={t('order.form.notesPlaceholder') || 'Any special requests? (e.g. No onions)'}
+                        placeholder={t('order.form.notesPlaceholder') || 'Any special requests?'}
                       />
                     </div>
 
@@ -1464,7 +1740,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
             </>
           )}
 
-          {/* --- NEWLY ADDED ORDERS TAB RENDER --- */}
+          {/* Orders Tab */}
           {activeTab === 'orders' && (
             <div className="p-6">
               <OrdersTab
@@ -1540,18 +1816,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         )}
       </div>
 
-      {/* Toast Container */}
-      <div className={`fixed top-4 ${isRTL ? 'left-4' : 'right-4'} z-[60] space-y-2 max-w-md`}>
-        {toasts.map(toast => (
-          <ToastComponent 
-            key={toast.id} 
-            toast={toast} 
-            onClose={removeToast} 
-          />
-        ))}
-      </div>
-
-     <WhatsAppConfirmationModal
+      <WhatsAppConfirmationModal
         isVisible={showWhatsAppConfirmation}
         restaurantName={restaurantName}
         whatsappNumber={whatsAppPhoneNumber}

@@ -11,7 +11,6 @@ import {
   FileText, 
   Shield, 
   Utensils,
-  Wine,
   Building,
   Hash,
   Camera
@@ -227,9 +226,7 @@ const OnboardingRestaurant: React.FC = () => {
         if (!formData.restaurantName?.trim()) {
           newErrors.restaurantName = t('onboardingRestaurant.step1.errors.nameRequired');
         }
-        if (!formData.restaurantLogoPath) {
-          newErrors.restaurantLogoPath = t('onboardingRestaurant.step1.errors.logoRequired');
-        }
+      
         if (formData.cuisineType === undefined || formData.cuisineType === null) {
           newErrors.cuisineType = t('onboardingRestaurant.step1.errors.cuisineRequired') as any;
         }
@@ -245,12 +242,6 @@ const OnboardingRestaurant: React.FC = () => {
         break;
         
       case 3: // Legal Info
-        if (!formData.taxNumber?.trim()) {
-          newErrors.taxNumber = t('onboardingRestaurant.step3.errors.taxNumberRequired');
-        }
-        if (!formData.taxOffice?.trim()) {
-          newErrors.taxOffice = t('onboardingRestaurant.step3.errors.taxOfficeRequired');
-        }
         break;
     }
     
@@ -387,152 +378,152 @@ const OnboardingRestaurant: React.FC = () => {
     }
   };
 
-const renderStep1 = () => (
-    <div className="space-y-6">
-      <div className="text-center mb-8">
-        <Store className="h-12 w-12 mx-auto text-primary-600 mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-          {t('onboardingRestaurant.step1.title')}
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          {t('onboardingRestaurant.step1.subtitle')}
-        </p>
-      </div>
+  const renderStep1 = () => (
+      <div className="space-y-6">
+        <div className="text-center mb-8">
+          <Store className="h-12 w-12 mx-auto text-primary-600 mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            {t('onboardingRestaurant.step1.title')}
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            {t('onboardingRestaurant.step1.subtitle')}
+          </p>
+        </div>
 
-      {/* Restaurant Name */}
-      <div>
-        {/* --- MODIFIED: Added flex container for label and counter --- */}
-        <div className={`flex justify-between items-center mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <label htmlFor="restaurantName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-            {t('onboardingRestaurant.step1.nameLabel')}
+        {/* Restaurant Name */}
+        <div>
+          {/* --- MODIFIED: Added flex container for label and counter --- */}
+          <div className={`flex justify-between items-center mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <label htmlFor="restaurantName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+              {t('onboardingRestaurant.step1.nameLabel')}
+            </label>
+            {/* --- ADDED: Character counter --- */}
+            <span className="text-sm text-gray-500 dark:text-gray-400" aria-live="polite">
+              {formData.restaurantName.length} / 50
+            </span>
+          </div>
+          <div className="relative">
+            <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+            <input
+              type="text"
+              id="restaurantName"
+              name="restaurantName"
+              value={formData.restaurantName}
+              onChange={handleInputChange}
+              maxLength={50} 
+              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+                errors.restaurantName
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+              placeholder={t('onboardingRestaurant.step1.namePlaceholder')}
+              dir={isRTL ? 'rtl' : 'ltr'}
+            />
+          </div>
+          {errors.restaurantName && (
+            <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.restaurantName}</p>
+          )}
+        </div>
+
+        {/* Restaurant Logo */}
+        <div>
+          <label htmlFor="restaurantLogo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t('onboardingRestaurant.step1.logoLabel')}
           </label>
-          {/* --- ADDED: Character counter --- */}
-          <span className="text-sm text-gray-500 dark:text-gray-400" aria-live="polite">
-            {formData.restaurantName.length} / 50
-          </span>
-        </div>
-        <div className="relative">
-          <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-          <input
-            type="text"
-            id="restaurantName"
-            name="restaurantName"
-            value={formData.restaurantName}
-            onChange={handleInputChange}
-            maxLength={50} 
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors.restaurantName
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
-            placeholder={t('onboardingRestaurant.step1.namePlaceholder')}
-            dir={isRTL ? 'rtl' : 'ltr'}
-          />
-        </div>
-        {errors.restaurantName && (
-          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.restaurantName}</p>
-        )}
-      </div>
-
-      {/* Restaurant Logo */}
-      <div>
-        <label htmlFor="restaurantLogo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {t('onboardingRestaurant.step1.logoLabel')}
-        </label>
-        <div className="relative">
-          <Camera className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-          <input
-            type="file"
-            id="restaurantLogo"
-            accept="image/*"
-            onChange={handleFileUpload('restaurantLogoPath')}
-            disabled={isUploadingLogo}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              isUploadingLogo 
-                ? 'opacity-50 cursor-not-allowed' 
-                : ''
-            } ${
-              errors.restaurantLogoPath
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white`}
-          />
+          <div className="relative">
+            <Camera className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+            <input
+              type="file"
+              id="restaurantLogo"
+              accept="image/*"
+              onChange={handleFileUpload('restaurantLogoPath')}
+              disabled={isUploadingLogo}
+              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+                isUploadingLogo 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : ''
+              } ${
+                errors.restaurantLogoPath
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white`}
+            />
+            {isUploadingLogo && (
+              <div className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2`}>
+                <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
+          </div>
+          
+          {/* Upload Status */}
           {isUploadingLogo && (
-            <div className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2`}>
-              <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+            <p className={`mt-1 text-sm text-blue-600 dark:text-blue-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+              {t('onboardingRestaurant.step1.logoUploading')}
+            </p>
+          )}
+          
+          {/* Error Message */}
+          {errors.restaurantLogoPath && (
+            <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.restaurantLogoPath}</p>
+          )}
+          
+          {/* Success Preview */}
+          {formData.restaurantLogoPath && !isUploadingLogo && (
+            <div className="mt-3">
+              <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                <img 
+                  src={formData.restaurantLogoPath} 
+                  alt="Restaurant Logo Preview" 
+                  className="h-16 w-16 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
+                />
+                <div>
+                  <p className={`text-sm text-green-600 dark:text-green-400 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingRestaurant.step1.logoSuccess')}
+                  </p>
+                  <p className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingRestaurant.step1.logoSuccessSub')}
+                  </p>
+                </div>
+              </div>
             </div>
           )}
         </div>
-        
-        {/* Upload Status */}
-        {isUploadingLogo && (
-          <p className={`mt-1 text-sm text-blue-600 dark:text-blue-400 ${isRTL ? 'text-right' : 'text-left'}`}>
-            {t('onboardingRestaurant.step1.logoUploading')}
-          </p>
-        )}
-        
-        {/* Error Message */}
-        {errors.restaurantLogoPath && (
-          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.restaurantLogoPath}</p>
-        )}
-        
-        {/* Success Preview */}
-        {formData.restaurantLogoPath && !isUploadingLogo && (
-          <div className="mt-3">
-            <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
-              <img 
-                src={formData.restaurantLogoPath} 
-                alt="Restaurant Logo Preview" 
-                className="h-16 w-16 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
-              />
-              <div>
-                <p className={`text-sm text-green-600 dark:text-green-400 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
-                  {t('onboardingRestaurant.step1.logoSuccess')}
-                </p>
-                <p className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  {t('onboardingRestaurant.step1.logoSuccessSub')}
-                </p>
-              </div>
-            </div>
+
+        {/* Cuisine Type */}
+        <div>
+          <label htmlFor="cuisineType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            {t('onboardingRestaurant.step1.cuisineLabel')}
+          </label>
+          <div className="relative">
+            <Utensils className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+            <select
+              id="cuisineType"
+              name="cuisineType"
+              value={formData.cuisineType}
+              onChange={handleInputChange}
+              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+                errors.cuisineType
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
+              dir={isRTL ? 'rtl' : 'ltr'}
+            >
+              {cuisineOptions.map(option => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </div>
-        )}
-      </div>
-
-      {/* Cuisine Type */}
-      <div>
-        <label htmlFor="cuisineType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {t('onboardingRestaurant.step1.cuisineLabel')}
-        </label>
-        <div className="relative">
-          <Utensils className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-          <select
-            id="cuisineType"
-            name="cuisineType"
-            value={formData.cuisineType}
-            onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors.cuisineType
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
-            dir={isRTL ? 'rtl' : 'ltr'}
-          >
-            {cuisineOptions.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
+          {errors.cuisineType && (
+            <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.cuisineType}</p>
+          )}
         </div>
-        {errors.cuisineType && (
-          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.cuisineType}</p>
-        )}
-      </div>
 
-     
-     
-    </div>
-  );
+      
+      
+      </div>
+    );
 
   const renderStep2 = () => (
     <div className="space-y-6">

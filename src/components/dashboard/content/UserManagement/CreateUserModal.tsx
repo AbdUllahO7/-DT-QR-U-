@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { UserPlus, Shield, Building, ChevronDown, Loader2 } from 'lucide-react'; // Added Loader2
+import { UserPlus, Shield, Building, ChevronDown, Loader2, EyeOff, Eye } from 'lucide-react'; // Added Loader2
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../../hooks';
 import type {  BranchInfo } from '../../../../types/api';
@@ -341,7 +341,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       onClick={() => setShowPassword(!showPassword)}
                       className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300`}
                     >
-                      {showPassword ? '👁️' : '🔒'}
+                      {showPassword ? <EyeOff/> :<Eye/> }
                     </button>
                   </div>
                   {errors.password && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>}
@@ -372,7 +372,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
                       className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300`}
                     >
-                      {showPasswordConfirm ? '👁️' : '🔒'}
+                      {showPasswordConfirm ? <EyeOff/> :<Eye/> }
                     </button>
                   </div>
                   {errors.passwordConfirm && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.passwordConfirm}</p>}

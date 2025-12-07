@@ -1,5 +1,3 @@
-// hooks/useCartHandlers.ts (Fixed version)
-
 import { BasketExtraItem, basketService, ProductExtraDto } from "../services/Branch/BasketService"
 import { orderService } from "../services/Branch/OrderService"
 import { WhatsAppService } from "../services/WhatsAppService"
@@ -64,7 +62,6 @@ interface UseCartHandlersProps {
   setShowOrderForm: (show: boolean) => void
   setOrderForm: (form: OrderForm) => void
   tableId?: number
-  // FIXED: Add WhatsApp confirmation modal controls
   restaurantPreferences?: any
   setPendingWhatsAppData?: (data: any) => void
   setShowWhatsAppConfirmation?: (show: boolean) => void
@@ -91,7 +88,6 @@ export const useCartHandlers = ({
   setOrderForm,
   tableId,
   restaurantPreferences,
-  // FIXED: Add these parameters
   setPendingWhatsAppData,
   setShowWhatsAppConfirmation
 }: UseCartHandlersProps) => {
@@ -110,15 +106,26 @@ export const useCartHandlers = ({
     return cleanId
   }
 
-  // Helper function to calculate item total price including addons
+  // ✅ FIXED: Helper function to calculate item total price including addons AND extras
   const calculateItemTotalPrice = (item: CartItem): number => {
     let itemTotal = item.price
     
+    // Add addons price
     if (item.addons && item.addons.length > 0) {
       const addonTotal = item.addons.reduce((addonSum, addon) => {
         return addonSum + (addon.price * addon.quantity)
       }, 0)
       itemTotal += addonTotal
+    }
+    
+    // ✅ FIX: Add extras price (only for non-removal extras)
+    if (item.extras && item.extras.length > 0) {
+      const extrasTotal = item.extras
+        .filter(extra => !extra.isRemoval) // Only count added extras, not removed ones
+        .reduce((extrasSum, extra) => {
+          return extrasSum + (extra.unitPrice * extra.quantity)
+        }, 0)
+      itemTotal += extrasTotal
     }
     
     return itemTotal
@@ -140,7 +147,7 @@ export const useCartHandlers = ({
       
     } catch (error) {
       console.error('Error sending WhatsApp notification:', error)
-      throw error // Re-throw so the caller can handle it
+      throw error
     }
   }
 
@@ -151,10 +158,10 @@ export const useCartHandlers = ({
       setError(null)
       
       const basket = await basketService.getMyBasket()
+      
       setBasketId(basket.basketId)
       
       const cartItems: CartItem[] = basket.items.map((item) => {
-        // Map addons
         const mappedAddons = item.addonItems?.map(addon => ({
           branchProductAddonId: addon.branchProductId,
           addonName: addon.productName || '',
@@ -165,7 +172,7 @@ export const useCartHandlers = ({
           basketItemId: addon.basketItemId
         }))
         
-          const mappedExtras = item.extras?.map(extra => ({
+        const mappedExtras = item.extras?.map(extra => ({
           branchProductExtraId: extra.branchProductExtraId,
           productExtraId: extra.productExtraId,
           extraId: extra.extraId,
@@ -195,67 +202,15 @@ export const useCartHandlers = ({
       })
       
       setCart(cartItems)
+      
     } catch (err: any) {
-      console.error('Error loading basket:', err)
+      console.error('❌ Error loading basket:', err)
       setError('Failed to load basket')
+      setCart([])
     } finally {
       setLoading(false)
     }
   }
-
-
-const handleAddExtraBack = async (branchProductExtraId: number, basketItemId: number) => {
-  try {
-    setLoading(true)
-    setError(null)
-
-    const cartItem = cart.find(item => item.basketItemId === basketItemId)
-    if (!cartItem) {
-      console.error('Cart item not found')
-      return
-    }
-
-    const extra = cartItem.extras?.find(e => e.branchProductExtraId === branchProductExtraId)
-    if (!extra || !extra.isRemoval) {
-      console.error('Can only add back removal extras')
-      return
-    }
-
-    await basketService.deleteMyBasketItem(basketItemId)
-
-    // Remove this extra entirely from the payload (don't send it)
-    const updatedExtras: ProductExtraDto[] = cartItem.extras
-      ?.filter(e => e.branchProductExtraId !== branchProductExtraId)
-      ?.map(e => {
-        const extraPayload: any = {
-          branchProductExtraId: e.branchProductExtraId,
-          extraId: e.extraId,
-          isRemoval: e.isRemoval
-        }
-        
-        if (!e.isRemoval) {
-          extraPayload.quantity = e.quantity
-        }
-        
-        return extraPayload
-      }) || []
-
-    await basketService.addUnifiedItemToMyBasket({
-      branchProductId: cartItem.branchProductId,
-      quantity: cartItem.quantity,
-      extras: updatedExtras.length > 0 ? updatedExtras : undefined
-    })
-
-    await loadBasket()
-
-  } catch (err: any) {
-    console.error('Error adding extra back:', err)
-    setError('Failed to add extra back')
-  } finally {
-    setLoading(false)
-  }
-}
-
 
   // Clear basket
   const clearBasket = async () => {
@@ -290,272 +245,237 @@ const handleAddExtraBack = async (branchProductExtraId: number, basketItemId: nu
     }
   }
 
-// Handle quantity increase - Send ALL extras properly
-const handleQuantityIncrease = async (basketItemId?: number) => {
-  if (!basketItemId) return
-  
-  try {
-    setLoading(true)
-    setError(null)
+  // ✅ SIMPLIFIED: Handle quantity increase
+  const handleQuantityIncrease = async (basketItemId?: number) => {
+    if (!basketItemId) return
+    
+    try {
+      setLoading(true)
+      setError(null)
 
-    const cartItem = cart.find(item => item.basketItemId === basketItemId)
-    if (!cartItem) {
-      console.error('Cart item not found')
+      const cartItem = cart.find(item => item.basketItemId === basketItemId)
+      if (!cartItem) {
+        console.error('❌ Cart item not found')
+        setError('Cart item not found. Please refresh.')
+        return
+      }
+
+      console.log('📦 Incrementing item quantity:', {
+        basketItemId,
+        branchProductId: cartItem.branchProductId,
+        currentQuantity: cartItem.quantity
+      })
+
+      // ✅ IMPORTANT: Don't send extras when just adding quantity!
+      // The existing extras stay with the original item
+      await basketService.addUnifiedItemToMyBasket({
+        branchProductId: cartItem.branchProductId,
+        quantity: 1,
+        // NO EXTRAS - just adding 1 more plain item
+      })
+
+      console.log('✅ Item quantity increased successfully')
+      await loadBasket()
+
+    } catch (err: any) {
+      console.error('❌ Error increasing quantity:', err)
+      
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.title ||
+                          err.message || 
+                          'Failed to increase item quantity'
+      
+      setError(errorMessage)
+      
+      // Always reload basket to sync state
+      try {
+        await loadBasket()
+      } catch (loadErr) {
+        console.error('❌ Failed to reload basket after error:', loadErr)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // ✅ NEW: Handle extra toggle using dedicated endpoint
+  const handleExtraToggle = async (branchProductExtraId: number, basketItemId: number, currentIsRemoval: boolean) => {
+    if (!currentIsRemoval) {
+      console.warn('⚠️ Toggle should only be used for removed items (isRemoval: true)')
       return
     }
 
-    // ✅ Map extras properly: omit quantity for removals with quantity > 0
-    const productExtras: ProductExtraDto[] = cartItem.extras?.map(extra => {
-      const extraPayload: any = {
-        branchProductExtraId: extra.branchProductExtraId,
-        extraId: extra.extraId,
-        isRemoval: extra.isRemoval
-      }
+    try {
+      setLoading(true)
+      setError(null)
+
+      console.log('🔄 Toggling extra (removing removal):', {
+        branchProductExtraId,
+        basketItemId
+      })
+
+      // ✅ SIMPLE: Just delete the extra - that's it!
+      await basketService.deleteBasketItemExtra(basketItemId, branchProductExtraId)
+
+      console.log('✅ Extra toggled successfully')
+
+      // Reload basket to reflect changes
+      await loadBasket()
+
+    } catch (err: any) {
+      console.error('❌ Error toggling extra:', err)
+      console.error('Error response:', err.response?.data)
       
+      setError(err.response?.data?.message || err.message || 'Failed to update extra')
+      
+      // Always reload to sync state
+      try {
+        await loadBasket()
+      } catch (loadErr) {
+        console.error('❌ Failed to reload basket after error:', loadErr)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // ✅ NEW: Handle extra quantity increase using dedicated endpoint
+  const handleExtraQuantityIncrease = async (branchProductExtraId: number, basketItemId: number) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const cartItem = cart.find(item => item.basketItemId === basketItemId)
+      if (!cartItem) {
+        console.error('❌ Cart item not found')
+        setError('Cart item not found')
+        return
+      }
+
+      const extra = cartItem.extras?.find(e => e.branchProductExtraId === branchProductExtraId)
+      if (!extra) {
+        console.error('❌ Extra not found')
+        setError('Extra not found')
+        return
+      }
+
       if (extra.isRemoval) {
-        // For removal extras:
-        // quantity: 1 → Don't send quantity field (user doesn't want it)
-        // quantity: 0 → Send quantity: 0 (user wants it)
-        if (extra.quantity === 0) {
-          extraPayload.quantity = 0
-        }
-        // If quantity is 1, don't add quantity field at all
-      } else {
-        // For addition extras: always send quantity
-        extraPayload.quantity = extra.quantity
+        console.error('❌ Cannot increase quantity of removal extra')
+        setError('Cannot increase quantity of removal extra')
+        return
       }
-      
-      return extraPayload
-    }) || []
 
-    await basketService.addUnifiedItemToMyBasket({
-      branchProductId: cartItem.branchProductId,
-      quantity: 1,
-      extras: productExtras.length > 0 ? productExtras : undefined
-    })
-
-    await loadBasket()
-  } catch (err: any) {
-    console.error('Error increasing parent item quantity:', err)
-    setError('Failed to increase item quantity')
-  } finally {
-    setLoading(false)
-  }
-}
-
-// Handle extra toggle - SIMPLIFIED AND CORRECTED
-const handleExtraToggle = async (branchProductExtraId: number, basketItemId: number, currentIsRemoval: boolean) => {
-  if (!currentIsRemoval) {
-    console.warn('Toggle should only be used for removed items (isRemoval: true)')
-    return
-  }
-
-  try {
-    setLoading(true)
-    setError(null)
-
-    const cartItem = cart.find(item => item.basketItemId === basketItemId)
-    if (!cartItem) {
-      console.error('Cart item not found')
-      return
-    }
-
-    const extra = cartItem.extras?.find(e => e.branchProductExtraId === branchProductExtraId)
-    if (!extra) {
-      console.error('Extra not found')
-      return
-    }
-
-    await basketService.deleteMyBasketItem(basketItemId)
-
-    // ✅ CORRECTED: Send ALL extras and toggle the clicked one
-    const updatedExtras: ProductExtraDto[] = cartItem.extras?.map(e => {
-      const extraPayload: any = {
-        branchProductExtraId: e.branchProductExtraId,
-        extraId: e.extraId,
-        isRemoval: e.isRemoval
+      if (extra.maxQuantity && extra.quantity >= extra.maxQuantity) {
+        setError(`Maximum quantity for ${extra.extraName} is ${extra.maxQuantity}`)
+        return
       }
+
+      const newQuantity = extra.quantity + 1
+
+      console.log('➕ Increasing extra quantity:', {
+        branchProductExtraId,
+        basketItemId,
+        currentQuantity: extra.quantity,
+        newQuantity
+      })
+
+      // ✅ SIMPLE: Just update the extra quantity
+      await basketService.updateBasketItemExtra(
+        basketItemId,
+        branchProductExtraId,
+        { quantity: newQuantity }
+      )
+
+      console.log('✅ Extra quantity increased successfully')
+
+      // Reload basket
+      await loadBasket()
+
+    } catch (err: any) {
+      console.error('❌ Error increasing extra quantity:', err)
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      })
       
-      if (e.isRemoval) {
-        if (e.branchProductExtraId === branchProductExtraId) {
-          // Toggle the clicked removal extra
-          // quantity: 1 → set to 0 (add it back)
-          // quantity: 0 → don't add field (remove it)
-          if (e.quantity === 1) {
-            extraPayload.quantity = 0
-          }
-          // If quantity is 0, don't add quantity field
-        } else {
-          // Keep other removal extras as they are
-          if (e.quantity === 0) {
-            extraPayload.quantity = 0
-          }
-          // If quantity is 1, don't add quantity field
-        }
-      } else {
-        // For addition extras: always send quantity
-        extraPayload.quantity = e.quantity
-      }
+      setError(err.response?.data?.message || 'Failed to increase extra quantity')
       
-      return extraPayload
-    }) || []
-
-
-    await basketService.addUnifiedItemToMyBasket({
-      branchProductId: cartItem.branchProductId,
-      quantity: cartItem.quantity,
-      extras: updatedExtras.length > 0 ? updatedExtras : undefined
-    })
-
-    await loadBasket()
-
-  } catch (err: any) {
-    console.error('Error toggling extra:', err)
-    setError('Failed to update extra')
-  } finally {
-    setLoading(false)
-  }
-}
-
-// Handle extra quantity increase - For addition extras only
-const handleExtraQuantityIncrease = async (branchProductExtraId: number, basketItemId: number) => {
-  try {
-    setLoading(true)
-    setError(null)
-
-    const cartItem = cart.find(item => item.basketItemId === basketItemId)
-    if (!cartItem) {
-      console.error('Cart item not found')
-      return
-    }
-
-    const extra = cartItem.extras?.find(e => e.branchProductExtraId === branchProductExtraId)
-    if (!extra) {
-      console.error('Extra not found')
-      return
-    }
-
-    if (extra.isRemoval) {
-      console.error('Cannot increase quantity of removal extra')
-      return
-    }
-
-    if (extra.maxQuantity && extra.quantity >= extra.maxQuantity) {
-      setError(`Maximum quantity for ${extra.extraName} is ${extra.maxQuantity}`)
+      // Always reload basket
+      await loadBasket()
+    } finally {
       setLoading(false)
-      return
     }
-
-    await basketService.deleteMyBasketItem(basketItemId)
-
-    const updatedExtras: ProductExtraDto[] = cartItem.extras?.map(e => {
-      const extraPayload: any = {
-        branchProductExtraId: e.branchProductExtraId,
-        extraId: e.extraId,
-        isRemoval: e.isRemoval
-      }
-      
-      if (e.isRemoval) {
-        // For removal extras: handle quantity properly
-        if (e.quantity === 0) {
-          extraPayload.quantity = 0
-        }
-        // If quantity is 1, don't add quantity field
-      } else {
-        // For addition extras: always send quantity
-        extraPayload.quantity = e.branchProductExtraId === branchProductExtraId 
-          ? e.quantity + 1 
-          : e.quantity
-      }
-      
-      return extraPayload
-    }) || []
-
-    await basketService.addUnifiedItemToMyBasket({
-      branchProductId: cartItem.branchProductId,
-      quantity: cartItem.quantity,
-      extras: updatedExtras.length > 0 ? updatedExtras : undefined
-    })
-
-    await loadBasket()
-
-  } catch (err: any) {
-    console.error('Error increasing extra quantity:', err)
-    setError('Failed to increase extra quantity')
-  } finally {
-    setLoading(false)
   }
-}
 
-// Handle extra quantity decrease - For addition extras only
-const handleExtraQuantityDecrease = async (branchProductExtraId: number, basketItemId: number) => {
-  try {
-    setLoading(true)
-    setError(null)
+  // ✅ NEW: Handle extra quantity decrease using dedicated endpoint
+  const handleExtraQuantityDecrease = async (branchProductExtraId: number, basketItemId: number) => {
+    try {
+      setLoading(true)
+      setError(null)
 
-    const cartItem = cart.find(item => item.basketItemId === basketItemId)
-    if (!cartItem) {
-      console.error('Cart item not found')
-      return
-    }
+      const cartItem = cart.find(item => item.basketItemId === basketItemId)
+      if (!cartItem) {
+        console.error('❌ Cart item not found')
+        setError('Cart item not found. Please refresh.')
+        return
+      }
 
-    const extra = cartItem.extras?.find(e => e.branchProductExtraId === branchProductExtraId)
-    if (!extra) {
-      console.error('Extra not found')
-      return
-    }
+      const extra = cartItem.extras?.find(e => e.branchProductExtraId === branchProductExtraId)
+      if (!extra) {
+        console.error('❌ Extra not found')
+        setError('Extra not found')
+        return
+      }
 
-    if (extra.isRemoval) {
-      console.error('Cannot decrease quantity of removal extra')
-      return
-    }
+      if (extra.isRemoval) {
+        console.error('❌ Cannot decrease quantity of removal extra')
+        setError('Cannot decrease quantity of removal extra')
+        return
+      }
 
-    if (extra.minQuantity && extra.quantity <= extra.minQuantity) {
-      setError(`Minimum quantity for ${extra.extraName} is ${extra.minQuantity}`)
+      const newQuantity = extra.quantity - 1
+
+      console.log('➖ Decreasing extra quantity:', {
+        branchProductExtraId,
+        basketItemId,
+        currentQuantity: extra.quantity,
+        newQuantity
+      })
+
+      if (newQuantity <= 0) {
+        // ✅ If quantity would be 0 or less, just delete the extra
+        console.log('🗑️ Removing extra completely (quantity would be 0)')
+        await basketService.deleteBasketItemExtra(basketItemId, branchProductExtraId)
+      } else {
+        // ✅ Otherwise, update the quantity
+        await basketService.updateBasketItemExtra(
+          basketItemId,
+          branchProductExtraId,
+          { quantity: newQuantity }
+        )
+      }
+
+      console.log('✅ Extra quantity decreased successfully')
+
+      await loadBasket()
+
+    } catch (err: any) {
+      console.error('❌ Error decreasing extra quantity:', err)
+      console.error('Error response:', err.response?.data)
+      
+      setError(err.response?.data?.message || err.message || 'Failed to decrease extra quantity')
+      
+      // Always reload
+      try {
+        await loadBasket()
+      } catch (loadErr) {
+        console.error('❌ Failed to reload basket after error:', loadErr)
+      }
+    } finally {
       setLoading(false)
-      return
     }
-
-    await basketService.deleteMyBasketItem(basketItemId)
-
-    const updatedExtras: ProductExtraDto[] = cartItem.extras?.map(e => {
-      const extraPayload: any = {
-        branchProductExtraId: e.branchProductExtraId,
-        extraId: e.extraId,
-        isRemoval: e.isRemoval
-      }
-      
-      if (e.isRemoval) {
-        // For removal extras: handle quantity properly
-        if (e.quantity === 0) {
-          extraPayload.quantity = 0
-        }
-        // If quantity is 1, don't add quantity field
-      } else {
-        // For addition extras: always send quantity
-        extraPayload.quantity = e.branchProductExtraId === branchProductExtraId 
-          ? Math.max(0, e.quantity - 1)
-          : e.quantity
-      }
-      
-      return extraPayload
-    }) || []
-
-    await basketService.addUnifiedItemToMyBasket({
-      branchProductId: cartItem.branchProductId,
-      quantity: cartItem.quantity,
-      extras: updatedExtras.length > 0 ? updatedExtras : undefined
-    })
-
-    await loadBasket()
-
-  } catch (err: any) {
-    console.error('Error decreasing extra quantity:', err)
-    setError('Failed to decrease extra quantity')
-  } finally {
-    setLoading(false)
   }
-}
 
   // Handle quantity decrease
   const handleQuantityDecrease = async (basketItemId?: number) => {
@@ -667,37 +587,33 @@ const handleExtraQuantityDecrease = async (branchProductExtraId: number, basketI
     return errors
   }
 
-// In useCartHandlers.ts - Update validateOrderForm function
-const validateOrderForm = (): string[] => {
-  const errors: string[] = []
-  
-  if (!orderForm.orderTypeId) {
-    errors.push('Please select an order type')
-    return errors // Return early if no order type selected
+  const validateOrderForm = (): string[] => {
+    const errors: string[] = []
+    
+    if (!orderForm.orderTypeId) {
+      errors.push('Please select an order type')
+      return errors
+    }
+    
+    const selectedOrderType = getSelectedOrderType()
+    
+    if (selectedOrderType?.requiresName && !orderForm.customerName?.trim()) {
+      errors.push('Customer name is required for this order type')
+    }
+    
+    if (selectedOrderType?.requiresAddress && !orderForm.deliveryAddress?.trim()) {
+      errors.push('Delivery address is required for this order type')
+    }
+    
+    if (selectedOrderType?.requiresPhone && !orderForm.customerPhone?.trim()) {
+      errors.push('Phone number is required for this order type')
+    }
+    
+    const minOrderErrors = validateMinimumOrder()
+    errors.push(...minOrderErrors)
+    
+    return errors
   }
-  
-  const selectedOrderType = getSelectedOrderType()
-  
-  // Validate required fields based on order type
-  if (selectedOrderType?.requiresName && !orderForm.customerName?.trim()) {
-    errors.push('Customer name is required for this order type')
-  }
-  
-  if (selectedOrderType?.requiresAddress && !orderForm.deliveryAddress?.trim()) {
-    errors.push('Delivery address is required for this order type')
-  }
-  
-  if (selectedOrderType?.requiresPhone && !orderForm.customerPhone?.trim()) {
-    errors.push('Phone number is required for this order type')
-  }
-  
-
-  // Validate minimum order
-  const minOrderErrors = validateMinimumOrder()
-  errors.push(...minOrderErrors)
-  
-  return errors
-}
 
   // Order creation and tracking functions
   const addOrderToTracking = async (orderTag: string) => {
@@ -716,9 +632,8 @@ const validateOrderForm = (): string[] => {
     }
   }
 
-   const handlePriceChangeConfirmation = async () => {
+  const handlePriceChangeConfirmation = async () => {
     try {
-      
       const cleanSessionId = getCleanSessionId(sessionId)
       if (cleanSessionId) {
         try {
@@ -745,103 +660,95 @@ const validateOrderForm = (): string[] => {
     }
   }
 
-  // FIXED: Create order function with proper WhatsApp confirmation
-// FIXED: Create order function with proper WhatsApp confirmation
-const createOrder = async () => {
-  try {
-    setLoading(true)
-    setError(null)
-    setValidationErrors([])
+  const createOrder = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      setValidationErrors([])
 
-    const cartErrors = validateCart()
-    const formErrors = validateOrderForm()
-    const allErrors = [...cartErrors, ...formErrors]
-    
-    if (allErrors.length > 0) {
-      setValidationErrors(allErrors)
-      setLoading(false)
-      return
-    }
-
-    const selectedOrderType = getSelectedOrderType()
-    
-    const sessionOrderDto: CreateSessionOrderDto = {
-      customerName: orderForm.customerName.trim(),
-      notes: orderForm.notes.trim() || undefined,
-      paymentMethod:"",
-      orderTypeId: orderForm.orderTypeId,
-      ...(orderForm.tableId && { tableId: orderForm.tableId }),
-      ...(orderForm.tableNumber?.trim() && { tableNumber: orderForm.tableNumber.trim() }),
-      ...(selectedOrderType?.requiresAddress || orderForm.deliveryAddress?.trim() ? { deliveryAddress: orderForm.deliveryAddress?.trim() } : {}),
-      ...(selectedOrderType?.requiresPhone || orderForm.customerPhone?.trim() ? { customerPhone: orderForm.customerPhone?.trim() } : {})
-    }
-    
-    const order = await orderService.createSessionOrder(sessionOrderDto)
-    // Add order to tracking immediately
-    if (order.orderTag) {
-      await addOrderToTracking(order.orderTag)
-    }
-    // Calculate order total for WhatsApp message
-    const serviceChargeAmount = selectedOrderType?.serviceCharge || 0
-    if (order.orderTag && WhatsAppService.isWhatsAppEnabled(restaurantPreferences)) {
+      const cartErrors = validateCart()
+      const formErrors = validateOrderForm()
+      const allErrors = [...cartErrors, ...formErrors]
       
-      const whatsappData = {
-        orderTag: order.orderTag,
-        customerName: orderForm.customerName,
-        cart,
-        totalPrice,
-        orderType: selectedOrderType?.name || 'Standard',
-        notes: orderForm.notes,
-        tableId: orderForm.tableId,
-        tableNumber: orderForm.tableNumber,
-        deliveryAddress: orderForm.deliveryAddress,
-        estimatedTime: selectedOrderType?.estimatedMinutes,
-        serviceCharge: serviceChargeAmount
-      }
-
-      // Set WhatsApp data and show modal
-      if (setPendingWhatsAppData && setShowWhatsAppConfirmation) {
-        setPendingWhatsAppData(whatsappData)
-        setShowWhatsAppConfirmation(true)
-        
-        // DON'T clear cart and form here - let the WhatsApp handlers do it
+      if (allErrors.length > 0) {
+        setValidationErrors(allErrors)
         setLoading(false)
-        return // Exit early to let WhatsApp modal show
-      } else {
-        console.warn('❌ WhatsApp confirmation functions not available')
+        return
       }
-    } 
-    
-    // If we reach here, WhatsApp is not enabled or not available
-    // Clean up and complete the order
-    setCart([])
-    setBasketId(null)
-    setShowOrderForm(false)
-    
-    setOrderForm({
-      customerName: '',
-      notes: '',
-      orderTypeId: 0,
-      tableId: tableId,
-      deliveryAddress: '',
-      customerPhone: '',
-      paymentMethod: '',
-      tableNumber: ''
-    })
-    
-    if (onOrderCreated) {
-      onOrderCreated(order.orderId)
-    }
 
-    setError(null)
+      const selectedOrderType = getSelectedOrderType()
+      
+      const sessionOrderDto: CreateSessionOrderDto = {
+        customerName: orderForm.customerName.trim(),
+        notes: orderForm.notes.trim() || undefined,
+        paymentMethod:"",
+        orderTypeId: orderForm.orderTypeId,
+        ...(orderForm.tableId && { tableId: orderForm.tableId }),
+        ...(orderForm.tableNumber?.trim() && { tableNumber: orderForm.tableNumber.trim() }),
+        ...(selectedOrderType?.requiresAddress || orderForm.deliveryAddress?.trim() ? { deliveryAddress: orderForm.deliveryAddress?.trim() } : {}),
+        ...(selectedOrderType?.requiresPhone || orderForm.customerPhone?.trim() ? { customerPhone: orderForm.customerPhone?.trim() } : {})
+      }
+      
+      const order = await orderService.createSessionOrder(sessionOrderDto)
+      
+      if (order.orderTag) {
+        await addOrderToTracking(order.orderTag)
+      }
+      
+      const serviceChargeAmount = selectedOrderType?.serviceCharge || 0
+      if (order.orderTag && WhatsAppService.isWhatsAppEnabled(restaurantPreferences)) {
+        const whatsappData = {
+          orderTag: order.orderTag,
+          customerName: orderForm.customerName,
+          cart,
+          totalPrice,
+          orderType: selectedOrderType?.name || 'Standard',
+          notes: orderForm.notes,
+          tableId: orderForm.tableId,
+          tableNumber: orderForm.tableNumber,
+          deliveryAddress: orderForm.deliveryAddress,
+          estimatedTime: selectedOrderType?.estimatedMinutes,
+          serviceCharge: serviceChargeAmount
+        }
 
-  } catch (err: any) {
-    console.error('❌ Error creating order:', err)
-    setShowPriceChangeModal(true)
-  } finally {
+        if (setPendingWhatsAppData && setShowWhatsAppConfirmation) {
+          setPendingWhatsAppData(whatsappData)
+          setShowWhatsAppConfirmation(true)
+          setLoading(false)
+          return
+        } else {
+          console.warn('❌ WhatsApp confirmation functions not available')
+        }
+      } 
+      
+      setCart([])
+      setBasketId(null)
+      setShowOrderForm(false)
+      
+      setOrderForm({
+        customerName: '',
+        notes: '',
+        orderTypeId: 0,
+        tableId: tableId,
+        deliveryAddress: '',
+        customerPhone: '',
+        paymentMethod: '',
+        tableNumber: ''
+      })
+      
+      if (onOrderCreated) {
+        onOrderCreated(order.orderId)
+      }
+
+      setError(null)
+
+    } catch (err: any) {
+      console.error('❌ Error creating order:', err)
+      setShowPriceChangeModal(true)
+    } finally {
       setLoading(false)
+    }
   }
-}
 
   // Order tracking functions
   const loadOrderTracking = async (orderTag: string) => {
@@ -858,7 +765,6 @@ const createOrder = async () => {
             : order
         )
       )
-
       
     } catch (err: any) {
       console.error('Error loading order tracking:', err)
@@ -897,46 +803,44 @@ const createOrder = async () => {
     }
   }
 
-  // Add this new function to clean up after order
-const cleanupAfterOrder = () => {
-  setCart([])
-  setBasketId(null)
-  setShowOrderForm(false)
-  
-  setOrderForm({
-    customerName: '',
-    notes: '',
-    orderTypeId: 0,
-    tableId: tableId,
-    deliveryAddress: '',
-    customerPhone: '',
-    paymentMethod: '',
-    tableNumber: ''
-  })
-}
+  const cleanupAfterOrder = () => {
+    setCart([])
+    setBasketId(null)
+    setShowOrderForm(false)
+    
+    setOrderForm({
+      customerName: '',
+      notes: '',
+      orderTypeId: 0,
+      tableId: tableId,
+      deliveryAddress: '',
+      customerPhone: '',
+      paymentMethod: '',
+      tableNumber: ''
+    })
+  }
 
-// Add cleanupAfterOrder to the return statement
-return {
-  loadBasket,
-  clearBasket,
-  removeFromBasket,
-  handleQuantityIncrease,
-  handleQuantityDecrease,
-  handleAddonQuantityIncrease,
-  canIncreaseAddonQuantity,
-  canDecreaseAddonQuantity,
-  getAddonQuantityError,
-  createOrder,
-  loadOrderTracking,
-  removeOrderFromTracking,
-  refreshAllPendingOrders,
-  calculateItemTotalPrice,
-  getSelectedOrderType,
-  handlePriceChangeConfirmation,
-  sendOrderToWhatsApp,
-  cleanupAfterOrder,
-  handleExtraToggle,
-  handleExtraQuantityIncrease,
-  handleExtraQuantityDecrease 
-}
+  return {
+    loadBasket,
+    clearBasket,
+    removeFromBasket,
+    handleQuantityIncrease,
+    handleQuantityDecrease,
+    handleAddonQuantityIncrease,
+    canIncreaseAddonQuantity,
+    canDecreaseAddonQuantity,
+    getAddonQuantityError,
+    createOrder,
+    loadOrderTracking,
+    removeOrderFromTracking,
+    refreshAllPendingOrders,
+    calculateItemTotalPrice,
+    getSelectedOrderType,
+    handlePriceChangeConfirmation,
+    sendOrderToWhatsApp,
+    cleanupAfterOrder,
+    handleExtraToggle,
+    handleExtraQuantityIncrease,
+    handleExtraQuantityDecrease 
+  }
 }

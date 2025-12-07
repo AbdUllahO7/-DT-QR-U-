@@ -1,5 +1,5 @@
 import React from 'react'
-import { Plus, Minus, Settings, XCircle, PlusCircle } from 'lucide-react'
+import { Plus, Minus, Settings, XCircle, PlusCircle, Trash2 } from 'lucide-react'
 import { useLanguage } from '../../../../../contexts/LanguageContext'
 
 interface CartItemAddon {
@@ -227,7 +227,7 @@ const CartItemComponent: React.FC<CartItemProps> = ({
               </div>
             )}
 
-            {/* Extras Section */}
+            {/* Extras Section - FIXED */}
             {variant.extras && variant.extras.length > 0 && (
               <div className="mb-3">
                 <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
@@ -235,7 +235,8 @@ const CartItemComponent: React.FC<CartItemProps> = ({
                 </p>
                 <div className="space-y-2">
                   {variant.extras.map((extra) => {
-                    const canDecrease = !extra.isRemoval && (!extra.minQuantity || extra.quantity > extra.minQuantity)
+                    const effectiveMinQuantity = extra.minQuantity ?? 1
+                    const isAtMinimum = extra.quantity <= effectiveMinQuantity
                     const canIncrease = !extra.isRemoval && (!extra.maxQuantity || extra.quantity < extra.maxQuantity)
                     
                     return (
@@ -255,9 +256,10 @@ const CartItemComponent: React.FC<CartItemProps> = ({
                               <PlusCircle className="h-3 w-3 text-green-500" />
                             )}
                             <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                              {/* ✅ FIX: Better display text */}
                               {extra.isRemoval 
                                 ? `${t('menu.cart.without')} ${extra.extraName}` 
-                                : `${t('menu.cart.extra')} ${extra.extraName}`
+                                : extra.extraName
                               }
                             </span>
                           </div>
@@ -282,6 +284,7 @@ const CartItemComponent: React.FC<CartItemProps> = ({
                           )}
                         </div>
                         
+                        {/* CASE 1: "Removed" item (Red background) - Click Add to revert to normal */}
                         {extra.isRemoval ? (
                           <button
                             onClick={() => variant.basketItemId && onExtraToggle && onExtraToggle(extra.branchProductExtraId, variant.basketItemId, extra.isRemoval)}
@@ -293,23 +296,35 @@ const CartItemComponent: React.FC<CartItemProps> = ({
                             <span>{t('menu.cart.add')}</span>
                           </button>
                         ) : (
+                          /* CASE 2: "Added" Extra (Green background) */
                           <div className="flex items-center space-x-2">
                             <div className="flex items-center space-x-1 bg-white dark:bg-slate-700 rounded p-0.5">
                               <button
-                                onClick={() => variant.basketItemId && onExtraQuantityDecrease && onExtraQuantityDecrease(extra.branchProductExtraId, variant.basketItemId)}
-                                disabled={loading || !variant.basketItemId || !canDecrease || !onExtraQuantityDecrease}
-                                className={`w-4 h-4 text-white rounded flex items-center justify-center transition-colors disabled:opacity-50 ${
-                                  canDecrease 
-                                    ? 'bg-red-500 hover:bg-red-600' 
-                                    : 'bg-gray-400 cursor-not-allowed'
-                                }`}
-                                title={!canDecrease ? `${t('menu.cart.min')}: ${extra.minQuantity || 0}` : t('menu.cart.decreaseQuantity')}
+                                onClick={() => {
+                                  if (variant.basketItemId && onExtraQuantityDecrease) {
+                                    onExtraQuantityDecrease(extra.branchProductExtraId, variant.basketItemId)
+                                  }
+                                }}
+                                disabled={loading || !variant.basketItemId || !onExtraQuantityDecrease}
+                                className="w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded flex items-center justify-center transition-colors disabled:opacity-50"
+                                title={
+                                  isAtMinimum
+                                    ? t('menu.cart.remove') 
+                                    : t('menu.cart.decreaseQuantity')
+                                }
                               >
-                                <Minus className="h-2 w-2" />
+                                {/* ✅ FIX: Show trash icon when at minimum (will delete on click) */}
+                                {isAtMinimum ? (
+                                  <Trash2 className="h-2 w-2" />
+                                ) : (
+                                  <Minus className="h-2 w-2" />
+                                )}
                               </button>
+                              
                               <span className="w-4 text-center font-bold text-xs text-slate-800 dark:text-slate-100">
                                 {extra.quantity}
                               </span>
+                              
                               <button
                                 onClick={() => variant.basketItemId && onExtraQuantityIncrease && onExtraQuantityIncrease(extra.branchProductExtraId, variant.basketItemId)}
                                 disabled={loading || !variant.basketItemId || !canIncrease || !onExtraQuantityIncrease}

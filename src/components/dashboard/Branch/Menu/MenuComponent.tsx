@@ -1,4 +1,4 @@
-// MenuComponent.tsx - FIXED for required extras validation
+// MenuComponent.tsx - FIXED for required extras validation AND duplicate product issue
 
 "use client"
 
@@ -126,22 +126,12 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
     }
   }
 
-  // Check if product has required extras
-  const hasRequiredExtras = (product: MenuProduct): boolean => {
-    if (!product.availableExtras || product.availableExtras.length === 0) {
-      return false
-    }
-    return product.availableExtras.some(category => category.isRequired)
-  }
-
-  // FIXED: Add to basket function - handles products with required extras
+  // FIXED: Add to basket function - handles products with extras
   const addToBasket = async (
     product: MenuProduct, 
     addons: SelectedAddon[] = [], 
     extras: ProductExtraMenu[] = []
   ) => {
-
-
     try {
       // Prepare the main item request
       const mainItemRequest: any = {
@@ -149,26 +139,30 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         quantity: 1
       }
 
-      
       if (extras.length > 0) {
-        // Option 1: Try adding extras as a field in the main request
         mainItemRequest.extras = extras.map(extra => {
-          // 1. Create the base object with properties that are always required
+          // Create the base object with properties that are always required
           const extraPayload: any = {
             branchProductExtraId: extra.branchProductExtraId,
             extraId: extra.extraId,
             isRemoval: extra.isRemoval
           }
 
-          // 2. Only add quantity if it is NOT a removal
+          // Only add quantity if it is NOT a removal
           if (!extra.isRemoval) {
             extraPayload.quantity = extra.quantity
           }
 
           return extraPayload
         })
-        
       }
+
+      console.log('🛒 Adding to basket:', {
+        product: product.productName,
+        addons: addons.length,
+        extras: extras.length,
+        mainItemRequest
+      })
 
       // Add the main product
       const mainItem = await basketService.addUnifiedItemToMyBasket(mainItemRequest)
@@ -179,8 +173,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
           const availableAddon = product.availableAddons?.find(
             a => a.branchProductAddonId === addon.branchProductAddonId
           )
-          
-          
           
           return {
             branchProductId: availableAddon?.addonBranchProductId || addon.branchProductAddonId,
@@ -202,13 +194,15 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         }
       }
 
+      console.log('✅ Successfully added to basket')
+
       // Update basket item count and basketId
       await loadBasketItemCount()
       
     } catch (err: any) {
       console.error('❌ Error adding to basket:', err)
       if (err.response) {
-        setError( err.response.data)
+        setError(err.response.data)
       }
     }
   }
@@ -286,15 +280,13 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       .sort((a, b) => a.displayOrder - b.displayOrder)
   }
 
-  // MODIFIED: Check if product needs customization before adding
+  // ✅ FIXED: Always open modal first (no direct add to cart)
   const handleQuickAddToCart = async (product: MenuProduct) => {
-    // If product has required extras or any addons, open modal
-    if (hasRequiredExtras(product) || (product.availableAddons && product.availableAddons.length > 0)) {
-      handleCustomizeProduct(product)
-    } else {
-      // Simple product, add directly
-      await addToBasket(product, [], [])
-    }
+    console.log('🔍 Quick add triggered for:', product.productName)
+    console.log('📝 Opening modal for product customization')
+    
+    // ✅ Always open modal, let user confirm before adding
+    handleCustomizeProduct(product)
   }
 
   // Handle product customization
@@ -309,6 +301,12 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
     addons: SelectedAddon[], 
     extras: ProductExtraMenu[]
   ) => {
+    console.log('🛒 Modal add to cart:', {
+      product: product.productName,
+      addons: addons.length,
+      extras: extras.length
+    })
+    
     await addToBasket(product, addons, extras)
     setShowProductModal(false)
     setSelectedProduct(null)
@@ -387,7 +385,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         restaurantPreferences={menuData.preferences}
       />
 
-      {/* Product Customization Modal */}
       <ProductModal
         isOpen={showProductModal}
         product={selectedProduct}

@@ -54,11 +54,13 @@ export default function ExtrasManagement() {
   // Forms
   const [categoryForm, setCategoryForm] = useState<CreateExtraCategoryData>({
     categoryName: '',
+    description: '',
     status: true,
     isRequired: false,
     defaultMinSelectionCount: 0,
     defaultMaxSelectionCount: 0,
     defaultMinTotalQuantity: 0,
+    isRemovalCategory : false,
     defaultMaxTotalQuantity: 0,
   });
   
@@ -278,11 +280,11 @@ export default function ExtrasManagement() {
     setSelectedExtra(null);
     setSelectedFile(null);
     setImagePreview('');
-    setPreviousImageUrl('');
     setCategoryForm({
-        categoryName: '', status: true, isRequired: false,
+      
+        categoryName: '', description: '', status: true, isRequired: false,
         defaultMinSelectionCount: 0, defaultMaxSelectionCount: 0,
-        defaultMinTotalQuantity: 0, defaultMaxTotalQuantity: 0,
+        defaultMinTotalQuantity: 0, defaultMaxTotalQuantity: 0, isRemovalCategory: false,
     });
     setExtraForm({
         extraCategoryId: 0, name: '', description: '',
@@ -554,30 +556,50 @@ export default function ExtrasManagement() {
                       />
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input 
-                              type="checkbox" 
-                              checked={categoryForm.status}
-                              onChange={(e) => setCategoryForm({...categoryForm, status: e.target.checked})}
-                              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" 
-                            />
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">{t('extrasManagement.categories.fields.statusLabel')}</span>
-                          </label>
-                        </div>
-                        <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input 
-                              type="checkbox" 
-                              checked={categoryForm.isRequired}
-                              onChange={(e) => setCategoryForm({...categoryForm, isRequired: e.target.checked})}
-                              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" 
-                            />
-                            <span className="text-sm font-medium text-gray-900 dark:text-white">{t('extrasManagement.categories.fields.requiredLabel')}</span>
-                          </label>
-                        </div>
-                    </div>
+                   <div className="grid grid-cols-3 gap-4">
+  <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+    <label className="flex items-center gap-2 cursor-pointer">
+      <input 
+        type="checkbox" 
+        checked={categoryForm.status}
+        onChange={(e) => setCategoryForm({...categoryForm, status: e.target.checked})}
+        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" 
+      />
+      <span className="text-sm font-medium text-gray-900 dark:text-white">
+        {t('extrasManagement.categories.fields.statusLabel')}
+      </span>
+    </label>
+  </div>
+  
+  <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+    <label className="flex items-center gap-2 cursor-pointer">
+      <input 
+        type="checkbox" 
+        checked={categoryForm.isRequired}
+        onChange={(e) => setCategoryForm({...categoryForm, isRequired: e.target.checked})}
+        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" 
+      />
+      <span className="text-sm font-medium text-gray-900 dark:text-white">
+        {t('extrasManagement.categories.fields.requiredLabel')}
+      </span>
+    </label>
+  </div>
+
+  {/* ✅ NEW: isRemovalCategory checkbox */}
+  <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
+    <label className="flex items-center gap-2 cursor-pointer">
+      <input 
+        type="checkbox" 
+        checked={categoryForm.isRemovalCategory}
+        onChange={(e) => setCategoryForm({...categoryForm, isRemovalCategory: e.target.checked})}
+        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" 
+      />
+      <span className="text-sm font-medium text-gray-900 dark:text-white">
+        {t('extrasManagement.categories.fields.removalCategoryLabel')}
+      </span>
+    </label>
+  </div>
+</div>
 
                     {/* Selection Rules */}
                     <div className="space-y-3">

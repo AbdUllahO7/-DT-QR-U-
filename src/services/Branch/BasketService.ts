@@ -105,6 +105,18 @@ export interface AddUnifiedItemDto {
   extras?: ProductExtraDto[];  // Added extras field
 }
 
+// ✅ NEW: Extra management interfaces
+export interface UpdateExtraDto {
+  quantity: number;
+  replacementExtraId?: number;
+}
+
+export interface AddExtraDto {
+  branchProductExtraId: number;
+  quantity: number;
+  note?: string;
+}
+
 // Batch add items interface
 export interface BatchAddItemDto {
   branchProductId: number;
@@ -277,8 +289,6 @@ class BasketService {
       this.handleError(error, 'Price changes onaylanırken hata oluştu');
     }
   }
-
-
 
   // GET /api/Basket/products/{branchProductId}/recommended-addons
   async getRecommendedAddons(branchProductId: number): Promise<RecommendedAddon[]> {
@@ -476,6 +486,97 @@ class BasketService {
     } catch (error: any) {
       logger.error('Active basket getirme hatası', error, { prefix: 'BasketService' });
       this.handleError(error, 'Active basket getirilirken hata oluştu');
+    }
+  }
+
+  // ========================================
+  // ✅ NEW: EXTRA MANAGEMENT ENDPOINTS
+  // ========================================
+
+  /**
+   * PUT /api/Basket/my-basket/items/{basketItemId}/extras/{branchProductExtraId}
+   * Update an extra's quantity or replace it with another extra
+   */
+  async updateBasketItemExtra(
+    basketItemId: number,
+    branchProductExtraId: number,
+    data: UpdateExtraDto
+  ): Promise<BasketItem> {
+    try {
+      logger.info('Basket item extra güncelleme isteği gönderiliyor', { 
+        basketItemId, 
+        branchProductExtraId, 
+        data 
+      }, { prefix: 'BasketService' });
+      
+      const url = `${this.baseUrl}/my-basket/items/${basketItemId}/extras/${branchProductExtraId}`;
+      const response = await httpClient.put<BasketItem>(url, data);
+      
+      logger.info('Basket item extra başarıyla güncellendi', { 
+        basketItemId, 
+        branchProductExtraId 
+      }, { prefix: 'BasketService' });
+      
+      return response.data;
+    } catch (error: any) {
+      logger.error('Basket item extra güncelleme hatası', error, { prefix: 'BasketService' });
+      this.handleError(error, 'Basket item extra güncellenirken hata oluştu');
+    }
+  }
+
+  /**
+   * DELETE /api/Basket/my-basket/items/{basketItemId}/extras/{branchProductExtraId}
+   * Remove an extra from a basket item
+   */
+  async deleteBasketItemExtra(
+    basketItemId: number,
+    branchProductExtraId: number
+  ): Promise<void> {
+    try {
+      logger.info('Basket item extra silme isteği gönderiliyor', { 
+        basketItemId, 
+        branchProductExtraId 
+      }, { prefix: 'BasketService' });
+      
+      const url = `${this.baseUrl}/my-basket/items/${basketItemId}/extras/${branchProductExtraId}`;
+      await httpClient.delete(url);
+      
+      logger.info('Basket item extra başarıyla silindi', { 
+        basketItemId, 
+        branchProductExtraId 
+      }, { prefix: 'BasketService' });
+    } catch (error: any) {
+      logger.error('Basket item extra silme hatası', error, { prefix: 'BasketService' });
+      this.handleError(error, 'Basket item extra silinirken hata oluştu');
+    }
+  }
+
+  /**
+   * POST /api/Basket/my-basket/items/{basketItemId}/extras
+   * Add one or more extras to a basket item
+   */
+  async addExtrasToBasketItem(
+    basketItemId: number,
+    extras: AddExtraDto[]
+  ): Promise<BasketItem> {
+    try {
+      logger.info('Basket item extras ekleme isteği gönderiliyor', { 
+        basketItemId, 
+        extrasCount: extras.length 
+      }, { prefix: 'BasketService' });
+      
+      const url = `${this.baseUrl}/my-basket/items/${basketItemId}/extras`;
+      const response = await httpClient.post<BasketItem>(url, extras);
+      
+      logger.info('Basket item extras başarıyla eklendi', { 
+        basketItemId, 
+        extrasCount: extras.length 
+      }, { prefix: 'BasketService' });
+      
+      return response.data;
+    } catch (error: any) {
+      logger.error('Basket item extras ekleme hatası', error, { prefix: 'BasketService' });
+      this.handleError(error, 'Basket item extras eklenirken hata oluştu');
     }
   }
 

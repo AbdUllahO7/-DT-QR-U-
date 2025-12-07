@@ -1,4 +1,4 @@
-import { APIExtraCategory, CreateExtraCategoryData, ExtraCategory, ReorderCategoriesData, UpdateExtraCategoryData } from "../../types/Extras/type";
+import { APIExtraCategory, CreateExtraCategoryData, ExtraCategory, ReorderProductExtraCategoriesData, UpdateExtraCategoryData } from "../../types/Extras/type";
 import { httpClient } from "../../utils/http";
 import { logger } from "../../utils/logger";
 
@@ -41,10 +41,12 @@ class ExtraCategoriesService {
   // POST - Create new extra category
   async createExtraCategory(categoryData: CreateExtraCategoryData): Promise<ExtraCategory> {
     try {
+      // ✅ UPDATED: Include isRemovalCategory in payload
       const payload = {
         categoryName: categoryData.categoryName,
         status: categoryData.status,
         isRequired: categoryData.isRequired,
+        isRemovalCategory: categoryData.isRemovalCategory, // ✅ NEW FIELD
         defaultMinSelectionCount: categoryData.defaultMinSelectionCount,
         defaultMaxSelectionCount: categoryData.defaultMaxSelectionCount,
         defaultMinTotalQuantity: categoryData.defaultMinTotalQuantity,
@@ -67,10 +69,12 @@ class ExtraCategoriesService {
   // PUT - Update extra category
   async updateExtraCategory(categoryData: UpdateExtraCategoryData): Promise<ExtraCategory> {
     try {
+      // ✅ UPDATED: Include isRemovalCategory in payload
       const payload = {
         categoryName: categoryData.categoryName,
         status: categoryData.status,
         isRequired: categoryData.isRequired,
+        isRemovalCategory: categoryData.isRemovalCategory, 
         defaultMinSelectionCount: categoryData.defaultMinSelectionCount,
         defaultMaxSelectionCount: categoryData.defaultMaxSelectionCount,
         defaultMinTotalQuantity: categoryData.defaultMinTotalQuantity,
@@ -129,7 +133,7 @@ class ExtraCategoriesService {
   }
 
   // POST - Reorder extra categories
-  async reorderExtraCategories(reorderData: ReorderCategoriesData): Promise<void> {
+  async reorderExtraCategories(reorderData: ReorderProductExtraCategoriesData): Promise<void> {
     try {
       logger.info('Extra kategori sıralama isteği gönderiliyor', { reorderData });
       

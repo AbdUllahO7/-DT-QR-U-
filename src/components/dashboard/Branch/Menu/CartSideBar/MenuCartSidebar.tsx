@@ -9,7 +9,7 @@ import { useLanguage } from "../../../../../contexts/LanguageContext"
 import { OrderType, orderTypeService } from "../../../../../services/Branch/BranchOrderTypeService"
 import { CartItem, useCartHandlers } from "../../../../../hooks/useCartHandlers"
 import CartContent from "./CartContent"
-import OrdersTab from "./OrdersTab" // This now imports the fixed component
+import OrdersTab from "./OrdersTab"
 import { CartSidebarProps, GroupedCartItem, OrderForm, TrackedOrder } from "../../../../../types/menu/carSideBarTypes"
 import WhatsAppConfirmationModal from "./WhatsAppConfirmationModal"
 import ToastComponent from "./ToastComponenet"
@@ -20,14 +20,12 @@ interface UpdatedCartSidebarProps extends CartSidebarProps {
   restaurantPreferences?: any
 }
 
-// Toast Interface and Component
 export interface Toast {
   id: string
   type: 'success' | 'error' | 'loading'
   message: string
   duration?: number
 }
-
 
 const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   isOpen,
@@ -38,9 +36,8 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   restaurantPreferences
 }) => {
   const { t } = useLanguage()
-  // Toast state
   const [toasts, setToasts] = useState<Toast[]>([])
-  // Toast functions
+  
   const showToast = (type: 'success' | 'error' | 'loading', message: string, duration?: number): string => {
     const id = Math.random().toString(36).substr(2, 9)
     const newToast: Toast = {
@@ -49,7 +46,6 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
       message,
       duration: duration || (type === 'loading' ? 0 : type === 'success' ? 4000 : 5000)
     }
-
     setToasts(prev => [...prev, newToast])
     return id
   }
@@ -66,10 +62,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     ))
   }
 
-  // Tab management
   const [activeTab, setActiveTab] = useState<'cart' | 'orders'>('cart')
-  
-  // State management
   const [cart, setCart] = useState<CartItem[]>([])
   const [totalPrice, setTotalPrice] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -79,9 +72,6 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   const [pendingWhatsAppData, setPendingWhatsAppData] = useState<any>(null)
   const [whatsappSending, setWhatsappSending] = useState(false)
   const [updatableOrders, setUpdatableOrders] = useState<UpdatableOrder[]>([])
-
-  
-  // Order creation states
   const [showOrderForm, setShowOrderForm] = useState(false)
   const [orderTypes, setOrderTypes] = useState<OrderType[]>([])
   const [loadingOrderTypes, setLoadingOrderTypes] = useState(false)
@@ -101,17 +91,12 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   })
   const [estimatedTime, setEstimatedTime] = useState(0)
   const [validationErrors, setValidationErrors] = useState<string[]>([])
-
-  // Price change confirmation states
   const [showPriceChangeModal, setShowPriceChangeModal] = useState(false)
   const [priceChanges, setPriceChanges] = useState<any>(null)
   const [confirmingPriceChanges, setConfirmingPriceChanges] = useState(false)
-
-  // Order tracking states
   const [trackedOrders, setTrackedOrders] = useState<TrackedOrder[]>([])
   const [trackingLoading, setTrackingLoading] = useState(false)
 
-  // Use the custom hook for cart handlers
   const {
     loadBasket,
     clearBasket,
@@ -132,8 +117,8 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     handlePriceChangeConfirmation,
     cleanupAfterOrder,
     handleExtraToggle,
-  handleExtraQuantityIncrease,
-  handleExtraQuantityDecrease
+    handleExtraQuantityIncrease,
+    handleExtraQuantityDecrease
   } = useCartHandlers({
     cart,
     setCart,
@@ -156,37 +141,105 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     tableId,
     restaurantPreferences,
     setPendingWhatsAppData,
-    
     setShowWhatsAppConfirmation
   })
 
-  // Enhanced createOrder function with toast messages
+  // 🔍 DEBUG: Log cart state whenever it changes
+  useEffect(() => {
+    console.log('🛒 Cart State Updated:', {
+      cartLength: cart.length,
+      items: cart.map(item => ({
+        name: item.productName,
+        basketItemId: item.basketItemId,
+        price: item.price,
+        quantity: item.quantity,
+        addons: item.addons?.length || 0,
+        extras: item.extras?.length || 0,
+        extrasDetails: item.extras?.map(e => ({
+          name: e.extraName,
+          unitPrice: e.unitPrice,
+          quantity: e.quantity,
+          isRemoval: e.isRemoval,
+          subtotal: e.unitPrice * e.quantity
+        }))
+      }))
+    })
+  }, [cart])
+
+  // ✅ FIXED: Calculate total price with DETAILED LOGGING
+  useEffect(() => {
+    console.log('💰 ===== CALCULATING TOTAL PRICE =====')
+    
+    if (cart.length === 0) {
+      console.log('❌ Cart is empty, setting total to 0')
+      setTotalPrice(0)
+      return
+    }
+
+    const total = cart.reduce((sum, item, index) => {
+      console.log(`\n📦 Item ${index + 1}: ${item.productName}`)
+      
+      // Use calculateItemTotalPrice which includes extras
+      const itemTotal = calculateItemTotalPrice(item)
+      
+      // ✅ Log all extras first (including removals)
+      console.log('📋 ALL Extras:', item.extras?.map(e => ({
+        name: e.extraName,
+        unitPrice: e.unitPrice,
+        qty: e.quantity,
+        isRemoval: e.isRemoval,
+        subtotal: e.unitPrice * e.quantity
+      })))
+      
+      // ✅ Log only non-removal extras
+      const nonRemovalExtras = item.extras?.filter(e => !e.isRemoval) || []
+      console.log('✅ NON-REMOVAL Extras:', nonRemovalExtras.map(e => ({
+        name: e.extraName,
+        unitPrice: e.unitPrice,
+        qty: e.quantity,
+        subtotal: e.unitPrice * e.quantity
+      })))
+      
+      // ✅ Calculate extras total manually
+      const extrasTotal = nonRemovalExtras.reduce((sum, e) => sum + (e.unitPrice * e.quantity), 0)
+      console.log('💵 Extras Total:', extrasTotal)
+      
+      console.log({
+        basePrice: item.price,
+        quantity: item.quantity,
+        addons: item.addons?.length || 0,
+        extras: item.extras?.length || 0,
+        calculatedItemTotal: itemTotal,
+        expectedTotal: item.price + extrasTotal,
+        difference: itemTotal - (item.price + extrasTotal),
+        finalContribution: itemTotal * item.quantity
+      })
+      
+      return sum + (itemTotal * item.quantity)
+    }, 0)
+    
+    console.log('\n✅ FINAL TOTAL PRICE:', total)
+    console.log('=====================================\n')
+    
+    setTotalPrice(total)
+  }, [cart, calculateItemTotalPrice])
+
   const createOrder = async () => {
     let toastId: string | null = null
-    
     try {
       toastId = showToast('loading', t('menu.cart.creating_order') || 'Creating order...')
-
       await originalCreateOrder()
-      
-      // Success toast
       if (toastId) {
         updateToast(toastId, 'success', t('menu.cart.order_created_success') || 'Order created successfully!')
       } else {
         showToast('success', t('menu.cart.order_created_success') || 'Order created successfully!')
       }
-
-      // Switch to orders tab to show the new order
       setActiveTab('orders')
-      
     } catch (error: any) {
       console.error('Error creating order:', error)
-      
-      // Error toast
       const errorMessage = error?.message || 
         t('menu.cart.order_creation_failed') || 
         'Failed to create order. Please try again.'
-
       if (toastId) {
         updateToast(toastId, 'error', errorMessage)
       } else {
@@ -195,58 +248,41 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     }
   }
 
-const handleWhatsAppConfirm = async () => {
-  if (!pendingWhatsAppData) return
-  
-  let toastId: string | null = null
-  
-  try {
-    setWhatsappSending(true)
-    toastId = showToast('loading', t('menu.cart.sending_whatsapp') || 'Sending WhatsApp message...')
-
-    await sendOrderToWhatsApp(pendingWhatsAppData)
-    
-    if (toastId) {
-      updateToast(toastId, 'success', t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!')
-    } else {
-      showToast('success', t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!')
+  const handleWhatsAppConfirm = async () => {
+    if (!pendingWhatsAppData) return
+    let toastId: string | null = null
+    try {
+      setWhatsappSending(true)
+      toastId = showToast('loading', t('menu.cart.sending_whatsapp') || 'Sending WhatsApp message...')
+      await sendOrderToWhatsApp(pendingWhatsAppData)
+      if (toastId) {
+        updateToast(toastId, 'success', t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!')
+      } else {
+        showToast('success', t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!')
+      }
+    } catch (error) {
+      console.error('Error sending WhatsApp message:', error)
+      const errorMessage = t('menu.cart.whatsapp_send_failed') || 'Failed to send WhatsApp message'
+      if (toastId) {
+        updateToast(toastId, 'error', errorMessage)
+      } else {
+        showToast('error', errorMessage)
+      }
+    } finally {
+      setWhatsappSending(false)
+      setShowWhatsAppConfirmation(false)
+      setPendingWhatsAppData(null)
+      cleanupAfterOrder()
+      setActiveTab('orders')
     }
-
-  } catch (error) {
-    console.error('Error sending WhatsApp message:', error)
-    
-    const errorMessage = t('menu.cart.whatsapp_send_failed') || 'Failed to send WhatsApp message'
-    
-    if (toastId) {
-      updateToast(toastId, 'error', errorMessage)
-    } else {
-      showToast('error', errorMessage)
-    }
-    
-    // Don't block order completion on WhatsApp failure
-  } finally {
-    setWhatsappSending(false)
-    
-    // Clean up regardless of success/failure
-    setShowWhatsAppConfirmation(false)
-    setPendingWhatsAppData(null)
-    
-    // Now clean up the cart and form using the cleanup function
-    cleanupAfterOrder()
-    
-    // Switch to orders tab
-    setActiveTab('orders')
   }
-}
 
-  // Fetch updatable orders handler
   const fetchUpdatableOrders = async () => {
     try {
       if (trackedOrders.length === 0) {
         setUpdatableOrders([])
         return
       }
-      
       const orders = await orderService.getUpdatableOrders()
       setUpdatableOrders(orders)
     } catch (error) {
@@ -255,33 +291,23 @@ const handleWhatsAppConfirm = async () => {
     }
   }
 
-  // Fetch updatable orders when tracked orders change
   useEffect(() => {
     fetchUpdatableOrders()
   }, [trackedOrders])
 
-const handleWhatsAppCancel = () => {
-  // User chose to skip WhatsApp
-  setShowWhatsAppConfirmation(false)
-  setPendingWhatsAppData(null)
-  setWhatsappSending(false)
-  
-  // Still clean up the cart and form
-  cleanupAfterOrder()
-  
-  // Switch to orders tab
-  setActiveTab('orders')
-}
+  const handleWhatsAppCancel = () => {
+    setShowWhatsAppConfirmation(false)
+    setPendingWhatsAppData(null)
+    setWhatsappSending(false)
+    cleanupAfterOrder()
+    setActiveTab('orders')
+  }
 
-  // Enhanced clearBasket with toast
   const handleClearBasket = async () => {
     let toastId: string | null = null
-    
     try {
       toastId = showToast('loading', t('menu.cart.clearing_basket') || 'Clearing basket...')
-
       await clearBasket()
-      
       if (toastId) {
         updateToast(toastId, 'success', t('menu.cart.basket_cleared') || 'Basket cleared successfully!')
       } else {
@@ -289,7 +315,6 @@ const handleWhatsAppCancel = () => {
       }
     } catch (error) {
       const errorMessage = t('menu.cart.clear_basket_failed') || 'Failed to clear basket'
-      
       if (toastId) {
         updateToast(toastId, 'error', errorMessage)
       } else {
@@ -298,7 +323,6 @@ const handleWhatsAppCancel = () => {
     }
   }
 
-  // Load tracked orders from localStorage on mount
   useEffect(() => {
     const savedOrders = localStorage.getItem('trackedOrders')
     if (savedOrders) {
@@ -314,30 +338,23 @@ const handleWhatsAppCancel = () => {
     }
   }, [])
 
-  // Save tracked orders to localStorage whenever it changes
   useEffect(() => {
     if (trackedOrders.length > 0) {
       localStorage.setItem('trackedOrders', JSON.stringify(trackedOrders))
     }
   }, [trackedOrders])
 
-
-
-  // Auto-refresh all pending orders
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null
-    
     const pendingOrders = trackedOrders.filter(order => 
       order.trackingInfo.orderStatus === 'Pending'
     )
-    
     if (activeTab === 'orders' && pendingOrders.length > 0) {
       interval = setInterval(() => {
         refreshAllPendingOrders()
-        fetchUpdatableOrders() // Also refresh updatable orders
+        fetchUpdatableOrders()
       }, 15000)
     }
-    
     return () => {
       if (interval) {
         clearInterval(interval)
@@ -345,51 +362,30 @@ const handleWhatsAppCancel = () => {
     }
   }, [activeTab, trackedOrders])
 
-  // Load order types when component mounts or when showing order form
   useEffect(() => {
     if (showOrderForm && orderTypes.length === 0) {
       loadOrderTypes()
     }
   }, [showOrderForm])
 
-  // Load basket when sidebar opens and cart tab is active
   useEffect(() => {
     if (isOpen && activeTab === 'cart') {
       loadBasket()
     }
   }, [isOpen, activeTab])
 
-  // Update order total when order type or total price changes
   useEffect(() => {
     if (orderForm.orderTypeId && totalPrice > 0) {
       calculateOrderTotal()
     }
   }, [orderForm.orderTypeId, totalPrice])
 
-  // Calculate total price whenever cart changes
-  useEffect(() => {
-    const total = cart.reduce((sum, item) => {
-      const baseTotal = item.price * item.quantity
-      const addonsPrice = item.addons?.reduce((addonSum, addon) => {
-        return addonSum + (addon.price * addon.quantity)
-      }, 0) || 0
-      const itemTotal = baseTotal + addonsPrice
-      return sum + itemTotal
-    }, 0)
-    
-    setTotalPrice(total)
-  }, [cart])
-
-  // Load order types function
   const loadOrderTypes = async () => {
     try {
       setLoadingOrderTypes(true)
       setError(null)
-      
       const types = await orderTypeService.getOrderTypesBySessionId()
-      
       setOrderTypes(types)
-      
       if (types.length > 0 && orderForm.orderTypeId === 0) {
         const defaultType = types.find(t => t.isStandard) || types[0]
         setOrderForm((prev: any) => ({ 
@@ -397,7 +393,6 @@ const handleWhatsAppCancel = () => {
           orderTypeId: defaultType.id 
         }))
       }
-      
     } catch (err: any) {
       console.error('❌ Error loading order types:', err)
       setError('Failed to load order types')
@@ -407,11 +402,9 @@ const handleWhatsAppCancel = () => {
     }
   }
 
-  // Calculate order total function
   const calculateOrderTotal = async () => {
     try {
       const selectedOrderType = getSelectedOrderType()
-      
       if (!selectedOrderType) {
         setOrderTotal({
           baseAmount: totalPrice,
@@ -421,66 +414,67 @@ const handleWhatsAppCancel = () => {
         setEstimatedTime(0)
         return
       }
-
       const serviceChargeAmount = selectedOrderType.serviceCharge || 0
       const total = totalPrice + serviceChargeAmount
-
       setOrderTotal({
         baseAmount: totalPrice,
         serviceCharge: serviceChargeAmount,
         totalAmount: total
       })
-      
       const time = selectedOrderType.estimatedMinutes || 0
       setEstimatedTime(time)
-      
     } catch (err) {
       console.error('Error calculating order total:', err)
     }
   }
 
-// In CartSidebar.tsx, update the groupedItems calculation:
-const groupedItems: GroupedCartItem[] = cart.reduce((groups, item, index) => {
-  const existingGroup = groups.find(g => g.product.branchProductId === item.branchProductId)
-  
-  const variantItemTotal = calculateItemTotalPrice(item)
-  
-  const variant = {
-    basketItemId: item.basketItemId,
-    cartIndex: index,
-    quantity: item.quantity,
-    addons: item.addons,
-    extras: item.extras, // ✅ ADD THIS
-    totalItemPrice: variantItemTotal,
-    isPlain: (!item.addons || item.addons.length === 0) && (!item.extras || item.extras.length === 0) // ✅ UPDATE THIS
-  }
-
-  if (existingGroup) {
-    existingGroup.variants.push(variant)
-    existingGroup.totalQuantity += item.quantity
-    existingGroup.totalPrice += variantItemTotal * item.quantity
-  } else {
-    groups.push({
-      product: {
-        branchProductId: item.branchProductId,
-        productName: item.productName,
-        price: item.price,
-        productImageUrl: item.productImageUrl
-      },
-      variants: [variant],
-      totalQuantity: item.quantity,
-      totalPrice: variantItemTotal * item.quantity
+  // 🔍 DEBUG: Log grouped items calculation
+  const groupedItems: GroupedCartItem[] = cart.reduce((groups, item, index) => {
+    const existingGroup = groups.find(g => g.product.branchProductId === item.branchProductId)
+    const variantItemTotal = calculateItemTotalPrice(item)
+    
+    console.log(`📊 Grouping Item ${index + 1}:`, {
+      name: item.productName,
+      variantTotal: variantItemTotal,
+      quantity: item.quantity,
+      contribution: variantItemTotal * item.quantity
     })
-  }
+    
+    const variant = {
+      basketItemId: item.basketItemId,
+      cartIndex: index,
+      quantity: item.quantity,
+      addons: item.addons,
+      extras: item.extras,
+      totalItemPrice: variantItemTotal,
+      isPlain: (!item.addons || item.addons.length === 0) && (!item.extras || item.extras.length === 0)
+    }
 
-  return groups
-}, [] as GroupedCartItem[])
+    if (existingGroup) {
+      existingGroup.variants.push(variant)
+      existingGroup.totalQuantity += item.quantity
+      existingGroup.totalPrice += variantItemTotal * item.quantity
+    } else {
+      groups.push({
+        product: {
+          branchProductId: item.branchProductId,
+          productName: item.productName,
+          price: item.price,
+          productImageUrl: item.productImageUrl
+        },
+        variants: [variant],
+        totalQuantity: item.quantity,
+        totalPrice: variantItemTotal * item.quantity
+      })
+    }
+
+    return groups
+  }, [] as GroupedCartItem[])
 
   if (!isOpen) return null
 
   return (
     <>
-      {/* Toast Container */}
       {toasts.length > 0 && (
         <div className="fixed top-4 right-4 z-[60] space-y-2 max-w-sm">
           {toasts.map((toast) => (
@@ -491,7 +485,6 @@ const groupedItems: GroupedCartItem[] = cart.reduce((groups, item, index) => {
 
       <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex justify-end">
         <div className="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl h-full overflow-y-auto border-l border-slate-200/50 dark:border-slate-700/50 shadow-xl">
-          {/* Header */}
           <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-white flex items-center ">
@@ -524,7 +517,6 @@ const groupedItems: GroupedCartItem[] = cart.reduce((groups, item, index) => {
             </div>
           </div>
 
-          {/* Tabs */}
           <div className="flex border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50">
             <button
               onClick={() => {
@@ -570,7 +562,6 @@ const groupedItems: GroupedCartItem[] = cart.reduce((groups, item, index) => {
             </button>
           </div>
 
-          {/* Content */}
           <div className="p-6">
             {error && (
               <div className="mb-4 p-3 bg-red-100 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
@@ -606,69 +597,68 @@ const groupedItems: GroupedCartItem[] = cart.reduce((groups, item, index) => {
                   paymentPreferences={restaurantPreferences}
                 />
               ) : (
-              // In CartSidebar.tsx, update the CartContent component call:
                 <CartContent
-              cart={cart}
-              groupedItems={groupedItems}
-              totalPrice={totalPrice}
-              loading={loading}
-              onProceedToOrder={() => setShowOrderForm(true)}
-              onQuantityIncrease={handleQuantityIncrease}
-              onQuantityDecrease={handleQuantityDecrease}
-              onAddonQuantityIncrease={handleAddonQuantityIncrease}
-              onRemoveFromBasket={removeFromBasket}
-              canIncreaseAddonQuantity={canIncreaseAddonQuantity}
-              canDecreaseAddonQuantity={canDecreaseAddonQuantity}
-              getAddonQuantityError={getAddonQuantityError}
-              onExtraToggle={async (branchProductExtraId, basketItemId, currentIsRemoval) => {
-                let toastId: string | null = null
-                try {
-                  toastId = showToast('loading', 'Updating extra...')
-                  await handleExtraToggle(branchProductExtraId, basketItemId , currentIsRemoval)
-                  if (toastId) {
-                    updateToast(toastId, 'success', 'Extra updated successfully!')
-                  }
-                } catch (error) {
-                  if (toastId) {
-                    updateToast(toastId, 'error', 'Failed to update extra')
-                  } else {
-                    showToast('error', 'Failed to update extra')
-                  }
-                }
-              }}
-              onExtraQuantityIncrease={async (branchProductExtraId, basketItemId) => {
-                let toastId: string | null = null
-                try {
-                  toastId = showToast('loading', 'Increasing quantity...')
-                  await handleExtraQuantityIncrease(branchProductExtraId, basketItemId)
-                  if (toastId) {
-                    updateToast(toastId, 'success', 'Quantity increased!')
-                  }
-                } catch (error) {
-                  if (toastId) {
-                    updateToast(toastId, 'error', 'Failed to increase quantity')
-                  } else {
-                    showToast('error', 'Failed to increase quantity')
-                  }
-                }
-              }}
-              onExtraQuantityDecrease={async (branchProductExtraId, basketItemId) => {
-                let toastId: string | null = null
-                try {
-                  toastId = showToast('loading', 'Decreasing quantity...')
-                  await handleExtraQuantityDecrease(branchProductExtraId, basketItemId)
-                  if (toastId) {
-                    updateToast(toastId, 'success', 'Quantity decreased!')
-                  }
-                } catch (error) {
-                  if (toastId) {
-                    updateToast(toastId, 'error', 'Failed to decrease quantity')
-                  } else {
-                    showToast('error', 'Failed to decrease quantity')
-                  }
-                }
-              }}
-            />
+                  cart={cart}
+                  groupedItems={groupedItems}
+                  totalPrice={totalPrice}
+                  loading={loading}
+                  onProceedToOrder={() => setShowOrderForm(true)}
+                  onQuantityIncrease={handleQuantityIncrease}
+                  onQuantityDecrease={handleQuantityDecrease}
+                  onAddonQuantityIncrease={handleAddonQuantityIncrease}
+                  onRemoveFromBasket={removeFromBasket}
+                  canIncreaseAddonQuantity={canIncreaseAddonQuantity}
+                  canDecreaseAddonQuantity={canDecreaseAddonQuantity}
+                  getAddonQuantityError={getAddonQuantityError}
+                  onExtraToggle={async (branchProductExtraId, basketItemId, currentIsRemoval) => {
+                    let toastId: string | null = null
+                    try {
+                      toastId = showToast('loading', 'Updating extra...')
+                      await handleExtraToggle(branchProductExtraId, basketItemId , currentIsRemoval)
+                      if (toastId) {
+                        updateToast(toastId, 'success', 'Extra updated successfully!')
+                      }
+                    } catch (error) {
+                      if (toastId) {
+                        updateToast(toastId, 'error', 'Failed to update extra')
+                      } else {
+                        showToast('error', 'Failed to update extra')
+                      }
+                    }
+                  }}
+                  onExtraQuantityIncrease={async (branchProductExtraId, basketItemId) => {
+                    let toastId: string | null = null
+                    try {
+                      toastId = showToast('loading', 'Increasing quantity...')
+                      await handleExtraQuantityIncrease(branchProductExtraId, basketItemId)
+                      if (toastId) {
+                        updateToast(toastId, 'success', 'Quantity increased!')
+                      }
+                    } catch (error) {
+                      if (toastId) {
+                        updateToast(toastId, 'error', 'Failed to increase quantity')
+                      } else {
+                        showToast('error', 'Failed to increase quantity')
+                      }
+                    }
+                  }}
+                  onExtraQuantityDecrease={async (branchProductExtraId, basketItemId) => {
+                    let toastId: string | null = null
+                    try {
+                      toastId = showToast('loading', 'Decreasing quantity...')
+                      await handleExtraQuantityDecrease(branchProductExtraId, basketItemId)
+                      if (toastId) {
+                        updateToast(toastId, 'success', 'Quantity decreased!')
+                      }
+                    } catch (error) {
+                      if (toastId) {
+                        updateToast(toastId, 'error', 'Failed to decrease quantity')
+                      } else {
+                        showToast('error', 'Failed to decrease quantity')
+                      }
+                    }
+                  }}
+                />
               )
             ) : (
               <OrdersTab
