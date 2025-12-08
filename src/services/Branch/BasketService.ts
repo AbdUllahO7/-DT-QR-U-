@@ -125,13 +125,8 @@ export interface BatchAddItemDto {
   parentBasketItemId?: number;
 }
 
-// Update basket item interface
-export interface UpdateBasketItemDto {
-  basketItemId: number;
-  basketId: string;
-  branchProductId: number;
-  quantity: number;
-}
+// Note: updateMyBasketItem now takes (basketItemId, newQuantity) directly
+// Backend auto-scales extras when quantity changes
 
 // Price change interfaces
 export interface PriceChange {
@@ -386,28 +381,25 @@ class BasketService {
   }
 
   // PUT /api/Basket/my-basket/items/{basketItemId}
-  async updateMyBasketItem(basketItemId: number, data: UpdateBasketItemDto): Promise<BasketItem> {
+  // Backend UpdateBasketItemCommand auto-scales extras when quantity changes
+  async updateMyBasketItem(basketItemId: number, newQuantity: number): Promise<void> {
     try {
-      logger.info('My basket item güncelleme isteği gönderiliyor', { basketItemId, data }, { prefix: 'BasketService' });
-      
+      logger.info('My basket item quantity güncelleme isteği gönderiliyor', {
+        basketItemId,
+        newQuantity
+      }, { prefix: 'BasketService' });
+
       const url = `${this.baseUrl}/my-basket/items/${basketItemId}`;
-      
-      // The API expects basketId at the top level and the rest in updateDto
+
+      // Backend expects: { quantity: number }
+      // UpdateBasketItemDto only has Quantity property
       const requestBody = {
-        basketId: data.basketId,  // basketId at top level
-        updateDto: {
-          basketItemId: data.basketItemId,
-          branchProductId: data.branchProductId,
-          quantity: data.quantity
-        }
+        quantity: newQuantity
       };
-      
-      
-      const response = await httpClient.put<BasketItem>(url, requestBody);
-      
+
+      await httpClient.put(url, requestBody);
+
       logger.info('My basket item başarıyla güncellendi', { basketItemId }, { prefix: 'BasketService' });
-      
-      return response.data;
     } catch (error: any) {
       logger.error('My basket item güncelleme hatası', error, { prefix: 'BasketService' });
       this.handleError(error, 'My basket item güncellenirken hata oluştu');
