@@ -3580,9 +3580,12 @@ export const tr = {
       loading: "Menü Yükleniyor",
       allergens: "Alerjen Bilgisi",
       quantity: "Miktar",
+      extras: "Ekstralar",
+      required: "Gerekli",
       addons: "Eklentiler",
       product: "Ürün",
       addToBasket: "Sepete Ekle",
+      addToOrder: "Siparişe Ekle",
       loadingSubtitle: "Lezzetli seçimlerimizi sizin için hazırlıyoruz...",
       error: {
         title: "Menü Mevcut Değil",

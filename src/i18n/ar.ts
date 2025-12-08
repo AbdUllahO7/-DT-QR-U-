@@ -3583,6 +3583,7 @@ contact: {
       addons  : "الإضافات",
       product: "المنتج",
       addToBasket: "أضف إلى السلة",
+      addToOrder: "أضف إلى الطلب",
       allergens: "مسببات الحساسية",
       loadingSubtitle: "نحضر لك أشهى المأكولات...",
       error: {

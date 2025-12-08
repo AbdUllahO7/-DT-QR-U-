@@ -3581,6 +3581,7 @@ export const en = {
   addons: "Addons",
   products: "Products",
   addToBasket: "Add to Basket",
+  addToOrder: "Add to Order",
   loadingSubtitle: "Preparing our delicious selections for you...",
   error: {
     title: "Menu Unavailable",
