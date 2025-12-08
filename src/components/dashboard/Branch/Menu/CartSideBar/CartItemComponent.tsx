@@ -80,6 +80,8 @@ const CartItemComponent: React.FC<CartItemProps> = ({
 }) => {
   const { t } = useLanguage()
 
+  console.log("group",group)
+
   return (
     <div className="bg-slate-50/50 dark:bg-slate-800/50 p-4 rounded-xl backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50">
       {/* Product Header */}

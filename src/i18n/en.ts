@@ -5144,59 +5144,67 @@ extrasManagement: {
     extraDeleted: 'Extra deleted successfully',
     restored: 'Restored successfully'
   },
-
-  categoryConfigModal: {
-    title: 'Configure Extra Categories',
-    productLabel: 'Product:',
-    searchPlaceholder: 'Search categories...',
-    
-    stats: {
-      selectedCategories: 'Selected Categories',
-      selectedExtras: 'Selected Extras',
-      available: 'Available'
-    },
-
-    loading: {
-      categories: 'Loading available categories...'
-    },
-
-    empty: {
-      noCategories: 'No categories available',
-      noResults: 'No categories match your search'
-    },
-
-    badges: {
-      required: 'Required',
-      optional: 'Optional'
-    },
-
-    category: {
-      availableExtras: 'available extras',
-      configurationTitle: 'Category Configuration',
-      selectExtrasTitle: 'Select Extras',
-      selectCategoryWarning: 'Select the category above to enable extras'
-    },
-
-    fields: {
-      minSelection: 'Min Selection',
-      maxSelection: 'Max Selection',
-      minQuantity: 'Min Quantity',
-      maxQuantity: 'Max Quantity',
-      overrideRequired: 'Override Required Setting'
-    },
-
-    footer: {
-      categoriesSelected: 'categories selected',
-      cancel: 'Cancel',
-      save: 'Save Configuration',
-      saving: 'Saving...'
-    },
-
-    errors: {
-      loadFailed: 'Failed to load available categories and extras',
-      saveFailed: 'Failed to save configuration'
-    }
+categoryConfigModal: {
+  title: 'Configure Branch Extras',
+  productLabel: 'Configuring extras for:',
+  searchPlaceholder: 'Search categories...',
+  errors: {
+    loadFailed: 'Failed to load configuration data',
+    saveFailed: 'Failed to save configuration',
+    generic: 'An error occurred'
   },
+  stats: {
+    selectedCategories: 'Categories',
+    selectedExtras: 'Extras',
+    available: 'Total Available'
+  },
+  loading: {
+    categories: 'Loading categories and extras...'
+  },
+  empty: {
+    noResults: 'No categories match your search',
+    noCategories: 'No extra categories available'
+  },
+  badges: {
+    required: 'Required',
+    optional: 'Optional',
+    removal: 'Removal'
+  },
+  category: {
+    availableExtras: 'extras available',
+    configurationTitle: 'Category Rules',
+    selectExtrasTitle: 'Select Extras',
+    selectCategoryWarning: 'Select this category to enable extras selection'
+  },
+  fields: {
+    minSelection: 'Min Selection',
+    maxSelection: 'Max Selection',
+    minQuantity: 'Min Total Qty',
+    maxQuantity: 'Max Total Qty',
+    overrideRequired: 'Override "Required" Status',
+    specialPrice: 'Special Price',
+    minQty: 'Min Qty',
+    maxQty: 'Max Qty',
+    required: 'Required'
+  },
+  labels: {
+    originalPrice: 'Original',
+    removesIngredient: 'Removes ingredient',
+    extraConfiguration: 'Extra Configuration'
+  },
+  placeholders: {
+    defaultPrice: 'Default'
+  },
+  messages: {
+    removalPriceWarning: 'Price cannot be set for removal extras'
+  },
+  footer: {
+    categoriesSelected: 'categories selected',
+    cancel: 'Cancel',
+    save: 'Save Changes',
+    saving: 'Saving...'
+  }
+}
 
 },
     onboardingComplete: {

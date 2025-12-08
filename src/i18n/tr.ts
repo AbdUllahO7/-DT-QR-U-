@@ -5166,59 +5166,67 @@ extrasManagement: {
     extraDeleted: 'Ekstra başarıyla silindi',
     restored: 'Başarıyla geri yüklendi'
   },
-
-  categoryConfigModal: {
-    title: 'Ekstra Kategorilerini Yapılandır',
-    productLabel: 'Ürün:',
-    searchPlaceholder: 'Kategori ara...',
-    
-    stats: {
-      selectedCategories: 'Seçilen Kategoriler',
-      selectedExtras: 'Seçilen Ekstralar',
-      available: 'Mevcut'
-    },
-
-    loading: {
-      categories: 'Mevcut kategoriler yükleniyor...'
-    },
-
-    empty: {
-      noCategories: 'Mevcut kategori yok',
-      noResults: 'Aramanıza uygun kategori bulunamadı'
-    },
-
-    badges: {
-      required: 'Zorunlu',
-      optional: 'İsteğe Bağlı'
-    },
-
-    category: {
-      availableExtras: 'mevcut ekstralar',
-      configurationTitle: 'Kategori Yapılandırması',
-      selectExtrasTitle: 'Ekstra Seç',
-      selectCategoryWarning: 'Ekstraları etkinleştirmek için yukarıdaki kategoriyi seçin'
-    },
-
-    fields: {
-      minSelection: 'Min Seçim',
-      maxSelection: 'Maks Seçim',
-      minQuantity: 'Min Miktar',
-      maxQuantity: 'Maks Miktar',
-      overrideRequired: 'Zorunlu Ayarını Geçersiz Kıl'
-    },
-
-    footer: {
-      categoriesSelected: 'kategori seçildi',
-      cancel: 'İptal',
-      save: 'Yapılandırmayı Kaydet',
-      saving: 'Kaydediliyor...'
-    },
-
-    errors: {
-      loadFailed: 'Mevcut kategoriler ve ekstralar yüklenemedi',
-      saveFailed: 'Yapılandırma kaydedilemedi'
-    }
+categoryConfigModal: {
+  title: 'Şube Ekstralarını Yapılandır',
+  productLabel: 'Ekstralar yapılandırılıyor:',
+  searchPlaceholder: 'Kategorilerde ara...',
+  errors: {
+    loadFailed: 'Yapılandırma verileri yüklenemedi',
+    saveFailed: 'Yapılandırma kaydedilemedi',
+    generic: 'Bir hata oluştu'
   },
+  stats: {
+    selectedCategories: 'Kategoriler',
+    selectedExtras: 'Ekstralar',
+    available: 'Toplam Mevcut'
+  },
+  loading: {
+    categories: 'Kategoriler ve ekstralar yükleniyor...'
+  },
+  empty: {
+    noResults: 'Aramanızla eşleşen kategori yok',
+    noCategories: 'Mevcut ekstra kategorisi yok'
+  },
+  badges: {
+    required: 'Zorunlu',
+    optional: 'İsteğe Bağlı',
+    removal: 'Çıkarma'
+  },
+  category: {
+    availableExtras: 'ekstra mevcut',
+    configurationTitle: 'Kategori Kuralları',
+    selectExtrasTitle: 'Ekstraları Seç',
+    selectCategoryWarning: 'Ekstra seçimini etkinleştirmek için bu kategoriyi seçin'
+  },
+  fields: {
+    minSelection: 'Min Seçim',
+    maxSelection: 'Maks Seçim',
+    minQuantity: 'Min Toplam Adet',
+    maxQuantity: 'Maks Toplam Adet',
+    overrideRequired: '"Zorunlu" Durumunu Geçersiz Kıl',
+    specialPrice: 'Özel Fiyat',
+    minQty: 'Min Adet',
+    maxQty: 'Maks Adet',
+    required: 'Zorunlu'
+  },
+  labels: {
+    originalPrice: 'Orijinal',
+    removesIngredient: 'Malzemeyi çıkarır',
+    extraConfiguration: 'Ekstra Yapılandırması'
+  },
+  placeholders: {
+    defaultPrice: 'Varsayılan'
+  },
+  messages: {
+    removalPriceWarning: 'Çıkarma ekstraları için fiyat belirlenemez'
+  },
+  footer: {
+    categoriesSelected: 'kategori seçildi',
+    cancel: 'İptal',
+    save: 'Değişiklikleri Kaydet',
+    saving: 'Kaydediliyor...'
+  }
+}
 
 },
       onboardingComplete: {

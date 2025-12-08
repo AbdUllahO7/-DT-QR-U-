@@ -5144,60 +5144,70 @@ extrasManagement: {
     restored: 'تمت الاستعادة بنجاح'
   },
 
-  categoryConfigModal: {
-    title: 'تكوين فئات الإضافات',
-    productLabel: 'المنتج:',
-    searchPlaceholder: 'البحث عن الفئات...',
-    
-    stats: {
-      selectedCategories: 'الفئات المختارة',
-      selectedExtras: 'الإضافات المختارة',
-      available: 'متاح'
-    },
-
-    loading: {
-      categories: 'جارٍ تحميل الفئات المتاحة...'
-    },
-
-    empty: {
-      noCategories: 'لا توجد فئات متاحة',
-      noResults: 'لا توجد فئات تطابق بحثك'
-    },
-
-    badges: {
-      required: 'مطلوب',
-      optional: 'اختياري'
-    },
-
-    category: {
-      availableExtras: 'إضافات متاحة',
-      configurationTitle: 'تكوين الفئة',
-      selectExtrasTitle: 'اختر الإضافات',
-      selectCategoryWarning: 'اختر الفئة أعلاه لتمكين الإضافات'
-    },
-
-    fields: {
-      minSelection: 'الحد الأدنى للاختيار',
-      maxSelection: 'الحد الأقصى للاختيار',
-      minQuantity: 'الحد الأدنى للكمية',
-      maxQuantity: 'الحد الأقصى للكمية',
-      overrideRequired: 'تجاوز الإعداد المطلوب'
-    },
-
-    footer: {
-      categoriesSelected: 'فئات مختارة',
-      cancel: 'إلغاء',
-      save: 'حفظ التكوين',
-      saving: 'جارٍ الحفظ...'
-    },
-
-    errors: {
-      loadFailed: 'فشل تحميل الفئات والإضافات المتاحة',
-      saveFailed: 'فشل حفظ التكوين'
-    }
+ categoryConfigModal: {
+  title: 'تكوين إضافات الفرع',
+  productLabel: 'تكوين الإضافات للمنتج:',
+  searchPlaceholder: 'بحث في الفئات...',
+  errors: {
+    loadFailed: 'فشل تحميل بيانات التكوين',
+    saveFailed: 'فشل حفظ التكوين',
+    generic: 'حدث خطأ ما'
   },
+  stats: {
+    selectedCategories: 'الفئات',
+    selectedExtras: 'الإضافات',
+    available: 'المجموع المتاح'
+  },
+  loading: {
+    categories: 'جاري تحميل الفئات والإضافات...'
+  },
+  empty: {
+    noResults: 'لا توجد فئات تطابق بحثك',
+    noCategories: 'لا توجد فئات إضافات متاحة'
+  },
+  badges: {
+    required: 'إلزامي',
+    optional: 'اختياري',
+    removal: 'إزالة'
+  },
+  category: {
+    availableExtras: 'إضافات متاحة',
+    configurationTitle: 'قواعد الفئة',
+    selectExtrasTitle: 'تحديد الإضافات',
+    selectCategoryWarning: 'قم بتحديد هذه الفئة لتمكين اختيار الإضافات'
+  },
+  fields: {
+    minSelection: 'أقل اختيار',
+    maxSelection: 'أقصى اختيار',
+    minQuantity: 'أقل كمية إجمالية',
+    maxQuantity: 'أقصى كمية إجمالية',
+    overrideRequired: 'تجاوز حالة "الإلزامية"',
+    specialPrice: 'سعر خاص',
+    minQty: 'أقل كمية',
+    maxQty: 'أقصى كمية',
+    required: 'إلزامي'
+  },
+  labels: {
+    originalPrice: 'الأصلي',
+    removesIngredient: 'يزيل مكون',
+    extraConfiguration: 'تكوين الإضافة'
+  },
+  placeholders: {
+    defaultPrice: 'الافتراضي'
+  },
+  messages: {
+    removalPriceWarning: 'لا يمكن تحديد سعر لإضافات الإزالة'
+  },
+  footer: {
+    categoriesSelected: 'فئات محددة',
+    cancel: 'إلغاء',
+    save: 'حفظ التغييرات',
+    saving: 'جاري الحفظ...'
+  }
+}
+  
 
-},
+  },
   onboardingComplete: {
   "title": "اكتملت عملية التسجيل!",
   "message": "تم حفظ بيانات المطعم والفرع بنجاح. جاري توجيهك إلى صفحة تسجيل الدخول...",

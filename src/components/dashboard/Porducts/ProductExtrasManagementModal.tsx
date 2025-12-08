@@ -353,19 +353,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                           </div>
                         </div>
 
-                        <div className="space-y-3 pt-2">
-                           <label className="flex items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={formData.isRequired}
-                              onChange={(e) => setFormData({ ...formData, isRequired: e.target.checked })}
-                              className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                            />
-                            <span className="ml-3 text-sm font-medium text-gray-900 dark:text-white">
-                              {t('extrasManagement.productExtras.requiredExtra')}
-                            </span>
-                          </label>
-                        </div>
+                       
                       </div>
 
                       {/* Right Side: Logic */}
@@ -499,18 +487,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                                   {t('common.edit')}: {getExtraName(extra.extraId)}
                                 </h3>
-                                <div className="flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
-                                  <input
-                                    id={`edit-req-${extra.id}`}
-                                    type="checkbox"
-                                    checked={editFormData.isRequired}
-                                    onChange={(e) => setEditFormData({ ...editFormData, isRequired: e.target.checked })}
-                                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                                  />
-                                  <label htmlFor={`edit-req-${extra.id}`} className="ml-2 text-sm text-gray-700 dark:text-gray-300 font-medium cursor-pointer">
-                                    {t('extrasManagement.productExtras.requiredExtra')}
-                                  </label>
-                                </div>
+                               
                               </div>
 
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
