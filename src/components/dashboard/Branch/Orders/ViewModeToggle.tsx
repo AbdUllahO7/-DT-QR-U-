@@ -15,11 +15,7 @@ const ViewModeToggle: React.FC<ViewModeToggleProps> = ({
   onModeChange,
   t
 }) => {
-    console.log('ViewModeToggle props:', {
-    viewMode,
-    pendingCount,
-    branchCount
-  });
+
   
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">

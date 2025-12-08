@@ -259,7 +259,6 @@ async assignBranchToUser(id: string, branchData: AssignBranchDto): Promise<ApiRe
         apiPayload.targetBranchId = null;
         logger.info('🔄 newBranchId 0 olarak algılandı, API için null olarak değiştirildi.', { prefix: 'UserService' });
       }
-      console.log("apiPayload",apiPayload)
       const response = await apiRequest<any>({
         method: 'PUT',
         url: `/api/Users/${id}/branch`,

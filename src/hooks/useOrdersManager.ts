@@ -80,7 +80,6 @@ export const useOrdersManager = () => {
 
   // Handle branch selection
 const handleBranchSelect = (branch: BranchDropdownItem) => {
-  console.log('🏢 handleBranchSelect called:', branch.branchName);
   setState(prev => ({ 
     ...prev, 
     selectedBranch: branch,
@@ -144,7 +143,6 @@ const fetchBranchOrders = useCallback(async (branchId?: number, page?: number, p
 }, []); // ✅ Empty dependencies
 
 const handleBranchPageChange = (newPage: number) => {
-  console.log('🔄 Changing page to:', newPage);
   
   // ✅ Update state first - useEffect will trigger fetch
   setState(prev => ({
@@ -154,7 +152,6 @@ const handleBranchPageChange = (newPage: number) => {
 };
 
 const handleBranchItemsPerPageChange = (newItemsPerPage: number) => {
-  console.log('📏 Changing items per page to:', newItemsPerPage);
   
   // ✅ Update state first - useEffect will trigger fetch
   setState(prev => ({
@@ -483,7 +480,6 @@ const handleBranchItemsPerPageChange = (newItemsPerPage: number) => {
   };
 
 const switchViewMode = (mode: 'pending' | 'branch' | 'deletedOrders') => {
-  console.log('🔀 switchViewMode called:', mode);
   
   setState(prev => ({ 
     ...prev, 
@@ -496,8 +492,6 @@ const switchViewMode = (mode: 'pending' | 'branch' | 'deletedOrders') => {
     }
   }));
   
-  // DON'T fetch here - let useEffect in component handle it
-  console.log('✋ switchViewMode: NOT fetching, letting useEffect handle it');
 };
 
   // Modal handlers

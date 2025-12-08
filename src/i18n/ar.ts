@@ -254,6 +254,7 @@ export const ar = {
         subtitle: "إدارة حالة التفعيل والحد الأدنى لقيمة الطلب ورسوم الخدمة لأنواع الطلبات",
         loading: "جاري تحميل أنواع الطلبات...",
         pleaseWait: "يرجى الانتظار",
+        estimatedMinutes: "دقائق مقدرة",
         settingsUpdated: "تم تحديث الإعدادات بنجاح",
         updateError: "حدث خطأ أثناء تحديث الإعدادات",
         loadingError: "حدث خطأ أثناء تحميل أنواع الطلبات",
@@ -924,6 +925,7 @@ contact: {
 
   // Table Management
   tableManagement: {
+    addTable: 'إضافة طاولة',
     ActiveStatus :"الحالة النشطة",
       descriptionActive: "الفئة نشطة ومرئية",
       descriptionInActive: "الفئة غير نشطة ومخفية",
@@ -2843,7 +2845,7 @@ contact: {
       passwordInfo: 'معلومات كلمة المرور',
       locationInfo: 'معلومات الموقع',
       roleAssignment: 'تعيين السلطة والدور',
-
+      selectBranch: 'اختر الفرع',
 
       phoneNumber: 'رقم الهاتف',
       confirmPassword: 'تأكيد كلمة المرور',
@@ -3112,6 +3114,7 @@ contact: {
       error: {
         clearTableFailed: "فشل مسح الطاولة. يُرجى المحاولة مرة أخرى",
         fetchCategoriesFailed: "فشل في جلب الفئات",
+        createCategoryFirst: "يرجى إنشاء فئة أولاً قبل إضافة الطاولات",
         fetchTablesFailed: "فشل في جلب الطاولات",
         categoryNameRequired: "اسم الفئة مطلوب",
         addCategoryFailed: "فشل في إضافة الفئة",
@@ -3580,6 +3583,7 @@ contact: {
       addons  : "الإضافات",
       product: "المنتج",
       addToBasket: "أضف إلى السلة",
+      addToOrder: "أضف إلى الطلب",
       allergens: "مسببات الحساسية",
       loadingSubtitle: "نحضر لك أشهى المأكولات...",
       error: {
@@ -3656,87 +3660,91 @@ contact: {
           corporateMeals: "وجبات الشركات"
         }
       },
-      cart: {
-      title: 'السلة',
-      basePrice: 'السعر الأساسي',
-      price_change_title : "إشعار تغير الاسعار",
-      confirm:"قبول",
-      cancel:"رفض",
-      confirm_cancel_title:"السبب الذي كتبته سيصل إلى المطعم.",
-      cancel_order_confirm :"هل أنت متأكد أنك تريد إلغاء الطلب؟ ",
-      order_cancelled_success:"لقد تم إلغاء طلبك بنجاح.",
-      success:"ناجح",
-      newOrder: 'طلب جديد',
-      orders: 'الطلبات',
-       cancel_Reason_prompt_title:"سبب الإلغاء", 
-      reason:"صندوق ارسال السبب", 
-      submit: "إرسال", 
-      order_can_be_updated: 'يمكن تحديث الطلب',
-      time_remaining: 'الوقت المتبقي',
-      modified_times: 'تم التعديل {{count}} مرة/مرات',
-      edit_order: 'تعديل الطلب',
-      edit_order_items: 'تعديل عناصر الطلب',
-      update_reason: 'سبب التحديث',
-      update_reason_placeholder: 'لماذا تقوم بتحديث هذا الطلب؟',
-      update_reason_required: 'يرجى تقديم سبب للتحديث',
-      no_changes_detected: 'لم يتم اكتشاف أي تغييرات. يرجى تعديل العناصر قبل التحديث.',
-      characters: 'حرف',
-      updating: 'جاري التحديث...',
-      update_order: 'تحديث الطلب',
-      was: 'كان',
-      add_note: 'إضافة ملاحظة...',
-      marked_for_deletion: 'محدد للحذف',
-      restore_item: 'استعادة العنصر',
-      delete_item: 'حذف العنصر',
-      order_updated_success: 'تم تحديث الطلب بنجاح!',
-      order_update_failed: 'فشل تحديث الطلب',
-      price_change_confirm: 'تغيرت بعض الأسعار منذ تقديم الطلب. هل تريد المتابعة بالتحديث؟',
-      cancel_order: "إلغاء الطب",
-      notes: 'ملاحظات',
-      refresh: 'تحديث',
-      refreshing: 'جاري التحديث...',
-      remove: 'إزالة',
-      orderType: 'نوع الطلب',
-      table: 'الطاولة',
-      empty: 'السلة فارغة',
-      emptyDesc: 'ابدأ بإضافة بعض العناصر إلى سلتك',
-      total: 'المجموع',
-      proceed: 'المتابعة للطلب',
-      placeOrder: "إتمام الطلب",
-      processing: 'جاري المعالجة...',
-      clear: 'تفريغ السلة',
-      item: 'عنصر',
-      items: 'عناصر',
-      variant: 'نوع',
-      variants: 'أنواع',
-      plain: 'عادي',
-      customized: 'مخصص',
-      addons: 'الإضافات',
-      variantTotal: 'مجموع النوع',
-      quantity: 'الكمية',
-      each: 'للواحد',
-      min: 'الحد الأدنى',
-      max: 'الحد الأقصى',
-      qty: 'كمية',
-      minQuantityError: 'الحد الأدنى للكمية لـ {name} هو {min}',
-      maxQuantityError: 'الحد الأقصى للكمية لـ {name} هو {max}',
-      decreaseQuantity: 'تقليل الكمية',
-      increaseQuantity: 'زيادة الكمية',
-        "creating_order": "جاري إنشاء الطلب...",
-  "order_created_success": "تم إنشاء الطلب بنجاح!",
-  "order_creation_failed": "فشل في إنشاء الطلب. يرجى المحاولة مرة أخرى.",
-  "sending_whatsapp": "جاري إرسال رسالة واتساب...",
-  "whatsapp_sent_success": "تم إرسال رسالة واتساب بنجاح!",
-  "whatsapp_send_failed": "فشل في إرسال رسالة واتساب",
-  "clearing_basket": "جاري مسح السلة...",
-  "basket_cleared": "تم مسح السلة بنجاح!",
-  "clear_basket_failed": "فشل في مسح السلة",
-  "load_order_types_failed": "فشل في تحميل أنواع الطلبات",
-  "confirming_price_changes": "جاري تأكيد تغييرات الأسعار...",
-  "price_changes_confirmed": "تم تأكيد تغييرات الأسعار بنجاح!",
-  "price_changes_failed": "فشل في تأكيد تغييرات الأسعار",
-  "session_required": "معرف الجلسة مطلوب"
-    }
+    cart: {
+    "title": "السلة",
+    "basePrice": "السعر الأساسي",
+    "price_change_title": "إشعار تغير الاسعار",
+    "confirm": "قبول",
+    "cancel": "رفض",
+    "confirm_cancel_title": "السبب الذي كتبته سيصل إلى المطعم.",
+    "cancel_order_confirm": "هل أنت متأكد أنك تريد إلغاء الطلب؟",
+    "order_cancelled_success": "لقد تم إلغاء طلبك بنجاح.",
+    "success": "ناجح",
+    "newOrder": "طلب جديد",
+    "orders": "الطلبات",
+    "cancel_Reason_prompt_title": "سبب الإلغاء",
+    "reason": "سبب الإلغاء",
+    "submit": "إرسال",
+    "order_can_be_updated": "يمكن تحديث الطلب",
+    "time_remaining": "الوقت المتبقي",
+    "modified_times": "تم التعديل {{count}} مرة/مرات",
+    "edit_order": "تعديل الطلب",
+    "edit_order_items": "تعديل عناصر الطلب",
+    "update_reason": "سبب التحديث",
+    "update_reason_placeholder": "لماذا تقوم بتحديث هذا الطلب؟",
+    "update_reason_required": "يرجى تقديم سبب للتحديث",
+    "no_changes_detected": "لم يتم اكتشاف أي تغييرات. يرجى تعديل العناصر قبل التحديث.",
+    "characters": "حرف",
+    "updating": "جاري التحديث...",
+    "update_order": "تحديث الطلب",
+    "was": "كان",
+    "add_note": "إضافة ملاحظة...",
+    "marked_for_deletion": "محدد للحذف",
+    "restore_item": "استعادة العنصر",
+    "delete_item": "حذف العنصر",
+    "order_updated_success": "تم تحديث الطلب بنجاح!",
+    "order_update_failed": "فشل تحديث الطلب",
+    "price_change_confirm": "تغيرت بعض الأسعار منذ تقديم الطلب. هل تريد المتابعة بالتحديث؟",
+    "cancel_order": "إلغاء الطلب",
+    "notes": "ملاحظات",
+    "refresh": "تحديث",
+    "refreshing": "جاري التحديث...",
+    "remove": "إزالة",
+    "orderType": "نوع الطلب",
+    "table": "الطاولة",
+    "empty": "السلة فارغة",
+    "emptyDesc": "ابدأ بإضافة بعض العناصر إلى سلتك",
+    "total": "المجموع",
+    "proceed": "المتابعة للطلب",
+    "placeOrder": "إتمام الطلب",
+    "processing": "جاري المعالجة...",
+    "clear": "تفريغ السلة",
+    "item": "عنصر",
+    "items": "عناصر",
+    "variant": "نوع",
+    "variants": "أنواع",
+    "plain": "عادي",
+    "customized": "مخصص",
+    "addons": "الإضافات",
+    "variantTotal": "مجموع النوع",
+    "quantity": "الكمية",
+    "each": "للواحد",
+    "min": "الحد الأدنى",
+    "max": "الحد الأقصى",
+    "qty": "كمية",
+    "minQuantityError": "الحد الأدنى للكمية لـ {name} هو {min}",
+    "maxQuantityError": "الحد الأقصى للكمية لـ {name} هو {max}",
+    "decreaseQuantity": "تقليل الكمية",
+    "increaseQuantity": "زيادة الكمية",
+    "creating_order": "جاري إنشاء الطلب...",
+    "order_created_success": "تم إنشاء الطلب بنجاح!",
+    "order_creation_failed": "فشل في إنشاء الطلب. يرجى المحاولة مرة أخرى.",
+    "sending_whatsapp": "جاري إرسال رسالة واتساب...",
+    "whatsapp_sent_success": "تم إرسال رسالة واتساب بنجاح!",
+    "whatsapp_send_failed": "فشل في إرسال رسالة واتساب",
+    "clearing_basket": "جاري مسح السلة...",
+    "basket_cleared": "تم مسح السلة بنجاح!",
+    "clear_basket_failed": "فشل في مسح السلة",
+    "load_order_types_failed": "فشل في تحميل أنواع الطلبات",
+    "confirming_price_changes": "جاري تأكيد تغييرات الأسعار...",
+    "price_changes_confirmed": "تم تأكيد تغييرات الأسعار بنجاح!",
+    "price_changes_failed": "فشل في تأكيد تغييرات الأسعار",
+    "session_required": "معرف الجلسة مطلوب",
+    "extras": "الإضافات والخيارات",
+    "without": "بدون",
+    "extra": "زيادة",
+    "add": "إضافة"
+  },
   },
 
   order: {
@@ -3808,7 +3816,7 @@ contact: {
     confirming: 'جاري التأكيد...'
   },
 
-  productModal: {
+ productModal: {
     "customizeOrder": "تخصيص طلبك",
     "allergenInformation": "معلومات الحساسية",
     "ingredients": "المكونات",
@@ -3821,7 +3829,21 @@ contact: {
     "quantity": "الكمية",
     "total": "المجموع",
     "addToCart": "إضافة إلى السلة",
-    addons:"الإضافات"
+    "addons": "الإضافات",
+    "extras": "الإضافات الخاصة",
+    "required": "مطلوب",
+    "selected": "تم اختياره",
+    "select": "اختر",
+    "minSelect": "أدنى",
+    "maxSelect": "أقصى",
+    "qty": "الكمية",
+    "removal": "إزالة",
+    "remove": "إزالة",
+    "removed": "تمت الإزالة",
+    "categoryRequired": "{{name}} مطلوب",
+    "minSelectionError": "اختر {{min}} عناصر على الأقل من {{name}}",
+    "maxSelectionError": "الحد الأقصى {{max}} عناصر مسموح بها من {{name}}",
+    "extraRequired": "{{name}} مطلوب"
   },
 
   errors: {
@@ -4709,9 +4731,12 @@ recycleBin: {
       "mersisLabel": "رقم MERSIS",
       "mersisPlaceholder": "أدخل رقم MERSIS الخاص بك",
       "tradeRegistryLabel": "رقم السجل التجاري",
+      
       "tradeRegistryPlaceholder": "أدخل رقم السجل التجاري الخاص بك",
       "errors": {
+        taxNumberRequired: "الرقم الضريبي مطلوب",
         "companyTitleRequired": "الاسم التجاري للشركة مطلوب",
+        mersisRequired: "رقم MERSIS مطلوب",
         "legalTypeRequired": "اختر الكيان القانوني"
       }
     },
@@ -4976,10 +5001,10 @@ recycleBin: {
   },
 extrasManagement: {
   title: 'إدارة الإضافات',
-  description: 'إدارة مجموعات الإضافات وعناصرها',
-  searchPlaceholder: 'بحث عن الفئات أو الإضافات...',
-  loading: 'جاري التحميل...',
-  processing: 'جاري المعالجة...',
+  description: 'إدارة فئات الإضافات والعناصر الخاصة بها',
+  searchPlaceholder: 'البحث عن الفئات أو الإضافات...',
+  loading: 'جارٍ التحميل...',
+  processing: 'جارٍ المعالجة...',
   
   buttons: {
     add: 'إضافة',
@@ -4997,10 +5022,10 @@ extrasManagement: {
   deleteModal: {
     titleCategory: 'حذف الفئة؟',
     titleItem: 'حذف العنصر؟',
-    confirmMessage: 'هل أنت متأكد من أنك تريد حذف "{name}"؟',
+    confirmMessage: 'هل أنت متأكد من حذف "{name}"؟',
     warningMessage: 'لا يمكن التراجع عن هذا الإجراء. سيتم نقل العنصر إلى سلة المحذوفات.',
     confirmButton: 'حذف',
-    processingButton: 'جاري الحذف...',
+    processingButton: 'جارٍ الحذف...',
     cancelButton: 'إلغاء'
   },
   
@@ -5011,21 +5036,22 @@ extrasManagement: {
     editCategory: 'تعديل الفئة',
     noCategories: 'لم يتم العثور على فئات',
     tryAdjusting: 'حاول تعديل البحث أو إضافة فئة جديدة.',
-    select: 'تحديد:',
+    select: 'اختيار:',
     qtyLimit: 'حد الكمية:',
     active: 'نشط',
     inactive: 'غير نشط',
-    required: 'إلزامي',
+    required: 'مطلوب',
     fields: {
       categoryName: 'اسم الفئة',
       categoryNamePlaceholder: 'مثال: إضافات البيتزا',
-      statusLabel: 'حالة النشاط',
-      requiredLabel: 'هل هي إلزامية؟',
+      statusLabel: 'الحالة النشطة',
+      requiredLabel: 'هل هو مطلوب؟',
       selectionRules: 'قواعد الاختيار',
       minSelection: 'الحد الأدنى للاختيار',
       maxSelection: 'الحد الأقصى للاختيار',
       minQuantity: 'الحد الأدنى للكمية',
-      maxQuantity: 'الحد الأقصى للكمية'
+      maxQuantity: 'الحد الأقصى للكمية',
+      removalCategoryLabel: 'فئة إزالة (طرح)'
     }
   },
 
@@ -5036,7 +5062,7 @@ extrasManagement: {
     noItems: 'لا توجد عناصر في هذه الفئة بعد.',
     noDescription: 'لا يوجد وصف',
     fields: {
-      parentCategory: 'الفئة الأصل',
+      parentCategory: 'الفئة الأصلية',
       selectCategory: 'اختر الفئة...',
       itemName: 'اسم العنصر',
       itemNamePlaceholder: 'اسم العنصر',
@@ -5044,7 +5070,7 @@ extrasManagement: {
       description: 'الوصف',
       descriptionPlaceholder: 'تفاصيل اختيارية...',
       imageLabel: 'صورة العنصر',
-      uploadText: 'اضغط لرفع صورة',
+      uploadText: 'انقر لتحميل الصورة',
       activeLabel: 'نشط',
       removalLabel: 'عنصر إزالة (طرح)'
     }
@@ -5056,40 +5082,40 @@ extrasManagement: {
     addCategory: 'إضافة فئة',
     addExtra: 'إضافة إضافة',
     selectCategory: 'اختر الفئة',
-    chooseCategory: 'اختر فئة...',
+    chooseCategory: 'اختر الفئة...',
     selectExtra: 'اختر الإضافة',
-    chooseExtra: 'اختر إضافة...',
-    noCategoriesYet: 'لا توجد فئات مضافة بعد',
-    noExtrasYet: 'لا توجد إضافات مضافة بعد',
+    chooseExtra: 'اختر الإضافة...',
+    noCategoriesYet: 'لم تتم إضافة فئات بعد',
+    noExtrasYet: 'لم تتم إضافة إضافات بعد',
     confirmDelete: 'هل أنت متأكد من حذف هذه الفئة؟',
     confirmDeleteExtra: 'هل أنت متأكد من حذف هذه الإضافة؟',
     unknownCategory: 'فئة غير معروفة',
     unknownExtra: 'إضافة غير معروفة',
     confirm: 'تأكيد',
-    selection: 'الاختيار',
-    quantity: 'الكمية',
-    required: 'إلزامي',
+    selection: 'اختيار',
+    quantity: 'كمية',
+    required: 'مطلوب',
     optional: 'اختياري',
     basePrice: 'السعر الأساسي',
     unitPrice: 'سعر الوحدة',
     selectionMode: 'وضع الاختيار',
-    single: 'فردي',
+    single: 'مفرد',
     multiple: 'متعدد',
-    requiredExtra: 'إضافة إلزامية',
+    requiredExtra: 'إضافة مطلوبة',
     defaultQty: 'الكمية الافتراضية',
-    minQty: 'أقل كمية',
-    maxQty: 'أقصى كمية',
+    minQty: 'الحد الأدنى',
+    maxQty: 'الحد الأقصى',
     qty: 'الكمية',
-    minSelection: 'أقل اختيار',
-    maxSelection: 'أقصى اختيار',
-    minQuantity: 'أقل كمية',
-    maxQuantity: 'أقصى كمية',
+    minSelection: 'الحد الأدنى للاختيار',
+    maxSelection: 'الحد الأقصى للاختيار',
+    minQuantity: 'الحد الأدنى للكمية',
+    maxQuantity: 'الحد الأقصى للكمية',
     selectionLimits: 'حدود الاختيار',
     quantityLimits: 'حدود الكمية',
-    minSelectLabel: 'أقل اختيار',
+    minSelectLabel: 'أدنى اختيار',
     maxSelectLabel: 'أقصى اختيار',
-    minTotalLabel: 'أقل إجمالي',
-    maxTotalLabel: 'أقصى إجمالي'
+    minTotalLabel: 'الحد الأدنى الإجمالي',
+    maxTotalLabel: 'الحد الأقصى الإجمالي'
   },
   
   recycleBin: {
@@ -5104,23 +5130,93 @@ extrasManagement: {
   errors: {
     loadCategories: 'خطأ في تحميل الفئات',
     loadExtras: 'خطأ في تحميل الإضافات',
-    uploadImage: 'خطأ في رفع الصورة',
+    uploadImage: 'خطأ في تحميل الصورة',
     deleteFailed: 'فشل حذف العنصر',
     loadFailed: 'فشل تحميل البيانات',
     saveFailed: 'فشل حفظ البيانات',
     updateFailed: 'فشل تحديث البيانات',
-    restoreFailed: 'فشل استعادة العنصر'
+    restoreFailed: 'فشلت استعادة العنصر'
   },
 
   success: {
-    categoryAdded: 'تم إضافة الفئة بنجاح',
+    categoryAdded: 'تمت إضافة الفئة بنجاح',
     categoryUpdated: 'تم تحديث الفئة بنجاح',
     categoryDeleted: 'تم حذف الفئة بنجاح',
-    extraAdded: 'تم إضافة الإضافة بنجاح',
+    extraAdded: 'تمت إضافة الإضافة بنجاح',
     extraUpdated: 'تم تحديث الإضافة بنجاح',
     extraDeleted: 'تم حذف الإضافة بنجاح',
-    restored: 'تم الاستعادة بنجاح'
+    restored: 'تمت الاستعادة بنجاح'
+  },
+
+ categoryConfigModal: {
+  title: 'تكوين إضافات الفرع',
+  productLabel: 'تكوين الإضافات للمنتج:',
+  searchPlaceholder: 'بحث في الفئات...',
+  errors: {
+    loadFailed: 'فشل تحميل بيانات التكوين',
+    saveFailed: 'فشل حفظ التكوين',
+    generic: 'حدث خطأ ما'
+  },
+  stats: {
+    selectedCategories: 'الفئات',
+    selectedExtras: 'الإضافات',
+    available: 'المجموع المتاح'
+  },
+  loading: {
+    categories: 'جاري تحميل الفئات والإضافات...'
+  },
+  empty: {
+    noResults: 'لا توجد فئات تطابق بحثك',
+    noCategories: 'لا توجد فئات إضافات متاحة'
+  },
+  badges: {
+    required: 'إلزامي',
+    optional: 'اختياري',
+    removal: 'إزالة'
+  },
+  category: {
+    availableExtras: 'إضافات متاحة',
+    configurationTitle: 'قواعد الفئة',
+    selectExtrasTitle: 'تحديد الإضافات',
+    selectCategoryWarning: 'قم بتحديد هذه الفئة لتمكين اختيار الإضافات'
+  },
+  fields: {
+    minSelection: 'أقل اختيار',
+    maxSelection: 'أقصى اختيار',
+    minQuantity: 'أقل كمية إجمالية',
+    maxQuantity: 'أقصى كمية إجمالية',
+    overrideRequired: 'تجاوز حالة "الإلزامية"',
+    specialPrice: 'سعر خاص',
+    minQty: 'أقل كمية',
+    maxQty: 'أقصى كمية',
+    required: 'إلزامي'
+  },
+  labels: {
+    originalPrice: 'الأصلي',
+    removesIngredient: 'يزيل مكون',
+    extraConfiguration: 'تكوين الإضافة'
+  },
+  placeholders: {
+    defaultPrice: 'الافتراضي'
+  },
+  messages: {
+    removalPriceWarning: 'لا يمكن تحديد سعر لإضافات الإزالة'
+  },
+  footer: {
+    categoriesSelected: 'فئات محددة',
+    cancel: 'إلغاء',
+    save: 'حفظ التغييرات',
+    saving: 'جاري الحفظ...'
   }
 }
+  
+
+  },
+  onboardingComplete: {
+  "title": "اكتملت عملية التسجيل!",
+  "message": "تم حفظ بيانات المطعم والفرع بنجاح. جاري توجيهك إلى صفحة تسجيل الدخول...",
+  "redirectingIn": "ثواني وسيتم توجيهك"
+},
+
 
 }; 

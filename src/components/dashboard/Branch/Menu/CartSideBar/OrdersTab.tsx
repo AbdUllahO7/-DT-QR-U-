@@ -38,7 +38,6 @@ const OrdersTab: React.FC<ExtendedOrdersTabProps> = ({
     await onLoadOrderTracking(orderTag)
   }
 
-  console.log("updatableOrders",updatableOrders)
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -190,7 +189,6 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
       }
     })
     
-    console.log('Initialized editable items (with correct parent links):', items)
     setEditableItems(items)
     setIsEditing(true)
   }
@@ -339,7 +337,6 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
 
     try {
       setUpdating(true)
-      console.log('Update DTO:', updateDto)
       await orderService.updatePendingOrder(updateDto)
       
       setAlertModal({ isOpen: true, title: t('menu.cart.success') || 'Success', message: t('menu.cart.order_updated_success') || 'Order updated successfully!'});

@@ -16,13 +16,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
   t,
     totalFiltered,
 }) => {
-  console.log('PaginationControls render:', {
-    currentPage: pagination.currentPage,
-    itemsPerPage: pagination.itemsPerPage,
-    totalItems: pagination.totalItems,
-    totalPages: pagination.totalPages,
-    totalFiltered
-  });
+
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">

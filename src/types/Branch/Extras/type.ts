@@ -1,6 +1,7 @@
 // ===== BranchProductExtraCategories Types =====
 
 export interface BranchProductExtraCategory {
+  effectiveIsRequired: boolean;
   id: number;
   branchProductId: number;
   productExtraCategoryId: number;

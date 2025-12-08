@@ -241,6 +241,7 @@ export interface CategoriesContentProps {
   onMoveUp: (index: number) => void;
   onMoveDown: (index: number) => void;
   onSaveOrder: () => void;
+  handleShowProductExtras: (product: DetailedProduct) => void;
   onAddProduct: (productId: number, branchCategoryId: number) => void;
   onRemoveProduct: (branchProductId: number, productName?: string) => void;
   onDeleteCategory: (branchCategoryId: number, categoryName: string) => void;

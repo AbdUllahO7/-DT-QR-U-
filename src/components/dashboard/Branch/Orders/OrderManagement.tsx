@@ -95,10 +95,8 @@ const OrdersManager: React.FC = () => {
 
   // Initial fetch on mount - only once
   useEffect(() => {
-    console.log('🎬 Initial mount effect running');
     if (!fetchedInitially.current) {
       fetchedInitially.current = true;
-      console.log('📋 Initial fetch of pending and branch orders...');
       fetchPendingOrders();
       // Don't fetch branch orders here - let the main effect handle it
     }
@@ -106,16 +104,10 @@ const OrdersManager: React.FC = () => {
 
   // Main fetch effect - handles view mode and pagination changes
   useEffect(() => {
-    console.log('📊 Orders fetch effect triggered:', {
-      viewMode: state.viewMode,
-      currentPage: state.pagination.currentPage,
-      itemsPerPage: state.pagination.itemsPerPage,
-      isFetching: isFetchingRef.current
-    });
+   
 
     // Skip if already fetching
     if (isFetchingRef.current) {
-      console.log('⏭️ Skipping fetch - already fetching');
       return;
     }
 
@@ -130,11 +122,9 @@ const OrdersManager: React.FC = () => {
         lastFetchedConfig.current.viewMode === currentConfig.viewMode &&
         lastFetchedConfig.current.page === currentConfig.page &&
         lastFetchedConfig.current.pageSize === currentConfig.pageSize) {
-      console.log('✋ Same config already fetched, skipping:', currentConfig);
       return;
     }
 
-    console.log('✅ New config, fetching orders:', currentConfig);
     
     // Set fetching flag BEFORE updating ref
     isFetchingRef.current = true;
@@ -143,10 +133,8 @@ const OrdersManager: React.FC = () => {
     const fetchData = async () => {
       try {
         if (state.viewMode === 'pending') {
-          console.log('📥 Calling fetchPendingOrders');
           await fetchPendingOrders();
         } else if (state.viewMode === 'branch') {
-          console.log('📥 Calling fetchBranchOrders');
           await fetchBranchOrders(
             undefined, // branchId (for branch users, it's handled internally)
             state.pagination.currentPage,
@@ -178,7 +166,6 @@ const OrdersManager: React.FC = () => {
     // Only set up auto-refresh if we're in pending view mode
     if (state.viewMode === 'pending') {
       intervalRef.current = window.setInterval(() => {
-        console.log('🔄 Auto-refreshing pending orders...');
         fetchPendingOrders();
       }, 30000); // 30 seconds
     }

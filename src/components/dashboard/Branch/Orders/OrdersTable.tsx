@@ -45,7 +45,6 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
 }) => {
   const isRTL = lang === 'ar';
 
-  console.log("orders",orders)
   
   const getSortIcon = (field: string) => {
     if (sortField !== field) return null;

@@ -136,7 +136,6 @@ const [selectedProductForExtras, setSelectedProductForExtras] = useState<{
 
 const handleOpenProductExtras = (productId: number, productName: string) => {
 
-  console.log("Opening Extras Modal for Product ID:", productId, "Name:", productName);
 
   if (!productId || productId === 0 || isNaN(productId)) {
     console.error('❌ Invalid productId provided:', productId);

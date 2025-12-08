@@ -81,26 +81,16 @@ const OrdersManagerRestaurant: React.FC = () => {
 
   // Initial fetch - ONLY fetchBranches, nothing else
   useEffect(() => {
-    console.log('🎬 Initial mount effect running');
     if (!fetchedBranches.current) {
       fetchedBranches.current = true;
-      console.log('📋 Fetching branches...');
       fetchBranches();
     }
   }, []); // Run only once on mount
 
   // Fetch orders when branch/view mode/pagination changes
   useEffect(() => {
-    console.log('📊 Orders fetch effect triggered:', {
-      selectedBranch: state.selectedBranch?.branchId,
-      viewMode: state.viewMode,
-      currentPage: state.pagination.currentPage,
-      itemsPerPage: state.pagination.itemsPerPage,
-      isFetching: isFetchingRef.current
-    });
-
+   
     if (!state.selectedBranch || isFetchingRef.current) {
-      console.log('⏭️ Skipping fetch - no branch or already fetching');
       return;
     }
 
@@ -117,11 +107,9 @@ const OrdersManagerRestaurant: React.FC = () => {
         lastFetchedConfig.current.viewMode === currentConfig.viewMode &&
         lastFetchedConfig.current.page === currentConfig.page &&
         lastFetchedConfig.current.pageSize === currentConfig.pageSize) {
-      console.log('✋ Same config already fetched, skipping:', currentConfig);
       return;
     }
 
-    console.log('✅ New config, fetching orders:', currentConfig);
     
     // Set fetching flag BEFORE updating ref
     isFetchingRef.current = true;
@@ -130,10 +118,8 @@ const OrdersManagerRestaurant: React.FC = () => {
     const fetchData = async () => {
       try {
         if (state.viewMode === 'pending') {
-          console.log('📥 Calling fetchPendingOrders');
           await fetchPendingOrders(state.selectedBranch!.branchId);
         } else if (state.viewMode === 'branch') {
-          console.log('📥 Calling fetchBranchOrders');
           await fetchBranchOrders(
             state.selectedBranch!.branchId,
             state.pagination.currentPage,
@@ -164,7 +150,6 @@ const OrdersManagerRestaurant: React.FC = () => {
   };
 
   const handleBranchSelectInternal = (branch: any) => {
-    console.log('🏢 Branch selected:', branch.branchName);
     // Reset the fetch tracker when branch changes
     lastFetchedConfig.current = null;
     isFetchingRef.current = false;

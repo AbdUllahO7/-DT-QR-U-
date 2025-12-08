@@ -18,6 +18,8 @@ import { logger } from '../utils/logger';
 import { countries } from '../data/mockData';
 import { useLanguage } from '../contexts/LanguageContext';
 
+// Default logo URL when no logo is provided
+const DEFAULT_LOGO_URL = 'https://media.istockphoto.com/id/2173059563/vector/coming-soon-image-on-white-background-no-photo-available.jpg?s=612x612&w=0&k=20&c=v0a_B58wPFNDPULSiw_BmPyhSNCyrP_d17i2BPPyDTk=';
 
 const OnboardingBranch: React.FC = () => {
   const navigate = useNavigate();
@@ -491,8 +493,9 @@ const OnboardingBranch: React.FC = () => {
           newErrors.branchName = t('onboardingBranch.form.step1.branchName.error');
         }
         
+        // WhatsApp number is required
         if (!formData.whatsappOrderNumber?.trim()) {
-          newErrors.whatsappOrderNumber = t('onboardingBranch.form.step1.whatsappNumber.errorRequired');
+          newErrors.whatsappOrderNumber = t('onboardingBranch.form.step1.whatsappNumber.error');
         } else if (!/^\d{7,15}$/.test(formData.whatsappOrderNumber.trim())) {
           newErrors.whatsappOrderNumber = t('onboardingBranch.form.step1.whatsappNumber.errorInvalid');
         }
@@ -505,33 +508,17 @@ const OnboardingBranch: React.FC = () => {
         if (!formData.createAddressDto.city?.trim()) {
           newErrors['createAddressDto.city'] = t('onboardingBranch.form.step2.city.error');
         }
-        if (!formData.createAddressDto.street?.trim()) {
-          newErrors['createAddressDto.street'] = t('onboardingBranch.form.step2.street.error');
-        }
-        if (!formData.createAddressDto.addressLine1?.trim()) {
-          newErrors['createAddressDto.addressLine1'] = t('onboardingBranch.form.step2.addressLine1.error');
-        }
-        if (!formData.createAddressDto.addressLine2?.trim()) {
-          newErrors['createAddressDto.addressLine2'] = t('onboardingBranch.form.step2.addressLine2.error');
-        }
-        if (!formData.createAddressDto.zipCode?.trim()) {
-          newErrors['createAddressDto.zipCode'] = t('onboardingBranch.form.step2.zipCode.error');
-        }
+     
+       
         break;
         
       case 3: // Contact Info & Working Hours
-        if (!formData.createContactDto.phone?.trim()) {
-          newErrors['createContactDto.phone'] = t('onboardingBranch.form.step3.phone.errorRequired');
-        } else if (!/^\d{7,15}$/.test(formData.createContactDto.phone.trim())) {
-          newErrors['createContactDto.phone'] = t('onboardingBranch.form.step3.phone.errorInvalid');
-        }
+        
         
         if (!formData.createContactDto.mail?.trim()) {
           newErrors['createContactDto.mail'] = t('onboardingBranch.form.step3.email.error');
         }
-        if (!formData.createContactDto.location?.trim()) {
-          newErrors['createContactDto.location'] = t('onboardingBranch.form.step3.location.error');
-        }
+       
         
         // eslint-disable-next-line no-case-declarations
         const workingDays = formData.createBranchWorkingHourCoreDto?.filter(day => day.isWorkingDay) || [];
@@ -615,6 +602,10 @@ const OnboardingBranch: React.FC = () => {
       }
     }
 
+    // Determine final branch logo path with priority:
+    // 1. User uploaded logo
+    // 2. Restaurant logo path
+    // 3. Default logo URL
     let finalBranchLogoPath = formData.branchLogoPath;
     if (!finalBranchLogoPath && restaurantLogoPath) {
       finalBranchLogoPath = restaurantLogoPath;
@@ -624,8 +615,19 @@ const OnboardingBranch: React.FC = () => {
         });
       }
     }
-    const fullWhatsappNumber = `${whatsappCountryCode}${(formData.whatsappOrderNumber || '').replace(/\D/g, '')}`;
-    const fullContactPhone = `${contactCountryCode}${(formData.createContactDto.phone || '').replace(/\D/g, '')}`;
+    if (!finalBranchLogoPath) {
+      finalBranchLogoPath = DEFAULT_LOGO_URL;
+      if (import.meta.env.DEV) {
+        logger.info('Ne şube ne restaurant logosu yüklenmedi, varsayılan logo kullanılıyor', { 
+          DEFAULT_LOGO_URL 
+        });
+      }
+    }
+    
+    const fullWhatsappNumber = formData.whatsappOrderNumber 
+      ? `${whatsappCountryCode}${(formData.whatsappOrderNumber).replace(/\D/g, '')}`
+      : ''; 
+    const fullContactPhone = fullWhatsappNumber;
 
     const finalFormData: CreateBranchWithDetailsDto = {
       branchName: formData.branchName?.trim() || null,
@@ -641,7 +643,7 @@ const OnboardingBranch: React.FC = () => {
         addressLine2: formData.createAddressDto.addressLine2?.trim() || null
       },
       createContactDto: {
-        phone: fullContactPhone,
+        phone: fullContactPhone || '',
         mail: formData.createContactDto.mail?.trim() || null,
         location: formData.createContactDto.location?.trim() || null,
         contactHeader: formData.createContactDto.contactHeader?.trim() || null,
@@ -732,7 +734,7 @@ const OnboardingBranch: React.FC = () => {
 
     return (
       <AnimatePresence>
-        <div className="fixed inset-0 z-50 overflow-y-auto" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="fixed inset-0 z-50 overflow-y-auto " dir={isRTL ? 'rtl' : 'ltr'}>
           <div className="flex min-h-screen items-center justify-center p-4">
             {/* Backdrop */}
             <motion.div
@@ -993,7 +995,7 @@ const OnboardingBranch: React.FC = () => {
     <div className="space-y-6">
       <div>
         <label htmlFor="branchName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {t('onboardingBranch.form.step1.branchName.label')}
+          {t('onboardingBranch.form.step1.branchName.label')} <span className="text-red-500">*</span>
         </label>
         <div className="relative">
           <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
@@ -1010,6 +1012,7 @@ const OnboardingBranch: React.FC = () => {
             } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingBranch.form.step1.branchName.placeholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
+            required
           />
         </div>
         {errors.branchName && (
@@ -1020,7 +1023,7 @@ const OnboardingBranch: React.FC = () => {
       {/* WhatsApp Phone Input */}
       <div>
         <label htmlFor="whatsappOrderNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {t('onboardingBranch.form.step1.whatsappNumber.label')}
+          {t('onboardingBranch.form.step1.whatsappNumber.label')} <span className="text-red-500">*</span>
         </label>
         <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
           {/* Country Code Selector */}
@@ -1034,6 +1037,7 @@ const OnboardingBranch: React.FC = () => {
               className={`h-full py-3 pl-3 pr-8 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
               aria-label={t('onboardingBranch.form.step1.whatsappNumber.ariaLabel')}
               dir={isRTL ? 'rtl' : 'ltr'}
+              required
             >
               {countries.map(country => (
                 <option key={country.name} value={country.code}>
@@ -1066,6 +1070,7 @@ const OnboardingBranch: React.FC = () => {
               } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
               placeholder={t('onboardingBranch.form.step1.whatsappNumber.placeholder')}
               dir={isRTL ? 'rtl' : 'ltr'}
+              required
             />
           </div>
         </div>
@@ -1134,6 +1139,8 @@ const OnboardingBranch: React.FC = () => {
               </div>
             </div>
           )}
+          
+        
         </div>
       </div>
     </div>
@@ -1143,7 +1150,7 @@ const OnboardingBranch: React.FC = () => {
     <div className="space-y-6">
       <div>
         <label htmlFor="address.country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {t('onboardingBranch.form.step2.country.label')}
+          {t('onboardingBranch.form.step2.country.label')} <span className="text-red-500">*</span>
         </label>
         <div className="relative">
           <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
@@ -1160,6 +1167,7 @@ const OnboardingBranch: React.FC = () => {
             } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingBranch.form.step2.country.placeholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
+            required
           />
         </div>
         {errors['createAddressDto.country'] && (
@@ -1169,7 +1177,7 @@ const OnboardingBranch: React.FC = () => {
 
       <div>
         <label htmlFor="address.city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {t('onboardingBranch.form.step2.city.label')}
+          {t('onboardingBranch.form.step2.city.label')} <span className="text-red-500">*</span>
         </label>
         <div className="relative">
           <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
@@ -1186,6 +1194,7 @@ const OnboardingBranch: React.FC = () => {
             } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingBranch.form.step2.city.placeholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
+            required
           />
         </div>
         {errors['createAddressDto.city'] && (
@@ -1302,65 +1311,10 @@ const OnboardingBranch: React.FC = () => {
   const renderStep3 = () => (
     <div className="space-y-6">
       
-      {/* Contact Phone Input */}
-      <div>
-        <label htmlFor="contact.phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {t('onboardingBranch.form.step3.phone.label')}
-        </label>
-        <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-          {/* Country Code Selector */}
-          <div className="relative">
-            <select
-              id="contactCountryCode"
-              name="contactCountryCode"
-              value={contactCountryCode}
-              onChange={handleContactCountryCodeChange}
-              className={`h-full py-3 pl-3 pr-8 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
-              aria-label={t('onboardingBranch.form.step3.phone.ariaLabel')}
-              dir={isRTL ? 'rtl' : 'ltr'}
-            >
-              {countries.map(country => (
-                <option key={country.name} value={country.code}>
-                  {country.name} ({country.code})
-                </option>
-              ))}
-            </select>
-            <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-2' : 'right-0 pr-2'} flex items-center pointer-events-none`}>
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
-          </div>
-
-          {/* Phone Number Input */}
-          <div className="relative flex-1">
-            <Phone className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10`} />
-            <input
-              id="contact.phone"
-              name="contact.phone"
-              type="tel"
-              autoComplete="tel-national"
-              maxLength={10}
-              value={formData.createContactDto.phone ||  ''}
-              onChange={handleContactNationalPhoneChange}
-              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                errors['createContactDto.phone']
-                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
-              placeholder={t('onboardingBranch.form.step3.phone.placeholder')}
-              dir={isRTL ? 'rtl' : 'ltr'}
-            />
-          </div>
-        </div>
-        {errors['createContactDto.phone'] && (
-          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors['createContactDto.phone']}</p>
-        )}
-      </div>
-
+     
       <div>
         <label htmlFor="contact.mail" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {t('onboardingBranch.form.step3.email.label')}
+          {t('onboardingBranch.form.step3.email.label')} <span className="text-red-500">*</span>
         </label>
         <div className="relative">
           <Mail className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
@@ -1377,6 +1331,7 @@ const OnboardingBranch: React.FC = () => {
             } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingBranch.form.step3.email.placeholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
+            required
           />
         </div>
         {errors['createContactDto.mail'] && (
@@ -1674,7 +1629,7 @@ const OnboardingBranch: React.FC = () => {
   return (
     <>
       <MapPickerModal />
-      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 mt-[100px] to-white dark:from-gray-900 dark:to-gray-800" dir={isRTL ? 'rtl' : 'ltr'}>
       <header className="bg-white dark:bg-gray-800 shadow-sm">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
           <div className="md:flex md:items-center md:justify-between">

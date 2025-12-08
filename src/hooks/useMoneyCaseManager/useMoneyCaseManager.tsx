@@ -215,74 +215,71 @@ export const useMoneyCaseManager = () => {
     }
   }, [state.selectedBranch, state.openingBalance, fetchQuickSummary, fetchHistory]);
 
-  // Close money case
-// Close money case
-// In useMoneyCaseManager.ts, update error handling:
 
-const handleCloseCase = useCallback(async () => {
-  if (!state.selectedBranch) {
-    setState(prev => ({ 
-      ...prev, 
-      error: 'Please select a branch first' 
-    }));
-    return;
-  }
-  
-  if (state.actualCash === undefined || state.actualCash === null) {
-    setState(prev => ({ 
-      ...prev, 
-      error: 'Please enter actual cash amount' 
-    }));
-    return;
-  }
-  
-  setState(prev => ({ ...prev, loading: true, error: null }));
-  try {
-    const result = await moneyCaseService.closeMoneyCase({
-      branchId: state.selectedBranch.branchId,
-      actualCash: state.actualCash,
-      notes: state.closingNotes
-    });
-    
-    
-    // Safely access difference with multiple fallbacks
-    const difference = result?.difference ?? result?.discrepancy ?? 0;
-    const formattedDifference = typeof difference === 'number' 
-      ? difference.toFixed(2) 
-      : '0.00';
-    
-    setState(prev => ({ 
-      ...prev, 
-      activeCase: null,
-      showCloseModal: false,
-      loading: false,
-      success: `Money case closed successfully! Difference: $${formattedDifference}`,
-      actualCash: 0,
-      closingNotes: ''
-    }));
-
-    // Refresh data
-    if (state.selectedBranch) {
-      await Promise.all([
-        fetchQuickSummary(state.selectedBranch.branchId),
-        fetchHistory(state.selectedBranch.branchId),
-        fetchActiveCase(state.selectedBranch.branchId)
-      ]);
+  const handleCloseCase = useCallback(async () => {
+    if (!state.selectedBranch) {
+      setState(prev => ({ 
+        ...prev, 
+        error: 'Please select a branch first' 
+      }));
+      return;
     }
+    
+    if (state.actualCash === undefined || state.actualCash === null) {
+      setState(prev => ({ 
+        ...prev, 
+        error: 'Please enter actual cash amount' 
+      }));
+      return;
+    }
+    
+    setState(prev => ({ ...prev, loading: true, error: null }));
+    try {
+      const result = await moneyCaseService.closeMoneyCase({
+        branchId: state.selectedBranch.branchId,
+        actualCash: state.actualCash,
+        notes: state.closingNotes
+      });
+      
+      
+      // Safely access difference with multiple fallbacks
+      const difference = result?.difference ?? result?.discrepancy ?? 0;
+      const formattedDifference = typeof difference === 'number' 
+        ? difference.toFixed(2) 
+        : '0.00';
+      
+      setState(prev => ({ 
+        ...prev, 
+        activeCase: null,
+        showCloseModal: false,
+        loading: false,
+        success: `Money case closed successfully! Difference: $${formattedDifference}`,
+        actualCash: 0,
+        closingNotes: ''
+      }));
 
-    // Clear success message after 5 seconds
-    setTimeout(() => {
-      setState(prev => ({ ...prev, success: null }));
-    }, 5000);
-  } catch (error: any) {
-    console.error('Error closing money case:', error);
-    setState(prev => ({ 
-      ...prev, 
-      error: error.message || 'Failed to close case',
-      loading: false 
-    }));
-  }
-}, [state.selectedBranch, state.actualCash, state.closingNotes, fetchQuickSummary, fetchHistory, fetchActiveCase]);
+      // Refresh data
+      if (state.selectedBranch) {
+        await Promise.all([
+          fetchQuickSummary(state.selectedBranch.branchId),
+          fetchHistory(state.selectedBranch.branchId),
+          fetchActiveCase(state.selectedBranch.branchId)
+        ]);
+      }
+
+      // Clear success message after 5 seconds
+      setTimeout(() => {
+        setState(prev => ({ ...prev, success: null }));
+      }, 5000);
+    } catch (error: any) {
+      console.error('Error closing money case:', error);
+      setState(prev => ({ 
+        ...prev, 
+        error: error.message || 'Failed to close case',
+        loading: false 
+      }));
+    }
+  }, [state.selectedBranch, state.actualCash, state.closingNotes, fetchQuickSummary, fetchHistory, fetchActiveCase]);
 
   // Fetch Z Report
   const fetchZReport = useCallback(async (moneyCaseId: number) => {

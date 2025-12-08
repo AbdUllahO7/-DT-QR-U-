@@ -6,10 +6,10 @@ import {
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { logger } from '../../../utils/logger';
-import { CreateProductExtraData, ProductExtra, UpdateProductExtraData, Extra } from '../../../types/Extras/type';
 import { productExtrasService } from '../../../services/Extras/ProductExtrasService';
 import { extrasService } from '../../../services/Extras/ExtrasService';
 import { ConfirmationModal } from './ConfirmationModal';
+import { CreateProductExtraData, Extra, ProductExtra, UpdateProductExtraData } from '../../../types/Extras/type';
 // Import ConfirmationModal here
 
 interface ProductExtrasManagementModalProps {
@@ -55,7 +55,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
     selectionMode: 0, // 0: Single, 1: Multiple
     defaultQuantity: 1,
     defaultMinQuantity: 0,
-    defaultMaxQuantity: 10,
+    defaultMaxQuantity: 1,
     unitPrice: 0,
     isRequired: false
   });
@@ -64,7 +64,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
     selectionMode: 0,
     defaultQuantity: 1,
     defaultMinQuantity: 0,
-    defaultMaxQuantity: 10,
+    defaultMaxQuantity: 1,
     unitPrice: 0,
     isRequired: false
   });
@@ -130,14 +130,14 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
         selectionMode: 0,
         defaultQuantity: 1,
         defaultMinQuantity: 0,
-        defaultMaxQuantity: 10,
+        defaultMaxQuantity: 1,
         unitPrice: 0,
         isRequired: false
       });
       setShowAddForm(false);
-    } catch (error) {
+    } catch (error:any) {
       logger.error('Failed to add product extra:', error);
-      setError(t('error.saveFailed'));
+      setError(error.response?.data?.message );
     } finally {
       setIsSubmitting(false);
     }
@@ -353,19 +353,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                           </div>
                         </div>
 
-                        <div className="space-y-3 pt-2">
-                           <label className="flex items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                            <input
-                              type="checkbox"
-                              checked={formData.isRequired}
-                              onChange={(e) => setFormData({ ...formData, isRequired: e.target.checked })}
-                              className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                            />
-                            <span className="ml-3 text-sm font-medium text-gray-900 dark:text-white">
-                              {t('extrasManagement.productExtras.requiredExtra')}
-                            </span>
-                          </label>
-                        </div>
+                       
                       </div>
 
                       {/* Right Side: Logic */}
@@ -499,18 +487,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                                   {t('common.edit')}: {getExtraName(extra.extraId)}
                                 </h3>
-                                <div className="flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
-                                  <input
-                                    id={`edit-req-${extra.id}`}
-                                    type="checkbox"
-                                    checked={editFormData.isRequired}
-                                    onChange={(e) => setEditFormData({ ...editFormData, isRequired: e.target.checked })}
-                                    className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                                  />
-                                  <label htmlFor={`edit-req-${extra.id}`} className="ml-2 text-sm text-gray-700 dark:text-gray-300 font-medium cursor-pointer">
-                                    {t('extrasManagement.productExtras.requiredExtra')}
-                                  </label>
-                                </div>
+                               
                               </div>
 
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -565,7 +542,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                         title='Min'
                                         type="number"
                                         value={editFormData.defaultMinQuantity}
-                                        onChange={(e) => setEditFormData({ ...editFormData, defaultMinQuantity: parseInt(e.target.value) || 0 })}
+                                        onChange={(e) => setEditFormData({ ...editFormData, defaultMinQuantity: parseInt(e.target.value) || 1 })}
                                         className="w-full px-2 py-1.5 text-sm border rounded"
                                       />
                                     </div>
@@ -575,7 +552,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                         title='Max'
                                         type="number"
                                         value={editFormData.defaultMaxQuantity}
-                                        onChange={(e) => setEditFormData({ ...editFormData, defaultMaxQuantity: parseInt(e.target.value) || 10 })}
+                                        onChange={(e) => setEditFormData({ ...editFormData, defaultMaxQuantity: parseInt(e.target.value) || 1 })}
                                         className="w-full px-2 py-1.5 text-sm border rounded"
                                       />
                                     </div>

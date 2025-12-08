@@ -229,15 +229,15 @@ const TableCategoryModal: React.FC<Props> = ({
           setErrors({ general: error.response?.data?.message || t('TableCategoryModal.invalidData') });
         }
       } else if (error.response?.status === 401) {
-        setErrors({ general: t('TableCategoryModal.unauthorized') });
+        setErrors({ general: error.response?.data?.message  });
       } else if (error.response?.status === 403) {
-        setErrors({ general: t('TableCategoryModal.forbidden') });
+        setErrors({ general: error.response?.data?.message  });
       } else if (error.response?.status === 404) {
-        setErrors({ general: t('TableCategoryModal.branchNotFound') });
+        setErrors({ general: error.response?.data?.message });
       } else if (error.response?.status >= 500) {
-        setErrors({ general: t('TableCategoryModal.serverError') });
+        setErrors({ general: error.response?.data?.message  });
       } else {
-        setErrors({ general: t('TableCategoryModal.unexpectedError') });
+        setErrors({ general: error.response?.data?.message });
       }
     } finally {
       setIsSubmitting(false);

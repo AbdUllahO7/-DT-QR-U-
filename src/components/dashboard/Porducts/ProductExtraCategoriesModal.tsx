@@ -119,9 +119,9 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
         maxTotalQuantity: 10
       });
       setShowAddForm(false);
-    } catch (error) {
+    } catch (error:any) {
       logger.error('Failed to add product extra category:', error);
-      setError(t('error.saveFailed'));
+      setError(error.response?.data?.message );
     } finally {
       setIsSubmitting(false);
     }

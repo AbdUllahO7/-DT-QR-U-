@@ -66,98 +66,87 @@ class OrderService {
     }
   }
 
-async getBranchOrders(
-  branchId?: number, 
-  page: number = 1, 
-  pageSize: number = 10
-): Promise<{ orders: BranchOrder[], totalItems: number, totalPages: number }> {
-  // ✅ Add validation to prevent pageSize = 0
-  const validPageSize = pageSize > 0 ? pageSize : 10;
-  const validPage = page > 0 ? page : 1;
-  
-  const requestKey = `branch-${branchId}-${validPage}-${validPageSize}`;
-  
-  if (this.pendingConfigs.has(requestKey)) {
-    console.log('⏸️ Request already pending:', requestKey);
-    return { orders: [], totalItems: 0, totalPages: 0 };
-  }
-  
-  if (this.activeRequests.has(requestKey)) {
-    console.log('🔄 Reusing existing request:', requestKey);
-    return this.activeRequests.get(requestKey)!;
-  }
-
-  try {
-    this.pendingConfigs.add(requestKey);
+  async getBranchOrders(
+    branchId?: number, 
+    page: number = 1, 
+    pageSize: number = 10
+  ): Promise<{ orders: BranchOrder[], totalItems: number, totalPages: number }> {
+    // ✅ Add validation to prevent pageSize = 0
+    const validPageSize = pageSize > 0 ? pageSize : 10;
+    const validPage = page > 0 ? page : 1;
     
-    logger.info('Branch orders getirme isteği başlatılıyor', { 
-      branchId, 
-      page: validPage, 
-      pageSize: validPageSize 
-    }, { prefix: 'OrderService' });
+    const requestKey = `branch-${branchId}-${validPage}-${validPageSize}`;
     
-    const params: any = {
-      page: validPage,
-      pageSize: validPageSize,
-      includeItems: true
-    };
-    
-    if (branchId) {
-      params.branchId = branchId;
+    if (this.pendingConfigs.has(requestKey)) {
+      return { orders: [], totalItems: 0, totalPages: 0 };
     }
     
-    console.log("📤 API Request params:", params);
-    
-    const requestPromise = httpClient.get(`${this.baseUrl}/branch`, { params })
-      .then(response => {
-        const responseData = response.data;
-        let orders: BranchOrder[] = [];
-        let totalItems = 0;
-        let totalPages = 1;
-        
-        if (responseData && typeof responseData === 'object' && 'items' in responseData) {
-          orders = Array.isArray(responseData.items) ? responseData.items : [];
-          totalPages = responseData.totalPages || 1;
-          totalItems = responseData.totalCount || responseData.totalItems || 0;
-        }
-        
-        console.log("🎯 OrderService Final result:", {
-          ordersLength: orders.length,
-          totalItems,
-          totalPages,
-          page: validPage,
-          pageSize: validPageSize
+    if (this.activeRequests.has(requestKey)) {
+      return this.activeRequests.get(requestKey)!;
+    }
+
+    try {
+      this.pendingConfigs.add(requestKey);
+      
+      logger.info('Branch orders getirme isteği başlatılıyor', { 
+        branchId, 
+        page: validPage, 
+        pageSize: validPageSize 
+      }, { prefix: 'OrderService' });
+      
+      const params: any = {
+        page: validPage,
+        pageSize: validPageSize,
+        includeItems: true
+      };
+      
+      if (branchId) {
+        params.branchId = branchId;
+      }
+      
+      
+      const requestPromise = httpClient.get(`${this.baseUrl}/branch`, { params })
+        .then(response => {
+          const responseData = response.data;
+          let orders: BranchOrder[] = [];
+          let totalItems = 0;
+          let totalPages = 1;
+          
+          if (responseData && typeof responseData === 'object' && 'items' in responseData) {
+            orders = Array.isArray(responseData.items) ? responseData.items : [];
+            totalPages = responseData.totalPages || 1;
+            totalItems = responseData.totalCount || responseData.totalItems || 0;
+          }
+          
+     
+          return {
+            orders,
+            totalItems,
+            totalPages
+          };
+        })
+        .finally(() => {
+          this.activeRequests.delete(requestKey);
+          this.pendingConfigs.delete(requestKey);
         });
-        
-        return {
-          orders,
-          totalItems,
-          totalPages
-        };
-      })
-      .finally(() => {
-        this.activeRequests.delete(requestKey);
-        this.pendingConfigs.delete(requestKey);
-      });
-    
-    this.activeRequests.set(requestKey, requestPromise);
-    return await requestPromise;
-    
-  } catch (error: any) {
-    this.activeRequests.delete(requestKey);
-    this.pendingConfigs.delete(requestKey);
-    logger.error('Branch orders getirme hatası', error, { prefix: 'OrderService' });
-    this.handleError(error, 'Branch orders getirilirken hata oluştu');
-    return { orders: [], totalItems: 0, totalPages: 0 };
+      
+      this.activeRequests.set(requestKey, requestPromise);
+      return await requestPromise;
+      
+    } catch (error: any) {
+      this.activeRequests.delete(requestKey);
+      this.pendingConfigs.delete(requestKey);
+      logger.error('Branch orders getirme hatası', error, { prefix: 'OrderService' });
+      this.handleError(error, 'Branch orders getirilirken hata oluştu');
+      return { orders: [], totalItems: 0, totalPages: 0 };
+    }
   }
-}
 
   // Similar pattern for getPendingOrders
   async getPendingOrders(branchId?: number): Promise<PendingOrder[]> {
     const requestKey = `pending-${branchId}`;
     
     if (this.activeRequests.has(requestKey)) {
-      console.log('🔄 Reusing existing pending request:', requestKey);
       return this.activeRequests.get(requestKey)!;
     }
 
@@ -170,7 +159,6 @@ async getBranchOrders(
       
       const requestPromise = httpClient.get<PendingOrder[]>(url)
         .then(response => {
-          console.log("response Pending", response);
           const orders = Array.isArray(response.data) ? response.data : [];
           logger.info('Pending orders başarıyla alındı', { 
             branchId,

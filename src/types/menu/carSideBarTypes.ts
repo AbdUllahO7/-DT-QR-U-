@@ -11,7 +11,6 @@ export interface OrderForm {
   deliveryAddress?: string;
   customerPhone?: string;
   paymentMethod: string;
-  tableNumber?: string;
 }
 
 export interface OrderTotal {
@@ -25,7 +24,6 @@ export interface OrderFormProps {
   setOrderForm: React.Dispatch<React.SetStateAction<OrderForm>>;
   orderTypes: OrderType[];
   loadingOrderTypes: boolean;
-   tableNumber?: string;
   orderTotal: OrderTotal;
   estimatedTime: number;
   totalPrice: number;
@@ -125,11 +123,14 @@ export interface CartContentProps {
   totalPrice: number
   loading: boolean
   onProceedToOrder: () => void
-  onQuantityIncrease: (basketItemId?: number) => Promise<void>
-  onQuantityDecrease: (basketItemId?: number) => Promise<void>
-  onAddonQuantityIncrease: (addonBasketItemId: number) => Promise<void>
-  onRemoveFromBasket: (basketItemId: number) => Promise<void>
-  canIncreaseAddonQuantity: (addon: CartItemAddon) => boolean
-  canDecreaseAddonQuantity: (addon: CartItemAddon) => boolean
-  getAddonQuantityError: (addon: CartItemAddon) => string | null
+  onQuantityIncrease: (basketItemId?: number) => void
+  onQuantityDecrease: (basketItemId?: number) => void
+  onAddonQuantityIncrease: (basketItemId: number) => void
+  onRemoveFromBasket: (basketItemId: number) => void
+  canIncreaseAddonQuantity: (addon: any) => boolean
+  canDecreaseAddonQuantity: (addon: any) => boolean
+  getAddonQuantityError: (addon: any) => string | null
+  onExtraToggle?: (branchProductExtraId: number, basketItemId: number, currentIsRemoval: boolean) => void
+  onExtraQuantityIncrease?: (branchProductExtraId: number, basketItemId: number) => void
+  onExtraQuantityDecrease?: (branchProductExtraId: number, basketItemId: number) => void
 }

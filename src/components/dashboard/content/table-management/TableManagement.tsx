@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, Users, Plus, Trash2, MapPin, Edit2, MoreVertical } from 'lucide-react';
+import { ChevronDown, Users, Plus, Trash2, MapPin, Edit2, MoreVertical, LayoutGrid } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside, useSignalR } from '../../../../hooks';
 import { SignalRCallbacks } from '../../../../types/signalR';
@@ -135,7 +135,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
       });
     } catch (error:any) {
       logger.error('Masalar ve kategoriler yüklenirken hata:', error);
-               setError(error.response.data.message);
+      setError(error.response.data.message);
 
     } finally {
       setIsLoading(false);
@@ -167,7 +167,15 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     setIsBranchDropdownOpen(false);
   };
 
+  // ✅ UPDATED: Validation logic added here
   const handleCreateTable = () => {
+    // Check if there are no categories
+    if (categories.length === 0) {
+      setError(t('tableManagement.error.createCategoryFirst') || 'Please create a table category first.');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     setEditingTable(null);
     setIsModalOpen(true);
   };
@@ -229,7 +237,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         errorMessage = error.message;
       }
       
-               setError(error.response.data.message);
+      setError(error.response.data.message);
 
       
       setTimeout(() => setError(null), 5000);
@@ -263,7 +271,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
       logger.info('Table status updated:', { id, newStatus });
     } catch (error:any) {
       logger.error('Masa durumu güncellenirken hata:', error);
-               setError(error.response.data.message);
+      setError(error.response.data.message);
 
       
       setTables(prev => prev.map(table =>
@@ -351,7 +359,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         errorMessage = error.message;
       }
       
-               setError(error.response.data.message);
+      setError(error.response.data.message);
 
       setTimeout(() => setError(null), 5000);
       
@@ -371,11 +379,11 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     setEditingCategory(null);
   };
 
-const handleCategoryModalSuccess = () => {
-  fetchTablesAndCategories();
-  setIsCategoryModalOpen(false);
-  setEditingCategory(null);
-};
+  const handleCategoryModalSuccess = () => {
+    fetchTablesAndCategories();
+    setIsCategoryModalOpen(false);
+    setEditingCategory(null);
+  };
 
   const toggleCategoryMenu = (categoryId: number) => {
     setOpenCategoryMenu(openCategoryMenu === categoryId ? null : categoryId);
@@ -488,7 +496,17 @@ const handleCategoryModalSuccess = () => {
               )}
             </div>
 
-            {/* Action Buttons */}
+            <button
+              onClick={handleCreateTable}
+              disabled={categories.length === 0}
+              className={`inline-flex items-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-xl shadow-md text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200 ${isRTL ? 'flex-row-reverse' : ''}`}
+              title={categories.length === 0 ? t('tableManagement.error.createCategoryFirst') || 'Create a category first' : ''}
+            >
+              <LayoutGrid className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+              {t('tableManagement.addTable') || 'Add Table'}
+            </button>
+
+            {/* Add Category Button */}
             <button
               onClick={handleCreateCategory}
               className={`inline-flex items-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-xl shadow-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 ${isRTL ? 'flex-row-reverse' : ''}`}

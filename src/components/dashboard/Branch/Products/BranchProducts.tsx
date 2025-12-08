@@ -20,6 +20,8 @@ import { BranchProductAddon } from '../../../../services/Branch/BranchService';
 import { branchProductAddonsService } from '../../../../services/Branch/BranchAddonsService';
 import { BranchCategory, Category, DetailedProduct, EditedCategoryName, EditedProductPrice, ProductAddonData } from '../../../../types/BranchManagement/type';
 import BranchProductAddonsModal from './BranchProductAddonsModal';
+import { branchProductExtrasService } from '../../../../services/Branch/Extras/BranchProductExtrasService';
+import BranchProductExtraCategoriesModal from './BranchProductExtraCategoriesModal';
 
 interface BranchCategoriesProps {
   branchId?: number;
@@ -32,7 +34,7 @@ enum AdditionStep {
 }
 
 
-const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => {
+const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
   // Translation hook
   const { t, isRTL } = useLanguage();
 
@@ -68,6 +70,11 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isReordering, setIsReordering] = useState(false);
+
+  // Extra categories modal states
+  const [selectedProductForExtras, setSelectedProductForExtras] = useState<DetailedProduct | null>(null);
+  const [isProductExtrasModalOpen, setIsProductExtrasModalOpen] = useState(false);
+
   
   // Delete confirmation modal states
   const [deleteModal, setDeleteModal] = useState<{
@@ -92,6 +99,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
   useEffect(() => {
     fetchAvailableAddons();
   }, []);
+
 
   // New addon management functions
   const fetchAvailableAddons = async () => {
@@ -619,207 +627,224 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
     }
   };
 
-  const fetchBranchCategoriesWithProducts = async () => {
-    setIsLoadingBranchProducts(true);
-    
-    try {
-      // Get all branch products with full details including ingredients and allergens
-      const branchProducts = await branchProductService.getBranchProductsWithDetails();
+ const fetchBranchCategoriesWithProducts = async () => {
+  setIsLoadingBranchProducts(true);
+  
+  try {
+    const branchProducts = await branchProductService.getBranchProductsWithDetails();
 
-      // Enhanced categories with both selected and available products
-      const categoriesWithProducts = await Promise.all(
-        branchCategories.map(async (branchCategory) => {
-          try {
-            // Get branch products for this category (SELECTED products)
-            const selectedProducts = branchProducts.filter(branchProduct => {
-              const matches = branchProduct.branchCategory?.categoryId === branchCategory.categoryId;
-              return matches;
-            });
+    const categoriesWithProducts = await Promise.all(
+      branchCategories.map(async (branchCategory) => {
+        try {
+          const selectedProducts = branchProducts.filter(branchProduct => {
+            const matches = branchProduct.branchCategory?.categoryId === branchCategory.categoryId;
+            return matches;
+          });
 
-            // Transform selected branch products with proper ID mapping
-            const transformedSelectedProducts: DetailedProduct[] = await Promise.all(
-              selectedProducts.map(async (branchProduct) => {
-                //  Determine the correct product ID
-                const productId = branchProduct.originalProductId;
+          const transformedSelectedProducts: DetailedProduct[] = await Promise.all(
+            selectedProducts.map(async (branchProduct) => {
+              const productId = branchProduct.originalProductId;
 
-                //  Safety check - if we still don't have an ID, log error
-                if (!productId) {
-                  console.error('❌ Cannot determine product ID for branch product:', branchProduct);
+              if (!productId) {
+                console.error('❌ Cannot determine product ID for branch product:', branchProduct);
+              }
+
+              // Fetch addon and extras counts in parallel
+              let addonsCount = 0;
+              let hasAddons = false;
+              let extrasCount = 0;
+              let hasExtras = false;
+              let extraCategoriesCount = 0;
+              let hasExtraCategories = false;
+              
+              if (branchProduct.branchProductId) {
+                try {
+                  // Fetch both addons and extras simultaneously
+                  const [existingAddons, existingExtras] = await Promise.all([
+                    branchProductAddonsService.getBranchProductAddons(branchProduct.branchProductId),
+                    branchProductExtrasService.getBranchProductExtrasByBranchProductId(branchProduct.branchProductId)
+                  ]);
+
+                  
+                  
+                  // Process addons
+                  addonsCount = existingAddons.length;
+                  hasAddons = addonsCount > 0;
+                  
+                  // Process extras
+                  extrasCount = existingExtras.length;
+                  hasExtras = extrasCount > 0;
+                  
+                  // Count unique categories
+                  const uniqueCategories = new Set(
+                    existingExtras.map(extra => extra.categoryName).filter(Boolean)
+                  );
+                  extraCategoriesCount = uniqueCategories.size;
+                  hasExtraCategories = extraCategoriesCount > 0;
+                } catch (err) {
+                  console.warn('Failed to fetch addons/extras for product:', branchProduct.branchProductId, err);
                 }
+              }
 
-                // Fetch addon count for this branch product
-                let addonsCount = 0;
-                let hasAddons = false;
+              const transformed: DetailedProduct = {
+                id: productId,
+                branchProductId: branchProduct.branchProductId,
+                originalProductId: productId,
+                name: branchProduct.name,
+                description: branchProduct?.description,
+                price: branchProduct.price,
+                imageUrl: branchProduct?.imageUrl,
+                status: branchProduct.status,
+                displayOrder: branchProduct.displayOrder,
+                isSelected: true,
                 
-                if (branchProduct.branchProductId) {
-                  try {
-                    const existingAddons = await branchProductAddonsService.getBranchProductAddons(branchProduct.branchProductId);
-                    addonsCount = existingAddons.length;
-                    hasAddons = addonsCount > 0;
-                  } catch (err) {
-                    console.warn('Failed to fetch addons for product:', branchProduct.branchProductId, err);
-                  }
-                }
+                // Addon fields
+                addonsCount,
+                hasAddons,
+                
+                // Extras fields (NEW!)
+                extrasCount,
+                hasExtras,
+                extraCategoriesCount,
+                hasExtraCategories,
+                
+                allergens: branchProduct.allergens
+                  ? branchProduct.allergens.map((a: any, idx: number) => ({
+                      id: a.id ?? a.allergenId ?? idx + 1,
+                      allergenId: a.allergenId ?? idx + 1,
+                      allergenCode: a.code ?? '',
+                      code: typeof a.code === 'string' ? a.code : a.code ?? '',
+                      name: a.name ?? '',
+                      icon: a.icon ?? '',
+                      note: a.note ?? '',
+                      description: a.description ?? null,
+                      productCount: a.productCount ?? 0,
+                      containsAllergen: a.containsAllergen ?? false,
+                      presence: a.presence ?? '',
+                      displayOrder: a.displayOrder ?? idx + 1,
+                    }))
+                  : [],
+                
+                ingredients: branchProduct.ingredients
+                  ? branchProduct.ingredients.map((i: any, idx: number) => ({
+                      id: i.id ?? idx + 1,
+                      ingredientId: i.ingredientId ?? 0,
+                      name: i.ingredientName ?? '',
+                      ingredientName: i.ingredientName ?? '',
+                      productId: i.productId ?? productId,
+                      quantity: i.quantity ?? 0,
+                      unit: i.unit ?? '',
+                      isAllergenic: i.isAllergenic ?? false,
+                      isAvailable: i.isAvailable ?? true,
+                      allergenIds: i.allergenIds ?? [],
+                      allergens: i.allergens
+                        ? i.allergens.map((a: any, aidx: number) => ({
+                            id: a.id ?? a.allergenId ?? aidx + 1,
+                            allergenId: a.allergenId ?? aidx + 1,
+                            allergenCode: a.code ?? '',
+                            code: typeof a.code === 'string' ? a.code : a.code ?? '',
+                            name: a.name ?? '',
+                            icon: a.icon ?? '',
+                            note: a.note ?? '',
+                            description: a.description ?? null,
+                            productCount: a.productCount ?? 0,
+                            containsAllergen: a.containsAllergen ?? false,
+                            presence: a.presence ?? '',
+                          }))
+                        : [],
+                      restaurantId: i.restaurantId ?? 0,
+                      products: i.products ?? [],
+                      productIngredients: i.productIngredients ?? [],
+                    }))
+                  : [],
+              };
 
-                const transformed: DetailedProduct = {
-                  //  Use the correct field for product ID
-                  id: productId,
-                  
-                  branchProductId: branchProduct.branchProductId, 
-                  
-                  //  Store original product ID correctly
-                  originalProductId: productId,
-                  
-                  name: branchProduct.name,
-                  description: branchProduct?.description,
-                  price: branchProduct.price, 
-                  imageUrl: branchProduct?.imageUrl,
-                  status: branchProduct.status,
-                  displayOrder: branchProduct.displayOrder,
-                  isSelected: true,
-                  
-                  // New addon fields
-                  addonsCount,
-                  hasAddons,
-                  
-                  allergens: branchProduct.allergens
-                    ? branchProduct.allergens.map((a: any, idx: number) => ({
-                        id: a.id ?? a.allergenId ?? idx + 1,
-                        allergenId: a.allergenId ?? idx + 1,
-                        allergenCode: a.code ?? '',
-                        code: typeof a.code === 'string' ? a.code : a.code ?? '',
-                        name: a.name ?? '',
-                        icon: a.icon ?? '',
-                        note: a.note ?? '',
-                        description: a.description ?? null,
-                        productCount: a.productCount ?? 0,
-                        containsAllergen: a.containsAllergen ?? false,
-                        presence: a.presence ?? '',
-                        displayOrder: a.displayOrder ?? idx + 1,
-                      }))
-                    : [],
-                  
-                  ingredients: branchProduct.ingredients
-                    ? branchProduct.ingredients.map((i: any, idx: number) => ({
-                        id: i.id ?? idx + 1,
-                        ingredientId: i.ingredientId ?? 0,
-                        name: i.ingredientName ?? '',
-                        ingredientName: i.ingredientName ?? '',
-                        productId: i.productId ?? productId, 
-                        quantity: i.quantity ?? 0,
-                        unit: i.unit ?? '',
-                        isAllergenic: i.isAllergenic ?? false,
-                        isAvailable: i.isAvailable ?? true,
-                        allergenIds: i.allergenIds ?? [],
-                        allergens: i.allergens
-                          ? i.allergens.map((a: any, aidx: number) => ({
-                              id: a.id ?? a.allergenId ?? aidx + 1,
-                              allergenId: a.allergenId ?? aidx + 1,
-                              allergenCode: a.code ?? '',
-                              code: typeof a.code === 'string' ? a.code : a.code ?? '',
-                              name: a.name ?? '',
-                              icon: a.icon ?? '',
-                              note: a.note ?? '',
-                              description: a.description ?? null,
-                              productCount: a.productCount ?? 0,
-                              containsAllergen: a.containsAllergen ?? false,
-                              presence: a.presence ?? '',
-                            }))
-                          : [],
-                        restaurantId: i.restaurantId ?? 0,
-                        products: i.products ?? [],
-                        productIngredients: i.productIngredients ?? [],
-                      }))
-                    : [],
-                };
+              return transformed;
+            })
+          );
 
-                return transformed;
-              })
-            );
+          const allAvailableProducts = await branchCategoryService.getAvailableProductsForBranch({
+            categoryId: branchCategory.categoryId,
+            onlyActive: true,
+            includes: 'category,ingredients,allergens,addons'
+          });
 
-            // Get all available products for this category
-            const allAvailableProducts = await branchCategoryService.getAvailableProductsForBranch({
-              categoryId: branchCategory.categoryId,
-              onlyActive: true,
-              includes: 'category,ingredients,allergens,addons'
-            });
+          const transformedAvailableProducts: DetailedProduct[] = allAvailableProducts.map(product => ({
+            id: product.productId,
+            productId: product.productId,
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            imageUrl: product.imageUrl,
+            isAvailable: product.status,
+            status: product.status,
+            displayOrder: product.displayOrder,
+            categoryId: branchCategory.categoryId,
+            isSelected: false,
+            originalProductId: product.productId,
+            addonsCount: 0,
+            hasAddons: false,
+            extrasCount: 0,
+            hasExtras: false,
+            extraCategoriesCount: 0,
+            hasExtraCategories: false
+          }));
 
-            // Transform available products to expected format
-            const transformedAvailableProducts: DetailedProduct[] = allAvailableProducts.map(product => ({
-              id: product.productId,
-              productId: product.productId,
-              name: product.name,
-              description: product.description,
-              price: product.price,
-              imageUrl: product.imageUrl,
-              isAvailable: product.status,
-              status: product.status,
-              displayOrder: product.displayOrder,
-              categoryId: branchCategory.categoryId,
-              isSelected: false,
-              originalProductId: product.productId,
-              addonsCount: 0,
-              hasAddons: false
-            }));
+          const selectedProductIds = new Set(transformedSelectedProducts.map(p => p.id).filter(Boolean));
+          const unselectedProducts = transformedAvailableProducts.filter(product => {
+            return !selectedProductIds.has(product.id);
+          });
 
-            // Filter out products that are already selected (to get UNSELECTED products)
-            const selectedProductIds = new Set(transformedSelectedProducts.map(p => p.id).filter(Boolean)); 
-            const unselectedProducts = transformedAvailableProducts.filter(product => {
-              return !selectedProductIds.has(product.id);
-            });
+          const allProducts: DetailedProduct[] = [
+            ...transformedSelectedProducts.filter(p => p.id),
+            ...unselectedProducts
+          ];
 
-            // Combine selected and unselected products
-            const allProducts: DetailedProduct[] = [
-              ...transformedSelectedProducts.filter(p => p.id), // ✅ Only include products with valid IDs
-              ...unselectedProducts
-            ];
+          allProducts.sort((a, b) => {
+            if (a.isSelected && !b.isSelected) return -1;
+            if (!a.isSelected && b.isSelected) return 1;
+            return (a.displayOrder || 0) - (b.displayOrder || 0);
+          });
 
-            // Sort products: selected first, then by display order
-            allProducts.sort((a, b) => {
-              if (a.isSelected && !b.isSelected) return -1;
-              if (!a.isSelected && b.isSelected) return 1;
-              return (a.displayOrder || 0) - (b.displayOrder || 0);
-            });
+          return {
+            ...branchCategory,
+            products: allProducts,
+            selectedProductsCount: transformedSelectedProducts.filter(p => p.id).length,
+            unselectedProductsCount: unselectedProducts.length
+          };
+        } catch (err) {
+          console.error(`Error fetching products for category ${branchCategory.categoryId}:`, err);
+          return {
+            ...branchCategory,
+            products: [],
+            selectedProductsCount: 0,
+            unselectedProductsCount: 0
+          };
+        }
+      })
+    );
+    
+    setBranchCategories(categoriesWithProducts);
+    setOriginalBranchCategories([...categoriesWithProducts]);
+  } catch (err: any) {
+    console.error('❌ Error fetching branch categories with detailed products:', err);
+    setBranchCategories(prev => prev.map(cat => ({
+      ...cat,
+      products: [],
+      selectedProductsCount: 0,
+      unselectedProductsCount: 0
+    })));
+    setOriginalBranchCategories(prev => prev.map(cat => ({
+      ...cat,
+      products: [],
+      selectedProductsCount: 0,
+      unselectedProductsCount: 0
+    })));
+  } finally {
+    setIsLoadingBranchProducts(false);
+  }
+};
 
-      
-
-            return {
-              ...branchCategory,
-              products: allProducts,
-              selectedProductsCount: transformedSelectedProducts.filter(p => p.id).length, 
-              unselectedProductsCount: unselectedProducts.length
-            };
-          } catch (err) {
-            console.error(`Error fetching products for category ${branchCategory.categoryId}:`, err);
-            return {
-              ...branchCategory,
-              products: [],
-              selectedProductsCount: 0,
-              unselectedProductsCount: 0
-            };
-          }
-        })
-      );
-      setBranchCategories(categoriesWithProducts);
-      setOriginalBranchCategories([...categoriesWithProducts]);
-    } catch (err: any) {
-      console.error('❌ Error fetching branch categories with detailed products:', err);
-      setBranchCategories(prev => prev.map(cat => ({ 
-        ...cat, 
-        products: [], 
-        selectedProductsCount: 0,
-        unselectedProductsCount: 0 
-      })));
-      setOriginalBranchCategories(prev => prev.map(cat => ({ 
-        ...cat, 
-        products: [], 
-        selectedProductsCount: 0,
-        unselectedProductsCount: 0 
-      })));
-    } finally {
-      setIsLoadingBranchProducts(false);
-    }
-  };
 
   const fetchProductsForSelectedCategories = async () => {
     if (selectedCategories.size === 0) return;
@@ -1028,10 +1053,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId = 1 }) => 
   };
 
   const handleSave = async () => {
-    if (!branchId) {
-      setError(t('branchCategories.error.branchIdRequired') || 'Branch ID is required');
-      return;
-    }
+  
 
     if (selectedCategories.size === 0) {
       setError(t('branchCategories.error.selectAtLeastOne') || 'Please select at least one category');
@@ -1386,6 +1408,7 @@ const handleRemoveProductFromCategory = async (branchProductId: number, productN
     }
 };
 
+
   // Reordering functions
   const handleMoveUp = (index: number) => {
       const category = branchCategories[index];
@@ -1417,9 +1440,9 @@ const handleRemoveProductFromCategory = async (branchProductId: number, productN
       setBranchCategories(newCategories);
     }
   };
-const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAddon[] => {
-  return availableAddons
-};
+  const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAddon[] => {
+    return availableAddons
+  };
   const handleSaveOrder = async () => {
     setIsReordering(true);
     setError(null);
@@ -1444,6 +1467,53 @@ const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAdd
     }
   };
 
+  const handleShowProductExtras = async (product: DetailedProduct) => {
+  if (!product.branchProductId) {
+    setError('Product must be added to branch first before configuring extras');
+    return;
+  }
+
+  setSelectedProductForExtras(product);
+  setIsProductExtrasModalOpen(true);
+};
+
+const handleCloseProductExtras = async () => {
+  setSelectedProductForExtras(null);
+  setIsProductExtrasModalOpen(false);
+  
+  // Refresh branch categories to get updated extras count
+  if (activeTab === 'manage') {
+    await fetchBranchCategoriesWithProducts();
+  }
+};
+
+const handleSaveProductExtras = async (
+  branchProductId: number,
+  selectedCategoryIds: number[],
+  selectedExtraIds: number[]
+) => {
+  // Update local state to reflect new counts
+  const newExtrasCount = selectedExtraIds.length;
+  const newCategoriesCount = selectedCategoryIds.length;
+
+  setBranchCategories(prev =>
+    prev.map(category => ({
+      ...category,
+      products: category.products?.map(product =>
+        product.branchProductId === branchProductId
+          ? {
+              ...product,
+              extrasCount: newExtrasCount,
+              hasExtras: newExtrasCount > 0,
+              extraCategoriesCount: newCategoriesCount,
+              hasExtraCategories: newCategoriesCount > 0,
+            }
+          : product
+      ),
+    }))
+  );
+  
+};
   return (
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -1568,7 +1638,7 @@ const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAdd
         )}
 
         {/* Main Content */}
-     <CategoriesContent
+    <CategoriesContent
         activeTab={activeTab}
         branchId={branchId}
         categories={categories}
@@ -1597,6 +1667,7 @@ const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAdd
         setEditingProductId={setEditingProductId}
         setEditingCategoryId={setEditingCategoryId}
         handleShowProductAddons={handleShowProductAddons}
+        handleShowProductExtras={handleShowProductExtras}  // ADD THIS LINE
         handleShowProductDetails={handleShowProductDetails}
         onCategorySelect={handleCategorySelect}
         onProductSelect={handleProductSelect}
@@ -1629,8 +1700,17 @@ const getAvailableAddonsForProduct = (branchProductId: number): BranchProductAdd
         onCategoryNameCancel={handleCategoryNameCancel}
         getProductPrice={getProductPrice}
         getCategoryName={getCategoryName}
-        isCategoryActive={isCategoryActive}  
+        isCategoryActive={isCategoryActive}
       />
+
+      <BranchProductExtraCategoriesModal
+          isOpen={isProductExtrasModalOpen}
+          onClose={handleCloseProductExtras}
+          branchProductId={selectedProductForExtras?.branchProductId || 0}
+          productName={selectedProductForExtras?.name || ''}
+          onSave={handleSaveProductExtras}
+          isLoading={isLoading}
+        />
 
         {/* Delete Confirmation Modal */}
         <ConfirmDeleteModal

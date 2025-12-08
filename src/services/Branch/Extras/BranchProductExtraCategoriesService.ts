@@ -6,11 +6,23 @@ class BranchProductExtraCategoriesService {
   private baseUrl = '/api/BranchProductExtraCategories';
 
   // Get all branch product extra categories
-  async getBranchProductExtraCategories(): Promise<BranchProductExtraCategory[]> {
+  async getBranchProductExtraCategories(params?: {
+    branchProductId?: number;
+    branchId?: number;
+    onlyActive?: boolean;
+  }): Promise<BranchProductExtraCategory[]> {
     try {
       logger.info('Branch product extra categories listesi getiriliyor');
 
-      const response = await httpClient.get<APIBranchProductExtraCategory[]>(this.baseUrl);
+      const response = await httpClient.get<APIBranchProductExtraCategory[]>(this.baseUrl , 
+        {
+          params: {
+            branchProductId: params?.branchProductId,
+            branchId: params?.branchId,
+            onlyActive: params?.onlyActive,
+          },
+      }
+      );
 
       logger.info('Branch product extra categories listesi başarıyla getirildi', {
         count: response.data.length,
@@ -72,17 +84,28 @@ class BranchProductExtraCategoriesService {
     }
   }
 
-  // Get available extra categories
-  async getAvailableExtraCategories(): Promise<AvailableExtraCategory[]> {
+  // Get available extra categories with optional filters
+  async getAvailableExtraCategories(params?: {
+    branchProductId?: number;
+    branchId?: number;
+    onlyActive?: boolean;
+  }): Promise<AvailableExtraCategory[]> {
     try {
-      logger.info('Mevcut extra categories listesi getiriliyor');
+      logger.info('Mevcut extra categories listesi getiriliyor', { params });
 
-      const response = await httpClient.get<AvailableExtraCategory[]>(`${this.baseUrl}/available`);
 
+      const response = await httpClient.get<AvailableExtraCategory[]>(`${this.baseUrl}/available`, {
+          params: {
+            branchProductId: params?.branchProductId,
+            branchId: params?.branchId,
+            onlyActive: params?.onlyActive,
+          },
+      });
+      
+      
       logger.info('Mevcut extra categories listesi başarıyla getirildi', {
         count: response.data.length,
       });
-
       return response.data;
     } catch (error: any) {
       logger.error('❌ Mevcut extra categories listesi getirilirken hata:', error);
@@ -167,4 +190,5 @@ class BranchProductExtraCategoriesService {
     }
   }
 }
+
 export const branchProductExtraCategoriesService = new BranchProductExtraCategoriesService();

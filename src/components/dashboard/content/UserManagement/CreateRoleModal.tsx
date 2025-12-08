@@ -144,7 +144,6 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
         payload.branchId = Number(formData.branchId);
       }
 
-      console.log("form data payload", payload);
 
       const response = await roleService.createRole(payload); 
       

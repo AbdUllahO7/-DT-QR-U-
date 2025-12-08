@@ -14,7 +14,6 @@ import {
   Clock,
   MapPin,
   Smartphone,
-  Coffee,
   Utensils,
   Globe,
   ChevronDown

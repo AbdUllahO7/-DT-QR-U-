@@ -40,7 +40,6 @@ class ProductExtraCategoriesService {
         minTotalQuantity: response.data.minTotalQuantity,
         maxTotalQuantity: response.data.maxTotalQuantity,
         displayOrder: response.data.displayOrder,
-        isDeleted: response.data.isDeleted,
       };
       
       return transformed;
@@ -74,10 +73,8 @@ class ProductExtraCategoriesService {
         minTotalQuantity: item.minTotalQuantity,
         maxTotalQuantity: item.maxTotalQuantity,
         displayOrder: item.displayOrder,
-        isDeleted: item.isDeleted,
       }));
 
-      console.log('transformed', response.data);
       
       return transformed;
     } catch (error: any) {
@@ -108,7 +105,6 @@ class ProductExtraCategoriesService {
         minTotalQuantity: response.data.minTotalQuantity,
         maxTotalQuantity: response.data.maxTotalQuantity,
         displayOrder: response.data.displayOrder,
-        isDeleted: response.data.isDeleted,
       };
       
       return transformed;
@@ -152,7 +148,6 @@ class ProductExtraCategoriesService {
         minTotalQuantity: response.data.minTotalQuantity,
         maxTotalQuantity: response.data.maxTotalQuantity,
         displayOrder: response.data.displayOrder,
-        isDeleted: response.data.isDeleted,
       };
       
       return transformed;
@@ -200,7 +195,6 @@ class ProductExtraCategoriesService {
         minTotalQuantity: item.minTotalQuantity,
         maxTotalQuantity: item.maxTotalQuantity,
         displayOrder: item.displayOrder,
-        isDeleted: item.isDeleted,
       }));
       
       return transformed;
@@ -234,7 +228,6 @@ class ProductExtraCategoriesService {
         minTotalQuantity: item.minTotalQuantity,
         maxTotalQuantity: item.maxTotalQuantity,
         displayOrder: item.displayOrder,
-        isDeleted: item.isDeleted,
       }));
       
       return transformed;
