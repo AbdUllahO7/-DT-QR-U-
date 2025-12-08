@@ -4730,9 +4730,12 @@ recycleBin: {
       "mersisLabel": "رقم MERSIS",
       "mersisPlaceholder": "أدخل رقم MERSIS الخاص بك",
       "tradeRegistryLabel": "رقم السجل التجاري",
+      
       "tradeRegistryPlaceholder": "أدخل رقم السجل التجاري الخاص بك",
       "errors": {
+        taxNumberRequired: "الرقم الضريبي مطلوب",
         "companyTitleRequired": "الاسم التجاري للشركة مطلوب",
+        mersisRequired: "رقم MERSIS مطلوب",
         "legalTypeRequired": "اختر الكيان القانوني"
       }
     },

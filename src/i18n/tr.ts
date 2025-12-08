@@ -4710,7 +4710,9 @@ recommended: "Önerilen",
       "tradeRegistryLabel": "Ticaret Sicil Numarası",
       "tradeRegistryPlaceholder": "Ticaret sicil numaranızı girin",
       "errors": {
+        taxNumberRequired: "Vergi numarası gereklidir",
         "companyTitleRequired": "Şirket unvanı gereklidir",
+        mersisRequired: "MERSIS numarası gereklidir",
         "legalTypeRequired": "Hukuki yapı seçiniz"
       }
     },

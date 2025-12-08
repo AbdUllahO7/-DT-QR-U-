@@ -4733,6 +4733,8 @@ productModal: {
       "tradeRegistryLabel": "Trade Registry Number",
       "tradeRegistryPlaceholder": "Enter your trade registry number",
       "errors": {
+        taxNumberRequired: "Tax number is required",
+        mersisRequired: "MERSIS number is required",
         "companyTitleRequired": "Company title is required",
         "legalTypeRequired": "Select a legal type"
       }

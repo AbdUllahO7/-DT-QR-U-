@@ -6,8 +6,13 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 const OnboardingComplete: React.FC = () => {
   const navigate = useNavigate();
-  const { t } = useLanguage(); // Hook usage
+  const { t } = useLanguage();
   const [countdown, setCountdown] = useState<number>(10);
+
+  // 1. Add this useEffect to scroll to top on mount
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -83,4 +88,4 @@ const OnboardingComplete: React.FC = () => {
   );
 };
 
-export default OnboardingComplete;
+export default OnboardingComplete; 

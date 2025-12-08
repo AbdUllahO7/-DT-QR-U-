@@ -239,9 +239,12 @@ const OnboardingRestaurant: React.FC = () => {
         if (!formData.legalType?.trim()) {
           newErrors.legalType = t('onboardingRestaurant.step2.errors.legalTypeRequired');
         }
+   
+        
         break;
         
       case 3: // Legal Info
+      
         break;
     }
     
@@ -251,11 +254,13 @@ const OnboardingRestaurant: React.FC = () => {
 
   const handleNextStep = (): void => {
     if (validateStep(currentStep)) {
+      setErrors({}); // Clear errors when successfully moving to next step
       setCurrentStep(prev => prev + 1);
     }
   };
 
   const handlePreviousStep = (): void => {
+    setErrors({}); // Clear errors when moving backward
     setCurrentStep(prev => prev - 1);
   };
 
@@ -609,11 +614,22 @@ const OnboardingRestaurant: React.FC = () => {
             name="mersisNumber"
             value={formData.mersisNumber}
             onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            // Updated className to toggle red border/bg on error
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+              errors.mersisNumber
+                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingRestaurant.step2.mersisPlaceholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
+        {/* Added Error Message Display */}
+        {errors.mersisNumber && (
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+            {errors.mersisNumber}
+          </p>
+        )}
       </div>
 
       {/* Trade Registry Number */}
