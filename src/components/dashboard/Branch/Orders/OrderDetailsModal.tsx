@@ -3,7 +3,7 @@ import {
   Eye, XCircle, Clock, Package, AlertCircle, MapPin, Phone, User, Truck, 
   Home, CheckCircle, Printer, Calendar, Hash, ShoppingBag, MessageSquare,
   DollarSign, TrendingUp, Type, Maximize2, ChevronDown, ChevronUp, 
-  Settings, EyeOff, Droplets
+  Settings, EyeOff, Droplets, Plus
 } from 'lucide-react';
 import { orderService } from '../../../../services/Branch/OrderService';
 import { BranchOrder, Order } from '../../../../types/BranchManagement/type';
@@ -41,6 +41,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
   onClose,
   t
 }) => {
+
   // Font size state
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
 
@@ -171,7 +172,6 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
     return notes.replace(/\[METADATA:.*?\]/, '').trim() || null;
   };
 
-  const metadata = parseMetadata((order as any).notes);
   const cleanNotes = getCleanNotes((order as any).notes);
 
   // Handle print using the service
@@ -179,124 +179,169 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
     OrderPrintService.print({ order, status, lang, t });
   };
 
+  // Render Items Function (Updated to handle Extras and correct Pricing)
   const renderItems = (itemList: any[], isAddon = false, level = 0) => {
-    return itemList.map((item, index) => (
-      <div 
-        key={`${level}-${index}`} 
-        className={`group transition-all duration-200 ${isAddon ? 'ml-4' : ''}`}
-      >
+    return itemList.map((item, index) => {
+      // Calculate Extras Total for this specific item
+      const extrasTotal = item.extras?.reduce((sum: number, extra: any) => sum + (extra.totalPrice || 0), 0) || 0;
+      
+      // Calculate the display price (Item Total + Extras Total) to match the Order Total
+      // Use item.totalPrice if it exists, otherwise count * price
+      const baseTotal = item.totalPrice !== undefined ? item.totalPrice : (item.price * item.count);
+      const displayTotal = baseTotal + extrasTotal;
+
+      return (
         <div 
-          className={`relative ${densityPadding[viewDensity]} rounded-lg border transition-all hover:shadow-md ${
-            isAddon 
-              ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-600' 
-              : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-600'
-          } ${item.isProductDeleted ? 'opacity-60 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700' : ''}`} // <<< ADDED DELETED STYLING TO WRAPPER
+          key={`${level}-${index}`} 
+          className={`group transition-all duration-200 ${isAddon ? 'ml-4' : ''}`}
         >
-          {isAddon && (
-            <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-4 h-0.5 bg-blue-300 dark:bg-blue-600"></div>
-          )}
-          
-          <div className={`flex justify-between items-start ${densityGap[viewDensity]}`}>
-            <div className="flex-1 min-w-0">
-              {/* <<< MODIFIED PRODUCT NAME RENDERING >>> */}
-              <div className={`flex items-center ${densityGap[viewDensity]} mb-2`}>
-                <div className={`p-1.5 rounded-md ${
-                  isAddon 
-                    ? 'bg-blue-100 dark:bg-blue-800' 
-                    : 'bg-indigo-100 dark:bg-indigo-800'
-                }`}>
-                  <ShoppingBag className={`w-3 h-3 ${
-                    isAddon 
-                      ? 'text-blue-600 dark:text-blue-300' 
-                      : 'text-indigo-600 dark:text-indigo-300'
-                  }`} />
-                </div>
-                <h5 className={`font-semibold text-gray-900 dark:text-gray-100 text-sm truncate ${
-                  item.isProductDeleted ? 'line-through text-red-600 dark:text-red-400' : ''
-                }`}>
-                  {item.productName}
-                </h5>
-                {item.isProductDeleted && (
-                  <span className="ml-2 px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-[10px] rounded-full font-medium">
-                    {t('ordersManager.deleted') || 'Deleted'}
-                  </span>
-                )}
-                {isAddon && !item.isProductDeleted && (
-                  <span className="ml-2 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 text-[10px] rounded-full font-medium">
-                    Add-on
-                  </span>
-                )}
-              </div>
-              {/* <<< END MODIFICATION >>> */}
-
-              
-              <div className={`grid grid-cols-2 md:grid-cols-3 ${densityGap[viewDensity]} mb-2`}>
-                <div className="flex items-center gap-1.5">
-                  <Hash className="w-3 h-3 text-gray-400" />
-                  <div>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400">Qty</p>
-                    <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
-                      {item.count || 1}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <DollarSign className="w-3 h-3 text-gray-400" />
-                  <div>
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400">Unit</p>
-                    <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
-                      {item.price?.toFixed(2) || 'N/A'}
-                    </p>
-                  </div>
-                </div>
-                {item.addonPrice && (
-                  <div className="flex items-center gap-1.5">
-                    <DollarSign className="w-3 h-3 text-blue-500" />
-                    <div>
-                      <p className="text-[10px] text-gray-500 dark:text-gray-400">Addon</p>
-                      <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                        {item.addonPrice.toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {(item.note || item.addonNote) && (
-                <div className="mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded-md border border-amber-200 dark:border-amber-700">
-                  <div className="flex items-start gap-1.5">
-                    <MessageSquare className="w-3 h-3 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <p className="text-[10px] font-semibold text-amber-900 dark:text-amber-200 mb-0.5">
-                        Note:
-                      </p>
-                      <p className="text-xs text-amber-800 dark:text-amber-300">
-                        {item.note || item.addonNote}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-              
-            </div>
+          <div 
+            className={`relative ${densityPadding[viewDensity]} rounded-lg border transition-all hover:shadow-md ${
+              isAddon 
+                ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-600' 
+                : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-600'
+            } ${item.isProductDeleted ? 'opacity-60 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700' : ''}`}
+          >
+            {isAddon && (
+              <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-4 h-0.5 bg-blue-300 dark:bg-blue-600"></div>
+            )}
             
-            <div className="flex flex-col items-end">
-              <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5">Total</p>
-              <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
-                {item.totalPrice?.toFixed(2) || 'N/A'}
-              </p>
+            <div className={`flex justify-between items-start ${densityGap[viewDensity]}`}>
+              <div className="flex-1 min-w-0">
+                <div className={`flex items-center ${densityGap[viewDensity]} mb-2`}>
+                  <div className={`p-1.5 rounded-md ${
+                    isAddon 
+                      ? 'bg-blue-100 dark:bg-blue-800' 
+                      : 'bg-indigo-100 dark:bg-indigo-800'
+                  }`}>
+                    <ShoppingBag className={`w-3 h-3 ${
+                      isAddon 
+                        ? 'text-blue-600 dark:text-blue-300' 
+                        : 'text-indigo-600 dark:text-indigo-300'
+                    }`} />
+                  </div>
+                  <h5 className={`font-semibold text-gray-900 dark:text-gray-100 text-sm truncate ${
+                    item.isProductDeleted ? 'line-through text-red-600 dark:text-red-400' : ''
+                  }`}>
+                    {item.productName || item.extraName} {/* Handle extraName if rendering extras recursively */}
+                  </h5>
+                  {item.isProductDeleted && (
+                    <span className="ml-2 px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-[10px] rounded-full font-medium">
+                      {t('ordersManager.deleted') || 'Deleted'}
+                    </span>
+                  )}
+                  {isAddon && !item.isProductDeleted && (
+                    <span className="ml-2 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 text-[10px] rounded-full font-medium">
+                      Add-on
+                    </span>
+                  )}
+                </div>
+                
+                <div className={`grid grid-cols-2 md:grid-cols-3 ${densityGap[viewDensity]} mb-2`}>
+                  <div className="flex items-center gap-1.5">
+                    <Hash className="w-3 h-3 text-gray-400" />
+                    <div>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400">Qty</p>
+                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                        {item.count || item.quantity || 1}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <DollarSign className="w-3 h-3 text-gray-400" />
+                    <div>
+                      <p className="text-[10px] text-gray-500 dark:text-gray-400">Unit</p>
+                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                        {(item.price || item.unitPrice || 0).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+                  {item.addonPrice && (
+                    <div className="flex items-center gap-1.5">
+                      <DollarSign className="w-3 h-3 text-blue-500" />
+                      <div>
+                        <p className="text-[10px] text-gray-500 dark:text-gray-400">Addon</p>
+                        <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">
+                          {item.addonPrice.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {(item.note || item.addonNote) && (
+                  <div className="mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 rounded-md border border-amber-200 dark:border-amber-700">
+                    <div className="flex items-start gap-1.5">
+                      <MessageSquare className="w-3 h-3 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-[10px] font-semibold text-amber-900 dark:text-amber-200 mb-0.5">
+                          Note:
+                        </p>
+                        <p className="text-xs text-amber-800 dark:text-amber-300">
+                          {item.note || item.addonNote}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="flex flex-col items-end">
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5">Total</p>
+                <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
+                  {/* Display calculated total including extras if valid, else fallback */}
+                  {!isAddon && !Number.isNaN(displayTotal) ? displayTotal.toFixed(2) : (item.totalPrice || 0).toFixed(2)}
+                </p>
+              </div>
             </div>
           </div>
+          
+          {/* RENDER EXTRAS */}
+          {item.extras && item.extras.length > 0 && (
+            <div className="mt-2 ml-4 relative space-y-2">
+               <div className="absolute left-[-16px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-green-300 to-transparent dark:from-green-600"></div>
+               {item.extras.map((extra: any, extraIndex: number) => (
+                 <div key={`extra-${extraIndex}`} className={`relative ${densityPadding[viewDensity]} rounded-lg border bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-600`}>
+                   <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-4 h-0.5 bg-green-300 dark:bg-green-600"></div>
+                   
+                   <div className={`flex justify-between items-center ${densityGap[viewDensity]}`}>
+                     <div className="flex items-center gap-2">
+                        <div className="p-1.5 bg-green-100 dark:bg-green-800 rounded-md">
+                          <Plus className="w-3 h-3 text-green-600 dark:text-green-300" />
+                        </div>
+                        <div>
+                          <h6 className="text-xs font-semibold text-gray-800 dark:text-gray-200">{extra.extraName}</h6>
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400  px-1.5 rounded">{extra.extraCategoryName}</span>
+                        </div>
+                     </div>
+                     <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <p className="text-[10px] text-gray-500">Qty</p>
+                          <p className="text-xs font-medium text-gray-900 dark:text-gray-100">{extra.quantity}</p>
+                        </div>
+                        <div className="text-right min-w-[3rem]">
+                           <p className="text-[10px] text-gray-500">Price</p>
+                           <p className="text-xs font-bold text-green-600 dark:text-green-400">
+                              {extra.totalPrice > 0 ? `+${extra.totalPrice.toFixed(2)}` : 'Free'}
+                           </p>
+                        </div>
+                     </div>
+                   </div>
+                 </div>
+               ))}
+            </div>
+          )}
+
+          {/* RENDER ADDONS (Existing Logic) */}
+          {item.addonItems && item.addonItems.length > 0 && (
+            <div className={`mt-2 space-y-2 relative`}>
+              <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-300 to-transparent dark:from-blue-600"></div>
+              {renderItems(item.addonItems, true, level + 1)}
+            </div>
+          )}
         </div>
-        
-        {item.addonItems && item.addonItems.length > 0 && (
-          <div className={`mt-2 space-y-2 relative`}>
-            <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-300 to-transparent dark:from-blue-600"></div>
-            {renderItems(item.addonItems, true, level + 1)}
-          </div>
-        )}
-      </div>
-    ));
+      );
+    });
   };
 
   return (
