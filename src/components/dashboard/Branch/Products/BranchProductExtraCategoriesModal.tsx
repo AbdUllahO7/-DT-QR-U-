@@ -699,6 +699,8 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                 {t('extrasManagement.categoryConfigModal.category.configurationTitle')}
                               </h5>
                             </div>
+
+                            
                             
                             <div className="grid grid-cols-2 gap-4">
                               <div>
@@ -780,6 +782,28 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 />
                               </div>
+
+                            <div className={`mt-3 flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2`}>
+                              <input
+                                type="checkbox"
+                                id={`required-${category.productExtraCategoryId}`}
+                                checked={config.isRequiredOverride}
+                                onChange={(e) =>
+                                  handleConfigChange(
+                                    category.productExtraCategoryId,
+                                    'isRequiredOverride',
+                                    e.target.checked
+                                  )
+                                }
+                                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                              />
+                              <label
+                                htmlFor={`required-${category.productExtraCategoryId}`}
+                                className="text-sm text-gray-700 dark:text-gray-300"
+                              >
+                                {t('extrasManagement.categoryConfigModal.fields.overrideRequired')}
+                              </label>
+                            </div>
                             </div>
                             
                            

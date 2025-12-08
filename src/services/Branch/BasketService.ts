@@ -96,6 +96,7 @@ export interface ProductExtraDto {
   extraId: number;
   quantity: number;
   isRemoval: boolean;
+  note?: string | null;
 }
 
 // FIXED: Add unified item interface - now includes extras

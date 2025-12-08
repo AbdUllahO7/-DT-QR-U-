@@ -230,130 +230,131 @@ const CartItemComponent: React.FC<CartItemProps> = ({
             )}
 
             {/* Extras Section - FIXED */}
-            {variant.extras && variant.extras.length > 0 && (
-              <div className="mb-3">
-                <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
-                  {t('menu.cart.extras')}:
-                </p>
-                <div className="space-y-2">
-                  {variant.extras.map((extra) => {
-                    const effectiveMinQuantity = extra.minQuantity ?? 1
-                    const isAtMinimum = extra.quantity <= effectiveMinQuantity
-                    const canIncrease = !extra.isRemoval && (!extra.maxQuantity || extra.quantity < extra.maxQuantity)
-                    
-                    return (
-                      <div 
-                        key={extra.branchProductExtraId} 
-                        className={`flex justify-between items-center p-2 rounded ${
-                          extra.isRemoval 
-                            ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' 
-                            : 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
-                        }`}
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2">
-                            {extra.isRemoval ? (
-                              <XCircle className="h-3 w-3 text-red-500" />
-                            ) : (
-                              <PlusCircle className="h-3 w-3 text-green-500" />
-                            )}
-                            <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">
-                              {/* ✅ FIX: Better display text */}
-                              {extra.isRemoval 
-                                ? `${t('menu.cart.without')} ${extra.extraName}` 
-                                : extra.extraName
-                              }
-                            </span>
-                          </div>
-                          
-                          {extra.extraCategoryName && (
-                            <div className="text-xs text-slate-500 dark:text-slate-400 ml-5">
-                              {extra.extraCategoryName}
-                            </div>
-                          )}
-                          
-                          {extra.unitPrice > 0 && (
-                            <div className={`text-xs ml-5 ${extra.isRemoval ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                              ${extra.unitPrice.toFixed(2)} {t('menu.cart.each')}
-                              {!extra.isRemoval && ` × ${extra.quantity}`}
-                            </div>
-                          )}
-
-                          {!extra.isRemoval && (extra.minQuantity || extra.maxQuantity) && (
-                            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 ml-5">
-                              {t('menu.cart.qty')}: {extra.minQuantity || 1}-{extra.maxQuantity || 5}
-                            </div>
-                          )}
-                        </div>
-                        
-                        {/* CASE 1: "Removed" item (Red background) - Click Add to revert to normal */}
-                        {extra.isRemoval ? (
-                          <button
-                            onClick={() => variant.basketItemId && onExtraToggle && onExtraToggle(extra.branchProductExtraId, variant.basketItemId, extra.isRemoval)}
-                            disabled={loading || !variant.basketItemId || !onExtraToggle}
-                            className="px-3 py-1 rounded-lg text-xs font-medium transition-all bg-green-500 hover:bg-green-600 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
-                            title={t('menu.cart.add')}
-                          >
-                            <PlusCircle className="h-3 w-3" />
-                            <span>{t('menu.cart.add')}</span>
-                          </button>
-                        ) : (
-                          /* CASE 2: "Added" Extra (Green background) */
-                          <div className="flex items-center space-x-2">
-                            <div className="flex items-center space-x-1 bg-white dark:bg-slate-700 rounded p-0.5">
-                              <button
-                                onClick={() => {
-                                  if (variant.basketItemId && onExtraQuantityDecrease) {
-                                    onExtraQuantityDecrease(extra.branchProductExtraId, variant.basketItemId)
-                                  }
-                                }}
-                                disabled={loading || !variant.basketItemId || !onExtraQuantityDecrease}
-                                className="w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded flex items-center justify-center transition-colors disabled:opacity-50"
-                                title={
-                                  isAtMinimum
-                                    ? t('menu.cart.remove') 
-                                    : t('menu.cart.decreaseQuantity')
+              {variant.extras && variant.extras.length > 0 && (
+                <div className="mb-3">
+                  <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
+                    {t('menu.cart.extras')}:
+                  </p>
+                  <div className="space-y-2">
+                    {variant.extras.map((extra) => {
+                      // ✅ FIX: Calculate effective quantity (extra qty × parent product qty)
+                      const effectiveQuantity = extra.quantity * variant.quantity
+                      const effectiveMinQuantity = (extra.minQuantity ?? 1) * variant.quantity
+                      const isAtMinimum = effectiveQuantity <= effectiveMinQuantity
+                      const canIncrease = !extra.isRemoval && (!extra.maxQuantity || effectiveQuantity < (extra.maxQuantity * variant.quantity))
+                      
+                      return (
+                        <div 
+                          key={extra.branchProductExtraId} 
+                          className={`flex justify-between items-center p-2 rounded ${
+                            extra.isRemoval 
+                              ? 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800' 
+                              : 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
+                          }`}
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2">
+                              {extra.isRemoval ? (
+                                <XCircle className="h-3 w-3 text-red-500" />
+                              ) : (
+                                <PlusCircle className="h-3 w-3 text-green-500" />
+                              )}
+                              <span className="text-xs text-slate-700 dark:text-slate-300 font-medium">
+                                {extra.isRemoval 
+                                  ? `${t('menu.cart.without')} ${extra.extraName}` 
+                                  : extra.extraName
                                 }
-                              >
-                                {/* ✅ FIX: Show trash icon when at minimum (will delete on click) */}
-                                {isAtMinimum ? (
-                                  <Trash2 className="h-2 w-2" />
-                                ) : (
-                                  <Minus className="h-2 w-2" />
-                                )}
-                              </button>
-                              
-                              <span className="w-4 text-center font-bold text-xs text-slate-800 dark:text-slate-100">
-                                {extra.quantity}
                               </span>
-                              
-                              <button
-                                onClick={() => variant.basketItemId && onExtraQuantityIncrease && onExtraQuantityIncrease(extra.branchProductExtraId, variant.basketItemId)}
-                                disabled={loading || !variant.basketItemId || !canIncrease || !onExtraQuantityIncrease}
-                                className={`w-4 h-4 text-white rounded flex items-center justify-center transition-colors disabled:opacity-50 ${
-                                  canIncrease 
-                                    ? 'bg-orange-500 hover:bg-orange-600' 
-                                    : 'bg-gray-400 cursor-not-allowed'
-                                }`}
-                                title={!canIncrease ? `${t('menu.cart.max')}: ${extra.maxQuantity}` : t('menu.cart.increaseQuantity')}
-                              >
-                                <Plus className="h-2 w-2" />
-                              </button>
                             </div>
-
+                            
+                            {extra.extraCategoryName && (
+                              <div className="text-xs text-slate-500 dark:text-slate-400 ml-5">
+                                {extra.extraCategoryName}
+                              </div>
+                            )}
+                            
                             {extra.unitPrice > 0 && (
-                              <div className="text-xs font-medium text-green-600 dark:text-green-400 ml-1">
-                                +${(extra.unitPrice * extra.quantity).toFixed(2)}
+                              <div className={`text-xs ml-5 ${extra.isRemoval ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
+                                ${extra.unitPrice.toFixed(2)} {t('menu.cart.each')}
+                                {/* ✅ Show effective quantity */}
+                                {!extra.isRemoval && ` × ${effectiveQuantity}`}
+                              </div>
+                            )}
+
+                            {!extra.isRemoval && (extra.minQuantity || extra.maxQuantity) && (
+                              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 ml-5">
+                                {t('menu.cart.qty')}: {effectiveMinQuantity}-{(extra.maxQuantity || 5) * variant.quantity}
                               </div>
                             )}
                           </div>
-                        )}
-                      </div>
-                    )
-                  })}
+                          
+                          {extra.isRemoval ? (
+                            <button
+                              onClick={() => variant.basketItemId && onExtraToggle && onExtraToggle(extra.branchProductExtraId, variant.basketItemId, extra.isRemoval)}
+                              disabled={loading || !variant.basketItemId || !onExtraToggle}
+                              className="px-3 py-1 rounded-lg text-xs font-medium transition-all bg-green-500 hover:bg-green-600 text-white disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                              title={t('menu.cart.add')}
+                            >
+                              <PlusCircle className="h-3 w-3" />
+                              <span>{t('menu.cart.add')}</span>
+                            </button>
+                          ) : (
+                            <div className="flex items-center space-x-2">
+                              <div className="flex items-center space-x-1 bg-white dark:bg-slate-700 rounded p-0.5">
+                                <button
+                                  onClick={() => {
+                                    if (variant.basketItemId && onExtraQuantityDecrease) {
+                                      onExtraQuantityDecrease(extra.branchProductExtraId, variant.basketItemId)
+                                    }
+                                  }}
+                                  disabled={loading || !variant.basketItemId || !onExtraQuantityDecrease}
+                                  className="w-4 h-4 bg-red-500 hover:bg-red-600 text-white rounded flex items-center justify-center transition-colors disabled:opacity-50"
+                                  title={
+                                    isAtMinimum
+                                      ? t('menu.cart.remove') 
+                                      : t('menu.cart.decreaseQuantity')
+                                  }
+                                >
+                                  {isAtMinimum ? (
+                                    <Trash2 className="h-2 w-2" />
+                                  ) : (
+                                    <Minus className="h-2 w-2" />
+                                  )}
+                                </button>
+                                
+                                {/* ✅ Show effective quantity in the control */}
+                                <span className="w-4 text-center font-bold text-xs text-slate-800 dark:text-slate-100">
+                                  {effectiveQuantity}
+                                </span>
+                                
+                                <button
+                                  onClick={() => variant.basketItemId && onExtraQuantityIncrease && onExtraQuantityIncrease(extra.branchProductExtraId, variant.basketItemId)}
+                                  disabled={loading || !variant.basketItemId || !canIncrease || !onExtraQuantityIncrease}
+                                  className={`w-4 h-4 text-white rounded flex items-center justify-center transition-colors disabled:opacity-50 ${
+                                    canIncrease 
+                                      ? 'bg-orange-500 hover:bg-orange-600' 
+                                      : 'bg-gray-400 cursor-not-allowed'
+                                  }`}
+                                  title={!canIncrease ? `${t('menu.cart.max')}: ${(extra.maxQuantity || 5) * variant.quantity}` : t('menu.cart.increaseQuantity')}
+                                >
+                                  <Plus className="h-2 w-2" />
+                                </button>
+                              </div>
+
+                              {extra.unitPrice > 0 && (
+                                <div className="text-xs font-medium text-green-600 dark:text-green-400 ml-1">
+                                  {/* ✅ Show total price for effective quantity */}
+                                  +${(extra.unitPrice * effectiveQuantity).toFixed(2)}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
          
           </div>
         ))}

@@ -92,6 +92,8 @@ export const useCartHandlers = ({
   setShowWhatsAppConfirmation
 }: UseCartHandlersProps) => {
 
+  console.log("🛒 useCartHandlers initialized with cart:", cart)
+
   // Helper function to get clean session ID
   const getCleanSessionId = (sessionId?: string | null): string | null => {
     if (!sessionId || sessionId === 'empty' || sessionId.trim() === '') {
@@ -246,57 +248,101 @@ export const useCartHandlers = ({
   }
 
   // ✅ SIMPLIFIED: Handle quantity increase
-  const handleQuantityIncrease = async (basketItemId?: number) => {
-    if (!basketItemId) return
-    
-    try {
-      setLoading(true)
-      setError(null)
+   // ✅ ALTERNATIVE: Update quantity directly instead of adding new item
+// ✅ FIXED: Handle quantity increase - duplicate ALL extras for new product instance
+const handleQuantityIncrease = async (basketItemId?: number) => {
+  if (!basketItemId) return
+  
+  try {
+    setLoading(true)
+    setError(null)
 
-      const cartItem = cart.find(item => item.basketItemId === basketItemId)
-      if (!cartItem) {
-        console.error('❌ Cart item not found')
-        setError('Cart item not found. Please refresh.')
-        return
-      }
-
-      console.log('📦 Incrementing item quantity:', {
-        basketItemId,
-        branchProductId: cartItem.branchProductId,
-        currentQuantity: cartItem.quantity
-      })
-
-      // ✅ IMPORTANT: Don't send extras when just adding quantity!
-      // The existing extras stay with the original item
-      await basketService.addUnifiedItemToMyBasket({
-        branchProductId: cartItem.branchProductId,
-        quantity: 1,
-        // NO EXTRAS - just adding 1 more plain item
-      })
-
-      console.log('✅ Item quantity increased successfully')
-      await loadBasket()
-
-    } catch (err: any) {
-      console.error('❌ Error increasing quantity:', err)
-      
-      const errorMessage = err.response?.data?.message || 
-                          err.response?.data?.title ||
-                          err.message || 
-                          'Failed to increase item quantity'
-      
-      setError(errorMessage)
-      
-      // Always reload basket to sync state
-      try {
-        await loadBasket()
-      } catch (loadErr) {
-        console.error('❌ Failed to reload basket after error:', loadErr)
-      }
-    } finally {
-      setLoading(false)
+    const cartItem = cart.find(item => item.basketItemId === basketItemId)
+    if (!cartItem) {
+      console.error('❌ Cart item not found')
+      setError('Cart item not found. Please refresh.')
+      return
     }
+
+    console.log('📦 Duplicating product with extras:', {
+      basketItemId,
+      branchProductId: cartItem.branchProductId,
+      currentQuantity: cartItem.quantity,
+      extrasCount: cartItem.extras?.length || 0,
+      allExtras: cartItem.extras
+    })
+
+    // ✅ Extract ALL non-removal extras to duplicate
+    const extrasToAdd: ProductExtraDto[] = []
+    
+    if (cartItem.extras && cartItem.extras.length > 0) {
+      cartItem.extras.forEach(extra => {
+        // Only include added extras (not removed ones)
+        if (!extra.isRemoval) {
+          console.log('✅ Including extra for duplication:', {
+            name: extra.extraName,
+            category: extra.extraCategoryName,
+            branchProductExtraId: extra.branchProductExtraId,
+            quantity: extra.quantity,
+            isRequired: extra.isRequired
+          })
+          
+          extrasToAdd.push({
+            branchProductExtraId: extra.branchProductExtraId,
+            quantity: extra.quantity,
+            note: extra.note || undefined,
+            extraId: 0,
+            isRemoval: extra.isRemoval
+          })
+        } else {
+          console.log('⏭️ Skipping removal extra:', extra.extraName)
+        }
+      })
+    }
+
+    console.log('📤 Sending to API:', {
+      branchProductId: cartItem.branchProductId,
+      quantity: 1,
+      extrasCount: extrasToAdd.length,
+      extras: extrasToAdd
+    })
+
+    // ✅ Add new product instance with duplicated extras
+    await basketService.addUnifiedItemToMyBasket({
+      branchProductId: cartItem.branchProductId,
+      quantity: 1,
+      extras: extrasToAdd.length > 0 ? extrasToAdd : undefined
+    })
+
+    console.log('✅ Product duplicated successfully with extras')
+    await loadBasket()
+
+  } catch (err: any) {
+    console.error('❌ Error duplicating product:', err)
+    console.error('❌ Full error response:', {
+      message: err.message,
+      status: err.response?.status,
+      data: err.response?.data,
+      config: err.config?.data
+    })
+    
+    const errorMessage = err.response?.data?.message || 
+                        err.response?.data?.title ||
+                        err.message || 
+                        'Failed to duplicate product with extras'
+    
+    setError(errorMessage)
+    
+    // Always reload basket to sync state
+    try {
+      await loadBasket()
+    } catch (loadErr) {
+      console.error('❌ Failed to reload basket after error:', loadErr)
+    }
+  } finally {
+    setLoading(false)
   }
+}
 
   // ✅ NEW: Handle extra toggle using dedicated endpoint
   const handleExtraToggle = async (branchProductExtraId: number, basketItemId: number, currentIsRemoval: boolean) => {
