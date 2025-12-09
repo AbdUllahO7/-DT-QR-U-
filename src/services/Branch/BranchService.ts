@@ -1,603 +1,339 @@
-import { httpClient } from "../../utils/http";
+import { BatchUpdateBranchDto,  CreateBranchWithDetailsDto } from "../../types/api";
+import { BranchData } from "../../types/BranchManagement/type";
+import {  httpClient } from "../../utils/http";
 import { logger } from "../../utils/logger";
 
-// Updated interfaces based on your actual API response
-export interface BasketAddonItem {
+export interface UpdateMenuTableDto {
   id: number;
-  basketItemId: number;
-  branchProductId: number;
-  productName: string;
-  categoryName: string | null;
-  price: number;
-  quantity: number;
-  totalPrice: number;
-  imageUrl: string | null;
-  description: string | null;
-  isAddon: boolean;
-  parentBasketItemId: number;
-  addonItems: BasketAddonItem[];
-  addonPrice: number | null;
-  addonNote: string | null;
-  minQuantity:number;
-  maxQuantity:number;
+  menuTableName: string | null;
+  menuTableCategoryId: number;
+  capacity: number;
+  isActive: boolean;
+  isOccupied: boolean;
+  rowVersion: string;
 }
 
-export interface BasketExtraItem {
-  branchProductExtraId: number;
-  productExtraId?: number;
-  extraId: number;
-  extraName: string;
-  extraCategoryName?: string; 
-  selectionMode?: number;
-  isRequired?: boolean;
-  isRemoval: boolean;
-  unitPrice: number;
-  quantity: number;
-  minQuantity?: number;
-  maxQuantity?: number;
-  note?: string | null;
-}
 
-// Main basket item interface based on your API response
-export interface BasketItem {
-  id: number;
-  basketItemId: number;
-  branchProductId: number;
-  productName: string;
-  categoryName: string | null;
-  price: number;
-  quantity: number;
-  totalPrice: number;
-  imageUrl: string | null;
-  description: string | null;
-  isAddon: boolean;
-  extras?: BasketExtraItem[];
-  parentBasketItemId: number | null;
-  addonItems: BasketAddonItem[];
-  addonPrice: number | null;
-  addonNote: string | null;
-  maxQuantity:number;
-  minQuantity:number;
-}
-
-// Basket interface
-export interface Basket {
-  basketId: string;
-  items: BasketItem[];
-  totalAmount: number;
-  totalQuantity: number;
-  createdDate?: string;
-  modifiedDate?: string;
-}
-
-// Recommended addons interface
-export interface RecommendedAddon {
-  branchProductId: number;
-  productName: string;
-  productDescription: string;
-  imageUrl: string;
-  price: number;
-  categoryName: string;
+// Export the interface so it can be used in other files
+export interface BranchProductAddon {
+  mainBranchProductId: number;
+  addonBranchProductId: number;
+  mainProductName: string;
+  addonProductName: string;
+  addonProductDescription: string;
+  addonImageUrl: string;
+  addonPrice: number;
+  addonCategoryName: string;
   isRecommended: boolean;
   marketingText: string;
+  suggestedDisplayOrder: number;
 }
 
-// Table summary interface
-export interface TableSummary {
-  totalAmount: number;
-  totalQuantity: number;
-  itemsCount: number;
-  tables?: any[];
+// Updated BranchData interface to match your API response
+interface ApiBranchResponse {
+  id: number;
+  branchName: string;
+  branchTag: string;
+  branchStatus: boolean;
+  isTemporarilyClosed: boolean;
+  isOpenNow: boolean | null;
+  whatsappOrderNumber: string;
+  branchLogoPath: string;
+  branchDateCreated: string;
+  branchDateModified: string;
+  restaurant: {
+    restaurantId: number;
+    restaurantName: string;
+    restaurantLogoPath: string;
+    restaurantStatus: boolean;
+  };
+  address: {
+    addressId: number;
+    country: string;
+    city: string;
+    street: string;
+    addressLine1: string;
+    addressLine2: string;
+    zipCode: string;
+    fullAddress: string;
+  };
+  contact: {
+     phone: string | null;
+    mail: string | null;
+    location: string | null;
+    contactHeader: string | null;
+    footerTitle: string | null;
+    footerDescription: string | null;
+    openTitle: string | null;
+    openDays: string | null;
+    openHours: string | null;
+  };
+  workingHours: Array<{
+    id: number;
+    dayOfWeek: number;
+    openTime: string;
+    closeTime: string;
+    isWorkingDay: boolean;
+  }>;
+  categories: Array<{
+    id: number;
+    branchCategoryId: number;
+    branchId: number;
+    categoryId: number;
+    displayName: string;
+    displayOrder: number;
+    isActive: boolean;
+  }>;
+  menuTables: Array<{
+    id: number;
+    menuTableName: string;
+    qrCode: string;
+    qrCodeUrl: string;
+    menuTableCategoryId: number;
+    categoryName: string | null;
+    capacity: number;
+    displayOrder: number;
+    isOccupied: boolean;
+    isActive: boolean;
+    activeSessionCount: number;
+    branchId: number;
+  }>;
+  activeOrders: any[];
 }
 
-// FIXED: Add product extra interface
-export interface ProductExtraDto {
-  branchProductExtraId: number;
-  extraId: number;
-  quantity: number;
-  isRemoval: boolean;
-  note?: string | null;
-}
+class BranchService {
+  private baseUrl = '/api/Branches';
 
-// FIXED: Add unified item interface - now includes extras
-export interface AddUnifiedItemDto {
-  branchProductId: number;
-  quantity: number;
-  extras?: ProductExtraDto[];  // Added extras field
-}
-
-// ✅ NEW: Extra management interfaces
-export interface UpdateExtraDto {
-  quantity: number;
-  replacementExtraId?: number;
-}
-
-export interface AddExtraDto {
-  branchProductExtraId: number;
-  quantity: number;
-  note?: string;
-}
-
-// Batch add items interface
-export interface BatchAddItemDto {
-  branchProductId: number;
-  quantity: number;
-  parentBasketItemId?: number;
-}
-
-// Note: updateMyBasketItem now takes (basketItemId, newQuantity) directly
-// Backend auto-scales extras when quantity changes
-
-// Price change interfaces
-export interface PriceChange {
-  branchProductId: number;
-  productName: string;
-  oldPrice: number;
-  newPrice: number;
-  quantity: number;
-  basketItemId: number;
-}
-
-export interface BasketResponse {
-  basketId: string;
-  basketItems: BasketItem[];
-  totalPrice: number;
-  totalQuantity: number;
-}
-
-class BasketService {
-  private baseUrl = '/api/Basket';
-
-  // GET /api/Basket/{basketId}
-  async getBasket(basketId: string): Promise<Basket> {
+  async getBranches(): Promise<BranchData[]> {
     try {
-      logger.info('Basket getirme isteği gönderiliyor', { basketId }, { prefix: 'BasketService' });
+      logger.info('Kullanıcıya ait branch bilgileri getirme isteği gönderiliyor', null, { prefix: 'BranchService' });
       
-      const url = `${this.baseUrl}/${basketId}`;
-      const response = await httpClient.get<BasketItem[]>(url);
+      // Include related entities in the request
+      const includes = [
+        'address',
+        'contact',
+        'workingHours',
+      ];
       
-      // Convert response array to Basket object
-      const items = Array.isArray(response.data) ? response.data : [];
-      const totalAmount = items.reduce((sum, item) => sum + item.totalPrice, 0);
-      const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+      // Use 'include' (singular) parameter as confirmed working
+      const queryParams = new URLSearchParams({
+        include: includes.join(',')
+      });
       
-      const basket: Basket = {
-        basketId,
-        items,
-        totalAmount,
-        totalQuantity
-      };
+      const url = `${this.baseUrl}?${queryParams.toString()}`;
+      logger.info('Branch API Request URL:', url, { prefix: 'BranchService' });
       
-      logger.info('Basket başarıyla alındı', { 
-        basketId,
-        itemsCount: items.length,
-        totalAmount
-      }, { prefix: 'BasketService' });
-      
-      return basket;
-    } catch (error: any) {
-      logger.error('Basket getirme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'Basket getirilirken hata oluştu');
-    }
-  }
-
-  // DELETE /api/Basket/{basketId}
-  async deleteBasket(basketId: string): Promise<void> {
-    try {
-      logger.info('Basket silme isteği gönderiliyor', { basketId }, { prefix: 'BasketService' });
-      
-      const url = `${this.baseUrl}/${basketId}`;
-      await httpClient.delete(url);
-      
-      logger.info('Basket başarıyla silindi', { basketId }, { prefix: 'BasketService' });
-    } catch (error: any) {
-      logger.error('Basket silme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'Basket silinirken hata oluştu');
-    }
-  }
-
-  // GET /api/Basket/my-basket
-  async getMyBasket(): Promise<Basket> {
-    try {
-      logger.info('My basket getirme isteği gönderiliyor', {}, { prefix: 'BasketService' });
-      
-      const url = `${this.baseUrl}/my-basket`;
       const response = await httpClient.get(url);
       
-      // Try to access the basket data safely
-      let basketData;
+      logger.info('Branch API Raw Response:', response, { prefix: 'BranchService' });
+      logger.info('Branch API Response Data:', response.data, { prefix: 'BranchService' });
       
-      // Check if the data is directly in response.data
-      if (response.data && response.data.basketId) {
-        basketData = response.data;
-      }
-      // Check if the data is nested in response.data.data
-      else if (response.data && response.data.data && response.data.data.basketId) {
-        basketData = response.data.data;
-      }
-      // If no basket exists, return empty basket
-      else {
-        return {
-          basketId: 'empty',
-          items: [],
-          totalAmount: 0,
-          totalQuantity: 0
-        };
-      }
+      let branchData: BranchData[] = [];
       
-      
-      const basket: Basket = {
-        basketId: basketData.basketId || 'unknown',
-        items: basketData.basketItems || [],
-        totalAmount: basketData.totalPrice || 0,
-        totalQuantity: basketData.totalQuantity || 0
-      };
-      
-      logger.info('My basket başarıyla alındı', { 
-        basketId: basket.basketId,
-        itemsCount: basket.items.length,
-        totalAmount: basket.totalAmount,
-        totalQuantity: basket.totalQuantity
-      }, { prefix: 'BasketService' });
-      
-      return basket;
-    } catch (error: any) {
-      logger.error('My basket getirme hatası', error, { prefix: 'BasketService' });
-      
-      // Instead of throwing error, return empty basket when basket doesn't exist
-      if (error?.response?.status === 404) {
-        return {
-          basketId: 'empty',
-          items: [],
-          totalAmount: 0,
-          totalQuantity: 0
-        };
+      // Handle the response structure we see from your log
+      if (response.data && response.data.data) {
+        const apiData = response.data.data;
+        if (Array.isArray(apiData)) {
+          branchData = apiData.map(this.transformApiBranchToBranchData);
+        } else {
+          branchData = [this.transformApiBranchToBranchData(apiData)];
+        }
+      } else if (response.data) {
+        // Direct response without wrapper
+        if (Array.isArray(response.data)) {
+          branchData = response.data.map(this.transformApiBranchToBranchData);
+        } else {
+          branchData = [this.transformApiBranchToBranchData(response.data)];
+        }
       }
       
-      this.handleError(error, 'My basket getirilirken hata oluştu');
-    }
-  }
-
-  // DELETE /api/Basket/my-basket
-  async deleteMyBasket(): Promise<void> {
-    try {
-      logger.info('My basket silme isteği gönderiliyor', {}, { prefix: 'BasketService' });
+      logger.info('Transformed Branch Data:', branchData, { prefix: 'BranchService' });
+      logger.info('Kullanıcıya ait branch bilgileri başarıyla alındı', { 
+        branchCount: branchData.length,
+        includes: includes,
+        hasIncludedData: {
+          restaurant: !!response.data?.data?.restaurant,
+          address: !!response.data?.data?.address,
+          contact: !!response.data?.data?.contact,
+          workingHours: !!response.data?.data?.workingHours,
+          categories: !!response.data?.data?.categories,
+          menuTables: !!response.data?.data?.menuTables,
+          activeOrders: !!response.data?.data?.activeOrders
+        }
+      }, { prefix: 'BranchService' });
       
-      const url = `${this.baseUrl}/my-basket`;
-      await httpClient.delete(url);
-      
-      logger.info('My basket başarıyla silindi', {}, { prefix: 'BasketService' });
+      return branchData;
     } catch (error: any) {
-      logger.error('My basket silme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'My basket silinirken hata oluştu');
-    }
-  }
-
-  // POST /api/Basket/{basketId}/confirm-price-changes
-  async confirmSessionPriceChanges(sessionId: string , ): Promise<void> {
-    try {
-      logger.info('Session price changes onaylama isteği gönderiliyor', { sessionId }, { prefix: 'BasketService' });
-      const url = `${this.baseUrl}/session/${sessionId}/confirm-price-changes`;
-      const res = await  httpClient.post(url);
-      logger.info('Session price changes başarıyla onaylandı', { sessionId }, { prefix: 'BasketService' });
-    } catch (error: any) {
-      logger.error('Session price changes onaylama hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'Price changes onaylanırken hata oluştu');
-    }
-  }
-
-  // GET /api/Basket/products/{branchProductId}/recommended-addons
-  async getRecommendedAddons(branchProductId: number): Promise<RecommendedAddon[]> {
-    try {
-      logger.info('Recommended addons getirme isteği gönderiliyor', { branchProductId }, { prefix: 'BasketService' });
+      logger.error('Branch bilgileri getirme hatası', error, { prefix: 'BranchService' });
+      logger.error('Error response:', error?.response, { prefix: 'BranchService' });
+      logger.error('Error response data:', error?.response?.data, { prefix: 'BranchService' });
       
-      const url = `${this.baseUrl}/products/${branchProductId}/recommended-addons`;
-      const response = await httpClient.get<RecommendedAddon[]>(url);
-      
-      const addonsData = Array.isArray(response.data) ? response.data : [];
-      
-      logger.info('Recommended addons başarıyla alındı', { 
-        branchProductId,
-        addonsCount: addonsData.length 
-      }, { prefix: 'BasketService' });
-      
-      return addonsData;
-    } catch (error: any) {
-      logger.error('Recommended addons getirme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'Recommended addons getirilirken hata oluştu');
-    }
-  }
-
-  // GET /api/Basket/table-summary
-  async getTableSummary(): Promise<TableSummary> {
-    try {
-      logger.info('Table summary getirme isteği gönderiliyor', {}, { prefix: 'BasketService' });
-      
-      const url = `${this.baseUrl}/table-summary`;
-      const response = await httpClient.get<TableSummary>(url);
-      
-      logger.info('Table summary başarıyla alındı', { 
-        totalAmount: response.data.totalAmount,
-        totalQuantity: response.data.totalQuantity,
-        itemsCount: response.data.itemsCount
-      }, { prefix: 'BasketService' });
-      
-      return response.data;
-    } catch (error: any) {
-      logger.error('Table summary getirme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'Table summary getirilirken hata oluştu');
-    }
-  }
-
-  async addUnifiedItemToBasket(basketId: string, data: AddUnifiedItemDto): Promise<BasketItem> {
-    try {
-      logger.info('Unified item ekleme isteği gönderiliyor', { basketId, data }, { prefix: 'BasketService' });
-      const url = `${this.baseUrl}/${basketId}/unified-items`;
-      const response = await httpClient.post<BasketItem>(url, data);
-      
-      logger.info('Unified item başarıyla eklendi', { basketId }, { prefix: 'BasketService' });
-      
-      return response.data;
-    } catch (error: any) {
-      logger.error('Unified item ekleme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'Unified item eklenirken hata oluştu');
-    }
-  }
-
-  // POST /api/Basket/my-basket/unified-items
-  async addUnifiedItemToMyBasket(data: AddUnifiedItemDto): Promise<BasketItem> {
-    try {
-      logger.info('My basket unified item ekleme isteği gönderiliyor', { data }, { prefix: 'BasketService' });
-      const url = `${this.baseUrl}/my-basket/unified-items`;
-      const response = await httpClient.post<BasketItem>(url, data);
-      
-      logger.info('My basket unified item başarıyla eklendi', {}, { prefix: 'BasketService' });
-      
-      return response.data;
-    } catch (error: any) {
-      logger.error('My basket unified item ekleme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'My basket unified item eklenirken hata oluştu');
-    }
-  }
-
-  // POST /api/Basket/my-basket/items/batch
-  async batchAddItemsToMyBasket(items: BatchAddItemDto[]): Promise<any> {
-    try {
-      logger.info('My basket batch items ekleme isteği gönderiliyor', { 
-        itemsCount: items.length 
-      }, { prefix: 'BasketService' });
-      const url = `${this.baseUrl}/my-basket/items/batch`;
-      const response = await httpClient.post(url, items);
-      
-      logger.info('My basket batch items başarıyla eklendi', { 
-        response: response.data 
-      }, { prefix: 'BasketService' });
-      
-      return response.data;
-    } catch (error: any) {
-      logger.error('My basket batch items ekleme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'My basket batch items eklenirken hata oluştu');
-    }
-  }
-
-  // PUT /api/Basket/my-basket/items/{basketItemId}
-  // Backend UpdateBasketItemCommand auto-scales extras when quantity changes
-  async updateMyBasketItem(basketItemId: number, newQuantity: number): Promise<void> {
-    try {
-      logger.info('My basket item quantity güncelleme isteği gönderiliyor', {
-        basketItemId,
-        newQuantity
-      }, { prefix: 'BasketService' });
-
-      const url = `${this.baseUrl}/my-basket/items/${basketItemId}`;
-
-      // Backend expects: { quantity: number }
-      // UpdateBasketItemDto only has Quantity property
-      const requestBody = {
-        quantity: newQuantity
-      };
-
-      await httpClient.put(url, requestBody);
-
-      logger.info('My basket item başarıyla güncellendi', { basketItemId }, { prefix: 'BasketService' });
-    } catch (error: any) {
-      logger.error('My basket item güncelleme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'My basket item güncellenirken hata oluştu');
-    }
-  }
-
-  // DELETE /api/Basket/my-basket/items/{basketItemId}
-  async deleteMyBasketItem(basketItemId: number): Promise<void> {
-    try {
-      logger.info('My basket item silme isteği gönderiliyor', { basketItemId }, { prefix: 'BasketService' });
-      
-      const url = `${this.baseUrl}/my-basket/items/${basketItemId}`;
-      await httpClient.delete(url);
-      
-      logger.info('My basket item başarıyla silindi', { basketItemId }, { prefix: 'BasketService' });
-    } catch (error: any) {
-      logger.error('My basket item silme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'My basket item silinirken hata oluştu');
-    }
-  }
-
-  // DELETE /api/Basket/my-basket/products/{basketItemId}
-  async deleteMyBasketProduct(basketItemId: number): Promise<void> {
-    try {
-      logger.info('My basket product silme isteği gönderiliyor', { basketItemId }, { prefix: 'BasketService' });
-      
-      const url = `${this.baseUrl}/my-basket/products/${basketItemId}`;
-      await httpClient.delete(url);
-      
-      logger.info('My basket product başarıyla silindi', { basketItemId }, { prefix: 'BasketService' });
-    } catch (error: any) {
-      logger.error('My basket product silme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'My basket product silinirken hata oluştu');
-    }
-  }
-
-  // DELETE /api/Basket/my-basket/addons/{addonBasketItemId}
-  async deleteMyBasketAddon(addonBasketItemId: number): Promise<void> {
-    try {
-      logger.info('My basket addon silme isteği gönderiliyor', { addonBasketItemId }, { prefix: 'BasketService' });
-      
-      const url = `${this.baseUrl}/my-basket/addons/${addonBasketItemId}`;
-      await httpClient.delete(url);
-      
-      logger.info('My basket addon başarıyla silindi', { addonBasketItemId }, { prefix: 'BasketService' });
-    } catch (error: any) {
-      logger.error('My basket addon silme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'My basket addon silinirken hata oluştu');
-    }
-  }
-
-  // GET /api/Basket/active
-  async getActiveBasket(): Promise<Basket> {
-    try {
-      logger.info('Active basket getirme isteği gönderiliyor', {}, { prefix: 'BasketService' });
-      
-      const url = `${this.baseUrl}/active`;
-      const response = await httpClient.get<BasketResponse>(url);
-      
-      // Convert response to normalized Basket object
-      const basketData = response.data;
-      const basket: Basket = {
-        basketId: basketData.basketId,
-        items: basketData.basketItems || [],
-        totalAmount: basketData.totalPrice,
-        totalQuantity: basketData.totalQuantity
-      };
-      
-      logger.info('Active basket başarıyla alındı', { 
-        basketId: basket.basketId,
-        itemsCount: basket.items.length,
-        totalAmount: basket.totalAmount,
-        totalQuantity: basket.totalQuantity
-      }, { prefix: 'BasketService' });
-      
-      return basket;
-    } catch (error: any) {
-      logger.error('Active basket getirme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'Active basket getirilirken hata oluştu');
-    }
-  }
-
-  // ========================================
-  // ✅ NEW: EXTRA MANAGEMENT ENDPOINTS
-  // ========================================
-
-  /**
-   * PUT /api/Basket/my-basket/items/{basketItemId}/extras/{branchProductExtraId}
-   * Update an extra's quantity or replace it with another extra
-   */
-  async updateBasketItemExtra(
-    basketItemId: number,
-    branchProductExtraId: number,
-    data: UpdateExtraDto
-  ): Promise<BasketItem> {
-    try {
-      logger.info('Basket item extra güncelleme isteği gönderiliyor', { 
-        basketItemId, 
-        branchProductExtraId, 
-        data 
-      }, { prefix: 'BasketService' });
-      
-      const url = `${this.baseUrl}/my-basket/items/${basketItemId}/extras/${branchProductExtraId}`;
-      const response = await httpClient.put<BasketItem>(url, data);
-      
-      logger.info('Basket item extra başarıyla güncellendi', { 
-        basketItemId, 
-        branchProductExtraId 
-      }, { prefix: 'BasketService' });
-      
-      return response.data;
-    } catch (error: any) {
-      logger.error('Basket item extra güncelleme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'Basket item extra güncellenirken hata oluştu');
-    }
-  }
-
-  /**
-   * DELETE /api/Basket/my-basket/items/{basketItemId}/extras/{branchProductExtraId}
-   * Remove an extra from a basket item
-   */
-  async deleteBasketItemExtra(
-    basketItemId: number,
-    branchProductExtraId: number
-  ): Promise<void> {
-    try {
-      logger.info('Basket item extra silme isteği gönderiliyor', { 
-        basketItemId, 
-        branchProductExtraId 
-      }, { prefix: 'BasketService' });
-      
-      const url = `${this.baseUrl}/my-basket/items/${basketItemId}/extras/${branchProductExtraId}`;
-      await httpClient.delete(url);
-      
-      logger.info('Basket item extra başarıyla silindi', { 
-        basketItemId, 
-        branchProductExtraId 
-      }, { prefix: 'BasketService' });
-    } catch (error: any) {
-      logger.error('Basket item extra silme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'Basket item extra silinirken hata oluştu');
-    }
-  }
-
-  /**
-   * POST /api/Basket/my-basket/items/{basketItemId}/extras
-   * Add one or more extras to a basket item
-   */
-  async addExtrasToBasketItem(
-    basketItemId: number,
-    extras: AddExtraDto[]
-  ): Promise<BasketItem> {
-    try {
-      logger.info('Basket item extras ekleme isteği gönderiliyor', { 
-        basketItemId, 
-        extrasCount: extras.length 
-      }, { prefix: 'BasketService' });
-      
-      const url = `${this.baseUrl}/my-basket/items/${basketItemId}/extras`;
-      const response = await httpClient.post<BasketItem>(url, extras);
-      
-      logger.info('Basket item extras başarıyla eklendi', { 
-        basketItemId, 
-        extrasCount: extras.length 
-      }, { prefix: 'BasketService' });
-      
-      return response.data;
-    } catch (error: any) {
-      logger.error('Basket item extras ekleme hatası', error, { prefix: 'BasketService' });
-      this.handleError(error, 'Basket item extras eklenirken hata oluştu');
-    }
-  }
-
-  // Enhanced error handling helper
-  private handleError(error: any, defaultMessage: string): never {
-    if (error?.response?.status === 400) {
-      const errorData = error?.response?.data;
-      if (errorData?.errors) {
-        // Validation error'ları göster
-        const validationErrors = Object.values(errorData.errors).flat();
-        throw new Error(`Doğrulama hatası: ${validationErrors.join(', ')}`);
+      // Enhanced error handling
+      if (error?.response?.status === 401) {
+        throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+      } else if (error?.response?.status === 403) {
+        throw new Error('Bu işlem için yetkiniz bulunmuyor.');
+      } else if (error?.response?.status === 0 || !navigator.onLine) {
+        throw new Error('İnternet bağlantınızı kontrol edin.');
       } else {
-        throw new Error('Geçersiz istek. Lütfen verileri kontrol edin.');
+        throw new Error(`Branch bilgileri getirilirken hata oluştu: ${error?.message || 'Bilinmeyen hata'}`);
       }
-    } else if (error?.response?.status === 401) {
-      throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
-    } else if (error?.response?.status === 403) {
-      throw new Error('Bu işlem için yetkiniz bulunmuyor.');
-    } else if (error?.response?.status === 404) {
-      throw new Error('Sepet bulunamadı.');
-    } else if (error?.response?.status === 409) {
-      throw new Error('Bu kayıt zaten mevcut.');
-    } else if (error?.response?.status === 0 || !navigator.onLine) {
-      throw new Error('İnternet bağlantınızı kontrol edin.');
-    } else {
-      throw new Error(`${defaultMessage}: ${error?.message || 'Bilinmeyen hata'}`);
+    }
+  }
+
+
+
+  // Helper method to transform API response to BranchData
+  private transformApiBranchToBranchData(apiBranch: ApiBranchResponse): BranchData {
+    return {
+      id: apiBranch.id,
+      branchId: apiBranch.id,
+      branchName: apiBranch.branchName,
+      whatsappOrderNumber: apiBranch.whatsappOrderNumber,
+      email: apiBranch.contact?.mail || null,
+      branchStatus: apiBranch.branchStatus,
+      restaurantId: apiBranch.restaurant?.restaurantId || 0,
+      branchLogoPath: apiBranch.branchLogoPath,
+      isOpenNow: apiBranch.isOpenNow || false,
+      isTemporarilyClosed: apiBranch.isTemporarilyClosed,
+      createAddressDto: {
+        country: apiBranch.address?.country || null,
+        city: apiBranch.address?.city || null,
+        street: apiBranch.address?.street || null,
+        zipCode: apiBranch.address?.zipCode || null,
+        addressLine1: apiBranch.address?.addressLine1 || null,
+        addressLine2 : apiBranch.address?.addressLine2 || null,
+      },
+      createContactDto :{
+          phone: apiBranch.whatsappOrderNumber || '',
+          mail: apiBranch.contact.mail || '',
+          location: apiBranch?.contact.location || '',
+          contactHeader: apiBranch?.contact.contactHeader || '',
+          footerTitle: apiBranch?.contact.footerTitle || '',
+          footerDescription: apiBranch?.contact.footerDescription || '',
+          openTitle: apiBranch?.contact.openTitle || '',
+          openDays: apiBranch?.contact.openDays || '',
+          openHours: apiBranch?.contact.openHours || '',
+      },
+      workingHours: apiBranch.workingHours?.map(wh => ({
+        openTime: wh.openTime,
+        closeTime: wh.closeTime,
+        dayOfWeek: wh.dayOfWeek,
+        isWorkingDay : wh.isWorkingDay
+      })) || []
+    };
+  }
+
+  async updateBranch(id: number, data: Partial<CreateBranchWithDetailsDto>): Promise<BranchData> {
+    try {
+      logger.info('Branch güncelleme isteği gönderiliyor', { id, data }, { prefix: 'BranchService' });
+      
+      // Transform the data to match the API's expected format
+      const batchUpdateData: BatchUpdateBranchDto = {
+        branchName: data.branchName?.trim() || null,
+        whatsappOrderNumber: data.whatsappOrderNumber?.trim() || null,
+        branchLogoPath: data.branchLogoPath || null,
+      };
+
+      // Transform address data if provided
+      if (data.createAddressDto) {
+        batchUpdateData.batchUpdateAddressDto = {
+          country: data.createAddressDto.country?.trim() || null,
+          city: data.createAddressDto.city?.trim() || null,
+          street: data.createAddressDto.street?.trim() || null,
+          adressLine1: data.createAddressDto.addressLine1?.trim() || null, 
+          adressLine2: data.createAddressDto.addressLine2?.trim() || null, 
+          zipCode: data.createAddressDto.zipCode?.trim() || null,
+        };
+      }
+
+      // Transform contact data if provided
+      if (data.createContactDto) {
+        batchUpdateData.batchUpdateContactDto = {
+          contactHeader: data.createContactDto.contactHeader?.trim() || null,
+          location: data.createContactDto.location?.trim() || null,
+          phone: data.createContactDto.phone?.trim() || null,
+          mail: data.createContactDto.mail?.trim() || null,
+          footerTitle: data.createContactDto.footerTitle?.trim() || null,
+          footerDescription: data.createContactDto.footerDescription?.trim() || null,
+          openTitle: data.createContactDto.openTitle?.trim() || null,
+          openDays: data.createContactDto.openDays?.trim() || null,
+          openHours: data.createContactDto.openHours?.trim() || null,
+        };
+      }
+
+      // Transform working hours data if provided
+      if (data.createBranchWorkingHourCoreDto && data.createBranchWorkingHourCoreDto.length > 0) {
+        batchUpdateData.batchUpdateBranchWorkingHourDto = data.createBranchWorkingHourCoreDto.map(hour => ({
+          dayOfWeek: hour.dayOfWeek,
+          openTime: hour.openTime,
+          closeTime: hour.closeTime,
+          isWorkingDay: hour.isWorkingDay
+        }));
+      }
+
+      logger.info('Transformed batch update data', batchUpdateData, { prefix: 'BranchService' });
+
+      const response = await httpClient.put<any>(`${this.baseUrl}/${id}/batch-update`, batchUpdateData);
+      logger.info('Branch Update API Response alındı', response.data, { prefix: 'BranchService' });
+      return response.data.data!;
+    } catch (error: any) {
+      logger.error('Branch güncelleme hatası', error, { prefix: 'BranchService' });
+      
+      // Enhanced error handling
+      if (error.response?.data?.errors) {
+        logger.error('API Validation Hataları:', error.response.data.errors, { prefix: 'BranchService' });
+      }
+      
+      throw error;
+    }
+  }
+
+  async deleteBranch(id: number): Promise<void> {
+    try {
+      logger.info('Branch silme isteği gönderiliyor', { id }, { prefix: 'BranchService' });
+      await httpClient.delete(`${this.baseUrl}/${id}`);
+      logger.info('Branch başarıyla silindi', { id }, { prefix: 'BranchService' });
+    } catch (error: any) {
+      logger.error('Branch silme hatası', error, { prefix: 'BranchService' });
+      throw error;
+    }
+  }
+
+  async toggleTemporaryClose(branchId: number, isTemporarilyClosed: boolean, isOpenNow: boolean): Promise<void> {
+    try {
+      logger.info('Branch temporary close güncelleme isteği', { branchId, isTemporarilyClosed, isOpenNow }, { prefix: 'BranchService' });
+      
+      // Backend sadece boolean değer bekliyor olabilir
+      await httpClient.patch(`${this.baseUrl}/${branchId}/temporary-close`, isTemporarilyClosed);
+      
+      logger.info('Branch temporary close durumu güncellendi', null, { prefix: 'BranchService' });
+    } catch (error: any) {
+      logger.error('Branch temporary close güncelleme hatası', error, { prefix: 'BranchService' });
+      
+      // Detaylı hata mesajı
+      if (error?.response?.status === 400) {
+        const errorData = error?.response?.data;
+        if (errorData?.errors) {
+          // Validation error'ları göster
+          const validationErrors = Object.values(errorData.errors).flat();
+          throw new Error(`Doğrulama hatası: ${validationErrors.join(', ')}`);
+        } else {
+          throw new Error('Geçersiz istek. Lütfen verileri kontrol edin.');
+        }
+      } else if (error?.response?.status === 401) {
+        throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');
+      } else if (error?.response?.status === 403) {
+        throw new Error('Bu işlem için yetkiniz bulunmuyor.');
+      } else if (error?.response?.status === 404) {
+        throw new Error('Şube bulunamadı.');
+      } else if (error?.response?.status === 0 || !navigator.onLine) {
+        throw new Error('İnternet bağlantınızı kontrol edin.');
+      } else {
+        throw new Error(`Şube durumu güncellenirken hata oluştu: ${error?.message || 'Bilinmeyen hata'}`);
+      }
     }
   }
 }
 
-export const basketService = new BasketService();
+export const branchService = new BranchService();
