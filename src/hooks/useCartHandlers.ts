@@ -197,6 +197,28 @@ export const useCartHandlers = ({
           note: extra.note
         })) || []
         
+        // Calculate the correct total price for this item
+        // Base price * quantity
+        let itemTotal = (item.price || 0) * (item.quantity || 1)
+        
+        // Add addons total
+        if (mappedAddons && mappedAddons.length > 0) {
+          const addonTotal = mappedAddons.reduce((sum, addon) => {
+            return sum + (addon.price * addon.quantity)
+          }, 0)
+          itemTotal += addonTotal
+        }
+        
+        // Add extras total (only non-removal extras)
+        if (mappedExtras && mappedExtras.length > 0) {
+          const extrasTotal = mappedExtras
+            .filter(extra => !extra.isRemoval)
+            .reduce((sum, extra) => {
+              return sum + (extra.unitPrice * extra.quantity)
+            }, 0)
+          itemTotal += extrasTotal
+        }
+        
         return {
           basketItemId: item.basketItemId,
           branchProductId: item.branchProductId,
@@ -206,7 +228,7 @@ export const useCartHandlers = ({
           productImageUrl: item.imageUrl ?? undefined,
           addons: mappedAddons,
           extras: mappedExtras,  
-          totalItemPrice: item.totalPrice || 0
+          totalItemPrice: itemTotal
         }
       })
       
