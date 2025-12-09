@@ -254,10 +254,20 @@ export const useCartHandlers = ({
     }
   }
 
-  // ✅ FIXED: Handle quantity increase - UPDATE existing item quantity (not add new)
-  // This triggers backend auto-scaling for extras
-  const handleQuantityIncrease = async (basketItemId?: number) => {
-    if (!basketItemId) return
+
+const handleQuantityIncrease = async (basketItemId?: number) => {
+  if (!basketItemId) return
+  
+  try {
+    setLoading(true)
+    setError(null)
+
+    const cartItem = cart.find(item => item.basketItemId === basketItemId)
+    if (!cartItem) {
+      console.error('❌ Cart item not found')
+      setError('Cart item not found. Please refresh.')
+      return
+    }
 
     try {
       setLoading(true)
