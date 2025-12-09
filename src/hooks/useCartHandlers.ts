@@ -247,9 +247,7 @@ export const useCartHandlers = ({
     }
   }
 
-  // ✅ SIMPLIFIED: Handle quantity increase
-   // ✅ ALTERNATIVE: Update quantity directly instead of adding new item
-// ✅ FIXED: Handle quantity increase - duplicate ALL extras for new product instance
+
 const handleQuantityIncrease = async (basketItemId?: number) => {
   if (!basketItemId) return
   
