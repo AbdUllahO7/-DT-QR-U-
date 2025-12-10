@@ -10,6 +10,9 @@ import {
 } from '../../../../types/api';
 import { mediaService } from '../../../../services/mediaService';
 import { logger } from '../../../../utils/logger';
+import { countries } from '../../../../data/mockData';
+
+
 
 interface BranchEditModalProps {
   isOpen: boolean;
@@ -74,12 +77,29 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     { dayOfWeek: 0, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }
   ];
 
-  // Get day name from translations
   const getDayName = (dayOfWeek: number): string => {
     return t(`branchManagement.form.dayNames.${dayOfWeek}`);
   };
 
-  // Initialize form data when branch detail changes
+  // --- ADDED: Helper to parse full phone number into code and local number ---
+  const getPhoneParts = (fullNumber: string | null) => {
+    if (!fullNumber) return { code: '+90', number: '' }; // Default to TR if empty
+    
+    // Sort countries by code length desc to match longest prefix first (e.g. match +971 before +97)
+    const sortedCountries = [...countries].sort((a, b) => b.code.length - a.code.length);
+    const country = sortedCountries.find(c => fullNumber.startsWith(c.code));
+    
+    if (country) {
+      return {
+        code: country.code,
+        number: fullNumber.slice(country.code.length)
+      };
+    }
+    
+    // Fallback if no matching code found (assume default)
+    return { code: '+90', number: fullNumber };
+  };
+
   useEffect(() => {
     if (branchDetail && isOpen) {
       logger.info('Initializing form data from branch detail', branchDetail, { prefix: 'BranchEditModal' });
@@ -127,7 +147,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     }
   }, [branchDetail, isOpen]);
 
-  // Validation function
   const validateForm = (): boolean => {
     const errors: Record<string, string> = {};
 
@@ -135,7 +154,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
       errors.branchName = t('branchManagement.form.branchNameRequired');
     }
 
-    // Check if at least one working day is selected
     const hasWorkingDay = formData.createBranchWorkingHourCoreDto?.some(day => day.isWorkingDay);
     if (!hasWorkingDay) {
       errors.workingHours = t('branchManagement.form.workingHoursRequired');
@@ -165,7 +183,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     }
     setHasChanges(true);
     
-    // Clear validation error for the field being edited
     if (validationErrors[name]) {
       setValidationErrors(prev => {
         const newErrors = { ...prev };
@@ -173,6 +190,32 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
         return newErrors;
       });
     }
+  };
+
+  // --- ADDED: Handler for Country Code + Phone Number updates ---
+  const handlePhoneCompositeChange = (
+    fullFieldName: string, // e.g., 'whatsappOrderNumber' or 'createContactDto.phone'
+    currentFullValue: string | null,
+    partType: 'code' | 'number',
+    newValue: string
+  ) => {
+    const { code, number } = getPhoneParts(currentFullValue);
+    
+    let newFullNumber = '';
+    
+    if (partType === 'code') {
+      newFullNumber = newValue + number;
+    } else {
+      newFullNumber = code + newValue;
+    }
+
+    // Reuse the existing input change logic by creating a synthetic event
+    handleInputChange({
+      target: {
+        name: fullFieldName,
+        value: newFullNumber
+      }
+    } as React.ChangeEvent<HTMLInputElement>);
   };
 
   const handleWorkingHourChange = (dayIndex: number, field: keyof CreateBranchWorkingHourCoreDto, value: any) => {
@@ -184,7 +227,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     }));
     setHasChanges(true);
     
-    // Clear working hours validation error
     if (validationErrors.workingHours) {
       setValidationErrors(prev => {
         const newErrors = { ...prev };
@@ -194,18 +236,15 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     }
   };
 
-  // Image upload handlers
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       setUploadError(t('branchManagement.modal.errors.invalidFileType'));
       return;
     }
 
-    // Validate file size (5MB limit)
     if (file.size > 5 * 1024 * 1024) {
       setUploadError(t('branchManagement.modal.errors.fileSizeError'));
       return;
@@ -215,14 +254,12 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     setIsUploadingImage(true);
 
     try {
-      // Create preview
       const reader = new FileReader();
       reader.onload = (event) => {
         setImagePreview(event.target?.result as string);
       };
       reader.readAsDataURL(file);
 
-      // Upload file
       const previousUrl = formData.branchLogoPath;
       const newImageUrl = await mediaService.uploadFile(file, previousUrl || undefined);
       
@@ -237,11 +274,9 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     } catch (error) {
       logger.error('Image upload failed', error, { prefix: 'BranchEditModal' });
       setUploadError(t('branchManagement.modal.errors.imageUploadError'));
-      // Reset preview on error
       setImagePreview(formData.branchLogoPath);
     } finally {
       setIsUploadingImage(false);
-      // Clear the file input
       e.target.value = '';
     }
   };
@@ -268,7 +303,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     e.preventDefault();
     
     if (!validateForm()) {
-      // Switch to the tab with the first error
       if (validationErrors.branchName) setActiveTab('general');
       if (validationErrors.workingHours) setActiveTab('workingHours');
       return;
@@ -277,7 +311,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     setUploadError(null);
 
     try {
-      // Convert form data to API format
       const submitData: CreateBranchWithDetailsDto = {
         branchName: formData.branchName?.trim() || null,
         whatsappOrderNumber: formData.whatsappOrderNumber?.trim() || null,
@@ -311,26 +344,19 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
       };
 
       logger.info('Submitting branch update data', submitData, { prefix: 'BranchEditModal' });
-
       await onSubmit(submitData);
-      
-      // If successful, the parent component will handle closing the modal and refreshing data
       logger.info('Branch update successful', null, { prefix: 'BranchEditModal' });
       
     } catch (error: any) {
       logger.error('Branch update failed', error, { prefix: 'BranchEditModal' });
       
-      // Handle specific error types
       if (error?.response?.status === 400) {
         const errorData = error?.response?.data;
         if (errorData?.errors) {
-          // Handle validation errors from API
           const apiErrors: Record<string, string> = {};
           
-          // Map API validation errors to form fields
           Object.entries(errorData.errors).forEach(([field, messages]) => {
             if (Array.isArray(messages) && messages.length > 0) {
-              // Convert API field names to form field names
               const formField = field.toLowerCase();
               if (formField.includes('branchname')) {
                 apiErrors.branchName = messages[0];
@@ -356,7 +382,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
         }
       } else if (error?.response?.status === 401) {
         setUploadError(t('branchManagement.error.sessionExpired'));
-        // Optionally redirect to login
         setTimeout(() => {
           window.location.href = '/login';
         }, 2000);
@@ -522,14 +547,38 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('branchManagement.form.whatsappNumber')}
                     </label>
-                    <input
-                      type="text"
-                      name="whatsappOrderNumber"
-                      value={formData.whatsappOrderNumber || ''}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
-                      placeholder={t('branchManagement.form.whatsappPlaceholder')}
-                    />
+                    {/* --- CHANGED: Split Phone Input (Code Selector + Input) --- */}
+                    <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <select
+                        title='Country Code'
+                        value={getPhoneParts(formData.whatsappOrderNumber).code}
+                        onChange={(e) => handlePhoneCompositeChange(
+                          'whatsappOrderNumber', 
+                          formData.whatsappOrderNumber, 
+                          'code', 
+                          e.target.value
+                        )}
+                        className="w-1/3 md:w-1/4 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                      >
+                        {countries.map((country) => (
+                          <option key={country.code + country.name} value={country.code}>
+                            {country.name} ({country.code})
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="tel"
+                        value={getPhoneParts(formData.whatsappOrderNumber).number}
+                        onChange={(e) => handlePhoneCompositeChange(
+                          'whatsappOrderNumber', 
+                          formData.whatsappOrderNumber, 
+                          'number', 
+                          e.target.value
+                        )}
+                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+                        placeholder={t('branchManagement.form.whatsappPlaceholder')}
+                      />
+                    </div>
                   </div>
 
                   {/* Logo Upload Section */}
@@ -713,14 +762,38 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {t('branchManagement.form.phone')}
                       </label>
-                      <input
-                        type="tel"
-                        name="createContactDto.phone"
-                        value={formData.createContactDto.phone || ''}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
-                        placeholder={t('branchManagement.form.phonePlaceholder')}
-                      />
+                      {/* --- CHANGED: Split Phone Input for Contact Phone as well --- */}
+                      <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <select
+                          title='Country Code'
+                          value={getPhoneParts(formData.createContactDto.phone).code}
+                          onChange={(e) => handlePhoneCompositeChange(
+                            'createContactDto.phone', 
+                            formData.createContactDto.phone, 
+                            'code', 
+                            e.target.value
+                          )}
+                          className="w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
+                        >
+                          {countries.map((country) => (
+                            <option key={country.code + country.name} value={country.code}>
+                              {country.name} ({country.code})
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          type="tel"
+                          value={getPhoneParts(formData.createContactDto.phone).number}
+                          onChange={(e) => handlePhoneCompositeChange(
+                            'createContactDto.phone', 
+                            formData.createContactDto.phone, 
+                            'number', 
+                            e.target.value
+                          )}
+                          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+                          placeholder={t('branchManagement.form.phonePlaceholder')}
+                        />
+                      </div>
                     </div>
 
                     <div>

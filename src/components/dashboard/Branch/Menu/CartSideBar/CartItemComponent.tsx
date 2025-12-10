@@ -229,7 +229,7 @@ const CartItemComponent: React.FC<CartItemProps> = ({
               </div>
             )}
 
-            {/* Extras Section - FIXED */}
+            {/* Extras Section */}
               {variant.extras && variant.extras.length > 0 && (
                 <div className="mb-3">
                   <p className="text-xs font-semibold text-slate-600 dark:text-slate-400 mb-2">
@@ -237,11 +237,13 @@ const CartItemComponent: React.FC<CartItemProps> = ({
                   </p>
                   <div className="space-y-2">
                     {variant.extras.map((extra) => {
-                      // ✅ FIX: Calculate effective quantity (extra qty × parent product qty)
-                      const effectiveQuantity = extra.quantity * variant.quantity
-                      const effectiveMinQuantity = (extra.minQuantity ?? 1) * variant.quantity
-                      const isAtMinimum = effectiveQuantity <= effectiveMinQuantity
-                      const canIncrease = !extra.isRemoval && (!extra.maxQuantity || effectiveQuantity < (extra.maxQuantity * variant.quantity))
+                      // Backend stores TOTAL quantity for this basket line
+                      const totalQuantity = extra.quantity
+                      const minTotal = extra.minQuantity ?? 0
+                      const maxTotal = extra.maxQuantity
+
+                      const isAtMinimum = totalQuantity <= minTotal
+                      const canIncrease = !extra.isRemoval && (!maxTotal || totalQuantity < maxTotal)
                       
                       return (
                         <div 
@@ -276,14 +278,13 @@ const CartItemComponent: React.FC<CartItemProps> = ({
                             {extra.unitPrice > 0 && (
                               <div className={`text-xs ml-5 ${extra.isRemoval ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
                                 ${extra.unitPrice.toFixed(2)} {t('menu.cart.each')}
-                                {/* ✅ Show effective quantity */}
-                                {!extra.isRemoval && ` × ${effectiveQuantity}`}
+                                {!extra.isRemoval && ` × ${totalQuantity}`}
                               </div>
                             )}
 
                             {!extra.isRemoval && (extra.minQuantity || extra.maxQuantity) && (
                               <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 ml-5">
-                                {t('menu.cart.qty')}: {effectiveMinQuantity}-{(extra.maxQuantity || 5) * variant.quantity}
+                                {t('menu.cart.qty')}: {minTotal}-{maxTotal ?? '∞'}
                               </div>
                             )}
                           </div>
@@ -322,20 +323,23 @@ const CartItemComponent: React.FC<CartItemProps> = ({
                                   )}
                                 </button>
                                 
-                                {/* ✅ Show effective quantity in the control */}
                                 <span className="w-4 text-center font-bold text-xs text-slate-800 dark:text-slate-100">
-                                  {effectiveQuantity}
+                                  {totalQuantity}
                                 </span>
                                 
                                 <button
                                   onClick={() => variant.basketItemId && onExtraQuantityIncrease && onExtraQuantityIncrease(extra.branchProductExtraId, variant.basketItemId)}
                                   disabled={loading || !variant.basketItemId || !canIncrease || !onExtraQuantityIncrease}
                                   className={`w-4 h-4 text-white rounded flex items-center justify-center transition-colors disabled:opacity-50 ${
-                                    canIncrease 
-                                      ? 'bg-orange-500 hover:bg-orange-600' 
+                                    canIncrease
+                                      ? 'bg-orange-500 hover:bg-orange-600'
                                       : 'bg-gray-400 cursor-not-allowed'
                                   }`}
-                                  title={!canIncrease ? `${t('menu.cart.max')}: ${(extra.maxQuantity || 5) * variant.quantity}` : t('menu.cart.increaseQuantity')}
+                                  title={
+                                    !canIncrease && maxTotal
+                                      ? `${t('menu.cart.max')}: ${maxTotal}`
+                                      : t('menu.cart.increaseQuantity')
+                                  }
                                 >
                                   <Plus className="h-2 w-2" />
                                 </button>
@@ -343,8 +347,7 @@ const CartItemComponent: React.FC<CartItemProps> = ({
 
                               {extra.unitPrice > 0 && (
                                 <div className="text-xs font-medium text-green-600 dark:text-green-400 ml-1">
-                                  {/* ✅ Show total price for effective quantity */}
-                                  +${(extra.unitPrice * effectiveQuantity).toFixed(2)}
+                                  +${(extra.unitPrice * totalQuantity).toFixed(2)}
                                 </div>
                               )}
                             </div>

@@ -25,6 +25,9 @@ const CartContent: React.FC<CartContentProps> = ({
 }) => {
   const { t } = useLanguage()
 
+  console.log("Rendering CartContent with cart items:", cart);
+  console.log("totalPrice", totalPrice);
+
 
   if (cart.length === 0) {
     return <EmptyCartComponent />

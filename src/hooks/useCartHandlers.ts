@@ -108,28 +108,35 @@ export const useCartHandlers = ({
     return cleanId
   }
 
-  // ✅ FIXED: Helper function to calculate item total price including addons AND extras
+  // Helper to calculate TOTAL line price for a cart item
+  // - Prefers backend's totalItemPrice (already includes quantity, addons, extras)
+  // - Falls back to client-side calculation when needed
   const calculateItemTotalPrice = (item: CartItem): number => {
-    let itemTotal = item.price
-    
-    // Add addons price
+    if (item.totalItemPrice && item.totalItemPrice > 0) {
+      return item.totalItemPrice
+    }
+
+    // Base product total = unit price × quantity
+    let itemTotal = (item.price || 0) * (item.quantity || 0)
+
+    // Add addons total (quantities are already scaled by backend)
     if (item.addons && item.addons.length > 0) {
       const addonTotal = item.addons.reduce((addonSum, addon) => {
-        return addonSum + (addon.price * addon.quantity)
+        return addonSum + addon.price * addon.quantity
       }, 0)
       itemTotal += addonTotal
     }
-    
-    // ✅ FIX: Add extras price (only for non-removal extras)
+
+    // Add extras total (only non-removal extras, quantities are scaled totals)
     if (item.extras && item.extras.length > 0) {
       const extrasTotal = item.extras
-        .filter(extra => !extra.isRemoval) // Only count added extras, not removed ones
+        .filter(extra => !extra.isRemoval)
         .reduce((extrasSum, extra) => {
-          return extrasSum + (extra.unitPrice * extra.quantity)
+          return extrasSum + extra.unitPrice * extra.quantity
         }, 0)
       itemTotal += extrasTotal
     }
-    
+
     return itemTotal
   }
 
@@ -190,6 +197,28 @@ export const useCartHandlers = ({
           note: extra.note
         })) || []
         
+        // Calculate the correct total price for this item
+        // Base price * quantity
+        let itemTotal = (item.price || 0) * (item.quantity || 1)
+        
+        // Add addons total
+        if (mappedAddons && mappedAddons.length > 0) {
+          const addonTotal = mappedAddons.reduce((sum, addon) => {
+            return sum + (addon.price * addon.quantity)
+          }, 0)
+          itemTotal += addonTotal
+        }
+        
+        // Add extras total (only non-removal extras)
+        if (mappedExtras && mappedExtras.length > 0) {
+          const extrasTotal = mappedExtras
+            .filter(extra => !extra.isRemoval)
+            .reduce((sum, extra) => {
+              return sum + (extra.unitPrice * extra.quantity)
+            }, 0)
+          itemTotal += extrasTotal
+        }
+        
         return {
           basketItemId: item.basketItemId,
           branchProductId: item.branchProductId,
@@ -199,7 +228,7 @@ export const useCartHandlers = ({
           productImageUrl: item.imageUrl ?? undefined,
           addons: mappedAddons,
           extras: mappedExtras,  
-          totalItemPrice: item.totalPrice || 0
+          totalItemPrice: itemTotal
         }
       })
       
@@ -247,100 +276,65 @@ export const useCartHandlers = ({
     }
   }
 
+  // ✅ FIXED: Handle quantity increase - UPDATE existing item quantity (not add new)
+  // This triggers backend auto-scaling for extras
+  const handleQuantityIncrease = async (basketItemId?: number) => {
+    if (!basketItemId) return
 
-const handleQuantityIncrease = async (basketItemId?: number) => {
-  if (!basketItemId) return
-  
-  try {
-    setLoading(true)
-    setError(null)
-
-    const cartItem = cart.find(item => item.basketItemId === basketItemId)
-    if (!cartItem) {
-      console.error('❌ Cart item not found')
-      setError('Cart item not found. Please refresh.')
-      return
-    }
-
-    console.log('📦 Duplicating product with extras:', {
-      basketItemId,
-      branchProductId: cartItem.branchProductId,
-      currentQuantity: cartItem.quantity,
-      extrasCount: cartItem.extras?.length || 0,
-      allExtras: cartItem.extras
-    })
-
-    // ✅ Extract ALL non-removal extras to duplicate
-    const extrasToAdd: ProductExtraDto[] = []
-    
-    if (cartItem.extras && cartItem.extras.length > 0) {
-      cartItem.extras.forEach(extra => {
-        // Only include added extras (not removed ones)
-        if (!extra.isRemoval) {
-          console.log('✅ Including extra for duplication:', {
-            name: extra.extraName,
-            category: extra.extraCategoryName,
-            branchProductExtraId: extra.branchProductExtraId,
-            quantity: extra.quantity,
-            isRequired: extra.isRequired
-          })
-          
-          extrasToAdd.push({
-            branchProductExtraId: extra.branchProductExtraId,
-            quantity: extra.quantity,
-            note: extra.note || undefined,
-            extraId: 0,
-            isRemoval: extra.isRemoval
-          })
-        } else {
-          console.log('⏭️ Skipping removal extra:', extra.extraName)
-        }
-      })
-    }
-
-    console.log('📤 Sending to API:', {
-      branchProductId: cartItem.branchProductId,
-      quantity: 1,
-      extrasCount: extrasToAdd.length,
-      extras: extrasToAdd
-    })
-
-    // ✅ Add new product instance with duplicated extras
-    await basketService.addUnifiedItemToMyBasket({
-      branchProductId: cartItem.branchProductId,
-      quantity: 1,
-      extras: extrasToAdd.length > 0 ? extrasToAdd : undefined
-    })
-
-    console.log('✅ Product duplicated successfully with extras')
-    await loadBasket()
-
-  } catch (err: any) {
-    console.error('❌ Error duplicating product:', err)
-    console.error('❌ Full error response:', {
-      message: err.message,
-      status: err.response?.status,
-      data: err.response?.data,
-      config: err.config?.data
-    })
-    
-    const errorMessage = err.response?.data?.message || 
-                        err.response?.data?.title ||
-                        err.message || 
-                        'Failed to duplicate product with extras'
-    
-    setError(errorMessage)
-    
-    // Always reload basket to sync state
     try {
+      setLoading(true)
+      setError(null)
+
+      const cartItem = cart.find(item => item.basketItemId === basketItemId)
+      if (!cartItem) {
+        console.error('❌ Cart item not found')
+        setError('Cart item not found. Please refresh.')
+        return
+      }
+
+      const newQuantity = cartItem.quantity + 1
+
+      console.log('📦 Updating product quantity (backend will auto-scale extras):', {
+        basketItemId,
+        branchProductId: cartItem.branchProductId,
+        currentQuantity: cartItem.quantity,
+        newQuantity: newQuantity,
+        extrasCount: cartItem.extras?.length || 0
+      })
+
+      // ✅ Use UPDATE endpoint instead of ADD
+      // Backend's UpdateBasketItemCommandHandler has auto-scaling logic for extras
+      // When quantity changes: extra.Quantity = perItemQuantity * newQuantity
+      await basketService.updateMyBasketItem(basketItemId, newQuantity)
+
+      console.log('✅ Product quantity updated successfully (extras auto-scaled)')
       await loadBasket()
-    } catch (loadErr) {
-      console.error('❌ Failed to reload basket after error:', loadErr)
+
+    } catch (err: any) {
+      console.error('❌ Error updating product quantity:', err)
+      console.error('❌ Full error response:', {
+        message: err.message,
+        status: err.response?.status,
+        data: err.response?.data
+      })
+
+      const errorMessage = err.response?.data?.message ||
+                          err.response?.data?.title ||
+                          err.message ||
+                          'Failed to update product quantity'
+
+      setError(errorMessage)
+
+      // Always reload basket to sync state
+      try {
+        await loadBasket()
+      } catch (loadErr) {
+        console.error('❌ Failed to reload basket after error:', loadErr)
+      }
+    } finally {
+      setLoading(false)
     }
-  } finally {
-    setLoading(false)
   }
-}
 
   // ✅ NEW: Handle extra toggle using dedicated endpoint
   const handleExtraToggle = async (branchProductExtraId: number, basketItemId: number, currentIsRemoval: boolean) => {
@@ -409,21 +403,23 @@ const handleQuantityIncrease = async (basketItemId?: number) => {
         return
       }
 
+      // TOTAL quantity semantics: backend UpdateExtraQuantity expects absolute quantity
       if (extra.maxQuantity && extra.quantity >= extra.maxQuantity) {
         setError(`Maximum quantity for ${extra.extraName} is ${extra.maxQuantity}`)
         return
       }
 
+      // Increment by 1 total unit
       const newQuantity = extra.quantity + 1
 
       console.log('➕ Increasing extra quantity:', {
         branchProductExtraId,
         basketItemId,
-        currentQuantity: extra.quantity,
-        newQuantity
+        currentScaledQuantity: extra.quantity,
+        newScaledQuantity: newQuantity
       })
 
-      // ✅ SIMPLE: Just update the extra quantity
+      // Update with new scaled quantity
       await basketService.updateBasketItemExtra(
         basketItemId,
         branchProductExtraId,
@@ -478,18 +474,20 @@ const handleQuantityIncrease = async (basketItemId?: number) => {
         return
       }
 
+      // Decrement by 1 total unit
       const newQuantity = extra.quantity - 1
 
       console.log('➖ Decreasing extra quantity:', {
         branchProductExtraId,
         basketItemId,
-        currentQuantity: extra.quantity,
-        newQuantity
+        currentScaledQuantity: extra.quantity,
+        productQuantity: cartItem.quantity,
+        newScaledQuantity: newQuantity
       })
 
       if (newQuantity <= 0) {
         // ✅ If quantity would be 0 or less, just delete the extra
-        console.log('🗑️ Removing extra completely (quantity would be 0)')
+        console.log('🗑️ Removing extra completely (quantity would be 0 or negative)')
         await basketService.deleteBasketItemExtra(basketItemId, branchProductExtraId)
       } else {
         // ✅ Otherwise, update the quantity
@@ -521,19 +519,53 @@ const handleQuantityIncrease = async (basketItemId?: number) => {
     }
   }
 
-  // Handle quantity decrease
+  // ✅ FIXED: Handle quantity decrease - UPDATE when quantity > 1 (auto-scales extras)
   const handleQuantityDecrease = async (basketItemId?: number) => {
     if (!basketItemId) return
-    
+
     try {
       setLoading(true)
       setError(null)
 
-      await basketService.deleteMyBasketItem(basketItemId)
+      const cartItem = cart.find(item => item.basketItemId === basketItemId)
+      if (!cartItem) {
+        console.error('❌ Cart item not found')
+        setError('Cart item not found. Please refresh.')
+        return
+      }
+
+      if (cartItem.quantity <= 1) {
+        // If quantity is 1 or less, delete the entire item
+        console.log('🗑️ Deleting basket item (quantity would be 0):', basketItemId)
+        await basketService.deleteMyBasketItem(basketItemId)
+      } else {
+        // If quantity > 1, update to decrease (backend auto-scales extras)
+        const newQuantity = cartItem.quantity - 1
+        console.log('📦 Decreasing product quantity (backend will auto-scale extras):', {
+          basketItemId,
+          currentQuantity: cartItem.quantity,
+          newQuantity: newQuantity,
+          extrasCount: cartItem.extras?.length || 0
+        })
+
+        await basketService.updateMyBasketItem(basketItemId, newQuantity)
+        console.log('✅ Product quantity decreased successfully (extras auto-scaled)')
+      }
+
       await loadBasket()
     } catch (err: any) {
-      console.error('Error decreasing parent item quantity:', err)
-      setError('Failed to decrease item quantity')
+      console.error('❌ Error decreasing product quantity:', err)
+      const errorMessage = err.response?.data?.message ||
+                          err.message ||
+                          'Failed to decrease item quantity'
+      setError(errorMessage)
+
+      // Reload to sync state
+      try {
+        await loadBasket()
+      } catch (loadErr) {
+        console.error('❌ Failed to reload basket after error:', loadErr)
+      }
     } finally {
       setLoading(false)
     }

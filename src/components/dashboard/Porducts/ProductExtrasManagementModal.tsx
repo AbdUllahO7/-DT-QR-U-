@@ -52,7 +52,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
   // Form state
   const [formData, setFormData] = useState({
     extraId: 0,
-    selectionMode: 0, // 0: Single, 1: Multiple
+    selectionMode: 0, 
     defaultQuantity: 1,
     defaultMinQuantity: 0,
     defaultMaxQuantity: 1,

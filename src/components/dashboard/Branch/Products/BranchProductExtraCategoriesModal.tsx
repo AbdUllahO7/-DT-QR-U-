@@ -56,6 +56,7 @@ interface ExtraSpecificConfig {
   minQuantity: number;
   maxQuantity: number;
   isRequiredOverride: boolean;
+  unitPrice?: number;
 }
 
 interface ExtrasSpecificConfig {
@@ -925,7 +926,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                               type="number"
                                               min="0"
                                               step="1"
-                                              value={extraConfig.specialUnitPrice}
+                                              value={extraConfig.unitPrice}
                                               onChange={(e) =>
                                                 handleExtraConfigChange(
                                                   extra.productExtraId,

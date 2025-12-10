@@ -166,61 +166,19 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     })
   }, [cart])
 
-  // ✅ FIXED: Calculate total price with DETAILED LOGGING
+  // Calculate cart total using line totals from backend
   useEffect(() => {
-    console.log('💰 ===== CALCULATING TOTAL PRICE =====')
-    
     if (cart.length === 0) {
-      console.log('❌ Cart is empty, setting total to 0')
       setTotalPrice(0)
       return
     }
 
     const total = cart.reduce((sum, item, index) => {
-      console.log(`\n📦 Item ${index + 1}: ${item.productName}`)
-      
-      // Use calculateItemTotalPrice which includes extras
+      // Line total already includes quantity, addons and extras
       const itemTotal = calculateItemTotalPrice(item)
-      
-      // ✅ Log all extras first (including removals)
-      console.log('📋 ALL Extras:', item.extras?.map(e => ({
-        name: e.extraName,
-        unitPrice: e.unitPrice,
-        qty: e.quantity,
-        isRemoval: e.isRemoval,
-        subtotal: e.unitPrice * e.quantity
-      })))
-      
-      // ✅ Log only non-removal extras
-      const nonRemovalExtras = item.extras?.filter(e => !e.isRemoval) || []
-      console.log('✅ NON-REMOVAL Extras:', nonRemovalExtras.map(e => ({
-        name: e.extraName,
-        unitPrice: e.unitPrice,
-        qty: e.quantity,
-        subtotal: e.unitPrice * e.quantity
-      })))
-      
-      // ✅ Calculate extras total manually
-      const extrasTotal = nonRemovalExtras.reduce((sum, e) => sum + (e.unitPrice * e.quantity), 0)
-      console.log('💵 Extras Total:', extrasTotal)
-      
-      console.log({
-        basePrice: item.price,
-        quantity: item.quantity,
-        addons: item.addons?.length || 0,
-        extras: item.extras?.length || 0,
-        calculatedItemTotal: itemTotal,
-        expectedTotal: item.price + extrasTotal,
-        difference: itemTotal - (item.price + extrasTotal),
-        finalContribution: itemTotal * item.quantity
-      })
-      
-      return sum + (itemTotal * item.quantity)
+      return sum + itemTotal
     }, 0)
-    
-    console.log('\n✅ FINAL TOTAL PRICE:', total)
-    console.log('=====================================\n')
-    
+
     setTotalPrice(total)
   }, [cart, calculateItemTotalPrice])
 
@@ -428,17 +386,10 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     }
   }
 
-  // 🔍 DEBUG: Log grouped items calculation
+  // Group items for display using line totals
   const groupedItems: GroupedCartItem[] = cart.reduce((groups, item, index) => {
     const existingGroup = groups.find(g => g.product.branchProductId === item.branchProductId)
     const variantItemTotal = calculateItemTotalPrice(item)
-    
-    console.log(`📊 Grouping Item ${index + 1}:`, {
-      name: item.productName,
-      variantTotal: variantItemTotal,
-      quantity: item.quantity,
-      contribution: variantItemTotal * item.quantity
-    })
     
     const variant = {
       basketItemId: item.basketItemId,
@@ -453,7 +404,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     if (existingGroup) {
       existingGroup.variants.push(variant)
       existingGroup.totalQuantity += item.quantity
-      existingGroup.totalPrice += variantItemTotal * item.quantity
+      existingGroup.totalPrice += variantItemTotal
     } else {
       groups.push({
         product: {
@@ -464,7 +415,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
         },
         variants: [variant],
         totalQuantity: item.quantity,
-        totalPrice: variantItemTotal * item.quantity
+        totalPrice: variantItemTotal
       })
     }
 
