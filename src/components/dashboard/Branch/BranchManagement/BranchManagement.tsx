@@ -1,12 +1,51 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
-import {  CreateBranchWithDetailsDto } from '../../../../types/api';
+import { CreateBranchWithDetailsDto } from '../../../../types/api';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import BranchHeader from './BranchHeader';
 import BranchInfo from './BranchInfo';
 import { branchService } from '../../../../services/Branch/BranchService';
 import BranchWorkingHours from './BranchWorkingHours';
 import { BranchData, EditDataType } from '../../../../types/BranchManagement/type';
+
+// --- ADDED: Countries Data ---
+export const countries = [
+  { name: 'TR', code: '+90' },
+  { name: 'US', code: '+1' },
+  { name: 'GB', code: '+44' },
+  { name: 'DE', code: '+49' },
+  { name: 'FR', code: '+33' },
+  { name: 'ES', code: '+34' },
+  { name: 'IT', code: '+39' },
+  { name: 'NL', code: '+31' },
+  { name: 'GR', code: '+30' },
+  { name: 'JP', code: '+81' },
+  { name: 'KR', code: '+82' },
+  { name: 'CN', code: '+86' },
+  { name: 'IN', code: '+91' },
+  { name: 'BR', code: '+55' },
+  { name: 'RU', code: '+7' },
+  { name: 'AU', code: '+61' },
+  { name: 'CA', code: '+1' },
+  { name: 'MX', code: '+52' },
+  { name: 'AR', code: '+54' },
+  { name: 'ZA', code: '+27' },
+  { name: 'EG', code: '+20' },
+  { name: 'SA', code: '+966' },
+  { name: 'AE', code: '+971' },
+  { name: 'AT', code: '+43' },
+  { name: 'BE', code: '+32' },
+  { name: 'SE', code: '+46' },
+  { name: 'NO', code: '+47' },
+  { name: 'DK', code: '+45' },
+  { name: 'PL', code: '+48' },
+  { name: 'PT', code: '+351' },
+  { name: 'IE', code: '+353' },
+  { name: 'UA', code: '+380' },
+  { name: 'CZ', code: '+420' },
+  { name: 'HU', code: '+36' },
+  { name: 'RO', code: '+40' },
+];
 
 const BranchManagementBranch: React.FC = () => {
   const { t, isRTL } = useLanguage();
@@ -43,10 +82,27 @@ const BranchManagementBranch: React.FC = () => {
     createBranchWorkingHourCoreDto: [],
   });
 
-
   useEffect(() => {
     loadBranches();
   }, []);
+
+  // --- ADDED: Helper to parse full phone number into code and local number ---
+  const getPhoneParts = (fullNumber: string | null) => {
+    if (!fullNumber) return { code: '+90', number: '' }; // Default to TR if empty
+    
+    // Sort countries by code length desc to match longest prefix first
+    const sortedCountries = [...countries].sort((a, b) => b.code.length - a.code.length);
+    const country = sortedCountries.find(c => fullNumber.startsWith(c.code));
+    
+    if (country) {
+      return {
+        code: country.code,
+        number: fullNumber.slice(country.code.length)
+      };
+    }
+    
+    return { code: '+90', number: fullNumber };
+  };
 
   const loadBranches = async (): Promise<void> => {
     try {
@@ -70,7 +126,7 @@ const BranchManagementBranch: React.FC = () => {
       branchName: branch.branchName || '',
       whatsappOrderNumber: branch.whatsappOrderNumber || '',
       email: branch.email || '',
-      branchLogoPath: branch.branchLogoPath || '', // Initialize branchLogoPath
+      branchLogoPath: branch.branchLogoPath || '',
       createAddressDto: {
         country: branch.createAddressDto?.country || '',
         city: branch.createAddressDto?.city || '',
@@ -80,15 +136,15 @@ const BranchManagementBranch: React.FC = () => {
         addressLine2: branch.createAddressDto?.addressLine2 || '',
       },
       createContactDto: {
-        phone: branch.whatsappOrderNumber || '',
+        phone: branch.createContactDto?.phone || '', // Fixed: was reading from whatsappOrderNumber in your original code, standardized to contact phone
         mail: branch.email || '',
-        location: branch?.createContactDto.location || '',
-        contactHeader: branch?.createContactDto.contactHeader || '',
-        footerTitle: branch?.createContactDto.footerTitle || '',
-        footerDescription: branch?.createContactDto.footerDescription || '',
-        openTitle: branch?.createContactDto.openTitle || '',
-        openDays: branch?.createContactDto.openDays || '',
-        openHours: branch?.createContactDto.openHours || '',
+        location: branch?.createContactDto?.location || '',
+        contactHeader: branch?.createContactDto?.contactHeader || '',
+        footerTitle: branch?.createContactDto?.footerTitle || '',
+        footerDescription: branch?.createContactDto?.footerDescription || '',
+        openTitle: branch?.createContactDto?.openTitle || '',
+        openDays: branch?.createContactDto?.openDays || '',
+        openHours: branch?.createContactDto?.openHours || '',
       },
       createBranchWorkingHourCoreDto: branch.workingHours
         ? branch.workingHours.map((hour) => ({
@@ -116,7 +172,7 @@ const BranchManagementBranch: React.FC = () => {
       setError('');
       const updateData: Partial<CreateBranchWithDetailsDto> = {
         ...editData,
-        branchLogoPath: editData.branchLogoPath, // Include branchLogoPath in update
+        branchLogoPath: editData.branchLogoPath,
       };
       await branchService.updateBranch(selectedBranch.id, updateData);
       setSuccess(t('branchManagementBranch.messages.updateSuccess'));
@@ -162,6 +218,26 @@ const BranchManagementBranch: React.FC = () => {
       current[keys[keys.length - 1]] = value;
       return newData;
     });
+  };
+
+  // --- ADDED: Handler for Country Code + Phone Number updates ---
+  const handlePhoneCompositeChange = (
+    fullFieldName: string, 
+    currentFullValue: string, 
+    partType: 'code' | 'number', 
+    newValue: string
+  ) => {
+    const { code, number } = getPhoneParts(currentFullValue);
+    
+    let newFullNumber = '';
+    
+    if (partType === 'code') {
+      newFullNumber = newValue + number;
+    } else {
+      newFullNumber = code + newValue;
+    }
+
+    handleInputChange(fullFieldName, newFullNumber);
   };
 
   const handleWorkingHourChange = (dayOfWeek: number, field: string, value: string | boolean): void => {
@@ -236,13 +312,20 @@ const BranchManagementBranch: React.FC = () => {
           initializeEditData={initializeEditData}
           setEditData={setEditData} 
         />
+        
+        {/* --- MODIFIED: Passing new phone handling props to BranchInfo --- */}
         <BranchInfo
           selectedBranch={selectedBranch}
           isEditing={isEditing}
           editData={editData}
           t={t}
           handleInputChange={handleInputChange}
+          // Pass these new props:
+          countries={countries}
+          getPhoneParts={getPhoneParts}
+          handlePhoneCompositeChange={handlePhoneCompositeChange}
         />
+        
         <BranchWorkingHours
           selectedBranch={selectedBranch}
           isEditing={isEditing}
