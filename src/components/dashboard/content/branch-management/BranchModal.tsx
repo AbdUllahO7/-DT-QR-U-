@@ -19,6 +19,44 @@ import { useLanguage } from '../../../../contexts/LanguageContext';
 import type { CreateBranchWithDetailsDto, CreateBranchWorkingHourCoreDto } from '../../../../types/api';
 import { mediaService } from '../../../../services/mediaService';
 
+const countries = [
+  { name: 'TR', code: '+90' },
+  { name: 'US', code: '+1' },
+  { name: 'GB', code: '+44' },
+  { name: 'DE', code: '+49' },
+  { name: 'FR', code: '+33' },
+  { name: 'ES', code: '+34' },
+  { name: 'IT', code: '+39' },
+  { name: 'NL', code: '+31' },
+  { name: 'GR', code: '+30' },
+  { name: 'JP', code: '+81' },
+  { name: 'KR', code: '+82' },
+  { name: 'CN', code: '+86' },
+  { name: 'IN', code: '+91' },
+  { name: 'BR', code: '+55' },
+  { name: 'RU', code: '+7' },
+  { name: 'AU', code: '+61' },
+  { name: 'CA', code: '+1' },
+  { name: 'MX', code: '+52' },
+  { name: 'AR', code: '+54' },
+  { name: 'ZA', code: '+27' },
+  { name: 'EG', code: '+20' },
+  { name: 'SA', code: '+966' },
+  { name: 'AE', code: '+971' },
+  { name: 'AT', code: '+43' },
+  { name: 'BE', code: '+32' },
+  { name: 'SE', code: '+46' },
+  { name: 'NO', code: '+47' },
+  { name: 'DK', code: '+45' },
+  { name: 'PL', code: '+48' },
+  { name: 'PT', code: '+351' },
+  { name: 'IE', code: '+353' },
+  { name: 'UA', code: '+380' },
+  { name: 'CZ', code: '+420' },
+  { name: 'HU', code: '+36' },
+  { name: 'RO', code: '+40' },
+];
+
 interface BranchModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -49,14 +87,14 @@ const BranchModal: React.FC<BranchModalProps> = ({
   const [branchLogoPreview, setBranchLogoPreview] = useState<string | null>(formData.branchLogoPath || null);
   const [isUploadingLogo, setIsUploadingLogo] = useState<boolean>(false);
   const [isCurrentStepValid, setIsCurrentStepValid] = useState<boolean>(false);
+  
   const dayNamesDisplay = Array.isArray(t('branchModal.workingHours.days'))
     ? t('branchModal.workingHours.days')
     : language === 'ar'
     ? ['الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد']
     : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
-  // Update branchLogoPreview when formData.branchLogoPath changes
-useEffect(() => {
+  useEffect(() => {
     setBranchLogoPreview(formData.branchLogoPath || null);
   }, [formData.branchLogoPath]);
 
@@ -64,7 +102,6 @@ useEffect(() => {
     setIsCurrentStepValid(checkStepValidity(currentStep));
   }, [formData, currentStep]);
 
-  // Helper functions
   const formatTimeForInput = (timeStr: string): string => {
     return timeStr.substring(0, 5);
   };
@@ -73,7 +110,16 @@ useEffect(() => {
     return `${timeStr}:00`;
   };
 
-  // Toggle component for working hours
+  const getPhoneParts = (fullNumber: string | null) => {
+    if (!fullNumber) return { code: '+90', number: '' }; 
+    const sortedCountries = [...countries].sort((a, b) => b.code.length - a.code.length);
+    const country = sortedCountries.find(c => fullNumber.startsWith(c.code));
+    if (country) {
+      return { code: country.code, number: fullNumber.slice(country.code.length) };
+    }
+    return { code: '+90', number: fullNumber };
+  };
+
   const Toggle = ({ checked, onChange, disabled }: { checked: boolean; onChange: (checked: boolean) => void; disabled?: boolean }) => (
     <button
       type="button"
@@ -91,33 +137,22 @@ useEffect(() => {
     </button>
   );
 
-const checkStepValidity = (step: number): boolean => {
+  const checkStepValidity = (step: number): boolean => {
     switch (step) {
       case 1:
         return (
           !!formData.branchName?.trim() &&
-          !!formData.whatsappOrderNumber?.trim() &&
-          !!formData.branchLogoPath 
+          !!formData.whatsappOrderNumber?.trim() 
         );
       case 2:
-        return (
-          !!formData.createAddressDto.country?.trim() &&
-          !!formData.createAddressDto.city?.trim() &&
-          !!formData.createAddressDto.street?.trim() &&
-          !!formData.createAddressDto.addressLine1?.trim() &&
-          !!formData.createAddressDto.zipCode?.trim() &&
-          !!formData.createAddressDto.addressLine2?.trim() 
-        );
+        return true; 
       case 3:
-        return (
-          !!formData.createContactDto.phone?.trim() &&
-          !!formData.createContactDto.mail?.trim() &&
-          !!formData.createContactDto.location?.trim()
-        );
+        return true;
       default:
         return false;
     }
   };
+
   const validateStep = (step: number): boolean => {
     const errors: { [key: string]: string } = {};
 
@@ -128,52 +163,14 @@ const checkStepValidity = (step: number): boolean => {
       if (!formData.whatsappOrderNumber?.trim()) {
         errors.whatsappOrderNumber = t('branchModal.errors.whatsappNumber');
       }
-      // --- ADDED THIS ---
-      if (!formData.branchLogoPath) {
-        errors.branchLogoPath = t('branchModal.errors.branchLogo'); // Add this translation
-      }
-      // --- END ---
-    } else if (step === 2) {
-      if (!formData.createAddressDto.country?.trim()) {
-        errors['address.country'] = t('branchModal.errors.country');
-      }
-      if (!formData.createAddressDto.city?.trim()) {
-        errors['address.city'] = t('branchModal.errors.city');
-      }
-      if (!formData.createAddressDto.street?.trim()) {
-        errors['address.street'] = t('branchModal.errors.street');
-      }
-      if (!formData.createAddressDto.addressLine1?.trim()) {
-        errors['address.addressLine1'] = t('branchModal.errors.addressLine1');
-      }
-      if (!formData.createAddressDto.zipCode?.trim()) {
-        errors['address.zipCode'] = t('branchModal.errors.zipCode');
-      }
-      // --- ADDED THIS ---
-      if (!formData.createAddressDto.addressLine2?.trim()) {
-        errors['address.addressLine2'] = t('branchModal.errors.addressLine2'); 
-      }
-      // --- END ---
-    } else if (step === 3) {
-      if (!formData.createContactDto.phone?.trim()) {
-        errors['contact.phone'] = t('branchModal.errors.phone');
-      }
-      if (!formData.createContactDto.mail?.trim()) {
-        errors['contact.mail'] = t('branchModal.errors.email');
-      }
-      if (!formData.createContactDto.location?.trim()) {
-        errors['contact.location'] = t('branchModal.errors.location');
-      }
-    }
+    } 
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  // Input change handlers
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-
     let updatedFormData: CreateBranchWithDetailsDto;
 
     if (name.startsWith('address.')) {
@@ -213,7 +210,41 @@ const checkStepValidity = (step: number): boolean => {
     onInputChange(e);
   };
 
-  // Working hours change handler
+  // --- UPDATED: Handler with limitation logic ---
+  const handlePhoneCompositeChange = (
+    fullFieldName: string, 
+    currentFullValue: string | null, 
+    partType: 'code' | 'number', 
+    newValue: string
+  ) => {
+    // Validation for number part
+    if (partType === 'number') {
+      // 1. Only allow numeric characters
+      if (!/^\d*$/.test(newValue)) return;
+      
+      // 2. Limit to 15 digits max
+      if (newValue.length > 15) return;
+    }
+
+    const { code, number } = getPhoneParts(currentFullValue);
+    let newFullNumber = '';
+    
+    if (partType === 'code') {
+      newFullNumber = newValue + number;
+    } else {
+      newFullNumber = code + newValue;
+    }
+
+    const syntheticEvent = {
+      target: {
+        name: fullFieldName,
+        value: newFullNumber,
+      },
+    } as React.ChangeEvent<HTMLInputElement>;
+
+    handleInputChange(syntheticEvent);
+  };
+
   const handleWorkingHourChange = (dayIndex: number, field: keyof CreateBranchWorkingHourCoreDto, value: any) => {
     if (!formData.createBranchWorkingHourCoreDto) return;
 
@@ -240,23 +271,20 @@ const checkStepValidity = (step: number): boolean => {
     onWorkingHourChange(dayIndex, field, value);
   };
 
-  // Logo upload handlers
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
     const file = e.target.files?.[0];
     if (file) {
       setBranchLogo(file);
-
       const reader = new FileReader();
       reader.onload = (event) => {
         setBranchLogoPreview(event.target?.result as string);
       };
       reader.readAsDataURL(file);
-
       await handleLogoUpload(file);
     }
   };
 
-const handleLogoUpload = async (file?: File): Promise<void> => {
+  const handleLogoUpload = async (file?: File): Promise<void> => {
     const uploadFile = file || branchLogo;
     if (!uploadFile) return;
 
@@ -268,17 +296,6 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
         ...prev,
         branchLogoPath: responseUrl
       }));
-
-      // --- ADDED THIS ---
-      // Clear the error message on successful upload
-      if (formErrors.branchLogoPath) {
-        setFormErrors(prev => ({
-          ...prev,
-          branchLogoPath: ''
-        }));
-      }
-      // --- END ---
-
       setBranchLogo(null);
     } catch (error) {
       console.error('Logo upload error:', error);
@@ -287,7 +304,6 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
     }
   };
 
-  // Step navigation
   const handleNextStep = () => {
     if (validateStep(currentStep) && currentStep < 3) {
       setCurrentStep(currentStep + 1);
@@ -300,7 +316,6 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
     }
   };
 
-  // Form submit
   const handleSubmit = async () => {
     if (!validateStep(3)) {
       return;
@@ -308,7 +323,6 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
     await onSubmit(formData);
   };
 
-  // Render functions for each step
   const renderStep1 = () => (
     <div className="space-y-6">
       <div>
@@ -318,7 +332,7 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
         <div className="space-y-6">
           <div>
             <label htmlFor="branchName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.branchName.label')}
+              {t('branchModal.fields.branchName.label')} *
             </label>
             <div className="relative">
               <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
@@ -343,17 +357,43 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
 
           <div>
             <label htmlFor="whatsappOrderNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.whatsappNumber.label')}
+              {t('branchModal.fields.whatsappNumber.label')} *
             </label>
-            <div className="relative">
-              <Phone className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+            
+            <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <select
+                title='Country Code'
+                value={getPhoneParts(formData.whatsappOrderNumber).code}
+                onChange={(e) => handlePhoneCompositeChange(
+                  'whatsappOrderNumber', 
+                  formData.whatsappOrderNumber, 
+                  'code', 
+                  e.target.value
+                )}
+                className={`w-1/3 md:w-1/4 px-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+                  formErrors.whatsappOrderNumber
+                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+                } text-gray-900 dark:text-white`}
+              >
+                {countries.map((country) => (
+                  <option key={country.code + country.name} value={country.code}>
+                    {country.name} ({country.code})
+                  </option>
+                ))}
+              </select>
               <input
                 type="tel"
-                id="whatsappOrderNumber"
-                name="whatsappOrderNumber"
-                value={formData.whatsappOrderNumber || ''}
-                onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+                // --- ADDED: maxLength attribute ---
+                maxLength={15}
+                value={getPhoneParts(formData.whatsappOrderNumber).number}
+                onChange={(e) => handlePhoneCompositeChange(
+                  'whatsappOrderNumber', 
+                  formData.whatsappOrderNumber, 
+                  'number', 
+                  e.target.value
+                )}
+                className={`flex-1 px-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
                   formErrors.whatsappOrderNumber
                     ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                     : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
@@ -361,55 +401,66 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
                 placeholder={t('branchModal.fields.whatsappNumber.placeholder')}
               />
             </div>
+
             {formErrors.whatsappOrderNumber && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.whatsappOrderNumber}</p>
             )}
           </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {t('branchModal.fields.branchLogo.label')}
-        </label>
-        <div className="space-y-4">
-          {/* ... (image preview code) ... */}
-
-          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
-            <input
-              type="file"
-              id="branchLogo"
-              accept="image/*"
-              onChange={handleLogoChange}
-              className="hidden"
-              disabled={isUploadingLogo}
-            />
-            <label
-              htmlFor="branchLogo"
-              className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 ${
-                isUploadingLogo ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-              } ${
-                // --- MODIFIED THIS LINE ---
-                formErrors.branchLogoPath
-                  ? 'border-red-500' // Add red border on error
-                  : 'border-gray-300 dark:border-gray-600' // Default border
-                // --- END ---
-              }`}
-            >
-              <Upload className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-              {isUploadingLogo ? t('branchModal.fields.branchLogo.uploading') : t('branchModal.fields.branchLogo.select')}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              {t('branchModal.fields.branchLogo.label')}
             </label>
+            <div className="space-y-4">
+               {branchLogoPreview && (
+                <div className="mb-4">
+                  <div className="relative inline-block">
+                    <img
+                      src={branchLogoPreview}
+                      alt="Branch Logo"
+                      className="w-32 h-32 object-cover rounded-lg border-2 border-gray-300 dark:border-gray-600 shadow-sm"
+                    />
+                    {!isUploadingLogo && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                           setBranchLogoPreview(null);
+                           setFormData(prev => ({ ...prev, branchLogoPath: null }));
+                        }}
+                        className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors shadow-lg"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
+                <input
+                  type="file"
+                  id="branchLogo"
+                  accept="image/*"
+                  onChange={handleLogoChange}
+                  className="hidden"
+                  disabled={isUploadingLogo}
+                />
+                <label
+                  htmlFor="branchLogo"
+                  className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 ${
+                    isUploadingLogo ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                  } border-gray-300 dark:border-gray-600`}
+                >
+                  <Upload className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                  {isUploadingLogo ? t('branchModal.fields.branchLogo.uploading') : t('branchModal.fields.branchLogo.select')}
+                </label>
+              </div>
+
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {t('branchModal.fields.branchLogo.supportText')}
+              </p>
+            </div>
           </div>
-
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            {t('branchModal.fields.branchLogo.supportText')}
-          </p>
-
-          {/* --- ADDED THIS --- */}
-          {formErrors.branchLogoPath && (
-            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.branchLogoPath}</p>
-          )}
-          {/* --- END --- */}
-        </div>
-      </div>
         </div>
       </div>
     </div>
@@ -434,17 +485,10 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
                 name="address.country"
                 value={formData.createAddressDto.country || ''}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                  formErrors['address.country']
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 placeholder={t('branchModal.fields.country.placeholder')}
               />
             </div>
-            {formErrors['address.country'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.country']}</p>
-            )}
           </div>
 
           <div>
@@ -459,17 +503,10 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
                 name="address.city"
                 value={formData.createAddressDto.city || ''}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                  formErrors['address.city']
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 placeholder={t('branchModal.fields.city.placeholder')}
               />
             </div>
-            {formErrors['address.city'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.city']}</p>
-            )}
           </div>
 
           <div>
@@ -484,17 +521,10 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
                 name="address.street"
                 value={formData.createAddressDto.street || ''}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                  formErrors['address.street']
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 placeholder={t('branchModal.fields.street.placeholder')}
               />
             </div>
-            {formErrors['address.street'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.street']}</p>
-            )}
           </div>
 
           <div>
@@ -509,17 +539,10 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
                 name="address.zipCode"
                 value={formData.createAddressDto.zipCode || ''}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                  formErrors['address.zipCode']
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 placeholder={t('branchModal.fields.zipCode.placeholder')}
               />
             </div>
-            {formErrors['address.zipCode'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.zipCode']}</p>
-            )}
           </div>
 
           <div>
@@ -534,43 +557,29 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
                 name="address.addressLine1"
                 value={formData.createAddressDto.addressLine1 || ''}
                 onChange={handleInputChange}
-                className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                  formErrors['address.addressLine1']
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 placeholder={t('branchModal.fields.addressLine1.placeholder')}
               />
             </div>
-            {formErrors['address.addressLine1'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.addressLine1']}</p>
-            )}
           </div>
 
-      <div>
-        <label htmlFor="addressLine2" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {t('branchModal.fields.addressLine2.label')}
-        </label>
-        <div className="relative">
-          <Home className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-          <input
-            type="text"
-            id="addressLine2"
-            name="address.addressLine2"
-            value={formData.createAddressDto.addressLine2 || ''}
-            onChange={handleInputChange}
-            className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              formErrors['address.addressLine2']
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-            placeholder={t('branchModal.fields.addressLine2.placeholder')}
-          />
-        </div>
-        {formErrors['address.addressLine2'] && (
-          <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.addressLine2']}</p>
-        )}
-      </div>
+          <div>
+            <label htmlFor="addressLine2" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              {t('branchModal.fields.addressLine2.label')}
+            </label>
+            <div className="relative">
+              <Home className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+              <input
+                type="text"
+                id="addressLine2"
+                name="address.addressLine2"
+                value={formData.createAddressDto.addressLine2 || ''}
+                onChange={handleInputChange}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                placeholder={t('branchModal.fields.addressLine2.placeholder')}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -587,25 +596,40 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('branchModal.fields.phone.label')}
             </label>
-            <div className="relative">
-              <Phone className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+            
+            <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+               <select
+                title='Country Code'
+                value={getPhoneParts(formData.createContactDto.phone).code}
+                onChange={(e) => handlePhoneCompositeChange(
+                  'contact.phone', 
+                  formData.createContactDto.phone, 
+                  'code', 
+                  e.target.value
+                )}
+                className="w-1/3 md:w-1/4 px-3 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white"
+              >
+                {countries.map((country) => (
+                  <option key={country.code + country.name} value={country.code}>
+                    {country.name} ({country.code})
+                  </option>
+                ))}
+              </select>
               <input
                 type="tel"
-                id="phone"
-                name="contact.phone"
-                value={formData.createContactDto.phone || ''}
-                onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                  formErrors['contact.phone']
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                // --- ADDED: maxLength attribute ---
+                maxLength={15}
+                value={getPhoneParts(formData.createContactDto.phone).number}
+                onChange={(e) => handlePhoneCompositeChange(
+                  'contact.phone', 
+                  formData.createContactDto.phone, 
+                  'number', 
+                  e.target.value
+                )}
+                className={`flex-1 px-3 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
                 placeholder={t('branchModal.fields.phone.placeholder')}
               />
             </div>
-            {formErrors['contact.phone'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.phone']}</p>
-            )}
           </div>
 
           <div>
@@ -620,19 +644,13 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
                 name="contact.mail"
                 value={formData.createContactDto.mail || ''}
                 onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                  formErrors['contact.mail']
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                className="w-full px-10 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 placeholder={t('branchModal.fields.email.placeholder')}
               />
             </div>
-            {formErrors['contact.mail'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.mail']}</p>
-            )}
           </div>
 
+          {/* ... existing fields for location, header, etc. ... */}
           <div>
             <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('branchModal.fields.location.label')}
@@ -645,17 +663,10 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
                 name="contact.location"
                 value={formData.createContactDto.location || ''}
                 onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                  formErrors['contact.location']
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                className="w-full px-10 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
                 placeholder={t('branchModal.fields.location.placeholder')}
               />
             </div>
-            {formErrors['contact.location'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.location']}</p>
-            )}
           </div>
 
           <div>
@@ -968,7 +979,7 @@ const handleLogoUpload = async (file?: File): Promise<void> => {
           <button
             type="button"
             onClick={currentStep === 3 ? handleSubmit : handleNextStep}
-            className="inline-flex items-center px-4 py-2 text-sm fonßt-medium rounded-md bg-primary-600 text-white hover:bg-primary-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-primary-600 text-white hover:bg-primary-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isSubmitting || !isCurrentStepValid}
           >
             {currentStep === 3 ? (isSubmitting ? t('branchModal.buttons.saving') : t('branchModal.buttons.save')) : t('branchModal.buttons.next')}

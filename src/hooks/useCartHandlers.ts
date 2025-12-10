@@ -197,6 +197,28 @@ export const useCartHandlers = ({
           note: extra.note
         })) || []
         
+        // Calculate the correct total price for this item
+        // Base price * quantity
+        let itemTotal = (item.price || 0) * (item.quantity || 1)
+        
+        // Add addons total
+        if (mappedAddons && mappedAddons.length > 0) {
+          const addonTotal = mappedAddons.reduce((sum, addon) => {
+            return sum + (addon.price * addon.quantity)
+          }, 0)
+          itemTotal += addonTotal
+        }
+        
+        // Add extras total (only non-removal extras)
+        if (mappedExtras && mappedExtras.length > 0) {
+          const extrasTotal = mappedExtras
+            .filter(extra => !extra.isRemoval)
+            .reduce((sum, extra) => {
+              return sum + (extra.unitPrice * extra.quantity)
+            }, 0)
+          itemTotal += extrasTotal
+        }
+        
         return {
           basketItemId: item.basketItemId,
           branchProductId: item.branchProductId,
@@ -206,7 +228,7 @@ export const useCartHandlers = ({
           productImageUrl: item.imageUrl ?? undefined,
           addons: mappedAddons,
           extras: mappedExtras,  
-          totalItemPrice: item.totalPrice || 0
+          totalItemPrice: itemTotal
         }
       })
       
@@ -254,20 +276,10 @@ export const useCartHandlers = ({
     }
   }
 
-
-const handleQuantityIncrease = async (basketItemId?: number) => {
-  if (!basketItemId) return
-  
-  try {
-    setLoading(true)
-    setError(null)
-
-    const cartItem = cart.find(item => item.basketItemId === basketItemId)
-    if (!cartItem) {
-      console.error('❌ Cart item not found')
-      setError('Cart item not found. Please refresh.')
-      return
-    }
+  // ✅ FIXED: Handle quantity increase - UPDATE existing item quantity (not add new)
+  // This triggers backend auto-scaling for extras
+  const handleQuantityIncrease = async (basketItemId?: number) => {
+    if (!basketItemId) return
 
     try {
       setLoading(true)
