@@ -1,7 +1,8 @@
 import React from 'react';
-import { Phone, Mail, MapPin } from 'lucide-react';
+import { Phone, Mail, MapPin, Globe } from 'lucide-react';
 import { BranchInfoProps } from '../../../../types/BranchManagement/type';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { countryKeys } from '../../../../data/mockData';
 
 // Extend the props interface to accept the new phone handling props
 interface ExtendedBranchInfoProps extends BranchInfoProps {
@@ -67,7 +68,7 @@ const BranchInfo: React.FC<ExtendedBranchInfoProps> = ({
               {isEditing ? (
                 <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <select
-                  title='Country Code'
+                    title='Country Code'
                     value={getPhoneParts(editData.whatsappOrderNumber).code}
                     onChange={(e) => handlePhoneCompositeChange(
                       'whatsappOrderNumber',
@@ -145,15 +146,33 @@ const BranchInfo: React.FC<ExtendedBranchInfoProps> = ({
                   {t('branchManagementBranch.addressInfo.country')}
                 </label>
                 {isEditing ? (
-                  <input
-                    type="text"
-                    value={editData.createAddressDto?.country || ''}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      handleInputChange('createAddressDto.country', e.target.value)
-                    }
-                    placeholder={t('branchManagementBranch.placeholders.country')}
-                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:border-blue-400 dark:group-hover:border-blue-500"
-                  />
+                  <div className="relative">
+                    <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10`} />
+                    <select
+                      title='Country'
+                      value={editData.createAddressDto?.country || ''}
+                      onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+                        handleInputChange('createAddressDto.country', e.target.value)
+                      }
+                      className={`w-full ${isRTL ? 'pr-10 pl-8' : 'pl-10 pr-8'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 group-hover:border-blue-400 dark:group-hover:border-blue-500 appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
+                      dir={isRTL ? 'rtl' : 'ltr'}
+                    >
+                      <option value="" disabled>
+                        {t('branchManagementBranch.placeholders.country')}
+                      </option>
+                      {countryKeys.map((countryKey) => (
+                        <option key={countryKey} value={t(countryKey)}>
+                          {t(countryKey)}
+                        </option>
+                      ))}
+                    </select>
+                    {/* Custom dropdown arrow */}
+                    <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
+                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
                 ) : (
                   <p className="text-gray-900 dark:text-gray-100 font-medium">
                     {selectedBranch?.createAddressDto?.country || t('branchManagementBranch.basicInfo.notSpecified')}

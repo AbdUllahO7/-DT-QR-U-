@@ -15,8 +15,23 @@ import { branchService } from '../services/branchService';
 import { mediaService } from '../services/mediaService';
 import { restaurantService } from '../services/restaurantService';
 import { logger } from '../utils/logger';
-import { countries } from '../data/mockData';
 import { useLanguage } from '../contexts/LanguageContext';
+import { countriesWithCodes, countryKeys } from '../data/mockData';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix default marker icon issue with Leaflet
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
+});
 
 // Default logo URL when no logo is provided
 const DEFAULT_LOGO_URL = 'https://media.istockphoto.com/id/2173059563/vector/coming-soon-image-on-white-background-no-photo-available.jpg?s=612x612&w=0&k=20&c=v0a_B58wPFNDPULSiw_BmPyhSNCyrP_d17i2BPPyDTk=';
@@ -206,42 +221,41 @@ const OnboardingBranch: React.FC = () => {
       logger.error('Restaurant bilgileri alınırken hata oluştu', error);
     }
   };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-    const { name, value } = e.target;
-    
-    if (name.startsWith('address.')) {
-      const addressField = name.split('.')[1];
-      setFormData(prev => ({
-        ...prev,
-        createAddressDto: {
-          ...prev.createAddressDto,
-          [addressField]: value || ''
-        }
-      }));
-    } else if (name.startsWith('contact.')) {
-      const contactField = name.split('.')[1];
-      setFormData(prev => ({
-        ...prev,
-        createContactDto: {
-          ...prev.createContactDto,
-          [contactField]: value || ''
-        }
-      }));
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value || ''
-      }));
-    }
-    
-    if (errors[name as keyof typeof errors]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: null
-      }));
-    }
-  };
+const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>): void => {
+  const { name, value } = e.target;
+  
+  if (name.startsWith('address.')) {
+    const addressField = name.split('.')[1];
+    setFormData(prev => ({
+      ...prev,
+      createAddressDto: {
+        ...prev.createAddressDto,
+        [addressField]: value || ''
+      }
+    }));
+  } else if (name.startsWith('contact.')) {
+    const contactField = name.split('.')[1];
+    setFormData(prev => ({
+      ...prev,
+      createContactDto: {
+        ...prev.createContactDto,
+        [contactField]: value || ''
+      }
+    }));
+  } else {
+    setFormData(prev => ({
+      ...prev,
+      [name]: value || ''
+    }));
+  }
+  
+  if (errors[name as keyof typeof errors]) {
+    setErrors(prev => ({
+      ...prev,
+      [name]: null
+    }));
+  }
+};
 
   // Handlers for WhatsApp Number
   const handleWhatsappNationalPhoneChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -718,6 +732,29 @@ const OnboardingBranch: React.FC = () => {
     }
   };
 
+  // Component to update map view when coordinates change
+  const MapUpdater = ({ center }: { center: [number, number] }) => {
+    const map = useMap();
+    useEffect(() => {
+      map.setView(center, map.getZoom());
+    }, [center, map]);
+    return null;
+  };
+
+  // Component to handle map click events
+  const LocationMarker = () => {
+    useMapEvents({
+      click(e) {
+        setSelectedLatLng({
+          lat: e.latlng.lat,
+          lng: e.latlng.lng
+        });
+      },
+    });
+
+    return <Marker position={[selectedLatLng.lat, selectedLatLng.lng]} />;
+  };
+
   const MapPickerModal = () => {
     useEffect(() => {
       if (isMapModalOpen) {
@@ -821,19 +858,23 @@ const OnboardingBranch: React.FC = () => {
                     </span>
                   </div>
                   <div className="relative w-full h-[400px] bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 shadow-inner">
-                    {/* OpenStreetMap Embed with marker */}
-                    <iframe
-                      title="Location Map"
-                      width="100%"
-                      height="100%"
-                      frameBorder="0"
-                      style={{ border: 0 }}
-                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${selectedLatLng.lng - 0.01},${selectedLatLng.lat - 0.01},${selectedLatLng.lng + 0.01},${selectedLatLng.lat + 0.01}&layer=mapnik&marker=${selectedLatLng.lat},${selectedLatLng.lng}`}
-                      allowFullScreen
-                    />
-                    
+                    {/* Interactive Leaflet Map */}
+                    <MapContainer
+                      center={[selectedLatLng.lat, selectedLatLng.lng]}
+                      zoom={13}
+                      style={{ height: '100%', width: '100%' }}
+                      scrollWheelZoom={true}
+                    >
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <MapUpdater center={[selectedLatLng.lat, selectedLatLng.lng]} />
+                      <LocationMarker />
+                    </MapContainer>
+
                     {/* Overlay with instructions */}
-                    <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-10 pointer-events-none">
+                    <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-[1000] pointer-events-none">
                       <div className="bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-600">
                         <p className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
                           <MapPin className="h-4 w-4 text-primary-600" />
@@ -1039,7 +1080,7 @@ const OnboardingBranch: React.FC = () => {
               dir={isRTL ? 'rtl' : 'ltr'}
               required
             >
-              {countries.map(country => (
+              {countriesWithCodes.map(country => (
                 <option key={country.name} value={country.code}>
                   {country.name} ({country.code})
                 </option>
@@ -1154,25 +1195,35 @@ const OnboardingBranch: React.FC = () => {
         </label>
         <div className="relative">
           <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-          <input
-            type="text"
-            id="address.country"
-            name="address.country"
-            value={formData.createAddressDto.country || ''}
-            onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors['createAddressDto.country']
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
-            placeholder={t('onboardingBranch.form.step2.country.placeholder')}
-            dir={isRTL ? 'rtl' : 'ltr'}
-            required
-          />
+         <select
+          id="address.country"
+          name="address.country"
+          value={formData.createAddressDto.country || ''}
+          onChange={handleInputChange}
+          className={`w-full ${isRTL ? 'pr-10 pl-8' : 'pl-10 pr-8'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+            errors['createAddressDto.country']
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+          } text-gray-900 dark:text-white appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
+          dir={isRTL ? 'rtl' : 'ltr'}
+          required
+        >
+          <option value="" disabled>
+            {t('onboardingBranch.form.step2.country.placeholder')}
+          </option>
+          {countryKeys.map((countryKey) => (
+            <option key={countryKey} value={t(countryKey)}>
+              {t(countryKey)}
+            </option>
+          ))}
+        </select>
+        {/* Custom dropdown arrow */}
+        <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
+          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+          </svg>
         </div>
-        {errors['createAddressDto.country'] && (
-          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors['createAddressDto.country']}</p>
-        )}
+      </div>
       </div>
 
       <div>

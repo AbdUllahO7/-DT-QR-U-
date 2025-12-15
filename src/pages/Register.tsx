@@ -7,7 +7,7 @@ import { Eye, EyeOff, AlertCircle, User, Mail, Phone, Lock, ArrowLeft } from 'lu
  import type { RegisterDto } from '../types/api'; // Mocked below
 import { Link, useNavigate } from 'react-router-dom';
 import { logger } from '../utils/logger';
-import { countries } from '../data/mockData';
+import { countriesWithCodes } from '../data/mockData';
 
 
 
@@ -481,7 +481,7 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                     className={`h-full py-3 ${isRTL ? 'pr-8 pl-3' : 'pl-3 pr-8'} border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 appearance-none`}
                     aria-label={t('pages.register.countryCode')}
                   >
-                    {countries.map(country => (
+                    {countriesWithCodes.map(country => (
                       <option key={country.name} value={country.code}>
                         {country.name} ({country.code})
                       </option>

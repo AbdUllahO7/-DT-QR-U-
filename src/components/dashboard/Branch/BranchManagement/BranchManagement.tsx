@@ -7,45 +7,9 @@ import BranchInfo from './BranchInfo';
 import { branchService } from '../../../../services/Branch/BranchService';
 import BranchWorkingHours from './BranchWorkingHours';
 import { BranchData, EditDataType } from '../../../../types/BranchManagement/type';
+import { countriesWithCodes } from '../../../../data/mockData';
 
-// --- ADDED: Countries Data ---
-export const countries = [
-  { name: 'TR', code: '+90' },
-  { name: 'US', code: '+1' },
-  { name: 'GB', code: '+44' },
-  { name: 'DE', code: '+49' },
-  { name: 'FR', code: '+33' },
-  { name: 'ES', code: '+34' },
-  { name: 'IT', code: '+39' },
-  { name: 'NL', code: '+31' },
-  { name: 'GR', code: '+30' },
-  { name: 'JP', code: '+81' },
-  { name: 'KR', code: '+82' },
-  { name: 'CN', code: '+86' },
-  { name: 'IN', code: '+91' },
-  { name: 'BR', code: '+55' },
-  { name: 'RU', code: '+7' },
-  { name: 'AU', code: '+61' },
-  { name: 'CA', code: '+1' },
-  { name: 'MX', code: '+52' },
-  { name: 'AR', code: '+54' },
-  { name: 'ZA', code: '+27' },
-  { name: 'EG', code: '+20' },
-  { name: 'SA', code: '+966' },
-  { name: 'AE', code: '+971' },
-  { name: 'AT', code: '+43' },
-  { name: 'BE', code: '+32' },
-  { name: 'SE', code: '+46' },
-  { name: 'NO', code: '+47' },
-  { name: 'DK', code: '+45' },
-  { name: 'PL', code: '+48' },
-  { name: 'PT', code: '+351' },
-  { name: 'IE', code: '+353' },
-  { name: 'UA', code: '+380' },
-  { name: 'CZ', code: '+420' },
-  { name: 'HU', code: '+36' },
-  { name: 'RO', code: '+40' },
-];
+
 
 const BranchManagementBranch: React.FC = () => {
   const { t, isRTL } = useLanguage();
@@ -91,7 +55,7 @@ const BranchManagementBranch: React.FC = () => {
     if (!fullNumber) return { code: '+90', number: '' }; // Default to TR if empty
     
     // Sort countries by code length desc to match longest prefix first
-    const sortedCountries = [...countries].sort((a, b) => b.code.length - a.code.length);
+    const sortedCountries = [...countriesWithCodes].sort((a, b) => b.code.length - a.code.length);
     const country = sortedCountries.find(c => fullNumber.startsWith(c.code));
     
     if (country) {
@@ -321,7 +285,7 @@ const BranchManagementBranch: React.FC = () => {
           t={t}
           handleInputChange={handleInputChange}
           // Pass these new props:
-          countries={countries}
+          countries={countriesWithCodes}
           getPhoneParts={getPhoneParts}
           handlePhoneCompositeChange={handlePhoneCompositeChange}
         />

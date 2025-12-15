@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Building2, MapPin, Phone, Clock, Upload, Trash2, Image as ImageIcon, AlertTriangle } from 'lucide-react';
+import { X, Building2, MapPin, Phone, Clock, Upload, Trash2, Image as ImageIcon, AlertTriangle, Globe } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { 
   BranchDetailResponse, 
@@ -10,7 +10,7 @@ import {
 } from '../../../../types/api';
 import { mediaService } from '../../../../services/mediaService';
 import { logger } from '../../../../utils/logger';
-import { countries } from '../../../../data/mockData';
+import { countriesWithCodes, countryKeys } from '../../../../data/mockData';
 
 
 
@@ -86,7 +86,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     if (!fullNumber) return { code: '+90', number: '' }; // Default to TR if empty
     
     // Sort countries by code length desc to match longest prefix first (e.g. match +971 before +97)
-    const sortedCountries = [...countries].sort((a, b) => b.code.length - a.code.length);
+    const sortedCountries = [...countriesWithCodes].sort((a, b) => b.code.length - a.code.length);
     const country = sortedCountries.find(c => fullNumber.startsWith(c.code));
     
     if (country) {
@@ -163,9 +163,9 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     return Object.keys(errors).length === 0;
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
+
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setFormData(prev => ({
@@ -182,7 +182,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
       }));
     }
     setHasChanges(true);
-    
+
     if (validationErrors[name]) {
       setValidationErrors(prev => {
         const newErrors = { ...prev };
@@ -560,7 +560,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                         )}
                         className="w-1/3 md:w-1/4 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                       >
-                        {countries.map((country) => (
+                        {countriesWithCodes.map((country) => (
                           <option key={country.code + country.name} value={country.code}>
                             {country.name} ({country.code})
                           </option>
@@ -669,14 +669,32 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {t('branchManagement.form.country')}
                       </label>
-                      <input
-                        type="text"
-                        name="createAddressDto.country"
-                        value={formData.createAddressDto.country || ''}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
-                        placeholder={t('branchManagement.form.countryPlaceholder')}
-                      />
+                      <div className="relative">
+                        <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10`} />
+                        <select
+                        title='Country'
+                          name="createAddressDto.country"
+                          value={formData.createAddressDto.country || ''}
+                          onChange={handleInputChange}
+                          className={`w-full ${isRTL ? 'pr-10 pl-8' : 'pl-10 pr-8'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
+                          dir={isRTL ? 'rtl' : 'ltr'}
+                        >
+                          <option value="" disabled>
+                            {t('branchManagement.form.countryPlaceholder')}
+                          </option>
+                          {countryKeys.map((countryKey) => (
+                            <option key={countryKey} value={t(countryKey)}>
+                              {t(countryKey)}
+                            </option>
+                          ))}
+                        </select>
+                        {/* Custom dropdown arrow */}
+                        <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
                     </div>
 
                     <div>
@@ -775,7 +793,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                           )}
                           className="w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
                         >
-                          {countries.map((country) => (
+                          {countriesWithCodes.map((country) => (
                             <option key={country.code + country.name} value={country.code}>
                               {country.name} ({country.code})
                             </option>
