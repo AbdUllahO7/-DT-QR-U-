@@ -690,7 +690,7 @@ pricing: {
         name: 'الباقة الأساسية',
         features: {
           '0': 'إدارة فرع واحد',
-          '1': 'قائمة حتى 50 صنف',
+          '1': 'قائمة حتى 50 فئة',
           '2': 'لوحة تحكم وإحصائيات أساسية',
           '3': 'دعم فني عبر البريد الإلكتروني',
           '4': 'إنشاء كود QR فوري',
@@ -933,7 +933,7 @@ contact: {
     title: 'إدارة الطاولات',
     description: 'إدارة رموز QR والطاولات الخاصة بك',
     noCategories :"لايوجد فئات",
-    createFirstCategory: "أنشئ اول صنف",
+    createFirstCategory: "أنشئ اول فئة",
     error: {
       loadFailed: 'فشل في تحميل قائمة الفروع',
       dataLoadFailed: 'حدث خطأ أثناء تحميل البيانات'
@@ -1450,9 +1450,9 @@ contact: {
 
   // Buttons and actions
   actions: {
-    addFirstCategory: 'إضافة أول صنف',
-    addCategory: 'صنف جديدة',
-    newCategory: 'صنف جديدة',
+    addFirstCategory: 'إضافة أول فئة',
+    addCategory: 'فئة جديدة',
+    newCategory: 'فئة جديدة',
     addProduct: 'منتج جديد',
     newProduct: 'منتج جديد',
     editCategory: 'تعديل الفئة',
@@ -1507,8 +1507,8 @@ contact: {
     },
     category: {
       title: 'حذف الفئة',
-      messageWithProducts: 'تحتوي صنف "{{categoryName}}" على {{productCount}} منتج. حذف هذه الفئة سيحذف جميع المنتجات أيضاً. هل أنت متأكد من رغبتك في المتابعة؟',
-      messageEmpty: 'هل أنت متأكد من رغبتك في حذف صنف "{{categoryName}}"؟',
+      messageWithProducts: 'تحتوي فئة "{{categoryName}}" على {{productCount}} منتج. حذف هذه الفئة سيحذف جميع المنتجات أيضاً. هل أنت متأكد من رغبتك في المتابعة؟',
+      messageEmpty: 'هل أنت متأكد من رغبتك في حذف فئة "{{categoryName}}"؟',
       success: 'تم حذف الفئة بنجاح'
     }
   },
@@ -1579,7 +1579,7 @@ contact: {
   // Tooltips
   tooltips: {
     dragToReorder: 'اسحب لإعادة الترتيب',
-    dragToMoveCategory: 'اسحب لنقل المنتج إلى صنف أخرى',
+    dragToMoveCategory: 'اسحب لنقل المنتج إلى فئة أخرى',
     expandCategory: 'توسيع الفئة',
     collapseCategory: 'طي الفئة',
     editCategory: 'تعديل الفئة',
@@ -1593,8 +1593,8 @@ contact: {
 
   createCategoryModal: {
     // Header
-    title: 'إضافة صنف جديدة',
-    subtitle: 'إنشاء صنف قائمة',
+    title: 'إضافة فئة جديدة',
+    subtitle: 'إنشاء فئة قائمة',
     close: 'إغلاق',
 
     // Form fields
@@ -1613,14 +1613,14 @@ contact: {
     // Buttons
     buttons: {
       cancel: 'إلغاء',
-      create: 'إضافة صنف',
+      create: 'إضافة فئة',
       creating: 'جاري الإضافة...'
     },
 
     // Error messages
     errors: {
       general: 'حدث خطأ أثناء إضافة الفئة. يرجى المحاولة مرة أخرى.',
-      categoryExists: 'توجد صنف بهذا الاسم بالفعل. يرجى اختيار اسم مختلف.',
+      categoryExists: 'توجد فئة بهذا الاسم بالفعل. يرجى اختيار اسم مختلف.',
       invalidData: 'البيانات المدخلة غير صالحة. يرجى التحقق والمحاولة مرة أخرى.',
       serverError: 'حدث خطأ في الخادم. يرجى المحاولة لاحقاً.',
       networkError: 'خطأ في الاتصال بالشبكة. تحقق من الاتصال وحاول مرة أخرى.',
@@ -1645,7 +1645,7 @@ contact: {
     // Accessibility
     accessibility: {
       closeModal: 'إغلاق نافذة إضافة الفئة',
-      formTitle: 'نموذج إضافة صنف جديدة',
+      formTitle: 'نموذج إضافة فئة جديدة',
       requiredField: 'حقل مطلوب',
       optionalField: 'حقل اختياري'
     }
@@ -1680,7 +1680,7 @@ contact: {
     },
     category: {
       label: 'الفئة',
-      placeholder: 'اختر صنف',
+      placeholder: 'اختر فئة',
       required: 'اختيار الفئة مطلوب',
       invalidCategory: 'الفئة المختارة غير صالحة. الفئات المتاحة: {{categories}}'
     },
@@ -1759,7 +1759,7 @@ contact: {
     imageUpload: 'رفع صورة المنتج',
     removeImage: 'إزالة صورة المنتج',
     priceInput: 'إدخال سعر المنتج',
-    categorySelect: 'اختيار صنف المنتج',
+    categorySelect: 'اختيار فئة المنتج',
     statusToggle: 'تبديل حالة المنتج'
   }
   },
@@ -2137,7 +2137,7 @@ contact: {
         imageUpload: 'تحميل صورة المنتج',
         removeImage: 'إزالة صورة المنتج',
         priceInput: 'إدخال سعر المنتج',
-        categorySelect: 'اختيار صنف المنتج',
+        categorySelect: 'اختيار فئة المنتج',
         statusToggle: 'تبديل حالة توفر المنتج',
         imagePreview: 'معاينة صورة المنتج'
       }
@@ -2316,23 +2316,26 @@ contact: {
   SortableCategory: {
     product: 'منتج',
     products: 'منتجات',
-    editCategory: 'تعديل التصنيف',
-    deleteCategory: 'حذف التصنيف',
+    status : {
+      active : "نشط",
+    },
+    editCategory: 'تعديل الفئة',
+    deleteCategory: 'حذف الفئة',
     reorderingProducts: 'جاري حفظ ترتيب المنتجات...',
-    noCategoryProducts: 'لا توجد منتجات في هذا التصنيف بعد.',
-    expandCategory: 'توسيع التصنيف',
-    collapseCategory: 'طي التصنيف',
-    dragCategory: 'اسحب لإعادة ترتيب التصنيف',
+    noCategoryProducts: 'لا توجد منتجات في هذا الفئة بعد.',
+    expandCategory: 'توسيع الفئة',
+    collapseCategory: 'طي الفئة',
+    dragCategory: 'اسحب لإعادة ترتيب الفئة',
     accessibility: {
-      categoryActions: 'إجراءات التصنيف',
+      categoryActions: 'إجراءات الفئة',
       productCount: 'عدد المنتجات',
-      expandToggle: 'تبديل توسيع التصنيف',
-      editCategoryButton: 'تعديل التصنيف',
-      deleteCategoryButton: 'حذف التصنيف',
-      dragHandle: 'مقبض السحب لإعادة ترتيب التصنيف',
-      categoryCard: 'بطاقة التصنيف',
-      emptyCategory: 'تصنيف فارغ',
-      reorderingStatus: 'جاري إعادة ترتيب التصنيف'
+      expandToggle: 'تبديل توسيع الفئة',
+      editCategoryButton: 'تعديل الفئة',
+      deleteCategoryButton: 'حذف الفئة',
+      dragHandle: 'مقبض السحب لإعادة ترتيب الفئة',
+      categoryCard: 'بطاقة الفئة',
+      emptyCategory: 'فئة فارغة',
+      reorderingStatus: 'جاري إعادة ترتيب الفئة'
     }
   },
 
@@ -2507,7 +2510,7 @@ contact: {
     // Bulk table form
     addBulkTables: 'إضافة طاولات متعددة',
     categoryQuantities: 'كميات الطاولات حسب الفئة',
-    addCategory: 'إضافة صنف',
+    addCategory: 'إضافة فئة',
     category: 'الفئة',
     tableCount: 'عدد الطاولات',
     allTablesActive: 'جميع الطاولات يجب أن تكون نشطة',
@@ -2972,7 +2975,7 @@ contact: {
   },
   buttons: {
     addTable: "إضافة طاولة",
-    addCategory: "إضافة صنف",
+    addCategory: "إضافة فئة",
     batchCreate: "إنشاء متعدد",
     edit: "تعديل",
     delete: "حذف",
@@ -3052,7 +3055,7 @@ contact: {
       loading : "جارٍ التحميل...",
       multiCategory : "إنشاء طاولات متعددة عبر فئات مختلفة في وقت واحد",
       category: "الفئة",
-      SelectCategory: "اختر صنف",
+      SelectCategory: "اختر فئة",
       Quantity: "عدد الطاولات",
       Capacity: " سعة الطاولة (عدد الأشخاص)",
       createTables: "إنشاء الطاولات",
@@ -3066,8 +3069,8 @@ contact: {
       availableTables: "الطاولات المتاحة",
       searchPlaceholder: "ابحث عن الفئات...",
       refresh: "تحديث",
-      addCategory: "إضافة صنف",
-      addCategoryTitle: "إضافة صنف جديدة",
+      addCategory: "إضافة فئة",
+      addCategoryTitle: "إضافة فئة جديدة",
       categoryNameLabel: "اسم الفئة",
       categoryNamePlaceholder: "أدخل اسم الفئة",
       colorLabel: "اللون",
@@ -3462,14 +3465,14 @@ contact: {
         'Admin': 'عمليات الإدارة'
       },
       permissionNames: {
-        'category.create': 'إنشاء صنف',
-        'category.delete': 'حذف صنف',
-        'category.update': 'تحديث صنف',
-        'category.read': 'عرض صنف',
-        'branch.category.create': 'إنشاء صنف فرع',
-        'branch.category.delete': 'حذف صنف فرع',
-        'branch.category.update': 'تحديث صنف فرع',
-        'branch.category.read': 'عرض صنف فرع',
+        'category.create': 'إنشاء فئة',
+        'category.delete': 'حذف فئة',
+        'category.update': 'تحديث فئة',
+        'category.read': 'عرض فئة',
+        'branch.category.create': 'إنشاء فئة فرع',
+        'branch.category.delete': 'حذف فئة فرع',
+        'branch.category.update': 'تحديث فئة فرع',
+        'branch.category.read': 'عرض فئة فرع',
         'product.create': 'إنشاء منتج',
         'product.delete': 'حذف منتج',
         'product.update': 'تحديث منتج',
@@ -3609,7 +3612,7 @@ contact: {
       noResultsDesc: "جرب كلمات مختلفة أو تصفح فئات أخرى",
       noItemsCategory: "لا توجد عناصر في هذه الفئة",
       noItemsCategoryDesc: "تحقق من الفئات الأخرى للحصول على خيارات لذيذة",
-      selectCategory: "اختر صنف لبدء استكشاف مأكولاتنا المتقنة بعناية",
+      selectCategory: "اختر فئة لبدء استكشاف مأكولاتنا المتقنة بعناية",
       whyChooseUs: {
         title: "لماذا تختارنا؟",
         subtitle: "استمتع بالتميز الطهي مع التزامنا بالجودة والطازجة والخدمة الاستثنائية",

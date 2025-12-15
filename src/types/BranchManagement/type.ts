@@ -783,7 +783,7 @@ export interface CreateProductFormData {
 export interface CreateProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (productId?: number) => void;
   categories: Category[];
   selectedCategoryId?: number;
   onOpenIngredientSelection?: (productId: number, productName: string) => void;

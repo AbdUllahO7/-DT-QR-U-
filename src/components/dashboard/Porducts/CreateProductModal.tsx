@@ -195,12 +195,12 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
       logger.info('Ürün ekleme isteği gönderiliyor', { payload });
       const response = await productService.createProduct(payload);
       logger.info('Ürün başarıyla eklendi', { data: response });
-      
+
       if (onOpenIngredientSelection) {
         onOpenIngredientSelection(response.id, response.name);
       }
-      
-      onSuccess();
+
+      onSuccess(response.id);
       
       setFormData({
         name: '',

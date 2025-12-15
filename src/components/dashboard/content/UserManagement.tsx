@@ -146,7 +146,8 @@ useClickOutside(containerRef, () => setActiveDropdown(null));
       logger.error('Kullanıcılar yüklenirken hata', err, {
         prefix: 'UserManagement',
       });
-      setError(err.message || t('userManagementPage.error.loadFailed'));
+      console.log("err.response.data.message",err.response.data.message)
+      setError(err.response.data.message );
       setUsers([]);
     } finally {
       setIsLoading(false);
@@ -222,28 +223,28 @@ useClickOutside(containerRef, () => setActiveDropdown(null));
     [fetchUsers, t]
   );
 
+    // Fetch Roles
   // Fetch Roles
-// Fetch Roles
-const fetchRoles = useCallback(async () => {
-  try {
-    // Explicitly include permissions
-    const response = await roleService.getRoles({
-    });
-    if (response.success && response.data) {
-      const rolesData = Array.isArray(response.data) ? response.data : [];
-      setRoles(rolesData);
-      setRolesForModal(rolesData);
-      logger.info('Roller başarıyla yüklendi', rolesData, {
-        prefix: 'UserManagement',
+  const fetchRoles = useCallback(async () => {
+    try {
+      // Explicitly include permissions
+      const response = await roleService.getRoles({
       });
-    } else {
-      throw new Error(t('userManagementPage.error.rolesLoadFailed'));
+      if (response.success && response.data) {
+        const rolesData = Array.isArray(response.data) ? response.data : [];
+        setRoles(rolesData);
+        setRolesForModal(rolesData);
+        logger.info('Roller başarıyla yüklendi', rolesData, {
+          prefix: 'UserManagement',
+        });
+      } else {
+        throw new Error(t('userManagementPage.error.rolesLoadFailed'));
+      }
+    } catch (err: any) {
+      logger.error('Roller yüklenirken hata', err, { prefix: 'UserManagement' });
+      setRoles([]);
     }
-  } catch (err: any) {
-    logger.error('Roller yüklenirken hata', err, { prefix: 'UserManagement' });
-    setRoles([]);
-  }
-}, [t]);
+  }, [t]);
 
   // Fetch Branches
   const fetchBranches = useCallback(async () => {
@@ -343,44 +344,44 @@ const fetchRoles = useCallback(async () => {
 
 
 
-// Create Role Handler - Creates role then opens edit modal for permissions
-// Create Role Handler - Creates role with permissions in one call
-const handleRoleCreated = useCallback(async () => {
-  // Just refresh the roles list
-  await fetchRoles();
-}, [fetchRoles]);
+  // Create Role Handler - Creates role then opens edit modal for permissions
+  // Create Role Handler - Creates role with permissions in one call
+  const handleRoleCreated = useCallback(async () => {
+    // Just refresh the roles list
+    await fetchRoles();
+  }, [fetchRoles]);
 
 
+    // Edit Role Handlers
   // Edit Role Handlers
-// Edit Role Handlers
-const handleOpenEditRole = useCallback(async (role: Role) => {
-  setActiveDropdown(null);
-  
-  // Fetch the complete role data with permissions
-  try {
-    const response = await roleService.getRoleById( {
-    },role.appRoleId,);
+  const handleOpenEditRole = useCallback(async (role: Role) => {
+    setActiveDropdown(null);
     
-    if (response.success && response.data) {
-      setSelectedRoleForEdit(response.data);
-      setIsEditRoleModalOpen(true);
-    } else {
-      logger.error('Failed to fetch role details', response, {
+    // Fetch the complete role data with permissions
+    try {
+      const response = await roleService.getRoleById( {
+      },role.appRoleId,);
+      
+      if (response.success && response.data) {
+        setSelectedRoleForEdit(response.data);
+        setIsEditRoleModalOpen(true);
+      } else {
+        logger.error('Failed to fetch role details', response, {
+          prefix: 'UserManagement',
+        });
+        // Fallback to the role we have (might not have permissions)
+        setSelectedRoleForEdit(role);
+        setIsEditRoleModalOpen(true);
+      }
+    } catch (error) {
+      logger.error('Error fetching role details', error, {
         prefix: 'UserManagement',
       });
-      // Fallback to the role we have (might not have permissions)
+      // Fallback to the role we have
       setSelectedRoleForEdit(role);
       setIsEditRoleModalOpen(true);
     }
-  } catch (error) {
-    logger.error('Error fetching role details', error, {
-      prefix: 'UserManagement',
-    });
-    // Fallback to the role we have
-    setSelectedRoleForEdit(role);
-    setIsEditRoleModalOpen(true);
-  }
-}, []);
+  }, []);
 
   const handleEditRole = useCallback(
     async (roleId: string, roleData: UpdateRoleDto, permissionIds: number[]) => {
@@ -451,6 +452,7 @@ const handleOpenEditRole = useCallback(async (role: Role) => {
         logger.error('Kullanıcı oluşturulurken hata', err, {
           prefix: 'UserManagement',
         });
+        setError(err.response.data.message)
       } finally {
         setIsCreatingUser(false);
       }
@@ -1477,6 +1479,7 @@ const handleOpenEditRole = useCallback(async (role: Role) => {
           isOpen={isUserModalOpen}
           onClose={() => setIsUserModalOpen(false)}
           onSubmit={handleCreateUser}
+          error = {error}
           roles={rolesForModal}
           isLoading={isCreatingUser}
           isRolesLoading={isFetchingModalRoles}

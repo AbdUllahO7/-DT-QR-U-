@@ -2313,6 +2313,9 @@ export const en = {
   SortableCategory: {
     product: 'product',
     products: 'products', 
+    status : {
+      active : "active",
+    },
     editCategory: 'Edit category',
     deleteCategory: 'Delete category',
     reorderingProducts: 'Saving product order...',

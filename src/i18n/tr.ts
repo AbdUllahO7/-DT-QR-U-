@@ -2319,6 +2319,9 @@ export const tr = {
     product: 'ürün',
     products: 'ürün',
     editCategory: 'Kategoriyi düzenle',
+    status : {
+      active : "active",
+    },
     deleteCategory: 'Kategoriyi sil', 
     reorderingProducts: 'Ürün sıralaması kaydediliyor...',
     noCategoryProducts: 'Bu kategoride henüz ürün yok.',

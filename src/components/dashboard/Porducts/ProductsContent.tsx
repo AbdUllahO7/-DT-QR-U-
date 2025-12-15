@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   Search, Plus, Filter, ArrowUp,  Package, Utensils, Loader2,
   ChevronDown, Check, X, SortAsc, SortDesc, Eye, EyeOff, DollarSign, Hash, Users,
-  Trash2
+  Trash2, LayoutGrid, List
 } from 'lucide-react';
 import {
   DndContext,
@@ -103,6 +103,15 @@ const ProductsContent: React.FC = () => {
     categories: [],
     priceRange: { min: 0, max: 1000 }
   });
+
+  // View Mode State with localStorage persistence
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
+    const saved = localStorage.getItem('productsViewMode');
+    return (saved === 'grid' || saved === 'list') ? saved : 'list';
+  });
+
+  // Auto-scroll state for newly created products
+  const [newlyCreatedProductId, setNewlyCreatedProductId] = useState<number | null>(null);
   
   const filterRef = useRef<HTMLDivElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
@@ -270,31 +279,49 @@ const handleOpenProductExtras = (productId: number, productName: string) => {
     setIsIngredientUpdateModalOpen(true);
   };
   
-  const loadCategories = async () => {
+  const loadCategories = async (newProductId?: number) => {
     if (!selectedBranch) return;
-    
+
     try {
       setLoading(true);
-      
+
       let fetchedCategories: Category[];
       // Check if "Select All" is selected
       if (selectedBranch.branchId === SELECT_ALL_BRANCH_ID) {
         // Use getCategories for all branches
         fetchedCategories = await productService.getCategories();
-        logger.info('Tüm kategori verileri başarıyla yüklendi', { 
-          categoryCount: fetchedCategories.length 
+        logger.info('Tüm kategori verileri başarıyla yüklendi', {
+          categoryCount: fetchedCategories.length
         });
       } else {
         // Use getBranchCategories for specific branch
         fetchedCategories = await productService.getBranchCategories(selectedBranch.branchId);
-        logger.info('Şube kategori verileri başarıyla yüklendi', { 
+        logger.info('Şube kategori verileri başarıyla yüklendi', {
           branchId: selectedBranch.branchId,
-          categoryCount: fetchedCategories.length 
+          categoryCount: fetchedCategories.length
         });
       }
-      
+
+      // If a new product was created, expand its category and mark for highlight
+      if (newProductId) {
+        const categoryWithNewProduct = fetchedCategories.find(cat =>
+          cat.products?.some(p => p.id === newProductId)
+        );
+
+        if (categoryWithNewProduct) {
+          // Expand the category containing the new product
+          fetchedCategories = fetchedCategories.map(cat =>
+            cat.categoryId === categoryWithNewProduct.categoryId
+              ? { ...cat, isExpanded: true }
+              : cat
+          );
+        }
+
+        setNewlyCreatedProductId(newProductId);
+      }
+
       setCategories(fetchedCategories);
-      
+
     } catch (error) {
       logger.error('Kategori verileri alınamadı:', error);
       // Handle error - you might want to show a toast or error message
@@ -302,6 +329,37 @@ const handleOpenProductExtras = (productId: number, productName: string) => {
       setLoading(false);
     }
   };
+
+  // Toggle view mode and persist to localStorage
+  const toggleViewMode = () => {
+    const newMode = viewMode === 'list' ? 'grid' : 'list';
+    setViewMode(newMode);
+    localStorage.setItem('productsViewMode', newMode);
+  };
+
+  // Auto-scroll to newly created product
+  useEffect(() => {
+    if (newlyCreatedProductId) {
+      // Wait for the DOM to update and category to expand
+      setTimeout(() => {
+        // Find the product element using data attribute
+        const productElement = document.querySelector(`[data-product-id="${newlyCreatedProductId}"]`);
+
+        if (productElement) {
+          // Scroll to the product with smooth behavior
+          productElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+          });
+        }
+
+        // Clear the highlight after animation
+        setTimeout(() => {
+          setNewlyCreatedProductId(null);
+        }, 3000);
+      }, 500); // Increased timeout to ensure category expansion completes
+    }
+  }, [newlyCreatedProductId, categories]);
 
   // Sort categories and products
   const applySorting = (categoriesToSort: Category[]): Category[] => {
@@ -1029,7 +1087,38 @@ const handleOpenProductExtras = (productId: number, productName: string) => {
                 </button>
               )}
 
-            
+              {/* View Mode Toggle */}
+              <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                <button
+                  onClick={() => {
+                    setViewMode('list');
+                    localStorage.setItem('productsViewMode', 'list');
+                  }}
+                  className={`p-2 rounded-md transition-all duration-200 ${
+                    viewMode === 'list'
+                      ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                  title={t('viewMode.list') || 'List View'}
+                >
+                  <List className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    setViewMode('grid');
+                    localStorage.setItem('productsViewMode', 'grid');
+                  }}
+                  className={`p-2 rounded-md transition-all duration-200 ${
+                    viewMode === 'grid'
+                      ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                  }`}
+                  title={t('viewMode.grid') || 'Grid View'}
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </button>
+              </div>
+
               {/* Filter Dropdown */}
               <div className="relative" ref={filterRef}>
                 <button 
@@ -1216,7 +1305,7 @@ const handleOpenProductExtras = (productId: number, productName: string) => {
         </div>
 
         <SortableContext items={processedCategories.map(cat => cat.categoryId)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-4">
+            <div className={viewMode === 'grid' ? 'space-y-6' : 'space-y-4'}>
               {processedCategories.map((category) => (
                 <SortableCategory
                     key={category.categoryId}
@@ -1232,12 +1321,13 @@ const handleOpenProductExtras = (productId: number, productName: string) => {
                     onOpenProductExtras={handleOpenProductExtras}
                     allCategories={categories}
                     isReorderingProducts={isReorderingProducts && reorderingCategoryId === category.categoryId}
-                    viewMode="list"
+                    viewMode={viewMode}
+                    newlyCreatedProductId={newlyCreatedProductId}
                   />
               ))}
             </div>
-       
-          
+
+
           </SortableContext>
 
         <DragOverlay>
@@ -1300,7 +1390,7 @@ const handleOpenProductExtras = (productId: number, productName: string) => {
           setIsCreateProductModalOpen(false);
           setSelectedCategoryForProduct('');
         }}
-        onSuccess={loadCategories}
+        onSuccess={(productId) => loadCategories(productId)}
         categories={categories}
         onOpenIngredientSelection={handleOpenIngredientSelection}
       />

@@ -19,18 +19,20 @@ export const SortableCategory: React.FC<{
   onOpenAddonsManagement: (productId: number, productName: string) => void;
   onOpenProductExtras: (productId: number, productName: string) => void;
   viewMode?: 'list' | 'grid';
-}> = ({ 
-  category, 
-  isDark, 
-  onToggle, 
-  onEditProduct, 
-  onDeleteProduct, 
-  onEditCategory, 
-  onDeleteCategory, 
+  newlyCreatedProductId?: number | null;
+}> = ({
+  category,
+  isDark,
+  onToggle,
+  onEditProduct,
+  onDeleteProduct,
+  onEditCategory,
+  onDeleteCategory,
   isReorderingProducts = false,
   onOpenAddonsManagement,
   viewMode = 'list',
-  onOpenProductExtras
+  onOpenProductExtras,
+  newlyCreatedProductId
 }) => {
   const { t, isRTL } = useLanguage();
   const {
@@ -56,11 +58,17 @@ export const SortableCategory: React.FC<{
     return `${count} ${t('SortableCategory.products')}`;
   };
 
-  const GridProductCard = ({ product }: { product: any }) => {
+  const GridProductCard = ({ product, isNew }: { product: any; isNew?: boolean }) => {
     const hasValidImage = product.imageUrl && product.imageUrl !== 'string' && product.imageUrl.trim() !== '';
-    
+
     return (
-      <div className="group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-300 hover:shadow-2xl hover:shadow-primary-500/10 hover:-translate-y-1">
+      <div
+        data-product-id={product.id}
+        className={`group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border transition-all duration-300 hover:shadow-2xl hover:shadow-primary-500/10 hover:-translate-y-1 ${
+        isNew
+          ? 'border-2 border-primary-400 dark:border-primary-500 ring-4 ring-primary-200 dark:ring-primary-800 shadow-xl shadow-primary-500/30'
+          : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
+      }`}>
         {/* Product Image Container */}
         <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
           {hasValidImage ? (
@@ -80,7 +88,17 @@ export const SortableCategory: React.FC<{
           
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-          
+
+          {/* NEW Badge - only for newly created products */}
+          {isNew && (
+            <div className="absolute top-3 left-3 z-10">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-primary-500 to-purple-500 text-white shadow-lg animate-bounce">
+                <Sparkles className="w-3 h-3" />
+                <span>NEW!</span>
+              </div>
+            </div>
+          )}
+
           {/* Status Badge - Modern Pill */}
           <div className="absolute top-3 right-3 z-10">
             <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-md border transition-all duration-200 ${
@@ -93,7 +111,7 @@ export const SortableCategory: React.FC<{
               ) : (
                 <EyeOff className="w-3 h-3" />
               )}
-              <span>{product.isAvailable ? t('status.active') || 'Active' : t('status.inactive') || 'Inactive'}</span>
+              <span>{product.isAvailable ? t('SortableCategory.status.active') || 'Active' : t('status.inactive') || 'Inactive'}</span>
             </div>
           </div>
 
@@ -106,6 +124,13 @@ export const SortableCategory: React.FC<{
             >
               <Edit2 className="w-4 h-4" />
             </button>
+                <button
+                  onClick={() => onOpenProductExtras(product.id, product.name)}
+                  className="p-3 bg-white dark:bg-purple-900 text-gray-700 dark:text-gray-300   shadow-lg hover:shadow-xl transform hover:scale-110  duration-200  rounded-lg  transition-all"
+                  title={t('productsContent.actions.manageExtras')}
+                >
+                  <Layers className="h-4 w-4" />
+                </button>
             {onOpenAddonsManagement && (
               <button
                 onClick={() => onOpenAddonsManagement(product.id, product.name)}
@@ -272,6 +297,7 @@ export const SortableCategory: React.FC<{
                     onOpenProductExtras={onOpenProductExtras}
                     onDelete={onDeleteProduct}
                     onOpenAddonsManagement={onOpenAddonsManagement}
+                    isNew={newlyCreatedProductId === product.id}
                   />
                 ))}
                 {category.products.length === 0 && (
@@ -298,7 +324,11 @@ export const SortableCategory: React.FC<{
           {category.products.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {category.products.map((product) => (
-                <GridProductCard key={product.id} product={product} />
+                <GridProductCard
+                  key={product.id}
+                  product={product}
+                  isNew={newlyCreatedProductId === product.id}
+                />
               ))}
             </div>
           ) : (

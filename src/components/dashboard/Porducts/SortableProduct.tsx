@@ -13,10 +13,10 @@ export const SortableProduct: React.FC<{
   isDark: boolean;
   onEdit: (productId: number) => void;
   onDelete: (productId: number) => void;
-  onOpenAddonsManagement?: (productId: number, productName: string) => void; 
-    onOpenProductExtras: (productId: number, productName: string) => void;
-
-}> = ({ product, onEdit, onDelete, onOpenAddonsManagement , onOpenProductExtras }) => {
+  onOpenAddonsManagement?: (productId: number, productName: string) => void;
+  onOpenProductExtras: (productId: number, productName: string) => void;
+  isNew?: boolean;
+}> = ({ product, onEdit, onDelete, onOpenAddonsManagement, onOpenProductExtras, isNew }) => {
   const { t, isRTL } = useLanguage();
   const [imageError, setImageError] = useState(false);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -82,9 +82,12 @@ export const SortableProduct: React.FC<{
     <div
       ref={setNodeRef}
       style={style}
+      data-product-id={product.id}
       className={`group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden transition-all duration-300 ${
-        isDragging 
-          ? 'shadow-2xl shadow-primary-500/20 ring-2 ring-primary-500 scale-105' 
+        isDragging
+          ? 'shadow-2xl shadow-primary-500/20 ring-2 ring-primary-500 scale-105'
+          : isNew
+          ? 'shadow-xl shadow-primary-500/30 border-2 border-primary-400 dark:border-primary-500 ring-4 ring-primary-200 dark:ring-primary-800'
           : 'shadow-sm hover:shadow-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
       }`}
       role="article"
@@ -143,7 +146,13 @@ export const SortableProduct: React.FC<{
                 <h4 className="flex-1 font-semibold text-lg text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
                   {product.name}
                 </h4>
-             
+                {/* NEW Badge for newly created products */}
+                {isNew && (
+                  <div className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-primary-500 to-purple-500 text-white shadow-lg animate-bounce">
+                    <Sparkles className="w-3 h-3" />
+                    <span>NEW!</span>
+                  </div>
+                )}
               </div>
 
               {/* Description */}
@@ -287,7 +296,7 @@ export const SortableProduct: React.FC<{
                   >
                     <Edit2 className="h-4 w-4" />
                   </button>
-                      <button
+                  <button
                   onClick={() => onOpenProductExtras(product.id, product.name)}
                   className="p-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
                   title={t('productsContent.actions.manageExtras')}

@@ -1,16 +1,20 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { UserPlus, Shield, Building, ChevronDown, Loader2, EyeOff, Eye } from 'lucide-react'; // Added Loader2
+import { UserPlus, Shield, Building, ChevronDown, Loader2, EyeOff, Eye, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../../hooks';
 import type {  BranchInfo } from '../../../../types/api';
 import { CreateUserDto, Role } from '../../../../types/users/users.type';
+import { countriesWithCodes } from '../../../../data/mockData';
+
+
 
 export interface CreateUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (userData: CreateUserDto) => Promise<void>;
   roles: Role[];
+  error : String;
   branches: BranchInfo[];
   isLoading: boolean;
   isRolesLoading: boolean; 
@@ -23,6 +27,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   onSubmit,
   roles,
   branches,
+  error,
   isLoading,
   isRolesLoading, 
   onBranchChange, 
@@ -45,13 +50,19 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [apiError, setApiError] = useState<string>('');
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [locationType, setLocationType] = useState<'restaurant' | 'branch'>('restaurant');
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
+  const [countryCode, setCountryCode] = useState('+90');
+  const [isCountryCodeDropdownOpen, setIsCountryCodeDropdownOpen] = useState(false);
   const branchDropdownRef = useRef<HTMLDivElement>(null);
+  const countryCodeDropdownRef = useRef<HTMLDivElement>(null);
+
   useClickOutside(branchDropdownRef, () => setIsBranchDropdownOpen(false));
+  useClickOutside(countryCodeDropdownRef, () => setIsCountryCodeDropdownOpen(false));
 
   // Get selected branch name
   const selectedBranchName = formData.branchId 
@@ -119,10 +130,13 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
+
+    // Clear previous API errors
+    setApiError('');
 
     // Get current user ID from JWT token if available
     const getCurrentUserId = () => {
@@ -141,7 +155,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     const submitData: CreateUserDto = {
       ...formData,
       name: formData.name || `${formData.name.toLowerCase()}.${formData.surName.toLowerCase()}`.replace(/[^a-z.]/g, ''),
-      // **MODIFIED**: This logic remains correct. If no branches, locationType stays 'restaurant'
+      // Combine country code with phone number
+      phoneNumber: `${countryCode}${formData.phoneNumber}`.replace(/\s+/g, ''),
       restaurantId: locationType === 'restaurant' ? formData.restaurantId : null,
       branchId: locationType === 'branch' ? formData.branchId : null,
       profileImage: formData.profileImage || '',
@@ -149,7 +164,22 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
       roleIdsList: selectedRoles,
     };
 
-    onSubmit(submitData);
+    try {
+      await onSubmit(submitData);
+    } catch (error: any) {
+      // Parse and display API error messages
+      if (error.response?.data?.message) {
+        setApiError(error.response.data.message);
+      } else if (error.response?.data?.errors) {
+        // Handle validation errors object
+        const errorMessages = Object.values(error.response.data.errors).join(', ');
+        setApiError(errorMessages);
+      } else if (error.message) {
+        setApiError(error.message);
+      } else {
+        setApiError('An unexpected error occurred. Please try again.');
+      }
+    }
   };
 
   const handleRoleToggle = (roleId: string) => {
@@ -212,6 +242,30 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
           {/* Modal Body */}
           <form onSubmit={handleSubmit} className="p-6 space-y-6">
+            {/* API Error Message */}
+            {apiError && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <h4 className="text-sm font-medium text-red-800 dark:text-red-200 mb-1">
+                      {t('userManagementPage.createUser.error') || 'Error Creating User'}
+                    </h4>
+                    <p className="text-sm text-red-700 dark:text-red-300">
+                      {apiError}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setApiError('')}
+                    className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* Personal Info */}
             <div>
               <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">
@@ -262,6 +316,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               </div>
             </div>
 
+            
+
             {/* Contact Info */}
             <div>
               <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">
@@ -292,20 +348,71 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                   <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {t('userManagementPage.createUser.phoneNumber') || 'Phone Number'} <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="tel"
-                    id="phoneNumber"
-                    required
-                    value={formData.phoneNumber ?? ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
-                    className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.phoneNumber 
-                        ? 'border-red-500 dark:border-red-400' 
-                        : 'border-gray-300 dark:border-gray-600'
-                    }`}
-                    placeholder="+1 234 567 8900"
-                  />
+                  <div className="flex gap-2">
+                    {/* Country Code Dropdown */}
+                    <div className="relative w-32" ref={countryCodeDropdownRef}>
+                      <button
+                        type="button"
+                        onClick={() => setIsCountryCodeDropdownOpen(!isCountryCodeDropdownOpen)}
+                        className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                          errors.phoneNumber
+                            ? 'border-red-500 dark:border-red-400'
+                            : 'border-gray-300 dark:border-gray-600'
+                        }`}
+                      >
+                        <span className="flex items-center gap-1">
+                          <span>{countriesWithCodes.find(c => c.code === countryCode)?.flag || '🌍'}</span>
+                          <span>{countryCode}</span>
+                        </span>
+                        <ChevronDown className={`h-4 w-4 transition-transform ${isCountryCodeDropdownOpen ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {isCountryCodeDropdownOpen && (
+                        <div className="absolute z-30 mt-1 w-64 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 py-1 max-h-60 overflow-auto">
+                          {countriesWithCodes.map((country) => (
+                            <button
+                              key={country.code}
+                              type="button"
+                              onClick={() => {
+                                setCountryCode(country.code);
+                                setIsCountryCodeDropdownOpen(false);
+                              }}
+                              className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2 ${
+                                countryCode === country.code
+                                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                                  : 'text-gray-700 dark:text-gray-200'
+                              } ${isRTL ? 'text-right' : 'text-left'}`}
+                            >
+                              <span className="font-medium">{country.code}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Phone Number Input */}
+                    <input
+                      type="tel"
+                      id="phoneNumber"
+                      required
+                      value={formData.phoneNumber ?? ''}
+                      onChange={(e) => {
+                        // Only allow numbers and spaces
+                        const value = e.target.value.replace(/[^\d\s]/g, '');
+                        setFormData(prev => ({ ...prev, phoneNumber: value }));
+                      }}
+                      className={`flex-1 rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        errors.phoneNumber
+                          ? 'border-red-500 dark:border-red-400'
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}
+                      placeholder="538 937 0860"
+                    />
+                  </div>
                   {errors.phoneNumber && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.phoneNumber}</p>}
+                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    Full number: {countryCode} {formData.phoneNumber}
+                  </p>
                 </div>
               </div>
             </div>
