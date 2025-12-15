@@ -228,7 +228,7 @@ useClickOutside(containerRef, () => setActiveDropdown(null));
   const fetchRoles = useCallback(async () => {
     try {
       // Explicitly include permissions
-      const response = await roleService.getRoles({
+      const response = await roleService.getRolesaAsignable({
       });
       if (response.success && response.data) {
         const rolesData = Array.isArray(response.data) ? response.data : [];

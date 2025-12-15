@@ -36,7 +36,7 @@ class RoleService {
       
       const response = await apiRequest<Role[]>({
         method: 'GET',
-        url: '/api/Roles',
+        url: '/api/Roles/',
         params: apiParams
       });
 
@@ -54,6 +54,36 @@ class RoleService {
     }
   }
 
+    async getRolesaAsignable(params: GetRolesParams = {}): Promise<ApiResponse<Role[]>> {
+    try {
+      // Set defaults: includePermissions is true unless explicitly set to false
+      const apiParams: GetRolesParams = {
+        includePermissions: true,
+        ...params, 
+      };
+
+      logger.info('🔍 getRoles çağrılıyor...', apiParams, { prefix: 'RoleService' });
+
+      
+      const response = await apiRequest<Role[]>({
+        method: 'GET',
+        url: '/api/Roles/',
+        params: apiParams
+      });
+
+      logger.info('✅ getRoles başarılı', response, { prefix: 'RoleService' });
+      
+      const rolesData = Array.isArray(response) ? response : [];
+        
+      return {
+        success: true,
+        data: rolesData
+      };
+    } catch (error) {
+      logger.error('❌ getRoles hatası', error, { prefix: 'RoleService' });
+      throw error;
+    }
+  }
   /**
    * GET /api/Roles/{roleId}
    * Fetches a single role by its ID.

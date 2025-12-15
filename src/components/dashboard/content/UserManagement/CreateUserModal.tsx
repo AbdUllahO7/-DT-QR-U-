@@ -33,6 +33,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   onBranchChange, 
 }) => {
   const { t, isRTL } = useLanguage();
+
+  console.log("roles",roles)
   const [formData, setFormData] = useState<CreateUserDto>({
     surName: '',
     name: '',
