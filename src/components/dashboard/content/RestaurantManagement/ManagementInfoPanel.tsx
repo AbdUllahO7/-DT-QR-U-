@@ -1,15 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { isAxiosError } from 'axios';
-import { 
-  Edit3, 
-  Save, 
-  X, 
-  Building2, 
-  FileText, 
-  Hash, 
-  Briefcase, 
-  Scale, 
-  Wine,
+import {
+  Edit3,
+  Save,
+  X,
+  Building2,
+  FileText,
+  Hash,
+  Briefcase,
+  Scale,
   Upload,
   Image as ImageIcon,
   CheckCircle2,
