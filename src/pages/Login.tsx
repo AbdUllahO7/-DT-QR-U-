@@ -34,17 +34,38 @@ const Login: React.FC = () => {
     window.scrollTo(0, 0);
   }, []);
 
+  // Load saved email if Remember Me was checked
+  useEffect(() => {
+    const savedEmail = localStorage.getItem('savedEmail');
+    const isRemembered = localStorage.getItem('rememberMe') === 'true';
+
+    if (isRemembered && savedEmail) {
+      setFormData(prev => ({
+        ...prev,
+        email: savedEmail,
+        rememberMe: true
+      }));
+    }
+  }, []);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     const tokenExpiry = localStorage.getItem('tokenExpiry');
 
-    if (token) {
-      if (tokenExpiry && new Date(tokenExpiry) > new Date()) {
-        navigate('/dashboard');
-      } else {
-        localStorage.removeItem('token');
-        localStorage.removeItem('tokenExpiry');
-        localStorage.removeItem('userId');
+    if (token && tokenExpiry) {
+      try {
+        const expiryDate = new Date(tokenExpiry);
+        if (expiryDate > new Date()) {
+          logger.info('Valid token found, redirecting to dashboard');
+          navigate('/dashboard');
+        } else {
+          logger.info('Token expired, clearing localStorage');
+          localStorage.removeItem('token');
+          localStorage.removeItem('tokenExpiry');
+          localStorage.removeItem('userId');
+        }
+      } catch (error) {
+        logger.error('Error parsing token expiry', error);
       }
     }
   }, [navigate]);
@@ -82,7 +103,11 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    logger.info('Form submitted');
+    logger.info('Form submitted', {
+      email: formData.email,
+      rememberMe: formData.rememberMe,
+      hasPassword: !!formData.password
+    });
 
     if (!validateForm()) {
       logger.warn('Form validation failed');
@@ -105,9 +130,22 @@ const Login: React.FC = () => {
     }
 
     try {
-      logger.info('Sending login request with data', { formData });
-      const response = await authService.login(formData);
-      logger.info('Login response received', { response });
+      logger.info('Sending login request', {
+        email: formData.email,
+        rememberMe: formData.rememberMe
+      });
+
+      // Don't send rememberMe to the backend - it's frontend-only
+      const loginCredentials = {
+        email: formData.email,
+        password: formData.password
+      };
+
+      const response = await authService.login(loginCredentials as any);
+      logger.info('Login response received', {
+        hasAccessToken: !!response?.accessToken,
+        hasExpiresAt: !!response?.expiresAt
+      });
       
       if (response.accessToken) {
         const tokenParts = response.accessToken.split('.');
@@ -115,25 +153,53 @@ const Login: React.FC = () => {
         const userId = payload.user_id;
 
         logger.info('Login successful, saving token and redirecting');
-        
+
+        // Save authentication data
         localStorage.setItem('token', response.accessToken);
         localStorage.setItem('userId', userId);
         localStorage.setItem('tokenExpiry', response.expiresAt);
-        
+        logger.info('Token saved to localStorage', {
+          tokenLength: response.accessToken.length,
+          userId: userId,
+          expiresAt: response.expiresAt
+        });
+
+        // Handle Remember Me
+        if (formData.rememberMe) {
+          localStorage.setItem('savedEmail', formData.email);
+          localStorage.setItem('rememberMe', 'true');
+              localStorage.setItem('token', response.accessToken);
+        localStorage.setItem('userId', userId);
+        localStorage.setItem('tokenExpiry', response.expiresAt);
+          logger.info('Remember Me enabled - email saved', { email: formData.email });
+        } else {
+          localStorage.removeItem('savedEmail');
+          localStorage.removeItem('rememberMe');
+          logger.info('Remember Me disabled - email removed');
+        }
+
+        // Verify localStorage after saving
+        const savedToken = localStorage.getItem('token');
+        logger.info('Verifying localStorage after save', {
+          tokenExists: !!savedToken,
+          rememberMe: localStorage.getItem('rememberMe'),
+          savedEmail: localStorage.getItem('savedEmail')
+        });
+
         const onboardingUserId = localStorage.getItem('onboarding_userId');
         if (onboardingUserId) {
           logger.info('Onboarding süreci devam ediyor, restaurant onboarding sayfasına yönlendiriliyor');
           navigate('/onboarding/restaurant');
           return;
         }
-        
+
         // Kullanıcı tipini kontrol et
         if (isBranchOnlyUser()) {
           logger.info('Branch-only user detected, redirecting to dashboard');
           navigate('/dashboard');
           return;
         }
-        
+
         navigate('/dashboard');
       } else {
         logger.error('Invalid login response - no access token');
@@ -142,9 +208,8 @@ const Login: React.FC = () => {
     } catch (error: any) {
       logError(error, 'Login error');
 
-      const userFriendlyMessage = getUserFriendlyErrorMessage(error);
       setErrors({
-        general: error.response.data.errorMessage
+        general: error.response?.data?.errorMessage || getUserFriendlyErrorMessage(error)
       });
       setIsSubmitting(false);
       
@@ -162,20 +227,31 @@ const Login: React.FC = () => {
             localStorage.setItem('token', accessToken);
             localStorage.setItem('userId', userId);
             localStorage.setItem('tokenExpiry', error.response.data.expiresAt);
-            
+
+            // Handle Remember Me
+            if (formData.rememberMe) {
+              localStorage.setItem('savedEmail', formData.email);
+              localStorage.setItem('rememberMe', 'true');
+              logger.info('Remember Me enabled - email saved');
+            } else {
+              localStorage.removeItem('savedEmail');
+              localStorage.removeItem('rememberMe');
+              logger.info('Remember Me disabled - email removed');
+            }
+
             const onboardingUserId = localStorage.getItem('onboarding_userId');
             if (onboardingUserId) {
               logger.info('Onboarding süreci devam ediyor, restaurant onboarding sayfasına yönlendiriliyor');
               navigate('/onboarding/restaurant');
               return;
             }
-            
+
             if (isBranchOnlyUser()) {
               logger.info('Branch-only user detected, redirecting to dashboard');
               navigate('/dashboard');
               return;
             }
-            
+
             navigate('/dashboard');
             return;
           }
@@ -378,12 +454,6 @@ const Login: React.FC = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                onClick={(e) => {
-                  logger.info('Login button clicked');
-                  if (!isSubmitting) {
-                    handleSubmit(e);
-                  }
-                }}
                 className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg text-white text-sm font-medium ${
                   isSubmitting
                     ? 'bg-primary-400 cursor-not-allowed'
