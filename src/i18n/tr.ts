@@ -2962,17 +2962,17 @@ export const tr = {
   BranchtableManagement: {
 
   title: "Masa Yönetimi",
-  subtitle: "Restoran masalarınızı ve kategorilerinizi yönetin",
+  subtitle: "Restoran masalarınızı ve alanlarınızı yönetin",
 
   tabs: {
     tables: "Masalar",
-    categories: "Kategoriler", 
+    categories: "Alanlar",
     statistics: "İstatistikler",
     batchCreate: "Toplu Oluştur"
   },
   buttons: {
     addTable: "Masa Ekle",
-    addCategory: "Kategori Ekle",
+    addCategory: "Alan Ekle",
     batchCreate: "Toplu Oluştur",
     edit: "Düzenle",
     delete: "Sil",
@@ -2986,17 +2986,17 @@ export const tr = {
   },
   labels: {
     tableName: "Masa Adı",
-    category: "Kategori",
+    category: "Alan",
     capacity: "Kapasite",
     status: "Durum",
     occupation: "Doluluk",
     displayOrder: "Görüntüleme Sırası",
     search: "Masalarda ara...",
-    filterByCategory: "Kategoriye Göre Filtrele",
+    filterByCategory: "Alana Göre Filtrele",
     viewMode: "Görünüm Modu",
     totalTables: "Toplam Masa",
     activeTables: "Aktif Masalar",
-    occupiedTables: "Dolu Masalar", 
+    occupiedTables: "Dolu Masalar",
     availableTables: "Boş Masalar"
   },
   status: {
@@ -3008,7 +3008,7 @@ export const tr = {
   },
   actions: {
     markOccupied: "Dolu Olarak İşaretle",
-    markAvailable: "Boş Olarak İşaretle", 
+    markAvailable: "Boş Olarak İşaretle",
     activate: "Aktifleştir",
     deactivate: "Pasifleştir",
     viewDetails: "Detayları Görüntüle"
@@ -3017,7 +3017,7 @@ export const tr = {
     tableCreated: "Masa başarıyla oluşturuldu",
     tableUpdated: "Masa başarıyla güncellendi",
     tableDeleted: "Masa başarıyla silindi",
-    statusUpdated: "Durum başarıyla güncellendi", 
+    statusUpdated: "Durum başarıyla güncellendi",
     error: "Bir hata oluştu",
     noTables: "Masa bulunamadı",
     confirmDelete: "Bu masayı silmek istediğinizden emin misiniz?",
@@ -3029,20 +3029,20 @@ export const tr = {
     title: "Masa İstatistikleri",
     occupancyRate: "Doluluk Oranı",
     averageCapacity: "Ortalama Kapasite",
-    categoryBreakdown: "Kategori Dağılımı",
+    categoryBreakdown: "Alan Dağılımı",
     dailyOccupancy: "Günlük Doluluk",
     peakHours: "Yoğun Saatler"
   },
   forms: {
     createTable: "Yeni Masa Oluştur",
-    editTable: "Masayı Düzenle", 
+    editTable: "Masayı Düzenle",
     batchCreateTables: "Birden Fazla Masa Oluştur",
     quantity: "Miktar",
     namePrefix: "Ad Öneki",
     startingNumber: "Başlangıç Numarası"
   }
   },
-  
+
   BranchTableManagement: {
       "tableNameLabel": "Masa Adı",
   "capacityLabel": "Kapasite",
@@ -3050,15 +3050,15 @@ export const tr = {
     refreshTable: "Masa  güncelle",
     clearin: "Temizleniyor...",
     loading : "Yükleniyor...",
-    category: "Kategori",
-    SelectCategory: "Kategori Seçin",
+    category: "Alan",
+    SelectCategory: "Alan Seçin",
     Quantity: "Miktar",
     Capacity: "Kapasite",
     createTables: "Masalar Oluşturuluyor...",
     creatingTables: "Masalar Oluşturuluyor...",
-    multiCategory: "Farklı kategorilerde aynı anda birden fazla masa oluşturun",
+    multiCategory: "Farklı alanlarda aynı anda birden fazla masa oluşturun",
     batchCreateTables: "Toplu masa Oluştur",
-    header: "Category & Table Management",
+    header: "Alan & Masa Yönetimi",
     subheader: "Manage restaurant categories and tables with accordion view",
     totalCategories: "Total Categories",
     totalTables: "Total Tables",

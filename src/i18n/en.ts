@@ -2962,16 +2962,16 @@ export const en = {
     loading : "Loading...",
 
     batchCreateTables: "batchCreateTables",
-    subtitle: "Manage your restaurant tables and categories", 
+    subtitle: "Manage your restaurant tables and areas",
     tabs: {
       tables: "Tables",
-      categories: "Categories",
+      categories: "Areas",
       statistics: "Statistics",
       batchCreate: "Batch Create"
     },
     buttons: {
       addTable: "Add Table",
-      addCategory: "Add Category", 
+      addCategory: "Add Area",
       batchCreate: "Batch Create",
       edit: "Edit",
       delete: "Delete",
@@ -2985,16 +2985,16 @@ export const en = {
     },
     labels: {
       tableName: "Table Name",
-      category: "Category",
+      category: "Area",
       capacity: "Capacity",
       status: "Status",
       occupation: "Occupation",
       displayOrder: "Display Order",
       search: "Search tables...",
-      filterByCategory: "Filter by Category",
+      filterByCategory: "Filter by Area",
       viewMode: "View Mode",
       totalTables: "Total Tables",
-      activeTables: "Active Tables", 
+      activeTables: "Active Tables",
       occupiedTables: "Occupied Tables",
       availableTables: "Available Tables"
     },
@@ -3008,14 +3008,14 @@ export const en = {
     actions: {
       markOccupied: "Mark as Occupied",
       markAvailable: "Mark as Available",
-      activate: "Activate", 
+      activate: "Activate",
       deactivate: "Deactivate",
       viewDetails: "View Details"
     },
     messages: {
       tableCreated: "Table created successfully",
       tableUpdated: "Table updated successfully",
-      tableDeleted: "Table deleted successfully", 
+      tableDeleted: "Table deleted successfully",
       statusUpdated: "Status updated successfully",
       error: "An error occurred",
       noTables: "No tables found",
@@ -3028,8 +3028,8 @@ export const en = {
       title: "Table Statistics",
       occupancyRate: "Occupancy Rate",
       averageCapacity: "Average Capacity",
-      categoryBreakdown: "Category Breakdown",
-      dailyOccupancy: "Daily Occupancy", 
+      categoryBreakdown: "Area Breakdown",
+      dailyOccupancy: "Daily Occupancy",
       peakHours: "Peak Hours"
     },
     forms: {
@@ -3045,15 +3045,15 @@ export const en = {
   BranchTableManagement: {
         "capacityLabel": "Capacity",
     "tableNameLabel": "Table Name",
-    header: "Category & Table Management",
+    header: "Area & Table Management",
     "clearTable": "Clear Table",
-    "refreshTable": "Refresh Status", 
+    "refreshTable": "Refresh Status",
     "clearing": "Clearing...",
     loading : "Loading...",
-    category : "Category",
+    category : "Area",
     createTables: "Create Tables",
     creatingTables: "Creating...",
-   SelectCategory: "Select Category", 
+   SelectCategory: "Select Area", 
    Capacity: "Capacity",
    Quantity: "Quantity",
     batchCreateTables: "Batch Create Tables",

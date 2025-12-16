@@ -1,5 +1,5 @@
 import React from 'react';
-import { Edit3, Trash2, MapPin, Users, CheckCircle2, XCircle, Wine, Store } from 'lucide-react';
+import { Edit3, Trash2, MapPin, Users, CheckCircle2, XCircle, Store } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 
 interface RestaurantInfo {
