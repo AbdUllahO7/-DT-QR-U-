@@ -43,8 +43,6 @@ class AuthService {
       
       logger.info('Register API yanıtı:', response);
       
-      // API direkt RegisterResponse döndürüyor, ApiResponse wrapper'ı yok
-      // Bu yüzden manuel olarak ApiResponse formatına çeviriyoruz
       const apiResponse: ApiResponse<RegisterResponse> = {
         success: true,
         data: response,
