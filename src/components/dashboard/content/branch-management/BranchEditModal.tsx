@@ -20,6 +20,7 @@ interface BranchEditModalProps {
   onSubmit: (data: CreateBranchWithDetailsDto) => Promise<void>;
   branchDetail: BranchDetailResponse;
   isSubmitting: boolean;
+  error?: string | null;
 }
 
 const BranchEditModal: React.FC<BranchEditModalProps> = ({
@@ -28,6 +29,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
   onSubmit,
   branchDetail,
   isSubmitting,
+  error
 }) => {
   const { t, isRTL } = useLanguage();
   
@@ -438,7 +440,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
             </button>
           </div>
 
-          {/* Error Display */}
+          {/* Error Display - Upload Error */}
           {uploadError && (
             <div className="mx-6 mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <div className="flex items-start">
@@ -453,13 +455,25 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                     {uploadError}
                   </p>
                 </div>
-                <button
-                  onClick={() => setUploadError(null)}
-                  className={`${isRTL ? 'mr-auto' : 'ml-auto'} flex-shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300`}
-                  aria-label={t('common.dismiss')}
-                >
-                  <X className="h-5 w-5" />
-                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Error Display - Backend Error */}
+          {error && (
+            <div className="mx-6 mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <AlertTriangle className="h-5 w-5 text-red-400 dark:text-red-500" />
+                </div>
+                <div className={`${isRTL ? 'mr-3' : 'ml-3'}`}>
+                  <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+                    {t('common.error')}
+                  </h3>
+                  <div className="mt-1 text-sm text-red-700 dark:text-red-300 whitespace-pre-line">
+                    {error}
+                  </div>
+                </div>
               </div>
             </div>
           )}

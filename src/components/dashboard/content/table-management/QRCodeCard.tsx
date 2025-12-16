@@ -1,22 +1,20 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import {
-  QrCode,
   Users,
   Download,
   Edit,
   Trash2,
-  // Removed old toggles
   UserX,
   UserCheck,
-  // Added for new switch
   Loader2,
+  CheckCircle2,
+  XCircle
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { TableData } from '../../../../types/BranchManagement/type';
 
-// --- Modern Toggle Switch Component (Copied from your second file) ---
-
+// --- Reusable Toggle Switch Component ---
 const ToggleSwitch: React.FC<{
   isOn: boolean;
   onToggle: () => void;
@@ -35,15 +33,12 @@ const ToggleSwitch: React.FC<{
 
   const currentSize = sizes[size];
 
-  // Calculate transform for knob based on state and direction
   const getKnobTransform = () => {
     if (isRTL) {
-      // RTL: flip the whole switch, so active means knob on left
       return isOn
         ? `scaleX(-1) translateX(${currentSize.translateX}px)`
         : 'scaleX(-1) translateX(2px)';
     } else {
-      // LTR: normal behavior
       return isOn
         ? `translateX(${currentSize.translateX}px)`
         : 'translateX(2px)';
@@ -64,14 +59,10 @@ const ToggleSwitch: React.FC<{
           transition-colors duration-300 ease-in-out
           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-          ${isOn
-            ? 'bg-green-500 dark:bg-green-600'
-            : 'bg-gray-300 dark:bg-gray-600'
-          }
+          ${isOn ? 'bg-green-500' : 'bg-gray-600'}
         `}
         style={isRTL ? { transform: 'scaleX(-1)' } : undefined}
       >
-        {/* Sliding Knob */}
         <span
           className={`
             ${currentSize.knob}
@@ -86,18 +77,8 @@ const ToggleSwitch: React.FC<{
           )}
         </span>
       </div>
-
       {label && (
-        <span
-          className={`
-            text-sm font-medium transition-colors whitespace-nowrap
-            ${isOn
-              ? 'text-green-600 dark:text-green-400'
-              : 'text-gray-500 dark:text-gray-400'
-            }
-            ${disabled ? 'opacity-50' : 'group-hover:text-gray-700 dark:group-hover:text-gray-300'}
-          `}
-        >
+        <span className={`text-sm font-medium ${isOn ? 'text-green-500' : 'text-gray-400'}`}>
           {label}
         </span>
       )}
@@ -105,7 +86,7 @@ const ToggleSwitch: React.FC<{
   );
 };
 
-// --- Updated TableCard (QRCodeCard) ---
+// --- Updated TableCard to match Screenshot ---
 
 interface TableCardProps {
   table: TableData;
@@ -126,138 +107,148 @@ const TableCard: React.FC<TableCardProps> = ({
 }) => {
   const { t, isRTL } = useLanguage();
 
-  const getOccupancyColor = (isOccupied: boolean) => {
-    return isOccupied
-      ? 'text-red-600 dark:text-red-400'
-      : 'text-green-600 dark:text-green-400';
-  };
-
-  const getStatusText = (isActive: boolean) => {
-    return isActive ? t('TableCard.active') : t('TableCard.inactive');
-  };
-
-  const getOccupancyText = (isOccupied: boolean) => {
-    return isOccupied ? t('TableCard.occupied') : t('TableCard.empty');
-  };
-
-  const getCapacityText = (capacity: number) => {
-    return capacity === 1
-      ? `${capacity} ${t('TableCard.capacity')}`
-      : `${capacity} ${t('TableCard.capacityPlural')}`;
-  };
+  const getStatusText = (isActive: boolean) => isActive ? t('TableCard.active') : t('TableCard.inactive');
+  const getOccupancyText = (isOccupied: boolean) => isOccupied ? t('TableCard.occupied') : t('TableCard.empty');
+  
+  // Helper for capacity text
+  const capacityText = `${table.capacity} ${table.capacity === 1 ? t('TableCard.people') : t('TableCard.people')}`;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow"
-      role="article"
-      aria-label={t('TableCard.accessibility.tableCard')}
+      layout
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="relative w-full max-w-sm mx-auto"
     >
-      {/* Header Section (Unchanged) */}
-      <div className={`flex items-start justify-between mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
-          <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-            <QrCode className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-          </div>
-          <div>
-            <h4 className="font-medium text-gray-900 dark:text-white">
+      {/* Top Border Accent (Optional, matches the green line in similar designs) */}
+      <div className="absolute top-0 inset-x-4 h-[2px] bg-emerald-500 rounded-t-full z-10 opacity-80" />
+
+      {/* Main Card Container */}
+      <div className="relative bg-[#0f1420] dark:bg-[#0f1420] border border-gray-800 rounded-[2rem] p-5 shadow-2xl overflow-hidden">
+        
+        {/* Header Section */}
+        <div className={`flex justify-between items-start mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          {/* Title Area */}
+          <div className="flex w-[100px] flex-col gap-2">
+            <h2 className="text-3xl font-bold text-white tracking-tight">
               {table.menuTableName}
-            </h4>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {table.categoryName}
-            </p>
+            </h2>
+            
+            {/* Badges Row */}
+            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              {/* Capacity Badge */}
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-[#1e2538] rounded-full border border-gray-700/50">
+                <Users className="w-3.5 h-3.5 text-blue-400" />
+                <span className="text-xs font-medium text-blue-100">
+                   {/* Fallback text if translation fails/is simplistic */}
+                   {table.capacity} People
+                </span>
+              </div>
+              
+              {/* Active Badge (Mini) */}
+              <div className={`flex  items-center gap-1.5 px-3 py-1 rounded-full border border-gray-700/50 ${
+                table.isActive ? 'bg-emerald-900/30' : 'bg-red-900/30'
+              }`}>
+                {table.isActive ? (
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                ) : (
+                   <XCircle className="w-3.5 h-3.5 text-red-400" />
+                )}
+                <span className={`text-xs font-medium ${table.isActive ? 'text-emerald-100' : 'text-red-100'}`}>
+                  {getStatusText(table.isActive)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Icons (Download prominent, others subtle) */}
+          <div className={`flex gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+             <button
+              onClick={() => onDownload(table)}
+              className="p-2 text-purple-400 hover:text-purple-300 transition-colors"
+              title={t('TableCard.downloadQR')}
+            >
+              <Download className="w-5 h-5" />
+            </button>
+            
+            {/* Keeping Edit/Delete accessible but less prominent to match clean look */}
+            <div className="flex gap-1 opacity-1 group-hover:opacity-100 transition-opacity duration-200">
+                <button onClick={() => onEdit(table)} className="p-2 text-gray-500 hover:text-blue-400">
+                    <Edit className="w-4 h-4" />
+                </button>
+                <button onClick={() => onDelete(table.id)} className="p-2 text-gray-500 hover:text-red-400">
+                    <Trash2 className="w-4 h-4" />
+                </button>
+            </div>
           </div>
         </div>
 
-        {/* Action Buttons (Unchanged) */}
-        <div className={`flex gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <button
-            onClick={() => onDownload(table)}
-            className="p-1 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-            title={t('TableCard.downloadQR')}
-            aria-label={t('TableCard.accessibility.downloadButton')}
+        {/* QR Code Section - The Glow Effect */}
+        <div className="relative flex justify-center py-6">
+          {/* Background Glow */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-blue-500/20 rounded-full blur-xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl" />
+          
+          <a
+            href={`/table/qr/${table.qrCode}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="relative z-10 p-1.5 bg-white rounded-xl shadow-[0_0_15px_-3px_rgba(255,255,255,0.3)] hover:scale-105 transition-transform duration-300"
           >
-            <Download className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => onEdit(table)}
-            className="p-1 text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300"
-            title={t('TableCard.edit')}
-            aria-label={t('TableCard.accessibility.editButton')}
-          >
-            <Edit className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => onDelete(table.id)}
-            className="p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-            title={t('TableCard.delete')}
-            aria-label={t('TableCard.accessibility.deleteButton')}
-          >
-            <Trash2 className="h-5 w-5" />
-          </button>
+            <img
+              src={table.qrCodeUrl}
+              alt="QR Code"
+              className="w-32 h-32 rounded-lg object-cover"
+            />
+          </a>
         </div>
-      </div>
+        
 
-      {/* QR Code Preview (Unchanged) */}
-      <div className="mb-3">
-        <a
-          href={`/table/qr/${table.qrCode}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          title={t('TableCard.viewQRCode')}
-          aria-label={t('TableCard.accessibility.qrCodePreview')}
-          className="inline-block hover:opacity-80"
-        >
-          <img
-            src={`${table.qrCodeUrl}`}
-            alt={t('TableCard.viewQRCode')}
-            className="w-16 h-16 rounded border border-gray-200 dark:border-gray-600 bg-white"
-          />
-        </a>
-      </div>
-
-      {/* Capacity Info (Unchanged) */}
-      <div className={`flex items-center mb-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-        <Users className={`h-4 w-4 text-gray-400 ${isRTL ? 'ml-1' : 'mr-1'}`} />
-        <span className="text-sm text-gray-600 dark:text-gray-400">
-          {getCapacityText(table.capacity)}
-        </span>
-      </div>
-
-      {/* --- REFACTORED Status Controls --- */}
-      <div className="space-y-2">
-        {/* Active Status Toggle - Enhanced with Modern Switch */}
-        <div className={`flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {t('BranchTableManagement.status')} {/* Assumes this translation exists */}
-          </span>
-          <ToggleSwitch
-            isOn={table.isActive}
-            onToggle={() => onToggleStatus(table.id)}
-            disabled={isToggling}
-            loading={isToggling}
-            label={getStatusText(table.isActive)}
-            size="md"
-          />
-        </div>
-
-        {/* Occupancy Status - Restyled */}
-        <div className={`flex items-center justify-between py-2 px-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {t('BranchTableManagement.occupation')} {/* Assumes this translation exists */}
-          </span>
-          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            {table.isOccupied ? (
-              <UserX className="h-4 w-4 text-red-500" />
-            ) : (
-              <UserCheck className="h-4 w-4 text-green-500" />
-            )}
-            <span className={`text-sm font-medium ${getOccupancyColor(table.isOccupied)}`}>
-              {getOccupancyText(table.isOccupied)}
+        {/* Footer Controls Section */}
+        <div className="space-y-3 mt-2">
+          
+          {/* Status Row */}
+          <div className={`flex items-center justify-between p-3 bg-[#161b2a] rounded-xl border border-gray-800 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <span className="text-sm font-medium text-gray-300">
+              {t('BranchTableManagement.status')}
             </span>
+            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <ToggleSwitch
+                isOn={table.isActive}
+                onToggle={() => onToggleStatus(table.id)}
+                disabled={isToggling}
+                loading={isToggling}
+                size="md"
+              />
+               <span className={`text-sm font-medium min-w-[3rem] ${isRTL ? 'text-right' : 'text-left'} ${
+                table.isActive ? 'text-emerald-400' : 'text-gray-500'
+              }`}>
+                {getStatusText(table.isActive)}
+              </span>
+            </div>
           </div>
+
+          {/* Occupation Row */}
+          <div className={`flex items-center justify-between p-3 bg-[#161b2a] rounded-xl border border-gray-800 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <span className="text-sm font-medium text-gray-300">
+              {t('BranchTableManagement.occupation')}
+            </span>
+            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              {table.isOccupied ? (
+                <UserX className="h-4 w-4 text-red-400" />
+              ) : (
+                <UserCheck className="h-4 w-4 text-emerald-400" />
+              )}
+              <span className={`text-sm font-medium ${
+                table.isOccupied ? 'text-red-400' : 'text-emerald-400'
+              }`}>
+                {getOccupancyText(table.isOccupied)}
+              </span>
+            </div>
+          </div>
+          
         </div>
+
       </div>
     </motion.div>
   );
@@ -265,6 +256,5 @@ const TableCard: React.FC<TableCardProps> = ({
 
 export default TableCard;
 
-// Backward compatibility
 export type QRCodeData = TableData;
 export { TableCard as QRCodeCard };

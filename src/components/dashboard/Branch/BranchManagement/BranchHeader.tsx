@@ -97,26 +97,22 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
   const [isUploadingImage, setIsUploadingImage] = useState<boolean>(false);
   const [imageError, setImageError] = useState<string>('');
   const [dragActive, setDragActive] = useState<boolean>(false);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [isLoadingPublicId, setIsLoadingPublicId] = useState<boolean>(false);
 
 const handleNavigateToOnlineMenu = async () => {
     if (!selectedBranch) return;
-    
+
     try {
       setIsLoadingPublicId(true);
-          localStorage.removeItem('token');
+
       // Fetch the public ID
-      const { publicId, branchName } = await onlineMenuService.getPublicBranchId(selectedBranch.id);
-      
-      // Navigate with public ID as the route parameter
-      navigate(`/OnlineMenu/${publicId}`, {
-        state: { 
-          branchName,
-          branchId: selectedBranch.id // Optional, in case you need it later
-        }
-      });
-      
+      const { publicId } = await onlineMenuService.getPublicBranchId(selectedBranch.id);
+
+      // Open online menu in a new tab to keep admin session isolated
+      const onlineMenuUrl = `/OnlineMenu/${publicId}`;
+      window.open(onlineMenuUrl, '_blank', 'noopener,noreferrer');
+
     } catch (error: any) {
       console.error('Failed to get public ID:', error);
       alert(t('branchManagementBranch.errors.failedToGetPublicId') || 'Failed to get online menu link');
