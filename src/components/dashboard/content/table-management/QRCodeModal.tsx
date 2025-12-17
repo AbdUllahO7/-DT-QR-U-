@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Users,  Minus, X } from 'lucide-react';
-import { QRCodeData } from './QRCodeCard';
 import { logger } from '../../../../utils/logger';
 import { branchService, UpdateMenuTableDto } from '../../../../services/branchService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { QRCodeData } from '../../Branch/Table/TableCard';
 
 // API Response Types
 interface BranchDropdownItem {
@@ -68,7 +68,7 @@ interface QRCodeModalProps {
 
 type ModalStep = 'selection' | 'single' | 'bulk';
 
-const QRCodeModal: React.FC<QRCodeModalProps> = ({
+const QRCodeModalAdd: React.FC<QRCodeModalProps> = ({
   isOpen,
   onClose,
   qrData,
@@ -941,4 +941,4 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
   );
 };
 
-export default QRCodeModal;
+export default QRCodeModalAdd;
