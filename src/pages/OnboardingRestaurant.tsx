@@ -28,6 +28,7 @@ const OnboardingRestaurant: React.FC = () => {
   const { t, isRTL } = useLanguage();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
   const [errors, setErrors] = useState<Partial<CreateRestaurantDto>>({});
   const [apiError, setApiError] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
@@ -243,8 +244,13 @@ const OnboardingRestaurant: React.FC = () => {
         
         break;
         
-      case 3: // Legal Info
-      
+      case 3: // Legal Info - Optional fields
+        // Step 3 fields are optional, only validate format if provided
+        if (formData.taxNumber && formData.taxNumber.trim().length > 0) {
+          if (formData.taxNumber.trim().length !== 10) {
+            newErrors.taxNumber = t('onboardingRestaurant.step3.errors.taxNumberInvalid');
+          }
+        }
         break;
     }
     
@@ -252,10 +258,27 @@ const OnboardingRestaurant: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleNextStep = (): void => {
+  const handleNextStep = (e?: React.MouseEvent): void => {
+    // Prevent any default form submission
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // Prevent concurrent transitions
+    if (isTransitioning || isSubmitting) {
+      return;
+    }
+
     if (validateStep(currentStep)) {
+      setIsTransitioning(true);
       setErrors({}); // Clear errors when successfully moving to next step
       setCurrentStep(prev => prev + 1);
+
+      // Reset transition flag after a short delay
+      setTimeout(() => {
+        setIsTransitioning(false);
+      }, 300);
     }
   };
 
@@ -266,11 +289,23 @@ const OnboardingRestaurant: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    
+
+    // Prevent any action if we're transitioning between steps or already submitting
+    if (isTransitioning || isSubmitting) {
+      return;
+    }
+
+    // IMPORTANT: Only allow submission from step 3
+    if (currentStep !== 3) {
+      // If user pressed Enter on step 1 or 2, just move to next step
+      handleNextStep();
+      return;
+    }
+
     // Clear previous errors
     setApiError('');
     setSuccessMessage('');
-    
+
     // Validate all steps before submitting
     const step1Valid = validateStep(1);
     const step2Valid = validateStep(2);
@@ -946,14 +981,15 @@ const OnboardingRestaurant: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleNextStep}
-                  className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200"
+                  disabled={isTransitioning || isSubmitting}
+                  className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 >
                   {t('onboardingRestaurant.navigation.next')}
                 </button>
               ) : (
                 <button
                   type="submit"
-                  disabled={isSubmitting || isUploadingLogo || isUploadingWorkPermit || isUploadingFoodCertificate}
+                  disabled={isSubmitting || isTransitioning || isUploadingLogo || isUploadingWorkPermit || isUploadingFoodCertificate}
                   className={`px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
                 >
                   {isSubmitting ? (
