@@ -80,9 +80,9 @@ const Header: React.FC = () => {
   };
 
   const handleLogin = (): void => {
-    setIsOpen(false); // Close mobile menu
-
+    // ... (rest of your existing function)
     const token = localStorage.getItem('token');
+// ... (rest of your existing code)
     const tokenExpiry = localStorage.getItem('tokenExpiry');
 
     if (token && tokenExpiry) {
@@ -99,32 +99,29 @@ const Header: React.FC = () => {
         localStorage.removeItem('userId');
       }
     }
-
+    
     // Token yoksa veya geçersizse login sayfasına yönlendir
     navigate('/login');
   };
 
   const handleRegister = (): void => {
-    setIsOpen(false); // Close mobile menu
     navigate('/register');
   };
 
   const handleGoToPanel = (): void => {
-    setIsOpen(false); // Close mobile menu
     navigate('/selection');
   };
 
   const handleLogout = (): void => {
-    setIsOpen(false); // Close mobile menu
     clearAuth();
     navigate('/', { replace: true });
   };
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 overflow-hidden ${
-        isScrolled
-          ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg'
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
+        isScrolled 
+          ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg' 
           : 'bg-transparent'
       }`}
     >

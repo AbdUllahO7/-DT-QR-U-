@@ -1272,6 +1272,12 @@ export const tr = {
     description: 'Restoran şubelerini yönetin ve bilgilerini güncelleyin',
     loading: 'Şubeler yükleniyor...',
     addBranch: 'Yeni Şube Ekle',
+
+        purgeConfirm:{
+        title : "Bu işlemi yapmaya emin misiniz ?",
+        description:""
+      },
+      
     
     // Error messages
     error: {
@@ -3140,6 +3146,11 @@ export const tr = {
     loading: 'Şube bilgileri yükleniyor...',
     noBranchFound: 'Herhangi bir şube bulunamadı',
     uploadLogo: 'Logoyu Yükle',
+    noLogo: 'Logo Yok',
+    logoAlt: 'Şube Logosu',
+    uploading: 'Yükleniyor...',
+    uploadPrompt: 'Resmi bırakın veya göz atmak için tıklayın',
+    uploadHint: '5 MB\'ye kadar PNG, JPG, GIF',
     status: {
       open: 'Açık',
       closed: 'Kapalı',

@@ -1270,6 +1270,12 @@ export const en = {
       description: 'Manage restaurant branches and update their information',
       loading: 'Loading branches...',
       addBranch: 'Add New Branch',
+
+
+      purgeConfirm:{
+        title : "Are ypu sure about that ?",
+        description:""
+      },
       
       // Error messages
       error: {
@@ -3139,6 +3145,11 @@ export const en = {
     loading: 'Loading branch information...',
     noBranchFound: 'No branch found',
     uploadLogo: 'Upload Logo',
+    noLogo: 'No Logo',
+    logoAlt: 'Branch Logo',
+    uploading: 'Uploading...',
+    uploadPrompt: 'Drop image or click to browse',
+    uploadHint: 'PNG, JPG, GIF up to 5MB',
     status: {
       open: 'Open',
       closed: 'Closed',

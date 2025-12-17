@@ -1270,6 +1270,11 @@ contact: {
     description: 'إدارة فروع المطعم وتحديث معلوماتها',
     loading: 'جاري تحميل الفروع...',
     addBranch: 'إضافة فرع جديد',
+
+        purgeConfirm:{
+        title : "هل أنت متأكد من رغبتك في القيام بذلك؟",
+        description:""
+      },
     
     // Error messages
     error: {
@@ -3143,6 +3148,11 @@ contact: {
     loading: 'جاري تحميل معلومات الفرع...',
     noBranchFound: 'لم يتم العثور على أي فرع',
     uploadLogo: 'تحميل الشعار',
+    noLogo: 'لا يوجد شعار',
+    logoAlt: 'شعار الفرع',
+    uploading: 'جارٍ التحميل...',
+    uploadPrompt: 'قم بإسقاط الصورة أو انقر للتصفح',
+    uploadHint: 'PNG, JPG, GIF حتى 5 ميجابايت',
     status: {
       open: 'مفتوح',
       closed: 'مغلق',

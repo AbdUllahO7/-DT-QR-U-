@@ -668,7 +668,6 @@ const BranchManagement: React.FC = () => {
         onClose={handlePurgeModalClose}
         onConfirm={performPurgeBranch}
         title={t('branchManagement.purgeConfirm.title') || 'Permanent Deletion Warning'}
-        message={t('branchManagement.purgeConfirm.description') || 'This will PERMANENTLY delete the branch and ALL associated data. This action CANNOT be undone!'}
         isSubmitting={isPurgingBranch}
         itemType="branch-purge"
         itemName={branchToPurge?.branchName || ''}
