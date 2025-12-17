@@ -1181,15 +1181,15 @@ export const tr = {
         placeholder: 'Şehir adını girin'
       },
       street: {
-        label: 'Sokak *',
+        label: 'Sokak',
         placeholder: 'Sokak adını girin'
       },
       zipCode: {
-        label: 'Posta Kodu *',
+        label: 'Posta Kodu',
         placeholder: 'Posta kodunu girin'
       },
       addressLine1: {
-        label: 'Adres Satırı 1 *',
+        label: 'Adres Satırı 1',
         placeholder: 'Detaylı adres bilgisi girin'
       },
       addressLine2: {
@@ -1197,15 +1197,15 @@ export const tr = {
         placeholder: 'Ek adres bilgisi girin (opsiyonel)'
       },
       phone: {
-        label: 'Telefon Numarası *',
+        label: 'Telefon Numarası',
         placeholder: 'Telefon numarasını girin'
       },
       email: {
-        label: 'E-posta Adresi *',
+        label: 'E-posta Adresi ',
         placeholder: 'E-posta adresini girin'
       },
       location: {
-        label: 'Konum Bilgisi *',
+        label: 'Konum Bilgisi ',
         placeholder: 'Konum bilgisini girin (Örn: 40.9795,28.7225)'
       },
       contactHeader: {
@@ -1272,6 +1272,12 @@ export const tr = {
     description: 'Restoran şubelerini yönetin ve bilgilerini güncelleyin',
     loading: 'Şubeler yükleniyor...',
     addBranch: 'Yeni Şube Ekle',
+
+        purgeConfirm:{
+        title : "Bu işlemi yapmaya emin misiniz ?",
+        description:""
+      },
+      
     
     // Error messages
     error: {
@@ -3140,6 +3146,11 @@ export const tr = {
     loading: 'Şube bilgileri yükleniyor...',
     noBranchFound: 'Herhangi bir şube bulunamadı',
     uploadLogo: 'Logoyu Yükle',
+    noLogo: 'Logo Yok',
+    logoAlt: 'Şube Logosu',
+    uploading: 'Yükleniyor...',
+    uploadPrompt: 'Resmi bırakın veya göz atmak için tıklayın',
+    uploadHint: '5 MB\'ye kadar PNG, JPG, GIF',
     status: {
       open: 'Açık',
       closed: 'Kapalı',

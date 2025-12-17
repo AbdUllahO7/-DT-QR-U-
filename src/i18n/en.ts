@@ -1270,6 +1270,12 @@ export const en = {
       description: 'Manage restaurant branches and update their information',
       loading: 'Loading branches...',
       addBranch: 'Add New Branch',
+
+
+      purgeConfirm:{
+        title : "Are ypu sure about that ?",
+        description:""
+      },
       
       // Error messages
       error: {
@@ -3139,6 +3145,11 @@ export const en = {
     loading: 'Loading branch information...',
     noBranchFound: 'No branch found',
     uploadLogo: 'Upload Logo',
+    noLogo: 'No Logo',
+    logoAlt: 'Branch Logo',
+    uploading: 'Uploading...',
+    uploadPrompt: 'Drop image or click to browse',
+    uploadHint: 'PNG, JPG, GIF up to 5MB',
     status: {
       open: 'Open',
       closed: 'Closed',
@@ -4859,22 +4870,22 @@ productModal: {
           "error": "City is required"
         },
         "street": {
-          "label": "Street *",
+          "label": "Street",
           "placeholder": "Enter street name",
           "error": "Street is required"
         },
         "zipCode": {
-          "label": "Zip Code *",
+          "label": "Zip Code",
           "placeholder": "Enter zip code",
           "error": "Zip code is required"
         },
         "addressLine1": {
-          "label": "Address Line 1 *",
+          "label": "Address Line 1",
           "placeholder": "Enter detailed address",
           "error": "Address line 1 is required"
         },
         "addressLine2": {
-          "label": "Address Line 2 *",
+          "label": "Address Line 2",
           "placeholder": "Enter additional address information",
           "error": "Address line 2 is required"
         }
@@ -4883,19 +4894,19 @@ productModal: {
         "title": "Contact Information",
         "description": "Enter your branch contact details",
         "phone": {
-          "label": "Phone Number *",
+          "label": "Phone Number ",
           "placeholder": "212 123 4567",
           "ariaLabel": "Country Code",
           "errorRequired": "Phone number is required",
           "errorInvalid": "Invalid phone number format (7-15 digits)."
         },
         "email": {
-          "label": "Email Address *",
+          "label": "Email Address ",
           "placeholder": "Enter email address",
           "error": "Email address is required"
         },
         "location": {
-          "label": "Location Information *",
+          "label": "Location Information ",
           "placeholder": "Enter location info (e.g., 40.9795, 28.7225)",
           "error": "Location information is required",
           "selectOnMap": "Select on Map",

@@ -32,6 +32,7 @@ interface BranchModalProps {
   hasChanges: boolean;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onWorkingHourChange: (dayIndex: number, field: keyof CreateBranchWorkingHourCoreDto, value: any) => void;
+  error?: string | null;
 }
 
 const BranchModal: React.FC<BranchModalProps> = ({
@@ -42,7 +43,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
   setFormData,
   isSubmitting,
   onInputChange,
-  onWorkingHourChange
+  onWorkingHourChange,
+  error
 }) => {
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
@@ -885,6 +887,25 @@ const renderStep2 = () => (
             </button>
           </div>
         </div>
+
+        {/* Error Display */}
+        {error && (
+          <div className="mx-6 mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <X className="h-5 w-5 text-red-400" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800 dark:text-red-400">
+                  {t('common.error')}
+                </h3>
+                <div className="mt-2 text-sm text-red-700 dark:text-red-300 whitespace-pre-line">
+                  {error}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
           <nav aria-label="Progress">

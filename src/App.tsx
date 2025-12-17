@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
-
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Import your pages
 import Home from './pages/Home';
@@ -31,22 +31,25 @@ const App: React.FC = () => {
               inside a parent <Route> using the MainLayout.
             */}
             <Route element={<MainLayout />}>
+              {/* Public routes */}
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/resetPassword" element={<ResetPassword />} />
               <Route path="/confirmMail" element={<ConfirmMail />} />
               <Route path="/setnewpassword" element={<SetNewPassword />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/onboarding/restaurant" element={<OnboardingRestaurant />} />
-              <Route path="/onboarding/branch" element={<OnboardingBranch />} />
-              <Route path="/onboarding/complete" element={<OnboardingComplete />} />
+
+              {/* Protected onboarding routes */}
+              <Route path="/onboarding/restaurant" element={<ProtectedRoute><OnboardingRestaurant /></ProtectedRoute>} />
+              <Route path="/onboarding/branch" element={<ProtectedRoute><OnboardingBranch /></ProtectedRoute>} />
+              <Route path="/onboarding/complete" element={<ProtectedRoute><OnboardingComplete /></ProtectedRoute>} />
             </Route>
 
-            {/* These routes will NOT have the Header/Footer 
-              because they are not children of MainLayout.
-            */}
-            <Route path="/selection" element={<SelectionScreen />} />
-            <Route path="/dashboard/*" element={<Dashboard />} />
+            {/* Protected routes without Header/Footer */}
+            <Route path="/selection" element={<ProtectedRoute><SelectionScreen /></ProtectedRoute>} />
+            <Route path="/dashboard/*" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+
+            {/* Public routes for guests - QR and Online Menu */}
             <Route path="/table/qr/:qrToken" element={<TableQR />} />
             <Route path="/OnlineMenu/:publicId" element={<OnlineMenu />} />
             

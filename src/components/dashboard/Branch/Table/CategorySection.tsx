@@ -14,8 +14,8 @@ import {
   Loader2
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
-import TableCard from './TableCard';
 import { TableData } from '../../../../types/BranchManagement/type';
+import TableCard from './TableCard';
 
 interface CategoryData {
   id: number;

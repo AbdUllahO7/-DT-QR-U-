@@ -1155,11 +1155,11 @@ contact: {
     },
     fields: {
       branchName: {
-        label: 'اسم الفرع *',
+        label: 'اسم الفرع',
         placeholder: 'أدخل اسم الفرع'
       },
       whatsappNumber: {
-        label: 'رقم الطلبات واتساب *',
+        label: 'رقم الطلبات واتساب',
         placeholder: 'أدخل رقم الطلبات واتساب'
       },
       branchLogo: {
@@ -1179,15 +1179,15 @@ contact: {
         placeholder: 'أدخل اسم المدينة'
       },
       street: {
-        label: 'الشارع *',
+        label: 'الشارع',
         placeholder: 'أدخل اسم الشارع'
       },
       zipCode: {
-        label: 'الرمز البريدي *',
+        label: 'الرمز البريدي ',
         placeholder: 'أدخل الرمز البريدي'
       },
       addressLine1: {
-        label: 'سطر العنوان 1 *',
+        label: 'سطر العنوان 1',
         placeholder: 'أدخل معلومات العنوان التفصيلية'
       },
       addressLine2: {
@@ -1195,15 +1195,15 @@ contact: {
         placeholder: 'أدخل معلومات العنوان الإضافية (اختياري)'
       },
       phone: {
-        label: 'رقم الهاتف *',
+        label: 'رقم الهاتف',
         placeholder: 'أدخل رقم الهاتف'
       },
       email: {
-        label: 'عنوان البريد الإلكتروني *',
+        label: 'عنوان البريد الإلكتروني ',
         placeholder: 'أدخل عنوان البريد الإلكتروني'
       },
       location: {
-        label: 'معلومات الموقع *',
+        label: 'معلومات الموقع ',
         placeholder: 'أدخل معلومات الموقع (مثال: 40.9795,28.7225)'
       },
       contactHeader: {
@@ -1270,6 +1270,11 @@ contact: {
     description: 'إدارة فروع المطعم وتحديث معلوماتها',
     loading: 'جاري تحميل الفروع...',
     addBranch: 'إضافة فرع جديد',
+
+        purgeConfirm:{
+        title : "هل أنت متأكد من رغبتك في القيام بذلك؟",
+        description:""
+      },
     
     // Error messages
     error: {
@@ -3143,6 +3148,11 @@ contact: {
     loading: 'جاري تحميل معلومات الفرع...',
     noBranchFound: 'لم يتم العثور على أي فرع',
     uploadLogo: 'تحميل الشعار',
+    noLogo: 'لا يوجد شعار',
+    logoAlt: 'شعار الفرع',
+    uploading: 'جارٍ التحميل...',
+    uploadPrompt: 'قم بإسقاط الصورة أو انقر للتصفح',
+    uploadHint: 'PNG, JPG, GIF حتى 5 ميجابايت',
     status: {
       open: 'مفتوح',
       closed: 'مغلق',

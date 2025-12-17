@@ -304,6 +304,7 @@ export interface BranchHeaderProps {
   handleToggleTemporaryClose: () => Promise<void>;
   handleSave: () => Promise<void>;
   initializeEditData: (branch: BranchData) => void;
+  editData: EditDataType;
   setEditData: React.Dispatch<React.SetStateAction<EditDataType>>;
 }
 export interface CategoryData {

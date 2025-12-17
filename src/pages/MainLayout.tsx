@@ -16,7 +16,8 @@ const MainLayout: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
       <Header />
       {/* Outlet renders the matched child route's component */}
-      <main className="flex-grow">
+      {/* pt-16 adds padding-top to account for the fixed header (h-16 = 64px) */}
+      <main className="flex-grow w-full pt-16">
         <Outlet />
       </main>
       <Footer />
