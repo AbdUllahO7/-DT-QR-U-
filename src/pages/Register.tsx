@@ -187,8 +187,7 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
       // Store userId for onboarding and future use
       localStorage.setItem('onboarding_userId', response.data.userId);
       localStorage.setItem('userId', response.data.userId);
-      
-      // Redirect to restaurant onboarding
+      console.log("navigating")
       navigate('/onboarding/restaurant', { 
         state: { 
           message: t('pages.register.success.message'),

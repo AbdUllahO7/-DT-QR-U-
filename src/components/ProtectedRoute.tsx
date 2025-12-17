@@ -11,6 +11,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // Check if user is authenticated
   const token = localStorage.getItem('token');
   const tokenExpiry = localStorage.getItem('tokenExpiry');
+  const onboardingUserId = localStorage.getItem('onboarding_userId');
+
+  // Allow onboarding routes without token if user is in onboarding process
+  const isOnboardingRoute = location.pathname.startsWith('/onboarding');
+  if (isOnboardingRoute && onboardingUserId) {
+    return children;
+  }
 
   // If no token, redirect to login
   if (!token || !tokenExpiry) {

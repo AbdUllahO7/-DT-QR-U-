@@ -24,6 +24,7 @@ const BranchManagement: React.FC = () => {
   const [branches, setBranches] = useState<BranchInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingBranch, setEditingBranch] = useState<BranchDetailResponse | null>(null);
@@ -108,6 +109,17 @@ const BranchManagement: React.FC = () => {
     logger.info(`Restaurant ID: ${restaurantId} ile şube listesi isteniyor`, null, { prefix: 'BranchManagement' });
     fetchBranches();
   }, [t]);
+
+  // Auto-dismiss messages after 5 seconds
+  useEffect(() => {
+    if (error || successMessage) {
+      const timer = setTimeout(() => {
+        setError(null);
+        setSuccessMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error, successMessage]);
 
   const fetchBranches = async () => {
     setIsLoading(true);
@@ -397,10 +409,16 @@ const BranchManagement: React.FC = () => {
     try {
       await purgeService.purgeBranch(Number(branchToPurge.branchId));
       logger.info('Branch purged successfully', { branchId: branchToPurge.branchId }, { prefix: 'BranchManagement' });
-      
+
       // Reset modal states
       setBranchToPurge(null);
       setIsPurgeModalOpen(false);
+
+      // Show success message with timing information
+      setSuccessMessage(
+        t('branchManagement.success.purgeInitiated') ||
+        'Branch purge initiated successfully. The operation will be completed within 1-24 hours.'
+      );
 
       // Refresh the list to ensure consistency
       await fetchBranches();
@@ -544,6 +562,40 @@ const BranchManagement: React.FC = () => {
               <button
                 onClick={dismissError}
                 className={`${isRTL ? 'mr-auto' : 'ml-auto'} flex-shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors`}
+                aria-label={t('common.dismiss')}
+              >
+                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Success Message */}
+        {successMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg"
+          >
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-green-400 dark:text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className={`${isRTL ? 'mr-3' : 'ml-3'} flex-1`}>
+                <h3 className="text-sm font-medium text-green-800 dark:text-green-200">
+                  {t('common.success') || 'Success'}
+                </h3>
+                <p className="mt-1 text-sm text-green-700 dark:text-green-300 whitespace-pre-line">
+                  {successMessage}
+                </p>
+              </div>
+              <button
+                onClick={() => setSuccessMessage(null)}
+                className={`${isRTL ? 'mr-auto' : 'ml-auto'} flex-shrink-0 text-green-400 hover:text-green-600 dark:hover:text-green-300 transition-colors`}
                 aria-label={t('common.dismiss')}
               >
                 <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
