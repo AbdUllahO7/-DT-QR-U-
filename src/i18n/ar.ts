@@ -1162,11 +1162,11 @@ contact: {
     },
     fields: {
       branchName: {
-        label: 'اسم الفرع *',
+        label: 'اسم الفرع',
         placeholder: 'أدخل اسم الفرع'
       },
       whatsappNumber: {
-        label: 'رقم الطلبات واتساب *',
+        label: 'رقم الطلبات واتساب',
         placeholder: 'أدخل رقم الطلبات واتساب'
       },
       branchLogo: {
@@ -1186,15 +1186,15 @@ contact: {
         placeholder: 'أدخل اسم المدينة'
       },
       street: {
-        label: 'الشارع *',
+        label: 'الشارع',
         placeholder: 'أدخل اسم الشارع'
       },
       zipCode: {
-        label: 'الرمز البريدي *',
+        label: 'الرمز البريدي ',
         placeholder: 'أدخل الرمز البريدي'
       },
       addressLine1: {
-        label: 'سطر العنوان 1 *',
+        label: 'سطر العنوان 1',
         placeholder: 'أدخل معلومات العنوان التفصيلية'
       },
       addressLine2: {
@@ -1202,15 +1202,15 @@ contact: {
         placeholder: 'أدخل معلومات العنوان الإضافية (اختياري)'
       },
       phone: {
-        label: 'رقم الهاتف *',
+        label: 'رقم الهاتف',
         placeholder: 'أدخل رقم الهاتف'
       },
       email: {
-        label: 'عنوان البريد الإلكتروني *',
+        label: 'عنوان البريد الإلكتروني ',
         placeholder: 'أدخل عنوان البريد الإلكتروني'
       },
       location: {
-        label: 'معلومات الموقع *',
+        label: 'معلومات الموقع ',
         placeholder: 'أدخل معلومات الموقع (مثال: 40.9795,28.7225)'
       },
       contactHeader: {
@@ -1277,6 +1277,11 @@ contact: {
     description: 'إدارة فروع المطعم وتحديث معلوماتها',
     loading: 'جاري تحميل الفروع...',
     addBranch: 'إضافة فرع جديد',
+
+        purgeConfirm:{
+        title : "هل أنت متأكد من رغبتك في القيام بذلك؟",
+        description:""
+      },
     
     // Error messages
     error: {
@@ -2973,16 +2978,16 @@ contact: {
   BranchtableManagement: {
 
   title: "إدارة الطاولات",
-  subtitle: "إدارة طاولات المطعم والفئات",
+  subtitle: "إدارة طاولات المطعم والمناطق",
   tabs: {
     tables: "الطاولات",
-    categories: "الفئات",
+    categories: "المناطق",
     statistics: "الإحصائيات",
     batchCreate: "إنشاء متعدد"
   },
   buttons: {
     addTable: "إضافة طاولة",
-    addCategory: "إضافة فئة",
+    addCategory: "إضافة منطقة",
     batchCreate: "إنشاء متعدد",
     edit: "تعديل",
     delete: "حذف",
@@ -2996,13 +3001,13 @@ contact: {
   },
   labels: {
     tableName: "اسم الطاولة",
-    category: "الفئة",
+    category: "المنطقة",
     capacity: "السعة",
     status: "الحالة",
     occupation: "الإشغال",
     displayOrder: "ترتيب العرض",
     search: "البحث في الطاولات...",
-    filterByCategory: "تصفية حسب الفئة",
+    filterByCategory: "تصفية حسب المنطقة",
     viewMode: "وضع العرض",
     totalTables: "إجمالي الطاولات",
     activeTables: "الطاولات النشطة",
@@ -3039,7 +3044,7 @@ contact: {
     title: "إحصائيات الطاولات",
     occupancyRate: "معدل الإشغال",
     averageCapacity: "متوسط السعة",
-    categoryBreakdown: "توزيع الفئات",
+    categoryBreakdown: "توزيع المناطق",
     dailyOccupancy: "الإشغال اليومي",
     peakHours: "ساعات الذروة"
   },
@@ -3060,32 +3065,32 @@ contact: {
       refreshTable: " تحديث الحالة",
       clearing: "جارٍ المسح...",
       loading : "جارٍ التحميل...",
-      multiCategory : "إنشاء طاولات متعددة عبر فئات مختلفة في وقت واحد",
-      category: "الفئة",
-      SelectCategory: "اختر فئة",
+      multiCategory : "إنشاء طاولات متعددة عبر مناطق مختلفة في وقت واحد",
+      category: "المنطقة",
+      SelectCategory: "اختر منطقة",
       Quantity: "عدد الطاولات",
       Capacity: " سعة الطاولة (عدد الأشخاص)",
       createTables: "إنشاء الطاولات",
       creatingTables: "جارٍ إنشاء الطاولات...",
       batchCreateTables: "إنشاء طاولات دفعة واحدة",
-      header: "إدارة الفئات والطاولات",
-      subheader: "إدارة فئات المطعم والطاولات مع عرض الأكورديون",
-      totalCategories: "إجمالي الفئات",
+      header: "إدارة المناطق والطاولات",
+      subheader: "إدارة مناطق المطعم والطاولات مع عرض الأكورديون",
+      totalCategories: "إجمالي المناطق",
       totalTables: "إجمالي الطاولات",
       occupiedTables: "الطاولات المشغولة",
       availableTables: "الطاولات المتاحة",
-      searchPlaceholder: "ابحث عن الفئات...",
+      searchPlaceholder: "ابحث عن المناطق...",
       refresh: "تحديث",
-      addCategory: "إضافة فئة",
-      addCategoryTitle: "إضافة فئة جديدة",
-      categoryNameLabel: "اسم الفئة",
-      categoryNamePlaceholder: "أدخل اسم الفئة",
+      addCategory: "إضافة منطقة",
+      addCategoryTitle: "إضافة منطقة جديدة",
+      categoryNameLabel: "اسم المنطقة",
+      categoryNamePlaceholder: "أدخل اسم المنطقة",
       colorLabel: "اللون",
       iconLabel: "الأيقونة",
       save: "حفظ",
       cancel: "إلغاء",
-      noCategories: "لم يتم العثور على فئات",
-      addFirstCategory: "إضافة فئتك الأولى",
+      noCategories: "لم يتم العثور على مناطق",
+      addFirstCategory: "إضافة منطقتك الأولى",
       tablesCount: "طاولات",
       status: "الحالة",
       active: "نشط",
@@ -3096,7 +3101,7 @@ contact: {
       addTable: "إضافة طاولة",
       tableNamePlaceholder: "اسم الطاولة",
       capacityPlaceholder: "السعة",
-      noTables: "لا توجد طاولات في هذه الفئة",
+      noTables: "لا توجد طاولات في هذه المنطقة",
       qrCodeTitle: "رمز QR - {tableName}",
       qrCodeDescription: "امسح رمز QR هذا للوصول إلى قائمة الطاولة",
       downloadQR: "تنزيل رمز QR",
@@ -3150,6 +3155,11 @@ contact: {
     loading: 'جاري تحميل معلومات الفرع...',
     noBranchFound: 'لم يتم العثور على أي فرع',
     uploadLogo: 'تحميل الشعار',
+    noLogo: 'لا يوجد شعار',
+    logoAlt: 'شعار الفرع',
+    uploading: 'جارٍ التحميل...',
+    uploadPrompt: 'قم بإسقاط الصورة أو انقر للتصفح',
+    uploadHint: 'PNG, JPG, GIF حتى 5 ميجابايت',
     status: {
       open: 'مفتوح',
       closed: 'مغلق',

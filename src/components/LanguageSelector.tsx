@@ -52,7 +52,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative " ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`${getButtonStyle()} flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
@@ -69,12 +69,12 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
       </button>
 
       {isOpen && (
-        <div className={`absolute top-full mt-2 ${isRTL ? 'left-0' : 'right-0'} z-50 min-w-[180px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1`}>
+        <div className={`absolute top-full mt-2 ${isRTL ? 'left-0' : 'right-0'} min-w-[180px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1`}>
           {languages.map((lang) => (
             <button
               key={lang.code}
               onClick={() => handleLanguageChange(lang.code)}
-              className={`w-full flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
+              className={`w-full flex  z-[999] items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
                 language === lang.code ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : ''
               }`}
             >

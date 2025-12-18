@@ -145,10 +145,10 @@ const OnlineMenu: React.FC = () => {
           return;
         } catch (error: any) {
           console.warn('⚠️ Existing session failed, creating new session:', error);
+          // Only remove online menu related session data, NOT the admin token
           localStorage.removeItem('online_menu_session_id');
-          localStorage.removeItem('token');
           localStorage.removeItem('online_menu_public_id');
-          localStorage.removeItem('tokenExpiry');
+          localStorage.removeItem('customerSessionToken');
         }
       }
 

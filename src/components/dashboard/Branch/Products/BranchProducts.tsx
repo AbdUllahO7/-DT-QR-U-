@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Check, 
@@ -9,6 +10,8 @@ import {
   Calendar,
   Package,
   PlusSquare,
+  List,
+  Layers
 } from 'lucide-react';
 import { branchCategoryService } from '../../../../services/Branch/BranchCategoryService';
 import { branchProductService } from '../../../../services/Branch/BranchProductService';
@@ -697,12 +700,8 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
                 status: branchProduct.status,
                 displayOrder: branchProduct.displayOrder,
                 isSelected: true,
-                
-                // Addon fields
                 addonsCount,
                 hasAddons,
-                
-                // Extras fields (NEW!)
                 extrasCount,
                 hasExtras,
                 extraCategoriesCount,
@@ -1300,113 +1299,113 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
     }
   };
 
-const handleRemoveProductFromCategory = async (branchProductId: number, productName?: string) => {
-    try {
-        const scrollPosition = window.scrollY;
+  const handleRemoveProductFromCategory = async (branchProductId: number, productName?: string) => {
+      try {
+          const scrollPosition = window.scrollY;
 
-        let productToRemove = null;
-        let categoryIndex = -1;
+          let productToRemove = null;
+          let categoryIndex = -1;
 
-        for (let i = 0; i < branchCategories.length; i++) {
-            const product = branchCategories[i].products?.find(p => p.branchProductId === branchProductId);
-            if (product) {
-                productToRemove = product;
-                categoryIndex = i;
-                break;
-            }
-        }
+          for (let i = 0; i < branchCategories.length; i++) {
+              const product = branchCategories[i].products?.find(p => p.branchProductId === branchProductId);
+              if (product) {
+                  productToRemove = product;
+                  categoryIndex = i;
+                  break;
+              }
+          }
 
-        if (!productToRemove || categoryIndex === -1) {
-            setError(t('branchCategories.messages.error.productNotFound'));
-            return;
-        }
+          if (!productToRemove || categoryIndex === -1) {
+              setError(t('branchCategories.messages.error.productNotFound'));
+              return;
+          }
 
-        // ✅ Store the product's base ID for filtering later
-        const productId = productToRemove.id;
+          // ✅ Store the product's base ID for filtering later
+          const productId = productToRemove.id;
 
-        // 1. Optimistic Update (Set to isSelected: false)
-        const updatedCategoriesOptimistic = [...branchCategories];
-        const updatedProductsOptimistic = updatedCategoriesOptimistic[categoryIndex].products?.map(product => {
-            if (product.branchProductId === branchProductId) {
-                return {
-                    ...product,
-                    isSelected: false,
-                    branchProductId: undefined,
-                    addonsCount: 0,
-                    hasAddons: false
-                };
-            }
-            return product;
-        }) || [];
+          // 1. Optimistic Update (Set to isSelected: false)
+          const updatedCategoriesOptimistic = [...branchCategories];
+          const updatedProductsOptimistic = updatedCategoriesOptimistic[categoryIndex].products?.map(product => {
+              if (product.branchProductId === branchProductId) {
+                  return {
+                      ...product,
+                      isSelected: false,
+                      branchProductId: undefined,
+                      addonsCount: 0,
+                      hasAddons: false
+                  };
+              }
+              return product;
+          }) || [];
 
-        updatedCategoriesOptimistic[categoryIndex] = {
-            ...updatedCategoriesOptimistic[categoryIndex],
-            products: updatedProductsOptimistic,
-            selectedProductsCount: Math.max(0, (updatedCategoriesOptimistic[categoryIndex].selectedProductsCount || 1) - 1),
-            unselectedProductsCount: (updatedCategoriesOptimistic[categoryIndex].unselectedProductsCount || 0) + 1
-        };
+          updatedCategoriesOptimistic[categoryIndex] = {
+              ...updatedCategoriesOptimistic[categoryIndex],
+              products: updatedProductsOptimistic,
+              selectedProductsCount: Math.max(0, (updatedCategoriesOptimistic[categoryIndex].selectedProductsCount || 1) - 1),
+              unselectedProductsCount: (updatedCategoriesOptimistic[categoryIndex].unselectedProductsCount || 0) + 1
+          };
 
-        setBranchCategories(updatedCategoriesOptimistic);
-        setIsLoading(true);
+          setBranchCategories(updatedCategoriesOptimistic);
+          setIsLoading(true);
 
-        try {
-            // 2. API Call to Delete
-            await branchProductService.deleteBranchProduct(branchProductId);
-            
-            // 3. ✅ Final State Update - Filter by product.id instead of branchProductId
-            setBranchCategories(prevCategories => {
-                const finalCategories = prevCategories.map(cat => {
-                    if (cat.branchCategoryId === updatedCategoriesOptimistic[categoryIndex].branchCategoryId) {
-                        return {
-                            ...cat,
-                            products: cat.products ? cat.products.filter(p => p.id !== productId) : [],
-                        };
-                    }
-                    return cat;
-                });
-                return finalCategories;
-            });
+          try {
+              // 2. API Call to Delete
+              await branchProductService.deleteBranchProduct(branchProductId);
+              
+              // 3. ✅ Final State Update - Filter by product.id instead of branchProductId
+              setBranchCategories(prevCategories => {
+                  const finalCategories = prevCategories.map(cat => {
+                      if (cat.branchCategoryId === updatedCategoriesOptimistic[categoryIndex].branchCategoryId) {
+                          return {
+                              ...cat,
+                              products: cat.products ? cat.products.filter(p => p.id !== productId) : [],
+                          };
+                      }
+                      return cat;
+                  });
+                  return finalCategories;
+              });
 
-            setSuccessMessage(t('branchCategories.messages.success.productRemoved', { name: productName || productToRemove.name }));
-            
-        } catch (apiError: any) {
-            console.error('API call failed, reverting optimistic update:', apiError);
+              setSuccessMessage(t('branchCategories.messages.success.productRemoved', { name: productName || productToRemove.name }));
+              
+          } catch (apiError: any) {
+              console.error('API call failed, reverting optimistic update:', apiError);
 
-            // 4. Revert optimistic update on API failure
-            const revertedCategories = [...branchCategories];
-            const revertedProducts = revertedCategories[categoryIndex].products?.map(product => {
-                if (product.id === productId) {  // ✅ Also use productId here for consistency
-                    return {
-                        ...product,
-                        isSelected: true,
-                        branchProductId: branchProductId
-                    };
-                }
-                return product;
-            }) || [];
+              // 4. Revert optimistic update on API failure
+              const revertedCategories = [...branchCategories];
+              const revertedProducts = revertedCategories[categoryIndex].products?.map(product => {
+                  if (product.id === productId) {  // ✅ Also use productId here for consistency
+                      return {
+                          ...product,
+                          isSelected: true,
+                          branchProductId: branchProductId
+                      };
+                  }
+                  return product;
+              }) || [];
 
-            revertedCategories[categoryIndex] = {
-                ...revertedCategories[categoryIndex],
-                products: revertedProducts,
-                selectedProductsCount: (revertedCategories[categoryIndex].selectedProductsCount || 0) + 1,
-                unselectedProductsCount: Math.max(0, (revertedCategories[categoryIndex].unselectedProductsCount || 1) - 1)
-            };
+              revertedCategories[categoryIndex] = {
+                  ...revertedCategories[categoryIndex],
+                  products: revertedProducts,
+                  selectedProductsCount: (revertedCategories[categoryIndex].selectedProductsCount || 0) + 1,
+                  unselectedProductsCount: Math.max(0, (revertedCategories[categoryIndex].unselectedProductsCount || 1) - 1)
+              };
 
-            setBranchCategories(revertedCategories);
-            setError(apiError?.response?.data || t('branchCategories.messages.error.removingProduct'));
-        } finally {
-            setIsLoading(false);
-            setTimeout(() => {
-                window.scrollTo(0, scrollPosition);
-            }, 100);
-        }
+              setBranchCategories(revertedCategories);
+              setError(apiError?.response?.data || t('branchCategories.messages.error.removingProduct'));
+          } finally {
+              setIsLoading(false);
+              setTimeout(() => {
+                  window.scrollTo(0, scrollPosition);
+              }, 100);
+          }
 
-    } catch (err: any) {
-        console.error('Error removing product from category:', err);
-        setError(err.response.data.message);
-        setIsLoading(false);
-    }
-};
+      } catch (err: any) {
+          console.error('Error removing product from category:', err);
+          setError(err.response.data.message);
+          setIsLoading(false);
+      }
+  };
 
 
   // Reordering functions
@@ -1475,45 +1474,67 @@ const handleRemoveProductFromCategory = async (branchProductId: number, productN
 
   setSelectedProductForExtras(product);
   setIsProductExtrasModalOpen(true);
-};
+  };
 
-const handleCloseProductExtras = async () => {
-  setSelectedProductForExtras(null);
-  setIsProductExtrasModalOpen(false);
+  const handleCloseProductExtras = async () => {
+    setSelectedProductForExtras(null);
+    setIsProductExtrasModalOpen(false);
+    
+    // Refresh branch categories to get updated extras count
+    if (activeTab === 'manage') {
+      await fetchBranchCategoriesWithProducts();
+    }
+  };
+
+  const handleSaveProductExtras = async (
+    branchProductId: number,
+    selectedCategoryIds: number[],
+    selectedExtraIds: number[]
+  ) => {
+    // Update local state to reflect new counts
+    const newExtrasCount = selectedExtraIds.length;
+    const newCategoriesCount = selectedCategoryIds.length;
+
+    setBranchCategories(prev =>
+      prev.map(category => ({
+        ...category,
+        products: category.products?.map(product =>
+          product.branchProductId === branchProductId
+            ? {
+                ...product,
+                extrasCount: newExtrasCount,
+                hasExtras: newExtrasCount > 0,
+                extraCategoriesCount: newCategoriesCount,
+                hasExtraCategories: newCategoriesCount > 0,
+              }
+            : product
+        ),
+      }))
+    );
+    
+  };
+
+
+  // ----------------------------------------------------------------------
+  // DERIVED STATE CALCULATIONS FOR STATS
+  // ----------------------------------------------------------------------
   
-  // Refresh branch categories to get updated extras count
-  if (activeTab === 'manage') {
-    await fetchBranchCategoriesWithProducts();
-  }
-};
+  // 1. Active Categories: Actually filter by isActive
+  const activeCategoriesCount = branchCategories.filter(cat => cat.isActive).length;
 
-const handleSaveProductExtras = async (
-  branchProductId: number,
-  selectedCategoryIds: number[],
-  selectedExtraIds: number[]
-) => {
-  // Update local state to reflect new counts
-  const newExtrasCount = selectedExtraIds.length;
-  const newCategoriesCount = selectedCategoryIds.length;
+  // 2. Active Branch Products: Products that are selected/present in branch AND have status=true
+  const activeBranchProductsCount = branchCategories.reduce((acc, cat) => {
+    // Note: Assuming 'isSelected' means it's in the branch, and 'status' (or 'isActive') is the toggle
+    return acc + (cat.products?.filter(p => p.isSelected && p.status)?.length || 0);
+  }, 0);
 
-  setBranchCategories(prev =>
-    prev.map(category => ({
-      ...category,
-      products: category.products?.map(product =>
-        product.branchProductId === branchProductId
-          ? {
-              ...product,
-              extrasCount: newExtrasCount,
-              hasExtras: newExtrasCount > 0,
-              extraCategoriesCount: newCategoriesCount,
-              hasExtraCategories: newCategoriesCount > 0,
-            }
-          : product
-      ),
-    }))
-  );
-  
-};
+  // 3. Total Branch Products (Regardless of Active/Inactive)
+  const totalBranchProductsCount = branchCategories.reduce((acc, cat) => {
+    return acc + (cat.products?.filter(p => p.isSelected)?.length || 0);
+  }, 0);
+
+  // ----------------------------------------------------------------------
+
   return (
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="max-w-7xl mx-auto px-6 py-8">
@@ -1538,8 +1559,10 @@ const handleSaveProductExtras = async (
           </div>
         </div>
    
-        {/* Enhanced Stats Overview with Addons */}
+        {/* Enhanced Stats Overview with Addons - FIXED COUNTS */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
+          
+          {/* 1. Available Categories (Total System) */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div>
@@ -1552,11 +1575,15 @@ const handleSaveProductExtras = async (
             </div>
           </div>
 
+          {/* 2. Active Categories (Only isActive = true) */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{t('branchCategories.stats.activeCategories')}</p>
-                <p className="text-3xl font-bold text-gray-900 dark:text-white">{branchCategories.length}</p>
+                <p className="text-3xl font-bold text-gray-900 dark:text-white">
+                  {/* FIXED: Uses calculated active count instead of total length */}
+                  {activeCategoriesCount}
+                </p>
               </div>
               <div className="p-3 bg-green-50 dark:bg-green-900/30 rounded-xl">
                 <Check className="h-8 w-8 text-green-600 dark:text-green-400" />
@@ -1564,31 +1591,51 @@ const handleSaveProductExtras = async (
             </div>
           </div>
 
+          {/* 3. Categories Count (Dynamic: Add Selection vs Branch Total) */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{t('branchCategories.stats.selectedCategories')}</p>
-                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{selectedCategories.size}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                  {activeTab === 'manage' ? 'Total Branch Categories' : t('branchCategories.stats.selectedCategories')}
+                </p>
+                <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                  {/* FIXED: Toggle between Add Wizard Selection and Actual Branch Data */}
+                  {activeTab === 'manage' ? branchCategories.length : selectedCategories.size}
+                </p>
               </div>
               <div className="p-3 bg-purple-50 dark:bg-purple-900/30 rounded-xl">
-                <Plus className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                {activeTab === 'manage' ? (
+                   <Layers className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                ) : (
+                   <Plus className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+                )}
               </div>
             </div>
           </div>
 
+          {/* 4. Products Count (Dynamic: Add Selection vs Branch Active Products) */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">{t('branchCategories.stats.selectedProducts')}</p>
-                <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">{selectedProducts.size}</p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
+                   {activeTab === 'manage' ? 'Active Branch Products' : t('branchCategories.stats.selectedProducts')}
+                </p>
+                <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">
+                   {/* FIXED: Toggle between Add Wizard Selection and Actual Active Products */}
+                   {activeTab === 'manage' ? activeBranchProductsCount : selectedProducts.size}
+                </p>
               </div>
               <div className="p-3 bg-orange-50 dark:bg-orange-900/30 rounded-xl">
-                <Package className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+                 {activeTab === 'manage' ? (
+                    <List className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+                 ) : (
+                    <Package className="h-8 w-8 text-orange-600 dark:text-orange-400" />
+                 )}
               </div>
             </div>
           </div>
 
-          {/* New Addons Stats */}
+          {/* 5. Addons Stats */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
             <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
               <div>
@@ -1638,105 +1685,105 @@ const handleSaveProductExtras = async (
         )}
 
         {/* Main Content */}
-    <CategoriesContent
-        activeTab={activeTab}
-        branchId={branchId}
-        categories={categories}
-        branchCategories={branchCategories}
-        selectedCategories={selectedCategories}
-        selectedProducts={selectedProducts}
-        categoriesWithProducts={categoriesWithProducts}
-        currentStep={currentStep}
-        expandedCategories={expandedCategories}
-        expandedBranchCategories={expandedBranchCategories}
-        isReorderMode={isReorderMode}
-        hasUnsavedChanges={hasUnsavedChanges}
-        isReordering={isReordering}
-        isLoading={isLoading}
-        isSaving={isSaving}
-        isLoadingProducts={isLoadingProducts}
-        isLoadingBranchProducts={isLoadingBranchProducts}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        setSelectedCategories={setSelectedCategories}
-        setSelectedProducts={setSelectedProducts}
-        setCurrentStep={setCurrentStep}
-        setExpandedCategories={setExpandedCategories}
-        setExpandedBranchCategories={setExpandedBranchCategories}
-        setIsReorderMode={setIsReorderMode}
-        setEditingProductId={setEditingProductId}
-        setEditingCategoryId={setEditingCategoryId}
-        handleShowProductAddons={handleShowProductAddons}
-        handleShowProductExtras={handleShowProductExtras}  // ADD THIS LINE
-        handleShowProductDetails={handleShowProductDetails}
-        onCategorySelect={handleCategorySelect}
-        onProductSelect={handleProductSelect}
-        onSelectAllProducts={handleSelectAllProducts}
-        onClearAllProducts={handleClearAllProducts}
-        onProceedToProductSelection={proceedToProductSelection}
-        onProceedToReview={proceedToReview}
-        onBackToCategorySelection={backToCategorySelection}
-        onBackToProductSelection={backToProductSelection}
-        onSave={handleSave}
-        onMoveUp={handleMoveUp}
-        onMoveDown={handleMoveDown}
-        onSaveOrder={handleSaveOrder}
-        onAddProduct={handleAddProductToCategory}
-        onRemoveProduct={handleRemoveProductFromCategory}
-        onDeleteCategory={openDeleteModal}
-        onRefresh={fetchAvailableCategories}
-        setActiveTab={setActiveTab}
-        editedProductPrices={editedProductPrices}
-        editedCategoryNames={editedCategoryNames}
-        editingProductId={editingProductId}
-        editingCategoryId={editingCategoryId}
-        onProductPriceEdit={handleProductPriceEdit}
-        onProductPriceChange={handleProductPriceChange}
-        onProductPriceSave={handleProductPriceSave}
-        onProductPriceCancel={handleProductPriceCancel}
-        onCategoryNameEdit={handleCategoryNameEdit}
-        onCategoryNameChange={handleCategoryNameChange}
-        onCategoryNameSave={handleCategoryNameSave}
-        onCategoryNameCancel={handleCategoryNameCancel}
-        getProductPrice={getProductPrice}
-        getCategoryName={getCategoryName}
-        isCategoryActive={isCategoryActive}
-      />
+      <CategoriesContent
+          activeTab={activeTab}
+          branchId={branchId}
+          categories={categories}
+          branchCategories={branchCategories}
+          selectedCategories={selectedCategories}
+          selectedProducts={selectedProducts}
+          categoriesWithProducts={categoriesWithProducts}
+          currentStep={currentStep}
+          expandedCategories={expandedCategories}
+          expandedBranchCategories={expandedBranchCategories}
+          isReorderMode={isReorderMode}
+          hasUnsavedChanges={hasUnsavedChanges}
+          isReordering={isReordering}
+          isLoading={isLoading}
+          isSaving={isSaving}
+          isLoadingProducts={isLoadingProducts}
+          isLoadingBranchProducts={isLoadingBranchProducts}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          setSelectedCategories={setSelectedCategories}
+          setSelectedProducts={setSelectedProducts}
+          setCurrentStep={setCurrentStep}
+          setExpandedCategories={setExpandedCategories}
+          setExpandedBranchCategories={setExpandedBranchCategories}
+          setIsReorderMode={setIsReorderMode}
+          setEditingProductId={setEditingProductId}
+          setEditingCategoryId={setEditingCategoryId}
+          handleShowProductAddons={handleShowProductAddons}
+          handleShowProductExtras={handleShowProductExtras}  // ADD THIS LINE
+          handleShowProductDetails={handleShowProductDetails}
+          onCategorySelect={handleCategorySelect}
+          onProductSelect={handleProductSelect}
+          onSelectAllProducts={handleSelectAllProducts}
+          onClearAllProducts={handleClearAllProducts}
+          onProceedToProductSelection={proceedToProductSelection}
+          onProceedToReview={proceedToReview}
+          onBackToCategorySelection={backToCategorySelection}
+          onBackToProductSelection={backToProductSelection}
+          onSave={handleSave}
+          onMoveUp={handleMoveUp}
+          onMoveDown={handleMoveDown}
+          onSaveOrder={handleSaveOrder}
+          onAddProduct={handleAddProductToCategory}
+          onRemoveProduct={handleRemoveProductFromCategory}
+          onDeleteCategory={openDeleteModal}
+          onRefresh={fetchAvailableCategories}
+          setActiveTab={setActiveTab}
+          editedProductPrices={editedProductPrices}
+          editedCategoryNames={editedCategoryNames}
+          editingProductId={editingProductId}
+          editingCategoryId={editingCategoryId}
+          onProductPriceEdit={handleProductPriceEdit}
+          onProductPriceChange={handleProductPriceChange}
+          onProductPriceSave={handleProductPriceSave}
+          onProductPriceCancel={handleProductPriceCancel}
+          onCategoryNameEdit={handleCategoryNameEdit}
+          onCategoryNameChange={handleCategoryNameChange}
+          onCategoryNameSave={handleCategoryNameSave}
+          onCategoryNameCancel={handleCategoryNameCancel}
+          getProductPrice={getProductPrice}
+          getCategoryName={getCategoryName}
+          isCategoryActive={isCategoryActive}
+        />
 
-      <BranchProductExtraCategoriesModal
-          isOpen={isProductExtrasModalOpen}
-          onClose={handleCloseProductExtras}
-          branchProductId={selectedProductForExtras?.branchProductId || 0}
-          productName={selectedProductForExtras?.name || ''}
-          onSave={handleSaveProductExtras}
+        <BranchProductExtraCategoriesModal
+            isOpen={isProductExtrasModalOpen}
+            onClose={handleCloseProductExtras}
+            branchProductId={selectedProductForExtras?.branchProductId || 0}
+            productName={selectedProductForExtras?.name || ''}
+            onSave={handleSaveProductExtras}
+            isLoading={isLoading}
+          />
+
+          {/* Delete Confirmation Modal */}
+          <ConfirmDeleteModal
+            isOpen={deleteModal.isOpen}
+            onClose={closeDeleteModal}
+            onConfirm={performDelete}
+            title={t('branchCategories.deleteModal.title')}
+            message={t('branchCategories.deleteModal.message', { name: deleteModal.categoryName })}
+            isSubmitting={isDeleting}
+            itemType="category"
+            itemName={deleteModal.categoryName}
+          />
+
+          <ProductDetailsModal
+            isOpen={isProductDetailsModalOpen}
+            onClose={handleCloseProductDetails}
+            product={selectedProductForDetails}
+          />
+        <BranchProductAddonsModal
+          isOpen={isProductAddonsModalOpen}
+          onClose={handleCloseProductAddons}
+          product={selectedProductForAddons}
+          availableAddons={getAvailableAddonsForProduct(selectedProductForAddons?.branchProductId || 0)}
+          onSave={handleSaveProductAddons}
           isLoading={isLoading}
         />
-
-        {/* Delete Confirmation Modal */}
-        <ConfirmDeleteModal
-          isOpen={deleteModal.isOpen}
-          onClose={closeDeleteModal}
-          onConfirm={performDelete}
-          title={t('branchCategories.deleteModal.title')}
-          message={t('branchCategories.deleteModal.message', { name: deleteModal.categoryName })}
-          isSubmitting={isDeleting}
-          itemType="category"
-          itemName={deleteModal.categoryName}
-        />
-
-        <ProductDetailsModal
-          isOpen={isProductDetailsModalOpen}
-          onClose={handleCloseProductDetails}
-          product={selectedProductForDetails}
-        />
-      <BranchProductAddonsModal
-        isOpen={isProductAddonsModalOpen}
-        onClose={handleCloseProductAddons}
-        product={selectedProductForAddons}
-        availableAddons={getAvailableAddonsForProduct(selectedProductForAddons?.branchProductId || 0)}
-        onSave={handleSaveProductAddons}
-        isLoading={isLoading}
-      />
       </div>
     </div>
   );

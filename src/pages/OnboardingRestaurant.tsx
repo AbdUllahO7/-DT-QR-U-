@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  Building2, 
-  Upload, 
-  AlertCircle, 
-  CheckCircle, 
-  Store, 
-  FileText, 
-  Shield, 
+import {
+  ArrowLeft,
+  Building2,
+  Upload,
+  AlertCircle,
+  CheckCircle,
+  Store,
+  FileText,
+  Shield,
   Utensils,
   Building,
   Hash,
   Camera
 } from 'lucide-react';
+import Select from 'react-select';
 import { CuisineType } from '../types';
 import type { CreateRestaurantDto, ApiError } from '../types/api';
 import { restaurantService } from '../services/restaurantService';
@@ -534,26 +535,64 @@ const OnboardingRestaurant: React.FC = () => {
           <label htmlFor="cuisineType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             {t('onboardingRestaurant.step1.cuisineLabel')}
           </label>
-          <div className="relative">
-            <Utensils className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-            <select
+          <div className="relative ">
+            <Utensils className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10`} />
+            <Select
               id="cuisineType"
               name="cuisineType"
-              value={formData.cuisineType}
-              onChange={handleInputChange}
-              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                errors.cuisineType
-                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-              } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
-              dir={isRTL ? 'rtl' : 'ltr'}
-            >
-              {cuisineOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+              value={cuisineOptions.find(option => option.value === formData.cuisineType)}
+              onChange={(selectedOption) => {
+                if (selectedOption) {
+                  setFormData(prev => ({ ...prev, cuisineType: selectedOption.value }));
+                  if (errors.cuisineType) {
+                    setErrors(prev => ({ ...prev, cuisineType: undefined }));
+                  }
+                }
+              }}
+              options={cuisineOptions}
+              isSearchable
+              placeholder={t('onboardingRestaurant.step1.cuisineLabel')}
+              className={isRTL ? 'text-right' : 'text-left'}
+              styles={{
+                control: (base, state) => ({
+                  ...base,
+                  paddingLeft: isRTL ? '1rem' : '2.5rem',
+                  paddingRight: isRTL ? '2.5rem' : '1rem',
+                  paddingTop: '0.75rem',
+                  paddingBottom: '0.75rem',
+                  borderRadius: '0.5rem',
+                  borderColor: errors.cuisineType ? '#ef4444' : (state.isFocused ? '#6366f1' : (document.documentElement.classList.contains('dark') ? '#4b5563' : '#d1d5db')),
+                  backgroundColor: errors.cuisineType ? (document.documentElement.classList.contains('dark') ? '#7f1d1d' : '#fef2f2') : (document.documentElement.classList.contains('dark') ? '#374151' : '#fff'),
+                  boxShadow: state.isFocused ? '0 0 0 2px rgba(99, 102, 241, 0.5)' : 'none',
+                  '&:hover': {
+                    borderColor: state.isFocused ? '#6366f1' : (document.documentElement.classList.contains('dark') ? '#4b5563' : '#d1d5db')
+                  }
+                }),
+                menu: (base) => ({
+                  ...base,
+                  backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : '#fff',
+                  zIndex: 50
+                }),
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isSelected ? '#6366f1' : state.isFocused ? (document.documentElement.classList.contains('dark') ? '#4b5563' : '#e0e7ff') : (document.documentElement.classList.contains('dark') ? '#374151' : '#fff'),
+                  color: state.isSelected ? '#fff' : (document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#111827'),
+                  cursor: 'pointer'
+                }),
+                singleValue: (base) => ({
+                  ...base,
+                  color: document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#111827'
+                }),
+                input: (base) => ({
+                  ...base,
+                  color: document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#111827'
+                }),
+                placeholder: (base) => ({
+                  ...base,
+                  color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
+                })
+              }}
+            />
           </div>
           {errors.cuisineType && (
             <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.cuisineType}</p>
@@ -610,26 +649,64 @@ const OnboardingRestaurant: React.FC = () => {
           {t('onboardingRestaurant.step2.legalTypeLabel')}
         </label>
         <div className="relative">
-          <Shield className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-          <select
+          <Shield className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10`} />
+          <Select
             id="legalType"
             name="legalType"
-            value={formData.legalType}
-            onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors.legalType
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
-            dir={isRTL ? 'rtl' : 'ltr'}
-          >
-            <option value="">{t('onboardingRestaurant.step2.legalTypePlaceholder')}</option>
-            {legalTypeOptions.map(option => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+            value={formData.legalType ? { value: formData.legalType, label: formData.legalType } : null}
+            onChange={(selectedOption) => {
+              if (selectedOption) {
+                setFormData(prev => ({ ...prev, legalType: selectedOption.value }));
+                if (errors.legalType) {
+                  setErrors(prev => ({ ...prev, legalType: undefined }));
+                }
+              }
+            }}
+            options={legalTypeOptions.map(option => ({ value: option, label: option }))}
+            isSearchable
+            placeholder={t('onboardingRestaurant.step2.legalTypePlaceholder')}
+            isClearable
+            className={isRTL ? 'text-right' : 'text-left'}
+            styles={{
+              control: (base, state) => ({
+                ...base,
+                paddingLeft: isRTL ? '1rem' : '2.5rem',
+                paddingRight: isRTL ? '2.5rem' : '1rem',
+                paddingTop: '0.75rem',
+                paddingBottom: '0.75rem',
+                borderRadius: '0.5rem',
+                borderColor: errors.legalType ? '#ef4444' : (state.isFocused ? '#6366f1' : (document.documentElement.classList.contains('dark') ? '#4b5563' : '#d1d5db')),
+                backgroundColor: errors.legalType ? (document.documentElement.classList.contains('dark') ? '#7f1d1d' : '#fef2f2') : (document.documentElement.classList.contains('dark') ? '#374151' : '#fff'),
+                boxShadow: state.isFocused ? '0 0 0 2px rgba(99, 102, 241, 0.5)' : 'none',
+                '&:hover': {
+                  borderColor: state.isFocused ? '#6366f1' : (document.documentElement.classList.contains('dark') ? '#4b5563' : '#d1d5db')
+                }
+              }),
+              menu: (base) => ({
+                ...base,
+                backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : '#fff',
+                zIndex: 50
+              }),
+              option: (base, state) => ({
+                ...base,
+                backgroundColor: state.isSelected ? '#6366f1' : state.isFocused ? (document.documentElement.classList.contains('dark') ? '#4b5563' : '#e0e7ff') : (document.documentElement.classList.contains('dark') ? '#374151' : '#fff'),
+                color: state.isSelected ? '#fff' : (document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#111827'),
+                cursor: 'pointer'
+              }),
+              singleValue: (base) => ({
+                ...base,
+                color: document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#111827'
+              }),
+              input: (base) => ({
+                ...base,
+                color: document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#111827'
+              }),
+              placeholder: (base) => ({
+                ...base,
+                color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
+              })
+            }}
+          />
         </div>
         {errors.legalType && (
           <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.legalType}</p>

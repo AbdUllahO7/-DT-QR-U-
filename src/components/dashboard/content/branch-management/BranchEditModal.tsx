@@ -1,16 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Building2, MapPin, Phone, Clock, Upload, Trash2, Image as ImageIcon, AlertTriangle, Globe } from 'lucide-react';
+import { X, Building2, MapPin, Phone, Clock, Upload, Trash2, Image as ImageIcon, AlertTriangle, Globe, MapPinned, Navigation, Info, ArrowRight } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
-import { 
-  BranchDetailResponse, 
-  BranchEditFormData, 
+import {
+  BranchDetailResponse,
+  BranchEditFormData,
   CreateBranchWorkingHourCoreDto,
   CreateBranchWithDetailsDto
 } from '../../../../types/api';
 import { mediaService } from '../../../../services/mediaService';
 import { logger } from '../../../../utils/logger';
 import { countriesWithCodes, countryKeys } from '../../../../data/mockData';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix default marker icon issue with Leaflet
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
+});
 
 
 
@@ -20,6 +35,7 @@ interface BranchEditModalProps {
   onSubmit: (data: CreateBranchWithDetailsDto) => Promise<void>;
   branchDetail: BranchDetailResponse;
   isSubmitting: boolean;
+  error?: string | null;
 }
 
 const BranchEditModal: React.FC<BranchEditModalProps> = ({
@@ -28,6 +44,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
   onSubmit,
   branchDetail,
   isSubmitting,
+  error
 }) => {
   const { t, isRTL } = useLanguage();
   
@@ -66,6 +83,12 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // Map modal states
+  const [isMapModalOpen, setIsMapModalOpen] = useState<boolean>(false);
+  const [selectedLatLng, setSelectedLatLng] = useState<{ lat: number; lng: number }>({ lat: 41.0082, lng: 28.9784 }); // Default to Istanbul
+  const [googleMapsLink, setGoogleMapsLink] = useState<string>('');
+  const [linkError, setLinkError] = useState<string>('');
 
   const defaultWorkingHours: CreateBranchWorkingHourCoreDto[] = [
     { dayOfWeek: 1, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
@@ -299,6 +322,127 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     }
   };
 
+  // Map-related handlers
+  const extractCoordinatesFromLink = (link: string): { lat: number; lng: number } | null => {
+    try {
+      // Pattern 1: google.com/maps/@lat,lng,zoom
+      const pattern1 = /@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match1 = link.match(pattern1);
+      if (match1) {
+        return {
+          lat: parseFloat(match1[1]),
+          lng: parseFloat(match1[2])
+        };
+      }
+
+      // Pattern 2: google.com/maps?q=lat,lng
+      const pattern2 = /q=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match2 = link.match(pattern2);
+      if (match2) {
+        return {
+          lat: parseFloat(match2[1]),
+          lng: parseFloat(match2[2])
+        };
+      }
+
+      // Pattern 3: google.com/maps/place/.../@lat,lng
+      const pattern3 = /place\/[^@]*@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match3 = link.match(pattern3);
+      if (match3) {
+        return {
+          lat: parseFloat(match3[1]),
+          lng: parseFloat(match3[2])
+        };
+      }
+
+      // Pattern 4: ll=lat,lng or !3d lat !4d lng
+      const pattern4 = /!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/;
+      const match4 = link.match(pattern4);
+      if (match4) {
+        return {
+          lat: parseFloat(match4[1]),
+          lng: parseFloat(match4[2])
+        };
+      }
+
+      return null;
+    } catch (error) {
+      console.error('Error extracting coordinates:', error);
+      return null;
+    }
+  };
+
+  const handleGoogleMapsLinkChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const link = e.target.value;
+    setGoogleMapsLink(link);
+    setLinkError('');
+
+    if (link.trim()) {
+      const coords = extractCoordinatesFromLink(link);
+      if (coords) {
+        setSelectedLatLng(coords);
+        setLinkError('');
+      } else if (link.includes('google.com/maps') || link.includes('maps.app.goo.gl')) {
+        setLinkError(t('onboardingBranch.form.step3.location.invalidLink') || 'Could not extract coordinates from this link. Please try a different format.');
+      }
+    }
+  };
+
+  const handleOpenMapModal = (): void => {
+    // Parse existing location if available
+    if (formData.createContactDto.location) {
+      const coords = formData.createContactDto.location.split(',');
+      if (coords.length === 2) {
+        const lat = parseFloat(coords[0].trim());
+        const lng = parseFloat(coords[1].trim());
+        if (!isNaN(lat) && !isNaN(lng)) {
+          setSelectedLatLng({ lat, lng });
+        }
+      }
+    }
+    setIsMapModalOpen(true);
+  };
+
+  const handleCloseMapModal = (): void => {
+    setIsMapModalOpen(false);
+    setGoogleMapsLink('');
+    setLinkError('');
+  };
+
+  const handleConfirmLocation = (): void => {
+    const locationString = `${selectedLatLng.lat.toFixed(6)},${selectedLatLng.lng.toFixed(6)}`;
+    setFormData(prev => ({
+      ...prev,
+      createContactDto: {
+        ...prev.createContactDto,
+        location: locationString
+      }
+    }));
+    setHasChanges(true);
+    setIsMapModalOpen(false);
+    setGoogleMapsLink('');
+    setLinkError('');
+  };
+
+  const handleGetCurrentLocation = (): void => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setSelectedLatLng({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          alert(t('onboardingBranch.form.step3.location.geolocationError') || 'Could not get your location. Please select manually.');
+        }
+      );
+    } else {
+      alert(t('onboardingBranch.form.step3.location.geolocationNotSupported') || 'Geolocation is not supported by your browser.');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -403,6 +547,287 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     } 
   };
 
+  // Map components
+  const MapUpdater = ({ center }: { center: [number, number] }) => {
+    const map = useMap();
+    useEffect(() => {
+      map.setView(center, map.getZoom());
+    }, [center, map]);
+    return null;
+  };
+
+  const LocationMarker = () => {
+    useMapEvents({
+      click(e) {
+        setSelectedLatLng({
+          lat: e.latlng.lat,
+          lng: e.latlng.lng
+        });
+      },
+    });
+
+    return <Marker position={[selectedLatLng.lat, selectedLatLng.lng]} />;
+  };
+
+  const MapPickerModal = () => {
+    useEffect(() => {
+      if (isMapModalOpen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'unset';
+      }
+      return () => {
+        document.body.style.overflow = 'unset';
+      };
+    }, [isMapModalOpen]);
+
+    if (!isMapModalOpen) return null;
+
+    return (
+      <AnimatePresence>
+        <div className="fixed inset-0 z-[60] overflow-y-auto" dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className="flex min-h-screen items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleCloseMapModal}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            />
+
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-5xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+            >
+              {/* Header */}
+              <div className={`flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                  <MapPin className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    {t('onboardingBranch.form.step3.location.mapTitle') || 'Select Location'}
+                  </h3>
+                </div>
+                <button
+                  onClick={handleCloseMapModal}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                </button>
+              </div>
+
+              {/* Content - Scrollable */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {/* Google Maps Link Input */}
+                <div className="space-y-2">
+                  <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.googleMapsLink') || 'Google Maps Link (Optional)'}
+                  </label>
+                  <div className="relative">
+                    <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+                    <input
+                      type="text"
+                      value={googleMapsLink}
+                      onChange={handleGoogleMapsLinkChange}
+                      placeholder={t('onboardingBranch.form.step3.location.googleMapsLinkPlaceholder') || 'https://maps.google.com/...'}
+                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${
+                        linkError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
+                      } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                      dir="ltr"
+                    />
+                  </div>
+                  {linkError && (
+                    <p className={`text-xs text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {linkError}
+                    </p>
+                  )}
+                  <p className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.googleMapsLinkHelper') || 'Paste a Google Maps link and coordinates will be extracted automatically'}
+                  </p>
+                </div>
+
+                {/* Current Location Button */}
+                <button
+                  type="button"
+                  onClick={handleGetCurrentLocation}
+                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all duration-200 border border-blue-200 dark:border-blue-700 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+                >
+                  <Navigation className="h-5 w-5" />
+                  <span className="font-medium">
+                    {t('onboardingBranch.form.step3.location.useCurrentLocation') || 'Use My Current Location'}
+                  </span>
+                </button>
+
+                {/* Interactive Map Container */}
+                <div className="space-y-2">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <label className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.interactiveMap') || 'Interactive Map'}
+                    </label>
+                    <span className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.clickToPin') || 'Click on the map to select location'}
+                    </span>
+                  </div>
+                  <div className="relative w-full h-[400px] bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 shadow-inner">
+                    {/* Interactive Leaflet Map */}
+                    <MapContainer
+                      center={[selectedLatLng.lat, selectedLatLng.lng]}
+                      zoom={13}
+                      style={{ height: '100%', width: '100%' }}
+                      scrollWheelZoom={true}
+                    >
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <MapUpdater center={[selectedLatLng.lat, selectedLatLng.lng]} />
+                      <LocationMarker />
+                    </MapContainer>
+
+                    {/* Overlay with instructions */}
+                    <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-[1000] pointer-events-none">
+                      <div className="bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-600">
+                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                          {t('onboardingBranch.form.step3.location.markerPosition') || 'Marker Position'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* External Map Link */}
+                  <a
+                    href={`https://www.openstreetmap.org/?mlat=${selectedLatLng.lat}&mlon=${selectedLatLng.lng}#map=15/${selectedLatLng.lat}/${selectedLatLng.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 ${isRTL ? 'flex-row-reverse' : ''}`}
+                  >
+                    <span>{t('onboardingBranch.form.step3.location.openFullMap') || 'Open in Full Map'}</span>
+                    <ArrowRight className={`h-3 w-3 ${isRTL ? 'mr-1 rotate-180' : 'ml-1'}`} />
+                  </a>
+                </div>
+
+                {/* Coordinate Inputs */}
+                <div className="space-y-3">
+                  <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.manualCoordinates') || 'Manual Coordinates'}
+                  </label>
+                  <div className={`grid grid-cols-2 gap-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    <div>
+                      <label className={`block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('onboardingBranch.form.step3.location.latitude') || 'Latitude'}
+                      </label>
+                      <input
+                        title='number'
+                        type="number"
+                        step="any"
+                        value={selectedLatLng.lat}
+                        onChange={(e) => {
+                          const newLat = parseFloat(e.target.value) || 0;
+                          if (newLat >= -90 && newLat <= 90) {
+                            setSelectedLatLng(prev => ({ ...prev, lat: newLat }));
+                          }
+                        }}
+                        className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                        dir="ltr"
+                        min="-90"
+                        max="90"
+                      />
+                    </div>
+                    <div>
+                      <label className={`block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('onboardingBranch.form.step3.location.longitude') || 'Longitude'}
+                      </label>
+                      <input
+                        title='number2'
+                        type="number"
+                        step="any"
+                        value={selectedLatLng.lng}
+                        onChange={(e) => {
+                          const newLng = parseFloat(e.target.value) || 0;
+                          if (newLng >= -180 && newLng <= 180) {
+                            setSelectedLatLng(prev => ({ ...prev, lng: newLng }));
+                          }
+                        }}
+                        className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                        dir="ltr"
+                        min="-180"
+                        max="180"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Info Box */}
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-xl">
+                  <div className={`flex items-start space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                    <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                    <div className={`text-sm text-blue-700 dark:text-blue-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      <p className="font-medium mb-2">
+                        {t('onboardingBranch.form.step3.location.mapHelp') || 'How to use the map:'}
+                      </p>
+                      <ul className={`space-y-1.5 ${isRTL ? 'mr-4' : 'ml-4'}`}>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">①</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp1') || 'Paste a Google Maps link in the field above'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">②</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp2') || 'Or click "Use My Current Location"'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">③</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp3') || 'Or enter coordinates manually'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">④</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp4') || 'Open the full map to select location precisely'}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Current Selected Coordinates Display */}
+                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <span className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.selectedCoordinates') || 'Selected Coordinates:'}
+                    </span>
+                    <code className="text-sm font-mono text-blue-600 dark:text-blue-400" dir="ltr">
+                      {selectedLatLng.lat.toFixed(6)}, {selectedLatLng.lng.toFixed(6)}
+                    </code>
+                  </div>
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className={`flex items-center justify-end space-x-3 px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                <button
+                  type="button"
+                  onClick={handleCloseMapModal}
+                  className="px-5 py-2.5 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors font-medium"
+                >
+                  {t('common.cancel') || 'Cancel'}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmLocation}
+                  className="px-5 py-2.5 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium shadow-sm"
+                >
+                  {t('onboardingBranch.buttons.confirm') || 'Confirm Location'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </AnimatePresence>
+    );
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -438,7 +863,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
             </button>
           </div>
 
-          {/* Error Display */}
+          {/* Error Display - Upload Error */}
           {uploadError && (
             <div className="mx-6 mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
               <div className="flex items-start">
@@ -453,13 +878,25 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                     {uploadError}
                   </p>
                 </div>
-                <button
-                  onClick={() => setUploadError(null)}
-                  className={`${isRTL ? 'mr-auto' : 'ml-auto'} flex-shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300`}
-                  aria-label={t('common.dismiss')}
-                >
-                  <X className="h-5 w-5" />
-                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Error Display - Backend Error */}
+          {error && (
+            <div className="mx-6 mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <AlertTriangle className="h-5 w-5 text-red-400 dark:text-red-500" />
+                </div>
+                <div className={`${isRTL ? 'mr-3' : 'ml-3'}`}>
+                  <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+                    {t('common.error')}
+                  </h3>
+                  <div className="mt-1 text-sm text-red-700 dark:text-red-300 whitespace-pre-line">
+                    {error}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -833,14 +1270,27 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('branchManagement.form.location')}
                     </label>
-                    <input
-                      type="text"
-                      name="createContactDto.location"
-                      value={formData.createContactDto.location || ''}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
-                      placeholder={t('branchManagement.form.locationPlaceholder')}
-                    />
+                    <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <div className="relative flex-1">
+                        <MapPin className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+                        <input
+                          type="text"
+                          name="createContactDto.location"
+                          value={formData.createContactDto.location || ''}
+                          onChange={handleInputChange}
+                          className={`w-full ${isRTL ? 'pr-10 pl-3' : 'pl-10 pr-3'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors`}
+                          placeholder={t('branchManagement.form.locationPlaceholder')}
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleOpenMapModal}
+                        className={`flex items-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}
+                      >
+                        <MapPinned className="h-5 w-5" />
+                        <span className="hidden sm:inline">{t('onboardingBranch.form.step3.location.selectOnMap') || 'Select on Map'}</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div>
@@ -1029,6 +1479,9 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
             </form>
           </div>
         </motion.div>
+
+        {/* Map Picker Modal */}
+        <MapPickerModal />
       </div>
     </AnimatePresence>
   );

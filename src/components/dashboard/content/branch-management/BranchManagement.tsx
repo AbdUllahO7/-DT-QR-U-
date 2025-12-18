@@ -56,18 +56,21 @@ const BranchManagement: React.FC = () => {
       branchName: null,
       whatsappOrderNumber: null,
       restaurantId: restaurantId || 0,
-      branchLogoPath: null,
+      // Backend requires branchLogoPath - initialize with empty string
+      branchLogoPath: '',
       createAddressDto: {
-        country: null,
-        city: null,
+        // Backend requires country and city - initialize with empty strings
+        country: '',
+        city: '',
         street: null,
         zipCode: null,
         addressLine1: null,
         addressLine2: null,
       },
       createContactDto: {
-        phone: null,
-        mail: null,
+        // Backend requires phone and mail - initialize with empty strings
+        phone: '',
+        mail: '',
         location: null,
         contactHeader: null,
         footerTitle: null,
@@ -142,7 +145,7 @@ const BranchManagement: React.FC = () => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
@@ -187,18 +190,21 @@ const BranchManagement: React.FC = () => {
         branchName: data.branchName?.trim() || null,
         whatsappOrderNumber: data.whatsappOrderNumber?.trim() || null,
         restaurantId: restaurantId,
-        branchLogoPath: data.branchLogoPath || null,
+        // Backend requires branchLogoPath - use empty string if not provided
+        branchLogoPath: data.branchLogoPath || '',
         createAddressDto: {
-          country: data.createAddressDto.country?.trim() || null,
-          city: data.createAddressDto.city?.trim() || null,
+          // Backend requires country and city - use empty string if not provided
+          country: data.createAddressDto.country?.trim() || '',
+          city: data.createAddressDto.city?.trim() || '',
           street: data.createAddressDto.street?.trim() || null,
           zipCode: data.createAddressDto.zipCode?.trim() || null,
           addressLine1: data.createAddressDto.addressLine1?.trim() || null,
           addressLine2: data.createAddressDto.addressLine2?.trim() || null,
         },
         createContactDto: {
-          phone: data.createContactDto.phone?.trim() || null,
-          mail: data.createContactDto.mail?.trim() || null,
+          // Backend requires phone and mail - use empty string if not provided
+          phone: data.createContactDto.phone?.trim() || '',
+          mail: data.createContactDto.mail?.trim() || '',
           location: data.createContactDto.location?.trim() || null,
           contactHeader: data.createContactDto.contactHeader?.trim() || null,
           footerTitle: data.createContactDto.footerTitle?.trim() || null,
@@ -227,24 +233,36 @@ const BranchManagement: React.FC = () => {
       handleCloseModal();
     } catch (err: any) {
       logger.error('Error submitting branch:', err, { prefix: 'BranchManagement' });
-      
-      let errorMessage = isEditMode 
-        ? t('branchManagement.error.updateFailed') 
-        : t('branchManagement.error.createFailed');
-      
-      // Handle specific error types
-      if (err?.response?.status === 401) {
-        errorMessage = t('branchManagement.error.sessionExpired');
-      } else if (err?.response?.status === 403) {
-        errorMessage = t('branchManagement.error.noPermission');
-      } else if (err?.response?.status === 404) {
-        errorMessage = t('branchManagement.error.branchNotFound');
-      } else if (err?.response?.status === 0 || !navigator.onLine) {
-        errorMessage = t('branchManagement.error.connectionError');
+
+      // Extract error message from backend response
+      let errorMessage = '';
+
+      if (err?.response?.data?.title) {
+        // Backend returned an error title
+        errorMessage = err.response.data.title;
+      } else if (err?.response?.data?.errorMessage) {
+        // Alternative error message field
+        errorMessage = err.response.data.errorMessage;
+      } else if (err?.response?.data?.errors) {
+        // Handle validation errors
+        const errors = err.response.data.errors;
+        const errorMessages = Object.entries(errors)
+          .map(([field, messages]) => {
+            const messageArray = Array.isArray(messages) ? messages : [messages];
+            return `${field}: ${messageArray.join(', ')}`;
+          })
+          .join('\n');
+        errorMessage = errorMessages;
       } else if (err?.message) {
+        // Fallback to error message
         errorMessage = err.message;
+      } else {
+        // Generic error message
+        errorMessage = isEditMode
+          ? t('branchManagement.error.updateFailed')
+          : t('branchManagement.error.createFailed');
       }
-      
+
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -254,9 +272,9 @@ const BranchManagement: React.FC = () => {
   const handleEditBranch = async (branch: BranchInfo) => {
     try {
       logger.info(`Fetching branch details for branchId: ${branch.branchId}`, null, { prefix: 'BranchManagement' });
-      
+
       // Use the new API with includes to get full branch details
-      const branchDetail = await branchService.getBranchById(branch.branchId);
+      const branchDetail = await branchService.getBranchById(Number(branch.branchId));
       logger.info('Branch details fetched with includes', branchDetail, { prefix: 'BranchManagement' });
 
       if (branchDetail) {
@@ -308,7 +326,7 @@ const BranchManagement: React.FC = () => {
     setBranches(prev => prev.filter(branch => branch.branchId !== branchToDelete.branchId));
 
     try {
-      await branchService.deleteBranch(branchToDelete.branchId);
+      await branchService.deleteBranch(Number(branchToDelete.branchId));
       logger.info('Branch deleted successfully', { branchId: branchToDelete.branchId }, { prefix: 'BranchManagement' });
       
       // Reset modal states
@@ -320,9 +338,9 @@ const BranchManagement: React.FC = () => {
 
     } catch (err: any) {
       logger.error('Error deleting branch:', err, { prefix: 'BranchManagement' });
-      
+
       // Revert optimistic update on error
-      setBranches(prev => [...prev, branchBackup].sort((a, b) => a.branchId - b.branchId));
+      setBranches(prev => [...prev, branchBackup].sort((a, b) => Number(a.branchId) - Number(b.branchId)));
       
       let errorMessage = t('branchManagement.error.deleteFailed');
       
@@ -377,7 +395,7 @@ const BranchManagement: React.FC = () => {
     setBranches(prev => prev.filter(branch => branch.branchId !== branchToPurge.branchId));
 
     try {
-      await purgeService.purgeBranch(branchToPurge.branchId);
+      await purgeService.purgeBranch(Number(branchToPurge.branchId));
       logger.info('Branch purged successfully', { branchId: branchToPurge.branchId }, { prefix: 'BranchManagement' });
       
       // Reset modal states
@@ -389,9 +407,9 @@ const BranchManagement: React.FC = () => {
 
     } catch (err: any) {
       logger.error('Error purging branch:', err, { prefix: 'BranchManagement' });
-      
+
       // Revert optimistic update on error
-      setBranches(prev => [...prev, branchBackup].sort((a, b) => a.branchId - b.branchId));
+      setBranches(prev => [...prev, branchBackup].sort((a, b) => Number(a.branchId) - Number(b.branchId)));
       
       let errorMessage = t('branchManagement.error.purgeFailed') || 'Failed to permanently delete branch';
       
@@ -437,26 +455,27 @@ const BranchManagement: React.FC = () => {
     setEditingBranch(null);
     setFormData(getEmptyFormData());
     setHasChanges(false);
+    setError(null); // Clear error when closing modal
   };
 
-  const handleToggleTemporaryClose = async (branchId: number, isTemporarilyClosed: boolean) => {
+  const handleToggleTemporaryClose = async (branchId: string, isTemporarilyClosed: boolean) => {
     const branch = branches.find(b => b.branchId === branchId);
     const isOpenNow = branch ? branch.isOpenNow : false;
-    
+
     try {
       // Optimistic update
-      setBranches(prev => prev.map(branch => 
-        branch.branchId === branchId 
-          ? { ...branch, isTemporarilyClosed } 
+      setBranches(prev => prev.map(branch =>
+        branch.branchId === branchId
+          ? { ...branch, isTemporarilyClosed }
           : branch
       ));
 
-      await branchService.toggleTemporaryClose(branchId, isTemporarilyClosed, isOpenNow);
+      await branchService.toggleTemporaryClose(Number(branchId), isTemporarilyClosed, isOpenNow);
     } catch (err: any) {
       // Revert on error
-      setBranches(prev => prev.map(branch => 
-        branch.branchId === branchId 
-          ? { ...branch, isTemporarilyClosed: !isTemporarilyClosed } 
+      setBranches(prev => prev.map(branch =>
+        branch.branchId === branchId
+          ? { ...branch, isTemporarilyClosed: !isTemporarilyClosed }
           : branch
       ));
       
@@ -516,9 +535,9 @@ const BranchManagement: React.FC = () => {
               </div>
               <div className={`${isRTL ? 'mr-3' : 'ml-3'} flex-1`}>
                 <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-                  {t('branchManagement.error.title')}
+                  {t('common.error')}
                 </h3>
-                <p className="mt-1 text-sm text-red-700 dark:text-red-300">
+                <p className="mt-1 text-sm text-red-700 dark:text-red-300 whitespace-pre-line">
                   {error}
                 </p>
               </div>
@@ -612,6 +631,7 @@ const BranchManagement: React.FC = () => {
               onSubmit={handleSubmit}
               branchDetail={editingBranch}
               isSubmitting={isSubmitting}
+              error={error}
             />
           ) : (
             <BranchModal
@@ -624,6 +644,7 @@ const BranchManagement: React.FC = () => {
               hasChanges={hasChanges}
               onInputChange={handleInputChange}
               onWorkingHourChange={handleWorkingHourChange}
+              error={error}
             />
           )}
         </>
@@ -647,7 +668,6 @@ const BranchManagement: React.FC = () => {
         onClose={handlePurgeModalClose}
         onConfirm={performPurgeBranch}
         title={t('branchManagement.purgeConfirm.title') || 'Permanent Deletion Warning'}
-        message={t('branchManagement.purgeConfirm.description') || 'This will PERMANENTLY delete the branch and ALL associated data. This action CANNOT be undone!'}
         isSubmitting={isPurgingBranch}
         itemType="branch-purge"
         itemName={branchToPurge?.branchName || ''}
