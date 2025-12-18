@@ -150,118 +150,110 @@ httpClient.interceptors.request.use(
 );
 
 // Response interceptor
-// Request interceptor
-httpClient.interceptors.request.use(
-  (config) => {
-    // Network bağlantısını kontrol et
-    if (!checkNetworkConnection()) {
-      const offlineError: ApiError = {
+httpClient.interceptors.response.use(
+  (response) => {
+    // Başarılı yanıtları logla
+    if (import.meta.env.DEV) {
+      if (response.config.url?.includes('/api/Dashboard')) {
+        logger.debug('✅ Dashboard Response:', {
+          status: response.status,
+          url: response.config.url
+        });
+      } else {
+        logger.info('✅ Response:', {
+          status: response.status,
+          url: response.config.url,
+          data: response.data
+        });
+      }
+
+      // Special logging for login endpoint
+      if (response.config.url?.includes('/api/Auth/Login')) {
+        console.log('🔐 RAW API RESPONSE (in interceptor):', {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+          data: response.data,
+          dataType: typeof response.data,
+          dataKeys: response.data ? Object.keys(response.data) : 'null',
+          hasAccessToken: !!(response.data?.accessToken)
+        });
+        logger.info('🔐 Login Response Details:', {
+          status: response.status,
+          dataType: typeof response.data,
+          dataKeys: response.data ? Object.keys(response.data) : 'null',
+          hasAccessToken: !!(response.data?.accessToken),
+          data: response.data
+        });
+      }
+    }
+
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Network bağlantısı hatası
+    if (!error.response) {
+      logger.error('❌ Network Error:', {
+        message: error.message,
+        url: originalRequest?.url
+      });
+
+      const networkError: ApiError = {
         status: 0,
         message: getOfflineErrorMessage(),
         errors: undefined,
         response: undefined
       };
-      return Promise.reject(offlineError);
+
+      // Retry mekanizması
+      if (originalRequest && !originalRequest._retry) {
+        originalRequest._retry = true;
+        return retryRequest(originalRequest, error);
+      }
+
+      return Promise.reject(networkError);
     }
 
-    // Sadece development'ta ve önemli isteklerde detaylı log göster
+    // API hata yanıtını logla
     if (import.meta.env.DEV) {
-      // Dashboard endpoint'leri için daha az log
-      if (config.url?.includes('/api/Dashboard')) {
-        logger.debug('🚀 Dashboard Request:', {
-          method: config.method?.toUpperCase(),
-          url: config.url
-        });
-      } else {
-        logger.info('🚀 Request:', {
-          method: config.method?.toUpperCase(),
-          url: config.url,
-          data: config.data,
-          headers: config.headers
-        });
-      }
+      logger.error('❌ API Error:', {
+        status: error.response?.status,
+        url: originalRequest?.url,
+        data: error.response?.data
+      });
     }
-    
-    // Batch işlemler için özel timeout konfigürasyonu
-    if (config.url?.includes('/batch') || config.headers?.['X-Request-Type'] === 'batch-operation') {
-      config.timeout = 120000; // 2 dakika
-      if (import.meta.env.DEV) {
-        logger.info('⏱️ Batch işlem için uzun timeout ayarlandı');
-      }
-    }
-    
-    // **ONLINE MENU ENDPOINTS için özel token kontrolü**
-    if (config.url?.includes('/api/online')) {
-      // Public endpoints that don't need authentication
-      const publicEndpoints = [
-        '/start-session',
-        '/menu/'
-      ];
-      
-      const isPublicEndpoint = publicEndpoints.some(endpoint => config.url?.includes(endpoint));
-      
-      if (isPublicEndpoint) {
-        // Public endpoint - no token needed
-        if (import.meta.env.DEV) {
-          logger.info('🌍 Public online menu endpoint, no token required:', config.url);
-        }
-        return config;
-      }
-      
-      // Protected endpoint - token required
-      const onlineMenuToken = localStorage.getItem('token');
-      if (onlineMenuToken) {
-        config.headers.Authorization = `Bearer ${onlineMenuToken}`;
-        if (import.meta.env.DEV) {
-          logger.info('🌐 Online Menu token kullanılıyor:', `Bearer ${onlineMenuToken.substring(0, 15)}...`);
-        }
-      } else {
-        // Protected endpoint but no token
-        if (import.meta.env.DEV) {
-          logger.warn('⚠️ Protected online menu endpoint için token bulunamadı!', { url: config.url });
-        }
-        const authError: ApiError = {
-          status: 401,
-          message: 'Online menu oturumu başlatılmamış. Lütfen sayfayı yenileyin.',
-          errors: undefined,
-          response: undefined
-        };
-        return Promise.reject(authError);
-      }
-      return config;
-    }
-    
-    // Önce müşteri session token'ı kontrol et (TableQR için)
-    const customerSessionToken = localStorage.getItem('customerSessionToken');
-    if (customerSessionToken) {
-      config.headers.Authorization = `Bearer ${customerSessionToken}`;
-      if (import.meta.env.DEV) {
-        logger.debug('Customer session token kullanılıyor');
-      }
-    } else {
-      // Normal admin/user token
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-        if (import.meta.env.DEV && !config.url?.includes('/api/Dashboard')) {
-          logger.info('Token eklendi:', `Bearer ${token.substring(0, 15)}...`);
-        }
-        // Token'ın geçerlilik süresini kontrol et
-        const tokenExpiry = localStorage.getItem('tokenExpiry');
-        if (tokenExpiry) {
-          const expiryDate = new Date(tokenExpiry);
-          if (isNaN(expiryDate.getTime()) || expiryDate <= new Date()) {
-            logger.warn('⚠️ Token süresi dolmuş veya geçersiz!');
-          }
+
+    // 401 Unauthorized - Token geçersiz veya süresi dolmuş
+    if (error.response?.status === 401) {
+      // Login ve register sayfalarında token kontrolü yapma
+      if (!originalRequest?.url?.includes('/api/Auth/Login') &&
+          !originalRequest?.url?.includes('/api/Auth/Register')) {
+        logger.warn('⚠️ 401 Unauthorized - Token geçersiz');
+        localStorage.removeItem('token');
+        localStorage.removeItem('tokenExpiry');
+        localStorage.removeItem('userId');
+
+        // Redirect to login if not already there
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
         }
       }
     }
-    
-    return config;
-  },
-  (error) => {
-    logger.error('❌ Request Error:', error);
-    return Promise.reject(error);
+
+    // ApiError formatında hata döndür
+    const apiError: ApiError = {
+      status: error.response?.status || 500,
+      message: error.response?.data?.errorMessage ||
+               error.response?.data?.message ||
+               error.message ||
+               'Bir hata oluştu',
+      errors: error.response?.data?.errors,
+      response: error.response
+    };
+
+    return Promise.reject(apiError);
   }
 );
 
