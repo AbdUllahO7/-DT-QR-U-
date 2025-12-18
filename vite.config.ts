@@ -5,7 +5,21 @@ import fs from 'fs'
 
 export default defineConfig({
   plugins: [react()],
-  base: './', // Use relative paths for assets
+  base: '/', // Use absolute paths for production
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    sourcemap: false,
+    minify: 'esbuild', // Use esbuild for faster builds
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'ui-vendor': ['framer-motion', 'lucide-react'],
+        },
+      },
+    },
+  },
   server: {
     port: 3000,
     host: true,
