@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { QrCode, Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin, MessageCircle, PhoneCall } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
@@ -201,7 +202,26 @@ const Footer: React.FC = () => {
               ))}
             </ul>
 
-           
+            {/* Legal Links */}
+            <h3 className="text-lg font-semibold mb-6 mt-8">{t('footer.sections.legal.title')}</h3>
+            <ul className="space-y-3">
+              <li>
+                <Link
+                  to="/terms"
+                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                >
+                  {t('footer.sections.legal.links.terms')}
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/privacy"
+                  className="text-gray-400 hover:text-white transition-colors duration-200"
+                >
+                  {t('footer.sections.legal.links.privacy')}
+                </Link>
+              </li>
+            </ul>
           </div>
         </div>
       </div>

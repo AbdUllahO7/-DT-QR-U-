@@ -5,6 +5,7 @@ import fs from 'fs'
 
 export default defineConfig({
   plugins: [react()],
+  base: './', // Use relative paths for assets
   server: {
     port: 3000,
     host: true,

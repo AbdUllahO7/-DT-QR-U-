@@ -20,6 +20,8 @@ import ResetPassword from './pages/Pass/ResetPassword';
 import ConfirmMail from './pages/Pass/ConfirimMail';
 import SetNewPassword from './pages/Pass/SetNewPassword';
 import MainLayout from './pages/MainLayout';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 const App: React.FC = () => {
   return (

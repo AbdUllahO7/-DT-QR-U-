@@ -233,89 +233,11 @@ export const countryKeys = [
   'countries.zimbabwe'
 ];
 
-// Phone codes for countries (keeping old structure for backward compatibility)
-export const countriesWithCodes = [
-  { name: 'TR', code: '+90' },
-  { name: 'US', code: '+1' },
-  { name: 'GB', code: '+44' },
-  { name: 'DE', code: '+49' },
-  { name: 'FR', code: '+33' },
-  { name: 'ES', code: '+34' },
-  { name: 'IT', code: '+39' },
-  { name: 'NL', code: '+31' },
-  { name: 'GR', code: '+30' },
-  { name: 'JP', code: '+81' },
-  { name: 'KR', code: '+82' },
-  { name: 'CN', code: '+86' },
-  { name: 'IN', code: '+91' },
-  { name: 'BR', code: '+55' },
-  { name: 'RU', code: '+7' },
-  { name: 'AU', code: '+61' },
-  { name: 'CA', code: '+1' },
-  { name: 'MX', code: '+52' },
-  { name: 'AR', code: '+54' },
-  { name: 'ZA', code: '+27' },
-  { name: 'EG', code: '+20' },
-  { name: 'SA', code: '+966' },
-  { name: 'AE', code: '+971' },
-  { name: 'AT', code: '+43' },
-  { name: 'BE', code: '+32' },
-  { name: 'SE', code: '+46' },
-  { name: 'NO', code: '+47' },
-  { name: 'DK', code: '+45' },
-  { name: 'PL', code: '+48' },
-  { name: 'PT', code: '+351' },
-  { name: 'IE', code: '+353' },
-  { name: 'UA', code: '+380' },
-  { name: 'CZ', code: '+420' },
-  { name: 'HU', code: '+36' },
-  { name: 'RO', code: '+40' },
+// Phone codes for countries (deprecated - use countryCodes.ts instead)
+// Keeping this for backward compatibility
+import { sortedCountryCodes } from './countryCodes';
 
-  { name: 'CH', code: '+41' },   // Switzerland
-  { name: 'FI', code: '+358' },  // Finland
-  { name: 'IS', code: '+354' },  // Iceland
-  { name: 'LU', code: '+352' },  // Luxembourg
-  { name: 'SK', code: '+421' },  // Slovakia
-  { name: 'SI', code: '+386' },  // Slovenia
-  { name: 'BG', code: '+359' },  // Bulgaria
-  { name: 'HR', code: '+385' },  // Croatia
-  { name: 'RS', code: '+381' },  // Serbia
-  { name: 'BA', code: '+387' },  // Bosnia & Herzegovina
-  { name: 'AL', code: '+355' },  // Albania
-  { name: 'MK', code: '+389' },  // North Macedonia
-  { name: 'LT', code: '+370' },  // Lithuania
-  { name: 'LV', code: '+371' },  // Latvia
-  { name: 'EE', code: '+372' },  // Estonia
-
-  { name: 'PS', code: '+970' },  // Palestine
-  { name: 'SY', code: '+963' },  // Syria
-  { name: 'JO', code: '+962' },  // Jordan
-  { name: 'LB', code: '+961' },  // Lebanon
-  { name: 'IQ', code: '+964' },  // Iraq
-  { name: 'KW', code: '+965' },  // Kuwait
-  { name: 'QA', code: '+974' },  // Qatar
-  { name: 'OM', code: '+968' },  // Oman
-  { name: 'BH', code: '+973' },  // Bahrain
-
-  { name: 'PK', code: '+92' },   // Pakistan
-  { name: 'BD', code: '+880' },  // Bangladesh
-  { name: 'LK', code: '+94' },   // Sri Lanka
-  { name: 'NP', code: '+977' },  // Nepal
-  { name: 'TH', code: '+66' },   // Thailand
-  { name: 'VN', code: '+84' },   // Vietnam
-  { name: 'PH', code: '+63' },   // Philippines
-  { name: 'ID', code: '+62' },   // Indonesia
-  { name: 'MY', code: '+60' },   // Malaysia
-  { name: 'SG', code: '+65' },   // Singapore
-
-  { name: 'NZ', code: '+64' },   // New Zealand
-  { name: 'CL', code: '+56' },   // Chile
-  { name: 'CO', code: '+57' },   // Colombia
-  { name: 'PE', code: '+51' },   // Peru
-  { name: 'VE', code: '+58' },   // Venezuela
-
-  { name: 'NG', code: '+234' },  // Nigeria
-  { name: 'KE', code: '+254' },  // Kenya
-  { name: 'MA', code: '+212' },  // Morocco
-  { name: 'TN', code: '+216' },  // Tunisia
-];
+export const countriesWithCodes = sortedCountryCodes.map(country => ({
+  name: country.name,
+  code: country.dialCode
+}));

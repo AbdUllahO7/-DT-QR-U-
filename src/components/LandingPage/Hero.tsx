@@ -113,31 +113,30 @@ const Hero: React.FC = () => {
                         <div className="w-4 h-2 bg-white rounded-sm"></div>
                       </div>
                     </div>
-                    
-                    {/* QR Code Area */}
+                 {/* QR Code Area within Mockup */}
                     <div className="text-center">
                       <QrCode className="h-16 w-16 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">iDIGITEK Restoran</h3>
-                      <p className="text-sm opacity-90 mb-6">Menümüzü görüntülemek için QR kodu tarayın</p>
+                      <h3 className="text-lg font-semibold mb-2">{t('hero.mockup.restaurantName')}</h3>
+                      <p className="text-sm opacity-90 mb-6">{t('hero.mockup.scanPrompt')}</p>
                       
                       {/* Sample Menu Items */}
                       <div className="space-y-3 text-left">
                         <div className="bg-white/20 rounded-lg p-3">
                           <div className="flex justify-between items-center">
-                            <span className="font-medium">Margherita Pizza</span>
-                            <span className="font-semibold">₺45</span>
+                            <span className="font-medium">{t('hero.mockup.pizza')}</span>
+                            <span className="font-semibold">₺145</span> {/* Updated price suggestion */}
                           </div>
                         </div>
                         <div className="bg-white/20 rounded-lg p-3">
                           <div className="flex justify-between items-center">
-                            <span className="font-medium">Caesar Salad</span>
-                            <span className="font-semibold">₺28</span>
+                            <span className="font-medium">{t('hero.mockup.salad')}</span>
+                            <span className="font-semibold">₺85</span>
                           </div>
                         </div>
                         <div className="bg-white/20 rounded-lg p-3">
                           <div className="flex justify-between items-center">
-                            <span className="font-medium">Tiramisu</span>
-                            <span className="font-semibold">₺22</span>
+                            <span className="font-medium">{t('hero.mockup.dessert')}</span>
+                            <span className="font-semibold">₺65</span>
                           </div>
                         </div>
                       </div>
