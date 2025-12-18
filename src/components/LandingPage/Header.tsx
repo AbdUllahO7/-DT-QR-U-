@@ -36,26 +36,21 @@ const Header: React.FC = () => {
     100
   );
 
-  // --- ADD THIS NEW useEffect FOR SCROLLING ---
-  // This hook handles scrolling when the URL hash changes,
-  // especially when navigating from another page.
+
   useEffect(() => {
-    // Check if there's a hash and we are on the home page
     if (location.hash && isHomePage) {
-      const id = location.hash.substring(1); // Get "features" from "#features"
+      const id = location.hash.substring(1); 
       
-      // Use setTimeout to give the Home component time to render its sections
       setTimeout(() => {
         const element = document.getElementById(id);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth' });
         }
-      }, 100); // 100ms delay. You can adjust this if needed.
+      }, 100); 
     }
-  }, [isHomePage, location.hash]); // Run when path or hash changes
+  }, [isHomePage, location.hash]); 
 
 
-  // Component mount olduğunda auth durumunu kontrol et
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
@@ -69,20 +64,16 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // --- SIMPLIFIED NAVIGATION LOGIC ---
   const handleNavClick = (href: string): void => {
     setIsOpen(false); // Close mobile menu regardless
 
-    // We simply navigate to the path with the hash.
-    // The new useEffect hook will handle the scrolling.
-    // This works whether we are on the home page or not.
     navigate(`/${href}`); 
   };
 
   const handleLogin = (): void => {
-    // ... (rest of your existing function)
+    setIsOpen(false); // Close mobile menu
+
     const token = localStorage.getItem('token');
-// ... (rest of your existing code)
     const tokenExpiry = localStorage.getItem('tokenExpiry');
 
     if (token && tokenExpiry) {
@@ -99,20 +90,23 @@ const Header: React.FC = () => {
         localStorage.removeItem('userId');
       }
     }
-    
+
     // Token yoksa veya geçersizse login sayfasına yönlendir
     navigate('/login');
   };
 
   const handleRegister = (): void => {
+    setIsOpen(false); // Close mobile menu
     navigate('/register');
   };
 
   const handleGoToPanel = (): void => {
+    setIsOpen(false); // Close mobile menu
     navigate('/selection');
   };
 
   const handleLogout = (): void => {
+    setIsOpen(false); // Close mobile menu
     clearAuth();
     navigate('/', { replace: true });
   };
@@ -275,7 +269,7 @@ const Header: React.FC = () => {
                     
                     <button
                       onClick={handleRegister}
-                      className={`flex items-center w-full px-3 py-2 mt-1 rounded-md text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white transition-colors duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
+                      className={`flex items-center w-full px-3 py-2 mt-1 rounded-md text-sm font-medium  hover:bg-primary-700 text-white transition-colors duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
                     >
                       <UserPlus className="h-4 w-4" />
                       <span>{t('auth.register')}</span>
