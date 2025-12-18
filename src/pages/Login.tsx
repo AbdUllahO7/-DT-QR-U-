@@ -107,104 +107,108 @@ const Login: React.FC = () => {
     try {
       logger.info('Sending login request with data', { formData });
       const response = await authService.login(formData);
+
+      // CRITICAL DEBUG - Force console output
+      console.log('=== LOGIN RESPONSE DEBUG ===');
+      console.log('Full response:', response);
+      console.log('Response type:', typeof response);
+      console.log('Response keys:', response ? Object.keys(response) : 'null');
+      console.log('Response:', JSON.stringify(response, null, 2));
+      console.log('========================');
+
       logger.info('Login response received', { response });
-      
-      if (response.accessToken) {
-        const tokenParts = response.accessToken.split('.');
+      logger.info('Response type:', typeof response);
+      logger.info('Response keys:', response ? Object.keys(response) : 'null');
+
+      // Handle different response formats
+      let loginData = response;
+
+      // Check if response is wrapped in a data property
+      if (response && !response.accessToken && (response as any).data?.accessToken) {
+        console.log('Response is wrapped in data property');
+        logger.info('Response is wrapped in data property');
+        loginData = (response as any).data;
+      }
+
+      console.log('AccessToken value:', loginData?.accessToken);
+      console.log('loginData type:', typeof loginData);
+      console.log('loginData is null?', loginData === null);
+      console.log('loginData is undefined?', loginData === undefined);
+      console.log('accessToken truthy?', !!loginData?.accessToken);
+      console.log('About to check if condition...');
+
+      logger.info('AccessToken value:', loginData?.accessToken);
+
+      if (loginData?.accessToken) {
+        console.log('✅ INSIDE IF BLOCK - Token exists!');
+        const tokenParts = loginData.accessToken.split('.');
         const payload = JSON.parse(atob(tokenParts[1]));
         const userId = payload.user_id;
 
         logger.info('Login successful, saving token and redirecting');
-        
-        localStorage.setItem('token', response.accessToken);
+        logger.info('Saving to localStorage:', {
+          token: loginData.accessToken.substring(0, 20) + '...',
+          userId,
+          expiresAt: loginData.expiresAt
+        });
+
+        localStorage.setItem('token', loginData.accessToken);
         localStorage.setItem('userId', userId);
-        localStorage.setItem('tokenExpiry', response.expiresAt);
-        
+        localStorage.setItem('tokenExpiry', loginData.expiresAt);
+
+        // Verify token was saved
+        const savedToken = localStorage.getItem('token');
+        logger.info('Token saved to localStorage:', savedToken ? 'YES' : 'NO');
+
         const onboardingUserId = localStorage.getItem('onboarding_userId');
         if (onboardingUserId) {
           logger.info('Onboarding süreci devam ediyor, restaurant onboarding sayfasına yönlendiriliyor');
           navigate('/onboarding/restaurant');
           return;
         }
-        
+
         // Kullanıcı tipini kontrol et
         if (isBranchOnlyUser()) {
           logger.info('Branch-only user detected, redirecting to dashboard');
           navigate('/dashboard');
           return;
         }
-        
+
+        logger.info('Redirecting to dashboard...');
         navigate('/dashboard');
       } else {
-        logger.error('Invalid login response - no access token');
-        throw new Error('Geçersiz giriş yanıtı');
+        console.log('❌ ELSE BLOCK - Token does NOT exist!');
+        console.log('loginData:', loginData);
+        logger.error('Invalid login response - no access token', { loginData });
+        throw new Error('Geçersiz giriş yanıtı - accessToken bulunamadı');
       }
+
+      console.log('After if/else block');
     } catch (error: any) {
+      console.log('=== LOGIN ERROR ===');
+      console.log('Error:', error);
+      console.log('Error status:', error.status);
+      console.log('Error message:', error.message);
+      console.log('Error response:', error.response);
+      console.log('==================');
+
       logError(error, 'Login error');
 
       const userFriendlyMessage = getUserFriendlyErrorMessage(error);
-      setErrors({
-        general: error.response.data.errorMessage
-      });
-      setIsSubmitting(false);
-      
-      if (error.message === 'Sunucudan geçersiz yanıt alındı' && error.response?.status === 200) {
-        try {
-          logger.info('Trying to parse successful response with error', { data: error.response?.data });
-          const accessToken = error.response?.data?.accessToken;
-          if (accessToken) {
-            const tokenParts = accessToken.split('.');
-            const payload = JSON.parse(atob(tokenParts[1]));
-            const userId = payload.user_id;
-            
-            logger.info('Found access token in error response, saving and redirecting');
-            
-            localStorage.setItem('token', accessToken);
-            localStorage.setItem('userId', userId);
-            localStorage.setItem('tokenExpiry', error.response.data.expiresAt);
-            
-            const onboardingUserId = localStorage.getItem('onboarding_userId');
-            if (onboardingUserId) {
-              logger.info('Onboarding süreci devam ediyor, restaurant onboarding sayfasına yönlendiriliyor');
-              navigate('/onboarding/restaurant');
-              return;
-            }
-            
-            if (isBranchOnlyUser()) {
-              logger.info('Branch-only user detected, redirecting to dashboard');
-              navigate('/dashboard');
-              return;
-            }
-            
-            navigate('/dashboard');
-            return;
-          }
-        } catch (innerError) {
-          logger.error('Response parsing error', innerError);
-        }
-      }
-      
-      if (error.status === 400) {
-        if (error.errors) {
-          const validationErrors: typeof errors = {};
-          Object.entries(error.errors).forEach(([key, value]) => {
-            validationErrors[key as keyof typeof errors] = Array.isArray(value) 
-              ? (value as string[])[0]
-              : value as string;
-          });
-          setErrors(validationErrors);
-        } else {
-          setErrors({
-            general: error.response.data.errorMessage || t('pages.login.errors.generalError')
-          });
-        }
-      } else if (error.status === 401) {
-        setErrors({
-          general: error.response.data.errorMessage
+
+      // Handle 400 validation errors
+      if (error.status === 400 && error.errors) {
+        const validationErrors: typeof errors = {};
+        Object.entries(error.errors).forEach(([key, value]) => {
+          validationErrors[key as keyof typeof errors] = Array.isArray(value)
+            ? (value as string[])[0]
+            : value as string;
         });
+        setErrors(validationErrors);
       } else {
+        // Handle all other errors with the error message from ApiError
         setErrors({
-          general:  error.response.data.errorMessage || t('pages.login.errors.generalError')
+          general: error.message || userFriendlyMessage || t('pages.login.errors.generalError')
         });
       }
     } finally {
