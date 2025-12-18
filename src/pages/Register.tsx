@@ -7,7 +7,7 @@ import { Eye, EyeOff, AlertCircle, User, Mail, Phone, Lock, ArrowLeft } from 'lu
  import type { RegisterDto } from '../types/api'; // Mocked below
 import { Link, useNavigate } from 'react-router-dom';
 import { logger } from '../utils/logger';
-import { countriesWithCodes } from '../data/mockData';
+import { sortedCountryCodes, getPlaceholderByDialCode } from '../data/countryCodes';
 
 
 
@@ -26,6 +26,11 @@ const Register: React.FC = () => {
     profileImagePath: ' ', // API required field
     termsofUserService: false
   });
+
+  // State for dynamic phone placeholder
+  const [phonePlaceholder, setPhonePlaceholder] = useState<string>(
+    getPlaceholderByDialCode('+90')
+  );
 
   const [errors, setErrors] = useState<{
     name?: string;
@@ -57,9 +62,12 @@ useEffect(() => {
       [name]: isCheckbox ? checked : value
     }));
 
+    // Update phone placeholder when country code changes
+    if (name === 'countryCode') {
+      setPhonePlaceholder(getPlaceholderByDialCode(value));
+    }
 
 
-    
     // Clear error when user starts typing
     if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({
@@ -479,11 +487,11 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                     value={formData.countryCode}
                     onChange={handleInputChange}
                     className={`h-full py-3 ${isRTL ? 'pr-8 pl-3' : 'pl-3 pr-8'} border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 appearance-none`}
-                    aria-label={t('pages.register.countryCode')}
+                    aria-label="Country Code"
                   >
-                    {countriesWithCodes.map(country => (
-                      <option key={country.name} value={country.code}>
-                        {country.name} ({country.code})
+                    {sortedCountryCodes.map(country => (
+                      <option key={country.name} value={country.dialCode}>
+                        {country.name} ({country.dialCode})
                       </option>
                     ))}
                   </select>
@@ -506,17 +514,17 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                     value={formData.phoneNumber}
                     onChange={handleNationalPhoneChange} // Use new handler
                     onBlur={() => handleBlur('phoneNumber')}
-                    maxLength={10}
+                    maxLength={15}
                     className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
-                      errors.phoneNumber 
-                        ? 'border-red-500 dark:border-red-500' 
+                      errors.phoneNumber
+                        ? 'border-red-500 dark:border-red-500'
                         // Updated validation check for green border
                         : touched.phoneNumber && formData.phoneNumber.trim() && /^\d{7,15}$/.test(formData.phoneNumber.trim())
                           ? 'border-green-500 dark:border-green-400'
                           : 'border-gray-300 dark:border-gray-600'
                     }`}
-                    // Assuming this placeholder is for the national part, e.g., "555 123 4567"
-                    placeholder={t('pages.register.placeholders.phone')} 
+                    // Dynamic placeholder based on selected country
+                    placeholder={phonePlaceholder}
                   />
                 </div>
               </div>

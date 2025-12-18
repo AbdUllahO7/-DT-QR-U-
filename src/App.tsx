@@ -20,6 +20,8 @@ import ResetPassword from './pages/Pass/ResetPassword';
 import ConfirmMail from './pages/Pass/ConfirimMail';
 import SetNewPassword from './pages/Pass/SetNewPassword';
 import MainLayout from './pages/MainLayout';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 
 const App: React.FC = () => {
   return (
@@ -40,6 +42,8 @@ const App: React.FC = () => {
               <Route path="/onboarding/restaurant" element={<OnboardingRestaurant />} />
               <Route path="/onboarding/branch" element={<OnboardingBranch />} />
               <Route path="/onboarding/complete" element={<OnboardingComplete />} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
             </Route>
 
             {/* These routes will NOT have the Header/Footer 

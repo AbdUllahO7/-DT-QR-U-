@@ -122,28 +122,34 @@ export const en = {
     signUp: 'Sign Up'
   },
 
-  // Hero Section
-  hero: {
-    title: {
-      line1: 'Digitize Your',
-      line2: 'Restaurant',
-      line3: 'with QR Menu'
-    },
-    subtitle: 'Your customers can instantly access your menu by scanning the QR code. Offer a contactless, fast and modern experience.',
-    features: {
-      qrAccess: 'Quick Access with QR Code',
-      mobileOptimized: 'Mobile Optimization',
-      instantUpdate: 'Instant Update'
-    },
-    cta: {
-      getStarted: 'Get Started',
-      features: 'Features'
-    },
-    socialProof: {
-      restaurants: '500+ Happy Restaurants',
-      satisfaction: '99% Customer Satisfaction'
-    }
+hero: {
+  title: {
+    line1: 'Digitize Your',
+    line2: 'Restaurant',
+    line3: 'with QR Menu'
   },
+  subtitle: 'Your customers can instantly access your menu by scanning the QR code. Offer a contactless, fast and modern experience.',
+  features: {
+    qrAccess: 'Quick Access with QR Code',
+    mobileOptimized: 'Mobile Optimization',
+    instantUpdate: 'Instant Update'
+  },
+  cta: {
+    getStarted: 'Get Started',
+    features: 'Features'
+  },
+  socialProof: {
+    restaurants: '500+ Happy Restaurants',
+    satisfaction: '99% Customer Satisfaction'
+  },
+  mockup: {
+    restaurantName: 'iDIGITEK',
+    scanPrompt: 'Scan QR code to view menu',
+    pizza: 'Margherita Pizza',
+    salad: 'Caesar Salad',
+    dessert: 'Tiramisu'
+  }
+},
 
   // Dashboard Navigation
   dashboard: {
@@ -5411,6 +5417,140 @@ categoryConfigModal: {
     "yemen": "Yemen",
     "zambia": "Zambia",
     "zimbabwe": "Zimbabwe"
+  },
+
+  // Legal Pages
+  legal: {
+    terms: {
+      title: 'Terms of Service',
+      lastUpdated: 'Last Updated: December 2025',
+      sections: {
+        introduction: {
+          title: '1. Introduction',
+          content: 'Welcome to QR Menu ("we", "us", or "our"). These Terms of Service ("Terms") govern your access to and use of our digital menu platform and services. By accessing or using our services, you agree to be bound by these Terms. If you do not agree with any part of these Terms, you may not use our services.'
+        },
+        acceptance: {
+          title: '2. Acceptance of Terms',
+          content: 'By creating an account, accessing our platform, or using any of our services, you acknowledge that you have read, understood, and agree to be bound by these Terms and our Privacy Policy. These Terms apply to all users of the service, including restaurants, restaurant owners, staff members, and end customers.'
+        },
+        services: {
+          title: '3. Description of Services',
+          content: 'QR Menu provides a comprehensive digital menu solution for restaurants and food service businesses. Our services include but are not limited to:',
+          features: {
+            0: 'Digital menu creation and management',
+            1: 'QR code generation for table and takeaway ordering',
+            2: 'Order management and tracking system',
+            3: 'Analytics and reporting tools'
+          }
+        },
+        userResponsibilities: {
+          title: '4. User Responsibilities',
+          content: 'As a user of QR Menu, you agree to:',
+          items: {
+            0: 'Provide accurate and complete information when creating an account',
+            1: 'Maintain the security and confidentiality of your account credentials',
+            2: 'Use the service in compliance with all applicable laws and regulations',
+            3: 'Not use the service for any unlawful, harmful, or fraudulent purposes'
+          }
+        },
+        payment: {
+          title: '5. Payment Terms',
+          content: 'Subscription fees are billed in advance on a monthly or annual basis depending on your chosen plan. All fees are non-refundable except as required by law. We reserve the right to modify our pricing with 30 days notice to existing customers. Failure to pay fees may result in suspension or termination of your account.'
+        },
+        termination: {
+          title: '6. Termination',
+          content: 'You may terminate your account at any time through your account settings. We reserve the right to suspend or terminate your account if you violate these Terms or engage in activities that harm our service or other users. Upon termination, your right to use the service will immediately cease, though certain provisions of these Terms will survive termination.'
+        },
+        intellectualProperty: {
+          title: '7. Intellectual Property',
+          content: 'All content, features, and functionality of QR Menu, including but not limited to text, graphics, logos, and software, are owned by us or our licensors and are protected by international copyright, trademark, and other intellectual property laws. You may not copy, modify, distribute, or create derivative works based on our service without our express written permission.'
+        },
+        liability: {
+          title: '8. Limitation of Liability',
+          content: 'To the maximum extent permitted by law, QR Menu and its affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use or inability to use the service. Our total liability for any claims arising from these Terms or your use of the service shall not exceed the amount you paid us in the twelve months preceding the claim.'
+        },
+        changes: {
+          title: '9. Changes to Terms',
+          content: 'We reserve the right to modify these Terms at any time. We will notify users of any material changes via email or through our platform. Your continued use of the service after such modifications constitutes your acceptance of the updated Terms. We encourage you to review these Terms periodically.'
+        },
+        contact: {
+          title: 'Contact Us',
+          content: 'If you have any questions about these Terms of Service, please contact us at:'
+        }
+      }
+    },
+    privacy: {
+      title: 'Privacy Policy',
+      lastUpdated: 'Last Updated: December 2025',
+      sections: {
+        introduction: {
+          title: '1. Introduction',
+          content: 'At QR Menu, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our digital menu platform. By using our services, you consent to the data practices described in this policy.'
+        },
+        dataCollection: {
+          title: '2. Information We Collect',
+          content: 'We collect several types of information to provide and improve our services:',
+          items: {
+            0: 'Personal Information: Name, email address, phone number, and business details provided during registration',
+            1: 'Business Information: Restaurant details, menu items, pricing, and operational data',
+            2: 'Usage Data: Information about how you interact with our platform, including access times and features used',
+            3: 'Device Information: IP address, browser type, operating system, and device identifiers',
+            4: 'Payment Information: Billing details and transaction history (processed securely through third-party payment providers)'
+          }
+        },
+        dataUsage: {
+          title: '3. How We Use Your Information',
+          content: 'We use the collected information for various purposes:',
+          items: {
+            0: 'To provide, maintain, and improve our services',
+            1: 'To process transactions and send related information',
+            2: 'To send administrative information, updates, and security alerts',
+            3: 'To respond to customer service requests and support needs',
+            4: 'To analyze usage patterns and optimize user experience'
+          }
+        },
+        dataSecurity: {
+          title: '4. Data Security',
+          content: 'We implement industry-standard security measures to protect your information, including encryption, secure servers, and regular security audits. However, no method of transmission over the internet is 100% secure, and we cannot guarantee absolute security of your data. We encourage you to use strong passwords and keep your account credentials confidential.'
+        },
+        dataSharing: {
+          title: '5. Data Sharing and Disclosure',
+          content: 'We do not sell your personal information. We may share your information only in the following circumstances:',
+          items: {
+            0: 'With service providers who assist in operating our platform (under strict confidentiality agreements)',
+            1: 'When required by law or to protect our legal rights',
+            2: 'In connection with a business transfer, merger, or acquisition (with prior notice to users)'
+          }
+        },
+        cookies: {
+          title: '6. Cookies and Tracking Technologies',
+          content: 'We use cookies and similar tracking technologies to enhance your experience, analyze usage patterns, and deliver personalized content. You can control cookie preferences through your browser settings, though disabling cookies may limit certain features of our service.'
+        },
+        userRights: {
+          title: '7. Your Rights',
+          content: 'You have certain rights regarding your personal information:',
+          items: {
+            0: 'Access: Request a copy of the personal information we hold about you',
+            1: 'Correction: Request correction of inaccurate or incomplete information',
+            2: 'Deletion: Request deletion of your personal information (subject to legal obligations)',
+            3: 'Data Portability: Request transfer of your data to another service',
+            4: 'Opt-out: Unsubscribe from marketing communications at any time'
+          }
+        },
+        childrenPrivacy: {
+          title: '8. Children\'s Privacy',
+          content: 'Our services are not intended for individuals under the age of 18. We do not knowingly collect personal information from children. If we become aware that we have collected information from a child without parental consent, we will take steps to delete that information.'
+        },
+        changes: {
+          title: '9. Changes to This Privacy Policy',
+          content: 'We may update this Privacy Policy from time to time to reflect changes in our practices or legal requirements. We will notify you of any material changes by posting the updated policy on our platform and updating the "Last Updated" date. We encourage you to review this policy periodically.'
+        },
+        contact: {
+          title: 'Contact Us',
+          content: 'If you have any questions or concerns about this Privacy Policy or our data practices, please contact us at:'
+        }
+      }
+    }
   }
 
 }; 
