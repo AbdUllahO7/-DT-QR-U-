@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   Plus,
   Search,
   Building,
@@ -18,9 +18,13 @@ import {
   Users,
   Utensils,
   Coffee,
-  Wine,
   Store,
-  Home
+  Home,
+  TreePine,
+  Sunrise,
+  Armchair,
+  Umbrella,
+  Building2
 } from 'lucide-react';
 import { 
   CreateMenuTableDto, 
@@ -44,16 +48,16 @@ const IconSelector: React.FC<{
   const { t } = useLanguage();
   
   const iconMapping: Record<string, { component: React.ComponentType<any>, label: string }> = {
-    table: { component: Grid, label: 'Table' },
-    users: { component: Users, label: 'Users' },
-    grid: { component: Grid, label: 'Grid' },
-    building: { component: Building, label: 'Building' },
-    settings: { component: RefreshCw, label: 'Settings' },
-    utensils: { component: Utensils, label: 'Utensils' },
-    coffee: { component: Coffee, label: 'Coffee' },
-    wine: { component: Wine, label: 'Wine' },
+    building: { component: Building2, label: 'Salon' },
+    terrace: { component: Sunrise, label: 'Terrace' },
+    garden: { component: TreePine, label: 'Garden' },
+    rooftop: { component: Umbrella, label: 'Rooftop' },
+    lounge: { component: Armchair, label: 'Lounge' },
+    utensils: { component: Utensils, label: 'Dining' },
+    coffee: { component: Coffee, label: 'Cafe' },
     store: { component: Store, label: 'Store' },
-    home: { component: Home, label: 'Home' }
+    home: { component: Home, label: 'Home' },
+    users: { component: Users, label: 'Event Space' }
   };
 
   return (

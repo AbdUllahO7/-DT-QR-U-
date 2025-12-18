@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Store, Building2, Phone, Mail, MapPin, Clock, 
-  ArrowLeft, AlertCircle, CheckCircle, Globe, 
+import {
+  Store, Building2, Phone, Mail, MapPin, Clock,
+  ArrowLeft, AlertCircle, CheckCircle, Globe,
   MapPinned, FileText, Home, Info, ArrowRight, Upload, X, Navigation
 } from 'lucide-react';
-import type { 
-  CreateBranchWithDetailsDto, 
+import Select from 'react-select';
+import type {
+  CreateBranchWithDetailsDto,
   CreateBranchWorkingHourCoreDto,
   ApiError,
 } from '../types/api';
@@ -1067,29 +1068,62 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
         </label>
         <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
           {/* Country Code Selector */}
-          <div className="relative">
-            <select
+          <div className="w-48">
+            <Select
               id="whatsappCountryCode"
               name="whatsappCountryCode"
-              value={whatsappCountryCode}
-           
-              onChange={handleWhatsappCountryCodeChange}
-              className={`h-full py-3 pl-3 pr-8 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
-              aria-label={t('onboardingBranch.form.step1.whatsappNumber.ariaLabel')}
-              dir={isRTL ? 'rtl' : 'ltr'}
-              required
-            >
-              {countriesWithCodes.map(country => (
-                <option key={country.name} value={country.code}>
-                  {country.name} ({country.code})
-                </option>
-              ))}
-            </select>
-            <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-2' : 'right-0 pr-2'} flex items-center pointer-events-none`}>
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
+              value={countriesWithCodes.find(c => c.code === whatsappCountryCode) ?
+                { value: whatsappCountryCode, label: `${countriesWithCodes.find(c => c.code === whatsappCountryCode)?.name} (${whatsappCountryCode})` } :
+                null}
+              onChange={(selectedOption) => {
+                if (selectedOption) {
+                  setWhatsappCountryCode(selectedOption.value);
+                }
+              }}
+              options={countriesWithCodes.map(country => ({
+                value: country.code,
+                label: `${country.name} (${country.code})`
+              }))}
+              isSearchable
+              placeholder={t('onboardingBranch.form.step1.whatsappNumber.ariaLabel')}
+              className={isRTL ? 'text-right' : 'text-left'}
+              styles={{
+                control: (base, state) => ({
+                  ...base,
+                  minHeight: '48px',
+                  borderRadius: '0.5rem',
+                  borderColor: state.isFocused ? '#6366f1' : (document.documentElement.classList.contains('dark') ? '#4b5563' : '#d1d5db'),
+                  backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : '#fff',
+                  boxShadow: state.isFocused ? '0 0 0 2px rgba(99, 102, 241, 0.5)' : 'none',
+                  '&:hover': {
+                    borderColor: state.isFocused ? '#6366f1' : (document.documentElement.classList.contains('dark') ? '#4b5563' : '#d1d5db')
+                  }
+                }),
+                menu: (base) => ({
+                  ...base,
+                  backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : '#fff',
+                  zIndex: 50
+                }),
+                option: (base, state) => ({
+                  ...base,
+                  backgroundColor: state.isSelected ? '#6366f1' : state.isFocused ? (document.documentElement.classList.contains('dark') ? '#4b5563' : '#e0e7ff') : (document.documentElement.classList.contains('dark') ? '#374151' : '#fff'),
+                  color: state.isSelected ? '#fff' : (document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#111827'),
+                  cursor: 'pointer'
+                }),
+                singleValue: (base) => ({
+                  ...base,
+                  color: document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#111827'
+                }),
+                input: (base) => ({
+                  ...base,
+                  color: document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#111827'
+                }),
+                placeholder: (base) => ({
+                  ...base,
+                  color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
+                })
+              }}
+            />
           </div>
 
           {/* Phone Number Input */}
@@ -1193,36 +1227,78 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
           {t('onboardingBranch.form.step2.country.label')} <span className="text-red-500">*</span>
         </label>
         <div className="relative">
-          <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-         <select
-          id="address.country"
-          name="address.country"
-          value={formData.createAddressDto.country || ''}
-          onChange={handleInputChange}
-          className={`w-full ${isRTL ? 'pr-10 pl-8' : 'pl-10 pr-8'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-            errors['createAddressDto.country']
-              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-          } text-gray-900 dark:text-white appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
-          dir={isRTL ? 'rtl' : 'ltr'}
-          required
-        >
-          <option value="" disabled>
-            {t('onboardingBranch.form.step2.country.placeholder')}
-          </option>
-          {countryKeys.map((countryKey) => (
-            <option key={countryKey} value={t(countryKey)}>
-              {t(countryKey)}
-            </option>
-          ))}
-        </select>
-        {/* Custom dropdown arrow */}
-        <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-          </svg>
+          <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10`} />
+          <Select
+            id="address.country"
+            name="address.country"
+            value={formData.createAddressDto.country ?
+              { value: formData.createAddressDto.country, label: formData.createAddressDto.country } :
+              null}
+            onChange={(selectedOption) => {
+              if (selectedOption) {
+                setFormData(prev => ({
+                  ...prev,
+                  createAddressDto: {
+                    ...prev.createAddressDto,
+                    country: selectedOption.value
+                  }
+                }));
+                if (errors['createAddressDto.country']) {
+                  setErrors(prev => ({ ...prev, 'createAddressDto.country': undefined }));
+                }
+              }
+            }}
+            options={countryKeys.map((countryKey) => ({
+              value: t(countryKey),
+              label: t(countryKey)
+            }))}
+            isSearchable
+            placeholder={t('onboardingBranch.form.step2.country.placeholder')}
+            className={isRTL ? 'text-right' : 'text-left'}
+            styles={{
+              control: (base, state) => ({
+                ...base,
+                paddingLeft: isRTL ? '1rem' : '2.5rem',
+                paddingRight: isRTL ? '2.5rem' : '1rem',
+                paddingTop: '0.75rem',
+                paddingBottom: '0.75rem',
+                borderRadius: '0.5rem',
+                borderColor: errors['createAddressDto.country'] ? '#ef4444' : (state.isFocused ? '#6366f1' : (document.documentElement.classList.contains('dark') ? '#4b5563' : '#d1d5db')),
+                backgroundColor: errors['createAddressDto.country'] ? (document.documentElement.classList.contains('dark') ? '#7f1d1d' : '#fef2f2') : (document.documentElement.classList.contains('dark') ? '#374151' : '#fff'),
+                boxShadow: state.isFocused ? '0 0 0 2px rgba(99, 102, 241, 0.5)' : 'none',
+                '&:hover': {
+                  borderColor: state.isFocused ? '#6366f1' : (document.documentElement.classList.contains('dark') ? '#4b5563' : '#d1d5db')
+                }
+              }),
+              menu: (base) => ({
+                ...base,
+                backgroundColor: document.documentElement.classList.contains('dark') ? '#374151' : '#fff',
+                zIndex: 50
+              }),
+              option: (base, state) => ({
+                ...base,
+                backgroundColor: state.isSelected ? '#6366f1' : state.isFocused ? (document.documentElement.classList.contains('dark') ? '#4b5563' : '#e0e7ff') : (document.documentElement.classList.contains('dark') ? '#374151' : '#fff'),
+                color: state.isSelected ? '#fff' : (document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#111827'),
+                cursor: 'pointer'
+              }),
+              singleValue: (base) => ({
+                ...base,
+                color: document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#111827'
+              }),
+              input: (base) => ({
+                ...base,
+                color: document.documentElement.classList.contains('dark') ? '#f3f4f6' : '#111827'
+              }),
+              placeholder: (base) => ({
+                ...base,
+                color: document.documentElement.classList.contains('dark') ? '#9ca3af' : '#6b7280'
+              })
+            }}
+          />
         </div>
-      </div>
+        {errors['createAddressDto.country'] && (
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors['createAddressDto.country']}</p>
+        )}
       </div>
 
       <div>

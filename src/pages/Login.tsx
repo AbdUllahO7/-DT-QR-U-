@@ -108,61 +108,24 @@ const Login: React.FC = () => {
       logger.info('Sending login request with data', { formData });
       const response = await authService.login(formData);
 
-      // CRITICAL DEBUG - Force console output
-      console.log('=== LOGIN RESPONSE DEBUG ===');
-      console.log('Full response:', response);
-      console.log('Response type:', typeof response);
-      console.log('Response keys:', response ? Object.keys(response) : 'null');
-      console.log('Response:', JSON.stringify(response, null, 2));
-      console.log('========================');
-
-      logger.info('Login response received', { response });
-      logger.info('Response type:', typeof response);
-      logger.info('Response keys:', response ? Object.keys(response) : 'null');
+      
 
       // Handle different response formats
       let loginData = response;
 
       // Check if response is wrapped in a data property
       if (response && !response.accessToken && (response as any).data?.accessToken) {
-        console.log('Response is wrapped in data property');
         logger.info('Response is wrapped in data property');
         loginData = (response as any).data;
       }
 
-      console.log('AccessToken value:', loginData?.accessToken);
-      console.log('loginData type:', typeof loginData);
-      console.log('loginData is null?', loginData === null);
-      console.log('loginData is undefined?', loginData === undefined);
-      console.log('accessToken truthy?', !!loginData?.accessToken);
-      console.log('About to check if condition...');
-
-      logger.info('AccessToken value:', loginData?.accessToken);
+    
 
       if (loginData?.accessToken) {
-        console.log('✅ INSIDE IF BLOCK - Token exists!');
         const tokenParts = loginData.accessToken.split('.');
-        const payload = JSON.parse(atob(tokenParts[1]));
-        const userId = payload.user_id;
-
-        logger.info('Login successful, saving token and redirecting');
-        logger.info('Saving to localStorage:', {
-          token: loginData.accessToken.substring(0, 20) + '...',
-          userId,
-          expiresAt: loginData.expiresAt
-        });
-
-        localStorage.setItem('token', loginData.accessToken);
-        localStorage.setItem('userId', userId);
-        localStorage.setItem('tokenExpiry', loginData.expiresAt);
-
-        // Verify token was saved
-        const savedToken = localStorage.getItem('token');
-        logger.info('Token saved to localStorage:', savedToken ? 'YES' : 'NO');
 
         const onboardingUserId = localStorage.getItem('onboarding_userId');
         if (onboardingUserId) {
-          logger.info('Onboarding süreci devam ediyor, restaurant onboarding sayfasına yönlendiriliyor');
           navigate('/onboarding/restaurant');
           return;
         }
@@ -174,25 +137,14 @@ const Login: React.FC = () => {
           return;
         }
 
-        logger.info('Redirecting to dashboard...');
         navigate('/dashboard');
       } else {
-        console.log('❌ ELSE BLOCK - Token does NOT exist!');
-        console.log('loginData:', loginData);
         logger.error('Invalid login response - no access token', { loginData });
         throw new Error('Geçersiz giriş yanıtı - accessToken bulunamadı');
       }
 
-      console.log('After if/else block');
     } catch (error: any) {
-      console.log('=== LOGIN ERROR ===');
-      console.log('Error:', error);
-      console.log('Error status:', error.status);
-      console.log('Error message:', error.message);
-      console.log('Error response:', error.response);
-      console.log('==================');
-
-      logError(error, 'Login error');
+ 
 
       const userFriendlyMessage = getUserFriendlyErrorMessage(error);
 
