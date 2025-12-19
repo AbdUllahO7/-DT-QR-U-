@@ -62,6 +62,7 @@ export interface BranchMenuResponse {
   restaurantName: string
   branchAddress: string
   isOpen: boolean
+  logo?:string
   categories: MenuCategory[]
   statusMessage?:string
   preferences?:any

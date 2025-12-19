@@ -20,6 +20,10 @@ import {
 } from 'lucide-react';
 import MenuComponent from "../components/dashboard/Branch/Menu/MenuComponent";
 import { httpClient } from "../utils/http";
+// IMPORT SERVICE AND TYPE
+import { branchProductService } from "../services/Branch/BranchProductService";
+import { BranchMenuResponse } from "../types/menu/type";
+import LanguageSelector from "../components/LanguageSelector";
 
 interface TableInfo {
   valid: boolean;
@@ -36,83 +40,24 @@ interface TableInfo {
   };
 }
 
-// Language Selector Component
-const LanguageSelector: React.FC = () => {
-  const { language, setLanguage, t } = useLanguage();
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const isRTL = language === 'ar';
-
-  const languages = [
-    { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'ar', name: 'العربية', flag: '🇸🇦' }
-  ];
-
-  const currentLanguage = languages.find(lang => lang.code === language);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleLanguageChange = (langCode: string) => {
-    setLanguage(langCode as any);
-    setIsOpen(false);
-  };
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`p-2 rounded-lg bg-white/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-colors duration-200 flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} border border-gray-200 dark:border-gray-700`}
-      >
-        <Globe className="h-5 w-5" />
-        <span className="text-sm font-medium">{currentLanguage?.flag}</span>
-        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-
-      {isOpen && (
-        <div className={`absolute top-full mt-2 ${isRTL ? 'left-0' : 'right-0'} z-50 min-w-[180px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1`}>
-          {languages.map((lang) => (
-            <button
-              key={lang.code}
-              onClick={() => handleLanguageChange(lang.code)}
-              className={`w-full flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
-                language === lang.code ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : ''
-              }`}
-            >
-              <span className="text-lg">{lang.flag}</span>
-              <span className="font-medium">{lang.name}</span>
-              {language === lang.code && (
-                <span className={`${isRTL ? 'mr-auto' : 'ml-auto'} text-blue-600 dark:text-blue-400`}>
-                  ✓
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
 
 const TableQR = () => {
   const { qrToken } = useParams();
   const { language, t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [tableInfo, setTableInfo] = useState<TableInfo | null>(null);
+  
+  // NEW: State for Branch Data
+  const [branchData, setBranchData] = useState<BranchMenuResponse | null>(null);
+  
   const [error, setError] = useState<string | null>(null);
   const [sessionStarted, setSessionStarted] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const hasRun = useRef(false);
   const isRTL = language === 'ar';
+
+
+  console.log("branchData",branchData)
 
   useEffect(() => {
     if (hasRun.current) return;
@@ -124,7 +69,7 @@ const TableQR = () => {
       setError(null);
 
       try {
-        // 1. QR doğrulama
+        // 1. QR validation
         const res = await httpClient.get(`/api/table/qr/${qrToken}`);
         const data = res.data;
         if (!data.valid) {
@@ -134,7 +79,17 @@ const TableQR = () => {
         }
         setTableInfo(data);
 
-        // 2. Fingerprint ve customerIdentifier
+        try {
+           const menuResponse = await branchProductService.getBranchMenu(data.branchId, []);
+           // Type cast just like in MenuComponent
+           const typedMenuData = menuResponse as unknown as BranchMenuResponse;
+           setBranchData(typedMenuData);
+        } catch (branchErr) {
+           console.error("Failed to fetch branch info for QR landing page", branchErr);
+           // We don't block the UI if this fails, just show default text
+        }
+
+        // 2. Fingerprint and customerIdentifier
         const fp = await FingerprintJS.load();
         const result = await fp.get();
         const deviceFingerprint = result.visitorId;
@@ -194,11 +149,6 @@ const TableQR = () => {
               {t('tableQR.loading.fetchingTableInfo')}
             </p>
           </div>
-          <div className="space-y-2">
-            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full animate-pulse"></div>
-            </div>
-          </div>
         </div>
       </div>
     );
@@ -243,15 +193,29 @@ const TableQR = () => {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-              <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Utensils className="h-5 w-5 text-white" />
-              </div>
+              
+              {/* UPDATED: Show Logo if available, otherwise Icon */}
+              {branchData?.logo ? (
+                 <div className="w-10 h-10 relative rounded-xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700">
+                   <img 
+                     src={branchData.logo} 
+                     alt="Branch Logo" 
+                     className="w-full h-full object-cover"
+                   />
+                 </div>
+              ) : (
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <Utensils className="h-5 w-5 text-white" />
+                </div>
+              )}
+
               <div>
+                {/* UPDATED: Show Restaurant Name if available */}
                 <h1 className="text-lg font-bold text-gray-900 dark:text-white">
-                  {t('tableQR.header.title')}
+                  {branchData?.restaurantName || t('tableQR.header.title')}
                 </h1>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {t('tableQR.header.subtitle')}
+                     {branchData?.branchName || t('tableQR.header.subtitle')} 
                 </p>
               </div>
             </div>
@@ -271,10 +235,25 @@ const TableQR = () => {
         {/* Welcome Card */}
         <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden mb-8">
           <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 p-8 text-white text-center">
-            <div className="mx-auto w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
-              <MapPin className="h-10 w-10" />
-            </div>
-            <h2 className="text-3xl font-bold mb-2">{t('tableQR.welcome.greeting')}</h2>
+            {/* UPDATED: Larger Logo in Welcome Banner if available */}
+            {branchData?.preferences?.logo ? (
+                 <div className="mx-auto w-24 h-24 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-lg overflow-hidden p-1">
+                   <img 
+                     src={branchData.preferences.logo} 
+                     alt="Branch Logo" 
+                     className="w-full h-full object-cover rounded-xl"
+                   />
+                 </div>
+            ) : (
+              <div className="mx-auto w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mb-4 backdrop-blur-sm">
+                <MapPin className="h-10 w-10" />
+              </div>
+            )}
+            
+            {/* UPDATED: Welcome Message with Restaurant Name */}
+            <h2 className="text-3xl font-bold mb-2">
+               {branchData ? `${t('tableQR.welcome.greeting')} ${branchData.branchName}` : t('tableQR.welcome.greeting')}
+            </h2>
             <p className="text-blue-100 text-lg">
               {isRTL 
                 ? `${t('tableQR.welcome.connectedToTable')} ${tableInfo.tableName}`
@@ -342,9 +321,6 @@ const TableQR = () => {
                 </p>
               </div>
             </div>
-
-            {/* Message */}
-         
           </div>
         </div>
 

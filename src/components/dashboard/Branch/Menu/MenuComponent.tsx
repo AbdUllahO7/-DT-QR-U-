@@ -1,4 +1,4 @@
-// MenuComponent.tsx - FIXED for required extras validation AND duplicate product issue
+// MenuComponent.tsx - FIXED Layout for Horizontal Categories
 
 "use client"
 
@@ -69,7 +69,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       setBasketId(basket.basketId)
       
     } catch (err: any) {
-      // Ignore errors for item count - basket might not exist yet
       setBasketItemCount(0)
       setBasketId(null)
     }
@@ -126,14 +125,13 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
     }
   }
 
-  // FIXED: Add to basket function - handles products with extras
+  // Add to basket function
   const addToBasket = async (
     product: MenuProduct, 
     addons: SelectedAddon[] = [], 
     extras: ProductExtraMenu[] = []
   ) => {
     try {
-      // Prepare the main item request
       const mainItemRequest: any = {
         branchProductId: product.branchProductId,
         quantity: 1
@@ -141,33 +139,20 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
 
       if (extras.length > 0) {
         mainItemRequest.extras = extras.map(extra => {
-          // Create the base object with properties that are always required
           const extraPayload: any = {
             branchProductExtraId: extra.branchProductExtraId,
             extraId: extra.extraId,
             isRemoval: extra.isRemoval
           }
-
-          // Only add quantity if it is NOT a removal
           if (!extra.isRemoval) {
             extraPayload.quantity = extra.quantity
           }
-
           return extraPayload
         })
       }
 
-      console.log('🛒 Adding to basket:', {
-        product: product.productName,
-        addons: addons.length,
-        extras: extras.length,
-        mainItemRequest
-      })
-
-      // Add the main product
       const mainItem = await basketService.addUnifiedItemToMyBasket(mainItemRequest)
 
-      // If we have addons, add them as child items
       if (mainItem.basketItemId && addons.length > 0) {
         const addonItems = addons.map(addon => {
           const availableAddon = product.availableAddons?.find(
@@ -182,21 +167,10 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         })
 
         if (addonItems.length > 0) {
-          try {
-            await basketService.batchAddItemsToMyBasket(addonItems)
-          } catch (batchError: any) {
-            console.error('❌ Error in batch add:', batchError)
-            if (batchError.response) {
-              console.error('Error response:', batchError.response.data)
-            }
-            throw batchError
-          }
+          await basketService.batchAddItemsToMyBasket(addonItems)
         }
       }
 
-      console.log('✅ Successfully added to basket')
-
-      // Update basket item count and basketId
       await loadBasketItemCount()
       
     } catch (err: any) {
@@ -227,7 +201,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         } else {
           await basketService.deleteMyBasketItem(itemToRemove.basketItemId)
         }
-
         await loadBasketItemCount()
       }
     } catch (err: any) {
@@ -235,7 +208,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
     }
   }
 
-  // Get quantity of a specific product in basket
   const getCartItemQuantity = useCallback(async (branchProductId: number): Promise<number> => {
     try {
       const basket = await basketService.getMyBasket()
@@ -259,7 +231,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
     })
   }
 
-  // Helper function to find a product by ID
   const findProduct = (branchProductId: number): MenuProduct | undefined => {
     if (!menuData?.categories) return undefined
     return menuData.categories
@@ -267,10 +238,8 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       .find((p) => p.branchProductId === branchProductId)
   }
 
-  // Filter categories and products
   const getFilteredCategories = (): MenuCategory[] => {
     if (!menuData?.categories) return []
-
     return menuData.categories
       .filter(
         (category) =>
@@ -280,39 +249,25 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       .sort((a, b) => a.displayOrder - b.displayOrder)
   }
 
-  // ✅ FIXED: Always open modal first (no direct add to cart)
   const handleQuickAddToCart = async (product: MenuProduct) => {
-    console.log('🔍 Quick add triggered for:', product.productName)
-    console.log('📝 Opening modal for product customization')
-    
-    // ✅ Always open modal, let user confirm before adding
     handleCustomizeProduct(product)
   }
 
-  // Handle product customization
   const handleCustomizeProduct = (product: MenuProduct) => {
     setSelectedProduct(product)
     setShowProductModal(true)
   }
 
-  // Handle modal add to cart with extras
   const handleModalAddToCart = async (
     product: MenuProduct, 
     addons: SelectedAddon[], 
     extras: ProductExtraMenu[]
   ) => {
-    console.log('🛒 Modal add to cart:', {
-      product: product.productName,
-      addons: addons.length,
-      extras: extras.length
-    })
-    
     await addToBasket(product, addons, extras)
     setShowProductModal(false)
     setSelectedProduct(null)
   }
 
-  // Handle cart toggle with basket count refresh
   const handleCartToggle = async () => {
     if (!showCart) {
       await loadBasketItemCount()
@@ -320,21 +275,13 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
     setShowCart(!showCart)
   }
 
-  // Loading state
-  if (loading) {
-    return <LoadingState />
-  }
-  // Error state
-  if (error) {
-    return <ErrorState error={error} />
-  }
+  if (loading) return <LoadingState />
+  if (error) return <ErrorState error={error} />
   if (!menuData) return null
   const filteredCategories = getFilteredCategories()
 
-  
   return (
     <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800 ${isRTL ? 'rtl' : 'ltr'}`}>
-      {/* Header */}
       <Header 
         menuData={menuData}
         totalItems={basketItemCount}
@@ -342,22 +289,25 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       />
 
       <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Search Bar */}
         <SearchBar 
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
         />
 
-        <div className="grid xl:grid-cols-3 lg:grid-cols-3 gap-6">
-          {/* Categories Sidebar */}
+        {/* --- FIXED LAYOUT START --- */}
+        {/* Changed from 'grid' to 'flex-col'. This removes the sidebar constraint 
+            and allows the horizontal categories bar to span the full width. */}
+        <div className="flex flex-col gap-6 mt-4">
+          
+          {/* Categories Bar - Now full width sticky top bar */}
           <CategoriesSidebar
             categories={filteredCategories}
             selectedCategory={selectedCategory}
             onCategorySelect={setSelectedCategory}
           />
 
-          {/* Products Grid */}
-          <div className="lg:col-span-2">
+          {/* Products Grid - Now full width */}
+          <div className="w-full">
             <ProductGrid
               categories={filteredCategories}
               selectedCategory={selectedCategory}
@@ -374,9 +324,9 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
             />
           </div>
         </div>
+        {/* --- FIXED LAYOUT END --- */}
       </div>
 
-      {/* Cart Sidebar with basketId as sessionId */}
       <CartSidebar
         isOpen={showCart}
         onClose={() => setShowCart(false)}
@@ -395,7 +345,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         onAddToCart={handleModalAddToCart}
       />
 
-      {/* Footer */}
       <Footer />
     </div>
   )

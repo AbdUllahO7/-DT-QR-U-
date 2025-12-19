@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, Users, Plus, Trash2, MapPin, Edit2, MoreVertical, LayoutGrid } from 'lucide-react';
+import { ChevronDown, Users, Plus, Trash2, MapPin, Edit2, MoreVertical, LayoutGrid, X, Loader2, Grid, CheckCircle } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside, useSignalR } from '../../../../hooks';
 import { SignalRCallbacks } from '../../../../types/signalR';
 import { logger } from '../../../../utils/logger';
 import { branchService } from '../../../../services/branchService';
-import TableCard from './QRCodeCard';
 import AddQRCodeCard from './AddQRCodeCard';
-import QRCodeModal from './QRCodeModal';
 import TableCategoryModal from './TableCategoryModal';
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 import { BranchDropdownItem, GroupedTables, RestaurantBranchDropdownItem, TableCategory, TableData } from '../../../../types/BranchManagement/type';
 import { useNavigate } from 'react-router-dom';
 import { tableService } from '../../../../services/Branch/branchTableService';
+import TableCard from '../../Branch/Table/TableCard';
+import QRCodeModalAdd from './QRCodeModal';
 
 interface Props {
   selectedBranch: RestaurantBranchDropdownItem | null;
@@ -46,9 +46,35 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   const [isDeletingCategory, setIsDeletingCategory] = useState(false);
   const [openCategoryMenu, setOpenCategoryMenu] = useState<number | null>(null);
 
+    const [qrModal, setQrModal] = useState<{
+      isOpen: boolean;
+      table: TableData | null;
+    }>({
+      isOpen: false,
+      table: null
+    });
+
+
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   
   useClickOutside(dropdownRef, () => setIsBranchDropdownOpen(false));
+
+  const generateQRCodeImageUrl = (qrCode: string): string => {
+    if (!qrCode) return '';
+    
+    const baseUrl = window.location.origin;
+    const tableUrl = `${baseUrl}/table/qr/${qrCode}`;
+    
+    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(tableUrl)}`;
+  };
+
+    const handleCloseQRModal = (): void => {
+    setQrModal({
+      isOpen: false,
+      table: null
+    });
+  };
+
   
   const navigate = useNavigate();
   const token = localStorage.getItem('token') || '';
@@ -167,9 +193,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     setIsBranchDropdownOpen(false);
   };
 
-  // ✅ UPDATED: Validation logic added here
   const handleCreateTable = () => {
-    // Check if there are no categories
     if (categories.length === 0) {
       setError(t('tableManagement.error.createCategoryFirst') || 'Please create a table category first.');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -200,6 +224,8 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     if (!tableToDelete || !selectedBranchForTables?.branchId) {
       throw new Error(t('TableManagement.error.branchRequired'));
     }
+
+    
 
     setIsDeletingTable(true);
 
@@ -373,6 +399,13 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     setIsCategoryDeleteModalOpen(false);
     setCategoryToDelete(null);
   };
+
+    const handleShowQRCode = (table: TableData): void => {
+      setQrModal({
+        isOpen: true,
+        table
+      });
+    };
 
   const handleCategoryModalClose = () => {
     setIsCategoryModalOpen(false);
@@ -633,7 +666,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
 
                   {/* Tables Grid */}
                   <div 
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"                    
                     role="grid"
                     aria-label={`${category.categoryName} ${t('tableManagement.accessibility.tablesGrid')}`}
                   >
@@ -651,6 +684,8 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
                           onDelete={() => handleDeleteTable(table)} 
                           onToggleStatus={handleToggleStatus}
                           onDownload={downloadQR}
+                                              onShowQRCode={handleShowQRCode}
+                          isToggling={false}
                         />
                       </motion.div>
                     ))}
@@ -672,7 +707,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         )}
 
       {/* Modals */}
-      <QRCodeModal
+      <QRCodeModalAdd
         isOpen={isModalOpen}
         onClose={handleModalClose}
         qrData={getModalTableData()}
@@ -688,6 +723,16 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         categories={categories}
         onSuccess={handleModalSuccess}
       />
+
+        {/* QR Code Modal */}
+        {qrModal.table && (
+          <QRCodeModal
+            isOpen={qrModal.isOpen}
+            onClose={handleCloseQRModal}
+            table={qrModal.table}
+            qrCodeImageUrl={generateQRCodeImageUrl(qrModal.table.qrCode || '')}
+          />
+        )}
 
       <TableCategoryModal
         isOpen={isCategoryModalOpen}
@@ -727,3 +772,119 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
 };
 
 export default TableManagement;
+
+
+const QRCodeModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  table: TableData;
+  qrCodeImageUrl: string;
+}> = ({ isOpen, onClose, table, qrCodeImageUrl }) => {
+  const { t } = useLanguage();
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
+
+  if (!isOpen) return null;
+
+  const getTableUrl = (): string => {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/table/qr/${table.qrCode}`;
+  };
+
+  const handleDownloadQR = async () => {
+    setIsDownloading(true);
+    try {
+      const response = await fetch(qrCodeImageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `table-${table.menuTableName}-qr.png`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading QR code:', error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleCopyUrl = async () => {
+    setIsCopying(true);
+    try {
+      await navigator.clipboard.writeText(getTableUrl());
+      setTimeout(() => setIsCopying(false), 2000);
+    } catch (error) {
+      console.error('Error copying URL:', error);
+      setIsCopying(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl max-w-md w-full p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+            {t('BranchTableManagement.qrCodeTitle', { tableName: table.menuTableName })}
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          >
+            <X className="h-6 w-6" />
+          </button>
+        </div>
+
+        <div className="text-center mb-6">
+          <div className="bg-white p-4 rounded-xl border-2 border-gray-200 inline-block">
+            <img 
+              src={qrCodeImageUrl} 
+              alt={t('BranchTableManagement.qrCodeTitle', { tableName: table.menuTableName })}
+              className="w-48 h-48 mx-auto"
+              onError={(e) => {
+                e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMDAgNzBDOTQuNDc3MiA3MCA5MCA3NC40NzcyIDkwIDgwVjEyMEM5MCA5NC40NzcyIDk0LjQ3NzIgOTAgMTAwIDkwSDE0MEM5NC40NzcyIDkwIDkwIDk0LjQ3NzIgOTAgMTAwVjE0MEg5MFY4MEg5MFY3MEgxMDBaIiBmaWxsPSIjOUI5QkEwIi8+Cjx0ZXh0IHg9IjEwMCIgeT0iMTMwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5QjlCQTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiPk5vIFFSIENvZGU8L3RleHQ+Cjwvc3ZnPgo=';
+              }}
+            />
+          </div>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-3">
+            {t('BranchTableManagement.qrCodeDescription')}
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          <button
+            onClick={handleDownloadQR}
+            disabled={isDownloading}
+            className="w-full px-4 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {isDownloading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Grid className="h-4 w-4" />
+            )}
+            {isDownloading ? t('BranchTableManagement.downloading') : t('BranchTableManagement.downloadQR')}
+          </button>
+
+          <button
+            onClick={handleCopyUrl}
+            className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 flex items-center justify-center gap-2"
+          >
+            {isCopying ? (
+              <>
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                {t('BranchTableManagement.copied')}
+              </>
+            ) : (
+              <>
+                <Grid className="h-4 w-4" />
+                {t('BranchTableManagement.copyQRUrl')}
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};

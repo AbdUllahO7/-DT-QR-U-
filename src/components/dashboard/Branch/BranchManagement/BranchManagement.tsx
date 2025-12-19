@@ -274,7 +274,8 @@ const BranchManagementBranch: React.FC = () => {
           handleToggleTemporaryClose={handleToggleTemporaryClose}
           handleSave={handleSave}
           initializeEditData={initializeEditData}
-          setEditData={setEditData} 
+          editData={editData}
+          setEditData={setEditData}
         />
         
         {/* --- MODIFIED: Passing new phone handling props to BranchInfo --- */}

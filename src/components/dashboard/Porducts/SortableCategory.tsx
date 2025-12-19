@@ -271,9 +271,9 @@ export const SortableCategory: React.FC<{
                 title={category.isExpanded ? t('SortableCategory.collapseCategory') : t('SortableCategory.expandCategory')}
               >
                 {category.isExpanded ? (
-                  <ChevronUp className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
+                  <ChevronUp className={`h-5 w-5 transition-transform duration-200 ${isRTL ? 'rotate-180' : ''} ${category.isExpanded ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`} />
                 ) : (
-                  <ChevronDown className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isRTL ? 'rotate-180' : ''} ${category.isExpanded ? 'text-white' : 'text-gray-600 dark:text-gray-400'}`} />
                 )}
               </button>
             )}

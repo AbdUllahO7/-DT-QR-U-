@@ -92,31 +92,28 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
   handleToggleTemporaryClose,
   handleSave,
   initializeEditData,
+  editData,
   setEditData,
 }) => {
   const [isUploadingImage, setIsUploadingImage] = useState<boolean>(false);
   const [imageError, setImageError] = useState<string>('');
   const [dragActive, setDragActive] = useState<boolean>(false);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [isLoadingPublicId, setIsLoadingPublicId] = useState<boolean>(false);
 
 const handleNavigateToOnlineMenu = async () => {
     if (!selectedBranch) return;
-    
+
     try {
       setIsLoadingPublicId(true);
-          localStorage.removeItem('token');
+
       // Fetch the public ID
-      const { publicId, branchName } = await onlineMenuService.getPublicBranchId(selectedBranch.id);
-      
-      // Navigate with public ID as the route parameter
-      navigate(`/OnlineMenu/${publicId}`, {
-        state: { 
-          branchName,
-          branchId: selectedBranch.id // Optional, in case you need it later
-        }
-      });
-      
+      const { publicId } = await onlineMenuService.getPublicBranchId(selectedBranch.id);
+
+      // Open online menu in a new tab to keep admin session isolated
+      const onlineMenuUrl = `/OnlineMenu/${publicId}`;
+      window.open(onlineMenuUrl, '_blank', 'noopener,noreferrer');
+
     } catch (error: any) {
       console.error('Failed to get public ID:', error);
       alert(t('branchManagementBranch.errors.failedToGetPublicId') || 'Failed to get online menu link');
@@ -202,14 +199,25 @@ const handleNavigateToOnlineMenu = async () => {
               </div>
               {selectedBranch && (
                 <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''} flex-wrap`}>
-                  {/* Logo */}
+                  {/* Logo - Show editData logo when editing and uploaded, otherwise show original */}
                   <div className="relative group flex-shrink-0">
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
-                    <img
-                      src={selectedBranch.branchLogoPath || DEFAULT_IMAGE_URL}
-                      alt={t('branchManagementBranch.logoAlt') || 'Branch Logo'}
-                      className="relative lg:w-96 lg:h-32 sm:w-20 sm:h-20 object-cover rounded-2xl border-2 border-white dark:border-slate-700 shadow-xl transition-transform duration-300 group-hover:scale-105"
-                    />
+                    {(isEditing && editData.branchLogoPath) || (!isEditing && selectedBranch.branchLogoPath) ? (
+                      <>
+                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
+                        <img
+                          src={isEditing ? (editData.branchLogoPath || selectedBranch.branchLogoPath || '') : (selectedBranch.branchLogoPath || '')}
+                          alt={t('branchManagementBranch.logoAlt') || 'Branch Logo'}
+                          className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 object-cover rounded-2xl border-2 border-white dark:border-slate-700 shadow-xl transition-transform duration-300 group-hover:scale-105"
+                        />
+                      </>
+                    ) : (
+                      <div className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-2xl border-2 border-dashed border-slate-300 dark:border-slate-600 shadow-inner">
+                        <Image className="w-8 h-8 text-slate-400 dark:text-slate-500 mb-2" />
+                        <span className="text-xs font-medium text-slate-500 dark:text-slate-400 text-center px-2">
+                          {t('branchManagementBranch.noLogo') || 'No Logo'}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -285,20 +293,20 @@ const handleNavigateToOnlineMenu = async () => {
         )}
             {/* Bottom Row - Image Upload (Editing Mode) */}
             {isEditing && (
-              <div className="w-full max-w-sm">
-                <label className={`block text-sm font-semibold ${theme.text.primary} mb-3`}>
+              <div className="w-full max-w-md">
+                <label className={`block text-sm font-semibold ${theme.text.primary} mb-2`}>
                   {t('branchManagementBranch.uploadLogo') || 'Upload Logo'}
                 </label>
-                
+
                 <div
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
                   onDragOver={handleDrag}
                   onDrop={handleDrop}
-                  className={`relative group cursor-pointer transition-all duration-300 rounded-2xl border-2 border-dashed p-6
-                    ${dragActive 
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20 scale-105' 
-                      : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:scale-[1.02]'}`}
+                  className={`relative group cursor-pointer transition-all duration-300 rounded-xl border-2 border-dashed p-4
+                    ${dragActive
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20 scale-[1.02]'
+                      : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'}`}
                 >
                   <input
                     title='branch-logo-upload'
@@ -309,30 +317,35 @@ const handleNavigateToOnlineMenu = async () => {
                     disabled={isUploadingImage}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
-                  
-                  <div className="flex flex-col items-center gap-3 text-center">
+
+                  <div className="flex items-center gap-3">
                     {isUploadingImage ? (
-                      <div className="p-4 bg-blue-100 dark:bg-blue-900/50 rounded-xl">
-                        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                      <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex-shrink-0">
+                        <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
                       </div>
                     ) : (
-                      <div className="p-4 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 rounded-xl group-hover:from-blue-200 group-hover:to-indigo-200 dark:group-hover:from-blue-800/50 dark:group-hover:to-indigo-800/50 transition-all duration-300">
-                        <Upload className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                      <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/50 dark:to-indigo-900/50 rounded-lg group-hover:from-blue-200 group-hover:to-indigo-200 dark:group-hover:from-blue-800/50 dark:group-hover:to-indigo-800/50 transition-all duration-300 flex-shrink-0">
+                        <Upload className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                       </div>
                     )}
-                    
-                    <div className="space-y-1">
-                      <p className={`text-sm font-medium ${theme.text.primary}`}>
-                        {isUploadingImage ? 'Uploading...' : 'Drop image here or click to browse'}
+
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm font-medium ${theme.text.primary} truncate`}>
+                        {isUploadingImage
+                          ? t('branchManagementBranch.uploading') || 'Uploading...'
+                          : t('branchManagementBranch.uploadPrompt') || 'Drop image or click to browse'}
+                      </p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        {t('branchManagementBranch.uploadHint') || 'PNG, JPG, GIF up to 5MB'}
                       </p>
                     </div>
                   </div>
                 </div>
-                
+
                 {imageError && (
-                  <div className="mt-3 flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl">
+                  <div className="mt-2 flex items-center gap-2 p-2.5 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
                     <X className="w-4 h-4 text-red-500 flex-shrink-0" />
-                    <p className={`text-sm ${theme.text.error}`}>{imageError}</p>
+                    <p className={`text-xs ${theme.text.error}`}>{imageError}</p>
                   </div>
                 )}
               </div>

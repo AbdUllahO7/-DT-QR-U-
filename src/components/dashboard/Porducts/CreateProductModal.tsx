@@ -571,31 +571,40 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
                         <span>{t('createProductModal.form.category.label')}</span>
                         <span className="text-red-500">*</span>
                       </label>
-                      <select
-                        id="categoryId"
-                        value={formData.categoryId}
-                        onChange={(e) => {
-                          const newCategoryId = parseInt(e.target.value) || 0;
-                          handleChange('categoryId', newCategoryId);
-                        }}
-                        onFocus={() => setFocusedField('categoryId')}
-                        onBlur={() => setFocusedField('')}
-                        className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 text-gray-900 dark:text-white ${
-                          errors.categoryId
-                            ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
-                            : focusedField === 'categoryId'
-                            ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/10 focus:ring-4 focus:ring-blue-500/20'
-                            : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400'
-                        } focus:outline-none`}
-                        aria-required="true"
-                      >
-                        <option value="0">{t('createProductModal.form.category.placeholder')}</option>
-                        {categories.map((category) => (
-                          <option key={category.categoryId} value={category.categoryId}>
-                            {category.categoryName}
-                          </option>
-                        ))}
-                      </select>
+                      <div className="relative">
+                        <select
+                          id="categoryId"
+                          value={formData.categoryId}
+                          onChange={(e) => {
+                            const newCategoryId = parseInt(e.target.value) || 0;
+                            handleChange('categoryId', newCategoryId);
+                          }}
+                          onFocus={() => setFocusedField('categoryId')}
+                          onBlur={() => setFocusedField('')}
+                          className={`w-full ${isRTL ? 'pr-5 pl-12' : 'pl-5 pr-12'} py-4 border-2 rounded-2xl transition-all duration-300 text-gray-900 dark:text-white appearance-none ${
+                            errors.categoryId
+                              ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
+                              : focusedField === 'categoryId'
+                              ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/10 focus:ring-4 focus:ring-blue-500/20'
+                              : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400'
+                          } focus:outline-none ${isRTL ? 'text-right' : 'text-left'}`}
+                          dir={isRTL ? 'rtl' : 'ltr'}
+                          aria-required="true"
+                        >
+                          <option value="0">{t('createProductModal.form.category.placeholder')}</option>
+                          {categories.map((category) => (
+                            <option key={category.categoryId} value={category.categoryId}>
+                              {category.categoryName}
+                            </option>
+                          ))}
+                        </select>
+                        {/* Custom dropdown arrow */}
+                        <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
                       <AnimatePresence>
                         {errors.categoryId && (
                           <motion.p 

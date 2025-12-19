@@ -9,7 +9,7 @@ interface BranchCardProps {
   onEdit: (branch: BranchInfo) => void;
   onDelete: (branch: BranchInfo) => void;
   onPurge: (branch: BranchInfo) => void;
-  onToggleTemporaryClose: (branchId: number, isTemporarilyClosed: boolean) => void;
+  onToggleTemporaryClose: (branchId: string, isTemporarilyClosed: boolean) => void;
 }
 
 const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onPurge, onToggleTemporaryClose }) => {
