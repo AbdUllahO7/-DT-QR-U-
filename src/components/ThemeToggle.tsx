@@ -1,55 +1,51 @@
-import React from 'react';
+"use client";
+
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 const ThemeToggle: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
+  const [isRTL, setIsRTL] = useState(false);
+
+  // Detect direction on mount
+  useEffect(() => {
+    const isArabic = document.documentElement.dir === 'rtl' || document.documentElement.lang === 'ar';
+    setIsRTL(isArabic);
+  }, []);
+
+  // In LTR: Dark mode moves +24px (Right)
+  // In RTL: Dark mode moves -24px (Left)
+  const shiftDistance = isDark ? (isRTL ? -24 : 24) : 0;
 
   return (
     <motion.button
       onClick={toggleTheme}
-      className="relative flex items-center justify-center w-14 h-8 bg-gray-200 dark:bg-gray-700 rounded-full shadow-inner transition-colors duration-300 focus:outline-none focus:ring-4 focus:ring-primary-500/30"
+      // Use 'ltr' for the button's internal flex to keep Sun/Moon positions consistent
+      dir="ltr" 
+      className="relative flex items-center justify-between w-14 h-8 bg-slate-200/50 dark:bg-slate-800/50 backdrop-blur-md rounded-full p-1 shadow-inner focus:outline-none focus:ring-2 focus:ring-orange-500/50 border border-slate-300/50 dark:border-slate-700/50"
       whileTap={{ scale: 0.95 }}
     >
-      {/* Toggle Background */}
+      {/* Moving Knob */}
       <motion.div
-        className="absolute inset-1 bg-gradient-to-r from-primary-500 to-primary-600 rounded-full shadow-lg"
-        animate={{
-          x: isDark ? 24 : 0,
-        }}
-        transition={{ 
-          type: "spring", 
-          stiffness: 500, 
-          damping: 30 
-        }}
+        className="absolute w-6 h-6 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full shadow-lg z-10"
+        initial={false}
+        animate={{ x: shiftDistance }}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
       />
       
-      {/* Sun Icon */}
-      <motion.div
-        className="absolute left-1 flex items-center justify-center w-6 h-6"
-        animate={{
-          scale: isDark ? 0.8 : 1,
-          opacity: isDark ? 0.5 : 1,
-        }}
-        transition={{ duration: 0.2 }}
-      >
-        <Sun className="w-4 h-4 text-yellow-500" />
-      </motion.div>
+      {/* Sun Icon (Always on left internally) */}
+      <div className="flex items-center justify-center w-6 h-6 z-0">
+        <Sun className={`w-4 h-4 ${isDark ? 'text-slate-400' : 'text-orange-500'} transition-colors`} />
+      </div>
       
-      {/* Moon Icon */}
-      <motion.div
-        className="absolute right-1 flex items-center justify-center w-6 h-6"
-        animate={{
-          scale: isDark ? 1 : 0.8,
-          opacity: isDark ? 1 : 0.5,
-        }}
-        transition={{ duration: 0.2 }}
-      >
-        <Moon className="w-4 h-4 text-blue-400" />
-      </motion.div>
+      {/* Moon Icon (Always on right internally) */}
+      <div className="flex items-center justify-center w-6 h-6 z-0">
+        <Moon className={`w-4 h-4 ${isDark ? 'text-blue-400' : 'text-slate-500'} transition-colors`} />
+      </div>
     </motion.button>
   );
 };
 
-export default ThemeToggle; 
+export default ThemeToggle;

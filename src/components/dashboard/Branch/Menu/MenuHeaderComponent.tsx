@@ -4,9 +4,8 @@ import type React from "react"
 import { UtensilsCrossed, MapPin, ShoppingCart } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import LanguageSelector from "../../../LanguageSelector"
+import ThemeToggle from "../../../ThemeToggle" // Assuming the file path
 import { HeaderProps } from "../../../../types/menu/type"
-
-
 
 const Header: React.FC<HeaderProps> = ({ menuData, totalItems, onCartToggle }) => {
   const { t } = useLanguage()
@@ -15,6 +14,7 @@ const Header: React.FC<HeaderProps> = ({ menuData, totalItems, onCartToggle }) =
     <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-40 shadow-lg">
       <div className="max-w-6xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
+          {/* Left Side: Logo and Info */}
           <div className="flex items-center space-x-4">
             <div className="w-12 h-12 bg-gradient-to-br from-orange-500 via-orange-600 to-pink-500 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-300">
               <UtensilsCrossed className="h-6 w-6 text-white" />
@@ -41,10 +41,16 @@ const Header: React.FC<HeaderProps> = ({ menuData, totalItems, onCartToggle }) =
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
+          {/* Right Side: Actions */}
+          <div className="flex items-center space-x-3 md:space-x-4">
+            {/* Added Theme Toggle Here */}
+            <ThemeToggle />
+            
+            <div className="h-6 w-[1px] bg-slate-200 dark:bg-slate-700 mx-1" />
+
             <button
               onClick={onCartToggle}
-              className="relative bg-gradient-to-r ml-2 from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white p-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-orange-500/25 transform hover:scale-105 group"
+              className="relative bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white p-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-orange-500/25 transform hover:scale-105 group"
             >
               <ShoppingCart className="h-5 w-5 group-hover:rotate-12 transition-transform duration-300" />
               {totalItems > 0 && (
@@ -53,6 +59,7 @@ const Header: React.FC<HeaderProps> = ({ menuData, totalItems, onCartToggle }) =
                 </span>
               )}
             </button>
+            
             <LanguageSelector variant="header" />
           </div>
         </div>

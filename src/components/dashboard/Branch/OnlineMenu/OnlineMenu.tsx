@@ -50,9 +50,6 @@ interface SelectedExtra {
   isRequired?: boolean;
 }
 
-// ==========================================
-// COMPONENT
-// ==========================================
 
 const OnlineMenu: React.FC = () => {
   const { publicId } = useParams<{ publicId: string }>();
@@ -200,9 +197,6 @@ const initializeMenu = async () => {
   }
 };
 
-  // ==========================================
-  // PRICE CHANGE DETECTION
-  // ==========================================
 
   const buildPriceCache = (menu: OnlineMenuResponse) => {
     const cache = new Map<number, number>();
@@ -293,10 +287,6 @@ const initializeMenu = async () => {
     setPriceChanges(null);
     setIsCartOpen(true);
   };
-
-  // ==========================================
-  // PRODUCT MODAL & CUSTOMIZATION
-  // ==========================================
 
   const openProductModal = (product: MenuProduct) => {
     setSelectedProduct(product);

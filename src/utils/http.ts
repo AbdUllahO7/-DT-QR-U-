@@ -213,13 +213,17 @@ httpClient.interceptors.response.use(
 
     // 401 Unauthorized - Token geçersiz veya süresi dolmuş
     if (error.response?.status === 401) {
-      // Don't redirect to login for auth and onboarding endpoints
+      // Don't redirect to login for public pages and auth endpoints
       const isAuthEndpoint = originalRequest?.url?.includes('/api/Auth/');
       const isOnboardingEndpoint = originalRequest?.url?.includes('/api/Restaurant') ||
                                    originalRequest?.url?.includes('/api/Branch/CreateOnboardingBranch');
       const isOnboardingPage = window.location.pathname.includes('/onboarding');
+      const isPublicMenuPage = window.location.pathname.includes('/table/qr/') ||
+                               window.location.pathname.includes('/OnlineMenu');
+      const isPublicEndpoint = originalRequest?.url?.includes('/api/Table/') ||
+                              originalRequest?.url?.includes('/api/OnlineMenu/');
 
-      if (!isAuthEndpoint && !isOnboardingEndpoint && !isOnboardingPage) {
+      if (!isAuthEndpoint && !isOnboardingEndpoint && !isOnboardingPage && !isPublicMenuPage && !isPublicEndpoint) {
         logger.warn('⚠️ 401 Unauthorized - Token geçersiz, kullanıcı oturumu kapatılıyor');
 
         // SECURITY FIX: Use authStorage for centralized auth clearing

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useTheme } from "../contexts/ThemeContext";
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { nanoid } from 'nanoid';
 import {
@@ -16,10 +17,13 @@ import {
   Smartphone,
   Utensils,
   Globe,
-  ChevronDown
+  ChevronDown,
+  Moon,
+  Sun
 } from 'lucide-react';
 import MenuComponent from "../components/dashboard/Branch/Menu/MenuComponent";
 import { httpClient } from "../utils/http";
+import ThemeToggle from "../components/ThemeToggle";
 
 interface TableInfo {
   valid: boolean;
@@ -102,6 +106,8 @@ const LanguageSelector: React.FC = () => {
     </div>
   );
 };
+
+
 
 const TableQR = () => {
   const { qrToken } = useParams();
@@ -260,6 +266,7 @@ const TableQR = () => {
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-sm text-green-600 dark:text-green-400 font-medium">{t('tableQR.header.active')}</span>
               </div>
+              <ThemeToggle />
               <LanguageSelector />
             </div>
           </div>

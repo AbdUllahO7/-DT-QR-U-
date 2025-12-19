@@ -146,20 +146,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
               <FileText className="h-4 w-4" />
               <span>{t('subscription.title')}</span>
             </button> */}
-            {!isBranchOnly && (
-              <button
-                onClick={() => {
-                  onTabChange('settings');
-                  setIsOpen(false);
-                }}
-                className={`w-full px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center ${
-                  isRTL ? 'text-right space-x-reverse space-x-3' : 'text-left space-x-3'
-                }`}
-              >
-                <Settings className="h-4 w-4" />
-                <span>{t('settings.title')}</span>
-              </button>
-            )}
+     
             <hr className="my-2 border-gray-200 dark:border-gray-700" />
             <button
               onClick={() => {
