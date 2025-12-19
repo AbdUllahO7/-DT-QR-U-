@@ -865,7 +865,7 @@ useEffect(() => {
                   <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                   {isLoadingBranches ? t('productsContent.branch.loading') : t('productsContent.branch.selectBranch')}
                 </span>
-                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                <ChevronDown className={`h-4 w-4 text-gray-600 dark:text-gray-400 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
               </button>
 
               {isBranchDropdownOpen && (
@@ -931,7 +931,7 @@ useEffect(() => {
                     <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     {selectedBranch ? selectedBranch.branchName : t('productsContent.branch.selectBranch')}
                   </span>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                  <ChevronDown className={`h-4 w-4 text-gray-600 dark:text-gray-400 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
                 </button>
 
                 {isBranchDropdownOpen && (
@@ -1051,7 +1051,7 @@ useEffect(() => {
                     <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     {selectedBranch ? selectedBranch.branchName : t('productsContent.branch.selectBranch')}
                   </span>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                  <ChevronDown className={`h-4 w-4 text-gray-600 dark:text-gray-400 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
                 </button>
 
                 {isBranchDropdownOpen && (
@@ -1135,7 +1135,7 @@ useEffect(() => {
                 >
                   <Filter className="h-4 w-4" />
                   <span className="hidden sm:inline">{t('productsContent.search.filter')}</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${showFilterDropdown ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-4 w-4 text-gray-600 dark:text-gray-400 transition-transform duration-200 ${showFilterDropdown ? 'rotate-180' : ''}`} />
                 </button>
 
                 {showFilterDropdown && (
@@ -1244,7 +1244,7 @@ useEffect(() => {
                 >
                   <ArrowUp className="h-4 w-4" />
                   <span className="hidden sm:inline">{t('productsContent.search.sort')}</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-4 w-4 text-gray-600 dark:text-gray-400 transition-transform duration-200 ${showSortDropdown ? 'rotate-180' : ''}`} />
                 </button>
 
                 {showSortDropdown && (
