@@ -54,7 +54,7 @@ class RoleService {
     }
   }
 
-    async getRolesaAsignable(params: GetRolesParams = {}): Promise<ApiResponse<Role[]>> {
+    async getRolesAssignable(params: GetRolesParams = {}): Promise<ApiResponse<Role[]>> {
     try {
       // Set defaults: includePermissions is true unless explicitly set to false
       const apiParams: GetRolesParams = {

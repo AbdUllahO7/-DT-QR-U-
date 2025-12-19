@@ -2853,7 +2853,7 @@ hero: {
       locationInfo: 'Konum Bilgileri',
       roleAssignment: 'Yetki ve Rol Ataması',
 
-        honeNumber: 'Telefon Numarası',
+        phoneNumber: 'Telefon Numarası',
       confirmPassword: 'Şifreyi Onayla',
       location: 'Konum',
       roles: 'Roller',

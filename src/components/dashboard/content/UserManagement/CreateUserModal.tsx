@@ -14,10 +14,10 @@ export interface CreateUserModalProps {
   onClose: () => void;
   onSubmit: (userData: CreateUserDto) => Promise<void>;
   roles: Role[];
-  error : String;
+  error : string | null;
   branches: BranchInfo[];
   isLoading: boolean;
-  isRolesLoading: boolean; 
+  isRolesLoading: boolean;
   onBranchChange: (branchId: number | null | undefined) => void;
 }
 
