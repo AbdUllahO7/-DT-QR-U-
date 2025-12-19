@@ -2804,12 +2804,13 @@ hero: {
       title: 'Yeni Rol Oluştur',
       stepBasicInfo: 'Temel Bilgiler',
       stepPermissions:"İzinler",
+      deselectAll:"Seçimi Kaldır",
       selectBranch: 'Şube Seçimi',
       step1Info: "Rol Oluştur",
       step1Description: "Yeni rol için temel bilgileri girin",
       continue: "İzinlere Devam Et",
       branch: 'Şube',
-      selectAll: 'Tüm Şubeler',
+      selectAll: 'Tüm Roller',
       noBranch: 'Şube Yok',
       finish: "Bitir",
       creating: "Oluşturuluyor...",
@@ -3238,11 +3239,6 @@ hero: {
       selectedProducts: 'Seçilen Ürünler',
       fromCategories: 'Kategorilerden',
       avalibleAddons: 'Mevcut Eklentiler',
-    },
-
-    status :{
-      active: 'Aktif',
-      inactive : "Pasif"
     },
 
     // Tab Navigation

@@ -336,18 +336,25 @@ export interface TableData {
 
 export interface TableCardProps {
   table: TableData;
-  isEditing: boolean;
-  isToggling: boolean;
-  isClearing?: boolean; // New prop for clear table loading state
-  onEdit: () => void;
-  onCancelEdit: () => void;
-  onUpdate: (tableId: number, updatedData: Partial<TableData>) => Promise<void>;
-  onDelete: (tableId: number) => Promise<void>;
-  onToggleStatus: (tableId: number, newStatus: boolean) => Promise<void>;
-  onToggleOccupation: (tableId: number, isOccupied: boolean) => Promise<void>;
-  onClearTable: (tableId: number) => Promise<void>; // New prop for clear table
-  onShowQRCode: (table: TableData) => void;
-  onTableChange: (tableId: number, updatedData: Partial<TableData>) => void;
+  // Optional props for different contexts
+  isEditing?: boolean;
+  isToggling?: boolean;
+  isClearing?: boolean;
+  categoryColor?: string;
+
+  // Required actions
+  onEdit: (table?: TableData) => void;
+  onDelete: (tableId: number) => void | Promise<void>;
+  onToggleStatus: (tableId: number, newStatus?: boolean) => void | Promise<void>;
+  onShowQRCode?: (table: TableData) => void;
+  onDownload?: (table: TableData) => void;
+
+  // Optional actions (for Branch Tables context)
+  onCancelEdit?: () => void;
+  onUpdate?: (tableId: number, updatedData: Partial<TableData>) => Promise<void>;
+  onToggleOccupation?: (tableId: number, isOccupied: boolean) => Promise<void>;
+  onClearTable?: (tableId: number) => Promise<void>;
+  onTableChange?: (tableId: number, updatedData: Partial<TableData>) => void;
 }
 
 export interface OrderData {

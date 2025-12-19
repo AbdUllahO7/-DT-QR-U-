@@ -2803,6 +2803,7 @@ contact: {
       step1Title: "الخطوة ١: المعلومات الأساسية",
       step2Title: "الخطوة ٢: تحديد الأذونات",
       stepBasicInfo: "المعلومات الأساسية",
+      deselectAll:"إلغاء",
       stepPermissions: "الأذونات",
       step1Info: "إنشاء دور",
       step1Description: "أدخل المعلومات الأساسية للدور الجديد",
@@ -2810,7 +2811,7 @@ contact: {
       step2Description: "يمكنك الآن تحديد الأذونات لهذا الدور",
       continue: "الانتقال إلى الأذونات",
       back: "رجوع",
-            step2Info: "تحديد أذونات المستخدم",
+      step2Info: "تحديد أذونات المستخدم",
       skipPermissions: "تخطي (إضافة لاحقًا)",
       finish: "إنهاء",
       createing: "جارٍ الإنشاء...",
@@ -3231,10 +3232,6 @@ contact: {
     header: 'إدارة فئات الفرع',
     subheader: 'إدارة الفئات والمنتجات للفرع ',
     lastUpdated: 'آخر تحديث',
-    status :{
-      active: 'نشط',
-      inactive : "غير نشط"
-    },
     stats: {
       availableCategories: 'الفئات المتاحة',
       readyToAdd: 'جاهزة للإضافة',
