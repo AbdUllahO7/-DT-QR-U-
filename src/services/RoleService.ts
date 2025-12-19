@@ -67,7 +67,7 @@ class RoleService {
       
       const response = await apiRequest<Role[]>({
         method: 'GET',
-        url: '/api/Roles/',
+        url: '/api/Roles/assignable',
         params: apiParams
       });
 

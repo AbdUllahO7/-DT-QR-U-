@@ -1188,15 +1188,15 @@ hero: {
         placeholder: 'Şehir adını girin'
       },
       street: {
-        label: 'Sokak',
+        label: 'Sokak *',
         placeholder: 'Sokak adını girin'
       },
       zipCode: {
-        label: 'Posta Kodu',
+        label: 'Posta Kodu ',
         placeholder: 'Posta kodunu girin'
       },
       addressLine1: {
-        label: 'Adres Satırı 1',
+        label: 'Adres Satırı 1 *',
         placeholder: 'Detaylı adres bilgisi girin'
       },
       addressLine2: {
@@ -1204,15 +1204,15 @@ hero: {
         placeholder: 'Ek adres bilgisi girin (opsiyonel)'
       },
       phone: {
-        label: 'Telefon Numarası',
+        label: 'Telefon Numarası *',
         placeholder: 'Telefon numarasını girin'
       },
       email: {
-        label: 'E-posta Adresi ',
+        label: 'E-posta Adresi *',
         placeholder: 'E-posta adresini girin'
       },
       location: {
-        label: 'Konum Bilgisi ',
+        label: 'Konum Bilgisi *',
         placeholder: 'Konum bilgisini girin (Örn: 40.9795,28.7225)'
       },
       contactHeader: {
@@ -1279,12 +1279,6 @@ hero: {
     description: 'Restoran şubelerini yönetin ve bilgilerini güncelleyin',
     loading: 'Şubeler yükleniyor...',
     addBranch: 'Yeni Şube Ekle',
-
-        purgeConfirm:{
-        title : "Bu işlemi yapmaya emin misiniz ?",
-        description:""
-      },
-      
     
     // Error messages
     error: {
@@ -2975,17 +2969,17 @@ hero: {
   BranchtableManagement: {
 
   title: "Masa Yönetimi",
-  subtitle: "Restoran masalarınızı ve alanlarınızı yönetin",
+  subtitle: "Restoran masalarınızı ve kategorilerinizi yönetin",
 
   tabs: {
     tables: "Masalar",
-    categories: "Alanlar",
+    categories: "Kategoriler", 
     statistics: "İstatistikler",
     batchCreate: "Toplu Oluştur"
   },
   buttons: {
     addTable: "Masa Ekle",
-    addCategory: "Alan Ekle",
+    addCategory: "Kategori Ekle",
     batchCreate: "Toplu Oluştur",
     edit: "Düzenle",
     delete: "Sil",
@@ -2999,17 +2993,17 @@ hero: {
   },
   labels: {
     tableName: "Masa Adı",
-    category: "Alan",
+    category: "Kategori",
     capacity: "Kapasite",
     status: "Durum",
     occupation: "Doluluk",
     displayOrder: "Görüntüleme Sırası",
     search: "Masalarda ara...",
-    filterByCategory: "Alana Göre Filtrele",
+    filterByCategory: "Kategoriye Göre Filtrele",
     viewMode: "Görünüm Modu",
     totalTables: "Toplam Masa",
     activeTables: "Aktif Masalar",
-    occupiedTables: "Dolu Masalar",
+    occupiedTables: "Dolu Masalar", 
     availableTables: "Boş Masalar"
   },
   status: {
@@ -3021,7 +3015,7 @@ hero: {
   },
   actions: {
     markOccupied: "Dolu Olarak İşaretle",
-    markAvailable: "Boş Olarak İşaretle",
+    markAvailable: "Boş Olarak İşaretle", 
     activate: "Aktifleştir",
     deactivate: "Pasifleştir",
     viewDetails: "Detayları Görüntüle"
@@ -3030,7 +3024,7 @@ hero: {
     tableCreated: "Masa başarıyla oluşturuldu",
     tableUpdated: "Masa başarıyla güncellendi",
     tableDeleted: "Masa başarıyla silindi",
-    statusUpdated: "Durum başarıyla güncellendi",
+    statusUpdated: "Durum başarıyla güncellendi", 
     error: "Bir hata oluştu",
     noTables: "Masa bulunamadı",
     confirmDelete: "Bu masayı silmek istediğinizden emin misiniz?",
@@ -3042,20 +3036,20 @@ hero: {
     title: "Masa İstatistikleri",
     occupancyRate: "Doluluk Oranı",
     averageCapacity: "Ortalama Kapasite",
-    categoryBreakdown: "Alan Dağılımı",
+    categoryBreakdown: "Kategori Dağılımı",
     dailyOccupancy: "Günlük Doluluk",
     peakHours: "Yoğun Saatler"
   },
   forms: {
     createTable: "Yeni Masa Oluştur",
-    editTable: "Masayı Düzenle",
+    editTable: "Masayı Düzenle", 
     batchCreateTables: "Birden Fazla Masa Oluştur",
     quantity: "Miktar",
     namePrefix: "Ad Öneki",
     startingNumber: "Başlangıç Numarası"
   }
   },
-
+  
   BranchTableManagement: {
       "tableNameLabel": "Masa Adı",
   "capacityLabel": "Kapasite",
@@ -3063,15 +3057,15 @@ hero: {
     refreshTable: "Masa  güncelle",
     clearin: "Temizleniyor...",
     loading : "Yükleniyor...",
-    category: "Alan",
-    SelectCategory: "Alan Seçin",
+    category: "Kategori",
+    SelectCategory: "Kategori Seçin",
     Quantity: "Miktar",
     Capacity: "Kapasite",
     createTables: "Masalar Oluşturuluyor...",
     creatingTables: "Masalar Oluşturuluyor...",
-    multiCategory: "Farklı alanlarda aynı anda birden fazla masa oluşturun",
+    multiCategory: "Farklı kategorilerde aynı anda birden fazla masa oluşturun",
     batchCreateTables: "Toplu masa Oluştur",
-    header: "Alan & Masa Yönetimi",
+    header: "Category & Table Management",
     subheader: "Manage restaurant categories and tables with accordion view",
     totalCategories: "Total Categories",
     totalTables: "Total Tables",
@@ -3153,11 +3147,6 @@ hero: {
     loading: 'Şube bilgileri yükleniyor...',
     noBranchFound: 'Herhangi bir şube bulunamadı',
     uploadLogo: 'Logoyu Yükle',
-    noLogo: 'Logo Yok',
-    logoAlt: 'Şube Logosu',
-    uploading: 'Yükleniyor...',
-    uploadPrompt: 'Resmi bırakın veya göz atmak için tıklayın',
-    uploadHint: '5 MB\'ye kadar PNG, JPG, GIF',
     status: {
       open: 'Açık',
       closed: 'Kapalı',
@@ -4754,6 +4743,7 @@ recommended: "Önerilen",
       "foodCertificateUploading": "Gıda belgesi yükleniyor...",
       "foodCertificateSuccess": "✓ Gıda belgesi başarıyla yüklendi",
       "errors": {
+        taxNumberInvalid:"Geçerli bir sayı girin",
         "taxNumberRequired": "Vergi numarası gereklidir",
         "taxOfficeRequired": "Vergi dairesi gereklidir"
       }
@@ -4901,22 +4891,22 @@ recommended: "Önerilen",
         "error": "Şehir gereklidir"
       },
       "street": {
-        "label": "Sokak *",
+        "label": "Sokak ",
         "placeholder": "Sokak adını girin",
         "error": "Sokak gereklidir"
       },
       "zipCode": {
-        "label": "Posta Kodu *",
+        "label": "Posta Kodu ",
         "placeholder": "Posta kodunu girin",
         "error": "Posta kodu gereklidir"
       },
       "addressLine1": {
-        "label": "Adres Satırı 1 *",
+        "label": "Adres Satırı 1 ",
         "placeholder": "Detaylı adres bilgisi girin",
         "error": "Adres satırı 1 gereklidir"
       },
       "addressLine2": {
-        "label": "Adres Satırı 2 *",
+        "label": "Adres Satırı 2 ",
         "placeholder": "Ek adres bilgisi girin",
         "error": "Adres satırı 2 gereklidir"
       }
@@ -4937,7 +4927,7 @@ recommended: "Önerilen",
         "error": "E-posta adresi gereklidir"
       },
       "location": {
-        "label": "Konum Bilgisi *",
+        "label": "Konum Bilgisi",
         "placeholder": "Konum bilgisini girin (Örn: 40.9795, 28.7225)",
         "error": "Konum bilgisi gereklidir",
         "selectOnMap": "Haritadan Seç",

@@ -247,11 +247,7 @@ const OnboardingRestaurant: React.FC = () => {
         
       case 3: // Legal Info - Optional fields
         // Step 3 fields are optional, only validate format if provided
-        if (formData.taxNumber && formData.taxNumber.trim().length > 0) {
-          if (formData.taxNumber.trim().length !== 10) {
-            newErrors.taxNumber = t('onboardingRestaurant.step3.errors.taxNumberInvalid');
-          }
-        }
+        
         break;
     }
     

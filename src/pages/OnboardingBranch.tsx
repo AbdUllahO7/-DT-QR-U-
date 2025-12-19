@@ -191,6 +191,10 @@ const OnboardingBranch: React.FC = () => {
       fetchRestaurantInfo(finalRestaurantId);
     } else {
       logger.warn('RestaurantId bulunamadı! OnboardingRestaurant sayfasına yönlendirilecek.');
+      setApiError(t('onboardingBranch.errors.restaurantNotFound') || 'Restaurant ID not found. Redirecting...');
+      setTimeout(() => {
+        navigate('/onboarding/restaurant');
+      }, 2000);
     }
   }, [location.state]);
 

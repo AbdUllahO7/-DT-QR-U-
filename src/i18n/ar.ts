@@ -1162,11 +1162,11 @@ contact: {
     },
     fields: {
       branchName: {
-        label: 'اسم الفرع',
+        label: 'اسم الفرع *',
         placeholder: 'أدخل اسم الفرع'
       },
       whatsappNumber: {
-        label: 'رقم الطلبات واتساب',
+        label: 'رقم الطلبات واتساب *',
         placeholder: 'أدخل رقم الطلبات واتساب'
       },
       branchLogo: {
@@ -1186,7 +1186,7 @@ contact: {
         placeholder: 'أدخل اسم المدينة'
       },
       street: {
-        label: 'الشارع',
+        label: 'الشارع ',
         placeholder: 'أدخل اسم الشارع'
       },
       zipCode: {
@@ -1194,7 +1194,7 @@ contact: {
         placeholder: 'أدخل الرمز البريدي'
       },
       addressLine1: {
-        label: 'سطر العنوان 1',
+        label: 'سطر العنوان 1 ',
         placeholder: 'أدخل معلومات العنوان التفصيلية'
       },
       addressLine2: {
@@ -1202,15 +1202,15 @@ contact: {
         placeholder: 'أدخل معلومات العنوان الإضافية (اختياري)'
       },
       phone: {
-        label: 'رقم الهاتف',
+        label: 'رقم الهاتف *',
         placeholder: 'أدخل رقم الهاتف'
       },
       email: {
-        label: 'عنوان البريد الإلكتروني ',
+        label: 'عنوان البريد الإلكتروني *',
         placeholder: 'أدخل عنوان البريد الإلكتروني'
       },
       location: {
-        label: 'معلومات الموقع ',
+        label: 'معلومات الموقع',
         placeholder: 'أدخل معلومات الموقع (مثال: 40.9795,28.7225)'
       },
       contactHeader: {
@@ -1277,11 +1277,6 @@ contact: {
     description: 'إدارة فروع المطعم وتحديث معلوماتها',
     loading: 'جاري تحميل الفروع...',
     addBranch: 'إضافة فرع جديد',
-
-        purgeConfirm:{
-        title : "هل أنت متأكد من رغبتك في القيام بذلك؟",
-        description:""
-      },
     
     // Error messages
     error: {
@@ -2978,16 +2973,16 @@ contact: {
   BranchtableManagement: {
 
   title: "إدارة الطاولات",
-  subtitle: "إدارة طاولات المطعم والمناطق",
+  subtitle: "إدارة طاولات المطعم والفئات",
   tabs: {
     tables: "الطاولات",
-    categories: "المناطق",
+    categories: "الفئات",
     statistics: "الإحصائيات",
     batchCreate: "إنشاء متعدد"
   },
   buttons: {
     addTable: "إضافة طاولة",
-    addCategory: "إضافة منطقة",
+    addCategory: "إضافة فئة",
     batchCreate: "إنشاء متعدد",
     edit: "تعديل",
     delete: "حذف",
@@ -3001,13 +2996,13 @@ contact: {
   },
   labels: {
     tableName: "اسم الطاولة",
-    category: "المنطقة",
+    category: "الفئة",
     capacity: "السعة",
     status: "الحالة",
     occupation: "الإشغال",
     displayOrder: "ترتيب العرض",
     search: "البحث في الطاولات...",
-    filterByCategory: "تصفية حسب المنطقة",
+    filterByCategory: "تصفية حسب الفئة",
     viewMode: "وضع العرض",
     totalTables: "إجمالي الطاولات",
     activeTables: "الطاولات النشطة",
@@ -3044,7 +3039,7 @@ contact: {
     title: "إحصائيات الطاولات",
     occupancyRate: "معدل الإشغال",
     averageCapacity: "متوسط السعة",
-    categoryBreakdown: "توزيع المناطق",
+    categoryBreakdown: "توزيع الفئات",
     dailyOccupancy: "الإشغال اليومي",
     peakHours: "ساعات الذروة"
   },
@@ -3065,32 +3060,32 @@ contact: {
       refreshTable: " تحديث الحالة",
       clearing: "جارٍ المسح...",
       loading : "جارٍ التحميل...",
-      multiCategory : "إنشاء طاولات متعددة عبر مناطق مختلفة في وقت واحد",
-      category: "المنطقة",
-      SelectCategory: "اختر منطقة",
+      multiCategory : "إنشاء طاولات متعددة عبر فئات مختلفة في وقت واحد",
+      category: "الفئة",
+      SelectCategory: "اختر فئة",
       Quantity: "عدد الطاولات",
       Capacity: " سعة الطاولة (عدد الأشخاص)",
       createTables: "إنشاء الطاولات",
       creatingTables: "جارٍ إنشاء الطاولات...",
       batchCreateTables: "إنشاء طاولات دفعة واحدة",
-      header: "إدارة المناطق والطاولات",
-      subheader: "إدارة مناطق المطعم والطاولات مع عرض الأكورديون",
-      totalCategories: "إجمالي المناطق",
+      header: "إدارة الفئات والطاولات",
+      subheader: "إدارة فئات المطعم والطاولات مع عرض الأكورديون",
+      totalCategories: "إجمالي الفئات",
       totalTables: "إجمالي الطاولات",
       occupiedTables: "الطاولات المشغولة",
       availableTables: "الطاولات المتاحة",
-      searchPlaceholder: "ابحث عن المناطق...",
+      searchPlaceholder: "ابحث عن الفئات...",
       refresh: "تحديث",
-      addCategory: "إضافة منطقة",
-      addCategoryTitle: "إضافة منطقة جديدة",
-      categoryNameLabel: "اسم المنطقة",
-      categoryNamePlaceholder: "أدخل اسم المنطقة",
+      addCategory: "إضافة فئة",
+      addCategoryTitle: "إضافة فئة جديدة",
+      categoryNameLabel: "اسم الفئة",
+      categoryNamePlaceholder: "أدخل اسم الفئة",
       colorLabel: "اللون",
       iconLabel: "الأيقونة",
       save: "حفظ",
       cancel: "إلغاء",
-      noCategories: "لم يتم العثور على مناطق",
-      addFirstCategory: "إضافة منطقتك الأولى",
+      noCategories: "لم يتم العثور على فئات",
+      addFirstCategory: "إضافة فئتك الأولى",
       tablesCount: "طاولات",
       status: "الحالة",
       active: "نشط",
@@ -3101,7 +3096,7 @@ contact: {
       addTable: "إضافة طاولة",
       tableNamePlaceholder: "اسم الطاولة",
       capacityPlaceholder: "السعة",
-      noTables: "لا توجد طاولات في هذه المنطقة",
+      noTables: "لا توجد طاولات في هذه الفئة",
       qrCodeTitle: "رمز QR - {tableName}",
       qrCodeDescription: "امسح رمز QR هذا للوصول إلى قائمة الطاولة",
       downloadQR: "تنزيل رمز QR",
@@ -3155,11 +3150,6 @@ contact: {
     loading: 'جاري تحميل معلومات الفرع...',
     noBranchFound: 'لم يتم العثور على أي فرع',
     uploadLogo: 'تحميل الشعار',
-    noLogo: 'لا يوجد شعار',
-    logoAlt: 'شعار الفرع',
-    uploading: 'جارٍ التحميل...',
-    uploadPrompt: 'قم بإسقاط الصورة أو انقر للتصفح',
-    uploadHint: 'PNG, JPG, GIF حتى 5 ميجابايت',
     status: {
       open: 'مفتوح',
       closed: 'مغلق',
@@ -4774,6 +4764,7 @@ recycleBin: {
       "foodCertificateUploading": "جاري تحميل شهادة الغذاء...",
       "foodCertificateSuccess": "✓ تم تحميل شهادة الغذاء بنجاح",
       "errors": {
+        taxNumberInvalid:"أدخل رقم صحيح ",
         "taxNumberRequired": "الرقم الضريبي مطلوب",
         "taxOfficeRequired": "مكتب الضرائب مطلوب"
       }
@@ -4876,22 +4867,22 @@ recycleBin: {
           "error": "المدينة مطلوبة"
         },
         "street": {
-          "label": "الشارع *",
+          "label": "الشارع ",
           "placeholder": "أدخل اسم الشارع",
           "error": "الشارع مطلوب"
         },
         "zipCode": {
-          "label": "الرمز البريدي *",
+          "label": "الرمز البريدي ",
           "placeholder": "أدخل الرمز البريدي",
           "error": "الرمز البريدي مطلوب"
         },
         "addressLine1": {
-          "label": "سطر العنوان 1 *",
+          "label": "سطر العنوان 1 ",
           "placeholder": "أدخل العنوان التفصيلي",
           "error": "سطر العنوان 1 مطلوب"
         },
         "addressLine2": {
-          "label": "سطر العنوان 2 *",
+          "label": "سطر العنوان 2 ",
           "placeholder": "أدخل معلومات عنوان إضافية",
           "error": "سطر العنوان 2 مطلوب"
         }
@@ -4912,7 +4903,7 @@ recycleBin: {
           "error": "عنوان البريد الإلكتروني مطلوب"
         },
         "location": {
-          "label": "معلومات الموقع *",
+          "label": "معلومات الموقع",
           "placeholder": "أدخل معلومات الموقع (مثال: 40.9795, 28.7225)",
           "error": "معلومات الموقع مطلوبة",
           "selectOnMap": "اختر من الخريطة",
