@@ -228,12 +228,11 @@ useClickOutside(containerRef, () => setActiveDropdown(null));
   const fetchRoles = useCallback(async () => {
     try {
       // Explicitly include permissions
-      const response = await roleService.getRolesaAsignable({
+      const response = await roleService.getRoles({
       });
       if (response.success && response.data) {
         const rolesData = Array.isArray(response.data) ? response.data : [];
         setRoles(rolesData);
-        setRolesForModal(rolesData);
         logger.info('Roller başarıyla yüklendi', rolesData, {
           prefix: 'UserManagement',
         });
@@ -565,7 +564,7 @@ useClickOutside(containerRef, () => setActiveDropdown(null));
       }
       setIsFetchingModalRoles(true);
       try {
-        const response = await roleService.getRoles({ branchId: branchId });
+        const response = await roleService.getRolesAssignable({ branchId: branchId });
         setRolesForModal(response.data || []);
       } catch (err) {
         logger.error('Modal rolleri yüklenirken hata', err, {
@@ -1202,9 +1201,21 @@ useClickOutside(containerRef, () => setActiveDropdown(null));
           {/* Add User Button */}
           {activeTab === 'users' && (
             <button
-              onClick={() => {
-                setRolesForModal(roles); // Reset roles list to global roles on open
+              onClick={async () => {
+                setIsFetchingModalRoles(true);
                 setIsUserModalOpen(true);
+                try {
+                  // Fetch assignable roles without branch filter (for restaurant-level roles)
+                  const response = await roleService.getRolesAssignable({});
+                  setRolesForModal(response.data || []);
+                } catch (err) {
+                  logger.error('Modal rolleri yüklenirken hata', err, {
+                    prefix: 'UserManagement',
+                  });
+                  setRolesForModal([]);
+                } finally {
+                  setIsFetchingModalRoles(false);
+                }
               }}
               className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
             >
@@ -1374,7 +1385,7 @@ useClickOutside(containerRef, () => setActiveDropdown(null));
           {viewMode === 'grid' && filteredRoles.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <AnimatePresence>
-                {filteredRoles.map((role, index) => (
+                {filteredRoles.map((role) => (
                   <motion.div
                    key={role.appRoleId}
                     initial={{ opacity: 0, scale: 0.9 }}
