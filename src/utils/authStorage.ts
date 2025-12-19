@@ -21,34 +21,33 @@ class AuthStorage {
   private readonly REMEMBER_ME_KEY = 'remember_me';
 
   /**
-   * Determines which storage to use based on remember me preference
+   * Always use localStorage for token storage
+   * WARNING: This is less secure than using sessionStorage
    */
   private getStorage(): Storage {
-    const rememberMe = localStorage.getItem(this.REMEMBER_ME_KEY) === 'true';
-    return rememberMe ? localStorage : sessionStorage;
+    return localStorage;
   }
 
   /**
-   * Save authentication data
+   * Save authentication data to localStorage
    * @param data Authentication data to store
-   * @param rememberMe Whether to persist across browser sessions
+   * @param rememberMe Whether to persist across browser sessions (kept for compatibility)
    */
   saveAuth(data: AuthData, rememberMe: boolean = false): void {
     try {
-      // Set the remember me preference first
+      // Set the remember me preference for compatibility
       if (rememberMe) {
         localStorage.setItem(this.REMEMBER_ME_KEY, 'true');
       } else {
         localStorage.removeItem(this.REMEMBER_ME_KEY);
       }
 
-      const storage = this.getStorage();
+      // Always use localStorage
+      localStorage.setItem(this.TOKEN_KEY, data.token);
+      localStorage.setItem(this.USER_ID_KEY, data.userId);
+      localStorage.setItem(this.TOKEN_EXPIRY_KEY, data.tokenExpiry);
 
-      storage.setItem(this.TOKEN_KEY, data.token);
-      storage.setItem(this.USER_ID_KEY, data.userId);
-      storage.setItem(this.TOKEN_EXPIRY_KEY, data.tokenExpiry);
-
-      console.log(`✅ Auth data saved to ${rememberMe ? 'localStorage' : 'sessionStorage'}`);
+      console.log('✅ Auth data saved to localStorage');
     } catch (error) {
       console.error('Error saving auth data:', error);
       throw new Error('Failed to save authentication data');
@@ -133,15 +132,10 @@ class AuthStorage {
   }
 
   /**
-   * Clear all authentication data from both storages
+   * Clear all authentication data from localStorage
    */
   clearAuth(): void {
     try {
-      // Clear from sessionStorage
-      sessionStorage.removeItem(this.TOKEN_KEY);
-      sessionStorage.removeItem(this.USER_ID_KEY);
-      sessionStorage.removeItem(this.TOKEN_EXPIRY_KEY);
-
       // Clear from localStorage
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.USER_ID_KEY);
@@ -151,8 +145,9 @@ class AuthStorage {
       localStorage.removeItem('selectedBranchId');
       localStorage.removeItem('selectedBranchName');
       localStorage.removeItem('onboarding_userId');
+      localStorage.removeItem('onboarding_restaurantId');
 
-      console.log('✅ Auth data cleared from all storage');
+      console.log('✅ Auth data cleared from localStorage');
     } catch (error) {
       console.error('Error clearing auth data:', error);
     }
@@ -181,20 +176,18 @@ class AuthStorage {
   }
 
   /**
-   * Clean up old tokens from localStorage if "Remember Me" is not enabled
-   * This should be called on app initialization
-   * Only cleans up if there's actually a token in localStorage
+   * Clean up expired tokens from localStorage on app initialization
    */
   cleanupOldTokens(): void {
-    const hasLocalStorageToken = localStorage.getItem(this.TOKEN_KEY);
-    const rememberMeEnabled = this.isRememberMeEnabled();
+    // Check if token exists and is valid
+    const hasToken = localStorage.getItem(this.TOKEN_KEY);
 
-    // Only clean up if there's a token in localStorage but "Remember Me" is NOT enabled
-    if (hasLocalStorageToken && !rememberMeEnabled) {
+    if (hasToken && !this.isTokenValid()) {
+      // Token exists but is expired, clean it up
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.USER_ID_KEY);
       localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
-      console.log('✅ Cleaned up old tokens from localStorage (Remember Me is disabled)');
+      console.log('✅ Cleaned up expired tokens from localStorage');
     }
   }
 }
