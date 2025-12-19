@@ -1186,15 +1186,15 @@ contact: {
         placeholder: 'أدخل اسم المدينة'
       },
       street: {
-        label: 'الشارع *',
+        label: 'الشارع ',
         placeholder: 'أدخل اسم الشارع'
       },
       zipCode: {
-        label: 'الرمز البريدي *',
+        label: 'الرمز البريدي ',
         placeholder: 'أدخل الرمز البريدي'
       },
       addressLine1: {
-        label: 'سطر العنوان 1 *',
+        label: 'سطر العنوان 1 ',
         placeholder: 'أدخل معلومات العنوان التفصيلية'
       },
       addressLine2: {
@@ -1210,7 +1210,7 @@ contact: {
         placeholder: 'أدخل عنوان البريد الإلكتروني'
       },
       location: {
-        label: 'معلومات الموقع *',
+        label: 'معلومات الموقع',
         placeholder: 'أدخل معلومات الموقع (مثال: 40.9795,28.7225)'
       },
       contactHeader: {
@@ -4764,6 +4764,7 @@ recycleBin: {
       "foodCertificateUploading": "جاري تحميل شهادة الغذاء...",
       "foodCertificateSuccess": "✓ تم تحميل شهادة الغذاء بنجاح",
       "errors": {
+        taxNumberInvalid:"أدخل رقم صحيح ",
         "taxNumberRequired": "الرقم الضريبي مطلوب",
         "taxOfficeRequired": "مكتب الضرائب مطلوب"
       }
@@ -4866,22 +4867,22 @@ recycleBin: {
           "error": "المدينة مطلوبة"
         },
         "street": {
-          "label": "الشارع *",
+          "label": "الشارع ",
           "placeholder": "أدخل اسم الشارع",
           "error": "الشارع مطلوب"
         },
         "zipCode": {
-          "label": "الرمز البريدي *",
+          "label": "الرمز البريدي ",
           "placeholder": "أدخل الرمز البريدي",
           "error": "الرمز البريدي مطلوب"
         },
         "addressLine1": {
-          "label": "سطر العنوان 1 *",
+          "label": "سطر العنوان 1 ",
           "placeholder": "أدخل العنوان التفصيلي",
           "error": "سطر العنوان 1 مطلوب"
         },
         "addressLine2": {
-          "label": "سطر العنوان 2 *",
+          "label": "سطر العنوان 2 ",
           "placeholder": "أدخل معلومات عنوان إضافية",
           "error": "سطر العنوان 2 مطلوب"
         }
@@ -4902,7 +4903,7 @@ recycleBin: {
           "error": "عنوان البريد الإلكتروني مطلوب"
         },
         "location": {
-          "label": "معلومات الموقع *",
+          "label": "معلومات الموقع",
           "placeholder": "أدخل معلومات الموقع (مثال: 40.9795, 28.7225)",
           "error": "معلومات الموقع مطلوبة",
           "selectOnMap": "اختر من الخريطة",

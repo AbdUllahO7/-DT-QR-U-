@@ -2,7 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
-
+import ProtectedRoute from './components/ProtectedRoute';
 
 // Import your pages
 import Home from './pages/Home';
@@ -46,11 +46,19 @@ const App: React.FC = () => {
               <Route path="/privacy" element={<PrivacyPolicy />} />
             </Route>
 
-            {/* These routes will NOT have the Header/Footer 
+            {/* These routes will NOT have the Header/Footer
               because they are not children of MainLayout.
             */}
-            <Route path="/selection" element={<SelectionScreen />} />
-            <Route path="/dashboard/*" element={<Dashboard />} />
+            <Route path="/selection" element={
+              <ProtectedRoute>
+                <SelectionScreen />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard/*" element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            } />
             <Route path="/table/qr/:qrToken" element={<TableQR />} />
             <Route path="/OnlineMenu/:publicId" element={<OnlineMenu />} />
             

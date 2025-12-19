@@ -192,10 +192,9 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         throw new Error(response.message || 'Sunucudan geçersiz yanıt alındı');
       }
 
-      // Store userId for onboarding and future use
+      // Store userId for onboarding (only use onboarding_userId to avoid conflicts with auth)
       localStorage.setItem('onboarding_userId', response.data.userId);
-      localStorage.setItem('userId', response.data.userId);
-      
+
       // Redirect to restaurant onboarding
       navigate('/onboarding/restaurant', { 
         state: { 
@@ -655,16 +654,26 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                   errors.termsofUserService ? 'border-red-500' : ''
                 }`}
               />
-              <label htmlFor="termsofUserService" className={`${isRTL ? 'mr-2' : 'ml-2'} block text-sm text-gray-700 dark:text-gray-300`}>
-                <Link to="/terms" className="text-primary-600 dark:text-primary-400 hover:underline">
-                  {t('pages.register.terms.service')}
-                </Link>
-                {' '}{t('pages.register.terms.and')}{' '}
-                <Link to="/privacy" className="text-primary-600 dark:text-primary-400 hover:underline">
-                  {t('pages.register.terms.privacy')}
-                </Link>
-                {' '}{t('pages.register.terms.accept')}
-              </label>
+           <label htmlFor="termsofUserService" className={`${isRTL ? 'mr-2' : 'ml-2'} block text-sm text-gray-700 dark:text-gray-300`}>
+            <Link 
+              to="/terms" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-primary-600 dark:text-primary-400 hover:underline"
+            >
+              {t('pages.register.terms.service')}
+            </Link>
+            {' '}{t('pages.register.terms.and')}{' '}
+            <Link 
+              to="/privacy" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-primary-600 dark:text-primary-400 hover:underline"
+            >
+              {t('pages.register.terms.privacy')}
+            </Link>
+            {' '}{t('pages.register.terms.accept')}
+          </label>
             </div>
             {errors.termsofUserService && (
               <p className="mt-1 text-sm text-red-500">{errors.termsofUserService}</p>

@@ -2,6 +2,7 @@ import axios from 'axios';
 import type { ApiError } from '../types/api';
 import { logger } from './logger';
 import { shouldRetryRequest } from './errorHandler';
+import { authStorage } from './authStorage';
 
 const BASE_URL = import.meta.env.DEV ? 'http://localhost:7001' : 'https://api.mertcode.com';
 // Network bağlantısı kontrolü
@@ -102,7 +103,7 @@ httpClient.interceptors.request.use(
       }
     }
     
-    // Önce müşteri session token'ı kontrol et
+    // Önce müşteri session token'ı kontrol et (for public menu access)
     const customerSessionToken = localStorage.getItem('customerSessionToken');
     if (customerSessionToken) {
       config.headers.Authorization = `Bearer ${customerSessionToken}`;
@@ -110,35 +111,20 @@ httpClient.interceptors.request.use(
         logger.debug('Customer session token kullanılıyor');
       }
     } else {
-      const token = localStorage.getItem('token');
+      // SECURITY FIX: Use authStorage instead of localStorage
+      const token = authStorage.getToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
         if (import.meta.env.DEV && !config.url?.includes('/api/Dashboard')) {
           logger.info('Token eklendi:', `Bearer ${token.substring(0, 15)}...`);
         }
-        // Token'ın geçerlilik süresini kontrol et
-        const tokenExpiry = localStorage.getItem('tokenExpiry');
-        if (tokenExpiry) {
-          const expiryDate = new Date(tokenExpiry);
-          if (isNaN(expiryDate.getTime()) || expiryDate <= new Date()) {
-            logger.warn('⚠️ Token süresi dolmuş veya geçersiz!');
-          }
+
+        // Validate token is still valid
+        if (!authStorage.isTokenValid()) {
+          logger.warn('⚠️ Token süresi dolmuş veya geçersiz!');
+          authStorage.clearAuth();
         }
-      } /* else {
-        // Token yoksa hata fırlat
-        if (config.url?.includes('/api/Restaurants/branches') || 
-            config.url?.includes('/api/Branches') ||
-            config.url?.includes('/api/Dashboard')) {
-          logger.error('Token bulunamadı, API isteği yapılamıyor', { url: config.url });
-          const authError: ApiError = {
-            status: 401,
-            message: 'Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.',
-            errors: undefined,
-            response: undefined
-          };
-          return Promise.reject(authError);
-        }
-      } */
+      }
     }
     
     return config;
@@ -227,13 +213,17 @@ httpClient.interceptors.response.use(
 
     // 401 Unauthorized - Token geçersiz veya süresi dolmuş
     if (error.response?.status === 401) {
-      // Login ve register sayfalarında token kontrolü yapma
-      if (!originalRequest?.url?.includes('/api/Auth/Login') &&
-          !originalRequest?.url?.includes('/api/Auth/Register')) {
-        logger.warn('⚠️ 401 Unauthorized - Token geçersiz');
-        localStorage.removeItem('token');
-        localStorage.removeItem('tokenExpiry');
-        localStorage.removeItem('userId');
+      // Don't redirect to login for auth and onboarding endpoints
+      const isAuthEndpoint = originalRequest?.url?.includes('/api/Auth/');
+      const isOnboardingEndpoint = originalRequest?.url?.includes('/api/Restaurant') ||
+                                   originalRequest?.url?.includes('/api/Branch/CreateOnboardingBranch');
+      const isOnboardingPage = window.location.pathname.includes('/onboarding');
+
+      if (!isAuthEndpoint && !isOnboardingEndpoint && !isOnboardingPage) {
+        logger.warn('⚠️ 401 Unauthorized - Token geçersiz, kullanıcı oturumu kapatılıyor');
+
+        // SECURITY FIX: Use authStorage for centralized auth clearing
+        authStorage.clearAuth();
 
         // Redirect to login if not already there
         if (!window.location.pathname.includes('/login')) {

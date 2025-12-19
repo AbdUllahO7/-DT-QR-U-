@@ -190,37 +190,40 @@ const handleOpenProductExtras = (productId: number, productName: string) => {
   useClickOutside(branchDropdownRef, () => setIsBranchDropdownOpen(false));
 
   // Load branches on component mount
-  useEffect(() => {
-    const fetchBranches = async () => {
-      setIsLoadingBranches(true);
-      try {
-        const branchList = await branchService.getBranchesDropdown();
-        
-        // Add "Select All" option at the beginning
-        const selectAllOption: BranchDropdownItem = {
-          branchId: SELECT_ALL_BRANCH_ID,
-          branchName: t('productsContent.branch.selectAll') || 'All Branches'
-        };
-        
-        const branchesWithSelectAll = [selectAllOption, ...branchList];
-        setBranches(branchesWithSelectAll);
-        
-        // Auto-select "Select All" option if no branch is selected
-        if (!selectedBranch) {
-          setSelectedBranch(selectAllOption);
+// Load branches on component mount AND when language changes
+useEffect(() => {
+  const fetchBranches = async () => {
+    setIsLoadingBranches(true);
+    try {
+      const branchList = await branchService.getBranchesDropdown();
+      
+      // The label is now recalculated every time 't' updates
+      const selectAllOption: BranchDropdownItem = {
+        branchId: SELECT_ALL_BRANCH_ID,
+        branchName: t('productsContent.branch.selectAll') || 'All Branches'
+      };
+      
+      const branchesWithSelectAll = [selectAllOption, ...branchList];
+      setBranches(branchesWithSelectAll);
+      
+      // Update the selected branch label if "All" was selected
+      setSelectedBranch(prev => {
+        if (!prev || prev.branchId === SELECT_ALL_BRANCH_ID) {
+          return selectAllOption;
         }
-        
-        logger.info('Şube listesi başarıyla yüklendi', { branchCount: branchList.length });
-      } catch (error) {
-        logger.error('Şube listesi yüklenirken hata:', error);
-        // Handle error - you might want to show a toast or error message
-      } finally {
-        setIsLoadingBranches(false);
-      }
-    };
+        return prev;
+      });
+      
+      logger.info('Şube listesi başarıyla yüklendi');
+    } catch (error) {
+      logger.error('Şube listesi yüklenirken hata:', error);
+    } finally {
+      setIsLoadingBranches(false);
+    }
+  };
 
-    fetchBranches();
-  }, []);
+  fetchBranches();
+}, [t]); // Added 't' as a dependency
 
   // Load categories when branch changes
   useEffect(() => {

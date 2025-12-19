@@ -1192,7 +1192,7 @@ hero: {
         placeholder: 'Sokak adını girin'
       },
       zipCode: {
-        label: 'Posta Kodu *',
+        label: 'Posta Kodu ',
         placeholder: 'Posta kodunu girin'
       },
       addressLine1: {
@@ -4743,6 +4743,7 @@ recommended: "Önerilen",
       "foodCertificateUploading": "Gıda belgesi yükleniyor...",
       "foodCertificateSuccess": "✓ Gıda belgesi başarıyla yüklendi",
       "errors": {
+        taxNumberInvalid:"Geçerli bir sayı girin",
         "taxNumberRequired": "Vergi numarası gereklidir",
         "taxOfficeRequired": "Vergi dairesi gereklidir"
       }
@@ -4890,22 +4891,22 @@ recommended: "Önerilen",
         "error": "Şehir gereklidir"
       },
       "street": {
-        "label": "Sokak *",
+        "label": "Sokak ",
         "placeholder": "Sokak adını girin",
         "error": "Sokak gereklidir"
       },
       "zipCode": {
-        "label": "Posta Kodu *",
+        "label": "Posta Kodu ",
         "placeholder": "Posta kodunu girin",
         "error": "Posta kodu gereklidir"
       },
       "addressLine1": {
-        "label": "Adres Satırı 1 *",
+        "label": "Adres Satırı 1 ",
         "placeholder": "Detaylı adres bilgisi girin",
         "error": "Adres satırı 1 gereklidir"
       },
       "addressLine2": {
-        "label": "Adres Satırı 2 *",
+        "label": "Adres Satırı 2 ",
         "placeholder": "Ek adres bilgisi girin",
         "error": "Adres satırı 2 gereklidir"
       }
@@ -4926,7 +4927,7 @@ recommended: "Önerilen",
         "error": "E-posta adresi gereklidir"
       },
       "location": {
-        "label": "Konum Bilgisi *",
+        "label": "Konum Bilgisi",
         "placeholder": "Konum bilgisini girin (Örn: 40.9795, 28.7225)",
         "error": "Konum bilgisi gereklidir",
         "selectOnMap": "Haritadan Seç",

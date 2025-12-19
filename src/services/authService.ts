@@ -1,6 +1,7 @@
 import { apiRequest } from '../utils/apiRequest';
 import { decodeToken } from '../utils/http';
 import { sanitizePlaceholder } from '../utils/sanitize';
+import { authStorage } from '../utils/authStorage';
 import type {
   LoginDto,
   LoginResponse,
@@ -101,8 +102,8 @@ class AuthService {
     try {
       logger.info('getUserProfile çağrılıyor...');
 
-      // 1) Önce localStorage'dan JWT'yi kontrol et
-      const storedToken = localStorage.getItem('token');
+      // 1) SECURITY FIX: Use authStorage instead of localStorage
+      const storedToken = authStorage.getToken();
       if (!storedToken) {
         throw new Error('Token bulunamadı');
       }
@@ -298,9 +299,8 @@ class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('tokenExpiry');
-    localStorage.removeItem('userId');
+    // SECURITY FIX: Use authStorage for centralized auth clearing
+    authStorage.clearAuth();
   }
 }
 
