@@ -1,16 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Building2, MapPin, Phone, Clock, Upload, Trash2, Image as ImageIcon, AlertTriangle, Globe } from 'lucide-react';
+import { X, Building2, MapPin, Phone, Clock, Upload, Trash2, Image as ImageIcon, AlertTriangle, Globe, Navigation } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
-import { 
-  BranchDetailResponse, 
-  BranchEditFormData, 
+import {
+  BranchDetailResponse,
+  BranchEditFormData,
   CreateBranchWorkingHourCoreDto,
   CreateBranchWithDetailsDto
 } from '../../../../types/api';
 import { mediaService } from '../../../../services/mediaService';
 import { logger } from '../../../../utils/logger';
 import { countriesWithCodes, countryKeys } from '../../../../data/mockData';
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
+});
 
 
 
@@ -61,11 +75,18 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
   const [hasChanges, setHasChanges] = useState(false);
   const [activeTab, setActiveTab] = useState<'general' | 'address' | 'contact' | 'workingHours'>('general');
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  
+
   // Image upload states
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  // Map modal state
+  const [isMapModalOpen, setIsMapModalOpen] = useState<boolean>(false);
+  const [selectedLatLng, setSelectedLatLng] = useState<{ lat: number; lng: number }>({
+    lat: 41.0082, // Default to Istanbul
+    lng: 28.9784
+  });
 
   const defaultWorkingHours: CreateBranchWorkingHourCoreDto[] = [
     { dayOfWeek: 1, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
@@ -400,7 +421,156 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
           t('branchManagement.error.unknownError')
         );
       }
-    } 
+    }
+  };
+
+  // Map handlers
+  const handleOpenMapModal = (): void => {
+    // Try to parse existing location
+    if (formData.createContactDto.location) {
+      try {
+        const [lat, lng] = formData.createContactDto.location.split(',').map(Number);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          setSelectedLatLng({ lat, lng });
+        }
+      } catch (error) {
+        logger.error('Failed to parse location', error);
+      }
+    }
+    setIsMapModalOpen(true);
+  };
+
+  const handleCloseMapModal = (): void => {
+    setIsMapModalOpen(false);
+  };
+
+  const handleConfirmLocation = (): void => {
+    const locationString = `${selectedLatLng.lat.toFixed(6)},${selectedLatLng.lng.toFixed(6)}`;
+    setFormData(prev => ({
+      ...prev,
+      createContactDto: {
+        ...prev.createContactDto,
+        location: locationString
+      }
+    }));
+    setHasChanges(true);
+    setIsMapModalOpen(false);
+    if (validationErrors['createContactDto.location']) {
+      const newErrors = { ...validationErrors };
+      delete newErrors['createContactDto.location'];
+      setValidationErrors(newErrors);
+    }
+  };
+
+  // Map components
+  const MapUpdater: React.FC<{ center: [number, number] }> = ({ center }) => {
+    const map = useMap();
+    useEffect(() => {
+      map.setView(center, map.getZoom());
+    }, [center, map]);
+    return null;
+  };
+
+  const LocationMarker: React.FC = () => {
+    useMapEvents({
+      click(e) {
+        setSelectedLatLng({
+          lat: e.latlng.lat,
+          lng: e.latlng.lng,
+        });
+      },
+    });
+
+    return <Marker position={[selectedLatLng.lat, selectedLatLng.lng]} />;
+  };
+
+  const MapPickerModal = () => {
+    useEffect(() => {
+      if (isMapModalOpen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'unset';
+      }
+
+      return () => {
+        document.body.style.overflow = 'unset';
+      };
+    }, [isMapModalOpen]);
+
+    if (!isMapModalOpen) return null;
+
+    return (
+      <AnimatePresence>
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 z-[9999] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className={`relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-xl ${isRTL ? 'rtl' : 'ltr'}`}
+          >
+            <div className={`flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                {t('onboardingBranch.form.step3.location.mapTitle')}
+              </h3>
+              <button
+                onClick={handleCloseMapModal}
+                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                {t('onboardingBranch.form.step3.location.clickToPin')}
+              </div>
+
+              <div className="relative w-full h-[400px] bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 shadow-inner">
+                <MapContainer
+                  center={[selectedLatLng.lat, selectedLatLng.lng]}
+                  zoom={13}
+                  style={{ height: '100%', width: '100%' }}
+                  scrollWheelZoom={true}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <MapUpdater center={[selectedLatLng.lat, selectedLatLng.lng]} />
+                  <LocationMarker />
+                </MapContainer>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between">
+                <div className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                  <span className="font-medium">{t('onboardingBranch.form.step3.location.selectedCoordinates')}</span>
+                  <code className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400" dir="ltr">
+                    {selectedLatLng.lat.toFixed(6)}, {selectedLatLng.lng.toFixed(6)}
+                  </code>
+                </div>
+              </div>
+            </div>
+
+            <div className={`flex ${isRTL ? 'flex-row-reverse space-x-reverse' : ''} space-x-3 p-6 border-t border-gray-200 dark:border-gray-700`}>
+              <button
+                type="button"
+                onClick={handleCloseMapModal}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmLocation}
+                className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+              >
+                {t('common.save')}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </AnimatePresence>
+    );
   };
 
   if (!isOpen) return null;
@@ -833,14 +1003,25 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('branchManagement.form.location')}
                     </label>
-                    <input
-                      type="text"
-                      name="createContactDto.location"
-                      value={formData.createContactDto.location || ''}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
-                      placeholder={t('branchManagement.form.locationPlaceholder')}
-                    />
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        name="createContactDto.location"
+                        value={formData.createContactDto.location || ''}
+                        onChange={handleInputChange}
+                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+                        placeholder={t('branchManagement.form.locationPlaceholder')}
+                        readOnly
+                      />
+                      <button
+                        type="button"
+                        onClick={handleOpenMapModal}
+                        className={`px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                      >
+                        <Navigation className="w-4 h-4" />
+                        <span className="hidden sm:inline">{t('onboardingBranch.form.step3.location.selectOnMap')}</span>
+                      </button>
+                    </div>
                   </div>
 
                   <div>
@@ -1030,6 +1211,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
           </div>
         </motion.div>
       </div>
+      <MapPickerModal />
     </AnimatePresence>
   );
 };
