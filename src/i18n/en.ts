@@ -1177,11 +1177,11 @@ hero: {
         supportText: 'PNG, JPG, GIF formats are supported. Maximum file size: 5MB'
       },
       country: {
-        label: 'Country *',
+        label: 'Country ',
         placeholder: 'Enter country name'
       },
       city: {
-        label: 'City *',
+        label: 'City ',
         placeholder: 'Enter city name'
       },
       street: {
@@ -1189,11 +1189,11 @@ hero: {
         placeholder: 'Enter street name'
       },
       zipCode: {
-        label: 'Zip Code *',
+        label: 'Zip Code',
         placeholder: 'Enter zip code'
       },
       addressLine1: {
-        label: 'Address Line 1 *',
+        label: 'Address Line 1',
         placeholder: 'Enter detailed address information'
       },
       addressLine2: {
@@ -4752,9 +4752,9 @@ productModal: {
     "step3": {
       "title": "Legal Documents",
       "subtitle": "Enter your tax and document information",
-      "taxNumberLabel": "Tax Number *",
+      "taxNumberLabel": "Tax Number",
       "taxNumberPlaceholder": "Enter your tax number",
-      "taxOfficeLabel": "Tax Office *",
+      "taxOfficeLabel": "Tax Office",
       "taxOfficePlaceholder": "Enter your tax office",
       "workPermitLabel": "Work Permit Document",
       "workPermitUploading": "Work permit document uploading...",
@@ -4763,6 +4763,7 @@ productModal: {
       "foodCertificateUploading": "Food certificate uploading...",
       "foodCertificateSuccess": "✓ Food certificate uploaded successfully",
       "errors": {
+        taxNumberInvalid:"Enter a valid number",
         "taxNumberRequired": "Tax number is required",
         "taxOfficeRequired": "Tax office is required"
       }
@@ -4855,32 +4856,32 @@ productModal: {
         "title": "Address Information",
         "description": "Enter your branch address details",
         "country": {
-          "label": "Country *",
+          "label": "Country ",
           "placeholder": "Enter country name",
           "error": "Country is required"
         },
         "city": {
-          "label": "City *",
+          "label": "City",
           "placeholder": "Enter city name",
           "error": "City is required"
         },
         "street": {
-          "label": "Street *",
+          "label": "Street ",
           "placeholder": "Enter street name",
           "error": "Street is required"
         },
         "zipCode": {
-          "label": "Zip Code *",
+          "label": "Zip Code ",
           "placeholder": "Enter zip code",
           "error": "Zip code is required"
         },
         "addressLine1": {
-          "label": "Address Line 1 *",
+          "label": "Address Line 1",
           "placeholder": "Enter detailed address",
           "error": "Address line 1 is required"
         },
         "addressLine2": {
-          "label": "Address Line 2 *",
+          "label": "Address Line 2 ",
           "placeholder": "Enter additional address information",
           "error": "Address line 2 is required"
         }

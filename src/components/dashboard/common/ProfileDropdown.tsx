@@ -3,7 +3,7 @@ import { User, FileText, Settings, LogOut, ChevronDown } from 'lucide-react';
 import { useClickOutside } from '../../../hooks';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { authService } from '../../../services/authService';
-import { UserProfileResponse } from '../../../types/api';
+import { UserProfileResponse } from '../../../types/users/users.type';
 
 interface ProfileDropdownProps {
   branchName: string | null;

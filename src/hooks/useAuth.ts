@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { authStorage } from '../utils/authStorage';
 
 export const useAuth = () => {
   const navigate = useNavigate();
@@ -37,10 +38,8 @@ export const useAuth = () => {
   // Check if token is expired and redirect if necessary
   const checkTokenExpiry = useCallback(() => {
     try {
-      const token = localStorage.getItem('token');
-      const tokenExpiry = localStorage.getItem('tokenExpiry');
-
-      if (!token || !tokenExpiry) {
+      // SECURITY FIX: Use authStorage for validation
+      if (!authStorage.isAuthenticated()) {
         if (isAuthenticated) {
           clearAuth();
           navigate('/login', { replace: true });
@@ -48,31 +47,19 @@ export const useAuth = () => {
         return false;
       }
 
-      const expiryDate = new Date(tokenExpiry);
-      const now = new Date();
-
-      // Check if date is valid
-      if (isNaN(expiryDate.getTime())) {
-        clearAuth();
-        navigate('/login', { replace: true });
-        return false;
-      }
-
-      // Check if token has expired
-      if (expiryDate <= now) {
-        clearAuth();
-        navigate('/login', { replace: true });
-        return false;
-      }
-
       // Optional: Warn user when token is about to expire (5 minutes before)
-      const timeUntilExpiry = expiryDate.getTime() - now.getTime();
-      const fiveMinutes = 5 * 60 * 1000;
-      
-      if (timeUntilExpiry <= fiveMinutes && timeUntilExpiry > 0) {
-        console.warn(`Token will expire in ${Math.round(timeUntilExpiry / 1000)} seconds`);
-        // You could show a warning notification here
-        // Example: showNotification('Your session will expire soon. Please save your work.');
+      const tokenExpiry = authStorage.getTokenExpiry();
+      if (tokenExpiry) {
+        const expiryDate = new Date(tokenExpiry);
+        const now = new Date();
+        const timeUntilExpiry = expiryDate.getTime() - now.getTime();
+        const fiveMinutes = 5 * 60 * 1000;
+
+        if (timeUntilExpiry <= fiveMinutes && timeUntilExpiry > 0) {
+          console.warn(`Token will expire in ${Math.round(timeUntilExpiry / 1000)} seconds`);
+          // You could show a warning notification here
+          // Example: showNotification('Your session will expire soon. Please save your work.');
+        }
       }
 
       return true;
@@ -86,28 +73,23 @@ export const useAuth = () => {
 
   const checkAuth = useCallback(() => {
     try {
-      const token = localStorage.getItem('token');
-      const tokenExpiry = localStorage.getItem('tokenExpiry');
+      // SECURITY FIX: Use authStorage for validation
+      if (authStorage.isAuthenticated()) {
+        setIsAuthenticated(true);
 
-      if (token && tokenExpiry) {
-        const expiryDate = new Date(tokenExpiry);
-        const now = new Date();
-        
-        if (!isNaN(expiryDate.getTime()) && expiryDate > now) {
-          setIsAuthenticated(true);
-          
-          // Calculate time until expiry and set a timeout for automatic logout
+        // Calculate time until expiry and set a timeout for automatic logout
+        const tokenExpiry = authStorage.getTokenExpiry();
+        if (tokenExpiry) {
+          const expiryDate = new Date(tokenExpiry);
+          const now = new Date();
           const timeUntilExpiry = expiryDate.getTime() - now.getTime();
-          
+
           if (timeUntilExpiry > 0) {
             window.setTimeout(() => {  // Using window.setTimeout for clarity
               clearAuth();
               navigate('/login', { replace: true });
             }, timeUntilExpiry);
           }
-        } else {
-          clearAuth();
-          navigate('/login', { replace: true });
         }
       } else {
         setIsAuthenticated(false);
@@ -121,56 +103,32 @@ export const useAuth = () => {
   }, [navigate]);
 
   const clearAuth = useCallback(() => {
-    // Clear all auth-related data from localStorage
-    localStorage.removeItem('token');
-    localStorage.removeItem('tokenExpiry');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('restaurantName');
-    localStorage.removeItem('selectedBranchId');
-    localStorage.removeItem('selectedBranchName');
-    
+    // SECURITY FIX: Use authStorage for centralized auth clearing
+    authStorage.clearAuth();
+
     // Clear the interval when logging out
     if (checkIntervalRef.current) {
       clearInterval(checkIntervalRef.current);
       checkIntervalRef.current = null;
     }
-    
+
     setIsAuthenticated(false);
   }, []);
 
   const requireAuth = useCallback((callback?: () => void) => {
     try {
-      const token = localStorage.getItem('token');
-      const tokenExpiry = localStorage.getItem('tokenExpiry');
+      // SECURITY FIX: Use authStorage for validation
+      if (!authStorage.isAuthenticated()) {
+        clearAuth();
+        navigate('/login', { replace: true });
+        return false;
+      }
 
-      if (!token || !tokenExpiry) {
-        clearAuth();
-        navigate('/login', { replace: true });
-        return false;
-      }
-      
-      const expiryDate = new Date(tokenExpiry);
-      const now = new Date();
-      
-      // Check for invalid date
-      if (isNaN(expiryDate.getTime())) {
-        clearAuth();
-        navigate('/login', { replace: true });
-        return false;
-      }
-      
-      // Check if expired
-      if (expiryDate <= now) {
-        clearAuth();
-        navigate('/login', { replace: true });
-        return false;
-      }
-      
       // Execute callback if provided
       if (callback) {
         callback();
       }
-      
+
       return true;
     } catch (error) {
       console.error('Error during requireAuth:', error);

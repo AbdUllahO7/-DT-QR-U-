@@ -515,9 +515,7 @@ const BranchManagement: React.FC = () => {
                 <AlertTriangle className="h-5 w-5 text-red-400 dark:text-red-500" />
               </div>
               <div className={`${isRTL ? 'mr-3' : 'ml-3'} flex-1`}>
-                <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-                  {t('branchManagement.error.title')}
-                </h3>
+           
                 <p className="mt-1 text-sm text-red-700 dark:text-red-300">
                   {error}
                 </p>

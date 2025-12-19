@@ -13,9 +13,9 @@ import {
   Crown
 } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import { UserProfileResponse } from '../../../types/api';
 import { authService } from '../../../services/authService';
 import { CATEGORY_COLORS } from '../../../types/BranchManagement/type';
+import { UserProfileResponse } from '../../../types/users/users.type';
 
 // Kategori renkleri
 
@@ -348,7 +348,7 @@ const Profile: React.FC = () => {
                             className={`px-3 py-1.5 rounded-lg text-sm font-medium ${categoryColor}`}
                             title={permission.description}
                           >
-                            {translatedName}
+                            {permission.name}
                           </span>
                         );
                       })}
