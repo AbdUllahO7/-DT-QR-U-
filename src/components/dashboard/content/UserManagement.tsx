@@ -344,7 +344,6 @@ useClickOutside(containerRef, () => setActiveDropdown(null));
 
 
 
-  // Create Role Handler - Creates role then opens edit modal for permissions
   // Create Role Handler - Creates role with permissions in one call
   const handleRoleCreated = useCallback(async () => {
     // Just refresh the roles list
