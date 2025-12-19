@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
+import { useTheme } from "../contexts/ThemeContext";
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { nanoid } from 'nanoid';
 import {
@@ -16,7 +17,9 @@ import {
   Smartphone,
   Utensils,
   Globe,
-  ChevronDown
+  ChevronDown,
+  Moon,
+  Sun
 } from 'lucide-react';
 import MenuComponent from "../components/dashboard/Branch/Menu/MenuComponent";
 import { httpClient } from "../utils/http";
@@ -100,6 +103,25 @@ const LanguageSelector: React.FC = () => {
         </div>
       )}
     </div>
+  );
+};
+
+// Theme Toggle Component
+const ThemeToggle: React.FC = () => {
+  const { isDark, toggleTheme } = useTheme();
+
+  return (
+    <button
+      onClick={toggleTheme}
+      className="p-2 rounded-lg bg-white/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-all duration-200 border border-gray-200 dark:border-gray-700"
+      aria-label="Toggle theme"
+    >
+      {isDark ? (
+        <Sun className="h-5 w-5 text-yellow-500" />
+      ) : (
+        <Moon className="h-5 w-5 text-indigo-600" />
+      )}
+    </button>
   );
 };
 
@@ -260,6 +282,7 @@ const TableQR = () => {
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-sm text-green-600 dark:text-green-400 font-medium">{t('tableQR.header.active')}</span>
               </div>
+              <ThemeToggle />
               <LanguageSelector />
             </div>
           </div>

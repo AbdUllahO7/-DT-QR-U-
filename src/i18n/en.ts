@@ -1310,7 +1310,7 @@ hero: {
         branchName: 'Branch Name',
         branchNamePlaceholder: 'Enter branch name',
         branchNameRequired: 'Branch name is required',
-        whatsappNumber: 'WhatsApp Order Number',
+        whatsappNumber: 'WhatsApp Order Number *',
         whatsappPlaceholder: 'Enter WhatsApp number',
         branchLogo: 'Branch Logo',
         logoUpload: 'Upload Logo',
@@ -1320,9 +1320,9 @@ hero: {
         logoInstructions: 'You can upload JPG, PNG or GIF files, maximum 5MB size.',
 
         // Address fields
-        country: 'Country',
+        country: 'Country *',
         countryPlaceholder: 'Enter country name',
-        city: 'City',
+        city: 'City *',
         cityPlaceholder: 'Enter city name',
         street: 'Street',
         streetPlaceholder: 'Enter street name',
@@ -1334,9 +1334,9 @@ hero: {
         addressLine2Placeholder: 'Additional address information (optional)',
 
         // Contact fields
-        phone: 'Phone',
+        phone: 'Phone *',
         phonePlaceholder: 'Enter phone number',
-        email: 'Email',
+        email: 'Email *',
         emailPlaceholder: 'Enter email address',
         location: 'Location',
         locationPlaceholder: 'Enter location information',
