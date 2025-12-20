@@ -63,6 +63,16 @@ export const tr = {
         asc: "İsim (A-Z)",
         desc: "İsim (Z-A)"
       },
+      "status": {
+      "label": "Durum",
+      "asc": "Durum (A-Z)",
+      "desc": "Durum (Z-A)"
+    },
+    "allergen": {
+      "label": "Alerjen",
+      "asc": "Alerjen (A-Z)",
+      "desc": "Alerjen (Z-A)"
+    },
       price: {
         asc: "Fiyat (Düşükten Yükseğe)",
         desc: "Fiyat (Yüksekten Düşüğe)"
@@ -2804,12 +2814,13 @@ hero: {
       title: 'Yeni Rol Oluştur',
       stepBasicInfo: 'Temel Bilgiler',
       stepPermissions:"İzinler",
+      deselectAll:"Seçimi Kaldır",
       selectBranch: 'Şube Seçimi',
       step1Info: "Rol Oluştur",
       step1Description: "Yeni rol için temel bilgileri girin",
       continue: "İzinlere Devam Et",
       branch: 'Şube',
-      selectAll: 'Tüm Şubeler',
+      selectAll: 'Tüm Roller',
       noBranch: 'Şube Yok',
       finish: "Bitir",
       creating: "Oluşturuluyor...",
@@ -3238,11 +3249,6 @@ hero: {
       selectedProducts: 'Seçilen Ürünler',
       fromCategories: 'Kategorilerden',
       avalibleAddons: 'Mevcut Eklentiler',
-    },
-
-    status :{
-      active: 'Aktif',
-      inactive : "Pasif"
     },
 
     // Tab Navigation

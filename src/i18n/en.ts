@@ -63,6 +63,16 @@ export const en = {
       "asc": "Name (A-Z)",
       "desc": "Name (Z-A)"
     },
+  "status": {
+      "label": "Status",
+      "asc": "Status (A-Z)",
+      "desc": "Status (Z-A)"
+    },
+    "allergen": {
+      "label": "Allergen",
+      "asc": "Allergen (A-Z)",
+      "desc": "Allergen (Z-A)"
+    },
     "price": {
       "asc": "Price (Low to High)",
       "desc": "Price (High to Low)"
@@ -2796,6 +2806,7 @@ hero: {
     createRole: {
       title: 'Create New Role',
       step1Title: "Step 1: Basic Information",
+      deselectAll:"Deselect all",
       step2Title: "Step 2: Select Permissions",
       stepBasicInfo: "Basic Info",
       stepPermissions: "Permissions",
@@ -3226,10 +3237,6 @@ hero: {
     header: 'Branch Categories Management',
     subheader: 'Manage categories and products for Branch ',
     lastUpdated: 'Last Updated',
-    status :{
-      active: 'Active',
-      inactive : "Pasif"
-    },
     stats: {
       availableCategories: 'Available Categories',
       readyToAdd: 'Ready to add',

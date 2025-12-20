@@ -3,11 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, AlertCircle, Mail, Lock, ArrowLeft } from 'lucide-react';
 import { authService } from '../services/authService';
-import { isBranchOnlyUser } from '../utils/http';
 import { useLanguage } from '../contexts/LanguageContext';
 import { logger } from '../utils/logger';
 import { useNetworkStatus } from '../hooks/useNetworkStatus';
-import { getUserFriendlyErrorMessage, logError } from '../utils/errorHandler';
+import { logError } from '../utils/errorHandler';
 import { authStorage } from '../utils/authStorage';
 import type { LoginDto } from '../types/api';
 
@@ -34,7 +33,6 @@ const Login: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    // Check if user is already authenticated
     if (authStorage.isAuthenticated()) {
       logger.info('User already authenticated, redirecting to dashboard');
       navigate('/dashboard');
@@ -47,8 +45,8 @@ const Login: React.FC = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
-    if (errors[name as keyof typeof errors]) {
-      setErrors(prev => ({ ...prev, [name]: undefined }));
+    if (errors[name as keyof typeof errors] || errors.general) {
+      setErrors(prev => ({ ...prev, [name]: undefined, general: undefined }));
     }
   };
 
@@ -83,9 +81,7 @@ const Login: React.FC = () => {
     }
 
     try {
-      // FIX: Separate rememberMe from the API payload
       const { rememberMe, ...apiCredentials } = formData;
-
       const response = await authService.login(apiCredentials);
 
       if (response.accessToken) {
@@ -93,8 +89,6 @@ const Login: React.FC = () => {
         const payload = JSON.parse(atob(tokenParts[1]));
         const userId = payload.user_id;
 
-        // SECURITY FIX: Use authStorage instead of localStorage
-        // This prevents cross-device session persistence unless "Remember Me" is checked
         authStorage.saveAuth({
           token: response.accessToken,
           userId: userId,
@@ -105,17 +99,22 @@ const Login: React.FC = () => {
 
         const onboardingUserId = localStorage.getItem('onboarding_userId');
 
-        // Final redirection logic
         if (onboardingUserId) {
           navigate('/onboarding/restaurant');
         } else {
-          // Hard reload or window.location ensures Axios interceptors pick up the new token immediately
           window.location.href = '/dashboard';
         }
       }
     } catch (error: any) {
       logError(error, 'Login error');
-      setErrors({ general: getUserFriendlyErrorMessage(error) });
+      
+      // Extraction logic for your specific API response structure
+      const apiErrorMessage = 
+        error.response?.data?.errorMessage || 
+        error.message || 
+        "An unexpected error occurred";
+
+      setErrors({ general: apiErrorMessage });
       setIsSubmitting(false);
     }
   };
@@ -156,14 +155,18 @@ const Login: React.FC = () => {
             <div className="mb-6 rounded-lg bg-red-50 dark:bg-red-900/20 p-4 border border-red-200">
               <div className="flex">
                 <AlertCircle className="h-5 w-5 text-red-400 flex-shrink-0" />
-                <div className="ml-3 text-sm text-red-700 dark:text-red-300">{errors.general}</div>
+                <div className="ml-3 text-sm text-red-700 dark:text-red-300">
+                  {errors.general}
+                </div>
               </div>
             </div>
           )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('pages.login.email')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('pages.login.email')}
+              </label>
               <div className="relative">
                 <Mail className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400`} />
                 <input
@@ -179,7 +182,9 @@ const Login: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('pages.login.password')}</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('pages.login.password')}
+              </label>
               <div className="relative">
                 <Lock className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400`} />
                 <input
