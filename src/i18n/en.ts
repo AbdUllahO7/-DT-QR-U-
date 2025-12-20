@@ -63,6 +63,16 @@ export const en = {
       "asc": "Name (A-Z)",
       "desc": "Name (Z-A)"
     },
+  "status": {
+      "label": "Status",
+      "asc": "Status (A-Z)",
+      "desc": "Status (Z-A)"
+    },
+    "allergen": {
+      "label": "Allergen",
+      "asc": "Allergen (A-Z)",
+      "desc": "Allergen (Z-A)"
+    },
     "price": {
       "asc": "Price (Low to High)",
       "desc": "Price (High to Low)"

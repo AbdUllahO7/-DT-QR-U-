@@ -131,16 +131,7 @@ const Navbar: React.FC<NavbarProps> = ({
                 <Moon className="h-5 w-5" />
               )}
             </button>
-            <button 
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 relative"
-              aria-label={t('accessibility.notifications')}
-              title={t('notifications.title')}
-            >
-              <Bell className="h-5 w-5" />
-              <span className={`absolute -top-1 ${isRTL ? '-left-1' : '-right-1'} h-3 w-3 bg-red-500 rounded-full text-xs text-white flex items-center justify-center`}>
-                3
-              </span>
-            </button>
+            
             <ProfileDropdown
               branchName={branchName}
               onTabChange={onTabChange}

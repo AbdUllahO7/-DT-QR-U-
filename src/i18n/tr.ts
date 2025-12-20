@@ -63,6 +63,16 @@ export const tr = {
         asc: "İsim (A-Z)",
         desc: "İsim (Z-A)"
       },
+      "status": {
+      "label": "Durum",
+      "asc": "Durum (A-Z)",
+      "desc": "Durum (Z-A)"
+    },
+    "allergen": {
+      "label": "Alerjen",
+      "asc": "Alerjen (A-Z)",
+      "desc": "Alerjen (Z-A)"
+    },
       price: {
         asc: "Fiyat (Düşükten Yükseğe)",
         desc: "Fiyat (Yüksekten Düşüğe)"
