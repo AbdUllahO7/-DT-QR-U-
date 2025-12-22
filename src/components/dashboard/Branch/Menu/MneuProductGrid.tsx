@@ -121,9 +121,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">
             {t('menu.noCategories')}
           </h3>
-          <p className="text-slate-600 dark:text-slate-400">
-            {t('menu.noCategoriesDesc')}
-          </p>
+         
         </div>
       </div>
     )

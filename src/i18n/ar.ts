@@ -228,7 +228,7 @@ hero: {
       },
       delete: {
         title: 'حذف الفرع',
-        confirmMessage: 'هل أنت متأكد من أنك تريد حذف الفرع "{branchName}"؟ لا يمكن التراجع عن هذا الإجراء.'
+        confirmMessage: 'هل أنت متأكد من أنك تريد حذف الفرع ؟ لا يمكن التراجع عن هذا الإجراء.'
       }
     },
     orders: {
@@ -236,6 +236,9 @@ hero: {
       description: 'عرض وإدارة الطلبات.',
       loading: 'جاري تحميل الطلبات...',
       refresh: 'تحديث',
+      selectBranch: "اختر الفرع",
+    selectBranchToView: "اختر الفرع المراد عرضه",
+    noBranches: "لا توجد فروع",
       newOrder: 'طلب جديد',
       tabs: {
         all: 'الكل',
@@ -901,6 +904,9 @@ contact: {
     orderNumber: 'طلب',
     table: 'طاولة',
     items: 'عناصر',
+          selectBranch: "اختر الفرع",
+    selectBranchToView: "اختر الفرع المراد عرضه",
+    noBranches: "لا توجد فروع",
     tabs: {
       all: 'جميع الطلبات',
       pending: 'في الانتظار',
@@ -946,6 +952,8 @@ contact: {
   tableManagement: {
     addTable: 'إضافة طاولة',
     ActiveStatus :"الحالة النشطة",
+    selectBranchPrompt:"لا توجد فروع",
+    selectBranch: "اختر الفرع",
       descriptionActive: "الفئة نشطة ومرئية",
       descriptionInActive: "الفئة غير نشطة ومخفية",
     loading: 'جاري تحميل الطاولات...',
@@ -1174,11 +1182,11 @@ contact: {
     },
     fields: {
       branchName: {
-        label: 'اسم الفرع *',
+        label: 'اسم الفرع',
         placeholder: 'أدخل اسم الفرع'
       },
       whatsappNumber: {
-        label: 'رقم الطلبات واتساب *',
+        label: 'رقم الطلبات واتساب',
         placeholder: 'أدخل رقم الطلبات واتساب'
       },
       branchLogo: {
@@ -1315,7 +1323,7 @@ contact: {
     // Delete confirmation
     deleteConfirm: {
       title: 'تأكيد حذف الفرع',
-      description: 'هل أنت متأكد من حذف فرع "{{branchName}}"؟ لا يمكن التراجع عن هذا الإجراء.'
+      description: 'هل أنت متأكد من حذف فرع ؟ لا يمكن التراجع عن هذا الإجراء.'
     },
 
     // Form labels and fields
@@ -1385,7 +1393,7 @@ contact: {
     modal: {
       createTitle: 'إضافة فرع جديد',
       createDescription: 'أدخل معلومات الفرع الجديد',
-      editTitle: 'تعديل الفرع - {branchName}',
+      editTitle: 'تعديل الفرع ',
       editDescription: 'تعديل معلومات الفرع',
       
       tabs: {
@@ -2818,6 +2826,7 @@ contact: {
       deselectAll:"إلغاء",
       stepPermissions: "الأذونات",
       step1Info: "إنشاء دور",
+      clear :"إلغاء تحديد الكل",
       step1Description: "أدخل المعلومات الأساسية للدور الجديد",
       roleCreatedSuccess: "تم إنشاء الدور بنجاح!",
       step2Description: "يمكنك الآن تحديد الأذونات لهذا الدور",
@@ -2869,7 +2878,7 @@ contact: {
       locationInfo: 'معلومات الموقع',
       roleAssignment: 'تعيين السلطة والدور',
       selectBranch: 'اختر الفرع',
-
+      fullNumber:"الرقم كامل:",
       phoneNumber: 'رقم الهاتف',
       confirmPassword: 'تأكيد كلمة المرور',
       location: 'الموقع',
@@ -2995,7 +3004,7 @@ contact: {
   },
   buttons: {
     addTable: "إضافة طاولة",
-    addCategory: "إضافة فئة",
+    addCategory: "إضافة منطقة",
     batchCreate: "إنشاء متعدد",
     edit: "تعديل",
     delete: "حذف",
@@ -3009,7 +3018,7 @@ contact: {
   },
   labels: {
     tableName: "اسم الطاولة",
-    category: "الفئة",
+    category: "المنطقة",
     capacity: "السعة",
     status: "الحالة",
     occupation: "الإشغال",
@@ -3089,10 +3098,10 @@ contact: {
       availableTables: "الطاولات المتاحة",
       searchPlaceholder: "ابحث عن الفئات...",
       refresh: "تحديث",
-      addCategory: "إضافة فئة",
-      addCategoryTitle: "إضافة فئة جديدة",
-      categoryNameLabel: "اسم الفئة",
-      categoryNamePlaceholder: "أدخل اسم الفئة",
+      addCategory: "إضافة منطقة",
+      addCategoryTitle: "إضافة منطقة جديدة",
+      categoryNameLabel: "اسم المنطقة",
+      categoryNamePlaceholder: "أدخل اسم المنطقة",
       colorLabel: "اللون",
       iconLabel: "الأيقونة",
       save: "حفظ",
@@ -3595,6 +3604,8 @@ contact: {
   },
 
   menu: {
+      noCategories :"لايوجد قائمة",
+      noCategoriesDesc :"لايوجد قائمة",
       title: "القائمة",
       loading: "تحميل القائمة",
       basePrice: "السعر الأساسي",
@@ -3770,6 +3781,7 @@ contact: {
     form: {
       title: 'تفاصيل الطلب',
       orderType: 'نوع الطلب',
+      pleaseFillRequiredFields:"يرجى ملء الحقول المطلوبة",
       paymentMethod: 'طريقة الدفع',
       selectPaymentMethod: 'اختر طريقة الدفع...',
       tableNumberPlaceholder : "..ادخل رقم الطاولة هنا",
@@ -3886,6 +3898,7 @@ contact: {
     total : 'المجموع',
     clearFilters: 'مسح الفلاتر',
     filtered: 'تم التصفية',
+    showing:"عرض",
     OrderType : 'نوع الطلب',
     subTotal: "المجموع الفرعي",
     serviceFeeApplied:"رسوم الخدمة",
@@ -4841,12 +4854,12 @@ recycleBin: {
         "title": "معلومات الفرع",
         "description": "أدخل المعلومات الأساسية لفرعك",
         "branchName": {
-          "label": "اسم الفرع *",
+          "label": "اسم الفرع ",
           "placeholder": "أدخل اسم الفرع",
           "error": "اسم الفرع مطلوب"
         },
         "whatsappNumber": {
-          "label": "رقم طلبات الواتساب *",
+          "label": "رقم طلبات الواتساب",
           "placeholder": "555 123 4567",
           "ariaLabel": "رمز البلد",
           "errorRequired": "رقم طلبات الواتساب مطلوب",

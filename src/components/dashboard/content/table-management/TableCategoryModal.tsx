@@ -7,13 +7,18 @@ import {
   FileText, 
   Building2, 
   Users, 
-  Sparkles 
+  Sparkles,
+  // New specific icons
+  Home,       // Indoor
+  Trees,      // Garden
+  CloudSun,   // Terrace
+  Umbrella    // Outdoor
 } from 'lucide-react';
 import { httpClient } from '../../../../utils/http';
 import { restaurantService } from '../../../../services/restaurantService';
 import { logger } from '../../../../utils/logger';
 import { useLanguage } from '../../../../contexts/LanguageContext';
-import { colorPresets, iconOptions, RestaurantBranchDropdownItem, TableCategoryFormData, TableCategoryPayload, TableCategory } from '../../../../types/BranchManagement/type';
+import { colorPresets, RestaurantBranchDropdownItem, TableCategoryFormData, TableCategoryPayload, TableCategory } from '../../../../types/BranchManagement/type';
 import { tableService } from '../../../../services/Branch/branchTableService';
 
 interface Props {
@@ -24,6 +29,14 @@ interface Props {
   editingCategory?: TableCategory | null;
   isEditMode?: boolean;
 }
+
+// Define the specific Area Types here
+const areaOptions = [
+  { value: 'indoor', label: 'Indoor', icon: Home },
+  { value: 'outdoor', label: 'Outdoor', icon: Umbrella },
+  { value: 'terrace', label: 'Terrace', icon: CloudSun },
+  { value: 'garden', label: 'Garden', icon: Trees },
+];
 
 const TableCategoryModal: React.FC<Props> = ({ 
   isOpen, 
@@ -38,7 +51,7 @@ const TableCategoryModal: React.FC<Props> = ({
     categoryName: '',
     description: '',
     colorCode: '#3b82f6',
-    iconClass: '',
+    iconClass: 'indoor', // Default to indoor
     displayOrder: 0,
     isActive: true,
   });
@@ -67,22 +80,20 @@ const TableCategoryModal: React.FC<Props> = ({
     if (!isOpen) return;
 
     if (isEditMode && editingCategory) {
-      // Populate form with existing category data
       setFormData({
         categoryName: editingCategory.categoryName,
         description: editingCategory.description || '',
         colorCode: editingCategory.colorCode || '#3b82f6',
-        iconClass: editingCategory.iconClass || '',
+        iconClass: editingCategory.iconClass || 'indoor',
         displayOrder: editingCategory.displayOrder || 0,
         isActive: editingCategory.isActive,
       });
     } else {
-      // Reset form for new category
       setFormData({
         categoryName: '',
         description: '',
         colorCode: '#3b82f6',
-        iconClass: '',
+        iconClass: 'indoor',
         displayOrder: 0,
         isActive: true,
       });
@@ -97,7 +108,6 @@ const TableCategoryModal: React.FC<Props> = ({
     if (selectedBranch) {
       setBranchId(selectedBranch.id);
     } else {
-      // Ana restoran ise branchları çek
       (async () => {
         try {
           const dropdownItems = await restaurantService.getRestaurantBranchesDropdown();
@@ -122,7 +132,6 @@ const TableCategoryModal: React.FC<Props> = ({
       [name]: value,
     }));
 
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
     }
@@ -137,7 +146,6 @@ const TableCategoryModal: React.FC<Props> = ({
     
     if (!validateForm()) return;
     
-    // BranchId kontrolü
     if (!branchId) {
       setErrors({ general: t('TableCategoryModal.branchRequired') });
       return;
@@ -146,7 +154,6 @@ const TableCategoryModal: React.FC<Props> = ({
     setIsSubmitting(true);
     try {
       if (isEditMode && editingCategory) {
-        // UPDATE existing category
         await tableService.updateCategory(editingCategory.id,   {
           id: editingCategory.id,
           categoryName: formData.categoryName.trim(),
@@ -154,10 +161,9 @@ const TableCategoryModal: React.FC<Props> = ({
           iconClass: formData.iconClass,
           isActive: formData.isActive,
           rowVersion: editingCategory.rowVersion,
-        },branchId );
+        }, branchId );
         logger.info('Kategori başarıyla güncellendi', { categoryId: editingCategory.id });
       } else {
-        // CREATE new category
         const payload: TableCategoryPayload = {
           categoryName: formData.categoryName.trim() || null,
           description: formData.description?.trim() || null,
@@ -167,38 +173,29 @@ const TableCategoryModal: React.FC<Props> = ({
           isActive: formData.isActive
         };
         
-        logger.info('Gönderilen payload', { payload, branchId });
-        
-        // LocalStorage'a branchId'yi kaydet
         if (branchId) {
           localStorage.setItem('menutable_create_selected_branchId', String(branchId));
         }
         
-        // BranchId'yi query parameter olarak kullan
         const response = await httpClient.post(`/api/branches/table-categories?branchId=${branchId}`, payload);
-        logger.info('Kategori başarıyla eklendi', { data: response.data });
         
-        // Kategori oluşturulduktan sonra kategorileri yeniden yükle
         if (branchId) {
           try {
             await httpClient.get(`/api/branches/table-categories?branchId=${branchId}`);
-            logger.info('Kategoriler yeniden yüklendi');
           } catch (error) {
             logger.error('Kategoriler yeniden yüklenirken hata', error);
           }
         }
       }
       
-      // Success callback'i çağır
       onSuccess && onSuccess();
       onClose();
       
-      // Form'u sıfırla
       setFormData({
         categoryName: '',
         description: '',
         colorCode: '#3b82f6',
-        iconClass: '',
+        iconClass: 'indoor',
         displayOrder: 0,
         isActive: true,
       });
@@ -206,11 +203,9 @@ const TableCategoryModal: React.FC<Props> = ({
     } catch (error: any) {
       console.error('❌ Kategori işlemi sırasında hata:', error);
       
-      // API'den gelen spesifik hataları işle
       if (error.response?.status === 400) {
         const apiErrors = error.response?.data?.errors;
         if (apiErrors) {
-          // Field specific hatalar
           const fieldErrors: Record<string, string> = {};
           Object.keys(apiErrors).forEach(key => {
             const fieldName = key.toLowerCase();
@@ -228,14 +223,6 @@ const TableCategoryModal: React.FC<Props> = ({
         } else {
           setErrors({ general: error.response?.data?.message || t('TableCategoryModal.invalidData') });
         }
-      } else if (error.response?.status === 401) {
-        setErrors({ general: error.response?.data?.message  });
-      } else if (error.response?.status === 403) {
-        setErrors({ general: error.response?.data?.message  });
-      } else if (error.response?.status === 404) {
-        setErrors({ general: error.response?.data?.message });
-      } else if (error.response?.status >= 500) {
-        setErrors({ general: error.response?.data?.message  });
       } else {
         setErrors({ general: error.response?.data?.message });
       }
@@ -254,7 +241,6 @@ return (
           aria-label={t('TableCategoryModal.accessibility.modal')}
           dir={isRTL ? 'rtl' : 'ltr'}
         >
-          {/* Enhanced Backdrop with gradient overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -262,7 +248,6 @@ return (
             className="fixed inset-0 bg-gradient-to-br from-purple-900/30 via-blue-900/40 to-indigo-900/30 backdrop-blur-md"
             onClick={onClose}
           >
-            {/* Animated background orbs */}
             <motion.div
               animate={{
                 scale: [1, 1.2, 1],
@@ -281,7 +266,6 @@ return (
             />
           </motion.div>
           
-          {/* Modal */}
           <div className="flex min-h-screen items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 40 }}
@@ -291,19 +275,15 @@ return (
               className="relative w-full max-w-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/50 overflow-hidden"
               dir={isRTL ? 'rtl' : 'ltr'}
             >
-              {/* Decorative glow effect */}
               <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-400/30 to-purple-500/30 rounded-full blur-3xl" />
               <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-400/30 to-primary-500/30 rounded-full blur-3xl" />
               
-              {/* Enhanced Header with mesh gradient */}
               <div className="relative bg-gradient-to-br from-primary-500 via-primary-600 to-purple-600 dark:from-primary-600 dark:via-primary-700 dark:to-purple-700 p-8 text-white overflow-hidden">
-                {/* Animated mesh pattern */}
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
                 <div className="absolute inset-0 opacity-30">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
                 </div>
                 
-                {/* Close button with better styling */}
               <button
                 onClick={onClose}
                 className={`absolute top-6 p-2.5 hover:bg-white/25 dark:hover:bg-white/15 rounded-xl transition-all duration-300 hover:scale-110 hover:rotate-90 group z-10 ${isRTL ? 'left-6' : 'right-6'}`}
@@ -327,7 +307,7 @@ return (
                       transition={{ delay: 0.1 }}
                       className="text-2xl font-bold drop-shadow-md"
                     >
-                      {isEditMode ?  t('TableCategoryModal.title') : ''}
+                      {isEditMode ?  t('TableCategoryModal.title') : t('TableCategoryModal.addCategoryTitle')}
                     </motion.h3>
                     <motion.p 
                       initial={{ opacity: 0 }}
@@ -335,15 +315,13 @@ return (
                       transition={{ delay: 0.2 }}
                       className="text-primary-50/90 text-sm mt-1 drop-shadow"
                     >
-                      {isEditMode ?  t('TableCategoryModal.subtitle') : ''}
+                      {isEditMode ?  t('TableCategoryModal.subtitle') : t('TableCategoryModal.addCategorySubtitle')}
                     </motion.p>
                   </div>
                 </div>
               </div>
 
-              {/* Form with better spacing */}
               <form onSubmit={handleSubmit} className="relative p-8 space-y-6" role="form" aria-label={t('TableCategoryModal.accessibility.form')}>
-                {/* General Error */}
                 {errors.general && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
@@ -354,7 +332,6 @@ return (
                   </motion.div>
                 )}
 
-                {/* Category Name with floating label effect */}
                 <div className="space-y-2">
                   <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
                     <Tag className="w-4 h-4 text-primary-600 dark:text-primary-400" />
@@ -398,7 +375,6 @@ return (
                   )}
                 </div>
 
-                {/* Description with better styling */}
                 <div className="space-y-2">
                   <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
                     <FileText className="w-4 h-4 text-primary-600 dark:text-primary-400" />
@@ -427,14 +403,12 @@ return (
                   </div>
                 </div>
 
-                {/* Color Selection with glassmorphism */}
                 <div className="space-y-3">
                   <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
                     <Palette className="w-4 h-4 text-primary-600 dark:text-primary-400" />
                     {t('TableCategoryModal.colorSelection')}
                   </label>
                   
-                  {/* Enhanced Color Presets */}
                   <div 
                     className="grid grid-cols-8 gap-2.5 p-4 bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-800/30 dark:to-gray-700/30 rounded-2xl backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50"
                     role="group"
@@ -463,7 +437,6 @@ return (
                     ))}
                   </div>
 
-                  {/* Custom Color Picker with better design */}
                   <div className={`flex items-center gap-4 p-4 bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-700/30 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <motion.div
                       whileHover={{ scale: 1.05 }}
@@ -487,7 +460,7 @@ return (
                   </div>
                 </div>
 
-                {/* Icon Selection with cards */}
+                {/* Area Type Selection */}
                 <div className="space-y-3">
                   <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
                     <Building2 className="w-4 h-4 text-primary-600 dark:text-primary-400" />
@@ -498,7 +471,7 @@ return (
                     role="group"
                     aria-label={t('TableCategoryModal.accessibility.iconGrid')}
                   >
-                    {iconOptions.map((option) => (
+                    {areaOptions.map((option) => (
                       <motion.button
                         key={option.value}
                         type="button"
@@ -512,10 +485,10 @@ return (
                             : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-xl hover:shadow-primary-500/20'
                           }
                         `}
-                        aria-label={`${t('TableCategoryModal.accessibility.iconOption')} ${t(option.label)}`}
+                        aria-label={`${t('TableCategoryModal.accessibility.iconOption')} ${option.label}`}
                       >
-                        <option.icon className="w-6 h-6" />
-                        <span className="text-xs font-semibold">{t(option.label)}</span>
+                        <option.icon className="w-8 h-8 mb-1" />
+                        <span className="text-xs font-semibold">{t(option.label) || option.label}</span>
                       </motion.button>
                     ))}
                   </div>
@@ -530,7 +503,6 @@ return (
                   )}
                 </div>
 
-                {/* Active Status Toggle (only in edit mode) */}
                 {isEditMode && (
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
@@ -558,15 +530,14 @@ return (
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
                         className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ${
                           isRTL
-                            ? (formData.isActive ? 'translate-x-1' : 'translate-x-8') // RTL logic (On = left, Off = right)
-                            : (formData.isActive ? 'translate-x-8' : 'translate-x-1') // LTR logic (On = right, Off = left)
+                            ? (formData.isActive ? 'translate-x-1' : 'translate-x-8') 
+                            : (formData.isActive ? 'translate-x-8' : 'translate-x-1') 
                         }`}
                       />
                     </button>
                   </motion.div>
                 )}
 
-                {/* Branch Selection (if needed and not in edit mode) */}
                 {!isEditMode && !selectedBranch && branches.length > 0 && (
                   <div className="space-y-2">
                     <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
@@ -600,7 +571,6 @@ return (
                   </div>
                 )}
 
-                {/* Enhanced Action Buttons */}
                 <div className={`flex gap-4 pt-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <motion.button
                     type="button"

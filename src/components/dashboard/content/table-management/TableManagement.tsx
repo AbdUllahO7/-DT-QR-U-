@@ -13,6 +13,7 @@ import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 import { BranchDropdownItem, GroupedTables, RestaurantBranchDropdownItem, TableCategory, TableData } from '../../../../types/BranchManagement/type';
 import { useNavigate } from 'react-router-dom';
 import TableCard from '../../Branch/Table/TableCard';
+import { QRCodeModalShow } from '../../Branch/Table/BranchTables';
 
 interface Props {
   selectedBranch: RestaurantBranchDropdownItem | null;
@@ -38,6 +39,15 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [tableToDelete, setTableToDelete] = useState<TableData | null>(null);
   const [isDeletingTable, setIsDeletingTable] = useState(false);
+
+    const [qrModal, setQrModal] = useState<{
+      isOpen: boolean;
+      table: TableData | null;
+    }>({
+      isOpen: false,
+      table: null
+    });
+
 
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setIsBranchDropdownOpen(false));
@@ -163,6 +173,22 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   const handleCreateTable = () => {
     setEditingTable(null);
     setIsModalOpen(true);
+  };
+
+    const handleCloseQRModal = (): void => {
+    setQrModal({
+      isOpen: false,
+      table: null
+    });
+  };
+
+    const generateQRCodeImageUrl = (qrCode: string): string => {
+    if (!qrCode) return '';
+    
+    const baseUrl = window.location.origin;
+    const tableUrl = `${baseUrl}/table/qr/${qrCode}`;
+    
+    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(tableUrl)}`;
   };
 
   const handleEditTable = (table: TableData) => {
@@ -294,6 +320,13 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     setEditingTable(null);
     setError(null);
   };
+
+    const handleShowQRCode = (table: TableData): void => {
+      setQrModal({
+        isOpen: true,
+        table
+      });
+    };
 
   // --- Render Functions (Styling Modernized) ---
 
@@ -503,7 +536,8 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
                           onEdit={() => handleEditTable(table)}
                           onDelete={() => handleDeleteTable(table)}
                           onToggleStatus={(id) => handleToggleStatus(id)}
-                          onDownload={downloadQR}
+                          onDownload={handleShowQRCode}
+                          onShowQRCode={handleShowQRCode}
                           categoryColor={category.colorCode}
                         />
                       </motion.div>
@@ -562,6 +596,15 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         itemType="table"
         itemName={tableToDelete?.menuTableName || ''}
       />
+
+        {qrModal.table && (
+          <QRCodeModalShow
+            isOpen={qrModal.isOpen}
+            onClose={handleCloseQRModal}
+            table={qrModal.table}
+            qrCodeImageUrl={generateQRCodeImageUrl(qrModal.table.qrCode || '')}
+          />
+        )}
     </div>
   </div>
   );

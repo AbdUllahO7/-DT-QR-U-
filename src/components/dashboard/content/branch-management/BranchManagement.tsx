@@ -23,7 +23,7 @@ const BranchManagement: React.FC = () => {
   const { t, isRTL } = useLanguage();
   const [branches, setBranches] = useState<BranchInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string>("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingBranch, setEditingBranch] = useState<BranchDetailResponse | null>(null);
@@ -337,9 +337,9 @@ const BranchManagement: React.FC = () => {
       } else if (err?.message) {
         errorMessage = err.message;
       }
-      
-      setError(errorMessage);
-      
+      setError(err.response.data);
+            console.log("err.response.data",err.response.data)
+
       // Clear error after 5 seconds
       setTimeout(() => setError(null), 5000);
       
@@ -629,11 +629,12 @@ const BranchManagement: React.FC = () => {
 
       {/* Delete Confirmation Modal */}
       <ConfirmDeleteModal
+        errorMessage={error}
         isOpen={isDeleteModalOpen}
         onClose={handleDeleteModalClose}
         onConfirm={performDeleteBranch}
         title={t('branchManagement.deleteConfirm.title')}
-        message={t('branchManagement.deleteConfirm.description')}
+        message={t('branchManagement.deleteConfirm.description')} 
         isSubmitting={isDeletingBranch}
         itemType="branch"
         itemName={branchToDelete?.branchName || ''}

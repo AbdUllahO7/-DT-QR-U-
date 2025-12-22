@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Shield, Building, ChevronDown, Loader2 } from 'lucide-react';
+import { Shield, Building, ChevronDown, Loader2, CheckSquare, X } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../../hooks';
 import { roleService } from '../../../../services/RoleService';
@@ -50,7 +50,7 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
     []
   );
   const [isFetchingPermissions, setIsFetchingPermissions] = useState(false);
-  
+
   // Ref to prevent re-fetch on initial load
   const isInitialLoad = useRef(true);
 
@@ -68,7 +68,7 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
       // 1. Fetch the full permission catalog
       const fetchPermissions = async () => {
         setIsFetchingPermissions(true);
-        
+
         // --- MODIFIED: Prepare params with role's branchId ---
         const params: { branchId?: number } = {};
         if (role.branchId && Number(role.branchId) > 0) {
@@ -153,12 +153,12 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
 
     const fetchCatalogForNewBranch = async () => {
       setIsFetchingPermissions(true);
-      
+
       const params: { branchId?: number } = {};
       if (formData.branchId && Number(formData.branchId) > 0) {
         params.branchId = Number(formData.branchId);
       }
-      
+
       try {
         const response = await roleService.getPermissionCatalog(params);
         if (response.success && response.data) {
@@ -172,17 +172,17 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
           setPermissionCatalog([]); // Clear catalog on failure
         }
       } catch (error) {
-         logger.error('Error re-fetching permission catalog', error, {
-            prefix: 'EditRoleModal',
-          });
-         setPermissionCatalog([]); // Clear catalog on error
+        logger.error('Error re-fetching permission catalog', error, {
+          prefix: 'EditRoleModal',
+        });
+        setPermissionCatalog([]); // Clear catalog on error
       } finally {
         setIsFetchingPermissions(false);
       }
     };
 
     fetchCatalogForNewBranch();
-    
+
   }, [formData.branchId]); // Dependency: only the branchId from form state
   // --- END NEW EFFECT ---
 
@@ -195,7 +195,7 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     if (!formData.name || formData.name.length < 3) {
-      newErrors.name = t('userManagementPage.createRole.errors.nameRequired');
+      newErrors.name = t('userManagementPage.createRole.validation.nameRequired');
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -211,7 +211,7 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
       branchId: formData.branchId || "", // Send "" if no branch
       category: formData.category || null,
     };
-    
+
     // Fix: Ensure branchId is null if empty string, if API requires
     // Based on CreateRoleModal, API handles empty/falsy values
     if (!submitData.branchId) {
@@ -252,6 +252,19 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
       setSelectedPermissions((prev) => [...new Set([...prev, ...categoryIds])]);
     }
   };
+
+  // --- NEW: Global Select/Deselect Logic ---
+  const handleSelectAllGlobal = () => {
+    const allIds = permissionCatalog.flatMap((cat) =>
+      cat.permissions.map((p) => p.permissionId)
+    );
+    setSelectedPermissions(allIds);
+  };
+
+  const handleDeselectAllGlobal = () => {
+    setSelectedPermissions([]);
+  };
+  // ----------------------------------------
 
   if (!isOpen) return null;
 
@@ -304,11 +317,10 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  className={`w-full px-3 py-2 border ${
-                    errors.name
+                  className={`w-full px-3 py-2 border ${errors.name
                       ? 'border-red-500'
                       : 'border-gray-300 dark:border-gray-600'
-                  } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
+                    } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
                   placeholder={t(
                     'userManagementPage.createRole.roleNamePlaceholder'
                   )}
@@ -367,35 +379,30 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
                     type="button"
                     onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
                     disabled={isBusy || branches.length === 0}
-                    className={`flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${
-                      isRTL ? 'flex-row-reverse' : ''
-                    }`}
+                    className={`flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${isRTL ? 'flex-row-reverse' : ''
+                      }`}
                   >
                     <span
-                      className={`flex items-center ${
-                        isRTL ? 'flex-row-reverse' : ''
-                      }`}
+                      className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''
+                        }`}
                     >
                       <Building
-                        className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${
-                          isRTL ? 'ml-2' : 'mr-2'
-                        }`}
+                        className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'
+                          }`}
                       />
                       {selectedBranchName ||
                         t('userManagementPage.createRole.selectBranch')}
                     </span>
                     <ChevronDown
-                      className={`h-4 w-4 transition-transform duration-200 ${
-                        isBranchDropdownOpen ? 'transform rotate-180' : ''
-                      } ${isRTL ? 'mr-2' : 'ml-2'}`}
+                      className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''
+                        } ${isRTL ? 'mr-2' : 'ml-2'}`}
                     />
                   </button>
 
                   {isBranchDropdownOpen && (
                     <div
-                      className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-700 rounded-md shadow-lg border border-gray-200 dark:border-gray-600 py-1 max-h-60 overflow-auto ${
-                        isRTL ? 'right-0' : 'left-0'
-                      }`}
+                      className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-700 rounded-md shadow-lg border border-gray-200 dark:border-gray-600 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'
+                        }`}
                     >
                       <button
                         type="button"
@@ -403,15 +410,14 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
                           setFormData({ ...formData, branchId: "" });
                           setIsBranchDropdownOpen(false);
                         }}
-                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 ${
-                          !formData.branchId
+                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 ${!formData.branchId
                             ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
                             : 'text-gray-700 dark:text-gray-200'
-                        } ${isRTL ? 'text-right' : 'text-left'}`}
+                          } ${isRTL ? 'text-right' : 'text-left'}`}
                       >
                         {t('userManagementPage.createRole.noBranch')}
                       </button>
-                      
+
                       {branches.map((branch) => (
                         <button
                           key={branch.branchId}
@@ -423,11 +429,10 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
                             });
                             setIsBranchDropdownOpen(false);
                           }}
-                          className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 ${
-                            formData.branchId === branch.branchId
+                          className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 ${formData.branchId === branch.branchId
                               ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
                               : 'text-gray-700 dark:text-gray-200'
-                          } ${isRTL ? 'text-right' : 'text-left'}`}
+                            } ${isRTL ? 'text-right' : 'text-left'}`}
                         >
                           {branch.branchName}
                         </button>
@@ -443,9 +448,34 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
 
             {/* Permissions */}
             <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                {t('userManagementPage.createRole.permissions')}
-              </h4>
+
+              {/* --- UPDATED: Header with Select All / Clear Buttons --- */}
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  {t('userManagementPage.createRole.permissions')}
+                </h4>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSelectAllGlobal}
+                    disabled={isBusy || permissionCatalog.length === 0}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-md transition-colors disabled:opacity-50"
+                  >
+                    <CheckSquare className="h-3.5 w-3.5" />
+                    {t('userManagementPage.createRole.selectAll') || 'Select All'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeselectAllGlobal}
+                    disabled={isBusy || selectedPermissions.length === 0}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors disabled:opacity-50"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                    {t('userManagementPage.createRole.clear') || 'Clear'}
+                  </button>
+                </div>
+              </div>
+              {/* ----------------------------------------------------- */}
 
               <div className="max-h-80 min-h-[10rem] overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                 {isFetchingPermissions ? (
@@ -487,13 +517,12 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
                             onClick={() =>
                               handleSelectAllInCategory(catalog.category)
                             }
-                            className={`text-xs px-2 py-1 rounded ${
-                              allSelected
+                            className={`text-xs px-2 py-1 rounded ${allSelected
                                 ? 'bg-purple-600 text-white'
                                 : someSelected
-                                ? 'bg-purple-300 dark:bg-purple-700 text-gray-700 dark:text-gray-200'
-                                : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
-                            } hover:opacity-80 transition-opacity`}
+                                  ? 'bg-purple-300 dark:bg-purple-700 text-gray-700 dark:text-gray-200'
+                                  : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
+                              } hover:opacity-80 transition-opacity`}
                             disabled={isBusy}
                           >
                             {allSelected
@@ -524,7 +553,7 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
                                 <div className="font-medium text-sm text-gray-900 dark:text-white">
                                   {permission.description}
                                 </div>
-                            
+
                               </div>
                             </label>
                           ))}
@@ -561,7 +590,7 @@ const EditRoleModal: React.FC<EditRoleModalProps> = ({
               >
                 {isLoading ? (
                   <Loader2 className="animate-spin h-4 w-4" />
-                ) : null }
+                ) : null}
                 {isLoading
                   ? t('userManagementPage.editRole.saving')
                   : t('userManagementPage.editRole.save')}

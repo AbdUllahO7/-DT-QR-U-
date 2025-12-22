@@ -215,7 +215,7 @@ const RecycleBin: React.FC = () => {
       setDeletedItems(prev => prev.filter(i => !(i.id === productToRestore.id && i.entityType === productToRestore.entityType)));
     } catch (error) {
       console.error('Error restoring product:', error);
-      showNotification('error', t('recycleBin.restore.error'));
+      showNotification('error',error.message);
     } finally {
       setRestoringIds(prev => {
         const newSet = new Set(prev);
@@ -1009,7 +1009,7 @@ const RecycleBin: React.FC = () => {
       {notification && (
         <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg border max-w-md ${notification.type === 'success'
             ? 'bg-green-900 dark:bg-green-900 border-green-200 dark:border-green-800'
-            : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+            : 'bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-800'
           }`}>
           <div className="flex items-center gap-3">
             {notification.type === 'success' ? (

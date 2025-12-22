@@ -225,7 +225,7 @@ hero: {
       },
       delete: {
         title: 'Delete Branch',
-        confirmMessage: 'Are you sure you want to delete branch "{branchName}"? This action cannot be undone.'
+        confirmMessage: 'Are you sure you want to delete branch ? This action cannot be undone.'
       }
     },
     orders: {
@@ -234,6 +234,9 @@ hero: {
       loading: 'Loading orders...',
       refresh: 'Refresh',
       newOrder: 'New Order',
+      selectBranch : "Select Branch",
+      selectBranchToView:"Select Branch To View",
+      noBranches: "No Branches",
       tabs: {
         all: 'All',
         pending: 'Pending',
@@ -902,6 +905,9 @@ hero: {
     orderNumber: 'Order',
     table: 'Table',
     items: 'Items',
+          selectBranch : "Select Branch",
+      selectBranchToView:"Select Branch To View",
+      noBranches: "No Branches",
     tabs: {
       all: 'All Orders',
       pending: 'Pending',
@@ -949,6 +955,9 @@ hero: {
     loading: 'Loading tables...',
     title: 'Table Management',
     ActiveStatus :"Active Status",
+    selectBranchPrompt:"No Branches",
+          selectBranch : "Select Branch",
+
     descriptionActive : "Category is active and visible", 
     descriptionInActive : "Category is inactive and hidden", 
 
@@ -1171,7 +1180,7 @@ hero: {
     },
     fields: {
       branchName: {
-        label: 'Branch Name *',
+        label: 'Branch Name',
         placeholder: 'Enter branch name'
       },
       whatsappNumber: {
@@ -1312,7 +1321,7 @@ hero: {
       // Delete confirmation
       deleteConfirm: {
         title: 'Confirm Branch Deletion',
-        description: 'Are you sure you want to delete the branch "{{branchName}}"? This action cannot be undone.'
+        description: 'Are you sure you want to delete the branch ? This action cannot be undone.'
       },
 
       // Form labels and fields
@@ -1382,7 +1391,7 @@ hero: {
       modal: {
         createTitle: 'Add New Branch',
         createDescription: 'Enter new branch information',
-        editTitle: 'Edit Branch - {branchName}',
+        editTitle: 'Edit Branch',
         editDescription: 'Edit branch information',
         
         tabs: {
@@ -2806,7 +2815,7 @@ hero: {
     createRole: {
       title: 'Create New Role',
       step1Title: "Step 1: Basic Information",
-      deselectAll:"Deselect all",
+      deselectAll:"Clear",
       step2Title: "Step 2: Select Permissions",
       stepBasicInfo: "Basic Info",
       stepPermissions: "Permissions",
@@ -2817,6 +2826,7 @@ hero: {
       step2Description: "Now you can select permissions for this role",
       continue: "Continue to Permissions",
       back: "Back",
+      clear: "Clear",
       skipPermissions: "Skip (Add Later)",
       finish: "Finish",
       creating: "Creating...",
@@ -2843,7 +2853,6 @@ hero: {
       permissionsSelected: 'selected',
       cancel: 'Cancel',
       create: 'Create Role',
-      deselectAll:"Un Select",
       validation: {
         nameRequired: 'Role name must be at least 3 characters',
         nameMaxLength: 'Role name can be maximum 50 characters',
@@ -2865,6 +2874,7 @@ hero: {
       confirmPassword: 'Confirm Password',
       location: 'Restaurant/Branch Location',
       roles: 'Roles',
+      fullNumber:"Full Number :",
       userIsActive: 'User is Active',
       // Form fields
       firstName: 'First Name',
@@ -2884,7 +2894,7 @@ hero: {
       passwordConfirmPlaceholder: 'Re-enter your password',
       
       // Location
-      locationType: 'Location Type',
+      locationType: 'User Scope',
       restaurant: 'Restaurant',
       branch: 'Branch',
       restaurantId: 'Restaurant ID',
@@ -2988,7 +2998,7 @@ hero: {
     },
     buttons: {
       addTable: "Add Table",
-      addCategory: "Add Category", 
+      addCategory: "Add Areas", 
       batchCreate: "Batch Create",
       edit: "Edit",
       delete: "Delete",
@@ -3081,17 +3091,17 @@ hero: {
     availableTables: "Available Tables",
     searchPlaceholder: "Search categories...",
     refresh: "Refresh",
-    addCategory: "Add Category",
-    addCategoryTitle: "Add New Category",
+    addCategory: "Add Area",
+    addCategoryTitle: "Add New Area",
     multiCategory: "Create multiple tables across different categories at once",
-    categoryNameLabel: "Category Name",
-    categoryNamePlaceholder: "Enter category name",
+    categoryNameLabel: "Area Name",
+    categoryNamePlaceholder: "Enter Area name",
     colorLabel: "Color",
     iconLabel: "Icon",
     save: "Save",
     cancel: "Cancel",
     noCategories: "No categories found",
-    addFirstCategory: "Add Your First Category",
+    addFirstCategory: "Add Your First Area",
     tablesCount: "tables",
     status: "Status",
     active: "Active",
@@ -3590,6 +3600,7 @@ hero: {
 
   menu: {
   title: "Menu",
+       noCategories: "No list",
   basePrice: "Base Price",
   loading: "Loading Menu",
   allergens: "Allergens",
@@ -3764,7 +3775,7 @@ cart: {
       title: 'Order Details',
       name:"name",
       address:"address",
-      
+      pleaseFillRequiredFields:"Please Fill Required Fields",
       phone:"phone",
       tableNumberPlaceholder : "Enter table number here..",
       tableNumber:"Table Number",
@@ -3881,6 +3892,7 @@ productModal: {
     clearFilters:"Clear Filters",
     subTotal:"Sub Total",
     filtered:"Filtered",
+    showing:"Showing",
     modificationHistory:"Modification History",
     lastModifiedAt : "Last Modified At",
     modifiedBy : "ModifiedBy",
@@ -4838,7 +4850,7 @@ productModal: {
         "title": "Branch Information",
         "description": "Enter the basic information of your branch",
         "branchName": {
-          "label": "Branch Name *",
+          "label": "Branch Name",
           "placeholder": "Enter branch name",
           "error": "Branch name is required"
         },

@@ -283,6 +283,7 @@ const handleBranchItemsPerPageChange = (newItemsPerPage: number) => {
         activeRowVersion: null 
       }));
     } catch (error: any) {
+      console.log("errror new",error)
       setState(prev => ({ 
         ...prev, 
         error: error.message, 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -16,7 +16,9 @@ import { mediaService } from '../services/mediaService';
 import { restaurantService } from '../services/restaurantService';
 import { logger } from '../utils/logger';
 import { useLanguage } from '../contexts/LanguageContext';
-import { countriesWithCodes, countryKeys } from '../data/mockData';
+// Ensure this path is correct based on your project structure
+import { sortedCountryCodes, getPlaceholderByDialCode } from '../data/countryCodes';
+import { countryKeys } from '../data/mockData';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -65,9 +67,12 @@ const OnboardingBranch: React.FC = () => {
   const [branchLogoPreview, setBranchLogoPreview] = useState<string | null>(null);
   const [isUploadingLogo, setIsUploadingLogo] = useState<boolean>(false);
 
-  // Phone country codes
+  // Phone country codes & Placeholders
   const [whatsappCountryCode, setWhatsappCountryCode] = useState<string>('+90');
+  const [whatsappPlaceholder, setWhatsappPlaceholder] = useState<string>(getPlaceholderByDialCode('+90'));
+
   const [contactCountryCode, setContactCountryCode] = useState<string>('+90');
+  const [contactPlaceholder, setContactPlaceholder] = useState<string>(getPlaceholderByDialCode('+90'));
 
   // Map modal state
   const [isMapModalOpen, setIsMapModalOpen] = useState<boolean>(false);
@@ -81,7 +86,7 @@ const OnboardingBranch: React.FC = () => {
   // Form data state
   const [formData, setFormData] = useState<CreateBranchWithDetailsDto>({
     branchName: '',
-    whatsappOrderNumber: '',
+    whatsappOrderNumber: '', // Stores strictly the national digits
     restaurantId: 0,
     branchLogoPath: null,
     createAddressDto: {
@@ -93,7 +98,7 @@ const OnboardingBranch: React.FC = () => {
       addressLine2: ''
     },
     createContactDto: {
-      phone: '',
+      phone: '', // Stores strictly the national digits
       mail: '',
       location: '',
       contactHeader: '',
@@ -166,17 +171,11 @@ const OnboardingBranch: React.FC = () => {
       const id = parseInt(restaurantIdFromState);
       if (!isNaN(id) && id > 0) {
         finalRestaurantId = id;
-        if (import.meta.env.DEV) {
-          logger.info('RestaurantId state\'ten alındı', { id });
-        }
       }
     } else if (restaurantIdFromStorage) {
       const id = parseInt(restaurantIdFromStorage);
       if (!isNaN(id) && id > 0) {
         finalRestaurantId = id;
-        if (import.meta.env.DEV) {
-          logger.info('RestaurantId localStorage\'tan alındı', { id });
-        }
       }
     }
 
@@ -184,7 +183,7 @@ const OnboardingBranch: React.FC = () => {
       setRestaurantId(finalRestaurantId);
       setFormData(prev => ({
         ...prev,
-        restaurantId: finalRestaurantId
+        restaurantId: finalRestaurantId!
       }));
 
       fetchRestaurantInfo(finalRestaurantId);
@@ -206,9 +205,6 @@ const OnboardingBranch: React.FC = () => {
       const storedRestaurantLogoPath = localStorage.getItem('restaurantLogoPath');
       if (storedRestaurantLogoPath) {
         setRestaurantLogoPath(storedRestaurantLogoPath);
-        if (import.meta.env.DEV) {
-          logger.info('Restaurant logo path localStorage\'dan alındı', { restaurantLogoPath: storedRestaurantLogoPath });
-        }
         return;
       }
 
@@ -216,49 +212,47 @@ const OnboardingBranch: React.FC = () => {
       
       if (restaurantInfo && restaurantInfo.restaurantLogoPath) {
         setRestaurantLogoPath(restaurantInfo.restaurantLogoPath);
-        if (import.meta.env.DEV) {
-          logger.info('Restaurant logo path API\'den alındı', { restaurantLogoPath: restaurantInfo.restaurantLogoPath });
-        }
       }
     } catch (error) {
       logger.error('Restaurant bilgileri alınırken hata oluştu', error);
     }
   };
-const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>): void => {
-  const { name, value } = e.target;
-  
-  if (name.startsWith('address.')) {
-    const addressField = name.split('.')[1];
-    setFormData(prev => ({
-      ...prev,
-      createAddressDto: {
-        ...prev.createAddressDto,
-        [addressField]: value || ''
-      }
-    }));
-  } else if (name.startsWith('contact.')) {
-    const contactField = name.split('.')[1];
-    setFormData(prev => ({
-      ...prev,
-      createContactDto: {
-        ...prev.createContactDto,
-        [contactField]: value || ''
-      }
-    }));
-  } else {
-    setFormData(prev => ({
-      ...prev,
-      [name]: value || ''
-    }));
-  }
-  
-  if (errors[name as keyof typeof errors]) {
-    setErrors(prev => ({
-      ...prev,
-      [name]: null
-    }));
-  }
-};
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>): void => {
+    const { name, value } = e.target;
+    
+    if (name.startsWith('address.')) {
+      const addressField = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        createAddressDto: {
+          ...prev.createAddressDto,
+          [addressField]: value || ''
+        }
+      }));
+    } else if (name.startsWith('contact.')) {
+      const contactField = name.split('.')[1];
+      setFormData(prev => ({
+        ...prev,
+        createContactDto: {
+          ...prev.createContactDto,
+          [contactField]: value || ''
+        }
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value || ''
+      }));
+    }
+    
+    if (errors[name as keyof typeof errors]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
+    }
+  };
 
   // Handlers for WhatsApp Number
   const handleWhatsappNationalPhoneChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -276,7 +270,9 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
   };
 
   const handleWhatsappCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    setWhatsappCountryCode(e.target.value);
+    const code = e.target.value;
+    setWhatsappCountryCode(code);
+    setWhatsappPlaceholder(getPlaceholderByDialCode(code));
   };
 
   // Handlers for Contact Phone Number
@@ -298,51 +294,29 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
   };
 
   const handleContactCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    setContactCountryCode(e.target.value);
+    const code = e.target.value;
+    setContactCountryCode(code);
+    setContactPlaceholder(getPlaceholderByDialCode(code));
   };
 
   // Function to extract coordinates from Google Maps link
   const extractCoordinatesFromLink = (link: string): { lat: number; lng: number } | null => {
     try {
-      // Pattern 1: google.com/maps/@lat,lng,zoom
       const pattern1 = /@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
       const match1 = link.match(pattern1);
-      if (match1) {
-        return {
-          lat: parseFloat(match1[1]),
-          lng: parseFloat(match1[2])
-        };
-      }
+      if (match1) return { lat: parseFloat(match1[1]), lng: parseFloat(match1[2]) };
 
-      // Pattern 2: google.com/maps?q=lat,lng
       const pattern2 = /q=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
       const match2 = link.match(pattern2);
-      if (match2) {
-        return {
-          lat: parseFloat(match2[1]),
-          lng: parseFloat(match2[2])
-        };
-      }
+      if (match2) return { lat: parseFloat(match2[1]), lng: parseFloat(match2[2]) };
 
-      // Pattern 3: google.com/maps/place/.../@lat,lng
       const pattern3 = /place\/[^@]*@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
       const match3 = link.match(pattern3);
-      if (match3) {
-        return {
-          lat: parseFloat(match3[1]),
-          lng: parseFloat(match3[2])
-        };
-      }
+      if (match3) return { lat: parseFloat(match3[1]), lng: parseFloat(match3[2]) };
 
-      // Pattern 4: ll=lat,lng or !3d lat !4d lng
       const pattern4 = /!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/;
       const match4 = link.match(pattern4);
-      if (match4) {
-        return {
-          lat: parseFloat(match4[1]),
-          lng: parseFloat(match4[2])
-        };
-      }
+      if (match4) return { lat: parseFloat(match4[1]), lng: parseFloat(match4[2]) };
 
       return null;
     } catch (error) {
@@ -489,20 +463,7 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
   };
 
   const validateStep = (step: number): boolean => {
-    const newErrors: {
-      branchName?: string;
-      whatsappOrderNumber?: string;
-      'createAddressDto.country'?: string;
-      'createAddressDto.city'?: string;
-      'createAddressDto.street'?: string;
-      'createAddressDto.addressLine1'?: string;
-      'createAddressDto.addressLine2'?: string;
-      'createAddressDto.zipCode'?: string;
-      'createContactDto.phone'?: string;
-      'createContactDto.mail'?: string;
-      'createContactDto.location'?: string;
-      workingHours?: string;
-    } = {};
+    const newErrors: any = {};
     
     switch (step) {
       case 1: // Basic Info
@@ -525,17 +486,12 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
         if (!formData.createAddressDto.city?.trim()) {
           newErrors['createAddressDto.city'] = t('onboardingBranch.form.step2.city.error');
         }
-     
-       
         break;
         
       case 3: // Contact Info & Working Hours
-        
-        
         if (!formData.createContactDto.mail?.trim()) {
           newErrors['createContactDto.mail'] = t('onboardingBranch.form.step3.email.error');
         }
-       
         
         // eslint-disable-next-line no-case-declarations
         const workingDays = formData.createBranchWorkingHourCoreDto?.filter(day => day.isWorkingDay) || [];
@@ -619,32 +575,27 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
       }
     }
 
-    // Determine final branch logo path with priority:
-    // 1. User uploaded logo
-    // 2. Restaurant logo path
-    // 3. Default logo URL
+    // Determine final branch logo path
     let finalBranchLogoPath = formData.branchLogoPath;
     if (!finalBranchLogoPath && restaurantLogoPath) {
       finalBranchLogoPath = restaurantLogoPath;
-      if (import.meta.env.DEV) {
-        logger.info('Şube profil fotoğrafı yüklenmedi, restaurant logo path\'i kullanılıyor', { 
-          restaurantLogoPath 
-        });
-      }
     }
     if (!finalBranchLogoPath) {
       finalBranchLogoPath = DEFAULT_LOGO_URL;
-      if (import.meta.env.DEV) {
-        logger.info('Ne şube ne restaurant logosu yüklenmedi, varsayılan logo kullanılıyor', { 
-          DEFAULT_LOGO_URL 
-        });
-      }
     }
     
+    // Combine Country Code and National Number
     const fullWhatsappNumber = formData.whatsappOrderNumber 
       ? `${whatsappCountryCode}${(formData.whatsappOrderNumber).replace(/\D/g, '')}`
       : ''; 
-    const fullContactPhone = fullWhatsappNumber;
+      
+    // Handle Contact Phone Number if it exists, else fallback to WhatsApp number
+    let fullContactPhone = '';
+    if (formData.createContactDto.phone) {
+         fullContactPhone = `${contactCountryCode}${formData.createContactDto.phone.replace(/\D/g, '')}`;
+    } else {
+         fullContactPhone = fullWhatsappNumber;
+    }
 
     const finalFormData: CreateBranchWithDetailsDto = {
       branchName: formData.branchName?.trim() || null,
@@ -681,26 +632,17 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
       }
       
       const response = await branchService.createOnboardingBranch(finalFormData);
-      if (import.meta.env.DEV) {
-        logger.info('Branch Creation Response', { response });
-      }
       
       if (response.branchId) {
         setSuccessMessage(t('onboardingBranch.messages.successMessage'));
         
         const branchId = response.branchId;
-        if (import.meta.env.DEV) {
-          logger.info('Oluşturulan Branch ID', { branchId });
-        }
         localStorage.setItem('onboarding_branchId', branchId.toString());
         
         setTimeout(() => {
           navigate('/onboarding/complete');
         }, 2000);
       } else {
-        if (import.meta.env.DEV) {
-          console.error('BranchId alınamadı! Response:', response);
-        }
         setApiError(t('onboardingBranch.messages.api.branchIdMissing'));
       }
     } catch (error) {
@@ -869,7 +811,7 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
                       scrollWheelZoom={true}
                     >
                       <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                       />
                       <MapUpdater center={[selectedLatLng.lat, selectedLatLng.lng]} />
@@ -910,7 +852,7 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
                         {t('onboardingBranch.form.step3.location.latitude') || 'خط العرض'}
                       </label>
                       <input
-                      title='number'
+                        title='number'
                         type="number"
                         step="1"
                         value={selectedLatLng.lat}
@@ -1069,26 +1011,24 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
         <label htmlFor="whatsappOrderNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           {t('onboardingBranch.form.step1.whatsappNumber.label')} <span className="text-red-500">*</span>
         </label>
-        <div className={`flex ${isRTL ? 'flex-row-reverse' : ''} space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+        <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
           {/* Country Code Selector */}
           <div className="relative">
             <select
+            title='whatsappCountryCode'
               id="whatsappCountryCode"
               name="whatsappCountryCode"
               value={whatsappCountryCode}
-           
               onChange={handleWhatsappCountryCodeChange}
-              className={`h-full py-3 pl-3 pr-8 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
-              aria-label={t('onboardingBranch.form.step1.whatsappNumber.ariaLabel')}
-              dir={isRTL ? 'rtl' : 'ltr'}
-              required
+              className={`h-full py-3 ${isRTL ? 'pr-8 pl-3' : 'pl-3 pr-8'} border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 appearance-none`}
             >
-              {countriesWithCodes.map(country => (
-                <option key={country.name} value={country.code}>
-                  {country.name} ({country.code})
+              {sortedCountryCodes.map(country => (
+                <option key={country.name} value={country.dialCode}>
+                  {country.name} ({country.dialCode})
                 </option>
               ))}
             </select>
+             {/* Chevron for select */}
             <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-2' : 'right-0 pr-2'} flex items-center pointer-events-none`}>
               <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -1104,16 +1044,16 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
               name="whatsappOrderNumber"
               type="tel"
               autoComplete="tel-national"
-              maxLength={10}
+              maxLength={15}
               value={formData.whatsappOrderNumber || ''}
               onChange={handleWhatsappNationalPhoneChange}
-              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+              className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
                 errors.whatsappOrderNumber
-                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
-              placeholder={t('onboardingBranch.form.step1.whatsappNumber.placeholder')}
-              dir={isRTL ? 'rtl' : 'ltr'}
+                  ? 'border-red-500 dark:border-red-500'
+                  : 'border-gray-300 dark:border-gray-600'
+              }`}
+              placeholder={whatsappPlaceholder}
+              dir="ltr"
               required
             />
           </div>
@@ -1183,8 +1123,6 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
               </div>
             </div>
           )}
-          
-        
         </div>
       </div>
     </div>
@@ -1364,8 +1302,58 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
 
   const renderStep3 = () => (
     <div className="space-y-6">
+      {/* Contact Phone - UPDATED STYLE */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+           {t('onboardingBranch.form.step3.phone.label') || 'Contact Phone'}
+        </label>
+        <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
+          {/* Country Code Selector */}
+          <div className="relative">
+            <select
+            title='contactCountryCode'
+              value={contactCountryCode}
+              onChange={handleContactCountryCodeChange}
+              className={`h-full py-3 ${isRTL ? 'pr-8 pl-3' : 'pl-3 pr-8'} border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 appearance-none`}
+            >
+              {sortedCountryCodes.map(country => (
+                <option key={country.name} value={country.dialCode}>
+                  {country.name} ({country.dialCode})
+                </option>
+              ))}
+            </select>
+             {/* Chevron for select */}
+            <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-2' : 'right-0 pr-2'} flex items-center pointer-events-none`}>
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Phone Number Input */}
+          <div className="relative flex-1">
+            <Phone className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10`} />
+            <input
+              type="tel"
+              autoComplete="tel-national"
+              maxLength={15}
+              value={formData.createContactDto.phone}
+              onChange={handleContactNationalPhoneChange}
+              className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
+                errors['createContactDto.phone']
+                  ? 'border-red-500 dark:border-red-500'
+                  : 'border-gray-300 dark:border-gray-600'
+              }`}
+              placeholder={contactPlaceholder}
+              dir="ltr"
+            />
+          </div>
+        </div>
+         {errors['createContactDto.phone'] && (
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors['createContactDto.phone']}</p>
+        )}
+      </div>
       
-     
       <div>
         <label htmlFor="contact.mail" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           {t('onboardingBranch.form.step3.email.label')} <span className="text-red-500">*</span>

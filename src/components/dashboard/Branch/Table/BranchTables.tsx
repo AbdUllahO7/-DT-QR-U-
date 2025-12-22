@@ -15,12 +15,11 @@ import {
   XCircle,
   Copy,
   Trash2,
-  Users,
-  Utensils,
-  Coffee,
-  Wine,
-  Store,
-  Home
+  // Specific Area Icons
+  Home,       // Indoor
+  Trees,      // Garden
+  CloudSun,   // Terrace
+  Umbrella    // Outdoor
 } from 'lucide-react';
 import { 
   CreateMenuTableDto, 
@@ -43,53 +42,48 @@ const IconSelector: React.FC<{
 }> = ({ selectedIcon, onSelect, isRTL }) => {
   const { t } = useLanguage();
   
-  const iconMapping: Record<string, { component: React.ComponentType<any>, label: string }> = {
-    table: { component: Grid, label: 'Table' },
-    users: { component: Users, label: 'Users' },
-    grid: { component: Grid, label: 'Grid' },
-    building: { component: Building, label: 'Building' },
-    settings: { component: RefreshCw, label: 'Settings' },
-    utensils: { component: Utensils, label: 'Utensils' },
-    coffee: { component: Coffee, label: 'Coffee' },
-    wine: { component: Wine, label: 'Wine' },
-    store: { component: Store, label: 'Store' },
-    home: { component: Home, label: 'Home' }
-  };
+  // Specific Area Types matching the Modal configuration
+  const areaOptions = [
+    { value: 'indoor', label: 'Indoor', icon: Home },
+    { value: 'outdoor', label: 'Outdoor', icon: Umbrella },
+    { value: 'terrace', label: 'Terrace', icon: CloudSun },
+    { value: 'garden', label: 'Garden', icon: Trees },
+  ];
 
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
         {t('BranchTableManagement.iconLabel')}
       </label>
-      <div className="grid grid-cols-5 gap-2">
-        {Object.entries(iconMapping).map(([key, { component: IconComponent, label }]) => (
+      <div className="grid grid-cols-4 gap-4">
+        {areaOptions.map((option) => (
           <button
-            key={key}
+            key={option.value}
             type="button"
-            onClick={() => onSelect(key)}
+            onClick={() => onSelect(option.value)}
             className={`
-              p-3 rounded-lg border-2 transition-all duration-200
-              flex flex-col items-center gap-1
-              ${selectedIcon === key 
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30' 
-                : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-700'
+              p-4 rounded-xl border-2 transition-all duration-200
+              flex flex-col items-center gap-2
+              ${selectedIcon === option.value 
+                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-md' 
+                : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-gray-50 dark:hover:bg-gray-800'
               }
             `}
-            title={label}
+            title={t(option.label) || option.label}
           >
-            <IconComponent 
-              className={`h-5 w-5 ${
-                selectedIcon === key 
+            <option.icon 
+              className={`h-6 w-6 ${
+                selectedIcon === option.value 
                   ? 'text-blue-600 dark:text-blue-400' 
-                  : 'text-gray-600 dark:text-gray-400'
+                  : 'text-gray-500 dark:text-gray-400'
               }`} 
             />
-            <span className={`text-xs ${
-              selectedIcon === key 
-                ? 'text-blue-600 dark:text-blue-400 font-medium' 
-                : 'text-gray-500 dark:text-gray-400'
+            <span className={`text-sm font-medium ${
+              selectedIcon === option.value 
+                ? 'text-blue-600 dark:text-blue-400' 
+                : 'text-gray-600 dark:text-gray-400'
             }`}>
-              {label}
+              {t(option.label) || option.label}
             </span>
           </button>
         ))}
@@ -98,7 +92,7 @@ const IconSelector: React.FC<{
   );
 };
 
-const QRCodeModal: React.FC<{
+export const QRCodeModalShow: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   table: TableData;
@@ -257,7 +251,8 @@ const BranchTableManagement: React.FC = () => {
   }>({
     categoryName: '',
     colorCode: '#3b82f6',
-    iconClass: 'table',
+    // Default to 'indoor' instead of 'table' to match the new options
+    iconClass: 'indoor', 
     isActive: true
   });
 
@@ -378,9 +373,10 @@ const BranchTableManagement: React.FC = () => {
   const fetchCategories = async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const categoriesData = await tableService.getCategories(true, true);
+
       setCategories(categoriesData as CategoryData[]);
       if (categoriesData.length > 0) {
         setExpandedCategories(new Set([categoriesData[0].id]));
@@ -618,7 +614,7 @@ const BranchTableManagement: React.FC = () => {
       setNewCategory({
         categoryName: '',
         colorCode: '#3b82f6',
-        iconClass: 'table',
+        iconClass: 'indoor', // Reset to indoor
         isActive: true
       });
       setShowAddCategory(false);
@@ -881,7 +877,6 @@ const BranchTableManagement: React.FC = () => {
               
             <button
                 onClick={() => {
-                   // ✅ ADDED VALIDATION HERE
                   if (categories.length === 0) {
                     setError(t('BranchTableManagement.error.createCategoryFirst') || 'Please create a category first.');
                     return;
@@ -1237,7 +1232,7 @@ const BranchTableManagement: React.FC = () => {
 
         {/* QR Code Modal */}
         {qrModal.table && (
-          <QRCodeModal
+          <QRCodeModalShow
             isOpen={qrModal.isOpen}
             onClose={handleCloseQRModal}
             table={qrModal.table}

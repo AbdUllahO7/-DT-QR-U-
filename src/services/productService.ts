@@ -486,7 +486,7 @@ class ProductService {
         } else if (error.response?.status === 400) {
           throw new Error('Geçersiz ürün geri yükleme isteği');
         } else {
-          throw new Error('Ürün geri yüklenirken bir hata oluştu');
+          throw new Error(error.message);
         }
       }
     }
