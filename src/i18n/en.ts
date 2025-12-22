@@ -2674,22 +2674,26 @@ hero: {
       }
     },
 
-    "assignBranchModal": {
-      "title": "Assign Branch",
-      "assigningTo": "Assigning",
-      "toNewBranch": "to a new branch",
-      "currentBranch": "Current Branch",
-      "branchIdDisplay": "(ID: {{id}})",
-      "newBranchLabel": "New Branch",
-      "selectBranchPlaceholder": "Select a branch",
-      "submitButton": "Assign Branch",
-      "submitButtonLoading": "Assigning...",
-      assignedToRestaurant:"Assigned To Restaurant",
-      assignToRestaurant:"Restaurant assignment",
-      "validation": {
-        "branchRequired": "Please select a branch"
-      }
-    },
+  "assignBranchModal": {
+  "title": "Assign Branch",
+  "assigningTo": "Assigning",
+  "selectDestinationType": "Select Scope Type",
+  "toNewBranch": "to a new branch",
+  "currentBranch": "Current Branch",
+  "assignedToRestaurant": "Restaurant Level (HQ)",
+  "alreadyAtRestaurant": "Already at HQ",
+  "groupBranches": "Assign to Branch",
+  "assignToRestaurant": "Assign to Restaurant",
+  "selectBranch": "Select Branch",
+  "selectBranchPlaceholder": "Select a branch",
+  "confirmRestaurantTitle": "Confirm Restaurant Assignment",
+  "confirmRestaurantDesc": "{{name}} will be unassigned from their current branch and moved to the Restaurant level.",
+  "submitButton": "Assign",
+  "submitButtonLoading": "Assigning...",
+  "validation": {
+    "branchRequired": "Please select a branch"
+  }
+},
 
     // Statistics
     stats: {
@@ -3893,6 +3897,7 @@ productModal: {
     subTotal:"Sub Total",
     filtered:"Filtered",
     showing:"Showing",
+    updateAction:"Update",
     modificationHistory:"Modification History",
     lastModifiedAt : "Last Modified At",
     modifiedBy : "ModifiedBy",
@@ -3957,7 +3962,6 @@ productModal: {
     cancel: "Cancel",
     confirmAction: "Confirm",
     rejectAction: "Reject",
-    updateAction: "Update",
     confirming: "Confirming...",
     rejecting: "Rejecting...",
     updating: "Updating...",

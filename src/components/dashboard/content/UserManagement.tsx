@@ -22,7 +22,7 @@ import {
   Trash2,
   Key,
 } from 'lucide-react';
-import { useClickOutside } from '../../../hooks';
+import { useAuth, useClickOutside } from '../../../hooks';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { userService } from '../../../services/userService';
 import { roleService } from '../../../services/RoleService';
@@ -43,6 +43,7 @@ import {  AssignBranchDto, CreateUserDto, PermissionCatalog, Role, UpdateRoleDto
 import ChangePasswordModal from './UserManagement/ChangePasswordModal';
 import AssignBranchModal from './UserManagement/AssignBranchModal';
 import { ChangePasswordDto } from '../../../types/users/users.type';
+import { RestaurantBranchDropdownItem } from '../../../types/RestaurantTypes';
 type ViewMode = 'grid' ;
 
 type TabMode = 'users' | 'roles';
@@ -54,8 +55,6 @@ const UserManagement: React.FC = () => {
   const [roles, setRoles] = useState<Role[]>([]); // Master list of GLOBAL roles
   const [branches, setBranches] = useState<BranchInfo[]>([]);
   const [permissionCatalog, setPermissionCatalog] = useState<PermissionCatalog[]>([]);
-
-
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [activeTab, setActiveTab] = useState<TabMode>('users');
   const [searchTerm, setSearchTerm] = useState('');
@@ -104,7 +103,26 @@ const UserManagement: React.FC = () => {
     onConfirm: () => void;
   } | null>(null);
   const [isConfirmationLoading, setIsConfirmationLoading] = useState(false);
+useEffect(() => {
+    const checkPermission = () => {
+      try {
+        const storedUser = localStorage.getItem('user'); // Or your auth storage key
+        if (storedUser) {
+          const currentUser = JSON.parse(storedUser);
+          
+          // Allow if: User is Owner OR User has no specific branch (HQ)
+          const isAuthorized = currentUser.roles?.includes('RestaurantOwner') || !currentUser.branchId;
+          
+          setCanAssignBranch(isAuthorized);
+        }
+      } catch (error) {
+        console.error('Error checking permissions', error);
+        setCanAssignBranch(false);
+      }
+    };
 
+    checkPermission();
+  }, []);
   // View User Permissions Modal State
   const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false);
   const [selectedUserForPermissions, setSelectedUserForPermissions] = useState<UserData | null>(null);
@@ -117,42 +135,44 @@ const UserManagement: React.FC = () => {
   const [isEditRoleModalOpen, setIsEditRoleModalOpen] = useState(false);
   const [selectedRoleForEdit, setSelectedRoleForEdit] = useState<Role | null>(null);
   const [isEditingRole, setIsEditingRole] = useState(false);
-
+  const [canAssignBranch, setCanAssignBranch] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => {
     setActiveDropdown(null);
   });
-const containerRef = useRef<HTMLDivElement>(null);
-useClickOutside(containerRef, () => setActiveDropdown(null));
-  // Fetch Users
-  const fetchUsers = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const response = await userService.getAllUsers({
-        Includes: 'roles,permissions',
-      });
 
-      if (response.success && response.data) {
-        const usersData = Array.isArray(response.data) ? response.data : [];
-        setUsers(usersData);
-        logger.info('Kullanıcılar başarıyla yüklendi', usersData, {
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  useClickOutside(containerRef, () => setActiveDropdown(null));
+    // Fetch Users
+    const fetchUsers = useCallback(async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await userService.getAllUsers({
+          Includes: 'roles,permissions',
+        });
+
+        if (response.success && response.data) {
+          const usersData = Array.isArray(response.data) ? response.data : [];
+          setUsers(usersData);
+          logger.info('Kullanıcılar başarıyla yüklendi', usersData, {
+            prefix: 'UserManagement',
+          });
+        } else {
+          throw new Error(t('userManagementPage.error.loadFailed'));
+        }
+      } catch (err: any) {
+        logger.error('Kullanıcılar yüklenirken hata', err, {
           prefix: 'UserManagement',
         });
-      } else {
-        throw new Error(t('userManagementPage.error.loadFailed'));
+        console.log("err.response.data.message",err.response.data.message)
+        setError(err.response.data.message );
+        setUsers([]);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err: any) {
-      logger.error('Kullanıcılar yüklenirken hata', err, {
-        prefix: 'UserManagement',
-      });
-      console.log("err.response.data.message",err.response.data.message)
-      setError(err.response.data.message );
-      setUsers([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t]);
+    }, [t]);
 
   // Change Password Handlers
   const handleOpenChangePassword = useCallback((user: UserData) => {
@@ -207,7 +227,7 @@ useClickOutside(containerRef, () => setActiveDropdown(null));
           });
           setIsAssignBranchModalOpen(false);
           setSelectedUserForBranch(null);
-          await fetchUsers(); // Refresh the users list
+          await fetchUsers(); 
         } else {
           throw new Error(t('userManagementPage.error.assignBranchFailed'));
         }
@@ -223,8 +243,7 @@ useClickOutside(containerRef, () => setActiveDropdown(null));
     [fetchUsers, t]
   );
 
-    // Fetch Roles
-  // Fetch Roles
+
   const fetchRoles = useCallback(async () => {
     try {
       // Explicitly include permissions
@@ -249,6 +268,7 @@ useClickOutside(containerRef, () => setActiveDropdown(null));
   const fetchBranches = useCallback(async () => {
     try {
       const branchesData = await branchService.getBranches();
+      console.log("branchesData",branchesData)
       setBranches(branchesData);
       logger.info('Şubeler başarıyla yüklendi', branchesData, {
         prefix: 'UserManagement',
@@ -833,14 +853,15 @@ useClickOutside(containerRef, () => setActiveDropdown(null));
           <Key className="h-4 w-4" />
           {t('userManagementPage.actions.changePassword')}
         </button>
-        <button
-          onClick={() => handleOpenAssignBranch(user)}
-          className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
-        >
-          <MapPin className="h-4 w-4" />
-          {t('userManagementPage.actions.assignBranch')}
-        </button>
-     
+     {branches && branches.length > 0 && (
+          <button
+            onClick={() => handleOpenAssignBranch(user)}
+            className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600"
+          >
+            <MapPin className="h-4 w-4" />
+            {t('userManagementPage.actions.assignBranch')}
+          </button>
+        )}
         <div className="border-t border-gray-200 dark:border-gray-600 my-1"></div>
         <button
           onClick={() => handleToggleUserStatus(user)}

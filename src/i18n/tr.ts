@@ -2677,22 +2677,26 @@ hero: {
         "passwordMismatch": "Şifreler eşleşmiyor"
       }
     },
-    "assignBranchModal": {
-      "title": "Şube Ata",
-      "assigningTo": "Atanıyor",
-      "toNewBranch": "yeni bir şubeye",
-      "currentBranch": "Mevcut Şube",
-      "branchIdDisplay": "(ID: {{id}})",
-      "newBranchLabel": "Yeni Şube",
-      "selectBranchPlaceholder": "Bir şube seçin",
-      "submitButton": "Şube Ata",
-      assignedToRestaurant:"Restorana Atandı",
-      assignToRestaurant:"Restoran ataması",
-      "submitButtonLoading": "Atanıyor...",
-      "validation": {
-        "branchRequired": "Lütfen bir şube seçin"
-      }
-    },
+  "assignBranchModal": {
+  "title": "Şube Ata",
+  "assigningTo": "Atanan Kişi",
+  "selectDestinationType": "Kapsam Türünü Seçin",
+  "toNewBranch": "yeni bir şubeye",
+  "currentBranch": "Mevcut Şube",
+  "assignedToRestaurant": "Restoran Seviyesi (Merkez)",
+  "alreadyAtRestaurant": "Zaten Merkezde",
+  "groupBranches": "Şubeye Ata",
+  "assignToRestaurant": "Restorana Ata",
+  "selectBranch": "Şube Seçin",
+  "selectBranchPlaceholder": "Bir şube seçin",
+  "confirmRestaurantTitle": "Restoran Atamasını Onayla",
+  "confirmRestaurantDesc": "{{name}} mevcut şubesinden çıkarılacak ve Restoran seviyesine atanacaktır.",
+  "submitButton": "Ata",
+  "submitButtonLoading": "Atanıyor...",
+  "validation": {
+    "branchRequired": "Lütfen bir şube seçin"
+  }
+},
 
     // Statistics
     stats: {
@@ -3898,6 +3902,7 @@ productModal: {
 
   ordersManager: {
       total : 'Toplam',
+      updateAction:"Güncele",
       subTotal:"Ara Toplam",
       modificationHistory:"değişiklik Geçmişi",
       showing:"Gösteriliyor",
@@ -3961,7 +3966,7 @@ productModal: {
       rejectOrderPrompt: "Reddetme nedenini girin:",
       rejectReasonPlaceholder: "Reddetme nedeni...",
       updateStatusTitle: "Durumu Güncelle",
-      updateStatusPrompt: "Sipariş durumunu {status} olarak güncellemek istediğinizden emin misiniz?",
+      updateStatusPrompt: "Sipariş durumunu  olarak güncellemek istediğinizden emin misiniz?",
       cancel: "İptal",
       confirmAction: "Onayla",
       rejectAction: "Reddet",

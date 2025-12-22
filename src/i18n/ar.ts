@@ -2678,22 +2678,26 @@ contact: {
         "passwordMismatch": "كلمات المرور غير متطابقة"
       }
     },
-    "assignBranchModal": {
-      "title": "تعيين الفرع",
-      "assigningTo": "تعيين",
-      "toNewBranch": "إلى فرع جديد",
-      "currentBranch": "الفرع الحالي",
-      "branchIdDisplay": "(المعرف: {{id}})",
-      "newBranchLabel": "الفرع الجديد",
-      "selectBranchPlaceholder": "اختر فرعاً",
-      "submitButton": "تعيين الفرع",
-      "submitButtonLoading": "جاري التعيين...",
-      "validation": {
-        "branchRequired": "يرجى اختيار فرع",
-        assignedToRestaurant :"مُخصص للمطعم",
-        assignToRestaurant : "تعيين للمطعم",
-      }
-    },
+  "assignBranchModal": {
+    "title": "تعيين الفرع",
+    "assigningTo": "تعيين",
+    "selectDestinationType": "حدد نوع النطاق",
+    "toNewBranch": "إلى فرع جديد",
+    "currentBranch": "الفرع الحالي",
+    "assignedToRestaurant": "مستوى المطعم (المركز الرئيسي)",
+    "alreadyAtRestaurant": "معين بالفعل للمطعم",
+    "groupBranches": "تعيين لفرع محدد",
+    "assignToRestaurant": "تعيين للمطعم (المركز)",
+    "selectBranch": "اختر الفرع",
+    "selectBranchPlaceholder": "اختر فرعاً...",
+    "confirmRestaurantTitle": "تأكيد التعيين للمطعم",
+    "confirmRestaurantDesc": "سيتم إزالة {{name}} من الفرع الحالي وتعيينه على مستوى المطعم.",
+    "submitButton": "حفظ التعيين",
+    "submitButtonLoading": "جاري الحفظ...",
+    "validation": {
+      "branchRequired": "يرجى اختيار فرع"
+    }
+  },
 
     // Statistics
     stats: {
@@ -2823,7 +2827,6 @@ contact: {
       step1Title: "الخطوة ١: المعلومات الأساسية",
       step2Title: "الخطوة ٢: تحديد الأذونات",
       stepBasicInfo: "المعلومات الأساسية",
-      deselectAll:"إلغاء",
       stepPermissions: "الأذونات",
       step1Info: "إنشاء دور",
       clear :"إلغاء تحديد الكل",
@@ -3898,6 +3901,7 @@ contact: {
     total : 'المجموع',
     clearFilters: 'مسح الفلاتر',
     filtered: 'تم التصفية',
+    updateAction:"تحديث",
     showing:"عرض",
     OrderType : 'نوع الطلب',
     subTotal: "المجموع الفرعي",
@@ -3926,7 +3930,6 @@ contact: {
     orderType: "نوع الطلب",
     minPrice: "السعر الأدنى",
     maxPrice: "السعر الأقصى",
-    showing:"عرض",
     to:"إلى",
     perpage : "لكل صفحة",
     cancelOrder:"إلغاء الطلب",
@@ -3963,7 +3966,6 @@ contact: {
     "cancel": "إلغاء",
     "confirmAction": "تأكيد",
     "rejectAction": "رفض",
-    "updateAction": "تحديث",
     "confirming": "جاري التأكيد...",
     "rejecting": "جاري الرفض...",
     "updating": "جاري التحديث...",
