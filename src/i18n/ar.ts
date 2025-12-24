@@ -37,7 +37,10 @@ export const ar = {
     last7Days: 'آخر 7 أيام',
     last30Days: 'آخر 30 يوم',
     thisMonth: 'هذا الشهر',
-    lastMonth: 'الشهر الماضي'
+    lastMonth: 'الشهر الماضي',
+    remove: 'إزالة',
+    dismiss: 'رفض',
+    download: 'تحميل'
   },
   filter: {
       "status": "الحالة",
@@ -1324,6 +1327,12 @@ contact: {
     deleteConfirm: {
       title: 'تأكيد حذف الفرع',
       description: 'هل أنت متأكد من حذف فرع ؟ لا يمكن التراجع عن هذا الإجراء.'
+    },
+
+    // تأكيد الحذف الدائم
+    purgeConfirm: {
+      title: 'تحذير الحذف الدائم',
+      description: 'سيؤدي هذا إلى حذف الفرع وجميع البيانات المرتبطة به بشكل دائم. لا يمكن التراجع عن هذا الإجراء!'
     },
 
     // Form labels and fields
@@ -3109,6 +3118,10 @@ contact: {
       iconLabel: "الأيقونة",
       save: "حفظ",
       cancel: "إلغاء",
+      edit: "تعديل",
+      delete: "حذف",
+      qrCode: "رمز الاستجابة السريعة",
+      showQRCode: "عرض رمز الاستجابة السريعة",
       noCategories: "لم يتم العثور على فئات",
       addFirstCategory: "إضافة فئتك الأولى",
       tablesCount: "طاولات",
@@ -3540,7 +3553,8 @@ contact: {
       },
       error: {
         loadFailed: 'فشل في تحميل بيانات الملف الشخصي'
-      }
+      },
+      changePhoto: 'تغيير'
   },
 
   addonModal: {
@@ -3776,7 +3790,12 @@ contact: {
     "extras": "الإضافات والخيارات",
     "without": "بدون",
     "extra": "زيادة",
-    "add": "إضافة"
+    "add": "إضافة",
+    "edit": "تعديل",
+    "cancel_edit": "إلغاء",
+    "restore": "استعادة",
+    "delete": "حذف",
+    "duplicate": "تكرار"
   },
   },
 

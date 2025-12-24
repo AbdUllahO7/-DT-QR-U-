@@ -144,10 +144,11 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
             {/* View Details */}
             <button
               onClick={() => onOpenDetails(order)}
-              className="p-2.5 text-indigo-600 hover:text-white hover:bg-indigo-600 dark:text-indigo-400 dark:hover:bg-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg"
+              className="flex items-center gap-1 px-3 py-2.5 text-indigo-600 hover:text-white hover:bg-indigo-600 dark:text-indigo-400 dark:hover:bg-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg text-sm font-medium"
               title={t('ordersManager.viewDetails')}
             >
               <Eye className="w-5 h-5" />
+              <span>{t('ordersManager.viewDetails') || 'View'}</span>
             </button>
           </div>
           
@@ -157,21 +158,23 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
             {status === OrderStatusEnums.Pending && (
               <button
                 onClick={() => onOpenReject(order.id.toString(), rowVersion)}
-                className="p-2 text-red-600 hover:text-white hover:bg-red-600 dark:text-red-400 dark:hover:bg-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg transition-all duration-200 hover:scale-105"
+                className="flex items-center gap-1 px-2 py-2 text-red-600 hover:text-white hover:bg-red-600 dark:text-red-400 dark:hover:bg-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
                 title={t('ordersManager.reject')}
               >
                 <XCircle className="w-4 h-4" />
+                <span>{t('ordersManager.reject') || 'Reject'}</span>
               </button>
             )}
-            
+
             {/* Cancel Button */}
             {orderService.canCancelOrder(status) && (
               <button
                 onClick={() => onOpenCancel(order.id.toString(), rowVersion)}
-                className="p-2 text-orange-600 hover:text-white hover:bg-orange-600 dark:text-orange-400 dark:hover:bg-orange-500 bg-orange-50 dark:bg-orange-900/20 rounded-lg transition-all duration-200 hover:scale-105"
+                className="flex items-center gap-1 px-2 py-2 text-orange-600 hover:text-white hover:bg-orange-600 dark:text-orange-400 dark:hover:bg-orange-500 bg-orange-50 dark:bg-orange-900/20 rounded-lg transition-all duration-200 hover:scale-105 text-xs font-medium"
                 title={t('ordersManager.cancel')}
               >
                 <Ban className="w-4 h-4" />
+                <span>{t('ordersManager.cancel') || 'Cancel'}</span>
               </button>
             )}
             

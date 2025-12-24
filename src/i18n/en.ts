@@ -38,7 +38,10 @@ export const en = {
     last30Days: 'Last 30 Days',
     thisMonth: 'This Month',
     lastMonth: 'Last Month',
-    retry: 'Retry'
+    retry: 'Retry',
+    remove: 'Remove',
+    dismiss: 'Dismiss',
+    download: 'Download'
   },
   filter: {
       "status": "Status",
@@ -1322,6 +1325,12 @@ hero: {
       deleteConfirm: {
         title: 'Confirm Branch Deletion',
         description: 'Are you sure you want to delete the branch ? This action cannot be undone.'
+      },
+
+      // Purge confirmation (permanent deletion)
+      purgeConfirm: {
+        title: 'Permanent Deletion Warning',
+        description: 'This will PERMANENTLY delete the branch and ALL associated data. This action CANNOT be undone!'
       },
 
       // Form labels and fields
@@ -3104,6 +3113,10 @@ hero: {
     iconLabel: "Icon",
     save: "Save",
     cancel: "Cancel",
+    edit: "Edit",
+    delete: "Delete",
+    qrCode: "QR Code",
+    showQRCode: "Show QR Code",
     noCategories: "No categories found",
     addFirstCategory: "Add Your First Area",
     tablesCount: "tables",
@@ -3535,7 +3548,8 @@ hero: {
       },
       error: {
         loadFailed: 'Failed to load profile data'
-      }
+      },
+      changePhoto: 'Change'
   },
 
   addonModal: {
@@ -3770,7 +3784,12 @@ cart: {
     "extras": "Extras",
     "without": "Without",
     "extra": "Extra",
-    "add": "Add"
+    "add": "Add",
+    "edit": "Edit",
+    "cancel_edit": "Cancel",
+    "restore": "Restore",
+    "delete": "Delete",
+    "duplicate": "Duplicate"
   },
   },
 

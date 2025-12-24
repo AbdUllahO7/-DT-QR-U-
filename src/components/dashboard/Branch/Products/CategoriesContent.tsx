@@ -230,10 +230,11 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
         {showEditButton && (
           <button
             onClick={onEdit}
-            className="p-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+            className="flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors text-xs font-medium"
             title="Edit price"
           >
             <Edit3 className="h-3 w-3" />
+            <span>{t('common.edit') || 'Edit'}</span>
           </button>
         )}
       </div>
@@ -267,15 +268,17 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
           />
           <button
             onClick={() => saveCategoryName(categoryId)}
-            className="p-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
+            className="flex items-center gap-1 px-3 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors text-sm font-medium"
           >
             <Check className="h-4 w-4" />
+            <span>{t('common.save') || 'Save'}</span>
           </button>
           <button
             onClick={() => cancelCategoryNameEdit(categoryId)}
-            className="p-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors"
+            className="flex items-center gap-1 px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors text-sm font-medium"
           >
             <X className="h-4 w-4" />
+            <span>{t('common.cancel') || 'Cancel'}</span>
           </button>
         </div>
       );
@@ -295,10 +298,11 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
         {showEditButton && isActive && (
           <button
             onClick={() => startEditingCategoryName(categoryId, currentDisplayName)}
-            className="p-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+            className="flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors text-xs font-medium"
             title="Edit category name"
           >
             <Edit3 className="h-3 w-3" />
+            <span>{t('common.edit') || 'Edit'}</span>
           </button>
         )}
         {/* ADD inactive indicator */}

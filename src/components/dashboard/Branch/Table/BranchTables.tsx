@@ -922,8 +922,9 @@ const BranchTableManagement: React.FC = () => {
                 <AlertCircle className={`h-5 w-5 text-red-600 dark:text-red-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                 <span className="text-red-700 dark:text-red-300">{error}</span>
               </div>
-              <button onClick={() => setError(null)} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200">
+              <button onClick={() => setError(null)} className="flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 text-sm font-medium">
                 <X className="h-4 w-4" />
+                <span>{t('common.dismiss') || 'Dismiss'}</span>
               </button>
             </div>
           </div>
@@ -936,8 +937,9 @@ const BranchTableManagement: React.FC = () => {
                 <CheckCircle className={`h-5 w-5 text-green-600 dark:text-green-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                 <span className="text-green-700 dark:text-green-300">{successMessage}</span>
               </div>
-              <button onClick={() => setSuccessMessage(null)} className="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200">
+              <button onClick={() => setSuccessMessage(null)} className="flex items-center gap-1 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-200 text-sm font-medium">
                 <X className="h-4 w-4" />
+                <span>{t('common.dismiss') || 'Dismiss'}</span>
               </button>
             </div>
           </div>
@@ -1036,8 +1038,9 @@ const BranchTableManagement: React.FC = () => {
                         <AlertCircle className={`h-5 w-5 text-red-600 dark:text-red-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         <span className="text-red-700 dark:text-red-300">{batchCreateError}</span>
                       </div>
-                      <button onClick={() => setBatchCreateError(null)} className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200">
+                      <button onClick={() => setBatchCreateError(null)} className="flex items-center gap-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-200 text-sm font-medium">
                         <X className="h-4 w-4" />
+                        <span>{t('common.dismiss') || 'Dismiss'}</span>
                       </button>
                     </div>
                   </div>

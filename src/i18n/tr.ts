@@ -36,7 +36,10 @@ export const tr = {
     last30Days: 'Son 30 Gün',
     thisMonth: 'Bu Ay',
     lastMonth: 'Geçen Ay',
-    retry: 'Tekrar Dene'
+    retry: 'Tekrar Dene',
+    remove: 'Kaldır',
+    dismiss: 'Kapat',
+    download: 'İndir'
   },
 
   filter: {
@@ -376,7 +379,8 @@ hero: {
        title : "QR Menü",
       logout: 'Çıkış Yap',
       branch: 'Şube'
-    }
+    },
+    changePhoto: 'Değiştir'
   },
 
   // Theme
@@ -1325,6 +1329,12 @@ hero: {
     deleteConfirm: {
       title: 'Şube Silme Onayı',
       description: ' şubesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'
+    },
+
+    // Purge onayı (kalıcı silme)
+    purgeConfirm: {
+      title: 'Kalıcı Silme Uyarısı',
+      description: 'Bu işlem şubeyi ve TÜM ilişkili verileri KALICI OLARAK silecektir. Bu işlem GERİ ALINAMAZ!'
     },
 
     // Form labels and fields
@@ -3106,6 +3116,10 @@ BranchTableManagement: {
     iconLabel: "İkon",
     save: "Kaydet",
     cancel: "İptal",
+    edit: "Düzenle",
+    delete: "Sil",
+    qrCode: "QR Kod",
+    showQRCode: "QR Kodunu Göster",
     noCategories: "Bölge bulunamadı",
     addFirstCategory: "İlk bölgeyi ekle",
     tablesCount: "masa",
@@ -3774,7 +3788,12 @@ cart: {
     "extras": "Seçenekler",
     "without": "Çıkarılan",
     "extra": "Ekstra",
-    "add": "Ekle"
+    "add": "Ekle",
+    "edit": "Düzenle",
+    "cancel_edit": "İptal",
+    "restore": "Geri Yükle",
+    "delete": "Sil",
+    "duplicate": "Çoğalt"
   },
   },
 

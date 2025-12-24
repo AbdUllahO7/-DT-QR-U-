@@ -536,8 +536,9 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
               )}
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white">
-            <X className="w-6 h-6" />
+          <button onClick={onClose} className="flex items-center gap-2 px-3 py-2 hover:bg-white/20 rounded-lg transition-colors text-white text-sm font-medium">
+            <X className="w-5 h-5" />
+            <span>{t('common.close') || 'Close'}</span>
           </button>
         </div>
 
@@ -700,13 +701,16 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                     <button
                                       onClick={() => handleDuplicateItem(item.basketItemId)}
                                       disabled={updatingItemId === item.basketItemId}
-                                      className="p-2 hover:bg-blue-100 dark:hover:bg-blue-950/20 rounded-lg text-blue-600 dark:text-blue-400 transition-colors disabled:opacity-50"
+                                      className="flex items-center gap-1 px-3 py-2 hover:bg-blue-100 dark:hover:bg-blue-950/20 rounded-lg text-blue-600 dark:text-blue-400 transition-colors disabled:opacity-50 text-xs font-medium"
                                       title={t('menu.cart.duplicate') || 'Duplicate item'}
                                     >
                                       {updatingItemId === item.basketItemId ? (
                                         <Loader2 className="w-4 h-4 animate-spin" />
                                       ) : (
-                                        <Copy className="w-4 h-4" />
+                                        <>
+                                          <Copy className="w-4 h-4" />
+                                          <span>{t('menu.cart.duplicate') || 'Duplicate'}</span>
+                                        </>
                                       )}
                                     </button>
                                   )}
@@ -714,12 +718,15 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                   <button
                                     onClick={() => handleDeleteItem(item.basketItemId)}
                                     disabled={deletingItemId === item.basketItemId}
-                                    className="ml-auto p-2 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg text-red-500 transition-colors disabled:opacity-50"
+                                    className="ml-auto flex items-center gap-1 px-3 py-2 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg text-red-500 transition-colors disabled:opacity-50 text-xs font-medium"
                                   >
                                     {deletingItemId === item.basketItemId ? (
                                       <Loader2 className="w-4 h-4 animate-spin" />
                                     ) : (
-                                      <Trash2 className="w-4 h-4" />
+                                      <>
+                                        <Trash2 className="w-4 h-4" />
+                                        <span>{t('menu.cart.delete') || 'Delete'}</span>
+                                      </>
                                     )}
                                   </button>
                                 </div>
@@ -795,11 +802,12 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                             </div>
                                           )}
 
-                                          <button 
-                                            onClick={() => handleDeleteExtra(item, extra.branchProductExtraId)} 
-                                            className="p-1.5 hover:bg-red-100 dark:hover:bg-red-950/20 rounded text-red-500"
+                                          <button
+                                            onClick={() => handleDeleteExtra(item, extra.branchProductExtraId)}
+                                            className="flex items-center gap-1 px-2 py-1.5 hover:bg-red-100 dark:hover:bg-red-950/20 rounded text-red-500 text-xs font-medium"
                                           >
                                             <X className="w-4 h-4" />
+                                            <span>{t('common.remove') || 'Remove'}</span>
                                           </button>
                                         </div>
                                       ))}
@@ -837,8 +845,12 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                           </button>
                                         </div>
 
-                                        <button onClick={() => handleDeleteAddon(addonId)} className="p-1.5 hover:bg-red-100 dark:hover:bg-red-950/20 rounded text-red-500">
+                                        <button
+                                          onClick={() => handleDeleteAddon(addonId)}
+                                          className="flex items-center gap-1 px-2 py-1.5 hover:bg-red-100 dark:hover:bg-red-950/20 rounded text-red-500 text-xs font-medium"
+                                        >
                                           <X className="w-4 h-4" />
+                                          <span>{t('common.remove') || 'Remove'}</span>
                                         </button>
                                       </div>
                                     );
