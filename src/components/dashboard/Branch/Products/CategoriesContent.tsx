@@ -28,7 +28,9 @@ import {
   ChefHat,
   Sparkles,
   Grid,
-  List
+  List,
+  Power,
+  ShoppingBag
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { AdditionStep, BranchCategory, CategoriesContentProps } from '../../../../types/BranchManagement/type';
@@ -96,6 +98,8 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   handleShowProductAddons,
   isCategoryActive,
   handleShowProductExtras,
+  onToggleProductStatus,
+  onToggleProductAvailability,
 }) => {
   const { t, isRTL } = useLanguage();
   const navigate = useNavigate()
@@ -701,6 +705,50 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                       </button>
                     )}
 
+                    {/* Active/Inactive Toggle Button */}
+                    {product.isSelected && product.branchProductId && onToggleProductStatus && (
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          await onToggleProductStatus(product.branchProductId!, product.status);
+                        }}
+                        disabled={isLoading}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all duration-200 ${
+                          product.status
+                            ? 'text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20'
+                            : 'text-gray-500 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700/50'
+                        }`}
+                        title={product.status ? t('branchCategories.products.deactivate') : t('branchCategories.products.activate')}
+                      >
+                        <Power className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          {product.status ? t('branchCategories.status.active') : t('branchCategories.status.inactive')}
+                        </span>
+                      </button>
+                    )}
+
+                    {/* Available/Out of Stock Toggle Button */}
+                    {product.isSelected && product.branchProductId && onToggleProductAvailability && (
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation();
+                          await onToggleProductAvailability(product.branchProductId!, product.isAvailable ?? true);
+                        }}
+                        disabled={isLoading}
+                        className={`flex items-center gap-1.5 px-3 py-2 rounded-lg transition-all duration-200 ${
+                          product.isAvailable !== false
+                            ? 'text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                            : 'text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                        }`}
+                        title={product.isAvailable !== false ? t('branchCategories.products.markOutOfStock') : t('branchCategories.products.markInStock')}
+                      >
+                        <ShoppingBag className="h-4 w-4" />
+                        <span className="text-sm font-medium">
+                          {product.isAvailable !== false ? t('branchCategories.stock.inStock') : t('branchCategories.stock.outOfStock')}
+                        </span>
+                      </button>
+                    )}
+
                     {/* Addons Button */}
                     {product.isSelected && product.branchProductId && handleShowProductAddons && (
                       <button
@@ -865,7 +913,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                     </div>
 
                     {/* Action Buttons */}
-                    <div className={`flex items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className={`flex flex-wrap items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       {hasDetailedInfo && (
                         <button
                           onClick={(e) => {
@@ -876,6 +924,44 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                           title={t('branchCategories.products.viewDetails')}
                         >
                           <Eye className="h-3.5 w-3.5 mx-auto" />
+                        </button>
+                      )}
+
+                      {/* Active/Inactive Toggle Button */}
+                      {product.isSelected && product.branchProductId && onToggleProductStatus && (
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            await onToggleProductStatus(product.branchProductId!, product.status);
+                          }}
+                          disabled={isLoading}
+                          className={`flex-1 p-1.5 rounded-md transition-colors ${
+                            product.status
+                              ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50'
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600'
+                          }`}
+                          title={product.status ? t('branchCategories.products.deactivate') : t('branchCategories.products.activate')}
+                        >
+                          <Power className="h-3.5 w-3.5 mx-auto" />
+                        </button>
+                      )}
+
+                      {/* Available/Out of Stock Toggle Button */}
+                      {product.isSelected && product.branchProductId && onToggleProductAvailability && (
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            await onToggleProductAvailability(product.branchProductId!, product.isAvailable ?? true);
+                          }}
+                          disabled={isLoading}
+                          className={`flex-1 p-1.5 rounded-md transition-colors ${
+                            product.isAvailable !== false
+                              ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50'
+                              : 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/50'
+                          }`}
+                          title={product.isAvailable !== false ? t('branchCategories.products.markOutOfStock') : t('branchCategories.products.markInStock')}
+                        >
+                          <ShoppingBag className="h-3.5 w-3.5 mx-auto" />
                         </button>
                       )}
 
