@@ -785,7 +785,8 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
               let hasExtras = false;
               let extraCategoriesCount = 0;
               let hasExtraCategories = false;
-              
+              let extrasData: any[] = [];
+
               if (branchProduct.branchProductId) {
                 try {
                   // Fetch both addons and extras simultaneously
@@ -794,19 +795,21 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
                     branchProductExtrasService.getBranchProductExtrasByBranchProductId(branchProduct.branchProductId)
                   ]);
 
-                  
-                  
+
+
                   // Process addons
                   addonsCount = existingAddons.length;
                   hasAddons = addonsCount > 0;
-                  
-                  // Process extras
-                  extrasCount = existingExtras.length;
+
+                  // Process extras - filter to only show active extras
+                  const activeExtras = existingExtras.filter(extra => extra.isActive);
+                  extrasData = activeExtras;
+                  extrasCount = activeExtras.length;
                   hasExtras = extrasCount > 0;
-                  
-                  // Count unique categories
+
+                  // Count unique categories from active extras
                   const uniqueCategories = new Set(
-                    existingExtras.map(extra => extra.categoryName).filter(Boolean)
+                    activeExtras.map(extra => extra.categoryName).filter(Boolean)
                   );
                   extraCategoriesCount = uniqueCategories.size;
                   hasExtraCategories = extraCategoriesCount > 0;
@@ -830,13 +833,12 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
                 // Addon fields
                 addonsCount,
                 hasAddons,
-                
+
                 // Extras fields (NEW!)
+                extras: extrasData,
                 extrasCount,
                 hasExtras,
-                extraCategoriesCount,
-                hasExtraCategories,
-                
+
                 allergens: branchProduct.allergens
                   ? branchProduct.allergens.map((a: any, idx: number) => ({
                       id: a.id ?? a.allergenId ?? idx + 1,

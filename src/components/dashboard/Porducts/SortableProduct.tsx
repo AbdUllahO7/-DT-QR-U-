@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -7,6 +7,8 @@ import { productService } from "../../../services/productService";
 import { logger } from "../../../utils/logger";
 import { productAddonsService } from "../../../services/ProductAddonsService";
 import { Ingredient, Product, ProductAddon } from "../../../types/BranchManagement/type";
+import { productExtrasService } from "../../../services/Extras/ProductExtrasService";
+import { ProductExtra } from "../../../types/Extras/type";
 
 export const SortableProduct: React.FC<{
   product: Product;
@@ -25,6 +27,9 @@ export const SortableProduct: React.FC<{
   const [addons, setAddons] = useState<ProductAddon[]>([]);
   const [isLoadingAddons, setIsLoadingAddons] = useState(false);
   const [addonError, setAddonError] = useState<string | null>(null);
+  const [extras, setExtras] = useState<ProductExtra[]>([]);
+  const [isLoadingExtras, setIsLoadingExtras] = useState(false);
+  const [extrasError, setExtrasError] = useState<string | null>(null);
 
   const {
     attributes,
@@ -44,14 +49,16 @@ export const SortableProduct: React.FC<{
 
   const hasValidImage = product.imageUrl && product.imageUrl !== 'string' && product.imageUrl.trim() !== '' && !imageError;
 
-  // Fetch ingredients and addons when component mounts or product.id changes
+  // Fetch ingredients, addons, and extras when component mounts or product.id changes
   useEffect(() => {
     const loadProductData = async () => {
       setIsLoadingIngredients(true);
       setIsLoadingAddons(true);
+      setIsLoadingExtras(true);
       setIngredientError(null);
       setAddonError(null);
-      
+      setExtrasError(null);
+
       try {
         const fetchedIngredients = await productService.getProductIngredients(product.id);
         setIngredients(fetchedIngredients);
@@ -73,10 +80,38 @@ export const SortableProduct: React.FC<{
       } finally {
         setIsLoadingAddons(false);
       }
+
+      try {
+        const fetchedExtras = await productExtrasService.getProductExtrasByProductId(product.id);
+        // Filter to only show non-deleted extras
+        const activeExtras = fetchedExtras.filter(extra => !extra.isDeleted);
+        console.log("activeExtras",activeExtras)
+        setExtras(activeExtras);
+        console.log("fetchedExtras",fetchedExtras)
+        logger.info('Product extras loaded', { productId: product.id, extrasCount: activeExtras.length });
+      } catch (error: any) {
+        logger.error('Error loading extras:', error);
+        setExtrasError(t('SortableProduct.errors.loadingExtras'));
+      } finally {
+        setIsLoadingExtras(false);
+      }
     };
 
     loadProductData();
   }, [product.id, t]);
+
+  // Group extras by category name
+  const groupedExtras = useMemo(() => {
+    const groups: Record<string, ProductExtra[]> = {};
+    extras.forEach((extra) => {
+      const categoryName = extra.categoryName || t('SortableProduct.uncategorized');
+      if (!groups[categoryName]) {
+        groups[categoryName] = [];
+      }
+      groups[categoryName].push(extra);
+    });
+    return groups;
+  }, [extras, t]);
 
   return (
     <div
@@ -241,14 +276,14 @@ export const SortableProduct: React.FC<{
                     </div>
                     <div className={`flex flex-wrap gap-1.5 ${isRTL ? 'justify-end' : ''}`}>
                       {addons.map((addon) => (
-                        <span 
+                        <span
                           key={addon.id}
                           className="inline-flex items-center gap-1 text-xs bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2.5 py-1 rounded-lg border border-blue-200 dark:border-blue-800"
                         >
                           {addon.addonProduct?.name || `Product ${addon.addonProductId}`}
                           {addon.isRecommended && (
                             <span title={t('SortableProduct.recommended')}>
-                              <Sparkles 
+                              <Sparkles
                                 className="h-3 w-3 text-yellow-500"
                                 aria-label={t('SortableProduct.accessibility.recommendedAddon')}
                               />
@@ -262,6 +297,60 @@ export const SortableProduct: React.FC<{
                   <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/30 px-3 py-2 rounded-lg">
                     <Plus className="h-3.5 w-3.5 opacity-50" />
                     <span>{t('SortableProduct.noAddons')}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Extras Section - Grouped by Category */}
+              <div className="space-y-2">
+                {isLoadingExtras ? (
+                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/30 px-3 py-2 rounded-lg">
+                    <Loader2 className="h-4 w-4 animate-spin text-primary-500" />
+                    <span>{t('SortableProduct.loadingExtras')}</span>
+                  </div>
+                ) : extrasError ? (
+                  <div className="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-3 py-2 rounded-lg border border-red-200 dark:border-red-800">
+                    <AlertCircle className="h-4 w-4" />
+                    <span>{extrasError}</span>
+                  </div>
+                ) : extras.length > 0 ? (
+                  <div className="space-y-2">
+                    {Object.entries(groupedExtras).map(([categoryName, categoryExtras]) => (
+                      <div
+                        key={categoryName}
+                        className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/10 dark:to-violet-900/10 px-3 py-2.5 rounded-xl border border-purple-200 dark:border-purple-800"
+                      >
+                        <div className={`flex items-center gap-2 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <Layers className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                          <span className="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide">
+                            {categoryName}
+                          </span>
+                          <span className="text-xs text-purple-600 dark:text-purple-400 bg-purple-200 dark:bg-purple-800/50 px-2 py-0.5 rounded-full">
+                            {categoryExtras.length}
+                          </span>
+                        </div>
+                        <div className={`flex flex-wrap gap-1.5 ${isRTL ? 'justify-end' : ''}`}>
+                          {categoryExtras.map((extra) => (
+                            <span
+                              key={extra.id}
+                              className="inline-flex items-center gap-1 text-xs bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2.5 py-1 rounded-lg border border-purple-200 dark:border-purple-800"
+                            >
+                              {extra.extraName || `Extra ${extra.extraId}`}
+                              {extra.unitPrice > 0 && (
+                                <span className="text-purple-600 dark:text-purple-400 font-medium">
+                                  +{extra.unitPrice.toFixed(2)}₺
+                                </span>
+                              )}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/30 px-3 py-2 rounded-lg">
+                    <Layers className="h-3.5 w-3.5 opacity-50" />
+                    <span>{t('SortableProduct.noExtras')}</span>
                   </div>
                 )}
               </div>

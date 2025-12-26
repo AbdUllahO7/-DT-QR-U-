@@ -2352,11 +2352,16 @@ contact: {
   SortableCategory: {
     product: 'منتج',
     products: 'منتجات',
+    extras: 'إضافات',
+    loadingExtras: 'تحميل الإضافات...',
     status : {
       active : "نشط",
     },
     editCategory: 'تعديل الفئة',
     deleteCategory: 'حذف الفئة',
+    editProduct: 'تعديل المنتج',
+    deleteProduct: 'حذف المنتج',
+    manageAddons: 'إدارة الإضافات',
     reorderingProducts: 'جاري حفظ ترتيب المنتجات...',
     noCategoryProducts: 'لا توجد منتجات في هذا الفئة بعد.',
     expandCategory: 'توسيع الفئة',
@@ -2383,6 +2388,11 @@ contact: {
     loadingAddons: 'جاري تحميل الإضافات...',
     addons: 'الإضافات',
     noAddons: 'لم تتم إضافة إضافات',
+    loadingExtras: 'تحميل الإضافات...',
+    extras: 'إضافات',
+    noExtras: 'لم تتم إضافة إضافات',
+    uncategorized: 'غير مصنف',
+    manageExtras: 'إدارة إضافات المنتج',
     manageAddons: 'إدارة الإضافات',
     editProduct: 'تعديل المنتج',
     deleteProduct: 'حذف المنتج',
@@ -2401,7 +2411,8 @@ contact: {
     },
     errors: {
       loadingIngredients: 'حدث خطأ أثناء تحميل المكونات.',
-      loadingAddons: 'حدث خطأ أثناء تحميل الإضافات.'
+      loadingAddons: 'حدث خطأ أثناء تحميل الإضافات.',
+      loadingExtras: 'فشل تحميل الإضافات.'
     },
     accessibility: {
       productImage: 'صورة المنتج',

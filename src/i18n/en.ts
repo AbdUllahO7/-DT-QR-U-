@@ -2347,12 +2347,17 @@ hero: {
 
   SortableCategory: {
     product: 'product',
-    products: 'products', 
+    products: 'products',
+    extras: 'Extras',
+    loadingExtras: 'Loading extras...',
     status : {
       active : "active",
     },
     editCategory: 'Edit category',
     deleteCategory: 'Delete category',
+    editProduct: 'Edit Product',
+    deleteProduct: 'Delete Product',
+    manageAddons: 'Manage Addons',
     reorderingProducts: 'Saving product order...',
     noCategoryProducts: 'No products in this category yet.',
     expandCategory: 'Expand category',
@@ -2379,6 +2384,11 @@ hero: {
     loadingAddons: 'Loading addons...',
     addons: 'Addons',
     noAddons: 'No addons added',
+    loadingExtras: 'Loading extras...',
+    extras: 'Extras',
+    noExtras: 'No extras added',
+    uncategorized: 'Uncategorized',
+    manageExtras: 'Manage product extras',
     manageAddons: 'Manage addons',
     editProduct: 'Edit product',
     deleteProduct: 'Delete product',
@@ -2397,7 +2407,8 @@ hero: {
     },
     errors: {
       loadingIngredients: 'An error occurred while loading ingredients.',
-      loadingAddons: 'An error occurred while loading addons.'
+      loadingAddons: 'An error occurred while loading addons.',
+      loadingExtras: 'An error occurred while loading extras.'
     },
     accessibility: {
       productImage: 'Product image',

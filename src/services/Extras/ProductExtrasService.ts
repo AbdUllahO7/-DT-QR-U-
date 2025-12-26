@@ -35,6 +35,8 @@ class ProductExtrasService {
         id: response.data.id,
         productId: response.data.productId,
         extraId: response.data.extraId,
+        extraName: response.data.extraName,
+        categoryName: response.data.categoryName,
         selectionMode: response.data.selectionMode,
         defaultQuantity: response.data.defaultQuantity,
         defaultMinQuantity: response.data.defaultMinQuantity,
@@ -71,6 +73,8 @@ class ProductExtrasService {
         id: item.id,
         productId: item.productId,
         extraId: item.extraId,
+        extraName: item.extraName,
+        categoryName: item.categoryName,
         selectionMode: item.selectionMode,
         defaultQuantity: item.defaultQuantity,
         defaultMinQuantity: item.defaultMinQuantity,
@@ -117,6 +121,8 @@ class ProductExtrasService {
         id: response.data.id,
         productId: response.data.productId,
         extraId: response.data.extraId,
+        extraName: response.data.extraName,
+        categoryName: response.data.categoryName,
         selectionMode: response.data.selectionMode,
         defaultQuantity: response.data.defaultQuantity,
         defaultMinQuantity: response.data.defaultMinQuantity,
@@ -166,6 +172,8 @@ class ProductExtrasService {
         id: item.id,
         productId: item.productId,
         extraId: item.extraId,
+        extraName: item.extraName,
+        categoryName: item.categoryName,
         selectionMode: item.selectionMode,
         defaultQuantity: item.defaultQuantity,
         defaultMinQuantity: item.defaultMinQuantity,
@@ -202,9 +210,9 @@ class ProductExtrasService {
     try {
       const payload = {
         productId: data.productId,
-        extraOrders: data.extraOrders.map(order => ({
-          productExtraId: order.productExtraId,
-          newDisplayOrder: order.newDisplayOrder,
+        extraOrders: data.items.map((order) => ({
+          productExtraId: order.id,
+          newDisplayOrder: order.displayOrder,
         }))
       };
       

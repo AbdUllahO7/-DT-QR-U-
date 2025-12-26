@@ -103,6 +103,9 @@ export interface DetailedProduct{
   branchCategory?: Category;
   ingredients?: APIIngredient[];
   allergens?: APIAllergen[];
+  extras?: any[]; // Product extras
+  extrasCount?: number;
+  hasExtras?: boolean;
   orderDetails?: any;
   isSelected?: boolean;
   addonsCount?: number;

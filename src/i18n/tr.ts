@@ -2354,11 +2354,16 @@ hero: {
   SortableCategory: {
     product: 'ürün',
     products: 'ürün',
+    extras: 'Ekstralar',
+    loadingExtras: 'Ekstralar yükleniyor...',
     editCategory: 'Kategoriyi düzenle',
     status : {
       active : "active",
     },
-    deleteCategory: 'Kategoriyi sil', 
+    deleteCategory: 'Kategoriyi sil',
+    editProduct: 'Ürünü Düzenle',
+    deleteProduct: 'Ürünü Sil',
+    manageAddons: 'Eklentileri Yönet',
     reorderingProducts: 'Ürün sıralaması kaydediliyor...',
     noCategoryProducts: 'Bu kategoride henüz ürün yok.',
     expandCategory: 'Kategoriyi genişlet',
@@ -2385,6 +2390,11 @@ hero: {
     loadingAddons: 'Eklentiler yükleniyor...',
     addons: 'Eklentiler',
     noAddons: 'Eklenti eklenmemiş',
+    loadingExtras: 'Ekstralar yükleniyor...',
+    extras: 'Ekstralar',
+    noExtras: 'Ekstra eklenmedi',
+    uncategorized: 'Kategorisiz',
+    manageExtras: 'Ürün ekstralarını yönet',
     manageAddons: 'Eklentileri yönet',
     editProduct: 'Ürünü düzenle',
     deleteProduct: 'Ürünü sil',
@@ -2403,7 +2413,8 @@ hero: {
     },
     errors: {
       loadingIngredients: 'Malzemeler yüklenirken bir hata oluştu.',
-      loadingAddons: 'Eklentiler yüklenirken bir hata oluştu.'
+      loadingAddons: 'Eklentiler yüklenirken bir hata oluştu.',
+      loadingExtras: 'Ekstralar yüklenirken bir hata oluştu.'
     },
     accessibility: {
       productImage: 'Ürün resmi',

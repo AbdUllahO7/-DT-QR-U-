@@ -4,6 +4,10 @@ import { CSS } from "@dnd-kit/utilities";
 import { Edit2, GripVertical, Loader2, Package, Trash2, Plus, Eye, EyeOff, ChevronDown, ChevronUp, Sparkles, Layers } from "lucide-react";
 import { SortableProduct } from "./SortableProduct";
 import { Category } from "../../../types/BranchManagement/type";
+import { useState, useEffect } from "react";
+import { logger } from "../../../utils/logger";
+import { productExtrasService } from "../../../services/Extras/ProductExtrasService";
+import { BranchProductExtra } from "../../../types/Extras/type";
 
 export const SortableCategory: React.FC<{
   category: Category;
@@ -44,6 +48,9 @@ export const SortableCategory: React.FC<{
     isDragging
   } = useSortable({ id: category.categoryId });
 
+  // State for batch extras loading in grid view
+  const [productExtras, setProductExtras] = useState<Map<number, BranchProductExtra[]>>(new Map());
+  const [loadingExtras, setLoadingExtras] = useState<Set<number>>(new Set());
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -58,7 +65,46 @@ export const SortableCategory: React.FC<{
     return `${count} ${t('SortableCategory.products')}`;
   };
 
-  const GridProductCard = ({ product, isNew }: { product: any; isNew?: boolean }) => {
+  // Load extras for all products when in grid view
+  useEffect(() => {
+    const loadExtrasForProducts = async () => {
+      for (const product of category.products) {
+        if (!productExtras.has(product.id) && !loadingExtras.has(product.id)) {
+          setLoadingExtras(prev => new Set(prev).add(product.id));
+
+          try {
+            const fetchedExtras = await productExtrasService.getProductExtrasByProductId(product.id);
+            
+            setProductExtras(prev => new Map(prev).set(product.id, fetchedExtras));
+          } catch (error) {
+            logger.error('Error loading extras for product', { productId: product.id, error });
+          } finally {
+            setLoadingExtras(prev => {
+              const next = new Set(prev);
+              next.delete(product.id);
+              return next;
+            });
+          }
+        }
+      }
+    };
+
+    if (viewMode === 'grid') {
+      loadExtrasForProducts();
+    }
+  }, [category.products, viewMode, productExtras, loadingExtras]);
+
+  const GridProductCard = ({
+    product,
+    isNew,
+    extras = [],
+    isLoadingExtras = false
+  }: {
+    product: any;
+    isNew?: boolean;
+    extras?: BranchProductExtra[];
+    isLoadingExtras?: boolean;
+  }) => {
     const hasValidImage = product.imageUrl && product.imageUrl !== 'string' && product.imageUrl.trim() !== '';
 
     return (
@@ -166,9 +212,29 @@ export const SortableCategory: React.FC<{
           </p>
           <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
             <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 dark:from-primary-400 dark:to-primary-600 bg-clip-text text-transparent">
-              {   product.price.toFixed(2) }
+              {product.price.toFixed(2)}
             </span>
           </div>
+
+          {/* Extras Badge */}
+          {extras && extras.length > 0 && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onOpenProductExtras(product.id, product.name);
+              }}
+              className="mt-2 flex items-center gap-2 px-2.5 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-lg text-xs font-medium hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+            >
+              <Layers className="h-3.5 w-3.5" />
+              <span>{extras.length} {t('SortableCategory.extras')}</span>
+            </button>
+          )}
+          {isLoadingExtras && (
+            <div className="mt-2 flex items-center gap-2 px-2.5 py-1.5 text-xs text-gray-500">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              <span>{t('SortableCategory.loadingExtras')}</span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -328,6 +394,8 @@ export const SortableCategory: React.FC<{
                   key={product.id}
                   product={product}
                   isNew={newlyCreatedProductId === product.id}
+                  extras={productExtras.get(product.id) || []}
+                  isLoadingExtras={loadingExtras.has(product.id)}
                 />
               ))}
             </div>
