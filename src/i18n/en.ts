@@ -2400,6 +2400,7 @@ hero: {
       view: 'View',
       addons: 'Addons',
       extras: 'Extras',
+      ingredients: 'Ingredients',
       edit: 'Edit',
       delete: 'Delete',
       add: 'Add',
@@ -5196,7 +5197,10 @@ extrasManagement: {
     addExtra: 'Add New Extra',
     editExtra: 'Edit Extra',
     noItems: 'No items in this category yet.',
+    alreadyExists: 'Already Exists',
     noDescription: 'No description',
+    duplicateWarning: 'Duplicate Extra',
+    duplicateMessage: 'This extra already exists in the selected category. Please choose a different name.',
     fields: {
       parentCategory: 'Parent Category',
       selectCategory: 'Select Category...',

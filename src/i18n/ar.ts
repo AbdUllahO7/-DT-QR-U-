@@ -2402,6 +2402,7 @@ contact: {
     price: 'السعر',
     buttons: {
       view: 'عرض',
+      ingredients: 'مكونات',
       addons: 'إضافات',
       extras: 'إضافية',
       edit: 'تعديل',
@@ -5194,9 +5195,12 @@ extrasManagement: {
 
   extras: {
     title: 'الإضافات',
+    alreadyExists: 'موجود بالفعل',
     addExtra: 'إضافة إضافة جديدة',
     editExtra: 'تعديل الإضافة',
     noItems: 'لا توجد عناصر في هذه الفئة بعد.',
+    duplicateWarning:"تحذير مكرر",
+    duplicateMessage:"توجد هذه الإضافة بالفعل في الفئة المحددة. يرجى اختيار اسم مختلف.",
     noDescription: 'لا يوجد وصف',
     fields: {
       parentCategory: 'الفئة الأصلية',

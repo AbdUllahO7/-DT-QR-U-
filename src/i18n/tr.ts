@@ -2408,6 +2408,7 @@ hero: {
       extras: 'Ekstralar',
       edit: 'Düzenle',
       delete: 'Sil',
+      ingredients: 'Malzemeler',
       add: 'Ekle',
       remove: 'Kaldır'
     },
@@ -5217,7 +5218,10 @@ extrasManagement: {
   },
 
   extras: {
+    alreadyExists: 'Zaten Var',
     title: 'Ekstralar',
+    duplicateWarning: 'Bu ekstra zaten mevcut.',
+    duplicateMessage: 'Bu ekstra, seçilen kategoride zaten mevcut. Lütfen farklı bir ad seçin.',
     addExtra: 'Yeni Ekstra Ekle',
     editExtra: 'Ekstra Düzenle',
     noItems: 'Bu kategoride henüz öğe yok.',

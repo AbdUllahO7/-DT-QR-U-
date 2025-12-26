@@ -1322,6 +1322,7 @@ useEffect(() => {
                     activeId={activeId}
                     onOpenAddonsManagement={handleOpenAddonsManagement}
                     onOpenProductExtras={handleOpenProductExtras}
+                    onOpenIngredientUpdate={handleOpenIngredientUpdate}
                     allCategories={categories}
                     isReorderingProducts={isReorderingProducts && reorderingCategoryId === category.categoryId}
                     viewMode={viewMode}
@@ -1395,7 +1396,7 @@ useEffect(() => {
         }}
         onSuccess={(productId) => loadCategories(productId)}
         categories={categories}
-        onOpenIngredientSelection={handleOpenIngredientSelection}
+        selectedCategoryId={selectedCategoryForProduct ? Number(selectedCategoryForProduct) : undefined}
       />
 
       {isEditCategoryModalOpen && selectedCategoryForEdit && (

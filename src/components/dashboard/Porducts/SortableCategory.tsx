@@ -22,6 +22,7 @@ export const SortableCategory: React.FC<{
   isReorderingProducts?: boolean;
   onOpenAddonsManagement: (productId: number, productName: string) => void;
   onOpenProductExtras: (productId: number, productName: string) => void;
+  onOpenIngredientUpdate?: (productId: number, productName: string) => void;
   viewMode?: 'list' | 'grid';
   newlyCreatedProductId?: number | null;
 }> = ({
@@ -36,6 +37,7 @@ export const SortableCategory: React.FC<{
   onOpenAddonsManagement,
   viewMode = 'list',
   onOpenProductExtras,
+  onOpenIngredientUpdate,
   newlyCreatedProductId
 }) => {
   const { t, isRTL } = useLanguage();
@@ -363,6 +365,7 @@ export const SortableCategory: React.FC<{
                     onOpenProductExtras={onOpenProductExtras}
                     onDelete={onDeleteProduct}
                     onOpenAddonsManagement={onOpenAddonsManagement}
+                    onOpenIngredientUpdate={onOpenIngredientUpdate}
                     isNew={newlyCreatedProductId === product.id}
                   />
                 ))}

@@ -799,7 +799,6 @@ export interface CreateProductModalProps {
   onSuccess: (productId?: number) => void;
   categories: Category[];
   selectedCategoryId?: number;
-  onOpenIngredientSelection?: (productId: number, productName: string) => void;
 }
 
 export interface ProductAddonsModalProps {

@@ -7,13 +7,12 @@ import { mediaService } from '../../../services/mediaService';
 import { productService } from '../../../services/productService';
 import { CreateProductFormData, CreateProductModalProps, DEFAULT_IMAGE_URL } from '../../../types/BranchManagement/type';
 
-const CreateProductModal: React.FC<CreateProductModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  onSuccess, 
+const CreateProductModal: React.FC<CreateProductModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
   categories,
-  selectedCategoryId,
-  onOpenIngredientSelection
+  selectedCategoryId
 }) => {
   const { t, isRTL } = useLanguage();
   const [formData, setFormData] = useState<CreateProductFormData>({
@@ -196,9 +195,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
       const response = await productService.createProduct(payload);
       logger.info('Ürün başarıyla eklendi', { data: response });
 
-      if (onOpenIngredientSelection) {
-        onOpenIngredientSelection(response.id, response.name);
-      }
+      // Removed automatic ingredient selection - user can now manage ingredients via product card icon
 
       onSuccess(response.id);
       

@@ -17,8 +17,9 @@ export const SortableProduct: React.FC<{
   onDelete: (productId: number) => void;
   onOpenAddonsManagement?: (productId: number, productName: string) => void;
   onOpenProductExtras: (productId: number, productName: string) => void;
+  onOpenIngredientUpdate?: (productId: number, productName: string) => void;
   isNew?: boolean;
-}> = ({ product, onEdit, onDelete, onOpenAddonsManagement, onOpenProductExtras, isNew }) => {
+}> = ({ product, onEdit, onDelete, onOpenAddonsManagement, onOpenProductExtras, onOpenIngredientUpdate, isNew }) => {
   const { t, isRTL } = useLanguage();
   const [imageError, setImageError] = useState(false);
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
@@ -375,6 +376,18 @@ export const SortableProduct: React.FC<{
                     >
                       <Plus className="h-4 w-4" />
                       <span className="text-sm font-medium">{t('SortableProduct.buttons.addons')}</span>
+                    </button>
+                  )}
+
+                  {onOpenIngredientUpdate && (
+                    <button
+                      onClick={() => onOpenIngredientUpdate(product.id, product.name)}
+                      className="flex items-center gap-1.5 px-3 py-2 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-all duration-200"
+                      title={t('SortableProduct.manageIngredients') || 'Manage Ingredients'}
+                      aria-label={t('SortableProduct.accessibility.ingredientsButton') || 'Manage ingredients button'}
+                    >
+                      <ChefHat className="h-4 w-4" />
+                      <span className="text-sm font-medium">{t('SortableProduct.buttons.ingredients') || 'Ingredients'}</span>
                     </button>
                   )}
 
