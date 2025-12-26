@@ -341,28 +341,31 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         onCartToggle={handleCartToggle}
       />
 
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {/* Search Bar */}
-        <SearchBar 
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
+        <div className="mb-4">
+          <SearchBar
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+          />
+        </div>
+
+        {/* Categories - Shows horizontal on mobile, vertical sidebar on desktop */}
+        <CategoriesSidebar
+          categories={filteredCategories}
+          selectedCategory={selectedCategory}
+          onCategorySelect={setSelectedCategory}
         />
 
-        <div className="grid xl:grid-cols-3 lg:grid-cols-3 gap-6">
-          {/* Categories Sidebar */}
-          <CategoriesSidebar
-            categories={filteredCategories}
-            selectedCategory={selectedCategory}
-            onCategorySelect={setSelectedCategory}
-          />
-
-          {/* Products Grid */}
-          <div className="lg:col-span-2">
+        {/* Main Grid: Mobile stacks, Desktop has sidebar + content */}
+        <div className="lg:grid lg:grid-cols-3 lg:gap-6">
+          {/* Products Grid - Full width on mobile, 2 cols on desktop */}
+          <div className="lg:col-span-2 lg:col-start-2">
             <ProductGrid
               categories={filteredCategories}
               selectedCategory={selectedCategory}
               searchTerm={searchTerm}
-              cart={[]} 
+              cart={[]}
               favorites={favorites}
               onAddToCart={handleQuickAddToCart}
               onRemoveFromCart={removeFromBasket}

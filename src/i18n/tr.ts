@@ -2392,6 +2392,15 @@ hero: {
     allergenic: 'Alerjen içerir',
     recommended: 'Önerilen',
     price: 'Fiyat',
+    buttons: {
+      view: 'Görüntüle',
+      addons: 'Eklentiler',
+      extras: 'Ekstralar',
+      edit: 'Düzenle',
+      delete: 'Sil',
+      add: 'Ekle',
+      remove: 'Kaldır'
+    },
     errors: {
       loadingIngredients: 'Malzemeler yüklenirken bir hata oluştu.',
       loadingAddons: 'Eklentiler yüklenirken bir hata oluştu.'
@@ -5262,7 +5271,7 @@ categoryConfigModal: {
     maxSelection: 'Maks Seçim',
     minQuantity: 'Min Toplam Adet',
     maxQuantity: 'Maks Toplam Adet',
-    overrideRequired: '"Zorunlu" Durumunu Geçersiz Kıl',
+    overrideRequired: 'Zorunlu',
     specialPrice: 'Özel Fiyat',
     minQty: 'Min Adet',
     maxQty: 'Maks Adet',

@@ -2385,6 +2385,15 @@ hero: {
     allergenic: 'Contains allergens',
     recommended: 'Recommended',
     price: 'Price',
+    buttons: {
+      view: 'View',
+      addons: 'Addons',
+      extras: 'Extras',
+      edit: 'Edit',
+      delete: 'Delete',
+      add: 'Add',
+      remove: 'Remove'
+    },
     errors: {
       loadingIngredients: 'An error occurred while loading ingredients.',
       loadingAddons: 'An error occurred while loading addons.'
@@ -2887,7 +2896,7 @@ hero: {
       confirmPassword: 'Confirm Password',
       location: 'Restaurant/Branch Location',
       roles: 'Roles',
-      fullNumber:"Full Number :",
+      fullNumber:"Full Number ",
       userIsActive: 'User is Active',
       // Form fields
       firstName: 'First Name',
@@ -5236,7 +5245,7 @@ categoryConfigModal: {
     maxSelection: 'Max Selection',
     minQuantity: 'Min Total Qty',
     maxQuantity: 'Max Total Qty',
-    overrideRequired: 'Override "Required" Status',
+    overrideRequired: 'Required',
     specialPrice: 'Special Price',
     minQty: 'Min Qty',
     maxQty: 'Max Qty',

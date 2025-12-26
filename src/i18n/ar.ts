@@ -2390,6 +2390,15 @@ contact: {
     allergenic: 'يحتوي على مسببات الحساسية',
     recommended: 'موصى به',
     price: 'السعر',
+    buttons: {
+      view: 'عرض',
+      addons: 'إضافات',
+      extras: 'إضافية',
+      edit: 'تعديل',
+      delete: 'حذف',
+      add: 'إضافة',
+      remove: 'إزالة'
+    },
     errors: {
       loadingIngredients: 'حدث خطأ أثناء تحميل المكونات.',
       loadingAddons: 'حدث خطأ أثناء تحميل الإضافات.'
@@ -5239,7 +5248,7 @@ extrasManagement: {
     maxSelection: 'أقصى اختيار',
     minQuantity: 'أقل كمية إجمالية',
     maxQuantity: 'أقصى كمية إجمالية',
-    overrideRequired: 'تجاوز حالة "الإلزامية"',
+    overrideRequired: '  الإلزامية',
     specialPrice: 'سعر خاص',
     minQty: 'أقل كمية',
     maxQty: 'أقصى كمية',

@@ -280,36 +280,40 @@ export const SortableProduct: React.FC<{
                   {onOpenAddonsManagement && (
                     <button
                       onClick={() => onOpenAddonsManagement(product.id, product.name)}
-                      className="p-2 text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 hover:scale-110"
+                      className="flex items-center gap-1.5 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200"
                       title={t('SortableProduct.manageAddons')}
                       aria-label={t('SortableProduct.accessibility.addonsButton')}
                     >
                       <Plus className="h-4 w-4" />
+                      <span className="text-sm font-medium">{t('SortableProduct.buttons.addons')}</span>
                     </button>
                   )}
-                  
+
                   <button
                     onClick={() => onEdit(product.id)}
-                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all duration-200 hover:scale-110"
+                    className="flex items-center gap-1.5 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all duration-200"
                     title={t('SortableProduct.editProduct')}
                     aria-label={t('SortableProduct.accessibility.editButton')}
                   >
                     <Edit2 className="h-4 w-4" />
+                    <span className="text-sm font-medium">{t('SortableProduct.buttons.edit')}</span>
                   </button>
                   <button
                   onClick={() => onOpenProductExtras(product.id, product.name)}
-                  className="p-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
                   title={t('productsContent.actions.manageExtras')}
                 >
                   <Layers className="h-4 w-4" />
+                  <span className="text-sm font-medium">{t('SortableProduct.buttons.extras')}</span>
                 </button>
                   <button
                     onClick={() => onDelete(product.id)}
-                    className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 hover:scale-110"
+                    className="flex items-center gap-1.5 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
                     title={t('SortableProduct.deleteProduct')}
                     aria-label={t('SortableProduct.accessibility.deleteButton')}
                   >
                     <Trash2 className="h-4 w-4" />
+                    <span className="text-sm font-medium">{t('SortableProduct.buttons.delete')}</span>
                   </button>
                 </div>
               </div>
