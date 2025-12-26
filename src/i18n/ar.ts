@@ -3430,10 +3430,14 @@ contact: {
     // Status
     status: {
       active: 'نشط',
-      inactive: 'تم تعطيله من قبل المطعم',
+      inactive: 'تم تعطيله   ',
       available: 'متاح',
       unavailable: 'غير متاح'
-    },
+      },
+      stock : {
+        inStock: 'متوفر في المخزون',
+        outOfStock: 'غير متوفر في المخزون'
+      },
 
     // Messages
     messages: {
@@ -5209,6 +5213,8 @@ extrasManagement: {
     chooseExtra: 'اختر الإضافة...',
     noCategoriesYet: 'لم تتم إضافة فئات بعد',
     noExtrasYet: 'لم تتم إضافة إضافات بعد',
+    noDescription: 'لا يوجد وصف متاح',
+    addExtrasHint: 'أضف إضافات لهذه الفئة باستخدام الزر أعلاه.',
     confirmDelete: 'هل أنت متأكد من حذف هذه الفئة؟',
     confirmDeleteExtra: 'هل أنت متأكد من حذف هذه الإضافة؟',
     unknownCategory: 'فئة غير معروفة',
@@ -5218,16 +5224,26 @@ extrasManagement: {
     quantity: 'كمية',
     required: 'مطلوب',
     optional: 'اختياري',
+    requiredShort: 'مطل',
     basePrice: 'السعر الأساسي',
     unitPrice: 'سعر الوحدة',
     selectionMode: 'وضع الاختيار',
     single: 'مفرد',
     multiple: 'متعدد',
+    singleSelect: 'اختيار مفرد',
+    multiSelect: 'اختيار متعدد',
     requiredExtra: 'إضافة مطلوبة',
     defaultQty: 'الكمية الافتراضية',
+    default: 'افتراضي',
+    defaultShort: 'افت.',
     minQty: 'الحد الأدنى',
+    min: 'أدنى',
     maxQty: 'الحد الأقصى',
+    max: 'أقصى',
     qty: 'الكمية',
+    quantities: 'الكميات',
+    quantityConfiguration: 'تكوين الكمية',
+    priceAndSelection: 'السعر والاختيار',
     minSelection: 'الحد الأدنى للاختيار',
     maxSelection: 'الحد الأقصى للاختيار',
     minQuantity: 'الحد الأدنى للكمية',

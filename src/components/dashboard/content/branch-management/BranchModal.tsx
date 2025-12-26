@@ -131,12 +131,18 @@ const BranchModal: React.FC<BranchModalProps> = ({
       case 1:
         return (
           !!formData.branchName?.trim() &&
-          !!formData.whatsappOrderNumber?.trim() 
+          !!formData.whatsappOrderNumber?.trim()
         );
       case 2:
-        return true; 
+        return (
+          !!formData.createAddressDto.city?.trim() &&
+          !!formData.createAddressDto.country?.trim()
+        );
       case 3:
-        return true;
+        return (
+          !!formData.createContactDto.phone?.trim() &&
+          !!formData.createContactDto.mail?.trim()
+        );
       default:
         return false;
     }
@@ -152,7 +158,21 @@ const BranchModal: React.FC<BranchModalProps> = ({
       if (!formData.whatsappOrderNumber?.trim()) {
         errors.whatsappOrderNumber = t('branchModal.errors.whatsappNumber');
       }
-    } 
+    } else if (step === 2) {
+      if (!formData.createAddressDto.city?.trim()) {
+        errors['address.city'] = t('branchModal.errors.city') || 'City is required';
+      }
+      if (!formData.createAddressDto.country?.trim()) {
+        errors['address.country'] = t('branchModal.errors.country') || 'Country is required';
+      }
+    } else if (step === 3) {
+      if (!formData.createContactDto.phone?.trim()) {
+        errors['contact.phone'] = t('branchModal.errors.phone') || 'Phone is required';
+      }
+      if (!formData.createContactDto.mail?.trim()) {
+        errors['contact.mail'] = t('branchModal.errors.email') || 'Email is required';
+      }
+    }
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
@@ -304,7 +324,14 @@ const BranchModal: React.FC<BranchModalProps> = ({
     if (!validateStep(3)) {
       return;
     }
-    await onSubmit(formData);
+
+    // Set default logo if not provided
+    const submissionData = {
+      ...formData,
+      branchLogoPath: formData.branchLogoPath || 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/330px-No_image_available.svg.png'
+    };
+
+    await onSubmit(submissionData);
   };
 
   // --- MAP HANDLERS ---
@@ -612,7 +639,7 @@ const renderStep2 = () => (
       <div className="space-y-6">
         <div>
           <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            {t('branchModal.fields.country.label')}
+            {t('branchModal.fields.country.label')} <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10`} />
@@ -621,7 +648,7 @@ const renderStep2 = () => (
               name="address.country"
               value={formData.createAddressDto.country || ''}
               onChange={handleInputChange}
-              className={`w-full ${isRTL ? 'pr-10 pl-8' : 'pl-10 pr-8'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
+              className={`w-full ${isRTL ? 'pr-10 pl-8' : 'pl-10 pr-8'} py-3 border ${formErrors['address.country'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
               dir={isRTL ? 'rtl' : 'ltr'}
             >
               <option value="" disabled>
@@ -640,11 +667,14 @@ const renderStep2 = () => (
               </svg>
             </div>
           </div>
+          {formErrors['address.country'] && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.country']}</p>
+          )}
         </div>
 
         <div>
           <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            {t('branchModal.fields.city.label')}
+            {t('branchModal.fields.city.label')} <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
@@ -654,11 +684,14 @@ const renderStep2 = () => (
               name="address.city"
               value={formData.createAddressDto.city || ''}
               onChange={handleInputChange}
-              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${formErrors['address.city'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
               placeholder={t('branchModal.fields.city.placeholder')}
               dir={isRTL ? 'rtl' : 'ltr'}
             />
           </div>
+          {formErrors['address.city'] && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.city']}</p>
+          )}
         </div>
 
         <div>
@@ -750,20 +783,20 @@ const renderStep2 = () => (
         <div className="space-y-6">
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.phone.label')}
+              {t('branchModal.fields.phone.label')} <span className="text-red-500">*</span>
             </label>
-            
+
             <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                <select
                 title='Country Code'
                 value={getPhoneParts(formData.createContactDto.phone).code}
                 onChange={(e) => handlePhoneCompositeChange(
-                  'contact.phone', 
-                  formData.createContactDto.phone, 
-                  'code', 
+                  'contact.phone',
+                  formData.createContactDto.phone,
+                  'code',
                   e.target.value
                 )}
-                className="w-1/3 md:w-1/4 px-3 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white"
+                className={`w-1/3 md:w-1/4 px-3 py-3 border ${formErrors['contact.phone'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white`}
               >
                 {countriesWithCodes.map((country) => (
                   <option key={country.code + country.name} value={country.code}>
@@ -776,20 +809,23 @@ const renderStep2 = () => (
                 maxLength={15}
                 value={getPhoneParts(formData.createContactDto.phone).number}
                 onChange={(e) => handlePhoneCompositeChange(
-                  'contact.phone', 
-                  formData.createContactDto.phone, 
-                  'number', 
+                  'contact.phone',
+                  formData.createContactDto.phone,
+                  'number',
                   e.target.value
                 )}
-                className={`flex-1 px-3 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`flex-1 px-3 py-3 border ${formErrors['contact.phone'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
                 placeholder={t('branchModal.fields.phone.placeholder')}
               />
             </div>
+            {formErrors['contact.phone'] && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.phone']}</p>
+            )}
           </div>
 
           <div>
             <label htmlFor="mail" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.email.label')}
+              {t('branchModal.fields.email.label')} <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Mail className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
@@ -799,10 +835,13 @@ const renderStep2 = () => (
                 name="contact.mail"
                 value={formData.createContactDto.mail || ''}
                 onChange={handleInputChange}
-                className="w-full px-10 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                className={`w-full px-10 py-3 border ${formErrors['contact.mail'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
                 placeholder={t('branchModal.fields.email.placeholder')}
               />
             </div>
+            {formErrors['contact.mail'] && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.mail']}</p>
+            )}
           </div>
 
           {/* --- UPDATED LOCATION FIELD WITH MAP BUTTON --- */}
@@ -1053,7 +1092,7 @@ const renderStep2 = () => (
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                {formData.branchName ? t('branchModal.title.edit') : t('branchModal.title.add')}
+                {t('branchModal.title.add')}
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {t('branchModal.subtitle')}

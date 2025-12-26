@@ -3427,9 +3427,13 @@ BranchTableManagement: {
     // Status
     status: {
       active: 'Aktif',
-      inactive: 'Restaurant tarafından devre dışı bırakıldı',
+      inactive: 'devre dışı bırakıldı',
       available: 'Mevcut',
       unavailable: 'Mevcut Değil'
+    },
+     stock : {
+      inStock: 'Stokta Var',
+      outOfStock: 'Stokta Yok'
     },
 
     // Messages
@@ -5233,6 +5237,8 @@ extrasManagement: {
     chooseExtra: 'Ekstra Seçin...',
     noCategoriesYet: 'Henüz kategori eklenmedi',
     noExtrasYet: 'Henüz ekstra eklenmedi',
+    noDescription: 'Açıklama mevcut değil',
+    addExtrasHint: 'Yukarıdaki düğmeyi kullanarak bu kategoriye ekstra ekleyin.',
     confirmDelete: 'Bu kategoriyi silmek istediğinizden emin misiniz?',
     confirmDeleteExtra: 'Bu ekstrayi silmek istediğinizden emin misiniz?',
     unknownCategory: 'Bilinmeyen Kategori',
@@ -5242,16 +5248,26 @@ extrasManagement: {
     quantity: 'Miktar',
     required: 'Zorunlu',
     optional: 'İsteğe Bağlı',
+    requiredShort: 'Zor',
     basePrice: 'Temel Fiyat',
     unitPrice: 'Birim Fiyat',
     selectionMode: 'Seçim Modu',
     single: 'Tekli',
     multiple: 'Çoklu',
+    singleSelect: 'Tekli Seçim',
+    multiSelect: 'Çoklu Seçim',
     requiredExtra: 'Zorunlu Ekstra',
     defaultQty: 'Varsayılan Miktar',
+    default: 'Varsayılan',
+    defaultShort: 'Var.',
     minQty: 'Min Miktar',
+    min: 'Min',
     maxQty: 'Maks Miktar',
+    max: 'Maks',
     qty: 'Miktar',
+    quantities: 'Miktarlar',
+    quantityConfiguration: 'Miktar Yapılandırması',
+    priceAndSelection: 'Fiyat ve Seçim',
     minSelection: 'Min Seçim',
     maxSelection: 'Maks Seçim',
     minQuantity: 'Min Miktar',

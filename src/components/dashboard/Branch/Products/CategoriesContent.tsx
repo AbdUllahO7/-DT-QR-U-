@@ -740,7 +740,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                             ? 'text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20'
                             : 'text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 hover:bg-orange-50 dark:hover:bg-orange-900/20'
                         }`}
-                        title={product.isAvailable !== false ? t('branchCategories.products.markOutOfStock') : t('branchCategories.products.markInStock')}
                       >
                         <ShoppingBag className="h-4 w-4" />
                         <span className="text-sm font-medium">

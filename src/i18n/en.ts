@@ -1187,7 +1187,7 @@ hero: {
         placeholder: 'Enter branch name'
       },
       whatsappNumber: {
-        label: 'WhatsApp Order Number *',
+        label: 'WhatsApp Order Number ',
         placeholder: 'Enter WhatsApp order number'
       },
       branchLogo: {
@@ -1207,7 +1207,7 @@ hero: {
         placeholder: 'Enter city name'
       },
       street: {
-        label: 'Street *',
+        label: 'Street ',
         placeholder: 'Enter street name'
       },
       zipCode: {
@@ -1223,15 +1223,15 @@ hero: {
         placeholder: 'Enter additional address information (optional)'
       },
       phone: {
-        label: 'Phone Number *',
+        label: 'Phone Number ',
         placeholder: 'Enter phone number'
       },
       email: {
-        label: 'Email Address *',
+        label: 'Email Address ',
         placeholder: 'Enter email address'
       },
       location: {
-        label: 'Location Information *',
+        label: 'Location Information (Optional)',
         placeholder: 'Enter location information (e.g., 40.9795,28.7225)'
       },
       contactHeader: {
@@ -1308,6 +1308,7 @@ hero: {
         restaurantIdNotFound: 'Restaurant ID not found',
         detailsLoadFailed: 'Failed to load branch details',
         statusUpdateFailed: 'Failed to update branch status',
+        validationFailed: 'Please fix the validation errors below',
         sessionExpired: 'Session expired. Please log in again.',
         noPermission: 'You do not have permission for this operation.',
         branchNotFound: 'Branch not found.',
@@ -3273,6 +3274,10 @@ hero: {
     header: 'Branch Categories Management',
     subheader: 'Manage categories and products for Branch ',
     lastUpdated: 'Last Updated',
+    stock : {
+      inStock: 'In Stock',
+      outOfStock: 'Out of Stock'
+    },
     stats: {
       availableCategories: 'Available Categories',
       readyToAdd: 'Ready to add',
@@ -3424,7 +3429,7 @@ hero: {
     // Status
     status: {
       active: 'Active',
-      inactive: 'Disabled by the restaurant',
+      inactive: 'Disabled ',
       available: 'Available',
       unavailable: 'Unavailable'
     },
@@ -5207,6 +5212,8 @@ extrasManagement: {
     chooseExtra: 'Choose Extra...',
     noCategoriesYet: 'No categories added yet',
     noExtrasYet: 'No extras added yet',
+    noDescription: 'No description available',
+    addExtrasHint: 'Add extras to this category using the button above.',
     confirmDelete: 'Are you sure you want to delete this category?',
     confirmDeleteExtra: 'Are you sure you want to delete this extra?',
     unknownCategory: 'Unknown Category',
@@ -5216,16 +5223,26 @@ extrasManagement: {
     quantity: 'Quantity',
     required : 'Required',
     optional: 'Optional',
+    requiredShort: 'Req',
     basePrice: 'Base Price',
     unitPrice: 'Unit Price',
     selectionMode: 'Selection Mode',
     single: 'Single',
     multiple: 'Multiple',
+    singleSelect: 'Single Select',
+    multiSelect: 'Multi Select',
     requiredExtra: 'Required Extra',
     defaultQty: 'Default Qty',
+    default: 'Default',
+    defaultShort: 'Def.',
     minQty: 'Min Qty',
+    min: 'Min',
     maxQty: 'Max Qty',
+    max: 'Max',
     qty: 'Qty',
+    quantities: 'Quantities',
+    quantityConfiguration: 'Quantity Configuration',
+    priceAndSelection: 'Price & Selection',
     minSelection: 'Min Selection',
     maxSelection: 'Max Selection',
     minQuantity: 'Min Quantity',
