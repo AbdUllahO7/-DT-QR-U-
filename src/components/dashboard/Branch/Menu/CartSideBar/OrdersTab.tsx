@@ -1,7 +1,7 @@
 "use client" // Assuming this is needed as per your other file
 
 import type React from "react"
-import { useState } from "react" // Removed useEffect as it wasn't used
+import { useState, useEffect } from "react"
 import { Clock, CheckCircle, ClipboardList, Loader2, Edit, X, Save, AlertCircle, RefreshCw, Plus, Minus, Trash2 } from "lucide-react"
 import { useLanguage } from "../../../../../contexts/LanguageContext"
 import { OrderCardProps, OrdersTabProps } from "../../../../../types/menu/carSideBarTypes"
@@ -139,6 +139,29 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
 
   const canCancel = updatableOrder && orderService.canCancelOrder(order.trackingInfo.orderStatus);
 
+  // Auto-refresh polling for active orders
+  useEffect(() => {
+    const isOrderActive = () => {
+      const status = order.trackingInfo.orderStatus.toLowerCase();
+      return status !== 'completed' && status !== 'cancelled' && status !== 'rejected';
+    };
+
+    // Only poll if order is active and not being edited
+    if (!isOrderActive() || isEditing || updating) {
+      return;
+    }
+
+    // Poll every 10 seconds
+    const pollInterval = setInterval(() => {
+      onLoadOrderTracking(order.orderTag);
+    }, 10000); // 10 seconds
+
+    // Cleanup on unmount or when dependencies change
+    return () => {
+      clearInterval(pollInterval);
+    };
+  }, [order.orderTag, order.trackingInfo.orderStatus, isEditing, updating, onLoadOrderTracking]);
+
   const getTimeRemaining = () => {
     if (!updatableOrder?.updateDeadline) return null
     
@@ -177,9 +200,9 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
           items.push({
             ...addon,
             orderDetailId: addon.id, // The addon's own unique OrderItem ID
-            
+
             // --- THIS IS THE CRITICAL FIX ---
-            parentOrderDetailId: addon.parentOrderItemId, 
+            parentOrderDetailId: addon.parentOrderItemId || item.orderDetailId,
             // --- END OF FIX ---
 
             originalCount: addon.count,
@@ -453,10 +476,11 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
             {!isEditing && (
               <button
                 onClick={handleEdit}
-                className="p-2 text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-800/30 rounded-lg transition-colors"
+                className="flex items-center gap-1 px-3 py-2 text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-800/30 rounded-lg transition-colors text-sm font-medium"
                 title={t('menu.cart.edit_order') || 'Edit order'}
               >
                 <Edit className="h-4 w-4" />
+                <span>{t('menu.cart.edit') || 'Edit'}</span>
               </button>
             )}
           </div>
@@ -544,7 +568,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
                       {/* Delete/Restore Button */}
                       <button
                         onClick={() => item.isDeleted ? handleRestoreItem(item.orderDetailId) : handleDeleteItem(item.orderDetailId)}
-                        className={`p-2 rounded-lg transition-colors ${
+                        className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-colors text-xs font-medium ${
                           item.isDeleted
                             ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200'
                             : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200'
@@ -552,9 +576,15 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
                         title={item.isDeleted ? (t('menu.cart.restore_item') || 'Restore item') : (t('menu.cart.delete_item') || 'Delete item')}
                       >
                         {item.isDeleted ? (
-                          <RefreshCw className="h-4 w-4" />
+                          <>
+                            <RefreshCw className="h-4 w-4" />
+                            <span>{t('menu.cart.restore') || 'Restore'}</span>
+                          </>
                         ) : (
-                          <Trash2 className="h-4 w-4" />
+                          <>
+                            <Trash2 className="h-4 w-4" />
+                            <span>{t('menu.cart.delete') || 'Delete'}</span>
+                          </>
                         )}
                       </button>
                     </div>
@@ -631,14 +661,24 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
                                 {/* Addon Delete/Restore Button */}
                                 <button
                                   onClick={() => addon.isDeleted ? handleRestoreItem(addon.orderDetailId) : handleDeleteItem(addon.orderDetailId)}
-                                  className={`p-2 rounded-lg transition-colors ${
+                                  className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-colors text-xs font-medium ${
                                     addon.isDeleted
                                       ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200'
                                       : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200'
                                   }`}
                                   title={addon.isDeleted ? (t('menu.cart.restore_item') || 'Restore item') : (t('menu.cart.delete_item') || 'Delete item')}
                                 >
-                                  {addon.isDeleted ? <RefreshCw className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+                                  {addon.isDeleted ? (
+                                    <>
+                                      <RefreshCw className="h-4 w-4" />
+                                      <span>{t('menu.cart.restore') || 'Restore'}</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Trash2 className="h-4 w-4" />
+                                      <span>{t('menu.cart.delete') || 'Delete'}</span>
+                                    </>
+                                  )}
                                 </button>
                               </div>
                             </div>
@@ -700,9 +740,10 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
               <button
                 onClick={handleCancelEdit}
                 disabled={updating}
-                className="px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
               >
                 <X className="h-4 w-4" />
+                <span>{t('menu.cart.cancel_edit') || 'Cancel'}</span>
               </button>
             </div>
           </div>
@@ -767,7 +808,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
           </button>
         )}
 
-        {isPending && !isEditing && !canCancel && (
+        {!isEditing && (
           <button
             onClick={() => onLoadOrderTracking(order.orderTag)}
             disabled={trackingLoading || updating}
@@ -776,17 +817,17 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
             {trackingLoading ? (
               <>
                 <Loader2 className="h-3 w-3 animate-spin" />
-                {t('menu.cart.refreshing')}
+                {t('menu.cart.refreshing') || 'Refreshing...'}
               </>
             ) : (
               <>
                 <RefreshCw className="h-3 w-3" />
-                {t('menu.cart.refresh')}
+                {t('menu.cart.refresh') || 'Refresh Status'}
               </>
             )}
           </button>
         )}
-        
+
         {!isEditing && (
           <button
             onClick={() => onRemoveOrderFromTracking(order.orderTag)}

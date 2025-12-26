@@ -11,55 +11,57 @@ const Header: React.FC<HeaderProps> = ({ menuData, totalItems, onCartToggle }) =
   const { t } = useLanguage()
 
   return (
-    <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-40 shadow-lg">
-      <div className="max-w-6xl mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+    <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-40 shadow-lg overflow-hidden">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+        <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Left Side: Logo and Info */}
-          <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-orange-500 via-orange-600 to-pink-500 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-105 transition-transform duration-300">
-              <UtensilsCrossed className="h-6 w-6 text-white" />
+          <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-orange-500 via-orange-600 to-pink-500 rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+              <UtensilsCrossed className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-xl mr-2 font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 dark:from-slate-100 dark:via-slate-200 dark:to-slate-300 bg-clip-text text-transparent">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-slate-800 via-slate-700 to-slate-600 dark:from-slate-100 dark:via-slate-200 dark:to-slate-300 bg-clip-text text-transparent truncate">
                 {menuData.restaurantName}
               </h1>
-              
-              <div className="flex items-center space-x-2 mt-1 mr-2">
-                <div className="flex items-center space-x-1 text-slate-600 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-800/50 px-2 py-1 rounded-full backdrop-blur-sm">
-                  <MapPin className="h-3 w-3" />
-                  <p className="text-xs font-medium">{menuData.branchName}</p>
+
+              <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
+                <div className="flex items-center gap-1 text-slate-600 dark:text-slate-400 bg-slate-100/50 dark:bg-slate-800/50 px-2 py-0.5 sm:py-1 rounded-full backdrop-blur-sm">
+                  <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
+                  <p className="text-xs font-medium truncate max-w-[100px] sm:max-w-none">{menuData.branchName}</p>
                 </div>
-                <div className={`flex items-center space-x-1 px-2 py-1 rounded-full backdrop-blur-sm mr-2 ${
-                  menuData.isOpen 
-                    ? "bg-emerald-100/50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300" 
+                <div className={`flex items-center gap-1 px-2 py-0.5 sm:py-1 rounded-full backdrop-blur-sm ${
+                  menuData.isOpen
+                    ? "bg-emerald-100/50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
                     : "bg-red-100/50 dark:bg-red-900/30 text-red-700 dark:text-red-300"
                 }`}>
-                  <div className={`w-2 h-2 rounded-full ml-2 ${menuData.isOpen ? "bg-emerald-500" : "bg-red-500"} animate-pulse`} />
-                  <span className="text-xs font-semibold">{menuData.isOpen ? t('menu.open') : t('menu.closed')}</span>
+                  <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${menuData.isOpen ? "bg-emerald-500" : "bg-red-500"} animate-pulse`} />
+                  <span className="text-xs font-semibold whitespace-nowrap">{menuData.isOpen ? t('menu.open') : t('menu.closed')}</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Right Side: Actions */}
-          <div className="flex items-center space-x-3 md:space-x-4">
-            {/* Added Theme Toggle Here */}
-            <ThemeToggle />
-            
-            <div className="h-6 w-[1px] bg-slate-200 dark:bg-slate-700 mx-1" />
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {/* Theme Toggle - Hidden on very small screens */}
+            <div className="hidden sm:block">
+              <ThemeToggle />
+            </div>
+
+            <div className="hidden sm:block h-6 w-[1px] bg-slate-200 dark:bg-slate-700" />
 
             <button
               onClick={onCartToggle}
-              className="relative bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white p-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-orange-500/25 transform hover:scale-105 group"
+              className="relative bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white p-2 sm:p-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-orange-500/25 transform active:scale-95 sm:hover:scale-105 group"
             >
-              <ShoppingCart className="h-5 w-5 group-hover:rotate-12 transition-transform duration-300" />
+              <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 group-hover:rotate-12 transition-transform duration-300" />
               {totalItems > 0 && (
-                <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold shadow-lg animate-pulse">
+                <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center font-bold shadow-lg animate-pulse">
                   {totalItems}
                 </span>
               )}
             </button>
-            
+
             <LanguageSelector variant="header" />
           </div>
         </div>

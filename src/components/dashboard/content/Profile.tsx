@@ -102,8 +102,9 @@ const Profile: React.FC = () => {
                 initials
               )}
             </div>
-            <button className={`absolute -bottom-2 ${isRTL ? '-left-2' : '-right-2'} bg-white text-primary-600 p-2 rounded-full shadow-lg group-hover:scale-110 transition-transform`}>
+            <button className={`absolute -bottom-2 ${isRTL ? '-left-2' : '-right-2'} flex items-center gap-1 bg-white text-primary-600 px-3 py-2 rounded-full shadow-lg group-hover:scale-110 transition-transform text-xs font-medium`}>
               <Camera className="w-4 h-4" />
+              <span>{t('profile.changePhoto') || 'Change'}</span>
             </button>
           </div>
 
@@ -148,8 +149,9 @@ const Profile: React.FC = () => {
               <User className="w-6 h-6 text-primary-600" />
               {t('profile.personalInfo')}
             </h2>
-            <button className="text-primary-600 hover:text-primary-700 p-2 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
+            <button className="flex items-center gap-2 text-primary-600 hover:text-primary-700 px-3 py-2 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors text-sm font-medium">
               <Edit3 className="w-5 h-5" />
+              <span>{t('common.edit') || 'Edit'}</span>
             </button>
           </div>
 

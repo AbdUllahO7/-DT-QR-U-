@@ -23,7 +23,8 @@ const BranchManagement: React.FC = () => {
   const { t, isRTL } = useLanguage();
   const [branches, setBranches] = useState<BranchInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string>("");
+  const [validationErrors, setValidationErrors] = useState<Record<string, string[]> | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingBranch, setEditingBranch] = useState<BranchDetailResponse | null>(null);
@@ -106,10 +107,22 @@ const BranchManagement: React.FC = () => {
     fetchBranches();
   }, [t]);
 
+  // Helper function to format field names for display
+  const formatFieldName = (fieldName: string): string => {
+    // Remove DTO prefixes and convert to readable format
+    const cleanName = fieldName
+      .replace('CreateAddressDto.', '')
+      .replace('CreateContactDto.', '')
+      .replace(/([A-Z])/g, ' $1')
+      .trim();
+    return cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+  };
+
   const fetchBranches = async () => {
     setIsLoading(true);
     setError('');
-    
+    setValidationErrors(null);
+
     try {
       logger.info('Şube listesi alınıyor...', null, { prefix: 'BranchManagement' });
       const branchesData = await branchService.getBranches();
@@ -142,7 +155,7 @@ const BranchManagement: React.FC = () => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
@@ -176,6 +189,9 @@ const BranchManagement: React.FC = () => {
 
   const handleSubmit = async (data: CreateBranchWithDetailsDto) => {
     setIsSubmitting(true);
+    setError('');
+    setValidationErrors(null);
+
     try {
       const restaurantId = getRestaurantIdFromToken();
       if (!restaurantId) {
@@ -227,25 +243,31 @@ const BranchManagement: React.FC = () => {
       handleCloseModal();
     } catch (err: any) {
       logger.error('Error submitting branch:', err, { prefix: 'BranchManagement' });
-      
-      let errorMessage = isEditMode 
-        ? t('branchManagement.error.updateFailed') 
-        : t('branchManagement.error.createFailed');
-      
-      // Handle specific error types
-      if (err?.response?.status === 401) {
-        errorMessage = t('branchManagement.error.sessionExpired');
-      } else if (err?.response?.status === 403) {
-        errorMessage = t('branchManagement.error.noPermission');
-      } else if (err?.response?.status === 404) {
-        errorMessage = t('branchManagement.error.branchNotFound');
-      } else if (err?.response?.status === 0 || !navigator.onLine) {
-        errorMessage = t('branchManagement.error.connectionError');
-      } else if (err?.message) {
-        errorMessage = err.message;
+
+      // Check if this is a validation error (400 status)
+      if (err?.response?.status === 400 && err?.response?.data?.errors) {
+        setValidationErrors(err.response.data.errors);
+        setError(t('branchManagement.error.validationFailed') || 'Please fix the validation errors below');
+      } else {
+        // Handle other error types
+        let errorMessage = isEditMode
+          ? t('branchManagement.error.updateFailed')
+          : t('branchManagement.error.createFailed');
+
+        if (err?.response?.status === 401) {
+          errorMessage = t('branchManagement.error.sessionExpired');
+        } else if (err?.response?.status === 403) {
+          errorMessage = t('branchManagement.error.noPermission');
+        } else if (err?.response?.status === 404) {
+          errorMessage = t('branchManagement.error.branchNotFound');
+        } else if (err?.response?.status === 0 || !navigator.onLine) {
+          errorMessage = t('branchManagement.error.connectionError');
+        } else if (err?.message) {
+          errorMessage = err.message;
+        }
+
+        setError(errorMessage);
       }
-      
-      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -254,9 +276,9 @@ const BranchManagement: React.FC = () => {
   const handleEditBranch = async (branch: BranchInfo) => {
     try {
       logger.info(`Fetching branch details for branchId: ${branch.branchId}`, null, { prefix: 'BranchManagement' });
-      
+
       // Use the new API with includes to get full branch details
-      const branchDetail = await branchService.getBranchById(branch.branchId);
+      const branchDetail = await branchService.getBranchById(Number(branch.branchId));
       logger.info('Branch details fetched with includes', branchDetail, { prefix: 'BranchManagement' });
 
       if (branchDetail) {
@@ -308,7 +330,7 @@ const BranchManagement: React.FC = () => {
     setBranches(prev => prev.filter(branch => branch.branchId !== branchToDelete.branchId));
 
     try {
-      await branchService.deleteBranch(branchToDelete.branchId);
+      await branchService.deleteBranch(Number(branchToDelete.branchId));
       logger.info('Branch deleted successfully', { branchId: branchToDelete.branchId }, { prefix: 'BranchManagement' });
       
       // Reset modal states
@@ -320,10 +342,10 @@ const BranchManagement: React.FC = () => {
 
     } catch (err: any) {
       logger.error('Error deleting branch:', err, { prefix: 'BranchManagement' });
-      
+
       // Revert optimistic update on error
-      setBranches(prev => [...prev, branchBackup].sort((a, b) => a.branchId - b.branchId));
-      
+      setBranches(prev => [...prev, branchBackup].sort((a, b) => Number(a.branchId) - Number(b.branchId)));
+
       let errorMessage = t('branchManagement.error.deleteFailed');
       
       if (err?.response?.status === 401) {
@@ -337,11 +359,11 @@ const BranchManagement: React.FC = () => {
       } else if (err?.message) {
         errorMessage = err.message;
       }
-      
-      setError(errorMessage);
-      
+      setError(err.response.data);
+            console.log("err.response.data",err.response.data)
+
       // Clear error after 5 seconds
-      setTimeout(() => setError(null), 5000);
+      setTimeout(() => setError(""), 5000);
       
       // Re-throw error to be handled by the modal
       throw new Error(errorMessage);
@@ -377,7 +399,7 @@ const BranchManagement: React.FC = () => {
     setBranches(prev => prev.filter(branch => branch.branchId !== branchToPurge.branchId));
 
     try {
-      await purgeService.purgeBranch(branchToPurge.branchId);
+      await purgeService.purgeBranch(Number(branchToPurge.branchId));
       logger.info('Branch purged successfully', { branchId: branchToPurge.branchId }, { prefix: 'BranchManagement' });
       
       // Reset modal states
@@ -391,10 +413,10 @@ const BranchManagement: React.FC = () => {
       logger.error('Error purging branch:', err, { prefix: 'BranchManagement' });
       
       // Revert optimistic update on error
-      setBranches(prev => [...prev, branchBackup].sort((a, b) => a.branchId - b.branchId));
-      
+      setBranches(prev => [...prev, branchBackup].sort((a, b) => Number(a.branchId) - Number(b.branchId)));
+
       let errorMessage = t('branchManagement.error.purgeFailed') || 'Failed to permanently delete branch';
-      
+
       if (err?.response?.status === 401) {
         errorMessage = t('branchManagement.error.sessionExpired');
       } else if (err?.response?.status === 403) {
@@ -404,11 +426,11 @@ const BranchManagement: React.FC = () => {
       } else if (err?.message) {
         errorMessage = err.message;
       }
-      
+
       setError(errorMessage);
-      
+
       // Clear error after 5 seconds
-      setTimeout(() => setError(null), 5000);
+      setTimeout(() => setError(""), 5000);
       
       // Re-throw error to be handled by the modal
       throw new Error(errorMessage);
@@ -440,28 +462,28 @@ const BranchManagement: React.FC = () => {
   };
 
   const handleToggleTemporaryClose = async (branchId: number, isTemporarilyClosed: boolean) => {
-    const branch = branches.find(b => b.branchId === branchId);
+    const branch = branches.find(b => Number(b.branchId) === branchId);
     const isOpenNow = branch ? branch.isOpenNow : false;
-    
+
     try {
       // Optimistic update
-      setBranches(prev => prev.map(branch => 
-        branch.branchId === branchId 
-          ? { ...branch, isTemporarilyClosed } 
+      setBranches(prev => prev.map(branch =>
+        Number(branch.branchId) === branchId
+          ? { ...branch, isTemporarilyClosed }
           : branch
       ));
 
       await branchService.toggleTemporaryClose(branchId, isTemporarilyClosed, isOpenNow);
     } catch (err: any) {
       // Revert on error
-      setBranches(prev => prev.map(branch => 
-        branch.branchId === branchId 
-          ? { ...branch, isTemporarilyClosed: !isTemporarilyClosed } 
+      setBranches(prev => prev.map(branch =>
+        Number(branch.branchId) === branchId
+          ? { ...branch, isTemporarilyClosed: !isTemporarilyClosed }
           : branch
       ));
-      
+
       let errorMessage = t('branchManagement.error.statusUpdateFailed');
-      
+
       if (err?.response?.status === 401) {
         errorMessage = t('branchManagement.error.sessionExpired');
       } else if (err?.response?.status === 403) {
@@ -471,14 +493,15 @@ const BranchManagement: React.FC = () => {
       } else if (err?.message) {
         errorMessage = err.message;
       }
-      
+
       setError(errorMessage);
-      setTimeout(() => setError(null), 3000);
+      setTimeout(() => setError(""), 3000);
     }
   };
 
   const dismissError = () => {
-    setError(null);
+    setError("");
+    setValidationErrors(null);
   };
 
   return (
@@ -504,31 +527,54 @@ const BranchManagement: React.FC = () => {
         </div>
 
         {/* Error message */}
-        {error && (
-          <motion.div 
+        {(error || validationErrors) && (
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] max-w-2xl w-full mx-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg shadow-lg overflow-hidden"
           >
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <AlertTriangle className="h-5 w-5 text-red-400 dark:text-red-500" />
+            <div className="p-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <AlertTriangle className="h-5 w-5 text-red-400 dark:text-red-500" />
+                </div>
+                <div className={`${isRTL ? 'mr-3' : 'ml-3'} flex-1`}>
+                  {error && (
+                    <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                      {error}
+                    </p>
+                  )}
+
+                  {validationErrors && (
+                    <div className="mt-3 space-y-2">
+                      {Object.entries(validationErrors).map(([field, messages]) => (
+                        <div key={field} className="flex items-start">
+                          <span className="inline-block w-2 h-2 mt-1.5 mr-2 bg-red-400 dark:bg-red-500 rounded-full flex-shrink-0"></span>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-red-700 dark:text-red-300">
+                              {formatFieldName(field)}:
+                            </p>
+                            {messages.map((message, idx) => (
+                              <p key={idx} className="text-sm text-red-600 dark:text-red-400 ml-2">
+                                {message}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={dismissError}
+                  className={`${isRTL ? 'mr-auto' : 'ml-auto'} flex-shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors`}
+                  aria-label={t('common.dismiss')}
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
               </div>
-              <div className={`${isRTL ? 'mr-3' : 'ml-3'} flex-1`}>
-           
-                <p className="mt-1 text-sm text-red-700 dark:text-red-300">
-                  {error}
-                </p>
-              </div>
-              <button
-                onClick={dismissError}
-                className={`${isRTL ? 'mr-auto' : 'ml-auto'} flex-shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors`}
-                aria-label={t('common.dismiss')}
-              >
-                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
             </div>
           </motion.div>
         )}
@@ -637,6 +683,7 @@ const BranchManagement: React.FC = () => {
         isSubmitting={isDeletingBranch}
         itemType="branch"
         itemName={branchToDelete?.branchName || ''}
+        errorMessage={error}
       />
 
       {/* Purge Confirmation Modal */}
@@ -649,6 +696,7 @@ const BranchManagement: React.FC = () => {
         isSubmitting={isPurgingBranch}
         itemType="branch-purge"
         itemName={branchToPurge?.branchName || ''}
+        errorMessage={error}
       />
     </div>
   );

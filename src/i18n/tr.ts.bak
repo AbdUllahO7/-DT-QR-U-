@@ -220,7 +220,7 @@ hero: {
       },
       delete: {
         title: 'Şubeyi Sil',
-        confirmMessage: '"{branchName}" şubesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'
+        confirmMessage: ' şubesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'
       }
     },
     orders: {
@@ -1305,7 +1305,7 @@ hero: {
     // Delete confirmation
     deleteConfirm: {
       title: 'Şube Silme Onayı',
-      description: '"{{branchName}}" şubesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'
+      description: '"{branchName}" şubesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'
     },
 
     // Form labels and fields

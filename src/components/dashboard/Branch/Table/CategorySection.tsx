@@ -11,7 +11,12 @@ import {
   Users,
   Building,
   Settings,
-  Loader2
+  Loader2,
+  // New specific icons
+  Home,       // Indoor
+  Trees,      // Garden
+  CloudSun,   // Terrace
+  Umbrella    // Outdoor
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import TableCard from './TableCard';
@@ -204,11 +209,12 @@ const CategorySection: React.FC<CategorySectionProps> = ({
 
   const getIconComponent = (iconClass: string): JSX.Element => {
     const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-      table: Grid,
-      users: Users,
-      grid: Building,
-      building: Building,
-      settings: Settings
+      // Map specific area types to icons
+      indoor: Home,
+      outdoor: Umbrella,
+      terrace: CloudSun,
+      garden: Trees,
+
     };
     const IconComponent = iconMap[iconClass] || Grid;
     return <IconComponent className="h-4 w-4" />;

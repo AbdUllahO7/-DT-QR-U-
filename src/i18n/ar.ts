@@ -37,7 +37,10 @@ export const ar = {
     last7Days: 'آخر 7 أيام',
     last30Days: 'آخر 30 يوم',
     thisMonth: 'هذا الشهر',
-    lastMonth: 'الشهر الماضي'
+    lastMonth: 'الشهر الماضي',
+    remove: 'إزالة',
+    dismiss: 'رفض',
+    download: 'تحميل'
   },
   filter: {
       "status": "الحالة",
@@ -228,7 +231,7 @@ hero: {
       },
       delete: {
         title: 'حذف الفرع',
-        confirmMessage: 'هل أنت متأكد من أنك تريد حذف الفرع "{branchName}"؟ لا يمكن التراجع عن هذا الإجراء.'
+        confirmMessage: 'هل أنت متأكد من أنك تريد حذف الفرع ؟ لا يمكن التراجع عن هذا الإجراء.'
       }
     },
     orders: {
@@ -236,6 +239,9 @@ hero: {
       description: 'عرض وإدارة الطلبات.',
       loading: 'جاري تحميل الطلبات...',
       refresh: 'تحديث',
+      selectBranch: "اختر الفرع",
+    selectBranchToView: "اختر الفرع المراد عرضه",
+    noBranches: "لا توجد فروع",
       newOrder: 'طلب جديد',
       tabs: {
         all: 'الكل',
@@ -901,6 +907,9 @@ contact: {
     orderNumber: 'طلب',
     table: 'طاولة',
     items: 'عناصر',
+          selectBranch: "اختر الفرع",
+    selectBranchToView: "اختر الفرع المراد عرضه",
+    noBranches: "لا توجد فروع",
     tabs: {
       all: 'جميع الطلبات',
       pending: 'في الانتظار',
@@ -946,6 +955,8 @@ contact: {
   tableManagement: {
     addTable: 'إضافة طاولة',
     ActiveStatus :"الحالة النشطة",
+    selectBranchPrompt:"لا توجد فروع",
+    selectBranch: "اختر الفرع",
       descriptionActive: "الفئة نشطة ومرئية",
       descriptionInActive: "الفئة غير نشطة ومخفية",
     loading: 'جاري تحميل الطاولات...',
@@ -1174,11 +1185,11 @@ contact: {
     },
     fields: {
       branchName: {
-        label: 'اسم الفرع *',
+        label: 'اسم الفرع',
         placeholder: 'أدخل اسم الفرع'
       },
       whatsappNumber: {
-        label: 'رقم الطلبات واتساب *',
+        label: 'رقم الطلبات واتساب',
         placeholder: 'أدخل رقم الطلبات واتساب'
       },
       branchLogo: {
@@ -1315,7 +1326,13 @@ contact: {
     // Delete confirmation
     deleteConfirm: {
       title: 'تأكيد حذف الفرع',
-      description: 'هل أنت متأكد من حذف فرع "{{branchName}}"؟ لا يمكن التراجع عن هذا الإجراء.'
+      description: 'هل أنت متأكد من حذف فرع ؟ لا يمكن التراجع عن هذا الإجراء.'
+    },
+
+    // تأكيد الحذف الدائم
+    purgeConfirm: {
+      title: 'تحذير الحذف الدائم',
+      description: 'سيؤدي هذا إلى حذف الفرع وجميع البيانات المرتبطة به بشكل دائم. لا يمكن التراجع عن هذا الإجراء!'
     },
 
     // Form labels and fields
@@ -1385,7 +1402,7 @@ contact: {
     modal: {
       createTitle: 'إضافة فرع جديد',
       createDescription: 'أدخل معلومات الفرع الجديد',
-      editTitle: 'تعديل الفرع - {branchName}',
+      editTitle: 'تعديل الفرع ',
       editDescription: 'تعديل معلومات الفرع',
       
       tabs: {
@@ -2373,6 +2390,15 @@ contact: {
     allergenic: 'يحتوي على مسببات الحساسية',
     recommended: 'موصى به',
     price: 'السعر',
+    buttons: {
+      view: 'عرض',
+      addons: 'إضافات',
+      extras: 'إضافية',
+      edit: 'تعديل',
+      delete: 'حذف',
+      add: 'إضافة',
+      remove: 'إزالة'
+    },
     errors: {
       loadingIngredients: 'حدث خطأ أثناء تحميل المكونات.',
       loadingAddons: 'حدث خطأ أثناء تحميل الإضافات.'
@@ -2670,22 +2696,26 @@ contact: {
         "passwordMismatch": "كلمات المرور غير متطابقة"
       }
     },
-    "assignBranchModal": {
-      "title": "تعيين الفرع",
-      "assigningTo": "تعيين",
-      "toNewBranch": "إلى فرع جديد",
-      "currentBranch": "الفرع الحالي",
-      "branchIdDisplay": "(المعرف: {{id}})",
-      "newBranchLabel": "الفرع الجديد",
-      "selectBranchPlaceholder": "اختر فرعاً",
-      "submitButton": "تعيين الفرع",
-      "submitButtonLoading": "جاري التعيين...",
-      "validation": {
-        "branchRequired": "يرجى اختيار فرع",
-        assignedToRestaurant :"مُخصص للمطعم",
-        assignToRestaurant : "تعيين للمطعم",
-      }
-    },
+  "assignBranchModal": {
+    "title": "تعيين الفرع",
+    "assigningTo": "تعيين",
+    "selectDestinationType": "حدد نوع النطاق",
+    "toNewBranch": "إلى فرع جديد",
+    "currentBranch": "الفرع الحالي",
+    "assignedToRestaurant": "مستوى المطعم (المركز الرئيسي)",
+    "alreadyAtRestaurant": "معين بالفعل للمطعم",
+    "groupBranches": "تعيين لفرع محدد",
+    "assignToRestaurant": "تعيين للمطعم (المركز)",
+    "selectBranch": "اختر الفرع",
+    "selectBranchPlaceholder": "اختر فرعاً...",
+    "confirmRestaurantTitle": "تأكيد التعيين للمطعم",
+    "confirmRestaurantDesc": "سيتم إزالة {{name}} من الفرع الحالي وتعيينه على مستوى المطعم.",
+    "submitButton": "حفظ التعيين",
+    "submitButtonLoading": "جاري الحفظ...",
+    "validation": {
+      "branchRequired": "يرجى اختيار فرع"
+    }
+  },
 
     // Statistics
     stats: {
@@ -2815,9 +2845,9 @@ contact: {
       step1Title: "الخطوة ١: المعلومات الأساسية",
       step2Title: "الخطوة ٢: تحديد الأذونات",
       stepBasicInfo: "المعلومات الأساسية",
-      deselectAll:"إلغاء",
       stepPermissions: "الأذونات",
       step1Info: "إنشاء دور",
+      clear :"إلغاء تحديد الكل",
       step1Description: "أدخل المعلومات الأساسية للدور الجديد",
       roleCreatedSuccess: "تم إنشاء الدور بنجاح!",
       step2Description: "يمكنك الآن تحديد الأذونات لهذا الدور",
@@ -2869,7 +2899,7 @@ contact: {
       locationInfo: 'معلومات الموقع',
       roleAssignment: 'تعيين السلطة والدور',
       selectBranch: 'اختر الفرع',
-
+      fullNumber:"الرقم كامل:",
       phoneNumber: 'رقم الهاتف',
       confirmPassword: 'تأكيد كلمة المرور',
       location: 'الموقع',
@@ -2995,7 +3025,7 @@ contact: {
   },
   buttons: {
     addTable: "إضافة طاولة",
-    addCategory: "إضافة فئة",
+    addCategory: "إضافة منطقة",
     batchCreate: "إنشاء متعدد",
     edit: "تعديل",
     delete: "حذف",
@@ -3009,7 +3039,7 @@ contact: {
   },
   labels: {
     tableName: "اسم الطاولة",
-    category: "الفئة",
+    category: "المنطقة",
     capacity: "السعة",
     status: "الحالة",
     occupation: "الإشغال",
@@ -3089,14 +3119,18 @@ contact: {
       availableTables: "الطاولات المتاحة",
       searchPlaceholder: "ابحث عن الفئات...",
       refresh: "تحديث",
-      addCategory: "إضافة فئة",
-      addCategoryTitle: "إضافة فئة جديدة",
-      categoryNameLabel: "اسم الفئة",
-      categoryNamePlaceholder: "أدخل اسم الفئة",
+      addCategory: "إضافة منطقة",
+      addCategoryTitle: "إضافة منطقة جديدة",
+      categoryNameLabel: "اسم المنطقة",
+      categoryNamePlaceholder: "أدخل اسم المنطقة",
       colorLabel: "اللون",
       iconLabel: "الأيقونة",
       save: "حفظ",
       cancel: "إلغاء",
+      edit: "تعديل",
+      delete: "حذف",
+      qrCode: "رمز الاستجابة السريعة",
+      showQRCode: "عرض رمز الاستجابة السريعة",
       noCategories: "لم يتم العثور على فئات",
       addFirstCategory: "إضافة فئتك الأولى",
       tablesCount: "طاولات",
@@ -3396,10 +3430,14 @@ contact: {
     // Status
     status: {
       active: 'نشط',
-      inactive: 'تم تعطيله من قبل المطعم',
+      inactive: 'تم تعطيله   ',
       available: 'متاح',
       unavailable: 'غير متاح'
-    },
+      },
+      stock : {
+        inStock: 'متوفر في المخزون',
+        outOfStock: 'غير متوفر في المخزون'
+      },
 
     // Messages
     messages: {
@@ -3528,7 +3566,8 @@ contact: {
       },
       error: {
         loadFailed: 'فشل في تحميل بيانات الملف الشخصي'
-      }
+      },
+      changePhoto: 'تغيير'
   },
 
   addonModal: {
@@ -3595,6 +3634,8 @@ contact: {
   },
 
   menu: {
+      noCategories :"لايوجد قائمة",
+      noCategoriesDesc :"لايوجد قائمة",
       title: "القائمة",
       loading: "تحميل القائمة",
       basePrice: "السعر الأساسي",
@@ -3762,7 +3803,12 @@ contact: {
     "extras": "الإضافات والخيارات",
     "without": "بدون",
     "extra": "زيادة",
-    "add": "إضافة"
+    "add": "إضافة",
+    "edit": "تعديل",
+    "cancel_edit": "إلغاء",
+    "restore": "استعادة",
+    "delete": "حذف",
+    "duplicate": "تكرار"
   },
   },
 
@@ -3770,6 +3816,7 @@ contact: {
     form: {
       title: 'تفاصيل الطلب',
       orderType: 'نوع الطلب',
+      pleaseFillRequiredFields:"يرجى ملء الحقول المطلوبة",
       paymentMethod: 'طريقة الدفع',
       selectPaymentMethod: 'اختر طريقة الدفع...',
       tableNumberPlaceholder : "..ادخل رقم الطاولة هنا",
@@ -3886,6 +3933,8 @@ contact: {
     total : 'المجموع',
     clearFilters: 'مسح الفلاتر',
     filtered: 'تم التصفية',
+    updateAction:"تحديث",
+    showing:"عرض",
     OrderType : 'نوع الطلب',
     subTotal: "المجموع الفرعي",
     serviceFeeApplied:"رسوم الخدمة",
@@ -3913,7 +3962,6 @@ contact: {
     orderType: "نوع الطلب",
     minPrice: "السعر الأدنى",
     maxPrice: "السعر الأقصى",
-    showing:"عرض",
     to:"إلى",
     perpage : "لكل صفحة",
     cancelOrder:"إلغاء الطلب",
@@ -3950,7 +3998,6 @@ contact: {
     "cancel": "إلغاء",
     "confirmAction": "تأكيد",
     "rejectAction": "رفض",
-    "updateAction": "تحديث",
     "confirming": "جاري التأكيد...",
     "rejecting": "جاري الرفض...",
     "updating": "جاري التحديث...",
@@ -4182,16 +4229,69 @@ recycleBin: {
       recommended: "مستحسن",
     },
     categoryRestore: {
-      title: "خيارات استعادة الفئة",
-      subtitle: "اختر آلية استعادة الفئة",
-      simpleTitle: "استعادة الفئة فقط",
-      simpleDesc: "سيتم استعادة الفئة فارغة دون المنتجات التي كانت بداخلها",
-      cascadeTitle: "استعادة الفئة مع محتوياتها",
-      cascadeDesc: "هل تريد استعادة الفئة مع كافة المنتجات المرتبطة بها؟",
-      includeOptions: "تضمين الخيارات المرتبطة",
-      includeImages: "تضمين صورة الفئة",
-      includeAll: "تضمين جميع البيانات المرتبطة",
-      includeProducts: "تضمين المنتجات داخل الفئة",
+      title: "استعادة الفئة",
+      subtitle: "اختر كيفية استعادة الفئة",
+      simpleTitle: "استعادة بسيطة (معلومات عامة فقط)",
+      simpleDesc: "استعادة المعلومات الأساسية للفئة فقط (الاسم، الوصف)",
+      cascadeTitle: "استعادة كاملة (مع جميع البيانات)",
+      cascadeDesc: "استعادة الفئة مع جميع البيانات المرتبطة:",
+      includeProducts: "جميع المنتجات في هذه الفئة",
+      includeAll: "جميع التكوينات المرتبطة",
+      recommended: "مستحسن",
+    },
+    branchCategoryRestore: {
+      title: "استعادة فئة الفرع",
+      subtitle: "اختر كيفية استعادة فئة الفرع",
+      simpleTitle: "استعادة بسيطة (معلومات عامة فقط)",
+      simpleDesc: "استعادة المعلومات الأساسية لفئة الفرع فقط",
+      cascadeTitle: "استعادة كاملة (مع جميع البيانات)",
+      cascadeDesc: "استعادة فئة الفرع مع جميع البيانات المرتبطة:",
+      includeProducts: "جميع منتجات الفرع في هذه الفئة",
+      includeAll: "جميع التكوينات المرتبطة",
+      recommended: "مستحسن",
+    },
+    tableCategoryRestore: {
+      title: "استعادة فئة الطاولة",
+      subtitle: "اختر كيفية استعادة فئة الطاولة",
+      simpleTitle: "استعادة بسيطة (معلومات عامة فقط)",
+      simpleDesc: "استعادة المعلومات الأساسية لفئة الطاولة فقط",
+      cascadeTitle: "استعادة كاملة (مع جميع البيانات)",
+      cascadeDesc: "استعادة فئة الطاولة مع جميع البيانات المرتبطة:",
+      includeTables: "جميع الطاولات في هذه الفئة",
+      includeAll: "جميع التكوينات المرتبطة",
+      recommended: "مستحسن",
+    },
+    extraCategoryRestore: {
+      title: "استعادة فئة الإضافات",
+      subtitle: "اختر كيفية استعادة فئة الإضافات",
+      simpleTitle: "استعادة بسيطة (معلومات عامة فقط)",
+      simpleDesc: "استعادة المعلومات الأساسية لفئة الإضافات فقط",
+      cascadeTitle: "استعادة كاملة (مع جميع البيانات)",
+      cascadeDesc: "استعادة فئة الإضافات مع جميع البيانات المرتبطة:",
+      includeExtras: "جميع الإضافات في هذه الفئة",
+      includeAll: "جميع التكوينات المرتبطة",
+      recommended: "مستحسن",
+    },
+    branchProductRestore: {
+      title: "استعادة منتج الفرع",
+      subtitle: "اختر كيفية استعادة منتج الفرع",
+      simpleTitle: "استعادة بسيطة (معلومات عامة فقط)",
+      simpleDesc: "استعادة المعلومات الأساسية لمنتج الفرع فقط",
+      cascadeTitle: "استعادة كاملة (مع جميع البيانات)",
+      cascadeDesc: "استعادة منتج الفرع مع جميع البيانات المرتبطة:",
+      includeOptions: "خيارات وإعدادات منتج الفرع",
+      includeAll: "جميع التكوينات المرتبطة",
+      recommended: "مستحسن",
+    },
+    extraRestore: {
+      title: "استعادة الإضافة",
+      subtitle: "اختر كيفية استعادة الإضافة",
+      simpleTitle: "استعادة بسيطة (معلومات عامة فقط)",
+      simpleDesc: "استعادة المعلومات الأساسية للإضافة فقط",
+      cascadeTitle: "استعادة كاملة (مع جميع البيانات)",
+      cascadeDesc: "استعادة الإضافة مع جميع البيانات المرتبطة:",
+      includeOptions: "خيارات وإعدادات الإضافة",
+      includeAll: "جميع التكوينات المرتبطة",
       recommended: "مستحسن",
     },
     filter: {
@@ -4253,11 +4353,17 @@ recycleBin: {
       button: 'استعادة',
       restoring: 'جاري الاستعادة...',
       successCategory: 'تمت استعادة الفئة "{name}" بنجاح',
+      successCategoryCascade: 'تمت استعادة الفئة "{name}" وجميع المنتجات المرتبطة بنجاح',
       successProduct: 'تمت استعادة المنتج "{name}" بنجاح',
+      successProductCascade: 'تمت استعادة المنتج "{name}" وجميع البيانات المرتبطة بنجاح',
       successBranch: 'تمت استعادة الفرع "{name}" بنجاح',
+      successBranchCascade: 'تمت استعادة الفرع "{name}" وجميع البيانات المرتبطة بنجاح',
       successTable: 'تمت استعادة الطاولة "{name}" بنجاح',
+      successBranchProduct: 'تمت استعادة منتج الفرع "{name}" بنجاح',
       successBranchCategory: 'تمت استعادة فئة الفرع "{name}" بنجاح',
       successTableCategory: 'تمت استعادة فئة الطاولة "{name}" بنجاح',
+      successExtra: 'تمت استعادة الإضافة "{name}" بنجاح',
+      successExtraCategory: 'تمت استعادة فئة الإضافات "{name}" بنجاح',
       error: 'فشلت عملية الاستعادة'
     },
     empty: {
@@ -4841,12 +4947,12 @@ recycleBin: {
         "title": "معلومات الفرع",
         "description": "أدخل المعلومات الأساسية لفرعك",
         "branchName": {
-          "label": "اسم الفرع *",
+          "label": "اسم الفرع ",
           "placeholder": "أدخل اسم الفرع",
           "error": "اسم الفرع مطلوب"
         },
         "whatsappNumber": {
-          "label": "رقم طلبات الواتساب *",
+          "label": "رقم طلبات الواتساب",
           "placeholder": "555 123 4567",
           "ariaLabel": "رمز البلد",
           "errorRequired": "رقم طلبات الواتساب مطلوب",
@@ -5107,6 +5213,8 @@ extrasManagement: {
     chooseExtra: 'اختر الإضافة...',
     noCategoriesYet: 'لم تتم إضافة فئات بعد',
     noExtrasYet: 'لم تتم إضافة إضافات بعد',
+    noDescription: 'لا يوجد وصف متاح',
+    addExtrasHint: 'أضف إضافات لهذه الفئة باستخدام الزر أعلاه.',
     confirmDelete: 'هل أنت متأكد من حذف هذه الفئة؟',
     confirmDeleteExtra: 'هل أنت متأكد من حذف هذه الإضافة؟',
     unknownCategory: 'فئة غير معروفة',
@@ -5116,16 +5224,26 @@ extrasManagement: {
     quantity: 'كمية',
     required: 'مطلوب',
     optional: 'اختياري',
+    requiredShort: 'مطل',
     basePrice: 'السعر الأساسي',
     unitPrice: 'سعر الوحدة',
     selectionMode: 'وضع الاختيار',
     single: 'مفرد',
     multiple: 'متعدد',
+    singleSelect: 'اختيار مفرد',
+    multiSelect: 'اختيار متعدد',
     requiredExtra: 'إضافة مطلوبة',
     defaultQty: 'الكمية الافتراضية',
+    default: 'افتراضي',
+    defaultShort: 'افت.',
     minQty: 'الحد الأدنى',
+    min: 'أدنى',
     maxQty: 'الحد الأقصى',
+    max: 'أقصى',
     qty: 'الكمية',
+    quantities: 'الكميات',
+    quantityConfiguration: 'تكوين الكمية',
+    priceAndSelection: 'السعر والاختيار',
     minSelection: 'الحد الأدنى للاختيار',
     maxSelection: 'الحد الأقصى للاختيار',
     minQuantity: 'الحد الأدنى للكمية',
@@ -5205,7 +5323,7 @@ extrasManagement: {
     maxSelection: 'أقصى اختيار',
     minQuantity: 'أقل كمية إجمالية',
     maxQuantity: 'أقصى كمية إجمالية',
-    overrideRequired: 'تجاوز حالة "الإلزامية"',
+    overrideRequired: '  الإلزامية',
     specialPrice: 'سعر خاص',
     minQty: 'أقل كمية',
     maxQty: 'أقصى كمية',

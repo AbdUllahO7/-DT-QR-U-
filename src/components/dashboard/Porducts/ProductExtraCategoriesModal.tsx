@@ -307,9 +307,9 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                             type="checkbox"
                             checked={formData.isRequiredOverride}
                             onChange={(e) => setFormData({ ...formData, isRequiredOverride: e.target.checked })}
-                            className="w-5 h-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                            className="w-5 h-5 rounded dark:text-gray-300 border-gray-300 text-primary-600 focus:ring-primary-500"
                           />
-                          <label htmlFor="add-required" className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+                          <label htmlFor="add-required" className="ml-3 text-sm   font-medium text-gray-700 dark:text-gray-300 cursor-pointer select-none">
                             {t('extrasManagement.productExtras.required')}
                           </label>
                         </div>
@@ -319,7 +319,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
+                            <label className="block text-xs font-semibold text-gray-500 dark:text-white mb-1 uppercase tracking-wider">
                               {t('extrasManagement.productExtras.minSelection')}
                             </label>
                             <input
@@ -328,11 +328,11 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                               min={0}
                               value={formData.minSelectionCount}
                               onChange={(e) => setFormData({ ...formData, minSelectionCount: parseInt(e.target.value) || 0 })}
-                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
+                              className="w-full px-3 py-2 border border-gray-300  dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
+                            <label className="block text-xs font-semibold text-gray-500 dark:text-white mb-1 uppercase tracking-wider">
                               {t('extrasManagement.productExtras.maxSelection')}
                             </label>
                             <input
@@ -341,14 +341,14 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                               min={1}
                               value={formData.maxSelectionCount}
                               onChange={(e) => setFormData({ ...formData, maxSelectionCount: parseInt(e.target.value) || 1 })}
-                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
+                              className="w-full px-3 py-2 border dark:text-gray-300 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
                             />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
+                            <label className="block text-xs font-semibold text-gray-500 dark:text-white mb-1 uppercase tracking-wider">
                               {t('extrasManagement.productExtras.minQuantity')}
                             </label>
                             <input
@@ -357,11 +357,11 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                               min={0}
                               value={formData.minTotalQuantity}
                               onChange={(e) => setFormData({ ...formData, minTotalQuantity: parseInt(e.target.value) || 0 })}
-                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
+                              className="w-full px-3 py-2 border dark:text-gray-300 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider">
+                            <label className="block text-xs font-semibold text-gray-500 dark:text-white mb-1 uppercase tracking-wider">
                               {t('extrasManagement.productExtras.maxQuantity')}
                             </label>
                             <input
@@ -370,7 +370,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                               min={1}
                               value={formData.maxTotalQuantity}
                               onChange={(e) => setFormData({ ...formData, maxTotalQuantity: parseInt(e.target.value) || 10 })}
-                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
+                              className="w-full px-3 py-2 border dark:text-gray-300 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
                             />
                           </div>
                         </div>
@@ -443,7 +443,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                                   type="checkbox"
                                   checked={editFormData.isRequiredOverride}
                                   onChange={(e) => setEditFormData({ ...editFormData, isRequiredOverride: e.target.checked })}
-                                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                  className="rounded border-gray-300 dark:text-white text-primary-600 focus:ring-primary-500"
                                 />
                                 <label htmlFor={`edit-req-${category.id}`} className="ml-2 text-sm text-gray-700 dark:text-gray-300 font-medium cursor-pointer">
                                   {t('extrasManagement.productExtras.required')}
@@ -453,12 +453,12 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-                                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                                  <h4 className="text-xs font-bold text-gray-500 uppercase dark:text-white tracking-wider mb-2">
                                      {t('extrasManagement.productExtras.selectionLimits')}
                                   </h4>
                                   <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                      <label className="block text-xs text-gray-500 mb-1">
+                                      <label className="block text-xs dark:text-white text-gray-500 mb-1">
                                         {t('extrasManagement.productExtras.minSelectLabel')}
                                       </label>
                                       <input
@@ -467,11 +467,11 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                                         min={0}
                                         value={editFormData.minSelectionCount}
                                         onChange={(e) => setEditFormData({ ...editFormData, minSelectionCount: parseInt(e.target.value) || 0 })}
-                                        className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                        className="w-full px-3 py-2 border dark:text-white rounded-md dark:bg-gray-700 dark:border-gray-600"
                                       />
                                     </div>
                                     <div>
-                                      <label className="block text-xs text-gray-500 mb-1">
+                                      <label className="block text-xs dark:text-white mb-1">
                                         {t('extrasManagement.productExtras.maxSelectLabel')}
                                       </label>
                                       <input
@@ -480,19 +480,19 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                                         min={1}
                                         value={editFormData.maxSelectionCount}
                                         onChange={(e) => setEditFormData({ ...editFormData, maxSelectionCount: parseInt(e.target.value) || 1 })}
-                                        className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                        className="w-full px-3 py-2 dark:text-white border rounded-md dark:bg-gray-700 dark:border-gray-600"
                                       />
                                     </div>
                                   </div>
                                </div>
 
                                <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-                                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
+                                  <h4 className="text-xs font-bold dark:text-white text-gray-500 uppercase tracking-wider mb-2">
                                      {t('extrasManagement.productExtras.quantityLimits')}
                                   </h4>
                                   <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                      <label className="block text-xs text-gray-500 mb-1">
+                                      <label className="block text-xs dark:text-white mb-1">
                                         {t('extrasManagement.productExtras.minTotalLabel')}
                                       </label>
                                       <input
@@ -501,11 +501,11 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                                         min={0}
                                         value={editFormData.minTotalQuantity}
                                         onChange={(e) => setEditFormData({ ...editFormData, minTotalQuantity: parseInt(e.target.value) || 0 })}
-                                        className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                        className="w-full px-3 py-2 dark:text-white border rounded-md dark:bg-gray-700 dark:border-gray-600"
                                       />
                                     </div>
                                     <div>
-                                      <label className="block text-xs text-gray-500 mb-1">
+                                      <label className="block text-xs text-gray-500 dark:text-white mb-1">
                                          {t('extrasManagement.productExtras.maxTotalLabel')}
                                       </label>
                                       <input
@@ -514,7 +514,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                                         min={1}
                                         value={editFormData.maxTotalQuantity}
                                         onChange={(e) => setEditFormData({ ...editFormData, maxTotalQuantity: parseInt(e.target.value) || 10 })}
-                                        className="w-full px-3 py-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                        className="w-full px-3 py-2 border dark:text-white rounded-md dark:bg-gray-700 dark:border-gray-600"
                                       />
                                     </div>
                                   </div>

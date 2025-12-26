@@ -36,7 +36,10 @@ export const tr = {
     last30Days: 'Son 30 Gün',
     thisMonth: 'Bu Ay',
     lastMonth: 'Geçen Ay',
-    retry: 'Tekrar Dene'
+    retry: 'Tekrar Dene',
+    remove: 'Kaldır',
+    dismiss: 'Kapat',
+    download: 'İndir'
   },
 
   filter: {
@@ -230,7 +233,7 @@ hero: {
       },
       delete: {
         title: 'Şubeyi Sil',
-        confirmMessage: '"{branchName}" şubesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'
+        confirmMessage: ' şubesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'
       }
     },
     orders: {
@@ -239,6 +242,9 @@ hero: {
       loading: 'Siparişler yükleniyor...',
       refresh: 'Yenile',
       newOrder: 'Yeni Sipariş',
+      selectBranch: "Şube Seç",
+      selectBranchToView: "Görüntülenecek Şube Seç",
+      noBranches: "Şube Yok",
       tabs: {
         all: 'Tümü',
         pending: 'Bekleyen',
@@ -373,7 +379,8 @@ hero: {
        title : "QR Menü",
       logout: 'Çıkış Yap',
       branch: 'Şube'
-    }
+    },
+    changePhoto: 'Değiştir'
   },
 
   // Theme
@@ -903,6 +910,10 @@ hero: {
     orderNumber: 'Sipariş',
     table: 'Masa',
     items: 'Ürün',
+    
+          selectBranch: "Şube Seç",
+      selectBranchToView: "Görüntülenecek Şube Seç",
+      noBranches: "Şube Yok",
     tabs: {
       all: 'Tüm Siparişler',
       pending: 'Bekleyen',
@@ -948,6 +959,8 @@ hero: {
   tableManagement: {
     addTable: 'Masa Ekle',
   ActiveStatus :"Aktif Durum", 
+       selectBranch: "Şube Seç",
+      selectBranchPrompt:"Şube Yok",
   descriptionActive : "Kategori etkin ve görünür", 
   descriptionInActive : "Kategori etkin değil ve gizli",
     loading: 'Masalar yükleniyor...',
@@ -1174,11 +1187,11 @@ hero: {
     },
     fields: {
       branchName: {
-        label: 'Şube Adı *',
+        label: 'Şube Adı',
         placeholder: 'Şube adını girin'
       },
       whatsappNumber: {
-        label: 'WhatsApp Sipariş Numarası *',
+        label: 'WhatsApp Sipariş Numarası',
         placeholder: 'WhatsApp sipariş numarasını girin'
       },
       branchLogo: {
@@ -1315,7 +1328,13 @@ hero: {
     // Delete confirmation
     deleteConfirm: {
       title: 'Şube Silme Onayı',
-      description: '"{{branchName}}" şubesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'
+      description: ' şubesini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.'
+    },
+
+    // Purge onayı (kalıcı silme)
+    purgeConfirm: {
+      title: 'Kalıcı Silme Uyarısı',
+      description: 'Bu işlem şubeyi ve TÜM ilişkili verileri KALICI OLARAK silecektir. Bu işlem GERİ ALINAMAZ!'
     },
 
     // Form labels and fields
@@ -1385,7 +1404,7 @@ hero: {
     modal: {
       createTitle: 'Yeni Şube Ekle',
       createDescription: 'Yeni şube bilgilerini girin',
-      editTitle: 'Şube Düzenle - {branchName}',
+      editTitle: 'Şube Düzenle ',
       editDescription: 'Şube bilgilerini düzenleyin',
       
       tabs: {
@@ -2373,6 +2392,15 @@ hero: {
     allergenic: 'Alerjen içerir',
     recommended: 'Önerilen',
     price: 'Fiyat',
+    buttons: {
+      view: 'Görüntüle',
+      addons: 'Eklentiler',
+      extras: 'Ekstralar',
+      edit: 'Düzenle',
+      delete: 'Sil',
+      add: 'Ekle',
+      remove: 'Kaldır'
+    },
     errors: {
       loadingIngredients: 'Malzemeler yüklenirken bir hata oluştu.',
       loadingAddons: 'Eklentiler yüklenirken bir hata oluştu.'
@@ -2668,22 +2696,26 @@ hero: {
         "passwordMismatch": "Şifreler eşleşmiyor"
       }
     },
-    "assignBranchModal": {
-      "title": "Şube Ata",
-      "assigningTo": "Atanıyor",
-      "toNewBranch": "yeni bir şubeye",
-      "currentBranch": "Mevcut Şube",
-      "branchIdDisplay": "(ID: {{id}})",
-      "newBranchLabel": "Yeni Şube",
-      "selectBranchPlaceholder": "Bir şube seçin",
-      "submitButton": "Şube Ata",
-      assignedToRestaurant:"Restorana Atandı",
-      assignToRestaurant:"Restoran ataması",
-      "submitButtonLoading": "Atanıyor...",
-      "validation": {
-        "branchRequired": "Lütfen bir şube seçin"
-      }
-    },
+  "assignBranchModal": {
+  "title": "Şube Ata",
+  "assigningTo": "Atanan Kişi",
+  "selectDestinationType": "Kapsam Türünü Seçin",
+  "toNewBranch": "yeni bir şubeye",
+  "currentBranch": "Mevcut Şube",
+  "assignedToRestaurant": "Restoran Seviyesi (Merkez)",
+  "alreadyAtRestaurant": "Zaten Merkezde",
+  "groupBranches": "Şubeye Ata",
+  "assignToRestaurant": "Restorana Ata",
+  "selectBranch": "Şube Seçin",
+  "selectBranchPlaceholder": "Bir şube seçin",
+  "confirmRestaurantTitle": "Restoran Atamasını Onayla",
+  "confirmRestaurantDesc": "{{name}} mevcut şubesinden çıkarılacak ve Restoran seviyesine atanacaktır.",
+  "submitButton": "Ata",
+  "submitButtonLoading": "Atanıyor...",
+  "validation": {
+    "branchRequired": "Lütfen bir şube seçin"
+  }
+},
 
     // Statistics
     stats: {
@@ -2817,6 +2849,7 @@ hero: {
       deselectAll:"Seçimi Kaldır",
       selectBranch: 'Şube Seçimi',
       step1Info: "Rol Oluştur",
+      clear:"Seçimi Kaldır",
       step1Description: "Yeni rol için temel bilgileri girin",
       continue: "İzinlere Devam Et",
       branch: 'Şube',
@@ -2863,7 +2896,7 @@ hero: {
       passwordInfo: 'Şifre Bilgileri',
       locationInfo: 'Konum Bilgileri',
       roleAssignment: 'Yetki ve Rol Ataması',
-
+      fullNumber:"Telefon numarası",
         phoneNumber: 'Telefon Numarası',
       confirmPassword: 'Şifreyi Onayla',
       location: 'Konum',
@@ -3061,94 +3094,98 @@ hero: {
   }
   },
   
-  BranchTableManagement: {
-      "tableNameLabel": "Masa Adı",
-  "capacityLabel": "Kapasite",
-    clearTable: "Masayı temizleniyor",
-    refreshTable: "Masa  güncelle",
+BranchTableManagement: {
+    tableNameLabel: "Masa Adı",
+    capacityLabel: "Kapasite",
+    clearTable: "Masayı Boşalt", // Changed from "Masayı temizleniyor" to imperative action
+    refreshTable: "Masayı Güncelle",
     clearin: "Temizleniyor...",
-    loading : "Yükleniyor...",
-    category: "Kategori",
-    SelectCategory: "Kategori Seçin",
+    loading: "Yükleniyor...",
+    category: "Bölge",
+    SelectCategory: "Bölge Seçin",
     Quantity: "Miktar",
     Capacity: "Kapasite",
     createTables: "Masalar Oluşturuluyor...",
     creatingTables: "Masalar Oluşturuluyor...",
-    multiCategory: "Farklı kategorilerde aynı anda birden fazla masa oluşturun",
-    batchCreateTables: "Toplu masa Oluştur",
-    header: "Category & Table Management",
-    subheader: "Manage restaurant categories and tables with accordion view",
-    totalCategories: "Total Categories",
-    totalTables: "Total Tables",
-    occupiedTables: "Occupied Tables",
-    availableTables: "Available Tables",
-    searchPlaceholder: "Search categories...",
-    refresh: "Refresh",
-    addCategory: "Add Category",
-    addCategoryTitle: "Add New Category",
-    categoryNameLabel: "Category Name",
-    categoryNamePlaceholder: "Enter category name",
-    colorLabel: "Color",
-    iconLabel: "Icon",
-    save: "Save",
-    cancel: "Cancel",
-    noCategories: "No categories found",
-    addFirstCategory: "Add Your First Category",
-    tablesCount: "tables",
-    status: "Status",
-    active: "Active",
-    inactive: "Inactive",
-    occupation: "Occupation",
-    occupied: "Occupied",
-    available: "Available",
-    addTable: "Add Table",
-    tableNamePlaceholder: "Table name",
-    capacityPlaceholder: "Capacity",
-    noTables: "No tables in this category",
-    qrCodeTitle: "QR Code - {tableName}",
-    qrCodeDescription: "Scan this QR code to access the table menu",
-    downloadQR: "Download QR Code",
-    downloading: "Downloading...",
-    copyQRUrl: "Copy QR URL",
-    copied: "Copied!",
+    multiCategory: "Farklı bölgelerde aynı anda birden fazla masa oluşturun",
+    batchCreateTables: "Toplu Masa Oluştur",
+    header: "Bölge ve Masa Yönetimi",
+    subheader: "Restoran bölgelerini ve masalarını akordiyon görünümüyle yönetin",
+    totalCategories: "Toplam Bölge",
+    totalTables: "Toplam Masa",
+    occupiedTables: "Dolu Masalar",
+    availableTables: "Boş Masalar",
+    searchPlaceholder: "Bölge ara...",
+    refresh: "Yenile",
+    addCategory: "Bölge Ekle",
+    addCategoryTitle: "Yeni Bölge Ekle",
+    categoryNameLabel: "Bölge Adı",
+    categoryNamePlaceholder: "Bölge adını girin",
+    colorLabel: "Renk",
+    iconLabel: "İkon",
+    save: "Kaydet",
+    cancel: "İptal",
+    edit: "Düzenle",
+    delete: "Sil",
+    qrCode: "QR Kod",
+    showQRCode: "QR Kodunu Göster",
+    noCategories: "Bölge bulunamadı",
+    addFirstCategory: "İlk bölgeyi ekle",
+    tablesCount: "masa",
+    status: "Durum",
+    active: "Aktif",
+    inactive: "Pasif",
+    occupation: "Doluluk",
+    occupied: "Dolu",
+    available: "Boş",
+    addTable: "Masa Ekle",
+    tableNamePlaceholder: "Masa adı",
+    capacityPlaceholder: "Kapasite",
+    noTables: "Bu bölgede masa yok",
+    qrCodeTitle: "QR Kod - {tableName}",
+    qrCodeDescription: "Masa menüsüne erişmek için bu QR kodu taratın",
+    downloadQR: "QR Kodunu İndir",
+    downloading: "İndiriliyor...",
+    copyQRUrl: "QR Linkini Kopyala",
+    copied: "Kopyalandı!",
     success: {
-      tableCleared: "{{tableName}} masası temizlendi ve artık kullanılabilir",
-      tableOccupied: "{{tableName}} masanın durumu 'dolu' olarak güncellendi",
+      tableCleared: "{{tableName}} masası temizlendi ve kullanıma hazır",
+      tableOccupied: "{{tableName}} masası 'dolu' olarak güncellendi",
       tableClearedGeneric: "Masa başarıyla temizlendi",
       tableStatusUpdated: "Masa durumu başarıyla güncellendi",
-      categoryAdded: "Category added successfully",
-      categoryUpdated: "Category updated successfully",
-      categoryDeleted: "Category deleted successfully",
-      tableAdded: "Table added successfully",
-      tableUpdated: "Table updated successfully",
-      tableDeleted: "Table deleted successfully",
-      categoryActivated: "Category activated successfully",
-      categoryDeactivated: "Category deactivated successfully",
-      tableActivated: "Table activated successfully",
-      tableDeactivated: "Table deactivated successfully",
-      tableAvailable: "Table marked as available",
-      dataRefreshed: "Data refreshed successfully"
+      categoryAdded: "Bölge başarıyla eklendi",
+      categoryUpdated: "Bölge başarıyla güncellendi",
+      categoryDeleted: "Bölge başarıyla silindi",
+      tableAdded: "Masa başarıyla eklendi",
+      tableUpdated: "Masa başarıyla güncellendi",
+      tableDeleted: "Masa başarıyla silindi",
+      categoryActivated: "Bölge başarıyla aktifleştirildi",
+      categoryDeactivated: "Bölge başarıyla pasife alındı",
+      tableActivated: "Masa başarıyla aktifleştirildi",
+      tableDeactivated: "Masa başarıyla pasife alındı",
+      tableAvailable: "Masa 'boş' olarak işaretlendi",
+      dataRefreshed: "Veriler başarıyla yenilendi"
     },
     error: {
       clearTableFailed: "Masa temizlenemedi. Lütfen tekrar deneyin.",
-      fetchCategoriesFailed: "Failed to fetch categories",
-      fetchTablesFailed: "Failed to fetch tables",
-      categoryNameRequired: "Category name is required",
-      createCategoryFirst: "Please create a category first",
-      addCategoryFailed: "Failed to add category",
-      updateCategoryFailed: "Failed to update category",
-      deleteCategoryFailed: "Failed to delete category",
-      categoryHasTables: "Cannot delete category with existing tables",
-      categoryNotFound: "Category not found",
-      addTableFailed: "Failed to add table",
-      updateTableFailed: "Failed to update table",
-      deleteTableFailed: "Failed to delete table",
-      tableNameRequired: "Table name is required",
-      tableNotFound: "Table not found",
-      updateCategoryStatusFailed: "Failed to update category status",
-      updateTableStatusFailed: "Failed to update table status",
-      updateTableOccupationFailed: "Failed to update table occupation",
-      refreshFailed: "Failed to refresh data"
+      fetchCategoriesFailed: "Bölgeler getirilemedi",
+      fetchTablesFailed: "Masalar getirilemedi",
+      categoryNameRequired: "Bölge adı zorunludur",
+      createCategoryFirst: "Lütfen önce bir bölge oluşturun",
+      addCategoryFailed: "Bölge eklenemedi",
+      updateCategoryFailed: "Bölge güncellenemedi",
+      deleteCategoryFailed: "Bölge silinemedi",
+      categoryHasTables: "Mevcut masaları olan bir bölge silinemez",
+      categoryNotFound: "Bölge bulunamadı",
+      addTableFailed: "Masa eklenemedi",
+      updateTableFailed: "Masa güncellenemedi",
+      deleteTableFailed: "Masa silinemedi",
+      tableNameRequired: "Masa adı zorunludur",
+      tableNotFound: "Masa bulunamadı",
+      updateCategoryStatusFailed: "Bölge durumu güncellenemedi",
+      updateTableStatusFailed: "Masa durumu güncellenemedi",
+      updateTableOccupationFailed: "Masa doluluk durumu güncellenemedi",
+      refreshFailed: "Veri yenileme başarısız oldu"
     }
   },
 
@@ -3390,9 +3427,13 @@ hero: {
     // Status
     status: {
       active: 'Aktif',
-      inactive: 'Restaurant tarafından devre dışı bırakıldı',
+      inactive: 'devre dışı bırakıldı',
       available: 'Mevcut',
       unavailable: 'Mevcut Değil'
+    },
+     stock : {
+      inStock: 'Stokta Var',
+      outOfStock: 'Stokta Yok'
     },
 
     // Messages
@@ -3595,6 +3636,7 @@ hero: {
       basePrice: "Temel Fiyat",
       loading: "Menü Yükleniyor",
       allergens: "Alerjen Bilgisi",
+      noCategories: "Liste yok",
       quantity: "Miktar",
       extras: "Ekstralar",
       required: "Gerekli",
@@ -3759,7 +3801,12 @@ cart: {
     "extras": "Seçenekler",
     "without": "Çıkarılan",
     "extra": "Ekstra",
-    "add": "Ekle"
+    "add": "Ekle",
+    "edit": "Düzenle",
+    "cancel_edit": "İptal",
+    "restore": "Geri Yükle",
+    "delete": "Sil",
+    "duplicate": "Çoğalt"
   },
   },
 
@@ -3767,6 +3814,7 @@ cart: {
     form: {
       title: 'Sipariş Detayları',
       orderType: 'Sipariş Türü',
+      pleaseFillRequiredFields:"Lütfen Gerekli Alanları Doldurun",
       tableNumberRequired:"Masa numarası zorunlu",
       paymentMethod: 'Ödeme Yöntemi',
       name: 'İsim',
@@ -3886,8 +3934,10 @@ productModal: {
 
   ordersManager: {
       total : 'Toplam',
+      updateAction:"Güncele",
       subTotal:"Ara Toplam",
       modificationHistory:"değişiklik Geçmişi",
+      showing:"Gösteriliyor",
       lastModifiedAt:"Son Değiştirilme Tarihi",
       modifiedBy:"Değiştiren",
       modificationDetails:"DeğişiklikAyrıntıları",
@@ -3948,7 +3998,7 @@ productModal: {
       rejectOrderPrompt: "Reddetme nedenini girin:",
       rejectReasonPlaceholder: "Reddetme nedeni...",
       updateStatusTitle: "Durumu Güncelle",
-      updateStatusPrompt: "Sipariş durumunu {status} olarak güncellemek istediğinizden emin misiniz?",
+      updateStatusPrompt: "Sipariş durumunu  olarak güncellemek istediğinizden emin misiniz?",
       cancel: "İptal",
       confirmAction: "Onayla",
       rejectAction: "Reddet",
@@ -4182,16 +4232,69 @@ includeAll: 'Tüm İlişkili Verileri Dahil Et',
 recommended: 'Tavsiye Edilen',
 },
 categoryRestore: {
-title: "Ürün Seçeneklerini Geri Yükle",
-subtitle: "Ürünü Nasıl Geri Yükleyeceğinizi Seçin",
-simpleTitle: "Ürünü Geri Yükle",
-simpleDesc: "Bu ürünü geri yüklemek yalnızca genel ürün bilgilerini geri yükleyecektir",
-cascadeTitle: "Bu ürünü geri yüklemek, tüm ilişkili varyantları ve uzantıları da geri yükleyecektir",
-cascadeDesc: "Yalnızca ürünü mü yoksa tüm ilişkili varyantları ve uzantıları da geri yüklemek istiyor musunuz?",
-includeOptions: "Varyantları ve uzantıları dahil et",
-includeImages: "Ürün resmini ekle",
-includeAll: "Tüm ilişkili verileri ekle",
-includeProducts: "Kategorideki ürünleri dahil et",
+title: "Kategoriyi Geri Yükle",
+subtitle: "Kategoriyi nasıl geri yüklemek istediğinizi seçin",
+simpleTitle: "Basit Geri Yükleme (Yalnızca Genel Bilgiler)",
+simpleDesc: "Yalnızca temel kategori bilgilerini geri yükle (ad, açıklama)",
+cascadeTitle: "Tam Geri Yükleme (Tüm Verilerle)",
+cascadeDesc: "Kategoriyi tüm ilişkili verilerle geri yükle:",
+includeProducts: "Bu kategorideki tüm ürünler",
+includeAll: "Tüm ilişkili yapılandırmalar",
+recommended: "Önerilen",
+},
+branchCategoryRestore: {
+title: "Şube Kategorisini Geri Yükle",
+subtitle: "Şube kategorisini nasıl geri yüklemek istediğinizi seçin",
+simpleTitle: "Basit Geri Yükleme (Yalnızca Genel Bilgiler)",
+simpleDesc: "Yalnızca temel şube kategorisi bilgilerini geri yükle",
+cascadeTitle: "Tam Geri Yükleme (Tüm Verilerle)",
+cascadeDesc: "Şube kategorisini tüm ilişkili verilerle geri yükle:",
+includeProducts: "Bu kategorideki tüm şube ürünleri",
+includeAll: "Tüm ilişkili yapılandırmalar",
+recommended: "Önerilen",
+},
+tableCategoryRestore: {
+title: "Masa Kategorisini Geri Yükle",
+subtitle: "Masa kategorisini nasıl geri yüklemek istediğinizi seçin",
+simpleTitle: "Basit Geri Yükleme (Yalnızca Genel Bilgiler)",
+simpleDesc: "Yalnızca temel masa kategorisi bilgilerini geri yükle",
+cascadeTitle: "Tam Geri Yükleme (Tüm Verilerle)",
+cascadeDesc: "Masa kategorisini tüm ilişkili verilerle geri yükle:",
+includeTables: "Bu kategorideki tüm masalar",
+includeAll: "Tüm ilişkili yapılandırmalar",
+recommended: "Önerilen",
+},
+extraCategoryRestore: {
+title: "Ekstra Kategorisini Geri Yükle",
+subtitle: "Ekstra kategorisini nasıl geri yüklemek istediğinizi seçin",
+simpleTitle: "Basit Geri Yükleme (Yalnızca Genel Bilgiler)",
+simpleDesc: "Yalnızca temel ekstra kategorisi bilgilerini geri yükle",
+cascadeTitle: "Tam Geri Yükleme (Tüm Verilerle)",
+cascadeDesc: "Ekstra kategorisini tüm ilişkili verilerle geri yükle:",
+includeExtras: "Bu kategorideki tüm ekstralar",
+includeAll: "Tüm ilişkili yapılandırmalar",
+recommended: "Önerilen",
+},
+branchProductRestore: {
+title: "Şube Ürünü Geri Yükle",
+subtitle: "Şube ürününü nasıl geri yüklemek istediğinizi seçin",
+simpleTitle: "Basit Geri Yükleme (Yalnızca Genel Bilgiler)",
+simpleDesc: "Yalnızca temel şube ürünü bilgilerini geri yükle",
+cascadeTitle: "Tam Geri Yükleme (Tüm Verilerle)",
+cascadeDesc: "Şube ürününü tüm ilişkili verilerle geri yükle:",
+includeOptions: "Şube ürün seçenekleri ve ayarları",
+includeAll: "Tüm ilişkili yapılandırmalar",
+recommended: "Önerilen",
+},
+extraRestore: {
+title: "Ekstrayı Geri Yükle",
+subtitle: "Ekstrayı nasıl geri yüklemek istediğinizi seçin",
+simpleTitle: "Basit Geri Yükleme (Yalnızca Genel Bilgiler)",
+simpleDesc: "Yalnızca temel ekstra bilgilerini geri yükle",
+cascadeTitle: "Tam Geri Yükleme (Tüm Verilerle)",
+cascadeDesc: "Ekstrayı tüm ilişkili verilerle geri yükle:",
+includeOptions: "Ekstra seçenekleri ve ayarları",
+includeAll: "Tüm ilişkili yapılandırmalar",
 recommended: "Önerilen",
 },
     search: 'Öğe ara...',
@@ -4252,11 +4355,17 @@ recommended: "Önerilen",
       button: 'Geri Yükle',
       restoring: 'Geri yükleniyor...',
       successCategory: '"{name}" kategorisi başarıyla geri yüklendi',
+      successCategoryCascade: '"{name}" kategorisi ve tüm ilişkili ürünler başarıyla geri yüklendi',
       successProduct: '"{name}" ürünü başarıyla geri yüklendi',
+      successProductCascade: '"{name}" ürünü ve tüm ilişkili veriler başarıyla geri yüklendi',
       successBranch: '"{name}" şubesi başarıyla geri yüklendi',
+      successBranchCascade: '"{name}" şubesi ve tüm ilişkili veriler başarıyla geri yüklendi',
       successTable: '"{name}" masası başarıyla geri yüklendi',
+      successBranchProduct: '"{name}" şube ürünü başarıyla geri yüklendi',
       successBranchCategory: '"{name}" şube kategorisi başarıyla geri yüklendi',
       successTableCategory: '"{name}" masa Alanı başarıyla geri yüklendi',
+      successExtra: '"{name}" ekstrası başarıyla geri yüklendi',
+      successExtraCategory: '"{name}" ekstra kategorisi başarıyla geri yüklendi',
       error: 'Geri yükleme işlemi başarısız oldu'
     },
     empty: {
@@ -4862,12 +4971,12 @@ recommended: "Önerilen",
       "title": "Şube Bilgileri",
       "description": "Şubenizin temel bilgilerini girin",
       "branchName": {
-        "label": "Şube Adı *",
+        "label": "Şube Adı ",
         "placeholder": "Şube adını girin",
         "error": "Şube adı gereklidir"
       },
       "whatsappNumber": {
-        "label": "WhatsApp Sipariş Numarası *",
+        "label": "WhatsApp Sipariş Numarası ",
         "placeholder": "555 123 4567",
         "ariaLabel": "Ülke Kodu",
         "errorRequired": "WhatsApp sipariş numarası gereklidir",
@@ -5128,6 +5237,8 @@ extrasManagement: {
     chooseExtra: 'Ekstra Seçin...',
     noCategoriesYet: 'Henüz kategori eklenmedi',
     noExtrasYet: 'Henüz ekstra eklenmedi',
+    noDescription: 'Açıklama mevcut değil',
+    addExtrasHint: 'Yukarıdaki düğmeyi kullanarak bu kategoriye ekstra ekleyin.',
     confirmDelete: 'Bu kategoriyi silmek istediğinizden emin misiniz?',
     confirmDeleteExtra: 'Bu ekstrayi silmek istediğinizden emin misiniz?',
     unknownCategory: 'Bilinmeyen Kategori',
@@ -5137,16 +5248,26 @@ extrasManagement: {
     quantity: 'Miktar',
     required: 'Zorunlu',
     optional: 'İsteğe Bağlı',
+    requiredShort: 'Zor',
     basePrice: 'Temel Fiyat',
     unitPrice: 'Birim Fiyat',
     selectionMode: 'Seçim Modu',
     single: 'Tekli',
     multiple: 'Çoklu',
+    singleSelect: 'Tekli Seçim',
+    multiSelect: 'Çoklu Seçim',
     requiredExtra: 'Zorunlu Ekstra',
     defaultQty: 'Varsayılan Miktar',
+    default: 'Varsayılan',
+    defaultShort: 'Var.',
     minQty: 'Min Miktar',
+    min: 'Min',
     maxQty: 'Maks Miktar',
+    max: 'Maks',
     qty: 'Miktar',
+    quantities: 'Miktarlar',
+    quantityConfiguration: 'Miktar Yapılandırması',
+    priceAndSelection: 'Fiyat ve Seçim',
     minSelection: 'Min Seçim',
     maxSelection: 'Maks Seçim',
     minQuantity: 'Min Miktar',
@@ -5225,7 +5346,7 @@ categoryConfigModal: {
     maxSelection: 'Maks Seçim',
     minQuantity: 'Min Toplam Adet',
     maxQuantity: 'Maks Toplam Adet',
-    overrideRequired: '"Zorunlu" Durumunu Geçersiz Kıl',
+    overrideRequired: 'Zorunlu',
     specialPrice: 'Özel Fiyat',
     minQty: 'Min Adet',
     maxQty: 'Maks Adet',

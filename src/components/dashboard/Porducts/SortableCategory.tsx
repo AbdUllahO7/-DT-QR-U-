@@ -166,7 +166,7 @@ export const SortableCategory: React.FC<{
           </p>
           <div className="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
             <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 dark:from-primary-400 dark:to-primary-600 bg-clip-text text-transparent">
-              {t('productsContent.currency.format', { amount: product.price.toFixed(2) })}
+              {   product.price.toFixed(2) }
             </span>
           </div>
         </div>

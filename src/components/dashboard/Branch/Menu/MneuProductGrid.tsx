@@ -121,9 +121,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">
             {t('menu.noCategories')}
           </h3>
-          <p className="text-slate-600 dark:text-slate-400">
-            {t('menu.noCategoriesDesc')}
-          </p>
+         
         </div>
       </div>
     )
@@ -162,7 +160,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                 
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6">
                 {category.products.map((product) => (
                   <ProductCard
                     key={product.branchProductId}
@@ -190,7 +188,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6">
             {visibleProducts.map((product) => (
               <ProductCard
                 key={product.branchProductId}

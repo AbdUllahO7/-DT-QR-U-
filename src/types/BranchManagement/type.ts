@@ -105,17 +105,18 @@ export interface DetailedProduct{
   allergens?: APIAllergen[];
   orderDetails?: any;
   isSelected?: boolean;
-  addonsCount?: number; 
-  hasAddons?: boolean;   
-  price: number; 
-  imageUrl?: string; 
-  name: string; 
-  description?: string; 
-  status: boolean; 
-  displayOrder: number; 
-  editedPrice?: number; 
-  editedName?: string; 
-  editedDescription?: string; 
+  addonsCount?: number;
+  hasAddons?: boolean;
+  price: number;
+  imageUrl?: string;
+  name: string;
+  description?: string;
+  status: boolean;
+  isAvailable?: boolean; // true = in stock, false = out of stock
+  displayOrder: number;
+  editedPrice?: number;
+  editedName?: string;
+  editedDescription?: string;
 }
 
 export interface BranchCategory {
@@ -263,6 +264,8 @@ export interface CategoriesContentProps {
   getCategoryName: (categoryId: number, originalName: string) => string;
   handleShowProductAddons?: (product: DetailedProduct) => void;
   isCategoryActive: (categoryId: number) => boolean;
+  onToggleProductStatus?: (branchProductId: number, currentStatus: boolean) => Promise<void>;
+  onToggleProductAvailability?: (branchProductId: number, currentAvailability: boolean) => Promise<void>;
 }
 
 

@@ -38,7 +38,10 @@ export const en = {
     last30Days: 'Last 30 Days',
     thisMonth: 'This Month',
     lastMonth: 'Last Month',
-    retry: 'Retry'
+    retry: 'Retry',
+    remove: 'Remove',
+    dismiss: 'Dismiss',
+    download: 'Download'
   },
   filter: {
       "status": "Status",
@@ -225,7 +228,7 @@ hero: {
       },
       delete: {
         title: 'Delete Branch',
-        confirmMessage: 'Are you sure you want to delete branch "{branchName}"? This action cannot be undone.'
+        confirmMessage: 'Are you sure you want to delete branch ? This action cannot be undone.'
       }
     },
     orders: {
@@ -234,6 +237,9 @@ hero: {
       loading: 'Loading orders...',
       refresh: 'Refresh',
       newOrder: 'New Order',
+      selectBranch : "Select Branch",
+      selectBranchToView:"Select Branch To View",
+      noBranches: "No Branches",
       tabs: {
         all: 'All',
         pending: 'Pending',
@@ -902,6 +908,9 @@ hero: {
     orderNumber: 'Order',
     table: 'Table',
     items: 'Items',
+          selectBranch : "Select Branch",
+      selectBranchToView:"Select Branch To View",
+      noBranches: "No Branches",
     tabs: {
       all: 'All Orders',
       pending: 'Pending',
@@ -949,6 +958,9 @@ hero: {
     loading: 'Loading tables...',
     title: 'Table Management',
     ActiveStatus :"Active Status",
+    selectBranchPrompt:"No Branches",
+          selectBranch : "Select Branch",
+
     descriptionActive : "Category is active and visible", 
     descriptionInActive : "Category is inactive and hidden", 
 
@@ -1171,11 +1183,11 @@ hero: {
     },
     fields: {
       branchName: {
-        label: 'Branch Name *',
+        label: 'Branch Name',
         placeholder: 'Enter branch name'
       },
       whatsappNumber: {
-        label: 'WhatsApp Order Number *',
+        label: 'WhatsApp Order Number ',
         placeholder: 'Enter WhatsApp order number'
       },
       branchLogo: {
@@ -1195,7 +1207,7 @@ hero: {
         placeholder: 'Enter city name'
       },
       street: {
-        label: 'Street *',
+        label: 'Street ',
         placeholder: 'Enter street name'
       },
       zipCode: {
@@ -1211,15 +1223,15 @@ hero: {
         placeholder: 'Enter additional address information (optional)'
       },
       phone: {
-        label: 'Phone Number *',
+        label: 'Phone Number ',
         placeholder: 'Enter phone number'
       },
       email: {
-        label: 'Email Address *',
+        label: 'Email Address ',
         placeholder: 'Enter email address'
       },
       location: {
-        label: 'Location Information *',
+        label: 'Location Information (Optional)',
         placeholder: 'Enter location information (e.g., 40.9795,28.7225)'
       },
       contactHeader: {
@@ -1296,6 +1308,7 @@ hero: {
         restaurantIdNotFound: 'Restaurant ID not found',
         detailsLoadFailed: 'Failed to load branch details',
         statusUpdateFailed: 'Failed to update branch status',
+        validationFailed: 'Please fix the validation errors below',
         sessionExpired: 'Session expired. Please log in again.',
         noPermission: 'You do not have permission for this operation.',
         branchNotFound: 'Branch not found.',
@@ -1312,7 +1325,13 @@ hero: {
       // Delete confirmation
       deleteConfirm: {
         title: 'Confirm Branch Deletion',
-        description: 'Are you sure you want to delete the branch "{{branchName}}"? This action cannot be undone.'
+        description: 'Are you sure you want to delete the branch ? This action cannot be undone.'
+      },
+
+      // Purge confirmation (permanent deletion)
+      purgeConfirm: {
+        title: 'Permanent Deletion Warning',
+        description: 'This will PERMANENTLY delete the branch and ALL associated data. This action CANNOT be undone!'
       },
 
       // Form labels and fields
@@ -1382,7 +1401,7 @@ hero: {
       modal: {
         createTitle: 'Add New Branch',
         createDescription: 'Enter new branch information',
-        editTitle: 'Edit Branch - {branchName}',
+        editTitle: 'Edit Branch',
         editDescription: 'Edit branch information',
         
         tabs: {
@@ -2367,6 +2386,15 @@ hero: {
     allergenic: 'Contains allergens',
     recommended: 'Recommended',
     price: 'Price',
+    buttons: {
+      view: 'View',
+      addons: 'Addons',
+      extras: 'Extras',
+      edit: 'Edit',
+      delete: 'Delete',
+      add: 'Add',
+      remove: 'Remove'
+    },
     errors: {
       loadingIngredients: 'An error occurred while loading ingredients.',
       loadingAddons: 'An error occurred while loading addons.'
@@ -2557,8 +2585,8 @@ hero: {
   },
 
   TableCategoryModal: {
-    title: 'Add Table Area',
-    subtitle: 'Create a new table Area',
+    addCategoryTitle: 'Add Table Area',
+    addCategorySubtitle: 'Create a new table Area',
     categoryName: 'Area Name',
     categoryNamePlaceholder: 'e.g. VIP Tables, Garden Tables',
     description: 'Description (Optional)',
@@ -2665,22 +2693,26 @@ hero: {
       }
     },
 
-    "assignBranchModal": {
-      "title": "Assign Branch",
-      "assigningTo": "Assigning",
-      "toNewBranch": "to a new branch",
-      "currentBranch": "Current Branch",
-      "branchIdDisplay": "(ID: {{id}})",
-      "newBranchLabel": "New Branch",
-      "selectBranchPlaceholder": "Select a branch",
-      "submitButton": "Assign Branch",
-      "submitButtonLoading": "Assigning...",
-      assignedToRestaurant:"Assigned To Restaurant",
-      assignToRestaurant:"Restaurant assignment",
-      "validation": {
-        "branchRequired": "Please select a branch"
-      }
-    },
+  "assignBranchModal": {
+  "title": "Assign Branch",
+  "assigningTo": "Assigning",
+  "selectDestinationType": "Select Scope Type",
+  "toNewBranch": "to a new branch",
+  "currentBranch": "Current Branch",
+  "assignedToRestaurant": "Restaurant Level (HQ)",
+  "alreadyAtRestaurant": "Already at HQ",
+  "groupBranches": "Assign to Branch",
+  "assignToRestaurant": "Assign to Restaurant",
+  "selectBranch": "Select Branch",
+  "selectBranchPlaceholder": "Select a branch",
+  "confirmRestaurantTitle": "Confirm Restaurant Assignment",
+  "confirmRestaurantDesc": "{{name}} will be unassigned from their current branch and moved to the Restaurant level.",
+  "submitButton": "Assign",
+  "submitButtonLoading": "Assigning...",
+  "validation": {
+    "branchRequired": "Please select a branch"
+  }
+},
 
     // Statistics
     stats: {
@@ -2806,7 +2838,7 @@ hero: {
     createRole: {
       title: 'Create New Role',
       step1Title: "Step 1: Basic Information",
-      deselectAll:"Deselect all",
+      deselectAll:"Clear",
       step2Title: "Step 2: Select Permissions",
       stepBasicInfo: "Basic Info",
       stepPermissions: "Permissions",
@@ -2817,6 +2849,7 @@ hero: {
       step2Description: "Now you can select permissions for this role",
       continue: "Continue to Permissions",
       back: "Back",
+      clear: "Clear",
       skipPermissions: "Skip (Add Later)",
       finish: "Finish",
       creating: "Creating...",
@@ -2843,7 +2876,6 @@ hero: {
       permissionsSelected: 'selected',
       cancel: 'Cancel',
       create: 'Create Role',
-      deselectAll:"Un Select",
       validation: {
         nameRequired: 'Role name must be at least 3 characters',
         nameMaxLength: 'Role name can be maximum 50 characters',
@@ -2865,6 +2897,7 @@ hero: {
       confirmPassword: 'Confirm Password',
       location: 'Restaurant/Branch Location',
       roles: 'Roles',
+      fullNumber:"Full Number ",
       userIsActive: 'User is Active',
       // Form fields
       firstName: 'First Name',
@@ -2884,7 +2917,7 @@ hero: {
       passwordConfirmPlaceholder: 'Re-enter your password',
       
       // Location
-      locationType: 'Location Type',
+      locationType: 'User Scope',
       restaurant: 'Restaurant',
       branch: 'Branch',
       restaurantId: 'Restaurant ID',
@@ -2988,7 +3021,7 @@ hero: {
     },
     buttons: {
       addTable: "Add Table",
-      addCategory: "Add Category", 
+      addCategory: "Add Areas", 
       batchCreate: "Batch Create",
       edit: "Edit",
       delete: "Delete",
@@ -3081,17 +3114,21 @@ hero: {
     availableTables: "Available Tables",
     searchPlaceholder: "Search categories...",
     refresh: "Refresh",
-    addCategory: "Add Category",
-    addCategoryTitle: "Add New Category",
+    addCategory: "Add Area",
+    addCategoryTitle: "Add New Area",
     multiCategory: "Create multiple tables across different categories at once",
-    categoryNameLabel: "Category Name",
-    categoryNamePlaceholder: "Enter category name",
+    categoryNameLabel: "Area Name",
+    categoryNamePlaceholder: "Enter Area name",
     colorLabel: "Color",
     iconLabel: "Icon",
     save: "Save",
     cancel: "Cancel",
+    edit: "Edit",
+    delete: "Delete",
+    qrCode: "QR Code",
+    showQRCode: "Show QR Code",
     noCategories: "No categories found",
-    addFirstCategory: "Add Your First Category",
+    addFirstCategory: "Add Your First Area",
     tablesCount: "tables",
     status: "Status",
     active: "Active",
@@ -3237,6 +3274,10 @@ hero: {
     header: 'Branch Categories Management',
     subheader: 'Manage categories and products for Branch ',
     lastUpdated: 'Last Updated',
+    stock : {
+      inStock: 'In Stock',
+      outOfStock: 'Out of Stock'
+    },
     stats: {
       availableCategories: 'Available Categories',
       readyToAdd: 'Ready to add',
@@ -3388,7 +3429,7 @@ hero: {
     // Status
     status: {
       active: 'Active',
-      inactive: 'Disabled by the restaurant',
+      inactive: 'Disabled ',
       available: 'Available',
       unavailable: 'Unavailable'
     },
@@ -3521,7 +3562,8 @@ hero: {
       },
       error: {
         loadFailed: 'Failed to load profile data'
-      }
+      },
+      changePhoto: 'Change'
   },
 
   addonModal: {
@@ -3590,6 +3632,7 @@ hero: {
 
   menu: {
   title: "Menu",
+       noCategories: "No list",
   basePrice: "Base Price",
   loading: "Loading Menu",
   allergens: "Allergens",
@@ -3755,7 +3798,12 @@ cart: {
     "extras": "Extras",
     "without": "Without",
     "extra": "Extra",
-    "add": "Add"
+    "add": "Add",
+    "edit": "Edit",
+    "cancel_edit": "Cancel",
+    "restore": "Restore",
+    "delete": "Delete",
+    "duplicate": "Duplicate"
   },
   },
 
@@ -3764,7 +3812,7 @@ cart: {
       title: 'Order Details',
       name:"name",
       address:"address",
-      
+      pleaseFillRequiredFields:"Please Fill Required Fields",
       phone:"phone",
       tableNumberPlaceholder : "Enter table number here..",
       tableNumber:"Table Number",
@@ -3881,6 +3929,8 @@ productModal: {
     clearFilters:"Clear Filters",
     subTotal:"Sub Total",
     filtered:"Filtered",
+    showing:"Showing",
+    updateAction:"Update",
     modificationHistory:"Modification History",
     lastModifiedAt : "Last Modified At",
     modifiedBy : "ModifiedBy",
@@ -3945,7 +3995,6 @@ productModal: {
     cancel: "Cancel",
     confirmAction: "Confirm",
     rejectAction: "Reject",
-    updateAction: "Update",
     confirming: "Confirming...",
     rejecting: "Rejecting...",
     updating: "Updating...",
@@ -4213,11 +4262,17 @@ productModal: {
       button: 'Restore',
       restoring: 'Restoring...',
       successCategory: '"{name}" category has been restored successfully',
+      successCategoryCascade: '"{name}" category and all associated products have been restored successfully',
       successProduct: '"{name}" product has been restored successfully',
+      successProductCascade: '"{name}" product and all associated data have been restored successfully',
       successBranch: '"{name}" branch has been restored successfully',
+      successBranchCascade: '"{name}" branch and all associated data have been restored successfully',
       successTable: '"{name}" table has been restored successfully',
+      successBranchProduct: '"{name}" branch product has been restored successfully',
       successBranchCategory: '"{name}" branch category has been restored successfully',
       successTableCategory: '"{name}" table Area has been restored successfully',
+      successExtra: '"{name}" extra has been restored successfully',
+      successExtraCategory: '"{name}" extra category has been restored successfully',
       error: 'Restore operation failed'
     },
       productRestore : {
@@ -4233,16 +4288,69 @@ productModal: {
           recommended: 'Recommended',
       },
     categoryRestore: {
-        title: "Restore Product Options",
-        subtitle: "Choose How to Restore the Product",
-        simpleTitle: "Restore the Product",
-        simpleDesc: "Restoring this product will restore only general product information",
-        cascadeTitle: "Restoring this product will also restore all associated variants and extensions",
-        cascadeDesc: "Do you want to restore just the product or all associated variants and extensions as well?",
-        includeOptions: "Include variants and extensions",
-        includeImages: "Include the product image",
-        includeAll: "Include all associated data",
-        includeProducts: "Include products in the category",
+        title: "Restore Category",
+        subtitle: "Choose how to restore the category",
+        simpleTitle: "Simple Restore (General Info Only)",
+        simpleDesc: "Restore only the basic category information (name, description)",
+        cascadeTitle: "Full Restore (With All Data)",
+        cascadeDesc: "Restore the category with all associated data:",
+        includeProducts: "All products in this category",
+        includeAll: "All related configurations",
+        recommended: "Recommended",
+        },
+    branchCategoryRestore: {
+        title: "Restore Branch Category",
+        subtitle: "Choose how to restore the branch category",
+        simpleTitle: "Simple Restore (General Info Only)",
+        simpleDesc: "Restore only the basic branch category information",
+        cascadeTitle: "Full Restore (With All Data)",
+        cascadeDesc: "Restore the branch category with all associated data:",
+        includeProducts: "All branch products in this category",
+        includeAll: "All related configurations",
+        recommended: "Recommended",
+        },
+    tableCategoryRestore: {
+        title: "Restore Table Category",
+        subtitle: "Choose how to restore the table category",
+        simpleTitle: "Simple Restore (General Info Only)",
+        simpleDesc: "Restore only the basic table category information",
+        cascadeTitle: "Full Restore (With All Data)",
+        cascadeDesc: "Restore the table category with all associated data:",
+        includeTables: "All tables in this category",
+        includeAll: "All related configurations",
+        recommended: "Recommended",
+        },
+    extraCategoryRestore: {
+        title: "Restore Extra Category",
+        subtitle: "Choose how to restore the extra category",
+        simpleTitle: "Simple Restore (General Info Only)",
+        simpleDesc: "Restore only the basic extra category information",
+        cascadeTitle: "Full Restore (With All Data)",
+        cascadeDesc: "Restore the extra category with all associated data:",
+        includeExtras: "All extras in this category",
+        includeAll: "All related configurations",
+        recommended: "Recommended",
+        },
+    branchProductRestore: {
+        title: "Restore Branch Product",
+        subtitle: "Choose how to restore the branch product",
+        simpleTitle: "Simple Restore (General Info Only)",
+        simpleDesc: "Restore only the basic branch product information",
+        cascadeTitle: "Full Restore (With All Data)",
+        cascadeDesc: "Restore the branch product with all associated data:",
+        includeOptions: "Branch product options and settings",
+        includeAll: "All related configurations",
+        recommended: "Recommended",
+        },
+    extraRestore: {
+        title: "Restore Extra",
+        subtitle: "Choose how to restore the extra",
+        simpleTitle: "Simple Restore (General Info Only)",
+        simpleDesc: "Restore only the basic extra information",
+        cascadeTitle: "Full Restore (With All Data)",
+        cascadeDesc: "Restore the extra with all associated data:",
+        includeOptions: "Extra options and settings",
+        includeAll: "All related configurations",
         recommended: "Recommended",
         },
     branchRestore:{
@@ -4838,7 +4946,7 @@ productModal: {
         "title": "Branch Information",
         "description": "Enter the basic information of your branch",
         "branchName": {
-          "label": "Branch Name *",
+          "label": "Branch Name",
           "placeholder": "Enter branch name",
           "error": "Branch name is required"
         },
@@ -5104,6 +5212,8 @@ extrasManagement: {
     chooseExtra: 'Choose Extra...',
     noCategoriesYet: 'No categories added yet',
     noExtrasYet: 'No extras added yet',
+    noDescription: 'No description available',
+    addExtrasHint: 'Add extras to this category using the button above.',
     confirmDelete: 'Are you sure you want to delete this category?',
     confirmDeleteExtra: 'Are you sure you want to delete this extra?',
     unknownCategory: 'Unknown Category',
@@ -5113,16 +5223,26 @@ extrasManagement: {
     quantity: 'Quantity',
     required : 'Required',
     optional: 'Optional',
+    requiredShort: 'Req',
     basePrice: 'Base Price',
     unitPrice: 'Unit Price',
     selectionMode: 'Selection Mode',
     single: 'Single',
     multiple: 'Multiple',
+    singleSelect: 'Single Select',
+    multiSelect: 'Multi Select',
     requiredExtra: 'Required Extra',
     defaultQty: 'Default Qty',
+    default: 'Default',
+    defaultShort: 'Def.',
     minQty: 'Min Qty',
+    min: 'Min',
     maxQty: 'Max Qty',
+    max: 'Max',
     qty: 'Qty',
+    quantities: 'Quantities',
+    quantityConfiguration: 'Quantity Configuration',
+    priceAndSelection: 'Price & Selection',
     minSelection: 'Min Selection',
     maxSelection: 'Max Selection',
     minQuantity: 'Min Quantity',
@@ -5201,7 +5321,7 @@ categoryConfigModal: {
     maxSelection: 'Max Selection',
     minQuantity: 'Min Total Qty',
     maxQuantity: 'Max Total Qty',
-    overrideRequired: 'Override "Required" Status',
+    overrideRequired: 'Required',
     specialPrice: 'Special Price',
     minQty: 'Min Qty',
     maxQty: 'Max Qty',

@@ -21,7 +21,7 @@ const AddQRCodeCard: React.FC<AddQRCodeCardProps> = ({ onClick }) => {
         border-2 border-dashed border-gray-300 dark:border-gray-600 
         p-6 
         hover:border-blue-600 dark:hover:border-blue-500 
-        transition-all duration-200 
+ 
         flex flex-col items-center justify-center gap-4 
         group focus:outline-none focus:ring-4 focus:ring-blue-500/50
         ${isRTL ? 'text-right' : 'text-left'}

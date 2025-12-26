@@ -248,7 +248,7 @@ class OrderService {
       return response.data;
     } catch (error: any) {
       logger.error('Order onaylama hatası', error, { prefix: 'OrderService' });
-      this.handleError(error, 'Order onaylanırken hata oluştu');
+      this.handleError(error,error.message);
     }
   }
 
@@ -685,7 +685,7 @@ class OrderService {
         const validationErrors = Object.values(errorData.errors).flat();
         throw new Error(`Doğrulama hatası: ${validationErrors.join(', ')}`);
       } else {
-        throw new Error('Geçersiz istek. Lütfen verileri kontrol edin.');
+        throw new Error(error.message);
       }
     } else if (error?.response?.status === 401) {
       throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');

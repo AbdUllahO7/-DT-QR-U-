@@ -535,8 +535,9 @@ const Subscription: React.FC = () => {
                         <div className="font-semibold text-gray-900 dark:text-white">₺{invoice.amount}</div>
                         <div className="text-xs text-gray-600 dark:text-gray-400">{invoice.plan}</div>
                       </div>
-                      <button className="p-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                      <button className="flex items-center gap-1 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-sm font-medium">
                         <Download className="h-4 w-4" />
+                        <span>{t('common.download') || 'Download'}</span>
                       </button>
                     </div>
                   </motion.div>

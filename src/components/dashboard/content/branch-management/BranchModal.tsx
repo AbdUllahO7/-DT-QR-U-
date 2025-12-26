@@ -13,14 +13,31 @@ import {
   MapPinned,
   FileText,
   ArrowLeft,
-  ArrowRight
+  ArrowRight,
+  Navigation // Imported Navigation icon
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import type { CreateBranchWithDetailsDto, CreateBranchWorkingHourCoreDto } from '../../../../types/api';
 import { mediaService } from '../../../../services/mediaService';
 import { countriesWithCodes, countryKeys } from '../../../../data/mockData';
 
+// --- LEAFLET IMPORTS & SETUP ---
+import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import { motion, AnimatePresence } from 'framer-motion'; // Using framer-motion for the map modal transition
 
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+// Fix for Leaflet default icon issues in React
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
+});
 
 interface BranchModalProps {
   isOpen: boolean;
@@ -53,6 +70,13 @@ const BranchModal: React.FC<BranchModalProps> = ({
   const [isUploadingLogo, setIsUploadingLogo] = useState<boolean>(false);
   const [isCurrentStepValid, setIsCurrentStepValid] = useState<boolean>(false);
   
+  // --- MAP STATE ---
+  const [isMapModalOpen, setIsMapModalOpen] = useState<boolean>(false);
+  const [selectedLatLng, setSelectedLatLng] = useState<{ lat: number; lng: number }>({
+    lat: 41.0082, // Default to Istanbul
+    lng: 28.9784
+  });
+
   const dayNamesDisplay = Array.isArray(t('branchModal.workingHours.days'))
     ? t('branchModal.workingHours.days')
     : language === 'ar'
@@ -107,12 +131,18 @@ const BranchModal: React.FC<BranchModalProps> = ({
       case 1:
         return (
           !!formData.branchName?.trim() &&
-          !!formData.whatsappOrderNumber?.trim() 
+          !!formData.whatsappOrderNumber?.trim()
         );
       case 2:
-        return true; 
+        return (
+          !!formData.createAddressDto.city?.trim() &&
+          !!formData.createAddressDto.country?.trim()
+        );
       case 3:
-        return true;
+        return (
+          !!formData.createContactDto.phone?.trim() &&
+          !!formData.createContactDto.mail?.trim()
+        );
       default:
         return false;
     }
@@ -128,66 +158,75 @@ const BranchModal: React.FC<BranchModalProps> = ({
       if (!formData.whatsappOrderNumber?.trim()) {
         errors.whatsappOrderNumber = t('branchModal.errors.whatsappNumber');
       }
-    } 
+    } else if (step === 2) {
+      if (!formData.createAddressDto.city?.trim()) {
+        errors['address.city'] = t('branchModal.errors.city') || 'City is required';
+      }
+      if (!formData.createAddressDto.country?.trim()) {
+        errors['address.country'] = t('branchModal.errors.country') || 'Country is required';
+      }
+    } else if (step === 3) {
+      if (!formData.createContactDto.phone?.trim()) {
+        errors['contact.phone'] = t('branchModal.errors.phone') || 'Phone is required';
+      }
+      if (!formData.createContactDto.mail?.trim()) {
+        errors['contact.mail'] = t('branchModal.errors.email') || 'Email is required';
+      }
+    }
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-  const { name, value } = e.target;
-  let updatedFormData: CreateBranchWithDetailsDto;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    let updatedFormData: CreateBranchWithDetailsDto;
 
-  if (name.startsWith('address.')) {
-    const addressField = name.split('.')[1];
-    updatedFormData = {
-      ...formData,
-      createAddressDto: {
-        ...formData.createAddressDto,
-        [addressField]: value
-      }
-    };
-  } else if (name.startsWith('contact.')) {
-    const contactField = name.split('.')[1];
-    updatedFormData = {
-      ...formData,
-      createContactDto: {
-        ...formData.createContactDto,
-        [contactField]: value
-      }
-    };
-  } else {
-    updatedFormData = {
-      ...formData,
-      [name]: value
-    };
-  }
+    if (name.startsWith('address.')) {
+      const addressField = name.split('.')[1];
+      updatedFormData = {
+        ...formData,
+        createAddressDto: {
+          ...formData.createAddressDto,
+          [addressField]: value
+        }
+      };
+    } else if (name.startsWith('contact.')) {
+      const contactField = name.split('.')[1];
+      updatedFormData = {
+        ...formData,
+        createContactDto: {
+          ...formData.createContactDto,
+          [contactField]: value
+        }
+      };
+    } else {
+      updatedFormData = {
+        ...formData,
+        [name]: value
+      };
+    }
 
-  setFormData(updatedFormData);
+    setFormData(updatedFormData);
 
-  if (formErrors[name]) {
-    setFormErrors(prev => ({
-      ...prev,
-      [name]: ''
-    }));
-  }
+    if (formErrors[name]) {
+      setFormErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
 
-  onInputChange(e);
-};
+    onInputChange(e);
+  };
 
-  // --- UPDATED: Handler with limitation logic ---
   const handlePhoneCompositeChange = (
     fullFieldName: string, 
     currentFullValue: string | null, 
     partType: 'code' | 'number', 
     newValue: string
   ) => {
-    // Validation for number part
     if (partType === 'number') {
-      // 1. Only allow numeric characters
       if (!/^\d*$/.test(newValue)) return;
-      
-      // 2. Limit to 15 digits max
       if (newValue.length > 15) return;
     }
 
@@ -285,8 +324,169 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
     if (!validateStep(3)) {
       return;
     }
-    await onSubmit(formData);
+
+    // Set default logo if not provided
+    const submissionData = {
+      ...formData,
+      branchLogoPath: formData.branchLogoPath || 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/330px-No_image_available.svg.png'
+    };
+
+    await onSubmit(submissionData);
   };
+
+  // --- MAP HANDLERS ---
+  const handleOpenMapModal = (): void => {
+    // Try to parse existing location if available
+    if (formData.createContactDto.location) {
+      try {
+        const [lat, lng] = formData.createContactDto.location.split(',').map(Number);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          setSelectedLatLng({ lat, lng });
+        }
+      } catch (error) {
+        console.error('Failed to parse location', error);
+      }
+    }
+    setIsMapModalOpen(true);
+  };
+
+  const handleCloseMapModal = (): void => {
+    setIsMapModalOpen(false);
+  };
+
+  const handleConfirmLocation = (): void => {
+    const locationString = `${selectedLatLng.lat.toFixed(6)},${selectedLatLng.lng.toFixed(6)}`;
+    
+    setFormData(prev => ({
+      ...prev,
+      createContactDto: {
+        ...prev.createContactDto,
+        location: locationString
+      }
+    }));
+    
+    // Trigger input change for validation if needed (though not strictly required since we set state above)
+    // We create a synthetic event just in case parent needs to know
+    const syntheticEvent = {
+        target: {
+          name: 'contact.location',
+          value: locationString,
+        },
+      } as React.ChangeEvent<HTMLInputElement>;
+    onInputChange(syntheticEvent);
+
+    setIsMapModalOpen(false);
+  };
+
+  // --- MAP SUB-COMPONENTS ---
+  const MapUpdater: React.FC<{ center: [number, number] }> = ({ center }) => {
+    const map = useMap();
+    useEffect(() => {
+      map.setView(center, map.getZoom());
+    }, [center, map]);
+    return null;
+  };
+
+  const LocationMarker: React.FC = () => {
+    useMapEvents({
+      click(e) {
+        setSelectedLatLng({
+          lat: e.latlng.lat,
+          lng: e.latlng.lng,
+        });
+      },
+    });
+    return <Marker position={[selectedLatLng.lat, selectedLatLng.lng]} />;
+  };
+
+  const MapPickerModal = () => {
+    // Prevent background scrolling when map modal is open
+    useEffect(() => {
+      if (isMapModalOpen) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = 'unset';
+      }
+      return () => { document.body.style.overflow = 'unset'; };
+    }, [isMapModalOpen]);
+
+    if (!isMapModalOpen) return null;
+
+    return (
+      <AnimatePresence>
+        {/* Higher Z-index to overlay the existing modal (which is z-50) */}
+        <div className="fixed inset-0 bg-black bg-opacity-60 dark:bg-opacity-80 z-[60] flex items-center justify-center p-4">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className={`relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl ${isRTL ? 'rtl' : 'ltr'}`}
+          >
+            <div className={`flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                {t('onboardingBranch.form.step3.location.mapTitle')}
+              </h3>
+              <button
+                onClick={handleCloseMapModal}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </button>
+            </div>
+
+            <div className="p-6">
+              <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+                {t('onboardingBranch.form.step3.location.clickToPin')}
+              </div>
+
+              <div className="relative w-full h-[400px] bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 shadow-inner">
+                <MapContainer
+                  center={[selectedLatLng.lat, selectedLatLng.lng]}
+                  zoom={13}
+                  style={{ height: '100%', width: '100%' }}
+                  scrollWheelZoom={true}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <MapUpdater center={[selectedLatLng.lat, selectedLatLng.lng]} />
+                  <LocationMarker />
+                </MapContainer>
+              </div>
+
+              <div className="mt-4 flex items-center justify-between">
+                <div className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                  <span className="font-medium">{t('onboardingBranch.form.step3.location.selectedCoordinates')}</span>
+                  <code className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400" dir="ltr">
+                    {selectedLatLng.lat.toFixed(6)}, {selectedLatLng.lng.toFixed(6)}
+                  </code>
+                </div>
+              </div>
+            </div>
+
+            <div className={`flex ${isRTL ? 'flex-row-reverse space-x-reverse' : ''} space-x-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-xl`}>
+              <button
+                type="button"
+                onClick={handleCloseMapModal}
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-colors shadow-sm"
+              >
+                {t('branchModal.buttons.cancel')}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmLocation}
+                className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
+              >
+                {t('branchModal.buttons.save')}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      </AnimatePresence>
+    );
+  };
+
 
   const renderStep1 = () => (
     <div className="space-y-6">
@@ -349,7 +549,6 @@ const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaE
               </select>
               <input
                 type="tel"
-                // --- ADDED: maxLength attribute ---
                 maxLength={15}
                 value={getPhoneParts(formData.whatsappOrderNumber).number}
                 onChange={(e) => handlePhoneCompositeChange(
@@ -440,7 +639,7 @@ const renderStep2 = () => (
       <div className="space-y-6">
         <div>
           <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            {t('branchModal.fields.country.label')}
+            {t('branchModal.fields.country.label')} <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10`} />
@@ -449,7 +648,7 @@ const renderStep2 = () => (
               name="address.country"
               value={formData.createAddressDto.country || ''}
               onChange={handleInputChange}
-              className={`w-full ${isRTL ? 'pr-10 pl-8' : 'pl-10 pr-8'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
+              className={`w-full ${isRTL ? 'pr-10 pl-8' : 'pl-10 pr-8'} py-3 border ${formErrors['address.country'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
               dir={isRTL ? 'rtl' : 'ltr'}
             >
               <option value="" disabled>
@@ -468,11 +667,14 @@ const renderStep2 = () => (
               </svg>
             </div>
           </div>
+          {formErrors['address.country'] && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.country']}</p>
+          )}
         </div>
 
         <div>
           <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            {t('branchModal.fields.city.label')}
+            {t('branchModal.fields.city.label')} <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
@@ -482,11 +684,14 @@ const renderStep2 = () => (
               name="address.city"
               value={formData.createAddressDto.city || ''}
               onChange={handleInputChange}
-              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${formErrors['address.city'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
               placeholder={t('branchModal.fields.city.placeholder')}
               dir={isRTL ? 'rtl' : 'ltr'}
             />
           </div>
+          {formErrors['address.city'] && (
+            <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.city']}</p>
+          )}
         </div>
 
         <div>
@@ -578,20 +783,20 @@ const renderStep2 = () => (
         <div className="space-y-6">
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.phone.label')}
+              {t('branchModal.fields.phone.label')} <span className="text-red-500">*</span>
             </label>
-            
+
             <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                <select
                 title='Country Code'
                 value={getPhoneParts(formData.createContactDto.phone).code}
                 onChange={(e) => handlePhoneCompositeChange(
-                  'contact.phone', 
-                  formData.createContactDto.phone, 
-                  'code', 
+                  'contact.phone',
+                  formData.createContactDto.phone,
+                  'code',
                   e.target.value
                 )}
-                className="w-1/3 md:w-1/4 px-3 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white"
+                className={`w-1/3 md:w-1/4 px-3 py-3 border ${formErrors['contact.phone'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white`}
               >
                 {countriesWithCodes.map((country) => (
                   <option key={country.code + country.name} value={country.code}>
@@ -601,24 +806,26 @@ const renderStep2 = () => (
               </select>
               <input
                 type="tel"
-                // --- ADDED: maxLength attribute ---
                 maxLength={15}
                 value={getPhoneParts(formData.createContactDto.phone).number}
                 onChange={(e) => handlePhoneCompositeChange(
-                  'contact.phone', 
-                  formData.createContactDto.phone, 
-                  'number', 
+                  'contact.phone',
+                  formData.createContactDto.phone,
+                  'number',
                   e.target.value
                 )}
-                className={`flex-1 px-3 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`flex-1 px-3 py-3 border ${formErrors['contact.phone'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
                 placeholder={t('branchModal.fields.phone.placeholder')}
               />
             </div>
+            {formErrors['contact.phone'] && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.phone']}</p>
+            )}
           </div>
 
           <div>
             <label htmlFor="mail" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.email.label')}
+              {t('branchModal.fields.email.label')} <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Mail className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
@@ -628,28 +835,42 @@ const renderStep2 = () => (
                 name="contact.mail"
                 value={formData.createContactDto.mail || ''}
                 onChange={handleInputChange}
-                className="w-full px-10 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                className={`w-full px-10 py-3 border ${formErrors['contact.mail'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
                 placeholder={t('branchModal.fields.email.placeholder')}
               />
             </div>
+            {formErrors['contact.mail'] && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.mail']}</p>
+            )}
           </div>
 
-          {/* ... existing fields for location, header, etc. ... */}
+          {/* --- UPDATED LOCATION FIELD WITH MAP BUTTON --- */}
           <div>
             <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('branchModal.fields.location.label')}
             </label>
-            <div className="relative">
-              <MapPin className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-              <input
-                type="text"
-                id="location"
-                name="contact.location"
-                value={formData.createContactDto.location || ''}
-                onChange={handleInputChange}
-                className="w-full px-10 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
-                placeholder={t('branchModal.fields.location.placeholder')}
-              />
+            <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className="relative flex-1">
+                <MapPin className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none`} />
+                <input
+                  type="text"
+                  id="location"
+                  name="contact.location"
+                  value={formData.createContactDto.location || ''}
+                  onChange={handleInputChange}
+                  readOnly
+                  className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                  placeholder={t('branchModal.fields.location.placeholder')}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={handleOpenMapModal}
+                className={`px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}
+              >
+                <Navigation className="w-5 h-5" />
+                <span className="hidden sm:inline">{t('onboardingBranch.form.step3.location.selectOnMap')}</span>
+              </button>
             </div>
           </div>
 
@@ -871,7 +1092,7 @@ const renderStep2 = () => (
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                {formData.branchName ? t('branchModal.title.edit') : t('branchModal.title.add')}
+                {t('branchModal.title.add')}
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {t('branchModal.subtitle')}
@@ -971,6 +1192,8 @@ const renderStep2 = () => (
           </button>
         </div>
       </div>
+      {/* Render the Map Modal here */}
+      <MapPickerModal />
     </div>
   );
 };

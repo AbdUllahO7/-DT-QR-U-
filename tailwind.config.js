@@ -46,9 +46,20 @@ export default {
     },
   },
   plugins: [
-    // RTL support utilities
+    // RTL support utilities and scrollbar hide
     function({ addUtilities }) {
       const newUtilities = {
+        // Hide scrollbar utility
+        '.scrollbar-hide': {
+          /* IE and Edge */
+          '-ms-overflow-style': 'none',
+          /* Firefox */
+          'scrollbar-width': 'none',
+        },
+        '.scrollbar-hide::-webkit-scrollbar': {
+          /* Chrome, Safari and Opera */
+          'display': 'none',
+        },
         '.rtl-space-x-reverse': {
           '--tw-space-x-reverse': '1',
         },

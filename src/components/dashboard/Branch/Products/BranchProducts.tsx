@@ -549,6 +549,135 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
     }
   };
 
+  // Toggle product active/inactive status
+  const handleToggleProductStatus = async (branchProductId: number, currentStatus: boolean) => {
+    try {
+      setIsLoading(true);
+
+      // Find the product to get its current data
+      let productToUpdate: DetailedProduct | undefined;
+      let categoryIndex = -1;
+
+      for (let i = 0; i < branchCategories.length; i++) {
+        const product = branchCategories[i].products?.find(p => p.branchProductId === branchProductId);
+        if (product) {
+          productToUpdate = product;
+          categoryIndex = i;
+          break;
+        }
+      }
+
+      if (!productToUpdate) {
+        setError('Product not found');
+        return;
+      }
+
+      // Prepare the payload
+      const productData = {
+        branchProductId: branchProductId,
+        price: productToUpdate.price,
+        isActive: !currentStatus, // Toggle the status
+        displayOrder: productToUpdate.displayOrder,
+        branchCategoryId: branchCategories[categoryIndex].branchCategoryId,
+      };
+
+      // Update the product status
+      await branchProductService.updateBranchProduct(branchProductId, productData);
+
+      // Update local state
+      setBranchCategories(prev => {
+        const updated = [...prev];
+        if (categoryIndex >= 0 && updated[categoryIndex].products) {
+          updated[categoryIndex] = {
+            ...updated[categoryIndex],
+            products: updated[categoryIndex].products!.map(product =>
+              product.branchProductId === branchProductId
+                ? { ...product, status: !currentStatus }
+                : product
+            ),
+          };
+        }
+        return updated;
+      });
+
+      setSuccessMessage(
+        !currentStatus
+          ? t('branchCategories.messages.productActivated') || 'Product activated successfully'
+          : t('branchCategories.messages.productDeactivated') || 'Product deactivated successfully'
+      );
+    } catch (err: any) {
+      console.error('Error toggling product status:', err);
+      setError(err.response?.data?.message || 'Failed to update product status');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Toggle product availability (in stock/out of stock)
+  const handleToggleProductAvailability = async (branchProductId: number, currentAvailability: boolean) => {
+    try {
+      setIsLoading(true);
+
+      // Find the product to get its current data
+      let productToUpdate: DetailedProduct | undefined;
+      let categoryIndex = -1;
+
+      for (let i = 0; i < branchCategories.length; i++) {
+        const product = branchCategories[i].products?.find(p => p.branchProductId === branchProductId);
+        if (product) {
+          productToUpdate = product;
+          categoryIndex = i;
+          break;
+        }
+      }
+
+      if (!productToUpdate) {
+        setError('Product not found');
+        return;
+      }
+
+      // Prepare the payload with availability field
+      const productData = {
+        branchProductId: branchProductId,
+        price: productToUpdate.price,
+        isActive: productToUpdate.status,
+        isAvailable: !currentAvailability, // Toggle availability
+        displayOrder: productToUpdate.displayOrder,
+        branchCategoryId: branchCategories[categoryIndex].branchCategoryId,
+      };
+
+      // Update the product availability
+      await branchProductService.updateBranchProduct(branchProductId, productData);
+
+      // Update local state
+      setBranchCategories(prev => {
+        const updated = [...prev];
+        if (categoryIndex >= 0 && updated[categoryIndex].products) {
+          updated[categoryIndex] = {
+            ...updated[categoryIndex],
+            products: updated[categoryIndex].products!.map(product =>
+              product.branchProductId === branchProductId
+                ? { ...product, isAvailable: !currentAvailability }
+                : product
+            ),
+          };
+        }
+        return updated;
+      });
+
+      setSuccessMessage(
+        !currentAvailability
+          ? t('branchCategories.messages.productInStock') || 'Product marked as in stock'
+          : t('branchCategories.messages.productOutOfStock') || 'Product marked as out of stock'
+      );
+    } catch (err: any) {
+      console.error('Error toggling product availability:', err);
+      setError(err.response?.data?.message || 'Failed to update product availability');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Product details modal functions
   const handleShowProductDetails = (product: DetailedProduct) => {
     setSelectedProductForDetails(product);
@@ -1701,6 +1830,8 @@ const handleSaveProductExtras = async (
         getProductPrice={getProductPrice}
         getCategoryName={getCategoryName}
         isCategoryActive={isCategoryActive}
+        onToggleProductStatus={handleToggleProductStatus}
+        onToggleProductAvailability={handleToggleProductAvailability}
       />
 
       <BranchProductExtraCategoriesModal

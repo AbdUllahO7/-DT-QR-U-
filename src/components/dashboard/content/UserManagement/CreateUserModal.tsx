@@ -1,20 +1,19 @@
 import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { UserPlus, Shield, Building, ChevronDown, Loader2, EyeOff, Eye, AlertCircle } from 'lucide-react';
+import { UserPlus, Shield, Building, ChevronDown, Loader2, EyeOff, Eye, AlertCircle, Phone } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../../hooks';
-import type {  BranchInfo } from '../../../../types/api';
+import type { BranchInfo } from '../../../../types/api';
 import { CreateUserDto, Role } from '../../../../types/users/users.type';
-import { countriesWithCodes } from '../../../../data/mockData';
-
-
+// Updated import to match Register page logic
+import { sortedCountryCodes, getPlaceholderByDialCode } from '../../../../data/countryCodes';
 
 export interface CreateUserModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (userData: CreateUserDto) => Promise<void>;
   roles: Role[];
-  error : string | null;
+  error: string | null;
   branches: BranchInfo[];
   isLoading: boolean;
   isRolesLoading: boolean;
@@ -29,12 +28,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   branches,
   error,
   isLoading,
-  isRolesLoading, 
-  onBranchChange, 
+  isRolesLoading,
+  onBranchChange,
 }) => {
   const { t, isRTL } = useLanguage();
 
-  console.log("roles",roles)
   const [formData, setFormData] = useState<CreateUserDto>({
     surName: '',
     name: '',
@@ -50,6 +48,11 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     isActive: true
   });
 
+  // State for dynamic phone placeholder matching Register logic
+  const [countryCode, setCountryCode] = useState('+90');
+  const [phonePlaceholder, setPhonePlaceholder] = useState<string>(
+    getPlaceholderByDialCode('+90')
+  );
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [apiError, setApiError] = useState<string>('');
@@ -58,17 +61,14 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [locationType, setLocationType] = useState<'restaurant' | 'branch'>('restaurant');
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
-  const [countryCode, setCountryCode] = useState('+90');
-  const [isCountryCodeDropdownOpen, setIsCountryCodeDropdownOpen] = useState(false);
+  
   const branchDropdownRef = useRef<HTMLDivElement>(null);
-  const countryCodeDropdownRef = useRef<HTMLDivElement>(null);
 
   useClickOutside(branchDropdownRef, () => setIsBranchDropdownOpen(false));
-  useClickOutside(countryCodeDropdownRef, () => setIsCountryCodeDropdownOpen(false));
 
   // Get selected branch name
-  const selectedBranchName = formData.branchId 
-    ? branches.find(b => Number(b.branchId) === Number(formData.branchId))?.branchName 
+  const selectedBranchName = formData.branchId
+    ? branches.find(b => Number(b.branchId) === Number(formData.branchId))?.branchName
     : null;
 
   const validateForm = (): boolean => {
@@ -109,14 +109,17 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
       newErrors.passwordConfirm = 'Passwords do not match';
     }
 
-    // Phone number validation
+    // Phone number validation (Updated to match Register regex)
     if (!formData.phoneNumber || formData.phoneNumber.length === 0) {
       newErrors.phoneNumber = 'Phone number is required';
+    } else {
+      const cleanPhone = formData.phoneNumber.replace(/[\s\-\(\)]/g, '');
+      if (!/^\d{7,15}$/.test(cleanPhone)) {
+        newErrors.phoneNumber = 'Invalid phone number format';
+      }
     }
 
     // Location validation
-    // **MODIFIED**: Only validate branchId if locationType is 'branch'
-    // (This check is implicitly correct because locationType will only be 'branch' if branches exist)
     if (locationType === 'branch') {
       if (!formData.branchId) {
         newErrors.branchId = 'Branch is required';
@@ -137,10 +140,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
     if (!validateForm()) return;
 
-    // Clear previous API errors
     setApiError('');
 
-    // Get current user ID from JWT token if available
     const getCurrentUserId = () => {
       try {
         const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -169,11 +170,9 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     try {
       await onSubmit(submitData);
     } catch (error: any) {
-      // Parse and display API error messages
       if (error.response?.data?.message) {
         setApiError(error.response.data.message);
       } else if (error.response?.data?.errors) {
-        // Handle validation errors object
         const errorMessages = Object.values(error.response.data.errors).join(', ');
         setApiError(errorMessages);
       } else if (error.message) {
@@ -185,7 +184,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   };
 
   const handleRoleToggle = (roleId: string) => {
-    setSelectedRoles(prev => 
+    setSelectedRoles(prev =>
       prev.includes(roleId)
         ? prev.filter(id => id !== roleId)
         : [...prev, roleId]
@@ -194,15 +193,15 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
   const handleLocationTypeChange = (type: 'restaurant' | 'branch') => {
     setLocationType(type);
-    
+
     if (type === 'restaurant') {
       setFormData(prev => ({ ...prev, branchId: null }));
-    } else { // type === 'branch'
+    } else {
       setFormData(prev => ({ ...prev, restaurantId: null, branchId: null }));
     }
-    
+
     onBranchChange(null);
-    
+
     setErrors(prev => {
       const newErrors = { ...prev };
       delete newErrors.restaurantId;
@@ -211,9 +210,15 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
     });
   };
 
+  // Handler for country code change
+  const handleCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const code = e.target.value;
+    setCountryCode(code);
+    setPhonePlaceholder(getPlaceholderByDialCode(code));
+  };
+
   if (!isOpen) return null;
 
-  // **NEW**: Check if branches exist
   const hasBranches = branches && branches.length > 0;
 
   return (
@@ -286,8 +291,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     value={formData.name}
                     onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                     className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.name 
-                        ? 'border-red-500 dark:border-red-400' 
+                      errors.name
+                        ? 'border-red-500 dark:border-red-400'
                         : 'border-gray-300 dark:border-gray-600'
                     }`}
                     placeholder="Enter first name"
@@ -307,8 +312,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     value={formData.surName}
                     onChange={(e) => setFormData(prev => ({ ...prev, surName: e.target.value }))}
                     className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.surName 
-                        ? 'border-red-500 dark:border-red-400' 
+                      errors.surName
+                        ? 'border-red-500 dark:border-red-400'
                         : 'border-gray-300 dark:border-gray-600'
                     }`}
                     placeholder="Enter last name"
@@ -317,8 +322,6 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 </div>
               </div>
             </div>
-
-            
 
             {/* Contact Info */}
             <div>
@@ -337,8 +340,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     value={formData.email}
                     onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                     className={`w-full rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.email 
-                        ? 'border-red-500 dark:border-red-400' 
+                      errors.email
+                        ? 'border-red-500 dark:border-red-400'
                         : 'border-gray-300 dark:border-gray-600'
                     }`}
                     placeholder="user@example.com"
@@ -348,72 +351,64 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
 
                 <div>
                   <label htmlFor="phoneNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {t('userManagementPage.createUser.phoneNumber') || 'Phone Number'} <span className="text-red-500">*</span>
+                    {t('userManagementPage.createUser.phoneNumber') || 'Phone Number'} 
                   </label>
-                  <div className="flex gap-2">
-                    {/* Country Code Dropdown */}
-                    <div className="relative w-32" ref={countryCodeDropdownRef}>
-                      <button
-                        type="button"
-                        onClick={() => setIsCountryCodeDropdownOpen(!isCountryCodeDropdownOpen)}
-                        className={`flex items-center justify-between w-full px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    
+                    {/* Native Country Code Selector - Updated to match Register page */}
+                    <div className="relative w-32">
+                      <select
+                      title='countryCode'
+                        id="countryCode"
+                        value={countryCode}
+                        onChange={handleCountryCodeChange}
+                        className={`w-full h-full rounded-lg border px-3 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 appearance-none ${
+                          errors.phoneNumber
+                            ? 'border-red-500 dark:border-red-400'
+                            : 'border-gray-300 dark:border-gray-600'
+                        } ${isRTL ? 'text-right pr-8' : 'text-left'}`}
+                        dir="ltr"
+                      >
+                         {sortedCountryCodes.map((country) => (
+                          <option key={country.name} value={country.dialCode}>
+                            {country.name} ({country.dialCode})
+                          </option>
+                        ))}
+                      </select>
+                      
+                      {/* Custom Arrow Icon */}
+                      <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-2' : 'right-0 pr-2'} flex items-center pointer-events-none`}>
+                        <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
+
+                    {/* Phone Number Input */}
+                    <div className="relative flex-1">
+                      {/* Added Phone Icon to match Register style exactly inside the input container */}
+                      <Phone className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10`} />
+                      <input
+                        type="tel"
+                        id="phoneNumber"
+                        value={formData.phoneNumber ?? ''}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, ''); // Digits only to match Register
+                          setFormData(prev => ({ ...prev, phoneNumber: value }));
+                        }}
+                        className={`w-full rounded-lg border ${isRTL ? 'pr-10 pl-2' : 'pl-10 pr-4'} py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                           errors.phoneNumber
                             ? 'border-red-500 dark:border-red-400'
                             : 'border-gray-300 dark:border-gray-600'
                         }`}
-                      >
-                        <span className="flex items-center gap-1">
-                          <span>{countriesWithCodes.find(c => c.code === countryCode)?.flag || '🌍'}</span>
-                          <span>{countryCode}</span>
-                        </span>
-                        <ChevronDown className={`h-4 w-4 transition-transform ${isCountryCodeDropdownOpen ? 'rotate-180' : ''}`} />
-                      </button>
-
-                      {isCountryCodeDropdownOpen && (
-                        <div className="absolute z-30 mt-1 w-64 bg-white dark:bg-gray-700 rounded-lg shadow-lg border border-gray-200 dark:border-gray-600 py-1 max-h-60 overflow-auto">
-                          {countriesWithCodes.map((country) => (
-                            <button
-                              key={country.code}
-                              type="button"
-                              onClick={() => {
-                                setCountryCode(country.code);
-                                setIsCountryCodeDropdownOpen(false);
-                              }}
-                              className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 flex items-center gap-2 ${
-                                countryCode === country.code
-                                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                                  : 'text-gray-700 dark:text-gray-200'
-                              } ${isRTL ? 'text-right' : 'text-left'}`}
-                            >
-                              <span className="font-medium">{country.code}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                        placeholder={phonePlaceholder}
+                        dir="ltr"
+                      />
                     </div>
-
-                    {/* Phone Number Input */}
-                    <input
-                      type="tel"
-                      id="phoneNumber"
-                      required
-                      value={formData.phoneNumber ?? ''}
-                      onChange={(e) => {
-                        // Only allow numbers and spaces
-                        const value = e.target.value.replace(/[^\d\s]/g, '');
-                        setFormData(prev => ({ ...prev, phoneNumber: value }));
-                      }}
-                      className={`flex-1 rounded-lg border px-4 py-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.phoneNumber
-                          ? 'border-red-500 dark:border-red-400'
-                          : 'border-gray-300 dark:border-gray-600'
-                      }`}
-                      placeholder="538 937 0860"
-                    />
                   </div>
                   {errors.phoneNumber && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.phoneNumber}</p>}
-                  <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                    Full number: {countryCode} {formData.phoneNumber}
+                  <p className={`mt-1 text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`} dir="ltr">
+                    {t('userManagementPage.createUser.fullNumber') || 'Full number'}: {countryCode} {formData.phoneNumber}
                   </p>
                 </div>
               </div>
@@ -439,8 +434,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       value={formData.password}
                       onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                       className={`w-full rounded-lg border px-4 py-2 ${isRTL ? 'pl-10' : 'pr-10'} text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.password 
-                          ? 'border-red-500 dark:border-red-400' 
+                        errors.password
+                          ? 'border-red-500 dark:border-red-400'
                           : 'border-gray-300 dark:border-gray-600'
                       }`}
                       placeholder="Enter password (min 6 characters)"
@@ -450,7 +445,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       onClick={() => setShowPassword(!showPassword)}
                       className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300`}
                     >
-                      {showPassword ? <EyeOff/> :<Eye/> }
+                      {showPassword ? <EyeOff /> : <Eye />}
                     </button>
                   </div>
                   {errors.password && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password}</p>}
@@ -470,8 +465,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       value={formData.passwordConfirm}
                       onChange={(e) => setFormData(prev => ({ ...prev, passwordConfirm: e.target.value }))}
                       className={`w-full rounded-lg border px-4 py-2 ${isRTL ? 'pl-10' : 'pr-10'} text-gray-900 dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.passwordConfirm 
-                          ? 'border-red-500 dark:border-red-400' 
+                        errors.passwordConfirm
+                          ? 'border-red-500 dark:border-red-400'
                           : 'border-gray-300 dark:border-gray-600'
                       }`}
                       placeholder="Confirm password"
@@ -481,7 +476,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                       onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
                       className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300`}
                     >
-                      {showPasswordConfirm ? <EyeOff/> :<Eye/> }
+                      {showPasswordConfirm ? <EyeOff /> : <Eye />}
                     </button>
                   </div>
                   {errors.passwordConfirm && <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.passwordConfirm}</p>}
@@ -489,13 +484,13 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               </div>
             </div>
 
-            {/* **MODIFIED**: Location Selection (Conditional) */}
+            {/* Location Selection (Conditional) */}
             {hasBranches && (
               <div>
                 <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">
                   {t('userManagementPage.createUser.location') || 'Location'}
                 </h4>
-                
+
                 {/* Location Type Selector */}
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -534,7 +529,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 {/* Conditional Input Based on Location Type */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {locationType === 'restaurant' ? (
-                  ""
+                    ""
                   ) : (
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -546,8 +541,8 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                           onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
                           disabled={isLoading || branches.length === 0}
                           className={`flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${
-                            errors.branchId 
-                              ? 'border-red-500 dark:border-red-400' 
+                            errors.branchId
+                              ? 'border-red-500 dark:border-red-400'
                               : 'border-gray-300 dark:border-gray-600'
                           } ${isRTL ? 'flex-row-reverse' : ''}`}
                         >
@@ -555,10 +550,10 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                             <Building className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                             {selectedBranchName || t('userManagementPage.createUser.selectBranch') || 'Select Branch'}
                           </span>
-                          <ChevronDown 
+                          <ChevronDown
                             className={`h-4 w-4 transition-transform duration-200 ${
                               isBranchDropdownOpen ? 'transform rotate-180' : ''
-                            } ${isRTL ? 'mr-2' : 'ml-2'}`} 
+                            } ${isRTL ? 'mr-2' : 'ml-2'}`}
                           />
                         </button>
 
@@ -610,13 +605,13 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
               <h4 className="text-md font-medium text-gray-900 dark:text-white mb-4">
                 {t('userManagementPage.createUser.roleAssignment') || 'Role Assignment'}
               </h4>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                   {t('userManagementPage.createUser.roles') || 'Roles'} ({selectedRoles.length} selected) <span className="text-red-500">*</span>
                 </label>
                 <div className="max-h-48 min-h-[10rem] overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/50">
-                  
+
                   {isRolesLoading ? (
                     <div className="flex items-center justify-center h-full min-h-[8rem]">
                       <div className="flex flex-col items-center gap-2 text-gray-500 dark:text-gray-400">
@@ -630,7 +625,6 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                     <div className="text-center py-6 flex flex-col items-center justify-center h-full min-h-[8rem]">
                       <Shield className="h-8 w-8 text-gray-400 mx-auto mb-2" />
                       <p className="text-gray-500 dark:text-gray-400 text-sm font-medium mb-1">
-                        {/* **MODIFIED**: Simplified this check */}
                         {hasBranches && locationType === 'branch' && !formData.branchId
                           ? t('userManagementPage.createUser.selectBranchForRoles') || 'Select a branch'
                           : t('userManagementPage.createUser.noRoles') || 'No roles available'}
@@ -706,12 +700,12 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                 className="px-6 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isLoading && <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>}
-                {isLoading 
-                  ? t('userManagementPage.createUser.creating') || 'Creating...' 
+                {isLoading
+                  ? t('userManagementPage.createUser.creating') || 'Creating...'
                   : isRolesLoading
                     ? t('userManagementPage.createUser.loadingRoles') || 'Loading Roles...'
-                  : roles.length === 0 
-                    ? t('userManagementPage.createUser.noRoles') || 'No Roles Available' 
+                  : roles.length === 0
+                    ? t('userManagementPage.createUser.noRoles') || 'No Roles Available'
                     : t('userManagementPage.createUser.create') || 'Create User'}
               </button>
             </div>

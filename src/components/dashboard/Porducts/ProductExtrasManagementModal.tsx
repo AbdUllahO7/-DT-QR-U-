@@ -253,7 +253,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                   <Layers className="h-6 w-6 text-primary-600" />
                   {t('extrasManagement.productExtras.manageExtras')}
                 </h2>
-                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-300 mt-1">
                   <span>{productName}</span>
                   <span className="text-gray-300 mx-1">•</span>
                   <span className="font-medium text-primary-600 dark:text-primary-400">{extraCategoryName}</span>
@@ -287,7 +287,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                 {!showAddForm && getAvailableExtrasToAdd().length > 0 && (
                   <button
                     onClick={() => setShowAddForm(true)}
-                    className="group w-full flex items-center justify-center gap-3 px-6 py-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-400 hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-all duration-200"
+                    className="group w-full flex items-center justify-center gap-3 px-6 py-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-300 hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-all duration-200"
                   >
                     <div className="bg-gray-200 dark:bg-gray-700 rounded-full p-1 group-hover:bg-primary-100 dark:group-hover:bg-primary-900 transition-colors">
                       <Plus className="h-5 w-5" />
@@ -303,7 +303,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                         {t('extrasManagement.productExtras.addExtra')}
                       </h3>
-                      <button onClick={() => setShowAddForm(false)} className="text-gray-400 hover:text-gray-600">
+                      <button onClick={() => setShowAddForm(false)} className="text-gray-300 hover:text-gray-600">
                         <X className="h-5 w-5" />
                       </button>
                     </div>
@@ -329,8 +329,8 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                             ))}
                           </select>
                           {formData.extraId > 0 && (
-                            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-700/50 p-2 rounded border border-gray-100 dark:border-gray-700">
-                              {getExtraDetails(formData.extraId)?.description || "No description available"}
+                            <p className="mt-2 text-sm text-gray-500 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 p-2 rounded border border-gray-100 dark:border-gray-700">
+                              {getExtraDetails(formData.extraId)?.description || t('extrasManagement.productExtras.noDescription')}
                             </p>
                           )}
                         </div>
@@ -340,7 +340,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                             {t('extrasManagement.productExtras.unitPrice')} <span className="text-red-500">*</span>
                           </label>
                           <div className="relative">
-                            <DollarSign className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+                            <DollarSign className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-300`} />
                             <input
                               title='Unit Price'
                               type="number"
@@ -348,7 +348,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                               step={0.01}
                               value={formData.unitPrice}
                               onChange={(e) => setFormData({ ...formData, unitPrice: parseFloat(e.target.value) || 0 })}
-                              className={`w-full ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 font-medium text-lg`}
+                              className={`w-full ${isRTL ? 'pr-12 pl-4' : 'pl-12 pr-4'} py-2.5 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 font-medium text-lg`}
                             />
                           </div>
                         </div>
@@ -363,7 +363,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                             {t('extrasManagement.productExtras.selectionMode')}
                           </label>
                           <div className="grid grid-cols-2 gap-3">
-                            <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${formData.selectionMode === 0 ? 'bg-primary-50 border-primary-500 text-primary-700' : 'border-gray-200 hover:border-gray-300'}`}>
+                            <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${formData.selectionMode === 0 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'}`}>
                               <input
                                 type="radio"
                                 value={0}
@@ -373,7 +373,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                               />
                               <span className="font-medium">{t('extrasManagement.productExtras.single')}</span>
                             </label>
-                            <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${formData.selectionMode === 1 ? 'bg-primary-50 border-primary-500 text-primary-700' : 'border-gray-200 hover:border-gray-300'}`}>
+                            <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${formData.selectionMode === 1 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'}`}>
                               <input
                                 type="radio"
                                 value={1}
@@ -387,39 +387,39 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                         </div>
 
                         <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl space-y-4">
-                           <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Quantity Configuration</h4>
+                           <h4 className="text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">{t('extrasManagement.productExtras.quantityConfiguration')}</h4>
                            <div className="grid grid-cols-3 gap-3">
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">Default</label>
+                              <label className="block text-xs text-gray-500 dark:text-gray-300 mb-1">{t('extrasManagement.productExtras.default')}</label>
                               <input
                                 title='Default'
                                 type="number"
                                 min={1}
                                 value={formData.defaultQuantity}
                                 onChange={(e) => setFormData({ ...formData, defaultQuantity: parseInt(e.target.value) || 1 })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
                               />
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">Min</label>
+                              <label className="block text-xs text-gray-500 dark:text-gray-300 mb-1">{t('extrasManagement.productExtras.min')}</label>
                               <input
                                 title='Min'
                                 type="number"
                                 min={0}
                                 value={formData.defaultMinQuantity}
                                 onChange={(e) => setFormData({ ...formData, defaultMinQuantity: parseInt(e.target.value) || 0 })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
                               />
                             </div>
                             <div>
-                              <label className="block text-xs text-gray-500 mb-1">Max</label>
+                              <label className="block text-xs text-gray-500 dark:text-gray-300 mb-1">{t('extrasManagement.productExtras.max')}</label>
                               <input
                                 title='Max'
                                 type="number"
                                 min={1}
                                 value={formData.defaultMaxQuantity}
                                 onChange={(e) => setFormData({ ...formData, defaultMaxQuantity: parseInt(e.target.value) || 10 })}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg text-sm focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500"
                               />
                             </div>
                           </div>
@@ -460,12 +460,12 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                 {productExtras.length === 0 ? (
                   <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
                     <div className="bg-gray-50 dark:bg-gray-700 h-16 w-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Package className="h-8 w-8 text-gray-400" />
+                      <Package className="h-8 w-8 text-gray-400 dark:text-gray-300" />
                     </div>
-                    <p className="text-gray-500 dark:text-gray-400 font-medium">
+                    <p className="text-gray-500 dark:text-gray-300 font-medium">
                       {t('extrasManagement.productExtras.noExtrasYet')}
                     </p>
-                    <p className="text-sm text-gray-400 mt-1">Add extras to this category using the button above.</p>
+                    <p className="text-sm text-gray-400  dark:text-gray-300 mt-1">{t('extrasManagement.productExtras.addExtrasHint')}</p>
                   </div>
                 ) : (
                   <div className="grid gap-4">
@@ -493,9 +493,9 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-4">
                                   <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Price & Selection</label>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('extrasManagement.productExtras.priceAndSelection')}</label>
                                     <div className="relative mb-3">
-                                      <DollarSign className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
+                                      <DollarSign className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-300`} />
                                       <input
                                         title='Unit Price'
                                         type="number"
@@ -503,57 +503,57 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                         step={0.01}
                                         value={editFormData.unitPrice}
                                         onChange={(e) => setEditFormData({ ...editFormData, unitPrice: parseFloat(e.target.value) || 0 })}
-                                        className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 rounded-lg`}
+                                        className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500`}
                                       />
                                     </div>
                                     <div className="flex gap-2">
-                                       <button 
+                                       <button
                                         onClick={() => setEditFormData({...editFormData, selectionMode: 0})}
-                                        className={`flex-1 py-2 text-xs font-medium rounded border ${editFormData.selectionMode === 0 ? 'bg-primary-50 border-primary-500 text-primary-700' : 'bg-white border-gray-200'}`}
+                                        className={`flex-1 py-2 text-xs font-medium rounded border transition-colors ${editFormData.selectionMode === 0 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'}`}
                                        >
-                                         Single Select
+                                         {t('extrasManagement.productExtras.singleSelect')}
                                        </button>
-                                       <button 
+                                       <button
                                         onClick={() => setEditFormData({...editFormData, selectionMode: 1})}
-                                        className={`flex-1 py-2 text-xs font-medium rounded border ${editFormData.selectionMode === 1 ? 'bg-primary-50 border-primary-500 text-primary-700' : 'bg-white border-gray-200'}`}
+                                        className={`flex-1 py-2 text-xs font-medium rounded border transition-colors ${editFormData.selectionMode === 1 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'}`}
                                        >
-                                         Multi Select
+                                         {t('extrasManagement.productExtras.multiSelect')}
                                        </button>
                                     </div>
                                   </div>
                                 </div>
 
                                 <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-                                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Quantities</h4>
+                                  <h4 className="text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider mb-2">{t('extrasManagement.productExtras.quantities')}</h4>
                                   <div className="grid grid-cols-3 gap-2">
                                     <div>
-                                      <label className="block text-xs text-gray-500 mb-1">Def.</label>
+                                      <label className="block text-xs text-gray-500 dark:text-gray-300 mb-1">{t('extrasManagement.productExtras.defaultShort')}</label>
                                       <input
                                         title='Default'
                                         type="number"
                                         value={editFormData.defaultQuantity}
                                         onChange={(e) => setEditFormData({ ...editFormData, defaultQuantity: parseInt(e.target.value) || 1 })}
-                                        className="w-full px-2 py-1.5 text-sm border rounded"
+                                        className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-primary-500/20"
                                       />
                                     </div>
                                     <div>
-                                      <label className="block text-xs text-gray-500 mb-1">Min</label>
+                                      <label className="block text-xs text-gray-500 dark:text-gray-300 mb-1">{t('extrasManagement.productExtras.min')}</label>
                                       <input
                                         title='Min'
                                         type="number"
                                         value={editFormData.defaultMinQuantity}
                                         onChange={(e) => setEditFormData({ ...editFormData, defaultMinQuantity: parseInt(e.target.value) || 1 })}
-                                        className="w-full px-2 py-1.5 text-sm border rounded"
+                                        className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-primary-500/20"
                                       />
                                     </div>
                                     <div>
-                                      <label className="block text-xs text-gray-500 mb-1">Max</label>
+                                      <label className="block text-xs text-gray-500 dark:text-gray-300 mb-1">{t('extrasManagement.productExtras.max')}</label>
                                       <input
                                         title='Max'
                                         type="number"
                                         value={editFormData.defaultMaxQuantity}
                                         onChange={(e) => setEditFormData({ ...editFormData, defaultMaxQuantity: parseInt(e.target.value) || 1 })}
-                                        className="w-full px-2 py-1.5 text-sm border rounded"
+                                        className="w-full px-2 py-1.5 text-sm border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded focus:ring-2 focus:ring-primary-500/20"
                                       />
                                     </div>
                                   </div>
@@ -588,29 +588,29 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                   </h3>
                                   <div className="flex gap-2">
                                     {extra.isRequired && (
-                                      <span className="px-2 py-0.5 text-xs font-bold uppercase bg-red-100 text-red-700 rounded">
-                                        Req
+                                      <span className="px-2 py-0.5 text-xs font-bold uppercase bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded">
+                                        {t('extrasManagement.productExtras.requiredShort')}
                                       </span>
                                     )}
-                                    <span className="px-2 py-0.5 text-xs font-bold uppercase bg-blue-100 text-blue-700 rounded">
-                                      {extra.selectionMode === 0 ? 'Single' : 'Multi'}
+                                    <span className="px-2 py-0.5 text-xs font-bold uppercase bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded">
+                                      {extra.selectionMode === 0 ? t('extrasManagement.productExtras.single') : t('extrasManagement.productExtras.multiple')}
                                     </span>
                                   </div>
                                 </div>
                                 
                                 {extraDetails?.description && (
-                                  <p className="text-sm text-gray-500 dark:text-gray-400 mb-3 line-clamp-1">
+                                  <p className="text-sm text-gray-500 dark:text-gray-300 mb-3 line-clamp-1">
                                     {extraDetails.description}
                                   </p>
                                 )}
 
                                 <div className="flex items-center gap-6 text-sm">
                                   <div className="flex items-center gap-1.5 text-gray-900 dark:text-white font-semibold bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-full border border-green-100 dark:border-green-900/30">
-                                    <DollarSign className="h-4 w-4 text-green-600" />
+                                    <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
                                     <span>{extra.unitPrice.toFixed(2)}</span>
                                   </div>
-                                  <div className="text-gray-500">
-                                    Qty: <span className="font-medium text-gray-700 dark:text-gray-300">{extra.defaultQuantity}</span> ({extra.defaultMinQuantity}-{extra.defaultMaxQuantity})
+                                  <div className="text-gray-500 dark:text-gray-300">
+                                    {t('extrasManagement.productExtras.qty')}: <span className="font-medium text-gray-700 dark:text-gray-300">{extra.defaultQuantity}</span> ({extra.defaultMinQuantity}-{extra.defaultMaxQuantity})
                                   </div>
                                 </div>
                               </div>
@@ -618,13 +618,13 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                               <div className="flex items-center gap-1 border-l border-gray-200 dark:border-gray-700 pl-4 ml-4">
                                 <button
                                   onClick={() => startEdit(extra)}
-                                  className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
+                                  className="p-2 text-gray-400 dark:text-gray-300 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"
                                 >
                                   <Edit2 className="h-4 w-4" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteClick(extra.id)}
-                                  className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
+                                  className="p-2 text-gray-400 dark:text-gray-300 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </button>

@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Key, Shield } from 'lucide-react';
-import { Role } from '../../../../types/api';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { Role } from '../../../../types/users/users.type';
 
 export interface ViewRolePermissionsModalProps {
   isOpen: boolean;
