@@ -23,6 +23,8 @@ interface EditableOrderItem extends OrderItem {
   isDeleted?: boolean
   originalCount?: number
   editedNote?: string
+  branchProductExtraId?: number // For extras
+  isRemoval?: boolean // For extras
 }
 
 const OrdersTab: React.FC<ExtendedOrdersTabProps> = ({
@@ -185,6 +187,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
 
     // Initialize editable items from updatableOrder.items
     const items: EditableOrderItem[] = []
+    console.log("updatableOrder",updatableOrder)
     updatableOrder.items.forEach(item => {
       // 1. Add the parent item
       items.push({
@@ -193,7 +196,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
         originalCount: item.count,
         editedNote: item.note || ''
       })
-      
+
       // 2. Add its addon items
       if (item.addonItems && item.addonItems.length > 0) {
         item.addonItems.forEach(addon => {
@@ -202,7 +205,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
             orderDetailId: addon.id, // The addon's own unique OrderItem ID
 
             // --- THIS IS THE CRITICAL FIX ---
-            parentOrderDetailId: addon.parentOrderItemId || item.orderDetailId,
+            parentOrderDetailId: addon.parentOrderItemId || item.id, // Use item.id, not item.orderDetailId
             // --- END OF FIX ---
 
             originalCount: addon.count,
@@ -210,8 +213,36 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
           })
         })
       }
+
+      // 3. Add its extra items
+      if (item.extras && item.extras.length > 0) {
+        item.extras.forEach(extra => {
+          items.push({
+            id: extra.id,
+            orderDetailId: extra.id, // The extra's own unique OrderItem ID
+            branchProductId: extra.branchProductExtraId, // Map extraId to productId for UI consistency
+            productName: extra.extraName, // Map extraName to productName for UI consistency
+            price: extra.unitPrice, // Map unitPrice to price for UI consistency
+            count: extra.quantity, // Map quantity to count for UI consistency
+            totalPrice: extra.totalPrice,
+            parentOrderDetailId: item.id, // Use item.id (the parent product's ID from API)
+            isAddon: false, // Extras are not addons
+            addonItems: [], // Extras don't have nested addons
+            originalCount: extra.quantity,
+            editedNote: extra.note || '',
+            note: extra.note,
+            isProductDeleted: false,
+            lastModifiedAt: '',
+            lastModifiedBy: '',
+            modificationLog: '',
+            // Keep extra-specific fields for later use
+            branchProductExtraId: extra.branchProductExtraId,
+            isRemoval: extra.isRemoval
+          } as EditableOrderItem)
+        })
+      }
     })
-    
+
     setEditableItems(items)
     setIsEditing(true)
   }
@@ -334,21 +365,69 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
       return
     }
 
-    const items: UpdatePendingOrderItemDto[] = editableItems
-      .filter(item => {
-        // We send items that are NOT deleted AND have a count > 0
-        const shouldInclude = !item.isDeleted && item.count && item.count > 0
-        return shouldInclude
-      })
-      .map(item => ({
-        // Map all properties, ensuring correct types
+    // Separate parent products/addons from extras
+    const parentItems = editableItems.filter(item => {
+      const isExtra = item.branchProductExtraId !== undefined && item.branchProductExtraId !== null;
+      const shouldInclude = !item.isDeleted && item.count && item.count > 0 && !isExtra;
+      console.log('Parent item:', {
+        id: item.orderDetailId,
+        name: item.productName,
+        isExtra,
+        shouldInclude
+      });
+      return shouldInclude;
+    });
+
+    const extraItems = editableItems.filter(item => {
+      const isExtra = item.branchProductExtraId !== undefined && item.branchProductExtraId !== null;
+      const shouldInclude = !item.isDeleted && item.count && item.count > 0 && isExtra;
+      console.log('Extra item:', {
+        id: item.orderDetailId,
+        name: item.productName,
+        parentId: item.parentOrderDetailId,
+        isExtra,
+        shouldInclude
+      });
+      return shouldInclude;
+    });
+
+    // Group extras by their parent product ID
+    const extrasByParent = new Map<number, EditableOrderItem[]>();
+    extraItems.forEach(extra => {
+      const parentId = extra.parentOrderDetailId;
+      if (parentId) {
+        if (!extrasByParent.has(parentId)) {
+          extrasByParent.set(parentId, []);
+        }
+        extrasByParent.get(parentId)!.push(extra);
+      }
+    });
+
+    // Map parent items with their nested extras
+    const items: UpdatePendingOrderItemDto[] = parentItems.map(item => {
+      const itemExtras = extrasByParent.get(item.orderDetailId) || [];
+
+      const dto: UpdatePendingOrderItemDto = {
         orderDetailId: item.orderDetailId || 0,
         branchProductId: item.branchProductId,
         count: item.count || 0,
         note: item.editedNote || null,
         isAddon: item.isAddon || false,
-        parentOrderDetailId: item.parentOrderDetailId || null
-      }));
+        parentOrderDetailId: item.parentOrderDetailId || null,
+        extras: itemExtras.map(extra => ({
+          branchProductExtraId: extra.branchProductExtraId!,
+          quantity: extra.count || 0,
+          note: extra.editedNote || null
+        }))
+      };
+
+      console.log('Mapped DTO item:', {
+        name: item.productName,
+        dto
+      });
+
+      return dto;
+    });
 
     const updateDto: UpdatePendingOrderDto = {
       orderId: updatableOrder.orderId,
@@ -357,6 +436,8 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
       priceChangesConfirmed: false,
       rowVersion: updatableOrder.rowVersion
     }
+
+    console.log('Final Update DTO:', JSON.stringify(updateDto, null, 2));
 
     try {
       setUpdating(true)
@@ -605,11 +686,26 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
                               
                               <div className="flex items-start gap-3">
                                 <div className="flex-1">
-                                  {/* Addon Name & Price */}
+                                  {/* Addon/Extra Name & Price */}
                                   <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                                      {addon.productName} 
-                                      <span className="text-xs text-slate-500 dark:text-slate-400"> (Addon)</span>
+                                      {addon.branchProductExtraId ? (
+                                        <>
+                                          {addon.isRemoval ? (
+                                            <span className="text-red-600 dark:text-red-400">
+                                              {t('menu.no') || 'No'} {addon.productName}
+                                            </span>
+                                          ) : (
+                                            addon.productName
+                                          )}
+                                          <span className="text-xs text-blue-500 dark:text-blue-400"> (Extra)</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          {addon.productName}
+                                          <span className="text-xs text-slate-500 dark:text-slate-400"> (Addon)</span>
+                                        </>
+                                      )}
                                     </span>
                                     <span className="text-sm font-semibold text-green-600 dark:text-green-400">
                                       ${(addon.price * (addon.count || 0)).toFixed(2)}

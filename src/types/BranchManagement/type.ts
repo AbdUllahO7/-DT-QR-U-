@@ -103,6 +103,9 @@ export interface DetailedProduct{
   branchCategory?: Category;
   ingredients?: APIIngredient[];
   allergens?: APIAllergen[];
+  extras?: any[]; // Product extras
+  extrasCount?: number;
+  hasExtras?: boolean;
   orderDetails?: any;
   isSelected?: boolean;
   addonsCount?: number;
@@ -796,7 +799,6 @@ export interface CreateProductModalProps {
   onSuccess: (productId?: number) => void;
   categories: Category[];
   selectedCategoryId?: number;
-  onOpenIngredientSelection?: (productId: number, productName: string) => void;
 }
 
 export interface ProductAddonsModalProps {
@@ -888,6 +890,21 @@ export interface ErrorBoundaryProps {
 
 
 
+export interface OrderExtraItem {
+  id: number;
+  branchProductExtraId: number;
+  productExtraId: number;
+  extraId: number;
+  extraName: string;
+  extraCategoryName: string;
+  selectionMode: number;
+  isRemoval: boolean;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  note: string | null;
+}
+
 export interface OrderItem {
   id: number;
   orderItemId?: number;
@@ -905,6 +922,7 @@ export interface OrderItem {
   isAddon: boolean;
   parentOrderItemId?: number | null;
   addonItems: OrderItem[];
+  extras?: OrderExtraItem[];
   parentOrderDetailId:number;
   orderDetailId:number
   addonPrice?: number | null;

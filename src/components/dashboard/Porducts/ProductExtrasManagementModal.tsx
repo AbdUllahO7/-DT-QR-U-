@@ -160,9 +160,9 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
       await productExtrasService.updateProductExtra(data);
       await loadData();
       setEditingId(null);
-    } catch (error) {
+    } catch (error :any) {
       logger.error('Failed to update product extra:', error);
-      setError(t('error.updateFailed'));
+      setError(error.message);
     } finally {
       setIsSubmitting(false);
     }

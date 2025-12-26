@@ -2347,12 +2347,17 @@ hero: {
 
   SortableCategory: {
     product: 'product',
-    products: 'products', 
+    products: 'products',
+    extras: 'Extras',
+    loadingExtras: 'Loading extras...',
     status : {
       active : "active",
     },
     editCategory: 'Edit category',
     deleteCategory: 'Delete category',
+    editProduct: 'Edit Product',
+    deleteProduct: 'Delete Product',
+    manageAddons: 'Manage Addons',
     reorderingProducts: 'Saving product order...',
     noCategoryProducts: 'No products in this category yet.',
     expandCategory: 'Expand category',
@@ -2379,6 +2384,11 @@ hero: {
     loadingAddons: 'Loading addons...',
     addons: 'Addons',
     noAddons: 'No addons added',
+    loadingExtras: 'Loading extras...',
+    extras: 'Extras',
+    noExtras: 'No extras added',
+    uncategorized: 'Uncategorized',
+    manageExtras: 'Manage product extras',
     manageAddons: 'Manage addons',
     editProduct: 'Edit product',
     deleteProduct: 'Delete product',
@@ -2390,6 +2400,7 @@ hero: {
       view: 'View',
       addons: 'Addons',
       extras: 'Extras',
+      ingredients: 'Ingredients',
       edit: 'Edit',
       delete: 'Delete',
       add: 'Add',
@@ -2397,7 +2408,8 @@ hero: {
     },
     errors: {
       loadingIngredients: 'An error occurred while loading ingredients.',
-      loadingAddons: 'An error occurred while loading addons.'
+      loadingAddons: 'An error occurred while loading addons.',
+      loadingExtras: 'An error occurred while loading extras.'
     },
     accessibility: {
       productImage: 'Product image',
@@ -2456,7 +2468,7 @@ hero: {
     ingredientNameRequired: 'Ingredient name is required',
     enterIngredientName: 'Enter ingredient name',
     containsAllergensCheckbox: 'Contains Allergens',
-    availableForUse: 'Available for Use',
+    availableForUse: 'visible',
     allergenInfoContent: 'Allergen Information',
     selectAllergensMessage: 'Select allergens contained in this ingredient:',
     enableAllergenMessage: 'Check "Contains Allergens" first to select allergens.',
@@ -2651,6 +2663,8 @@ hero: {
     },
     confirmation: {
         deleteRoleTitle: "Delete Role",
+        activateTitle: "Activate User?",
+        activateMessage: "Are you sure you want to activate {name}?",
         deleteRoleMessage: "Are you sure you want to delete this role? This action cannot be undone.",
         deactivateTitle:"Deactivate User?",
         deactivateMessage:"Are you sure you want to deactivate {name}? They will lose access to the system."
@@ -3725,6 +3739,7 @@ cart: {
     "price_change_title": "Price Change",
     "confirm": "Confirm",
     "cancel": "Cancel",
+    error : "Error",
     "cancel_Reason_prompt_title": "Cancellation Reason",
     "reason": "Cancellation Reason",
     "submit": "Send",
@@ -5156,7 +5171,7 @@ extrasManagement: {
   
   categories: {
     title: 'Extra Categories',
-    addNew: '+ Add New Category',
+    addNew: 'Add New Category',
     addCategory: 'Add New Category',
     editCategory: 'Edit Category',
     noCategories: 'No categories found',
@@ -5185,7 +5200,10 @@ extrasManagement: {
     addExtra: 'Add New Extra',
     editExtra: 'Edit Extra',
     noItems: 'No items in this category yet.',
+    alreadyExists: 'Already Exists',
     noDescription: 'No description',
+    duplicateWarning: 'Duplicate Extra',
+    duplicateMessage: 'This extra already exists in the selected category. Please choose a different name.',
     fields: {
       parentCategory: 'Parent Category',
       selectCategory: 'Select Category...',

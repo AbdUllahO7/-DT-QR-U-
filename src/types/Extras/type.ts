@@ -95,6 +95,8 @@ export interface ProductExtra {
   id: number;
   productId: number;
   extraId: number;
+  extraName?: string;
+  categoryName?: string;
   selectionMode: number; // 0: Single, 1: Multiple
   defaultQuantity: number;
   defaultMinQuantity: number;
@@ -102,6 +104,7 @@ export interface ProductExtra {
   unitPrice: number;
   isRequired: boolean;
   displayOrder?: number;
+  isDeleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -384,6 +387,8 @@ export interface APIProductExtra {
   id: number;
   productId: number;
   extraId: number;
+  extraName?: string;
+  categoryName?: string;
   selectionMode: number;
   defaultQuantity: number;
   defaultMinQuantity: number;
@@ -391,6 +396,7 @@ export interface APIProductExtra {
   unitPrice: number;
   isRequired: boolean;
   displayOrder?: number;
+  isDeleted?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -7,13 +7,12 @@ import { mediaService } from '../../../services/mediaService';
 import { productService } from '../../../services/productService';
 import { CreateProductFormData, CreateProductModalProps, DEFAULT_IMAGE_URL } from '../../../types/BranchManagement/type';
 
-const CreateProductModal: React.FC<CreateProductModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  onSuccess, 
+const CreateProductModal: React.FC<CreateProductModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
   categories,
-  selectedCategoryId,
-  onOpenIngredientSelection
+  selectedCategoryId
 }) => {
   const { t, isRTL } = useLanguage();
   const [formData, setFormData] = useState<CreateProductFormData>({
@@ -196,9 +195,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
       const response = await productService.createProduct(payload);
       logger.info('Ürün başarıyla eklendi', { data: response });
 
-      if (onOpenIngredientSelection) {
-        onOpenIngredientSelection(response.id, response.name);
-      }
+      // Removed automatic ingredient selection - user can now manage ingredients via product card icon
 
       onSuccess(response.id);
       
@@ -580,18 +577,18 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
                         }}
                         onFocus={() => setFocusedField('categoryId')}
                         onBlur={() => setFocusedField('')}
-                        className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 text-gray-900 dark:text-white ${
+                        className={`w-full px-5 py-4 border-2  rounded-2xl transition-all duration-300 text-gray-900 dark:text-white ${
                           errors.categoryId
                             ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
                             : focusedField === 'categoryId'
                             ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/10 focus:ring-4 focus:ring-blue-500/20'
-                            : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400'
+                            : 'border-gray-300 dark:border-gray-600  dark:bg-gray-700/50 hover:border-gray-400'
                         } focus:outline-none`}
                         aria-required="true"
                       >
                         <option value="0">{t('createProductModal.form.category.placeholder')}</option>
                         {categories.map((category) => (
-                          <option key={category.categoryId} value={category.categoryId}>
+                          <option className='dark:bg-black' key={category.categoryId} value={category.categoryId}>
                             {category.categoryName}
                           </option>
                         ))}

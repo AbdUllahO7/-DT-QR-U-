@@ -11,15 +11,8 @@ import {
   CheckCircle,
   Loader2,
   X,
-  Save,
-  XCircle,
   Copy,
-  Trash2,
-  // Specific Area Icons
-  Home,       // Indoor
-  Trees,      // Garden
-  CloudSun,   // Terrace
-  Umbrella    // Outdoor
+  Trash2
 } from 'lucide-react';
 import { 
   CreateMenuTableDto, 
@@ -34,63 +27,7 @@ import { useLanguage } from '../../../../contexts/LanguageContext';
 import CategorySection from './CategorySection';
 import { CategoryData, TableData } from '../../../../types/BranchManagement/type';
 import { useNavigate } from 'react-router-dom';
-
-const IconSelector: React.FC<{
-  selectedIcon: string;
-  onSelect: (icon: string) => void;
-  isRTL: boolean;
-}> = ({ selectedIcon, onSelect, isRTL }) => {
-  const { t } = useLanguage();
-  
-  // Specific Area Types matching the Modal configuration
-  const areaOptions = [
-    { value: 'indoor', label: 'Indoor', icon: Home },
-    { value: 'outdoor', label: 'Outdoor', icon: Umbrella },
-    { value: 'terrace', label: 'Terrace', icon: CloudSun },
-    { value: 'garden', label: 'Garden', icon: Trees },
-  ];
-
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-        {t('BranchTableManagement.iconLabel')}
-      </label>
-      <div className="grid grid-cols-4 gap-4">
-        {areaOptions.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            onClick={() => onSelect(option.value)}
-            className={`
-              p-4 rounded-xl border-2 transition-all duration-200
-              flex flex-col items-center gap-2
-              ${selectedIcon === option.value 
-                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-md' 
-                : 'border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:bg-gray-50 dark:hover:bg-gray-800'
-              }
-            `}
-            title={t(option.label) || option.label}
-          >
-            <option.icon 
-              className={`h-6 w-6 ${
-                selectedIcon === option.value 
-                  ? 'text-blue-600 dark:text-blue-400' 
-                  : 'text-gray-500 dark:text-gray-400'
-              }`} 
-            />
-            <span className={`text-sm font-medium ${
-              selectedIcon === option.value 
-                ? 'text-blue-600 dark:text-blue-400' 
-                : 'text-gray-600 dark:text-gray-400'
-            }`}>
-              {t(option.label) || option.label}
-            </span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-};
+import BranchTableCategoryModal from './BranchTableCategoryModal';
 
 export const QRCodeModalShow: React.FC<{
   isOpen: boolean;
@@ -223,7 +160,6 @@ const BranchTableManagement: React.FC = () => {
   const [showAddCategory, setShowAddCategory] = useState<boolean>(false);
   const [showAddTable, setShowAddTable] = useState<number | null>(null);
   const [showBatchCreate, setShowBatchCreate] = useState<boolean>(false);
-  const [addCategoryError, setAddCategoryError] = useState<string | null>(null);
   const [batchCreateError, setBatchCreateError] = useState<string | null>(null);
   const navigate = useNavigate();
 
@@ -243,18 +179,6 @@ const BranchTableManagement: React.FC = () => {
     tables: new Set()
   });
 
-  const [newCategory, setNewCategory] = useState<{
-    categoryName: string;
-    colorCode: string;
-    iconClass: string;
-    isActive: boolean;
-  }>({
-    categoryName: '',
-    colorCode: '#3b82f6',
-    // Default to 'indoor' instead of 'table' to match the new options
-    iconClass: 'indoor', 
-    isActive: true
-  });
 
   const [newTable, setNewTable] = useState<{
     menuTableName: string;
@@ -592,50 +516,6 @@ const BranchTableManagement: React.FC = () => {
     }
   };
 
-  const handleAddCategory = async (): Promise<void> => {
-    if (!newCategory.categoryName.trim()) {
-      setError(t('BranchTableManagement.error.categoryNameRequired'));
-      return;
-    }
-
-    const categoryData: CreateTableCategoryDto = {
-      categoryName: newCategory.categoryName,
-      colorCode: newCategory.colorCode,
-      iconClass: newCategory.iconClass,
-      displayOrder: categories.length,
-      isActive: newCategory.isActive
-    };
-
-    setIsSaving(true);
-    setAddCategoryError(null);
-    try {
-      await tableService.createCategory(categoryData);
-      await fetchCategories();
-      setNewCategory({
-        categoryName: '',
-        colorCode: '#3b82f6',
-        iconClass: 'indoor', // Reset to indoor
-        isActive: true
-      });
-      setShowAddCategory(false);
-      setSuccessMessage(t('BranchTableManagement.success.categoryAdded'));
-    } catch (err: any) {
-      console.error('Error adding category:', err);
-
-      const status = err.status || err.response?.status;
-
-      if (status === 409) {
-        setAddCategoryError(err.response.data.message);
-        setError(err.response.data.message);
-      } else {
-        setError(err.response.data.message);
-        setAddCategoryError(err.response.data.message);
-      }
-      
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   const handleUpdateCategory = async (categoryId: number, updatedData: Partial<CategoryData>): Promise<void> => {
     try {
@@ -891,10 +771,7 @@ const BranchTableManagement: React.FC = () => {
                 {t('BranchTableManagement.batchCreateTables')}
               </button>
           <button
-                onClick={() => {
-                  setShowAddCategory(true);
-                  setAddCategoryError(null);
-                }}
+                onClick={() => setShowAddCategory(true)}
                 disabled={isLoading}
                 className={`px-4 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${isRTL ? 'flex-row-reverse' : ''}`}
               >
@@ -945,81 +822,13 @@ const BranchTableManagement: React.FC = () => {
           </div>
         )}
 
-        {/* Add Category Form */}
-        {showAddCategory && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              {t('BranchTableManagement.addCategoryTitle')}
-            </h3>
-          
-            <div className="grid grid-cols-1 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t('BranchTableManagement.categoryNameLabel')}
-                </label>
-                <input
-                  type="text"
-                  value={newCategory.categoryName}
-                  onChange={(e) => setNewCategory(prev => ({ ...prev, categoryName: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  placeholder={t('BranchTableManagement.categoryNamePlaceholder')}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  {t('BranchTableManagement.colorLabel')}
-                </label>
-                <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <input
-                    type="color"
-                    title='colorCode'
-                    value={newCategory.colorCode}
-                    onChange={(e) => setNewCategory(prev => ({ ...prev, colorCode: e.target.value }))}
-                    className="w-12 h-10 border border-gray-300 dark:border-gray-600 rounded-lg"
-                  />
-                  <input
-                    type="text"
-                    title='colorCode'
-                    value={newCategory.colorCode}
-                    onChange={(e) => setNewCategory(prev => ({ ...prev, colorCode: e.target.value }))}
-                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              {/* Enhanced Icon Selector */}
-              <IconSelector
-                selectedIcon={newCategory.iconClass}
-                onSelect={(icon) => setNewCategory(prev => ({ ...prev, iconClass: icon }))}
-                isRTL={isRTL}
-              />
-
-              <div className={`flex items-end gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <button
-                  onClick={handleAddCategory}
-                  disabled={isSaving}
-                  className={`px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-                >
-                  {isSaving ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4" />
-                  )}
-                  {isSaving ? t('BranchTableManagement.saving') : t('BranchTableManagement.save')}
-                </button>
-                <button
-                  onClick={() => setShowAddCategory(false)}
-                  disabled={isSaving}
-                  className={`px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-                >
-                  <XCircle className="h-4 w-4" />
-                  {t('BranchTableManagement.cancel')}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Category Modal */}
+        <BranchTableCategoryModal
+          isOpen={showAddCategory}
+          onClose={() => setShowAddCategory(false)}
+          branchId={0}
+          onSuccess={fetchCategories}
+        />
 
         {/* Batch Create Modal */}
         {showBatchCreate && (

@@ -375,6 +375,7 @@ export default function ExtrasManagement() {
           isEditMode={modalType === 'edit-extra'}
           formData={extraForm}
           categories={categories}
+          allExtras={extras}
           imagePreview={imagePreview}
           loading={loading}
           uploading={uploading}

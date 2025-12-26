@@ -29,13 +29,20 @@ export interface UpdatableOrder {
   updateDeadline:string,
 }
 
+export interface UpdatePendingOrderExtraDto {
+  branchProductExtraId: number;
+  quantity: number;
+  note: string | null;
+}
+
 export interface UpdatePendingOrderItemDto {
   orderDetailId: number; // Use 0 for new items
-  branchProductId: number;
+  branchProductId: number; // For products/addons
   count: number;
   note: string | null;
   isAddon: boolean;
   parentOrderDetailId: number | null; // Null for base items, ID for addons
+  extras?: UpdatePendingOrderExtraDto[]; // Nested extras array
 }
 
 

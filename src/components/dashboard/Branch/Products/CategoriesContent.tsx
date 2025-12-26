@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Check,
   X,
@@ -30,7 +30,8 @@ import {
   Grid,
   List,
   Power,
-  ShoppingBag
+  ShoppingBag,
+  Layers
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { AdditionStep, BranchCategory, CategoriesContentProps } from '../../../../types/BranchManagement/type';
@@ -662,6 +663,54 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                   </div>
                 ) : null}
 
+                {/* Extras Section - Grouped by Category */}
+                {product.extras && product.extras.length > 0 && (() => {
+                  const groupedExtras: Record<string, any[]> = {};
+                  product.extras.forEach((extra: any) => {
+                    const categoryName = extra.categoryName || t('SortableProduct.uncategorized');
+                    if (!groupedExtras[categoryName]) {
+                      groupedExtras[categoryName] = [];
+                    }
+                    groupedExtras[categoryName].push(extra);
+                  });
+
+                  return (
+                    <div className="space-y-2">
+                      {Object.entries(groupedExtras).map(([categoryName, categoryExtras]) => (
+                        <div
+                          key={categoryName}
+                          className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-900/10 dark:to-violet-900/10 px-3 py-2.5 rounded-xl border border-purple-200 dark:border-purple-800"
+                        >
+                          <div className={`flex items-center gap-2 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <Layers className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            <span className="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide">
+                              {categoryName}
+                            </span>
+                            <span className="text-xs text-purple-600 dark:text-purple-400 bg-purple-200 dark:bg-purple-800/50 px-2 py-0.5 rounded-full">
+                              {categoryExtras.length}
+                            </span>
+                          </div>
+                          <div className={`flex flex-wrap gap-1.5 ${isRTL ? 'justify-end' : ''}`}>
+                            {categoryExtras.map((extra: any) => (
+                              <span
+                                key={extra.id}
+                                className="inline-flex items-center gap-1 text-xs bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2.5 py-1 rounded-lg border border-purple-200 dark:border-purple-800"
+                              >
+                                {extra.extraName || `Extra ${extra.extraId}`}
+                                {extra.specialUnitPrice > 0 && (
+                                  <span className="text-purple-600 dark:text-purple-400 font-medium">
+                                    +{extra.specialUnitPrice.toFixed(2)}₺
+                                  </span>
+                                )}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+
                 {/* Allergens display */}
                 {product.allergens && product.allergens.length > 0 && (
                   <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
@@ -892,6 +941,16 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                         <ChefHat className="h-3 w-3 text-orange-600 dark:text-orange-400" />
                         <span className="text-xs text-orange-600 dark:text-orange-400">
                           {product.ingredients.length} ingredients
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Extras count */}
+                    {product.extras && product.extras.length > 0 && (
+                      <div className="flex items-center gap-1 mb-2">
+                        <Layers className="h-3 w-3 text-purple-600 dark:text-purple-400" />
+                        <span className="text-xs text-purple-600 dark:text-purple-400">
+                          {product.extras.length} extras
                         </span>
                       </div>
                     )}

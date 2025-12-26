@@ -1,12 +1,13 @@
-import React from 'react';
-import { X, Upload } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Upload, AlertCircle } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import { CreateExtraData, ExtraCategory } from '../../../types/Extras/type';
+import { CreateExtraData, ExtraCategory, Extra } from '../../../types/Extras/type';
 
 interface ExtraModalProps {
   isEditMode: boolean;
   formData: CreateExtraData;
   categories: ExtraCategory[];
+  allExtras: Extra[];
   imagePreview: string;
   loading: boolean;
   uploading: boolean;
@@ -22,6 +23,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
   isEditMode,
   formData,
   categories,
+  allExtras,
   imagePreview,
   loading,
   uploading,
@@ -33,6 +35,111 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
   onClose,
 }) => {
   const { t } = useLanguage();
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredExtras, setFilteredExtras] = useState<Extra[]>([]);
+  const [duplicateInSameCategory, setDuplicateInSameCategory] = useState(false);
+  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
+
+  // Filter extras based on input
+  useEffect(() => {
+    if (formData.name && !isEditMode) {
+      // Only validate if category is selected (not 0)
+      if (formData.extraCategoryId && formData.extraCategoryId !== 0) {
+        // Filter extras for suggestions (show all matching extras)
+        const filtered = allExtras.filter(extra =>
+          extra.name.toLowerCase().includes(formData.name.toLowerCase())
+        );
+        setFilteredExtras(filtered);
+
+        // Check for exact duplicate ONLY in the same category
+        const duplicateInSameCategory = allExtras.some(extra =>
+          extra.name.toLowerCase().trim() === formData.name.toLowerCase().trim() &&
+          extra.extraCategoryId === formData.extraCategoryId
+        );
+
+        // Debug logging
+        console.log('Duplicate Check:', {
+          name: formData.name,
+          categoryId: formData.extraCategoryId,
+          isDuplicate: duplicateInSameCategory,
+          allExtrasInCategory: allExtras.filter(e => e.extraCategoryId === formData.extraCategoryId).map(e => e.name)
+        });
+
+        setDuplicateInSameCategory(duplicateInSameCategory);
+
+        // Show warning with animation when duplicate is detected
+        if (duplicateInSameCategory) {
+          setShowDuplicateWarning(true);
+        } else {
+          setShowDuplicateWarning(false);
+        }
+      } else {
+        const filtered = allExtras.filter(extra =>
+          extra.name.toLowerCase().includes(formData.name.toLowerCase())
+        );
+        setFilteredExtras(filtered);
+        setDuplicateInSameCategory(false);
+        setShowDuplicateWarning(false);
+      }
+    } else {
+      setFilteredExtras([]);
+      setDuplicateInSameCategory(false);
+      setShowDuplicateWarning(false);
+    }
+  }, [formData.name, formData.extraCategoryId, allExtras, isEditMode]);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node) &&
+          inputRef.current && !inputRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelectExtra = (extra: Extra) => {
+    // Check if this extra already exists in the current category
+    const isDuplicate = extra.extraCategoryId === formData.extraCategoryId;
+
+    onChange({
+      ...formData,
+      name: extra.name,
+      description: extra.description || '',
+      basePrice: extra.basePrice,
+      isRemoval: extra.isRemoval,
+      imageUrl: extra.imageUrl || '',
+      status: extra.status,
+    });
+    setShowSuggestions(false);
+
+    // If it's a duplicate, show warning
+    if (isDuplicate) {
+      setDuplicateInSameCategory(true);
+      setShowDuplicateWarning(true);
+    } else {
+      setDuplicateInSameCategory(false);
+      setShowDuplicateWarning(false);
+    }
+  };
+
+  const handleNameChange = (value: string) => {
+    onChange({ ...formData, name: value });
+    setShowSuggestions(value.length > 0);
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (duplicateInSameCategory && !isEditMode) {
+      return; // Prevent submission if duplicate in same category
+    }
+    onSubmit(e);
+  };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -52,7 +159,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
 
           {/* Modal Content */}
           <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
-            <form id="extraForm" onSubmit={onSubmit} className="space-y-5">
+            <form id="extraForm" onSubmit={handleFormSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   {t('extrasManagement.extras.fields.parentCategory')}
@@ -73,19 +180,115 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                 </select>
               </div>
 
+              {/* Duplicate Warning Banner with Transition */}
+              <div
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  showDuplicateWarning ? 'max-h-32 opacity-100' : 'max-h-0 opacity-0'
+                }`}
+              >
+                <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-lg">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0">
+                      <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400" />
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <h3 className="text-sm font-medium text-red-800 dark:text-red-300">
+                        {t('extrasManagement.extras.duplicateWarning') || 'Extra Already Exists'}
+                      </h3>
+                      <div className="mt-1 text-sm text-red-700 dark:text-red-400">
+                        {t('extrasManagement.extras.duplicateMessage') || 'This extra already exists in the selected category. Please choose a different name.'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2">
+                <div className="col-span-2 relative">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                     {t('extrasManagement.extras.fields.itemName')}
                   </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => onChange({ ...formData, name: e.target.value })}
-                    className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5 px-3"
-                    placeholder={t('extrasManagement.extras.fields.itemNamePlaceholder')}
-                  />
+                  <div className="relative">
+                    <input
+                      ref={inputRef}
+                      type="text"
+                      required
+                      value={formData.name}
+                      onChange={(e) => handleNameChange(e.target.value)}
+                      onFocus={() => formData.name && !isEditMode && setShowSuggestions(true)}
+                      className={`w-full rounded-lg border ${
+                        duplicateInSameCategory
+                          ? 'border-red-500 dark:border-red-500'
+                          : 'border-gray-300 dark:border-gray-600'
+                      } bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5 px-3 ${
+                        duplicateInSameCategory ? 'focus:border-red-500 focus:ring-red-500' : ''
+                      }`}
+                      placeholder={t('extrasManagement.extras.fields.itemNamePlaceholder')}
+                    />
+                    {duplicateInSameCategory && (
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <AlertCircle className="h-5 w-5 text-red-500" />
+                      </div>
+                    )}
+                  </div>
+
+                 
+
+                  {/* Autocomplete Suggestions */}
+                  {showSuggestions && filteredExtras.length > 0 && !isEditMode && (
+                    <div
+                      ref={suggestionsRef}
+                      className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-auto"
+                    >
+                      <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600">
+                        Select from existing extras or create new
+                      </div>
+                      {filteredExtras.map((extra) => {
+                        const extraCategory = categories.find(cat => cat.id === extra.extraCategoryId);
+                        const isSameCategory = extra.extraCategoryId === formData.extraCategoryId;
+
+                        return (
+                          <button
+                            key={extra.id}
+                            type="button"
+                            onClick={() => handleSelectExtra(extra)}
+                            disabled={isSameCategory && extra.name.toLowerCase() === formData.name.toLowerCase()}
+                            className={`w-full text-left px-3 py-2 border-b border-gray-100 dark:border-gray-600 last:border-b-0 transition-colors ${
+                              isSameCategory && extra.name.toLowerCase() === formData.name.toLowerCase()
+                                ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800'
+                                : 'hover:bg-blue-50 dark:hover:bg-gray-600'
+                            }`}
+                          >
+                            <div className="flex justify-between items-start">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                    {extra.name}
+                                  </div>
+                                  {isSameCategory && extra.name.toLowerCase() === formData.name.toLowerCase() && (
+                                    <span className="text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-0.5 rounded">
+                                      Already in Category
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-xs text-blue-600 dark:text-blue-400 mt-0.5 font-medium">
+                                  {extraCategory?.categoryName || 'Unknown Category'}
+                                </div>
+                                {extra.description && (
+                                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                    {extra.description}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="ml-2 text-sm font-semibold text-blue-600 dark:text-blue-400">
+                                ${extra.basePrice.toFixed(2)}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -189,11 +392,18 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
             <button
               type="submit"
               form="extraForm"
-              disabled={loading || uploading}
-              className="inline-flex justify-center rounded-lg border border-transparent shadow-sm px-5 py-2.5 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={loading || uploading || (duplicateInSameCategory && !isEditMode)}
+              className={`inline-flex justify-center rounded-lg border border-transparent shadow-sm px-5 py-2.5 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm transition-all duration-200 ${
+                duplicateInSameCategory && !isEditMode
+                  ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed opacity-60'
+                  : 'bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
+              }`}
+              title={duplicateInSameCategory && !isEditMode ? t('extrasManagement.extras.duplicateWarning') || 'Extra already exists in this category' : ''}
             >
               {loading || uploading
                 ? t('extrasManagement.processing')
+                : duplicateInSameCategory && !isEditMode
+                ? t('extrasManagement.extras.alreadyExists') || 'Already Exists'
                 : isEditMode
                 ? t('extrasManagement.buttons.save')
                 : t('extrasManagement.buttons.add')}

@@ -634,7 +634,7 @@ hero: {
       placeholders: {
         firstName: 'Adınız',
         lastName: 'Soyadınız',
-        email: 'ornek@email.com',
+         email: 'example@email.com',
         phone: '05XX XXX XX XX',
         password: '••••••••',
         confirmPassword: 'Şifrenizi tekrar girin'
@@ -2354,11 +2354,16 @@ hero: {
   SortableCategory: {
     product: 'ürün',
     products: 'ürün',
+    extras: 'Ekstralar',
+    loadingExtras: 'Ekstralar yükleniyor...',
     editCategory: 'Kategoriyi düzenle',
     status : {
       active : "active",
     },
-    deleteCategory: 'Kategoriyi sil', 
+    deleteCategory: 'Kategoriyi sil',
+    editProduct: 'Ürünü Düzenle',
+    deleteProduct: 'Ürünü Sil',
+    manageAddons: 'Eklentileri Yönet',
     reorderingProducts: 'Ürün sıralaması kaydediliyor...',
     noCategoryProducts: 'Bu kategoride henüz ürün yok.',
     expandCategory: 'Kategoriyi genişlet',
@@ -2385,6 +2390,11 @@ hero: {
     loadingAddons: 'Eklentiler yükleniyor...',
     addons: 'Eklentiler',
     noAddons: 'Eklenti eklenmemiş',
+    loadingExtras: 'Ekstralar yükleniyor...',
+    extras: 'Ekstralar',
+    noExtras: 'Ekstra eklenmedi',
+    uncategorized: 'Kategorisiz',
+    manageExtras: 'Ürün ekstralarını yönet',
     manageAddons: 'Eklentileri yönet',
     editProduct: 'Ürünü düzenle',
     deleteProduct: 'Ürünü sil',
@@ -2398,12 +2408,14 @@ hero: {
       extras: 'Ekstralar',
       edit: 'Düzenle',
       delete: 'Sil',
+      ingredients: 'Malzemeler',
       add: 'Ekle',
       remove: 'Kaldır'
     },
     errors: {
       loadingIngredients: 'Malzemeler yüklenirken bir hata oluştu.',
-      loadingAddons: 'Eklentiler yüklenirken bir hata oluştu.'
+      loadingAddons: 'Eklentiler yüklenirken bir hata oluştu.',
+      loadingExtras: 'Ekstralar yüklenirken bir hata oluştu.'
     },
     accessibility: {
       productImage: 'Ürün resmi',
@@ -2462,7 +2474,7 @@ hero: {
     ingredientNameRequired: 'Malzeme adı gereklidir',
     enterIngredientName: 'Malzeme adını girin',
     containsAllergensCheckbox: 'Alerjen İçerir',
-    availableForUse: 'Kullanım İçin Uygun',
+    availableForUse: 'Görünür',
     allergenInfoContent: 'Alerjen Bilgileri',
     selectAllergensMessage: 'Bu malzemenin içerdiği alerjenleri seçin:',
     enableAllergenMessage: 'Alerjen seçmek için önce "Alerjen İçerir" seçeneğini işaretleyin.',
@@ -2654,10 +2666,12 @@ hero: {
       save:"kaydet"
     },
   confirmation: {
-        deleteRoleTitle: "Rolü Sil",
-        deleteRoleMessage: "Bu rolü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
-        deactivateTitle:"Kullanıcıyı Devre Dışı Bırak?",
-        deactivateMessage:"{name} adlı kullanıcıyı devre dışı bırakmak istediğinizden emin misiniz? Sisteme erişimini kaybedecek."
+    activateTitle: "Kullanıcıyı Etkinleştir",
+    activateMessage: "{name} adlı kullanıcıyı etkinleştirmek istediğinizden emin misiniz?",
+    deleteRoleTitle: "Rolü Sil",
+    deleteRoleMessage: "Bu rolü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    deactivateTitle:"Kullanıcıyı Devre Dışı Bırak?",
+    deactivateMessage:"{name} adlı kullanıcıyı devre dışı bırakmak istediğinizden emin misiniz? Sisteme erişimini kaybedecek."
 
       },
 
@@ -3724,6 +3738,7 @@ cart: {
     "order_can_be_updated": "Sipariş güncellenebilir",
     "time_remaining": "Kalan süre",
     "modified_times": "{{count}} kez değiştirildi",
+    "error": "Hata",
     "price_change_title": "Fiyat değişikliği",
     "cancel_reason_prompt_title": "İptal Nedeni",
     "reason": "İptal Nedeni",
@@ -5181,7 +5196,7 @@ extrasManagement: {
   
   categories: {
     title: 'Ekstra Kategorileri',
-    addNew: '+ Yeni Kategori Ekle',
+    addNew: 'Yeni Kategori Ekle',
     addCategory: 'Yeni Kategori Ekle',
     editCategory: 'Kategoriyi Düzenle',
     noCategories: 'Kategori bulunamadı',
@@ -5206,7 +5221,10 @@ extrasManagement: {
   },
 
   extras: {
+    alreadyExists: 'Zaten Var',
     title: 'Ekstralar',
+    duplicateWarning: 'Bu ekstra zaten mevcut.',
+    duplicateMessage: 'Bu ekstra, seçilen kategoride zaten mevcut. Lütfen farklı bir ad seçin.',
     addExtra: 'Yeni Ekstra Ekle',
     editExtra: 'Ekstra Düzenle',
     noItems: 'Bu kategoride henüz öğe yok.',

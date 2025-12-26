@@ -631,8 +631,8 @@ features: {
       placeholders: {
         firstName: 'اسمك الأول',
         lastName: 'اسم العائلة',
-        email: 'إكزامبل@إيميل.كوم',
-        phone: '05XX XXX XX XX',
+        email: 'example@email.com',
+         phone: '05XX XXX XX XX',
         password: '••••••••',
         confirmPassword: 'أعد إدخال كلمة المرور'
       },
@@ -2352,11 +2352,16 @@ contact: {
   SortableCategory: {
     product: 'منتج',
     products: 'منتجات',
+    extras: 'إضافات',
+    loadingExtras: 'تحميل الإضافات...',
     status : {
       active : "نشط",
     },
     editCategory: 'تعديل الفئة',
     deleteCategory: 'حذف الفئة',
+    editProduct: 'تعديل المنتج',
+    deleteProduct: 'حذف المنتج',
+    manageAddons: 'إدارة الإضافات',
     reorderingProducts: 'جاري حفظ ترتيب المنتجات...',
     noCategoryProducts: 'لا توجد منتجات في هذا الفئة بعد.',
     expandCategory: 'توسيع الفئة',
@@ -2383,6 +2388,11 @@ contact: {
     loadingAddons: 'جاري تحميل الإضافات...',
     addons: 'الإضافات',
     noAddons: 'لم تتم إضافة إضافات',
+    loadingExtras: 'تحميل الإضافات...',
+    extras: 'إضافات',
+    noExtras: 'لم تتم إضافة إضافات',
+    uncategorized: 'غير مصنف',
+    manageExtras: 'إدارة إضافات المنتج',
     manageAddons: 'إدارة الإضافات',
     editProduct: 'تعديل المنتج',
     deleteProduct: 'حذف المنتج',
@@ -2392,6 +2402,7 @@ contact: {
     price: 'السعر',
     buttons: {
       view: 'عرض',
+      ingredients: 'مكونات',
       addons: 'إضافات',
       extras: 'إضافية',
       edit: 'تعديل',
@@ -2401,7 +2412,8 @@ contact: {
     },
     errors: {
       loadingIngredients: 'حدث خطأ أثناء تحميل المكونات.',
-      loadingAddons: 'حدث خطأ أثناء تحميل الإضافات.'
+      loadingAddons: 'حدث خطأ أثناء تحميل الإضافات.',
+      loadingExtras: 'فشل تحميل الإضافات.'
     },
     accessibility: {
       productImage: 'صورة المنتج',
@@ -2460,7 +2472,7 @@ contact: {
     ingredientNameRequired: 'اسم المكون مطلوب',
     enterIngredientName: 'أدخل اسم المكون',
     containsAllergensCheckbox: 'يحتوي على مسببات الحساسية',
-    availableForUse: 'متاح للاستخدام',
+    availableForUse: 'مرئي',
     allergenInfoContent: 'معلومات مسببات الحساسية',
     selectAllergensMessage: 'حدد مسببات الحساسية الموجودة في هذا المكون:',
     enableAllergenMessage: 'قم بتفعيل "يحتوي على مسببات الحساسية" أولاً لتحديد المسببات.',
@@ -2651,6 +2663,8 @@ contact: {
     },
   confirmation: {
       deleteRoleTitle: "حذف الدور",
+      activateTitle: "تفعيل المستخدم؟",
+      activateMessage: "هل أنت متأكد من رغبتك في تفعيل {name}؟",
       deleteRoleMessage: "هل أنت متأكد من رغبتك في حذف هذا الدور؟ لا يمكن التراجع عن هذا الإجراء",
       deactivateTitle: "إلغاء تنشيط المستخدم؟",
       deactivateMessage: "هل أنت متأكد من رغبتك في إلغاء تنشيط {name}؟ سيفقدون الوصول إلى النظام",
@@ -3731,6 +3745,7 @@ contact: {
     "order_cancelled_success": "لقد تم إلغاء طلبك بنجاح.",
     "success": "ناجح",
     "newOrder": "طلب جديد",
+    "error": "خطأ",
     "orders": "الطلبات",
     "cancel_Reason_prompt_title": "سبب الإلغاء",
     "reason": "سبب الإلغاء",
@@ -5157,7 +5172,7 @@ extrasManagement: {
   
   categories: {
     title: 'فئات الإضافات',
-    addNew: '+ إضافة فئة جديدة',
+    addNew: ' إضافة فئة جديدة',
     addCategory: 'إضافة فئة جديدة',
     editCategory: 'تعديل الفئة',
     noCategories: 'لم يتم العثور على فئات',
@@ -5183,9 +5198,12 @@ extrasManagement: {
 
   extras: {
     title: 'الإضافات',
+    alreadyExists: 'موجود بالفعل',
     addExtra: 'إضافة إضافة جديدة',
     editExtra: 'تعديل الإضافة',
     noItems: 'لا توجد عناصر في هذه الفئة بعد.',
+    duplicateWarning:"تحذير مكرر",
+    duplicateMessage:"توجد هذه الإضافة بالفعل في الفئة المحددة. يرجى اختيار اسم مختلف.",
     noDescription: 'لا يوجد وصف',
     fields: {
       parentCategory: 'الفئة الأصلية',
