@@ -2468,7 +2468,7 @@ hero: {
     ingredientNameRequired: 'Ingredient name is required',
     enterIngredientName: 'Enter ingredient name',
     containsAllergensCheckbox: 'Contains Allergens',
-    availableForUse: 'Available for Use',
+    availableForUse: 'visible',
     allergenInfoContent: 'Allergen Information',
     selectAllergensMessage: 'Select allergens contained in this ingredient:',
     enableAllergenMessage: 'Check "Contains Allergens" first to select allergens.',
@@ -2663,6 +2663,8 @@ hero: {
     },
     confirmation: {
         deleteRoleTitle: "Delete Role",
+        activateTitle: "Activate User?",
+        activateMessage: "Are you sure you want to activate {name}?",
         deleteRoleMessage: "Are you sure you want to delete this role? This action cannot be undone.",
         deactivateTitle:"Deactivate User?",
         deactivateMessage:"Are you sure you want to deactivate {name}? They will lose access to the system."
@@ -3737,6 +3739,7 @@ cart: {
     "price_change_title": "Price Change",
     "confirm": "Confirm",
     "cancel": "Cancel",
+    error : "Error",
     "cancel_Reason_prompt_title": "Cancellation Reason",
     "reason": "Cancellation Reason",
     "submit": "Send",
@@ -5168,7 +5171,7 @@ extrasManagement: {
   
   categories: {
     title: 'Extra Categories',
-    addNew: '+ Add New Category',
+    addNew: 'Add New Category',
     addCategory: 'Add New Category',
     editCategory: 'Edit Category',
     noCategories: 'No categories found',

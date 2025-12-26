@@ -76,7 +76,6 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
           setShowDuplicateWarning(false);
         }
       } else {
-        // If no category selected, still show suggestions but no duplicate error
         const filtered = allExtras.filter(extra =>
           extra.name.toLowerCase().includes(formData.name.toLowerCase())
         );

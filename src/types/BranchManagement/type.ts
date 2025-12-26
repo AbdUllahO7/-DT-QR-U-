@@ -890,6 +890,21 @@ export interface ErrorBoundaryProps {
 
 
 
+export interface OrderExtraItem {
+  id: number;
+  branchProductExtraId: number;
+  productExtraId: number;
+  extraId: number;
+  extraName: string;
+  extraCategoryName: string;
+  selectionMode: number;
+  isRemoval: boolean;
+  quantity: number;
+  unitPrice: number;
+  totalPrice: number;
+  note: string | null;
+}
+
 export interface OrderItem {
   id: number;
   orderItemId?: number;
@@ -907,6 +922,7 @@ export interface OrderItem {
   isAddon: boolean;
   parentOrderItemId?: number | null;
   addonItems: OrderItem[];
+  extras?: OrderExtraItem[];
   parentOrderDetailId:number;
   orderDetailId:number
   addonPrice?: number | null;

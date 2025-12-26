@@ -143,9 +143,9 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
       await productExtraCategoriesService.updateProductExtraCategory(data);
       await loadData();
       setEditingId(null);
-    } catch (error) {
+    } catch (error :any) {
       logger.error('Failed to update product extra category:', error);
-      setError(t('error.updateFailed'));
+      setError(error.message);
     } finally {
       setIsSubmitting(false);
     }

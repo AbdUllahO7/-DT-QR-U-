@@ -350,17 +350,19 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
           />
         </div>
 
-        {/* Categories - Shows horizontal on mobile, vertical sidebar on desktop */}
-        <CategoriesSidebar
-          categories={filteredCategories}
-          selectedCategory={selectedCategory}
-          onCategorySelect={setSelectedCategory}
-        />
-
         {/* Main Grid: Mobile stacks, Desktop has sidebar + content */}
-        <div className="lg:grid lg:grid-cols-3 lg:gap-6">
-          {/* Products Grid - Full width on mobile, 2 cols on desktop */}
-          <div className="lg:col-span-2 lg:col-start-2">
+        <div className="lg:grid lg:grid-cols-4 lg:gap-6">
+          {/* Categories - Shows horizontal on mobile, vertical sidebar on desktop */}
+          <div className="lg:col-span-1">
+            <CategoriesSidebar
+              categories={filteredCategories}
+              selectedCategory={selectedCategory}
+              onCategorySelect={setSelectedCategory}
+            />
+          </div>
+
+          {/* Products Grid - Full width on mobile, 3 cols on desktop */}
+          <div className="lg:col-span-3">
             <ProductGrid
               categories={filteredCategories}
               selectedCategory={selectedCategory}

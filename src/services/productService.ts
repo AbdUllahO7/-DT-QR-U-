@@ -706,8 +706,8 @@ class ProductService {
       const response = await httpClient.get(`${this.baseUrl}/Products/${productId}/ingredients`);
       
       logger.info('Ürün malzemeleri başarıyla getirildi', { 
-        productId, 
-        ingredientCount: response.data?.length || 0 
+        productId,
+        ingredientCount: response.data?.length || 0
       });
       
       return response.data || [];

@@ -634,7 +634,7 @@ hero: {
       placeholders: {
         firstName: 'Adınız',
         lastName: 'Soyadınız',
-        email: 'ornek@email.com',
+         email: 'example@email.com',
         phone: '05XX XXX XX XX',
         password: '••••••••',
         confirmPassword: 'Şifrenizi tekrar girin'
@@ -2474,7 +2474,7 @@ hero: {
     ingredientNameRequired: 'Malzeme adı gereklidir',
     enterIngredientName: 'Malzeme adını girin',
     containsAllergensCheckbox: 'Alerjen İçerir',
-    availableForUse: 'Kullanım İçin Uygun',
+    availableForUse: 'Görünür',
     allergenInfoContent: 'Alerjen Bilgileri',
     selectAllergensMessage: 'Bu malzemenin içerdiği alerjenleri seçin:',
     enableAllergenMessage: 'Alerjen seçmek için önce "Alerjen İçerir" seçeneğini işaretleyin.',
@@ -2666,10 +2666,12 @@ hero: {
       save:"kaydet"
     },
   confirmation: {
-        deleteRoleTitle: "Rolü Sil",
-        deleteRoleMessage: "Bu rolü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
-        deactivateTitle:"Kullanıcıyı Devre Dışı Bırak?",
-        deactivateMessage:"{name} adlı kullanıcıyı devre dışı bırakmak istediğinizden emin misiniz? Sisteme erişimini kaybedecek."
+    activateTitle: "Kullanıcıyı Etkinleştir",
+    activateMessage: "{name} adlı kullanıcıyı etkinleştirmek istediğinizden emin misiniz?",
+    deleteRoleTitle: "Rolü Sil",
+    deleteRoleMessage: "Bu rolü silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.",
+    deactivateTitle:"Kullanıcıyı Devre Dışı Bırak?",
+    deactivateMessage:"{name} adlı kullanıcıyı devre dışı bırakmak istediğinizden emin misiniz? Sisteme erişimini kaybedecek."
 
       },
 
@@ -3736,6 +3738,7 @@ cart: {
     "order_can_be_updated": "Sipariş güncellenebilir",
     "time_remaining": "Kalan süre",
     "modified_times": "{{count}} kez değiştirildi",
+    "error": "Hata",
     "price_change_title": "Fiyat değişikliği",
     "cancel_reason_prompt_title": "İptal Nedeni",
     "reason": "İptal Nedeni",
@@ -5193,7 +5196,7 @@ extrasManagement: {
   
   categories: {
     title: 'Ekstra Kategorileri',
-    addNew: '+ Yeni Kategori Ekle',
+    addNew: 'Yeni Kategori Ekle',
     addCategory: 'Yeni Kategori Ekle',
     editCategory: 'Kategoriyi Düzenle',
     noCategories: 'Kategori bulunamadı',

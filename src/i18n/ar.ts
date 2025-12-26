@@ -631,8 +631,8 @@ features: {
       placeholders: {
         firstName: 'اسمك الأول',
         lastName: 'اسم العائلة',
-        email: 'إكزامبل@إيميل.كوم',
-        phone: '05XX XXX XX XX',
+        email: 'example@email.com',
+         phone: '05XX XXX XX XX',
         password: '••••••••',
         confirmPassword: 'أعد إدخال كلمة المرور'
       },
@@ -2472,7 +2472,7 @@ contact: {
     ingredientNameRequired: 'اسم المكون مطلوب',
     enterIngredientName: 'أدخل اسم المكون',
     containsAllergensCheckbox: 'يحتوي على مسببات الحساسية',
-    availableForUse: 'متاح للاستخدام',
+    availableForUse: 'مرئي',
     allergenInfoContent: 'معلومات مسببات الحساسية',
     selectAllergensMessage: 'حدد مسببات الحساسية الموجودة في هذا المكون:',
     enableAllergenMessage: 'قم بتفعيل "يحتوي على مسببات الحساسية" أولاً لتحديد المسببات.',
@@ -2663,6 +2663,8 @@ contact: {
     },
   confirmation: {
       deleteRoleTitle: "حذف الدور",
+      activateTitle: "تفعيل المستخدم؟",
+      activateMessage: "هل أنت متأكد من رغبتك في تفعيل {name}؟",
       deleteRoleMessage: "هل أنت متأكد من رغبتك في حذف هذا الدور؟ لا يمكن التراجع عن هذا الإجراء",
       deactivateTitle: "إلغاء تنشيط المستخدم؟",
       deactivateMessage: "هل أنت متأكد من رغبتك في إلغاء تنشيط {name}؟ سيفقدون الوصول إلى النظام",
@@ -3743,6 +3745,7 @@ contact: {
     "order_cancelled_success": "لقد تم إلغاء طلبك بنجاح.",
     "success": "ناجح",
     "newOrder": "طلب جديد",
+    "error": "خطأ",
     "orders": "الطلبات",
     "cancel_Reason_prompt_title": "سبب الإلغاء",
     "reason": "سبب الإلغاء",
@@ -5169,7 +5172,7 @@ extrasManagement: {
   
   categories: {
     title: 'فئات الإضافات',
-    addNew: '+ إضافة فئة جديدة',
+    addNew: ' إضافة فئة جديدة',
     addCategory: 'إضافة فئة جديدة',
     editCategory: 'تعديل الفئة',
     noCategories: 'لم يتم العثور على فئات',

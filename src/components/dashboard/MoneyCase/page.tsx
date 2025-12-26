@@ -5,27 +5,17 @@ import { Users, ChevronDown, Calendar, Filter, X, Check } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { branchService } from '../../../services/branchService';
 import { moneyCaseService } from '../../../services/Branch/MoneyCaseService';
+import QuickSummaryCards from '../Branch/MoneyCaseManager/QuickSummaryCards';
+import MoneyCaseActions from '../Branch/MoneyCaseManager/MoneyCaseActions';
+import OpenMoneyCaseModal from '../Branch/MoneyCaseManager/OpenMoneyCaseModal';
+import CloseMoneyCaseModal from '../Branch/MoneyCaseManager/CloseMoneyCaseModal';
+import { ActiveMoneyCase, QuickSummary, PreviousCloseInfo, MoneyCaseSummary } from '../../../types/BranchManagement/MoneyCase';
 
-// --- MOCK TYPES & INTERFACES (Replaces external imports) ---
+// --- TYPES & INTERFACES ---
 
 interface BranchData {
   branchId: string;
   branchName: string;
-}
-
-interface MoneyCaseSummary {
-  restaurantName: string;
-  fromDate: string;
-  toDate: string;
-  totalSales: number;
-  totalCash: number;
-  totalCard: number;
-  totalOrders: number;
-  totalDifference: number;
-  totalCases: number;
-  averageOrderValue: number;
-  shiftsWithDiscrepancy: number;
-  moneyCases: any[]; // Array of individual cases for filtering
 }
 
 interface RestaurantSummaryParams {
@@ -255,6 +245,17 @@ export default function RestaurantSummaryPage() {
   const [appliedFilters, setAppliedFilters] = useState<RestaurantSummaryParams>({});
   const [hasActiveFilters, setHasActiveFilters] = useState<boolean>(false);
 
+  // Money case management states
+  const [activeCase, setActiveCase] = useState<ActiveMoneyCase | null>(null);
+  const [quickSummary, setQuickSummary] = useState<QuickSummary | null>(null);
+  const [showOpenModal, setShowOpenModal] = useState<boolean>(false);
+  const [showCloseModal, setShowCloseModal] = useState<boolean>(false);
+  const [openingBalance, setOpeningBalance] = useState<number>(0);
+  const [actualCash, setActualCash] = useState<number>(0);
+  const [closingNotes, setClosingNotes] = useState<string>('');
+  const [previousCloseInfo, setPreviousCloseInfo] = useState<PreviousCloseInfo | null>(null);
+  const [actionLoading, setActionLoading] = useState<boolean>(false);
+
   // Fetch Branches on component mount
   useEffect(() => {
     const fetchBranches = async () => {
@@ -274,6 +275,33 @@ export default function RestaurantSummaryPage() {
     };
     fetchBranches();
   }, [t]);
+
+  // Fetch active case and quick summary when branch is selected
+  useEffect(() => {
+    const fetchBranchData = async () => {
+      if (!selectedBranch) {
+        setActiveCase(null);
+        setQuickSummary(null);
+        return;
+      }
+
+      try {
+        const branchId = parseInt(selectedBranch.branchId);
+
+        // Fetch active case
+        const active = await moneyCaseService.getActiveMoneyCase(branchId);
+        setActiveCase(active);
+
+        // Fetch quick summary
+        const summary = await moneyCaseService.getQuickSummary(branchId);
+        setQuickSummary(summary);
+      } catch (e: any) {
+        console.error("Failed to fetch branch money case data:", e);
+      }
+    };
+
+    fetchBranchData();
+  }, [selectedBranch]);
 
   // 1. Fetch Raw Data (Depends ONLY on Date Filters, NOT branch)
   useEffect(() => {
@@ -295,48 +323,8 @@ export default function RestaurantSummaryPage() {
     fetchSummary();
   }, [appliedFilters, t]);
 
-  // 2. Calculate Filtered Summary (Frontend Filtering by Branch)
-  const summary = useMemo(() => {
-    if (!rawSummary) return null;
-    if (!selectedBranch) return rawSummary;
-
-    // 1. Access the list of individual money cases.
-    const allCases = rawSummary.moneyCases || [];
-
-    // If no list exists, we cannot frontend filter. Return raw data.
-    if (!Array.isArray(allCases) || allCases.length === 0) {
-      return rawSummary;
-    }
-
-    // 2. Filter by Branch ID
-    const filteredCases = allCases.filter((item: any) => item.branchId === selectedBranch.branchId);
-
-    // 3. Recalculate Totals
-    const newTotalSales = filteredCases.reduce((sum: number, item: any) => sum + (item.totalSales || item.totalAmount || 0), 0);
-    const newTotalCash = filteredCases.reduce((sum: number, item: any) => sum + (item.totalCash || item.cashAmount || 0), 0);
-    const newTotalCard = filteredCases.reduce((sum: number, item: any) => sum + (item.totalCard || item.creditCardAmount || 0), 0);
-    const newTotalOrders = filteredCases.reduce((sum: number, item: any) => sum + (item.totalOrders || item.orderCount || 0), 0);
-    const newTotalDifference = filteredCases.reduce((sum: number, item: any) => sum + (item.totalDifference || item.difference || 0), 0);
-    
-    const newTotalCases = filteredCases.length;
-    const newAverageOrderValue = newTotalOrders > 0 ? newTotalSales / newTotalOrders : 0;
-    const newShiftsWithDiscrepancy = filteredCases.filter((item: any) => (item.difference || item.totalDifference) !== 0).length;
-
-    // 4. Return new Summary object
-    return {
-      ...rawSummary,
-      totalSales: newTotalSales,
-      totalCash: newTotalCash,
-      totalCard: newTotalCard,
-      totalOrders: newTotalOrders,
-      totalDifference: newTotalDifference,
-      totalCases: newTotalCases,
-      averageOrderValue: newAverageOrderValue,
-      shiftsWithDiscrepancy: newShiftsWithDiscrepancy,
-      moneyCases: filteredCases // Update the list in the filtered object too
-    };
-
-  }, [rawSummary, selectedBranch]);
+  // Use raw summary data (restaurant-level aggregated data)
+  const summary = rawSummary;
 
   // Click-outside handler to close dropdown
   useEffect(() => {
@@ -388,6 +376,92 @@ export default function RestaurantSummaryPage() {
     const dates = preset.getValue();
     setFromDate(dates.fromDate);
     setToDate(dates.toDate);
+  };
+
+  // Money case handlers
+  const handleShowOpenModal = async () => {
+    if (!selectedBranch) return;
+
+    try {
+      const branchId = parseInt(selectedBranch.branchId);
+      const info = await moneyCaseService.getPreviousCloseInfo(branchId);
+      setPreviousCloseInfo(info);
+
+      const suggestedBalance = info?.suggestedOpeningBalance || 0;
+      setOpeningBalance(suggestedBalance);
+      setShowOpenModal(true);
+    } catch (error) {
+      console.error("Failed to get previous close info", error);
+      setPreviousCloseInfo(null);
+      setOpeningBalance(0);
+      setShowOpenModal(true);
+    }
+  };
+
+  const handleOpenCase = async () => {
+    if (!selectedBranch) return;
+
+    try {
+      setActionLoading(true);
+      const branchId = parseInt(selectedBranch.branchId);
+
+      const result = await moneyCaseService.openMoneyCase({
+        branchId,
+        openingBalance
+      });
+
+      setActiveCase(result);
+      setShowOpenModal(false);
+
+      // Refresh quick summary
+      const summary = await moneyCaseService.getQuickSummary(branchId);
+      setQuickSummary(summary);
+    } catch (error: any) {
+      console.error("Failed to open money case:", error);
+      alert(error.message || 'Failed to open money case');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleCloseCase = async () => {
+    if (!selectedBranch || !activeCase) return;
+
+    try {
+      setActionLoading(true);
+      const branchId = parseInt(selectedBranch.branchId);
+
+      await moneyCaseService.closeMoneyCase({
+        branchId,
+        actualCash,
+        notes: closingNotes
+      });
+
+      setActiveCase(null);
+      setShowCloseModal(false);
+      setActualCash(0);
+      setClosingNotes('');
+
+      // Refresh quick summary
+      const summary = await moneyCaseService.getQuickSummary(branchId);
+      setQuickSummary(summary);
+    } catch (error: any) {
+      console.error("Failed to close money case:", error);
+      alert(error.message || 'Failed to close money case');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleOpenCloseModal = () => {
+    if (!activeCase) return;
+    setActualCash(activeCase.totalAmount || 0);
+    setShowCloseModal(true);
+  };
+
+  const handleCloseModals = () => {
+    setShowOpenModal(false);
+    setShowCloseModal(false);
   };
 
   if (loading && !rawSummary) {
@@ -615,7 +689,26 @@ export default function RestaurantSummaryPage() {
             </button>
           </div>
         )}
-          
+
+        {/* Quick Summary Cards */}
+        <QuickSummaryCards
+          quickSummary={quickSummary}
+          activeCase={activeCase}
+          loading={loading}
+          t={t}
+          isRTL={isRTL}
+        />
+
+        {/* Money Case Action Buttons */}
+        <MoneyCaseActions
+          activeCase={activeCase}
+          loading={actionLoading}
+          onOpenCase={handleShowOpenModal}
+          onCloseCase={handleOpenCloseModal}
+          t={t}
+          isRTL={isRTL}
+        />
+
         {/* Summary Information */}
         <p className="text-lg text-gray-500 dark:text-gray-400 mb-8">
           {t('moneyCase.showingResults')} <span className="font-semibold text-gray-700 dark:text-gray-200">{displaySummary?.restaurantName || t('moneyCase.yourRestaurant')}</span> {t('moneyCase.from')} <span className="font-semibold text-gray-700 dark:text-gray-200">{displaySummary?.fromDate ? new Date(displaySummary.fromDate).toLocaleDateString() : '-'}</span> {t('moneyCase.to')} <span className="font-semibold text-gray-700 dark:text-gray-200">{displaySummary?.toDate ? new Date(displaySummary.toDate).toLocaleDateString() : '-'}</span>
@@ -675,6 +768,33 @@ export default function RestaurantSummaryPage() {
             />
           </div>
         </div>
+
+        {/* Modals */}
+        <OpenMoneyCaseModal
+          previousCloseInfo={previousCloseInfo}
+          show={showOpenModal}
+          loading={actionLoading}
+          openingBalance={openingBalance}
+          onOpeningBalanceChange={setOpeningBalance}
+          onConfirm={handleOpenCase}
+          onClose={handleCloseModals}
+          t={t}
+          isRTL={isRTL}
+        />
+
+        <CloseMoneyCaseModal
+          show={showCloseModal}
+          loading={actionLoading}
+          activeCase={activeCase}
+          actualCash={actualCash}
+          closingNotes={closingNotes}
+          onActualCashChange={setActualCash}
+          onNotesChange={setClosingNotes}
+          onConfirm={handleCloseCase}
+          onClose={handleCloseModals}
+          t={t}
+          isRTL={isRTL}
+        />
       </div>
     </div>
   );

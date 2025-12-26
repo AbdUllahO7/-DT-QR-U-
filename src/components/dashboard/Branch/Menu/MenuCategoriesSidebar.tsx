@@ -14,7 +14,7 @@ const CategoriesSidebar: React.FC<CategoriesSidebarProps> = ({
   const { t } = useLanguage()
 
   return (
-    <div className="lg:col-span-1">
+    <div>
       {/* Mobile: Horizontal Scrolling Categories */}
       <div className="lg:hidden mb-4">
         <div className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 p-3">
@@ -79,7 +79,7 @@ const CategoriesSidebar: React.FC<CategoriesSidebarProps> = ({
               onClick={() => onCategorySelect(category.categoryId)}
               className={`w-full text-left p-3 rounded-xl transition-all duration-300 transform hover:scale-[1.02] ${
                 selectedCategory === category.categoryId
-                  ? "bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 text-white shadow-lg shadow-orange-500/25 scale-[1.02]"
+                  ? "bg-gradient-to-br from-orange-500 to-pink-500 text-white shadow-lg shadow-orange-500/25 scale-[1.02]"
                   : "bg-slate-50/50 dark:bg-slate-700/50 hover:bg-slate-100/50 dark:hover:bg-slate-600/50 text-slate-700 dark:text-slate-300 hover:shadow-lg backdrop-blur-sm border border-slate-200/50 dark:border-slate-600/50"
               }`}
             >
