@@ -27,6 +27,7 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { userService } from '../../../services/userService';
 import { roleService } from '../../../services/RoleService';
 import { logger } from '../../../utils/logger';
+import { getTranslatedRoleName, getTranslatedCategoryName } from '../../../utils/permissionTranslation';
 import type {
   BranchInfo,
 } from '../../../types/api';
@@ -710,7 +711,7 @@ useEffect(() => {
       setActiveDropdown(null);
       setConfirmationConfig({
         title: t('userManagementPage.confirmation.deleteRoleTitle'),
-        message: t('userManagementPage.confirmation.deleteRoleMessage', { name: role.name }),
+        message: t('userManagementPage.confirmation.deleteRoleMessage', { name: getTranslatedRoleName(role.name, t) }),
         confirmText: t('userManagementPage.actions.delete'),
         actionType: 'delete',
         onConfirm: async () => {
@@ -1423,10 +1424,10 @@ useEffect(() => {
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                            {role.name}
+                            {getTranslatedRoleName(role.name, t)}
                           </h3>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {role.category || 'No Category'}
+                            {role.category ? getTranslatedCategoryName(role.category, t) : t('userManagementPage.noCategory') || 'No Category'}
                           </p>
                         </div>
                       </div>

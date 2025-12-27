@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Key, Shield } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { Role } from '../../../../types/users/users.type';
-import { getTranslatedPermissionName } from '../../../../utils/permissionTranslation';
+import { getTranslatedPermissionName, getTranslatedRoleName } from '../../../../utils/permissionTranslation';
 
 export interface ViewRolePermissionsModalProps {
   isOpen: boolean;
@@ -43,7 +43,7 @@ const ViewRolePermissionsModal: React.FC<ViewRolePermissionsModalProps> = ({
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
               <Shield className="h-5 w-5 text-purple-500 dark:text-purple-400" />
               {t('userManagementPage.rolePermissionsModal.title')}{' '}
-              {role.name}
+              {getTranslatedRoleName(role.name, t)}
             </h3>
             <button
               onClick={onClose}

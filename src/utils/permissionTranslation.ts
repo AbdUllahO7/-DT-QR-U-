@@ -164,6 +164,15 @@ const permissionTranslations: Record<string, { en: string; tr: string; ar: strin
   'admin.api.control': { en: 'API Control', tr: 'API Kontrolü', ar: 'التحكم في API' }
 };
 
+// Role name translations
+const roleTranslations: Record<string, { en: string; tr: string; ar: string }> = {
+  'RestaurantOwner': { en: 'Restaurant Owner', tr: 'Restoran Sahibi', ar: 'مالك المطعم' },
+  'RestaurantManager': { en: 'Restaurant Manager', tr: 'Restoran Yöneticisi', ar: 'مدير المطعم' },
+  'RestaurantStaff': { en: 'Restaurant Staff', tr: 'Restoran Personeli', ar: 'موظف المطعم' },
+  'BranchManager': { en: 'Branch Manager', tr: 'Şube Yöneticisi', ar: 'مدير الفرع' },
+  'BranchStaff': { en: 'Branch Staff', tr: 'Şube Personeli', ar: 'موظف الفرع' }
+};
+
 // Category name translations - ALL CATEGORIES
 const categoryTranslations: Record<string, { en: string; tr: string; ar: string }> = {
   'Branch': { en: 'Branch Management', tr: 'Şube Yönetimi', ar: 'إدارة الفروع' },
@@ -278,6 +287,41 @@ export const getTranslatedCategoryName = (
   if (translated === translationKey) {
     console.warn(`No translation found for category: ${category}`);
     return category;
+  }
+
+  return translated;
+};
+
+/**
+ * Get translated role name
+ * @param roleName - Role name
+ * @param t - Translation function from useLanguage
+ * @returns Translated role name
+ */
+export const getTranslatedRoleName = (
+  roleName: string,
+  t: (key: string) => string
+): string => {
+  if (!roleName) {
+    return 'Unknown Role';
+  }
+
+  // Get current language
+  const currentLang = getCurrentLanguage();
+
+  // Check if we have a translation for this role
+  if (roleTranslations[roleName]) {
+    return roleTranslations[roleName][currentLang];
+  }
+
+  // Try the i18n translation as fallback
+  const translationKey = `roles.${roleName}`;
+  const translated = t(translationKey);
+
+  // If translation returns the key itself (not found), use the original role name
+  if (translated === translationKey) {
+    console.warn(`No translation found for role: ${roleName}`);
+    return roleName;
   }
 
   return translated;
