@@ -980,8 +980,41 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                           }}
                           className="flex-1 p-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-md hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
                           title={t('branchCategories.products.viewDetails')}
+                          aria-label={t('branchCategories.products.viewDetails')}
                         >
                           <Eye className="h-3.5 w-3.5 mx-auto" />
+                        </button>
+                      )}
+
+                      {/* Addons Button */}
+                      {product.isSelected && product.branchProductId && handleShowProductAddons && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleShowProductAddons(product);
+                          }}
+                          disabled={isLoading}
+                          className="flex-1 p-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 rounded-md hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-colors"
+                          title={`${t('branchCategories.products.configureAddons')}${product.hasAddons ? ` (${product.addonsCount})` : ''}`}
+                          aria-label={t('branchCategories.products.configureAddons')}
+                        >
+                          <Puzzle className="h-3.5 w-3.5 mx-auto" />
+                        </button>
+                      )}
+
+                      {/* Extra Categories Button */}
+                      {product.isSelected && product.branchProductId && handleShowProductExtras && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleShowProductExtras(product);
+                          }}
+                          disabled={isLoading}
+                          className="flex-1 p-1.5 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-md hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors"
+                          title={t('branchCategories.products.manageExtras')}
+                          aria-label={t('branchCategories.products.manageExtras')}
+                        >
+                          <Grid3X3 className="h-3.5 w-3.5 mx-auto" />
                         </button>
                       )}
 
@@ -999,6 +1032,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                               : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-500 hover:bg-gray-200 dark:hover:bg-gray-600'
                           }`}
                           title={product.status ? t('branchCategories.products.deactivate') : t('branchCategories.products.activate')}
+                          aria-label={product.status ? t('branchCategories.products.deactivate') : t('branchCategories.products.activate')}
                         >
                           <Power className="h-3.5 w-3.5 mx-auto" />
                         </button>
@@ -1018,6 +1052,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                               : 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 hover:bg-orange-200 dark:hover:bg-orange-900/50'
                           }`}
                           title={product.isAvailable !== false ? t('branchCategories.products.markOutOfStock') : t('branchCategories.products.markInStock')}
+                          aria-label={product.isAvailable !== false ? t('branchCategories.products.markOutOfStock') : t('branchCategories.products.markInStock')}
                         >
                           <ShoppingBag className="h-3.5 w-3.5 mx-auto" />
                         </button>
@@ -1034,6 +1069,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                             disabled={isLoading || isLoadingBranchProducts}
                             className="flex-1 p-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-md hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors disabled:opacity-50"
                             title={t('branchCategories.products.removeFromBranch')}
+                            aria-label={t('branchCategories.products.removeFromBranch')}
                           >
                             <X className="h-3.5 w-3.5 mx-auto" />
                           </button>
@@ -1047,6 +1083,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                             disabled={isLoading}
                             className="flex-1 p-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-md hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors disabled:opacity-50"
                             title={t('branchCategories.products.addToBranch')}
+                            aria-label={t('branchCategories.products.addToBranch')}
                           >
                             <Plus className="h-3.5 w-3.5 mx-auto" />
                           </button>

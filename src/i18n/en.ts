@@ -3397,7 +3397,13 @@ hero: {
       addedToBranch: 'products added to branch',
       moreAvailableToAdd: 'more available to add',
       withDetailedInfo: 'with detailed info',
-      products: 'products'
+      products: 'products',
+      activate: 'Activate Product',
+      deactivate: 'Deactivate Product',
+      markInStock: 'Mark as In Stock',
+      markOutOfStock: 'Mark as Out of Stock',
+      configureAddons: 'Configure Add-ons',
+      manageExtras: 'Manage Extras'
     },
 
     // Product Details Modal
