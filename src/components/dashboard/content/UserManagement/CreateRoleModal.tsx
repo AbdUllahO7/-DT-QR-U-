@@ -7,6 +7,7 @@ import { roleService } from '../../../../services/RoleService';
 import { logger } from '../../../../utils/logger';
 import type { BranchInfo } from '../../../../types/api';
 import { CreateRoleDto, PermissionCatalog } from '../../../../types/users/users.type';
+import { getTranslatedPermissionName, getTranslatedCategoryName } from '../../../../utils/permissionTranslation';
 
 export interface CreateRoleModalProps {
   isOpen: boolean;
@@ -628,7 +629,7 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                               {/* Category Header */}
                               <div className="bg-gray-100 dark:bg-gray-700 px-4 py-2 flex items-center justify-between sticky top-0 z-10">
                                 <span className="font-medium text-sm text-gray-700 dark:text-gray-300">
-                                  {catalog.category}
+                                  {getTranslatedCategoryName(catalog.category, t)}
                                 </span>
                                 <button
                                   type="button"
@@ -649,26 +650,30 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
 
                               {/* Permissions List */}
                               <div className="p-2">
-                                {catalog.permissions.map((permission) => (
-                                  <label
-                                    key={permission.permissionId}
-                                    className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 cursor-pointer"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={selectedPermissions.includes(permission.permissionId)}
-                                      onChange={() => handlePermissionToggle(permission.permissionId)}
-                                      disabled={isBusy}
-                                      className="mt-0.5 h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                      <div className="font-medium text-sm text-gray-900 dark:text-white">
-                                        {permission.description}
-                                      </div>
+                                {catalog.permissions.map((permission) => {
+                                  const translatedName = getTranslatedPermissionName(permission, t);
 
-                                    </div>
-                                  </label>
-                                ))}
+                                  return (
+                                    <label
+                                      key={permission.permissionId}
+                                      className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 cursor-pointer"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedPermissions.includes(permission.permissionId)}
+                                        onChange={() => handlePermissionToggle(permission.permissionId)}
+                                        disabled={isBusy}
+                                        className="mt-0.5 h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                                      />
+                                      <div className="flex-1 min-w-0">
+                                        <div className="font-medium text-sm text-gray-900 dark:text-white">
+                                          {translatedName}
+                                        </div>
+
+                                      </div>
+                                    </label>
+                                  );
+                                })}
                               </div>
                             </div>
                           );

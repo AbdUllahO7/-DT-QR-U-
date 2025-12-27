@@ -3395,7 +3395,13 @@ BranchTableManagement: {
       addedToBranch: 'şubeye eklenen ürün',
       moreAvailableToAdd: 'daha eklenebilir',
       withDetailedInfo: 'detaylı bilgili',
-      products: 'ürün'
+      products: 'ürün',
+      activate: 'Ürünü Aktifleştir',
+      deactivate: 'Ürünü Devre Dışı Bırak',
+      markInStock: 'Stokta Olarak İşaretle',
+      markOutOfStock: 'Stokta Yok Olarak İşaretle',
+      configureAddons: 'Ek Seçenekleri Yapılandır',
+      manageExtras: 'Ekstraları Yönet'
     },
 
     // Product Details Modal

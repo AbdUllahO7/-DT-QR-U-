@@ -224,11 +224,13 @@ async createRole(roleData: CreateRoleDto): Promise<ApiResponse<Role>> {
         delete apiParams.branchId;
       }
 
+
       const response = await apiRequest<PermissionCatalog[]>({
         method: 'GET',
         url: '/api/Permissions/catalog',
         params: apiParams // Send the cleaned params
       });
+      console.log("getPermissionCatalog",response)
 
       logger.info('✅ getPermissionCatalog başarılı', response, { prefix: 'RoleService' });
       

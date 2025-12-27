@@ -7,6 +7,7 @@ import type { BranchInfo } from '../../../../types/api';
 import { CreateUserDto, Role } from '../../../../types/users/users.type';
 // Updated import to match Register page logic
 import { sortedCountryCodes, getPlaceholderByDialCode } from '../../../../data/countryCodes';
+import { getTranslatedRoleName, getTranslatedCategoryName } from '../../../../utils/permissionTranslation';
 
 export interface CreateUserModalProps {
   isOpen: boolean;
@@ -650,14 +651,14 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
                           />
                           <div className="flex-1 min-w-0">
                             <div className="font-medium text-sm text-gray-900 dark:text-white">
-                              {role.name}
+                              {getTranslatedRoleName(role.name, t)}
                             </div>
                             <div className="text-xs text-gray-500 dark:text-gray-400">
                               {role.description}
                             </div>
                             {role.category && (
                               <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                                {role.category}
+                                {getTranslatedCategoryName(role.category, t)}
                               </div>
                             )}
                           </div>

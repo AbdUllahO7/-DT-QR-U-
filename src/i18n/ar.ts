@@ -3398,7 +3398,13 @@ contact: {
       addedToBranch: 'منتجات مضافة إلى الفرع',
       moreAvailableToAdd: 'المزيد متاح للإضافة',
       withDetailedInfo: 'بمعلومات مفصلة',
-      products: 'منتجات'
+      products: 'منتجات',
+      activate: 'تفعيل المنتج',
+      deactivate: 'إلغاء تفعيل المنتج',
+      markInStock: 'تحديد كمتوفر',
+      markOutOfStock: 'تحديد كغير متوفر',
+      configureAddons: 'تكوين الإضافات',
+      manageExtras: 'إدارة الإضافات'
     },
 
     // Product Details Modal
