@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Building2, 
-  ShieldCheck, 
+import {
+  User,
+  Mail,
+  Calendar,
+  Building2,
+  ShieldCheck,
   Edit3,
   Camera,
   CheckCircle,
@@ -16,6 +16,7 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { authService } from '../../../services/authService';
 import { CATEGORY_COLORS } from '../../../types/BranchManagement/type';
 import { UserProfileResponse } from '../../../types/users/users.type';
+import { getTranslatedPermissionName, getTranslatedCategoryName } from '../../../utils/permissionTranslation';
 
 // Kategori renkleri
 
@@ -127,7 +128,7 @@ const Profile: React.FC = () => {
               {[...new Set(appRoles.map(permission => permission.category))].map((category, index) => (
                 <span key={index} className="px-4 py-2 rounded-full text-sm font-medium bg-white/10 text-white border border-white/20 flex items-center gap-2">
                   <Crown className="w-4 h-4" />
-                  {t(`profile.categories.${category}`) || category}
+                  {getTranslatedCategoryName(category, t)}
                 </span>
               ))}
             </div>
@@ -314,7 +315,7 @@ const Profile: React.FC = () => {
                   <div className={`flex items-center justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className={`${isRTL ? 'text-right' : 'text-left'}`}>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {t(`profile.categories.${category}`) || category}
+                        {getTranslatedCategoryName(category, t)}
                       </h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {permissions.length} {t('profile.permissions.totalPermissions').toLowerCase()}
@@ -337,20 +338,20 @@ const Profile: React.FC = () => {
                         CATEGORY_COLORS[category]?.includes('bg-blue-100') ? 'bg-blue-500' :
                         CATEGORY_COLORS[category]?.includes('bg-red-100') ? 'bg-red-500' :
                         'bg-gray-400'}`}></span>
-                      {t(`profile.categories.${category}`) || category} ({permissions.length})
+                      {getTranslatedCategoryName(category, t)} ({permissions.length})
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {permissions.map((permission, permIndex) => {
-                        const translatedName = t(`profile.permissionNames.${permission.name}`) || permission.description || permission.name;
+                        const translatedName = getTranslatedPermissionName(permission, t);
                         const categoryColor = CATEGORY_COLORS[category] || 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-300';
-                        
+
                         return (
                           <span
                             key={permIndex}
                             className={`px-3 py-1.5 rounded-lg text-sm font-medium ${categoryColor}`}
                             title={permission.description}
                           >
-                            {permission.name}
+                            {translatedName}
                           </span>
                         );
                       })}
