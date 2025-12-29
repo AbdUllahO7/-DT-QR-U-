@@ -2862,6 +2862,7 @@ hero: {
       stepPermissions:"İzinler",
       deselectAll:"Seçimi Kaldır",
       selectBranch: 'Şube Seçimi',
+      permissionsRequired: "* En az bir izin gereklidir",
       step1Info: "Rol Oluştur",
       clear:"Seçimi Kaldır",
       step1Description: "Yeni rol için temel bilgileri girin",
