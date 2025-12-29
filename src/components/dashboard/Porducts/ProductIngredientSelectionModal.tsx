@@ -192,10 +192,14 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
     }
   };
 
-  const filteredIngredients = ingredients.filter(ingredient =>
-    ingredient.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    ingredient.isAvailable // Only show available ingredients
-  );
+  const filteredIngredients = ingredients.filter(ingredient => {
+    const matchesSearch = ingredient.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const isAssignedToProduct = currentProductIngredients.some(ing => ing.ingredientId === ingredient.id);
+
+    // If ingredient is already assigned to this product, show it regardless of status
+    // Otherwise, only show if it's available
+    return matchesSearch && (isAssignedToProduct || ingredient.isAvailable);
+  });
 
   const getAllergenInfo = (allergenIds: number[]) => {
     if (!allergenIds?.length) return '';

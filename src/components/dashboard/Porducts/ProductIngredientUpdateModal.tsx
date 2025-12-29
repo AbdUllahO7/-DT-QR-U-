@@ -198,10 +198,14 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
     }
   };
 
-  const filteredIngredients = allIngredients.filter(ingredient =>
-    ingredient.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-    ingredient.isAvailable // Only show available ingredients
-  );
+  const filteredIngredients = allIngredients.filter(ingredient => {
+    const matchesSearch = ingredient.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const isAssignedToProduct = selectedIngredients.has(ingredient.id);
+
+    // If ingredient is already assigned to this product, show it regardless of status
+    // Otherwise, only show if it's available
+    return matchesSearch && (isAssignedToProduct || ingredient.isAvailable);
+  });
 
   return (
     <AnimatePresence>
