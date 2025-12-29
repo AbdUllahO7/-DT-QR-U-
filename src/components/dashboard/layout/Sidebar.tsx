@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { SidebarProps } from '../../../types/BranchManagement/type';
+import BranchSelector from '../common/BranchSelector';
 
 
 
@@ -30,7 +31,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   branchName,
   isBranchOnly,
   onLogout,
-
+  onSelectBranch,
+  onBackToMain,
 }) => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
@@ -49,6 +51,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleHomeClick = () => {
     navigate('/');
   };
+
+  // Determine which menu to show based on branch selection
+  const showBranchMenu = branchName !== null;
 
   return (
     <>
@@ -84,29 +89,55 @@ const Sidebar: React.FC<SidebarProps> = ({
             </button>
           </div>
 
+          {/* Branch Selector - Only for restaurant users */}
+          {!isBranchOnly && (
+            <div className="px-6 py-3 border-b border-gray-200 dark:border-gray-700">
+              <BranchSelector
+                restaurantName={restaurantName}
+                branchName={branchName}
+                onSelectBranch={onSelectBranch}
+                onBackToMain={onBackToMain}
+              />
+            </div>
+          )}
+
           {/* Restaurant & Branch Info */}
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-lg font-medium text-gray-800 dark:text-gray-200 truncate">
               {restaurantName}
             </h2>
-          
 
-         
+
+
           </div>
 
           {/* Navigation */}
           <nav className="mt-5 flex-1 px-3 space-y-1">
-            <button
-              onClick={() => handleNavigate('overview', 'overview')}
-              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                activeTab === 'overview'
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              } ${isRTL ? 'text-right' : 'text-left'}`}
-            >
-              <BarChart3 className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-              <span className="truncate">{t('dashboard.overview.title')}</span>
-            </button>
+            {/* Back to Restaurant Button - Only shown in branch mode */}
+            {showBranchMenu && (
+              <button
+                onClick={onBackToMain}
+                className={`w-full flex items-center px-3 py-2.5 mb-3 rounded-md transition-colors duration-200 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 border-2 border-dashed border-gray-300 dark:border-gray-600 ${isRTL ? 'text-right' : 'text-left'}`}
+              >
+                <Store className={`h-5 w-5 dark:text-white ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                <span className="text-sm dark:text-white">{t('dashboard.sidebar.backToRestaurant') || 'Back to Restaurant'}</span>
+              </button>
+            )}
+
+            {/* Restaurant Menu Items - Only shown when NOT in branch mode */}
+            {!showBranchMenu && (
+              <>
+                <button
+                  onClick={() => handleNavigate('overview', 'overview')}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
+                    activeTab === 'overview'
+                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <BarChart3 className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  <span className="truncate">{t('dashboard.overview.title')}</span>
+                </button>
              <button
               onClick={() => handleNavigate('RestaurantManagement', 'RestaurantManagement')}
               className={`w-full flex items-center text-sm px-3 py-2 rounded-md transition-colors duration-200 ${
@@ -229,7 +260,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               </button>
             )}
 
-       
+
            {!isBranchOnly && (
               <button
                 onClick={() => handleNavigate('ResturantSettings', 'ResturantSettings')}
@@ -242,9 +273,100 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <Settings className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
                 <span>{t('dashboard.settings.title')}</span>
               </button>
-              
+
             )}
-              
+              </>
+            )}
+
+            {/* Branch Menu Items - Only shown when in branch mode */}
+            {showBranchMenu && (
+              <>
+                <button
+                  onClick={() => handleNavigate('branchProducts', 'branchProducts')}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
+                    activeTab === 'branchProducts'
+                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <ShoppingCart className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  <span>{t('dashboard.branchProducts.title') || 'Branch Products'}</span>
+                </button>
+
+                <button
+                  onClick={() => handleNavigate('TableManagement', 'TableManagement')}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
+                    activeTab === 'TableManagement'
+                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <Table className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  <span>{t('dashboard.tables.title')}</span>
+                </button>
+
+                <button
+                  onClick={() => handleNavigate('BranchManagement', 'BranchManagement')}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
+                    activeTab === 'BranchManagement'
+                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <Building2 className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  <span>{t('dashboard.branchManagement.title') || 'Branch Management'}</span>
+                </button>
+
+                <button
+                  onClick={() => handleNavigate('Branchorders', 'Branchorders')}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
+                    activeTab === 'Branchorders'
+                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <HardHat className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  <span>{t('dashboard.orders.title')}</span>
+                </button>
+
+                <button
+                  onClick={() => handleNavigate('orderType', 'orderType')}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
+                    activeTab === 'orderType'
+                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <Type className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  <span>{t('dashboard.orderType.title')}</span>
+                </button>
+
+                <button
+                  onClick={() => handleNavigate('moneyCase', 'moneyCase')}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
+                    activeTab === 'moneyCase'
+                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <DollarSign className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  <span>{t('dashboard.moneyCase.title')}</span>
+                </button>
+
+                <button
+                  onClick={() => handleNavigate('BranchSettings', 'BranchSettings')}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
+                    activeTab === 'BranchSettings'
+                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <Settings className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  <span>{t('dashboard.settings.title')}</span>
+                </button>
+              </>
+            )}
+
           </nav>
 
           {/* Logout */}

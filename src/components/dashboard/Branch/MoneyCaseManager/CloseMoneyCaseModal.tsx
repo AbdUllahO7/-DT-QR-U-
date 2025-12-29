@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Lock, AlertTriangle } from 'lucide-react';
+import { X, Lock, AlertTriangle, AlertCircle } from 'lucide-react';
 import { ActiveMoneyCase } from '../../../../types/BranchManagement/MoneyCase';
 
 interface Props {
@@ -14,6 +14,7 @@ interface Props {
   onClose: () => void;
   t: (key: string) => string;
   isRTL: boolean;
+  error?: string | null;
 }
 
 const CloseMoneyCaseModal: React.FC<Props> = ({
@@ -27,7 +28,8 @@ const CloseMoneyCaseModal: React.FC<Props> = ({
   onConfirm,
   onClose,
   t,
-  isRTL
+  isRTL,
+  error,
 }) => {
   if (!show) return null;
   const expectedCash = activeCase?.totalAmount || activeCase?.currentBalance || 0;
@@ -38,8 +40,8 @@ const CloseMoneyCaseModal: React.FC<Props> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         {/* Backdrop */}
-        <div 
-          className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" 
+        <div
+          className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
           onClick={onClose}
         />
 
@@ -65,6 +67,19 @@ const CloseMoneyCaseModal: React.FC<Props> = ({
 
           {/* Body */}
           <div className="px-6 py-4 space-y-4">
+            {/* Error Message */}
+            {error && (
+              <div className={`p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg ${isRTL ? 'text-right' : 'text-left'}`}>
+                <div className={`flex items-start ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <AlertCircle className={`h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 ${isRTL ? 'ml-3' : 'mr-3'} mt-0.5`} />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-red-800 dark:text-red-300">
+                      {error}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Expected Cash */}
             <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
               <p className="text-sm font-medium text-blue-900 dark:text-blue-300">

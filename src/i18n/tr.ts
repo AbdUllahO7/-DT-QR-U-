@@ -378,7 +378,14 @@ hero: {
     sidebar: {
        title : "QR Menü",
       logout: 'Çıkış Yap',
-      branch: 'Şube'
+      branch: 'Şube',
+      backToRestaurant: 'Restoran Paneline Geri Dön'
+    },
+    branchProducts: {
+      title: 'Şube Ürünleri'
+    },
+    branchManagement: {
+      title: 'Şube Yönetimi'
     },
     changePhoto: 'Değiştir'
   },

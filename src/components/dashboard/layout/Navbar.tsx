@@ -4,7 +4,8 @@ import {
   Sun,
   Moon,
   Bell,
-  ChevronDown
+  ChevronDown,
+  Building2
 } from 'lucide-react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -106,9 +107,18 @@ const Navbar: React.FC<NavbarProps> = ({
               <Menu className="h-6 w-6" />
             </button>
             <div>
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-                {title}
-              </h1>
+              <div className="flex items-center space-x-2">
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  {title}
+                </h1>
+                {/* Branch Mode Indicator */}
+                {branchName && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                    <Building2 className="h-3 w-3 mr-1" />
+                    {branchName}
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {description}
               </p>

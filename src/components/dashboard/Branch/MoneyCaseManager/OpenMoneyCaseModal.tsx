@@ -1,6 +1,6 @@
 import React from 'react';
 // Import Info icon and the new type
-import { X, Unlock, Info } from 'lucide-react';
+import { X, Unlock, Info, AlertCircle } from 'lucide-react';
 import { PreviousCloseInfo } from '../../../../types/BranchManagement/MoneyCase';
 
 interface Props {
@@ -14,6 +14,7 @@ interface Props {
   isRTL: boolean;
   // Add new prop to receive previous close data
   previousCloseInfo: PreviousCloseInfo | null;
+  error?: string | null;
 }
 
 const OpenMoneyCaseModal: React.FC<Props> = ({
@@ -26,6 +27,7 @@ const OpenMoneyCaseModal: React.FC<Props> = ({
   t,
   isRTL,
   previousCloseInfo,
+  error,
 }) => {
   if (!show) return null;
 
@@ -33,8 +35,8 @@ const OpenMoneyCaseModal: React.FC<Props> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         {/* Backdrop */}
-        <div 
-          className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" 
+        <div
+          className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
           onClick={onClose}
         />
 
@@ -60,6 +62,19 @@ const OpenMoneyCaseModal: React.FC<Props> = ({
 
           {/* Body */}
           <div className="px-6 py-4">
+            {/* Error Message */}
+            {error && (
+              <div className={`mb-4 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg ${isRTL ? 'text-right' : 'text-left'}`}>
+                <div className={`flex items-start ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <AlertCircle className={`h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0 ${isRTL ? 'ml-3' : 'mr-3'} mt-0.5`} />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-red-800 dark:text-red-300">
+                      {error}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
             
             {/* NEW: Previous Close Info Box */}
             {previousCloseInfo && previousCloseInfo.hasPreviousClose && (

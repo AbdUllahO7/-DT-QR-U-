@@ -9,9 +9,11 @@ import BranchWorkingHours from './BranchWorkingHours';
 import { BranchData, EditDataType } from '../../../../types/BranchManagement/type';
 import { countriesWithCodes } from '../../../../data/mockData';
 
+interface BranchManagementBranchProps {
+  branchId?: number;
+}
 
-
-const BranchManagementBranch: React.FC = () => {
+const BranchManagementBranch: React.FC<BranchManagementBranchProps> = ({ branchId }) => {
   const { t, isRTL } = useLanguage();
   const [branches, setBranches] = useState<BranchData[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<BranchData | null>(null);

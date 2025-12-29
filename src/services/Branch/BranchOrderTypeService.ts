@@ -1,4 +1,4 @@
-import { httpClient } from "../../utils/http";
+import { httpClient, getEffectiveBranchId } from "../../utils/http";
 import { logger } from "../../utils/logger";
 
 // Core OrderType interface
@@ -78,9 +78,12 @@ class OrderTypeService {
 
   async getOrderTypes(branchId?: number): Promise<OrderType[]> {
   try {
-    const url = branchId ? `${this.baseUrl}?branchId=${branchId}` : this.baseUrl;
-    
-    logger.info('OrderType listesi getirme isteği gönderiliyor', { branchId }, { prefix: 'OrderTypeService' });
+    // Get effective branch ID (from parameter, localStorage, or token)
+    const effectiveBranchId = branchId || getEffectiveBranchId();
+
+    const url = effectiveBranchId ? `${this.baseUrl}?branchId=${effectiveBranchId}` : this.baseUrl;
+
+    logger.info('OrderType listesi getirme isteği gönderiliyor', { branchId: effectiveBranchId }, { prefix: 'OrderTypeService' });
     
     const response = await httpClient.get<OrderType[] | GetOrderTypesResponse>(url);
     
@@ -239,10 +242,14 @@ class OrderTypeService {
 
   async getOrderTypeById(id: number): Promise<OrderType> {
     try {
-      logger.info('OrderType detay getirme isteği gönderiliyor', { id }, { prefix: 'OrderTypeService' });
-      
-      const response = await httpClient.get<{ data: OrderType }>(`${this.baseUrl}/${id}`);
-      
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('OrderType detay getirme isteği gönderiliyor', { id, branchId }, { prefix: 'OrderTypeService' });
+
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.get<{ data: OrderType }>(`${this.baseUrl}/${id}`, { params });
+
       logger.info('OrderType detayı başarıyla alındı', response.data, { prefix: 'OrderTypeService' });
       return response.data.data;
     } catch (error: any) {
@@ -253,8 +260,11 @@ class OrderTypeService {
 
   async updateOrderType(id: number, data: UpdateOrderTypeDto): Promise<OrderType> {
     try {
-      logger.info('OrderType güncelleme isteği gönderiliyor', { id, data }, { prefix: 'OrderTypeService' });
-      
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('OrderType güncelleme isteği gönderiliyor', { id, data, branchId }, { prefix: 'OrderTypeService' });
+
       // Trim string values
       const updateData: UpdateOrderTypeDto = {
         id:data.id,
@@ -273,28 +283,33 @@ class OrderTypeService {
         estimatedMinutes: data.estimatedMinutes || 0,
         rowVersion: data.rowVersion
       };
-      
-      const response = await httpClient.put<{ data: OrderType }>(`${this.baseUrl}/${id}`, updateData);
-      
+
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.put<{ data: OrderType }>(`${this.baseUrl}/${id}`, updateData, { params });
+
       logger.info('OrderType başarıyla güncellendi', response.data, { prefix: 'OrderTypeService' });
       return response.data.data;
     } catch (error: any) {
       logger.error('OrderType güncelleme hatası', error, { prefix: 'OrderTypeService' });
-      
+
       if (error.response?.data?.errors) {
         logger.error('API Validation Hataları:', error.response.data.errors, { prefix: 'OrderTypeService' });
       }
-      
+
       this.handleError(error, 'OrderType güncellenirken hata oluştu');
     }
   }
 
   async deleteOrderType(id: number): Promise<void> {
     try {
-      logger.info('OrderType silme isteği gönderiliyor', { id }, { prefix: 'OrderTypeService' });
-      
-      await httpClient.delete(`${this.baseUrl}/${id}`);
-      
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('OrderType silme isteği gönderiliyor', { id, branchId }, { prefix: 'OrderTypeService' });
+
+      const params = branchId ? { branchId } : {};
+      await httpClient.delete(`${this.baseUrl}/${id}`, { params });
+
       logger.info('OrderType başarıyla silindi', { id }, { prefix: 'OrderTypeService' });
     } catch (error: any) {
       logger.error('OrderType silme hatası', error, { prefix: 'OrderTypeService' });
@@ -305,9 +320,13 @@ class OrderTypeService {
   // ✅ UPDATED: Now accepts expanded UpdateOrderTypeSettingsDto with all fields
   async updateOrderTypeSettings(id: number, data: UpdateOrderTypeSettingsDto): Promise<OrderType> {
     try {
-      logger.info('OrderType ayarları güncelleme isteği gönderiliyor', { id, data }, { prefix: 'OrderTypeService' });
-      
-      const response = await httpClient.put<any>(`${this.baseUrl}/${id}/settings`, data);
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('OrderType ayarları güncelleme isteği gönderiliyor', { id, data, branchId }, { prefix: 'OrderTypeService' });
+
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.put<any>(`${this.baseUrl}/${id}/settings`, data, { params });
 
       let orderType: OrderType | null = null;
       
@@ -446,18 +465,22 @@ class OrderTypeService {
 
   async reorderOrderTypes(reorderData: ReorderOrderTypeDto[]): Promise<void> {
     try {
-      logger.info('OrderType sıralama güncelleme isteği gönderiliyor', reorderData, { prefix: 'OrderTypeService' });
-      
-      await httpClient.put(`${this.baseUrl}/reorder`, reorderData);
-      
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('OrderType sıralama güncelleme isteği gönderiliyor', { reorderData, branchId }, { prefix: 'OrderTypeService' });
+
+      const params = branchId ? { branchId } : {};
+      await httpClient.put(`${this.baseUrl}/reorder`, reorderData, { params });
+
       logger.info('OrderType sıralaması başarıyla güncellendi', null, { prefix: 'OrderTypeService' });
     } catch (error: any) {
       logger.error('OrderType sıralama güncelleme hatası', error, { prefix: 'OrderTypeService' });
-      
+
       if (error.response?.data?.errors) {
         logger.error('API Validation Hataları:', error.response.data.errors, { prefix: 'OrderTypeService' });
       }
-      
+
       this.handleError(error, 'OrderType sıralaması güncellenirken hata oluştu');
     }
   }

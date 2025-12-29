@@ -299,15 +299,41 @@ export const isBranchOnlyUser = (): boolean => {
   try {
     const token = localStorage.getItem('token');
     if (!token) return false;
-    
+
     const decoded = decodeToken(token);
     const hasRestaurantId = decoded?.restaurant_id && decoded?.restaurant_id !== "" && decoded?.restaurant_id !== null && decoded?.restaurant_id !== undefined;
     const hasBranchId = decoded?.branch_id && decoded?.branch_id !== "" && decoded?.branch_id !== null && decoded?.branch_id !== undefined;
-    
+
     return !hasRestaurantId && hasBranchId;
   } catch (error) {
     console.error('Kullanıcı tipi kontrol edilirken hata:', error);
     return false;
+  }
+};
+
+/**
+ * Get the effective branch ID to use for API calls.
+ * Priority:
+ * 1. Selected branch from localStorage (when restaurant user selects a branch)
+ * 2. Branch ID from JWT token (for branch-only users)
+ * 3. null if neither exists
+ */
+export const getEffectiveBranchId = (): number | null => {
+  try {
+    // First, check if there's a selected branch in localStorage (restaurant user selection)
+    const selectedBranchId = localStorage.getItem('selectedBranchId');
+    if (selectedBranchId) {
+      const parsed = parseInt(selectedBranchId, 10);
+      if (!isNaN(parsed)) {
+        return parsed;
+      }
+    }
+
+    // Fall back to branch ID from token (for branch-only users)
+    return getBranchIdFromToken();
+  } catch (error) {
+    console.error('Effective branch ID alınırken hata:', error);
+    return getBranchIdFromToken();
   }
 }; 
 

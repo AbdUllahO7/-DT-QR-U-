@@ -7,10 +7,8 @@ import {
   MoonStar, 
   Sun, 
   Settings as SettingsIcon,
-  User,
   Shield,
   Palette,
-  Globe,
   Smartphone,
   Volume2,
   Eye,
@@ -19,10 +17,8 @@ import {
   Upload,
   Trash2,
   Save,
-  AlertCircle,
   Info,
-  ChevronRight,
-  EyeOff,
+
   Languages,
   Clock,
   Calendar,
@@ -30,7 +26,6 @@ import {
   Database,
   HardDrive,
   Wifi,
-  WifiOff
 } from 'lucide-react';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { useLanguage } from '../../../../contexts/LanguageContext';
@@ -38,8 +33,11 @@ import BranchPreferencesTab from './BranchPreferencesTab';
 import { UserSettingsState } from '../../../../types/BranchManagement/type';
 
 
+interface BranchSettingsProps {
+  branchId?: number;
+}
 
-const BranchSettings: React.FC = () => {
+const BranchSettings: React.FC<BranchSettingsProps> = ({ branchId }) => {
   const { isDark, toggleTheme } = useTheme();
   const { t, language, setLanguage } = useLanguage();
   const isRTL = language === 'ar';

@@ -238,41 +238,7 @@ export const EditCategoryModal: React.FC<{
                 
                   </div>
 
-                  {/* Description */}
-                  <div className="space-y-2">
-                    <label 
-                      htmlFor="description" 
-                      className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}
-                    >
-                      <FileText className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                      <span>{t('editCategoryModal.form.description.label')}</span>
-                    </label>
-                    
-                    <div className="relative">
-                      <textarea
-                        id="description"
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        onFocus={() => setFocusedField('description')}
-                        onBlur={() => setFocusedField('')}
-                        maxLength={maxDescLength}
-                        rows={4}
-                        className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 resize-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
-                          focusedField === 'description'
-                            ? 'border-primary-500 dark:border-primary-400 bg-primary-50/50 dark:bg-primary-900/10 focus:ring-4 focus:ring-primary-500/20'
-                            : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400 dark:hover:border-gray-500'
-                        } focus:outline-none`}
-                        placeholder={t('editCategoryModal.form.description.placeholder')}
-                      />
-                      
-                      {/* Character Counter */}
-                      <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} bottom-3 text-xs text-gray-400`}>
-                        {descriptionLength}/{maxDescLength}
-                      </div>
-                    </div>
-
-                   
-                  </div>
+            
 
                   {/* Status Toggle - Enhanced */}
                   <div className="relative rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 p-5 border border-gray-200 dark:border-gray-600">

@@ -1,6 +1,6 @@
 import { BranchOrder, ConfirmOrderDto, CreateSessionOrderDto, Order, OrderItem, OrderTrackingInfo, PendingOrder, QRTrackingInfo, RejectOrderDto, SmartCreateOrderDto, TableBasketSummary, UpdateOrderStatusDto, OrderStatus } from '../../types/BranchManagement/type';
 import { CancelOrderDto, OrderStatusEnums, UpdatableOrder, UpdatePendingOrderDto } from '../../types/Orders/type';
-import { httpClient } from '../../utils/http';
+import { httpClient, getEffectiveBranchId } from '../../utils/http';
 import { logger } from '../../utils/logger';
 import { OrderType, orderTypeService } from './BranchOrderTypeService';
 
@@ -47,17 +47,20 @@ class OrderService {
 
   async createSessionOrder(data: CreateSessionOrderDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Session order oluşturma isteği gönderiliyor', { data, branchId }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/from-session?branchId=${branchId}`
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Session order oluşturma isteği gönderiliyor', { data, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/from-session?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/from-session`;
-        
+
       const response = await httpClient.post<Order>(url, data);
-      
-      logger.info('Session order başarıyla oluşturuldu', { 
+
+      logger.info('Session order başarıyla oluşturuldu', {
         orderId: response.data,
-        branchId
+        branchId: effectiveBranchId
       }, { prefix: 'OrderService' });
       
       return response.data;
@@ -67,41 +70,44 @@ class OrderService {
   }
 
   async getBranchOrders(
-    branchId?: number, 
-    page: number = 1, 
+    branchId?: number,
+    page: number = 1,
     pageSize: number = 10
   ): Promise<{ orders: BranchOrder[], totalItems: number, totalPages: number }> {
     // ✅ Add validation to prevent pageSize = 0
     const validPageSize = pageSize > 0 ? pageSize : 10;
     const validPage = page > 0 ? page : 1;
-    
-    const requestKey = `branch-${branchId}-${validPage}-${validPageSize}`;
-    
+
+    // Get effective branch ID (from parameter, localStorage, or token)
+    const effectiveBranchId = branchId || getEffectiveBranchId();
+
+    const requestKey = `branch-${effectiveBranchId}-${validPage}-${validPageSize}`;
+
     if (this.pendingConfigs.has(requestKey)) {
       return { orders: [], totalItems: 0, totalPages: 0 };
     }
-    
+
     if (this.activeRequests.has(requestKey)) {
       return this.activeRequests.get(requestKey)!;
     }
 
     try {
       this.pendingConfigs.add(requestKey);
-      
-      logger.info('Branch orders getirme isteği başlatılıyor', { 
-        branchId, 
-        page: validPage, 
-        pageSize: validPageSize 
+
+      logger.info('Branch orders getirme isteği başlatılıyor', {
+        branchId: effectiveBranchId,
+        page: validPage,
+        pageSize: validPageSize
       }, { prefix: 'OrderService' });
-      
+
       const params: any = {
         page: validPage,
         pageSize: validPageSize,
         includeItems: true
       };
-      
-      if (branchId) {
-        params.branchId = branchId;
+
+      if (effectiveBranchId) {
+        params.branchId = effectiveBranchId;
       }
       
       
@@ -144,18 +150,21 @@ class OrderService {
 
   // Similar pattern for getPendingOrders
   async getPendingOrders(branchId?: number): Promise<PendingOrder[]> {
-    const requestKey = `pending-${branchId}`;
-    
+    // Get effective branch ID (from parameter, localStorage, or token)
+    const effectiveBranchId = branchId || getEffectiveBranchId();
+
+    const requestKey = `pending-${effectiveBranchId}`;
+
     if (this.activeRequests.has(requestKey)) {
       return this.activeRequests.get(requestKey)!;
     }
 
     try {
-      const url = branchId 
-        ? `${this.baseUrl}/pending?branchId=${branchId}` 
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/pending?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/pending`;
-        
-      logger.info('Pending orders getirme isteği gönderiliyor', { branchId }, { prefix: 'OrderService' });
+
+      logger.info('Pending orders getirme isteği gönderiliyor', { branchId: effectiveBranchId }, { prefix: 'OrderService' });
       
       const requestPromise = httpClient.get<PendingOrder[]>(url)
         .then(response => {
@@ -183,21 +192,24 @@ class OrderService {
 
   async getTableOrders(tableId: number, branchId?: number): Promise<Order[]> {
     try {
-      logger.info('Table orders getirme isteği gönderiliyor', { tableId, branchId }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/table/${tableId}?branchId=${branchId}`
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Table orders getirme isteği gönderiliyor', { tableId, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/table/${tableId}?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/table/${tableId}`;
-        
+
       const response = await httpClient.get<Order[]>(url);
       const orders = Array.isArray(response.data) ? response.data : [];
-      
-      logger.info('Table orders başarıyla alındı', { 
+
+      logger.info('Table orders başarıyla alındı', {
         tableId,
-        branchId,
-        ordersCount: orders.length 
+        branchId: effectiveBranchId,
+        ordersCount: orders.length
       }, { prefix: 'OrderService' });
-      
+
       return orders;
     } catch (error: any) {
       logger.error('Table orders getirme hatası', error, { prefix: 'OrderService' });
@@ -207,17 +219,20 @@ class OrderService {
 
   async getOrder(orderId: string, branchId?: number): Promise<Order> {
     try {
-      logger.info('Order getirme isteği gönderiliyor', { orderId, branchId }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/${orderId}?branchId=${branchId}`
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Order getirme isteği gönderiliyor', { orderId, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/${orderId}?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/${orderId}`;
-        
+
       const response = await httpClient.get<Order>(url);
-      
-      logger.info('Order başarıyla alındı', { 
+
+      logger.info('Order başarıyla alındı', {
         orderId,
-        branchId,
+        branchId: effectiveBranchId,
         customerName: response.data.customerName,
         status: response.data.status
       }, { prefix: 'OrderService' });
@@ -231,17 +246,20 @@ class OrderService {
 
   async confirmOrder(orderId: string, data: ConfirmOrderDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Order onaylama isteği gönderiliyor', { orderId, data, branchId }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/${orderId}/confirm?branchId=${branchId}`
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Order onaylama isteği gönderiliyor', { orderId, data, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/${orderId}/confirm?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/${orderId}/confirm`;
-        
+
       const response = await httpClient.post<Order>(url, data);
-      
-      logger.info('Order başarıyla onaylandı', { 
+
+      logger.info('Order başarıyla onaylandı', {
         orderId,
-        branchId,
+        branchId: effectiveBranchId,
         newStatus: response.data.status
       }, { prefix: 'OrderService' });
       
@@ -254,17 +272,20 @@ class OrderService {
 
   async rejectOrder(orderId: string, data: RejectOrderDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Order reddetme isteği gönderiliyor', { orderId, data, branchId }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/${orderId}/reject?branchId=${branchId}`
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Order reddetme isteği gönderiliyor', { orderId, data, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/${orderId}/reject?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/${orderId}/reject`;
-        
+
       const response = await httpClient.post<Order>(url, data);
-      
-      logger.info('Order başarıyla reddedildi', { 
+
+      logger.info('Order başarıyla reddedildi', {
         orderId,
-        branchId,
+        branchId: effectiveBranchId,
         rejectionReason: data.rejectionReason
       }, { prefix: 'OrderService' });
       
@@ -277,17 +298,20 @@ class OrderService {
 
   async cancelOrder(data: CancelOrderDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Order iptal etme isteği gönderiliyor', { orderId: data.orderId, data, branchId }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/cancel?branchId=${branchId}`
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Order iptal etme isteği gönderiliyor', { orderId: data.orderId, data, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/cancel?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/cancel`;
-        
+
       const response = await httpClient.post<Order>(url, data);
-      
-      logger.info('Order başarıyla iptal edildi', { 
+
+      logger.info('Order başarıyla iptal edildi', {
         orderId: data.orderId,
-        branchId,
+        branchId: effectiveBranchId,
         cancellationReason: data.cancellationReason
       }, { prefix: 'OrderService' });
       
@@ -300,17 +324,20 @@ class OrderService {
 
   async updateOrderStatus(orderId: string, data: UpdateOrderStatusDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Order status güncelleme isteği gönderiliyor', { orderId, data, branchId }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/${orderId}/status?branchId=${branchId}`
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Order status güncelleme isteği gönderiliyor', { orderId, data, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/${orderId}/status?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/${orderId}/status`;
-        
+
       const response = await httpClient.put<Order>(url, data);
-      
-      logger.info('Order status başarıyla güncellendi', { 
+
+      logger.info('Order status başarıyla güncellendi', {
         orderId,
-        branchId,
+        branchId: effectiveBranchId,
         oldStatus: data.newStatus,
         newStatus: response.data.status
       }, { prefix: 'OrderService' });
@@ -381,16 +408,19 @@ class OrderService {
 
   async getTableBasketSummary(branchId?: number): Promise<TableBasketSummary[]> {
     try {
-      const url = branchId 
-        ? `${this.baseUrl}/table-basket-summary?branchId=${branchId}` 
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/table-basket-summary?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/table-basket-summary`;
-        
-      logger.info('Table basket summary getirme isteği gönderiliyor', { branchId }, { prefix: 'OrderService' });
+
+      logger.info('Table basket summary getirme isteği gönderiliyor', { branchId: effectiveBranchId }, { prefix: 'OrderService' });
       const response = await httpClient.get<TableBasketSummary[]>(url);
       const summaries = Array.isArray(response.data) ? response.data : [];
-      
-      logger.info('Table basket summary başarıyla alındı', { 
-        branchId,
+
+      logger.info('Table basket summary başarıyla alındı', {
+        branchId: effectiveBranchId,
         tablesCount: summaries.length,
         activeBaskets: summaries.filter(s => s.hasActiveBasket).length
       }, { prefix: 'OrderService' });
@@ -624,19 +654,22 @@ class OrderService {
   // <<< NEW METHOD ADDED HERE >>>
   async updatePendingOrder(data: UpdatePendingOrderDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Pending order güncelleme isteği gönderiliyor', { 
-        orderId: data.orderId, 
-        branchId 
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Pending order güncelleme isteği gönderiliyor', {
+        orderId: data.orderId,
+        branchId: effectiveBranchId
       }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/updatepending?branchId=${branchId}`
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/updatepending?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/updatepending`;
       const response = await httpClient.put<Order>(url, data);
-      
-      logger.info('Pending order başarıyla güncellendi', { 
+
+      logger.info('Pending order başarıyla güncellendi', {
         orderId: response.data.orderId,
-        branchId,
+        branchId: effectiveBranchId,
         newStatus: response.data.status
       }, { prefix: 'OrderService' });
       
@@ -650,25 +683,28 @@ class OrderService {
   // <<< UPDATED METHOD HERE >>>
   async getUpdatableOrders(branchId?: number): Promise<UpdatableOrder[]> {
     try {
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
       const params: any = {
-        includeItems: true // <-- ADDED PARAM
+        includeItems: true
       };
-      if (branchId) {
-        params.branchId = branchId;
+      if (effectiveBranchId) {
+        params.branchId = effectiveBranchId;
       }
-        
-      logger.info('Updatable orders getirme isteği gönderiliyor', { branchId, params }, { prefix: 'OrderService' });
-      
+
+      logger.info('Updatable orders getirme isteği gönderiliyor', { branchId: effectiveBranchId, params }, { prefix: 'OrderService' });
+
       // Updated to use params object
       const response = await httpClient.get<UpdatableOrder[]>(`${this.baseUrl}/updatable`, {
-         params 
+         params
       });
-      
+
       const orders = Array.isArray(response.data) ? response.data : [];
 
-      logger.info('Updatable orders başarıyla alındı', { 
-        branchId,
-        ordersCount: orders.length 
+      logger.info('Updatable orders başarıyla alındı', {
+        branchId: effectiveBranchId,
+        ordersCount: orders.length
       }, { prefix: 'OrderService' });
 
       return orders;

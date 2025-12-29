@@ -376,7 +376,14 @@ hero: {
     sidebar: {
       title : "QR Menu",
       logout: 'Logout',
-      branch: 'Branch'
+      branch: 'Branch',
+      backToRestaurant: 'Back to Restaurant Panel'
+    },
+    branchProducts: {
+      title: 'Branch Products'
+    },
+    branchManagement: {
+      title: 'Branch Management'
     }
   },
 

@@ -18,7 +18,11 @@ import SuccessNotification from './SuccessNotification';
 import OrdersTable from './OrdersTable';
 import CancelModal from './CancelModal';
 
-const OrdersManager: React.FC = () => {
+interface OrdersManagerProps {
+  branchId?: number;
+}
+
+const OrdersManager: React.FC<OrdersManagerProps> = ({ branchId }) => {
   const { t, language } = useLanguage();
   const lang = language;
   const intervalRef = useRef<number | null>(null);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
+import {
   Plus,
   Search,
   Building,
@@ -14,9 +14,9 @@ import {
   Copy,
   Trash2
 } from 'lucide-react';
-import { 
-  CreateMenuTableDto, 
-  UpdateMenuTableDto, 
+import {
+  CreateMenuTableDto,
+  UpdateMenuTableDto,
   CreateTableCategoryDto,
   UpdateTableCategoryDto,
   BatchCreateMenuTableItemDto,
@@ -144,7 +144,11 @@ export const QRCodeModalShow: React.FC<{
   );
 };
 
-const BranchTableManagement: React.FC = () => {
+interface BranchTableManagementProps {
+  branchId?: number;
+}
+
+const BranchTableManagement: React.FC<BranchTableManagementProps> = ({ branchId }) => {
   const { t, isRTL } = useLanguage();
   
   const [categories, setCategories] = useState<CategoryData[]>([]);
