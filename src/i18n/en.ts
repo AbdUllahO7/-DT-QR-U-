@@ -2853,6 +2853,7 @@ hero: {
       title: 'Create New Role',
       step1Title: "Step 1: Basic Information",
       deselectAll:"Clear",
+      permissionsRequired: "* At least one permission is required",
       step2Title: "Step 2: Select Permissions",
       stepBasicInfo: "Basic Info",
       stepPermissions: "Permissions",

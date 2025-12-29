@@ -178,6 +178,7 @@ const handleOpenProductExtras = (productId: number, productName: string) => {
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string>('');
   const [isIngredientSelectionModalOpen, setIsIngredientSelectionModalOpen] = useState(false);
   const [selectedProductForIngredients, setSelectedProductForIngredients] = useState<{
     productId: number;
@@ -490,6 +491,7 @@ useEffect(() => {
       message: t('productsContent.delete.product.message', { productName: product.name }),
       onConfirm: async () => {
         setIsDeleting(true);
+        setDeleteError(''); // Clear previous errors
         try {
           await productService.deleteProduct(productId);
           setCategories(categories.map(cat => ({
@@ -497,11 +499,20 @@ useEffect(() => {
             products: cat.products?.filter(product => product.id !== productId)
           })));
           logger.info('Ürün başarıyla silindi', { productId });
+        } catch (error: any) {
+          logger.error('Ürün silinirken hata:', error);
+          // Extract error message from API response
+          const errorMessage = error.response?.data?.message ||
+                             error.message ||
+                             t('productsContent.error.deleteFailed');
+          setDeleteError(errorMessage);
+          throw error; // Re-throw to prevent modal from closing
         } finally {
           setIsDeleting(false);
         }
       }
     });
+    setDeleteError(''); // Clear error when opening modal
     setIsConfirmDeleteModalOpen(true);
   };
 
@@ -521,7 +532,7 @@ useEffect(() => {
 
   const handleDeleteCategory = (categoryId: number) => {
     const category = categories.find(cat => cat.categoryId === categoryId);
-    
+
     if (!category) {
       alert(t('productsContent.error.categoryNotFound'));
       return;
@@ -531,23 +542,28 @@ useEffect(() => {
       type: 'category',
       id: categoryId,
       title: t('productsContent.delete.category.title'),
-      message: category?.products?.length > 0
-        ? t('products.delete.category.messageWithProducts', { 
-            categoryName: category.categoryName, 
-            productCount: category?.products?.length 
-          })
-        : t('productsContent.delete.category.messageEmpty', { categoryName: category.categoryName }),
+      message: t('productsContent.delete.category.messageEmpty', { categoryName: category.categoryName }),
       onConfirm: async () => {
         setIsDeleting(true);
+        setDeleteError(''); // Clear previous errors
         try {
           await productService.deleteCategory(categoryId);
           setCategories(categories.filter(cat => cat.categoryId !== categoryId));
           logger.info('Kategori başarıyla silindi', { categoryId });
+        } catch (error: any) {
+          logger.error('Kategori silinirken hata:', error);
+          // Extract error message from API response
+          const errorMessage = error.response?.data?.message ||
+                             error.message ||
+                             t('productsContent.error.deleteFailed');
+          setDeleteError(errorMessage);
+          throw error; // Re-throw to prevent modal from closing
         } finally {
           setIsDeleting(false);
         }
       }
     });
+    setDeleteError(''); // Clear error when opening modal
     setIsConfirmDeleteModalOpen(true);
   };
 
@@ -1440,10 +1456,12 @@ useEffect(() => {
 
       {isConfirmDeleteModalOpen && deleteConfig && (
         <ConfirmDeleteModal
+          errorMessage={deleteError}
           isOpen={isConfirmDeleteModalOpen}
           onClose={() => {
             setIsConfirmDeleteModalOpen(false);
             setDeleteConfig(null);
+            setDeleteError(''); // Clear error when closing modal
           }}
           onConfirm={deleteConfig.onConfirm}
           title={deleteConfig.title}

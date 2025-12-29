@@ -39,7 +39,11 @@ export const EditCategoryModal: React.FC<{
       onClose();
     } catch (err: any) {
       logger.error('Kategori güncelleme hatası:', err);
-      setError(t('editCategoryModal.errors.updateFailed'));
+      // Extract error message from API response
+      const errorMessage = err.response?.data?.message ||
+                          err.message ||
+                          t('editCategoryModal.errors.updateFailed');
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

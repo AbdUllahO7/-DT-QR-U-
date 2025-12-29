@@ -43,17 +43,13 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
   const [chooseBranchId, setChooseBranchId] = useState(0);
 
   // Loading states
-  const [isCreatingRole, setIsCreatingRole] = useState(false);
-  const [isAssigningPermissions, setIsAssigningPermissions] = useState(false);
-
-  // Store created role ID
-  const [createdRoleId, setCreatedRoleId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setIsBranchDropdownOpen(false));
 
   // Combined loading state
-  const isBusy = isCreatingRole || isAssigningPermissions || isFetchingPermissions;
+  const isBusy = isSubmitting || isFetchingPermissions;
 
   // Fetch permissions when moving to step 2 or if branchId changes
   useEffect(() => {
@@ -75,7 +71,6 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
       setErrors({});
       setSelectedPermissions([]);
       setPermissionCatalog([]);
-      setCreatedRoleId(null);
     }
   }, [isOpen]);
 
@@ -120,12 +115,22 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleStep1Continue = async () => {
+  const handleStep1Continue = () => {
     if (!validateForm()) return;
+    // Just move to step 2 without creating the role yet
+    setCurrentStep(2);
+  };
 
+  const handleStep2Submit = async () => {
+    // Validate that at least one permission is selected
+    if (selectedPermissions.length === 0) {
+      logger.warn('No permissions selected', {}, { prefix: 'CreateRoleModal' });
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
-      setIsCreatingRole(true);
-
+      // First, create the role
       const payload: CreateRoleDto = {
         name: formData.name,
         description: formData.description,
@@ -136,80 +141,57 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
         payload.branchId = Number(formData.branchId);
       }
 
-      const response = await roleService.createRole(payload);
+      const createResponse = await roleService.createRole(payload);
 
-      if (!response.success || !response.data) {
+      if (!createResponse.success || !createResponse.data) {
         throw new Error(t('userManagementPage.error.createRoleFailed'));
       }
 
-      logger.info('Rol başarıyla oluşturuldu', response.data, {
+      logger.info('Rol başarıyla oluşturuldu', createResponse.data, {
         prefix: 'CreateRoleModal',
       });
-      setCreatedRoleId(response.data.roleId ?? null);
 
-      setCurrentStep(2);
+      const roleId = createResponse.data.roleId;
+
+      // Then, assign permissions
+      if (roleId) {
+        const response = await roleService.updateRolePermissions(
+          roleId,
+          { permissionIds: selectedPermissions }
+        );
+
+        if (response.success) {
+          logger.info(
+            'Rol izinleri başarıyla eklendi',
+            response.data,
+            { prefix: 'CreateRoleModal' }
+          );
+        } else {
+          logger.warn(
+            'Rol izinleri güncellenirken uyarı',
+            response,
+            { prefix: 'CreateRoleModal' }
+          );
+        }
+      }
+
+      onSuccess();
+      onClose();
 
     } catch (error: any) {
-      logger.error('Rol oluşturulurken hata', error, {
+      logger.error('Rol oluşturulurken veya izinler atanırken hata', error, {
         prefix: 'CreateRoleModal',
       });
       setErrors({
         name: error.message || t('userManagementPage.error.createRoleFailed')
       });
+      // Go back to step 1 to show the error
+      setCurrentStep(1);
     } finally {
-      setIsCreatingRole(false);
+      setIsSubmitting(false);
     }
   };
 
-  const handleStep2Submit = async () => {
-    if (!createdRoleId) {
-      logger.error('No role ID available', {}, { prefix: 'CreateRoleModal' });
-      return;
-    }
-
-    setIsAssigningPermissions(true);
-    try {
-      if (selectedPermissions.length === 0) {
-        logger.info('No permissions selected, skipping assignment.', {}, { prefix: 'CreateRoleModal' });
-        onSuccess();
-        onClose();
-        return;
-      }
-
-      const response = await roleService.updateRolePermissions(
-        createdRoleId,
-        { permissionIds: selectedPermissions }
-      );
-
-      if (response.success) {
-        logger.info(
-          'Rol izinleri başarıyla eklendi',
-          response.data,
-          { prefix: 'CreateRoleModal' }
-        );
-        onSuccess();
-        onClose();
-      } else {
-        logger.warn(
-          'Rol izinleri güncellenirken uyarı',
-          response,
-          { prefix: 'CreateRoleModal' }
-        );
-      }
-
-    } catch (error: any) {
-      logger.error('Rol izinleri atanırken hata', error, {
-        prefix: 'CreateRoleModal',
-      });
-    } finally {
-      setIsAssigningPermissions(false);
-    }
-  };
-
-  const handleSkipPermissions = async () => {
-    onSuccess();
-    onClose();
-  };
 
   const handlePermissionToggle = (permissionId: number) => {
     setSelectedPermissions((prev) =>
@@ -528,20 +510,11 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                       disabled={isBusy}
                       className="px-6 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
-                      {isCreatingRole ? (
-                        <>
-                          <Loader2 className="animate-spin h-4 w-4" />
-                          {t('userManagementPage.createRole.creating')}
-                        </>
+                      {t('userManagementPage.createRole.continue')}
+                      {isRTL ? (
+                        <ArrowLeft className="h-4 w-4" />
                       ) : (
-                        <>
-                          {t('userManagementPage.createRole.continue')}
-                          {isRTL ? (
-                            <ArrowLeft className="h-4 w-4" />
-                          ) : (
-                            <ArrowRight className="h-4 w-4" />
-                          )}
-                        </>
+                        <ArrowRight className="h-4 w-4" />
                       )}
                     </button>
                   </div>
@@ -565,6 +538,9 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                         </h5>
                         <p className="text-sm text-purple-800 dark:text-purple-300">
                           {t('userManagementPage.createRole.step2Description')}
+                        </p>
+                        <p className="text-sm text-purple-800 dark:text-purple-300 mt-2 font-medium">
+                          {t('userManagementPage.createRole.permissionsRequired') || '* At least one permission is required'}
                         </p>
                       </div>
                     </div>
@@ -691,48 +667,38 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                   </div>
 
                   {/* Step 2 Footer */}
-                  <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
                     <button
                       type="button"
-                      onClick={handleSkipPermissions}
+                      onClick={() => setCurrentStep(1)}
                       disabled={isBusy}
-                      className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white focus:outline-none disabled:opacity-50"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none disabled:opacity-50 flex items-center gap-2"
                     >
-                      {t('userManagementPage.createRole.skipPermissions')}
+                      {isRTL ? (
+                        <ArrowRight className="h-4 w-4" />
+                      ) : (
+                        <ArrowLeft className="h-4 w-4" />
+                      )}
+                      {t('userManagementPage.createRole.back')}
                     </button>
-                    <div className="flex space-x-4">
-                      <button
-                        type="button"
-                        onClick={() => setCurrentStep(1)}
-                        disabled={isBusy}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none disabled:opacity-50 flex items-center gap-2"
-                      >
-                        {isRTL ? (
-                          <ArrowRight className="h-4 w-4" />
-                        ) : (
-                          <ArrowLeft className="h-4 w-4" />
-                        )}
-                        {t('userManagementPage.createRole.back')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleStep2Submit}
-                        disabled={isBusy}
-                        className="px-6 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                      >
-                        {isAssigningPermissions ? (
-                          <>
-                            <Loader2 className="animate-spin h-4 w-4" />
-                            {t('userManagementPage.createRole.assigningPermissions')}
-                          </>
-                        ) : (
-                          <>
-                            <Check className="h-4 w-4" />
-                            {t('userManagementPage.createRole.finish')}
-                          </>
-                        )}
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={handleStep2Submit}
+                      disabled={isBusy || selectedPermissions.length === 0}
+                      className="px-6 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="animate-spin h-4 w-4" />
+                          {t('userManagementPage.createRole.creating')}
+                        </>
+                      ) : (
+                        <>
+                          <Check className="h-4 w-4" />
+                          {t('userManagementPage.createRole.finish')}
+                        </>
+                      )}
+                    </button>
                   </div>
                 </motion.div>
               )}

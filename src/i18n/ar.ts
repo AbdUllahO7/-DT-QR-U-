@@ -1534,7 +1534,6 @@ contact: {
     productMoveError: 'حدث خطأ أثناء نقل المنتج.'
   },
 
-  // Delete confirmations
   delete: {
     product: {
       title: 'حذف المنتج',
@@ -1549,7 +1548,6 @@ contact: {
     }
   },
 
-  // Error messages
   error: {
     loadFailed: 'فشل في تحميل البيانات',
     categoryNotFound: 'الفئة غير موجودة',
@@ -2860,6 +2858,7 @@ contact: {
       step2Title: "الخطوة ٢: تحديد الأذونات",
       stepBasicInfo: "المعلومات الأساسية",
       stepPermissions: "الأذونات",
+      permissionsRequired: "* يجب تحديد إذن واحد على الأقل",
       step1Info: "إنشاء دور",
       clear :"إلغاء تحديد الكل",
       step1Description: "أدخل المعلومات الأساسية للدور الجديد",
