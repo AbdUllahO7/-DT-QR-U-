@@ -2093,10 +2093,10 @@ hero: {
           required: 'Category selection is required'
         },
         status: {
-          label: 'Available in Stock',
-          description: 'Product will be visible in menu when available',
-          available: 'Available',
-          unavailable: 'Unavailable'
+          label: 'Active',
+          description: 'Product will be visible in menu when Active',
+          available: 'Active',
+          unavailable: 'Inactive'
         }
       },
 
@@ -5227,7 +5227,7 @@ extrasManagement: {
   },
 
   productExtras: {
-    manageCategories: 'Manage Product Categories',
+    manageCategories: 'Manage Product Extras Categories',
     manageExtras: 'Manage Extras',
     addCategory: 'Add Category',
     addExtra: 'Add Extra',

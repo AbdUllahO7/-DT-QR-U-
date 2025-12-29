@@ -6,13 +6,13 @@ const permissionTranslations: Record<string, { en: string; tr: string; ar: strin
   'branch.create': { en: 'Create Branch', tr: 'Şube Oluşturma', ar: 'إنشاء فرع' },
   'branch.delete': { en: 'Delete Branch', tr: 'Şube Silme', ar: 'حذف فرع' },
   'branch.update': { en: 'Update Branch', tr: 'Şube Güncelleme', ar: 'تحديث فرع' },
-  'branch.read': { en: 'View Branch', tr: 'Şube Görüntüleme', ar: 'عرض فرع' },
+  'branch.read': { en: 'Read Branch', tr: 'Şube Görüntüleme', ar: 'عرض فرع' },
 
   // Branch Category
   'branch.category.create': { en: 'Create Branch Category', tr: 'Şube Kategorisi Oluşturma', ar: 'إنشاء فئة فرع' },
   'branch.category.delete': { en: 'Delete Branch Category', tr: 'Şube Kategorisi Silme', ar: 'حذف فئة فرع' },
   'branch.category.update': { en: 'Update Branch Category', tr: 'Şube Kategorisi Güncelleme', ar: 'تحديث فئة فرع' },
-  'branch.category.read': { en: 'View Branch Category', tr: 'Şube Kategorisi Görüntüleme', ar: 'عرض فئة فرع' },
+  'branch.category.read': { en: 'Read Branch Category', tr: 'Şube Kategorisi Görüntüleme', ar: 'عرض فئة فرع' },
 
   // Branch Money Case
   'branch.money.case.open': { en: 'Open Money Case', tr: 'Kasa Açma', ar: 'فتح الخزينة' },
@@ -24,141 +24,141 @@ const permissionTranslations: Record<string, { en: string; tr: string; ar: strin
   'branch.product.create': { en: 'Create Branch Product', tr: 'Şube Ürünü Oluşturma', ar: 'إنشاء منتج فرع' },
   'branch.product.delete': { en: 'Delete Branch Product', tr: 'Şube Ürünü Silme', ar: 'حذف منتج فرع' },
   'branch.product.update': { en: 'Update Branch Product', tr: 'Şube Ürünü Güncelleme', ar: 'تحديث منتج فرع' },
-  'branch.product.read': { en: 'View Branch Product', tr: 'Şube Ürünü Görüntüleme', ar: 'عرض منتج فرع' },
+  'branch.product.read': { en: 'Read Branch Product', tr: 'Şube Ürünü Görüntüleme', ar: 'عرض منتج فرع' },
 
   // Branch Product Addon
   'branch.product.addon.create': { en: 'Create Branch Product Addon', tr: 'Şube Ürün Eklentisi Oluşturma', ar: 'إنشاء إضافة منتج فرع' },
   'branch.product.addon.delete': { en: 'Delete Branch Product Addon', tr: 'Şube Ürün Eklentisi Silme', ar: 'حذف إضافة منتج فرع' },
   'branch.product.addon.update': { en: 'Update Branch Product Addon', tr: 'Şube Ürün Eklentisi Güncelleme', ar: 'تحديث إضافة منتج فرع' },
-  'branch.product.addon.read': { en: 'View Branch Product Addon', tr: 'Şube Ürün Eklentisi Görüntüleme', ar: 'عرض إضافة منتج فرع' },
+  'branch.product.addon.read': { en: 'Read Branch Product Addon', tr: 'Şube Ürün Eklentisi Görüntüleme', ar: 'عرض إضافة منتج فرع' },
 
   // Branch Product Extra
   'branch.product.extra.create': { en: 'Create Branch Product Extra', tr: 'Şube Ürün Ekstrası Oluşturma', ar: 'إنشاء إضافي منتج فرع' },
   'branch.product.extra.delete': { en: 'Delete Branch Product Extra', tr: 'Şube Ürün Ekstrası Silme', ar: 'حذف إضافي منتج فرع' },
   'branch.product.extra.update': { en: 'Update Branch Product Extra', tr: 'Şube Ürün Ekstrası Güncelleme', ar: 'تحديث إضافي منتج فرع' },
-  'branch.product.extra.read': { en: 'View Branch Product Extra', tr: 'Şube Ürün Ekstrası Görüntüleme', ar: 'عرض إضافي منتج فرع' },
+  'branch.product.extra.read': { en: 'Read Branch Product Extra', tr: 'Şube Ürün Ekstrası Görüntüleme', ar: 'عرض إضافي منتج فرع' },
 
   // Branch Product Extra Category
   'branch.product.extra.category.create': { en: 'Create Branch Product Extra Category', tr: 'Şube Ürün Ekstra Kategorisi Oluşturma', ar: 'إنشاء فئة إضافي منتج فرع' },
   'branch.product.extra.category.delete': { en: 'Delete Branch Product Extra Category', tr: 'Şube Ürün Ekstra Kategorisi Silme', ar: 'حذف فئة إضافي منتج فرع' },
   'branch.product.extra.category.update': { en: 'Update Branch Product Extra Category', tr: 'Şube Ürün Ekstra Kategorisi Güncelleme', ar: 'تحديث فئة إضافي منتج فرع' },
-  'branch.product.extra.category.read': { en: 'View Branch Product Extra Category', tr: 'Şube Ürün Ekstra Kategorisi Görüntüleme', ar: 'عرض فئة إضافي منتج فرع' },
+  'branch.product.extra.category.read': { en: 'Read Branch Product Extra Category', tr: 'Şube Ürün Ekstra Kategorisi Görüntüleme', ar: 'عرض فئة إضافي منتج فرع' },
 
   // Branch QR Code
   'branch.qrcode.create': { en: 'Create QR Code', tr: 'QR Kodu Oluşturma', ar: 'إنشاء رمز QR' },
   'branch.qrcode.delete': { en: 'Delete QR Code', tr: 'QR Kodu Silme', ar: 'حذف رمز QR' },
   'branch.qrcode.update': { en: 'Update QR Code', tr: 'QR Kodu Güncelleme', ar: 'تحديث رمز QR' },
-  'branch.qrcode.read': { en: 'View QR Code', tr: 'QR Kodu Görüntüleme', ar: 'عرض رمز QR' },
+  'branch.qrcode.read': { en: 'Read QR Code', tr: 'QR Kodu Görüntüleme', ar: 'عرض رمز QR' },
 
   // Branch User
   'branch.user.create': { en: 'Create Branch User', tr: 'Şube Kullanıcısı Oluşturma', ar: 'إنشاء مستخدم فرع' },
   'branch.user.delete': { en: 'Delete Branch User', tr: 'Şube Kullanıcısı Silme', ar: 'حذف مستخدم فرع' },
   'branch.user.update': { en: 'Update Branch User', tr: 'Şube Kullanıcısı Güncelleme', ar: 'تحديث مستخدم فرع' },
-  'branch.user.read': { en: 'View Branch User', tr: 'Şube Kullanıcısı Görüntüleme', ar: 'عرض مستخدم فرع' },
+  'branch.user.read': { en: 'Read Branch User', tr: 'Şube Kullanıcısı Görüntüleme', ar: 'عرض مستخدم فرع' },
 
   // Branch Working Hour
   'branch.working.hour.update': { en: 'Update Working Hours', tr: 'Çalışma Saatleri Güncelleme', ar: 'تحديث ساعات العمل' },
-  'branch.working.hour.read': { en: 'View Working Hours', tr: 'Çalışma Saatleri Görüntüleme', ar: 'عرض ساعات العمل' },
+  'branch.working.hour.read': { en: 'Read Working Hours', tr: 'Çalışma Saatleri Görüntüleme', ar: 'عرض ساعات العمل' },
 
   // Category
   'category.create': { en: 'Create Category', tr: 'Kategori Oluşturma', ar: 'إنشاء فئة' },
   'category.delete': { en: 'Delete Category', tr: 'Kategori Silme', ar: 'حذف فئة' },
   'category.update': { en: 'Update Category', tr: 'Kategori Güncelleme', ar: 'تحديث فئة' },
-  'category.read': { en: 'View Category', tr: 'Kategori Görüntüleme', ar: 'عرض فئة' },
+  'category.read': { en: 'Read Category', tr: 'Kategori Görüntüleme', ar: 'عرض فئة' },
 
   // Extra
   'extra.create': { en: 'Create Extra', tr: 'Ekstra Oluşturma', ar: 'إنشاء إضافي' },
   'extra.delete': { en: 'Delete Extra', tr: 'Ekstra Silme', ar: 'حذف إضافي' },
   'extra.update': { en: 'Update Extra', tr: 'Ekstra Güncelleme', ar: 'تحديث إضافي' },
-  'extra.read': { en: 'View Extra', tr: 'Ekstra Görüntüleme', ar: 'عرض إضافي' },
+  'extra.read': { en: 'Read Extra', tr: 'Ekstra Görüntüleme', ar: 'عرض إضافي' },
 
   // Extra Category
   'extra.category.create': { en: 'Create Extra Category', tr: 'Ekstra Kategorisi Oluşturma', ar: 'إنشاء فئة إضافية' },
   'extra.category.delete': { en: 'Delete Extra Category', tr: 'Ekstra Kategorisi Silme', ar: 'حذف فئة إضافية' },
   'extra.category.update': { en: 'Update Extra Category', tr: 'Ekstra Kategorisi Güncelleme', ar: 'تحديث فئة إضافية' },
-  'extra.category.read': { en: 'View Extra Category', tr: 'Ekstra Kategorisi Görüntüleme', ar: 'عرض فئة إضافية' },
+  'extra.category.read': { en: 'Read Extra Category', tr: 'Ekstra Kategorisi Görüntüleme', ar: 'عرض فئة إضافية' },
 
   // Ingredient
   'ingredient.create': { en: 'Create Ingredient', tr: 'Malzeme Oluşturma', ar: 'إنشاء مكون' },
   'ingredient.delete': { en: 'Delete Ingredient', tr: 'Malzeme Silme', ar: 'حذف مكون' },
   'ingredient.update': { en: 'Update Ingredient', tr: 'Malzeme Güncelleme', ar: 'تحديث مكون' },
-  'ingredient.read': { en: 'View Ingredient', tr: 'Malzeme Görüntüleme', ar: 'عرض مكون' },
+  'ingredient.read': { en: 'Read Ingredient', tr: 'Malzeme Görüntüleme', ar: 'عرض مكون' },
 
   // Menu Table
   'menu.table.create': { en: 'Create Menu Table', tr: 'Masa Oluşturma', ar: 'إنشاء طاولة' },
   'menu.table.delete': { en: 'Delete Menu Table', tr: 'Masa Silme', ar: 'حذف طاولة' },
   'menu.table.update': { en: 'Update Menu Table', tr: 'Masa Güncelleme', ar: 'تحديث طاولة' },
-  'menu.table.read': { en: 'View Menu Table', tr: 'Masa Görüntüleme', ar: 'عرض طاولة' },
+  'menu.table.read': { en: 'Read Menu Table', tr: 'Masa Görüntüleme', ar: 'عرض طاولة' },
 
   // Menu Table Category
   'menu.table.category.create': { en: 'Create Table Category', tr: 'Masa Kategorisi Oluşturma', ar: 'إنشاء فئة طاولة' },
   'menu.table.category.delete': { en: 'Delete Table Category', tr: 'Masa Kategorisi Silme', ar: 'حذف فئة طاولة' },
   'menu.table.category.update': { en: 'Update Table Category', tr: 'Masa Kategorisi Güncelleme', ar: 'تحديث فئة طاولة' },
-  'menu.table.category.read': { en: 'View Table Category', tr: 'Masa Kategorisi Görüntüleme', ar: 'عرض فئة طاولة' },
+  'menu.table.category.read': { en: 'Read Table Category', tr: 'Masa Kategorisi Görüntüleme', ar: 'عرض فئة طاولة' },
 
   // Order
   'order.create': { en: 'Create Order', tr: 'Sipariş Oluşturma', ar: 'إنشاء طلب' },
   'order.delete': { en: 'Delete Order', tr: 'Sipariş Silme', ar: 'حذف طلب' },
   'order.update': { en: 'Update Order', tr: 'Sipariş Güncelleme', ar: 'تحديث طلب' },
-  'order.read': { en: 'View Order', tr: 'Sipariş Görüntüleme', ar: 'عرض طلب' },
+  'order.read': { en: 'Read Order', tr: 'Sipariş Görüntüleme', ar: 'عرض طلب' },
   'order.cancel': { en: 'Cancel Order', tr: 'Sipariş İptal Etme', ar: 'إلغاء طلب' },
 
   // Order Type
   'order.type.create': { en: 'Create Order Type', tr: 'Sipariş Tipi Oluşturma', ar: 'إنشاء نوع طلب' },
   'order.type.delete': { en: 'Delete Order Type', tr: 'Sipariş Tipi Silme', ar: 'حذف نوع طلب' },
   'order.type.update': { en: 'Update Order Type', tr: 'Sipariş Tipi Güncelleme', ar: 'تحديث نوع طلب' },
-  'order.type.read': { en: 'View Order Type', tr: 'Sipariş Tipi Görüntüleme', ar: 'عرض نوع طلب' },
+  'order.type.read': { en: 'Read Order Type', tr: 'Sipariş Tipi Görüntüleme', ar: 'عرض نوع طلب' },
 
   // Product
   'product.create': { en: 'Create Product', tr: 'Ürün Oluşturma', ar: 'إنشاء منتج' },
   'product.delete': { en: 'Delete Product', tr: 'Ürün Silme', ar: 'حذف منتج' },
   'product.update': { en: 'Update Product', tr: 'Ürün Güncelleme', ar: 'تحديث منتج' },
-  'product.read': { en: 'View Product', tr: 'Ürün Görüntüleme', ar: 'عرض منتج' },
+  'product.read': { en: 'Read Product', tr: 'Ürün Görüntüleme', ar: 'عرض منتج' },
   'product.edit': { en: 'Edit Product', tr: 'Ürün Düzenleme', ar: 'تعديل منتج' },
 
   // Product Addon
   'product.addon.create': { en: 'Create Product Addon', tr: 'Ürün Eklentisi Oluşturma', ar: 'إنشاء إضافة منتج' },
   'product.addon.delete': { en: 'Delete Product Addon', tr: 'Ürün Eklentisi Silme', ar: 'حذف إضافة منتج' },
   'product.addon.update': { en: 'Update Product Addon', tr: 'Ürün Eklentisi Güncelleme', ar: 'تحديث إضافة منتج' },
-  'product.addon.read': { en: 'View Product Addon', tr: 'Ürün Eklentisi Görüntüleme', ar: 'عرض إضافة منتج' },
+  'product.addon.read': { en: 'Read Product Addon', tr: 'Ürün Eklentisi Görüntüleme', ar: 'عرض إضافة منتج' },
 
   // Product Extra
   'product.extra.create': { en: 'Create Product Extra', tr: 'Ürün Ekstrası Oluşturma', ar: 'إنشاء إضافي منتج' },
   'product.extra.delete': { en: 'Delete Product Extra', tr: 'Ürün Ekstrası Silme', ar: 'حذف إضافي منتج' },
   'product.extra.update': { en: 'Update Product Extra', tr: 'Ürün Ekstrası Güncelleme', ar: 'تحديث إضافي منتج' },
-  'product.extra.read': { en: 'View Product Extra', tr: 'Ürün Ekstrası Görüntüleme', ar: 'عرض إضافي منتج' },
+  'product.extra.read': { en: 'Read Product Extra', tr: 'Ürün Ekstrası Görüntüleme', ar: 'عرض إضافي منتج' },
 
   // Product Extra Category
   'product.extra.category.create': { en: 'Create Product Extra Category', tr: 'Ürün Ekstra Kategorisi Oluşturma', ar: 'إنشاء فئة إضافي منتج' },
   'product.extra.category.delete': { en: 'Delete Product Extra Category', tr: 'Ürün Ekstra Kategorisi Silme', ar: 'حذف فئة إضافي منتج' },
   'product.extra.category.update': { en: 'Update Product Extra Category', tr: 'Ürün Ekstra Kategorisi Güncelleme', ar: 'تحديث فئة إضافي منتج' },
-  'product.extra.category.read': { en: 'View Product Extra Category', tr: 'Ürün Ekstra Kategorisi Görüntüleme', ar: 'عرض فئة إضافي منتج' },
+  'product.extra.category.read': { en: 'Read Product Extra Category', tr: 'Ürün Ekstra Kategorisi Görüntüleme', ar: 'عرض فئة إضافي منتج' },
 
   // Product Ingredient
   'product.ingredient.create': { en: 'Add Ingredient to Product', tr: 'Ürüne Malzeme Ekleme', ar: 'إضافة مكون إلى منتج' },
   'product.ingredient.delete': { en: 'Remove Ingredient from Product', tr: 'Üründen Malzeme Çıkarma', ar: 'إزالة مكون من منتج' },
-  'product.ingredient.read': { en: 'View Product Ingredients', tr: 'Ürün Malzemelerini Görüntüleme', ar: 'عرض مكونات المنتج' },
+  'product.ingredient.read': { en: 'Read Product Ingredients', tr: 'Ürün Malzemelerini Görüntüleme', ar: 'عرض مكونات المنتج' },
 
   // Restaurant
   'restaurant.create': { en: 'Create Restaurant', tr: 'Restoran Oluşturma', ar: 'إنشاء مطعم' },
   'restaurant.delete': { en: 'Delete Restaurant', tr: 'Restoran Silme', ar: 'حذف مطعم' },
   'restaurant.update': { en: 'Update Restaurant', tr: 'Restoran Güncelleme', ar: 'تحديث مطعم' },
-  'restaurant.read': { en: 'View Restaurant', tr: 'Restoran Görüntüleme', ar: 'عرض مطعم' },
+  'restaurant.read': { en: 'Read Restaurant', tr: 'Restoran Görüntüleme', ar: 'عرض مطعم' },
 
   // Restaurant User
   'restaurant.user.create': { en: 'Create Restaurant User', tr: 'Restoran Kullanıcısı Oluşturma', ar: 'إنشاء مستخدم مطعم' },
   'restaurant.user.delete': { en: 'Delete Restaurant User', tr: 'Restoran Kullanıcısı Silme', ar: 'حذف مستخدم مطعم' },
   'restaurant.user.update': { en: 'Update Restaurant User', tr: 'Restoran Kullanıcısı Güncelleme', ar: 'تحديث مستخدم مطعم' },
-  'restaurant.user.read': { en: 'View Restaurant User', tr: 'Restoran Kullanıcısı Görüntüleme', ar: 'عرض مستخدم مطعم' },
+  'restaurant.user.read': { en: 'Read Restaurant User', tr: 'Restoran Kullanıcısı Görüntüleme', ar: 'عرض مستخدم مطعم' },
 
   // Table Session
   'table.session.create': { en: 'Create Table Session', tr: 'Masa Oturumu Oluşturma', ar: 'إنشاء جلسة طاولة' },
   'table.session.delete': { en: 'Delete Table Session', tr: 'Masa Oturumu Silme', ar: 'حذف جلسة طاولة' },
   'table.session.update': { en: 'Update Table Session', tr: 'Masa Oturumu Güncelleme', ar: 'تحديث جلسة طاولة' },
-  'table.session.read': { en: 'View Table Session', tr: 'Masa Oturumu Görüntüleme', ar: 'عرض جلسة طاولة' },
+  'table.session.read': { en: 'Read Table Session', tr: 'Masa Oturumu Görüntüleme', ar: 'عرض جلسة طاولة' },
 
   // Table Summary
-  'table.summary.read': { en: 'View Table Summary', tr: 'Masa Özeti Görüntüleme', ar: 'عرض ملخص الطاولة' },
+  'table.summary.read': { en: 'Read Table Summary', tr: 'Masa Özeti Görüntüleme', ar: 'عرض ملخص الطاولة' },
 
   // Admin
   'admin.api.control': { en: 'API Control', tr: 'API Kontrolü', ar: 'التحكم في API' }
@@ -205,9 +205,7 @@ const categoryTranslations: Record<string, { en: string; tr: string; ar: string 
   'Admin': { en: 'Admin Operations', tr: 'Yönetici İşlemleri', ar: 'عمليات الإدارة' }
 };
 
-/**
- * Get current language from localStorage or default to 'en'
- */
+
 const getCurrentLanguage = (): 'en' | 'tr' | 'ar' => {
   try {
     const lang = localStorage.getItem('language') || 'en';
@@ -216,6 +214,25 @@ const getCurrentLanguage = (): 'en' | 'tr' | 'ar' => {
     return 'en';
   }
 };
+
+/**
+ * Create a reverse mapping from permission names to keys
+ * This helps when the API returns permissions without the 'key' field
+ */
+const createReverseNameMapping = (): Map<string, string> => {
+  const map = new Map<string, string>();
+
+  for (const [key, translations] of Object.entries(permissionTranslations)) {
+    // Map all language variants back to the key
+    map.set(translations.en.toLowerCase(), key);
+    map.set(translations.tr.toLowerCase(), key);
+    map.set(translations.ar.toLowerCase(), key);
+  }
+
+  return map;
+};
+
+const reverseNameMap = createReverseNameMapping();
 
 /**
  * Get translated permission name
@@ -228,7 +245,13 @@ export const getTranslatedPermissionName = (
   t: (key: string) => string
 ): string => {
   // Try to get the permission key - use 'key' field first, then fall back to 'name'
-  const permissionKey = 'key' in permission ? permission.key : permission.name;
+  let permissionKey = 'key' in permission ? permission.key : permission.name;
+
+  console.log('[Translation] Processing permission:', {
+    hasKey: 'key' in permission,
+    permissionKey,
+    permission
+  });
 
   // If no key available, use description or name as fallback
   if (!permissionKey) {
@@ -239,9 +262,16 @@ export const getTranslatedPermissionName = (
   // Get current language
   const currentLang = getCurrentLanguage();
 
-  // Check if we have a translation for this permission key
+  // First, try to look up using the key directly
   if (permissionTranslations[permissionKey]) {
     return permissionTranslations[permissionKey][currentLang];
+  }
+
+  // If direct lookup fails, try reverse mapping from name (for when API returns permissions without 'key' field)
+  const reverseLookupKey = reverseNameMap.get(permissionKey.toLowerCase());
+  if (reverseLookupKey && permissionTranslations[reverseLookupKey]) {
+    console.log(`[Translation] Using reverse mapping: "${permissionKey}" → "${reverseLookupKey}" → "${permissionTranslations[reverseLookupKey][currentLang]}"`);
+    return permissionTranslations[reverseLookupKey][currentLang];
   }
 
   // Try the i18n translation as fallback

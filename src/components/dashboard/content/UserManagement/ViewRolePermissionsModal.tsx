@@ -18,6 +18,8 @@ const ViewRolePermissionsModal: React.FC<ViewRolePermissionsModalProps> = ({
 }) => {
   const { t, isRTL } = useLanguage();
 
+  console.log("role",role)
+
   if (!isOpen) return null;
 
   return (
@@ -66,7 +68,7 @@ const ViewRolePermissionsModal: React.FC<ViewRolePermissionsModalProps> = ({
                         key={permission.permissionId || index} // Use permissionId if available
                         className="flex flex-col rounded-lg bg-gray-100 px-3 py-2 dark:bg-gray-700"
                       >
-                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
                           {translatedName}
                         </span>
                       </div>

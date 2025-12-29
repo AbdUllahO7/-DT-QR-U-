@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Key, Shield } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { UserData } from '../../../../types/users/users.type';
+import { getTranslatedPermissionName, getTranslatedRoleName } from '../../../../utils/permissionTranslation';
 
 export interface ViewPermissionsModalProps {
   isOpen: boolean;
@@ -76,7 +77,7 @@ const ViewPermissionsModal: React.FC<ViewPermissionsModalProps> = ({
                       key={index}
                       className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-800 dark:bg-purple-900/30 dark:text-purple-400"
                     >
-                      {role}
+                      {getTranslatedRoleName(role, t)}
                     </span>
                   ))}
                 </div>
@@ -99,16 +100,20 @@ const ViewPermissionsModal: React.FC<ViewPermissionsModalProps> = ({
             <div className="max-h-64 overflow-y-auto rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50 p-4">
               {hasPermissions ? (
                 <div className="space-y-2">
-                  {user.permissions?.map((permission, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-col rounded-lg bg-gray-100 px-3 py-2 dark:bg-gray-700"
-                    >
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
-                        {permission}
-                      </span>
-                    </div>
-                  ))}
+                  {user.permissions?.map((permission, index) => {
+                    const translatedName = getTranslatedPermissionName(permission, t);
+
+                    return (
+                      <div
+                        key={permission.permissionId || index}
+                        className="flex flex-col rounded-lg bg-gray-100 px-3 py-2 dark:bg-gray-700"
+                      >
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                          {translatedName}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-center text-sm text-gray-500 dark:text-gray-400">

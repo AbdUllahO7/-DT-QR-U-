@@ -58,6 +58,7 @@ const IngredientsContent: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedIngredient, setSelectedIngredient] = useState<Ingredient | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string>('');
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -187,19 +188,47 @@ const IngredientsContent: React.FC = () => {
 
   const handleDelete = (ingredient: Ingredient) => {
     setSelectedIngredient(ingredient);
+    setDeleteError('');
     setShowDeleteModal(true);
   };
 
   const handleDeleteConfirm = async () => {
     if (!selectedIngredient) return;
-    
+
     setIsDeleting(true);
+    setDeleteError('');
     try {
       await ingredientsService.deleteIngredient(selectedIngredient.id);
       setIngredients(prev => prev.filter(ing => ing.id !== selectedIngredient.id));
       logger.info('Ingredient deleted', { id: selectedIngredient.id });
-    } catch (err) {
+      setShowDeleteModal(false);
+      setSelectedIngredient(null);
+    } catch (err: any) {
       logger.error('Ingredient deletion error:', err);
+
+      // Extract error message from API response
+      let errorMessage = t('IngredientsContent.deleteError') || 'An error occurred while deleting the ingredient.';
+
+      if (err.response?.data) {
+        // If response.data is a string, use it directly
+        if (typeof err.response.data === 'string') {
+          errorMessage = err.response.data;
+        }
+        // If response.data has a message field
+        else if (err.response.data.message) {
+          errorMessage = err.response.data.message;
+        }
+        // If response.data has an error field
+        else if (err.response.data.error) {
+          errorMessage = err.response.data.error;
+        }
+      }
+      // Fallback to top-level message if available
+      else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setDeleteError(errorMessage);
       throw err;
     } finally {
       setIsDeleting(false);
@@ -765,12 +794,14 @@ const IngredientsContent: React.FC = () => {
         onClose={() => {
           setShowDeleteModal(false);
           setSelectedIngredient(null);
+          setDeleteError('');
         }}
         onConfirm={handleDeleteConfirm}
         title={t('IngredientsContent.deleteIngredient')}
         message={selectedIngredient ? t('IngredientsContent.deleteConfirmMessage').replace('{name}', selectedIngredient.name) : ''}
         isSubmitting={isDeleting}
         itemName={selectedIngredient?.name}
+        errorMessage={deleteError}
       />
     </motion.div>
   );

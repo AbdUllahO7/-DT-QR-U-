@@ -1064,7 +1064,7 @@ hero: {
   products: {
     status: {
       outOfStock: 'Stokta Yok',
-      inStock: 'Stokta Var',
+      inStock: 'Aktif',
       available: 'Mevcut',
       unavailable: 'Mevcut Değil'
     },
@@ -2099,10 +2099,10 @@ hero: {
           required: 'Kategori seçimi gereklidir'
         },
         status: {
-          label: 'Stokta Var',
-          description: 'Mevcut olduğunda ürün menüde görünür',
-          available: 'Mevcut',
-          unavailable: 'Mevcut Değil'
+          label: 'Aktif ',
+          description: 'Aktif olduğunda ürün menüde görünür',
+          available: 'Aktif',
+          unavailable: 'Aktif Değil'
         }
       },
 
@@ -3453,7 +3453,7 @@ BranchTableManagement: {
       unavailable: 'Mevcut Değil'
     },
      stock : {
-      inStock: 'Stokta Var',
+      inStock: 'Aktif',
       outOfStock: 'Stokta Yok'
     },
 
@@ -5252,7 +5252,7 @@ extrasManagement: {
   },
 
   productExtras: {
-    manageCategories: 'Ürün Kategorilerini Yönet',
+    manageCategories: 'Ürün Ekstraları Kategorilerini Yönetin',
     manageExtras: 'Ekstraları Yönet',
     addCategory: 'Kategori Ekle',
     addExtra: 'Ekstra Ekle',

@@ -1575,7 +1575,7 @@ useEffect(() => {
           isOpen={isRolePermissionsModalOpen}
           onClose={handleCloseRolePermissions}
           role={selectedRoleForPermissions}
-        />
+        /> 
       )}
 
       {/* Edit Role Modal */}
