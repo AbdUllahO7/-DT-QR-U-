@@ -128,7 +128,7 @@ const CloseMoneyCaseModal: React.FC<Props> = ({
                     <p className={`text-lg font-bold ${
                       difference > 0 ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      ${Math.abs(difference).toFixed(2)}
+                      {Math.abs(difference).toFixed(2)}
                     </p>
                   </div>
                 </div>

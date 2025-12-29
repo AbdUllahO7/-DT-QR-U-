@@ -339,7 +339,7 @@ export const SortableProduct: React.FC<{
                               {extra.extraName || `Extra ${extra.extraId}`}
                               {extra.unitPrice > 0 && (
                                 <span className="text-purple-600 dark:text-purple-400 font-medium">
-                                  +{extra.unitPrice.toFixed(2)}₺
+                                  +{extra.unitPrice.toFixed(2)}
                                 </span>
                               )}
                             </span>
@@ -362,7 +362,6 @@ export const SortableProduct: React.FC<{
                   <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 dark:from-primary-400 dark:to-primary-600 bg-clip-text text-transparent">
                     {product.price.toFixed(2)}
                   </span>
-                  <span className="text-sm text-gray-500 dark:text-gray-400 font-medium">₺</span>
                 </div>
 
                 {/* Action Buttons */}

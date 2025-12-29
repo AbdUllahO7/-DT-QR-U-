@@ -463,7 +463,6 @@ const OrderTypeRestaurantComponent = () => {
                           className={`w-full px-4 py-3 ${isRTL ? 'pr-10 text-right' : 'pl-10'} border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all duration-200 shadow-sm`}
                           placeholder="0.00"
                         />
-                        <span className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400`}>₺</span>
                       </div>
                     </div>
 
@@ -483,7 +482,6 @@ const OrderTypeRestaurantComponent = () => {
                           className={`w-full px-4 py-3 ${isRTL ? 'pr-10 text-right' : 'pl-10'} border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all duration-200 shadow-sm`}
                           placeholder="0.00"
                         />
-                        <span className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400`}>₺</span>
                       </div>
                     </div>
 

@@ -61,7 +61,7 @@ const CartContent: React.FC<CartContentProps> = ({
             {t('menu.cart.total')}
           </span>
           <span className="text-xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-            ${totalPrice.toFixed(2)}
+            {totalPrice.toFixed(2)}
           </span>
         </div>
         

@@ -764,7 +764,7 @@ hero: {
     vatInfo: 'Prices include VAT. Custom pricing available for enterprise plans.',
     perMonth: 'month',
     perYear: 'year',
-    monthlyEquivalent: 'Monthly ₺{amount} (2 months free)'
+    monthlyEquivalent: 'Monthly {amount} (2 months free)'
   },
 
   // Testimonials
@@ -1605,8 +1605,8 @@ hero: {
 
   // Currency
   currency: {
-    symbol: '₺',
-    format: '{{amount}} ₺'
+    symbol: '',
+    format: '{{amount}}'
   },
 
   // Status indicators
@@ -1713,11 +1713,11 @@ hero: {
       required: 'Product name is required'
     },
     price: {
-      label: 'Price (₺)',
+      label: 'Price',
       placeholder: '0',
       required: 'Price is required',
       mustBePositive: 'Price must be greater than 0',
-      currency: '₺'
+      currency: ''
     },
     category: {
       label: 'Category',
@@ -2089,10 +2089,10 @@ hero: {
           optional: 'Optional'
         },
         price: {
-          label: 'Price (₺)',
+          label: 'Price',
           placeholder: '0',
           required: 'Price is required',
-          currency: '₺'
+          currency: ''
         },
         category: {
           label: 'Category',
@@ -4160,9 +4160,9 @@ productModal: {
     }
   },
   currencies: {
-    TRY: "Turkish Lira (₺)",
-    USD: "US Dollar ($)",
-    EUR: "Euro (€)"
+    TRY: "Turkish Lira ()",
+    USD: "US Dollar ()",
+    EUR: "Euro ()"
   },
   languages: {
     tr: "Turkish",
@@ -5462,7 +5462,6 @@ categoryConfigModal: {
     "iran": "Iran",
     "iraq": "Iraq",
     "ireland": "Ireland",
-    "israel": "Israel",
     "italy": "Italy",
     "jamaica": "Jamaica",
     "japan": "Japan",

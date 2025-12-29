@@ -598,7 +598,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
                             {item.productName}
                           </span>
                           <span className="text-sm font-semibold text-green-600 dark:text-green-400">
-                            ${(item.price * (item.count || 0)).toFixed(2)}
+                            {(item.price * (item.count || 0)).toFixed(2)}
                           </span>
                         </div>
 
@@ -708,7 +708,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
                                       )}
                                     </span>
                                     <span className="text-sm font-semibold text-green-600 dark:text-green-400">
-                                      ${(addon.price * (addon.count || 0)).toFixed(2)}
+                                      {(addon.price * (addon.count || 0)).toFixed(2)}
                                     </span>
                                   </div>
 

@@ -766,7 +766,7 @@ hero: {
     vatInfo: 'Fiyatlar KDV dahildir. Kurumsal planlar için özel fiyatlandırma mevcuttur.',
     perMonth: 'ay',
     perYear: 'yıl',
-    monthlyEquivalent: 'Aylık ₺{amount} (2 ay ücretsiz)'
+    monthlyEquivalent: 'Aylık {amount} (2 ay ücretsiz)'
   },
 
   // Testimonials
@@ -1142,8 +1142,8 @@ hero: {
       revenue: 'Gelir'
     },
     currency: {
-      symbol: '₺',
-      format: (value: { toLocaleString: (arg0: string) => any; }) => `₺${value.toLocaleString('tr-TR')}`
+      symbol: '',
+      format: (value: { toLocaleString: (arg0: string) => any; }) => `${value.toLocaleString('tr-TR')}`
     }
   },
 
@@ -1609,8 +1609,8 @@ hero: {
 
   // Currency
   currency: {
-    symbol: '₺',
-    format: '{{amount}} ₺'
+    symbol: '',
+    format: '{{amount}}'
   },
 
   // Status indicators
@@ -1717,11 +1717,11 @@ hero: {
       required: 'Ürün adı gereklidir'
     },
     price: {
-      label: 'Fiyat (₺)',
+      label: 'Fiyat ',
       placeholder: '0',
       required: 'Fiyat gereklidir',
       mustBePositive: 'Fiyat 0\'dan büyük olmalıdır',
-      currency: '₺'
+      currency: ''
     },
     category: {
       label: 'Kategori',
@@ -2095,10 +2095,10 @@ hero: {
           optional: 'Opsiyonel'
         },
         price: {
-          label: 'Fiyat (₺)',
+          label: 'Fiyat',
           placeholder: '0',
           required: 'Fiyat gereklidir',
-          currency: '₺'
+          currency: ''
         },
         category: {
           label: 'Kategori',
@@ -4168,9 +4168,9 @@ productModal: {
       }
     },
     currencies: {
-      TRY: "Türk Lirası (₺)",
-      USD: "Amerikan Doları ($)",
-      EUR: "Euro (€)"
+      TRY: "Türk Lirası ",
+      USD: "Amerikan Doları ",
+      EUR: "Euro"
     },
     languages: {
       tr: "Türkçe",
@@ -5487,7 +5487,6 @@ categoryConfigModal: {
     "iran": "İran",
     "iraq": "Irak",
     "ireland": "İrlanda",
-    "israel": "İsrail",
     "italy": "İtalya",
     "jamaica": "Jamaika",
     "japan": "Japonya",

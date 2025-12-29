@@ -104,7 +104,7 @@ const SortableAddonItem: React.FC<{
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 text-sm font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg">
                   <DollarSign className="h-3 w-3" />
-                  {addonProduct?.price?.toFixed(2) || '0.00'} ₺
+                  {addonProduct?.price?.toFixed(2) || '0.00'} 
                 </span>
                 {addon.isRecommended && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-lg">
@@ -667,7 +667,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                                       <div className="flex items-center justify-between">
                                         <span className="inline-flex items-center gap-1 px-2.5 py-1 text-sm font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg">
                                           <DollarSign className="h-3 w-3" />
-                                          {product.price.toFixed(2)} ₺
+                                          {product.price.toFixed(2)} 
                                         </span>
                                         <span className="text-xs text-gray-500 dark:text-gray-400 px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded-lg">
                                           {product.categoryName}
