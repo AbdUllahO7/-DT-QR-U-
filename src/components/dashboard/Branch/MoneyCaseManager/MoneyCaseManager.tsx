@@ -103,7 +103,11 @@ const getDatePresets = (t: any) => [
   }
 ];
 
-const MoneyCaseManager: React.FC = () => {
+interface MoneyCaseManagerProps {
+  branchId?: number;
+}
+
+const MoneyCaseManager: React.FC<MoneyCaseManagerProps> = ({ branchId }) => {
   const { t, isRTL } = useLanguage();
 
   const {
@@ -174,7 +178,7 @@ const MoneyCaseManager: React.FC = () => {
 
   const fetchBranchSummary = async () => {
     if (!state.selectedBranch) return;
-    
+
     try {
       setSummaryLoading(true);
       const summary = await moneyCaseService.getBranchSummary({
@@ -182,8 +186,12 @@ const MoneyCaseManager: React.FC = () => {
         ...appliedFilters
       });
       setBranchSummary(summary);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch branch summary:', error);
+      setState(prev => ({
+        ...prev,
+        error: error.message || 'Failed to fetch branch summary'
+      }));
     } finally {
       setSummaryLoading(false);
     }
@@ -198,24 +206,26 @@ const MoneyCaseManager: React.FC = () => {
 
   const handleShowOpenModal = async () => {
     if (!state.selectedBranch) return;
-    
+
     try {
       const info = await moneyCaseService.getPreviousCloseInfo(state.selectedBranch.branchId);
       setPreviousCloseInfo(info);
-      
+
       const suggestedBalance = info?.suggestedOpeningBalance || 0;
       setState(prev => ({
         ...prev,
         openingBalance: suggestedBalance,
-        showOpenModal: true
+        showOpenModal: true,
+        error: null // Clear any previous errors when opening modal
       }));
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to get previous close info", error);
       setPreviousCloseInfo(null);
       setState(prev => ({
         ...prev,
         openingBalance: 0,
-        showOpenModal: true
+        showOpenModal: true,
+        error: error.message || 'Failed to get previous close information'
       }));
     }
   };
@@ -596,13 +606,14 @@ const MoneyCaseManager: React.FC = () => {
           show={state.showOpenModal}
           loading={state.loading}
           openingBalance={state.openingBalance}
-          onOpeningBalanceChange={(value) => 
+          onOpeningBalanceChange={(value) =>
             setState(prev => ({ ...prev, openingBalance: value }))
           }
           onConfirm={handleOpenCase}
           onClose={closeModals}
           t={t}
           isRTL={isRTL}
+          error={state.showOpenModal ? state.error : null}
         />
 
         <CloseMoneyCaseModal
@@ -611,16 +622,17 @@ const MoneyCaseManager: React.FC = () => {
           activeCase={state.activeCase}
           actualCash={state.actualCash}
           closingNotes={state.closingNotes}
-          onActualCashChange={(value) => 
+          onActualCashChange={(value) =>
             setState(prev => ({ ...prev, actualCash: value }))
           }
-          onNotesChange={(value) => 
+          onNotesChange={(value) =>
             setState(prev => ({ ...prev, closingNotes: value }))
           }
           onConfirm={handleCloseCase}
           onClose={closeModals}
           t={t}
           isRTL={isRTL}
+          error={state.showCloseModal ? state.error : null}
         />
 
         <ZReportModal

@@ -1,4 +1,4 @@
-import { httpClient } from "../../utils/http";
+import { httpClient, getEffectiveBranchId } from "../../utils/http";
 import { logger } from "../../utils/logger";
 
 // Available addons interface (from the /available endpoint)
@@ -81,9 +81,11 @@ class BranchProductAddonsService {
   // GET /api/BranchProductAddons/available
   async getAvailableBranchProductAddons(): Promise<BranchProductAddon[]> {
     try {
-      const url = `${this.baseUrl}/available`;
-      
-      const response = await httpClient.get<BranchProductAddon[]>(url);
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.get<BranchProductAddon[]>(`${this.baseUrl}/available`, { params });
       
       // The response is a direct array of BranchProductAddon objects
       const addonsData: BranchProductAddon[] = Array.isArray(response.data) ? response.data : [];

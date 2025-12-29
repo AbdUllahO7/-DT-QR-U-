@@ -1,5 +1,5 @@
 import { APIBranchProductExtra, AvailableProductExtra, BatchUpdateBranchProductExtraData, BranchProductExtra, CreateBranchProductExtraData, GroupedBranchProductExtra, ReorderBranchProductExtraItem, UpdateBranchProductExtraData } from "../../../types/Branch/Extras/type";
-import { httpClient } from "../../../utils/http";
+import { httpClient, getEffectiveBranchId } from "../../../utils/http";
 import { logger } from "../../../utils/logger";
 
 class BranchProductExtrasService {
@@ -10,14 +10,20 @@ class BranchProductExtrasService {
     branchProductId: number
   ): Promise<BranchProductExtra[]> {
     try {
-      logger.info('Branch product extras listesi getiriliyor', { branchProductId });
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
 
+      logger.info('Branch product extras listesi getiriliyor', { branchProductId, branchId });
+
+      const params = branchId ? { branchId } : {};
       const response = await httpClient.get<APIBranchProductExtra[]>(
-        `${this.baseUrl}/branch-product/${branchProductId}`
+        `${this.baseUrl}/branch-product/${branchProductId}`,
+        { params }
       );
 
       logger.info('Branch product extras listesi başarıyla getirildi', {
         count: response.data.length,
+        branchId
       });
       return response.data;
     } catch (error: any) {
@@ -31,14 +37,20 @@ class BranchProductExtrasService {
     branchProductId: number
   ): Promise<GroupedBranchProductExtra[]> {
     try {
-      logger.info('Gruplu branch product extras listesi getiriliyor', { branchProductId });
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
 
+      logger.info('Gruplu branch product extras listesi getiriliyor', { branchProductId, branchId });
+
+      const params = branchId ? { branchId } : {};
       const response = await httpClient.get<GroupedBranchProductExtra[]>(
-        `${this.baseUrl}/branch-product/${branchProductId}/grouped`
+        `${this.baseUrl}/branch-product/${branchProductId}/grouped`,
+        { params }
       );
 
       logger.info('Gruplu branch product extras listesi başarıyla getirildi', {
         count: response.data.length,
+        branchId
       });
 
       return response.data;
@@ -51,11 +63,15 @@ class BranchProductExtrasService {
   // Get branch product extra by ID
   async getBranchProductExtraById(id: number): Promise<BranchProductExtra> {
     try {
-      logger.info('Branch product extra detayı getiriliyor', { id });
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
 
-      const response = await httpClient.get<APIBranchProductExtra>(`${this.baseUrl}/${id}`);
+      logger.info('Branch product extra detayı getiriliyor', { id, branchId });
 
-      logger.info('Branch product extra detayı başarıyla getirildi', { data: response.data });
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.get<APIBranchProductExtra>(`${this.baseUrl}/${id}`, { params });
+
+      logger.info('Branch product extra detayı başarıyla getirildi', { data: response.data, branchId });
 
       return response.data;
     } catch (error: any) {
@@ -67,6 +83,9 @@ class BranchProductExtrasService {
   // Update branch product extra
   async updateBranchProductExtra(data: UpdateBranchProductExtraData): Promise<BranchProductExtra> {
     try {
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
       const payload = {
         isActive: data.isActive,
         specialUnitPrice: data.specialUnitPrice,
@@ -78,14 +97,17 @@ class BranchProductExtrasService {
       logger.info('Branch product extra güncelleme isteği gönderiliyor', {
         id: data.id,
         payload,
+        branchId
       });
 
+      const params = branchId ? { branchId } : {};
       const response = await httpClient.put<APIBranchProductExtra>(
         `${this.baseUrl}/${data.id}`,
-        payload
+        payload,
+        { params }
       );
 
-      logger.info('Branch product extra başarıyla güncellendi', { data: response.data });
+      logger.info('Branch product extra başarıyla güncellendi', { data: response.data, branchId });
 
       return response.data;
     } catch (error: any) {
@@ -97,11 +119,15 @@ class BranchProductExtrasService {
   // Delete branch product extra
   async deleteBranchProductExtra(id: number): Promise<void> {
     try {
-      logger.info('Branch product extra silme isteği gönderiliyor', { id });
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
 
-      await httpClient.delete(`${this.baseUrl}/${id}`);
+      logger.info('Branch product extra silme isteği gönderiliyor', { id, branchId });
 
-      logger.info('Branch product extra başarıyla silindi', { id });
+      const params = branchId ? { branchId } : {};
+      await httpClient.delete(`${this.baseUrl}/${id}`, { params });
+
+      logger.info('Branch product extra başarıyla silindi', { id, branchId });
     } catch (error: any) {
       logger.error('❌ Branch product extra silinirken hata:', error);
       throw error;
@@ -111,6 +137,9 @@ class BranchProductExtrasService {
   // Create branch product extra
   async createBranchProductExtra(data: CreateBranchProductExtraData): Promise<BranchProductExtra> {
     try {
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
       const payload = {
         branchProductId: data.branchProductId,
         productExtraId: data.productExtraId,
@@ -121,11 +150,12 @@ class BranchProductExtrasService {
         isRequiredOverride: data.isRequiredOverride,
       };
 
-      logger.info('Branch product extra ekleme isteği gönderiliyor', { payload });
+      logger.info('Branch product extra ekleme isteği gönderiliyor', { payload, branchId });
 
-      const response = await httpClient.post<APIBranchProductExtra>(this.baseUrl, payload);
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.post<APIBranchProductExtra>(this.baseUrl, payload, { params });
 
-      logger.info('Branch product extra başarıyla eklendi', { data: response.data });
+      logger.info('Branch product extra başarıyla eklendi', { data: response.data, branchId });
 
       return response.data;
     } catch (error: any) {
@@ -141,16 +171,20 @@ class BranchProductExtrasService {
     onlyActive?: boolean;
   }): Promise<AvailableProductExtra[]> {
     try {
-      logger.info('Mevcut product extras listesi getiriliyor', { params });
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = params?.branchId || getEffectiveBranchId();
+
+      logger.info('Mevcut product extras listesi getiriliyor', { params, branchId: effectiveBranchId });
       const response = await httpClient.get<AvailableProductExtra[]>(`${this.baseUrl}/available`, {
         params: {
           branchProductId: params?.branchProductId,
-          branchId: params?.branchId,
+          ...(effectiveBranchId && { branchId: effectiveBranchId }),
         }
       });
 
       logger.info('Mevcut product extras listesi başarıyla getirildi', {
         count: response.data.length,
+        branchId: effectiveBranchId
       });
 
       return response.data;
@@ -163,11 +197,15 @@ class BranchProductExtrasService {
   // Batch update branch product extras
   async batchUpdateBranchProductExtras(data: BatchUpdateBranchProductExtraData): Promise<void> {
     try {
-      logger.info('Branch product extras batch update işlemi gönderiliyor', { data });
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
 
-      await httpClient.post(`${this.baseUrl}/batch-update`, data);
+      logger.info('Branch product extras batch update işlemi gönderiliyor', { data, branchId });
 
-      logger.info('Branch product extras batch update işlemi başarıyla tamamlandı');
+      const params = branchId ? { branchId } : {};
+      await httpClient.post(`${this.baseUrl}/batch-update`, data, { params });
+
+      logger.info('Branch product extras batch update işlemi başarıyla tamamlandı', { branchId });
     } catch (error: any) {
       logger.error('❌ Branch product extras batch update işlemi sırasında hata:', error);
       throw error;
@@ -180,17 +218,23 @@ class BranchProductExtrasService {
     items: ReorderBranchProductExtraItem[]
   ): Promise<void> {
     try {
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
       logger.info('Branch product extras reorder işlemi gönderiliyor', {
         branchProductId,
         items,
+        branchId
       });
 
+      const params = branchId ? { branchId } : {};
       await httpClient.put(
         `${this.baseUrl}/branch-product/${branchProductId}/reorder`,
-        items
+        items,
+        { params }
       );
 
-      logger.info('Branch product extras reorder işlemi başarıyla tamamlandı');
+      logger.info('Branch product extras reorder işlemi başarıyla tamamlandı', { branchId });
     } catch (error: any) {
       logger.error('❌ Branch product extras reorder işlemi sırasında hata:', error);
       throw error;
@@ -200,12 +244,17 @@ class BranchProductExtrasService {
   // Get deleted branch product extras
   async getDeletedBranchProductExtras(): Promise<BranchProductExtra[]> {
     try {
-      logger.info('Silinen branch product extras listesi getiriliyor');
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
 
-      const response = await httpClient.get<APIBranchProductExtra[]>(`${this.baseUrl}/deleted`);
+      logger.info('Silinen branch product extras listesi getiriliyor', { branchId });
+
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.get<APIBranchProductExtra[]>(`${this.baseUrl}/deleted`, { params });
 
       logger.info('Silinen branch product extras listesi başarıyla getirildi', {
         count: response.data.length,
+        branchId
       });
 
       return response.data;
@@ -218,11 +267,15 @@ class BranchProductExtrasService {
   // Restore deleted branch product extra
   async restoreBranchProductExtra(id: number): Promise<void> {
     try {
-      logger.info('Branch product extra restore isteği gönderiliyor', { id });
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
 
-      await httpClient.post(`${this.baseUrl}/${id}/restore`);
+      logger.info('Branch product extra restore isteği gönderiliyor', { id, branchId });
 
-      logger.info('Branch product extra başarıyla restore edildi', { id });
+      const params = branchId ? { branchId } : {};
+      await httpClient.post(`${this.baseUrl}/${id}/restore`, {}, { params });
+
+      logger.info('Branch product extra başarıyla restore edildi', { id, branchId });
     } catch (error: any) {
       logger.error('❌ Branch product extra restore edilirken hata:', error);
       throw error;

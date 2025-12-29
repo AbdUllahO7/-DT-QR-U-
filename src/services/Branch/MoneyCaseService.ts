@@ -1,6 +1,6 @@
 // src/services/Branch/MoneyCaseService.ts
 
-import { httpClient } from "../../utils/http";
+import { httpClient, getEffectiveBranchId } from "../../utils/http";
 import { logger } from "../../utils/logger";
 import {
   ActiveMoneyCase,
@@ -256,9 +256,12 @@ class MoneyCaseService {
    */
   async getActiveMoneyCase(branchId?: number): Promise<ActiveMoneyCase | null> {
     try {
-      logger.info('Aktif kasa getiriliyor', { branchId });
-      
-      const params = branchId ? { branchId } : {};
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Aktif kasa getiriliyor', { branchId: effectiveBranchId });
+
+      const params = effectiveBranchId ? { branchId: effectiveBranchId } : {};
       const response = await httpClient.get<ApiResponse<ActiveMoneyCaseResponse | null>>(
         `${this.baseUrl}/active`,
         { params }
@@ -298,9 +301,12 @@ class MoneyCaseService {
    */
   async getPreviousCloseInfo(branchId?: number): Promise<PreviousCloseInfo | null> {
     try {
-      logger.info('Önceki kasa kapanış bilgisi getiriliyor', { branchId });
-      
-      const params = branchId ? { branchId } : {};
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Önceki kasa kapanış bilgisi getiriliyor', { branchId: effectiveBranchId });
+
+      const params = effectiveBranchId ? { branchId: effectiveBranchId } : {};
       const response = await httpClient.get<ApiResponse<PreviousCloseInfo>>(
         `${this.baseUrl}/previous-close-info`,
         { params }
@@ -338,11 +344,15 @@ class MoneyCaseService {
    */
   async getMoneyCaseHistory(params: MoneyCaseHistoryParams = {}): Promise<MoneyCaseHistoryResponse> {
     try {
-      logger.info('Kasa geçmişi getiriliyor', params);
-      
+      // Get effective branch ID if not provided in params
+      const effectiveBranchId = params.branchId || getEffectiveBranchId();
+
+      logger.info('Kasa geçmişi getiriliyor', { ...params, branchId: effectiveBranchId });
+
       const queryParams = {
         ...params,
-        pageSize: params.pageSize || 30
+        pageSize: params.pageSize || 30,
+        ...(effectiveBranchId && { branchId: effectiveBranchId })
       };
       
       // API returns array directly in data, not wrapped in items
@@ -422,14 +432,22 @@ class MoneyCaseService {
    */
   async getBranchSummary(params: BranchSummaryParams = {}): Promise<MoneyCaseSummary> {
     try {
-      logger.info('Şube özet raporu getiriliyor', params);
-      
+      // Get effective branch ID if not provided in params
+      const effectiveBranchId = params.branchId || getEffectiveBranchId();
+
+      const queryParams = {
+        ...params,
+        ...(effectiveBranchId && { branchId: effectiveBranchId })
+      };
+
+      logger.info('Şube özet raporu getiriliyor', queryParams);
+
       const response = await httpClient.get<{
         message: string;
         data: BranchSummaryApiResponse;
       }>(
         `${this.baseUrl}/summary/branch`,
-        { params }
+        { params: queryParams }
       );
       
       logger.info('✅ Şube özet raporu API response:', { 
@@ -479,9 +497,12 @@ class MoneyCaseService {
    */
   async getQuickSummary(branchId?: number): Promise<QuickSummary> {
     try {
-      logger.info('Hızlı özet getiriliyor', { branchId });
-      
-      const params = branchId ? { branchId } : {};
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Hızlı özet getiriliyor', { branchId: effectiveBranchId });
+
+      const params = effectiveBranchId ? { branchId: effectiveBranchId } : {};
       const response = await httpClient.get<{
         message: string;
         data: QuickSummaryApiResponse;
@@ -544,14 +565,17 @@ class MoneyCaseService {
    */
   async getTodayHistory(branchId?: number): Promise<MoneyCaseHistoryItem[]> {
     try {
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
-      
+
       const response = await this.getMoneyCaseHistory({
-        branchId,
+        ...(effectiveBranchId !== null && { branchId: effectiveBranchId }),
         fromDate: today.toISOString(),
         toDate: tomorrow.toISOString(),
         pageSize: 100

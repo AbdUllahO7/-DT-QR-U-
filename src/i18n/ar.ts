@@ -372,12 +372,19 @@ hero: {
     sidebar: {
       title : "قائمة QR",
       logout: 'تسجيل الخروج',
-      branch: 'فرع'
+      branch: 'فرع',
+      backToRestaurant: 'العودة إلى لوحة المطعم'
+    },
+    branchProducts: {
+      title: 'منتجات الفرع'
+    },
+    branchManagement: {
+      title: 'إدارة الفرع'
     },
     RestaurantManagement : {
       title : "إدارة المطعم"
     },
-    branchManagementTitle: "إدارة الفروع" 
+    branchManagementTitle: "إدارة الفروع"
   },
 
   // Theme

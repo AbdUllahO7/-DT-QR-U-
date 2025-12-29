@@ -1,4 +1,4 @@
-import { httpClient } from "../../utils/http";
+import { httpClient, getEffectiveBranchId } from "../../utils/http";
 import { logger } from "../../utils/logger";
 
 // Interface for the complete branch preferences response
@@ -65,12 +65,15 @@ class BranchPreferencesService {
   // UPDATED: Now accepts branchId parameter
   async getBranchPreferences(branchId?: number): Promise<BranchPreferences> {
     try {
-      logger.info('Branch preferences bilgileri getirme isteği gönderiliyor', { branchId }, { prefix: 'BranchPreferencesService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}?branchId=${branchId}`
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Branch preferences bilgileri getirme isteği gönderiliyor', { branchId: effectiveBranchId }, { prefix: 'BranchPreferencesService' });
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}?branchId=${effectiveBranchId}`
         : this.baseUrl;
-      
+
       const response = await httpClient.get<BranchPreferences>(url);
       
       logger.info('Branch Preferences API Response:', response.data, { prefix: 'BranchPreferencesService' });
@@ -100,8 +103,11 @@ class BranchPreferencesService {
   // UPDATED: Now accepts branchId parameter
   async updateBranchPreferences(data: UpdateBranchPreferencesDto, branchId?: number): Promise<BranchPreferences> {
     try {
-      logger.info('Branch preferences güncelleme isteği gönderiliyor', { data, branchId }, { prefix: 'BranchPreferencesService' });
-      
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Branch preferences güncelleme isteği gönderiliyor', { data, branchId: effectiveBranchId }, { prefix: 'BranchPreferencesService' });
+
       // Clean and trim string values
       const updateData: UpdateBranchPreferencesDto = {
         autoConfirmOrders: data.autoConfirmOrders,
@@ -124,15 +130,12 @@ class BranchPreferencesService {
 
       logger.info('Cleaned update data:', updateData, { prefix: 'BranchPreferencesService' });
 
-      const url = branchId 
-        ? `${this.baseUrl}?branchId=${branchId}`
-        : this.baseUrl;
+      const params = effectiveBranchId ? { branchId: effectiveBranchId } : {};
+      const response = await httpClient.put<BranchPreferences>(this.baseUrl, updateData, { params });
 
-      const response = await httpClient.put<BranchPreferences>(url, updateData);
-      
       logger.info('Branch Preferences Update API Response alındı', response.data, { prefix: 'BranchPreferencesService' });
-      logger.info('Branch preferences başarıyla güncellendi', { branchId }, { prefix: 'BranchPreferencesService' });
-      
+      logger.info('Branch preferences başarıyla güncellendi', { branchId: effectiveBranchId }, { prefix: 'BranchPreferencesService' });
+
       return response.data;
     } catch (error: any) {
       logger.error('Branch preferences güncelleme hatası', error, { prefix: 'BranchPreferencesService' });
@@ -164,8 +167,11 @@ class BranchPreferencesService {
   // UPDATED: Now accepts branchId parameter
   async updateSessionSettings(data: UpdateSessionSettingsDto, branchId?: number): Promise<BranchPreferences> {
     try {
-      logger.info('Session settings güncelleme isteği gönderiliyor', { data, branchId }, { prefix: 'BranchPreferencesService' });
-      
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Session settings güncelleme isteği gönderiliyor', { data, branchId: effectiveBranchId }, { prefix: 'BranchPreferencesService' });
+
       const updateData: UpdateSessionSettingsDto = {
         cleanupMode: data.cleanupMode,
         sessionTimeoutMinutes: data.sessionTimeoutMinutes,
@@ -174,15 +180,12 @@ class BranchPreferencesService {
 
       logger.info('Session settings update data:', updateData, { prefix: 'BranchPreferencesService' });
 
-      const url = branchId 
-        ? `${this.baseUrl}/session-settings?branchId=${branchId}`
-        : `${this.baseUrl}/session-settings`;
+      const params = effectiveBranchId ? { branchId: effectiveBranchId } : {};
+      const response = await httpClient.put<BranchPreferences>(`${this.baseUrl}/session-settings`, updateData, { params });
 
-      const response = await httpClient.put<BranchPreferences>(url, updateData);
-      
       logger.info('Session Settings Update API Response alındı', response.data, { prefix: 'BranchPreferencesService' });
-      logger.info('Session settings başarıyla güncellendi', { branchId }, { prefix: 'BranchPreferencesService' });
-      
+      logger.info('Session settings başarıyla güncellendi', { branchId: effectiveBranchId }, { prefix: 'BranchPreferencesService' });
+
       return response.data;
     } catch (error: any) {
       logger.error('Session settings güncelleme hatası', error, { prefix: 'BranchPreferencesService' });
@@ -212,8 +215,11 @@ class BranchPreferencesService {
   // UPDATED: Now accepts branchId parameter
   async updatePaymentSettings(data: UpdatePaymentSettingsDto, branchId?: number): Promise<BranchPreferences> {
     try {
-      logger.info('Payment settings güncelleme isteği gönderiliyor', { data, branchId }, { prefix: 'BranchPreferencesService' });
-      
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Payment settings güncelleme isteği gönderiliyor', { data, branchId: effectiveBranchId }, { prefix: 'BranchPreferencesService' });
+
       const updateData: UpdatePaymentSettingsDto = {
         acceptCash: data.acceptCash,
         acceptCreditCard: data.acceptCreditCard,
@@ -222,15 +228,12 @@ class BranchPreferencesService {
 
       logger.info('Payment settings update data:', updateData, { prefix: 'BranchPreferencesService' });
 
-      const url = branchId 
-        ? `${this.baseUrl}/payment-settings?branchId=${branchId}`
-        : `${this.baseUrl}/payment-settings`;
+      const params = effectiveBranchId ? { branchId: effectiveBranchId } : {};
+      const response = await httpClient.put<BranchPreferences>(`${this.baseUrl}/payment-settings`, updateData, { params });
 
-      const response = await httpClient.put<BranchPreferences>(url, updateData);
-      
       logger.info('Payment Settings Update API Response alındı', response.data, { prefix: 'BranchPreferencesService' });
-      logger.info('Payment settings başarıyla güncellendi', { branchId }, { prefix: 'BranchPreferencesService' });
-      
+      logger.info('Payment settings başarıyla güncellendi', { branchId: effectiveBranchId }, { prefix: 'BranchPreferencesService' });
+
       return response.data;
     } catch (error: any) {
       logger.error('Payment settings güncelleme hatası', error, { prefix: 'BranchPreferencesService' });

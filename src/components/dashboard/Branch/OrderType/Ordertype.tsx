@@ -3,7 +3,11 @@ import { Settings, Save, AlertCircle, CheckCircle, Loader2, Clock, DollarSign, U
 import { OrderType, orderTypeService, UpdateOrderTypeDto } from '../../../../services/Branch/BranchOrderTypeService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 
-const OrderTypeComponent = () => {
+interface OrderTypeComponentProps {
+  branchId?: number;
+}
+
+const OrderTypeComponent: React.FC<OrderTypeComponentProps> = ({ branchId }) => {
   const { t, isRTL } = useLanguage();
   const [orderTypes, setOrderTypes] = useState<OrderType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
