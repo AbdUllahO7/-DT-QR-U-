@@ -2095,10 +2095,10 @@ contact: {
           required: 'اختيار الفئة مطلوب'
         },
         status: {
-          label: 'متوفر في المخزون',
-          description: 'سيكون المنتج مرئياً في القائمة عندما يكون متوفراً',
-          available: 'متوفر',
-          unavailable: 'غير متوفر'
+          label: 'نشيط',
+          description: 'سيكون المنتج مرئياً في القائمة عندما يكون نشطاً',
+          available: 'نشيط',
+          unavailable: 'غير نشيط'
         }
       },
 
@@ -5226,7 +5226,7 @@ extrasManagement: {
   },
 
   productExtras: {
-    manageCategories: 'إدارة فئات المنتج',
+    manageCategories: 'إدارة فئات الإضافات الخاصة بالمنتج',
     manageExtras: 'إدارة الإضافات',
     addCategory: 'إضافة فئة',
     addExtra: 'إضافة إضافة',

@@ -547,18 +547,7 @@ const IngredientFormModal: React.FC<IngredientFormModalProps> = ({
                                   </label>
                                 </div>
                                 
-                                <div>
-                                  <input
-                                    type="text"
-                                    placeholder={t('IngredientsContent.additionalNotes')}
-                                    value={allergenDetails[allergen.id]?.note || ''}
-                                    onChange={(e) => handleAllergenDetailChange(allergen.id, 'note', e.target.value)}
-                                    disabled={loading}
-                                    className={`w-full ${
-                                      viewDensity === 'compact' ? 'px-2 py-1.5' : 'px-3 py-2'
-                                    } border border-gray-300 dark:border-gray-600 rounded-md focus:ring-1 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 disabled:opacity-50 disabled:cursor-not-allowed`}
-                                  />
-                                </div>
+                               
                               </div>
                             </div>
                           );

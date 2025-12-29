@@ -33,12 +33,12 @@ class RoleService {
 
       logger.info('🔍 getRoles çağrılıyor...', apiParams, { prefix: 'RoleService' });
 
-      
       const response = await apiRequest<Role[]>({
         method: 'GET',
         url: '/api/Roles/',
         params: apiParams
       });
+        console.log("getRoles",response)
 
       logger.info('✅ getRoles başarılı', response, { prefix: 'RoleService' });
       
@@ -106,6 +106,7 @@ class RoleService {
 
       });
 
+      console.log("getRoleById response:", response);
 
       logger.info('✅ getRoleById başarılı', response, { prefix: 'RoleService' });
       

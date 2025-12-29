@@ -193,7 +193,8 @@ const ProductIngredientSelectionModal: React.FC<ProductIngredientSelectionModalP
   };
 
   const filteredIngredients = ingredients.filter(ingredient =>
-    ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ingredient.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+    ingredient.isAvailable // Only show available ingredients
   );
 
   const getAllergenInfo = (allergenIds: number[]) => {

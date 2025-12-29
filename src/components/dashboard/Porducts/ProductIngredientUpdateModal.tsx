@@ -12,6 +12,7 @@ interface Ingredient {
   name: string;
   unit: string;
   price?: number;
+  isAvailable: boolean;
 }
 
 const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> = ({
@@ -89,7 +90,8 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
         id: item.ingredientId || item.id,
         name: item.ingredientName || item.name || 'Unknown Ingredient',
         unit: item.unit || 'piece',
-        price: item.price || 0
+        price: item.price || 0,
+        isAvailable: item.isAvailable !== undefined ? item.isAvailable : true
       }));
     } catch (error) {
       logger.error('Tüm malzemeler alınamadı:', error);
@@ -197,7 +199,8 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
   };
 
   const filteredIngredients = allIngredients.filter(ingredient =>
-    ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ingredient.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+    ingredient.isAvailable // Only show available ingredients
   );
 
   return (
