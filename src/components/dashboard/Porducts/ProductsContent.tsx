@@ -1437,7 +1437,6 @@ useEffect(() => {
           onSuccess={loadCategories}
           product={selectedProductForEdit}
           categories={categories}
-          onOpenIngredientUpdate={handleOpenIngredientUpdate}
         />
       )}
 

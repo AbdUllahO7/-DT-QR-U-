@@ -763,7 +763,7 @@ pricing: {
     vatInfo: 'جميع الأسعار شاملة ضريبة القيمة المضافة. تتوفر عروض خاصة للسلاسل الكبيرة.',
     perMonth: 'شهر',
     perYear: 'سنة',
-    monthlyEquivalent: 'فقط ₺{amount} / شهر (عند الدفع السنوي)'
+    monthlyEquivalent: 'فقط {amount} / شهر (عند الدفع السنوي)'
   },
 
   // Testimonials
@@ -1140,8 +1140,8 @@ contact: {
       
     },
     currency: {
-      symbol: '₺',
-      format: (value: { toLocaleString: (arg0: string) => any; }) => `${value.toLocaleString('ar-SA')} ₺`
+      symbol: '',
+      format: (value: { toLocaleString: (arg0: string) => any; }) => `${value.toLocaleString('ar-SA')} `
     }
   },
 
@@ -1549,8 +1549,8 @@ contact: {
     },
     category: {
       title: 'حذف الفئة',
-      messageWithProducts: 'تحتوي فئة "{{categoryName}}" على {{productCount}} منتج. حذف هذه الفئة سيحذف جميع المنتجات أيضاً. هل أنت متأكد من رغبتك في المتابعة؟',
-      messageEmpty: 'هل أنت متأكد من رغبتك في حذف فئة "{{categoryName}}"؟',
+      messageWithProducts: 'تحتوي فئة "{categoryName}" على {productCount} منتج. حذف هذه الفئة سيحذف جميع المنتجات أيضاً. هل أنت متأكد من رغبتك في المتابعة؟',
+      messageEmpty: 'هل أنت متأكد من رغبتك في حذف فئة "{categoryName}"؟',
       success: 'تم حذف الفئة بنجاح'
     }
   },
@@ -1605,8 +1605,8 @@ contact: {
 
   // Currency
   currency: {
-    symbol: '₺',
-    format: '{{amount}} ₺'
+    symbol: '',
+    format: '{{amount}}'
   },
 
   // Status indicators
@@ -1713,11 +1713,11 @@ contact: {
       required: 'اسم المنتج مطلوب'
     },
     price: {
-      label: 'السعر (₺)',
+      label: 'السعر',
       placeholder: '0',
       required: 'السعر مطلوب',
       mustBePositive: 'السعر يجب أن يكون أكبر من 0',
-      currency: '₺'
+      currency: ''
     },
     category: {
       label: 'الفئة',
@@ -2091,10 +2091,10 @@ contact: {
           optional: 'اختياري'
         },
         price: {
-          label: 'السعر (₺)',
+          label: 'السعر ()',
           placeholder: '0',
           required: 'السعر مطلوب',
-          currency: '₺'
+          currency: ''
         },
         category: {
           label: 'الفئة',
@@ -2399,6 +2399,7 @@ contact: {
     uncategorized: 'غير مصنف',
     manageExtras: 'إدارة إضافات المنتج',
     manageAddons: 'إدارة الإضافات',
+    manageIngredients: 'إدارة المكونات',
     editProduct: 'تعديل المنتج',
     deleteProduct: 'حذف المنتج',
     dragProduct: 'اسحب لإعادة ترتيب المنتج',
@@ -4162,9 +4163,9 @@ contact: {
       }
     },
     "currencies": {
-      "TRY": "الليرة التركية (₺)",
-      "USD": "الدولار الأمريكي ($)",
-      "EUR": "اليورو (€)"
+      "TRY": "الليرة التركية",
+      "USD": "الدولار الأمريكي",
+      "EUR": "اليورو"
     },
     "languages": {
         "tr": "التركية",
@@ -5463,7 +5464,6 @@ extrasManagement: {
     "iran": "إيران",
     "iraq": "العراق",
     "ireland": "أيرلندا",
-    "israel": "إسرائيل",
     "italy": "إيطاليا",
     "jamaica": "جامايكا",
     "japan": "اليابان",

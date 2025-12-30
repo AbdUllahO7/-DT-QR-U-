@@ -82,7 +82,6 @@ export const countryCodesData: CountryCode[] = [
   { name: 'IR', dialCode: '+98', placeholder: '912 345 6789' },
   { name: 'IQ', dialCode: '+964', placeholder: '791 234 5678' },
   { name: 'IE', dialCode: '+353', placeholder: '85 012 3456' },
-  { name: 'IL', dialCode: '+972', placeholder: '50-123-4567' },
   { name: 'IT', dialCode: '+39', placeholder: '312 345 6789' },
   { name: 'JM', dialCode: '+1876', placeholder: '876-210-1234' },
   { name: 'JP', dialCode: '+81', placeholder: '90-1234-5678' },

@@ -390,7 +390,7 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
                                 </span>
                                 {ingredient.price && (
                                   <span className="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg font-medium">
-                                    {ingredient.price.toFixed(2)} ₺
+                                    {ingredient.price.toFixed(2)} 
                                   </span>
                                 )}
                               </div>

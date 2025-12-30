@@ -106,13 +106,13 @@ const BranchCard: React.FC<BranchCardProps> = ({ branch, onEdit, onDelete, onPur
                 <Trash2 className="h-4 w-4" />
                 <span>{t('branchCard.actions.delete')}</span>
               </button>
-              <button
+           {/*    <button
                 onClick={() => { onPurge(branch); setIsMenuOpen(false); }}
                 className={`w-full flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} px-4 py-2 text-sm text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors border-t border-gray-200 dark:border-gray-700 ${isRTL ? 'text-right' : 'text-left'}`}
               >
                 <AlertTriangle className="h-4 w-4" />
                 <span>{t('branchCard.actions.purge') || 'Permanent Delete'}</span>
-              </button>
+              </button> */}
             </motion.div>
           )}
         </AnimatePresence>

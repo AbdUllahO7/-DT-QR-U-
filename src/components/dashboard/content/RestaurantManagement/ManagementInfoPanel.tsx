@@ -752,13 +752,13 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
                     <Trash2 className="w-4 h-4" />
                     {t('management.buttons.delete') || 'Delete Restaurant'}
                   </button>
-                  <button
+              {/*     <button
                     onClick={() => setShowPurgeModal(true)}
                     className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-800 hover:bg-red-900 text-white font-medium rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
                   >
                     <Trash2 className="w-4 h-4" />
                     {t('management.buttons.purge') || 'Permanently Delete'}
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </div>
@@ -768,6 +768,7 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
 
       {/* Delete Confirmation Modal */}
       <ConfirmDeleteModal
+        errorMessage=''
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
@@ -780,6 +781,7 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
 
       {/* Purge Confirmation Modal */}
       <ConfirmDeleteModal
+      errorMessage=''
         isOpen={showPurgeModal}
         onClose={() => setShowPurgeModal(false)}
         onConfirm={handlePurge}

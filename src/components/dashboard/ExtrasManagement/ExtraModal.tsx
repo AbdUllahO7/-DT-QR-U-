@@ -281,7 +281,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                                 )}
                               </div>
                               <div className="ml-2 text-sm font-semibold text-blue-600 dark:text-blue-400">
-                                ${extra.basePrice.toFixed(2)}
+                                {extra.basePrice.toFixed(2)}
                               </div>
                             </div>
                           </button>
@@ -295,7 +295,6 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                     {t('extrasManagement.extras.fields.price')}
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-gray-500">$</span>
                     <input
                       title="Price"
                       type="text"
@@ -308,7 +307,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                           onChange({ ...formData, basePrice: val === '' ? 0 : parseFloat(val) || 0 });
                         }
                       }}
-                      className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5 pl-7 pr-3"
+                      className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5 pl-2 pr-3"
                     />
                   </div>
                 </div>

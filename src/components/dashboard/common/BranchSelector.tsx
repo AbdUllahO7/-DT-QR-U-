@@ -78,7 +78,7 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
           ) : (
             <>
               {/* Main Restaurant Option */}
-              <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-750">
+              <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-300 dark:bg-slate-800 bg-gray-50 dark:bg-gray-750">
                 {t('branchSelector.labels.mainRestaurant')}
               </div>
               <button
@@ -96,7 +96,7 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
               </button>
 
               {/* Branches Header */}
-              <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-750 mt-1">
+              <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 dark:bg-slate-800 dark:text-gray-300 bg-gray-50 dark:bg-gray-750 mt-1">
                 {t('branchSelector.labels.branches')}
               </div>
 

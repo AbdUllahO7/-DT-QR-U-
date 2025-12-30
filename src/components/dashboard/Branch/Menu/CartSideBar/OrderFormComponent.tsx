@@ -334,7 +334,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
               {t('order.form.subtotal')}:
             </span>
             <span className="text-slate-800 dark:text-slate-200">
-              ${totalPrice.toFixed(2)}
+              {totalPrice.toFixed(2)}
             </span>
           </div>
 
@@ -344,7 +344,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
                 {t('order.form.serviceCharge')}:
               </span>
               <span className="text-slate-800 dark:text-slate-200">
-                +${orderTotal.serviceCharge.toFixed(2)}
+                +{orderTotal.serviceCharge.toFixed(2)}
               </span>
             </div>
           )}

@@ -122,21 +122,23 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                   {t('extrasManagement.categories.fields.selectionRules')}
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                      {t('extrasManagement.categories.fields.minSelection')}
-                    </label>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3"
-                      value={formData.defaultMinSelectionCount}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/[^0-9]/g, '');
-                        onChange({ ...formData, defaultMinSelectionCount: val === '' ? 0 : parseInt(val) });
-                      }}
-                    />
-                  </div>
+                  {!formData.isRemovalCategory && (
+                    <div>
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        {t('extrasManagement.categories.fields.minSelection')}
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3"
+                        value={formData.defaultMinSelectionCount}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, '');
+                          onChange({ ...formData, defaultMinSelectionCount: val === '' ? 0 : parseInt(val) });
+                        }}
+                      />
+                    </div>
+                  )}
                   <div>
                     <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                       {t('extrasManagement.categories.fields.maxSelection')}
@@ -154,21 +156,23 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                      {t('extrasManagement.categories.fields.minQuantity')}
-                    </label>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3"
-                      value={formData.defaultMinTotalQuantity}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(/[^0-9]/g, '');
-                        onChange({ ...formData, defaultMinTotalQuantity: val === '' ? 0 : parseInt(val) });
-                      }}
-                    />
-                  </div>
+                  {!formData.isRemovalCategory && (
+                    <div>
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        {t('extrasManagement.categories.fields.minQuantity')}
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3"
+                        value={formData.defaultMinTotalQuantity}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, '');
+                          onChange({ ...formData, defaultMinTotalQuantity: val === '' ? 0 : parseInt(val) });
+                        }}
+                      />
+                    </div>
+                  )}
                   <div>
                     <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                       {t('extrasManagement.categories.fields.maxQuantity')}

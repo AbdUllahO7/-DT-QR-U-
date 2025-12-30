@@ -699,7 +699,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                                 {extra.extraName || `Extra ${extra.extraId}`}
                                 {extra.specialUnitPrice > 0 && (
                                   <span className="text-purple-600 dark:text-purple-400 font-medium">
-                                    +{extra.specialUnitPrice.toFixed(2)}₺
+                                    +{extra.specialUnitPrice.toFixed(2)}
                                   </span>
                                 )}
                               </span>

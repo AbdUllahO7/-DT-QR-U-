@@ -152,7 +152,7 @@ const Pricing: React.FC = () => {
                 </h3>
                 <div className={`flex items-end justify-center space-x-1 ${isRTL ? 'space-x-reverse' : ''}`}>
                   <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                    ₺{plan.price}
+                    {plan.price}
                   </span>
                   <span className="text-gray-500 dark:text-gray-400 text-lg">
                     /{plan.period}

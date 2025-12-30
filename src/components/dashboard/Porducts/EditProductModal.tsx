@@ -522,18 +522,21 @@ export const EditProductModal: React.FC<{
                         onChange={(e) => handleChange('categoryId', e.target.value)}
                         onFocus={() => setFocusedField('categoryId')}
                         onBlur={() => setFocusedField('')}
+                        style={{
+                          colorScheme: document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+                        }}
                         className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 text-gray-900 dark:text-white ${
                           errors.categoryId
-                            ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
+                            ? 'border-red-300 dark:border-red-600 !bg-red-50/50 dark:!bg-red-900/10 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
                             : focusedField === 'categoryId'
-                            ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/10 focus:ring-4 focus:ring-blue-500/20'
+                            ? 'border-blue-500 dark:border-blue-400 !bg-blue-50/50 dark:!bg-blue-900/10 focus:ring-4 focus:ring-blue-500/20'
                             : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400'
-                        } focus:outline-none`}
+                        } focus:outline-none [&>option]:bg-white [&>option]:dark:bg-gray-800 [&>option]:text-gray-900 [&>option]:dark:text-white`}
                         aria-required="true"
                       >
-                        <option value="">{t('editProductModal.form.category.placeholder')}</option>
+                        <option value="" className="bg-white dark:bg-gray-800 text-gray-900 dark:text-white">{t('editProductModal.form.category.placeholder')}</option>
                         {categories.map((cat) => (
-                          <option key={cat.categoryId} value={cat.categoryId}>
+                          <option className='bg-white dark:bg-gray-800 text-gray-900 dark:text-white' key={cat.categoryId} value={cat.categoryId}>
                             {cat.categoryName}
                           </option>
                         ))}

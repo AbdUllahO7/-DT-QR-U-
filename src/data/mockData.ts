@@ -116,7 +116,6 @@ export const countryKeys = [
   'countries.iran',
   'countries.iraq',
   'countries.ireland',
-  'countries.israel',
   'countries.italy',
   'countries.jamaica',
   'countries.japan',

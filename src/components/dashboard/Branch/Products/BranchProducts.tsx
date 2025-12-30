@@ -487,15 +487,17 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
       let isActive: boolean | undefined = undefined;
       let displayOrder: number | undefined = undefined;
       let branchCategoryId: number | undefined = undefined;
+      let maxQuantity: number | undefined = undefined;
 
       for (let i = 0; i < branchCategories.length; i++) {
         const product = branchCategories[i].products?.find(p => p.id === productId && p.isSelected);
         if (product && product.branchProductId) {
           branchProductId = product.branchProductId;
           categoryIndex = i;
-          isActive = product.status; 
-          displayOrder = product.displayOrder; 
-          branchCategoryId = branchCategories[i].branchCategoryId; 
+          isActive = product.status;
+          displayOrder = product.displayOrder;
+          branchCategoryId = branchCategories[i].branchCategoryId;
+          maxQuantity = product.maxQuantity;
           break;
         }
       }
@@ -511,9 +513,10 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
       const productData = {
         branchProductId: branchProductId,
         price: newPrice,
-        isActive: isActive ?? true, 
+        isActive: isActive ?? true,
         displayOrder: displayOrder ?? 0, // Default to 0 if not found
         branchCategoryId: branchCategoryId, // Required field
+        maxQuantity: maxQuantity,
       };
 
       // Update the branch product price with all fields
@@ -579,6 +582,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
         isActive: !currentStatus, // Toggle the status
         displayOrder: productToUpdate.displayOrder,
         branchCategoryId: branchCategories[categoryIndex].branchCategoryId,
+        maxQuantity: productToUpdate.maxQuantity,
       };
 
       // Update the product status
@@ -644,6 +648,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
         isAvailable: !currentAvailability, // Toggle availability
         displayOrder: productToUpdate.displayOrder,
         branchCategoryId: branchCategories[categoryIndex].branchCategoryId,
+        maxQuantity: productToUpdate.maxQuantity,
       };
 
       // Update the product availability
@@ -913,6 +918,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
             categoryId: branchCategory.categoryId,
             isSelected: false,
             originalProductId: product.productId,
+            maxQuantity: product.maxQuantity,
             addonsCount: 0,
             hasAddons: false,
             extrasCount: 0,
@@ -1020,7 +1026,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
         
         const transformedProduct = {
           productId: product.productId,
-          id: product.productId, 
+          id: product.productId,
           name: product.name,
           description: product.description || '',
           price: product.price,
@@ -1030,6 +1036,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
           displayOrder: product.displayOrder,
           categoryId: categoryId,
           originalProductId: product.originalProductId,
+          maxQuantity: product.maxQuantity,
         };
         
         categoriesMap.get(categoryId)!.products.push(transformedProduct);
@@ -1263,7 +1270,8 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
               price: editedPrice,
               isActive : productToCreate.status,
               productId: productToCreate.id,
-              branchCategoryId: branchCategoryId
+              branchCategoryId: branchCategoryId,
+              maxQuantity: productToCreate.maxQuantity
             };
             const res = await branchProductService.createBranchProduct(productData);
             createdProductsCount++;
@@ -1363,7 +1371,8 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
           price: productToAdd.price,
           productId: productToAdd.id,
           isActive: productToAdd.status,
-          branchCategoryId: branchCategoryId
+          branchCategoryId: branchCategoryId,
+          maxQuantity: productToAdd.maxQuantity
         };
         const createdBranchProduct = await branchProductService.createBranchProduct(productData);
         setBranchCategories(prevCategories => {
