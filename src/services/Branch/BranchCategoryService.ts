@@ -58,6 +58,7 @@ interface APIProduct {
   displayOrder: number;
   description?: string;
   categoryId: number;
+  maxQuantity?: number;
 }
 
 interface APIBranchCategory {
@@ -97,6 +98,7 @@ class BranchCategoryService {
         status: apiProduct.status,
         displayOrder: apiProduct.displayOrder,
         categoryId: apiCategory.categoryId,
+        maxQuantity: apiProduct.maxQuantity,
       })) || [],
       productId: undefined,
       name: undefined

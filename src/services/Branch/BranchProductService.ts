@@ -7,6 +7,7 @@ interface CreateBranchProductRequest {
   price: number;
   productId: number;
   branchCategoryId: number;
+  maxQuantity?: number;
 }
 
 interface UpdateBranchProductRequest {
@@ -15,6 +16,7 @@ interface UpdateBranchProductRequest {
   isActive: boolean;
   displayOrder: number;
   branchCategoryId: number;
+  maxQuantity?: number;
 }
 
 interface BranchProductReorderRequest {
@@ -114,6 +116,7 @@ interface SimpleBranchProduct {
   description?: string;
   branchCategoryId: number;
   status?: boolean;
+  maxQuantity?: number;
 }
 
 class BranchProductService {
@@ -146,7 +149,7 @@ class BranchProductService {
   // Transform simple API response to match component expectations
   private transformSimpleAPIDataToComponentData(apiBranchProducts: SimpleBranchProduct[]): Product[] {
     return apiBranchProducts.map(apiBranchProduct => ({
-      id: apiBranchProduct.branchProductId, 
+      id: apiBranchProduct.branchProductId,
       branchProductId: apiBranchProduct.branchProductId,
       name: apiBranchProduct.name,
       description: apiBranchProduct.description || '',
@@ -156,7 +159,8 @@ class BranchProductService {
       status: apiBranchProduct.isActive ?? apiBranchProduct.status ?? true,
       displayOrder: apiBranchProduct.displayOrder || 0,
       categoryId: apiBranchProduct.branchCategoryId,
-      originalProductId: apiBranchProduct.productId
+      originalProductId: apiBranchProduct.productId,
+      maxQuantity: apiBranchProduct.maxQuantity
     }));
   }
 
@@ -173,7 +177,8 @@ class BranchProductService {
       displayOrder: apiBranchProduct.displayOrder || 0,
       categoryId: apiBranchProduct.branchCategoryId,
       branchProductId: apiBranchProduct.branchProductId,
-      originalProductId: apiBranchProduct.productId
+      originalProductId: apiBranchProduct.productId,
+      maxQuantity: apiBranchProduct.maxQuantity
     };
   }
 
@@ -296,6 +301,7 @@ class BranchProductService {
     isActive: boolean;
     productId: number;
     branchCategoryId: number;
+    maxQuantity?: number;
   }): Promise<Product> {
     try {
       // Get effective branch ID (from localStorage or token)

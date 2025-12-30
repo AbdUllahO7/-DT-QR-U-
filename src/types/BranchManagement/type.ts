@@ -93,6 +93,7 @@ export interface APIProduct {
   imageUrl?: string;
   status: boolean;
   displayOrder: number;
+  maxQuantity?: number;
 }
 
 export interface DetailedProduct{
@@ -117,6 +118,7 @@ export interface DetailedProduct{
   status: boolean;
   isAvailable?: boolean; // true = in stock, false = out of stock
   displayOrder: number;
+  maxQuantity?: number;
   editedPrice?: number;
   editedName?: string;
   editedDescription?: string;
@@ -641,6 +643,7 @@ export interface Product {
   ingredients?: APIIngredient[];
   allergens?: APIAllergen[];
   originalProductId:number,
+  maxQuantity?: number;
 
 }
 

@@ -153,6 +153,8 @@ export interface AvailableProductExtra {
   categoryName: string;
   selectionMode: number;
   unitPrice: number;
+  defaultMinQuantity: number;
+  defaultMaxQuantity: number;
   isRemoval: boolean;
 }
 

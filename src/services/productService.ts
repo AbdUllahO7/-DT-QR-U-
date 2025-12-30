@@ -13,6 +13,7 @@ interface APIProduct {
   displayOrder: number;
   description?: string; // May or may not be included
   categoryId: number;
+  maxQuantity?: number;
 }
 interface DeletedEntity {
   id: number;
@@ -96,15 +97,16 @@ class ProductService {
       restaurantId: apiCategory.restaurantId,
       isExpanded: true, 
       products: apiCategory.products.map(apiProduct => ({
-        id: apiProduct.productId, 
+        id: apiProduct.productId,
         name: apiProduct.name,
-        description: apiProduct.description || '', 
+        description: apiProduct.description || '',
         price: apiProduct.price,
         imageUrl: apiProduct.imageUrl || '',
-        isAvailable: apiProduct.status, 
+        isAvailable: apiProduct.status,
         status: apiProduct.status,
         displayOrder: apiProduct.displayOrder,
         categoryId: apiCategory.categoryId,
+        maxQuantity: apiProduct.maxQuantity,
       }))
     }));
   }
