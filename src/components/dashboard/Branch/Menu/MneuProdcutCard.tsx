@@ -6,16 +6,12 @@ import {
   Coffee, 
   Award, 
   Heart, 
-  Utensils, 
   Plus, 
   Minus, 
   Settings,
   Sparkles,
-  Clock,
-  Star,
   Info,
   ChefHat,
-  Flame
 } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import { MenuProduct } from "../../../../types/menu/type"
@@ -125,13 +121,13 @@ const ProductCard: React.FC<ProductCardProps> = ({
             className="relative group/fav"
           >
             <div className="absolute inset-0 bg-white dark:bg-slate-800 rounded-full blur opacity-50 group-hover/fav:opacity-100 transition-opacity"></div>
-            <div className="relative w-10 h-10 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 border border-slate-200/50 dark:border-slate-700/50">
+            {/* <div className="relative w-10 h-10 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 border border-slate-200/50 dark:border-slate-700/50">
               <Heart className={`h-4 w-4 transition-all duration-300 ${
                 isFavorite 
                   ? 'text-red-500 fill-red-500 scale-110' 
                   : 'text-slate-600 dark:text-slate-400 group-hover/fav:text-red-500 group-hover/fav:scale-110'
               }`} />
-            </div>
+            </div> */}
           </button>
         </div>
 
