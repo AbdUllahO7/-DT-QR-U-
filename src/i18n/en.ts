@@ -1548,8 +1548,8 @@ hero: {
     },
     category: {
       title: 'Delete Category',
-      messageWithProducts: 'Category "{{categoryName}}" contains {{productCount}} products. Deleting this category will also delete all products. Are you sure you want to continue?',
-      messageEmpty: 'Are you sure you want to delete category "{{categoryName}}"?',
+      messageWithProducts: 'Category "{categoryName}" contains {productCount} products. Deleting this category will also delete all products. Are you sure you want to continue?',
+      messageEmpty: 'Are you sure you want to delete category "{categoryName}"?',
       success: 'Category deleted successfully'
     }
   },
@@ -2399,6 +2399,7 @@ hero: {
     manageAddons: 'Manage addons',
     editProduct: 'Edit product',
     deleteProduct: 'Delete product',
+    manageIngredients: 'Manage product ingredients',
     dragProduct: 'Drag to reorder product',
     allergenic: 'Contains allergens',
     recommended: 'Recommended',

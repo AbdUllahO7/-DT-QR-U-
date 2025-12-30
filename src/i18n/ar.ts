@@ -1549,8 +1549,8 @@ contact: {
     },
     category: {
       title: 'حذف الفئة',
-      messageWithProducts: 'تحتوي فئة "{{categoryName}}" على {{productCount}} منتج. حذف هذه الفئة سيحذف جميع المنتجات أيضاً. هل أنت متأكد من رغبتك في المتابعة؟',
-      messageEmpty: 'هل أنت متأكد من رغبتك في حذف فئة "{{categoryName}}"؟',
+      messageWithProducts: 'تحتوي فئة "{categoryName}" على {productCount} منتج. حذف هذه الفئة سيحذف جميع المنتجات أيضاً. هل أنت متأكد من رغبتك في المتابعة؟',
+      messageEmpty: 'هل أنت متأكد من رغبتك في حذف فئة "{categoryName}"؟',
       success: 'تم حذف الفئة بنجاح'
     }
   },
@@ -2399,6 +2399,7 @@ contact: {
     uncategorized: 'غير مصنف',
     manageExtras: 'إدارة إضافات المنتج',
     manageAddons: 'إدارة الإضافات',
+    manageIngredients: 'إدارة المكونات',
     editProduct: 'تعديل المنتج',
     deleteProduct: 'حذف المنتج',
     dragProduct: 'اسحب لإعادة ترتيب المنتج',

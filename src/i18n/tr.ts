@@ -1552,8 +1552,8 @@ hero: {
     },
     category: {
       title: 'Kategoriyi Sil',
-      messageWithProducts: '"{{categoryName}}" kategorisinde {{productCount}} ürün bulunuyor. Bu kategoriyi silmek tüm ürünleri de silecektir. Devam etmek istediğinizden emin misiniz?',
-      messageEmpty: '"{{categoryName}}" kategorisini silmek istediğinizden emin misiniz?',
+      messageWithProducts: '"{categoryName}" kategorisinde {productCount} ürün bulunuyor. Bu kategoriyi silmek tüm ürünleri de silecektir. Devam etmek istediğinizden emin misiniz?',
+      messageEmpty: '"{categoryName}" kategorisini silmek istediğinizden emin misiniz?',
       success: 'Kategori başarıyla silindi'
     }
   },
@@ -2403,6 +2403,7 @@ hero: {
     uncategorized: 'Kategorisiz',
     manageExtras: 'Ürün ekstralarını yönet',
     manageAddons: 'Eklentileri yönet',
+    manageIngredients: 'Malzemeleri yönet',
     editProduct: 'Ürünü düzenle',
     deleteProduct: 'Ürünü sil',
     dragProduct: 'Ürün sırasını değiştirmek için sürükle',

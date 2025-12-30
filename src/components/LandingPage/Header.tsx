@@ -102,7 +102,7 @@ const Header: React.FC = () => {
 
   const handleGoToPanel = (): void => {
     setIsOpen(false); // Close mobile menu
-    navigate('/selection');
+    navigate('/dashboard');
   };
 
   const handleLogout = (): void => {
