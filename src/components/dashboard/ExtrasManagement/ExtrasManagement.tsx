@@ -44,6 +44,8 @@ export default function ExtrasManagement() {
     defaultMinTotalQuantity: 0,
     isRemovalCategory: false,
     defaultMaxTotalQuantity: 0,
+    isMaxSelectionUnlimited: false,
+    isMaxQuantityUnlimited: false,
   });
   const [extraForm, setExtraForm] = useState<CreateExtraData>({
     extraCategoryId: 0,
@@ -122,7 +124,12 @@ export default function ExtrasManagement() {
     setError(null);
     try {
       setLoading(true);
-      await extraCategoriesService.createExtraCategory(categoryForm);
+      const createData: CreateExtraCategoryData = {
+        ...categoryForm,
+        defaultMaxSelectionCount: categoryForm.isMaxSelectionUnlimited ? null : categoryForm.defaultMaxSelectionCount,
+        defaultMaxTotalQuantity: categoryForm.isMaxQuantityUnlimited ? null : categoryForm.defaultMaxTotalQuantity,
+      };
+      await extraCategoriesService.createExtraCategory(createData);
       await loadData();
       closeModal();
     } catch (err: any) {
@@ -155,9 +162,9 @@ export default function ExtrasManagement() {
         status: categoryForm.status,
         isRequired: categoryForm.isRequired,
         defaultMinSelectionCount: categoryForm.defaultMinSelectionCount,
-        defaultMaxSelectionCount: categoryForm.defaultMaxSelectionCount,
+        defaultMaxSelectionCount: categoryForm.isMaxSelectionUnlimited ? null : categoryForm.defaultMaxSelectionCount,
         defaultMinTotalQuantity: categoryForm.defaultMinTotalQuantity,
-        defaultMaxTotalQuantity: categoryForm.defaultMaxTotalQuantity,
+        defaultMaxTotalQuantity: categoryForm.isMaxQuantityUnlimited ? null : categoryForm.defaultMaxTotalQuantity,
         isRemovalCategory: categoryForm.isRemovalCategory || false,
       };
       await extraCategoriesService.updateExtraCategory(updateData);
@@ -271,6 +278,8 @@ export default function ExtrasManagement() {
       defaultMinTotalQuantity: 0,
       defaultMaxTotalQuantity: 0,
       isRemovalCategory: false,
+      isMaxSelectionUnlimited: false,
+      isMaxQuantityUnlimited: false,
     });
     setExtraForm({
       extraCategoryId: 0,
@@ -335,10 +344,12 @@ export default function ExtrasManagement() {
                       status: category.status,
                       isRequired: category.isRequired,
                       defaultMinSelectionCount: category.defaultMinSelectionCount,
-                      defaultMaxSelectionCount: category.defaultMaxSelectionCount,
+                      defaultMaxSelectionCount: category.defaultMaxSelectionCount || 0,
                       defaultMinTotalQuantity: category.defaultMinTotalQuantity,
-                      defaultMaxTotalQuantity: category.defaultMaxTotalQuantity,
+                      defaultMaxTotalQuantity: category.defaultMaxTotalQuantity || 0,
                       isRemovalCategory: (category as any).isRemovalCategory || false,
+                      isMaxSelectionUnlimited: category.defaultMaxSelectionCount === null || category.defaultMaxSelectionCount === undefined,
+                      isMaxQuantityUnlimited: category.defaultMaxTotalQuantity === null || category.defaultMaxTotalQuantity === undefined,
                     });
                     setModalType('edit-category');
                   }}

@@ -785,7 +785,10 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                             <div className="flex items-center gap-2 bg-white dark:bg-slate-700 rounded-lg p-1">
                                               <button
                                                 onClick={() => handleUpdateExtraQuantity(item, extra.branchProductExtraId, -1)}
-                                                disabled={updatingExtraId === extra.branchProductExtraId}
+                                                disabled={
+                                                  updatingExtraId === extra.branchProductExtraId ||
+                                                  extra.quantity <= (extra.minQuantity !== null && extra.minQuantity !== undefined ? extra.minQuantity : 0)
+                                                }
                                                 className="p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
                                               >
                                                 <Minus className="w-3 h-3" />
@@ -793,7 +796,10 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                               <span className="font-bold text-sm min-w-[1.5rem] text-center">{extra.quantity}</span>
                                               <button
                                                 onClick={() => handleUpdateExtraQuantity(item, extra.branchProductExtraId, 1)}
-                                                disabled={updatingExtraId === extra.branchProductExtraId || extra.quantity >= (extra.maxQuantity || 10)}
+                                                disabled={
+                                                  updatingExtraId === extra.branchProductExtraId ||
+                                                  extra.quantity >= (extra.maxQuantity !== null && extra.maxQuantity !== undefined ? extra.maxQuantity : 999)
+                                                }
                                                 className="p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
                                               >
                                                 <Plus className="w-3 h-3" />

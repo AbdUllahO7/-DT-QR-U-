@@ -255,7 +255,9 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
         item.extras.forEach(extra => {
           // Find the extra constraint for this specific extra
           const productExtras = extrasMap.get(item.branchProductId) || []
-          const extraConstraint = productExtras.find(e => e.branchProductExtraId === extra.branchProductExtraId)
+          const extraConstraint = productExtras.find(e => e.extraId === extra.branchProductExtraId)
+
+          console.log("extraConstraint",extraConstraint)
 
           items.push({
             id: extra.id,
@@ -279,8 +281,8 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
             branchProductExtraId: extra.branchProductExtraId,
             isRemoval: extra.isRemoval,
             extraCategoryName: extra.extraCategoryName,
-            minQuantity: extraConstraint?.minQuantity || 0,
-            maxQuantity: extraConstraint?.maxQuantity || 999
+            minQuantity: extra?.minQuantity || 0,
+            maxQuantity: extra?.maxQuantity
           } as EditableOrderItem)
         })
       }
@@ -300,7 +302,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
     setEditableItems(prev => {
       const item = prev.find(i => i.orderDetailId === itemId)
       if (!item) return prev
-
+      console.log("item",item)
       // For extras, apply special validation
       if (item.branchProductExtraId) {
         // Cannot change quantity of removal extras

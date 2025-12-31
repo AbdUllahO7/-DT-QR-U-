@@ -48,6 +48,8 @@ interface ExtrasConfig {
     minTotalQuantity: number;
     maxTotalQuantity: number;
     selectedExtras: Set<number>;
+    isMaxSelectionUnlimited?: boolean;
+    isMaxQuantityUnlimited?: boolean;
   };
 }
 
@@ -57,6 +59,7 @@ interface ExtraSpecificConfig {
   maxQuantity: number;
   isRequiredOverride: boolean;
   unitPrice?: number;
+  isMaxQuantityUnlimited?: boolean;
 }
 
 interface ExtrasSpecificConfig {
@@ -381,9 +384,9 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
             id: existingRelationId,
             isRequiredOverride: config.isRequiredOverride,
             minSelectionCount: config.minSelectionCount,
-            maxSelectionCount: config.maxSelectionCount,
+            maxSelectionCount: config.isMaxSelectionUnlimited ? null : config.maxSelectionCount,
             minTotalQuantity: config.minTotalQuantity,
-            maxTotalQuantity: config.maxTotalQuantity,
+            maxTotalQuantity: config.isMaxQuantityUnlimited ? null : config.maxTotalQuantity,
             isActive: true
           };
           await branchProductExtraCategoriesService.updateBranchProductExtraCategory(updateData);
@@ -393,9 +396,9 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
             productExtraCategoryId: categoryId,
             isRequiredOverride: config.isRequiredOverride,
             minSelectionCount: config.minSelectionCount,
-            maxSelectionCount: config.maxSelectionCount,
+            maxSelectionCount: config.isMaxSelectionUnlimited ? null : config.maxSelectionCount,
             minTotalQuantity: config.minTotalQuantity,
-            maxTotalQuantity: config.maxTotalQuantity,
+            maxTotalQuantity: config.isMaxQuantityUnlimited ? null : config.maxTotalQuantity,
             isActive: true,
           };
           await branchProductExtraCategoriesService.createBranchProductExtraCategory(createData);
@@ -450,7 +453,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
               // Don't send specialUnitPrice for removal extras
               specialUnitPrice: isRemoval ? 0 : extraConfig.specialUnitPrice,
               minQuantity: isRemoval ? 0 : extraConfig.minQuantity,
-              maxQuantity: extraConfig.maxQuantity,
+              maxQuantity: extraConfig.isMaxQuantityUnlimited ? null : extraConfig.maxQuantity,
               isRequiredOverride: extraConfig.isRequiredOverride,
             };
             await branchProductExtrasService.updateBranchProductExtra(updateData);
@@ -462,7 +465,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
               // Don't send specialUnitPrice for removal extras
               specialUnitPrice: isRemoval ? 0 : extraConfig.specialUnitPrice,
               minQuantity: isRemoval ? 0 : extraConfig.minQuantity,
-              maxQuantity: extraConfig.maxQuantity,
+              maxQuantity: extraConfig.isMaxQuantityUnlimited ? null : extraConfig.maxQuantity,
               isRequiredOverride: extraConfig.isRequiredOverride,
             };
             await branchProductExtrasService.createBranchProductExtra(extraData);
@@ -730,20 +733,38 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                   {t('extrasManagement.categoryConfigModal.fields.maxSelection')}
                                 </label>
-                                <input
-                                  title={t('extrasManagement.categoryConfigModal.fields.maxSelection')}
-                                  type="number"
-                                  min="0"
-                                  value={config.maxSelectionCount}
-                                  onChange={(e) =>
-                                    handleConfigChange(
-                                      category.productExtraCategoryId,
-                                      'maxSelectionCount',
-                                      parseInt(e.target.value) || 0
-                                    )
-                                  }
-                                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                />
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    title={t('extrasManagement.categoryConfigModal.fields.maxSelection')}
+                                    type="number"
+                                    min="0"
+                                    value={config.isMaxSelectionUnlimited ? '' : config.maxSelectionCount}
+                                    onChange={(e) =>
+                                      handleConfigChange(
+                                        category.productExtraCategoryId,
+                                        'maxSelectionCount',
+                                        parseInt(e.target.value) || 0
+                                      )
+                                    }
+                                    disabled={config.isMaxSelectionUnlimited}
+                                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                  />
+                                  <label className="flex items-center gap-2 whitespace-nowrap">
+                                    <input
+                                      type="checkbox"
+                                      checked={config.isMaxSelectionUnlimited || false}
+                                      onChange={(e) =>
+                                        handleConfigChange(
+                                          category.productExtraCategoryId,
+                                          'isMaxSelectionUnlimited',
+                                          e.target.checked
+                                        )
+                                      }
+                                      className="w-4 h-4 text-blue-600 rounded"
+                                    />
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">Unlimited</span>
+                                  </label>
+                                </div>
                               </div>
 
                               <div>
@@ -770,20 +791,38 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                   {t('extrasManagement.categoryConfigModal.fields.maxQuantity')}
                                 </label>
-                                <input
-                                  title={t('extrasManagement.categoryConfigModal.fields.maxQuantity')}
-                                  type="number"
-                                  min="0"
-                                  value={config.maxTotalQuantity}
-                                  onChange={(e) =>
-                                    handleConfigChange(
-                                      category.productExtraCategoryId,
-                                      'maxTotalQuantity',
-                                      parseInt(e.target.value) || 0
-                                    )
-                                  }
-                                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                />
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    title={t('extrasManagement.categoryConfigModal.fields.maxQuantity')}
+                                    type="number"
+                                    min="0"
+                                    value={config.isMaxQuantityUnlimited ? '' : config.maxTotalQuantity}
+                                    onChange={(e) =>
+                                      handleConfigChange(
+                                        category.productExtraCategoryId,
+                                        'maxTotalQuantity',
+                                        parseInt(e.target.value) || 0
+                                      )
+                                    }
+                                    disabled={config.isMaxQuantityUnlimited}
+                                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                  />
+                                  <label className="flex items-center gap-2 whitespace-nowrap">
+                                    <input
+                                      type="checkbox"
+                                      checked={config.isMaxQuantityUnlimited || false}
+                                      onChange={(e) =>
+                                        handleConfigChange(
+                                          category.productExtraCategoryId,
+                                          'isMaxQuantityUnlimited',
+                                          e.target.checked
+                                        )
+                                      }
+                                      className="w-4 h-4 text-blue-600 rounded"
+                                    />
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">Unlimited</span>
+                                  </label>
+                                </div>
                               </div>
 
                             <div className={`mt-3 flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2`}>
@@ -977,25 +1016,44 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                           </div>
                                         )}
 
-                                        <div>
+                                        <div className="col-span-2">
                                           <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             {t('extrasManagement.categoryConfigModal.fields.maxQty')}
                                           </label>
-                                          <input
-                                            title={t('extrasManagement.categoryConfigModal.fields.maxQty')}
-                                            type="number"
-                                            min="0"
-                                            value={extraConfig.maxQuantity}
-                                            onChange={(e) =>
-                                              handleExtraConfigChange(
-                                                extra.productExtraId,
-                                                'maxQuantity',
-                                                parseInt(e.target.value)
-                                              )
-                                            }
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                          />
+                                          <div className="flex items-center gap-2">
+                                            <input
+                                              title={t('extrasManagement.categoryConfigModal.fields.maxQty')}
+                                              type="number"
+                                              min="0"
+                                              value={extraConfig.isMaxQuantityUnlimited ? '' : extraConfig.maxQuantity}
+                                              onChange={(e) =>
+                                                handleExtraConfigChange(
+                                                  extra.productExtraId,
+                                                  'maxQuantity',
+                                                  parseInt(e.target.value)
+                                                )
+                                              }
+                                              onClick={(e) => e.stopPropagation()}
+                                              disabled={extraConfig.isMaxQuantityUnlimited}
+                                              className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                            />
+                                            <label className="flex items-center gap-2 whitespace-nowrap">
+                                              <input
+                                                type="checkbox"
+                                                checked={extraConfig.isMaxQuantityUnlimited || false}
+                                                onChange={(e) =>
+                                                  handleExtraConfigChange(
+                                                    extra.productExtraId,
+                                                    'isMaxQuantityUnlimited',
+                                                    e.target.checked
+                                                  )
+                                                }
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="w-4 h-4 text-blue-600 rounded"
+                                              />
+                                              <span className="text-xs text-gray-600 dark:text-gray-400">Unlimited</span>
+                                            </label>
+                                          </div>
                                         </div>
 
                                        

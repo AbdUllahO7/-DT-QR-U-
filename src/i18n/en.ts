@@ -5213,7 +5213,8 @@ extrasManagement: {
       minSelection: 'Minimum Selection',
       maxSelection: 'Maximum Selection',
       minQuantity: 'Minimum Quantity',
-      maxQuantity: 'Maximum Quantity'
+      maxQuantity: 'Maximum Quantity',
+      unlimited: 'Unlimited'
     }
   },
 

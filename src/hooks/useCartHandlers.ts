@@ -404,7 +404,8 @@ export const useCartHandlers = ({
       }
 
       // TOTAL quantity semantics: backend UpdateExtraQuantity expects absolute quantity
-      if (extra.maxQuantity && extra.quantity >= extra.maxQuantity) {
+      const maxQty = extra.maxQuantity !== null && extra.maxQuantity !== undefined ? extra.maxQuantity : 999;
+      if (extra.quantity >= maxQty) {
         setError(`Maximum quantity for ${extra.extraName} is ${extra.maxQuantity}`)
         return
       }
@@ -474,6 +475,9 @@ export const useCartHandlers = ({
         return
       }
 
+      // Check minimum quantity
+      const minQty = extra.minQuantity !== null && extra.minQuantity !== undefined ? extra.minQuantity : 0;
+
       // Decrement by 1 total unit
       const newQuantity = extra.quantity - 1
 
@@ -482,8 +486,14 @@ export const useCartHandlers = ({
         basketItemId,
         currentScaledQuantity: extra.quantity,
         productQuantity: cartItem.quantity,
-        newScaledQuantity: newQuantity
+        newScaledQuantity: newQuantity,
+        minQuantity: minQty
       })
+
+      if (newQuantity < minQty) {
+        setError(`Minimum quantity for ${extra.extraName} is ${extra.minQuantity}`)
+        return
+      }
 
       if (newQuantity <= 0) {
         // ✅ If quantity would be 0 or less, just delete the extra

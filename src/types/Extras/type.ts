@@ -70,10 +70,12 @@ export interface CreateExtraCategoryData {
   isRequired: boolean;
   isRemovalCategory?: boolean;
   defaultMinSelectionCount: number;
-  defaultMaxSelectionCount: number;
+  defaultMaxSelectionCount: number | null;
   defaultMinTotalQuantity: number;
-  defaultMaxTotalQuantity: number;
+  defaultMaxTotalQuantity: number | null;
   status: boolean;
+  isMaxSelectionUnlimited?: boolean;
+  isMaxQuantityUnlimited?: boolean;
 }
 
 export interface UpdateExtraCategoryData {
@@ -82,11 +84,13 @@ export interface UpdateExtraCategoryData {
   description?: string;
   isRequired: boolean;
   defaultMinSelectionCount: number;
-  defaultMaxSelectionCount: number;
+  defaultMaxSelectionCount: number | null;
   defaultMinTotalQuantity: number;
   isRemovalCategory: boolean;
-  defaultMaxTotalQuantity: number;
+  defaultMaxTotalQuantity: number | null;
   status: boolean;
+  isMaxSelectionUnlimited?: boolean;
+  isMaxQuantityUnlimited?: boolean;
 }
 
 // ===== Product Extra Types =====

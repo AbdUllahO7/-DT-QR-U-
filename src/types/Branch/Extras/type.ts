@@ -23,9 +23,9 @@ export interface CreateBranchProductExtraCategoryData {
   productExtraCategoryId: number;
   isRequiredOverride: boolean;
   minSelectionCount: number;
-  maxSelectionCount: number;
+  maxSelectionCount: number | null;
   minTotalQuantity: number;
-  maxTotalQuantity: number;
+  maxTotalQuantity: number | null;
   isActive: boolean;
 }
 
@@ -33,9 +33,9 @@ export interface UpdateBranchProductExtraCategoryData {
   id: number;
   isRequiredOverride: boolean;
   minSelectionCount: number;
-  maxSelectionCount: number;
+  maxSelectionCount: number | null;
   minTotalQuantity: number;
-  maxTotalQuantity: number;
+  maxTotalQuantity: number | null;
   isActive: boolean;
 }
 
@@ -112,7 +112,7 @@ export interface CreateBranchProductExtraData {
   isActive: boolean;
   specialUnitPrice: number;
   minQuantity: number;
-  maxQuantity: number;
+  maxQuantity: number | null;
   isRequiredOverride: boolean;
 }
 
@@ -121,7 +121,7 @@ export interface UpdateBranchProductExtraData {
   isActive: boolean;
   specialUnitPrice: number;
   minQuantity: number;
-  maxQuantity: number;
+  maxQuantity: number | null;
   isRequiredOverride: boolean;
 }
 

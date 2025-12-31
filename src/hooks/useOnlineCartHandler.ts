@@ -635,15 +635,20 @@ export const useOnlineCartHandler = ({
         return;
       }
 
-      const newQuantity = Math.max(
-        extra.minQuantity || 1,
-        Math.min(extra.maxQuantity || 10, extra.quantity + delta)
-      );
+      // Get min/max quantities with proper null checks
+      const minQty = extra.minQuantity !== null && extra.minQuantity !== undefined ? extra.minQuantity : 0;
+      const maxQty = extra.maxQuantity !== null && extra.maxQuantity !== undefined ? extra.maxQuantity : 999;
+
+      // Calculate new quantity within bounds
+      let newQuantity = extra.quantity + delta;
+      newQuantity = Math.max(minQty, Math.min(maxQty, newQuantity));
 
       // Check if we've hit the limits
       if (newQuantity === extra.quantity) {
-        if (newQuantity >= (extra.maxQuantity || 10)) {
+        if (delta > 0 && newQuantity >= maxQty) {
           addToast(`Maximum quantity for ${extra.extraName} is ${extra.maxQuantity}`, 'error');
+        } else if (delta < 0 && newQuantity <= minQty) {
+          addToast(`Minimum quantity for ${extra.extraName} is ${extra.minQuantity}`, 'error');
         }
         setUpdatingExtraId(null);
         return;
