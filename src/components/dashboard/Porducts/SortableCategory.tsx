@@ -159,7 +159,7 @@ export const SortableCategory: React.FC<{
               ) : (
                 <EyeOff className="w-3 h-3" />
               )}
-              <span>{product.isAvailable ? t('SortableCategory.status.active') || 'Active' : t('status.inactive') || 'Inactive'}</span>
+              <span>{product.isAvailable ? t('SortableCategory.status.active') || 'Active' : t('SortableCategory.status.inactive') || 'Inactive'}</span>
             </div>
           </div>
 
@@ -258,12 +258,12 @@ export const SortableCategory: React.FC<{
       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500"></div>
 
       {/* Category Header - Modern Design */}
-      <div className="relative p-6 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700">
+      <div className="relative p-4 md:p-6 bg-gradient-to-br from-gray-50 to-white dark:from-gray-800 dark:to-gray-900 border-b border-gray-200 dark:border-gray-700">
         {/* Background Decoration */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary-500/5 to-purple-500/5 rounded-full blur-3xl -z-0"></div>
-        
-        <div className={`relative flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-          <div className={`flex items-center gap-4 flex-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+
+        <div className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex items-center gap-3 md:gap-4 flex-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
             {/* Drag Handle - Enhanced */}
             {viewMode === 'list' && (
               <button
@@ -278,11 +278,11 @@ export const SortableCategory: React.FC<{
             )}
             
             <div className="flex-1 min-w-0">
-              <div className={`flex items-center gap-3 mb-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <div className={`flex flex-wrap items-center gap-2 md:gap-3 mb-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
                   {category.categoryName}
                   {category.products.length > 0 && (
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full">
+                    <span className="inline-flex items-center gap-1 px-2 md:px-2.5 py-0.5 md:py-1 text-xs font-medium bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full">
                       <Sparkles className="w-3 h-3" />
                       {category.products.length}
                     </span>
@@ -306,31 +306,31 @@ export const SortableCategory: React.FC<{
           </div>
 
           {/* Action Buttons - Modern Group */}
-          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <div className={`flex items-center gap-1 bg-gray-100 dark:bg-gray-700/50 rounded-xl p-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <div className={`flex items-center gap-2 flex-shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            <div className={`flex items-center gap-0.5 md:gap-1 bg-gray-100 dark:bg-gray-700/50 rounded-xl p-0.5 md:p-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <button
                 onClick={() => onEditCategory(category.categoryId)}
-                className="p-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-white dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+                className="p-1.5 md:p-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-white dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
                 title={t('SortableCategory.editCategory')}
                 disabled={isReorderingProducts}
               >
-                <Edit2 className="h-4 w-4" />
+                <Edit2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
               </button>
               <button
                 onClick={() => onDeleteCategory(category.categoryId)}
-                className="p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-white dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+                className="p-1.5 md:p-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-white dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
                 title={t('SortableCategory.deleteCategory')}
                 disabled={isReorderingProducts}
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-3.5 w-3.5 md:h-4 md:w-4" />
               </button>
             </div>
-            
+
             {/* Expand/Collapse Button */}
             {viewMode === 'list' && (
               <button
                 onClick={() => onToggle(category.categoryId)}
-                className={`p-2.5 rounded-xl transition-all duration-200 ${
+                className={`p-2 md:p-2.5 rounded-xl transition-all duration-200 ${
                   category.isExpanded
                     ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/25'
                     : 'bg-gray-100 dark:bg-gray-700/50 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -339,9 +339,9 @@ export const SortableCategory: React.FC<{
                 title={category.isExpanded ? t('SortableCategory.collapseCategory') : t('SortableCategory.expandCategory')}
               >
                 {category.isExpanded ? (
-                  <ChevronUp className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
+                  <ChevronUp className={`h-4 w-4 md:h-5 md:w-5 ${isRTL ? 'rotate-180' : ''}`} />
                 ) : (
-                  <ChevronDown className={`h-5 w-5 ${isRTL ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-4 w-4 md:h-5 md:w-5 ${isRTL ? 'rotate-180' : ''}`} />
                 )}
               </button>
             )}
@@ -353,7 +353,7 @@ export const SortableCategory: React.FC<{
       {viewMode === 'list' ? (
         // List View
         category.isExpanded && (
-          <div className="p-6 bg-gray-50 dark:bg-gray-900/30">
+          <div className="p-3 md:p-6 bg-gray-50 dark:bg-gray-900/30">
             <SortableContext items={category.products.map(p => p.id)} strategy={verticalListSortingStrategy}>
               <div className={`space-y-3 ${isReorderingProducts ? 'opacity-70 pointer-events-none' : ''}`}>
                 {category.products.map((product) => (
@@ -389,9 +389,9 @@ export const SortableCategory: React.FC<{
         )
       ) : (
         // Grid View
-        <div className="p-6 bg-gray-50 dark:bg-gray-900/30">
+        <div className="p-3 md:p-6 bg-gray-50 dark:bg-gray-900/30">
           {category.products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
               {category.products.map((product) => (
                 <GridProductCard
                   key={product.id}

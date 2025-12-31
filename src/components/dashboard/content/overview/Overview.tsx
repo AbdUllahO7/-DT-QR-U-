@@ -35,15 +35,15 @@ const KPICard: React.FC<{
   statusColor?: string;
 }> = ({ title, value, subValue, subText, icon: Icon, iconBgColor, iconColor, statusColor }) => {
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg flex items-center space-x-4 rtl:space-x-reverse transition-all duration-200 hover:shadow-xl">
-      <div className={`p-3 rounded-full ${iconBgColor} ${iconColor}`}>
-        <Icon className="w-6 h-6" />
+    <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-lg flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 sm:space-x-4 rtl:space-x-reverse transition-all duration-200 hover:shadow-xl">
+      <div className={`p-2.5 md:p-3 rounded-full ${iconBgColor} ${iconColor} flex-shrink-0`}>
+        <Icon className="w-5 h-5 md:w-6 md:h-6" />
       </div>
-      <div>
-        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
-        <p className={`text-2xl font-bold ${statusColor || 'text-gray-900 dark:text-white'}`}>{value}</p>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{title}</p>
+        <p className={`text-xl md:text-2xl font-bold ${statusColor || 'text-gray-900 dark:text-white'} truncate`}>{value}</p>
         {(subValue || subText) && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
             <span className="font-semibold text-gray-700 dark:text-gray-300">{subValue}</span> {subText}
           </p>
         )}
@@ -84,8 +84,8 @@ const TodayPaymentDistributionChart: React.FC<{ cash: number; card: number, titl
   const COLORS = ['#10B981', '#3B82F6']; // Green for Cash, Blue for Card
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg h-96 flex flex-col">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{title}</h3>
+    <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-lg h-72 md:h-80 lg:h-96 flex flex-col">
+      <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4">{title}</h3>
       <div className="flex-grow">
         {cash === 0 && card === 0 ? (
            <div className="h-full flex items-center justify-center text-gray-400">{labels.noData}</div>
@@ -128,7 +128,7 @@ const TodayPaymentDistributionChart: React.FC<{ cash: number; card: number, titl
   );
 };
 
-const WeeklyOverviewChart: React.FC<{ 
+const WeeklyOverviewChart: React.FC<{
   weekData: { totalRevenue: number; shiftCount: number; orderCount: number },
   monthData: { totalRevenue: number; shiftCount: number; orderCount: number },
   title: string,
@@ -140,8 +140,8 @@ const WeeklyOverviewChart: React.FC<{
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg h-96 flex flex-col">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{title}</h3>
+    <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-lg h-72 md:h-80 lg:h-96 flex flex-col">
+      <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 md:mb-4">{title}</h3>
       <div className="flex-grow">
         <ResponsiveContainer width="100%" height="100%">
           <RechartsBarChart data={data}>
@@ -297,25 +297,25 @@ const Overview: React.FC = () => {
   ] : [];
 
   return (
-    <div className="space-y-6">
-      
-      {/* 1. KPI Cards Row */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="space-y-4 md:space-y-6">
+
+      {/* 1. KPI Cards Row - Mobile First Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
         {topKpiCards.map((card, index) => (
           <KPICard key={index} {...card} />
         ))}
       </div>
 
-      {/* 2. Charts and Stats Row */}
+      {/* 2. Charts and Stats Row - Mobile First Grid */}
       {quickSummary && (
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 md:gap-4 lg:gap-6">
+
           {/* Comparison Chart */}
-          <div className="xl:col-span-1">
-             <WeeklyOverviewChart 
-                weekData={quickSummary.weekToDate} 
-                monthData={quickSummary.monthToDate} 
-                title={t('dashboard.overview.charts.revenueComparison')} 
+          <div className="lg:col-span-1">
+             <WeeklyOverviewChart
+                weekData={quickSummary.weekToDate}
+                monthData={quickSummary.monthToDate}
+                title={t('dashboard.overview.charts.revenueComparison')}
                 labels={{
                   week: t('dashboard.overview.kpis.changeTexts.thisWeek'),
                   month: t('dashboard.overview.quickStats.thisMonth')
@@ -324,10 +324,10 @@ const Overview: React.FC = () => {
           </div>
 
           {/* Cash vs Card Pie Chart */}
-          <div className="xl:col-span-1">
-            <TodayPaymentDistributionChart 
-              cash={quickSummary.todayCash} 
-              card={quickSummary.todayCard} 
+          <div className="lg:col-span-1">
+            <TodayPaymentDistributionChart
+              cash={quickSummary.todayCash}
+              card={quickSummary.todayCard}
               title={t('dashboard.overview.charts.paymentMethods')}
               labels={{
                 cash: t('dashboard.overview.quickStats.cashSales'),
@@ -338,10 +338,10 @@ const Overview: React.FC = () => {
           </div>
 
           {/* Quick Stats List */}
-          <div className="xl:col-span-1">
-            <QuickStatsList 
-              stats={detailedStats} 
-              title={t('dashboard.overview.title')} 
+          <div className="lg:col-span-1">
+            <QuickStatsList
+              stats={detailedStats}
+              title={t('dashboard.overview.title')}
             />
           </div>
         </div>

@@ -7,6 +7,13 @@ interface CartItemAddon {
   quantity: number
 }
 
+interface CartItemExtra {
+  extraName: string
+  isRemoval: boolean
+  quantity: number
+  price: number
+}
+
 interface CartItem {
   basketItemId?: number
   branchProductId?: number
@@ -15,6 +22,7 @@ interface CartItem {
   quantity: number
   productImageUrl?: string
   addons?: CartItemAddon[]
+  extras?: CartItemExtra[]
   totalItemPrice?: number // Optional, sometimes calculated
 }
 
@@ -49,29 +57,42 @@ export class WhatsAppService {
    */
   private static formatCartItems(cart: CartItem[]): string {
     let message = "*🛒 ORDER DETAILS:*"
-    
+
     cart.forEach((item, index) => {
       // Main product line: 1. Burger x1
       message += `\n\n${index + 1}. *${item.productName}* x${item.quantity}`
-      
+
       // Unit Price
       message += `\n   💰 ${item.price.toFixed(2)} TRY each`
-      
+
+      // Add extras if any
+      if (item.extras && item.extras.length > 0) {
+        item.extras.forEach(extra => {
+          if (extra.isRemoval) {
+            // Removal extras (like "No onions")
+            message += `\n   ❌ No ${extra.extraName}`
+          } else {
+            // Normal extras with quantity and price
+            message += `\n   ✨ ${extra.extraName} (${extra.quantity}x) - ${extra.price.toFixed(2)} TRY`
+          }
+        })
+      }
+
       // Add addons if any
       if (item.addons && item.addons.length > 0) {
         item.addons.forEach(addon => {
           message += `\n   ➕ ${addon.addonName} (${addon.quantity}x) - ${addon.price.toFixed(2)} TRY`
         })
       }
-      
+
       // Item total (Use provided total or calculate)
-      const finalItemPrice = item.totalItemPrice 
-        ? item.totalItemPrice 
+      const finalItemPrice = item.totalItemPrice
+        ? item.totalItemPrice
         : (item.price * item.quantity); // Fallback calculation
-        
+
       message += `\n   👉 *Item Total: ${finalItemPrice.toFixed(2)} TRY*`
     })
-    
+
     return message
   }
 

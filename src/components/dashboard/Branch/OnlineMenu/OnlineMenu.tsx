@@ -22,7 +22,8 @@ import CategoriesSidebar from '../Menu/MenuCategoriesSidebar';
 import Footer from '../Menu/MneuFooter';
 import SearchBar from '../Menu/MenuSearchBar';
 import { useLanguage } from '../../../../contexts/LanguageContext';
-import { OnlineMenuProductModal } from './OnlineMenuProductModal';
+import ProductModal from '../Menu/MenuProductModal';
+import { ProductExtraMenu } from '../../../../types/Extras/type';
 
 // Re-export interfaces for use in other components
 export interface SelectedAddon {
@@ -359,14 +360,57 @@ const initializeMenu = async () => {
   }
 };
 
-  const handleAddToBasket = async (
+  // Adapter function for MenuProductModal
+  const handleMenuProductModalAddToCart = async (
     product: MenuProduct,
-    quantity: number,
-    addons: SelectedAddon[],
-    extras: SelectedExtra[]
+    addons: import('../../../../types/menu/type').SelectedAddon[],
+    extras: ProductExtraMenu[]
   ) => {
     try {
-      await addToBasket(product, quantity, addons, extras);
+      // MenuProductModal manages quantity internally but doesn't pass it
+      // We'll use quantity of 1 since MenuProductModal multiplies addon quantities internally
+      const quantity = 1;
+
+      // Transform ProductExtraMenu[] to SelectedExtra[]
+      const selectedExtras: SelectedExtra[] = extras.map(extra => ({
+        branchProductExtraId: extra.branchProductExtraId,
+        extraId: extra.extraId,
+        extraName: extra.extraName || '',
+        extraCategoryName: extra.categoryName,
+        quantity: extra.quantity,
+        isRemoval: extra.isRemoval,
+        unitPrice: extra.unitPrice || extra.finalPrice,
+        maxQuantity: extra.maxQuantity,
+        minQuantity: extra.minQuantity,
+        selectionMode: extra.selectionMode,
+        isRequired: extra.isRequired,
+      }));
+
+      // Transform SelectedAddon[] from MenuProductModal format to OnlineMenu format
+      const onlineAddons: SelectedAddon[] = addons.map(addon => ({
+        addonBranchProductId: addon.branchProductAddonId,
+        branchProductAddonId: addon.branchProductAddonId,
+        quantity: addon.quantity,
+        addon: {
+          branchProductAddonId: addon.branchProductAddonId,
+          addonBranchProductId: addon.branchProductAddonId,
+          addonName: addon.addonName,
+          addonDescription: '',
+          addonImageUrl: '',
+          price: addon.price,
+          specialPrice: addon.price,
+          isRecommended: false,
+          marketingText: '',
+          maxQuantity: 999,
+          minQuantity: 0,
+          groupTag: '',
+          isGroupRequired: false,
+          ingredients: [],
+          allergens: [],
+        } as ProductAddon,
+      }));
+
+      await addToBasket(product, quantity, onlineAddons, selectedExtras);
     } catch (e: any) {
       alert(e.message || t('menu.error.addToBasket'));
     }
@@ -589,12 +633,11 @@ const initializeMenu = async () => {
       </div>
 
       {/* Product Detail Modal */}
-      <OnlineMenuProductModal
+      <ProductModal
+        isOpen={!!selectedProduct}
         product={selectedProduct}
         onClose={closeProductModal}
-        onAddToCart={handleAddToBasket}
-        isAddingToBasket={isAddingToBasket}
-        currency={menuData?.preferences.defaultCurrency}
+        onAddToCart={handleMenuProductModalAddToCart}
       />
 
       <Footer />

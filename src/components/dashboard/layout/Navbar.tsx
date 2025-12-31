@@ -92,46 +92,56 @@ const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <div className={`fixed top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm ${
-      isRTL 
-        ? 'left-0 right-0 lg:left-0 lg:right-64' 
+      isRTL
+        ? 'left-0 right-0 lg:left-0 lg:right-64'
         : 'left-0 right-0 lg:left-64 lg:right-0'
     }`}>
-      <nav className="w-full px-4 lg:px-8 py-4">
-        <div className="flex items-center justify-between">
-          {/* Sol - Menü ve başlık */}
-          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
+      <nav className="w-full px-3 md:px-4 lg:px-8 py-3 md:py-4">
+        <div className="flex items-center justify-between gap-2">
+          {/* Left - Menu and Title */}
+          <div className={`flex items-center flex-1 min-w-0 ${isRTL ? 'space-x-reverse space-x-2 md:space-x-3' : 'space-x-2 md:space-x-3'}`}>
             <button
               onClick={toggleSidebar}
-              className="lg:hidden p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              className="lg:hidden min-w-[44px] min-h-[44px] p-2 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-center"
+              aria-label={t('accessibility.menu')}
             >
               <Menu className="h-6 w-6" />
             </button>
-            <div>
-              <div className="flex items-center space-x-2">
-                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-base md:text-lg lg:text-xl font-semibold text-gray-900 dark:text-white truncate">
                   {title}
                 </h1>
                 {/* Branch Mode Indicator */}
                 {branchName && (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                  <span className="inline-flex items-center px-2 md:px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 whitespace-nowrap">
                     <Building2 className="h-3 w-3 mr-1" />
-                    {branchName}
+                    <span className="hidden sm:inline">{branchName}</span>
                   </span>
                 )}
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 truncate hidden sm:block">
                 {description}
               </p>
             </div>
           </div>
 
-          {/* Sağ - Arama, Dil, Tema, Bildirim, Profil */}
-          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
-            <SearchBox onSearch={onSearch} onResultClick={onSearchResultClick} />
-            <LanguageSelector variant="navbar" />
+          {/* Right - Controls (Responsive) */}
+          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2 md:space-x-3' : 'space-x-2 md:space-x-3'}`}>
+            {/* SearchBox - Hidden on mobile, shown on md+ */}
+            <div className="hidden md:block">
+              <SearchBox onSearch={onSearch} onResultClick={onSearchResultClick} />
+            </div>
+
+            {/* Language Selector - Hidden on mobile, shown on sm+ */}
+            <div className="hidden sm:block">
+              <LanguageSelector variant="navbar" />
+            </div>
+
+            {/* Theme Toggle - Always visible with 44px touch target */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+              className="min-w-[44px] min-h-[44px] p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 flex items-center justify-center"
               title={isDark ? t('theme.toggleToLight') : t('theme.toggleToDark')}
               aria-label={t('accessibility.theme')}
             >
@@ -141,7 +151,8 @@ const Navbar: React.FC<NavbarProps> = ({
                 <Moon className="h-5 w-5" />
               )}
             </button>
-            
+
+            {/* Profile Dropdown - Always visible */}
             <ProfileDropdown
               branchName={branchName}
               onTabChange={onTabChange}

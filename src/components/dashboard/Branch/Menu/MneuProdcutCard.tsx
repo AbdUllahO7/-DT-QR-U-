@@ -6,16 +6,12 @@ import {
   Coffee, 
   Award, 
   Heart, 
-  Utensils, 
   Plus, 
   Minus, 
   Settings,
   Sparkles,
-  Clock,
-  Star,
   Info,
   ChefHat,
-  Flame
 } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import { MenuProduct } from "../../../../types/menu/type"
@@ -53,8 +49,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
   }
 
   return (
-    <div 
-      className="group relative bg-white dark:bg-slate-800 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 flex flex-col h-full overflow-hidden border border-slate-200/50 dark:border-slate-700/50"
+    <div
+      className="group relative bg-white dark:bg-slate-800 rounded-2xl sm:rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 flex flex-col h-full overflow-hidden border border-slate-200/50 dark:border-slate-700/50"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{
@@ -62,10 +58,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
       }}
     >
       {/* Glow Effect */}
-      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-pink-500/0 to-purple-500/0 group-hover:from-orange-500/10 group-hover:via-pink-500/10 group-hover:to-purple-500/10 transition-all duration-700 rounded-3xl blur-xl"></div>
-      
-      {/* Product Image Section */}
-      <div className="relative h-56 bg-gradient-to-br from-slate-100 via-slate-50 to-white dark:from-slate-700 dark:via-slate-800 dark:to-slate-900 flex-shrink-0 overflow-hidden rounded-t-3xl">
+      <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-pink-500/0 to-purple-500/0 group-hover:from-orange-500/10 group-hover:via-pink-500/10 group-hover:to-purple-500/10 transition-all duration-700 rounded-2xl sm:rounded-3xl blur-xl"></div>
+
+      {/* Product Image Section - Responsive Height */}
+      <div className="relative h-44 sm:h-52 md:h-56 bg-gradient-to-br from-slate-100 via-slate-50 to-white dark:from-slate-700 dark:via-slate-800 dark:to-slate-900 flex-shrink-0 overflow-hidden rounded-t-2xl sm:rounded-t-3xl">
         {/* Background Pattern */}
         <div className="absolute inset-0 opacity-5">
           <div className="absolute inset-0" style={{
@@ -94,26 +90,26 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
 
-        {/* Top Badges Row */}
-        <div className="absolute top-3 left-3 right-3 flex items-start justify-between z-10">
+        {/* Top Badges Row - Responsive */}
+        <div className="absolute top-2 sm:top-3 left-2 sm:left-3 right-2 sm:right-3 flex items-start justify-between z-10">
           {/* Left Badges */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-1.5 sm:gap-2">
             {product.isRecommended && (
               <div className="relative group/badge">
                 <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full blur opacity-50"></div>
-                <span className="relative flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm transform transition-transform duration-300 group-hover/badge:scale-110">
+                <span className="relative flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white text-xs font-bold px-2 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-lg backdrop-blur-sm transform transition-transform duration-300 group-hover/badge:scale-110">
                   <Award className="h-3 w-3" />
-                  <span>{t('productCard.chefsPick')}</span>
+                  <span className="hidden sm:inline">{t('productCard.chefsPick')}</span>
                 </span>
               </div>
             )}
-            
+
             {hasAddons && (
               <div className="relative group/badge">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full blur opacity-50"></div>
-                <span className="relative flex items-center gap-1.5 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm transform transition-transform duration-300 group-hover/badge:scale-110">
+                <span className="relative flex items-center gap-1 sm:gap-1.5 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs font-bold px-2 sm:px-3 py-1 sm:py-1.5 rounded-full shadow-lg backdrop-blur-sm transform transition-transform duration-300 group-hover/badge:scale-110">
                   <Settings className="h-3 w-3" />
-                  <span>{t('productCard.customizable')}</span>
+                  <span className="hidden sm:inline">{t('productCard.customizable')}</span>
                 </span>
               </div>
             )}
@@ -125,27 +121,27 @@ const ProductCard: React.FC<ProductCardProps> = ({
             className="relative group/fav"
           >
             <div className="absolute inset-0 bg-white dark:bg-slate-800 rounded-full blur opacity-50 group-hover/fav:opacity-100 transition-opacity"></div>
-            <div className="relative w-10 h-10 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 border border-slate-200/50 dark:border-slate-700/50">
+            {/* <div className="relative w-10 h-10 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 border border-slate-200/50 dark:border-slate-700/50">
               <Heart className={`h-4 w-4 transition-all duration-300 ${
                 isFavorite 
                   ? 'text-red-500 fill-red-500 scale-110' 
                   : 'text-slate-600 dark:text-slate-400 group-hover/fav:text-red-500 group-hover/fav:scale-110'
               }`} />
-            </div>
+            </div> */}
           </button>
         </div>
 
-        {/* Price Tag - Floating */}
-        <div className="absolute bottom-0 left-0 right-0 p-4">
+        {/* Price Tag - Floating - Responsive */}
+        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4">
           <div className="relative inline-block">
-            <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-pink-600 rounded-2xl blur-lg opacity-50"></div>
-            <div className="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-4 py-2 rounded-2xl shadow-xl border border-orange-200/50 dark:border-orange-800/50">
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-pink-600 rounded-xl sm:rounded-2xl blur-lg opacity-50"></div>
+            <div className="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-xl border border-orange-200/50 dark:border-orange-800/50">
               <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-black bg-gradient-to-r from-orange-600 via-orange-500 to-pink-500 bg-clip-text text-transparent">
+                <span className="text-xl sm:text-2xl font-black bg-gradient-to-r from-orange-600 via-orange-500 to-pink-500 bg-clip-text text-transparent">
                   ${product.price.toFixed(2)}
                 </span>
                 {hasAddons && (
-                  <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                  <span className="text-xs text-slate-600 dark:text-slate-400 font-medium hidden sm:inline">
                     {t('productCard.addons')}
                   </span>
                 )}
@@ -155,15 +151,15 @@ const ProductCard: React.FC<ProductCardProps> = ({
         </div>
       </div>
 
-      {/* Product Info Section */}
-      <div className="relative p-5 flex flex-col flex-1 bg-gradient-to-b from-transparent to-slate-50/30 dark:to-slate-900/30">
+      {/* Product Info Section - Responsive Padding */}
+      <div className="relative p-4 sm:p-5 flex flex-col flex-1 bg-gradient-to-b from-transparent to-slate-50/30 dark:to-slate-900/30">
         {/* Product Name & Description */}
-        <div className="mb-4">
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-orange-600 group-hover:to-pink-600 group-hover:bg-clip-text transition-all duration-300">
+        <div className="mb-3 sm:mb-4">
+          <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white mb-1.5 sm:mb-2 line-clamp-2 group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-orange-600 group-hover:to-pink-600 group-hover:bg-clip-text transition-all duration-300">
             {product.productName}
           </h3>
           {product.productDescription && (
-            <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
               {product.productDescription}
             </p>
           )}
@@ -196,10 +192,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
 
-        {/* Allergens & Ingredients in Tabs */}
+        {/* Allergens & Ingredients in Tabs - Responsive Grid */}
         {(product.allergens?.length > 0 || product.ingredients?.length > 0) && (
-          <div className="mb-4" >
-            <div className="grid grid-cols-2 gap-3">
+          <div className="mb-3 sm:mb-4" >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               {/* Allergens */}
               {product.allergens && product.allergens.length > 0 && (
                 <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-xl p-3 border border-amber-200/50 dark:border-amber-800/50">
@@ -259,55 +255,58 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
 
-        {/* Action Buttons */}
-        <div className="mt-auto pt-4">
+        {/* Action Buttons - Responsive with 44px touch targets */}
+        <div className="mt-auto pt-3 sm:pt-4">
           {cartQuantity > 0 ? (
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-pink-600 rounded-2xl blur opacity-30"></div>
-              <div className="relative flex items-center justify-between bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-2xl p-2 border-2 border-orange-200 dark:border-orange-800 shadow-lg">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-pink-600 rounded-xl sm:rounded-2xl blur opacity-30"></div>
+              <div className="relative flex items-center justify-between bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-900 rounded-xl sm:rounded-2xl p-2 border-2 border-orange-200 dark:border-orange-800 shadow-lg">
                 <button
                   onClick={() => onRemoveFromCart(product.branchProductId)}
-                  className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-110 active:scale-95"
+                  className="min-w-[44px] min-h-[44px] w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-110 active:scale-95"
+                  aria-label="Remove from cart"
                 >
-                  <Minus className="h-4 w-4" />
+                  <Minus className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
-                
-                <div className="flex flex-col items-center">
-                  <span className="text-2xl font-black text-slate-900 dark:text-white">
+
+                <div className="flex flex-col items-center px-2">
+                  <span className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
                     {cartQuantity}
                   </span>
                   <span className="text-xs text-slate-600 dark:text-slate-400 font-medium">
                     {t('productCard.inCart')}
                   </span>
                 </div>
-                
+
                 <button
                   onClick={handleQuickAdd}
-                  className="w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white rounded-xl flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-110 active:scale-95"
+                  className="min-w-[44px] min-h-[44px] w-10 h-10 sm:w-11 sm:h-11 bg-gradient-to-br from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white rounded-xl flex items-center justify-center transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-110 active:scale-95"
+                  aria-label="Add to cart"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5" />
                 </button>
               </div>
             </div>
           ) : (
             <button
               onClick={handleQuickAdd}
-              className="relative w-full group/btn overflow-hidden"
+              className="relative w-full group/btn overflow-hidden min-h-[44px]"
+              aria-label={hasAddons ? t('productCard.customizeOrder') : t('productCard.addToCart')}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-600 rounded-2xl blur opacity-50 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
-              <div className="relative bg-gradient-to-r from-orange-500 via-orange-600 to-pink-600 hover:from-orange-600 hover:via-orange-700 hover:to-pink-700 text-white px-6 py-3.5 rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl font-bold text-sm border-2 border-orange-400/50 transform hover:scale-105 active:scale-95">
+              <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-600 rounded-xl sm:rounded-2xl blur opacity-50 group-hover/btn:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative bg-gradient-to-r from-orange-500 via-orange-600 to-pink-600 hover:from-orange-600 hover:via-orange-700 hover:to-pink-700 text-white px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl font-bold text-sm border-2 border-orange-400/50 transform hover:scale-105 active:scale-95">
                 {hasAddons ? (
                   <>
                     <Settings className="h-4 w-4" />
-                    <span>{t('productCard.customizeOrder')}</span>
+                    <span className="truncate">{t('productCard.customizeOrder')}</span>
                   </>
                 ) : (
                   <>
                     <Plus className="h-4 w-4" />
-                    <span>{t('productCard.addToCart')}</span>
+                    <span className="truncate">{t('productCard.addToCart')}</span>
                   </>
                 )}
-                
+
                 {/* Shimmer Effect */}
                 <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
               </div>

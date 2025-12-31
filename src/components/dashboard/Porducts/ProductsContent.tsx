@@ -1043,35 +1043,36 @@ useEffect(() => {
           </div>
         )}
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
-              <input
-                type="text"
-                placeholder={t('productsContent.search.placeholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-              />
-            </div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 md:p-6">
+          <div className="flex flex-col gap-3">
+            {/* First Row: Search + Branch Selector */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
+                <input
+                  type="text"
+                  placeholder={t('productsContent.search.placeholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
+                />
+              </div>
 
-            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
               {/* Branch Selector */}
-              <div className="relative" ref={branchDropdownRef}>
+              <div className="relative flex-shrink-0" ref={branchDropdownRef}>
                 <button
                   onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
-                  className={`flex items-center justify-between min-w-[200px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRTL ? 'flex-row-reverse' : ''}`}
+                  className={`flex items-center justify-between w-full sm:min-w-[180px] px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRTL ? 'flex-row-reverse' : ''}`}
                 >
-                  <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                    {selectedBranch ? selectedBranch.branchName : t('productsContent.branch.selectBranch')}
+                  <span className={`flex items-center truncate ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <Users className={`h-4 w-4 flex-shrink-0 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    <span className="truncate">{selectedBranch ? selectedBranch.branchName : t('productsContent.branch.selectBranch')}</span>
                   </span>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                  <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
                 </button>
 
                 {isBranchDropdownOpen && (
-                  <div className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'}`}>
+                  <div className={`absolute z-20 mt-1 w-full min-w-[200px] bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'}`}>
                     {branches.map(branch => (
                       <button
                         key={branch.branchId}
@@ -1094,15 +1095,19 @@ useEffect(() => {
                   </div>
                 )}
               </div>
+            </div>
 
+            {/* Second Row: Action Buttons - Responsive Layout */}
+            <div className={`flex flex-wrap items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
               {/* Clear Filters Button */}
               {hasActiveFilters && (
                 <button
                   onClick={clearFilters}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200"
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200"
+                  title={t('clear.filters') || 'Clear Filters'}
                 >
                   <X className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('clear.filters') || 'Clear'}</span>
+                  <span className="hidden xs:inline">{t('clear.filters') || 'Clear'}</span>
                 </button>
               )}
 
@@ -1140,22 +1145,22 @@ useEffect(() => {
 
               {/* Filter Dropdown */}
               <div className="relative" ref={filterRef}>
-                <button 
+                <button
                   onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium border rounded-lg transition-colors duration-200 ${
-                    hasActiveFilters 
-                      ? 'text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800' 
+                  className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border rounded-lg transition-colors duration-200 ${
+                    hasActiveFilters
+                      ? 'text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800'
                       : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
                   }`}
                   title={t('productsContent.search.filter')}
                 >
                   <Filter className="h-4 w-4" />
                   <span className="hidden sm:inline">{t('productsContent.search.filter')}</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${showFilterDropdown ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showFilterDropdown ? 'rotate-180' : ''}`}/>
                 </button>
 
                 {showFilterDropdown && (
-                  <div className="absolute top-full mt-2 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                  <div className="absolute top-full mt-2 w-80  bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 ">
                     <div className="p-4 space-y-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -1253,18 +1258,18 @@ useEffect(() => {
 
               {/* Sort Dropdown */}
               <div className="relative" ref={sortRef}>
-                <button 
+                <button
                   onClick={() => setShowSortDropdown(!showSortDropdown)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
                   title={t('productsContent.search.sort')}
                 >
                   <ArrowUp className="h-4 w-4" />
                   <span className="hidden sm:inline">{t('productsContent.search.sort')}</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
                 </button>
 
                 {showSortDropdown && (
-                  <div className="absolute top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                  <div className="absolute top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 left-0 sm:right-0 sm:left-auto">
                     <div className="p-2">
                       {sortOptions.map((option) => {
                         const Icon = option.icon;
@@ -1292,33 +1297,40 @@ useEffect(() => {
                 )}
               </div>
 
+              {/* Spacer to push action buttons to the right on larger screens */}
+              <div className="hidden md:block flex-1"></div>
+
               <button
                 onClick={() => setIsCreateCategoryModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70 transition-colors duration-200"
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70 transition-colors duration-200"
+                title={t('productsContent.actions.newCategory')}
               >
                 <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('productsContent.actions.newCategory')}</span>
+                <span className="hidden lg:inline">{t('productsContent.actions.newCategory')}</span>
               </button>
 
-              <button 
+              <button
                 onClick={() => {
-                  setSelectedCategoryForProduct(''); 
+                  setSelectedCategoryForProduct('');
                   setIsCreateProductModalOpen(true);
                 }}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200"
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200"
+                title={t('productsContent.actions.newProduct')}
               >
                 <Plus className="h-4 w-4" />
-                <span>{t('productsContent.actions.newProduct')}</span>
+                <span className="hidden md:inline">{t('productsContent.actions.newProduct')}</span>
               </button>
-                  <button 
-                    onClick={() => {
-                      navigate('/dashboard/RecycleBin', { state: { source: 'products' } })
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span>{t('productsContent.actions.RecycleBin')}</span>
-                  </button>
+
+              <button
+                onClick={() => {
+                  navigate('/dashboard/RecycleBin', { state: { source: 'products' } })
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
+                title={t('productsContent.actions.RecycleBin')}
+              >
+                <Trash2 className="h-4 w-4" />
+                <span className="hidden md:inline">{t('productsContent.actions.RecycleBin')}</span>
+              </button>
             </div>
           </div>
         </div>

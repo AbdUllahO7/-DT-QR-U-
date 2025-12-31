@@ -1855,7 +1855,7 @@ hero: {
 
       // Product status
       status: {
-        outOfStock: 'Out of Stock',
+        outOfStock: 'Unavailable',
         available: 'Available',
         unavailable: 'Unavailable'
       },
@@ -2359,6 +2359,7 @@ hero: {
     loadingExtras: 'Loading extras...',
     status : {
       active : "active",
+      inactive : "inactive"
     },
     editCategory: 'Edit category',
     deleteCategory: 'Delete category',
@@ -3661,7 +3662,12 @@ hero: {
 
   menu: {
   title: "Menu",
-       noCategories: "No list",
+  noCategories: "No list",
+  customizations: "Customizations",
+  extras: "Extras",
+  each: "Each",
+  availableExtras: "Available Extras",
+  no: "No",
   basePrice: "Base Price",
   loading: "Loading Menu",
   allergens: "Allergens",
@@ -3755,6 +3761,7 @@ cart: {
     "confirm": "Confirm",
     "cancel": "Cancel",
     error : "Error",
+    removal_item_toggle: "Remove Item",
     "cancel_Reason_prompt_title": "Cancellation Reason",
     "reason": "Cancellation Reason",
     "submit": "Send",
