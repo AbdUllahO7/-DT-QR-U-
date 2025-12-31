@@ -512,7 +512,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                   ))}
               </select>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                Şube için varsayılan dil ayarı
+                {t('branchPreferences.sections.localization.defaultLanguageDesc')}
               </p>
             </div>
             <div>
@@ -594,18 +594,15 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                   );
                 })}
               </div>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                {t('branchPreferences.sections.localization.supportedLanguagesDesc')}
-              </p>
+            
 
               {/* Warning about available languages */}
               <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                 <div className="flex items-start space-x-3 rtl:space-x-reverse">
                   <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
                   <div className="text-sm text-blue-800 dark:text-blue-300">
-                    <p className="font-medium mb-1">Not:</p>
                     <p>
-                      Şubeler sadece restoranın desteklediği dilleri seçebilir. Görüntülenen diller restoran tarafından belirlenir.
+                      {t('branchPreferences.sections.localization.languageRestaurantNote')}
                     </p>
                   </div>
                 </div>

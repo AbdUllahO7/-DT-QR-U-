@@ -4154,7 +4154,8 @@ contact: {
         "defaultLanguage": "اللغة الافتراضية",
         "defaultCurrency": "العملة الافتراضية",
         "timeZone": "المنطقة الزمنية",
-        "supportedLanguages": "اللغات المدعومة"
+        "supportedLanguages": "اللغات المدعومة",
+        "languageRestaurantNote":"يمكن للفروع اختيار اللغات المدعومة فقط من قبل المطعم. اللغات المعروضة تحددها المطعم."
       },
       "sessionManagement": {
         "title": "إدارة الجلسات",

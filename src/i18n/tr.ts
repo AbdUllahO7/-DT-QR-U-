@@ -4159,7 +4159,8 @@ productModal: {
         defaultLanguage: "Varsayılan Dil",
         defaultCurrency: "Varsayılan Para Birimi",
         timeZone: "Saat Dilimi",
-        supportedLanguages: "Desteklenen Diller"
+        supportedLanguages: "Desteklenen Diller",
+        languageRestaurantNote: "Şubeler sadece restoranın desteklediği dilleri seçebilir. Görüntülenen diller restoran tarafından belirlenir."
       },
       sessionManagement: {
         title: "Oturum Yönetimi",

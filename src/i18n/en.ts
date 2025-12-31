@@ -4153,7 +4153,8 @@ productModal: {
       defaultLanguage: "Default Language",
       defaultCurrency: "Default Currency",
       timeZone: "Time Zone",
-      supportedLanguages: "Supported Languages"
+      supportedLanguages: "Supported Languages",
+      languageRestaurantNote:"Branches can only select languages supported by the restaurant. The displayed languages are determined by the restaurant."
     },
     sessionManagement: {
       title: "Session Management",
