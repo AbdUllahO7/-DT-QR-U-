@@ -38,12 +38,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
     { value: 'EUR', label: t('branchPreferences.currencies.EUR') }
   ];
 
-  // Language options
-  const languages = [
-    { value: 'tr', label: t('branchPreferences.languages.tr') },
-    { value: 'en', label: t('branchPreferences.languages.en') },
-    { value: 'ar', label: t('branchPreferences.languages.ar') }
-  ];
+  console.log("BranchPreferences",preferences)
 
   // Timezone options
   const timezones = [
@@ -101,32 +96,52 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
   // Handle form field changes
   const handleFieldChange = (field: keyof UpdateBranchPreferencesDto, value: any) => {
     if (!formData) return;
-    
+
     const updatedFormData = {
       ...formData,
       [field]: value
     };
-    
+
     setFormData(updatedFormData);
     setHasChanges(true);
     setError(null);
     setSuccess(null);
   };
 
+  // Toggle language support
+  const toggleLanguage = (languageCode: string) => {
+    if (!formData || !formData.supportedLanguages) return;
+
+    const currentLanguages = [...formData.supportedLanguages];
+    const index = currentLanguages.indexOf(languageCode);
+
+    if (index > -1) {
+      // Remove language
+      currentLanguages.splice(index, 1);
+    } else {
+      // Add language
+      currentLanguages.push(languageCode);
+    }
+
+    handleFieldChange('supportedLanguages', currentLanguages);
+  };
+
   // Save preferences
   const handleSave = async () => {
     if (!formData || !hasChanges) return;
-    
+
     try {
       setIsSaving(true);
       setError(null);
-      
-      const updatedPreferences = await branchPreferencesService.updateBranchPreferences(formData);
-      setPreferences(updatedPreferences);
-      setFormData({ ...formData, rowVersion: updatedPreferences.rowVersion });
+
+      await branchPreferencesService.updateBranchPreferences(formData);
+
+      // Reload preferences to get complete data including availableLanguages
+      await loadPreferences();
+
       setHasChanges(false);
       setSuccess(t('branchPreferences.saveSuccess'));
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
@@ -477,12 +492,17 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                 onChange={(e) => handleFieldChange('defaultLanguage', e.target.value)}
                 className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                {languages.map((lang) => (
-                  <option key={lang.value} value={lang.value}>
-                    {lang.label}
-                  </option>
-                ))}
+                {(preferences?.availableLanguages || [])
+                  .filter(lang => formData.supportedLanguages?.includes(lang.code))
+                  .map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.displayName} ({lang.nativeName})
+                    </option>
+                  ))}
               </select>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                Şube için varsayılan dil ayarı
+              </p>
             </div>
 
             <div>
@@ -522,42 +542,66 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
             </div>
 
 <div className="col-span-2">
-  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">
     {t('branchPreferences.sections.localization.supportedLanguages')}
   </label>
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-    {[
-      { flag: 1, code: 'tr', label: t('branchPreferences.languages.tr') },
-      { flag: 2, code: 'en', label: t('branchPreferences.languages.en') },
-      { flag: 4, code: 'ar', label: t('branchPreferences.languages.ar') },
-      { flag: 8, code: 'de', label: t('branchPreferences.languages.de') },
-      { flag: 16, code: 'fr', label: t('branchPreferences.languages.fr') },
-      { flag: 32, code: 'ru', label: t('branchPreferences.languages.ru') },
-      { flag: 64, code: 'es', label: t('branchPreferences.languages.es') }
-    ].map((lang) => (
-      <div key={lang.code} className="flex items-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
-        <input
-          id={`lang-${lang.code}`}
-          type="checkbox"
-          checked={(formData.supportedLanguages & lang.flag) === lang.flag}
-          onChange={(e) => {
-            const currentValue = formData.supportedLanguages;
-            const newValue = e.target.checked 
-              ? currentValue | lang.flag  // Add flag
-              : currentValue & ~lang.flag; // Remove flag
-            handleFieldChange('supportedLanguages', newValue);
-          }}
-          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-        />
-        <label htmlFor={`lang-${lang.code}`} className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300 cursor-pointer">
-          {lang.label}
-        </label>
-      </div>
-    ))}
+  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+    {(preferences?.availableLanguages || []).map((lang) => {
+      const isSupported = formData.supportedLanguages?.includes(lang.code) || false;
+      const isDefaultLang = formData.defaultLanguage === lang.code;
+
+      return (
+        <div
+          key={lang.code}
+          className={`flex items-center p-3 rounded-lg border transition-all ${
+            isSupported
+              ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
+              : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600'
+          }`}
+        >
+          <input
+            id={`lang-${lang.code}`}
+            type="checkbox"
+            checked={isSupported}
+            disabled={isDefaultLang}
+            onChange={() => toggleLanguage(lang.code)}
+            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50"
+          />
+          <label
+            htmlFor={`lang-${lang.code}`}
+            className={`ml-2 rtl:mr-2 rtl:ml-0 text-sm font-medium cursor-pointer ${
+              isDefaultLang ? 'opacity-50' : ''
+            } ${
+              isSupported
+                ? 'text-blue-900 dark:text-blue-300'
+                : 'text-gray-900 dark:text-gray-300'
+            }`}
+          >
+            <div className="flex flex-col">
+              <span>{lang.displayName}</span>
+              <span className="text-xs opacity-75">{lang.nativeName}</span>
+            </div>
+          </label>
+        </div>
+      );
+    })}
   </div>
   <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
     {t('branchPreferences.sections.localization.supportedLanguagesDesc')}
   </p>
+
+  {/* Warning about available languages */}
+  <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+    <div className="flex items-start space-x-3 rtl:space-x-reverse">
+      <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+      <div className="text-sm text-blue-800 dark:text-blue-300">
+        <p className="font-medium mb-1">Not:</p>
+        <p>
+          Şubeler sadece restoranın desteklediği dilleri seçebilir. Görüntülenen diller restoran tarafından belirlenir.
+        </p>
+      </div>
+    </div>
+  </div>
 </div>
           </div>
         </div>

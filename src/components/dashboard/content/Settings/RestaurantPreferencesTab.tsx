@@ -152,51 +152,49 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
   }
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg ${className}`}>
-      {/* Header */}
-      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <Globe className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Restoran Tercihleri
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Restoran dil ayarlarını yönetin
-              </p>
-            </div>
+    <div className={className}>
+      {/* Header with actions */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+          <Globe className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              Restoran Dil Tercihleri
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              Restoran dil ayarlarını yönetin
+            </p>
           </div>
+        </div>
 
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <button
-              onClick={handleRefresh}
-              disabled={isLoading}
-              className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0 ${isLoading ? 'animate-spin' : ''}`} />
-              Yenile
-            </button>
+        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+          <button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0 ${isLoading ? 'animate-spin' : ''}`} />
+            Yenile
+          </button>
 
-            <button
-              onClick={handleSave}
-              disabled={!hasChanges || isSaving}
-              className="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors disabled:opacity-50"
-            >
-              {isSaving ? (
-                <Loader2 className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
-              )}
-              {isSaving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
-            </button>
-          </div>
+          <button
+            onClick={handleSave}
+            disabled={!hasChanges || isSaving}
+            className="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors disabled:opacity-50"
+          >
+            {isSaving ? (
+              <Loader2 className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+            )}
+            {isSaving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
+          </button>
         </div>
       </div>
 
       {/* Alert Messages */}
       {error && (
-        <div className="mx-6 mt-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
             <span className="text-red-800 dark:text-red-300">{error}</span>
@@ -205,7 +203,7 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
       )}
 
       {success && (
-        <div className="mx-6 mt-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+        <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
           <div className="flex items-center space-x-3 rtl:space-x-reverse">
             <CheckCircle className="w-5 h-5 text-green-600 dark:text-green-400" />
             <span className="text-green-800 dark:text-green-300">{success}</span>
@@ -214,7 +212,7 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
       )}
 
       {/* Content */}
-      <div className="p-6 space-y-8">
+      <div className="space-y-8">
         {/* Language Settings Section */}
         <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
           <div className="flex items-center space-x-3 rtl:space-x-reverse mb-4">
