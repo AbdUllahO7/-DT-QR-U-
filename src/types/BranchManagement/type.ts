@@ -904,6 +904,8 @@ export interface OrderExtraItem {
   isRemoval: boolean;
   quantity: number;
   unitPrice: number;
+  minQuantity: number;
+  maxQuantity: number;
   totalPrice: number;
   note: string | null;
 }

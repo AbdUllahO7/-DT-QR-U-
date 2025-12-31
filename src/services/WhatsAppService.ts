@@ -63,7 +63,8 @@ export class WhatsAppService {
       message += `\n\n${index + 1}. *${item.productName}* x${item.quantity}`
 
       // Unit Price
-      message += `\n   💰 ${item.price.toFixed(2)} TRY each`
+      const itemPrice = item.price || 0;
+      message += `\n   💰 ${itemPrice.toFixed(2)} TRY each`
 
       // Add extras if any
       if (item.extras && item.extras.length > 0) {
@@ -73,7 +74,8 @@ export class WhatsAppService {
             message += `\n   ❌ No ${extra.extraName}`
           } else {
             // Normal extras with quantity and price
-            message += `\n   ✨ ${extra.extraName} (${extra.quantity}x) - ${extra.price.toFixed(2)} TRY`
+            const extraPrice = extra.price || 0;
+            message += `\n   ✨ ${extra.extraName} (${extra.quantity}x) - ${extraPrice.toFixed(2)} TRY`
           }
         })
       }
@@ -81,14 +83,15 @@ export class WhatsAppService {
       // Add addons if any
       if (item.addons && item.addons.length > 0) {
         item.addons.forEach(addon => {
-          message += `\n   ➕ ${addon.addonName} (${addon.quantity}x) - ${addon.price.toFixed(2)} TRY`
+          const addonPrice = addon.price || 0;
+          message += `\n   ➕ ${addon.addonName} (${addon.quantity}x) - ${addonPrice.toFixed(2)} TRY`
         })
       }
 
       // Item total (Use provided total or calculate)
       const finalItemPrice = item.totalItemPrice
         ? item.totalItemPrice
-        : (item.price * item.quantity); // Fallback calculation
+        : (itemPrice * item.quantity); // Fallback calculation
 
       message += `\n   👉 *Item Total: ${finalItemPrice.toFixed(2)} TRY*`
     })
@@ -138,20 +141,21 @@ export class WhatsAppService {
     
     // 3. Price Breakdown
     message += `*💰 PRICE BREAKDOWN:*`
-    
-    if (data.subtotal !== undefined) {
+
+    if (data.subtotal !== undefined && data.subtotal !== null) {
       message += `\nSubtotal: ${data.subtotal.toFixed(2)} TRY`
     }
-    
+
     if (data.tax && data.tax > 0) {
       message += `\nTax: ${data.tax.toFixed(2)} TRY`
     }
-    
+
     if (data.serviceCharge && data.serviceCharge > 0) {
       message += `\nService Charge: ${data.serviceCharge.toFixed(2)} TRY`
     }
-    
-    message += `\n*TOTAL: ${data.totalPrice.toFixed(2)} TRY*`
+
+    const totalPrice = data.totalPrice || 0;
+    message += `\n*TOTAL: ${totalPrice.toFixed(2)} TRY*`
     
     // 4. Notes
     if (data.notes && data.notes.trim()) {

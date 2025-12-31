@@ -5212,7 +5212,8 @@ extrasManagement: {
       maxSelection: 'الحد الأقصى للاختيار',
       minQuantity: 'الحد الأدنى للكمية',
       maxQuantity: 'الحد الأقصى للكمية',
-      removalCategoryLabel: 'فئة إزالة (طرح)'
+      removalCategoryLabel: 'فئة إزالة (طرح)',
+      unlimited: 'غير محدود'
     }
   },
 

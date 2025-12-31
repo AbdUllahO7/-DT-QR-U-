@@ -5236,7 +5236,8 @@ extrasManagement: {
       maxSelection: 'Maksimum Seçim',
       removalCategoryLabel: 'Çıkarma Kategorisi',
       minQuantity: 'Minimum Miktar',
-      maxQuantity: 'Maksimum Miktar'
+      maxQuantity: 'Maksimum Miktar',
+      unlimited: 'Sınırsız'
     }
   },
 
