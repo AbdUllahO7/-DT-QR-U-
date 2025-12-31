@@ -34,25 +34,27 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ branchId }) => {
       fetchPendingOrders,
       handleConfirmOrder,
       handleRejectOrder,
-      handleCancelOrder, 
+      handleCancelOrder,
       handleUpdateStatus,
       switchViewMode,
       openConfirmModal,
       openRejectModal,
-      openCancelModal, 
+      openCancelModal,
       openStatusModal,
       openDetailsModal,
       closeModals,
       toggleRowExpansion,
       handleSort,
       fetchBranchOrders,
+      handlePendingPageChange,
+      handlePendingItemsPerPageChange,
       handleBranchPageChange,
       handleBranchItemsPerPageChange,
       setState
     }
   } = useOrdersManager();
 
-  // Client-side filtering only for pending orders
+  // Client-side filtering only for pending orders (now disabled since we use server-side pagination)
   const {
     filteredOrders,
     updateFilter,
@@ -61,41 +63,26 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ branchId }) => {
     hasActiveFilters
   } = useFiltering(state, setState);
 
-  // Create a separate state updater that only runs for pending mode
-  const pendingSetState = useCallback((newState: any) => {
-    if (state.viewMode === 'pending') {
-      setState(newState);
-    }
-  }, [state.viewMode, setState]);
-
-  // Client-side pagination only for pending orders
-  const {
-    paginatedOrders,
-    changePage,
-    changeItemsPerPage
-  } = usePagination(filteredOrders, state.pagination, pendingSetState);
-
   // Refs to track what's been fetched to prevent duplicates
   const fetchedInitially = useRef(false);
   const isFetchingRef = useRef(false);
   const lastFetchedConfig = useRef<{viewMode: string, page: number, pageSize: number} | null>(null);
 
   // Determine which orders to display and which handlers to use based on view mode
-  const displayOrders = state.viewMode === 'branch' 
-    ? state.branchOrders  // Server-side paginated
-    : paginatedOrders;     // Client-side paginated
+  // Now both modes use server-side pagination
+  const displayOrders = state.viewMode === 'branch'
+    ? state.branchOrders
+    : state.pendingOrders;
 
-  const displayTotalFiltered = state.viewMode === 'branch' 
-    ? state.pagination.totalItems  // From API
-    : filteredOrders.length;       // From client-side filtering
+  const displayTotalFiltered = state.pagination.totalItems;
 
-  const handlePageChangeInternal = state.viewMode === 'branch' 
-    ? handleBranchPageChange      // Server-side
-    : changePage;                 // Client-side
+  const handlePageChangeInternal = state.viewMode === 'branch'
+    ? handleBranchPageChange
+    : handlePendingPageChange;
 
-  const handleItemsPerPageChangeInternal = state.viewMode === 'branch' 
-    ? handleBranchItemsPerPageChange  // Server-side
-    : changeItemsPerPage;             // Client-side
+  const handleItemsPerPageChangeInternal = state.viewMode === 'branch'
+    ? handleBranchItemsPerPageChange
+    : handlePendingItemsPerPageChange;
 
   // Initial fetch on mount - only once
   useEffect(() => {
@@ -137,7 +124,11 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ branchId }) => {
     const fetchData = async () => {
       try {
         if (state.viewMode === 'pending') {
-          await fetchPendingOrders();
+          await fetchPendingOrders(
+            undefined, // branchId (for branch users, it's handled internally)
+            state.pagination.currentPage,
+            state.pagination.itemsPerPage
+          );
         } else if (state.viewMode === 'branch') {
           await fetchBranchOrders(
             undefined, // branchId (for branch users, it's handled internally)
@@ -170,7 +161,11 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ branchId }) => {
     // Only set up auto-refresh if we're in pending view mode
     if (state.viewMode === 'pending') {
       intervalRef.current = window.setInterval(() => {
-        fetchPendingOrders();
+        fetchPendingOrders(
+          undefined,
+          state.pagination.currentPage,
+          state.pagination.itemsPerPage
+        );
       }, 30000); // 30 seconds
     }
 
@@ -181,7 +176,7 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ branchId }) => {
         intervalRef.current = null;
       }
     };
-  }, [state.viewMode, fetchPendingOrders]);
+  }, [state.viewMode, state.pagination.currentPage, state.pagination.itemsPerPage, fetchPendingOrders]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">

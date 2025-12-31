@@ -48,6 +48,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set())
   const [errors, setErrors] = useState<Map<number, string>>(new Map())
   const [quantity, setQuantity] = useState(1)
+
+
+  console.log('ProductModal Rendered',product)
   
   // Initialize expanded categories when product changes
   useEffect(() => {
@@ -819,7 +822,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                                       
                                       {!extra.isRemoval && (
                                         <div className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                                          +${price.toFixed(2)}
+                                          +{price.toFixed(2)}
                                         </div>
                                       )}
                                     </div>
@@ -827,22 +830,30 @@ const ProductModal: React.FC<ProductModalProps> = ({
                                     {/* Extra Controls */}
                                     <div className="flex items-center gap-2 ml-4">
                                       {extra.isRemoval ? (
+                                        // Simple toggle for removal items - no increment/decrement
                                         <button
                                           onClick={() => handleExtraQuantityChange(
                                             extra.branchProductExtraId,
                                             isSelected ? -1 : 1,
                                             extra
                                           )}
-                                          className={`flex items-center gap-1 px-3 py-1.5 rounded-lg font-semibold text-xs transition-all ${
+                                          className={`relative flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
                                             isSelected
-                                              ? 'bg-blue-500 text-white'
-                                              : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
+                                              ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md'
+                                              : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
                                           }`}
                                         >
-                                          {isSelected && <Check className="h-3 w-3" />}
-                                          {isSelected ? t('productModal.removed') : t('productModal.remove')}
+                                          <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                                            isSelected
+                                              ? 'border-white bg-white'
+                                              : 'border-slate-400 dark:border-slate-500'
+                                          }`}>
+                                            {isSelected && <Check className="h-4 w-4 text-red-600" />}
+                                          </div>
+                                          <span>{isSelected ? t('productModal.removed') : t('productModal.remove')}</span>
                                         </button>
                                       ) : (
+                                        // Increment/decrement controls for regular extras
                                         <div className="flex items-center gap-2 bg-white dark:bg-slate-700 rounded-lg p-1 border border-slate-200 dark:border-slate-600">
                                           <button
                                             onClick={() => handleExtraQuantityChange(extra.branchProductExtraId, -1, extra)}

@@ -524,7 +524,7 @@ const initializeMenu = async () => {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className={`text-lg ${theme.text.secondary}`}>{t('menu.loadingOnline')}</p>
+          <p className={`text-lg ${theme.text.secondary}`}>{t('menu.loading')}</p>
         </div>
       </div>
     );

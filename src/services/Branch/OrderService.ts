@@ -148,41 +148,57 @@ class OrderService {
     }
   }
 
-  // Similar pattern for getPendingOrders
-  async getPendingOrders(branchId?: number): Promise<PendingOrder[]> {
+  // Similar pattern for getPendingOrders with pagination support
+  async getPendingOrders(branchId?: number, page: number = 1, pageSize: number = 10): Promise<{ orders: PendingOrder[], totalItems: number, totalPages: number }> {
     // Get effective branch ID (from parameter, localStorage, or token)
     const effectiveBranchId = branchId || getEffectiveBranchId();
 
-    const requestKey = `pending-${effectiveBranchId}`;
+    const requestKey = `pending-${effectiveBranchId}-${page}-${pageSize}`;
 
     if (this.activeRequests.has(requestKey)) {
       return this.activeRequests.get(requestKey)!;
     }
 
     try {
-      const url = effectiveBranchId
-        ? `${this.baseUrl}/pending?branchId=${effectiveBranchId}`
-        : `${this.baseUrl}/pending`;
+      const params = new URLSearchParams();
+      if (effectiveBranchId) {
+        params.append('branchId', effectiveBranchId.toString());
+      }
+      params.append('page', page.toString());
+      params.append('pageSize', pageSize.toString());
 
-      logger.info('Pending orders getirme isteği gönderiliyor', { branchId: effectiveBranchId }, { prefix: 'OrderService' });
-      
-      const requestPromise = httpClient.get<PendingOrder[]>(url)
+      const url = `${this.baseUrl}/pending?${params.toString()}`;
+
+      logger.info('Pending orders getirme isteği gönderiliyor', {
+        branchId: effectiveBranchId,
+        page,
+        pageSize
+      }, { prefix: 'OrderService' });
+
+      const requestPromise = httpClient.get<{ orders: PendingOrder[], totalItems: number, totalPages: number }>(url)
         .then(response => {
-          const orders = Array.isArray(response.data) ? response.data : [];
-          logger.info('Pending orders başarıyla alındı', { 
-            branchId,
-            ordersCount: orders.length 
+          const result = response.data;
+          logger.info('Pending orders başarıyla alındı', {
+            branchId: effectiveBranchId,
+            page,
+            pageSize,
+            ordersCount: result.orders?.length || 0,
+            totalItems: result.totalItems
           }, { prefix: 'OrderService' });
-          return orders;
+          return {
+            orders: Array.isArray(result.orders) ? result.orders : [],
+            totalItems: result.totalItems || 0,
+            totalPages: result.totalPages || 0
+          };
         })
         .finally(() => {
           this.activeRequests.delete(requestKey);
           this.pendingConfigs.delete(requestKey);
         });
-      
+
       this.activeRequests.set(requestKey, requestPromise);
       return await requestPromise;
-      
+
     } catch (error: any) {
       this.activeRequests.delete(requestKey);
        this.pendingConfigs.delete(requestKey);
