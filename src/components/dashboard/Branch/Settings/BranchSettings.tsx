@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Bell, 
-  Check, 
-  Mail, 
-  MoonStar, 
-  Sun, 
+import {
+  Bell,
+  Check,
+  Mail,
+  MoonStar,
+  Sun,
   Settings as SettingsIcon,
   Shield,
   Palette,
@@ -18,7 +18,7 @@ import {
   Trash2,
   Save,
   Info,
-
+  Globe,
   Languages,
   Clock,
   Calendar,
@@ -30,6 +30,7 @@ import {
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import BranchPreferencesTab from './BranchPreferencesTab';
+import RestaurantPreferencesTab from './RestaurantPreferencesTab';
 import { UserSettingsState } from '../../../../types/BranchManagement/type';
 
 
@@ -56,7 +57,7 @@ const BranchSettings: React.FC<BranchSettingsProps> = ({ branchId }) => {
   });
 
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [activeTab, setActiveTab] = useState<'general' | 'branch' | 'notifications' | 'privacy' | 'appearance' | 'data'>('branch');
+  const [activeTab, setActiveTab] = useState<'general' | 'branch' | 'restaurant' | 'notifications' | 'privacy' | 'appearance' | 'data'>('restaurant');
 
   // Load settings from localStorage on mount
   useEffect(() => {
@@ -96,12 +97,13 @@ const BranchSettings: React.FC<BranchSettingsProps> = ({ branchId }) => {
 
   const tabs = [
 /*     { id: 'general', label: t('settings.tabs.general'), icon: SettingsIcon },
- */    { id: 'branch', label: t('branchPreferences.title'), icon: SettingsIcon },
+ */    { id: 'restaurant', label: 'Restoran Tercihleri', icon: Globe },
+    { id: 'branch', label: t('branchPreferences.title'), icon: SettingsIcon },
 /*     { id: 'notifications', label: t('settings.tabs.notifications'), icon: Bell },
  *//*     { id: 'privacy', label: t('settings.tabs.privacy'), icon: Shield },
  */    { id: 'appearance', label: t('settings.tabs.appearance'), icon: Palette },
 /*     { id: 'data', label: t('settings.tabs.data'), icon: Database }
- */  
+ */
 ];
 
   // Reusable switch component
@@ -384,9 +386,12 @@ const BranchSettings: React.FC<BranchSettingsProps> = ({ branchId }) => {
             </div>
           </motion.div>
         )}
+        {activeTab === 'restaurant' && (
+          <RestaurantPreferencesTab />
+        )}
         {activeTab === 'branch' && (
-          <BranchPreferencesTab 
-          
+          <BranchPreferencesTab
+
           />
         )}
         {activeTab === 'notifications' && (
