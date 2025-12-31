@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Minus, Trash2, ShoppingCart, AlertCircle, Loader2, ChevronDown, ChevronUp, 
-         User, MapPin, Phone, Table, CheckCircle, ChevronLeft, ChevronRight, ArrowRight, ArrowLeft, 
+import { X, Plus, Minus, Trash2, ShoppingCart, AlertCircle, Loader2,
+         User, MapPin, Phone, Table, CheckCircle, ChevronLeft, ChevronRight, ArrowRight, ArrowLeft,
          Clock, CreditCard, Banknote, Smartphone, ClipboardList, Copy } from 'lucide-react';
 import { theme, Order } from '../../../../types/BranchManagement/type';
 import { BasketResponse, BasketItem } from '../../../../services/Branch/Online/OnlineMenuService';
@@ -503,44 +503,50 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   return (
     <>
       {/* Toast Container */}
-      <div className={`fixed top-4 ${isRTL ? 'left-4' : 'right-4'} z-[60] space-y-2 max-w-md pointer-events-none`}>
-        {toasts.map(toast => (
-          <div key={toast.id} className="pointer-events-auto">
-            <ToastComponent 
-              toast={toast} 
-              onClose={removeToast} 
-            />
-          </div>
-        ))}
-      </div>
+      {toasts.length > 0 && (
+        <div className="fixed top-4 right-4 z-[60] space-y-2 max-w-sm">
+          {toasts.map((toast) => (
+            <ToastComponent key={toast.id} toast={toast} onClose={removeToast} />
+          ))}
+        </div>
+      )}
 
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity" onClick={onClose} />
-
-      {/* Sidebar */}
-      <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[500px] bg-white dark:bg-slate-800 shadow-2xl z-50 flex flex-col overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
-        {/* Header */}
-        <div className="bg-gradient-to-r from-slate-600 to-slate-600 dark:from-slate-700 dark:to-slate-700 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {activeTab === 'cart' ? (
-              <ShoppingCart className="w-6 h-6 text-white" />
-            ) : (
-              <ClipboardList className="w-6 h-6 text-white" />
-            )}
-            <div>
-              <h2 className="text-xl font-bold text-white">{getStepTitle()}</h2>
-              {activeTab === 'cart' && (
-                <p className="text-emerald-100 text-sm">
-                  {itemCount} {t('menu.items')}
-                </p>
-              )}
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex justify-end">
+        {/* Sidebar */}
+        <div className="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl h-full overflow-y-auto border-l border-slate-200/50 dark:border-slate-700/50 shadow-xl" dir={isRTL ? 'rtl' : 'ltr'}>
+          {/* Header */}
+          <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white flex items-center">
+                {activeTab === 'cart' ? (
+                  <ShoppingCart className="h-4 w-4 mr-2 ml-2" />
+                ) : (
+                  <ClipboardList className="h-4 w-4 mr-2 ml-2" />
+                )}
+                {getStepTitle()}
+                {(updatingItemId || deletingItemId || isClearing) && <Loader2 className="h-3 w-3 ml-2 animate-spin" />}
+              </h3>
+              <div className="flex items-center space-x-2">
+                {itemCount > 0 && activeTab === 'cart' && cartStep === 'cart' && (
+                  <button
+                    onClick={handleClearBasket}
+                    disabled={isClearing}
+                    className="p-2 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50"
+                    title={t('menu.cart.clear')}
+                  >
+                    <Trash2 className="h-4 w-4 text-white" />
+                  </button>
+                )}
+                <button
+                  onClick={onClose}
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <X className="h-4 w-4 text-white" />
+                </button>
+              </div>
             </div>
           </div>
-          <button onClick={onClose} className="flex items-center gap-2 px-3 py-2 hover:bg-white/20 rounded-lg transition-colors text-white text-sm font-medium">
-            <X className="w-5 h-5" />
-            <span>{t('common.close') || 'Close'}</span>
-          </button>
-        </div>
 
         {/* Tabs */}
         <div className="flex border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50">
@@ -743,20 +749,13 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
                           {/* Addons & Extras */}
                           {(itemAddons.length > 0 || itemExtras.length > 0 || availableAddons.length > 0 || availableExtras.length > 0) && (
-                            <div className="border-t border-slate-200 dark:border-slate-700">
-                              <button
-                                onClick={() => toggleItemExpanded(item.basketItemId)}
-                                className="w-full px-4 py-2 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                              >
-                                <span className={`text-sm font-semibold ${theme.text.primary}`}>
-                                  {t('menu.customizations') || 'Customizations'} 
+                            <div className="border-t border-slate-200 dark:border-slate-700 mt-3">
+                              <div className="px-4 py-3">
+                                <h5 className={`text-xs font-bold ${theme.text.secondary} uppercase mb-3`}>
+                                  {t('menu.customizations') || 'Customizations'}
                                   {(itemAddons.length + itemExtras.length) > 0 && ` (${itemAddons.length + itemExtras.length})`}
-                                </span>
-                                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                              </button>
-
-                              {isExpanded && (
-                                <div className="px-4 pb-4 space-y-3">
+                                </h5>
+                                <div className="space-y-3">
                                   {/* Extras Section */}
                                   {itemExtras.length > 0 && (
                                     <div className="space-y-2">
@@ -917,29 +916,40 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                     </div>
                                   )}
                                 </div>
-                              )}
+                              </div>
                             </div>
                           )}
                         </div>
                       );
                     })}
 
-                    {itemCount > 0 && (
-                      <button
-                        onClick={handleClearBasket}
-                        disabled={isClearing}
-                        className="w-full py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors disabled:opacity-50"
-                      >
-                        {isClearing ? (
-                          <span className="flex items-center justify-center gap-2">
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Clearing...
-                          </span>
-                        ) : (
-                          t('menu.cart.clear')
+                    {/* Order Summary and Proceed Button */}
+                    <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700 space-y-3">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className={theme.text.secondary}>{t('order.form.subtotal')}</span>
+                          <span className={theme.text.primary}>{formatPrice(subtotal)}</span>
+                        </div>
+                        {tax > 0 && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className={theme.text.secondary}>Tax:</span>
+                            <span className={theme.text.primary}>{formatPrice(tax)}</span>
+                          </div>
                         )}
+                        <div className="flex items-center justify-between text-lg font-bold pt-2 border-t border-slate-200 dark:border-slate-700">
+                          <span className={theme.text.primary}>{t('menu.cart.total')}</span>
+                          <span className="text-orange-600 dark:text-orange-400">{formatPrice(total)}</span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={handleCheckout}
+                        disabled={itemCount === 0}
+                        className="w-full py-4 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {t('menu.cart.placeOrder')}
                       </button>
-                    )}
+                    </div>
                   </div>
                 )
               )}
@@ -1321,6 +1331,38 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Information Form Footer */}
+              {cartStep === 'information' && (
+                <div className="p-6 border-t border-slate-200 dark:border-slate-700">
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={handleBackToOrderTypes}
+                      className="flex-1 py-3 px-4 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      <BackIcon className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                      {t('priceChange.cancel')}
+                    </button>
+                    <button
+                      onClick={handleSubmitOrder}
+                      disabled={submittingOrder}
+                      className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {submittingOrder ? (
+                        <div className="flex items-center justify-center">
+                          <Loader2 className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'} animate-spin`} />
+                          {t('menu.cart.processing')}
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center">
+                          {t('order.form.createOrder')}
+                          <ForwardIcon className={`h-4 w-4 ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           )}
 
@@ -1338,66 +1380,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
             </div>
           )}
         </div>
-
-        {/* Footer - Different for each step */}
-        {activeTab === 'cart' && cartStep === 'cart' && itemCount > 0 && (
-          <div className="border-t border-slate-200 dark:border-slate-700 p-6 space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className={theme.text.secondary}>{t('order.form.subtotal')}</span>
-                <span className={theme.text.primary}>{formatPrice(subtotal)}</span>
-              </div>
-              {tax > 0 && (
-                <div className="flex items-center justify-between text-sm">
-                  <span className={theme.text.secondary}>Tax:</span>
-                  <span className={theme.text.primary}>{formatPrice(tax)}</span>
-                </div>
-              )}
-              <div className="flex items-center justify-between text-lg font-bold pt-2 border-t border-slate-200 dark:border-slate-700">
-                <span className={theme.text.primary}>{t('menu.cart.total')}</span>
-                <span className="text-emerald-600">{formatPrice(total)}</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleCheckout}
-              className="w-full py-4 bg-gradient-to-r from-slate-600 to-slate-600 hover:from-emerald-700 hover:to-slate-700 text-white rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl"
-            >
-              {t('menu.cart.placeOrder')}
-            </button>
-          </div>
-        )}
-
-        {activeTab === 'cart' && cartStep === 'information' && (
-          <div className="border-t border-slate-200 dark:border-slate-700 p-6">
-            <div className="flex space-x-3">
-              <button
-                onClick={handleBackToOrderTypes}
-                className="flex-1 py-3 px-4 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-              >
-                <BackIcon className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                {t('priceChange.cancel')}
-              </button>
-              <button
-                onClick={handleSubmitOrder}
-                disabled={submittingOrder}
-                className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submittingOrder ? (
-                  <div className="flex items-center justify-center">
-                    <Loader2 className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'} animate-spin`} />
-                    {t('menu.cart.processing')}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center">
-                    {t('order.form.createOrder')}
-                    <ForwardIcon className={`h-4 w-4 ${isRTL ? 'mr-2' : 'ml-2'}`} />
-                  </div>
-                )}
-              </button>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
       <WhatsAppConfirmationModal

@@ -11,7 +11,7 @@ const Header: React.FC<HeaderProps> = ({ menuData, totalItems, onCartToggle }) =
   const { t } = useLanguage()
 
   return (
-    <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-40 shadow-lg overflow-hidden">
+    <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-40 shadow-lg ">
       <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
         <div className="flex items-center justify-between gap-2 sm:gap-4">
           {/* Left Side: Logo and Info */}

@@ -132,7 +132,7 @@ export const SortableProduct: React.FC<{
       {/* Gradient accent */}
       <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500"></div>
 
-      <div className={`flex items-start gap-5 p-5 ${isRTL ? 'flex-row-reverse' : ''}`}>
+      <div className={`flex items-start gap-3 md:gap-5 p-3 md:p-5 ${isRTL ? 'flex-row-reverse' : ''}`}>
         {/* Product Image Section */}
         <div className="relative flex-shrink-0">
           {hasValidImage ? (
@@ -140,7 +140,7 @@ export const SortableProduct: React.FC<{
               <img
                 src={product.imageUrl}
                 alt={`${t('SortableProduct.accessibility.productImage')} - ${product.name}`}
-                className="w-24 h-24 rounded-xl object-cover bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 ring-2 ring-gray-200 dark:ring-gray-700 group-hover/image:ring-primary-300 dark:group-hover/image:ring-primary-600 transition-all duration-300"
+                className="w-16 h-16 md:w-24 md:h-24 rounded-xl object-cover bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 ring-2 ring-gray-200 dark:ring-gray-700 group-hover/image:ring-primary-300 dark:group-hover/image:ring-primary-600 transition-all duration-300"
                 onError={() => setImageError(true)}
                 loading="lazy"
               />
@@ -148,16 +148,16 @@ export const SortableProduct: React.FC<{
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-xl opacity-0 group-hover/image:opacity-100 transition-opacity duration-300"></div>
             </div>
           ) : (
-            <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center ring-2 ring-gray-200 dark:ring-gray-700 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all duration-300">
+            <div className="w-16 h-16 md:w-24 md:h-24 rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center ring-2 ring-gray-200 dark:ring-gray-700 group-hover:ring-primary-300 dark:group-hover:ring-primary-600 transition-all duration-300">
               <div className="relative">
                 <div className="absolute inset-0 bg-primary-500/10 blur-xl rounded-full"></div>
-                <Package className="relative h-10 w-10 text-gray-400 dark:text-gray-500" />
+                <Package className="relative h-8 w-8 md:h-10 md:w-10 text-gray-400 dark:text-gray-500" />
               </div>
             </div>
           )}
-          
+
           {/* Display order badge */}
-          <div className="absolute -bottom-2 -right-2 bg-gradient-to-br from-primary-500 to-primary-600 text-white text-xs font-bold px-2.5 py-1 rounded-lg shadow-lg">
+          <div className="absolute -bottom-1.5 -right-1.5 md:-bottom-2 md:-right-2 bg-gradient-to-br from-primary-500 to-primary-600 text-white text-xs font-bold px-2 md:px-2.5 py-0.5 md:py-1 rounded-lg shadow-lg">
             #{product.displayOrder}
           </div>
         </div>
@@ -357,64 +357,66 @@ export const SortableProduct: React.FC<{
               </div>
 
               {/* Footer: Price + Actions */}
-              <div className={`flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-3 border-t border-gray-100 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 dark:from-primary-400 dark:to-primary-600 bg-clip-text text-transparent">
+                  <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 dark:from-primary-400 dark:to-primary-600 bg-clip-text text-transparent">
                     {product.price.toFixed(2)}
                   </span>
                 </div>
 
-                {/* Action Buttons */}
-                <div className={`flex items-center gap-1 bg-gray-100 dark:bg-gray-700/50 rounded-xl p-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                {/* Action Buttons - Responsive with wrapping and icon-only on mobile */}
+                <div className={`flex flex-wrap items-center gap-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   {onOpenAddonsManagement && (
                     <button
                       onClick={() => onOpenAddonsManagement(product.id, product.name)}
-                      className="flex items-center gap-1.5 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200"
+                      className="flex items-center gap-1 px-2 md:px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 bg-gray-100 dark:bg-gray-700/50"
                       title={t('SortableProduct.manageAddons')}
                       aria-label={t('SortableProduct.accessibility.addonsButton')}
                     >
                       <Plus className="h-4 w-4" />
-                      <span className="text-sm font-medium">{t('SortableProduct.buttons.addons')}</span>
+                      <span className="text-xs md:text-sm font-medium hidden md:inline">{t('SortableProduct.buttons.addons')}</span>
                     </button>
                   )}
 
                   {onOpenIngredientUpdate && (
                     <button
                       onClick={() => onOpenIngredientUpdate(product.id, product.name)}
-                      className="flex items-center gap-1.5 px-3 py-2 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-all duration-200"
+                      className="flex items-center gap-1 px-2 md:px-3 py-2 text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-all duration-200 bg-gray-100 dark:bg-gray-700/50"
                       title={t('SortableProduct.manageIngredients') || 'Manage Ingredients'}
                       aria-label={t('SortableProduct.accessibility.ingredientsButton') || 'Manage ingredients button'}
                     >
                       <ChefHat className="h-4 w-4" />
-                      <span className="text-sm font-medium">{t('SortableProduct.buttons.ingredients') || 'Ingredients'}</span>
+                      <span className="text-xs md:text-sm font-medium hidden md:inline">{t('SortableProduct.buttons.ingredients') || 'Ingredients'}</span>
                     </button>
                   )}
 
                   <button
+                    onClick={() => onOpenProductExtras(product.id, product.name)}
+                    className="flex items-center gap-1 px-2 md:px-3 py-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors bg-gray-100 dark:bg-gray-700/50"
+                    title={t('productsContent.actions.manageExtras')}
+                  >
+                    <Layers className="h-4 w-4" />
+                    <span className="text-xs md:text-sm font-medium hidden md:inline">{t('SortableProduct.buttons.extras')}</span>
+                  </button>
+
+                  <button
                     onClick={() => onEdit(product.id)}
-                    className="flex items-center gap-1.5 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all duration-200"
+                    className="flex items-center gap-1 px-2 md:px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all duration-200 bg-gray-100 dark:bg-gray-700/50"
                     title={t('SortableProduct.editProduct')}
                     aria-label={t('SortableProduct.accessibility.editButton')}
                   >
                     <Edit2 className="h-4 w-4" />
-                    <span className="text-sm font-medium">{t('SortableProduct.buttons.edit')}</span>
+                    <span className="text-xs md:text-sm font-medium hidden lg:inline">{t('SortableProduct.buttons.edit')}</span>
                   </button>
-                  <button
-                  onClick={() => onOpenProductExtras(product.id, product.name)}
-                  className="flex items-center gap-1.5 px-3 py-2 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
-                  title={t('productsContent.actions.manageExtras')}
-                >
-                  <Layers className="h-4 w-4" />
-                  <span className="text-sm font-medium">{t('SortableProduct.buttons.extras')}</span>
-                </button>
+
                   <button
                     onClick={() => onDelete(product.id)}
-                    className="flex items-center gap-1.5 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
+                    className="flex items-center gap-1 px-2 md:px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 bg-gray-100 dark:bg-gray-700/50"
                     title={t('SortableProduct.deleteProduct')}
                     aria-label={t('SortableProduct.accessibility.deleteButton')}
                   >
                     <Trash2 className="h-4 w-4" />
-                    <span className="text-sm font-medium">{t('SortableProduct.buttons.delete')}</span>
+                    <span className="text-xs md:text-sm font-medium hidden lg:inline">{t('SortableProduct.buttons.delete')}</span>
                   </button>
                 </div>
               </div>

@@ -565,20 +565,78 @@ class OnlineMenuService {
         extrasCount: extras.length
       }, { prefix: 'OnlineMenuService' });
 
-      // First delete the old item
+      // ✅ STEP 1: Get current basket to find child addons
+      const currentBasket = await this.getMyBasket();
+
+      if (!currentBasket.items || currentBasket.items.length === 0) {
+        throw new Error('Basket is empty');
+      }
+
+      const currentItem = currentBasket.items.find((item) => item.basketItemId === basketItemId);
+
+      if (!currentItem) {
+        throw new Error('Basket item not found');
+      }
+
+      // ✅ STEP 2: Find all child addons (items with this basketItemId as parent)
+      const childAddons = currentBasket.items.filter(
+        (item) => item.parentBasketItemId === basketItemId && item.isAddon
+      );
+
+      logger.info('Found child addons to preserve', {
+        basketItemId,
+        childAddonsCount: childAddons.length,
+        childAddons: childAddons.map(addon => ({
+          basketItemId: addon.basketItemId,
+          branchProductId: addon.branchProductId,
+          quantity: addon.quantity
+        }))
+      }, { prefix: 'OnlineMenuService' });
+
+      // ✅ STEP 3: Delete child addons first (to avoid orphaned references)
+      for (const addon of childAddons) {
+        await this.deleteBasketItem(addon.basketItemId);
+      }
+
+      // ✅ STEP 4: Delete the main item
       await this.deleteBasketItem(basketItemId);
 
-      // Then add it back with new extras
-      await this.addUnifiedItemToMyBasket({
+      // ✅ STEP 5: Add the main item back with new extras
+      const addResponse = await this.addUnifiedItemToMyBasket({
         branchProductId,
         quantity,
         isAddon: false,
         extras: extras.length > 0 ? extras : undefined
       });
 
+      const newBasketItemId = addResponse.basketItemId;
+
+      logger.info('Main item re-added with new ID', {
+        oldBasketItemId: basketItemId,
+        newBasketItemId
+      }, { prefix: 'OnlineMenuService' });
+
+      // ✅ STEP 6: Re-add child addons with new parent ID
+      for (const addon of childAddons) {
+        await this.addUnifiedItemToMyBasket({
+          branchProductId: addon.branchProductId,
+          quantity: addon.quantity,
+          parentBasketItemId: newBasketItemId,
+          isAddon: true,
+          extras: addon.extras && addon.extras.length > 0 ? addon.extras.map(e => ({
+            branchProductExtraId: e.branchProductExtraId,
+            extraId: e.extraId,
+            quantity: e.quantity,
+            isRemoval: e.isRemoval
+          })) : undefined
+        });
+      }
+
       logger.info('Basket item extras başarıyla güncellendi', {
         basketItemId,
-        extrasCount: extras.length
+        newBasketItemId,
+        extrasCount: extras.length,
+        childAddonsReAdded: childAddons.length
       }, { prefix: 'OnlineMenuService' });
     } catch (error: any) {
       logger.error('Basket item extras güncelleme hatası', error, { prefix: 'OnlineMenuService' });

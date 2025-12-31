@@ -2366,6 +2366,7 @@ hero: {
     editCategory: 'Kategoriyi düzenle',
     status : {
       active : "active",
+      inactive : "inactive"
     },
     deleteCategory: 'Kategoriyi sil',
     editProduct: 'Ürünü Düzenle',
@@ -3456,7 +3457,7 @@ BranchTableManagement: {
     // Status
     status: {
       active: 'Aktif',
-      inactive: 'devre dışı bırakıldı',
+      inactive: 'Devre Dışı',
       available: 'Mevcut',
       unavailable: 'Mevcut Değil'
     },
@@ -3663,9 +3664,12 @@ BranchTableManagement: {
   menu: {
       title: "Menü",
       basePrice: "Temel Fiyat",
+      availableExtras: "Mevcut Ekstralar",
       loading: "Menü Yükleniyor",
       allergens: "Alerjen Bilgisi",
       noCategories: "Liste yok",
+      customizations: "Özelleştirmeler",
+      no: "Hayır",
       quantity: "Miktar",
       extras: "Ekstralar",
       required: "Gerekli",
@@ -3759,6 +3763,7 @@ cart: {
     "reason": "İptal Nedeni",
     "submit": "Gönder",
     "confirm": "Onayla",
+    removal_item_toggle: "Bu öğeyi siparişten kaldır",
     "confirm_cancel_title": "Yazdığınız sebep restorana iletilecektir",
     "cancel_order_confirm": "Siparişi iptal etmek istediğinizden emin misiniz?",
     "order_cancelled_success": "Siparişiniz Başarıyla İptal edildi",

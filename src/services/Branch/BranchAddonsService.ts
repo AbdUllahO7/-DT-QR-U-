@@ -121,18 +121,23 @@ class BranchProductAddonsService {
   // GET /api/BranchProductAddons/branch-product/{branchProductId}
   async getBranchProductAddons(branchProductId: number): Promise<BranchProductAddonDetails[]> {
     try {
-      logger.info('Branch product addons getirme isteği gönderiliyor', { branchProductId }, { prefix: 'BranchProductAddonsService' });
-      
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('Branch product addons getirme isteği gönderiliyor', { branchProductId, branchId }, { prefix: 'BranchProductAddonsService' });
+
       const url = `${this.baseUrl}/branch-product/${branchProductId}`;
-      const response = await httpClient.get<BranchProductAddonDetails[]>(url);
-      
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.get<BranchProductAddonDetails[]>(url, { params });
+
       const addonsData = Array.isArray(response.data) ? response.data : [];
-      
-      logger.info('Branch product addons başarıyla alındı', { 
+
+      logger.info('Branch product addons başarıyla alındı', {
         branchProductId,
-        addonsCount: addonsData.length 
+        branchId,
+        addonsCount: addonsData.length
       }, { prefix: 'BranchProductAddonsService' });
-      
+
       return addonsData;
     } catch (error: any) {
       logger.error('Branch product addons getirme hatası', error, { prefix: 'BranchProductAddonsService' });
@@ -143,15 +148,20 @@ class BranchProductAddonsService {
   // GET /api/BranchProductAddons/branch-product/{branchProductId}/grouped
   async getBranchProductAddonsGrouped(branchProductId: number): Promise<any> {
     try {
-      logger.info('Branch product addons grouped getirme isteği gönderiliyor', { branchProductId }, { prefix: 'BranchProductAddonsService' });
-      
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('Branch product addons grouped getirme isteği gönderiliyor', { branchProductId, branchId }, { prefix: 'BranchProductAddonsService' });
+
       const url = `${this.baseUrl}/branch-product/${branchProductId}/grouped`;
-      const response = await httpClient.get(url);
-      
-      logger.info('Branch product addons grouped başarıyla alındı', { 
-        branchProductId 
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.get(url, { params });
+
+      logger.info('Branch product addons grouped başarıyla alındı', {
+        branchProductId,
+        branchId
       }, { prefix: 'BranchProductAddonsService' });
-      
+
       return response.data;
     } catch (error: any) {
       logger.error('Branch product addons grouped getirme hatası', error, { prefix: 'BranchProductAddonsService' });
@@ -162,13 +172,17 @@ class BranchProductAddonsService {
   // GET /api/BranchProductAddons/{id}
   async getBranchProductAddon(id: number): Promise<BranchProductAddonDetails> {
     try {
-      logger.info('Branch product addon detayı getirme isteği gönderiliyor', { id }, { prefix: 'BranchProductAddonsService' });
-      
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('Branch product addon detayı getirme isteği gönderiliyor', { id, branchId }, { prefix: 'BranchProductAddonsService' });
+
       const url = `${this.baseUrl}/${id}`;
-      const response = await httpClient.get<BranchProductAddonDetails>(url);
-      
-      logger.info('Branch product addon detayı başarıyla alındı', { id }, { prefix: 'BranchProductAddonsService' });
-      
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.get<BranchProductAddonDetails>(url, { params });
+
+      logger.info('Branch product addon detayı başarıyla alındı', { id, branchId }, { prefix: 'BranchProductAddonsService' });
+
       return response.data;
     } catch (error: any) {
       logger.error('Branch product addon detayı getirme hatası', error, { prefix: 'BranchProductAddonsService' });
@@ -179,13 +193,17 @@ class BranchProductAddonsService {
   // PUT /api/BranchProductAddons/{id}
   async updateBranchProductAddon(id: number, data: UpdateBranchProductAddonDto): Promise<BranchProductAddonDetails> {
     try {
-      logger.info('Branch product addon güncelleme isteği gönderiliyor', { id, data }, { prefix: 'BranchProductAddonsService' });
-      
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('Branch product addon güncelleme isteği gönderiliyor', { id, branchId, data }, { prefix: 'BranchProductAddonsService' });
+
       const url = `${this.baseUrl}/${id}`;
-      const response = await httpClient.put<BranchProductAddonDetails>(url, data);
-      
-      logger.info('Branch product addon başarıyla güncellendi', { id }, { prefix: 'BranchProductAddonsService' });
-      
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.put<BranchProductAddonDetails>(url, data, { params });
+
+      logger.info('Branch product addon başarıyla güncellendi', { id, branchId }, { prefix: 'BranchProductAddonsService' });
+
       return response.data;
     } catch (error: any) {
       logger.error('Branch product addon güncelleme hatası', error, { prefix: 'BranchProductAddonsService' });
@@ -196,12 +214,16 @@ class BranchProductAddonsService {
   // DELETE /api/BranchProductAddons/{id}
   async deleteBranchProductAddon(id: number): Promise<void> {
     try {
-      logger.info('Branch product addon silme isteği gönderiliyor', { id }, { prefix: 'BranchProductAddonsService' });
-      
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('Branch product addon silme isteği gönderiliyor', { id, branchId }, { prefix: 'BranchProductAddonsService' });
+
       const url = `${this.baseUrl}/${id}`;
-      await httpClient.delete(url);
-      
-      logger.info('Branch product addon başarıyla silindi', { id }, { prefix: 'BranchProductAddonsService' });
+      const params = branchId ? { branchId } : {};
+      await httpClient.delete(url, { params });
+
+      logger.info('Branch product addon başarıyla silindi', { id, branchId }, { prefix: 'BranchProductAddonsService' });
     } catch (error: any) {
       logger.error('Branch product addon silme hatası', error, { prefix: 'BranchProductAddonsService' });
       this.handleError(error, 'Branch product addon silinirken hata oluştu');
@@ -211,14 +233,19 @@ class BranchProductAddonsService {
   // POST /api/BranchProductAddons
   async createBranchProductAddon(data: CreateBranchProductAddonDto): Promise<BranchProductAddonDetails> {
     try {
-      logger.info('Branch product addon oluşturma isteği gönderiliyor', { data }, { prefix: 'BranchProductAddonsService' });
-      
-      const response = await httpClient.post<BranchProductAddonDetails>(this.baseUrl, data);
-      
-      logger.info('Branch product addon başarıyla oluşturuldu', { 
-        id: response.data.id 
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('Branch product addon oluşturma isteği gönderiliyor', { branchId, data }, { prefix: 'BranchProductAddonsService' });
+
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.post<BranchProductAddonDetails>(this.baseUrl, data, { params });
+
+      logger.info('Branch product addon başarıyla oluşturuldu', {
+        id: response.data.id,
+        branchId
       }, { prefix: 'BranchProductAddonsService' });
-      
+
       return response.data;
     } catch (error: any) {
       logger.error('Branch product addon oluşturma hatası', error, { prefix: 'BranchProductAddonsService' });
@@ -229,18 +256,24 @@ class BranchProductAddonsService {
   // POST /api/BranchProductAddons/batch-update
   async batchUpdateBranchProductAddons(data: BatchUpdateBranchProductAddonsDto): Promise<any> {
     try {
-      logger.info('Branch product addons batch güncelleme isteği gönderiliyor', { 
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('Branch product addons batch güncelleme isteği gönderiliyor', {
         branchProductId: data.branchProductId,
-        addonsCount: data.addons.length 
+        branchId,
+        addonsCount: data.addons.length
       }, { prefix: 'BranchProductAddonsService' });
-      
+
       const url = `${this.baseUrl}/batch-update`;
-      const response = await httpClient.post(url, data);
-      
-      logger.info('Branch product addons batch güncelleme başarıyla tamamlandı', { 
-        branchProductId: data.branchProductId 
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.post(url, data, { params });
+
+      logger.info('Branch product addons batch güncelleme başarıyla tamamlandı', {
+        branchProductId: data.branchProductId,
+        branchId
       }, { prefix: 'BranchProductAddonsService' });
-      
+
       return response.data;
     } catch (error: any) {
       logger.error('Branch product addons batch güncelleme hatası', error, { prefix: 'BranchProductAddonsService' });
@@ -251,16 +284,22 @@ class BranchProductAddonsService {
   // PUT /api/BranchProductAddons/branch-product/{branchProductId}/reorder
   async reorderBranchProductAddons(branchProductId: number, reorderData: ReorderBranchProductAddonDto[]): Promise<void> {
     try {
-      logger.info('Branch product addons reorder isteği gönderiliyor', { 
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('Branch product addons reorder isteği gönderiliyor', {
         branchProductId,
-        itemsCount: reorderData.length 
+        branchId,
+        itemsCount: reorderData.length
       }, { prefix: 'BranchProductAddonsService' });
-      
+
       const url = `${this.baseUrl}/branch-product/${branchProductId}/reorder`;
-      await httpClient.put(url, reorderData);
-      
-      logger.info('Branch product addons reorder başarıyla tamamlandı', { 
-        branchProductId 
+      const params = branchId ? { branchId } : {};
+      await httpClient.put(url, reorderData, { params });
+
+      logger.info('Branch product addons reorder başarıyla tamamlandı', {
+        branchProductId,
+        branchId
       }, { prefix: 'BranchProductAddonsService' });
     } catch (error: any) {
       logger.error('Branch product addons reorder hatası', error, { prefix: 'BranchProductAddonsService' });
