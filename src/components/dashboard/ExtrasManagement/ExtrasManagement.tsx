@@ -81,12 +81,22 @@ export default function ExtrasManagement() {
     const loadLanguages = async () => {
       try {
         const languagesData = await languageService.getRestaurantLanguages();
-        console.log("languagesData",languagesData)
-        setSupportedLanguages(languagesData.availableLanguages || []);
+        console.log("languagesData", languagesData);
+
+        // Deduplicate languages by code
+        const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
+          if (!acc.find((l: any) => l.code === lang.code)) {
+            acc.push(lang);
+          }
+          return acc;
+        }, []);
+
+        console.log("uniqueLanguages", uniqueLanguages);
+        setSupportedLanguages(uniqueLanguages);
         setDefaultLanguage(languagesData.defaultLanguage || 'en');
 
         // Initialize empty translations
-        const languageCodes = languagesData.availableLanguages?.map((lang: any) => lang.code) || [];
+        const languageCodes = uniqueLanguages.map((lang: any) => lang.code);
         setNameTranslations(translationHook.getEmptyTranslations(languageCodes));
         setDescriptionTranslations(translationHook.getEmptyTranslations(languageCodes));
       } catch (error) {
@@ -176,16 +186,21 @@ export default function ExtrasManagement() {
       // Create the category with default language values
       const createdCategory = await extraCategoriesService.createExtraCategory(createData);
 
-      // Save translations for all languages
-      const translations = supportedLanguages.map((lang: any) => ({
-        extraCategoryId: createdCategory.id,
-        languageCode: lang.code,
-        name: categoryNameTranslations[lang.code] || undefined,
-        description: categoryDescriptionTranslations[lang.code] || undefined,
-      }));
+      // Save translations for non-default languages only
+      // Default language is stored in the base entity, not in translations
+      const translations = supportedLanguages
+        .filter((lang: any) => lang.code !== defaultLanguage)
+        .map((lang: any) => ({
+          extraCategoryId: createdCategory.id,
+          languageCode: lang.code,
+          categoryName: categoryNameTranslations[lang.code] || undefined,
+          description: categoryDescriptionTranslations[lang.code] || undefined,
+        }));
 
-      // Batch upsert translations
-      await extraCategoryTranslationService.batchUpsertExtraCategoryTranslations({ translations });
+      // Batch upsert translations (only if there are non-default languages)
+      if (translations.length > 0) {
+        await extraCategoryTranslationService.batchUpsertExtraCategoryTranslations({ translations });
+      }
 
       await loadData();
       closeModal();
@@ -212,10 +227,15 @@ export default function ExtrasManagement() {
     if (!selectedCategory) return;
     try {
       setLoading(true);
+
+      // Get default language values for name and description
+      const defaultName = translationHook.getTranslationWithFallback(categoryNameTranslations, defaultLanguage);
+      const defaultDescription = translationHook.getTranslationWithFallback(categoryDescriptionTranslations, defaultLanguage);
+
       const updateData = {
         id: selectedCategory.id,
-        categoryName: categoryForm.categoryName,
-        description: categoryForm.description,
+        categoryName: defaultName,
+        description: defaultDescription,
         status: categoryForm.status,
         isRequired: categoryForm.isRequired,
         defaultMinSelectionCount: categoryForm.defaultMinSelectionCount,
@@ -224,7 +244,26 @@ export default function ExtrasManagement() {
         defaultMaxTotalQuantity: categoryForm.isMaxQuantityUnlimited ? null : categoryForm.defaultMaxTotalQuantity,
         isRemovalCategory: categoryForm.isRemovalCategory || false,
       };
+
+      // Update the category with default language values
       await extraCategoriesService.updateExtraCategory(updateData);
+
+      // Update translations for non-default languages only
+      // Default language is stored in the base entity, not in translations
+      const translations = supportedLanguages
+        .filter((lang: any) => lang.code !== defaultLanguage)
+        .map((lang: any) => ({
+          extraCategoryId: selectedCategory.id,
+          languageCode: lang.code,
+          categoryName: categoryNameTranslations[lang.code] || undefined,
+          description: categoryDescriptionTranslations[lang.code] || undefined,
+        }));
+
+      // Batch upsert translations (only if there are non-default languages)
+      if (translations.length > 0) {
+        await extraCategoryTranslationService.batchUpsertExtraCategoryTranslations({ translations });
+      }
+
       await loadData();
       closeModal();
     } catch (err) {
@@ -254,16 +293,21 @@ export default function ExtrasManagement() {
         imageUrl
       });
 
-      // Save translations for all languages
-      const translations = supportedLanguages.map((lang: any) => ({
-        extraId: createdExtra.id,
-        languageCode: lang.code,
-        name: nameTranslations[lang.code] || undefined,
-        description: descriptionTranslations[lang.code] || undefined,
-      }));
+      // Save translations for non-default languages only
+      // Default language is stored in the base entity, not in translations
+      const translations = supportedLanguages
+        .filter((lang: any) => lang.code !== defaultLanguage)
+        .map((lang: any) => ({
+          extraId: createdExtra.id,
+          languageCode: lang.code,
+          name: nameTranslations[lang.code] || undefined,
+          description: descriptionTranslations[lang.code] || undefined,
+        }));
 
-      // Batch upsert translations
-      await extraTranslationService.batchUpsertExtraTranslations({ translations });
+      // Batch upsert translations (only if there are non-default languages)
+      if (translations.length > 0) {
+        await extraTranslationService.batchUpsertExtraTranslations({ translations });
+      }
 
       await loadData();
       closeModal();
@@ -296,16 +340,21 @@ export default function ExtrasManagement() {
         imageUrl
       });
 
-      // Update translations for all languages
-      const translations = supportedLanguages.map((lang: any) => ({
-        extraId: selectedExtra.id,
-        languageCode: lang.code,
-        name: nameTranslations[lang.code] || undefined,
-        description: descriptionTranslations[lang.code] || undefined,
-      }));
+      // Update translations for non-default languages only
+      // Default language is stored in the base entity, not in translations
+      const translations = supportedLanguages
+        .filter((lang: any) => lang.code !== defaultLanguage)
+        .map((lang: any) => ({
+          extraId: selectedExtra.id,
+          languageCode: lang.code,
+          name: nameTranslations[lang.code] || undefined,
+          description: descriptionTranslations[lang.code] || undefined,
+        }));
 
-      // Batch upsert translations
-      await extraTranslationService.batchUpsertExtraTranslations({ translations });
+      // Batch upsert translations (only if there are non-default languages)
+      if (translations.length > 0) {
+        await extraTranslationService.batchUpsertExtraTranslations({ translations });
+      }
 
       await loadData();
       closeModal();
@@ -374,6 +423,12 @@ export default function ExtrasManagement() {
     setSelectedExtra(null);
     setSelectedFile(null);
     setImagePreview('');
+
+    // Reset category translations
+    const languageCodes = supportedLanguages.map((lang: any) => lang.code);
+    setCategoryNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+    setCategoryDescriptionTranslations(translationHook.getEmptyTranslations(languageCodes));
+
     setCategoryForm({
       categoryName: '',
       description: '',
@@ -448,7 +503,7 @@ export default function ExtrasManagement() {
 
                     setModalType('add-extra');
                   }}
-                  onEditCategory={() => {
+                  onEditCategory={async () => {
                     setSelectedCategory(category);
                     setCategoryForm({
                       categoryName: category.categoryName,
@@ -463,6 +518,34 @@ export default function ExtrasManagement() {
                       isMaxSelectionUnlimited: category.defaultMaxSelectionCount === null || category.defaultMaxSelectionCount === undefined,
                       isMaxQuantityUnlimited: category.defaultMaxTotalQuantity === null || category.defaultMaxTotalQuantity === undefined,
                     });
+
+                    // Load existing translations
+                    try {
+                      const translations = await extraCategoryTranslationService.getExtraCategoryTranslations(category.id);
+                      const nameTranslationsObj = translationsToObject(translations, 'categoryName');
+                      const descriptionTranslationsObj = translationsToObject(translations, 'description');
+
+                      // Add base language from the category entity (not from translations table)
+                      nameTranslationsObj[defaultLanguage] = category.categoryName;
+                      descriptionTranslationsObj[defaultLanguage] = category.description || '';
+
+                      setCategoryNameTranslations(nameTranslationsObj);
+                      setCategoryDescriptionTranslations(descriptionTranslationsObj);
+                    } catch (error) {
+                      console.error('Failed to load category translations:', error);
+                      // Initialize with empty translations if load fails
+                      const languageCodes = supportedLanguages.map((lang: any) => lang.code);
+                      const emptyNameTranslations = translationHook.getEmptyTranslations(languageCodes);
+                      const emptyDescTranslations = translationHook.getEmptyTranslations(languageCodes);
+
+                      // Add base language from the category entity
+                      emptyNameTranslations[defaultLanguage] = category.categoryName;
+                      emptyDescTranslations[defaultLanguage] = category.description || '';
+
+                      setCategoryNameTranslations(emptyNameTranslations);
+                      setCategoryDescriptionTranslations(emptyDescTranslations);
+                    }
+
                     setModalType('edit-category');
                   }}
                   onDeleteCategory={() => initiateDeleteCategory(category)}
@@ -477,14 +560,26 @@ export default function ExtrasManagement() {
                       const translations = await extraTranslationService.getExtraTranslations(extra.id);
                       const nameTranslationsObj = translationsToObject(translations, 'name');
                       const descriptionTranslationsObj = translationsToObject(translations, 'description');
+
+                      // Add base language from the extra entity (not from translations table)
+                      nameTranslationsObj[defaultLanguage] = extra.name;
+                      descriptionTranslationsObj[defaultLanguage] = extra.description || '';
+
                       setNameTranslations(nameTranslationsObj);
                       setDescriptionTranslations(descriptionTranslationsObj);
                     } catch (error) {
                       console.error('Failed to load translations:', error);
                       // Initialize with empty translations if load fails
                       const languageCodes = supportedLanguages.map((lang: any) => lang.code);
-                      setNameTranslations(translationHook.getEmptyTranslations(languageCodes));
-                      setDescriptionTranslations(translationHook.getEmptyTranslations(languageCodes));
+                      const emptyNameTranslations = translationHook.getEmptyTranslations(languageCodes);
+                      const emptyDescTranslations = translationHook.getEmptyTranslations(languageCodes);
+
+                      // Add base language from the extra entity
+                      emptyNameTranslations[defaultLanguage] = extra.name;
+                      emptyDescTranslations[defaultLanguage] = extra.description || '';
+
+                      setNameTranslations(emptyNameTranslations);
+                      setDescriptionTranslations(emptyDescTranslations);
                     }
 
                     setModalType('edit-extra');
@@ -506,6 +601,12 @@ export default function ExtrasManagement() {
           onChange={setCategoryForm}
           onSubmit={modalType === 'add-category' ? handleCreateCategory : handleUpdateCategory}
           onClose={closeModal}
+          nameTranslations={categoryNameTranslations}
+          descriptionTranslations={categoryDescriptionTranslations}
+          onNameTranslationsChange={setCategoryNameTranslations}
+          onDescriptionTranslationsChange={setCategoryDescriptionTranslations}
+          supportedLanguages={supportedLanguages}
+          defaultLanguage={defaultLanguage}
         />
       )}
 

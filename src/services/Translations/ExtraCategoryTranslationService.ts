@@ -9,11 +9,19 @@ import {
 class ExtraCategoryTranslationService {
   private baseUrl = '/api/extra-category-translations';
 
+  // Helper method to get language from localStorage
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
   async getExtraCategoryTranslations(extraCategoryId: number): Promise<ExtraCategoryTranslation[]> {
     try {
-      logger.info('Fetching extra category translations', { extraCategoryId }, { prefix: 'ExtraCategoryTranslationService' });
-      const response = await httpClient.get<ExtraCategoryTranslation[]>(`${this.baseUrl}/${extraCategoryId}`);
-      logger.info('Extra category translations fetched successfully', { extraCategoryId, count: response.data.length }, { prefix: 'ExtraCategoryTranslationService' });
+      const language = this.getLanguageFromStorage();
+      logger.info('Fetching extra category translations', { extraCategoryId, language }, { prefix: 'ExtraCategoryTranslationService' });
+      const response = await httpClient.get<ExtraCategoryTranslation[]>(`${this.baseUrl}/${extraCategoryId}`, {
+        params: { language }
+      });
+      logger.info('Extra category translations fetched successfully', { extraCategoryId, count: response.data.length, language }, { prefix: 'ExtraCategoryTranslationService' });
       return response.data;
     } catch (error: any) {
       logger.error('Error fetching extra category translations', error, { prefix: 'ExtraCategoryTranslationService' });
@@ -23,9 +31,12 @@ class ExtraCategoryTranslationService {
 
   async getExtraCategoryTranslation(extraCategoryId: number, languageCode: string): Promise<ExtraCategoryTranslation> {
     try {
-      logger.info('Fetching extra category translation', { extraCategoryId, languageCode }, { prefix: 'ExtraCategoryTranslationService' });
-      const response = await httpClient.get<ExtraCategoryTranslation>(`${this.baseUrl}/${extraCategoryId}/${languageCode}`);
-      logger.info('Extra category translation fetched successfully', { extraCategoryId, languageCode }, { prefix: 'ExtraCategoryTranslationService' });
+      const language = this.getLanguageFromStorage();
+      logger.info('Fetching extra category translation', { extraCategoryId, languageCode, language }, { prefix: 'ExtraCategoryTranslationService' });
+      const response = await httpClient.get<ExtraCategoryTranslation>(`${this.baseUrl}/${extraCategoryId}/${languageCode}`, {
+        params: { language }
+      });
+      logger.info('Extra category translation fetched successfully', { extraCategoryId, languageCode, language }, { prefix: 'ExtraCategoryTranslationService' });
       return response.data;
     } catch (error: any) {
       logger.error('Error fetching extra category translation', error, { prefix: 'ExtraCategoryTranslationService' });

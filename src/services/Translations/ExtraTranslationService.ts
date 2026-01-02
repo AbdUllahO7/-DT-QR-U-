@@ -9,11 +9,19 @@ import {
 class ExtraTranslationService {
   private baseUrl = '/api/extra-translations';
 
+  // Helper method to get language from localStorage
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
   async getExtraTranslations(extraId: number): Promise<ExtraTranslation[]> {
     try {
-      logger.info('Fetching extra translations', { extraId }, { prefix: 'ExtraTranslationService' });
-      const response = await httpClient.get<ExtraTranslation[]>(`${this.baseUrl}/${extraId}`);
-      logger.info('Extra translations fetched successfully', { extraId, count: response.data.length }, { prefix: 'ExtraTranslationService' });
+      const language = this.getLanguageFromStorage();
+      logger.info('Fetching extra translations', { extraId, language }, { prefix: 'ExtraTranslationService' });
+      const response = await httpClient.get<ExtraTranslation[]>(`${this.baseUrl}/${extraId}`, {
+        params: { language }
+      });
+      logger.info('Extra translations fetched successfully', { extraId, count: response.data.length, language }, { prefix: 'ExtraTranslationService' });
       return response.data;
     } catch (error: any) {
       logger.error('Error fetching extra translations', error, { prefix: 'ExtraTranslationService' });

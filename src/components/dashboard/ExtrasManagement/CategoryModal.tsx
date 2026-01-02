@@ -3,7 +3,6 @@ import { X, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { CreateExtraCategoryData } from '../../../types/Extras/type';
 import { MultiLanguageInput } from '../../common/MultiLanguageInput';
-import { MultiLanguageTextArea } from '../../common/MultiLanguageTextArea';
 import { TranslatableFieldValue } from '../../../hooks/useTranslatableFields';
 
 interface LanguageOption {
@@ -50,7 +49,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 transition-opacity bg-gray-900/75 backdrop-blur-sm" onClick={onClose}></div>
-        <div className="inline-block  align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
+        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
 
           {/* Modal Header */}
           <div className="bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
@@ -63,7 +62,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
           </div>
 
           {/* Modal Content */}
-          <div className="max-w-9xl px-6 py-6 max-h-[70vh] ">
+          <div className="max-w-9xl px-6 py-6 max-h-[70vh] overflow-y-auto">
             {error && (
               <div className="mb-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-lg">
                 <div className="flex items-start">
@@ -80,8 +79,14 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
             )}
 
             <form id="categoryForm" onSubmit={onSubmit} className="space-y-5">
-              {/* Multi-Language Category Name */}
-              <div>
+              <div 
+                className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-2"
+                style={{ 
+                  maxHeight: '300px', 
+                  overflowY: 'auto',  /* Forces vertical scroll if content is tall */
+                  display: 'block' 
+                }}
+              >
                 <MultiLanguageInput
                   label={t('extrasManagement.categories.fields.categoryName')}
                   value={nameTranslations}
@@ -91,20 +96,6 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                   requiredLanguages={[defaultLanguage]}
                   placeholder={t('extrasManagement.categories.fields.categoryNamePlaceholder')}
                   disabled={loading}
-                />
-              </div>
-
-              {/* Multi-Language Description */}
-              <div>
-                <MultiLanguageTextArea
-                  label={t('extrasManagement.categories.fields.description') || 'Description'}
-                  value={descriptionTranslations}
-                  onChange={onDescriptionTranslationsChange}
-                  languages={supportedLanguages}
-                  required={false}
-                  placeholder={t('extrasManagement.categories.fields.descriptionPlaceholder') || 'Enter description'}
-                  disabled={loading}
-                  rows={3}
                 />
               </div>
 
@@ -166,6 +157,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                       <input
                         type="text"
                         inputMode="numeric"
+                        title={t('extrasManagement.categories.fields.minSelection')}
                         className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3"
                         value={formData.defaultMinSelectionCount}
                         onChange={(e) => {
@@ -213,6 +205,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                       <input
                         type="text"
                         inputMode="numeric"
+                        title={t('extrasManagement.categories.fields.minQuantity')}
                         className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3"
                         value={formData.defaultMinTotalQuantity}
                         onChange={(e) => {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { ChevronDown, Check } from 'lucide-react';
 import { TranslatableFieldValue } from '../../hooks/useTranslatableFields';
 
 interface LanguageOption {
@@ -18,8 +19,8 @@ interface MultiLanguageTextAreaProps {
   requiredLanguages?: string[];
   placeholder?: string;
   disabled?: boolean;
-  rows?: number;
   className?: string;
+  rows?: number;
 }
 
 export const MultiLanguageTextArea: React.FC<MultiLanguageTextAreaProps> = ({
@@ -31,11 +32,12 @@ export const MultiLanguageTextArea: React.FC<MultiLanguageTextAreaProps> = ({
   requiredLanguages = [],
   placeholder = '',
   disabled = false,
-  rows = 4,
   className = '',
+  rows = 3,
 }) => {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState(languages[0]?.code || '');
+  const [selectedLanguage, setSelectedLanguage] = useState(languages[0]?.code || '');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleInputChange = (languageCode: string, inputValue: string) => {
     onChange({
@@ -52,92 +54,118 @@ export const MultiLanguageTextArea: React.FC<MultiLanguageTextAreaProps> = ({
     return isLanguageRequired(langCode) && (!value[langCode] || value[langCode].trim() === '');
   };
 
+  const currentLanguage = languages.find(lang => lang.code === selectedLanguage);
+
   if (languages.length === 0) {
-    return (
-      <div className={`mb-4 ${className}`}>
-        <label className="block text-sm font-medium text-gray-700 mb-2">{label}</label>
-        <div className="text-sm text-red-600">
-          {t('multiLanguage.noLanguagesConfigured', 'No languages configured. Please configure languages in preferences.')}
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
     <div className={`mb-4 ${className}`}>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
 
-      {/* Language Tabs */}
-      <div className="flex flex-wrap gap-1 mb-2 border-b border-gray-200">
-        {languages.map((lang) => {
-          const isActive = activeTab === lang.code;
-          const error = hasError(lang.code);
-
-          return (
-            <button
-              key={lang.code}
-              type="button"
-              onClick={() => setActiveTab(lang.code)}
-              className={`
-                px-3 py-2 text-sm font-medium rounded-t-lg transition-colors
-                ${isActive
-                  ? 'bg-white text-blue-600 border-t border-l border-r border-gray-200'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-                }
-                ${error ? 'border-red-300' : ''}
-              `}
-            >
-              {lang.displayName}
-              {error && <span className="ml-1 text-red-500">!</span>}
-              {value[lang.code] && !error && <span className="ml-1 text-green-500">✓</span>}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* TextArea Fields */}
-      <div className="bg-white border border-gray-200 rounded-b-lg rounded-tr-lg p-3">
-        {languages.map((lang) => (
-          <div
-            key={lang.code}
-            className={activeTab === lang.code ? 'block' : 'hidden'}
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-500">
-                {lang.displayName} ({lang.nativeName})
-              </span>
-              {isLanguageRequired(lang.code) && (
-                <span className="text-xs text-red-500">
-                  {t('multiLanguage.required', 'Required')}
-                </span>
-              )}
-            </div>
-            <textarea
-              value={value[lang.code] || ''}
-              onChange={(e) => handleInputChange(lang.code, e.target.value)}
-              placeholder={placeholder}
-              disabled={disabled}
-              rows={rows}
-              dir={lang.isRtl ? 'rtl' : 'ltr'}
-              className={`
-                w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 resize-vertical
-                ${hasError(lang.code)
-                  ? 'border-red-300 focus:ring-red-500'
-                  : 'border-gray-300 focus:ring-blue-500'
-                }
-                ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}
-              `}
-            />
-            {hasError(lang.code) && (
-              <p className="mt-1 text-xs text-red-500">
-                {t('multiLanguage.fieldRequired', 'This field is required')}
-              </p>
+      <div className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden transition-all duration-200 ease-in-out">
+        
+        {/* Header / Language Selector */}
+        <button
+          type="button"
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="w-full px-3 py-2 flex items-center justify-between bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-750 transition-colors"
+          disabled={disabled}
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-900 dark:text-white">
+              {currentLanguage?.displayName} ({currentLanguage?.nativeName})
+            </span>
+            {hasError(selectedLanguage) && (
+              <span className="text-xs text-red-500 dark:text-red-400">⚠</span>
+            )}
+            {value[selectedLanguage] && !hasError(selectedLanguage) && (
+              <span className="text-xs text-green-500 dark:text-green-400">✓</span>
             )}
           </div>
-        ))}
+          <ChevronDown className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {/* Dropdown Menu (Relative - Pushes content down) */}
+        {isDropdownOpen && (
+          <div className="w-full bg-white dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 max-h-60 overflow-y-auto">
+            {languages.map((lang) => {
+              const isActive = selectedLanguage === lang.code;
+              const error = hasError(lang.code);
+              const hasValue = value[lang.code] && !error;
+
+              return (
+                <button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => {
+                    setSelectedLanguage(lang.code);
+                    setIsDropdownOpen(false);
+                  }}
+                  className={`
+                    w-full px-3 py-2 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors text-left
+                    ${isActive ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
+                  `}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className={`text-sm ${isActive ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-700 dark:text-gray-300'}`}>
+                      {lang.displayName}
+                    </span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      ({lang.nativeName})
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {error && <span className="text-xs text-red-500 dark:text-red-400">⚠</span>}
+                    {!error && hasValue && !isActive && <span className="text-xs text-green-500 dark:text-green-400">✓</span>}
+                    {isActive && <Check className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Text Area Input */}
+        <div className="p-3 bg-white dark:bg-gray-800">
+           {isLanguageRequired(selectedLanguage) && (
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
+                {currentLanguage?.displayName} ({currentLanguage?.nativeName})
+              </span>
+              <span className="text-xs text-red-500 dark:text-red-400">
+                {t('multiLanguage.required', 'Required')}
+              </span>
+            </div>
+          )}
+          <textarea
+            rows={rows}
+            value={value[selectedLanguage] || ''}
+            onChange={(e) => handleInputChange(selectedLanguage, e.target.value)}
+            placeholder={placeholder}
+            disabled={disabled}
+            dir={currentLanguage?.isRtl ? 'rtl' : 'ltr'}
+            className={`
+              w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 resize-y
+              bg-white dark:bg-gray-800 text-gray-900 dark:text-white
+              placeholder-gray-400 dark:placeholder-gray-500
+              ${hasError(selectedLanguage)
+                ? 'border-red-300 dark:border-red-600 focus:ring-red-500'
+                : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400'
+              }
+              ${disabled ? 'bg-gray-100 dark:bg-gray-900 cursor-not-allowed opacity-50' : ''}
+            `}
+          />
+          {hasError(selectedLanguage) && (
+            <p className="mt-1 text-xs text-red-500 dark:text-red-400">
+              {t('multiLanguage.fieldRequired', 'This field is required')}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
