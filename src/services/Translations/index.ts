@@ -1,5 +1,3 @@
-// Main translation service with all translation groups
-export { translationsService } from './TranslationsService';
 
 // Individual translation services
 export { aboutTranslationService } from './AboutTranslationService';

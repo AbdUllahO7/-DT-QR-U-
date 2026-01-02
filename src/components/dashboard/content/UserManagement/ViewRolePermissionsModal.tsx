@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Key, Shield } from 'lucide-react';
+import {  Shield } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { Role } from '../../../../types/users/users.type';
 import { getTranslatedPermissionName, getTranslatedRoleName } from '../../../../utils/permissionTranslation';

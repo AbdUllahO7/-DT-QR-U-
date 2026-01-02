@@ -10,3 +10,9 @@ export interface BranchLanguagesDto {
   defaultLanguage: string;
   availableLanguages: LanguageOptionDto[];
 }
+
+export interface RestaurantLanguagesDto {
+  restaurantId: number;
+  defaultLanguage: string;
+  availableLanguages: LanguageOptionDto[];
+}

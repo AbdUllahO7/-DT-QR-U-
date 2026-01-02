@@ -2,6 +2,16 @@ import React from 'react';
 import { X, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { CreateExtraCategoryData } from '../../../types/Extras/type';
+import { MultiLanguageInput } from '../../common/MultiLanguageInput';
+import { MultiLanguageTextArea } from '../../common/MultiLanguageTextArea';
+import { TranslatableFieldValue } from '../../../hooks/useTranslatableFields';
+
+interface LanguageOption {
+  code: string;
+  displayName: string;
+  nativeName: string;
+  isRtl: boolean;
+}
 
 interface CategoryModalProps {
   isEditMode: boolean;
@@ -11,6 +21,12 @@ interface CategoryModalProps {
   onChange: (data: CreateExtraCategoryData) => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
+  nameTranslations: TranslatableFieldValue;
+  descriptionTranslations: TranslatableFieldValue;
+  onNameTranslationsChange: (value: TranslatableFieldValue) => void;
+  onDescriptionTranslationsChange: (value: TranslatableFieldValue) => void;
+  supportedLanguages: LanguageOption[];
+  defaultLanguage: string;
 }
 
 export const CategoryModal: React.FC<CategoryModalProps> = ({
@@ -21,6 +37,12 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
   onChange,
   onSubmit,
   onClose,
+  nameTranslations,
+  descriptionTranslations,
+  onNameTranslationsChange,
+  onDescriptionTranslationsChange,
+  supportedLanguages,
+  defaultLanguage,
 }) => {
   const { t } = useLanguage();
 
@@ -58,17 +80,31 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
             )}
 
             <form id="categoryForm" onSubmit={onSubmit} className="space-y-5">
+              {/* Multi-Language Category Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  {t('extrasManagement.categories.fields.categoryName')}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.categoryName}
-                  onChange={(e) => onChange({ ...formData, categoryName: e.target.value })}
-                  className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2.5 px-3"
+                <MultiLanguageInput
+                  label={t('extrasManagement.categories.fields.categoryName')}
+                  value={nameTranslations}
+                  onChange={onNameTranslationsChange}
+                  languages={supportedLanguages}
+                  required={true}
+                  requiredLanguages={[defaultLanguage]}
                   placeholder={t('extrasManagement.categories.fields.categoryNamePlaceholder')}
+                  disabled={loading}
+                />
+              </div>
+
+              {/* Multi-Language Description */}
+              <div>
+                <MultiLanguageTextArea
+                  label={t('extrasManagement.categories.fields.description') || 'Description'}
+                  value={descriptionTranslations}
+                  onChange={onDescriptionTranslationsChange}
+                  languages={supportedLanguages}
+                  required={false}
+                  placeholder={t('extrasManagement.categories.fields.descriptionPlaceholder') || 'Enter description'}
+                  disabled={loading}
+                  rows={3}
                 />
               </div>
 

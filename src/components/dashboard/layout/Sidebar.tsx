@@ -210,7 +210,7 @@ const Sidebar: React.FC<SidebarProps> = ({
               <span>{t('dashboard.extras.title')}</span>
             </button>
 
-            <button
+           {/*  <button
               onClick={() => handleNavigate('tables', 'tables')}
               className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
                 activeTab === 'tables'
@@ -220,7 +220,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <Table className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.tables.title')}</span>
-            </button>
+            </button> */}
               <button
               onClick={() => handleNavigate('moneyCaseResturant', 'moneyCaseResturant')}
               className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
@@ -232,7 +232,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <DollarSign className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                 <span>{t('dashboard.moneyCase.title')}</span>
             </button>
-          <button
+        {/*   <button
               onClick={() => handleNavigate('orderTypeResturant', 'orderTypeResturant')}
               className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
                 activeTab === 'orderTypeResturant'
@@ -244,7 +244,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <span>{t('dashboard.orderType.title')}</span>
 
             </button>
-
+ */}
             {/* User Management - Only for non-branch-only users */}
             {!isBranchOnly && (
               <button

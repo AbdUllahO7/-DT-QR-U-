@@ -120,9 +120,16 @@ const OrderTypeRestaurantComponent = () => {
       const updatedOrderType = await orderTypeService.updateOrderTypeSettings(orderType.id, updateData);
 
       if (updatedOrderType) {
-        setOrderTypes(prev => 
-          prev.map(ot => 
-            ot.id === orderType.id ? updatedOrderType : ot
+        // Filter out undefined values from the response to preserve existing fields
+        const filteredUpdate = Object.fromEntries(
+          Object.entries(updatedOrderType).filter(([_, value]) => value !== undefined)
+        );
+
+        setOrderTypes(prev =>
+          prev.map(ot =>
+            ot.id === orderType.id
+              ? { ...ot, ...filteredUpdate }
+              : ot
           )
         );
       } else {

@@ -1502,6 +1502,7 @@ hero: {
     editProduct: 'Edit Product',
     deleteProduct: 'Delete Product',
     manageIngredients: 'Manage Ingredients',
+    manageExtras: 'Manage Extras',
     updateIngredients: 'Update Ingredients',
     manageAddons: 'Manage Add-ons',
     importSampleMenu: 'Import Sample Menu',
@@ -2608,6 +2609,7 @@ hero: {
   TableCategoryModal: {
     addCategoryTitle: 'Add Table Area',
     addCategorySubtitle: 'Create a new table Area',
+    addCategorySubtitle2: 'Define the properties of the new table Area',
     categoryName: 'Area Name',
     categoryNamePlaceholder: 'e.g. VIP Tables, Garden Tables',
     description: 'Description (Optional)',
@@ -3119,28 +3121,28 @@ hero: {
   BranchTableManagement: {
         "capacityLabel": "Capacity",
     "tableNameLabel": "Table Name",
-    header: "Category & Table Management",
+    header: "Areas & Table Management",
     "clearTable": "Clear Table",
     "refreshTable": "Refresh Status", 
     "clearing": "Clearing...",
-    loading : "Loading...",
-    category : "Category",
+    loading: "Loading...",
+    category: "Area",
     createTables: "Create Tables",
     creatingTables: "Creating...",
-   SelectCategory: "Select Category", 
+   SelectCategory: "Select Area",
    Capacity: "Capacity",
    Quantity: "Quantity",
     batchCreateTables: "Batch Create Tables",
-    subheader: "Manage restaurant categories and tables with accordion view",
-    totalCategories: "Total Categories",
+    subheader: "Manage restaurant Areas and tables with accordion view",
+    totalCategories: "Total Areas",
     totalTables: "Total Tables",
     occupiedTables: "Occupied Tables",
     availableTables: "Available Tables",
-    searchPlaceholder: "Search categories...",
+    searchPlaceholder: "Search Areas...",
     refresh: "Refresh",
     addCategory: "Add Area",
     addCategoryTitle: "Add New Area",
-    multiCategory: "Create multiple tables across different categories at once",
+    multiCategory: "Create multiple tables across different Areas at once",
     categoryNameLabel: "Area Name",
     categoryNamePlaceholder: "Enter Area name",
     colorLabel: "Color",
@@ -5720,6 +5722,13 @@ categoryConfigModal: {
         }
       }
     }
+  },
+
+  // Multi-Language System
+  multiLanguage: {
+    noLanguagesConfigured: 'No languages configured. Please configure languages in preferences.',
+    required: 'Required',
+    fieldRequired: 'This field is required'
   }
 
 }; 

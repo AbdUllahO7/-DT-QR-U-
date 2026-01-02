@@ -1,6 +1,6 @@
 import { httpClient, getEffectiveBranchId } from '../utils/http';
 import { logger } from '../utils/logger';
-import { BranchLanguagesDto } from '../types/Language/type';
+import { BranchLanguagesDto, RestaurantLanguagesDto } from '../types/Language/type';
 
 class LanguageService {
   private baseUrl = '/api/Languages';
@@ -47,6 +47,25 @@ class LanguageService {
     } catch (error: any) {
       logger.error('Error fetching branch languages', error, { prefix: 'LanguageService' });
       throw this.handleError(error, 'Error fetching branch languages');
+    }
+  }
+
+  async getRestaurantLanguages(): Promise<RestaurantLanguagesDto> {
+    try {
+      logger.info('Fetching restaurant languages', {}, { prefix: 'LanguageService' });
+
+      const response = await httpClient.get<RestaurantLanguagesDto>(`${this.baseUrl}/restaurant`);
+
+      logger.info('Restaurant languages fetched successfully', {
+        restaurantId: response.data.restaurantId,
+        languageCount: response.data.availableLanguages?.length || 0,
+        defaultLanguage: response.data.defaultLanguage
+      }, { prefix: 'LanguageService' });
+
+      return response.data;
+    } catch (error: any) {
+      logger.error('Error fetching restaurant languages', error, { prefix: 'LanguageService' });
+      throw this.handleError(error, 'Error fetching restaurant languages');
     }
   }
 

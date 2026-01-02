@@ -1503,6 +1503,7 @@ hero: {
     editCategory: 'Kategoriyi Düzenle',
     deleteCategory: 'Kategoriyi Sil',
     editProduct: 'Ürünü Düzenle',
+    manageExtras: 'Eklentileri Yönet',
     deleteProduct: 'Ürünü Sil',
     manageIngredients: 'Malzemeleri Yönet',
     updateIngredients: 'Malzemeleri Güncelle',
@@ -2615,6 +2616,8 @@ hero: {
     title: 'Masa Alan Ekle',
     subtitle: 'Yeni masa Alan oluşturun',
     categoryName: 'Alan Adı',
+    addCategoryTitle: 'Yeni Alan Ekle',
+    addCategorySubtitle: 'Yeni masa alanının özelliklerini tanımlayın',
     categoryNamePlaceholder: 'Örn: VIP Masalar, Bahçe Masaları',
     description: 'Açıklama (Opsiyonel)',
     descriptionPlaceholder: 'Alan hakkında kısa açıklama...',
@@ -4705,7 +4708,7 @@ recommended: "Önerilen",
     previousCloseInfo : "Önceki Kapanış Bilgisi",
     suggestedBalance : "Önerilen Bakiye",
     lastClosed: "Son Kapanış",
-    filtreler: {
+    filters: {
       title: "Filtreler",
       quickSelect: "Hızlı Seçim",
       today: "Bugün",
@@ -4715,15 +4718,15 @@ recommended: "Önerilen",
       thisMonth: "Bu Ay",
       lastMonth: "Geçen Ay",
       custom: "Özel",
-      fromDate: "Başlangıç ​​Tarihi",
+      fromDate: "Başlangıç Tarihi",
       toDate: "Bitiş Tarihi",
       apply: "Uygula",
       clear: "Temizle",
       clearAll: "Tümünü Temizle",
-      to: "Bitiş Tarihi",
-      from: "Başlangıç ​​Tarihi",
+      to: "e",
+      from: "den",
       active: "Aktif"
-} ,
+    } ,
     "status": "Durum",
     "open": "Açık",
     "closed": "Kapalı",
@@ -5744,4 +5747,11 @@ categoryConfigModal: {
       }
     }
   },
+
+  // Multi-Language System
+  multiLanguage: {
+    noLanguagesConfigured: 'Dil yapılandırılmamış. Lütfen tercihlerden dilleri yapılandırın.',
+    required: 'Gerekli',
+    fieldRequired: 'Bu alan gereklidir'
+  }
 };
