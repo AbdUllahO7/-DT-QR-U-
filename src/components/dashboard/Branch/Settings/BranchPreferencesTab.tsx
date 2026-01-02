@@ -500,9 +500,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                     </option>
                   ))}
               </select>
-              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                {t('branchPreferences.sections.localization.defaultLanguageDesc')}
-              </p>
+          
             </div>
 
             <div>

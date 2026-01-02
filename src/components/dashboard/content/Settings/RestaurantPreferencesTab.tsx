@@ -13,7 +13,6 @@ import {
   RestaurantPreferences,
   restaurantPreferencesService,
   UpdateRestaurantPreferencesDto,
-  LanguageOption
 } from '../../../../services/RestaurantPreferencesService';
 
 interface RestaurantPreferencesTabProps {
@@ -51,11 +50,12 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
       setFormData(initialFormData);
       setHasChanges(false);
     } catch (err: any) {
-      setError(err.message || 'Restoran tercihleri yüklenirken hata oluştu');
+      // Translation: Error loading restaurant preferences
+      setError(err.message || t('RestaurantPreferencesTab.errors.load'));
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadPreferences();
@@ -108,12 +108,14 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
       await loadPreferences();
 
       setHasChanges(false);
-      setSuccess('Restoran tercihleri başarıyla güncellendi');
+      // Translation: Restaurant preferences updated successfully
+      setSuccess(t('RestaurantPreferencesTab.alerts.success'));
 
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
-      setError(err.message || 'Restoran tercihleri kaydedilirken hata oluştu');
+      // Translation: Error saving restaurant preferences
+      setError(err.message || t('RestaurantPreferencesTab.errors.save'));
     } finally {
       setIsSaving(false);
     }
@@ -131,7 +133,7 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
         <div className="flex items-center space-x-3 rtl:space-x-reverse">
           <Loader2 className="w-6 h-6 animate-spin text-blue-600 dark:text-blue-400" />
           <span className="text-gray-600 dark:text-gray-300">
-            Yükleniyor...
+            {t('RestaurantPreferencesTab.loading')}
           </span>
         </div>
       </div>
@@ -144,7 +146,7 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
         <div className="flex items-center space-x-3 rtl:space-x-reverse">
           <AlertCircle className="w-6 h-6 text-red-600 dark:text-red-400" />
           <span className="text-red-800 dark:text-red-300">
-            {error || 'Restoran tercihleri yüklenemedi'}
+            {error || t('RestaurantPreferencesTab.errors.loadGeneral')}
           </span>
         </div>
       </div>
@@ -159,10 +161,10 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
           <Globe className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           <div>
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-              Restoran Dil Tercihleri
+              {t('RestaurantPreferencesTab.title')}
             </h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Restoran dil ayarlarını yönetin
+              {t('RestaurantPreferencesTab.subtitle')}
             </p>
           </div>
         </div>
@@ -174,7 +176,7 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
             className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0 ${isLoading ? 'animate-spin' : ''}`} />
-            Yenile
+            {t('RestaurantPreferencesTab.buttons.refresh')}
           </button>
 
           <button
@@ -187,7 +189,9 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
             ) : (
               <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
             )}
-            {isSaving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}
+            {isSaving 
+              ? t('RestaurantPreferencesTab.buttons.saving') 
+              : t('RestaurantPreferencesTab.buttons.save')}
           </button>
         </div>
       </div>
@@ -219,10 +223,10 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
             <Languages className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Dil Ayarları
+                {t('RestaurantPreferencesTab.sections.languageSettings.title')}
               </h3>
               <p className="text-gray-600 dark:text-gray-400 text-sm">
-                Restoranınızın desteklediği dilleri ve varsayılan dili ayarlayın
+                {t('RestaurantPreferencesTab.sections.languageSettings.subtitle')}
               </p>
             </div>
           </div>
@@ -231,7 +235,7 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
             {/* Default Language Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                Varsayılan Dil
+                {t('RestaurantPreferencesTab.form.defaultLanguage.label')}
               </label>
               <select
                 title="defaultLanguage"
@@ -248,14 +252,14 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
                   ))}
               </select>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                Restoran için varsayılan dil ayarı
+                {t('RestaurantPreferencesTab.form.defaultLanguage.helperText')}
               </p>
             </div>
 
             {/* Supported Languages */}
             <div>
               <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">
-                Desteklenen Diller
+                {t('RestaurantPreferencesTab.form.supportedLanguages.label')}
               </label>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                 {preferences?.availableLanguages.map((lang) => {
@@ -299,7 +303,7 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
                 })}
               </div>
               <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-                En az bir dil seçilmelidir. Varsayılan dil otomatik olarak seçili kalır.
+                {t('RestaurantPreferencesTab.form.supportedLanguages.helperText')}
               </p>
 
               {/* Warning about cascade */}
@@ -307,13 +311,13 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
                 <div className="flex items-start space-x-3 rtl:space-x-reverse">
                   <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
                   <div className="text-sm text-yellow-800 dark:text-yellow-300">
-                    <p className="font-medium mb-1">Önemli Not:</p>
+                    <p className="font-medium mb-1">{t('RestaurantPreferencesTab.alerts.cascadeWarning.title')}</p>
                     <p>
-                      Desteklenen dilleri azalttığınızda, şube tercihleri otomatik olarak güncellenir:
+                      {t('RestaurantPreferencesTab.alerts.cascadeWarning.description')}
                     </p>
                     <ul className="list-disc list-inside mt-1 space-y-1">
-                      <li>Şubeler sadece restoranın desteklediği dilleri destekleyebilir</li>
-                      <li>Bir şubenin varsayılan dili kaldırılırsa, restoranın varsayılan diline güncellenir</li>
+                      <li>{t('RestaurantPreferencesTab.alerts.cascadeWarning.point1')}</li>
+                      <li>{t('RestaurantPreferencesTab.alerts.cascadeWarning.point2')}</li>
                     </ul>
                   </div>
                 </div>
@@ -327,10 +331,10 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
           <div className="flex items-start space-x-3 rtl:space-x-reverse">
             <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
             <div className="text-sm text-blue-800 dark:text-blue-300">
-              <p className="font-medium mb-1">Doğrulama Kuralları:</p>
+              <p className="font-medium mb-1">{t('RestaurantPreferencesTab.alerts.validationInfo.title')}</p>
               <ul className="list-disc list-inside space-y-1">
-                <li>En az bir dil desteklenmelidir</li>
-                <li>Varsayılan dil, desteklenen diller arasında olmalıdır</li>
+                <li>{t('RestaurantPreferencesTab.alerts.validationInfo.point1')}</li>
+                <li>{t('RestaurantPreferencesTab.alerts.validationInfo.point2')}</li>
               </ul>
             </div>
           </div>

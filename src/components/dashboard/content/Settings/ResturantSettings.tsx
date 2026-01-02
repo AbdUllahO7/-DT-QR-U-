@@ -118,7 +118,7 @@ const ResturantSettings: React.FC = () => {
   };
 
   const tabs = [
-    { id: 'restaurant', label: 'Restoran Tercihleri', icon: Globe },
+    { id: 'restaurant', label: t('RestaurantPreferencesTab.title'), icon: Globe },
     { id: 'branch', label: t('branchPreferences.title'), icon: SettingsIcon },
     { id: 'appearance', label: t('settings.tabs.appearance'), icon: Palette },
   ];

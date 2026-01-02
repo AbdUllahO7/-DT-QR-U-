@@ -1,7 +1,7 @@
-import { 
-  APIExtra, 
-  Extra, 
-  CreateExtraData, 
+import {
+  APIExtra,
+  Extra,
+  CreateExtraData,
   UpdateExtraData,
   ReorderExtrasData
 } from '../../types/Extras/type';
@@ -11,17 +11,26 @@ import { logger } from "../../utils/logger";
 class ExtrasService {
   private baseUrl = '/api/Extras';
 
+  // Helper method to get language from localStorage
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
   // GET - Get all extras
   async getExtras(): Promise<Extra[]> {
     try {
-      logger.info('Extra listesi getiriliyor');
-      
-      const response = await httpClient.get<APIExtra[]>(`${this.baseUrl}`);
-      
-      logger.info('Extra listesi başarıyla getirildi', { 
-        count: response.data.length 
+      const language = this.getLanguageFromStorage();
+      logger.info('Extra listesi getiriliyor', { language });
+
+      const response = await httpClient.get<APIExtra[]>(`${this.baseUrl}`, {
+        params: { language }
       });
-      
+
+      logger.info('Extra listesi başarıyla getirildi', {
+        count: response.data.length,
+        language
+      });
+
       return response.data;
     } catch (error: any) {
       logger.error('❌ Extra listesi getirilirken hata:', error);
@@ -32,12 +41,15 @@ class ExtrasService {
   // GET - Get extra by ID
   async getExtraById(id: number): Promise<Extra> {
     try {
-      logger.info('Extra detayı getiriliyor', { id });
-      
-      const response = await httpClient.get<APIExtra>(`${this.baseUrl}/${id}`);
-      
-      logger.info('Extra detayı başarıyla getirildi', { data: response.data });
-      
+      const language = this.getLanguageFromStorage();
+      logger.info('Extra detayı getiriliyor', { id, language });
+
+      const response = await httpClient.get<APIExtra>(`${this.baseUrl}/${id}`, {
+        params: { language }
+      });
+
+      logger.info('Extra detayı başarıyla getirildi', { data: response.data, language });
+
       return response.data;
     } catch (error: any) {
       logger.error('❌ Extra detayı getirilirken hata:', error);
@@ -120,14 +132,18 @@ class ExtrasService {
   // GET - Get deleted extras
   async getDeletedExtras(): Promise<Extra[]> {
     try {
-      logger.info('Silinmiş extra listesi getiriliyor');
-      
-      const response = await httpClient.get<APIExtra[]>(`${this.baseUrl}/deleted`);
-      
-      logger.info('Silinmiş extra listesi başarıyla getirildi', { 
-        count: response.data.length 
+      const language = this.getLanguageFromStorage();
+      logger.info('Silinmiş extra listesi getiriliyor', { language });
+
+      const response = await httpClient.get<APIExtra[]>(`${this.baseUrl}/deleted`, {
+        params: { language }
       });
-      
+
+      logger.info('Silinmiş extra listesi başarıyla getirildi', {
+        count: response.data.length,
+        language
+      });
+
       return response.data;
     } catch (error: any) {
       logger.error('❌ Silinmiş extra listesi getirilirken hata:', error);

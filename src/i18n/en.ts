@@ -5209,6 +5209,8 @@ extrasManagement: {
     fields: {
       categoryName: 'Category Name',
       categoryNamePlaceholder: 'e.g., Pizza Toppings',
+      description: 'Description',
+      descriptionPlaceholder: 'Enter category description (optional)',
       statusLabel: 'Active Status',
       requiredLabel: 'Is it required?',
       selectionRules: 'Selection Rules',
@@ -5729,6 +5731,51 @@ categoryConfigModal: {
     noLanguagesConfigured: 'No languages configured. Please configure languages in preferences.',
     required: 'Required',
     fieldRequired: 'This field is required'
+  },
+  RestaurantPreferencesTab: {
+  title: 'Restaurant Language Preferences',
+  subtitle: 'Manage restaurant language settings',
+  loading: 'Loading...',
+  buttons: {
+    refresh: 'Refresh',
+    save: 'Save Changes',
+    saving: 'Saving...'
+  },
+  sections: {
+    languageSettings: {
+      title: 'Language Settings',
+      subtitle: 'Set the languages supported by your restaurant and the default language'
+    }
+  },
+  form: {
+    defaultLanguage: {
+      label: 'Default Language',
+      helperText: 'Default language setting for the restaurant'
+    },
+    supportedLanguages: {
+      label: 'Supported Languages',
+      helperText: 'At least one language must be selected. The default language remains selected automatically.'
+    }
+  },
+  alerts: {
+    success: 'Restaurant preferences updated successfully',
+    cascadeWarning: {
+      title: 'Important Note:',
+      description: 'When you reduce supported languages, branch preferences are updated automatically:',
+      point1: 'Branches can only support languages supported by the restaurant',
+      point2: 'If a branch\'s default language is removed, it updates to the restaurant\'s default language'
+    },
+    validationInfo: {
+      title: 'Validation Rules:',
+      point1: 'At least one language must be supported',
+      point2: 'Default language must be among supported languages'
+    }
+  },
+  errors: {
+    load: 'Error loading restaurant preferences',
+    loadGeneral: 'Restaurant preferences could not be loaded',
+    save: 'Error saving restaurant preferences'
+  }
   }
 
 }; 

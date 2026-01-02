@@ -153,14 +153,14 @@ export interface BatchUpsertDiscountTranslationsDto {
 // Extra Category Translations
 export interface ExtraCategoryTranslation extends Translation {
   extraCategoryId: number;
-  name?: string;
+  categoryName?: string;
   description?: string;
 }
 
 export interface UpsertExtraCategoryTranslationDto {
   extraCategoryId: number;
   languageCode: string;
-  name?: string;
+  categoryName?: string;
   description?: string;
 }
 

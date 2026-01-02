@@ -5233,6 +5233,8 @@ extrasManagement: {
     fields: {
       categoryName: 'Kategori Adı',
       categoryNamePlaceholder: 'örn: Pizza Malzemeleri',
+      description: 'Açıklama',
+      descriptionPlaceholder: 'Kategori açıklaması girin (isteğe bağlı)',
       statusLabel: 'Aktif Durum',
       requiredLabel: 'Zorunlu mu?',
       selectionRules: 'Seçim Kuralları',
@@ -5753,5 +5755,50 @@ categoryConfigModal: {
     noLanguagesConfigured: 'Dil yapılandırılmamış. Lütfen tercihlerden dilleri yapılandırın.',
     required: 'Gerekli',
     fieldRequired: 'Bu alan gereklidir'
+  },
+  RestaurantPreferencesTab: {
+  title: 'Restoran Dil Tercihleri',
+  subtitle: 'Restoran dil ayarlarını yönetin',
+  loading: 'Yükleniyor...',
+  buttons: {
+    refresh: 'Yenile',
+    save: 'Değişiklikleri Kaydet',
+    saving: 'Kaydediliyor...'
+  },
+  sections: {
+    languageSettings: {
+      title: 'Dil Ayarları',
+      subtitle: 'Restoranınızın desteklediği dilleri ve varsayılan dili ayarlayın'
+    }
+  },
+  form: {
+    defaultLanguage: {
+      label: 'Varsayılan Dil',
+      helperText: 'Restoran için varsayılan dil ayarı'
+    },
+    supportedLanguages: {
+      label: 'Desteklenen Diller',
+      helperText: 'En az bir dil seçilmelidir. Varsayılan dil otomatik olarak seçili kalır.'
+    }
+  },
+  alerts: {
+    success: 'Restoran tercihleri başarıyla güncellendi',
+    cascadeWarning: {
+      title: 'Önemli Not:',
+      description: 'Desteklenen dilleri azalttığınızda, şube tercihleri otomatik olarak güncellenir:',
+      point1: 'Şubeler sadece restoranın desteklediği dilleri destekleyebilir',
+      point2: 'Bir şubenin varsayılan dili kaldırılırsa, restoranın varsayılan diline güncellenir'
+    },
+    validationInfo: {
+      title: 'Doğrulama Kuralları:',
+      point1: 'En az bir dil desteklenmelidir',
+      point2: 'Varsayılan dil, desteklenen diller arasında olmalıdır'
+    }
+  },
+  errors: {
+    load: 'Restoran tercihleri yüklenirken hata oluştu',
+    loadGeneral: 'Restoran tercihleri yüklenemedi',
+    save: 'Restoran tercihleri kaydedilirken hata oluştu'
   }
+}
 };

@@ -5208,6 +5208,8 @@ extrasManagement: {
     fields: {
       categoryName: 'اسم الفئة',
       categoryNamePlaceholder: 'مثال: إضافات البيتزا',
+      description: 'الوصف',
+      descriptionPlaceholder: 'أدخل وصف الفئة (اختياري)',
       statusLabel: 'الحالة النشطة',
       requiredLabel: 'هل هو مطلوب؟',
       selectionRules: 'قواعد الاختيار',
@@ -5730,5 +5732,50 @@ extrasManagement: {
     noLanguagesConfigured: 'لم يتم تكوين اللغات. يرجى تكوين اللغات في التفضيلات.',
     required: 'مطلوب',
     fieldRequired: 'هذا الحقل مطلوب'
+  },
+  RestaurantPreferencesTab: {
+  title: 'تفضيلات لغة المطعم',
+  subtitle: 'إدارة إعدادات لغة المطعم',
+  loading: 'جاري التحميل...',
+  buttons: {
+    refresh: 'تحديث',
+    save: 'حفظ التغييرات',
+    saving: 'جاري الحفظ...'
+  },
+  sections: {
+    languageSettings: {
+      title: 'إعدادات اللغة',
+      subtitle: 'قم بتعيين اللغات التي يدعمها مطعمك واللغة الافتراضية'
+    }
+  },
+  form: {
+    defaultLanguage: {
+      label: 'اللغة الافتراضية',
+      helperText: 'إعداد اللغة الافتراضية للمطعم'
+    },
+    supportedLanguages: {
+      label: 'اللغات المدعومة',
+      helperText: 'يجب اختيار لغة واحدة على الأقل. تظل اللغة الافتراضية محددة تلقائياً.'
+    }
+  },
+  alerts: {
+    success: 'تم تحديث تفضيلات المطعم بنجاح',
+    cascadeWarning: {
+      title: 'ملاحظة هامة:',
+      description: 'عند تقليل اللغات المدعومة، يتم تحديث تفضيلات الفرع تلقائياً:',
+      point1: 'يمكن للفروع دعم اللغات التي يدعمها المطعم فقط',
+      point2: 'إذا تمت إزالة اللغة الافتراضية للفرع، فسيتم تحديثها إلى اللغة الافتراضية للمطعم'
+    },
+    validationInfo: {
+      title: 'قواعد التحقق:',
+      point1: 'يجب دعم لغة واحدة على الأقل',
+      point2: 'يجب أن تكون اللغة الافتراضية من بين اللغات المدعومة'
+    }
+  },
+  errors: {
+    load: 'حدث خطأ أثناء تحميل تفضيلات المطعم',
+    loadGeneral: 'تعذر تحميل تفضيلات المطعم',
+    save: 'حدث خطأ أثناء حفظ تفضيلات المطعم'
   }
+}
 };

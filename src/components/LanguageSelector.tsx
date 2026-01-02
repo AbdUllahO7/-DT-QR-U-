@@ -38,10 +38,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const handleLanguageChange = (langCode: Language) => {
     setLanguage(langCode);
     setIsOpen(false);
-    // Force a small delay to ensure the direction change takes effect
-    setTimeout(() => {
-      // This helps with any transition issues
-    }, 100);
+    // Refresh the page to apply language changes across all components
+    window.location.reload();
   };
 
   const getButtonStyle = () => {

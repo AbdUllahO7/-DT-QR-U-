@@ -77,9 +77,11 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
             </button>
           </div>
 
-          {/* Modal Content */}
-          <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
+          {/* Modal Content - Scrollable Area */}
+          <div className="px-6 py-6 max-h-[calc(100vh-16rem)] overflow-y-auto custom-scrollbar">
             <form id="extraForm" onSubmit={handleFormSubmit} className="space-y-5">
+              
+              {/* Parent Category Select */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   {t('extrasManagement.extras.fields.parentCategory')}
@@ -100,9 +102,10 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                 </select>
               </div>
 
-              {/* Multi-Language Name Input */}
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2">
+              {/* Grid for Name and Price */}
+              {/* Added 'items-start' to ensure Price input doesn't center vertically if Name dropdown expands */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+                <div className="sm:col-span-2">
                   <MultiLanguageInput
                     label={t('extrasManagement.extras.fields.itemName')}
                     value={nameTranslations}
@@ -115,7 +118,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {t('extrasManagement.extras.fields.price')}
                   </label>
                   <div className="relative">
@@ -131,7 +134,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                           onChange({ ...formData, basePrice: val === '' ? 0 : parseFloat(val) || 0 });
                         }
                       }}
-                      className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5 pl-2 pr-3"
+                      className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5 px-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
                     />
                   </div>
                 </div>
@@ -167,7 +170,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                       <button
                         type="button"
                         onClick={onImageClear}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600"
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -182,26 +185,27 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                 </div>
               </div>
 
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
+              {/* Checkboxes */}
+              <div className="flex gap-4 p-1">
+                <label className="flex items-center gap-2 cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={formData.status}
                     onChange={(e) => onChange({ ...formData, status: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded"
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                     {t('extrasManagement.extras.fields.activeLabel')}
                   </span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2 cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={formData.isRemoval}
                     onChange={(e) => onChange({ ...formData, isRemoval: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded"
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                     {t('extrasManagement.extras.fields.removalLabel')}
                   </span>
                 </label>
