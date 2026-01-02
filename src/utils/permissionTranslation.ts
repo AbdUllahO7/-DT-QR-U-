@@ -241,9 +241,32 @@ const reverseNameMap = createReverseNameMapping();
  * @returns Translated permission name
  */
 export const getTranslatedPermissionName = (
-  permission: Permission | RolePermission | AppPermission | AppRole,
+  permission: Permission | RolePermission | AppPermission | AppRole | string,
   t: (key: string) => string
 ): string => {
+  // Handle string permissions
+  if (typeof permission === 'string') {
+    const permissionKey = permission;
+    const currentLang = getCurrentLanguage();
+
+    // Try to look up using the key directly
+    if (permissionTranslations[permissionKey]) {
+      return permissionTranslations[permissionKey][currentLang];
+    }
+
+    // Try reverse mapping
+    const reverseLookupKey = reverseNameMap.get(permissionKey.toLowerCase());
+    if (reverseLookupKey && permissionTranslations[reverseLookupKey]) {
+      return permissionTranslations[reverseLookupKey][currentLang];
+    }
+
+    // Try i18n translation as fallback
+    const translationKey = `profile.permissionNames.${permissionKey}`;
+    const translated = t(translationKey);
+    return translated === translationKey ? permissionKey : translated;
+  }
+
+  // Handle object permissions
   // Try to get the permission key - use 'key' field first, then fall back to 'name'
   let permissionKey = 'key' in permission ? permission.key : permission.name;
 

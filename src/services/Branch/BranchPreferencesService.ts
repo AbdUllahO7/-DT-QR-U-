@@ -1,6 +1,14 @@
 import { httpClient, getEffectiveBranchId } from "../../utils/http";
 import { logger } from "../../utils/logger";
 
+// Interface for language option
+export interface LanguageOption {
+  code: string;
+  displayName: string;
+  nativeName: string;
+  isRtl: boolean;
+}
+
 // Interface for the complete branch preferences response
 export interface BranchPreferences {
   id: number;
@@ -14,9 +22,10 @@ export interface BranchPreferences {
   acceptCreditCard: boolean;
   acceptOnlinePayment: boolean;
   defaultCurrency: string;
-  supportedLanguages: number;
+  supportedLanguages: string[];
   defaultLanguage: string;
   timeZoneId: string;
+  availableLanguages: LanguageOption[];
   sessionTimeoutMinutes: number;
   cleanupMode: number;
   cleanupDelayAfterCloseMinutes: number;
@@ -36,7 +45,7 @@ export interface UpdateBranchPreferencesDto {
   acceptCreditCard: boolean;
   acceptOnlinePayment: boolean;
   defaultCurrency: string;
-  supportedLanguages: number;
+  supportedLanguages: string[];
   defaultLanguage: string;
   timeZoneId: string;
   sessionTimeoutMinutes: number;

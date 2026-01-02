@@ -5,6 +5,7 @@ import {
   X,
   Plus,
   Minus,
+  Check,
 } from 'lucide-react';
 import { theme } from '../../../../types/BranchManagement/type';
 import { MenuProduct } from '../../../../types/menu/type';
@@ -403,17 +404,14 @@ export const OnlineMenuProductModal: React.FC<OnlineMenuProductModalProps> = ({
                               (s) => s.branchProductExtraId === extra.branchProductExtraId
                             );
 
+                            // Check if this is a removal extra - either by the extra's flag OR the category's flag
+                            const isRemovalExtra = extra.isRemoval || extraCategory.isRemovalCategory;
+
                             return (
                               <div
                                 key={extra.branchProductExtraId}
-                                onClick={() =>
-                                  handleExtraToggle({
-                                    ...extra,
-                                    categoryName: extraCategory.categoryName,
-                                  })
-                                }
-                                className={`p-4 rounded-xl border transition-all cursor-pointer ${
-                                  extra.isRemoval
+                                className={`p-4 rounded-xl border transition-all ${
+                                  isRemovalExtra
                                     ? isSelected
                                       ? 'border-red-500 bg-red-50 dark:bg-red-900/10'
                                       : 'border-slate-200 dark:border-slate-700 hover:border-red-300'
@@ -423,41 +421,72 @@ export const OnlineMenuProductModal: React.FC<OnlineMenuProductModalProps> = ({
                                 }`}
                               >
                                 <div className="flex items-center justify-between">
-                                  <div className="flex items-center gap-3">
-                                    {/* Selection Indicator */}
-                                    <div
-                                      className={`w-5 h-5 rounded-full border flex items-center justify-center ${
-                                        isSelected
-                                          ? extra.isRemoval
-                                            ? 'bg-red-500 border-red-500'
-                                            : 'bg-emerald-500 border-emerald-500'
-                                          : 'border-slate-300 dark:border-slate-500'
-                                      }`}
-                                    >
-                                      {isSelected && <CheckCircle className="w-3.5 h-3.5 text-white" />}
-                                    </div>
-
+                                  <div className="flex items-center gap-3 flex-1">
                                     <span className={`font-medium ${theme.text.primary}`}>
                                       {extra.extraName}
                                     </span>
                                   </div>
 
                                   <div className="flex items-center gap-3">
-                                    {!extra.isRemoval && extra.unitPrice && extra.unitPrice > 0 && (
-                                      <span className={`font-medium ${theme.text.primary}`}>
-                                        +{formatPrice(extra.unitPrice || 0, currency)}
-                                      </span>
-                                    )}
-                                    {extra.isRemoval && (
-                                      <span className="text-xs font-bold text-red-500 uppercase">
-                                        {t('menu.remove') || 'Remove'}
-                                      </span>
+                                    {isRemovalExtra ? (
+                                      // Toggle button for removal extras - NO increment/decrement
+                                      <button
+                                        onClick={() =>
+                                          handleExtraToggle({
+                                            ...extra,
+                                            categoryName: extraCategory.categoryName,
+                                            isRemoval: true, // Force isRemoval to true for extras in removal categories
+                                          })
+                                        }
+                                        className={`relative flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 ${
+                                          isSelected
+                                            ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-md'
+                                            : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+                                        }`}
+                                      >
+                                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                                          isSelected
+                                            ? 'border-white bg-white'
+                                            : 'border-slate-400 dark:border-slate-500'
+                                        }`}>
+                                          {isSelected && <Check className="h-4 w-4 text-red-600" />}
+                                        </div>
+                                        <span>{isSelected ? (t('menu.removed') || 'Removed') : (t('menu.remove') || 'Remove')}</span>
+                                      </button>
+                                    ) : (
+                                      // Regular extra with price and add button
+                                      <>
+                                        {extra.unitPrice && extra.unitPrice > 0 && (
+                                          <span className={`font-medium ${theme.text.primary}`}>
+                                            +{formatPrice(extra.unitPrice || 0, currency)}
+                                          </span>
+                                        )}
+                                        <button
+                                          onClick={() =>
+                                            handleExtraToggle({
+                                              ...extra,
+                                              categoryName: extraCategory.categoryName,
+                                            })
+                                          }
+                                          className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
+                                            isSelected
+                                              ? 'bg-emerald-500 text-white'
+                                              : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-emerald-500 hover:text-white'
+                                          }`}
+                                        >
+                                          {isSelected ? (
+                                            <CheckCircle className="w-5 h-5" />
+                                          ) : (
+                                            <Plus className="w-5 h-5" />
+                                          )}
+                                        </button>
+                                      </>
                                     )}
                                   </div>
                                 </div>
 
-                                {/* Quantity Controls inside card */}
-                                {isSelected && !extra.isRemoval && (
+                                {/* Quantity Controls - ONLY for non-removal extras */}
+                                {isSelected && !isRemovalExtra && (
                                   <div
                                     className="flex items-center justify-end gap-3 mt-3 pt-3 border-t border-black/5 dark:border-white/5"
                                     onClick={(e) => e.stopPropagation()}

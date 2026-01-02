@@ -93,17 +93,39 @@ const handleBranchSelect = (branch: BranchDropdownItem) => {
 
 };
 
-  // Fetch pending orders with branch filter
- const fetchPendingOrders = useCallback(async (branchId?: number) => {
+  // Fetch pending orders with branch filter and pagination
+ const fetchPendingOrders = useCallback(async (branchId?: number, page?: number, pageSize?: number) => {
     const targetBranchId = branchId || getCurrentBranchId();
+    const targetPage = page !== undefined ? page : state.pagination.currentPage;
+    const targetPageSize = pageSize !== undefined ? pageSize : state.pagination.itemsPerPage;
+
     setState(prev => ({ ...prev, loading: true, error: null }));
     try {
-      const orders = await orderService.getPendingOrders(targetBranchId);
-      setState(prev => ({ ...prev, pendingOrders: orders, loading: false }));
+      const result = await orderService.getPendingOrders(targetBranchId, targetPage, targetPageSize);
+      setState(prev => ({
+        ...prev,
+        pendingOrders: result.orders,
+        loading: false,
+        pagination: {
+          ...prev.pagination,
+          totalItems: result.totalItems,
+          totalPages: result.totalPages
+        }
+      }));
     } catch (error: any) {
-      setState(prev => ({ ...prev, error: error.message, loading: false }));
+      setState(prev => ({
+        ...prev,
+        error: error.message,
+        loading: false,
+        pendingOrders: [],
+        pagination: {
+          ...prev.pagination,
+          totalItems: 0,
+          totalPages: 0
+        }
+      }));
     }
-  }, [getCurrentBranchId]);
+  }, []);
 
 const fetchBranchOrders = useCallback(async (branchId?: number, page?: number, pageSize?: number) => {
   const targetBranchId = branchId || state.selectedBranch?.branchId;
@@ -163,28 +185,24 @@ const handleBranchItemsPerPageChange = (newItemsPerPage: number) => {
     }
   }));
 };
-    // Handle page change
-    const handlePageChange = (newPage: number) => {
+    // Handle page change for pending orders
+    const handlePendingPageChange = (newPage: number) => {
       setState(prev => ({
         ...prev,
         pagination: { ...prev.pagination, currentPage: newPage }
       }));
-      
-      if (state.viewMode === 'branch') {
-        fetchBranchOrders(undefined, newPage, state.pagination.itemsPerPage);
-      }
     };
 
-    // Handle items per page change
-    const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    // Handle items per page change for pending orders
+    const handlePendingItemsPerPageChange = (newItemsPerPage: number) => {
       setState(prev => ({
         ...prev,
-        pagination: { ...prev.pagination, itemsPerPage: newItemsPerPage, currentPage: 1 }
+        pagination: {
+          ...prev.pagination,
+          itemsPerPage: newItemsPerPage,
+          currentPage: 1
+        }
       }));
-      
-      if (state.viewMode === 'branch') {
-        fetchBranchOrders(undefined, 1, newItemsPerPage);
-      }
     };
 
   // Fetch table basket summary with branch filter
@@ -594,7 +612,7 @@ const switchViewMode = (mode: 'pending' | 'branch' | 'deletedOrders') => {
     getAllOrderTypes,
     handleConfirmOrder,
     handleRejectOrder,
-    handleCancelOrder, 
+    handleCancelOrder,
     handleUpdateStatus,
     getOrderDetails,
     getTableOrders,
@@ -603,15 +621,15 @@ const switchViewMode = (mode: 'pending' | 'branch' | 'deletedOrders') => {
     switchViewMode,
     openConfirmModal,
     openRejectModal,
-    openCancelModal, 
+    openCancelModal,
     openStatusModal,
     openDetailsModal,
     closeModals,
     toggleRowExpansion,
     handleSort,
     setState,
-    handlePageChange,
-    handleItemsPerPageChange,
+    handlePendingPageChange,
+    handlePendingItemsPerPageChange,
     handleBranchPageChange,
     handleBranchItemsPerPageChange
   };

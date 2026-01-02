@@ -5,6 +5,10 @@ import { CreateExtraCategoryData, CreateExtraData, Extra, ExtraCategory } from '
 import { extrasService } from '../../../services/Extras/ExtrasService';
 import { mediaService } from '../../../services/mediaService';
 import { extraCategoriesService } from '../../../services/Extras/ExtraCategoriesService';
+import { extraTranslationService } from '../../../services/Translations/ExtraTranslationService';
+import { extraCategoryTranslationService } from '../../../services/Translations/ExtraCategoryTranslationService';
+import { languageService } from '../../../services/LanguageService';
+import { useTranslatableFields, TranslatableFieldValue, translationsToObject } from '../../../hooks/useTranslatableFields';
 import { ModalType, DeleteConfig } from './types';
 import { Header } from './Header';
 import { CategoryCard } from './CategoryCard';
@@ -16,6 +20,7 @@ import { EmptyState } from './EmptyState';
 export default function ExtrasManagement() {
   const { t, isRTL } = useLanguage();
   const navigate = useNavigate();
+  const translationHook = useTranslatableFields();
 
   // --- State ---
   const [modalType, setModalType] = useState<ModalType>(null);
@@ -56,9 +61,40 @@ export default function ExtrasManagement() {
     imageUrl: '',
     status: true,
   });
+
+  // Multi-language state for extras
+  const [nameTranslations, setNameTranslations] = useState<TranslatableFieldValue>({});
+  const [descriptionTranslations, setDescriptionTranslations] = useState<TranslatableFieldValue>({});
+
+  // Multi-language state for categories
+  const [categoryNameTranslations, setCategoryNameTranslations] = useState<TranslatableFieldValue>({});
+  const [categoryDescriptionTranslations, setCategoryDescriptionTranslations] = useState<TranslatableFieldValue>({});
+
+  const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
+  const [defaultLanguage, setDefaultLanguage] = useState<string>('en');
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [expandedCategories, setExpandedCategories] = useState<number[]>([]);
+
+  useEffect(() => {
+    const loadLanguages = async () => {
+      try {
+        const languagesData = await languageService.getRestaurantLanguages();
+        console.log("languagesData",languagesData)
+        setSupportedLanguages(languagesData.availableLanguages || []);
+        setDefaultLanguage(languagesData.defaultLanguage || 'en');
+
+        // Initialize empty translations
+        const languageCodes = languagesData.availableLanguages?.map((lang: any) => lang.code) || [];
+        setNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setDescriptionTranslations(translationHook.getEmptyTranslations(languageCodes));
+      } catch (error) {
+        console.error('Failed to load languages:', error);
+      }
+    };
+    loadLanguages();
+  }, []);
 
   // --- Effects ---
   useEffect(() => {
@@ -124,12 +160,33 @@ export default function ExtrasManagement() {
     setError(null);
     try {
       setLoading(true);
+
+      // Get default language values for name and description
+      const defaultName = translationHook.getTranslationWithFallback(categoryNameTranslations, defaultLanguage);
+      const defaultDescription = translationHook.getTranslationWithFallback(categoryDescriptionTranslations, defaultLanguage);
+
       const createData: CreateExtraCategoryData = {
         ...categoryForm,
+        categoryName: defaultName,
+        description: defaultDescription,
         defaultMaxSelectionCount: categoryForm.isMaxSelectionUnlimited ? null : categoryForm.defaultMaxSelectionCount,
         defaultMaxTotalQuantity: categoryForm.isMaxQuantityUnlimited ? null : categoryForm.defaultMaxTotalQuantity,
       };
-      await extraCategoriesService.createExtraCategory(createData);
+
+      // Create the category with default language values
+      const createdCategory = await extraCategoriesService.createExtraCategory(createData);
+
+      // Save translations for all languages
+      const translations = supportedLanguages.map((lang: any) => ({
+        extraCategoryId: createdCategory.id,
+        languageCode: lang.code,
+        name: categoryNameTranslations[lang.code] || undefined,
+        description: categoryDescriptionTranslations[lang.code] || undefined,
+      }));
+
+      // Batch upsert translations
+      await extraCategoryTranslationService.batchUpsertExtraCategoryTranslations({ translations });
+
       await loadData();
       closeModal();
     } catch (err: any) {
@@ -181,9 +238,33 @@ export default function ExtrasManagement() {
     e.preventDefault();
     try {
       setLoading(true);
+
+      // Get default language values for name and description
+      const defaultName = translationHook.getTranslationWithFallback(nameTranslations, defaultLanguage);
+      const defaultDescription = translationHook.getTranslationWithFallback(descriptionTranslations, defaultLanguage);
+
       let imageUrl = extraForm.imageUrl;
       if (selectedFile) imageUrl = await handleUploadImage();
-      await extrasService.createExtra({ ...extraForm, imageUrl });
+
+      // Create the extra with default language values
+      const createdExtra = await extrasService.createExtra({
+        ...extraForm,
+        name: defaultName,
+        description: defaultDescription,
+        imageUrl
+      });
+
+      // Save translations for all languages
+      const translations = supportedLanguages.map((lang: any) => ({
+        extraId: createdExtra.id,
+        languageCode: lang.code,
+        name: nameTranslations[lang.code] || undefined,
+        description: descriptionTranslations[lang.code] || undefined,
+      }));
+
+      // Batch upsert translations
+      await extraTranslationService.batchUpsertExtraTranslations({ translations });
+
       await loadData();
       closeModal();
     } catch (err) {
@@ -198,9 +279,34 @@ export default function ExtrasManagement() {
     if (!selectedExtra) return;
     try {
       setLoading(true);
+
+      // Get default language values
+      const defaultName = translationHook.getTranslationWithFallback(nameTranslations, defaultLanguage);
+      const defaultDescription = translationHook.getTranslationWithFallback(descriptionTranslations, defaultLanguage);
+
       let imageUrl = extraForm.imageUrl;
       if (selectedFile) imageUrl = await handleUploadImage();
-      await extrasService.updateExtra({ id: selectedExtra.id, ...extraForm, imageUrl });
+
+      // Update the extra with default language values
+      await extrasService.updateExtra({
+        id: selectedExtra.id,
+        ...extraForm,
+        name: defaultName,
+        description: defaultDescription,
+        imageUrl
+      });
+
+      // Update translations for all languages
+      const translations = supportedLanguages.map((lang: any) => ({
+        extraId: selectedExtra.id,
+        languageCode: lang.code,
+        name: nameTranslations[lang.code] || undefined,
+        description: descriptionTranslations[lang.code] || undefined,
+      }));
+
+      // Batch upsert translations
+      await extraTranslationService.batchUpsertExtraTranslations({ translations });
+
       await loadData();
       closeModal();
     } catch (err) {
@@ -334,6 +440,12 @@ export default function ExtrasManagement() {
                   onToggle={() => toggleCategory(category.id)}
                   onAddExtra={() => {
                     setExtraForm((prev) => ({ ...prev, extraCategoryId: category.id }));
+
+                    // Reset translations for new extra
+                    const languageCodes = supportedLanguages.map((lang: any) => lang.code);
+                    setNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+                    setDescriptionTranslations(translationHook.getEmptyTranslations(languageCodes));
+
                     setModalType('add-extra');
                   }}
                   onEditCategory={() => {
@@ -354,11 +466,27 @@ export default function ExtrasManagement() {
                     setModalType('edit-category');
                   }}
                   onDeleteCategory={() => initiateDeleteCategory(category)}
-                  onEditExtra={(extra) => {
+                  onEditExtra={async (extra) => {
                     setSelectedExtra(extra);
                     setExtraForm({ ...extra });
                     setImagePreview(extra.imageUrl || '');
                     setPreviousImageUrl(extra.imageUrl || '');
+
+                    // Load existing translations
+                    try {
+                      const translations = await extraTranslationService.getExtraTranslations(extra.id);
+                      const nameTranslationsObj = translationsToObject(translations, 'name');
+                      const descriptionTranslationsObj = translationsToObject(translations, 'description');
+                      setNameTranslations(nameTranslationsObj);
+                      setDescriptionTranslations(descriptionTranslationsObj);
+                    } catch (error) {
+                      console.error('Failed to load translations:', error);
+                      // Initialize with empty translations if load fails
+                      const languageCodes = supportedLanguages.map((lang: any) => lang.code);
+                      setNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+                      setDescriptionTranslations(translationHook.getEmptyTranslations(languageCodes));
+                    }
+
                     setModalType('edit-extra');
                   }}
                   onDeleteExtra={initiateDeleteExtra}
@@ -386,7 +514,6 @@ export default function ExtrasManagement() {
           isEditMode={modalType === 'edit-extra'}
           formData={extraForm}
           categories={categories}
-          allExtras={extras}
           imagePreview={imagePreview}
           loading={loading}
           uploading={uploading}
@@ -400,6 +527,12 @@ export default function ExtrasManagement() {
           }}
           onSubmit={modalType === 'add-extra' ? handleCreateExtra : handleUpdateExtra}
           onClose={closeModal}
+          nameTranslations={nameTranslations}
+          descriptionTranslations={descriptionTranslations}
+          onNameTranslationsChange={setNameTranslations}
+          onDescriptionTranslationsChange={setDescriptionTranslations}
+          supportedLanguages={supportedLanguages}
+          defaultLanguage={defaultLanguage}
         />
       )}
 

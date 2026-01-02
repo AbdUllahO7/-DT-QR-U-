@@ -1667,14 +1667,7 @@ const handleSaveProductExtras = async (
                 {t('branchCategories.subheader', { branchId })}
               </p>
             </div>
-            <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 px-4 py-2">
-                <div className={`flex items-center space-x-2 text-sm ${isRTL ? 'space-x-reverse' : ''}`}>
-                  <Calendar className="h-4 w-4 text-gray-400 dark:text-gray-500" />
-                  <span className="text-gray-600 dark:text-gray-300">{t('branchCategories.lastUpdated')}</span>
-                </div>
-              </div>
-            </div>
+           
           </div>
         </div>
    

@@ -1505,6 +1505,7 @@ contact: {
     manageIngredients: 'إدارة المكونات',
     updateIngredients: 'تحديث المكونات',
     manageAddons: 'إدارة الإضافات',
+    manageExtras: 'إدارة الإضافات',
     importSampleMenu: 'استيراد قائمة نموذجية',
     addFirstCategoryTitle: 'إضافة الفئة الأولى',
     RecycleBin:"سلة المحذوفات"
@@ -2610,7 +2611,9 @@ contact: {
   TableCategoryModal: {
     title: 'إضافة منطقة طاولة',
     subtitle: 'إنشاء منطقة طاولة جديدة',
+    addCategoryTitle: 'إضافة منطقة جديدة',
     categoryName: 'اسم المنطقة',
+    addCategorySubtitle: 'حدد خصائص المنطقة الجديدة',
     categoryNamePlaceholder: 'مثال: طاولات VIP، طاولات الحديقة',
     description: 'الوصف (اختياري)',
     descriptionPlaceholder: 'وصف قصير عن الفئة...',
@@ -3133,13 +3136,13 @@ contact: {
       createTables: "إنشاء الطاولات",
       creatingTables: "جارٍ إنشاء الطاولات...",
       batchCreateTables: "إنشاء طاولات دفعة واحدة",
-      header: "إدارة الفئات والطاولات",
-      subheader: "إدارة فئات المطعم والطاولات مع عرض الأكورديون",
-      totalCategories: "إجمالي الفئات",
+      header: "إدارة المناطق والطاولات",
+      subheader: "إدارة مناطق المطعم والطاولات",
+      totalCategories: "إجمالي المناطق",
       totalTables: "إجمالي الطاولات",
       occupiedTables: "الطاولات المشغولة",
       availableTables: "الطاولات المتاحة",
-      searchPlaceholder: "ابحث عن الفئات...",
+      searchPlaceholder: "ابحث عن المناطق...",
       refresh: "تحديث",
       addCategory: "إضافة منطقة",
       addCategoryTitle: "إضافة منطقة جديدة",
@@ -3153,8 +3156,8 @@ contact: {
       delete: "حذف",
       qrCode: "رمز الاستجابة السريعة",
       showQRCode: "عرض رمز الاستجابة السريعة",
-      noCategories: "لم يتم العثور على فئات",
-      addFirstCategory: "إضافة فئتك الأولى",
+      noCategories: "لم يتم العثور على مناطق",
+      addFirstCategory: "إضافة منطقتك الأولى",
       tablesCount: "طاولات",
       status: "الحالة",
       active: "نشط",
@@ -4154,7 +4157,8 @@ contact: {
         "defaultLanguage": "اللغة الافتراضية",
         "defaultCurrency": "العملة الافتراضية",
         "timeZone": "المنطقة الزمنية",
-        "supportedLanguages": "اللغات المدعومة"
+        "supportedLanguages": "اللغات المدعومة",
+        "languageRestaurantNote":"يمكن للفروع اختيار اللغات المدعومة فقط من قبل المطعم. اللغات المعروضة تحددها المطعم."
       },
       "sessionManagement": {
         "title": "إدارة الجلسات",
@@ -4162,11 +4166,10 @@ contact: {
         "sessionTimeout": "مهلة الجلسة (بالدقائق)",
         "cleanupMode": "وضع التنظيف",
         "cleanupDelay": "تأخير التنظيف بعد الإغلاق (بالدقائق)",
-        
-         "cleanupModeDesc": "اختر متى يتم تنظيف الجلسات المنتهية الصلاحية",
-    "sessionTimeoutDesc": "الدقائق قبل انتهاء صلاحية الجلسة بسبب عدم النشاط",
-    "cleanupDelayDesc": "الدقائق للانتظار بعد الإغلاق قبل التنظيف",
-    "cleanupDisabledMessage": "تنظيف الجلسات معطل. لن يتم تنظيف الجلسات تلقائياً."
+        "cleanupModeDesc": "اختر متى يتم تنظيف الجلسات المنتهية الصلاحية",
+        "sessionTimeoutDesc": "الدقائق قبل انتهاء صلاحية الجلسة بسبب عدم النشاط",
+        "cleanupDelayDesc": "الدقائق للانتظار بعد الإغلاق قبل التنظيف",
+        "cleanupDisabledMessage": "تنظيف الجلسات معطل. لن يتم تنظيف الجلسات تلقائياً."
       }
     },
     "currencies": {
@@ -5721,4 +5724,11 @@ extrasManagement: {
       }
     }
   },
+
+  // Multi-Language System
+  multiLanguage: {
+    noLanguagesConfigured: 'لم يتم تكوين اللغات. يرجى تكوين اللغات في التفضيلات.',
+    required: 'مطلوب',
+    fieldRequired: 'هذا الحقل مطلوب'
+  }
 };
