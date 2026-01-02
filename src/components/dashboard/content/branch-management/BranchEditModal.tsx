@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Building2, MapPin, Phone, Clock, Upload, Trash2, Image as ImageIcon, AlertTriangle, Globe, Navigation } from 'lucide-react';
+import { 
+  X, Building2, MapPin, Phone, Clock, Upload, Trash2, 
+  Image as ImageIcon, AlertTriangle, Globe, Navigation, 
+  ChevronDown, Search, Check 
+} from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import {
   BranchDetailResponse,
@@ -26,6 +30,112 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+// --- Custom Select Component ---
+interface CustomSelectProps {
+  options: { label: string; value: string; searchTerms?: string }[];
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  label?: string;
+  icon?: React.ReactNode;
+}
+
+const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, placeholder, icon }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { isRTL } = useLanguage();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filter options
+  const filteredOptions = options.filter(option => 
+    option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    option.value.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    option.searchTerms?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  return (
+    <div className="relative w-full" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full flex items-center justify-between px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors focus:ring-2 focus:ring-blue-500 ${
+          isOpen ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-300 dark:border-gray-600'
+        }`}
+      >
+        <div className="flex items-center gap-2 overflow-hidden">
+          {icon}
+          <span className="truncate block text-sm">
+            {selectedOption ? selectedOption.label : <span className="text-gray-500">{placeholder}</span>}
+          </span>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-60 overflow-hidden flex flex-col"
+          >
+            <div className="p-2 border-b border-gray-100 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
+              <div className="relative">
+                <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400`} />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search..."
+                  className={`w-full ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'} py-1.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-white`}
+                  autoFocus
+                />
+              </div>
+            </div>
+            
+            <div className="overflow-y-auto flex-1">
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      onChange(option.value);
+                      setIsOpen(false);
+                      setSearchTerm('');
+                    }}
+                    className={`w-full px-4 py-2 text-sm text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                      value === option.value ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    <span>{option.label}</span>
+                    {value === option.value && <Check className="w-4 h-4" />}
+                  </button>
+                ))
+              ) : (
+                <div className="px-4 py-3 text-sm text-gray-500 text-center">No results found</div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+// --- End Custom Select Component ---
 
 
 interface BranchEditModalProps {
@@ -102,11 +212,11 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     return t(`branchManagement.form.dayNames.${dayOfWeek}`);
   };
 
-  // --- ADDED: Helper to parse full phone number into code and local number ---
+  // Helper to parse full phone number into code and local number
   const getPhoneParts = (fullNumber: string | null) => {
     if (!fullNumber) return { code: '+90', number: '' }; // Default to TR if empty
     
-    // Sort countries by code length desc to match longest prefix first (e.g. match +971 before +97)
+    // Sort countries by code length desc to match longest prefix first
     const sortedCountries = [...countriesWithCodes].sort((a, b) => b.code.length - a.code.length);
     const country = sortedCountries.find(c => fullNumber.startsWith(c.code));
     
@@ -117,9 +227,22 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
       };
     }
     
-    // Fallback if no matching code found (assume default)
     return { code: '+90', number: fullNumber };
   };
+
+  // Prepare options for custom select
+  const countryCodeOptions = countriesWithCodes.map(c => ({
+    label: `${c.name} (${c.code})`,
+    value: c.code,
+    searchTerms: c.name
+  }));
+
+  const countryNameOptions = countryKeys.map(key => ({
+    label: t(key),
+    value: t(key),
+    searchTerms: key
+  }));
+
 
   useEffect(() => {
     if (branchDetail && isOpen) {
@@ -186,7 +309,10 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    updateFormData(name, value);
+  };
 
+  const updateFormData = (name: string, value: any) => {
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setFormData(prev => ({
@@ -213,9 +339,9 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     }
   };
 
-  // --- ADDED: Handler for Country Code + Phone Number updates ---
+  // Handler for Country Code + Phone Number updates
   const handlePhoneCompositeChange = (
-    fullFieldName: string, // e.g., 'whatsappOrderNumber' or 'createContactDto.phone'
+    fullFieldName: string,
     currentFullValue: string | null,
     partType: 'code' | 'number',
     newValue: string
@@ -230,13 +356,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
       newFullNumber = code + newValue;
     }
 
-    // Reuse the existing input change logic by creating a synthetic event
-    handleInputChange({
-      target: {
-        name: fullFieldName,
-        value: newFullNumber
-      }
-    } as React.ChangeEvent<HTMLInputElement>);
+    updateFormData(fullFieldName, newFullNumber);
   };
 
   const handleWorkingHourChange = (dayIndex: number, field: keyof CreateBranchWorkingHourCoreDto, value: any) => {
@@ -717,25 +837,21 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('branchManagement.form.whatsappNumber')}
                     </label>
-                    {/* --- CHANGED: Split Phone Input (Code Selector + Input) --- */}
-                    <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <select
-                        title='Country Code'
-                        value={getPhoneParts(formData.whatsappOrderNumber).code}
-                        onChange={(e) => handlePhoneCompositeChange(
-                          'whatsappOrderNumber', 
-                          formData.whatsappOrderNumber, 
-                          'code', 
-                          e.target.value
-                        )}
-                        className="w-1/3 md:w-1/4 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
-                      >
-                        {countriesWithCodes.map((country) => (
-                          <option key={country.code + country.name} value={country.code}>
-                            {country.name} ({country.code})
-                          </option>
-                        ))}
-                      </select>
+                    {/* Responsive Phone Input for Whatsapp */}
+                    <div className={`flex flex-col sm:flex-row gap-2 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                      <div className="w-full sm:w-1/3 md:w-1/4">
+                        <CustomSelect
+                          options={countryCodeOptions}
+                          value={getPhoneParts(formData.whatsappOrderNumber).code}
+                          onChange={(newCode) => handlePhoneCompositeChange(
+                            'whatsappOrderNumber',
+                            formData.whatsappOrderNumber,
+                            'code',
+                            newCode
+                          )}
+                          placeholder="Code"
+                        />
+                      </div>
                       <input
                         type="tel"
                         value={getPhoneParts(formData.whatsappOrderNumber).number}
@@ -745,7 +861,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                           'number', 
                           e.target.value
                         )}
-                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+                        className="w-full sm:flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors text-base"
                         placeholder={t('branchManagement.form.whatsappPlaceholder')}
                       />
                     </div>
@@ -835,36 +951,17 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
               {activeTab === 'address' && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                    <div className="relative">
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {t('branchManagement.form.country')}
                       </label>
-                      <div className="relative">
-                        <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10`} />
-                        <select
-                        title='Country'
-                          name="createAddressDto.country"
-                          value={formData.createAddressDto.country || ''}
-                          onChange={handleInputChange}
-                          className={`w-full ${isRTL ? 'pr-10 pl-8' : 'pl-10 pr-8'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
-                          dir={isRTL ? 'rtl' : 'ltr'}
-                        >
-                          <option value="" disabled>
-                            {t('branchManagement.form.countryPlaceholder')}
-                          </option>
-                          {countryKeys.map((countryKey) => (
-                            <option key={countryKey} value={t(countryKey)}>
-                              {t(countryKey)}
-                            </option>
-                          ))}
-                        </select>
-                        {/* Custom dropdown arrow */}
-                        <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
-                      </div>
+                      <CustomSelect
+                        options={countryNameOptions}
+                        value={formData.createAddressDto.country || ''}
+                        onChange={(val) => updateFormData('createAddressDto.country', val)}
+                        placeholder={t('branchManagement.form.countryPlaceholder')}
+                        icon={<Globe className="w-4 h-4 text-gray-400" />}
+                      />
                     </div>
 
                     <div>
@@ -950,25 +1047,21 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {t('branchManagement.form.phone')}
                       </label>
-                      {/* --- CHANGED: Split Phone Input for Contact Phone as well --- */}
-                      <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <select
-                          title='Country Code'
-                          value={getPhoneParts(formData.createContactDto.phone).code}
-                          onChange={(e) => handlePhoneCompositeChange(
-                            'createContactDto.phone', 
-                            formData.createContactDto.phone, 
-                            'code', 
-                            e.target.value
-                          )}
-                          className="w-1/3 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors"
-                        >
-                          {countriesWithCodes.map((country) => (
-                            <option key={country.code + country.name} value={country.code}>
-                              {country.name} ({country.code})
-                            </option>
-                          ))}
-                        </select>
+                      {/* Responsive Phone Input for Contact Phone */}
+                      <div className={`flex flex-col sm:flex-row gap-2 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                        <div className="w-full sm:w-1/3">
+                          <CustomSelect
+                            options={countryCodeOptions}
+                            value={getPhoneParts(formData.createContactDto.phone).code}
+                            onChange={(newCode) => handlePhoneCompositeChange(
+                              'createContactDto.phone',
+                              formData.createContactDto.phone,
+                              'code',
+                              newCode
+                            )}
+                            placeholder="Code"
+                          />
+                        </div>
                         <input
                           type="tel"
                           value={getPhoneParts(formData.createContactDto.phone).number}
@@ -978,7 +1071,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                             'number', 
                             e.target.value
                           )}
-                          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+                          className="w-full sm:flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors text-base"
                           placeholder={t('branchManagement.form.phonePlaceholder')}
                         />
                       </div>

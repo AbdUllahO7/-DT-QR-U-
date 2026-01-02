@@ -134,7 +134,7 @@ const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {/* Language Selector - Hidden on mobile, shown on sm+ */}
-            <div className="hidden sm:block">
+            <div className="sm:block">
               <LanguageSelector variant="navbar" />
             </div>
 
