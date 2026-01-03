@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Building2, AlertTriangle, Plus, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
-import { 
-  BranchInfo, 
-  CreateBranchWithDetailsDto, 
+import {
+  BranchInfo,
+  CreateBranchWithDetailsDto,
   CreateBranchWorkingHourCoreDto,
   BranchDetailResponse,
 } from '../../../../types/api';
@@ -18,9 +18,13 @@ import { logger } from '../../../../utils/logger';
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 import { useNavigate } from 'react-router-dom';
 import { purgeService } from '../../../../services/purge/PurgeService';
+import { useTranslatableFields, TranslatableFieldValue } from '../../../../hooks/useTranslatableFields';
+import { branchTranslationService } from '../../../../services/Translations/BranchTranslationService';
+import { contactTranslationService } from '../../../../services/Translations/ContactTranslationService';
 
 const BranchManagement: React.FC = () => {
   const { t, isRTL } = useLanguage();
+  const translationHook = useTranslatableFields();
   const [branches, setBranches] = useState<BranchInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string>("");
@@ -29,7 +33,23 @@ const BranchManagement: React.FC = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingBranch, setEditingBranch] = useState<BranchDetailResponse | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  // Supported languages
+  const supportedLanguages = [
+    { code: 'en', displayName: 'English', nativeName: 'English', isRtl: false },
+    { code: 'tr', displayName: 'Turkish', nativeName: 'Türkçe', isRtl: false },
+    { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', isRtl: true }
+  ];
+
+  // Translation state for create branch
+  const [branchNameTranslations, setBranchNameTranslations] = useState<TranslatableFieldValue>({});
+  const [contactHeaderTranslations, setContactHeaderTranslations] = useState<TranslatableFieldValue>({});
+  const [footerTitleTranslations, setFooterTitleTranslations] = useState<TranslatableFieldValue>({});
+  const [footerDescriptionTranslations, setFooterDescriptionTranslations] = useState<TranslatableFieldValue>({});
+  const [openTitleTranslations, setOpenTitleTranslations] = useState<TranslatableFieldValue>({});
+  const [openDaysTranslations, setOpenDaysTranslations] = useState<TranslatableFieldValue>({});
+  const [openHoursTranslations, setOpenHoursTranslations] = useState<TranslatableFieldValue>({});
   
   // Delete confirmation modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -187,7 +207,7 @@ const BranchManagement: React.FC = () => {
     setHasChanges(true);
   };
 
-  const handleSubmit = async (data: CreateBranchWithDetailsDto) => {
+  const handleSubmit = async (data: CreateBranchWithDetailsDto): Promise<void> => {
     setIsSubmitting(true);
     setError('');
     setValidationErrors(null);
@@ -234,13 +254,76 @@ const BranchManagement: React.FC = () => {
       if (isEditMode && editingBranch) {
         await branchService.updateBranch(editingBranch.branchId, transformedData);
         logger.info('Branch successfully updated', { branchId: editingBranch.branchId }, { prefix: 'BranchManagement' });
+        // Note: BranchEditModal will handle translation saving and closing
+        // Don't call handleCloseModal here for edit mode
       } else {
-        await branchService.createBranch(transformedData);
-        logger.info('Branch successfully created', null, { prefix: 'BranchManagement' });
+        const result = await branchService.createBranch(transformedData);
+        logger.info('Branch successfully created', result, { prefix: 'BranchManagement' });
+
+        // Save translations for newly created branch
+        if (result && result.branchId) {
+          try {
+            // Save branch name translations
+            const branchTranslationData = Object.keys(branchNameTranslations)
+              .filter(lang => lang !== 'en' && branchNameTranslations[lang])
+              .map(languageCode => ({
+                branchId: result.branchId,
+                languageCode,
+                branchName: branchNameTranslations[languageCode] || undefined,
+                description: undefined,
+                address: undefined
+              }));
+
+            if (branchTranslationData.length > 0) {
+              await branchTranslationService.batchUpsertBranchTranslations({
+                translations: branchTranslationData
+              });
+              logger.info('Branch translations saved for new branch', null, { prefix: 'BranchManagement' });
+            }
+
+            // Save contact translations (if the branch creation returned contact info)
+            // We'll need to fetch the branch details to get the contact ID
+            const branchDetails = await branchService.getBranchById(result.branchId);
+            if (branchDetails && branchDetails.contact?.contactId) {
+              const contactTranslationData = Object.keys(contactHeaderTranslations)
+                .filter(lang => lang !== 'en')
+                .filter(lang =>
+                  contactHeaderTranslations[lang] ||
+                  footerTitleTranslations[lang] ||
+                  footerDescriptionTranslations[lang] ||
+                  openTitleTranslations[lang] ||
+                  openDaysTranslations[lang] ||
+                  openHoursTranslations[lang]
+                )
+                .map(languageCode => ({
+                  contactId: branchDetails.contact!.contactId,
+                  languageCode,
+                  contactHeader: contactHeaderTranslations[languageCode] || undefined,
+                  footerTitle: footerTitleTranslations[languageCode] || undefined,
+                  footerDescription: footerDescriptionTranslations[languageCode] || undefined,
+                  openTitle: openTitleTranslations[languageCode] || undefined,
+                  openDays: openDaysTranslations[languageCode] || undefined,
+                  openHours: openHoursTranslations[languageCode] || undefined
+                }));
+
+              if (contactTranslationData.length > 0) {
+                await contactTranslationService.batchUpsertContactTranslations(
+                  { translations: contactTranslationData },
+                  result.branchId
+                );
+                logger.info('Contact translations saved for new branch', null, { prefix: 'BranchManagement' });
+              }
+            }
+          } catch (translationError) {
+            logger.error('Failed to save translations for new branch', translationError, { prefix: 'BranchManagement' });
+            // Don't fail the whole operation
+          }
+        }
+
+        // For create mode, close modal and refresh
+        await fetchBranches();
+        handleCloseModal();
       }
-      
-      await fetchBranches();
-      handleCloseModal();
     } catch (err: any) {
       logger.error('Error submitting branch:', err, { prefix: 'BranchManagement' });
 
@@ -459,6 +542,15 @@ const BranchManagement: React.FC = () => {
     setEditingBranch(null);
     setFormData(getEmptyFormData());
     setHasChanges(false);
+
+    // Reset translation state
+    setBranchNameTranslations({});
+    setContactHeaderTranslations({});
+    setFooterTitleTranslations({});
+    setFooterDescriptionTranslations({});
+    setOpenTitleTranslations({});
+    setOpenDaysTranslations({});
+    setOpenHoursTranslations({});
   };
 
   const handleToggleTemporaryClose = async (branchId: number, isTemporarilyClosed: boolean) => {
@@ -656,18 +748,33 @@ const BranchManagement: React.FC = () => {
               onSubmit={handleSubmit}
               branchDetail={editingBranch}
               isSubmitting={isSubmitting}
+              onSuccess={fetchBranches}
             />
           ) : (
-            <BranchModal
+         <BranchModal
               isOpen={isModalOpen}
               onClose={handleCloseModal}
-              onSubmit={handleSubmit}
+              supportedLanguages={supportedLanguages}
+              // Pass Translation States
+              branchNameTranslations={branchNameTranslations}
+              setBranchNameTranslations={setBranchNameTranslations}
+              contactHeaderTranslations={contactHeaderTranslations}
+              setContactHeaderTranslations={setContactHeaderTranslations}
+              footerTitleTranslations={footerTitleTranslations}
+              setFooterTitleTranslations={setFooterTitleTranslations}
+              footerDescriptionTranslations={footerDescriptionTranslations}
+              setFooterDescriptionTranslations={setFooterDescriptionTranslations}
+              openTitleTranslations={openTitleTranslations}
+              setOpenTitleTranslations={setOpenTitleTranslations}
+              openDaysTranslations={openDaysTranslations}
+              setOpenDaysTranslations={setOpenDaysTranslations}
+              openHoursTranslations={openHoursTranslations}
+              setOpenHoursTranslations={setOpenHoursTranslations}
+              // Pass Form Logic
               formData={formData}
               setFormData={setFormData}
+              onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
-              hasChanges={hasChanges}
-              onInputChange={handleInputChange}
-              onWorkingHourChange={handleWorkingHourChange}
             />
           )}
         </>

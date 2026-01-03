@@ -45,6 +45,7 @@ export const tr = {
   filter: {
       status: "Durum",
       all: "Tümü",
+      allergen: "Alerjen",
       active: "Aktif",
       inactive: "Pasif", 
       categories: "Kategoriler",
@@ -2449,7 +2450,8 @@ hero: {
     filter: 'Filtrele',
     sort: 'Sırala',
     newIngredient: 'Yeni Malzeme',
-    
+    clearFilters: 'Tüm Filtreleri Temizle',
+    applyFilters: 'Filtreleri Uygula',
     // Table headers
     ingredientName: 'Malzeme Adı',
     status: 'Durum',

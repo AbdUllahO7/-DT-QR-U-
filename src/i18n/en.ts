@@ -46,6 +46,7 @@ export const en = {
   filter: {
       "status": "Status",
       "all": "All",
+      "allergen": "Allergen",
       "active": "Active", 
       "inactive": "Inactive",
       "categories": "Categories",
@@ -2443,7 +2444,9 @@ hero: {
     filter: 'Filter',
     sort: 'Sort',
     newIngredient: 'New Ingredient',
-    
+    applyFilters: 'Apply Filters',
+    clearFilters: 'Clear All Filters',
+
     // Table headers
     ingredientName: 'Ingredient Name',
     status: 'Status',

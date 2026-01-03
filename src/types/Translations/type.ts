@@ -79,7 +79,7 @@ export interface BatchUpsertBranchProductAddonTranslationsDto {
 // Branch Translations
 export interface BranchTranslation extends Translation {
   branchId: number;
-  name?: string;
+  branchName?: string;
   description?: string;
   address?: string;
 }
@@ -87,7 +87,7 @@ export interface BranchTranslation extends Translation {
 export interface UpsertBranchTranslationDto {
   branchId: number;
   languageCode: string;
-  name?: string;
+  branchName?: string;
   description?: string;
   address?: string;
 }
@@ -119,6 +119,12 @@ export interface ContactTranslation extends Translation {
   contactId: number;
   title?: string;
   content?: string;
+  contactHeader?: string;
+  footerTitle?: string;
+  footerDescription?: string;
+  openTitle?: string;
+  openDays?: string;
+  openHours?: string;
 }
 
 export interface UpsertContactTranslationDto {
@@ -126,6 +132,12 @@ export interface UpsertContactTranslationDto {
   languageCode: string;
   title?: string;
   content?: string;
+  contactHeader?: string;
+  footerTitle?: string;
+  footerDescription?: string;
+  openTitle?: string;
+  openDays?: string;
+  openHours?: string;
 }
 
 export interface BatchUpsertContactTranslationsDto {

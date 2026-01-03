@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  X, Building2, MapPin, Phone, Clock, Upload, Trash2, 
-  Image as ImageIcon, AlertTriangle, Globe, Navigation, 
-  ChevronDown, Search, Check 
+import {
+  X, Building2, MapPin, Phone, Clock, Upload, Trash2,
+  Image as ImageIcon, AlertTriangle, Globe, Navigation,
+  ChevronDown, Search, Check
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import {
@@ -18,6 +18,11 @@ import { countriesWithCodes, countryKeys } from '../../../../data/mockData';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { MultiLanguageInput } from '../../../common/MultiLanguageInput';
+import { MultiLanguageTextArea } from '../../../common/MultiLanguageTextArea';
+import { useTranslatableFields, TranslatableFieldValue, translationResponseToObject } from '../../../../hooks/useTranslatableFields';
+import { branchTranslationService } from '../../../../services/Translations/BranchTranslationService';
+import { contactTranslationService } from '../../../../services/Translations/ContactTranslationService';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -144,6 +149,7 @@ interface BranchEditModalProps {
   onSubmit: (data: CreateBranchWithDetailsDto) => Promise<void>;
   branchDetail: BranchDetailResponse;
   isSubmitting: boolean;
+  onSuccess?: () => Promise<void>; // Callback to refresh branch list after successful save
 }
 
 const BranchEditModal: React.FC<BranchEditModalProps> = ({
@@ -152,9 +158,20 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
   onSubmit,
   branchDetail,
   isSubmitting,
+  onSuccess,
 }) => {
-  const { t, isRTL } = useLanguage();
-  
+  const { t, isRTL, language: currentLanguage } = useLanguage();
+  const translationHook = useTranslatableFields();
+
+  // Supported languages for MultiLanguageInput
+  const supportedLanguages = [
+    { code: 'en', displayName: 'English', nativeName: 'English', isRtl: false },
+    { code: 'tr', displayName: 'Turkish', nativeName: 'Türkçe', isRtl: false },
+    { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', isRtl: true }
+  ];
+
+  const defaultLanguage = 'en';
+
   const [formData, setFormData] = useState<BranchEditFormData>({
     branchName: '',
     restaurantId: branchDetail.restaurantId,
@@ -197,6 +214,18 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     lat: 41.0082, // Default to Istanbul
     lng: 28.9784
   });
+
+  // Translation state for branch fields
+  const [branchNameTranslations, setBranchNameTranslations] = useState<TranslatableFieldValue>({});
+  const [branchAddressTranslations, setBranchAddressTranslations] = useState<TranslatableFieldValue>({});
+
+  // Translation state for contact fields
+  const [contactHeaderTranslations, setContactHeaderTranslations] = useState<TranslatableFieldValue>({});
+  const [footerTitleTranslations, setFooterTitleTranslations] = useState<TranslatableFieldValue>({});
+  const [footerDescriptionTranslations, setFooterDescriptionTranslations] = useState<TranslatableFieldValue>({});
+  const [openTitleTranslations, setOpenTitleTranslations] = useState<TranslatableFieldValue>({});
+  const [openDaysTranslations, setOpenDaysTranslations] = useState<TranslatableFieldValue>({});
+  const [openHoursTranslations, setOpenHoursTranslations] = useState<TranslatableFieldValue>({});
 
   const defaultWorkingHours: CreateBranchWorkingHourCoreDto[] = [
     { dayOfWeek: 1, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
@@ -247,7 +276,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
   useEffect(() => {
     if (branchDetail && isOpen) {
       logger.info('Initializing form data from branch detail', branchDetail, { prefix: 'BranchEditModal' });
-      
+
       const initialFormData = {
         branchName: branchDetail.branchName || '',
         restaurantId: branchDetail.restaurantId,
@@ -281,13 +310,138 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
             }))
           : defaultWorkingHours,
       };
-      
+
       setFormData(initialFormData);
       setImagePreview(branchDetail.branchLogoPath);
       setHasChanges(false);
       setActiveTab('general');
       setValidationErrors({});
       setUploadError(null);
+
+      // Load branch translations
+      const loadBranchTranslations = async () => {
+        try {
+          const branchTranslations: any = await branchTranslationService.getBranchTranslations(branchDetail.id);
+
+          let nameTranslations: TranslatableFieldValue = {};
+          let addressTranslations: TranslatableFieldValue = {};
+
+          // Check if response is in new format (with baseValues and translations)
+          if (branchTranslations.baseValues && branchTranslations.translations) {
+            nameTranslations = translationResponseToObject(branchTranslations, 'branchName');
+            addressTranslations = translationResponseToObject(branchTranslations, 'address');
+          } else {
+            // Fallback: initialize with base values
+            const languageCodes = supportedLanguages.map((lang: any) => lang.code);
+            nameTranslations = translationHook.getEmptyTranslations(languageCodes);
+            addressTranslations = translationHook.getEmptyTranslations(languageCodes);
+
+            nameTranslations[defaultLanguage] = branchDetail.branchName || '';
+            addressTranslations[defaultLanguage] = `${branchDetail.address?.street || ''}, ${branchDetail.address?.city || ''}`;
+          }
+
+          setBranchNameTranslations(nameTranslations);
+          setBranchAddressTranslations(addressTranslations);
+        } catch (error) {
+          console.error('Failed to load branch translations:', error);
+          const languageCodes = supportedLanguages.map((lang: any) => lang.code);
+          const emptyNameTranslations = translationHook.getEmptyTranslations(languageCodes);
+          const emptyAddressTranslations = translationHook.getEmptyTranslations(languageCodes);
+
+          emptyNameTranslations[defaultLanguage] = branchDetail.branchName || '';
+          emptyAddressTranslations[defaultLanguage] = `${branchDetail.address?.street || ''}, ${branchDetail.address?.city || ''}`;
+
+          setBranchNameTranslations(emptyNameTranslations);
+          setBranchAddressTranslations(emptyAddressTranslations);
+        }
+      };
+
+      // Load contact translations
+      const loadContactTranslations = async () => {
+        if (!branchDetail.contact?.contactId) {
+          const languageCodes = supportedLanguages.map((lang: any) => lang.code);
+          setContactHeaderTranslations(translationHook.getEmptyTranslations(languageCodes));
+          setFooterTitleTranslations(translationHook.getEmptyTranslations(languageCodes));
+          setFooterDescriptionTranslations(translationHook.getEmptyTranslations(languageCodes));
+          setOpenTitleTranslations(translationHook.getEmptyTranslations(languageCodes));
+          setOpenDaysTranslations(translationHook.getEmptyTranslations(languageCodes));
+          setOpenHoursTranslations(translationHook.getEmptyTranslations(languageCodes));
+          return;
+        }
+
+        try {
+          const contactTranslations: any = await contactTranslationService.getContactTranslations(
+            branchDetail.contact.contactId,
+            branchDetail.id
+          );
+
+          let headerTranslations: TranslatableFieldValue = {};
+          let footerTitleTrans: TranslatableFieldValue = {};
+          let footerDescTrans: TranslatableFieldValue = {};
+          let openTitleTrans: TranslatableFieldValue = {};
+          let openDaysTrans: TranslatableFieldValue = {};
+          let openHoursTrans: TranslatableFieldValue = {};
+
+          // Check if response is in new format (with baseValues and translations)
+          if (contactTranslations.baseValues && contactTranslations.translations) {
+            headerTranslations = translationResponseToObject(contactTranslations, 'contactHeader');
+            footerTitleTrans = translationResponseToObject(contactTranslations, 'footerTitle');
+            footerDescTrans = translationResponseToObject(contactTranslations, 'footerDescription');
+            openTitleTrans = translationResponseToObject(contactTranslations, 'openTitle');
+            openDaysTrans = translationResponseToObject(contactTranslations, 'openDays');
+            openHoursTrans = translationResponseToObject(contactTranslations, 'openHours');
+          } else {
+            // Fallback: initialize with base values
+            const languageCodes = supportedLanguages.map((lang: any) => lang.code);
+            headerTranslations = translationHook.getEmptyTranslations(languageCodes);
+            footerTitleTrans = translationHook.getEmptyTranslations(languageCodes);
+            footerDescTrans = translationHook.getEmptyTranslations(languageCodes);
+            openTitleTrans = translationHook.getEmptyTranslations(languageCodes);
+            openDaysTrans = translationHook.getEmptyTranslations(languageCodes);
+            openHoursTrans = translationHook.getEmptyTranslations(languageCodes);
+
+            headerTranslations[defaultLanguage] = branchDetail.contact?.contactHeader || '';
+            footerTitleTrans[defaultLanguage] = branchDetail.contact?.footerTitle || '';
+            footerDescTrans[defaultLanguage] = branchDetail.contact?.footerDescription || '';
+            openTitleTrans[defaultLanguage] = branchDetail.contact?.openTitle || '';
+            openDaysTrans[defaultLanguage] = branchDetail.contact?.openDays || '';
+            openHoursTrans[defaultLanguage] = branchDetail.contact?.openHours || '';
+          }
+
+          setContactHeaderTranslations(headerTranslations);
+          setFooterTitleTranslations(footerTitleTrans);
+          setFooterDescriptionTranslations(footerDescTrans);
+          setOpenTitleTranslations(openTitleTrans);
+          setOpenDaysTranslations(openDaysTrans);
+          setOpenHoursTranslations(openHoursTrans);
+        } catch (error) {
+          console.error('Failed to load contact translations:', error);
+          const languageCodes = supportedLanguages.map((lang: any) => lang.code);
+          const emptyHeaderTrans = translationHook.getEmptyTranslations(languageCodes);
+          const emptyFooterTitleTrans = translationHook.getEmptyTranslations(languageCodes);
+          const emptyFooterDescTrans = translationHook.getEmptyTranslations(languageCodes);
+          const emptyOpenTitleTrans = translationHook.getEmptyTranslations(languageCodes);
+          const emptyOpenDaysTrans = translationHook.getEmptyTranslations(languageCodes);
+          const emptyOpenHoursTrans = translationHook.getEmptyTranslations(languageCodes);
+
+          emptyHeaderTrans[defaultLanguage] = branchDetail.contact?.contactHeader || '';
+          emptyFooterTitleTrans[defaultLanguage] = branchDetail.contact?.footerTitle || '';
+          emptyFooterDescTrans[defaultLanguage] = branchDetail.contact?.footerDescription || '';
+          emptyOpenTitleTrans[defaultLanguage] = branchDetail.contact?.openTitle || '';
+          emptyOpenDaysTrans[defaultLanguage] = branchDetail.contact?.openDays || '';
+          emptyOpenHoursTrans[defaultLanguage] = branchDetail.contact?.openHours || '';
+
+          setContactHeaderTranslations(emptyHeaderTrans);
+          setFooterTitleTranslations(emptyFooterTitleTrans);
+          setFooterDescriptionTranslations(emptyFooterDescTrans);
+          setOpenTitleTranslations(emptyOpenTitleTrans);
+          setOpenDaysTranslations(emptyOpenDaysTrans);
+          setOpenHoursTranslations(emptyOpenHoursTrans);
+        }
+      };
+
+      loadBranchTranslations();
+      loadContactTranslations();
     }
   }, [branchDetail, isOpen]);
 
@@ -487,7 +641,105 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
       logger.info('Submitting branch update data', submitData, { prefix: 'BranchEditModal' });
       await onSubmit(submitData);
       logger.info('Branch update successful', null, { prefix: 'BranchEditModal' });
-      
+
+      // Save branch translations
+      try {
+        logger.info('Starting branch translation save', {
+          branchNameTranslations,
+          branchAddressTranslations,
+          defaultLanguage,
+          branchId: branchDetail.id || branchDetail.branchId
+        }, { prefix: 'BranchEditModal' });
+
+        const branchTranslationData = Object.keys(branchNameTranslations)
+          .filter(lang => {
+            const isNotDefault = lang !== defaultLanguage;
+            const hasValue = branchNameTranslations[lang];
+            logger.info(`Checking language ${lang}`, { isNotDefault, hasValue, value: branchNameTranslations[lang] }, { prefix: 'BranchEditModal' });
+            return isNotDefault && hasValue;
+          })
+          .map(languageCode => ({
+            branchId: branchDetail.id || branchDetail.branchId,
+            languageCode,
+            branchName: branchNameTranslations[languageCode] || undefined,
+            description: undefined,
+            address: branchAddressTranslations[languageCode] || undefined
+          }));
+
+        logger.info('Branch translation data prepared', { count: branchTranslationData.length, data: branchTranslationData }, { prefix: 'BranchEditModal' });
+
+        if (branchTranslationData.length > 0) {
+          logger.info('Calling batchUpsertBranchTranslations', { translations: branchTranslationData }, { prefix: 'BranchEditModal' });
+          await branchTranslationService.batchUpsertBranchTranslations({
+            translations: branchTranslationData
+          });
+          logger.info('Branch translations saved successfully', null, { prefix: 'BranchEditModal' });
+        } else {
+          logger.warn('No branch translations to save', null, { prefix: 'BranchEditModal' });
+        }
+      } catch (translationError) {
+        logger.error('Failed to save branch translations', translationError, { prefix: 'BranchEditModal' });
+        console.error('Branch translation save error:', translationError);
+        // Don't fail the whole operation if translations fail
+      }
+
+      // Save contact translations
+      if (branchDetail.contact?.contactId) {
+        try {
+          logger.info('Starting contact translation save', {
+            contactId: branchDetail.contact.contactId,
+            contactHeaderTranslations,
+            defaultLanguage
+          }, { prefix: 'BranchEditModal' });
+
+          const contactTranslationData = Object.keys(contactHeaderTranslations)
+            .filter(lang => lang !== defaultLanguage)
+            .filter(lang =>
+              contactHeaderTranslations[lang] ||
+              footerTitleTranslations[lang] ||
+              footerDescriptionTranslations[lang] ||
+              openTitleTranslations[lang] ||
+              openDaysTranslations[lang] ||
+              openHoursTranslations[lang]
+            )
+            .map(languageCode => ({
+              contactId: branchDetail.contact!.contactId,
+              languageCode,
+              contactHeader: contactHeaderTranslations[languageCode] || undefined,
+              footerTitle: footerTitleTranslations[languageCode] || undefined,
+              footerDescription: footerDescriptionTranslations[languageCode] || undefined,
+              openTitle: openTitleTranslations[languageCode] || undefined,
+              openDays: openDaysTranslations[languageCode] || undefined,
+              openHours: openHoursTranslations[languageCode] || undefined
+            }));
+
+          logger.info('Contact translation data prepared', { count: contactTranslationData.length, data: contactTranslationData }, { prefix: 'BranchEditModal' });
+
+          if (contactTranslationData.length > 0) {
+            logger.info('Calling batchUpsertContactTranslations', null, { prefix: 'BranchEditModal' });
+            await contactTranslationService.batchUpsertContactTranslations(
+              { translations: contactTranslationData },
+              branchDetail.id || branchDetail.branchId
+            );
+            logger.info('Contact translations saved successfully', null, { prefix: 'BranchEditModal' });
+          } else {
+            logger.warn('No contact translations to save', null, { prefix: 'BranchEditModal' });
+          }
+        } catch (translationError) {
+          logger.error('Failed to save contact translations', translationError, { prefix: 'BranchEditModal' });
+          console.error('Contact translation save error:', translationError);
+          // Don't fail the whole operation if translations fail
+        }
+      } else {
+        logger.warn('No contact found for branch, skipping contact translations', { branchDetail }, { prefix: 'BranchEditModal' });
+      }
+
+      // Refresh branch list and close modal after successful save
+      if (onSuccess) {
+        await onSuccess();
+      }
+      onClose();
+
     } catch (error: any) {
       logger.error('Branch update failed', error, { prefix: 'BranchEditModal' });
       
@@ -810,20 +1062,18 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
               {activeTab === 'general' && (
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {t('branchManagement.form.branchName')} *
-                    </label>
-                    <input
-                      type="text"
-                      name="branchName"
-                      value={formData.branchName}
-                      onChange={handleInputChange}
-                      className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 transition-colors bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${
-                        validationErrors.branchName 
-                          ? 'border-red-300 dark:border-red-600 focus:ring-red-500' 
-                          : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500'
-                      }`}
+                    <MultiLanguageInput
+                      label={t('branchManagement.form.branchName') + ' *'}
+                      value={branchNameTranslations}
+                      onChange={(newTranslations) => {
+                        setBranchNameTranslations(newTranslations);
+                        // Update formData with the current language value
+                        const currentValue = newTranslations[currentLanguage] || newTranslations[defaultLanguage] || '';
+                        updateFormData('branchName', currentValue);
+                      }}
+                      languages={supportedLanguages}
                       placeholder={t('branchManagement.form.branchNamePlaceholder')}
+                      required={true}
                     />
                     {validationErrors.branchName && (
                       <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
@@ -1118,88 +1368,89 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {t('branchManagement.form.contactHeader')}
-                    </label>
-                    <input
-                      type="text"
-                      name="createContactDto.contactHeader"
-                      value={formData.createContactDto.contactHeader || ''}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+                    <MultiLanguageInput
+                      label={t('branchManagement.form.contactHeader')}
+                      value={contactHeaderTranslations}
+                      onChange={(newTranslations) => {
+                        setContactHeaderTranslations(newTranslations);
+                        const currentValue = newTranslations[currentLanguage] || newTranslations[defaultLanguage] || '';
+                        updateFormData('createContactDto.contactHeader', currentValue);
+                      }}
+                      languages={supportedLanguages}
                       placeholder={t('branchManagement.form.contactHeaderPlaceholder')}
                     />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {t('branchManagement.form.footerTitle')}
-                      </label>
-                      <input
-                        type="text"
-                        name="createContactDto.footerTitle"
-                        value={formData.createContactDto.footerTitle || ''}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+                      <MultiLanguageInput
+                        label={t('branchManagement.form.footerTitle')}
+                        value={footerTitleTranslations}
+                        onChange={(newTranslations) => {
+                          setFooterTitleTranslations(newTranslations);
+                          const currentValue = newTranslations[currentLanguage] || newTranslations[defaultLanguage] || '';
+                          updateFormData('createContactDto.footerTitle', currentValue);
+                        }}
+                        languages={supportedLanguages}
                         placeholder={t('branchManagement.form.footerTitlePlaceholder')}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {t('branchManagement.form.openTitle')}
-                      </label>
-                      <input
-                        type="text"
-                        name="createContactDto.openTitle"
-                        value={formData.createContactDto.openTitle || ''}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+                      <MultiLanguageInput
+                        label={t('branchManagement.form.openTitle')}
+                        value={openTitleTranslations}
+                        onChange={(newTranslations) => {
+                          setOpenTitleTranslations(newTranslations);
+                          const currentValue = newTranslations[currentLanguage] || newTranslations[defaultLanguage] || '';
+                          updateFormData('createContactDto.openTitle', currentValue);
+                        }}
+                        languages={supportedLanguages}
                         placeholder={t('branchManagement.form.openTitlePlaceholder')}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {t('branchManagement.form.footerDescription')}
-                    </label>
-                    <textarea
-                      name="createContactDto.footerDescription"
-                      value={formData.createContactDto.footerDescription || ''}
-                      onChange={handleInputChange}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors resize-none"
+                    <MultiLanguageTextArea
+                      label={t('branchManagement.form.footerDescription')}
+                      value={footerDescriptionTranslations}
+                      onChange={(newTranslations) => {
+                        setFooterDescriptionTranslations(newTranslations);
+                        const currentValue = newTranslations[currentLanguage] || newTranslations[defaultLanguage] || '';
+                        updateFormData('createContactDto.footerDescription', currentValue);
+                      }}
+                      languages={supportedLanguages}
                       placeholder={t('branchManagement.form.footerDescriptionPlaceholder')}
+                      rows={3}
                     />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {t('branchManagement.form.openDays')}
-                      </label>
-                      <input
-                        type="text"
-                        name="createContactDto.openDays"
-                        value={formData.createContactDto.openDays || ''}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+                      <MultiLanguageInput
+                        label={t('branchManagement.form.openDays')}
+                        value={openDaysTranslations}
+                        onChange={(newTranslations) => {
+                          setOpenDaysTranslations(newTranslations);
+                          const currentValue = newTranslations[currentLanguage] || newTranslations[defaultLanguage] || '';
+                          updateFormData('createContactDto.openDays', currentValue);
+                        }}
+                        languages={supportedLanguages}
                         placeholder={t('branchManagement.form.openDaysPlaceholder')}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {t('branchManagement.form.openHours')}
-                      </label>
-                      <input
-                        type="text"
-                        name="createContactDto.openHours"
-                        value={formData.createContactDto.openHours || ''}
-                        onChange={handleInputChange}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+                      <MultiLanguageInput
+                        label={t('branchManagement.form.openHours')}
+                        value={openHoursTranslations}
+                        onChange={(newTranslations) => {
+                          setOpenHoursTranslations(newTranslations);
+                          const currentValue = newTranslations[currentLanguage] || newTranslations[defaultLanguage] || '';
+                          updateFormData('createContactDto.openHours', currentValue);
+                        }}
+                        languages={supportedLanguages}
                         placeholder={t('branchManagement.form.openHoursPlaceholder')}
                       />
                     </div>

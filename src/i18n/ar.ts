@@ -45,6 +45,7 @@ export const ar = {
   filter: {
       "status": "الحالة",
       "all": "الكل",
+      "allergen": "مسبب الحساسية",
       "active": "نشط",
       "inactive": "غير نشط",
       "categories": "الفئات",
@@ -65,7 +66,6 @@ export const ar = {
       "asc": "الاسم (أ-ي)",
       "desc": "الاسم (ي-أ)"
     },
-    "ar": {
     "status": {
       "label": "الحالة",
       "asc": "الحالة (أ-ي)",
@@ -75,8 +75,7 @@ export const ar = {
       "label": "مسببات الحساسية",
       "asc": "المسببات (أ-ي)",
       "desc": "المسببات (ي-أ)"
-    }
-  },
+    },
     "price": {
       "asc": "السعر (من الأقل إلى الأعلى)",
       "desc": "السعر (من الأعلى إلى الأقل)"
@@ -2444,8 +2443,9 @@ contact: {
     searchPlaceholder: 'البحث عن المكونات...',
     filter: 'تصفية',
     sort: 'ترتيب',
+    applyFilters: 'تطبيق الفلاتر',
     newIngredient: 'مكون جديد',
-    
+    clearFilters: 'مسح جميع الفلاتر',
     // Table headers
     ingredientName: 'اسم المكون',
     status: 'الحالة',

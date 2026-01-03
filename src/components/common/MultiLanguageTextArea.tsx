@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, Check } from 'lucide-react';
+import { ChevronDown, Check, Copy } from 'lucide-react';
 import { TranslatableFieldValue } from '../../hooks/useTranslatableFields';
 
 interface LanguageOption {
@@ -21,6 +21,7 @@ interface MultiLanguageTextAreaProps {
   disabled?: boolean;
   className?: string;
   rows?: number;
+  defaultLanguage?: string;
 }
 
 export const MultiLanguageTextArea: React.FC<MultiLanguageTextAreaProps> = ({
@@ -34,6 +35,7 @@ export const MultiLanguageTextArea: React.FC<MultiLanguageTextAreaProps> = ({
   disabled = false,
   className = '',
   rows = 3,
+  defaultLanguage = 'en',
 }) => {
   const { t } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState(languages[0]?.code || '');
@@ -46,6 +48,16 @@ export const MultiLanguageTextArea: React.FC<MultiLanguageTextAreaProps> = ({
     });
   };
 
+  const handleCopyFromDefault = () => {
+    const defaultValue = value[defaultLanguage];
+    if (defaultValue && selectedLanguage !== defaultLanguage) {
+      onChange({
+        ...value,
+        [selectedLanguage]: defaultValue,
+      });
+    }
+  };
+
   const isLanguageRequired = (langCode: string) => {
     return requiredLanguages.includes(langCode) || (required && langCode === languages[0]?.code);
   };
@@ -55,6 +67,7 @@ export const MultiLanguageTextArea: React.FC<MultiLanguageTextAreaProps> = ({
   };
 
   const currentLanguage = languages.find(lang => lang.code === selectedLanguage);
+  const defaultLangName = languages.find(lang => lang.code === defaultLanguage)?.displayName || 'Default';
 
   if (languages.length === 0) {
     return null;
@@ -96,7 +109,7 @@ export const MultiLanguageTextArea: React.FC<MultiLanguageTextAreaProps> = ({
             {languages.map((lang) => {
               const isActive = selectedLanguage === lang.code;
               const error = hasError(lang.code);
-              const hasValue = value[lang.code] && !error;
+              const hasValue = value[lang.code] && value[lang.code].trim() !== '';
 
               return (
                 <button
@@ -120,8 +133,9 @@ export const MultiLanguageTextArea: React.FC<MultiLanguageTextAreaProps> = ({
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {error && <span className="text-xs text-red-500 dark:text-red-400">⚠</span>}
-                    {!error && hasValue && !isActive && <span className="text-xs text-green-500 dark:text-green-400">✓</span>}
+                    {error && <span className="text-xs text-red-500 dark:text-red-400">⚠ Required</span>}
+                    {!error && hasValue && <span className="text-xs text-green-500 dark:text-green-400">✓ Filled</span>}
+                    {!error && !hasValue && lang.code !== defaultLanguage && <span className="text-xs text-gray-400 dark:text-gray-500">Empty</span>}
                     {isActive && <Check className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
                   </div>
                 </button>
@@ -132,16 +146,25 @@ export const MultiLanguageTextArea: React.FC<MultiLanguageTextAreaProps> = ({
 
         {/* Text Area Input */}
         <div className="p-3 bg-white dark:bg-gray-800">
-           {isLanguageRequired(selectedLanguage) && (
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                {currentLanguage?.displayName} ({currentLanguage?.nativeName})
-              </span>
+          <div className="flex items-center justify-between mb-2">
+            {isLanguageRequired(selectedLanguage) && (
               <span className="text-xs text-red-500 dark:text-red-400">
-                {t('multiLanguage.required', 'Required')}
+                {t('multiLanguage.required')}
               </span>
-            </div>
-          )}
+            )}
+            {/* Copy from Default Language Button */}
+            {selectedLanguage !== defaultLanguage && value[defaultLanguage] && (
+              <button
+                type="button"
+                onClick={handleCopyFromDefault}
+                disabled={disabled}
+                className="ml-auto flex items-center gap-1 px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Copy className="w-3 h-3" />
+                Copy from {defaultLangName}
+              </button>
+            )}
+          </div>
           <textarea
             rows={rows}
             value={value[selectedLanguage] || ''}
