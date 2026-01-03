@@ -1043,7 +1043,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
           <div className="px-6 pt-4 pb-2">
             <LanguageFormControl
               languages={supportedLanguages}
-                      selectedLanguage={selectedFormLanguage}
+              selectedLanguage={selectedFormLanguage}
               onLanguageChange={setSelectedFormLanguage}
               defaultLanguage={defaultLanguage}
               showBulkFill={true}
@@ -1127,8 +1127,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                         updateFormData('branchName', currentValue);
                       }}
                       languages={supportedLanguages}
-                      selectedLanguage={selectedFormLanguage}
-                      showLanguageSelector={false}
                       placeholder={t('branchManagement.form.branchNamePlaceholder')}
                       required={true}
                     />
@@ -1434,8 +1432,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                         updateFormData('createContactDto.contactHeader', currentValue);
                       }}
                       languages={supportedLanguages}
-                      selectedLanguage={selectedFormLanguage}
-                      showLanguageSelector={false}
                       placeholder={t('branchManagement.form.contactHeaderPlaceholder')}
                     />
                   </div>
@@ -1451,8 +1447,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                           updateFormData('createContactDto.footerTitle', currentValue);
                         }}
                         languages={supportedLanguages}
-                      selectedLanguage={selectedFormLanguage}
-                      showLanguageSelector={false}
                         placeholder={t('branchManagement.form.footerTitlePlaceholder')}
                       />
                     </div>
@@ -1467,8 +1461,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                           updateFormData('createContactDto.openTitle', currentValue);
                         }}
                         languages={supportedLanguages}
-                      selectedLanguage={selectedFormLanguage}
-                      showLanguageSelector={false}
                         placeholder={t('branchManagement.form.openTitlePlaceholder')}
                       />
                     </div>
@@ -1484,8 +1476,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                         updateFormData('createContactDto.footerDescription', currentValue);
                       }}
                       languages={supportedLanguages}
-                      selectedLanguage={selectedFormLanguage}
-                      showLanguageSelector={false}
                       placeholder={t('branchManagement.form.footerDescriptionPlaceholder')}
                       rows={3}
                     />
@@ -1502,8 +1492,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                           updateFormData('createContactDto.openDays', currentValue);
                         }}
                         languages={supportedLanguages}
-                      selectedLanguage={selectedFormLanguage}
-                      showLanguageSelector={false}
                         placeholder={t('branchManagement.form.openDaysPlaceholder')}
                       />
                     </div>
@@ -1518,8 +1506,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                           updateFormData('createContactDto.openHours', currentValue);
                         }}
                         languages={supportedLanguages}
-                      selectedLanguage={selectedFormLanguage}
-                      showLanguageSelector={false}
                         placeholder={t('branchManagement.form.openHoursPlaceholder')}
                       />
                     </div>

@@ -31,6 +31,48 @@ export const translationsToObject = <T extends { languageCode: string }>(
 };
 
 /**
+ * Translation response format from server with baseValues and translations array
+ */
+export interface TranslationResponse<T> {
+  baseValues: T & { originalLanguage: string };
+  translations: Array<{ languageCode: string } & Partial<T>>;
+}
+
+/**
+ * Convert new translation response format to object format for multi-language inputs
+ * This handles the new format where server returns { baseValues: {..., originalLanguage}, translations: [...] }
+ * @param response - Translation response from API with baseValues and translations
+ * @param fieldName - Name of the field to extract (e.g., 'categoryName', 'name', 'description')
+ * @returns Object mapping language codes to values
+ */
+export const translationResponseToObject = <T extends Record<string, any>>(
+  response: TranslationResponse<T>,
+  fieldName: keyof T
+): TranslatableFieldValue => {
+  const result: Record<string, string> = {};
+
+  // Add the base value with its original language
+  if (response.baseValues && response.baseValues.originalLanguage) {
+    const baseValue = response.baseValues[fieldName as keyof typeof response.baseValues];
+    if (baseValue !== undefined && baseValue !== null) {
+      result[response.baseValues.originalLanguage] = String(baseValue);
+    }
+  }
+
+  // Add all translations
+  if (response.translations && Array.isArray(response.translations)) {
+    response.translations.forEach((translation) => {
+      const value = translation[fieldName as keyof typeof translation];
+      if (value !== undefined && value !== null && translation.languageCode) {
+        result[translation.languageCode] = String(value);
+      }
+    });
+  }
+
+  return result;
+};
+
+/**
  * Convert object format back to array of translations for API
  * @param values - Object mapping language codes to values
  * @param entityId - ID of the entity (productId, categoryId, etc.)

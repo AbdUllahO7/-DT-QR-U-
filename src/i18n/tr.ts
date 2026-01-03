@@ -45,6 +45,7 @@ export const tr = {
   filter: {
       status: "Durum",
       all: "Tümü",
+      allergen: "Alerjen",
       active: "Aktif",
       inactive: "Pasif", 
       categories: "Kategoriler",
@@ -2449,7 +2450,8 @@ hero: {
     filter: 'Filtrele',
     sort: 'Sırala',
     newIngredient: 'Yeni Malzeme',
-    
+    clearFilters: 'Tüm Filtreleri Temizle',
+    applyFilters: 'Filtreleri Uygula',
     // Table headers
     ingredientName: 'Malzeme Adı',
     status: 'Durum',
@@ -5754,6 +5756,8 @@ categoryConfigModal: {
   multiLanguage: {
     noLanguagesConfigured: 'Dil yapılandırılmamış. Lütfen tercihlerden dilleri yapılandırın.',
     required: 'Gerekli',
+    currentLanguage: 'Mevcut Dil',
+    quickFill: 'Hızlı Doldurma',
     fieldRequired: 'Bu alan gereklidir'
   },
   RestaurantPreferencesTab: {

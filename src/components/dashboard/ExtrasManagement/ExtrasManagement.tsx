@@ -8,7 +8,7 @@ import { extraCategoriesService } from '../../../services/Extras/ExtraCategories
 import { extraTranslationService } from '../../../services/Translations/ExtraTranslationService';
 import { extraCategoryTranslationService } from '../../../services/Translations/ExtraCategoryTranslationService';
 import { languageService } from '../../../services/LanguageService';
-import { useTranslatableFields, TranslatableFieldValue, translationsToObject } from '../../../hooks/useTranslatableFields';
+import { useTranslatableFields, TranslatableFieldValue, translationsToObject, translationResponseToObject, TranslationResponse } from '../../../hooks/useTranslatableFields';
 import { ModalType, DeleteConfig } from './types';
 import { Header } from './Header';
 import { CategoryCard } from './CategoryCard';
@@ -521,13 +521,31 @@ export default function ExtrasManagement() {
 
                     // Load existing translations
                     try {
-                      const translations = await extraCategoryTranslationService.getExtraCategoryTranslations(category.id);
-                      const nameTranslationsObj = translationsToObject(translations, 'categoryName');
-                      const descriptionTranslationsObj = translationsToObject(translations, 'description');
+                      const translations: any = await extraCategoryTranslationService.getExtraCategoryTranslations(category.id);
 
-                      // Add base language from the category entity (not from translations table)
-                      nameTranslationsObj[defaultLanguage] = category.categoryName;
-                      descriptionTranslationsObj[defaultLanguage] = category.description || '';
+                      let nameTranslationsObj: TranslatableFieldValue;
+                      let descriptionTranslationsObj: TranslatableFieldValue;
+
+                      // Check if response is in new format (with baseValues and translations)
+                      if (translations.baseValues && translations.translations) {
+                        nameTranslationsObj = translationResponseToObject(translations, 'categoryName');
+                        descriptionTranslationsObj = translationResponseToObject(translations, 'description');
+                      } else if (Array.isArray(translations)) {
+                        // Fallback to old format (array of translations)
+                        nameTranslationsObj = translationsToObject(translations as any[], 'categoryName');
+                        descriptionTranslationsObj = translationsToObject(translations as any[], 'description');
+
+                        // Add base language from the category entity (not from translations table)
+                        nameTranslationsObj[defaultLanguage] = category.categoryName;
+                        descriptionTranslationsObj[defaultLanguage] = category.description || '';
+                      } else {
+                        // If translations is neither new format nor array, initialize empty
+                        const languageCodes = supportedLanguages.map((lang: any) => lang.code);
+                        nameTranslationsObj = translationHook.getEmptyTranslations(languageCodes);
+                        descriptionTranslationsObj = translationHook.getEmptyTranslations(languageCodes);
+                        nameTranslationsObj[defaultLanguage] = category.categoryName;
+                        descriptionTranslationsObj[defaultLanguage] = category.description || '';
+                      }
 
                       setCategoryNameTranslations(nameTranslationsObj);
                       setCategoryDescriptionTranslations(descriptionTranslationsObj);
@@ -557,13 +575,31 @@ export default function ExtrasManagement() {
 
                     // Load existing translations
                     try {
-                      const translations = await extraTranslationService.getExtraTranslations(extra.id);
-                      const nameTranslationsObj = translationsToObject(translations, 'name');
-                      const descriptionTranslationsObj = translationsToObject(translations, 'description');
+                      const translations: any = await extraTranslationService.getExtraTranslations(extra.id);
 
-                      // Add base language from the extra entity (not from translations table)
-                      nameTranslationsObj[defaultLanguage] = extra.name;
-                      descriptionTranslationsObj[defaultLanguage] = extra.description || '';
+                      let nameTranslationsObj: TranslatableFieldValue;
+                      let descriptionTranslationsObj: TranslatableFieldValue;
+
+                      // Check if response is in new format (with baseValues and translations)
+                      if (translations.baseValues && translations.translations) {
+                        nameTranslationsObj = translationResponseToObject(translations, 'name');
+                        descriptionTranslationsObj = translationResponseToObject(translations, 'description');
+                      } else if (Array.isArray(translations)) {
+                        // Fallback to old format (array of translations)
+                        nameTranslationsObj = translationsToObject(translations as any[], 'name');
+                        descriptionTranslationsObj = translationsToObject(translations as any[], 'description');
+
+                        // Add base language from the extra entity (not from translations table)
+                        nameTranslationsObj[defaultLanguage] = extra.name;
+                        descriptionTranslationsObj[defaultLanguage] = extra.description || '';
+                      } else {
+                        // If translations is neither new format nor array, initialize empty
+                        const languageCodes = supportedLanguages.map((lang: any) => lang.code);
+                        nameTranslationsObj = translationHook.getEmptyTranslations(languageCodes);
+                        descriptionTranslationsObj = translationHook.getEmptyTranslations(languageCodes);
+                        nameTranslationsObj[defaultLanguage] = extra.name;
+                        descriptionTranslationsObj[defaultLanguage] = extra.description || '';
+                      }
 
                       setNameTranslations(nameTranslationsObj);
                       setDescriptionTranslations(descriptionTranslationsObj);
