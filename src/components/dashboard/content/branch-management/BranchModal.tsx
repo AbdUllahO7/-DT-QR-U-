@@ -26,6 +26,7 @@ import { TranslatableFieldValue } from '../../../../hooks/useTranslatableFields'
 // --- IMPORT MULTI-LANGUAGE COMPONENTS ---
 import { MultiLanguageInput } from '../../../common/MultiLanguageInput';
 import { MultiLanguageTextArea } from '../../../common/MultiLanguageTextArea';
+import { LanguageFormControl } from '../../../common/LanguageFormControl';
 
 // --- LEAFLET IMPORTS & SETUP ---
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
@@ -117,7 +118,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
   const [branchLogoPreview, setBranchLogoPreview] = useState<string | null>(formData.branchLogoPath || null);
   const [isUploadingLogo, setIsUploadingLogo] = useState<boolean>(false);
   const [isCurrentStepValid, setIsCurrentStepValid] = useState<boolean>(false);
-  const [selectedLanguageForBulkFill, setSelectedLanguageForBulkFill] = useState<string>('');
+  const [selectedFormLanguage, setSelectedFormLanguage] = useState<string>(defaultLanguage);
   
   // --- MAP STATE ---
   const [isMapModalOpen, setIsMapModalOpen] = useState<boolean>(false);
@@ -566,7 +567,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
           {t('branchModal.sections.basicInfo')}
         </h4>
         <div className="space-y-6">
-          
+
           {/* MULTI-LANGUAGE BRANCH NAME */}
           <div>
              <MultiLanguageInput
@@ -593,6 +594,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
                 placeholder={t('branchModal.fields.branchName.placeholder')}
                 required={true}
                 defaultLanguage={defaultLanguage}
+                selectedLanguage={selectedFormLanguage}
+                showLanguageSelector={false}
               />
               {formErrors.branchName && (
                 <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.branchName}</p>
@@ -967,6 +970,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
             languages={supportedLanguages}
             placeholder={t('branchModal.fields.contactHeader.placeholder')}
             defaultLanguage={defaultLanguage}
+            selectedLanguage={selectedFormLanguage}
+            showLanguageSelector={false}
           />
 
           <MultiLanguageInput
@@ -983,6 +988,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
             languages={supportedLanguages}
             placeholder={t('branchModal.fields.footerTitle.placeholder')}
             defaultLanguage={defaultLanguage}
+            selectedLanguage={selectedFormLanguage}
+            showLanguageSelector={false}
           />
 
           <MultiLanguageTextArea
@@ -1000,6 +1007,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
             placeholder={t('branchModal.fields.footerDescription.placeholder')}
             rows={3}
             defaultLanguage={defaultLanguage}
+            selectedLanguage={selectedFormLanguage}
+            showLanguageSelector={false}
           />
 
           <MultiLanguageInput
@@ -1016,6 +1025,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
             languages={supportedLanguages}
             placeholder={t('branchModal.fields.openTitle.placeholder')}
             defaultLanguage={defaultLanguage}
+            selectedLanguage={selectedFormLanguage}
+            showLanguageSelector={false}
           />
 
           <MultiLanguageInput
@@ -1032,6 +1043,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
             languages={supportedLanguages}
             placeholder={t('branchModal.fields.openDays.placeholder')}
             defaultLanguage={defaultLanguage}
+            selectedLanguage={selectedFormLanguage}
+            showLanguageSelector={false}
           />
 
           <MultiLanguageInput
@@ -1048,6 +1061,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
             languages={supportedLanguages}
             placeholder={t('branchModal.fields.openHours.placeholder')}
             defaultLanguage={defaultLanguage}
+            selectedLanguage={selectedFormLanguage}
+            showLanguageSelector={false}
           />
         </div>
       </div>
@@ -1176,44 +1191,13 @@ const BranchModal: React.FC<BranchModalProps> = ({
       <div className="bg-white dark:bg-gray-800 rounded-xl w-full max-w-6xl h-[95vh] flex flex-col">
         <div className="p-6 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <div className="flex-1">
+            <div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                 {t('branchModal.title.add')}
               </h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                 {t('branchModal.subtitle')}
               </p>
-            </div>
-
-            {/* Bulk Fill Language Selector */}
-            <div className="flex items-center gap-3 mr-4">
-              <div className="flex items-center gap-2">
-                <Languages className="w-4 h-4 text-gray-500 dark:text-gray-400" />
-                <select
-                  title="Quick Fill Language Selector"
-                  value={selectedLanguageForBulkFill}
-                  onChange={(e) => {
-                    const targetLang = e.target.value;
-                    setSelectedLanguageForBulkFill(targetLang);
-                    if (targetLang) {
-                      handleBulkFillLanguage(targetLang);
-                      // Reset after filling
-                      setTimeout(() => setSelectedLanguageForBulkFill(''), 100);
-                    }
-                  }}
-                  className="text-sm px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
-                >
-                  <option value="">Quick Fill Language...</option>
-                  {supportedLanguages
-                    .filter(lang => lang.code !== defaultLanguage)
-                    .map(lang => (
-                      <option key={lang.code} value={lang.code}>
-                        Fill {lang.displayName} from English
-                      </option>
-                    ))
-                  }
-                </select>
-              </div>
             </div>
 
             <button
@@ -1282,6 +1266,27 @@ const BranchModal: React.FC<BranchModalProps> = ({
               })}
             </ol>
           </nav>
+        </div>
+
+        {/* Centralized Language Control - Always Visible */}
+        <div className="px-6 pt-4">
+          <LanguageFormControl
+            languages={supportedLanguages}
+            selectedLanguage={selectedFormLanguage}
+            onLanguageChange={setSelectedFormLanguage}
+            defaultLanguage={defaultLanguage}
+            showBulkFill={true}
+            onBulkFill={handleBulkFillLanguage}
+            fieldValues={{
+              branchName: branchNameTranslations,
+              contactHeader: contactHeaderTranslations,
+              footerTitle: footerTitleTranslations,
+              footerDescription: footerDescriptionTranslations,
+              openTitle: openTitleTranslations,
+              openDays: openDaysTranslations,
+              openHours: openHoursTranslations,
+            }}
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">

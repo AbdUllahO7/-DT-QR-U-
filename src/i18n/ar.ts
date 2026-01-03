@@ -5731,6 +5731,8 @@ extrasManagement: {
   multiLanguage: {
     noLanguagesConfigured: 'لم يتم تكوين اللغات. يرجى تكوين اللغات في التفضيلات.',
     required: 'مطلوب',
+    currentLanguage: 'اللغة الحالية',
+    quickFill: 'تعبئة سريعة',
     fieldRequired: 'هذا الحقل مطلوب'
   },
   RestaurantPreferencesTab: {

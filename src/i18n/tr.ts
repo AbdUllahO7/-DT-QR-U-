@@ -5756,6 +5756,8 @@ categoryConfigModal: {
   multiLanguage: {
     noLanguagesConfigured: 'Dil yapılandırılmamış. Lütfen tercihlerden dilleri yapılandırın.',
     required: 'Gerekli',
+    currentLanguage: 'Mevcut Dil',
+    quickFill: 'Hızlı Doldurma',
     fieldRequired: 'Bu alan gereklidir'
   },
   RestaurantPreferencesTab: {

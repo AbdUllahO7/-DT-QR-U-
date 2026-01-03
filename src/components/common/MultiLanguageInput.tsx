@@ -21,7 +21,9 @@ interface MultiLanguageInputProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
-  defaultLanguage?: string; // Add default language prop
+  defaultLanguage?: string;
+  selectedLanguage?: string; // External language control
+  showLanguageSelector?: boolean; // Toggle between old and new mode
 }
 
 export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
@@ -34,11 +36,16 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
   placeholder = '',
   disabled = false,
   className = '',
-  defaultLanguage = 'en', // Default to English
+  defaultLanguage = 'en',
+  selectedLanguage: externalSelectedLanguage,
+  showLanguageSelector = true, // Default to true for backward compatibility
 }) => {
   const { t } = useLanguage();
-  const [selectedLanguage, setSelectedLanguage] = useState(languages[0]?.code || '');
+  const [internalSelectedLanguage, setInternalSelectedLanguage] = useState(languages[0]?.code || '');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Use external language if provided, otherwise use internal state
+  const selectedLanguage = externalSelectedLanguage || internalSelectedLanguage;
 
   const handleInputChange = (languageCode: string, inputValue: string) => {
     onChange({
@@ -79,6 +86,62 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
     );
   }
 
+  // If external language control is used (showLanguageSelector = false), show simplified version
+  if (!showLanguageSelector) {
+    return (
+      <div className={`mb-4 ${className}`}>
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
+        </label>
+
+        <div className="flex items-center justify-between mb-2">
+          {isLanguageRequired(selectedLanguage) && (
+            <span className="text-xs text-red-500 dark:text-red-400">
+              {t('multiLanguage.required')}
+            </span>
+          )}
+          {selectedLanguage !== defaultLanguage && value[defaultLanguage] && (
+            <button
+              type="button"
+              onClick={handleCopyFromDefault}
+              disabled={disabled}
+              className="ml-auto flex items-center gap-1 px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Copy className="w-3 h-3" />
+              Copy from {defaultLangName}
+            </button>
+          )}
+        </div>
+
+        <input
+          type="text"
+          value={value[selectedLanguage] || ''}
+          onChange={(e) => handleInputChange(selectedLanguage, e.target.value)}
+          placeholder={placeholder}
+          disabled={disabled}
+          dir={currentLanguage?.isRtl ? 'rtl' : 'ltr'}
+          className={`
+            w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2
+            bg-white dark:bg-gray-800 text-gray-900 dark:text-white
+            placeholder-gray-400 dark:placeholder-gray-500
+            ${hasError(selectedLanguage)
+              ? 'border-red-300 dark:border-red-600 focus:ring-red-500'
+              : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400'
+            }
+            ${disabled ? 'bg-gray-100 dark:bg-gray-900 cursor-not-allowed opacity-50' : ''}
+          `}
+        />
+        {hasError(selectedLanguage) && (
+          <p className="mt-1 text-xs text-red-500 dark:text-red-400">
+            {t('multiLanguage.fieldRequired')}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  // Original version with language selector
   return (
     <div className={`mb-4 ${className}`}>
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -87,7 +150,7 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
       </label>
 
       <div className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden transition-all duration-200 ease-in-out">
-        
+
         {/* Language Selector Header (Always Visible) */}
         <button
           type="button"
@@ -124,7 +187,7 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
                   key={lang.code}
                   type="button"
                   onClick={() => {
-                    setSelectedLanguage(lang.code);
+                    setInternalSelectedLanguage(lang.code);
                     setIsDropdownOpen(false);
                   }}
                   className={`

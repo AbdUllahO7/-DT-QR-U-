@@ -5733,6 +5733,8 @@ categoryConfigModal: {
   multiLanguage: {
     noLanguagesConfigured: 'No languages configured. Please configure languages in preferences.',
     required: 'Required',
+    quickFill: 'Quick Fill',
+    currentLanguage: 'Current Language',
     fieldRequired: 'This field is required'
   },
   RestaurantPreferencesTab: {
