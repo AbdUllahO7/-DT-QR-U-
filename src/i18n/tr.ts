@@ -2616,6 +2616,7 @@ hero: {
 
   TableCategoryModal: {
     title: 'Masa Alan Ekle',
+    update: 'Masa Alanını Güncelle',
     subtitle: 'Yeni masa Alan oluşturun',
     categoryName: 'Alan Adı',
     addCategoryTitle: 'Yeni Alan Ekle',
@@ -5804,5 +5805,22 @@ categoryConfigModal: {
     loadGeneral: 'Restoran tercihleri yüklenemedi',
     save: 'Restoran tercihleri kaydedilirken hata oluştu'
   }
-}
+},
+  BranchTableModal: {
+    addTitle: 'Yeni Şube Tablosu Ekle',
+    addSubtitle: 'Yeni bir şube tablosu oluşturmak için bilgileri doldurun.',
+    editTitle: 'Şube Tablosunu Düzenle',
+    tableNamePlaceholder: 'Tablo adını girin',
+    capacity: 'Tablo kapasitesini girin',
+    cancel: 'İptal',
+    tableName: 'Tablo Adı',
+    add: 'Ekle',
+    tableNameRequired: 'Tablo adı gereklidir',
+    capacityPlaceholder: 'Tablo kapasitesini girin',
+    saving: 'Kaydediliyor...',
+    status: 'Durum',
+    active: 'Aktif',
+    editSubtitle: 'Mevcut şube tablosu bilgilerini güncellemek için bilgileri doldurun.',
+    update: 'Güncelle'
+  }
 };

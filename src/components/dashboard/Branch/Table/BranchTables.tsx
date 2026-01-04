@@ -28,6 +28,9 @@ import CategorySection from './CategorySection';
 import { CategoryData, TableData } from '../../../../types/BranchManagement/type';
 import { useNavigate } from 'react-router-dom';
 import BranchTableCategoryModal from './BranchTableCategoryModal';
+import BranchTableModal from './BranchTableModal';
+import { tableTranslationService } from '../../../../services/Translations/TableTranslationService';
+import { TranslatableFieldValue } from '../../../../hooks/useTranslatableFields';
 
 export const QRCodeModalShow: React.FC<{
   isOpen: boolean;
@@ -166,6 +169,16 @@ const BranchTableManagement: React.FC<BranchTableManagementProps> = ({ branchId 
   const [showBatchCreate, setShowBatchCreate] = useState<boolean>(false);
   const [batchCreateError, setBatchCreateError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // Category modal state
+  const [editingCategoryForModal, setEditingCategoryForModal] = useState<CategoryData | null>(null);
+  const [isCategoryEditMode, setIsCategoryEditMode] = useState<boolean>(false);
+
+  // Table modal state
+  const [showTableModal, setShowTableModal] = useState<boolean>(false);
+  const [tableModalCategoryId, setTableModalCategoryId] = useState<number>(0);
+  const [editingTableForModal, setEditingTableForModal] = useState<TableData | null>(null);
+  const [isTableEditMode, setIsTableEditMode] = useState<boolean>(false);
 
   const [qrModal, setQrModal] = useState<{
     isOpen: boolean;
@@ -642,6 +655,73 @@ const BranchTableManagement: React.FC<BranchTableManagementProps> = ({ branchId 
     }
   };
 
+  const handleTableModalSubmit = async (
+    categoryId: number,
+    formData: { menuTableName: string; capacity: number; isActive: boolean },
+    translations: TranslatableFieldValue,
+    defaultLanguage: string
+  ): Promise<void> => {
+    try {
+      let tableId: number;
+
+      if (isTableEditMode && editingTableForModal) {
+        // Update existing table
+        const updateDto: UpdateMenuTableDto = {
+          id: editingTableForModal.id,
+          menuTableName: formData.menuTableName,
+          menuTableCategoryId: editingTableForModal.menuTableCategoryId,
+          capacity: formData.capacity,
+          isActive: formData.isActive,
+          isOccupied: editingTableForModal.isOccupied,
+          rowVersion: editingTableForModal.rowVersion || ''
+        };
+
+        await tableService.updateTable(editingTableForModal.id, updateDto);
+        tableId = editingTableForModal.id;
+        setSuccessMessage(t('BranchTableManagement.success.tableUpdated'));
+      } else {
+        // Create new table
+        const createDto: CreateMenuTableDto = {
+          menuTableName: formData.menuTableName,
+          menuTableCategoryId: categoryId,
+          capacity: formData.capacity,
+          displayOrder: getTablesForCategory(categoryId).length,
+          isActive: formData.isActive
+        };
+
+        const result = await tableService.createTable(createDto);
+        tableId = result.id;
+        setSuccessMessage(t('BranchTableManagement.success.tableAdded'));
+      }
+
+      // Save translations (exclude default language)
+      try {
+        const translationData = Object.keys(translations)
+          .filter(lang => lang !== defaultLanguage && translations[lang]) // Exclude default language and empty translations
+          .map(languageCode => ({
+            menuTableId: tableId,
+            languageCode,
+            menuTableName: translations[languageCode]
+          }));
+
+        if (translationData.length > 0) {
+          await tableTranslationService.batchUpsertTableTranslations({
+            translations: translationData
+          });
+        }
+      } catch (error) {
+        console.error('Failed to save table translations:', error);
+        // Don't fail the whole operation if translations fail
+      }
+
+      await fetchTables();
+      await fetchCategories();
+    } catch (error: any) {
+      console.error('Error saving table:', error);
+      throw error; // Re-throw to let the modal handle it
+    }
+  };
+
   const handleShowQRCode = (table: TableData): void => {
     setQrModal({
       isOpen: true,
@@ -828,10 +908,37 @@ const BranchTableManagement: React.FC<BranchTableManagementProps> = ({ branchId 
 
         {/* Category Modal */}
         <BranchTableCategoryModal
-          isOpen={showAddCategory}
-          onClose={() => setShowAddCategory(false)}
+          isOpen={showAddCategory || isCategoryEditMode}
+          onClose={() => {
+            setShowAddCategory(false);
+            setIsCategoryEditMode(false);
+            setEditingCategoryForModal(null);
+          }}
           branchId={0}
-          onSuccess={fetchCategories}
+          onSuccess={async () => {
+            await fetchCategories();
+            await fetchTables();
+          }}
+          editingCategory={editingCategoryForModal}
+          isEditMode={isCategoryEditMode}
+        />
+
+        {/* Table Modal */}
+        <BranchTableModal
+          isOpen={showTableModal}
+          onClose={() => {
+            setShowTableModal(false);
+            setEditingTableForModal(null);
+            setIsTableEditMode(false);
+          }}
+          categoryId={tableModalCategoryId}
+          onSuccess={async () => {
+            await fetchTables();
+            await fetchCategories();
+          }}
+          editingTable={editingTableForModal}
+          isEditMode={isTableEditMode}
+          onSubmit={handleTableModalSubmit}
         />
 
         {/* Batch Create Modal */}
@@ -998,7 +1105,13 @@ const BranchTableManagement: React.FC<BranchTableManagementProps> = ({ branchId 
                 showAddTable={showAddTable}
                 toggleLoading={toggleLoading}
                 onToggleExpansion={toggleCategory}
-                onStartEditing={setEditingCategory}
+                onStartEditing={(categoryId) => {
+                  const category = categories.find(cat => cat.id === categoryId);
+                  if (category) {
+                    setEditingCategoryForModal(category);
+                    setIsCategoryEditMode(true);
+                  }
+                }}
                 onCancelEditing={() => setEditingCategory(null)}
                 onUpdateCategory={handleUpdateCategory}
                 onDeleteCategory={handleDeleteCategory}
@@ -1008,10 +1121,23 @@ const BranchTableManagement: React.FC<BranchTableManagementProps> = ({ branchId 
                     cat.id === categoryId ? { ...cat, ...updatedData } : cat
                   ));
                 }}
-                onShowAddTable={setShowAddTable}
+                onShowAddTable={(categoryId) => {
+                  setTableModalCategoryId(categoryId);
+                  setIsTableEditMode(false);
+                  setEditingTableForModal(null);
+                  setShowTableModal(true);
+                }}
                 onHideAddTable={() => setShowAddTable(null)}
                 onAddTable={handleAddTable}
-                onStartTableEdit={setEditingTable}
+                onStartTableEdit={(tableId) => {
+                  const table = tables.find(t => t.id === tableId);
+                  if (table) {
+                    setEditingTableForModal(table);
+                    setTableModalCategoryId(table.menuTableCategoryId);
+                    setIsTableEditMode(true);
+                    setShowTableModal(true);
+                  }
+                }}
                 onCancelTableEdit={() => setEditingTable(null)}
                 onUpdateTable={handleUpdateTable}
                 onDeleteTable={handleDeleteTable}

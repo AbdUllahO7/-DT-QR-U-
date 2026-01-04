@@ -21,6 +21,7 @@ import { purgeService } from '../../../../services/purge/PurgeService';
 import { useTranslatableFields, TranslatableFieldValue } from '../../../../hooks/useTranslatableFields';
 import { branchTranslationService } from '../../../../services/Translations/BranchTranslationService';
 import { contactTranslationService } from '../../../../services/Translations/ContactTranslationService';
+import { languageService } from '../../../../services/LanguageService';
 
 const BranchManagement: React.FC = () => {
   const { t, isRTL } = useLanguage();
@@ -35,12 +36,9 @@ const BranchManagement: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // Supported languages
-  const supportedLanguages = [
-    { code: 'en', displayName: 'English', nativeName: 'English', isRtl: false },
-    { code: 'tr', displayName: 'Turkish', nativeName: 'Türkçe', isRtl: false },
-    { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', isRtl: true }
-  ];
+  // Supported languages - dynamically loaded
+  const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
+  const [defaultLanguage, setDefaultLanguage] = useState<string>('en');
 
   // Translation state for create branch
   const [branchNameTranslations, setBranchNameTranslations] = useState<TranslatableFieldValue>({});
@@ -105,8 +103,42 @@ const BranchManagement: React.FC = () => {
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
+    const loadLanguages = async () => {
+      try {
+        const languagesData = await languageService.getRestaurantLanguages();
+        console.log("languagesData", languagesData);
+
+        // Deduplicate languages by code
+        const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
+          if (!acc.find((l: any) => l.code === lang.code)) {
+            acc.push(lang);
+          }
+          return acc;
+        }, []);
+
+        console.log("uniqueLanguages", uniqueLanguages);
+        setSupportedLanguages(uniqueLanguages);
+        setDefaultLanguage(languagesData.defaultLanguage || 'en');
+
+        // Initialize empty translations
+        const languageCodes = uniqueLanguages.map((lang: any) => lang.code);
+        setBranchNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setContactHeaderTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setFooterTitleTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setFooterDescriptionTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setOpenTitleTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setOpenDaysTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setOpenHoursTranslations(translationHook.getEmptyTranslations(languageCodes));
+      } catch (error) {
+        console.error('Failed to load languages:', error);
+      }
+    };
+    loadLanguages();
+  }, []);
+
+  useEffect(() => {
     logger.info('BranchManagement component mount oldu', null, { prefix: 'BranchManagement' });
-    
+
     // Token kontrolü
     const token = localStorage.getItem('token');
     if (!token) {
@@ -114,7 +146,7 @@ const BranchManagement: React.FC = () => {
       setError(t('branchManagement.error.sessionExpired'));
       return;
     }
-    
+
     // Restaurant ID kontrolü
     const restaurantId = getRestaurantIdFromToken();
     if (!restaurantId) {
@@ -122,7 +154,7 @@ const BranchManagement: React.FC = () => {
       setError(t('branchManagement.error.restaurantIdNotFound'));
       return;
     }
-    
+
     logger.info(`Restaurant ID: ${restaurantId} ile şube listesi isteniyor`, null, { prefix: 'BranchManagement' });
     fetchBranches();
   }, [t]);
@@ -265,7 +297,7 @@ const BranchManagement: React.FC = () => {
           try {
             // Save branch name translations
             const branchTranslationData = Object.keys(branchNameTranslations)
-              .filter(lang => lang !== 'en' && branchNameTranslations[lang])
+              .filter(lang => lang !== defaultLanguage && branchNameTranslations[lang])
               .map(languageCode => ({
                 branchId: result.branchId,
                 languageCode,
@@ -286,7 +318,7 @@ const BranchManagement: React.FC = () => {
             const branchDetails = await branchService.getBranchById(result.branchId);
             if (branchDetails && branchDetails.contact?.contactId) {
               const contactTranslationData = Object.keys(contactHeaderTranslations)
-                .filter(lang => lang !== 'en')
+                .filter(lang => lang !== defaultLanguage)
                 .filter(lang =>
                   contactHeaderTranslations[lang] ||
                   footerTitleTranslations[lang] ||
@@ -775,6 +807,8 @@ const BranchManagement: React.FC = () => {
               setFormData={setFormData}
               onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
+              onInputChange={handleInputChange}
+              onWorkingHourChange={handleWorkingHourChange}
             />
           )}
         </>
