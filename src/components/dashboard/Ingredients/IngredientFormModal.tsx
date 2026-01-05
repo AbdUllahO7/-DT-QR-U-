@@ -326,7 +326,7 @@ const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
             
             {!collapsedSections.basicInfo && (
               <div className={`${densityPadding[viewDensity]} pt-0`}>
-                <div className={`grid grid-cols-1 md:grid-cols-2 ${densityGap[viewDensity]}`}>
+                <div className={`grid grid-cols-1 md:grid-cols-1 ${densityGap[viewDensity]}`}>
                   
                   {/* Multi Language Input for Name */}
                   <div className="w-full">
