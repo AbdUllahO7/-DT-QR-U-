@@ -1878,8 +1878,8 @@ hero: {
 
       // Counter texts
       counters: {
-        selectedProducts: '{{count}} products selected',
-        availableProducts: '{{count}} available products'
+        selectedProducts: '{count} products selected',
+        availableProducts: '{count} available products'
       },
 
       // Error messages

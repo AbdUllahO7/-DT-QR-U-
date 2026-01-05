@@ -40,7 +40,7 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
   showLanguageSelector = true, // Default to true for backward compatibility
 }) => {
   const { t } = useLanguage();
-  const [internalSelectedLanguage, setInternalSelectedLanguage] = useState(languages[0]?.code || '');
+  const [internalSelectedLanguage, setInternalSelectedLanguage] = useState(defaultLanguage || languages[0]?.code || '');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Use external language if provided, otherwise use internal state

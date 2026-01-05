@@ -75,17 +75,24 @@ interface GetOrderTypesResponse {
 
 class OrderTypeService {
   private baseUrl = '/api/OrderTypes';
-
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
   async getOrderTypes(branchId?: number): Promise<OrderType[]> {
   try {
     // Get effective branch ID (from parameter, localStorage, or token)
     const effectiveBranchId = branchId || getEffectiveBranchId();
+          const language = this.getLanguageFromStorage();
 
     const url = effectiveBranchId ? `${this.baseUrl}?branchId=${effectiveBranchId}` : this.baseUrl;
 
     logger.info('OrderType listesi getirme isteği gönderiliyor', { branchId: effectiveBranchId }, { prefix: 'OrderTypeService' });
-    
-    const response = await httpClient.get<OrderType[] | GetOrderTypesResponse>(url);
+
+    const response = await httpClient.get<OrderType[] | GetOrderTypesResponse>(url, {
+      params: {
+        language
+      }
+    });
     
     logger.info('OrderType API Raw Response:', response, { prefix: 'OrderTypeService' });
     logger.info('OrderType API Response Data:', response.data, { prefix: 'OrderTypeService' });
@@ -135,9 +142,14 @@ class OrderTypeService {
   async getOrderTypesBySessionId(): Promise<OrderType[]> {
     try {
       logger.info('Session OrderType listesi getirme isteği gönderiliyor', { prefix: 'OrderTypeService' });
-      
-      const response = await httpClient.get<OrderType[]>(`${this.baseUrl}/GetOrderTypesBySessionId`);
-      
+            const language = this.getLanguageFromStorage();
+
+      const response = await httpClient.get<OrderType[]>(`${this.baseUrl}/GetOrderTypesBySessionId`, {
+        params: {
+          language
+        }
+      });
+
       logger.info('Session OrderType API Raw Response:', response, { prefix: 'OrderTypeService' });
       logger.info('Session OrderType API Response Data:', response.data, { prefix: 'OrderTypeService' });
       
@@ -189,9 +201,14 @@ class OrderTypeService {
   async getOrderTypesByOnlineSessionId(): Promise<OrderType[]> {
     try {
       logger.info('Online Session OrderType listesi getirme isteği gönderiliyor', { prefix: 'OrderTypeService' });
-      
-      const response = await httpClient.get<OrderType[]>(`/api/OrderTypes/GetOrderTypesByOnlineSessionId`);
-      
+      const language = this.getLanguageFromStorage();
+
+      const response = await httpClient.get<OrderType[]>(`/api/OrderTypes/GetOrderTypesByOnlineSessionId`, {
+        params: {
+          language
+        }
+      });
+
       logger.info('Online Session OrderType API Raw Response:', response, { prefix: 'OrderTypeService' });
       logger.info('Online Session OrderType API Response Data:', response.data, { prefix: 'OrderTypeService' });
       
@@ -244,10 +261,11 @@ class OrderTypeService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
       logger.info('OrderType detay getirme isteği gönderiliyor', { id, branchId }, { prefix: 'OrderTypeService' });
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : { language };
       const response = await httpClient.get<{ data: OrderType }>(`${this.baseUrl}/${id}`, { params });
 
       logger.info('OrderType detayı başarıyla alındı', response.data, { prefix: 'OrderTypeService' });
@@ -421,9 +439,14 @@ class OrderTypeService {
   async getActiveOrderTypesByBranch(branchId: number): Promise<OrderType[]> {
     try {
       logger.info('Branch aktif OrderType listesi getirme isteği gönderiliyor', { branchId }, { prefix: 'OrderTypeService' });
-      
-      const response = await httpClient.get<OrderType[] | GetOrderTypesResponse>(`${this.baseUrl}/branch/${branchId}/active`);
-      
+      const language = this.getLanguageFromStorage();
+
+      const response = await httpClient.get<OrderType[] | GetOrderTypesResponse>(`${this.baseUrl}/branch/${branchId}/active`, {
+        params: {
+          language
+        }
+      });
+
       let orderTypes: OrderType[] = [];
       
       // Handle different response structures

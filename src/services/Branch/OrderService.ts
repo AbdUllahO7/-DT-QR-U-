@@ -44,19 +44,22 @@ class OrderService {
   private readonly CACHE_DURATION = 5 * 60 * 1000; 
   private activeRequests = new Map<string, Promise<any>>();
   private pendingConfigs = new Set<string>(); 
-
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
   async createSessionOrder(data: CreateSessionOrderDto, branchId?: number): Promise<Order> {
     try {
       // Get effective branch ID (from parameter, localStorage, or token)
       const effectiveBranchId = branchId || getEffectiveBranchId();
 
       logger.info('Session order oluşturma isteği gönderiliyor', { data, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+      const language = this.getLanguageFromStorage();
 
       const url = effectiveBranchId
         ? `${this.baseUrl}/from-session?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/from-session`;
 
-      const response = await httpClient.post<Order>(url, data);
+      const response = await httpClient.post<Order>(url, { ...data, language });
 
       logger.info('Session order başarıyla oluşturuldu', {
         orderId: response.data,
@@ -80,8 +83,9 @@ class OrderService {
 
     // Get effective branch ID (from parameter, localStorage, or token)
     const effectiveBranchId = branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
-    const requestKey = `branch-${effectiveBranchId}-${validPage}-${validPageSize}`;
+    const requestKey = `branch-${effectiveBranchId}-${validPage}-${validPageSize}-${language}`;
 
     if (this.pendingConfigs.has(requestKey)) {
       return { orders: [], totalItems: 0, totalPages: 0 };
@@ -152,8 +156,9 @@ class OrderService {
   async getPendingOrders(branchId?: number, page: number = 1, pageSize: number = 10): Promise<{ orders: PendingOrder[], totalItems: number, totalPages: number }> {
     // Get effective branch ID (from parameter, localStorage, or token)
     const effectiveBranchId = branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
-    const requestKey = `pending-${effectiveBranchId}-${page}-${pageSize}`;
+    const requestKey = `pending-${effectiveBranchId}-${page}-${pageSize}-${language}`;
 
     if (this.activeRequests.has(requestKey)) {
       return this.activeRequests.get(requestKey)!;
@@ -210,12 +215,13 @@ class OrderService {
     try {
       // Get effective branch ID (from parameter, localStorage, or token)
       const effectiveBranchId = branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
       logger.info('Table orders getirme isteği gönderiliyor', { tableId, branchId: effectiveBranchId }, { prefix: 'OrderService' });
 
       const url = effectiveBranchId
-        ? `${this.baseUrl}/table/${tableId}?branchId=${effectiveBranchId}`
-        : `${this.baseUrl}/table/${tableId}`;
+        ? `${this.baseUrl}/table/${tableId}?branchId=${effectiveBranchId}&language=${language}`
+        : `${this.baseUrl}/table/${tableId}?language=${language}`;
 
       const response = await httpClient.get<Order[]>(url);
       const orders = Array.isArray(response.data) ? response.data : [];
@@ -237,12 +243,13 @@ class OrderService {
     try {
       // Get effective branch ID (from parameter, localStorage, or token)
       const effectiveBranchId = branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
       logger.info('Order getirme isteği gönderiliyor', { orderId, branchId: effectiveBranchId }, { prefix: 'OrderService' });
 
       const url = effectiveBranchId
-        ? `${this.baseUrl}/${orderId}?branchId=${effectiveBranchId}`
-        : `${this.baseUrl}/${orderId}`;
+        ? `${this.baseUrl}/${orderId}?branchId=${effectiveBranchId}&language=${language}`
+        : `${this.baseUrl}/${orderId}?language=${language}`;
 
       const response = await httpClient.get<Order>(url);
 
@@ -385,7 +392,8 @@ class OrderService {
   async getOrderTrackingQR(orderTag: string): Promise<QRTrackingInfo> {
     try {
       logger.info('Order tracking QR getirme isteği gönderiliyor', { orderTag }, { prefix: 'OrderService' });
-      const url = `${this.baseUrl}/track/${orderTag}/qr`;
+      const language = this.getLanguageFromStorage();
+      const url = `${this.baseUrl}/track/${orderTag}/qr?language=${language}  `;
       const response = await httpClient.get<QRTrackingInfo>(url);
       logger.info('Order tracking QR başarıyla alındı', { 
         orderTag,
@@ -426,10 +434,11 @@ class OrderService {
     try {
       // Get effective branch ID (from parameter, localStorage, or token)
       const effectiveBranchId = branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
       const url = effectiveBranchId
-        ? `${this.baseUrl}/table-basket-summary?branchId=${effectiveBranchId}`
-        : `${this.baseUrl}/table-basket-summary`;
+        ? `${this.baseUrl}/table-basket-summary?branchId=${effectiveBranchId}&language=${language}`
+        : `${this.baseUrl}/table-basket-summary?language=${language}`;
 
       logger.info('Table basket summary getirme isteği gönderiliyor', { branchId: effectiveBranchId }, { prefix: 'OrderService' });
       const response = await httpClient.get<TableBasketSummary[]>(url);
@@ -701,9 +710,11 @@ class OrderService {
     try {
       // Get effective branch ID (from parameter, localStorage, or token)
       const effectiveBranchId = branchId || getEffectiveBranchId();
+            const language = this.getLanguageFromStorage();
 
       const params: any = {
-        includeItems: true
+        includeItems: true,
+        language
       };
       if (effectiveBranchId) {
         params.branchId = effectiveBranchId;

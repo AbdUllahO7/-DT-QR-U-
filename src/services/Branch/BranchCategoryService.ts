@@ -77,7 +77,9 @@ interface APIBranchCategory {
 
 class BranchCategoryService {
   private baseUrl = '/api/BranchCategories';
-
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
   // Transform API response to match component expectations
   private transformAPIDataToComponentData(apiCategories: APIBranchCategory[]): Category[] {
     return apiCategories.map(apiCategory => ({
@@ -110,13 +112,14 @@ class BranchCategoryService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
-
-      const { categoryId, onlyActive, includes } = params;
+      const { categoryId, onlyActive, includes  } = params;
+      const language = this.getLanguageFromStorage();
       const queryParams = new URLSearchParams();
       if (branchId) queryParams.append('branchId', branchId.toString());
       if (categoryId) queryParams.append('categoryId', categoryId.toString());
       if (onlyActive !== undefined) queryParams.append('onlyActive', onlyActive.toString());
       if (includes) queryParams.append('includes', includes);
+      if (language) queryParams.append('language', language);
 
       const response = await httpClient.get(`/api/BranchProducts/branch/available-products?${queryParams.toString()}`);
 
@@ -139,11 +142,12 @@ class BranchCategoryService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
-
+      const language = this.getLanguageFromStorage();
       const params = new URLSearchParams({
         includes: "products",
       });
       if (branchId) params.append('branchId', branchId.toString());
+      if (language) params.append('language', language);
 
       const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/available-categories?${params.toString()}`);
       logger.info('Available categories for branch retrieved successfully', {
@@ -163,9 +167,11 @@ class BranchCategoryService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
-
+      const language = this.getLanguageFromStorage();
+                  
       const params: any = {
-        includeInactive: true
+        includeInactive: true,
+        language
       };
 
       // Add branchId if available
@@ -190,12 +196,17 @@ class BranchCategoryService {
     try {
       // Get effective branch ID (from parameter, localStorage, or token)
       const effectiveBranchId = branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
       if (!effectiveBranchId) {
         throw new Error('Branch ID is required');
       }
 
-      const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/${effectiveBranchId}/public-categories`);
+      const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/${effectiveBranchId}/public-categories`, {
+        params: {
+          language
+        }
+      });
 
       logger.info('Public categories for branch retrieved successfully', {
         branchId: effectiveBranchId,
@@ -215,8 +226,9 @@ class BranchCategoryService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : { language };
       const response = await httpClient.get<APIBranchCategory>(`${this.baseUrl}/category/${categoryId}`, { params });
 
       logger.info('Branch category retrieved successfully', { categoryId, branchId });
@@ -453,10 +465,11 @@ class BranchCategoryService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
       logger.info('Fetching deleted branch categories', { branchId });
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : { language };
       const response = await httpClient.get<DeletedBranchCategory[]>(`${this.baseUrl}/deleted`, { params });
 
       logger.info('Deleted branch categories retrieved successfully', {

@@ -70,12 +70,15 @@ export interface UpdatePaymentSettingsDto {
 
 class BranchPreferencesService {
   private baseUrl = '/api/BranchPreferences';
-
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
   // UPDATED: Now accepts branchId parameter
   async getBranchPreferences(branchId?: number): Promise<BranchPreferences> {
     try {
       // Get effective branch ID (from parameter, localStorage, or token)
       const effectiveBranchId = branchId || getEffectiveBranchId();
+        const language = this.getLanguageFromStorage();
 
       logger.info('Branch preferences bilgileri getirme isteği gönderiliyor', { branchId: effectiveBranchId }, { prefix: 'BranchPreferencesService' });
 
@@ -83,8 +86,12 @@ class BranchPreferencesService {
         ? `${this.baseUrl}?branchId=${effectiveBranchId}`
         : this.baseUrl;
 
-      const response = await httpClient.get<BranchPreferences>(url);
-      
+      const params = {
+        language
+      };
+
+      const response = await httpClient.get<BranchPreferences>(url, { params });
+
       logger.info('Branch Preferences API Response:', response.data, { prefix: 'BranchPreferencesService' });
       logger.info('Branch preferences bilgileri başarıyla alındı', { branchId }, { prefix: 'BranchPreferencesService' });
       

@@ -31,7 +31,9 @@ interface ApiResponse<T> {
 
 class MoneyCaseService {
   private baseUrl = '/api/BranchMoneyCase';
-
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
   /**
    * Transform API response to UI format
    */
@@ -258,10 +260,11 @@ class MoneyCaseService {
     try {
       // Get effective branch ID (from parameter, localStorage, or token)
       const effectiveBranchId = branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
       logger.info('Aktif kasa getiriliyor', { branchId: effectiveBranchId });
 
-      const params = effectiveBranchId ? { branchId: effectiveBranchId } : {};
+      const params = effectiveBranchId ? { branchId: effectiveBranchId, language } : { language };
       const response = await httpClient.get<ApiResponse<ActiveMoneyCaseResponse | null>>(
         `${this.baseUrl}/active`,
         { params }
@@ -303,10 +306,11 @@ class MoneyCaseService {
     try {
       // Get effective branch ID (from parameter, localStorage, or token)
       const effectiveBranchId = branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
       logger.info('Önceki kasa kapanış bilgisi getiriliyor', { branchId: effectiveBranchId });
 
-      const params = effectiveBranchId ? { branchId: effectiveBranchId } : {};
+      const params = effectiveBranchId ? { branchId: effectiveBranchId, language } : { language };
       const response = await httpClient.get<ApiResponse<PreviousCloseInfo>>(
         `${this.baseUrl}/previous-close-info`,
         { params }
@@ -346,11 +350,13 @@ class MoneyCaseService {
     try {
       // Get effective branch ID if not provided in params
       const effectiveBranchId = params.branchId || getEffectiveBranchId();
-
+      const language = this.getLanguageFromStorage();
+       
       logger.info('Kasa geçmişi getiriliyor', { ...params, branchId: effectiveBranchId });
 
       const queryParams = {
         ...params,
+        language,
         pageSize: params.pageSize || 30,
         ...(effectiveBranchId && { branchId: effectiveBranchId })
       };
@@ -405,12 +411,13 @@ class MoneyCaseService {
   async getZReport(moneyCaseId: number): Promise<ZReport> {
     try {
       logger.info('Z raporu getiriliyor', { moneyCaseId });
-      
+      const language = this.getLanguageFromStorage();
       const response = await httpClient.get<{
         message: string;
         zReport: ZReportApiResponse;
       }>(
-        `${this.baseUrl}/${moneyCaseId}/z-report`
+        `${this.baseUrl}/${moneyCaseId}/z-report`,
+        { params: { language } }
       );
       
       logger.info('✅ Z raporu API response:', { 
@@ -434,10 +441,12 @@ class MoneyCaseService {
     try {
       // Get effective branch ID if not provided in params
       const effectiveBranchId = params.branchId || getEffectiveBranchId();
+            const language = this.getLanguageFromStorage();
 
       const queryParams = {
         ...params,
-        ...(effectiveBranchId && { branchId: effectiveBranchId })
+        ...(effectiveBranchId && { branchId: effectiveBranchId }),
+        language
       };
 
       logger.info('Şube özet raporu getiriliyor', queryParams);
@@ -469,13 +478,13 @@ class MoneyCaseService {
   async getRestaurantSummary(params: RestaurantSummaryParams = {}): Promise<MoneyCaseSummary> {
     try {
       logger.info('Restoran özet raporu getiriliyor', params);
-      
-      const response = await httpClient.get<{
+            const language = this.getLanguageFromStorage();
+        const response = await httpClient.get<{
         message: string;
         data: RestaurantSummaryApiResponse;
       }>(
         `${this.baseUrl}/summary/restaurant`,
-        { params }
+        { params: { ...params, language } }
       );
       
       logger.info('✅ Restoran özet raporu API response:', { 
@@ -499,6 +508,7 @@ class MoneyCaseService {
     try {
       // Get effective branch ID (from parameter, localStorage, or token)
       const effectiveBranchId = branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
       logger.info('Hızlı özet getiriliyor', { branchId: effectiveBranchId });
 
@@ -508,7 +518,7 @@ class MoneyCaseService {
         data: QuickSummaryApiResponse;
       }>(
         `${this.baseUrl}/summary/quick`,
-        { params }
+        { params: { ...params, language } }
       );
       
       logger.info('✅ Hızlı özet API response:', { 
@@ -578,7 +588,7 @@ class MoneyCaseService {
         ...(effectiveBranchId !== null && { branchId: effectiveBranchId }),
         fromDate: today.toISOString(),
         toDate: tomorrow.toISOString(),
-        pageSize: 100
+        pageSize: 100,
       });
       
       return response.items || [];

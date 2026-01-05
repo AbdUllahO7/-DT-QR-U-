@@ -5,6 +5,10 @@ import { logger } from "../../../utils/logger";
 class BranchProductExtraCategoriesService {
   private baseUrl = '/api/BranchProductExtraCategories';
 
+    private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
   // Get all branch product extra categories
   async getBranchProductExtraCategories(params?: {
     branchProductId?: number;
@@ -14,6 +18,7 @@ class BranchProductExtraCategoriesService {
     try {
       // Get effective branch ID (from parameter, localStorage, or token)
       const effectiveBranchId = params?.branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
       logger.info('Branch product extra categories listesi getiriliyor', { branchId: effectiveBranchId });
 
@@ -23,6 +28,7 @@ class BranchProductExtraCategoriesService {
             branchProductId: params?.branchProductId,
             ...(effectiveBranchId && { branchId: effectiveBranchId }),
             onlyActive: params?.onlyActive,
+            language
           },
       }
       );
@@ -77,10 +83,11 @@ class BranchProductExtraCategoriesService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
-      logger.info('Silinen branch product extra categories listesi getiriliyor', { branchId });
+      logger.info('Silinen branch product extra categories listesi getiriliyor', { branchId, language });
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : {};
       const response = await httpClient.get<APIBranchProductExtraCategory[]>(
         `${this.baseUrl}/deleted`,
         { params }
@@ -107,14 +114,16 @@ class BranchProductExtraCategoriesService {
     try {
       // Get effective branch ID (from parameter, localStorage, or token)
       const effectiveBranchId = params?.branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
-      logger.info('Mevcut extra categories listesi getiriliyor', { params, branchId: effectiveBranchId });
+      logger.info('Mevcut extra categories listesi getiriliyor', { params, branchId: effectiveBranchId, language });
 
       const response = await httpClient.get<AvailableExtraCategory[]>(`${this.baseUrl}/available`, {
           params: {
             branchProductId: params?.branchProductId,
             ...(effectiveBranchId && { branchId: effectiveBranchId }),
             onlyActive: params?.onlyActive,
+            language
           },
       });
 
