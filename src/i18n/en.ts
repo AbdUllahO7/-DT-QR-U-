@@ -2611,6 +2611,7 @@ hero: {
 
   TableCategoryModal: {
     addCategoryTitle: 'Add Table Area',
+    update: 'Update Table Area',
     addCategorySubtitle: 'Create a new table Area',
     addCategorySubtitle2: 'Define the properties of the new table Area',
     categoryName: 'Area Name',
@@ -5781,6 +5782,23 @@ categoryConfigModal: {
     loadGeneral: 'Restaurant preferences could not be loaded',
     save: 'Error saving restaurant preferences'
   }
+  },
+  BranchTableModal: {
+    'addTitle': 'Add Branch Table Category',
+    'editTitle': 'Edit Branch Table Category',
+    'addSubtitle': 'Fill in the details to create a new branch table category.',
+    'tableNamePlaceholder': 'Enter table name',
+    'capacity': 'Enter table capacity',
+    'tableName': 'Table Name',
+    'cancel': 'Cancel',
+    'tableNameRequired': 'Table name is required',
+    'editSubtitle': 'Fill in the details to update the branch table category.',
+    'add': 'Add',
+    'capacityPlaceholder': 'Enter table capacity',
+    'saving': 'Saving...',
+    'status': 'Status',
+    'active': 'Active',
+    'update': 'Update'
   }
 
 }; 

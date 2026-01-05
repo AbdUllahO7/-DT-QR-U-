@@ -2611,6 +2611,7 @@ contact: {
   TableCategoryModal: {
     title: 'إضافة منطقة طاولة',
     subtitle: 'إنشاء منطقة طاولة جديدة',
+    update: 'تحديث منطقة الطاولة',
     addCategoryTitle: 'إضافة منطقة جديدة',
     categoryName: 'اسم المنطقة',
     addCategorySubtitle: 'حدد خصائص المنطقة الجديدة',
@@ -5779,5 +5780,22 @@ extrasManagement: {
     loadGeneral: 'تعذر تحميل تفضيلات المطعم',
     save: 'حدث خطأ أثناء حفظ تفضيلات المطعم'
   }
+},
+BranchTableModal: {
+  addTitle: 'إضافة فئة جدول فرع',
+  addSubtitle: 'املأ التفاصيل لإنشاء فئة جدول فرع جديدة.',
+  editTitle: 'تحرير فئة جدول فرع',
+  tableNamePlaceholder: 'أدخل اسم الجدول',
+  capacity: 'أدخل سعة الجدول',
+  tableName: 'اسم الجدول',
+  cancel: 'إلغاء',
+  tableNameRequired: 'اسم الجدول مطلوب',
+  add: 'إضافة',
+  capacityPlaceholder: 'أدخل سعة الجدول',
+  editSubtitle: 'املأ التفاصيل لتحديث فئة جدول فرع.',
+  saving: 'جاري الحفظ...',
+  status: 'الحالة',
+  active: 'نشط',
+  update: 'تحديث'
 }
 };

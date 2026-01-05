@@ -137,54 +137,54 @@ class IngredientsService {
       }
     }
 
-  // ID'ye göre malzeme getir (GET by ID)
-  async getIngredientById(id: number): Promise<Ingredient> {
-    try {
-      logger.info('Malzeme detayı getiriliyor', { id });
-      const language = this.getLanguageFromStorage();
+    // ID'ye göre malzeme getir (GET by ID)
+    async getIngredientById(id: number): Promise<Ingredient> {
+      try {
+        logger.info('Malzeme detayı getiriliyor', { id });
+        const language = this.getLanguageFromStorage();
 
-      const response = await httpClient.get<APIIngredient>(`${this.baseUrl}/Ingredients/${id}`, {
-        params: {
-          language
-        }
-      });
+        const response = await httpClient.get<APIIngredient>(`${this.baseUrl}/Ingredients/${id}`, {
+          params: {
+            language
+          }
+        });
 
-      logger.info('Malzeme detayı başarıyla getirildi', { data: response.data });
-      
-      // Transform API response to internal format
-      const transformedIngredient: Ingredient = {
-        id: response.data.ingredientId,
-        name: response.data.name,
-        isAllergenic: response.data.isAllergenic,
-        isAvailable: response.data.isAvailable,
-        allergenIds: response.data.allergens?.map((allergen: any) => allergen.id) || [],
-        allergenDetails: response.data.allergens?.map((allergen: any) => ({
-          allergenId: allergen.id,
-          containsAllergen: allergen.containsAllergen !== null ? allergen.containsAllergen : true,
-          note: allergen.note || ''
-        })) || []
-      };
-      
-      return transformedIngredient;
-    } catch (error: any) {
-      logger.error('❌ Malzeme detayı getirilirken hata:', error);
-      throw error;
+        logger.info('Malzeme detayı başarıyla getirildi', { data: response.data });
+        
+        // Transform API response to internal format
+        const transformedIngredient: Ingredient = {
+          id: response.data.ingredientId,
+          name: response.data.name,
+          isAllergenic: response.data.isAllergenic,
+          isAvailable: response.data.isAvailable,
+          allergenIds: response.data.allergens?.map((allergen: any) => allergen.id) || [],
+          allergenDetails: response.data.allergens?.map((allergen: any) => ({
+            allergenId: allergen.id,
+            containsAllergen: allergen.containsAllergen !== null ? allergen.containsAllergen : true,
+            note: allergen.note || ''
+          })) || []
+        };
+        
+        return transformedIngredient;
+      } catch (error: any) {
+        logger.error('❌ Malzeme detayı getirilirken hata:', error);
+        throw error;
+      }
     }
-  }
 
-  // Malzeme silme (DELETE)
-  async deleteIngredient(id: number): Promise<void> {
-    try {
-      logger.info('Malzeme silme isteği gönderiliyor', { id });
-      
-      await httpClient.delete(`${this.baseUrl}/Ingredients/${id}`);
-      
-      logger.info('Malzeme başarıyla silindi', { id });
-    } catch (error: any) {
-      logger.error('❌ Malzeme silinirken hata:', error);
-      throw error;
+    // Malzeme silme (DELETE)
+    async deleteIngredient(id: number): Promise<void> {
+      try {
+        logger.info('Malzeme silme isteği gönderiliyor', { id });
+        
+        await httpClient.delete(`${this.baseUrl}/Ingredients/${id}`);
+        
+        logger.info('Malzeme başarıyla silindi', { id });
+      } catch (error: any) {
+        logger.error('❌ Malzeme silinirken hata:', error);
+        throw error;
+      }
     }
-  }
 
  
 }

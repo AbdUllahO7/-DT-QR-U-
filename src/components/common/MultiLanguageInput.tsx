@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import { ChevronDown, Check, Copy } from 'lucide-react';
 import { TranslatableFieldValue } from '../../hooks/useTranslatableFields'; // Adjust path if needed
 import { useLanguage } from '../../contexts/LanguageContext';

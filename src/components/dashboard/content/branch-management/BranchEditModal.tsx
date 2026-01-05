@@ -24,6 +24,7 @@ import { LanguageFormControl } from '../../../common/LanguageFormControl';
 import { useTranslatableFields, TranslatableFieldValue, translationResponseToObject } from '../../../../hooks/useTranslatableFields';
 import { branchTranslationService } from '../../../../services/Translations/BranchTranslationService';
 import { contactTranslationService } from '../../../../services/Translations/ContactTranslationService';
+import { languageService } from '../../../../services/LanguageService';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -164,14 +165,9 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
   const { t, isRTL, language: currentLanguage } = useLanguage();
   const translationHook = useTranslatableFields();
 
-  // Supported languages for MultiLanguageInput
-  const supportedLanguages = [
-    { code: 'en', displayName: 'English', nativeName: 'English', isRtl: false },
-    { code: 'tr', displayName: 'Turkish', nativeName: 'Türkçe', isRtl: false },
-    { code: 'ar', displayName: 'Arabic', nativeName: 'العربية', isRtl: true }
-  ];
-
-  const defaultLanguage = 'en';
+  // Supported languages - dynamically loaded
+  const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
+  const [defaultLanguage, setDefaultLanguage] = useState<string>('en');
 
   const [formData, setFormData] = useState<BranchEditFormData>({
     branchName: '',
@@ -274,6 +270,29 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     searchTerms: key
   }));
 
+  useEffect(() => {
+    const loadLanguages = async () => {
+      try {
+        const languagesData = await languageService.getRestaurantLanguages();
+        console.log("languagesData", languagesData);
+
+        // Deduplicate languages by code
+        const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
+          if (!acc.find((l: any) => l.code === lang.code)) {
+            acc.push(lang);
+          }
+          return acc;
+        }, []);
+
+        console.log("uniqueLanguages", uniqueLanguages);
+        setSupportedLanguages(uniqueLanguages);
+        setDefaultLanguage(languagesData.defaultLanguage || 'en');
+      } catch (error) {
+        console.error('Failed to load languages:', error);
+      }
+    };
+    loadLanguages();
+  }, []);
 
   useEffect(() => {
     if (branchDetail && isOpen) {

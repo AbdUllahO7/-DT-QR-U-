@@ -8,9 +8,6 @@ import {
   Save,
   XCircle,
   Grid,
-  Users,
-  Building,
-  Settings,
   Loader2,
   // New specific icons
   Home,       // Indoor
