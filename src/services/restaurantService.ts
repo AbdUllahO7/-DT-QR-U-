@@ -50,14 +50,22 @@ interface DeletedRestaurant {
 
 class RestaurantService {
   private baseUrl = '/api/Restaurants';
-
+     // Helper method to get language from localStorage
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
   // NEW: Get all restaurants
   async getRestaurants(): Promise<RestaurantInfo[]> {
     try {
       logger.info('Tüm restoranlar getiriliyor...');
-      const response = await httpClient.get<RestaurantInfo[]>(this.baseUrl);
+      const language = this.getLanguageFromStorage();
+      const response = await httpClient.get<RestaurantInfo[]>(this.baseUrl, {
+        params: {
+          'language': language
+        }
+      });
       logger.info('Restoranlar alındı:', response.data);
-      
+
       // Sanitize restaurantName and restaurantLogoPath for each restaurant
       const sanitizedData = response.data.map(restaurant => ({
         ...restaurant,
@@ -96,7 +104,12 @@ class RestaurantService {
 
   async getRestaurantByUserId(userId: string): Promise<Restaurant | null> {
     try {
-      const response = await httpClient.get<ApiResponse<Restaurant>>(`/api/Restaurants/user/${userId}`);
+      const language = this.getLanguageFromStorage();
+      const response = await httpClient.get<ApiResponse<Restaurant>>(`/api/Restaurants/user/${userId}`, {
+        params: {
+          'language': language
+        }
+      });
       return response.data.data || null;
     } catch (error) {
       if ((error as any).status === 404) {
@@ -111,8 +124,13 @@ class RestaurantService {
       if (import.meta.env.DEV) {
         logger.info('🔍 Restaurant branches dropdown API çağrısı başlatılıyor...');
       }
+      const language = this.getLanguageFromStorage();
 
-      const response = await httpClient.get<any[]>(`${this.baseUrl}/branches/dropdown`);
+      const response = await httpClient.get<any[]>(`${this.baseUrl}/branches/dropdown`, {
+       params: {
+          'language': language
+        }
+      });
 
       if (import.meta.env.DEV) {
         logger.info('📡 Restaurant branches dropdown API yanıtı:', response.data);
@@ -142,12 +160,17 @@ class RestaurantService {
       logger.info('Restaurant yönetim bilgileri alınıyor...');
       const { getRestaurantIdFromToken } = await import('../utils/http');
       const restaurantId = getRestaurantIdFromToken();
+      const language = this.getLanguageFromStorage();
 
       const url = restaurantId
         ? `${this.baseUrl}/management-info?restaurantId=${restaurantId}`
         : `${this.baseUrl}/management-info`;
 
-      const response = await httpClient.get<RestaurantManagementInfo>(url);
+      const response = await httpClient.get<RestaurantManagementInfo>(url, {
+        params: {
+          language
+        }
+      });
       logger.info('Restaurant yönetim bilgileri alındı:', response.data);
       let fixedData = response.data;
 
@@ -247,8 +270,13 @@ class RestaurantService {
 
   async getDeletedRestaurants(): Promise<DeletedRestaurant[]> {
     try {
+            const language = this.getLanguageFromStorage();
       logger.info('Silinmiş restaurantlar getiriliyor...');
-      const response = await httpClient.get<DeletedRestaurant[]>(`${this.baseUrl}/deleted`);
+      const response = await httpClient.get<DeletedRestaurant[]>(`${this.baseUrl}/deleted`, {
+        params: {
+          language
+        }
+      });
       logger.info('Silinmiş restaurantlar alındı:', response.data);
       return response.data;
     } catch (error: any) {
@@ -285,8 +313,9 @@ class RestaurantService {
   async getAbout(restaurantId: number): Promise<AboutInfo | null> {
     try {
       logger.info('About bilgileri alınıyor...', restaurantId);
+      const language = this.getLanguageFromStorage();
 
-      const response = await httpClient.get<AboutInfo>(`/api/About?restaurantId=${restaurantId}`);
+      const response = await httpClient.get<AboutInfo>(`/api/About?restaurantId=${restaurantId}&language=${language}`);
 
       logger.info('About bilgileri alındı:', response.data);
       return response.data;
