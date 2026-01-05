@@ -124,17 +124,17 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                   <div className="relative">
                     <input
                       title="Price"
-                      type="text"
-                      inputMode="decimal"
+                      type="number"
+                      step="0.01"
+                      min="0"
                       required
-                      value={formData.basePrice}
+                      value={formData.basePrice || ''}
                       onChange={(e) => {
                         const val = e.target.value;
-                        if (/^\d*\.?\d*$/.test(val)) {
-                          onChange({ ...formData, basePrice: val === '' ? 0 : parseFloat(val) || 0 });
-                        }
+                        onChange({ ...formData, basePrice: val === '' ? 0 : parseFloat(val) || 0 });
                       }}
                       className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5 px-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      placeholder="0.00"
                     />
                   </div>
                 </div>

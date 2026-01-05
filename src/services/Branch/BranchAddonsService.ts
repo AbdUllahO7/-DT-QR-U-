@@ -78,13 +78,18 @@ export interface BranchProductAddonDetails extends UpdateBranchProductAddonDto {
 class BranchProductAddonsService {
   private baseUrl = '/api/BranchProductAddons';
 
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
   // GET /api/BranchProductAddons/available
   async getAvailableBranchProductAddons(): Promise<BranchProductAddon[]> {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : { language };
       const response = await httpClient.get<BranchProductAddon[]>(`${this.baseUrl}/available`, { params });
       
       // The response is a direct array of BranchProductAddon objects
@@ -123,11 +128,12 @@ class BranchProductAddonsService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+            const language = this.getLanguageFromStorage();
 
       logger.info('Branch product addons getirme isteği gönderiliyor', { branchProductId, branchId }, { prefix: 'BranchProductAddonsService' });
 
       const url = `${this.baseUrl}/branch-product/${branchProductId}`;
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : { language };
       const response = await httpClient.get<BranchProductAddonDetails[]>(url, { params });
 
       const addonsData = Array.isArray(response.data) ? response.data : [];
@@ -150,11 +156,12 @@ class BranchProductAddonsService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
       logger.info('Branch product addons grouped getirme isteği gönderiliyor', { branchProductId, branchId }, { prefix: 'BranchProductAddonsService' });
 
       const url = `${this.baseUrl}/branch-product/${branchProductId}/grouped`;
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : { language };
       const response = await httpClient.get(url, { params });
 
       logger.info('Branch product addons grouped başarıyla alındı', {
@@ -174,11 +181,12 @@ class BranchProductAddonsService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+            const language = this.getLanguageFromStorage();
 
       logger.info('Branch product addon detayı getirme isteği gönderiliyor', { id, branchId }, { prefix: 'BranchProductAddonsService' });
 
       const url = `${this.baseUrl}/${id}`;
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : { language };
       const response = await httpClient.get<BranchProductAddonDetails>(url, { params });
 
       logger.info('Branch product addon detayı başarıyla alındı', { id, branchId }, { prefix: 'BranchProductAddonsService' });

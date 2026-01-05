@@ -6,7 +6,11 @@ import { logger } from "../../utils/logger";
 // Product Extra Categories Service Class
 class ProductExtraCategoriesService {
   private baseUrl = '/api';
+    private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
 
+  
   // Create Product Extra Category (POST)
   async createProductExtraCategory(data: CreateProductExtraCategoryData): Promise<ProductExtraCategory> {
     try {
@@ -53,9 +57,13 @@ class ProductExtraCategoriesService {
   async getProductExtraCategories(): Promise<ProductExtraCategory[]> {
     try {
       logger.info('Ürün ekstra kategori listesi getiriliyor');
-      
+                  const language = this.getLanguageFromStorage();
       const response = await httpClient.get<APIProductExtraCategory[]>(
-        `${this.baseUrl}/ProductExtraCategories`
+        `${this.baseUrl}/ProductExtraCategories`, {
+          params: {
+            'language': language
+          }
+        }
       );
       
       logger.info('Ürün ekstra kategori listesi başarıyla getirildi', { 
@@ -87,9 +95,13 @@ class ProductExtraCategoriesService {
   async getProductExtraCategoryById(id: number): Promise<ProductExtraCategory> {
     try {
       logger.info('Ürün ekstra kategori detayı getiriliyor', { id });
-      
+                  const language = this.getLanguageFromStorage();
       const response = await httpClient.get<APIProductExtraCategory>(
-        `${this.baseUrl}/ProductExtraCategories/${id}`
+        `${this.baseUrl}/ProductExtraCategories/${id}`, {
+          params: {
+            'language': language
+          }
+        }
       );
       
       logger.info('Ürün ekstra kategori detayı başarıyla getirildi', { data: response.data });
@@ -175,9 +187,14 @@ class ProductExtraCategoriesService {
   async getDeletedProductExtraCategories(): Promise<ProductExtraCategory[]> {
     try {
       logger.info('Silinmiş ürün ekstra kategori listesi getiriliyor');
-      
+                  const language = this.getLanguageFromStorage();
+
       const response = await httpClient.get<APIProductExtraCategory[]>(
-        `${this.baseUrl}/ProductExtraCategories/deleted`
+        `${this.baseUrl}/ProductExtraCategories/deleted`, {
+          params: {
+            'language': language
+          }
+        }
       );
       
       logger.info('Silinmiş ürün ekstra kategori listesi başarıyla getirildi', { 
@@ -208,9 +225,14 @@ class ProductExtraCategoriesService {
   async getAvailableProductExtraCategories(): Promise<ProductExtraCategory[]> {
     try {
       logger.info('Aktif ürün ekstra kategori listesi getiriliyor');
-      
+                  const language = this.getLanguageFromStorage();
+
       const response = await httpClient.get<APIProductExtraCategory[]>(
-        `${this.baseUrl}/ProductExtraCategories/available`
+        `${this.baseUrl}/ProductExtraCategories/available`, {
+          params: {
+            'language': language
+          }
+        }
       );
       
       logger.info('Aktif ürün ekstra kategori listesi başarıyla getirildi', { 

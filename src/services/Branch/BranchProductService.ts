@@ -182,18 +182,26 @@ class BranchProductService {
     };
   }
 
+    private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
   // Get all branch products with optional includes
   async getBranchProducts(includes?: string[]): Promise<Product[]> {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
-
+      const language = this.getLanguageFromStorage();
+      
       // Build query parameters
       const params = new URLSearchParams();
 
       // Add branchId if available
       if (branchId) {
         params.append('branchId', branchId.toString());
+      }
+      if (language) {
+        params.append('language', language);
       }
 
       // Add includes parameter if provided
@@ -248,8 +256,8 @@ class BranchProductService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
-
-      const params = branchId ? { branchId } : {};
+      const language = this.getLanguageFromStorage();
+      const params = branchId ? { branchId, language } : { language };
       const response = await httpClient.get<SimpleBranchProduct>(`${this.baseUrl}/${id}`, { params });
 
       logger.info('Branch product retrieved successfully', { id, branchId });
@@ -266,12 +274,16 @@ class BranchProductService {
   try {
     // Get effective branch ID (from parameter, localStorage, or token)
     const effectiveBranchId = branchId || getEffectiveBranchId();
+    const language = this.getLanguageFromStorage();
 
     if (!effectiveBranchId) {
       throw new Error('Branch ID is required');
     }
 
     let url = `${this.baseUrl}/branch/${effectiveBranchId}/menu`;
+    const params = {
+      language
+    };
 
     // Add includes parameter if provided
     if (includes && includes.length > 0) {
@@ -279,7 +291,7 @@ class BranchProductService {
       url += `?includes=${encodeURIComponent(includesParam)}`;
     }
 
-    const response = await httpClient.get(url);
+    const response = await httpClient.get(url, { params });
     logger.info('Branch menu retrieved successfully', {
       branchId: effectiveBranchId,
       hasIncludes: !!includes?.length,
@@ -435,7 +447,6 @@ class BranchProductService {
   async activateBranchProducts(branchProductIds: number[]): Promise<void> {
     try {
       logger.info('Activating multiple branch products', { branchProductIds });
-      
       const updatePromises = branchProductIds.map(id => 
         this.updateBranchProduct(id, { isActive: true })
       );
@@ -500,10 +511,11 @@ class BranchProductService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+              const language = this.getLanguageFromStorage();
 
       logger.info('Fetching deleted branch products', { branchId });
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : { language };
       const response = await httpClient.get<DeletedBranchProduct[]>(`${this.baseUrl}/deleted`, { params });
 
       logger.info('Deleted branch products retrieved successfully', {

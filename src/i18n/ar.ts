@@ -1876,8 +1876,8 @@ contact: {
 
     // Counter texts
     counters: {
-      selectedProducts: '{{count}} منتج محدد',
-      availableProducts: '{{count}} منتج متوفر'
+      selectedProducts: '{count} منتج محدد',
+      availableProducts: '{count} منتج متوفر'
     },
 
     // Error messages

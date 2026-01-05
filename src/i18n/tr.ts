@@ -1882,8 +1882,8 @@ hero: {
 
       // Counter texts
       counters: {
-        selectedProducts: '{{count}} ürün seçili',
-        availableProducts: '{{count}} mevcut ürün'
+        selectedProducts: '{count} ürün seçili',
+  availableProducts: '{count} mevcut ürün'
       },
 
       // Error messages

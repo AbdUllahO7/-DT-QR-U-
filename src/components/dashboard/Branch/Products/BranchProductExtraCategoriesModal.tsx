@@ -762,7 +762,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                       }
                                       className="w-4 h-4 text-blue-600 rounded"
                                     />
-                                    <span className="text-sm text-gray-600 dark:text-gray-400">Unlimited</span>
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">{t('extrasManagement.categories.fields.unlimited')}</span>
                                   </label>
                                 </div>
                               </div>
@@ -820,7 +820,8 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                       }
                                       className="w-4 h-4 text-blue-600 rounded"
                                     />
-                                    <span className="text-sm text-gray-600 dark:text-gray-400">Unlimited</span>
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">{t('extrasManagement.categories.fields.unlimited')}</span>
+
                                   </label>
                                 </div>
                               </div>

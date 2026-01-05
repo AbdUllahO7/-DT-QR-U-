@@ -10,7 +10,7 @@ import { productExtrasService } from "../../../services/Extras/ProductExtrasServ
 import { BranchProductExtra } from "../../../types/Extras/type";
 
 export const SortableCategory: React.FC<{
-  category: Category;
+category: Category;
   isDark: boolean;
   onToggle: (categoryId: number) => void;
   onEditProduct: (productId: number) => void;
@@ -378,9 +378,7 @@ export const SortableCategory: React.FC<{
                     <p className="text-gray-500 dark:text-gray-400 font-medium mb-1">
                       {t('SortableCategory.noCategoryProducts') || 'No products yet'}
                     </p>
-                    <p className="text-sm text-gray-400 dark:text-gray-500">
-                      Add your first product to get started
-                    </p>
+                   
                   </div>
                 )}
               </div>
@@ -411,9 +409,7 @@ export const SortableCategory: React.FC<{
               <p className="text-gray-500 dark:text-gray-400 font-medium mb-1">
                 {t('SortableCategory.noCategoryProducts') || 'No products yet'}
               </p>
-              <p className="text-sm text-gray-400 dark:text-gray-500">
-                Add your first product to get started
-              </p>
+             
             </div>
           )}
         </div>

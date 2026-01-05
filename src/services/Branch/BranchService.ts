@@ -103,12 +103,14 @@ interface ApiBranchResponse {
 
 class BranchService {
   private baseUrl = '/api/Branches';
-
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
   async getBranches(): Promise<BranchData[]> {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
-
+      const language = this.getLanguageFromStorage();
       logger.info('Kullanıcıya ait branch bilgileri getirme isteği gönderiliyor', { branchId }, { prefix: 'BranchService' });
 
       // Include related entities in the request
@@ -120,7 +122,8 @@ class BranchService {
 
       // Build query parameters
       const queryParams = new URLSearchParams({
-        include: includes.join(',')
+        include: includes.join(','),
+        language
       });
 
       // Add branchId if it exists

@@ -253,13 +253,42 @@ const BranchTableCategoryModal: React.FC<Props> = ({
           isActive: formData.isActive
         };
 
-        const result = await tableService.createCategory(payload);
-        logger.info('Category created successfully', result);
-        categoryId = result.id;
+        await tableService.createCategory(payload);
+        logger.info('Category created successfully', { prefix: 'BranchTableCategoryModal' });
+
+        // WORKAROUND: API returns malformed ID (empty object), so we need to fetch
+        // the category list to get the real ID of the newly created category
+        logger.info('Fetching categories to get the newly created category ID', { prefix: 'BranchTableCategoryModal' });
+
+        const categories = await tableService.getCategories(false, false);
+
+        // Find the newly created category by matching all properties
+        const newCategory = categories.find(cat =>
+          cat.categoryName === formData.categoryName.trim() &&
+          cat.colorCode === formData.colorCode &&
+          cat.iconClass === formData.iconClass &&
+          cat.isActive === formData.isActive
+        );
+
+        if (!newCategory || !newCategory.id || typeof newCategory.id !== 'number') {
+          throw new Error('Could not find the newly created category');
+        }
+
+        categoryId = newCategory.id;
+        logger.info('Found newly created category', { categoryId }, { prefix: 'BranchTableCategoryModal' });
       }
 
       // Save translations for table category
       try {
+        // Log and validate categoryId before creating translations
+        console.log('About to save translations - categoryId:', categoryId, 'type:', typeof categoryId);
+
+        // Additional validation: ensure categoryId is a valid number
+        if (!categoryId || typeof categoryId !== 'number' || isNaN(categoryId)) {
+          console.error('Invalid categoryId detected:', categoryId);
+          throw new Error(`Invalid category ID (${categoryId}) - cannot save translations`);
+        }
+
         const translationData = Object.keys(categoryNameTranslations)
           .filter(lang => lang !== defaultLanguage)
           .filter(lang =>
@@ -273,6 +302,8 @@ const BranchTableCategoryModal: React.FC<Props> = ({
             description: descriptionTranslations[languageCode] || undefined,
           }));
 
+        console.log('Translation data prepared:', translationData);
+
         if (translationData.length > 0) {
           await tableCategoryTranslationService.batchUpsertTableCategoryTranslations({
             translations: translationData
@@ -280,6 +311,7 @@ const BranchTableCategoryModal: React.FC<Props> = ({
           logger.info('Table category translations saved', null, { prefix: 'BranchTableCategoryModal' });
         }
       } catch (error) {
+        console.error('Translation save failed:', error);
         logger.error('Failed to save table category translations', error, { prefix: 'BranchTableCategoryModal' });
         // Don't fail the whole operation if translations fail
       }

@@ -148,14 +148,23 @@ export interface BasketResponse {
 class BasketService {
   private baseUrl = '/api/Basket';
 
+    private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
   // GET /api/Basket/{basketId}
   async getBasket(basketId: string): Promise<Basket> {
     try {
       logger.info('Basket getirme isteği gönderiliyor', { basketId }, { prefix: 'BasketService' });
-      
+            const language = this.getLanguageFromStorage();
+
       const url = `${this.baseUrl}/${basketId}`;
-      const response = await httpClient.get<BasketItem[]>(url);
-      
+      const response = await httpClient.get<BasketItem[]>(url, {
+        params: {
+          language: language
+        }
+      });
+
       // Convert response array to Basket object
       const items = Array.isArray(response.data) ? response.data : [];
       const totalAmount = items.reduce((sum, item) => sum + item.totalPrice, 0);
@@ -200,10 +209,15 @@ class BasketService {
   async getMyBasket(): Promise<Basket> {
     try {
       logger.info('My basket getirme isteği gönderiliyor', {}, { prefix: 'BasketService' });
-      
+                  const language = this.getLanguageFromStorage();
+
       const url = `${this.baseUrl}/my-basket`;
-      const response = await httpClient.get(url);
-      
+      const response = await httpClient.get(url, {
+        params: {
+          language: language
+        }
+      });
+
       // Try to access the basket data safely
       let basketData;
       
@@ -290,10 +304,15 @@ class BasketService {
   async getRecommendedAddons(branchProductId: number): Promise<RecommendedAddon[]> {
     try {
       logger.info('Recommended addons getirme isteği gönderiliyor', { branchProductId }, { prefix: 'BasketService' });
-      
+                  const language = this.getLanguageFromStorage();
+
       const url = `${this.baseUrl}/products/${branchProductId}/recommended-addons`;
-      const response = await httpClient.get<RecommendedAddon[]>(url);
-      
+      const response = await httpClient.get<RecommendedAddon[]>(url, {
+        params: {
+          language: language
+        }
+      });
+
       const addonsData = Array.isArray(response.data) ? response.data : [];
       
       logger.info('Recommended addons başarıyla alındı', { 
@@ -312,11 +331,16 @@ class BasketService {
   async getTableSummary(): Promise<TableSummary> {
     try {
       logger.info('Table summary getirme isteği gönderiliyor', {}, { prefix: 'BasketService' });
-      
+                  const language = this.getLanguageFromStorage();
+
       const url = `${this.baseUrl}/table-summary`;
-      const response = await httpClient.get<TableSummary>(url);
-      
-      logger.info('Table summary başarıyla alındı', { 
+      const response = await httpClient.get<TableSummary>(url, {
+        params: {
+          language: language
+        }
+      });
+
+      logger.info('Table summary başarıyla alındı', {
         totalAmount: response.data.totalAmount,
         totalQuantity: response.data.totalQuantity,
         itemsCount: response.data.itemsCount
@@ -455,10 +479,14 @@ class BasketService {
   async getActiveBasket(): Promise<Basket> {
     try {
       logger.info('Active basket getirme isteği gönderiliyor', {}, { prefix: 'BasketService' });
-      
+      const language = this.getLanguageFromStorage();
       const url = `${this.baseUrl}/active`;
-      const response = await httpClient.get<BasketResponse>(url);
-      
+      const response = await httpClient.get<BasketResponse>(url, {
+        params: {
+          language: language
+        }
+      });
+
       // Convert response to normalized Basket object
       const basketData = response.data;
       const basket: Basket = {

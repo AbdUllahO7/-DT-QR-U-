@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { ChevronDown, Check, Copy } from 'lucide-react';
-import { TranslatableFieldValue } from '../../hooks/useTranslatableFields'; // Adjust path if needed
+import React, { useRef, useState, MouseEvent, useEffect } from 'react';
+import { Copy, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { TranslatableFieldValue } from '../../hooks/useTranslatableFields';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface LanguageOption {
@@ -21,8 +21,8 @@ interface MultiLanguageInputProps {
   disabled?: boolean;
   className?: string;
   defaultLanguage?: string;
-  selectedLanguage?: string; // External language control
-  showLanguageSelector?: boolean; // Toggle between old and new mode
+  selectedLanguage?: string;
+  showLanguageSelector?: boolean;
 }
 
 export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
@@ -37,14 +37,55 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
   className = '',
   defaultLanguage = 'en',
   selectedLanguage: externalSelectedLanguage,
-  showLanguageSelector = true, // Default to true for backward compatibility
+  showLanguageSelector = true,
 }) => {
   const { t } = useLanguage();
-  const [internalSelectedLanguage, setInternalSelectedLanguage] = useState(languages[0]?.code || '');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [internalSelectedLanguage, setInternalSelectedLanguage] = useState(defaultLanguage || languages[0]?.code || '');
+  
+  // Refs for Scrolling Logic
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  
+  // State for Arrow Visibility
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
 
-  // Use external language if provided, otherwise use internal state
   const selectedLanguage = externalSelectedLanguage || internalSelectedLanguage;
+
+  // --- Check Scroll Capability (For Arrow Visibility) ---
+  const checkScrollButtons = () => {
+    if (tabsRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = tabsRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      // Tolerance of 1px for high-DPI display rounding errors
+      setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth - 1);
+    }
+  };
+
+  // Check scroll buttons on mount and when languages change
+  useEffect(() => {
+    checkScrollButtons();
+    window.addEventListener('resize', checkScrollButtons);
+    return () => window.removeEventListener('resize', checkScrollButtons);
+  }, [languages]);
+
+  // --- Button Scroll Handler ---
+  const scrollContainer = (direction: 'left' | 'right') => {
+    if (tabsRef.current) {
+      const scrollAmount = 200; // Distance to scroll per click
+      const currentScroll = tabsRef.current.scrollLeft;
+      
+      tabsRef.current.scrollTo({
+        left: direction === 'left' ? currentScroll - scrollAmount : currentScroll + scrollAmount,
+        behavior: 'smooth'
+      });
+      
+      // We rely on the onScroll event to update state, but setTimeout ensures it runs after animation starts
+      setTimeout(checkScrollButtons, 100); 
+    }
+  };
 
   const handleInputChange = (languageCode: string, inputValue: string) => {
     onChange({
@@ -72,191 +113,203 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
   };
 
   const currentLanguage = languages.find(lang => lang.code === selectedLanguage);
-  const defaultLangName = languages.find(lang => lang.code === defaultLanguage)?.displayName || 'Default';
 
-  if (languages.length === 0) {
-    return (
-      <div className={`mb-4 ${className}`}>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{label}</label>
-        <div className="text-sm text-red-600 dark:text-red-400">
-          {t('multiLanguage.noLanguagesConfigured')}
-        </div>
-      </div>
-    );
-  }
+  // --- 1. Mouse Wheel Horizontal Scroll Handler ---
+  const handleWheel = (e: React.WheelEvent) => {
+    if (tabsRef.current) {
+      if (tabsRef.current.scrollWidth > tabsRef.current.clientWidth) {
+        tabsRef.current.scrollLeft += e.deltaY;
+        checkScrollButtons(); // Update arrows
+      }
+    }
+  };
 
-  // If external language control is used (showLanguageSelector = false), show simplified version
-  if (!showLanguageSelector) {
-    return (
-      <div className={`mb-4 ${className}`}>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
-        </label>
+  // --- 2. Drag-to-Scroll Handlers ---
+  const handleMouseDown = (e: MouseEvent) => {
+    if (!tabsRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - tabsRef.current.offsetLeft);
+    setScrollLeft(tabsRef.current.scrollLeft);
+  };
 
-        <div className="flex items-center justify-between mb-2">
-          {isLanguageRequired(selectedLanguage) && (
-            <span className="text-xs text-red-500 dark:text-red-400">
-              {t('multiLanguage.required')}
-            </span>
-          )}
-          {selectedLanguage !== defaultLanguage && value[defaultLanguage] && (
-            <button
-              type="button"
-              onClick={handleCopyFromDefault}
-              disabled={disabled}
-              className="ml-auto flex items-center gap-1 px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Copy className="w-3 h-3" />
-              Copy from {defaultLangName}
-            </button>
-          )}
-        </div>
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
 
-        <input
-          type="text"
-          value={value[selectedLanguage] || ''}
-          onChange={(e) => handleInputChange(selectedLanguage, e.target.value)}
-          placeholder={placeholder}
-          disabled={disabled}
-          dir={currentLanguage?.isRtl ? 'rtl' : 'ltr'}
-          className={`
-            w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2
-            bg-white dark:bg-gray-800 text-gray-900 dark:text-white
-            placeholder-gray-400 dark:placeholder-gray-500
-            ${hasError(selectedLanguage)
-              ? 'border-red-300 dark:border-red-600 focus:ring-red-500'
-              : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400'
-            }
-            ${disabled ? 'bg-gray-100 dark:bg-gray-900 cursor-not-allowed opacity-50' : ''}
-          `}
-        />
-        {hasError(selectedLanguage) && (
-          <p className="mt-1 text-xs text-red-500 dark:text-red-400">
-            {t('multiLanguage.fieldRequired')}
-          </p>
-        )}
-      </div>
-    );
-  }
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
 
-  // Original version with language selector
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging || !tabsRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - tabsRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    tabsRef.current.scrollLeft = scrollLeft - walk;
+    checkScrollButtons(); // Update arrows while dragging
+  };
+
+  if (languages.length === 0) return null;
+
   return (
-    <div className={`mb-4 ${className}`}>
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+    <div className={`mb-6 ${className}`}>
+      {/* Utility Style to hide scrollbar but keep functionality */}
+      <style>{`
+        .hide-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .hide-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+      
+      <label className="block text-sm font-bold text-white mb-2">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
 
-      <div className="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden transition-all duration-200 ease-in-out">
+      {/* Main Card Container */}
+      <div className="bg-[#1e2330] border border-gray-700 rounded-lg overflow-hidden w-full shadow-lg">
+        
+        {/* Header: Scrollable Tabs */}
+        {showLanguageSelector && (
+          <div className="bg-[#161922] border-b border-gray-700 w-full relative group">
+            
+            {/* --- Left Scroll Button --- */}
+            <div className={`absolute left-0 top-0 bottom-0 z-20 flex items-center transition-opacity duration-300 ${canScrollLeft ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+              <div className="absolute inset-0 bg-gradient-to-r from-[#161922] to-transparent w-12 pointer-events-none" />
+              <button
+                type="button"
+                onClick={() => scrollContainer('left')}
+                className="relative z-10 p-1 ml-1 hover:bg-gray-700 rounded-full text-gray-400 hover:text-white transition-colors"
+              >
+                <ChevronLeft size={20} />
+              </button>
+            </div>
 
-        {/* Language Selector Header (Always Visible) */}
-        <button
-          type="button"
-          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="w-full px-3 py-2 flex items-center justify-between bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-750 transition-colors"
-          disabled={disabled}
-        >
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-900 dark:text-white">
-              {currentLanguage?.displayName} ({currentLanguage?.nativeName})
-            </span>
-            {hasError(selectedLanguage) && (
-              <span className="text-xs text-red-500 dark:text-red-400">⚠</span>
-            )}
-            {value[selectedLanguage] && !hasError(selectedLanguage) && (
-              <span className="text-xs text-green-500 dark:text-green-400">✓</span>
-            )}
-          </div>
-          <ChevronDown className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
-        </button>
+            {/* --- Right Scroll Button --- */}
+            <div className={`absolute right-0 top-0 bottom-0 z-20 flex items-center justify-end transition-opacity duration-300 ${canScrollRight ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+               <div className="absolute inset-0 bg-gradient-to-l from-[#161922] to-transparent w-12 pointer-events-none" />
+               <button
+                type="button"
+                onClick={() => scrollContainer('right')}
+                className="relative z-10 p-1 mr-1 hover:bg-gray-700 rounded-full text-gray-400 hover:text-white transition-colors"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
 
-        {/* FIX: Changed from 'absolute' to 'relative' (default block behavior).
-           This pushes the content down when open, preventing the list from being clipped by the modal.
-        */}
-        {isDropdownOpen && (
-          <div className="w-full bg-white dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600 max-h-60 overflow-y-auto">
-            {languages.map((lang) => {
-              const isActive = selectedLanguage === lang.code;
-              const error = hasError(lang.code);
-              const hasValue = value[lang.code] && value[lang.code].trim() !== '';
+            {/* --- Scrollable Container --- */}
+            <div 
+              ref={tabsRef}
+              className={`flex overflow-x-auto hide-scrollbar w-full flex-nowrap ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+              onWheel={handleWheel}
+              onMouseDown={handleMouseDown}
+              onMouseLeave={handleMouseLeave}
+              onMouseUp={handleMouseUp}
+              onMouseMove={handleMouseMove}
+              onScroll={checkScrollButtons} // Ensure arrows update on scroll
+            >
+              {languages.map((lang) => {
+                const isActive = selectedLanguage === lang.code;
+                const error = hasError(lang.code);
+                
+                return (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    // Only trigger click if we aren't dragging
+                    onClick={() => !isDragging && setInternalSelectedLanguage(lang.code)}
+                    disabled={disabled}
+                    className={`
+                      relative flex items-center gap-2 px-6 py-3.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 flex-shrink-0 select-none
+                      ${isActive 
+                        ? 'text-blue-400 bg-[#1e2330]' 
+                        : 'text-gray-400 hover:text-gray-200 bg-[#14161f] hover:bg-[#1a1d26]'
+                      }
+                    `}
+                  >
+                    {/* Active Indicator Line */}
+                    {isActive && (
+                      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] z-10" />
+                    )}
 
-              return (
-                <button
-                  key={lang.code}
-                  type="button"
-                  onClick={() => {
-                    setInternalSelectedLanguage(lang.code);
-                    setIsDropdownOpen(false);
-                  }}
-                  className={`
-                    w-full px-3 py-2 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors text-left
-                    ${isActive ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
-                  `}
-                >
-                  <div className="flex items-center gap-2">
-                    <span className={`text-sm ${isActive ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-700 dark:text-gray-300'}`}>
-                      {lang.displayName}
-                    </span>
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      ({lang.nativeName})
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {error && <span className="text-xs text-red-500 dark:text-red-400">⚠ Required</span>}
-                    {!error && hasValue && <span className="text-xs text-green-500 dark:text-green-400">✓ Filled</span>}
-                    {!error && !hasValue && lang.code !== defaultLanguage && <span className="text-xs text-gray-400 dark:text-gray-500">Empty</span>}
-                    {isActive && <Check className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
-                  </div>
-                </button>
-              );
-            })}
+                    {/* Active Indicator Top Gradient */}
+                    {isActive && (
+                      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />
+                    )}
+
+                    <span>{lang.displayName}</span>
+                    
+                    {error && (
+                      <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+                    )}
+                  </button>
+                );
+              })}
+              
+              {/* Spacer to ensure last item isn't covered by fade */}
+              <div className="w-8 flex-shrink-0" />
+            </div>
           </div>
         )}
 
-        {/* Input Field Area */}
-        <div className="p-3 bg-white dark:bg-gray-800">
-          <div className="flex items-center justify-between mb-2">
-            {isLanguageRequired(selectedLanguage) && (
-              <span className="text-xs text-red-500 dark:text-red-400">
-                {t('multiLanguage.required')}
+        {/* Input Body */}
+        <div className="p-5 bg-[#1e2330]">
+          
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                 {currentLanguage?.nativeName || currentLanguage?.displayName}
               </span>
-            )}
-            {/* Copy from Default Language Button */}
+              
+              {isLanguageRequired(selectedLanguage) && (
+                <span className="text-[10px] font-bold text-white bg-red-600 px-2 py-0.5 rounded-sm shadow-sm tracking-wider">
+                  REQUIRED
+                </span>
+              )}
+            </div>
+
             {selectedLanguage !== defaultLanguage && value[defaultLanguage] && (
-              <button
+               <button
                 type="button"
                 onClick={handleCopyFromDefault}
-                disabled={disabled}
-                className="ml-auto flex items-center gap-1 px-2 py-1 text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Copy className="w-3 h-3" />
-                Copy from {defaultLangName}
-              </button>
+                className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors opacity-70 hover:opacity-100"
+               >
+                 <Copy className="w-3 h-3" />
+                 <span>Copy Default</span>
+               </button>
             )}
           </div>
-          <input
-            type="text"
-            value={value[selectedLanguage] || ''}
-            onChange={(e) => handleInputChange(selectedLanguage, e.target.value)}
-            placeholder={placeholder}
-            disabled={disabled}
-            dir={currentLanguage?.isRtl ? 'rtl' : 'ltr'}
-            className={`
-              w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2
-              bg-white dark:bg-gray-800 text-gray-900 dark:text-white
-              placeholder-gray-400 dark:placeholder-gray-500
-              ${hasError(selectedLanguage)
-                ? 'border-red-300 dark:border-red-600 focus:ring-red-500'
-                : 'border-gray-300 dark:border-gray-600 focus:ring-blue-500 dark:focus:ring-blue-400'
-              }
-              ${disabled ? 'bg-gray-100 dark:bg-gray-900 cursor-not-allowed opacity-50' : ''}
-            `}
-          />
+
+          <div className="relative">
+            <input
+              type="text"
+              value={value[selectedLanguage] || ''}
+              onChange={(e) => handleInputChange(selectedLanguage, e.target.value)}
+              placeholder={placeholder || "Enter ingredient name"}
+              disabled={disabled}
+              dir={currentLanguage?.isRtl ? 'rtl' : 'ltr'}
+              className={`
+                w-full bg-transparent border-none p-0 text-base text-gray-200 
+                placeholder-gray-600 focus:ring-0 focus:outline-none
+                ${disabled ? 'cursor-not-allowed opacity-50' : ''}
+              `}
+            />
+            
+            <div className={`absolute -bottom-2 left-0 right-0 h-px transition-colors duration-200 ${
+              hasError(selectedLanguage) ? 'bg-red-600' : 'bg-gray-700'
+            }`} />
+          </div>
+
           {hasError(selectedLanguage) && (
-            <p className="mt-1 text-xs text-red-500 dark:text-red-400">
-              {t('multiLanguage.fieldRequired')}
-            </p>
+            <div className="mt-4 flex items-center gap-1.5 animate-in slide-in-from-top-1 fade-in">
+              <AlertCircle className="w-3.5 h-3.5 text-red-500" />
+              <p className="text-xs text-red-500 font-medium">
+                {t('multiLanguage.fieldRequired') || 'This field is required'}
+              </p>
+            </div>
           )}
         </div>
       </div>
