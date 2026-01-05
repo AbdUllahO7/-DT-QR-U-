@@ -139,7 +139,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
     if (editingCategoryName.trim()) {
       onCategoryNameChange(categoryId, editingCategoryName);
       onCategoryNameSave(categoryId);
-    }
+}
     setEditingCategoryName('');
   };
 
@@ -256,9 +256,11 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
     originalName: string;
     currentDisplayName: string;
     showEditButton?: boolean;
-    isActive?: boolean; // ADD THIS
-  }> = ({ categoryId, originalName, currentDisplayName, showEditButton = true, isActive = true }) => { // ADD isActive = true
+    isActive?: boolean;
+  }> = ({ categoryId, originalName, currentDisplayName, showEditButton = true, isActive = true }) => {
     const isCurrentlyEditing = editingCategoryId === categoryId;
+    // Use originalName (category.categoryName) instead of currentDisplayName (displayName)
+    const displayText = originalName;
     const hasChanged = currentDisplayName !== originalName;
 
     if (isCurrentlyEditing) {
@@ -296,18 +298,14 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
 
     return (
       <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-        <h4 className={`text-xl font-bold ${hasChanged ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-          {currentDisplayName}
+        <h4 className="text-xl font-bold text-gray-900 dark:text-white">
+          {displayText}
         </h4>
-        {hasChanged && (
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            (was: {originalName})
-          </span>
-        )}
-        {/* ADD isActive check here */}
+        {/* Show edited badge if displayName differs from originalName */}
+       
         {showEditButton && isActive && (
           <button
-            onClick={() => startEditingCategoryName(categoryId, currentDisplayName)}
+            onClick={() => startEditingCategoryName(categoryId, displayText)}
             className="flex items-center gap-1 px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors text-xs font-medium"
             title="Edit category name"
           >
@@ -1816,7 +1814,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <div className={`flex items-center gap-3 mb-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <div className={`flex items-center gap-3 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <CategoryNameDisplay
                           categoryId={branchCategory.categoryId}
                           originalName={branchCategory.category.categoryName}
@@ -1830,9 +1828,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-                        {t('branchCategories.manage.original')} {branchCategory.category.categoryName}
-                      </p>
                       <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <div className="flex items-center gap-1.5">
                           <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>

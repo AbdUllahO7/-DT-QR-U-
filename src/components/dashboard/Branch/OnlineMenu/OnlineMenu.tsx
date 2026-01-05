@@ -97,6 +97,7 @@ const OnlineMenu: React.FC = () => {
     }
   };
 
+
  const loadBasket = async () => {
   try {
     const data = await onlineMenuService.getMyBasket();
@@ -154,7 +155,7 @@ const OnlineMenu: React.FC = () => {
         publicId: pid,
         customerIdentifier,
         deviceFingerprint,
-        preferredLanguage: 'en',
+        preferredLanguage: 'ar',
       } as StartSessionDto);
 
       setSessionId(session.sessionId);

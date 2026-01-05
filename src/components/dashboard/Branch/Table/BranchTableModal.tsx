@@ -70,7 +70,6 @@ const BranchTableModal: React.FC<Props> = ({
     const loadLanguages = async () => {
       try {
         const languagesData = await languageService.getRestaurantLanguages();
-        console.log("languagesData", languagesData);
 
         // Deduplicate languages by code
         const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
@@ -80,7 +79,6 @@ const BranchTableModal: React.FC<Props> = ({
           return acc;
         }, []);
 
-        console.log("uniqueLanguages", uniqueLanguages);
         setSupportedLanguages(uniqueLanguages);
         setDefaultLanguage(languagesData.defaultLanguage || 'en');
 
@@ -108,13 +106,11 @@ const BranchTableModal: React.FC<Props> = ({
         // Load existing translations
         try {
           const response = await tableTranslationService.getTableTranslations(editingTable.id);
-          console.log("translations response", response);
 
           const tableNameTrans: TranslatableFieldValue = {
             [defaultLanguage]: editingTable.menuTableName
           };
 
-          // Handle the API response structure: { baseValues: {...}, translations: [...] }
           const translationsArray = response.translations || [];
 
           translationsArray.forEach(translation => {
@@ -126,7 +122,6 @@ const BranchTableModal: React.FC<Props> = ({
           setTableNameTranslations(tableNameTrans);
         } catch (error) {
           logger.error('Failed to load table translations', error, { prefix: 'BranchTableModal' });
-          // Initialize with default language value on error
           const tableNameTrans: TranslatableFieldValue = {
             [defaultLanguage]: editingTable.menuTableName
           };
@@ -139,7 +134,6 @@ const BranchTableModal: React.FC<Props> = ({
           isActive: true,
         });
 
-        // Reset translations for new table - initialize with empty default language value
         const emptyTranslations: TranslatableFieldValue = {
           [defaultLanguage]: ''
         };
@@ -223,11 +217,12 @@ const BranchTableModal: React.FC<Props> = ({
           aria-label={t('BranchTableModal.accessibility.modal') || 'Table Modal'}
           dir={isRTL ? 'rtl' : 'ltr'}
         >
+          {/* Overlay - Neutral dark for light mode, Darker for dark mode */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-gradient-to-br from-purple-900/30 via-blue-900/40 to-indigo-900/30 backdrop-blur-md"
+            className="fixed inset-0 bg-black/40 dark:bg-black/60 backdrop-blur-md"
             onClick={onClose}
           />
 
@@ -237,17 +232,18 @@ const BranchTableModal: React.FC<Props> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 40 }}
               transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
-              className="relative w-full max-w-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/50 overflow-hidden"
+              className="relative w-full max-w-xl bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
               onClick={(e) => e.stopPropagation()}
               dir={isRTL ? 'rtl' : 'ltr'}
             >
-              <div className="relative bg-gradient-to-br from-primary-500 via-primary-600 to-purple-600 dark:from-primary-600 dark:via-primary-700 dark:to-purple-700 p-8 text-white overflow-hidden">
+              {/* Header */}
+              <div className="relative bg-gradient-to-br from-primary-500 via-primary-600 to-purple-600 dark:from-primary-600 dark:via-primary-700 dark:to-purple-800 p-8 text-white overflow-hidden">
                 <button
                   onClick={onClose}
-                  className={`absolute top-6 p-2.5 hover:bg-white/25 dark:hover:bg-white/15 rounded-xl transition-all duration-300 hover:scale-110 hover:rotate-90 group z-10 ${isRTL ? 'left-6' : 'right-6'}`}
+                  className={`absolute top-6 p-2.5 hover:bg-white/20 dark:hover:bg-white/15 rounded-xl transition-all duration-300 hover:scale-110 hover:rotate-90 group z-10 ${isRTL ? 'left-6' : 'right-6'}`}
                   aria-label={t('BranchTableModal.accessibility.close') || 'Close'}
                 >
-                  <X className="w-5 h-5 group-hover:drop-shadow-lg" />
+                  <X className="w-5 h-5 group-hover:drop-shadow-lg text-white" />
                 </button>
 
                 <div className={`flex items-center gap-4 relative ${isRTL ? 'text-right' : ''}`}>
@@ -255,16 +251,16 @@ const BranchTableModal: React.FC<Props> = ({
                     initial={{ scale: 0, rotate: -180 }}
                     animate={{ scale: 1, rotate: 0 }}
                     transition={{ delay: 0.2, type: "spring" }}
-                    className="p-4 bg-white/25 backdrop-blur-sm rounded-2xl shadow-lg"
+                    className="p-4 bg-white/25 dark:bg-black/20 backdrop-blur-sm rounded-2xl shadow-lg"
                   >
-                    <Table className="w-7 h-7 drop-shadow-lg" />
+                    <Table className="w-7 h-7 drop-shadow-lg text-white" />
                   </motion.div>
                   <div className={isRTL ? 'text-right' : 'text-left'}>
                     <motion.h3
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 }}
-                      className="text-2xl font-bold drop-shadow-md"
+                      className="text-2xl font-bold drop-shadow-md text-white"
                     >
                       {isEditMode ? t('BranchTableModal.editTitle') || 'Edit Table' : t('BranchTableModal.addTitle') || 'Add New Table'}
                     </motion.h3>
@@ -272,7 +268,7 @@ const BranchTableModal: React.FC<Props> = ({
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.2 }}
-                      className="text-primary-50/90 text-sm mt-1 drop-shadow"
+                      className="text-primary-50/90 dark:text-gray-200/80 text-sm mt-1 drop-shadow"
                     >
                       {isEditMode ? t('BranchTableModal.editSubtitle') || 'Update table details' : t('BranchTableModal.addSubtitle') || 'Create a new table'}
                     </motion.p>
@@ -280,12 +276,12 @@ const BranchTableModal: React.FC<Props> = ({
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="relative p-8 space-y-6" role="form">
+              <form onSubmit={handleSubmit} className="relative p-8 space-y-6 bg-white dark:bg-gray-800" role="form">
                 {errors.general && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-4 bg-gradient-to-r from-red-50 to-red-100/50 dark:from-red-900/30 dark:to-red-800/20 border-l-4 border-red-500 dark:border-red-400 rounded-xl text-red-700 dark:text-red-300 text-sm font-medium shadow-sm"
+                    className="p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-lg text-red-700 dark:text-red-300 text-sm font-medium"
                   >
                     {errors.general}
                   </motion.div>
@@ -297,11 +293,8 @@ const BranchTableModal: React.FC<Props> = ({
                     value={tableNameTranslations}
                     onChange={(newTranslations) => {
                       setTableNameTranslations(newTranslations);
-                      // Update base formData with default language value for validation
                       const val = newTranslations[defaultLanguage] || '';
                       setFormData(prev => ({ ...prev, menuTableName: val }));
-
-                      // Clear error if exists
                       if (errors.menuTableName && val) {
                         setErrors(prev => {
                           const newErrors = { ...prev };
@@ -342,14 +335,14 @@ const BranchTableModal: React.FC<Props> = ({
                       placeholder={t('BranchTableModal.capacityPlaceholder') || 'Enter capacity'}
                       className={`
                         w-full px-5 py-3.5 rounded-2xl border-2 transition-all duration-300
-                        bg-white dark:bg-gray-800/50
+                        bg-white dark:bg-gray-800
                         text-gray-900 dark:text-gray-100
-                        placeholder-gray-400 dark:placeholder-gray-500
-                        border-gray-200 dark:border-gray-600
-                        hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg hover:shadow-primary-500/10
-                        focus:outline-none focus:ring-4 focus:ring-primary-500/30 focus:border-primary-500 focus:shadow-xl focus:shadow-primary-500/20
+                        placeholder-gray-400 dark:placeholder-gray-400
+                        border-gray-300 dark:border-gray-700
+                        hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg hover:shadow-primary-500/10
+                        focus:outline-none focus:ring-4 focus:ring-primary-500/20 dark:focus:ring-primary-500/20 focus:border-primary-500 dark:focus:border-primary-500
                         ${errors.capacity
-                          ? 'border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/30'
+                          ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20'
                           : ''
                         }
                         ${isRTL ? 'text-right' : 'text-left'}
@@ -372,27 +365,27 @@ const BranchTableModal: React.FC<Props> = ({
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`flex items-center justify-between p-5 bg-gradient-to-r from-gray-50 to-gray-100/80 dark:from-gray-800/50 dark:to-gray-700/30 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm ${isRTL ? 'flex-row-reverse' : ''}`}
+                    className={`flex items-center justify-between p-5 bg-gray-50 dark:bg-gray-800/80 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm ${isRTL ? 'flex-row-reverse' : ''}`}
                   >
                     <div>
-                      <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{t('BranchTableModal.status') || 'Table Status'}</h3>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                      <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">{t('BranchTableModal.status') || 'Table Status'}</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {formData.isActive ? t('BranchTableModal.active') || 'Table is active' : t('BranchTableModal.inactive') || 'Table is inactive'}
                       </p>
                     </div>
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, isActive: !prev.isActive }))}
-                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all duration-300 shadow-lg ${
+                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all duration-300 shadow-sm ${
                         formData.isActive
-                          ? 'bg-gradient-to-r from-primary-500 to-primary-600 shadow-primary-500/50'
-                          : 'bg-gray-300 dark:bg-gray-600 shadow-gray-400/30'
+                          ? 'bg-gradient-to-r from-primary-500 to-primary-600'
+                          : 'bg-gray-300 dark:bg-gray-600'
                       }`}
                     >
                       <motion.span
                         layout
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ${
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md ${
                           isRTL
                             ? (formData.isActive ? 'translate-x-1' : 'translate-x-8')
                             : (formData.isActive ? 'translate-x-8' : 'translate-x-1')
@@ -408,7 +401,7 @@ const BranchTableModal: React.FC<Props> = ({
                     onClick={onClose}
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="flex-1 px-6 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-2xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-md hover:shadow-lg"
+                    className="flex-1 px-6 py-3.5 text-sm font-semibold text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-2xl transition-all duration-300 border-2 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 shadow-sm hover:shadow-md"
                   >
                     {t('BranchTableModal.cancel') || 'Cancel'}
                   </motion.button>
@@ -417,7 +410,7 @@ const BranchTableModal: React.FC<Props> = ({
                     disabled={isSubmitting}
                     whileHover={{ scale: isSubmitting ? 1 : 1.02 }}
                     whileTap={{ scale: isSubmitting ? 1 : 0.98 }}
-                    className="flex-1 px-6 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-primary-600 via-primary-500 to-purple-600 hover:from-primary-700 hover:via-primary-600 hover:to-purple-700 dark:from-primary-500 dark:via-primary-600 dark:to-purple-600 dark:hover:from-primary-600 dark:hover:via-primary-700 dark:hover:to-purple-700 rounded-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary-500/40 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none shadow-xl hover:shadow-2xl shadow-primary-500/50 hover:shadow-primary-500/60"
+                    className="flex-1 px-6 py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-primary-600 via-primary-500 to-purple-600 hover:from-primary-700 hover:via-primary-600 hover:to-purple-700 dark:from-primary-500 dark:via-primary-600 dark:to-purple-600 rounded-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-primary-500/40 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40"
                   >
                     {isSubmitting ? (
                       <div className={`flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>

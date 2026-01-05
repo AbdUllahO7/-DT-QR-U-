@@ -94,6 +94,8 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         "availableAddons",
         "availableExtras",
       ])
+
+      console.log("Fetched menu response:", menuResponse)
       
       if (Array.isArray(menuResponse)) {
         setError("Menu format not supported yet. Please update the service.")
@@ -267,6 +269,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       .find((p) => p.branchProductId === branchProductId)
   }
 
+  console.log('MenuComponent render:', { menuData, searchTerm, selectedCategory })
   // Filter categories and products
   const getFilteredCategories = (): MenuCategory[] => {
     if (!menuData?.categories) return []

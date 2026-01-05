@@ -295,6 +295,10 @@ class OnlineMenuService {
   private anonymousUrl = '/api/Branches/Anonymus';
   private onlineUrl = '/api/online';
 
+   private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
   async getPublicBranchId(branchId: number): Promise<PublicBranchIdResponse> {
     try {
       logger.info('Public branch ID getirme isteği gönderiliyor', { branchId }, { prefix: 'OnlineMenuService' });
@@ -326,9 +330,14 @@ class OnlineMenuService {
   async getOnlineMenu(publicId: string): Promise<OnlineMenuResponse> {
     try {
       logger.info('Online menu getirme isteği gönderiliyor', { publicId }, { prefix: 'OnlineMenuService' });
-      
+        const language = this.getLanguageFromStorage();
+
       const url = `${this.onlineUrl}/menu/${publicId}`;
-      const response = await httpClient.get<OnlineMenuResponse>(url);
+      const response = await httpClient.get<OnlineMenuResponse>(url, {
+        params: {
+          language
+        }
+      });
       
       // Log extras information
       let totalExtrasCount = 0;
@@ -373,7 +382,7 @@ class OnlineMenuService {
         customerIdentifier: data.customerIdentifier,
         preferredLanguage: data.preferredLanguage
       }, { prefix: 'OnlineMenuService' });
-      
+
       const url = `${this.onlineUrl}/start-session`;
       const response = await httpClient.post<SessionResponse>(url, data);
       

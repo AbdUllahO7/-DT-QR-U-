@@ -8,6 +8,7 @@ import { branchService } from '../../../../services/Branch/BranchService';
 import BranchWorkingHours from './BranchWorkingHours';
 import { BranchData, EditDataType } from '../../../../types/BranchManagement/type';
 import { countriesWithCodes } from '../../../../data/mockData';
+import { BranchNameModal } from './BranchNameModal';
 
 interface BranchManagementBranchProps {
   branchId?: number;
@@ -21,6 +22,7 @@ const BranchManagementBranch: React.FC<BranchManagementBranchProps> = ({ branchI
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+  const [isBranchNameModalOpen, setIsBranchNameModalOpen] = useState<boolean>(false);
   const [editData, setEditData] = useState<EditDataType>({
     branchName: '',
     whatsappOrderNumber: '',
@@ -215,6 +217,46 @@ const BranchManagementBranch: React.FC<BranchManagementBranchProps> = ({ branchI
     }));
   };
 
+  const handleOpenBranchNameModal = (): void => {
+    setIsBranchNameModalOpen(true);
+  };
+
+  const handleCloseBranchNameModal = (): void => {
+    setIsBranchNameModalOpen(false);
+  };
+
+  const handleBranchNameModalSuccess = async (newName: string): Promise<void> => {
+    if (!selectedBranch) return;
+
+    try {
+      setIsLoading(true);
+      setError('');
+
+      // Update the branch name
+      const updateData: Partial<CreateBranchWithDetailsDto> = {
+        branchName: newName.trim()
+      };
+
+      await branchService.updateBranch(selectedBranch.id, updateData);
+
+      // Update local state
+      setEditData(prev => ({
+        ...prev,
+        branchName: newName.trim()
+      }));
+
+      setSuccess(t('branchManagementBranch.messages.nameUpdated') || 'Branch name updated successfully');
+      await loadBranches();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: any) {
+      setError(err.message || t('branchManagementBranch.messages.nameUpdateError') || 'Failed to update branch name');
+      setTimeout(() => setError(''), 3000);
+      throw err; // Re-throw to let modal handle it
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (isLoading && !selectedBranch) {
     return (
       <div className="flex items-center justify-center min-h-64 bg-gray-50 dark:bg-gray-900">
@@ -290,6 +332,7 @@ const BranchManagementBranch: React.FC<BranchManagementBranchProps> = ({ branchI
           countries={countriesWithCodes}
           getPhoneParts={getPhoneParts}
           handlePhoneCompositeChange={handlePhoneCompositeChange}
+          onEditBranchName={handleOpenBranchNameModal}
         />
         
         <BranchWorkingHours
@@ -299,6 +342,16 @@ const BranchManagementBranch: React.FC<BranchManagementBranchProps> = ({ branchI
           t={t}
           handleWorkingHourChange={handleWorkingHourChange}
         />
+
+        {selectedBranch && (
+          <BranchNameModal
+            isOpen={isBranchNameModalOpen}
+            onClose={handleCloseBranchNameModal}
+            onSuccess={handleBranchNameModalSuccess}
+            branchId={selectedBranch.id}
+            currentName={selectedBranch.branchName || ''}
+          />
+        )}
       </div>
     </div>
   );

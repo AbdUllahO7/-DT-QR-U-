@@ -967,19 +967,27 @@ hero: {
     title: 'Table Management',
     ActiveStatus :"Active Status",
     selectBranchPrompt:"No Branches",
-          selectBranch : "Select Branch",
+    selectBranch : "Select Branch",
 
-    descriptionActive : "Category is active and visible", 
-    descriptionInActive : "Category is inactive and hidden", 
+    descriptionActive : "Area is active",
+    descriptionInActive : "Area is inactive",
 
     description: 'Manage your QR codes and tables',
-            noCategories :"Not Found Area",
+    noCategories :"Not Found Area",
     createFirstCategory: "Create First Area",
+
+    areaTypes: {
+      indoor: 'Indoor',
+      outdoor: 'Outdoor',
+      terrace: 'Terrace',
+      garden: 'Garden'
+    },
+
     error: {
       loadFailed: 'Failed to load branch list',
       dataLoadFailed: 'An error occurred while loading data'
     },
-      deleteModal :{ title : "Are You Sure you want delete the item ? " },
+    deleteModal :{ title : "Are You Sure you want delete the item ? " },
     actions: {
       addTable: 'Add Table',
       addQRCode: 'Add QR Code',
@@ -2610,42 +2618,45 @@ hero: {
   },
 
   TableCategoryModal: {
-    addCategoryTitle: 'Add Table Area',
-    update: 'Update Table Area',
-    addCategorySubtitle: 'Create a new table Area',
-    addCategorySubtitle2: 'Define the properties of the new table Area',
+    addCategoryTitle: 'Add New Area',
+    editCategoryTitle: 'Edit Area',
+    update: 'Update Area',
+    addCategorySubtitle: 'Create a new area for your tables',
+    editCategorySubtitle: 'Update area details',
     categoryName: 'Area Name',
-    categoryNamePlaceholder: 'e.g. VIP Tables, Garden Tables',
-    description: 'Description (Optional)',
-    descriptionPlaceholder: 'Brief description about the Area...',
+    categoryNamePlaceholder: 'Enter area name',
+    description: 'Description',
+    descriptionPlaceholder: 'Enter description (optional)',
     colorSelection: 'Color Selection',
     customColor: 'Custom color',
-    iconSelection: 'Icon Selection',
+    iconSelection: 'Area Type',
     branchSelection: 'Branch Selection',
     cancel: 'Cancel',
     addCategory: 'Add Area',
     saving: 'Saving...',
-    
+
     // Icons
     table: 'Table',
     chair: 'Chair',
     service: 'Service',
     label: 'Label',
     layer: 'Layer',
-    
+
     // Validation errors
-    categoryNameRequired: 'Category name is required',
-    iconRequired: 'You must select an icon',
+    categoryNameRequired: 'Area name is required',
+    iconRequired: 'Icon is required',
     branchRequired: 'Branch selection is required',
-    invalidData: 'Invalid data sent',
+    invalidData: 'Invalid data provided',
+    errorOccurred: 'An error occurred',
     unauthorized: 'You are not authorized. Please log in again.',
     forbidden: 'You do not have permission for this operation.',
     branchNotFound: 'Selected branch not found.',
     serverError: 'Server error occurred. Please try again later.',
     unexpectedError: 'An unexpected error occurred while adding category',
-    
+
     accessibility: {
-      modal: 'Table Area creation modal',
+      modal: 'Table Area Modal',
+      close: 'Close',
       colorPalette: 'Color selection palette',
       colorPreset: 'Preset color option',
       customColorPicker: 'Custom color picker',
@@ -3223,6 +3234,7 @@ hero: {
     loading: 'Loading branch information...',
     noBranchFound: 'No branch found',
     uploadLogo: 'Upload Logo',
+    editBranchName: 'Edit Branch Name',
     status: {
       open: 'Open',
       closed: 'Closed',
@@ -3230,7 +3242,7 @@ hero: {
       reopenBranch: 'Reopen Branch',
       temporaryClose: 'Temporary Close'
     },
-    
+
     actions: {
       edit: 'Edit',
       save: 'Save',
@@ -3241,7 +3253,7 @@ hero: {
       deleteWarning: 'Are you sure you want to delete this branch? This action cannot be undone.',
       onlineMenu: 'Online Menu URL',
     },
-    
+
     basicInfo: {
       title: 'Basic Information',
       branchName: 'Branch Name',
@@ -3249,7 +3261,7 @@ hero: {
       email: 'Email',
       notSpecified: 'Not specified'
     },
-    
+
     addressInfo: {
       title: 'Address Information',
       country: 'Country',
@@ -3258,7 +3270,7 @@ hero: {
       postalCode: 'Postal Code',
       region: 'Region'
     },
-    
+
     workingHours: {
       title: 'Working Hours',
       workingDay: 'Working day',
@@ -3275,7 +3287,7 @@ hero: {
         6: 'Saturday'
       }
     },
-    
+
     messages: {
       updateSuccess: 'Branch information updated successfully',
       deleteSuccess: 'Branch deleted successfully',
@@ -3284,9 +3296,16 @@ hero: {
       updateError: 'Error occurred during update',
       deleteError: 'Error occurred during deletion',
       statusChangeError: 'Error occurred while changing status',
-      loadError: 'Error occurred while loading branch information'
+      loadError: 'Error occurred while loading branch information',
+      nameUpdated: 'Branch name updated successfully',
+      nameUpdateError: 'Failed to update branch name'
     },
-    
+
+    errors: {
+      nameRequired: 'Branch name is required',
+      saveFailed: 'Failed to save branch name'
+    },
+
     placeholders: {
       branchName: 'Enter branch name',
       whatsappNumber: 'Enter WhatsApp number',
@@ -3392,6 +3411,7 @@ hero: {
       noCategoriesAddedDesc: 'No categories have been added to this branch yet',
       addCategories: 'Add Categories',
       original: 'Original:',
+      customized: 'Customized',
       added: 'added',
       available: 'available',
       total: 'Total',
@@ -5784,21 +5804,39 @@ categoryConfigModal: {
   }
   },
   BranchTableModal: {
-    'addTitle': 'Add Branch Table Category',
-    'editTitle': 'Edit Branch Table Category',
-    'addSubtitle': 'Fill in the details to create a new branch table category.',
+    'addTitle': 'Add New Table',
+    'editTitle': 'Edit Table',
+    'addSubtitle': 'Create a new table',
     'tableNamePlaceholder': 'Enter table name',
-    'capacity': 'Enter table capacity',
+    'capacity': 'Capacity',
     'tableName': 'Table Name',
     'cancel': 'Cancel',
     'tableNameRequired': 'Table name is required',
-    'editSubtitle': 'Fill in the details to update the branch table category.',
-    'add': 'Add',
-    'capacityPlaceholder': 'Enter table capacity',
+    'capacityRequired': 'Capacity must be at least 1',
+    'editSubtitle': 'Update table details',
+    'add': 'Add Table',
+    'capacityPlaceholder': 'Enter capacity',
     'saving': 'Saving...',
-    'status': 'Status',
-    'active': 'Active',
-    'update': 'Update'
+    'status': 'Table Status',
+    'active': 'Table is active',
+    'inactive': 'Table is inactive',
+    'update': 'Update Table',
+    'invalidData': 'Invalid data provided',
+    'errorOccurred': 'An error occurred',
+    'accessibility': {
+      'modal': 'Table Modal',
+      'close': 'Close'
+    }
+  },
+
+  languageControl: {
+    editing: 'Editing',
+    copyFrom: 'Copy all from',
+    quickFill: 'Quick Fill Other Languages...',
+    fill: 'Fill',
+    bulkFillTitle: 'Bulk Fill Target Language',
+    scrollLeft: 'Scroll left',
+    scrollRight: 'Scroll right'
   }
 
 }; 

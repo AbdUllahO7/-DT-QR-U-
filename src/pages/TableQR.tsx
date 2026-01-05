@@ -144,7 +144,8 @@ const TableQR = () => {
         const fp = await FingerprintJS.load();
         const result = await fp.get();
         const deviceFingerprint = result.visitorId;
-        const preferredLanguage = language;
+        // Get language from localStorage instead of context to ensure consistency
+        const preferredLanguage = localStorage.getItem('language') || 'en';
         let customerIdentifier = localStorage.getItem('customerIdentifier');
         if (!customerIdentifier) {
           customerIdentifier = nanoid();
