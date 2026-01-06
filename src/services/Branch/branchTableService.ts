@@ -342,15 +342,14 @@ class TableService {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
       const language = this.getLanguageFromStorage();
-
+      console.log("language",language)
       logger.info('Masalar API çağrısı başlatılıyor', { categoryId, onlyActive, includeCategory, branchId }, { prefix: 'TableService' });
 
       const params = new URLSearchParams({
         onlyActive: onlyActive.toString(),
-        language: language,
         includeCategory: includeCategory.toString()
       });
-
+      params.append('language', language);
       if (categoryId) {
         params.append('categoryId', categoryId);
       }
@@ -359,9 +358,11 @@ class TableService {
       if (branchId) {
         params.append('branchId', branchId.toString());
       }
-
-      const response = await httpClient.get<TableData[]>(`${this.baseUrl}/tables?${params.toString()}`);
-      
+      console.log("params",params)
+      const response = await httpClient.get<TableData[]>(`${this.baseUrl}/tables?`, {
+        params  : params
+      });
+      console.log('Tables fetched:', response);
       logger.info('Masalar alındı', response.data, { prefix: 'TableService' });
       
       return response.data;

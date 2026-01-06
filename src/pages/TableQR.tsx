@@ -119,6 +119,7 @@ const TableQR = () => {
   const [showMenu, setShowMenu] = useState(false);
   const hasRun = useRef(false);
   const isRTL = language === 'ar';
+  const { isDark, toggleTheme } = useTheme();
 
   useEffect(() => {
     if (hasRun.current) return;
@@ -267,7 +268,18 @@ const TableQR = () => {
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-sm text-green-600 dark:text-green-400 font-medium">{t('tableQR.header.active')}</span>
               </div>
-              <ThemeToggle />
+                 <button
+                           onClick={toggleTheme}
+                           className="min-w-[44px] min-h-[44px] p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 flex items-center justify-center"
+                           title={isDark ? t('theme.toggleToLight') : t('theme.toggleToDark')}
+                           aria-label={t('accessibility.theme')}
+                         >
+                           {isDark ? (
+                             <Sun className="h-5 w-5" />
+                           ) : (
+                             <Moon className="h-5 w-5" />
+                           )}
+                         </button>
               <LanguageSelector />
             </div>
           </div>

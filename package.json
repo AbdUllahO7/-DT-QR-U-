@@ -28,12 +28,13 @@
     "react-leaflet": "^4.2.1",
     "react-router-dom": "^7.6.2",
     "recharts": "^3.0.0",
+    "sonner": "^2.0.7",
     "swiper": "^11.2.8"
   },
   "devDependencies": {
-    "@types/leaflet": "^1.9.14",
     "@types/babel__core": "^7.20.5",
     "@types/json-schema": "^7.0.15",
+    "@types/leaflet": "^1.9.14",
     "@types/node": "^24.0.3",
     "@types/prop-types": "^15.7.15",
     "@types/react": "^18.2.43",

@@ -959,6 +959,13 @@ contact: {
 
   // Table Management
   tableManagement: {
+
+    areaTypes: {
+      indoor: 'داخلية',
+      outdoor: 'خارجية',
+      terrace: 'تراس',
+      garden: 'حديقة'
+    },
     addTable: 'إضافة طاولة',
     ActiveStatus :"الحالة النشطة",
     selectBranchPrompt:"لا توجد فروع",
@@ -2611,6 +2618,8 @@ contact: {
   TableCategoryModal: {
     title: 'إضافة منطقة طاولة',
     subtitle: 'إنشاء منطقة طاولة جديدة',
+    editCategoryTitle: 'تعديل منطقة الطاولة',
+    editCategorySubtitle: 'حدد خصائص منطقة الطاولة',
     update: 'تحديث منطقة الطاولة',
     addCategoryTitle: 'إضافة منطقة جديدة',
     categoryName: 'اسم المنطقة',
@@ -3681,6 +3690,8 @@ contact: {
       product: "المنتج",
       addToBasket: "أضف إلى السلة",
       addToOrder: "أضف إلى الطلب",
+      resetSession: "إعادة تعيين الجلسة",
+      closeSession: "إغلاق الجلسة",
       allergens: "مسببات الحساسية",
       loadingSubtitle: "نحضر لك أشهى المأكولات...",
       error: {

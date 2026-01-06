@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   Loader2,
   ShoppingCart,
@@ -270,7 +271,7 @@ const initializeMenu = async () => {
       setPriceChanges(null);
     } catch (err: any) {
       console.error('Failed to confirm price changes:', err);
-      alert(t('menu.error.updatePrices'));
+      toast.error(t('menu.error.updatePrices'));
     } finally {
       setConfirmingPriceChanges(false);
     }
@@ -352,9 +353,9 @@ const initializeMenu = async () => {
   } catch (err: any) {
     // ✅ If session expired, show error to user
     if (err?.response?.status === 401) {
-      alert(t('menu.error.sessionExpired') || 'Your session has expired. Please refresh the page.');
+      toast.error(t('menu.error.sessionExpired') || 'Your session has expired. Please refresh the page.');
     } else {
-      throw new Error(err.message || t('menu.error.addToBasket'));
+      toast.error(err.message || t('menu.error.addToBasket'));
     }
   } finally {
     setIsAddingToBasket(false);
@@ -413,7 +414,7 @@ const initializeMenu = async () => {
 
       await addToBasket(product, quantity, onlineAddons, selectedExtras);
     } catch (e: any) {
-      alert(e.message || t('menu.error.addToBasket'));
+      toast.error(e.message || t('menu.error.addToBasket'));
     }
   };
 
@@ -436,7 +437,7 @@ const initializeMenu = async () => {
     try {
       await addToBasket(product, 1, [], []);
     } catch (e: any) {
-      alert(e.message || t('menu.error.addToBasket'));
+      toast.error(e.message || t('menu.error.addToBasket'));
     }
   };
 
@@ -452,9 +453,9 @@ const initializeMenu = async () => {
     } catch (e: any) {
       // ✅ Handle expired session
       if (e?.response?.status === 401) {
-        alert(t('menu.error.sessionExpired') || 'Your session has expired. Please refresh the page.');
+        toast.error(t('menu.error.sessionExpired') || 'Your session has expired. Please refresh the page.');
       } else {
-        alert(e.message || t('menu.error.removeFromBasket'));
+        toast.error(e.message || t('menu.error.removeFromBasket'));
       }
     }
   };
@@ -483,6 +484,66 @@ const initializeMenu = async () => {
       (i) => i.branchProductId === branchProductId && !i.isAddon
     );
     return item?.quantity || 0;
+  };
+
+  // Handle reset session - clear basket and create new session
+  const handleResetSession = async () => {
+    const loadingToast = toast.loading(t('menu.resetSession') + '...');
+    try {
+      // Clear all basket items
+      if (basket?.items) {
+        for (const item of basket.items) {
+          if (!item.parentBasketItemId) {
+            await onlineMenuService.deleteBasketItem(item.basketItemId);
+          }
+        }
+      }
+
+      // Clear session data from localStorage
+      localStorage.removeItem('online_menu_session_id');
+      localStorage.removeItem('token');
+      localStorage.removeItem('online_menu_public_id');
+      localStorage.removeItem('tokenExpiry');
+
+      // Reinitialize session
+      await initializeSession(publicId!);
+      toast.success(t('menu.resetSession') + ' - ' + t('common.success'), { id: loadingToast });
+    } catch (err: any) {
+      console.error('Error resetting session:', err);
+      toast.error(t('common.error'), { id: loadingToast });
+    }
+  };
+
+  // Handle close session - clear everything and reset
+  const handleCloseSession = async () => {
+    const loadingToast = toast.loading(t('menu.closeSession') + '...');
+    try {
+      // Clear all basket items
+      if (basket?.items) {
+        for (const item of basket.items) {
+          if (!item.parentBasketItemId) {
+            await onlineMenuService.deleteBasketItem(item.basketItemId);
+          }
+        }
+      }
+
+      // Clear all session data
+      localStorage.removeItem('online_menu_session_id');
+      localStorage.removeItem('token');
+      localStorage.removeItem('online_menu_public_id');
+      localStorage.removeItem('tokenExpiry');
+      localStorage.removeItem('customer_identifier');
+
+      // Reset states
+      setSessionId(null);
+      setIsSessionInitialized(false);
+      setBasket(null);
+
+      toast.success(t('menu.closeSession') + ' - ' + t('common.success'), { id: loadingToast });
+    } catch (err: any) {
+      console.error('Error closing session:', err);
+      toast.error(t('common.error'), { id: loadingToast });
+    }
   };
 
 
@@ -596,6 +657,22 @@ const initializeMenu = async () => {
             >
               <div className="p-4 sm:p-8 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 h-full">
                 <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+
+                {/* Session Control Buttons */}
+                <div className="mb-4 flex gap-2 justify-end">
+                  <button
+                    onClick={handleResetSession}
+                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm font-medium"
+                  >
+                    {t('menu.resetSession')}
+                  </button>
+                  <button
+                    onClick={handleCloseSession}
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm font-medium"
+                  >
+                    {t('menu.closeSession')}
+                  </button>
+                </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 bg-transparent mt-6">
                   {/* Categories Sidebar */}

@@ -965,6 +965,12 @@ hero: {
 
   // Table Management
   tableManagement: {
+    areaTypes:{
+      indoor: 'Kapalı',
+      outdoor: 'Açık',
+      terrace: 'Terasta',
+      garden: 'Bahçe'
+    },
     addTable: 'Masa Ekle',
   ActiveStatus :"Aktif Durum", 
        selectBranch: "Şube Seç",
@@ -2617,6 +2623,8 @@ hero: {
   TableCategoryModal: {
     title: 'Masa Alan Ekle',
     update: 'Masa Alanını Güncelle',
+    editCategoryTitle: 'Masa Alanını Düzenle',
+    editCategorySubtitle: 'Masa alanının özelliklerini düzenleyin',
     subtitle: 'Yeni masa Alan oluşturun',
     categoryName: 'Alan Adı',
     addCategoryTitle: 'Yeni Alan Ekle',
@@ -3683,6 +3691,8 @@ BranchTableManagement: {
       product: "Ürün",
       addToBasket: "Sepete Ekle",
       addToOrder: "Siparişe Ekle",
+      resetSession: "Oturumu Sıfırla",
+      closeSession: "Oturumu Kapat",
       loadingSubtitle: "Lezzetli seçimlerimizi sizin için hazırlıyoruz...",
       error: {
         title: "Menü Mevcut Değil",

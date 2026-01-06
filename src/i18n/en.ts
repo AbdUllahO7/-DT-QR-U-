@@ -2619,6 +2619,7 @@ hero: {
 
   TableCategoryModal: {
     addCategoryTitle: 'Add New Area',
+    
     editCategoryTitle: 'Edit Area',
     update: 'Update Area',
     addCategorySubtitle: 'Create a new area for your tables',
@@ -3702,6 +3703,8 @@ hero: {
   products: "Products",
   addToBasket: "Add to Basket",
   addToOrder: "Add to Order",
+  resetSession: "Reset Session",
+  closeSession: "Close Session",
   loadingSubtitle: "Preparing our delicious selections for you...",
   error: {
     title: "Menu Unavailable",

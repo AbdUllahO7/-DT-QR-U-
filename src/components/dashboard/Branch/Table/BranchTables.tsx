@@ -17,7 +17,6 @@ import {
 import {
   CreateMenuTableDto,
   UpdateMenuTableDto,
-  CreateTableCategoryDto,
   UpdateTableCategoryDto,
   BatchCreateMenuTableItemDto,
   CreateBatchMenuTableDto,

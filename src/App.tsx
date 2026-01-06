@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -27,6 +28,7 @@ const App: React.FC = () => {
   return (
     <LanguageProvider>
       <ThemeProvider>
+        <Toaster position="top-right" richColors expand={false} />
         <Router>
           <Routes>
             {/* Wrap all routes that need the Header/Footer 

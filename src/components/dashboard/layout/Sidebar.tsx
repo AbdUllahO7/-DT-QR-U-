@@ -353,6 +353,18 @@ const Sidebar: React.FC<SidebarProps> = ({
                   <span>{t('dashboard.moneyCase.title')}</span>
                 </button>
 
+                  <button
+                onClick={() => handleNavigate('users', 'users')}
+                className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
+                  activeTab === 'users'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                } ${isRTL ? 'text-right' : 'text-left'}`}
+              >
+                <Users className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                <span>{t('dashboard.users.title')}</span>
+              </button>
+
                 <button
                   onClick={() => handleNavigate('BranchSettings', 'BranchSettings')}
                   className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
