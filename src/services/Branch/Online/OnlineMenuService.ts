@@ -302,10 +302,10 @@ class OnlineMenuService {
   async getPublicBranchId(branchId: number): Promise<PublicBranchIdResponse> {
     try {
       logger.info('Public branch ID getirme isteği gönderiliyor', { branchId }, { prefix: 'OnlineMenuService' });
-      
+              const language = this.getLanguageFromStorage();
       const url = `${this.anonymousUrl}/GetPublicId`;
       const response = await httpClient.get<{ [key: string]: string }>(url, {
-        params: { branchId }
+        params: { branchId, language }
       });
       
       const branchName = Object.keys(response.data)[0] || '';
@@ -434,9 +434,10 @@ class OnlineMenuService {
   async getMyBasket(): Promise<BasketResponse> {
     try {
       logger.info('Sepet bilgileri getiriliyor', {}, { prefix: 'OnlineMenuService' });
-      
-      const url = `${this.onlineUrl}/my-basket`;
-      const response = await httpClient.get<BasketResponse>(url);
+              const language = this.getLanguageFromStorage();
+
+      const url = `${this.onlineUrl}/my-basket`, params = { language };
+      const response = await httpClient.get<BasketResponse>(url, { params });
       
       let totalExtrasInBasket = 0;
       response.data.basketItems?.forEach(item => {

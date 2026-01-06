@@ -3249,7 +3249,10 @@ BranchTableManagement: {
       deleting: 'Siliniyor...',
       confirmDelete: 'Silmeyi Onayla',
       deleteWarning: 'Bu şubeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
-      onlineMenu: 'Çevrimiçi Menüye Git'
+      onlineMenu: 'Çevrimiçi Menüye Git',
+      copyLink: 'Bağlantıyı Kopyala',
+      copied: 'Kopyalandı!',
+      linkCopied: 'Bağlantı panoya kopyalandı!',
     },
     
     basicInfo: {
@@ -3295,6 +3298,14 @@ BranchTableManagement: {
       deleteError: 'Silme işlemi sırasında hata oluştu',
       statusChangeError: 'Durum değiştirme sırasında hata oluştu',
       loadError: 'Şube bilgileri yüklenirken hata oluştu'
+    },
+
+    errors: {
+      nameRequired: 'Şube adı gereklidir',
+      saveFailed: 'Şube adı kaydedilemedi',
+      popupBlocked: 'Çevrimiçi menüyü açmak için lütfen açılır pencerelere izin verin',
+      failedToGetPublicId: 'Çevrimiçi menü bağlantısı alınamadı',
+      failedToCopyLink: 'Bağlantı kopyalanamadı'
     },
     
     placeholders: {
@@ -3923,6 +3934,21 @@ cart: {
       orderTypeRequired: 'Lütfen bir sipariş türü seçin',
       addressRequired: 'Bu sipariş türü için teslimat adresi gerekli',
       phoneRequired: 'Bu sipariş türü için telefon numarası gerekli'
+    }
+  },
+
+  orderTypes: {
+    DINE_IN: {
+      name: 'Restoranda Ye',
+      description: 'Restoran masasında yemek ye'
+    },
+    DELIVERY: {
+      name: 'Teslimat',
+      description: 'Adrese teslimat'
+    },
+    PICKUP: {
+      name: 'Gel Al',
+      description: 'Online sipariş ver, mağazadan al'
     }
   },
 

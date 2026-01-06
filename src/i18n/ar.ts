@@ -3248,7 +3248,10 @@ contact: {
       deleting: 'جاري الحذف...',
       confirmDelete: 'تأكيد الحذف',
       deleteWarning: 'هل أنت متأكد من أنك تريد حذف هذا الفرع؟ لا يمكن التراجع عن هذا الإجراء.',
-      onlineMenu: 'عرض القائمة الإلكترونية'
+      onlineMenu: 'عرض القائمة الإلكترونية',
+      copyLink: 'نسخ الرابط',
+      copied: 'تم النسخ!',
+      linkCopied: 'تم نسخ الرابط إلى الحافظة!',
     },
     
     basicInfo: {
@@ -3294,6 +3297,14 @@ contact: {
       deleteError: 'حدث خطأ أثناء الحذف',
       statusChangeError: 'حدث خطأ أثناء تغيير الحالة',
       loadError: 'حدث خطأ أثناء تحميل معلومات الفرع'
+    },
+
+    errors: {
+      nameRequired: 'اسم الفرع مطلوب',
+      saveFailed: 'فشل حفظ اسم الفرع',
+      popupBlocked: 'يرجى السماح بالنوافذ المنبثقة لفتح القائمة الإلكترونية',
+      failedToGetPublicId: 'فشل الحصول على رابط القائمة الإلكترونية',
+      failedToCopyLink: 'فشل نسخ الرابط'
     },
     
     placeholders: {
@@ -3919,6 +3930,21 @@ contact: {
       orderTypeRequired: 'يرجى اختيار نوع الطلب',
       addressRequired: 'عنوان التوصيل مطلوب لهذا النوع من الطلبات',
       phoneRequired: 'رقم الهاتف مطلوب لهذا النوع من الطلبات'
+    }
+  },
+
+  orderTypes: {
+    DINE_IN: {
+      name: 'تناول الطعام في المطعم',
+      description: 'تناول الطعام على طاولة المطعم'
+    },
+    DELIVERY: {
+      name: 'التوصيل',
+      description: 'التوصيل إلى العنوان'
+    },
+    PICKUP: {
+      name: 'الاستلام',
+      description: 'اطلب عبر الإنترنت، استلم من المتجر'
     }
   },
 

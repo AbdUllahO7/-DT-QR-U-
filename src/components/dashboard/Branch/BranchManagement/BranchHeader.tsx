@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Edit, MapPin, Save, X, Loader2, Upload, Image, Globe } from 'lucide-react';
+import { Edit, MapPin, Save, X, Loader2, Upload, Globe, Copy, Check } from 'lucide-react';
+import { toast } from 'sonner';
 import { mediaService } from '../../../../services/mediaService';
 import { BranchHeaderProps, DEFAULT_IMAGE_URL, theme } from '../../../../types/BranchManagement/type';
-import { useNavigate } from 'react-router-dom';
 import { onlineMenuService } from '../../../../services/Branch/Online/OnlineMenuService';
 
 
@@ -97,29 +97,66 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
   const [isUploadingImage, setIsUploadingImage] = useState<boolean>(false);
   const [imageError, setImageError] = useState<string>('');
   const [dragActive, setDragActive] = useState<boolean>(false);
-  const navigate = useNavigate(); 
   const [isLoadingPublicId, setIsLoadingPublicId] = useState<boolean>(false);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
 
 const handleNavigateToOnlineMenu = async () => {
     if (!selectedBranch) return;
-    
+
     try {
       setIsLoadingPublicId(true);
-          localStorage.removeItem('token');
+
       // Fetch the public ID
-      const { publicId, branchName } = await onlineMenuService.getPublicBranchId(selectedBranch.id);
-      
-      // Navigate with public ID as the route parameter
-      navigate(`/OnlineMenu/${publicId}`, {
-        state: { 
-          branchName,
-          branchId: selectedBranch.id // Optional, in case you need it later
-        }
-      });
-      
+      const { publicId } = await onlineMenuService.getPublicBranchId(selectedBranch.id);
+
+      // Construct the URL for the online menu
+      const onlineMenuUrl = `${window.location.origin}/OnlineMenu/${publicId}`;
+
+      // Open in a new tab/window
+      // Note: Browsers don't allow programmatic incognito mode for security reasons
+      // Users can manually open this in incognito mode by right-clicking
+      const newWindow = window.open(onlineMenuUrl, '_blank', 'noopener,noreferrer');
+
+      // If popup was blocked, show a message
+      if (!newWindow) {
+        toast.error(t('branchManagementBranch.errors.popupBlocked') || 'Please allow popups to open the online menu');
+      }
+
     } catch (error: any) {
       console.error('Failed to get public ID:', error);
-      alert(t('branchManagementBranch.errors.failedToGetPublicId') || 'Failed to get online menu link');
+      toast.error(t('branchManagementBranch.errors.failedToGetPublicId') || 'Failed to get online menu link');
+    } finally {
+      setIsLoadingPublicId(false);
+    }
+  };
+
+  const handleCopyOnlineMenuLink = async () => {
+    if (!selectedBranch) return;
+
+    try {
+      setIsLoadingPublicId(true);
+
+      // Fetch the public ID
+      const { publicId } = await onlineMenuService.getPublicBranchId(selectedBranch.id);
+
+      // Construct the URL for the online menu
+      const onlineMenuUrl = `${window.location.origin}/OnlineMenu/${publicId}`;
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(onlineMenuUrl);
+
+      // Show success feedback
+      setIsCopied(true);
+      toast.success(t('branchManagementBranch.actions.linkCopied') || 'Link copied to clipboard!');
+
+      // Reset the copied state after 2 seconds
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+
+    } catch (error: any) {
+      console.error('Failed to copy link:', error);
+      toast.error(t('branchManagementBranch.errors.failedToCopyLink') || 'Failed to copy link');
     } finally {
       setIsLoadingPublicId(false);
     }
@@ -234,17 +271,38 @@ const handleNavigateToOnlineMenu = async () => {
 
               {/* Action Buttons */}
               <div className={`flex flex-wrap gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                {/* Online Menu Button */}
+                {/* Online Menu Buttons */}
                 {selectedBranch && (
-                  <ModernButton
-                    onClick={handleNavigateToOnlineMenu}
-                    variant="primary"
-                    disabled={isLoadingPublicId}
-                    isLoading={isLoadingPublicId}
-                  >
-                    <Globe className="w-4 h-4" />
-                    <span>{t('branchManagementBranch.actions.onlineMenu') || 'Online Menu'}</span>
-                  </ModernButton>
+                  <>
+                    <ModernButton
+                      onClick={handleNavigateToOnlineMenu}
+                      variant="primary"
+                      disabled={isLoadingPublicId}
+                      isLoading={isLoadingPublicId && !isCopied}
+                    >
+                      <Globe className="w-4 h-4" />
+                      <span>{t('branchManagementBranch.actions.onlineMenu') || 'Online Menu'}</span>
+                    </ModernButton>
+
+                    <ModernButton
+                      onClick={handleCopyOnlineMenuLink}
+                      variant={isCopied ? 'success' : 'neutral'}
+                      disabled={isLoadingPublicId}
+                      isLoading={isLoadingPublicId && !isCopied}
+                    >
+                      {isCopied ? (
+                        <Check className="w-4 h-4" />
+                      ) : (
+                        <Copy className="w-4 h-4" />
+                      )}
+                      <span>
+                        {isCopied
+                          ? (t('branchManagementBranch.actions.copied') || 'Copied!')
+                          : (t('branchManagementBranch.actions.copyLink') || 'Copy Link')
+                        }
+                      </span>
+                    </ModernButton>
+                  </>
                 )}
 
                 {/* Edit/Save/Cancel Buttons */}

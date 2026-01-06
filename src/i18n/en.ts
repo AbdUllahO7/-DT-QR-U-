@@ -3253,6 +3253,9 @@ hero: {
       confirmDelete: 'Confirm Delete',
       deleteWarning: 'Are you sure you want to delete this branch? This action cannot be undone.',
       onlineMenu: 'Online Menu URL',
+      copyLink: 'Copy Link',
+      copied: 'Copied!',
+      linkCopied: 'Link copied to clipboard!',
     },
 
     basicInfo: {
@@ -3304,7 +3307,10 @@ hero: {
 
     errors: {
       nameRequired: 'Branch name is required',
-      saveFailed: 'Failed to save branch name'
+      saveFailed: 'Failed to save branch name',
+      popupBlocked: 'Please allow popups to open the online menu',
+      failedToGetPublicId: 'Failed to get online menu link',
+      failedToCopyLink: 'Failed to copy link'
     },
 
     placeholders: {
@@ -3931,6 +3937,21 @@ cart: {
       orderTypeRequired: 'Please select an order type',
       addressRequired: 'Delivery address is required for this order type',
       phoneRequired: 'Phone number is required for this order type'
+    }
+  },
+
+  orderTypes: {
+    DINE_IN: {
+      name: 'Dine In',
+      description: 'Eat at restaurant table'
+    },
+    DELIVERY: {
+      name: 'Delivery',
+      description: 'Deliver to address'
+    },
+    PICKUP: {
+      name: 'Pickup',
+      description: 'Order online, pick up at store'
     }
   },
 

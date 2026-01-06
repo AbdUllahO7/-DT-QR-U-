@@ -85,10 +85,9 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
       const types = await orderTypeService.getOrderTypesByOnlineSessionId();
       
       const availableTypes = types.filter(
-        type => 
-          type.isActive && 
-          basketTotal >= type.minOrderAmount && 
-          !type.requiresTable
+        type =>
+          type.isActive &&
+          basketTotal >= type.minOrderAmount
       );
       
       if (availableTypes.length === 0) {
@@ -108,6 +107,20 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
       style: 'currency',
       currency: currency,
     }).format(price);
+  };
+
+  // Helper function to get translated order type name and description
+  const getOrderTypeTranslation = (orderType: OrderType, field: 'name' | 'description'): string => {
+    const translationKey = `orderTypes.${orderType.code}.${field}`;
+    const translated = t(translationKey);
+
+    // If translation exists and is different from the key, use it; otherwise use API value
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+
+    // Fallback to API value
+    return field === 'name' ? orderType.name : orderType.description;
   };
 
   const handleOrderTypeSelect = (orderType: OrderType) => {
@@ -345,10 +358,10 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <div>
                               <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">
-                                {orderType.name}
+                                {getOrderTypeTranslation(orderType, 'name')}
                               </h3>
                               <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                                {orderType.description}
+                                {getOrderTypeTranslation(orderType, 'description')}
                               </p>
                             </div>
                             {isSelected && (
@@ -419,10 +432,10 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
                       <div className="text-2xl">{selectedOrderType?.icon}</div>
                       <div>
                         <h4 className="font-bold text-slate-900 dark:text-slate-100">
-                          {selectedOrderType?.name}
+                          {selectedOrderType && getOrderTypeTranslation(selectedOrderType, 'name')}
                         </h4>
                         <p className="text-sm text-slate-600 dark:text-slate-400">
-                          {selectedOrderType?.description}
+                          {selectedOrderType && getOrderTypeTranslation(selectedOrderType, 'description')}
                         </p>
                       </div>
                     </div>
