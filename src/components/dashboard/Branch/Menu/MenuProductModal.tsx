@@ -50,7 +50,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const [quantity, setQuantity] = useState(1)
 
 
-  console.log('ProductModal Rendered',product)
   
   // Initialize expanded categories when product changes
   useEffect(() => {

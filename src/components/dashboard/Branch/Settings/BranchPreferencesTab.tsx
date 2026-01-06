@@ -38,7 +38,6 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
     { value: 'EUR', label: t('branchPreferences.currencies.EUR') }
   ];
 
-  console.log("BranchPreferences",preferences)
 
   // Timezone options
   const timezones = [

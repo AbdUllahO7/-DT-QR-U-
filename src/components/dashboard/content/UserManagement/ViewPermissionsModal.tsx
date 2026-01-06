@@ -18,7 +18,6 @@ const ViewPermissionsModal: React.FC<ViewPermissionsModalProps> = ({
 }) => {
   const { t, isRTL } = useLanguage();
 
-  console.log("user",user)
 
   if (!isOpen) return null;
 

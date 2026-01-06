@@ -155,15 +155,7 @@ httpClient.interceptors.response.use(
 
       // Special logging for login endpoint
       if (response.config.url?.includes('/api/Auth/Login')) {
-        console.log('🔐 RAW API RESPONSE (in interceptor):', {
-          status: response.status,
-          statusText: response.statusText,
-          headers: response.headers,
-          data: response.data,
-          dataType: typeof response.data,
-          dataKeys: response.data ? Object.keys(response.data) : 'null',
-          hasAccessToken: !!(response.data?.accessToken)
-        });
+    
         logger.info('🔐 Login Response Details:', {
           status: response.status,
           dataType: typeof response.data,

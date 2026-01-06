@@ -1217,15 +1217,15 @@ hero: {
         supportText: 'PNG, JPG, GIF formatları desteklenir. Maksimum dosya boyutu: 5MB'
       },
       country: {
-        label: 'Ülke *',
+        label: 'Ülke ',
         placeholder: 'Ülke adını girin'
       },
       city: {
-        label: 'Şehir *',
+        label: 'Şehir ',
         placeholder: 'Şehir adını girin'
       },
       street: {
-        label: 'Sokak *',
+        label: 'Sokak ',
         placeholder: 'Sokak adını girin'
       },
       zipCode: {
@@ -1233,7 +1233,7 @@ hero: {
         placeholder: 'Posta kodunu girin'
       },
       addressLine1: {
-        label: 'Adres Satırı 1 *',
+        label: 'Adres Satırı 1',
         placeholder: 'Detaylı adres bilgisi girin'
       },
       addressLine2: {
@@ -1241,15 +1241,15 @@ hero: {
         placeholder: 'Ek adres bilgisi girin (opsiyonel)'
       },
       phone: {
-        label: 'Telefon Numarası *',
+        label: 'Telefon Numarası ',
         placeholder: 'Telefon numarasını girin'
       },
       email: {
-        label: 'E-posta Adresi *',
+        label: 'E-posta Adresi ',
         placeholder: 'E-posta adresini girin'
       },
       location: {
-        label: 'Konum Bilgisi *',
+        label: 'Konum Bilgisi ',
         placeholder: 'Konum bilgisini girin (Örn: 40.9795,28.7225)'
       },
       contactHeader: {
@@ -3321,6 +3321,10 @@ BranchTableManagement: {
   },
 
   branchCategories: {
+    categoryName: 'Kategori Adı',
+    originalName: 'Orijinal Ad',
+    editCategoryName: 'Kategori Adını Düzenle',
+    enterCategoryName: 'Kategori adını girin',
     header: 'Şube Kategori Yönetimi',
     subheader: ' Şubesi için kategorileri ve ürünleri yönet',
     lastUpdated: 'Son Güncelleme',
@@ -3487,7 +3491,7 @@ BranchTableManagement: {
       unavailable: 'Mevcut Değil'
     },
      stock : {
-      inStock: 'Aktif',
+      inStock: 'Stokta Var',
       outOfStock: 'Stokta Yok'
     },
 
@@ -4699,6 +4703,7 @@ recommended: "Önerilen",
   productCard: {
     chefsPick: "Şefin Seçimi",
     customizable: "Özelleştirilebilir",
+    outOfStock: "Stokta Yok",
     addons: "+ekstralar",
     allergens: "Alerjenler",
     ingredients: "Malzemeler",
@@ -5074,12 +5079,12 @@ recommended: "Önerilen",
       "title": "Adres Bilgileri",
       "description": "Şubenizin adres bilgilerini girin",
       "country": {
-        "label": "Ülke *",
+        "label": "Ülke",
         "placeholder": "Ülke adını girin",
         "error": "Ülke gereklidir"
       },
       "city": {
-        "label": "Şehir *",
+        "label": "Şehir",
         "placeholder": "Şehir adını girin",
         "error": "Şehir gereklidir"
       },
@@ -5858,5 +5863,14 @@ categoryConfigModal: {
     active: 'Aktif',
     editSubtitle: 'Mevcut şube tablosu bilgilerini güncellemek için bilgileri doldurun.',
     update: 'Güncelle'
+  },
+  languageControl: {
+    editing: 'Dili Düzenle',
+    copyFrom: 'Kopyala',
+    quickFill: 'Hızlı Doldurma',
+    fill: 'Doldur',
+    bulkFillTitle: 'Toplu Doldurma',
+    scrollLeft: 'Sola Kaydır',
+    scrollRight: 'Sağa Kaydır'
   }
 };

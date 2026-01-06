@@ -81,7 +81,6 @@ export default function ExtrasManagement() {
     const loadLanguages = async () => {
       try {
         const languagesData = await languageService.getRestaurantLanguages();
-        console.log("languagesData", languagesData);
 
         // Deduplicate languages by code
         const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
@@ -91,7 +90,6 @@ export default function ExtrasManagement() {
           return acc;
         }, []);
 
-        console.log("uniqueLanguages", uniqueLanguages);
         setSupportedLanguages(uniqueLanguages);
         setDefaultLanguage(languagesData.defaultLanguage || 'en');
 

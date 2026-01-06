@@ -47,7 +47,6 @@ class AuthStorage {
       localStorage.setItem(this.USER_ID_KEY, data.userId);
       localStorage.setItem(this.TOKEN_EXPIRY_KEY, data.tokenExpiry);
 
-      console.log('✅ Auth data saved to localStorage');
     } catch (error) {
       console.error('Error saving auth data:', error);
       throw new Error('Failed to save authentication data');
@@ -147,7 +146,6 @@ class AuthStorage {
       localStorage.removeItem('onboarding_userId');
       localStorage.removeItem('onboarding_restaurantId');
 
-      console.log('✅ Auth data cleared from localStorage');
     } catch (error) {
       console.error('Error clearing auth data:', error);
     }
@@ -187,7 +185,7 @@ class AuthStorage {
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.USER_ID_KEY);
       localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
-      console.log('✅ Cleaned up expired tokens from localStorage');
+     ('✅ Cleaned up expired tokens from localStorage');
     }
   }
 }

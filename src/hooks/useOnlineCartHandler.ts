@@ -176,14 +176,7 @@ export const useOnlineCartHandler = ({
         const item = items.find(i => i.basketItemId === basketItemId);
         if (!item) return;
 
-        console.log('📦 Duplicating product:', {
-        basketItemId,
-        productName: item.productName,
-        branchProductId: item.branchProductId,
-        parentQuantity: item.quantity,
-        extrasCount: item.extras?.length || 0,
-        allExtras: item.extras
-        });
+      
 
         // ✅ Extract ALL non-removal extras with their ORIGINAL quantities
         const extrasToAdd: ProductExtraDto[] = [];
@@ -194,40 +187,18 @@ export const useOnlineCartHandler = ({
             // ✅ IMPORTANT: Preserve the original extra quantity
             const extraQuantity = extra.quantity || 1;
             
-            console.log('✅ Including extra for duplication:', {
-                name: extra.extraName,
-                category: extra.extraCategoryName,
-                branchProductExtraId: extra.branchProductExtraId,
-                originalQuantity: extra.quantity,
-                preservedQuantity: extraQuantity,
-                isRemoval: extra.isRemoval
-            });
-            
+          
             extrasToAdd.push({
                 branchProductExtraId: extra.branchProductExtraId,
                 extraId: extra.extraId,
                 quantity: extraQuantity, // ✅ Preserve original quantity
                 isRemoval: false,
             });
-            } else {
-            console.log('⏭️ Skipping removal extra:', {
-                name: extra.extraName,
-                branchProductExtraId: extra.branchProductExtraId
-            });
             }
         });
         }
 
-        console.log('📤 Sending duplicate request to API:', {
-        branchProductId: item.branchProductId,
-        quantity: 1, // Always 1 for duplication
-        extrasCount: extrasToAdd.length,
-        extrasDetails: extrasToAdd.map(e => ({
-            branchProductExtraId: e.branchProductExtraId,
-            extraId: e.extraId,
-            quantity: e.quantity
-        }))
-        });
+     
 
         // ✅ Add the duplicated product with all extras
         const newItem = await onlineMenuService.addUnifiedItemToMyBasket({
@@ -237,21 +208,12 @@ export const useOnlineCartHandler = ({
         extras: extrasToAdd.length > 0 ? extrasToAdd : undefined,
         });
 
-        console.log('✅ Product duplicated successfully:', {
-        newBasketItemId: newItem.basketItemId,
-        extrasIncluded: extrasToAdd.length
-        });
+      
 
         // ✅ Duplicate addons with their quantities
         const itemAddons = item.addons || item.addonItems || [];
         if (itemAddons.length > 0 && newItem.basketItemId) {
-        console.log('📦 Duplicating addons:', {
-            count: itemAddons.length,
-            addons: itemAddons.map((a: any) => ({
-            name: a.addonName || a.productName,
-            quantity: a.quantity
-            }))
-        });
+      
         
         const addonPayloads = itemAddons.map((addon: any) => ({
             branchProductId: addon.addonBranchProductId || addon.branchProductId,
@@ -261,7 +223,6 @@ export const useOnlineCartHandler = ({
         }));
         
         await onlineMenuService.batchAddItemsToMyBasket(addonPayloads);
-        console.log('✅ Addons duplicated successfully');
         }
 
         // ✅ Reload basket to show updated state
@@ -298,7 +259,6 @@ export const useOnlineCartHandler = ({
     ) => {
         const newQuantity = currentQuantity + change;
         if (newQuantity < 1) {
-        console.log('🗑️ Quantity would be < 1, deleting item');
         await handleDeleteItem(basketItemId);
         return;
         }
@@ -318,32 +278,17 @@ export const useOnlineCartHandler = ({
                         (item.addonItems && item.addonItems.length > 0);
         const hasCustomizations = hasExtras || hasAddons;
         
-        console.log('📊 Quantity update analysis:', {
-            basketItemId,
-            productName: item.productName,
-            currentQuantity,
-            change,
-            newQuantity,
-            hasExtras,
-            hasAddons,
-            hasCustomizations,
-            extrasCount: item.extras?.length || 0,
-            addonsCount: (item.addons?.length || item.addonItems?.length || 0)
-        });
+      
         
         if (change > 0 && hasCustomizations) {
             // ✅ Duplicate the item with all customizations (like useCartHandler)
-            console.log('🔄 Item has customizations, duplicating instead of updating quantity');
             
             for (let i = 0; i < change; i++) {
-            console.log(`📦 Duplication ${i + 1} of ${change}`);
             await handleDuplicateItem(basketItemId);
             }
             
-            console.log('✅ All duplications completed');
         } else {
             // Normal quantity update (no customizations or decreasing)
-            console.log('📝 Simple quantity update (no customizations or decreasing)');
             
             await onlineMenuService.updateBasketItem(basketItemId, {
             basketItemId,
@@ -352,7 +297,6 @@ export const useOnlineCartHandler = ({
             quantity: newQuantity
             });
 
-            console.log('✅ Quantity updated successfully');
             await onBasketUpdate();
         }
         } catch (err: any) {
@@ -383,16 +327,9 @@ export const useOnlineCartHandler = ({
         setDeletingItemId(basketItemId);
         
         const item = items.find(i => i.basketItemId === basketItemId);
-        console.log('🗑️ Deleting item:', {
-            basketItemId,
-            productName: item?.productName,
-            hasExtras: item?.extras && item.extras.length > 0,
-            hasAddons: (item?.addons?.length || item?.addonItems?.length || 0) > 0
-        });
-        
+      
         await onlineMenuService.deleteBasketItem(basketItemId);
         
-        console.log('✅ Item deleted successfully');
         await onBasketUpdate();
         } catch (err: any) {
         console.error('❌ Failed to delete item:', err);
@@ -411,14 +348,10 @@ export const useOnlineCartHandler = ({
         try {
         setIsClearing(true);
         
-        console.log('🗑️ Clearing entire basket:', {
-            itemCount: items.length,
-            total
-        });
+      
         
         await onlineMenuService.clearBasket();
         
-        console.log('✅ Basket cleared successfully');
         await onBasketUpdate();
         addToast('Basket cleared', 'success', 3000);
         } catch (err: any) {
@@ -439,7 +372,6 @@ export const useOnlineCartHandler = ({
     const newQuantity = currentQuantity + change;
     
     if (newQuantity < 1) {
-      console.log('🗑️ Addon quantity would be < 1, deleting addon');
       await handleDeleteAddon(addonBasketItemId);
       return;
     }
@@ -452,15 +384,6 @@ export const useOnlineCartHandler = ({
 
     try {
       setUpdatingItemId(addonBasketItemId);
-      
-      console.log('📝 Updating addon quantity:', {
-        addonBasketItemId,
-        currentQuantity,
-        change,
-        newQuantity,
-        maxQuantity
-      });
-      
       await onlineMenuService.updateBasketItem(addonBasketItemId, {
         basketItemId: addonBasketItemId,
         basketId: basket?.basketId || '',
@@ -468,7 +391,6 @@ export const useOnlineCartHandler = ({
         quantity: newQuantity
       });
       
-      console.log('✅ Addon quantity updated successfully');
       await onBasketUpdate();
     } catch (err: any) {
       console.error('❌ Failed to update addon quantity:', err);
@@ -485,11 +407,9 @@ export const useOnlineCartHandler = ({
     if (!confirm('Remove this add-on?')) return;
 
     try {
-      console.log('🗑️ Deleting addon:', { addonBasketItemId });
       
       await onlineMenuService.deleteBasketItem(addonBasketItemId);
       
-      console.log('✅ Addon deleted successfully');
       await onBasketUpdate();
     } catch (err: any) {
       console.error('❌ Failed to delete addon:', err);
@@ -508,12 +428,7 @@ export const useOnlineCartHandler = ({
     try {
       setAddingAddonToItem(parentBasketItemId);
       
-      console.log('➕ Adding addon to item:', {
-        parentBasketItemId,
-        addonBranchProductId: addon.addonBranchProductId,
-        addonName: addon.addonName || addon.addonProductName,
-        quantity: parentQuantity
-      });
+ 
       
       await onlineMenuService.addUnifiedItemToMyBasket({
         branchProductId: addon.addonBranchProductId,
@@ -522,7 +437,6 @@ export const useOnlineCartHandler = ({
         isAddon: true
       });
       
-      console.log('✅ Addon added successfully');
       await onBasketUpdate();
     } catch (err: any) {
       console.error('❌ Failed to add addon:', err);
@@ -551,11 +465,7 @@ export const useOnlineCartHandler = ({
       let newExtras: ProductExtraDto[];
 
       if (existingIndex >= 0) {
-        // Remove extra - filter it out
-        console.log('🔄 Removing extra:', {
-          branchProductExtraId: extra.branchProductExtraId,
-          basketItemId: item.basketItemId
-        });
+
         
         newExtras = currentExtras
           .filter((e) => e.branchProductExtraId !== extra.branchProductExtraId)
@@ -566,12 +476,7 @@ export const useOnlineCartHandler = ({
             isRemoval: e.isRemoval,
           }));
       } else {
-        // Add extra - append to array
-        console.log('➕ Adding extra:', {
-          branchProductExtraId: extra.branchProductExtraId,
-          basketItemId: item.basketItemId,
-          quantity: 1
-        });
+
         
         newExtras = [
           ...currentExtras.map((e) => ({
@@ -654,13 +559,7 @@ export const useOnlineCartHandler = ({
         return;
       }
 
-      console.log(`${delta > 0 ? '➕' : '➖'} Updating extra quantity:`, {
-        extraName: extra.extraName,
-        basketItemId: item.basketItemId,
-        branchProductExtraId: extraId,
-        currentQuantity: extra.quantity,
-        newQuantity
-      });
+  
 
       // ✅ Build new extras array with updated quantity
       const newExtras: ProductExtraDto[] = currentExtras.map((e) => ({
@@ -698,10 +597,7 @@ export const useOnlineCartHandler = ({
 
       setUpdatingExtraId(extraId);
 
-      console.log('🗑️ Deleting extra:', {
-        basketItemId: item.basketItemId,
-        branchProductExtraId: extraId
-      });
+    
 
       const currentExtras = item.extras || [];
       

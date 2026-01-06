@@ -49,7 +49,6 @@ const Dashboard: React.FC = () => {
     return path;
   });
 
-  console.log("selectedBranch", selectedBranch);
 
   // URL değiştikçe sekme güncelle
   useEffect(() => {
@@ -139,7 +138,6 @@ const Dashboard: React.FC = () => {
 
   const handleSelectBranch = (item: RestaurantBranchDropdownItem) => {
     setSelectedBranch(item);
-    console.log("selectedBranch", item);
     // Persist selection to localStorage
     localStorage.setItem('selectedBranchId', item.id.toString());
     localStorage.setItem('selectedBranchName', item.name);

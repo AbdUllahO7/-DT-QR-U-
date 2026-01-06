@@ -1214,11 +1214,11 @@ contact: {
         supportText: 'تدعم صيغ PNG، JPG، GIF. الحد الأقصى لحجم الملف: 5 ميجابايت'
       },
       country: {
-        label: 'البلد *',
+        label: 'البلد',
         placeholder: 'أدخل اسم البلد'
       },
       city: {
-        label: 'المدينة *',
+        label: 'المدينة',
         placeholder: 'أدخل اسم المدينة'
       },
       street: {
@@ -1238,11 +1238,11 @@ contact: {
         placeholder: 'أدخل معلومات العنوان الإضافية (اختياري)'
       },
       phone: {
-        label: 'رقم الهاتف *',
+        label: 'رقم الهاتف ',
         placeholder: 'أدخل رقم الهاتف'
       },
       email: {
-        label: 'عنوان البريد الإلكتروني *',
+        label: 'عنوان البريد الإلكتروني',
         placeholder: 'أدخل عنوان البريد الإلكتروني'
       },
       location: {
@@ -3322,6 +3322,10 @@ contact: {
   branchCategories: {
     // Header and Stats
     header: 'إدارة فئات الفرع',
+    originalName: 'الاسم الأصلي',
+    editCategoryName: 'تعديل اسم الفئة',
+    categoryName: 'اسم الفئة',
+    enterCategoryName: 'أدخل اسم الفئة',
     subheader: 'إدارة الفئات والمنتجات للفرع ',
     lastUpdated: 'آخر تحديث',
     stats: {
@@ -4717,6 +4721,7 @@ recycleBin: {
    "productCard": {
     "chefsPick": "اختيار الشيف",
     "customizable": "قابل للتخصيص",
+    "outOfStock": "غير متوفر",
     "addons": "+إضافات",
     "allergens": "مسببات الحساسية",
     "ingredients": "المكونات",
@@ -5834,5 +5839,14 @@ BranchTableModal: {
   status: 'الحالة',
   active: 'نشط',
   update: 'تحديث'
-}
+},
+  languageControl : {
+    editing: 'تحرير اللغة',
+    copyFrom: 'نسخ من',
+    quickFill: 'تعبئة سريعة',
+    fill: 'تعبئة',
+    bulkFillTitle: 'تعبئة جماعية',
+    scrollLeft: 'تمرير لليسار',
+    scrollRight: 'تمرير لليمين'
+  }
 };

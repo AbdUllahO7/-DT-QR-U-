@@ -3327,9 +3327,14 @@ hero: {
 
   branchCategories: {
     // Header and Stats
+    editCategoryName: 'Edit Category Name',
+    originalName: 'Original Name',
+    categoryName: 'Category Name',
+    enterCategoryName: 'Enter Category Name',
     header: 'Branch Categories Management',
     subheader: 'Manage categories and products for Branch ',
     lastUpdated: 'Last Updated',
+
     stock : {
       inStock: 'In Stock',
       outOfStock: 'Out of Stock'
@@ -3504,7 +3509,8 @@ hero: {
         categoryDeleted: 'Category deleted successfully',
         productAdded: 'Product {name} added successfully',
         productRemoved: 'Product {name} removed successfully',
-        orderSaved: 'Category order saved successfully'
+        orderSaved: 'Category order saved successfully',
+        nameUpdated: 'Category name updated successfully'
       },
       error: {
         cannotDelete: 'Cannot delete category "{name}" because it contains {count} products. Please remove all products first.',
@@ -4727,6 +4733,7 @@ productModal: {
     "chefsPick": "Chef's Pick",
     "customizable": "Customizable",
     "addons": "+addons",
+    "outOfStock": "Out of Stock",
     "allergens": "Allergens",
     "ingredients": "Ingredients",
     "inCart": "in cart",
@@ -5858,6 +5865,7 @@ categoryConfigModal: {
     copyFrom: 'Copy all from',
     quickFill: 'Quick Fill Other Languages...',
     fill: 'Fill',
+    
     bulkFillTitle: 'Bulk Fill Target Language',
     scrollLeft: 'Scroll left',
     scrollRight: 'Scroll right'

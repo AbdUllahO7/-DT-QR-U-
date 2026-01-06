@@ -568,10 +568,9 @@ const BranchModal: React.FC<BranchModalProps> = ({
         </h4>
         <div className="space-y-6">
 
-          {/* MULTI-LANGUAGE BRANCH NAME */}
           <div>
              <MultiLanguageInput
-                label={t('branchModal.fields.branchName.label') + ' *'}
+                label={t('branchModal.fields.branchName.label')}
                 value={branchNameTranslations}
                 onChange={(newTranslations) => {
                   setBranchNameTranslations(newTranslations);

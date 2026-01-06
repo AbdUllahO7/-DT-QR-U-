@@ -9,6 +9,14 @@ export interface LanguageOption {
   isRtl: boolean;
 }
 
+// Interface for currency option
+export interface CurrencyOption {
+  code: string;
+  displayName: string;
+  symbol: string;
+  iconKey: string;
+}
+
 // Interface for the complete branch preferences response
 export interface BranchPreferences {
   id: number;
@@ -26,6 +34,7 @@ export interface BranchPreferences {
   defaultLanguage: string;
   timeZoneId: string;
   availableLanguages: LanguageOption[];
+  availableCurrencies: CurrencyOption[];
   sessionTimeoutMinutes: number;
   cleanupMode: number;
   cleanupDelayAfterCloseMinutes: number;

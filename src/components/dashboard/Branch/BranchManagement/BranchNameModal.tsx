@@ -86,7 +86,6 @@ export const BranchNameModal: React.FC<BranchNameModalProps> = ({
           }
         });
 
-        console.log('Loaded branch translations:', nameTrans);
         setBranchNameTranslations(nameTrans);
       } catch (error) {
         logger.error('Failed to load branch translations', error, { prefix: 'BranchNameModal' });
@@ -126,7 +125,6 @@ export const BranchNameModal: React.FC<BranchNameModalProps> = ({
           branchName: branchNameTranslations[languageCode],
         }));
 
-      console.log('Translation data to be saved:', translationData);
 
       if (translationData.length > 0) {
         await branchTranslationService.batchUpsertBranchTranslations({

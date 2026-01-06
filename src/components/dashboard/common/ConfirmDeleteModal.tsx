@@ -27,7 +27,6 @@ export const ConfirmDeleteModal: React.FC<{
   const { t, isRTL } = useLanguage();
   const [error, setError] = useState<string | null>(null);
 
-  console.log(errorMessage)
   const handleConfirm = async () => {
     setError(null);
     try {

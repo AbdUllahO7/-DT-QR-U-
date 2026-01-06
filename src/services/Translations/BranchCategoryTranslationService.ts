@@ -1,4 +1,4 @@
-import { httpClient } from '../../utils/http';
+import { getEffectiveBranchId, httpClient } from '../../utils/http';
 import { logger } from '../../utils/logger';
 import {
   BranchCategoryTranslation,
@@ -9,10 +9,14 @@ import {
 class BranchCategoryTranslationService {
   private baseUrl = '/api/branch-category-translations';
 
+
+
   async getBranchCategoryTranslations(branchCategoryId: number): Promise<BranchCategoryTranslation[]> {
     try {
       logger.info('Fetching branch category translations', { branchCategoryId }, { prefix: 'BranchCategoryTranslationService' });
-      const response = await httpClient.get<BranchCategoryTranslation[]>(`${this.baseUrl}/${branchCategoryId}`);
+            const effectiveBranchId = getEffectiveBranchId();
+
+      const response = await httpClient.get<BranchCategoryTranslation[]>(`${this.baseUrl}/${branchCategoryId}?branchId=${effectiveBranchId}`);
       logger.info('Branch category translations fetched successfully', { branchCategoryId, count: response.data.length }, { prefix: 'BranchCategoryTranslationService' });
       return response.data;
     } catch (error: any) {
@@ -23,8 +27,9 @@ class BranchCategoryTranslationService {
 
   async getBranchCategoryTranslation(branchCategoryId: number, languageCode: string): Promise<BranchCategoryTranslation> {
     try {
+                  const effectiveBranchId = getEffectiveBranchId();
       logger.info('Fetching branch category translation', { branchCategoryId, languageCode }, { prefix: 'BranchCategoryTranslationService' });
-      const response = await httpClient.get<BranchCategoryTranslation>(`${this.baseUrl}/${branchCategoryId}/${languageCode}`);
+      const response = await httpClient.get<BranchCategoryTranslation>(`${this.baseUrl}/${branchCategoryId}/${languageCode}?branchId=${effectiveBranchId}`);
       logger.info('Branch category translation fetched successfully', { branchCategoryId, languageCode }, { prefix: 'BranchCategoryTranslationService' });
       return response.data;
     } catch (error: any) {
@@ -35,8 +40,9 @@ class BranchCategoryTranslationService {
 
   async upsertBranchCategoryTranslation(data: UpsertBranchCategoryTranslationDto): Promise<BranchCategoryTranslation> {
     try {
+                        const effectiveBranchId = getEffectiveBranchId();
       logger.info('Upserting branch category translation', { data }, { prefix: 'BranchCategoryTranslationService' });
-      const response = await httpClient.put<BranchCategoryTranslation>(`${this.baseUrl}`, data);
+      const response = await httpClient.put<BranchCategoryTranslation>(`${this.baseUrl}/${effectiveBranchId}`, data);
       logger.info('Branch category translation upserted successfully', { data }, { prefix: 'BranchCategoryTranslationService' });
       return response.data;
     } catch (error: any) {
@@ -48,7 +54,8 @@ class BranchCategoryTranslationService {
   async batchUpsertBranchCategoryTranslations(data: BatchUpsertBranchCategoryTranslationsDto): Promise<BranchCategoryTranslation[]> {
     try {
       logger.info('Batch upserting branch category translations', { count: data.translations.length }, { prefix: 'BranchCategoryTranslationService' });
-      const response = await httpClient.put<BranchCategoryTranslation[]>(`${this.baseUrl}/batch`, data);
+      const effectiveBranchId = getEffectiveBranchId();
+      const response = await httpClient.put<BranchCategoryTranslation[]>(`${this.baseUrl}/batch?branchId=${effectiveBranchId}`, data);
       logger.info('Branch category translations batch upserted successfully', { count: data.translations.length }, { prefix: 'BranchCategoryTranslationService' });
       return response.data;
     } catch (error: any) {
@@ -59,8 +66,9 @@ class BranchCategoryTranslationService {
 
   async deleteBranchCategoryTranslation(branchCategoryId: number, languageCode: string): Promise<void> {
     try {
+                        const effectiveBranchId = getEffectiveBranchId();
       logger.info('Deleting branch category translation', { branchCategoryId, languageCode }, { prefix: 'BranchCategoryTranslationService' });
-      await httpClient.delete(`${this.baseUrl}/${branchCategoryId}/${languageCode}`);
+      await httpClient.delete(`${this.baseUrl}/${branchCategoryId}/${languageCode}?branchId=${effectiveBranchId}`);
       logger.info('Branch category translation deleted successfully', { branchCategoryId, languageCode }, { prefix: 'BranchCategoryTranslationService' });
     } catch (error: any) {
       logger.error('Error deleting branch category translation', error, { prefix: 'BranchCategoryTranslationService' });

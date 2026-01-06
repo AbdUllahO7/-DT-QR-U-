@@ -153,26 +153,36 @@ class OrderService {
   }
 
   // Similar pattern for getPendingOrders with pagination support
-  async getPendingOrders(branchId?: number, page: number = 1, pageSize: number = 10): Promise<{ orders: PendingOrder[], totalItems: number, totalPages: number }> {
-    // Get effective branch ID (from parameter, localStorage, or token)
-    const effectiveBranchId = branchId || getEffectiveBranchId();
-      const language = this.getLanguageFromStorage();
+// ... inside OrderService class
 
+  async getPendingOrders(
+    branchId?: number, 
+    page: number = 1, 
+    pageSize: number = 10
+  ): Promise<{ orders: PendingOrder[], totalItems: number, totalPages: number }> {
+    // 1. Get effective branch ID
+    const effectiveBranchId = branchId || getEffectiveBranchId();
+    const language = this.getLanguageFromStorage();
+
+    // 2. Create unique request key
     const requestKey = `pending-${effectiveBranchId}-${page}-${pageSize}-${language}`;
 
+    // 3. Return existing promise if request is already in flight (Deduplication)
     if (this.activeRequests.has(requestKey)) {
       return this.activeRequests.get(requestKey)!;
     }
 
     try {
-      const params = new URLSearchParams();
-      if (effectiveBranchId) {
-        params.append('branchId', effectiveBranchId.toString());
-      }
-      params.append('page', page.toString());
-      params.append('pageSize', pageSize.toString());
+      // 4. Use params object instead of manual string construction (Cleaner & safer)
+      const params: any = {
+        page,
+        pageSize,
+        language // Ensure language is passed
+      };
 
-      const url = `${this.baseUrl}/pending?${params.toString()}`;
+      if (effectiveBranchId) {
+        params.branchId = effectiveBranchId;
+      }
 
       logger.info('Pending orders getirme isteği gönderiliyor', {
         branchId: effectiveBranchId,
@@ -180,25 +190,51 @@ class OrderService {
         pageSize
       }, { prefix: 'OrderService' });
 
-      const requestPromise = httpClient.get<{ orders: PendingOrder[], totalItems: number, totalPages: number }>(url)
+      // 5. Create the request promise
+      const requestPromise = httpClient.get(
+        `${this.baseUrl}/pending`, 
+        { params } // Pass params here
+      )
         .then(response => {
           const result = response.data;
+          
+          // 6. Robust Response Mapping (The likely fix)
+          // Check for 'items' (common pagination), 'orders' (custom), or direct array
+          let orders: PendingOrder[] = [];
+          let totalItems = 0;
+          let totalPages = 0;
+
+          if (result) {
+            if (Array.isArray(result)) {
+               // Handle case where API returns just an array
+               orders = result;
+               totalItems = result.length;
+               totalPages = 1;
+            } else {
+               // Handle paginated object
+               orders = Array.isArray(result.items) ? result.items : (Array.isArray(result.orders) ? result.orders : []);
+               totalItems = result.totalCount || result.totalItems || orders.length;
+               totalPages = result.totalPages || 1;
+            }
+          }
+
           logger.info('Pending orders başarıyla alındı', {
             branchId: effectiveBranchId,
             page,
             pageSize,
-            ordersCount: result.orders?.length || 0,
-            totalItems: result.totalItems
+            ordersCount: orders.length,
+            totalItems: totalItems
           }, { prefix: 'OrderService' });
+
           return {
-            orders: Array.isArray(result.orders) ? result.orders : [],
-            totalItems: result.totalItems || 0,
-            totalPages: result.totalPages || 0
+            orders,
+            totalItems,
+            totalPages
           };
         })
         .finally(() => {
+          // 7. Cleanup
           this.activeRequests.delete(requestKey);
-          this.pendingConfigs.delete(requestKey);
         });
 
       this.activeRequests.set(requestKey, requestPromise);
@@ -206,10 +242,11 @@ class OrderService {
 
     } catch (error: any) {
       this.activeRequests.delete(requestKey);
-       this.pendingConfigs.delete(requestKey);
       this.handleError(error, 'Pending orders getirilirken hata oluştu');
     }
   }
+
+  // ... rest of the class
 
   async getTableOrders(tableId: number, branchId?: number): Promise<Order[]> {
     try {

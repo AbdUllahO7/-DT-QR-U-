@@ -106,8 +106,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   const navigate = useNavigate()
   const [editingCategoryName, setEditingCategoryName] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  console.log("branchCategories",branchCategories)
-  console.log("categoriesWithProducts",categoriesWithProducts)
   // Helper functions
   const toggleCategoryExpansion = (categoryId: number) => {
     const newExpanded = new Set(expandedCategories);
@@ -446,7 +444,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   if (isReorderMode || !expandedBranchCategories.has(branchCategory.categoryId) || !branchCategory.products || branchCategory.products.length === 0) {
     return null;
   }
-  console.log('Rendering manage products section for category:', branchCategory);
     const categoryIsActive = isCategoryActive ? isCategoryActive(branchCategory.categoryId) : true;
 
     return (

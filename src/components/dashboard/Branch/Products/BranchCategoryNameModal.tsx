@@ -70,6 +70,7 @@ export const BranchCategoryNameModal: React.FC<BranchCategoryNameModalProps> = (
   }, []);
 
   // Load existing translations when modal opens
+// Load existing translations when modal opens
   useEffect(() => {
     if (!isOpen || !branchCategoryId) return;
 
@@ -77,28 +78,46 @@ export const BranchCategoryNameModal: React.FC<BranchCategoryNameModalProps> = (
       try {
         const response = await branchCategoryTranslationService.getBranchCategoryTranslations(branchCategoryId);
 
+        console.log('Fetched translations response:', response);
+        // Initialize with the current name for the default language
         const nameTrans: TranslatableFieldValue = {
           [defaultLanguage]: currentName
         };
 
-        // Handle API response structure - could be array or object with translations property
-        const translationsArray = Array.isArray(response) ? response : (response as any)?.translations || [];
+        // Determine if response is an array or a wrapped object
+        let translationsArray: any[] = [];
+        
+        if (Array.isArray(response)) {
+          translationsArray = response;
+        } else if ((response as any)?.translations && Array.isArray((response as any).translations)) {
+          translationsArray = (response as any).translations;
+        } else if (typeof response === 'object' && response !== null) {
+          // Fallback: If the API returns a single object that IS the translation (rare but possible based on your snippet)
+          translationsArray = [response];
+        }
+
+        console.log('Processing translations:', translationsArray);
 
         translationsArray.forEach((translation: any) => {
-          if (translation.name) {
-            nameTrans[translation.languageCode] = translation.name;
+          // 1. Get the language code
+          const code = translation.languageCode || translation.originalLanguage;
+          
+          // 2. Get the name (check 'name', then 'displayName')
+          const value = translation.displayName || translation.displayName;
+
+          // 3. Only add if we have both a valid code and a value
+          if (code && value) {
+            nameTrans[code] = value;
           }
         });
 
-        console.log('Loaded branch category translations:', nameTrans);
         setCategoryNameTranslations(nameTrans);
       } catch (error) {
         logger.error('Failed to load branch category translations', error, { prefix: 'BranchCategoryNameModal' });
         // Initialize with default language value on error
-        const nameTrans: TranslatableFieldValue = {
+        setCategoryNameTranslations({
           [defaultLanguage]: currentName
-        };
-        setCategoryNameTranslations(nameTrans);
+        });
       }
     };
 
@@ -127,10 +146,9 @@ export const BranchCategoryNameModal: React.FC<BranchCategoryNameModalProps> = (
         .map(languageCode => ({
           branchCategoryId,
           languageCode,
-          name: categoryNameTranslations[languageCode],
+          displayName: categoryNameTranslations[languageCode],
         }));
 
-      console.log('Translation data to be saved:', translationData);
 
       if (translationData.length > 0) {
         await branchCategoryTranslationService.batchUpsertBranchCategoryTranslations({
