@@ -4,6 +4,7 @@
 
 import type React from "react"
 import { useState, useEffect, useCallback } from "react"
+import { toast } from "sonner"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import { branchProductService } from "../../../../services/Branch/BranchProductService"
 import { BranchMenuResponse, MenuCategory, MenuComponentProps, MenuProduct, SelectedAddon } from "../../../../types/menu/type"
@@ -94,6 +95,8 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         "availableAddons",
         "availableExtras",
       ])
+
+      console.log("Fetched menu response:", menuResponse)
       
       if (Array.isArray(menuResponse)) {
         setError("Menu format not supported yet. Please update the service.")
@@ -267,6 +270,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       .find((p) => p.branchProductId === branchProductId)
   }
 
+  console.log('MenuComponent render:', { menuData, searchTerm, selectedCategory })
   // Filter categories and products
   const getFilteredCategories = (): MenuCategory[] => {
     if (!menuData?.categories) return []
@@ -320,6 +324,51 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
     setShowCart(!showCart)
   }
 
+  // Handle reset session - clear basket
+  const handleResetSession = async () => {
+    const loadingToast = toast.loading(t('menu.resetSession') + '...')
+    try {
+      if (basketId) {
+        const basket = await basketService.getMyBasket()
+        // Delete all items from basket
+        for (const item of basket.items) {
+          if (!item.parentBasketItemId) { // Only delete parent items
+            await basketService.deleteMyBasketItem(item.basketItemId)
+          }
+        }
+        await loadBasketItemCount()
+        toast.success(t('menu.resetSession') + ' - ' + t('common.success'), { id: loadingToast })
+      } else {
+        toast.info('No active session to reset', { id: loadingToast })
+      }
+    } catch (err: any) {
+      console.error('Error resetting session:', err)
+      toast.error(t('common.error'), { id: loadingToast })
+    }
+  }
+
+  // Handle close session - clear basket and session
+  const handleCloseSession = async () => {
+    const loadingToast = toast.loading(t('menu.closeSession') + '...')
+    try {
+      if (basketId) {
+        const basket = await basketService.getMyBasket()
+        // Delete all items from basket
+        for (const item of basket.items) {
+          if (!item.parentBasketItemId) {
+            await basketService.deleteMyBasketItem(item.basketItemId)
+          }
+        }
+      }
+      setBasketId(null)
+      setBasketItemCount(0)
+      toast.success(t('menu.closeSession') + ' - ' + t('common.success'), { id: loadingToast })
+    } catch (err: any) {
+      console.error('Error closing session:', err)
+      toast.error(t('common.error'), { id: loadingToast })
+    }
+  }
+
   // Loading state
   if (loading) {
     return <LoadingState />
@@ -348,6 +397,22 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
           />
+        </div>
+
+        {/* Session Control Buttons */}
+        <div className="mb-4 flex gap-2 justify-end">
+          <button
+            onClick={handleResetSession}
+            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm font-medium"
+          >
+            {t('menu.resetSession')}
+          </button>
+          <button
+            onClick={handleCloseSession}
+            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm font-medium"
+          >
+            {t('menu.closeSession')}
+          </button>
         </div>
 
         {/* Main Grid: Mobile stacks, Desktop has sidebar + content */}

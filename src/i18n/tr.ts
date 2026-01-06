@@ -965,6 +965,12 @@ hero: {
 
   // Table Management
   tableManagement: {
+    areaTypes:{
+      indoor: 'Kapalı',
+      outdoor: 'Açık',
+      terrace: 'Terasta',
+      garden: 'Bahçe'
+    },
     addTable: 'Masa Ekle',
   ActiveStatus :"Aktif Durum", 
        selectBranch: "Şube Seç",
@@ -2617,6 +2623,8 @@ hero: {
   TableCategoryModal: {
     title: 'Masa Alan Ekle',
     update: 'Masa Alanını Güncelle',
+    editCategoryTitle: 'Masa Alanını Düzenle',
+    editCategorySubtitle: 'Masa alanının özelliklerini düzenleyin',
     subtitle: 'Yeni masa Alan oluşturun',
     categoryName: 'Alan Adı',
     addCategoryTitle: 'Yeni Alan Ekle',
@@ -3241,7 +3249,10 @@ BranchTableManagement: {
       deleting: 'Siliniyor...',
       confirmDelete: 'Silmeyi Onayla',
       deleteWarning: 'Bu şubeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
-      onlineMenu: 'Çevrimiçi Menüye Git'
+      onlineMenu: 'Çevrimiçi Menüye Git',
+      copyLink: 'Bağlantıyı Kopyala',
+      copied: 'Kopyalandı!',
+      linkCopied: 'Bağlantı panoya kopyalandı!',
     },
     
     basicInfo: {
@@ -3287,6 +3298,14 @@ BranchTableManagement: {
       deleteError: 'Silme işlemi sırasında hata oluştu',
       statusChangeError: 'Durum değiştirme sırasında hata oluştu',
       loadError: 'Şube bilgileri yüklenirken hata oluştu'
+    },
+
+    errors: {
+      nameRequired: 'Şube adı gereklidir',
+      saveFailed: 'Şube adı kaydedilemedi',
+      popupBlocked: 'Çevrimiçi menüyü açmak için lütfen açılır pencerelere izin verin',
+      failedToGetPublicId: 'Çevrimiçi menü bağlantısı alınamadı',
+      failedToCopyLink: 'Bağlantı kopyalanamadı'
     },
     
     placeholders: {
@@ -3683,6 +3702,8 @@ BranchTableManagement: {
       product: "Ürün",
       addToBasket: "Sepete Ekle",
       addToOrder: "Siparişe Ekle",
+      resetSession: "Oturumu Sıfırla",
+      closeSession: "Oturumu Kapat",
       loadingSubtitle: "Lezzetli seçimlerimizi sizin için hazırlıyoruz...",
       error: {
         title: "Menü Mevcut Değil",
@@ -3913,6 +3934,21 @@ cart: {
       orderTypeRequired: 'Lütfen bir sipariş türü seçin',
       addressRequired: 'Bu sipariş türü için teslimat adresi gerekli',
       phoneRequired: 'Bu sipariş türü için telefon numarası gerekli'
+    }
+  },
+
+  orderTypes: {
+    DINE_IN: {
+      name: 'Restoranda Ye',
+      description: 'Restoran masasında yemek ye'
+    },
+    DELIVERY: {
+      name: 'Teslimat',
+      description: 'Adrese teslimat'
+    },
+    PICKUP: {
+      name: 'Gel Al',
+      description: 'Online sipariş ver, mağazadan al'
     }
   },
 

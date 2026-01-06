@@ -196,6 +196,7 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
                 <span>{t('dashboard.settings.title')}</span>
               </button>
             )}
+            
 
           </nav>
 

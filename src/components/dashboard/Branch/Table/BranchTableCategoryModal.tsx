@@ -52,10 +52,10 @@ interface Props {
 }
 
 const areaOptions = [
-  { value: 'indoor', label: 'Indoor', icon: Home },
-  { value: 'outdoor', label: 'Outdoor', icon: Umbrella },
-  { value: 'terrace', label: 'Terrace', icon: CloudSun },
-  { value: 'garden', label: 'Garden', icon: Trees },
+  { value: 'indoor', label: 'tableManagement.areaTypes.indoor', icon: Home },
+  { value: 'outdoor', label: 'tableManagement.areaTypes.outdoor', icon: Umbrella },
+  { value: 'terrace', label: 'tableManagement.areaTypes.terrace', icon: CloudSun },
+  { value: 'garden', label: 'tableManagement.areaTypes.garden', icon: Trees },
 ];
 
 const BranchTableCategoryModal: React.FC<Props> = ({
@@ -347,10 +347,10 @@ const BranchTableCategoryModal: React.FC<Props> = ({
           });
           setErrors(fieldErrors);
         } else {
-          setErrors({ general: error.response?.data?.message || t('TableCategoryModal.invalidData') });
+          setErrors({ general: error.response?.data?.message || t('TableCategoryModal.invalidData') || 'Invalid data provided' });
         }
       } else {
-        setErrors({ general: error.response?.data?.message || 'An error occurred' });
+        setErrors({ general: error.response?.data?.message || t('TableCategoryModal.errorOccurred') || 'An error occurred' });
       }
     } finally {
       setIsSubmitting(false);
@@ -371,8 +371,9 @@ const BranchTableCategoryModal: React.FC<Props> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-gradient-to-br from-purple-900/30 via-blue-900/40 to-indigo-900/30 backdrop-blur-md"
+            className="fixed inset-0 bg-gradient-to-br from-purple-900/30 via-blue-900/40 to-indigo-900/30 dark:from-purple-950/40 dark:via-blue-950/50 dark:to-indigo-950/40 backdrop-blur-md"
             onClick={onClose}
+            aria-hidden="true"
           >
             <motion.div
               animate={{
@@ -380,7 +381,7 @@ const BranchTableCategoryModal: React.FC<Props> = ({
                 opacity: [0.2, 0.4, 0.2],
               }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
+              className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 dark:bg-purple-600/15 rounded-full blur-3xl"
             />
             <motion.div
               animate={{
@@ -388,7 +389,7 @@ const BranchTableCategoryModal: React.FC<Props> = ({
                 opacity: [0.2, 0.4, 0.2],
               }}
               transition={{ duration: 8, repeat: Infinity, delay: 2, ease: "easeInOut" }}
-              className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
+              className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 dark:bg-blue-600/15 rounded-full blur-3xl"
             />
           </motion.div>
 
@@ -398,12 +399,12 @@ const BranchTableCategoryModal: React.FC<Props> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 40 }}
               transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
-              className="relative w-full max-w-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/50 overflow-hidden"
+              className="relative w-full max-w-xl bg-white dark:bg-gray-800 backdrop-blur-2xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
               onClick={(e) => e.stopPropagation()}
               dir={isRTL ? 'rtl' : 'ltr'}
             >
-              <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-400/30 to-purple-500/30 rounded-full blur-3xl" />
-              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-400/30 to-primary-500/30 rounded-full blur-3xl" />
+              <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-400/30 to-purple-500/30 dark:from-primary-500/20 dark:to-purple-600/20 rounded-full blur-3xl" />
+              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-400/30 to-primary-500/30 dark:from-blue-500/20 dark:to-primary-600/20 rounded-full blur-3xl" />
 
               <div className="relative bg-gradient-to-br from-primary-500 via-primary-600 to-purple-600 dark:from-primary-600 dark:via-primary-700 dark:to-purple-700 p-8 text-white overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
@@ -435,7 +436,10 @@ const BranchTableCategoryModal: React.FC<Props> = ({
                       transition={{ delay: 0.1 }}
                       className="text-2xl font-bold drop-shadow-md"
                     >
-                      {isEditMode ? t('TableCategoryModal.addCategoryTitle') || 'Edit Area' : t('TableCategoryModal.addCategoryTitle') || 'Add New Area'}
+                      {isEditMode
+                        ? (t('TableCategoryModal.editCategoryTitle') || 'Edit Area')
+                        : (t('TableCategoryModal.addCategoryTitle') || 'Add New Area')
+                      }
                     </motion.h3>
                     <motion.p
                       initial={{ opacity: 0 }}
@@ -443,18 +447,21 @@ const BranchTableCategoryModal: React.FC<Props> = ({
                       transition={{ delay: 0.2 }}
                       className="text-primary-50/90 text-sm mt-1 drop-shadow"
                     >
-                      {isEditMode ? t('TableCategoryModal.addCategorySubtitle') || 'Update area details' : t('TableCategoryModal.addCategorySubtitle') || 'Create a new area for your tables'}
+                      {isEditMode
+                        ? (t('TableCategoryModal.editCategorySubtitle') || 'Update area details')
+                        : (t('TableCategoryModal.addCategorySubtitle') || 'Create a new area for your tables')
+                      }
                     </motion.p>
                   </div>
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="relative p-8 space-y-6" role="form">
+              <form onSubmit={handleSubmit} className="relative p-8 space-y-6 bg-white dark:bg-gray-800" role="form">
                 {errors.general && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-4 bg-gradient-to-r from-red-50 to-red-100/50 dark:from-red-900/30 dark:to-red-800/20 border-l-4 border-red-500 dark:border-red-400 rounded-xl text-red-700 dark:text-red-300 text-sm font-medium shadow-sm"
+                    className="p-4 text-primary-50/90  bg-gradient-to-r from-red-50 to-red-100/50 dark:from-red-900/30 dark:to-red-800/20 border-l-4 border-red-500 dark:border-red-400 rounded-xl text-red-700 dark:text-red-300 text-sm font-medium shadow-sm"
                   >
                     {errors.general}
                   </motion.div>

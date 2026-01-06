@@ -149,6 +149,21 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const acceptCash = restaurantPreferences?.acceptCash;
   const acceptCreditCard = restaurantPreferences?.acceptCreditCard;
   const acceptOnlinePayment = restaurantPreferences?.acceptOnlinePayment;
+
+  // Translation helper for order type name and description
+  const getOrderTypeTranslation = (orderType: any, field: 'name' | 'description'): string => {
+    if (!orderType) return '';
+    const translationKey = `orderTypes.${orderType.code}.${field}`;
+    const translated = t(translationKey);
+
+    // If translation exists and is not the same as the key, use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+
+    // Otherwise, fall back to API value
+    return field === 'name' ? orderType.name : orderType.description;
+  };
   
   // Available payment methods
   const availablePaymentMethods: { id: any; name: any; icon: any; description: any; }[] = [];
@@ -1007,10 +1022,10 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                 <div className="flex items-start justify-between gap-2 mb-2">
                                   <div>
                                     <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">
-                                      {orderType.name}
+                                      {getOrderTypeTranslation(orderType, 'name')}
                                     </h3>
                                     <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                                      {orderType.description}
+                                      {getOrderTypeTranslation(orderType, 'description')}
                                     </p>
                                   </div>
                                   {isSelected && (
@@ -1085,10 +1100,10 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                         <div className="text-2xl">{selectedOrderType.icon}</div>
                         <div>
                           <h4 className="font-bold text-slate-900 dark:text-slate-100">
-                            {selectedOrderType.name}
+                            {getOrderTypeTranslation(selectedOrderType, 'name')}
                           </h4>
                           <p className="text-sm text-slate-600 dark:text-slate-400">
-                            {selectedOrderType.description}
+                            {getOrderTypeTranslation(selectedOrderType, 'description')}
                           </p>
                         </div>
                       </div>

@@ -22,6 +22,7 @@ import { BranchCategory, Category, DetailedProduct, EditedCategoryName, EditedPr
 import BranchProductAddonsModal from './BranchProductAddonsModal';
 import { branchProductExtrasService } from '../../../../services/Branch/Extras/BranchProductExtrasService';
 import BranchProductExtraCategoriesModal from './BranchProductExtraCategoriesModal';
+import { BranchCategoryNameModal } from './BranchCategoryNameModal';
 
 interface BranchCategoriesProps {
   branchId?: number;
@@ -74,6 +75,15 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
   // Extra categories modal states
   const [selectedProductForExtras, setSelectedProductForExtras] = useState<DetailedProduct | null>(null);
   const [isProductExtrasModalOpen, setIsProductExtrasModalOpen] = useState(false);
+
+  // Category name modal states
+  const [isCategoryNameModalOpen, setIsCategoryNameModalOpen] = useState(false);
+  const [selectedCategoryForNameEdit, setSelectedCategoryForNameEdit] = useState<{
+    categoryId: number;
+    branchCategoryId: number;
+    currentName: string;
+    originalName: string;
+  } | null>(null);
 
   
   // Delete confirmation modal states
@@ -291,22 +301,24 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
       setError(t('branchCategories.messages.error.categoryInactive') || 'Cannot edit inactive category');
       return;
     }
-    
-    setEditingCategoryId(categoryId);
-    
-    const newEditedNames = new Map(editedCategoryNames);
-    
-    // For existing branch categories, use the current display name as the starting point
-    const currentName = activeTab === 'manage' 
-      ? branchCategories.find(bc => bc.categoryId === categoryId)?.displayName || originalName
-      : originalName;
-    
-    newEditedNames.set(categoryId, {
+
+    // Find the branch category to get the branchCategoryId
+    const branchCategory = branchCategories.find(bc => bc.categoryId === categoryId);
+    if (!branchCategory) {
+      setError(t('branchCategories.messages.error.categoryNotFound') || 'Category not found');
+      return;
+    }
+
+    // Get the current display name (which might be customized)
+    const currentName = branchCategory.category.categoryName || originalName;
+
+    setSelectedCategoryForNameEdit({
       categoryId,
-      originalName,
-      newName: currentName
+      branchCategoryId: branchCategory.branchCategoryId,
+      currentName,
+      originalName
     });
-    setEditedCategoryNames(newEditedNames);
+    setIsCategoryNameModalOpen(true);
   };
 
   const handleCategoryNameChange = (categoryId: number, newName: string) => {
@@ -331,61 +343,43 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
   };
 
   const handleCategoryNameSave = async (categoryId: number, newName?: string) => {
-    // Use functional state update to get the most current state
-    let nameToSave: string | undefined;
-    let originalName: string = '';
+    // This function is kept for backward compatibility but not actively used anymore
+    // since we're using the modal now
+    setEditingCategoryId(null);
+  };
 
-    setEditedCategoryNames((currentEditedNames) => {
-      const editedName = currentEditedNames.get(categoryId);
-      nameToSave = newName?.trim() || editedName?.newName?.trim();
-      originalName = editedName?.originalName || categories.find(cat => cat.categoryId === categoryId)?.categoryName || '';
-      
-      // Return the same state (we're just reading it)
-      return currentEditedNames;
-    });
+  const handleCategoryNameModalSuccess = async (newName: string) => {
+    if (!selectedCategoryForNameEdit) return;
 
-    // Add a small delay to ensure state has been read
-    await new Promise(resolve => setTimeout(resolve, 0));
-
-    // Validate the name to save
-    if (!nameToSave) {
-      setEditingCategoryId(null);
-      return;
-    }
-
-    // Check if the name has changed
-    if (nameToSave === originalName) {
-      console.warn('No changes to save:', { categoryId, nameToSave, originalName });
-      setEditingCategoryId(null);
-      return;
-    }
+    const { branchCategoryId, categoryId } = selectedCategoryForNameEdit;
 
     try {
-      await saveBranchCategoryName(categoryId, nameToSave);
-
-      setEditedCategoryNames((prev) => {
-        const newMap = new Map(prev);
-        newMap.set(categoryId, {
-          categoryId,
-          originalName: nameToSave ?? '', 
-          newName: nameToSave ?? '',
-        });
-        return newMap;
+      // Update the branch category display name
+      await branchCategoryService.updateBranchCategory({
+        branchCategoryId,
+        displayName: newName.trim()
       });
 
-      setCategories((prev) =>
-        prev.map((cat) =>
-          cat.categoryId === categoryId
-            ? { ...cat, categoryName: nameToSave ?? '' }
-            : cat
+      // Update local state
+      setBranchCategories(prev =>
+        prev.map(bc =>
+          bc.branchCategoryId === branchCategoryId
+            ? { ...bc, displayName: newName.trim() }
+            : bc
         )
       );
+
+      // Close the modal
+      handleCloseCategoryNameModal();
+
+      setSuccessMessage(t('branchCategories.messages.success.nameUpdated') || 'Category name updated successfully');
+      setTimeout(() => setSuccessMessage(null), 3000);
     } catch (error) {
       console.error('Failed to save category name:', error);
-      return; 
+      setError(t('branchCategories.messages.error.nameSaveFailed') || 'Failed to save category name');
+      setTimeout(() => setError(null), 3000);
+      throw error; // Re-throw to let modal handle it
     }
-
-    setEditingCategoryId(null);
   };
   
   const handleCategoryNameCancel = (categoryId: number) => {
@@ -399,6 +393,11 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
       });
       setEditedCategoryNames(newEditedNames);
     }
+  };
+
+  const handleCloseCategoryNameModal = () => {
+    setIsCategoryNameModalOpen(false);
+    setSelectedCategoryForNameEdit(null);
   };
 
   // Helper function to get edited price or original price
@@ -750,6 +749,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
     try {
       const response = await branchCategoryService.getBranchCategories();
       const existingCategories = Array.isArray(response) ? response : response.count || [];
+      
       const sortedCategories = existingCategories.sort((a: { displayOrder: number; }, b: { displayOrder: number; }) => a.displayOrder - b.displayOrder);
       setBranchCategories(sortedCategories);
       setOriginalBranchCategories([...sortedCategories]);
@@ -1218,7 +1218,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
           const editedName = getCategoryName(categoryId, category.categoryName);
           const categoryData = {
             categoryId: category.categoryId,
-            displayName: editedName, // Use edited name if available
+            displayName: editedName, 
             isActive: category.status,
             displayOrder: branchCategories.length + createdCount + 1
           };
@@ -1872,6 +1872,18 @@ const handleSaveProductExtras = async (
         onSave={handleSaveProductAddons}
         isLoading={isLoading}
       />
+
+      {selectedCategoryForNameEdit && (
+        <BranchCategoryNameModal
+          isOpen={isCategoryNameModalOpen}
+          onClose={handleCloseCategoryNameModal}
+          onSuccess={handleCategoryNameModalSuccess}
+          categoryId={selectedCategoryForNameEdit.categoryId}
+          branchCategoryId={selectedCategoryForNameEdit.branchCategoryId}
+          currentName={selectedCategoryForNameEdit.currentName}
+          originalName={selectedCategoryForNameEdit.originalName}
+        />
+      )}
       </div>
     </div>
   );

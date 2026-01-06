@@ -171,7 +171,7 @@ class BranchCategoryService {
                   
       const params: any = {
         includeInactive: true,
-        language
+        language :language
       };
 
       // Add branchId if available
@@ -180,7 +180,7 @@ class BranchCategoryService {
       }
 
       const response = await httpClient.get(`${this.baseUrl}`, { params });
-
+      console.log('Branch Categories Response:', response);
       logger.info('Branch categories retrieved successfully', {
         count: response.data,
         branchId

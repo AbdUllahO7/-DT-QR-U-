@@ -50,10 +50,10 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   };
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative flex-shrink-0" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`${getButtonStyle()} flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
+        className={`${getButtonStyle()} flex items-center flex-shrink-0 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
         aria-label={t('accessibility.language')}
         title={t('language.selectLanguage')}
       >

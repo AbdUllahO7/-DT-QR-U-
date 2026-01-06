@@ -959,6 +959,13 @@ contact: {
 
   // Table Management
   tableManagement: {
+
+    areaTypes: {
+      indoor: 'داخلية',
+      outdoor: 'خارجية',
+      terrace: 'تراس',
+      garden: 'حديقة'
+    },
     addTable: 'إضافة طاولة',
     ActiveStatus :"الحالة النشطة",
     selectBranchPrompt:"لا توجد فروع",
@@ -2611,6 +2618,8 @@ contact: {
   TableCategoryModal: {
     title: 'إضافة منطقة طاولة',
     subtitle: 'إنشاء منطقة طاولة جديدة',
+    editCategoryTitle: 'تعديل منطقة الطاولة',
+    editCategorySubtitle: 'حدد خصائص منطقة الطاولة',
     update: 'تحديث منطقة الطاولة',
     addCategoryTitle: 'إضافة منطقة جديدة',
     categoryName: 'اسم المنطقة',
@@ -3239,7 +3248,10 @@ contact: {
       deleting: 'جاري الحذف...',
       confirmDelete: 'تأكيد الحذف',
       deleteWarning: 'هل أنت متأكد من أنك تريد حذف هذا الفرع؟ لا يمكن التراجع عن هذا الإجراء.',
-      onlineMenu: 'عرض القائمة الإلكترونية'
+      onlineMenu: 'عرض القائمة الإلكترونية',
+      copyLink: 'نسخ الرابط',
+      copied: 'تم النسخ!',
+      linkCopied: 'تم نسخ الرابط إلى الحافظة!',
     },
     
     basicInfo: {
@@ -3285,6 +3297,14 @@ contact: {
       deleteError: 'حدث خطأ أثناء الحذف',
       statusChangeError: 'حدث خطأ أثناء تغيير الحالة',
       loadError: 'حدث خطأ أثناء تحميل معلومات الفرع'
+    },
+
+    errors: {
+      nameRequired: 'اسم الفرع مطلوب',
+      saveFailed: 'فشل حفظ اسم الفرع',
+      popupBlocked: 'يرجى السماح بالنوافذ المنبثقة لفتح القائمة الإلكترونية',
+      failedToGetPublicId: 'فشل الحصول على رابط القائمة الإلكترونية',
+      failedToCopyLink: 'فشل نسخ الرابط'
     },
     
     placeholders: {
@@ -3681,6 +3701,8 @@ contact: {
       product: "المنتج",
       addToBasket: "أضف إلى السلة",
       addToOrder: "أضف إلى الطلب",
+      resetSession: "إعادة تعيين الجلسة",
+      closeSession: "إغلاق الجلسة",
       allergens: "مسببات الحساسية",
       loadingSubtitle: "نحضر لك أشهى المأكولات...",
       error: {
@@ -3908,6 +3930,21 @@ contact: {
       orderTypeRequired: 'يرجى اختيار نوع الطلب',
       addressRequired: 'عنوان التوصيل مطلوب لهذا النوع من الطلبات',
       phoneRequired: 'رقم الهاتف مطلوب لهذا النوع من الطلبات'
+    }
+  },
+
+  orderTypes: {
+    DINE_IN: {
+      name: 'تناول الطعام في المطعم',
+      description: 'تناول الطعام على طاولة المطعم'
+    },
+    DELIVERY: {
+      name: 'التوصيل',
+      description: 'التوصيل إلى العنوان'
+    },
+    PICKUP: {
+      name: 'الاستلام',
+      description: 'اطلب عبر الإنترنت، استلم من المتجر'
     }
   },
 

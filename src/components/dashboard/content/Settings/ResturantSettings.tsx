@@ -112,10 +112,7 @@ const ResturantSettings: React.FC = () => {
     setLanguage(value as 'tr' | 'en' | 'ar');
   };
 
-  const handleSave = () => {
-    setSuccess(t('settings.saveSuccess'));
-    setTimeout(() => setSuccess(null), 3000);
-  };
+
 
   const tabs = [
     { id: 'restaurant', label: t('RestaurantPreferencesTab.title'), icon: Globe },

@@ -59,12 +59,10 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
     if (tabsRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = tabsRef.current;
       setCanScrollLeft(scrollLeft > 0);
-      // Tolerance of 1px for high-DPI display rounding errors
       setCanScrollRight(Math.ceil(scrollLeft + clientWidth) < scrollWidth - 1);
     }
   };
 
-  // Check scroll buttons on mount and when languages change
   useEffect(() => {
     checkScrollButtons();
     window.addEventListener('resize', checkScrollButtons);
@@ -74,7 +72,7 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
   // --- Button Scroll Handler ---
   const scrollContainer = (direction: 'left' | 'right') => {
     if (tabsRef.current) {
-      const scrollAmount = 200; // Distance to scroll per click
+      const scrollAmount = 200;
       const currentScroll = tabsRef.current.scrollLeft;
       
       tabsRef.current.scrollTo({
@@ -82,7 +80,6 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
         behavior: 'smooth'
       });
       
-      // We rely on the onScroll event to update state, but setTimeout ensures it runs after animation starts
       setTimeout(checkScrollButtons, 100); 
     }
   };
@@ -114,17 +111,15 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
 
   const currentLanguage = languages.find(lang => lang.code === selectedLanguage);
 
-  // --- 1. Mouse Wheel Horizontal Scroll Handler ---
   const handleWheel = (e: React.WheelEvent) => {
     if (tabsRef.current) {
       if (tabsRef.current.scrollWidth > tabsRef.current.clientWidth) {
         tabsRef.current.scrollLeft += e.deltaY;
-        checkScrollButtons(); // Update arrows
+        checkScrollButtons();
       }
     }
   };
 
-  // --- 2. Drag-to-Scroll Handlers ---
   const handleMouseDown = (e: MouseEvent) => {
     if (!tabsRef.current) return;
     setIsDragging(true);
@@ -146,14 +141,13 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
     const x = e.pageX - tabsRef.current.offsetLeft;
     const walk = (x - startX) * 2;
     tabsRef.current.scrollLeft = scrollLeft - walk;
-    checkScrollButtons(); // Update arrows while dragging
+    checkScrollButtons();
   };
 
   if (languages.length === 0) return null;
 
   return (
     <div className={`mb-6 ${className}`}>
-      {/* Utility Style to hide scrollbar but keep functionality */}
       <style>{`
         .hide-scrollbar::-webkit-scrollbar {
           display: none;
@@ -164,25 +158,25 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
         }
       `}</style>
       
-      <label className="block text-sm font-bold text-white mb-2">
+      <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
 
       {/* Main Card Container */}
-      <div className="bg-[#1e2330] border border-gray-700 rounded-lg overflow-hidden w-full shadow-lg">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden w-full shadow-sm">
         
         {/* Header: Scrollable Tabs */}
         {showLanguageSelector && (
-          <div className="bg-[#161922] border-b border-gray-700 w-full relative group">
+          <div className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 w-full relative group">
             
             {/* --- Left Scroll Button --- */}
             <div className={`absolute left-0 top-0 bottom-0 z-20 flex items-center transition-opacity duration-300 ${canScrollLeft ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-              <div className="absolute inset-0 bg-gradient-to-r from-[#161922] to-transparent w-12 pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-r from-gray-50 via-gray-50/90 to-transparent dark:from-gray-900 dark:via-gray-900/90 w-12 pointer-events-none" />
               <button
                 type="button"
                 onClick={() => scrollContainer('left')}
-                className="relative z-10 p-1 ml-1 hover:bg-gray-700 rounded-full text-gray-400 hover:text-white transition-colors"
+                className="relative z-10 p-1 ml-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
               >
                 <ChevronLeft size={20} />
               </button>
@@ -190,11 +184,11 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
 
             {/* --- Right Scroll Button --- */}
             <div className={`absolute right-0 top-0 bottom-0 z-20 flex items-center justify-end transition-opacity duration-300 ${canScrollRight ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-               <div className="absolute inset-0 bg-gradient-to-l from-[#161922] to-transparent w-12 pointer-events-none" />
+               <div className="absolute inset-0 bg-gradient-to-l from-gray-50 via-gray-50/90 to-transparent dark:from-gray-900 dark:via-gray-900/90 w-12 pointer-events-none" />
                <button
                 type="button"
                 onClick={() => scrollContainer('right')}
-                className="relative z-10 p-1 mr-1 hover:bg-gray-700 rounded-full text-gray-400 hover:text-white transition-colors"
+                className="relative z-10 p-1 mr-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
               >
                 <ChevronRight size={20} />
               </button>
@@ -209,7 +203,7 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
               onMouseLeave={handleMouseLeave}
               onMouseUp={handleMouseUp}
               onMouseMove={handleMouseMove}
-              onScroll={checkScrollButtons} // Ensure arrows update on scroll
+              onScroll={checkScrollButtons}
             >
               {languages.map((lang) => {
                 const isActive = selectedLanguage === lang.code;
@@ -219,25 +213,24 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
                   <button
                     key={lang.code}
                     type="button"
-                    // Only trigger click if we aren't dragging
                     onClick={() => !isDragging && setInternalSelectedLanguage(lang.code)}
                     disabled={disabled}
                     className={`
-                      relative flex items-center gap-2 px-6 py-3.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 flex-shrink-0 select-none
+                      relative flex items-center gap-2 px-6 py-3.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 flex-shrink-0 select-none border-r border-gray-100 dark:border-gray-800/50
                       ${isActive 
-                        ? 'text-blue-400 bg-[#1e2330]' 
-                        : 'text-gray-400 hover:text-gray-200 bg-[#14161f] hover:bg-[#1a1d26]'
+                        ? 'text-primary-600 dark:text-blue-400 bg-white dark:bg-gray-800' 
+                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800/50'
                       }
                     `}
                   >
                     {/* Active Indicator Line */}
                     {isActive && (
-                      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] z-10" />
+                      <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-primary-500 dark:bg-blue-500 z-10" />
                     )}
 
-                    {/* Active Indicator Top Gradient */}
+                    {/* Active Indicator Top Gradient (Dark mode only) */}
                     {isActive && (
-                      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />
+                      <div className="hidden dark:block absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />
                     )}
 
                     <span>{lang.displayName}</span>
@@ -249,23 +242,22 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
                 );
               })}
               
-              {/* Spacer to ensure last item isn't covered by fade */}
               <div className="w-8 flex-shrink-0" />
             </div>
           </div>
         )}
 
         {/* Input Body */}
-        <div className="p-5 bg-[#1e2330]">
+        <div className="p-5 bg-white dark:bg-gray-800">
           
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+              <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                  {currentLanguage?.nativeName || currentLanguage?.displayName}
               </span>
               
               {isLanguageRequired(selectedLanguage) && (
-                <span className="text-[10px] font-bold text-white bg-red-600 px-2 py-0.5 rounded-sm shadow-sm tracking-wider">
+                <span className="text-[10px] font-bold text-white bg-red-500 dark:bg-red-600 px-2 py-0.5 rounded-sm shadow-sm tracking-wider">
                   REQUIRED
                 </span>
               )}
@@ -275,7 +267,7 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
                <button
                 type="button"
                 onClick={handleCopyFromDefault}
-                className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors opacity-70 hover:opacity-100"
+                className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-400 hover:text-primary-600 dark:hover:text-white transition-colors opacity-70 hover:opacity-100"
                >
                  <Copy className="w-3 h-3" />
                  <span>Copy Default</span>
@@ -283,23 +275,27 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
             )}
           </div>
 
-          <div className="relative">
+          <div className="relative group/input">
             <input
               type="text"
               value={value[selectedLanguage] || ''}
               onChange={(e) => handleInputChange(selectedLanguage, e.target.value)}
-              placeholder={placeholder || "Enter ingredient name"}
+              placeholder={placeholder || "Enter text here"}
               disabled={disabled}
               dir={currentLanguage?.isRtl ? 'rtl' : 'ltr'}
               className={`
-                w-full bg-transparent border-none p-0 text-base text-gray-200 
-                placeholder-gray-600 focus:ring-0 focus:outline-none
+                w-full bg-transparent border-none p-2 text-base 
+                text-gray-900 dark:text-gray-100 
+                placeholder-gray-400 dark:placeholder-gray-500 
+                focus:ring-0 focus:outline-none transition-colors
                 ${disabled ? 'cursor-not-allowed opacity-50' : ''}
               `}
             />
             
-            <div className={`absolute -bottom-2 left-0 right-0 h-px transition-colors duration-200 ${
-              hasError(selectedLanguage) ? 'bg-red-600' : 'bg-gray-700'
+            <div className={`absolute -bottom-2 left-0 right-0 h-px transition-all duration-300 ${
+              hasError(selectedLanguage) 
+                ? 'bg-red-500 h-0.5' 
+                : 'bg-gray-200 dark:bg-gray-700 group-focus-within/input:bg-primary-500 dark:group-focus-within/input:bg-blue-500 group-focus-within/input:h-0.5'
             }`} />
           </div>
 
