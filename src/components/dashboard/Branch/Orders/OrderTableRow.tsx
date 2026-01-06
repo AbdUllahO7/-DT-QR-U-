@@ -4,6 +4,7 @@ import { BranchOrder, PendingOrder } from '../../../../types/BranchManagement/ty
 import { orderService } from '../../../../services/Branch/OrderService';
 import OrderStatusUtils from '../../../../utils/OrderStatusUtils';
 import { OrderStatusEnums } from '../../../../types/Orders/type';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface OrderTableRowProps {
   order: PendingOrder | BranchOrder;
@@ -32,6 +33,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
   t,
   rowIndex
 }) => {
+  const currency = useCurrency();
   const isPending = viewMode === 'pending';
   const status = isPending ? OrderStatusEnums.Pending : orderService.parseOrderStatus((order as BranchOrder).status);
   const rowVersion = order.rowVersion || '';
@@ -90,7 +92,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
       <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
         <div className="flex flex-col gap-1">
           <div className="text-lg font-black text-green-600 dark:text-green-400">
-            {order.totalPrice.toFixed(2)}
+            {currency.symbol}{order.totalPrice.toFixed(2)}
           </div>
           <div className={`flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Package className="w-3 h-3" />

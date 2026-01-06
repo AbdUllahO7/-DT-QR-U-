@@ -9,13 +9,23 @@ export interface LanguageOption {
   isRtl: boolean;
 }
 
+// Interface for currency option
+export interface CurrencyOption {
+  code: string;
+  displayName: string;
+  symbol: string;
+  iconKey: string;
+}
+
 // Interface for the complete restaurant preferences response
 export interface RestaurantPreferences {
   id: number;
   restaurantId: number;
   supportedLanguages: string[];
   defaultLanguage: string;
+  defaultCurrency: string;
   availableLanguages: LanguageOption[];
+  availableCurrencies: CurrencyOption[];
   createdAt: string;
   updatedAt: string | null;
   rowVersion: string | null;
@@ -25,6 +35,7 @@ export interface RestaurantPreferences {
 export interface UpdateRestaurantPreferencesDto {
   supportedLanguages?: string[];
   defaultLanguage?: string;
+  defaultCurrency?: string;
   rowVersion?: string | null;
 }
 
@@ -97,6 +108,10 @@ class RestaurantPreferencesService {
 
       if (data.defaultLanguage !== undefined) {
         updateData.defaultLanguage = data.defaultLanguage?.trim() || '';
+      }
+
+      if (data.defaultCurrency !== undefined) {
+        updateData.defaultCurrency = data.defaultCurrency?.trim() || '';
       }
 
       if (data.rowVersion !== undefined) {

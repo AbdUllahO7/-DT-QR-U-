@@ -1,19 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Settings, 
-  Save, 
-  RefreshCw, 
-  ShoppingCart, 
-  Eye, 
-  CreditCard, 
-  Globe, 
+import {
+  Settings,
+  Save,
+  RefreshCw,
+  ShoppingCart,
+  Eye,
+  CreditCard,
+  Globe,
   Clock,
   AlertCircle,
   CheckCircle,
-  Loader2
+  Loader2,
+  ChevronDown,
+  Search,
+  Check
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { BranchPreferences, branchPreferencesService, UpdateBranchPreferencesDto } from '../../../../services/Branch/BranchPreferencesService';
+import { restaurantPreferencesService, CurrencyOption } from '../../../../services/RestaurantPreferencesService';
 
 interface BranchPreferencesComponentProps {
   className?: string;
@@ -21,7 +25,7 @@ interface BranchPreferencesComponentProps {
 
 const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({ className = '' }) => {
   const { t } = useLanguage();
-  
+
   // State management
   const [preferences, setPreferences] = useState<BranchPreferences | null>(null);
   const [formData, setFormData] = useState<UpdateBranchPreferencesDto | null>(null);
@@ -30,13 +34,11 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [availableCurrencies, setAvailableCurrencies] = useState<CurrencyOption[]>([]);
 
-  // Currency options
-  const currencies = [
-    { value: 'TRY', label: t('branchPreferences.currencies.TRY') },
-    { value: 'USD', label: t('branchPreferences.currencies.USD') },
-    { value: 'EUR', label: t('branchPreferences.currencies.EUR') }
-  ];
+  // Currency selector state
+  const [isCurrencyDropdownOpen, setIsCurrencyDropdownOpen] = useState(false);
+  const [currencySearchQuery, setCurrencySearchQuery] = useState('');
 
 
   // Timezone options
@@ -55,30 +57,36 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
     try {
       setIsLoading(true);
       setError(null);
-      
-      const data = await branchPreferencesService.getBranchPreferences();
-      setPreferences(data);
-      
+
+      // Fetch both branch and restaurant preferences
+      const [branchData, restaurantData] = await Promise.all([
+        branchPreferencesService.getBranchPreferences(),
+        restaurantPreferencesService.getRestaurantPreferences()
+      ]);
+
+      setPreferences(branchData);
+      setAvailableCurrencies(restaurantData.availableCurrencies || []);
+
       // Initialize form data
       const initialFormData: UpdateBranchPreferencesDto = {
-        autoConfirmOrders: data.autoConfirmOrders,
-        useWhatsappForOrders: data.useWhatsappForOrders,
-        showProductDescriptions: data.showProductDescriptions,
-        enableAllergenDisplay: data.enableAllergenDisplay,
-        enableIngredientDisplay: data.enableIngredientDisplay,
-        acceptCash: data.acceptCash,
-        acceptCreditCard: data.acceptCreditCard,
-        acceptOnlinePayment: data.acceptOnlinePayment,
-        defaultCurrency: data.defaultCurrency,
-        supportedLanguages: data.supportedLanguages,
-        defaultLanguage: data.defaultLanguage,
-        timeZoneId: data.timeZoneId,
-        sessionTimeoutMinutes: data.sessionTimeoutMinutes,
-        cleanupMode: data.cleanupMode,
-        cleanupDelayAfterCloseMinutes: data.cleanupDelayAfterCloseMinutes,
-        rowVersion: data.rowVersion
+        autoConfirmOrders: branchData.autoConfirmOrders,
+        useWhatsappForOrders: branchData.useWhatsappForOrders,
+        showProductDescriptions: branchData.showProductDescriptions,
+        enableAllergenDisplay: branchData.enableAllergenDisplay,
+        enableIngredientDisplay: branchData.enableIngredientDisplay,
+        acceptCash: branchData.acceptCash,
+        acceptCreditCard: branchData.acceptCreditCard,
+        acceptOnlinePayment: branchData.acceptOnlinePayment,
+        defaultCurrency: branchData.defaultCurrency,
+        supportedLanguages: branchData.supportedLanguages,
+        defaultLanguage: branchData.defaultLanguage,
+        timeZoneId: branchData.timeZoneId,
+        sessionTimeoutMinutes: branchData.sessionTimeoutMinutes,
+        cleanupMode: branchData.cleanupMode,
+        cleanupDelayAfterCloseMinutes: branchData.cleanupDelayAfterCloseMinutes,
+        rowVersion: branchData.rowVersion
       };
-      
+
       setFormData(initialFormData);
       setHasChanges(false);
     } catch (err: any) {
@@ -123,6 +131,42 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
     }
 
     handleFieldChange('supportedLanguages', currentLanguages);
+  };
+
+  // Handle currency selection
+  const handleCurrencySelect = (currency: CurrencyOption) => {
+    handleFieldChange('defaultCurrency', currency.code);
+
+    // Save currency details to localStorage
+    localStorage.setItem('selectedCurrency', JSON.stringify({
+      code: currency.code,
+      symbol: currency.symbol,
+      displayName: currency.displayName
+    }));
+
+    setIsCurrencyDropdownOpen(false);
+    setCurrencySearchQuery('');
+  };
+
+  // Get filtered currencies based on search query
+  const getFilteredCurrencies = () => {
+    if (!availableCurrencies) return [];
+
+    if (!currencySearchQuery) return availableCurrencies;
+
+    const query = currencySearchQuery.toLowerCase();
+    return availableCurrencies.filter(
+      currency =>
+        currency.displayName.toLowerCase().includes(query) ||
+        currency.code.toLowerCase().includes(query) ||
+        currency.symbol.includes(query)
+    );
+  };
+
+  // Get selected currency object
+  const getSelectedCurrency = () => {
+    if (!formData?.defaultCurrency || !availableCurrencies) return null;
+    return availableCurrencies.find(c => c.code === formData.defaultCurrency) || null;
   };
 
   // Save preferences
@@ -502,22 +546,80 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
           
             </div>
 
-            <div>
+            {/* Custom Currency Selector */}
+            <div className="relative">
               <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                 {t('branchPreferences.sections.localization.defaultCurrency')}
               </label>
-              <select
-                title='defaultCurrency'
-                value={formData.defaultCurrency}
-                onChange={(e) => handleFieldChange('defaultCurrency', e.target.value)}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+
+              {/* Currency Display Button */}
+              <button
+                type="button"
+                onClick={() => setIsCurrencyDropdownOpen(!isCurrencyDropdownOpen)}
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:border-blue-500 dark:hover:border-blue-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all flex items-center justify-between"
               >
-                {currencies.map((currency) => (
-                  <option key={currency.value} value={currency.value}>
-                    {currency.label}
-                  </option>
-                ))}
-              </select>
+                <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                  <span className="text-2xl">{getSelectedCurrency()?.symbol || '$'}</span>
+                  <div className="text-left rtl:text-right">
+                    <div className="font-medium">{getSelectedCurrency()?.displayName || 'Select Currency'}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{getSelectedCurrency()?.code || ''}</div>
+                  </div>
+                </div>
+                <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isCurrencyDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown */}
+              {isCurrencyDropdownOpen && (
+                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-96 overflow-hidden">
+                  {/* Search Input */}
+                  <div className="p-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
+                    <div className="relative">
+                      <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Search currencies..."
+                        value={currencySearchQuery}
+                        onChange={(e) => setCurrencySearchQuery(e.target.value)}
+                        className="w-full pl-10 rtl:pr-10 rtl:pl-3 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Currency List */}
+                  <div className="max-h-80 overflow-y-auto">
+                    {getFilteredCurrencies().map((currency) => {
+                      const isSelected = formData?.defaultCurrency === currency.code;
+                      return (
+                        <button
+                          key={currency.code}
+                          type="button"
+                          onClick={() => handleCurrencySelect(currency)}
+                          className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                            isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                            <span className="text-2xl w-8 text-center">{currency.symbol}</span>
+                            <div className="text-left rtl:text-right">
+                              <div className={`font-medium ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                                {currency.displayName}
+                              </div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">{currency.code}</div>
+                            </div>
+                          </div>
+                          {isSelected && <Check className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
+                        </button>
+                      );
+                    })}
+
+                    {getFilteredCurrencies().length === 0 && (
+                      <div className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                        No currencies found
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>

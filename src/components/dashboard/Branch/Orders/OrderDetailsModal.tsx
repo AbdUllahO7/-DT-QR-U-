@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { 
-  Eye, XCircle, Clock, Package, AlertCircle, MapPin, Phone, User, Truck, 
+import {
+  Eye, XCircle, Clock, Package, AlertCircle, MapPin, Phone, User, Truck,
   Home, CheckCircle, Printer, Calendar, Hash, ShoppingBag, MessageSquare,
-  DollarSign, TrendingUp, Type, Maximize2, ChevronDown, ChevronUp, 
+  DollarSign, TrendingUp, Type, Maximize2, ChevronDown, ChevronUp,
   Settings, EyeOff, Droplets, Plus
 } from 'lucide-react';
 import { orderService } from '../../../../services/Branch/OrderService';
@@ -10,6 +10,7 @@ import { BranchOrder, Order } from '../../../../types/BranchManagement/type';
 import { OrderStatusEnums } from '../../../../types/Orders/type';
 import OrderStatusUtils from '../../../../utils/OrderStatusUtils';
 import { OrderPrintService } from './OrderPrintService';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface OrderDetailsModalProps {
   show: boolean;
@@ -41,6 +42,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
   onClose,
   t
 }) => {
+  const currency = useCurrency();
 
   // Font size state
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
@@ -252,7 +254,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     <div>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400">Unit</p>
                       <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
-                        {(item.price || item.unitPrice || 0).toFixed(2)}
+                        {currency.symbol}{(item.price || item.unitPrice || 0).toFixed(2)}
                       </p>
                     </div>
                   </div>
@@ -262,7 +264,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                       <div>
                         <p className="text-[10px] text-gray-500 dark:text-gray-400">Addon</p>
                         <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">
-                          {item.addonPrice.toFixed(2)}
+                          {currency.symbol}{item.addonPrice.toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -290,7 +292,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5">Total</p>
                 <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
                   {/* Display calculated total including extras if valid, else fallback */}
-                  {!isAddon && !Number.isNaN(displayTotal) ? displayTotal.toFixed(2) : (item.totalPrice || 0).toFixed(2)}
+                  {currency.symbol}{!isAddon && !Number.isNaN(displayTotal) ? displayTotal.toFixed(2) : (item.totalPrice || 0).toFixed(2)}
                 </p>
               </div>
             </div>
@@ -336,7 +338,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                            <p className={`text-xs font-bold ${
                              isRemoval ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
                            }`}>
-                              {extra.totalPrice > 0 ? `+${extra.totalPrice.toFixed(2)}` : 'Free'}
+                              {currency.symbol}{extra.totalPrice > 0 ? `+${extra.totalPrice.toFixed(2)}` : 'Free'}
                            </p>
                         </div>
                      </div>
@@ -566,7 +568,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400 mb-1" />
                 <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">{t('ordersManager.total')}</p>
                 <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                  {order.totalPrice.toFixed(2)}
+                  {currency.symbol}{order.totalPrice.toFixed(2)}
                 </p>
               </div>
             </div>
@@ -835,7 +837,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                               )}
                               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 pt-2 border-t border-amber-200 dark:border-amber-600">
                                 <p className="text-xs text-amber-800 dark:text-amber-300">
-                                  {t('ordersManager.total') || 'Total'}: <span className="font-semibold">{log.OldTotalPrice?.toFixed(2)} → {log.NewTotalPrice?.toFixed(2)}</span>
+                                  {t('ordersManager.total') || 'Total'}: <span className="font-semibold">{currency.symbol}{log.OldTotalPrice?.toFixed(2)} → {currency.symbol}{log.NewTotalPrice?.toFixed(2)}</span>
                                 </p>
                                 <p className="text-xs text-amber-800 dark:text-amber-300">
                                   {t('ordersManager.items') || 'Items'}: <span className="font-semibold">{log.OldItemCount} → {log.NewItemCount}</span>
@@ -892,7 +894,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     {t('ordersManager.subTotal')}
                   </span>
                   <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                    {(order.subTotal || 0).toFixed(2)}
+                    {currency.symbol}{(order.subTotal || 0).toFixed(2)}
                   </span>
                 </div>
                 
@@ -902,7 +904,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                       {t('ordersManager.serviceFeeApplied')}
                     </span>
                     <span className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                      +{order.serviceFeeApplied.toFixed(2)}
+                      +{currency.symbol}{order.serviceFeeApplied.toFixed(2)}
                     </span>
                   </div>
                 )}
@@ -916,7 +918,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     {t('ordersManager.total')}
                   </span>
                   <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    {order.totalPrice.toFixed(2)}
+                    {currency.symbol}{order.totalPrice.toFixed(2)}
                   </span>
                 </div>
               </div>

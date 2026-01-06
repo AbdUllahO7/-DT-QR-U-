@@ -54,13 +54,29 @@ class AuthStorage {
   }
 
   /**
-   * Get the current authentication token
+   * Get the raw token from storage WITHOUT validation
+   * Use this for adding token to API requests
+   * Let the API validate the token and return 401 if invalid
+   * @returns Token string or null
+   */
+  getRawToken(): string | null {
+    try {
+      const storage = this.getStorage();
+      return storage.getItem(this.TOKEN_KEY);
+    } catch (error) {
+      console.error('Error getting raw token:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get the current authentication token WITH validation
+   * Use this when you need to check if user is authenticated
    * @returns Token if valid, null otherwise
    */
   getToken(): string | null {
     try {
-      const storage = this.getStorage();
-      const token = storage.getItem(this.TOKEN_KEY);
+      const token = this.getRawToken();
 
       if (!token) {
         return null;
@@ -68,7 +84,7 @@ class AuthStorage {
 
       // Validate token expiry
       if (!this.isTokenValid()) {
-        this.clearAuth();
+        // Don't clear auth here - let the API return 401 and handle it there
         return null;
       }
 
@@ -185,7 +201,7 @@ class AuthStorage {
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.USER_ID_KEY);
       localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
-     ('✅ Cleaned up expired tokens from localStorage');
+      console.log('✅ Cleaned up expired tokens from localStorage');
     }
   }
 }

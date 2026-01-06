@@ -111,18 +111,13 @@ httpClient.interceptors.request.use(
         logger.debug('Customer session token kullanılıyor');
       }
     } else {
-      // SECURITY FIX: Use authStorage instead of localStorage
-      const token = authStorage.getToken();
+      // SECURITY FIX: Use authStorage.getRawToken() to get token without validation
+      // Let the API validate the token and return 401 if invalid
+      const token = authStorage.getRawToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
         if (import.meta.env.DEV && !config.url?.includes('/api/Dashboard')) {
           logger.info('Token eklendi:', `Bearer ${token.substring(0, 15)}...`);
-        }
-
-        // Validate token is still valid
-        if (!authStorage.isTokenValid()) {
-          logger.warn('⚠️ Token süresi dolmuş veya geçersiz!');
-          authStorage.clearAuth();
         }
       }
     }
@@ -214,8 +209,10 @@ httpClient.interceptors.response.use(
                                window.location.pathname.includes('/OnlineMenu');
       const isPublicEndpoint = originalRequest?.url?.includes('/api/Table/') ||
                               originalRequest?.url?.includes('/api/OnlineMenu/');
+      // Don't logout on currency API failures - currency is not critical
+      const isCurrencyEndpoint = originalRequest?.url?.includes('/api/Currencies/');
 
-      if (!isAuthEndpoint && !isOnboardingEndpoint && !isOnboardingPage && !isPublicMenuPage && !isPublicEndpoint) {
+      if (!isAuthEndpoint && !isOnboardingEndpoint && !isOnboardingPage && !isPublicMenuPage && !isPublicEndpoint && !isCurrencyEndpoint) {
         logger.warn('⚠️ 401 Unauthorized - Token geçersiz, kullanıcı oturumu kapatılıyor');
 
         // SECURITY FIX: Use authStorage for centralized auth clearing

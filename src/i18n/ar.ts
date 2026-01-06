@@ -5791,12 +5791,20 @@ extrasManagement: {
     languageSettings: {
       title: 'إعدادات اللغة',
       subtitle: 'قم بتعيين اللغات التي يدعمها مطعمك واللغة الافتراضية'
-    }
+    },
+       currencySettings: {
+      title: 'إعدادات العملة',
+      subtitle: 'قم بتعيين العملة الافتراضية لمطعمك'
+    },
   },
   form: {
     defaultLanguage: {
       label: 'اللغة الافتراضية',
       helperText: 'إعداد اللغة الافتراضية للمطعم'
+    },
+    defaultCurrency: {
+      label: 'العملة الافتراضية',
+      helperText: 'إعداد العملة الافتراضية للمطعم'
     },
     supportedLanguages: {
       label: 'اللغات المدعومة',

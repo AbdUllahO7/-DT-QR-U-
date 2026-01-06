@@ -5815,12 +5815,20 @@ categoryConfigModal: {
     languageSettings: {
       title: 'Dil Ayarları',
       subtitle: 'Restoranınızın desteklediği dilleri ve varsayılan dili ayarlayın'
+    },
+      currencySettings: {
+      title: 'Para Birimi Ayarları',
+      subtitle: 'Restoranınız için varsayılan para birimini ayarlayın'
     }
   },
   form: {
     defaultLanguage: {
       label: 'Varsayılan Dil',
       helperText: 'Restoran için varsayılan dil ayarı'
+    },
+     defaultCurrency: {
+      label: 'Varsayılan Para Birimi',
+      helperText: 'Restoran için varsayılan para birimi ayarı'
     },
     supportedLanguages: {
       label: 'Desteklenen Diller',

@@ -5802,12 +5802,20 @@ categoryConfigModal: {
     languageSettings: {
       title: 'Language Settings',
       subtitle: 'Set the languages supported by your restaurant and the default language'
+    },
+    currencySettings: {
+      title: 'Currency Settings',
+      subtitle: 'Set the default currency for your restaurant'
     }
   },
   form: {
     defaultLanguage: {
       label: 'Default Language',
       helperText: 'Default language setting for the restaurant'
+    },
+    defaultCurrency: {
+      label: 'Default Currency',
+      helperText: 'Default currency setting for the restaurant'
     },
     supportedLanguages: {
       label: 'Supported Languages',

@@ -2,12 +2,12 @@
 
 import React from "react"
 import { useState, useMemo, useEffect } from "react"
-import { 
-  X, 
-  Plus, 
-  Minus, 
-  ShoppingCart, 
-  Utensils, 
+import {
+  X,
+  Plus,
+  Minus,
+  ShoppingCart,
+  Utensils,
   Award,
   ChevronDown,
   ChevronUp,
@@ -18,6 +18,7 @@ import {
   Check
 } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
+import { useCurrency } from "../../../../hooks/useCurrency"
 import { ProductModalProps, SelectedAddon } from "../../../../types/menu/type"
 import { Allergen } from "../../../../services/allergen"
 import { ProductExtraMenu } from "../../../../types/Extras/type"
@@ -43,6 +44,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
   onAddToCart
 }) => {
   const { t } = useLanguage()
+  const currency = useCurrency()
   const [selectedAddons, setSelectedAddons] = useState<SelectedAddon[]>([])
   const [selectedExtras, setSelectedExtras] = useState<Map<number, number>>(new Map())
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set())
@@ -452,7 +454,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   )}
                   <div className="flex items-center space-x-2">
                     <span className="text-lg font-bold bg-gradient-to-r from-orange-600 to-pink-500 bg-clip-text text-transparent">
-                      ${(product.price || 0).toFixed(2)}
+                      {currency.symbol}{(product.price || 0).toFixed(2)}
                     </span>
                     {product.isRecommended && (
                       <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs px-2 py-1 rounded-full flex items-center">
@@ -553,7 +555,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                               )}
                               <div className="flex items-center space-x-2 mt-2">
                                 <span className="text-sm font-bold text-orange-600">
-                                  +${(addon.price || 0).toFixed(2)}
+                                  +{currency.symbol}{(addon.price || 0).toFixed(2)}
                                 </span>
                                 {addon.isRecommended && (
                                   <span className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs px-1.5 py-0.5 rounded-full">
@@ -821,7 +823,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                                       
                                       {!extra.isRemoval && (
                                         <div className="text-sm font-bold text-blue-600 dark:text-blue-400">
-                                          +{price.toFixed(2)}
+                                          +{currency.symbol}{price.toFixed(2)}
                                         </div>
                                       )}
                                     </div>
@@ -913,7 +915,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                 <div className="flex justify-between">
                   <span className="text-slate-600 dark:text-slate-400">{product.productName || ''} × {quantity}</span>
                   <span className="font-semibold text-slate-800 dark:text-slate-100">
-                    ${((product.price || 0) * quantity).toFixed(2)}
+                    {currency.symbol}{((product.price || 0) * quantity).toFixed(2)}
                   </span>
                 </div>
                 
@@ -923,7 +925,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                       {addon.addonName} × {addon.quantity * quantity}
                     </span>
                     <span className="font-semibold text-slate-800 dark:text-slate-100">
-                      +${((addon.price || 0) * addon.quantity * quantity).toFixed(2)}
+                      +{currency.symbol}{((addon.price || 0) * addon.quantity * quantity).toFixed(2)}
                     </span>
                   </div>
                 ))}
@@ -939,7 +941,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                         {extra.extraName || ''} × {qty * quantity}
                       </span>
                       <span className="font-semibold text-slate-800 dark:text-slate-100">
-                        +${(((extra.finalPrice || extra.unitPrice || 0) * qty * quantity)).toFixed(2)}
+                        +{currency.symbol}{(((extra.finalPrice || extra.unitPrice || 0) * qty * quantity)).toFixed(2)}
                       </span>
                     </div>
                   )
@@ -951,7 +953,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                       {t('productModal.total')}
                     </span>
                     <span className="font-bold text-xl bg-gradient-to-r from-orange-600 to-pink-500 bg-clip-text text-transparent">
-                      ${getTotalPrice.toFixed(2)}
+                      {currency.symbol}{getTotalPrice.toFixed(2)}
                     </span>
                   </div>
                 </div>

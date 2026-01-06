@@ -13,6 +13,7 @@ import {
   ChefHat,
 } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
+import { useCurrency } from "../../../../hooks/useCurrency"
 import { MenuProduct } from "../../../../types/menu/type"
 
 interface ProductCardProps {
@@ -35,6 +36,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onCustomize
 }) => {
   const { t } = useLanguage()
+  const currency = useCurrency()
   const [isHovered, setIsHovered] = useState(false)
   const hasAddons = product.availableAddons && product.availableAddons.length > 0
   
@@ -151,7 +153,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <div className="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl sm:rounded-2xl shadow-xl border border-orange-200/50 dark:border-orange-800/50">
               <div className="flex items-baseline gap-1">
                 <span className={`text-xl sm:text-2xl font-black ${isOutOfStock ? 'text-slate-500' : 'bg-gradient-to-r from-orange-600 via-orange-500 to-pink-500 bg-clip-text text-transparent'}`}>
-                  ${product.price.toFixed(2)}
+                  {currency.symbol}{product.price.toFixed(2)}
                 </span>
                 {hasAddons && (
                   <span className="text-xs text-slate-600 dark:text-slate-400 font-medium hidden sm:inline">
@@ -196,7 +198,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 <div key={addon.branchProductAddonId} className="relative group/addon">
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg blur"></div>
                   <span className="relative text-xs bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/30 dark:to-purple-900/30 text-blue-800 dark:text-blue-200 px-2.5 py-1 rounded-lg font-semibold border border-blue-200/50 dark:border-blue-800/50 transition-transform duration-200 hover:scale-105">
-                    +${addon.price.toFixed(2)} {addon.addonName}
+                    +{currency.symbol}{addon.price.toFixed(2)} {addon.addonName}
                   </span>
                 </div>
               ))}

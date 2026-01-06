@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Check, 
-  X, 
-  Store, 
+import {
+  Check,
+  X,
+  Store,
   Plus,
   AlertCircle,
   CheckCircle,
@@ -13,6 +13,7 @@ import {
 import { branchCategoryService } from '../../../../services/Branch/BranchCategoryService';
 import { branchProductService } from '../../../../services/Branch/BranchProductService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { useCurrency } from '../../../../hooks/useCurrency';
 import ProductDetailsModal from './ProductDetailsModal';
 import CategoriesContent from './CategoriesContent';
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
@@ -37,6 +38,9 @@ enum AdditionStep {
 const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
   // Translation hook
   const { t, isRTL } = useLanguage();
+
+  // Currency hook
+  const currency = useCurrency();
 
   // State management
   const [categories, setCategories] = useState<Category[]>([]);
@@ -534,7 +538,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
         return updated;
       });
 
-      setSuccessMessage(`Product price updated to $${newPrice.toFixed(2)}`);
+      setSuccessMessage(`Product price updated to ${currency.symbol}${newPrice.toFixed(2)}`);
 
       // Clear the edited state
       const newEditedPrices = new Map(editedProductPrices);
