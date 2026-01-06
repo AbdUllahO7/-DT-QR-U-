@@ -1074,8 +1074,8 @@ contact: {
   // Products
   products: {
     status: {
-      outOfStock: 'غير متوفر',
-      inStock: 'متوفر',
+      outOfStock: 'غير متوفر في المخزون',
+      inStock: 'متوفر في المخزون',
       available: 'متاح',
       unavailable: 'غير متاح'
     },

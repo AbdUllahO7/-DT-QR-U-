@@ -1078,7 +1078,7 @@ hero: {
   products: {
     status: {
       outOfStock: 'Stokta Yok',
-      inStock: 'Aktif',
+      inStock: 'Stokta Var',
       available: 'Mevcut',
       unavailable: 'Mevcut Değil'
     },

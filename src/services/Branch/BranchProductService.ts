@@ -17,6 +17,7 @@ interface UpdateBranchProductRequest {
   displayOrder: number;
   branchCategoryId: number;
   maxQuantity?: number;
+  isOutOfStock?: boolean;
 }
 
 interface BranchProductReorderRequest {
@@ -102,6 +103,7 @@ interface APIBranchProduct {
   orderDetails?: any;
   ingredients?: APIIngredient[];
   allergens?: APIAllergen[];
+  isOutOfStock?: boolean;
 }
 
 // Simple API response for basic endpoints
@@ -117,6 +119,7 @@ interface SimpleBranchProduct {
   branchCategoryId: number;
   status?: boolean;
   maxQuantity?: number;
+  isOutOfStock?: boolean;
 }
 
 class BranchProductService {
@@ -130,8 +133,9 @@ class BranchProductService {
       description: '', 
       price: apiBranchProduct.price,
       imageUrl: apiBranchProduct.product?.imageUrl || '',
-      isAvailable: apiBranchProduct.isActive,
+      isAvailable: !apiBranchProduct.isOutOfStock,
       status: apiBranchProduct.isActive,
+      
       displayOrder: apiBranchProduct.displayOrder,
       categoryId: apiBranchProduct.branchCategoryId,
       // Add branch-specific fields
@@ -155,7 +159,7 @@ class BranchProductService {
       description: apiBranchProduct.description || '',
       price: apiBranchProduct.price,
       imageUrl: apiBranchProduct.imageUrl || '',
-      isAvailable: apiBranchProduct.isActive ?? apiBranchProduct.status ?? true,
+     isAvailable: apiBranchProduct.isOutOfStock !== undefined ? !apiBranchProduct.isOutOfStock : true,
       status: apiBranchProduct.isActive ?? apiBranchProduct.status ?? true,
       displayOrder: apiBranchProduct.displayOrder || 0,
       categoryId: apiBranchProduct.branchCategoryId,
@@ -172,7 +176,7 @@ class BranchProductService {
       description: apiBranchProduct.description || '',
       price: apiBranchProduct.price,
       imageUrl: apiBranchProduct.imageUrl || '',
-      isAvailable: apiBranchProduct.isActive ?? apiBranchProduct.status ?? true,
+      isAvailable: apiBranchProduct.isOutOfStock !== undefined ? !apiBranchProduct.isOutOfStock : true,
       status:  apiBranchProduct.status ?? true,
       displayOrder: apiBranchProduct.displayOrder || 0,
       categoryId: apiBranchProduct.branchCategoryId,
@@ -217,7 +221,7 @@ class BranchProductService {
 
       const url = params.toString() ? `${this.baseUrl}?${params.toString()}` : this.baseUrl;
       const response = await httpClient.get<APIBranchProduct[]>(url);
- 
+      console.log('Branch products response:', response.data);
       // Determine if response has complex structure (with includes) or simple structure
       const firstItem = response.data[0];
       const hasComplexStructure = firstItem && (
@@ -359,9 +363,10 @@ class BranchProductService {
     isActive?: boolean;
     displayOrder?: number;
     branchCategoryId?: number;
+    maxQuantity?: number; 
+    isOutOfStock?: boolean; 
   }): Promise<Product> {
     try {
-      // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
 
       const payload: UpdateBranchProductRequest = {
@@ -369,9 +374,15 @@ class BranchProductService {
         price: productData.price ?? 0,
         isActive: productData.isActive ?? true,
         displayOrder: productData.displayOrder ?? 0,
-        branchCategoryId: productData.branchCategoryId ?? 0
+        branchCategoryId: productData.branchCategoryId ?? 0,
+        isOutOfStock: productData.isOutOfStock ?? false 
       };
 
+      // Add maxQuantity only if it exists
+      if (productData.maxQuantity !== undefined) {
+        payload.maxQuantity = productData.maxQuantity;
+      }
+      console.log("Updating branch product:", { id, payload, branchId });
       logger.info('Updating branch product', { id, payload, branchId });
       const params = branchId ? { branchId } : {};
       const response = await httpClient.put<SimpleBranchProduct>(`${this.baseUrl}/${id}`, payload, { params });

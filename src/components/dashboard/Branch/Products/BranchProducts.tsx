@@ -34,7 +34,6 @@ enum AdditionStep {
   REVIEW_SELECTION = 'review_selection'
 }
 
-
 const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
   // Translation hook
   const { t, isRTL } = useLanguage();
@@ -227,8 +226,6 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
         }
       }
     }
-    
-
     
     setEditingProductId(productId);
     
@@ -639,15 +636,19 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
         return;
       }
 
-      // Prepare the payload with availability field
+      // Calculate new state
+      const newAvailabilityState = !currentAvailability;
+      const isOutOfStock = !newAvailabilityState; // Backend uses inverse logic (isOutOfStock)
+
+      // Prepare the payload with the new isOutOfStock field
       const productData = {
         branchProductId: branchProductId,
         price: productToUpdate.price,
         isActive: productToUpdate.status,
-        isAvailable: !currentAvailability, // Toggle availability
         displayOrder: productToUpdate.displayOrder,
         branchCategoryId: branchCategories[categoryIndex].branchCategoryId,
         maxQuantity: productToUpdate.maxQuantity,
+        isOutOfStock: isOutOfStock // <--- Pass the new field here
       };
 
       // Update the product availability
@@ -661,7 +662,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
             ...updated[categoryIndex],
             products: updated[categoryIndex].products!.map(product =>
               product.branchProductId === branchProductId
-                ? { ...product, isAvailable: !currentAvailability }
+                ? { ...product, isAvailable: newAvailabilityState } // Map back to Frontend isAvailable
                 : product
             ),
           };
@@ -670,7 +671,7 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
       });
 
       setSuccessMessage(
-        !currentAvailability
+        newAvailabilityState
           ? t('branchCategories.messages.productInStock') || 'Product marked as in stock'
           : t('branchCategories.messages.productOutOfStock') || 'Product marked as out of stock'
       );
@@ -832,6 +833,8 @@ const BranchCategories: React.FC<BranchCategoriesProps> = ({ branchId }) => {
                 price: branchProduct.price,
                 imageUrl: branchProduct?.imageUrl,
                 status: branchProduct.status,
+                // ✅ ADDED THIS LINE: Ensure isAvailable is mapped from service
+                isAvailable: branchProduct.isAvailable, 
                 displayOrder: branchProduct.displayOrder,
                 isSelected: true,
                 
@@ -1667,10 +1670,10 @@ const handleSaveProductExtras = async (
                 {t('branchCategories.subheader', { branchId })}
               </p>
             </div>
-           
+            
           </div>
         </div>
-   
+    
         {/* Enhanced Stats Overview with Addons */}
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
