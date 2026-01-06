@@ -50,11 +50,13 @@ interface DeletedRestaurant {
 
 class RestaurantService {
   private baseUrl = '/api/Restaurants';
-     // Helper method to get language from localStorage
+  
+  // Helper method to get language from localStorage
   private getLanguageFromStorage(): string {
     return localStorage.getItem('language') || 'en';
   }
-  // NEW: Get all restaurants
+
+  // Get all restaurants
   async getRestaurants(): Promise<RestaurantInfo[]> {
     try {
       logger.info('Tüm restoranlar getiriliyor...');
@@ -84,11 +86,15 @@ class RestaurantService {
     try {
       logger.info('Restaurant oluşturma isteği gönderiliyor:', data);
 
-      const { userId, ...restData } = data;
+      // Destructure to separate userId (which maps to creatorUserId)
+      // and ensure languages are extracted to be explicitly included in apiData
+      const { userId, supportedLanguages, defaultLanguage, ...restData } = data;
 
       const apiData = {
         ...restData,
-        creatorUserId: userId
+        creatorUserId: userId,
+        supportedLanguages: supportedLanguages, 
+        defaultLanguage: defaultLanguage
       };
 
       logger.info('API\'ye gönderilen düzenlenmiş veri:', apiData);
@@ -270,7 +276,7 @@ class RestaurantService {
 
   async getDeletedRestaurants(): Promise<DeletedRestaurant[]> {
     try {
-            const language = this.getLanguageFromStorage();
+      const language = this.getLanguageFromStorage();
       logger.info('Silinmiş restaurantlar getiriliyor...');
       const response = await httpClient.get<DeletedRestaurant[]>(`${this.baseUrl}/deleted`, {
         params: {

@@ -92,7 +92,6 @@ export const useCartHandlers = ({
   setShowWhatsAppConfirmation
 }: UseCartHandlersProps) => {
 
-  console.log("🛒 useCartHandlers initialized with cart:", cart)
 
   // Helper function to get clean session ID
   const getCleanSessionId = (sessionId?: string | null): string | null => {
@@ -294,20 +293,11 @@ export const useCartHandlers = ({
 
       const newQuantity = cartItem.quantity + 1
 
-      console.log('📦 Updating product quantity (backend will auto-scale extras):', {
-        basketItemId,
-        branchProductId: cartItem.branchProductId,
-        currentQuantity: cartItem.quantity,
-        newQuantity: newQuantity,
-        extrasCount: cartItem.extras?.length || 0
-      })
+    
 
-      // ✅ Use UPDATE endpoint instead of ADD
-      // Backend's UpdateBasketItemCommandHandler has auto-scaling logic for extras
-      // When quantity changes: extra.Quantity = perItemQuantity * newQuantity
+      
       await basketService.updateMyBasketItem(basketItemId, newQuantity)
 
-      console.log('✅ Product quantity updated successfully (extras auto-scaled)')
       await loadBasket()
 
     } catch (err: any) {
@@ -347,15 +337,11 @@ export const useCartHandlers = ({
       setLoading(true)
       setError(null)
 
-      console.log('🔄 Toggling extra (removing removal):', {
-        branchProductExtraId,
-        basketItemId
-      })
+   
 
       // ✅ SIMPLE: Just delete the extra - that's it!
       await basketService.deleteBasketItemExtra(basketItemId, branchProductExtraId)
 
-      console.log('✅ Extra toggled successfully')
 
       // Reload basket to reflect changes
       await loadBasket()
@@ -413,13 +399,7 @@ export const useCartHandlers = ({
       // Increment by 1 total unit
       const newQuantity = extra.quantity + 1
 
-      console.log('➕ Increasing extra quantity:', {
-        branchProductExtraId,
-        basketItemId,
-        currentScaledQuantity: extra.quantity,
-        newScaledQuantity: newQuantity
-      })
-
+    
       // Update with new scaled quantity
       await basketService.updateBasketItemExtra(
         basketItemId,
@@ -427,7 +407,6 @@ export const useCartHandlers = ({
         { quantity: newQuantity }
       )
 
-      console.log('✅ Extra quantity increased successfully')
 
       // Reload basket
       await loadBasket()
@@ -481,14 +460,7 @@ export const useCartHandlers = ({
       // Decrement by 1 total unit
       const newQuantity = extra.quantity - 1
 
-      console.log('➖ Decreasing extra quantity:', {
-        branchProductExtraId,
-        basketItemId,
-        currentScaledQuantity: extra.quantity,
-        productQuantity: cartItem.quantity,
-        newScaledQuantity: newQuantity,
-        minQuantity: minQty
-      })
+   
 
       if (newQuantity < minQty) {
         setError(`Minimum quantity for ${extra.extraName} is ${extra.minQuantity}`)
@@ -497,7 +469,6 @@ export const useCartHandlers = ({
 
       if (newQuantity <= 0) {
         // ✅ If quantity would be 0 or less, just delete the extra
-        console.log('🗑️ Removing extra completely (quantity would be 0 or negative)')
         await basketService.deleteBasketItemExtra(basketItemId, branchProductExtraId)
       } else {
         // ✅ Otherwise, update the quantity
@@ -508,7 +479,6 @@ export const useCartHandlers = ({
         )
       }
 
-      console.log('✅ Extra quantity decreased successfully')
 
       await loadBasket()
 
@@ -546,20 +516,13 @@ export const useCartHandlers = ({
 
       if (cartItem.quantity <= 1) {
         // If quantity is 1 or less, delete the entire item
-        console.log('🗑️ Deleting basket item (quantity would be 0):', basketItemId)
         await basketService.deleteMyBasketItem(basketItemId)
       } else {
         // If quantity > 1, update to decrease (backend auto-scales extras)
         const newQuantity = cartItem.quantity - 1
-        console.log('📦 Decreasing product quantity (backend will auto-scale extras):', {
-          basketItemId,
-          currentQuantity: cartItem.quantity,
-          newQuantity: newQuantity,
-          extrasCount: cartItem.extras?.length || 0
-        })
+   
 
         await basketService.updateMyBasketItem(basketItemId, newQuantity)
-        console.log('✅ Product quantity decreased successfully (extras auto-scaled)')
       }
 
       await loadBasket()

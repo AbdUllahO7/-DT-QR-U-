@@ -274,7 +274,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     const loadLanguages = async () => {
       try {
         const languagesData = await languageService.getRestaurantLanguages();
-        console.log("languagesData", languagesData);
 
         // Deduplicate languages by code
         const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
@@ -284,7 +283,6 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
           return acc;
         }, []);
 
-        console.log("uniqueLanguages", uniqueLanguages);
         setSupportedLanguages(uniqueLanguages);
         setDefaultLanguage(languagesData.defaultLanguage || 'en');
       } catch (error) {
@@ -1137,7 +1135,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                 <div className="space-y-6">
                   <div>
                     <MultiLanguageInput
-                      label={t('branchManagement.form.branchName') + ' *'}
+                      label={t('branchManagement.form.branchName') }
                       value={branchNameTranslations}
                       onChange={(newTranslations) => {
                         setBranchNameTranslations(newTranslations);

@@ -8,6 +8,8 @@ export const ar = {
     actions: 'الإجراءات',
     change: 'تغيير',
     success: 'نجح',
+    setAsDefault: 'تعيين كافتراضي',
+    default: 'افتراضي',
     cancel: 'إلغاء',
       "emailAddress": "عنوان البريد الإلكتروني",
       "emailPlaceholder": "you@example.com",
@@ -1214,11 +1216,11 @@ contact: {
         supportText: 'تدعم صيغ PNG، JPG، GIF. الحد الأقصى لحجم الملف: 5 ميجابايت'
       },
       country: {
-        label: 'البلد *',
+        label: 'البلد',
         placeholder: 'أدخل اسم البلد'
       },
       city: {
-        label: 'المدينة *',
+        label: 'المدينة',
         placeholder: 'أدخل اسم المدينة'
       },
       street: {
@@ -1238,11 +1240,11 @@ contact: {
         placeholder: 'أدخل معلومات العنوان الإضافية (اختياري)'
       },
       phone: {
-        label: 'رقم الهاتف *',
+        label: 'رقم الهاتف ',
         placeholder: 'أدخل رقم الهاتف'
       },
       email: {
-        label: 'عنوان البريد الإلكتروني *',
+        label: 'عنوان البريد الإلكتروني',
         placeholder: 'أدخل عنوان البريد الإلكتروني'
       },
       location: {
@@ -3322,6 +3324,10 @@ contact: {
   branchCategories: {
     // Header and Stats
     header: 'إدارة فئات الفرع',
+    originalName: 'الاسم الأصلي',
+    editCategoryName: 'تعديل اسم الفئة',
+    categoryName: 'اسم الفئة',
+    enterCategoryName: 'أدخل اسم الفئة',
     subheader: 'إدارة الفئات والمنتجات للفرع ',
     lastUpdated: 'آخر تحديث',
     stats: {
@@ -4717,6 +4723,7 @@ recycleBin: {
    "productCard": {
     "chefsPick": "اختيار الشيف",
     "customizable": "قابل للتخصيص",
+    "outOfStock": "غير متوفر",
     "addons": "+إضافات",
     "allergens": "مسببات الحساسية",
     "ingredients": "المكونات",
@@ -4890,6 +4897,8 @@ recycleBin: {
     "backLink": "العودة إلى صفحة التسجيل",
     "progress": {
       "step1": "المعلومات الأساسية",
+      "languagesLabel": "اللغات",
+      "searchLanguages": "بحث عن اللغات",
       "step2": "معلومات الشركة",
       "step3": "المستندات القانونية"
     },
@@ -4911,11 +4920,11 @@ recycleBin: {
       "subtitle": "أدخل المعلومات الأساسية لمطعمك",
       "nameLabel": "اسم المطعم *",
       "namePlaceholder": "أدخل اسم مطعمك",
-      "logoLabel": "شعار المطعم *",
+      "logoLabel": "شعار المطعم",
       "logoUploading": "جاري تحميل الشعار...",
       "logoSuccess": "✓ تم تحميل الشعار بنجاح",
       "logoSuccessSub": "تم استلام رابط Cloudinary",
-      "cuisineLabel": "نوع المطبخ *",
+      "cuisineLabel": "نوع المطبخ ",
       "errors": {
         "nameRequired": "اسم المطعم مطلوب",
         "logoRequired": "شعار المطعم مطلوب",
@@ -4944,9 +4953,9 @@ recycleBin: {
     "step3": {
       "title": "المستندات القانونية",
       "subtitle": "أدخل معلومات الضرائب والمستندات",
-      "taxNumberLabel": "الرقم الضريبي *",
+      "taxNumberLabel": "الرقم الضريبي ",
       "taxNumberPlaceholder": "أدخل رقمك الضريبي",
-      "taxOfficeLabel": "مكتب الضرائب *",
+      "taxOfficeLabel": "مكتب الضرائب ",
       "taxOfficePlaceholder": "أدخل مكتب الضرائب الخاص بك",
       "workPermitLabel": "مستند تصريح العمل",
       "workPermitUploading": "جاري تحميل مستند تصريح العمل...",
@@ -5786,12 +5795,20 @@ extrasManagement: {
     languageSettings: {
       title: 'إعدادات اللغة',
       subtitle: 'قم بتعيين اللغات التي يدعمها مطعمك واللغة الافتراضية'
-    }
+    },
+       currencySettings: {
+      title: 'إعدادات العملة',
+      subtitle: 'قم بتعيين العملة الافتراضية لمطعمك'
+    },
   },
   form: {
     defaultLanguage: {
       label: 'اللغة الافتراضية',
       helperText: 'إعداد اللغة الافتراضية للمطعم'
+    },
+    defaultCurrency: {
+      label: 'العملة الافتراضية',
+      helperText: 'إعداد العملة الافتراضية للمطعم'
     },
     supportedLanguages: {
       label: 'اللغات المدعومة',
@@ -5834,5 +5851,14 @@ BranchTableModal: {
   status: 'الحالة',
   active: 'نشط',
   update: 'تحديث'
-}
+},
+  languageControl : {
+    editing: 'تحرير اللغة',
+    copyFrom: 'نسخ من',
+    quickFill: 'تعبئة سريعة',
+    fill: 'تعبئة',
+    bulkFillTitle: 'تعبئة جماعية',
+    scrollLeft: 'تمرير لليسار',
+    scrollRight: 'تمرير لليمين'
+  }
 };

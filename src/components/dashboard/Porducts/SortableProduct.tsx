@@ -86,9 +86,7 @@ export const SortableProduct: React.FC<{
         const fetchedExtras = await productExtrasService.getProductExtrasByProductId(product.id);
         // Filter to only show non-deleted extras
         const activeExtras = fetchedExtras.filter(extra => !extra.isDeleted);
-        console.log("activeExtras",activeExtras)
         setExtras(activeExtras);
-        console.log("fetchedExtras",fetchedExtras)
         logger.info('Product extras loaded', { productId: product.id, extrasCount: activeExtras.length });
       } catch (error: any) {
         logger.error('Error loading extras:', error);

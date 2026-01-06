@@ -144,27 +144,7 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     setShowWhatsAppConfirmation
   })
 
-  // 🔍 DEBUG: Log cart state whenever it changes
-  useEffect(() => {
-    console.log('🛒 Cart State Updated:', {
-      cartLength: cart.length,
-      items: cart.map(item => ({
-        name: item.productName,
-        basketItemId: item.basketItemId,
-        price: item.price,
-        quantity: item.quantity,
-        addons: item.addons?.length || 0,
-        extras: item.extras?.length || 0,
-        extrasDetails: item.extras?.map(e => ({
-          name: e.extraName,
-          unitPrice: e.unitPrice,
-          quantity: e.quantity,
-          isRemoval: e.isRemoval,
-          subtotal: e.unitPrice * e.quantity
-        }))
-      }))
-    })
-  }, [cart])
+
 
   // Calculate cart total using line totals from backend
   useEffect(() => {

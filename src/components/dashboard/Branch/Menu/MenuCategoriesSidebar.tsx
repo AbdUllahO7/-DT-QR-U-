@@ -13,7 +13,6 @@ const CategoriesSidebar: React.FC<CategoriesSidebarProps> = ({
 }) => {
   const { t } = useLanguage()
 
-  console.log("categories",categories)
 
   return (
     <div>

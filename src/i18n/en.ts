@@ -6,6 +6,8 @@ export const en = {
   common: {
     loading: 'Loading...',
     error: 'Error',
+    setAsDefault: 'Set as Default',
+    default: 'Default',
     success: 'Success',
     cancel: 'Cancel',
     change: 'Change',
@@ -3327,9 +3329,14 @@ hero: {
 
   branchCategories: {
     // Header and Stats
+    editCategoryName: 'Edit Category Name',
+    originalName: 'Original Name',
+    categoryName: 'Category Name',
+    enterCategoryName: 'Enter Category Name',
     header: 'Branch Categories Management',
     subheader: 'Manage categories and products for Branch ',
     lastUpdated: 'Last Updated',
+
     stock : {
       inStock: 'In Stock',
       outOfStock: 'Out of Stock'
@@ -3504,7 +3511,8 @@ hero: {
         categoryDeleted: 'Category deleted successfully',
         productAdded: 'Product {name} added successfully',
         productRemoved: 'Product {name} removed successfully',
-        orderSaved: 'Category order saved successfully'
+        orderSaved: 'Category order saved successfully',
+        nameUpdated: 'Category name updated successfully'
       },
       error: {
         cannotDelete: 'Cannot delete category "{name}" because it contains {count} products. Please remove all products first.',
@@ -4727,6 +4735,7 @@ productModal: {
     "chefsPick": "Chef's Pick",
     "customizable": "Customizable",
     "addons": "+addons",
+    "outOfStock": "Out of Stock",
     "allergens": "Allergens",
     "ingredients": "Ingredients",
     "inCart": "in cart",
@@ -4903,6 +4912,8 @@ productModal: {
     "progress": {
       "step1": "Basic Info",
       "step2": "Company Info",
+      "searchLanguages": "Search Languages",
+      "languagesLabel": "Languages",
       "step3": "Legal Documents"
     },
     "messages": {
@@ -4923,11 +4934,11 @@ productModal: {
       "subtitle": "Enter your restaurant's basic information",
       "nameLabel": "Restaurant Name *",
       "namePlaceholder": "Enter your restaurant name",
-      "logoLabel": "Restaurant Logo *",
+      "logoLabel": "Restaurant Logo ",
       "logoUploading": "Logo uploading...",
       "logoSuccess": "✓ Logo uploaded successfully",
       "logoSuccessSub": "Cloudinary URL received",
-      "cuisineLabel": "Cuisine Type *",
+      "cuisineLabel": "Cuisine Type ",
       "errors": {
         "nameRequired": "Restaurant name is required",
         "logoRequired": "Restaurant logo is required",
@@ -5795,12 +5806,20 @@ categoryConfigModal: {
     languageSettings: {
       title: 'Language Settings',
       subtitle: 'Set the languages supported by your restaurant and the default language'
+    },
+    currencySettings: {
+      title: 'Currency Settings',
+      subtitle: 'Set the default currency for your restaurant'
     }
   },
   form: {
     defaultLanguage: {
       label: 'Default Language',
       helperText: 'Default language setting for the restaurant'
+    },
+    defaultCurrency: {
+      label: 'Default Currency',
+      helperText: 'Default currency setting for the restaurant'
     },
     supportedLanguages: {
       label: 'Supported Languages',
@@ -5858,6 +5877,7 @@ categoryConfigModal: {
     copyFrom: 'Copy all from',
     quickFill: 'Quick Fill Other Languages...',
     fill: 'Fill',
+    
     bulkFillTitle: 'Bulk Fill Target Language',
     scrollLeft: 'Scroll left',
     scrollRight: 'Scroll right'

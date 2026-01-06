@@ -41,6 +41,7 @@ export interface MenuProduct {
   productDescription: string
   productImageUrl: string
   price: number
+  isOutOfStock: boolean
   isRecommended: boolean
   ingredients: MenuIngredient[]
   allergens: MenuAllergen[]

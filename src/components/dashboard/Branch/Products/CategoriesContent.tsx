@@ -34,6 +34,7 @@ import {
   Layers
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { useCurrency } from '../../../../hooks/useCurrency';
 import { AdditionStep, BranchCategory, CategoriesContentProps } from '../../../../types/BranchManagement/type';
 import { useNavigate } from 'react-router-dom';
 
@@ -103,11 +104,10 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   onToggleProductAvailability,
 }) => {
   const { t, isRTL } = useLanguage();
+  const currency = useCurrency();
   const navigate = useNavigate()
   const [editingCategoryName, setEditingCategoryName] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  console.log("branchCategories",branchCategories)
-  console.log("categoriesWithProducts",categoriesWithProducts)
   // Helper functions
   const toggleCategoryExpansion = (categoryId: number) => {
     const newExpanded = new Set(expandedCategories);
@@ -231,11 +231,11 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
     return (
       <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
         <span className={`font-bold ${hasChanged ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
-          ${currentPrice.toFixed(2)}
+          {currency.symbol}{currentPrice.toFixed(2)}
         </span>
         {hasChanged && (
           <span className="text-xs text-gray-500 line-through">
-            ${originalPrice.toFixed(2)}
+            {currency.symbol}{originalPrice.toFixed(2)}
           </span>
         )}
         {showEditButton && (
@@ -446,7 +446,6 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
   if (isReorderMode || !expandedBranchCategories.has(branchCategory.categoryId) || !branchCategory.products || branchCategory.products.length === 0) {
     return null;
   }
-  console.log('Rendering manage products section for category:', branchCategory);
     const categoryIsActive = isCategoryActive ? isCategoryActive(branchCategory.categoryId) : true;
 
     return (
@@ -699,7 +698,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                                 {extra.extraName || `Extra ${extra.extraId}`}
                                 {extra.specialUnitPrice > 0 && (
                                   <span className="text-purple-600 dark:text-purple-400 font-medium">
-                                    +{extra.specialUnitPrice.toFixed(2)}
+                                    +{currency.symbol}{extra.specialUnitPrice.toFixed(2)}
                                   </span>
                                 )}
                               </span>
@@ -1628,7 +1627,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                                     <div className="flex-1">
                                       <div className="font-medium text-gray-900 dark:text-white">{product.name}</div>
                                       <div className="text-sm text-gray-600 dark:text-gray-300">
-                                        ${currentPrice.toFixed(2)}
+                                        {currency.symbol}{currentPrice.toFixed(2)}
                                         {hasEditedPrice && (
                                           <span className="ml-2 px-2 py-1 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400 rounded-full text-xs">
                                             Custom price

@@ -409,7 +409,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
       )}
 
       {/* Action Buttons */}
-      <div className="flex space-x-3">
+      <div className="flex gap-3 space-x-3">
         <button
           onClick={onBack}
           className="flex-1 py-3 px-4 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
@@ -419,7 +419,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
         <button
           onClick={onCreate}
           disabled={isButtonDisabled}
-          className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 bg-gradient-to-r  from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <div className="flex items-center justify-center">

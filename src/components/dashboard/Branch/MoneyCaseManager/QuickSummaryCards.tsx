@@ -10,14 +10,16 @@ interface Props {
   loading: boolean;
   t: (key: string) => string;
   isRTL: boolean;
+  currencySymbol?: string;
 }
 
-const QuickSummaryCards: React.FC<Props> = ({ 
-  quickSummary, 
-  activeCase, 
-  loading, 
-  t, 
-  isRTL 
+const QuickSummaryCards: React.FC<Props> = ({
+  quickSummary,
+  activeCase,
+  loading,
+  t,
+  isRTL,
+  currencySymbol = '₺'
 }) => {
 
 
@@ -35,12 +37,10 @@ const QuickSummaryCards: React.FC<Props> = ({
   }
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return `${currencySymbol}${new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    }).format(value);
+    }).format(value)}`;
   };
 
   // Use quickSummary data first, then activeCase as fallback

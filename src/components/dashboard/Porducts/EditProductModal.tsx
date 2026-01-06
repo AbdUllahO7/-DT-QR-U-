@@ -11,6 +11,7 @@ import { MultiLanguageInput } from "../../common/MultiLanguageInput";
 import { MultiLanguageTextArea } from "../../common/MultiLanguageTextArea";
 import { useTranslatableFields, TranslatableFieldValue } from "../../../hooks/useTranslatableFields";
 import { productTranslationService } from "../../../services/Translations/ProductTranslationService";
+import { useCurrency } from "../../../hooks/useCurrency";
 
 export const EditProductModal: React.FC<{
   isOpen: boolean;
@@ -22,6 +23,7 @@ export const EditProductModal: React.FC<{
 }> = ({ isOpen, onClose, onSuccess, product, categories, onOpenIngredientUpdate }) => {
   const { t, isRTL } = useLanguage();
   const translationHook = useTranslatableFields();
+  const currency = useCurrency();
 
   // Supported languages - dynamically loaded
   const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
@@ -569,7 +571,8 @@ export const EditProductModal: React.FC<{
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="price" className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <DollarSign className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                                                {currency.symbol}
+
                         <span>{t('editProductModal.form.price.label')}</span>
                         <span className="text-red-500">*</span>
                       </label>

@@ -96,7 +96,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         "availableExtras",
       ])
 
-      console.log("Fetched menu response:", menuResponse)
       
       if (Array.isArray(menuResponse)) {
         setError("Menu format not supported yet. Please update the service.")
@@ -160,12 +159,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         })
       }
 
-      console.log('🛒 Adding to basket:', {
-        product: product.productName,
-        addons: addons.length,
-        extras: extras.length,
-        mainItemRequest
-      })
 
       // Add the main product
       const mainItem = await basketService.addUnifiedItemToMyBasket(mainItemRequest)
@@ -197,7 +190,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         }
       }
 
-      console.log('✅ Successfully added to basket')
 
       // Update basket item count and basketId
       await loadBasketItemCount()
@@ -270,7 +262,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       .find((p) => p.branchProductId === branchProductId)
   }
 
-  console.log('MenuComponent render:', { menuData, searchTerm, selectedCategory })
   // Filter categories and products
   const getFilteredCategories = (): MenuCategory[] => {
     if (!menuData?.categories) return []
@@ -286,8 +277,6 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
 
   // ✅ FIXED: Always open modal first (no direct add to cart)
   const handleQuickAddToCart = async (product: MenuProduct) => {
-    console.log('🔍 Quick add triggered for:', product.productName)
-    console.log('📝 Opening modal for product customization')
     
     // ✅ Always open modal, let user confirm before adding
     handleCustomizeProduct(product)
@@ -305,11 +294,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
     addons: SelectedAddon[], 
     extras: ProductExtraMenu[]
   ) => {
-    console.log('🛒 Modal add to cart:', {
-      product: product.productName,
-      addons: addons.length,
-      extras: extras.length
-    })
+
     
     await addToBasket(product, addons, extras)
     setShowProductModal(false)

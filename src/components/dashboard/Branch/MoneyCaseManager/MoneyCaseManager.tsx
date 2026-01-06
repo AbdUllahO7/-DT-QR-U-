@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Users, DollarSign, Calendar, RefreshCw, Filter, X, Check } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { useCurrency } from '../../../../hooks/useCurrency';
 import { useMoneyCaseManager } from '../../../../hooks/useMoneyCaseManager/useMoneyCaseManager';
 import { useClickOutside } from '../../../../hooks';
 import CloseMoneyCaseModal from './CloseMoneyCaseModal';
@@ -109,6 +110,7 @@ interface MoneyCaseManagerProps {
 
 const MoneyCaseManager: React.FC<MoneyCaseManagerProps> = ({ branchId }) => {
   const { t, isRTL } = useLanguage();
+  const currency = useCurrency();
 
   const {
     state,
@@ -396,12 +398,13 @@ const MoneyCaseManager: React.FC<MoneyCaseManagerProps> = ({ branchId }) => {
         <SuccessNotification message={state.success} />
 
         {/* Quick Summary Cards */}
-        <QuickSummaryCards 
+        <QuickSummaryCards
           quickSummary={state.quickSummary}
           activeCase={state.activeCase}
           loading={state.loading}
           t={t}
           isRTL={isRTL}
+          currencySymbol={currency.symbol}
         />
 
         {/* Branch Summary Section with Enhanced Filtering */}

@@ -106,7 +106,6 @@ const BranchTableCategoryModal: React.FC<Props> = ({
     const loadLanguages = async () => {
       try {
         const languagesData = await languageService.getRestaurantLanguages();
-        console.log("languagesData", languagesData);
 
         // Deduplicate languages by code
         const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
@@ -116,7 +115,6 @@ const BranchTableCategoryModal: React.FC<Props> = ({
           return acc;
         }, []);
 
-        console.log("uniqueLanguages", uniqueLanguages);
         setSupportedLanguages(uniqueLanguages);
         setDefaultLanguage(languagesData.defaultLanguage || 'en');
 
@@ -148,7 +146,6 @@ const BranchTableCategoryModal: React.FC<Props> = ({
         // Load existing translations
         try {
           const response = await tableCategoryTranslationService.getTableCategoryTranslations(editingCategory.id);
-          console.log("category translations response", response);
 
           const categoryNameTrans: TranslatableFieldValue = {
             [defaultLanguage]: editingCategory.categoryName
@@ -281,7 +278,6 @@ const BranchTableCategoryModal: React.FC<Props> = ({
       // Save translations for table category
       try {
         // Log and validate categoryId before creating translations
-        console.log('About to save translations - categoryId:', categoryId, 'type:', typeof categoryId);
 
         // Additional validation: ensure categoryId is a valid number
         if (!categoryId || typeof categoryId !== 'number' || isNaN(categoryId)) {
@@ -302,7 +298,6 @@ const BranchTableCategoryModal: React.FC<Props> = ({
             description: descriptionTranslations[languageCode] || undefined,
           }));
 
-        console.log('Translation data prepared:', translationData);
 
         if (translationData.length > 0) {
           await tableCategoryTranslationService.batchUpsertTableCategoryTranslations({

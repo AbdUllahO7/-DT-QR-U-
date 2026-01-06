@@ -131,7 +131,6 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
     const loadLanguages = async () => {
       try {
         const languagesData = await languageService.getRestaurantLanguages();
-        console.log("languagesData", languagesData);
 
         // Deduplicate languages by code
         const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
@@ -141,7 +140,6 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
           return acc;
         }, []);
 
-        console.log("uniqueLanguages", uniqueLanguages);
         setSupportedLanguages(uniqueLanguages);
         setDefaultLanguage(languagesData.defaultLanguage || 'en');
 
@@ -165,7 +163,6 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
         try {
           const response = await restaurantTranslationService.getRestaurantTranslations();
 
-          console.log("restaurant translations response", response);
 
           // Initialize with base values
           const nameTrans: TranslatableFieldValue = {
@@ -182,7 +179,6 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
             }
           });
 
-          console.log("Mapped restaurant name translations:", nameTrans);
           setRestaurantNameTranslations(nameTrans);
         } catch (error) {
           logger.error('Failed to load restaurant translations', error, { prefix: 'ManagementInfoPanel' });
@@ -392,7 +388,6 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
                     restaurantName: restaurantNameTranslations[languageCode],
                   }));
 
-                console.log('Translation data to be saved:', translationData);
 
                 if (translationData.length > 0) {
                   await restaurantTranslationService.batchUpsertRestaurantTranslations({
