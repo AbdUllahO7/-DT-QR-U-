@@ -61,6 +61,8 @@ export interface CreateRestaurantDto {
   tradeRegistryNumber?: string;
   legalType: string;
   isActive: boolean;
+  supportedLanguages?: string[];
+  defaultLanguage?: string;
 }
 
 export interface CreateRestaurantResponse {

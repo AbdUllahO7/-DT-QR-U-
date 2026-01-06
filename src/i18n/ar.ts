@@ -8,6 +8,8 @@ export const ar = {
     actions: 'الإجراءات',
     change: 'تغيير',
     success: 'نجح',
+    setAsDefault: 'تعيين كافتراضي',
+    default: 'افتراضي',
     cancel: 'إلغاء',
       "emailAddress": "عنوان البريد الإلكتروني",
       "emailPlaceholder": "you@example.com",
@@ -4895,6 +4897,8 @@ recycleBin: {
     "backLink": "العودة إلى صفحة التسجيل",
     "progress": {
       "step1": "المعلومات الأساسية",
+      "languagesLabel": "اللغات",
+      "searchLanguages": "بحث عن اللغات",
       "step2": "معلومات الشركة",
       "step3": "المستندات القانونية"
     },
@@ -4916,11 +4920,11 @@ recycleBin: {
       "subtitle": "أدخل المعلومات الأساسية لمطعمك",
       "nameLabel": "اسم المطعم *",
       "namePlaceholder": "أدخل اسم مطعمك",
-      "logoLabel": "شعار المطعم *",
+      "logoLabel": "شعار المطعم",
       "logoUploading": "جاري تحميل الشعار...",
       "logoSuccess": "✓ تم تحميل الشعار بنجاح",
       "logoSuccessSub": "تم استلام رابط Cloudinary",
-      "cuisineLabel": "نوع المطبخ *",
+      "cuisineLabel": "نوع المطبخ ",
       "errors": {
         "nameRequired": "اسم المطعم مطلوب",
         "logoRequired": "شعار المطعم مطلوب",
@@ -4949,9 +4953,9 @@ recycleBin: {
     "step3": {
       "title": "المستندات القانونية",
       "subtitle": "أدخل معلومات الضرائب والمستندات",
-      "taxNumberLabel": "الرقم الضريبي *",
+      "taxNumberLabel": "الرقم الضريبي ",
       "taxNumberPlaceholder": "أدخل رقمك الضريبي",
-      "taxOfficeLabel": "مكتب الضرائب *",
+      "taxOfficeLabel": "مكتب الضرائب ",
       "taxOfficePlaceholder": "أدخل مكتب الضرائب الخاص بك",
       "workPermitLabel": "مستند تصريح العمل",
       "workPermitUploading": "جاري تحميل مستند تصريح العمل...",

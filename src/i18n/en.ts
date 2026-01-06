@@ -6,6 +6,8 @@ export const en = {
   common: {
     loading: 'Loading...',
     error: 'Error',
+    setAsDefault: 'Set as Default',
+    default: 'Default',
     success: 'Success',
     cancel: 'Cancel',
     change: 'Change',
@@ -4910,6 +4912,8 @@ productModal: {
     "progress": {
       "step1": "Basic Info",
       "step2": "Company Info",
+      "searchLanguages": "Search Languages",
+      "languagesLabel": "Languages",
       "step3": "Legal Documents"
     },
     "messages": {
@@ -4930,11 +4934,11 @@ productModal: {
       "subtitle": "Enter your restaurant's basic information",
       "nameLabel": "Restaurant Name *",
       "namePlaceholder": "Enter your restaurant name",
-      "logoLabel": "Restaurant Logo *",
+      "logoLabel": "Restaurant Logo ",
       "logoUploading": "Logo uploading...",
       "logoSuccess": "✓ Logo uploaded successfully",
       "logoSuccessSub": "Cloudinary URL received",
-      "cuisineLabel": "Cuisine Type *",
+      "cuisineLabel": "Cuisine Type ",
       "errors": {
         "nameRequired": "Restaurant name is required",
         "logoRequired": "Restaurant logo is required",
