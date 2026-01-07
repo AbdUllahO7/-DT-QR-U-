@@ -297,7 +297,7 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
                   .filter(lang => formData.supportedLanguages?.includes(lang.code))
                   .map((lang) => (
                     <option key={lang.code} value={lang.code}>
-                      {lang.displayName} ({lang.nativeName})
+                      ({lang.nativeName})
                     </option>
                   ))}
               </select>
@@ -344,8 +344,7 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
                         }`}
                       >
                         <div className="flex flex-col">
-                          <span>{lang.displayName}</span>
-                          <span className="text-xs opacity-75">{lang.nativeName}</span>
+                          <span>{lang.nativeName}</span>
                         </div>
                       </label>
                     </div>

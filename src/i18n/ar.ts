@@ -7,6 +7,7 @@ export const ar = {
     error: 'خطأ',
     actions: 'الإجراءات',
     change: 'تغيير',
+    removal: 'إزالة',
     success: 'نجح',
     setAsDefault: 'تعيين كافتراضي',
     default: 'افتراضي',

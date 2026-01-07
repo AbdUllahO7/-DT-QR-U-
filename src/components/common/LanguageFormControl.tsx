@@ -194,7 +194,7 @@ export const LanguageFormControl: React.FC<LanguageFormControlProps> = ({
                   {isActive && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-blue-600 dark:bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.6)] z-10" />}
                   {isActive && <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />}
 
-                  <span>{lang.displayName}</span>
+                  <span>{lang.nativeName}</span>
 
                   {/* Completion Pill */}
                   {completion.total > 0 && (
@@ -223,7 +223,7 @@ export const LanguageFormControl: React.FC<LanguageFormControlProps> = ({
           {/* Left: Info Text */}
           <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <Languages className="w-4 h-4 text-gray-500 dark:text-gray-500" />
-            <span>{t('languageControl.editing') || 'Editing'} <span className="text-gray-900 dark:text-gray-200 font-semibold">{currentLanguage?.displayName}</span></span>
+            <span>{t('languageControl.editing') || 'Editing'} <span className="text-gray-900 dark:text-gray-200 font-semibold">{currentLanguage?.nativeName}</span></span>
           </div>
 
           {/* Right: Actions */}
@@ -237,7 +237,7 @@ export const LanguageFormControl: React.FC<LanguageFormControlProps> = ({
                  className="flex items-center justify-center gap-2 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 hover:bg-blue-100 dark:hover:bg-blue-500/20 border border-blue-200 dark:border-blue-500/20 rounded-md transition-colors whitespace-nowrap"
                >
                  <Copy className="w-3.5 h-3.5" />
-                 {t('languageControl.copyFrom') || 'Copy all from'} {languages.find(l => l.code === defaultLanguage)?.displayName}
+                 {t('languageControl.copyFrom') || 'Copy all from'} {languages.find(l => l.code === defaultLanguage)?.nativeName}
                </button>
             )}
 
@@ -259,7 +259,7 @@ export const LanguageFormControl: React.FC<LanguageFormControlProps> = ({
                     .filter(lang => lang.code !== defaultLanguage)
                     .map(lang => (
                       <option key={lang.code} value={lang.code}>
-                        {t('languageControl.fill') || 'Fill'} {lang.displayName}
+                        {t('languageControl.fill') || 'Fill'} {lang.nativeName}
                       </option>
                     ))
                   }

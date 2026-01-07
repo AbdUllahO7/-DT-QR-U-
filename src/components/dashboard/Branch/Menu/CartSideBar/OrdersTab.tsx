@@ -11,6 +11,7 @@ import { OrderItem } from "../../../../../types/BranchManagement/type"
 import { branchProductExtraCategoriesService } from "../../../../../services/Branch/Extras/BranchProductExtraCategoriesService"
 import { branchProductExtrasService } from "../../../../../services/Branch/Extras/BranchProductExtrasService"
 import { BranchProductExtraCategory, BranchProductExtra } from "../../../../../types/Branch/Extras/type"
+import { useCurrency } from "../../../../../hooks/useCurrency"
 
 interface ExtendedOrdersTabProps extends OrdersTabProps {
   updatableOrders: UpdatableOrder[]
@@ -45,6 +46,7 @@ const OrdersTab: React.FC<ExtendedOrdersTabProps> = ({
     await onRefreshUpdatableOrders()
     await onLoadOrderTracking(orderTag)
   }
+  const currency = useCurrency()
 
 
   const getStatusColor = (status: string) => {
@@ -131,6 +133,8 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
   updatableOrders,
   onUpdateOrder
 }) => {
+    const currency = useCurrency()
+
   const { t } = useLanguage()
   const [isEditing, setIsEditing] = useState(false)
   const [updating, setUpdating] = useState(false)
@@ -1071,7 +1075,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
         <div className="flex justify-between text-sm">
           <span className="text-slate-600 dark:text-slate-400">{t('menu.cart.total')}</span>
           <span className="font-semibold text-green-600 dark:text-green-400">
-            ${order.trackingInfo.totalPrice.toFixed(2)}
+            {currency.symbol}{(order.trackingInfo.totalPrice.toFixed(2))}
           </span>
         </div>
 

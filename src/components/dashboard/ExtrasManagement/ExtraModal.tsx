@@ -32,11 +32,14 @@ interface ExtraModalProps {
   onDescriptionTranslationsChange: (value: TranslatableFieldValue) => void;
   supportedLanguages: LanguageOption[];
   defaultLanguage: string;
+  error: string | null;
 }
+
 
 export const ExtraModal: React.FC<ExtraModalProps> = ({
   isEditMode,
   formData,
+  error,
   categories,
   imagePreview,
   loading,
@@ -56,22 +59,73 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
 }) => {
   const { t } = useLanguage();
 
+  console.log("categories",categories)
+
+  // Helper to find the currently selected category object
+  const currentCategory = categories.find((c) => c.id === formData.extraCategoryId);
+
+  // Helper to check if removal is allowed for the current selection
+  const isRemovalAllowed = currentCategory?.isRemovalCategory === true;
+
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(e);
+  };
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newCategoryId = parseInt(e.target.value);
+    const newCategory = categories.find((c) => c.id === newCategoryId);
+
+    // If switching to a category that DOES NOT support removal, force isRemoval to false
+    const shouldResetRemoval = formData.isRemoval && newCategory && !newCategory.isRemovalCategory;
+
+    onChange({
+      ...formData,
+      extraCategoryId: newCategoryId,
+      isRemoval: shouldResetRemoval ? false : formData.isRemoval,
+      // If we forced removal off, we don't necessarily need to reset price, 
+      // but if we turned it ON (not handled here), we would.
+    });
+  };
+
+  const handleRemovalCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = e.target.checked;
+
+    // 1. Validation: If trying to check it, ensure a category is selected
+    if (isChecked && !formData.extraCategoryId) {
+      alert(t('extrasManagement.errors.selectCategoryFirst') || 'Please select a category first.');
+      return;
+    }
+
+    // 2. Validation: Ensure the selected category allows removal
+    if (isChecked && !isRemovalAllowed) {
+      alert(t('extrasManagement.errors.categoryNotRemoval') || 'The selected category does not support removal items.');
+      return;
+    }
+
+    // 3. Update state
+    onChange({
+      ...formData,
+      isRemoval: isChecked,
+      basePrice: isChecked ? 0 : formData.basePrice,
+    });
   };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 transition-opacity bg-gray-900/75 backdrop-blur-sm" onClick={onClose}></div>
-        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
 
+
+        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+          
           {/* Modal Header */}
           <div className="bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">
               {isEditMode ? t('extrasManagement.extras.editExtra') : t('extrasManagement.extras.addExtra')}
             </h3>
+                    {error ? <div className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded">{error}</div> : null}
+
             <button onClick={onClose} className="text-gray-400 hover:text-gray-500 focus:outline-none">
               <X className="w-6 h-6" />
             </button>
@@ -89,21 +143,19 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                 <select
                   title="Parent Category"
                   value={formData.extraCategoryId}
-                  onChange={(e) => onChange({ ...formData, extraCategoryId: parseInt(e.target.value) })}
+                  onChange={handleCategoryChange}
                   className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5"
                   disabled={!!selectedCategoryId}
                 >
                   <option value={0}>{t('extrasManagement.extras.fields.selectCategory')}</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.categoryName}
+                      {c.categoryName} {c.isRemovalCategory ? `(${t('common.removal') || 'Removal'})` : ''}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Grid for Name and Price */}
-              {/* Added 'items-start' to ensure Price input doesn't center vertically if Name dropdown expands */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
                 <div className="sm:col-span-2">
                   <MultiLanguageInput
@@ -125,15 +177,16 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                     <input
                       title="Price"
                       type="number"
-                      step="0.01"
+                      step="1"
                       min="0"
-                      required
                       value={formData.basePrice || ''}
+                      // Disable input if removal is checked
+                      disabled={formData.isRemoval}
                       onChange={(e) => {
                         const val = e.target.value;
                         onChange({ ...formData, basePrice: val === '' ? 0 : parseFloat(val) || 0 });
                       }}
-                      className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5 px-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+                      className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5 px-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
                       placeholder="0.00"
                     />
                   </div>
@@ -198,12 +251,16 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                     {t('extrasManagement.extras.fields.activeLabel')}
                   </span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer group">
+                
+                {/* Removal Checkbox */}
+                <label className={`flex items-center gap-2 group ${!isRemovalAllowed ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
                   <input
                     type="checkbox"
                     checked={formData.isRemoval}
-                    onChange={(e) => onChange({ ...formData, isRemoval: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    onChange={handleRemovalCheckboxChange}
+                    // Optional: Physically disable the input if the category doesn't support it
+                    disabled={!isRemovalAllowed && !formData.isRemoval} 
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 disabled:cursor-not-allowed"
                   />
                   <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                     {t('extrasManagement.extras.fields.removalLabel')}

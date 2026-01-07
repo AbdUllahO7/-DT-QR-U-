@@ -1,11 +1,10 @@
 import { httpClient } from "../utils/http";
 import { logger } from "../utils/logger";
-import type { AxiosRequestConfig } from "axios";
 
 // Currency source enum
 export enum CurrencySource {
-  Restaurant = 0,
-  Branch = 1
+  Restaurant,
+  Branch
 }
 
 // Interface for session currency response
@@ -21,25 +20,12 @@ export interface SessionCurrency {
 class CurrencyService {
   private baseUrl = '/api/Currencies';
 
-  /**
-   * Gets the current session's currency
-   * This will return either the restaurant or branch currency depending on the current session context
-   * This endpoint is public and doesn't require authentication (for guest users on online menu)
-   */
+
   async getSessionCurrency(): Promise<SessionCurrency> {
     try {
       logger.info('Fetching session currency', {}, { prefix: 'CurrencyService' });
 
-      // Use skipAuth flag to make this a public request (no authentication required)
-      // This prevents the Authorization header from being added
-      const config: AxiosRequestConfig & { skipAuth?: boolean } = {
-        skipAuth: true
-      };
-
-      const response = await httpClient.get<SessionCurrency>(
-        `${this.baseUrl}/session-current`,
-        config
-      );
+      const response = await httpClient.get<SessionCurrency>(`${this.baseUrl}/session-current`);
 
       logger.info('Session currency fetched successfully:', response.data, { prefix: 'CurrencyService' });
 

@@ -60,6 +60,7 @@ export interface ExtraCategory {
   status: boolean;
   displayOrder?: number;
   createdAt?: string;
+  isRemovalCategory: boolean;
   updatedAt?: string;
   deletedAt?: string;
 }
