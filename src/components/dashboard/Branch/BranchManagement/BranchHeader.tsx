@@ -69,7 +69,7 @@ const ModernButton: React.FC<{
   <button
     onClick={onClick}
     disabled={disabled || isLoading}
-    className={`group px-6 py-3 ${theme[variant]} text-white rounded-xl font-semibold 
+    className={`group px-2 py-2 ${theme[variant]} text-white rounded-xl font-semibold 
       transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 
       focus:outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed 
       disabled:hover:translate-y-0 disabled:hover:shadow-lg backdrop-blur-sm

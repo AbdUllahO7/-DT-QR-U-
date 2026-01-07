@@ -172,6 +172,7 @@ const Overview: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t, language } = useLanguage();
+  const currency = useCurrency();
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -221,7 +222,6 @@ const Overview: React.FC = () => {
       </div>
     );
   }
-  const currency = useCurrency();
 
   // --- Data Preparation ---
   
