@@ -37,9 +37,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
   onSubmit,
   onClose,
   nameTranslations,
-  descriptionTranslations,
   onNameTranslationsChange,
-  onDescriptionTranslationsChange,
   supportedLanguages,
   defaultLanguage,
 }) => {
@@ -83,7 +81,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                 className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-2"
                 style={{ 
                   maxHeight: '300px', 
-                  overflowY: 'auto',  /* Forces vertical scroll if content is tall */
+                  overflowY: 'auto',
                   display: 'block' 
                 }}
               >
@@ -133,7 +131,16 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                     <input
                       type="checkbox"
                       checked={formData.isRemovalCategory}
-                      onChange={(e) => onChange({ ...formData, isRemovalCategory: e.target.checked })}
+                      onChange={(e) => {
+                        const isRemoval = e.target.checked;
+                        onChange({ 
+                          ...formData, 
+                          isRemovalCategory: isRemoval,
+                          // Reset Max Quantity fields if removal is checked
+                          defaultMaxTotalQuantity: isRemoval ? 0 : formData.defaultMaxTotalQuantity,
+                          isMaxQuantityUnlimited: isRemoval ? false : formData.isMaxQuantityUnlimited
+                        });
+                      }}
                       className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                     />
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
@@ -148,6 +155,8 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                 <h4 className="text-xs font-semibold uppercase text-gray-500 tracking-wider">
                   {t('extrasManagement.categories.fields.selectionRules')}
                 </h4>
+                
+                {/* Row 1: Min/Max Selection */}
                 <div className="grid grid-cols-2 gap-4">
                   {!formData.isRemovalCategory && (
                     <div>
@@ -196,8 +205,10 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  {!formData.isRemovalCategory && (
+                
+                {/* Row 2: Min/Max Quantity (Hidden completely if isRemovalCategory is true) */}
+                {!formData.isRemovalCategory && (
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                         {t('extrasManagement.categories.fields.minQuantity')}
@@ -214,36 +225,36 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                         }}
                       />
                     </div>
-                  )}
-                  <div>
-                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                      {t('extrasManagement.categories.fields.maxQuantity')}
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        title={t('extrasManagement.categories.fields.maxQuantity')}
-                        type="text"
-                        inputMode="numeric"
-                        className="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                        value={formData.isMaxQuantityUnlimited ? '' : (formData.defaultMaxTotalQuantity ?? '')}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/[^0-9]/g, '');
-                          onChange({ ...formData, defaultMaxTotalQuantity: val === '' ? 0 : parseInt(val) });
-                        }}
-                        disabled={formData.isMaxQuantityUnlimited}
-                      />
-                      <label className="flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={formData.isMaxQuantityUnlimited || false}
-                          onChange={(e) => onChange({ ...formData, isMaxQuantityUnlimited: e.target.checked })}
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                        />
-                        <span className="text-[11px] font-medium text-gray-700 dark:text-gray-300">{t('extrasManagement.categories.fields.unlimited')}</span>
+                    <div>
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        {t('extrasManagement.categories.fields.maxQuantity')}
                       </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          title={t('extrasManagement.categories.fields.maxQuantity')}
+                          type="text"
+                          inputMode="numeric"
+                          className="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                          value={formData.isMaxQuantityUnlimited ? '' : (formData.defaultMaxTotalQuantity ?? '')}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '');
+                            onChange({ ...formData, defaultMaxTotalQuantity: val === '' ? 0 : parseInt(val) });
+                          }}
+                          disabled={formData.isMaxQuantityUnlimited}
+                        />
+                        <label className="flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.isMaxQuantityUnlimited || false}
+                            onChange={(e) => onChange({ ...formData, isMaxQuantityUnlimited: e.target.checked })}
+                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                          />
+                          <span className="text-[11px] font-medium text-gray-700 dark:text-gray-300">{t('extrasManagement.categories.fields.unlimited')}</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </form>
           </div>

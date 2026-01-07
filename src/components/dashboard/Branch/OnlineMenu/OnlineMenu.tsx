@@ -659,7 +659,7 @@ const initializeMenu = async () => {
                 <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
                 {/* Session Control Buttons */}
-                <div className="mb-4 flex gap-2 justify-end">
+             {/*    <div className="mb-4 flex gap-2 justify-end">
                   <button
                     onClick={handleResetSession}
                     className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm font-medium"
@@ -672,7 +672,7 @@ const initializeMenu = async () => {
                   >
                     {t('menu.closeSession')}
                   </button>
-                </div>
+                </div> */}
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 bg-transparent mt-6">
                   {/* Categories Sidebar */}

@@ -385,7 +385,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         </div>
 
         {/* Session Control Buttons */}
-        <div className="mb-4 flex gap-2 justify-end">
+       {/*  <div className="mb-4 flex gap-2 justify-end">
           <button
             onClick={handleResetSession}
             className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm font-medium"
@@ -398,7 +398,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
           >
             {t('menu.closeSession')}
           </button>
-        </div>
+        </div> */}
 
         {/* Main Grid: Mobile stacks, Desktop has sidebar + content */}
         <div className="lg:grid lg:grid-cols-4 lg:gap-6">
