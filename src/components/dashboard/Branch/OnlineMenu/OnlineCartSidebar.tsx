@@ -16,6 +16,7 @@ import { TrackedOrder } from '../../../../types/menu/carSideBarTypes';
 import { UpdatableOrder } from '../../../../types/Orders/type';
 import OrdersTab from '../Menu/CartSideBar/OrdersTab';
 import { useOnlineCartHandler } from '../../../../hooks/useOnlineCartHandler';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface OnlineCartSidebarProps {
   isOpen: boolean;
@@ -34,7 +35,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   onClose,
   basket,
   onBasketUpdate,
-  currency = 'TRY',
   menuData
 }) => {
   const { t, language } = useLanguage();
@@ -89,11 +89,9 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     removeToast,
     updateToast,
     
-    // Functions
-    formatPrice,
+ 
     getAvailableAddonsForProduct,
     getAvailableExtrasForProduct,
-    toggleItemExpanded,
     
     // Cart operations
     handleUpdateQuantity,
@@ -121,7 +119,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     basket,
     onBasketUpdate,
     menuData,
-    currency
   });
   
   // --- TAB MANAGEMENT ---
@@ -140,6 +137,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const [trackedOrders, setTrackedOrders] = useState<TrackedOrder[]>([]);
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [updatableOrders, setUpdatableOrders] = useState<UpdatableOrder[]>([]);
+  const currency = useCurrency()
 
   // Get restaurant preferences
   const restaurantPreferences = menuData?.preferences || menuData?.restaurantPreferences || {};
@@ -695,7 +693,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                               <div className="flex-1 min-w-0">
                                 <h3 className={`font-semibold ${theme.text.primary} mb-1`}>{item.productName}</h3>
                                 <p className="text-sm text-emerald-600 font-semibold mb-2">
-                                  {formatPrice(item.price || item.price)}
+                                   {currency.symbol}{item.price}
                                 </p>
 
                                 <div className="flex items-center gap-3">
@@ -755,7 +753,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                 <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
                                   <div className="flex items-center justify-between">
                                     <span className={`text-xs ${theme.text.secondary}`}>{t('menu.cart.total')}</span>
-                                    <span className="font-bold text-emerald-600">{formatPrice(item.totalPrice)}</span>
+                                    <span className="font-bold text-emerald-600">{currency.symbol}{item.totalPrice}</span>
                                   </div>
                                 </div>
                               </div>
@@ -791,7 +789,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                             </p>
                                             {!extra.isRemoval && (
                                               <p className="text-xs text-blue-600 font-semibold">
-                                                {formatPrice(extra.unitPrice)} {t('menu.each') || 'each'}
+                                                {currency.symbol}{extra.unitPrice} {t('menu.each') || 'each'}
                                               </p>
                                             )}
                                           </div>
@@ -844,7 +842,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                       <div key={addonId} className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
                                         <div className="flex-1">
                                           <p className={`text-sm font-semibold ${theme.text.primary}`}>{addonName}</p>
-                                          <p className="text-xs text-emerald-600 font-semibold">{formatPrice(addonPrice)} each</p>
+                                          <p className="text-xs text-emerald-600 font-semibold"> {currency.symbol}{(addonPrice)} each</p>
                                         </div>
 
                                         <div className="flex items-center gap-2 bg-white dark:bg-slate-700 rounded-lg p-1">
@@ -903,7 +901,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                             </div>
                                             {!extra.isRemoval && (
                                               <span className="text-sm font-semibold text-blue-600">
-                                                {formatPrice(extra.unitPrice)}
+                                                {currency.symbol}{(extra.unitPrice)}
                                               </span>
                                             )}
                                           </button>
@@ -929,7 +927,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                               <span className={`text-sm ${theme.text.primary}`}>{addon.addonName}</span>
                                             </div>
                                             <span className="text-sm font-semibold text-emerald-600">
-                                              {formatPrice(addon.specialPrice || addon.price)}
+                                              {currency.symbol}{(addon.specialPrice || addon.price)}
                                             </span>
                                           </button>
                                         ))}
@@ -949,17 +947,17 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                       <div className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
                           <span className={theme.text.secondary}>{t('order.form.subtotal')}</span>
-                          <span className={theme.text.primary}>{formatPrice(subtotal)}</span>
+                          <span className={theme.text.primary}>{currency.symbol}{subtotal}</span>
                         </div>
                         {tax > 0 && (
                           <div className="flex items-center justify-between text-sm">
                             <span className={theme.text.secondary}>Tax:</span>
-                            <span className={theme.text.primary}>{formatPrice(tax)}</span>
+                            <span className={theme.text.primary}>{currency.symbol}{tax}</span>
                           </div>
                         )}
                         <div className="flex items-center justify-between text-lg font-bold pt-2 border-t border-slate-200 dark:border-slate-700">
                           <span className={theme.text.primary}>{t('menu.cart.total')}</span>
-                          <span className="text-orange-600 dark:text-orange-400">{formatPrice(total)}</span>
+                          <span className="text-orange-600 dark:text-orange-400">{currency.symbol}{total}</span>
                         </div>
                       </div>
 
@@ -1063,12 +1061,12 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                 <div className="space-y-1 text-xs">
                                   {orderType.minOrderAmount > 0 && (
                                     <p className="text-blue-600 dark:text-blue-400">
-                                      {t('order.form.minimumOrder')}: {formatPrice(orderType.minOrderAmount)}
+                                      {t('order.form.minimumOrder')}: {currency.symbol}{(orderType.minOrderAmount)}
                                     </p>
                                   )}
                                   {orderType.serviceCharge > 0 && (
                                     <p className="text-orange-600 dark:text-orange-400">
-                                      {t('order.form.serviceCharge')}: +{formatPrice(orderType.serviceCharge)}
+                                      {t('order.form.serviceCharge')}: +{currency.symbol}{(orderType.serviceCharge)}
                                     </p>
                                   )}
                                   {orderType.estimatedMinutes > 0 && (
@@ -1077,7 +1075,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                     </p>
                                   )}
                                   <p className="text-lg font-bold text-orange-600 dark:text-orange-400 mt-2">
-                                    {t('menu.cart.total')}: {formatPrice(calculatedTotal)}
+                                    {t('menu.cart.total')}: {currency.symbol}{(calculatedTotal)}
                                   </p>
                                 </div>
                               </div>
@@ -1118,12 +1116,12 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                     <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-600 space-y-1 text-xs">
                       {selectedOrderType.minOrderAmount > 0 && (
                         <p className="text-blue-600 dark:text-blue-400">
-                          {t('order.form.minimumOrder')}: {formatPrice(selectedOrderType.minOrderAmount)}
+                          {t('order.form.minimumOrder')}: {currency.symbol}{(selectedOrderType.minOrderAmount)}
                         </p>
                       )}
                       {selectedOrderType.serviceCharge > 0 && (
                         <p className="text-orange-600 dark:text-orange-400">
-                          {t('order.form.serviceCharge')}: +{formatPrice(selectedOrderType.serviceCharge)}
+                          {t('order.form.serviceCharge')}: +{currency.symbol}{(selectedOrderType.serviceCharge)}
                         </p>
                       )}
                       {selectedOrderType.estimatedMinutes > 0 && (
@@ -1309,7 +1307,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                       <div className="flex justify-between">
                         <span className="text-slate-600 dark:text-slate-400">{t('order.form.subtotal')}:</span>
                         <span className="text-slate-800 dark:text-slate-200">
-                          {formatPrice(total)}
+                          {currency.symbol}{(total)}
                         </span>
                       </div>
 
@@ -1317,7 +1315,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                         <div className="flex justify-between">
                           <span className="text-slate-600 dark:text-slate-400">{t('order.form.serviceCharge')}:</span>
                           <span className="text-slate-800 dark:text-slate-200">
-                            +{formatPrice(selectedOrderType.serviceCharge)}
+                            +{currency.symbol}{(selectedOrderType.serviceCharge)}
                           </span>
                         </div>
                       )}
@@ -1325,7 +1323,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                       <div className="flex justify-between font-bold border-t border-slate-200 dark:border-slate-600 pt-2">
                         <span className="text-slate-800 dark:text-slate-200">{t('menu.cart.total')}:</span>
                         <span className="text-orange-600 dark:text-orange-400">
-                          {formatPrice(total + selectedOrderType.serviceCharge)}
+                          {currency.symbol}{(total + selectedOrderType.serviceCharge)}
                         </span>
                       </div>
 

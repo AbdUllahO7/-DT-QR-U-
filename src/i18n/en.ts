@@ -6,6 +6,7 @@ export const en = {
   common: {
     loading: 'Loading...',
     error: 'Error',
+    removal: 'Removal',
     setAsDefault: 'Set as Default',
     default: 'Default',
     success: 'Success',

@@ -542,7 +542,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                   .filter(lang => formData.supportedLanguages?.includes(lang.code))
                   .map((lang) => (
                     <option key={lang.code} value={lang.code}>
-                      {lang.displayName} ({lang.nativeName})
+                      ({lang.nativeName})
                     </option>
                   ))}
               </select>
@@ -680,8 +680,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
             }`}
           >
             <div className="flex flex-col">
-              <span>{lang.displayName}</span>
-              <span className="text-xs opacity-75">{lang.nativeName}</span>
+              <span>{lang.nativeName}</span>
             </div>
           </label>
         </div>

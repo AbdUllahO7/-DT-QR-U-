@@ -4,6 +4,7 @@ export const tr = {
   common: {
     loading: 'Yükleniyor...',
     change: 'Değiştir',
+    removal: 'Kaldırma',
     error: 'Hata',
     success: 'Başarılı',
      "emailAddress": "E-posta Adresi",

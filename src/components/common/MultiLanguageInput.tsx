@@ -233,7 +233,7 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
                       <div className="hidden dark:block absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent opacity-50" />
                     )}
 
-                    <span>{lang.displayName}</span>
+                    <span>{lang.nativeName}</span>
                     
                     {error && (
                       <AlertCircle className="w-3.5 h-3.5 text-red-500" />
@@ -253,7 +253,7 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
-                 {currentLanguage?.nativeName || currentLanguage?.displayName}
+                 {currentLanguage?.nativeName || currentLanguage?.nativeName}
               </span>
               
               {isLanguageRequired(selectedLanguage) && (

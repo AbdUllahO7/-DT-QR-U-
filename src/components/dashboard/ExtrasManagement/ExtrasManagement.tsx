@@ -309,8 +309,9 @@ export default function ExtrasManagement() {
 
       await loadData();
       closeModal();
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error("Error creating extra:", err.message);
+      setError("Error creating extra:" + err.message);
     } finally {
       setLoading(false);
     }
@@ -646,6 +647,7 @@ export default function ExtrasManagement() {
 
       {(modalType === 'add-extra' || modalType === 'edit-extra') && (
         <ExtraModal
+          error={error}
           isEditMode={modalType === 'edit-extra'}
           formData={extraForm}
           categories={categories}
