@@ -4016,6 +4016,7 @@ contact: {
     clearFilters: 'مسح الفلاتر',
     filtered: 'تم التصفية',
     updateAction:"تحديث",
+    PaymentMethod:"طريقة الدفع",
     showing:"عرض",
     OrderType : 'نوع الطلب',
     subTotal: "المجموع الفرعي",
@@ -5860,5 +5861,11 @@ BranchTableModal: {
     bulkFillTitle: 'تعبئة جماعية',
     scrollLeft: 'تمرير لليسار',
     scrollRight: 'تمرير لليمين'
+  },
+  paymentMethod: {
+    title: 'طريقة الدفع',
+    cash: 'نقدي',
+    creditCard: 'بطاقة ائتمان',
+    online: 'دفع عبر الإنترنت'
   }
 };

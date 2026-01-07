@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { 
-  Eye, QrCode, ShoppingCart, Star, Calendar, TrendingUp, Users, 
-  DollarSign, BarChart, CalendarDays, Info, CreditCard, Wallet 
+   ShoppingCart, Calendar, Users, 
+  CalendarDays, CreditCard, Wallet, 
+  DollarSign
 } from 'lucide-react';
 import { 
   BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell 
@@ -11,6 +12,7 @@ import { useLanguage } from '../../../../contexts/LanguageContext';
 // Import Real Service and Types
 import { moneyCaseService } from '../../../../services/Branch/MoneyCaseService';
 import { QuickSummary } from '../../../../types/BranchManagement/MoneyCase';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 // --- Helper Functions ---
 const formatCurrency = (amount: number | undefined) => {
@@ -34,10 +36,11 @@ const KPICard: React.FC<{
   iconColor: string;
   statusColor?: string;
 }> = ({ title, value, subValue, subText, icon: Icon, iconBgColor, iconColor, statusColor }) => {
+  const currency = useCurrency();
   return (
     <div className="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-lg shadow-lg flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 sm:space-x-4 rtl:space-x-reverse transition-all duration-200 hover:shadow-xl">
       <div className={`p-2.5 md:p-3 rounded-full ${iconBgColor} ${iconColor} flex-shrink-0`}>
-        <Icon className="w-5 h-5 md:w-6 md:h-6" />
+         { currency.symbol }, 
       </div>
       <div className="flex-1 min-w-0">
         <p className="text-xs md:text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{title}</p>
@@ -218,6 +221,7 @@ const Overview: React.FC = () => {
       </div>
     );
   }
+  const currency = useCurrency();
 
   // --- Data Preparation ---
   

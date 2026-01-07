@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, Image as ImageIcon, Loader2, Plus, DollarSign, Tag, FileText, Eye, EyeOff, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, Loader2, Plus, AlertCircle, Sparkles } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
 import { mediaService } from '../../../services/mediaService';

@@ -12,13 +12,13 @@ import {
   FolderPlus,
   Type,
   Settings2,
-  DollarSign,
   Table,
   HardHat,
 } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { SidebarProps } from '../../../types/BranchManagement/type';
 import BranchSelector from '../common/BranchSelector';
+import { useCurrency } from '../../../hooks/useCurrency';
 
 
 
@@ -37,7 +37,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
-
+    const currency = useCurrency();
+  
   // Yardımcı: Sekmeye git ve durumu güncelle
   const handleNavigate = (path: string, tab: string) => {
     navigate(`/dashboard/${path}`);
@@ -229,7 +230,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
               } ${isRTL ? 'text-right' : 'text-left'}`}
             >
-                <DollarSign className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                {currency.symbol}
                 <span>{t('dashboard.moneyCase.title')}</span>
             </button>
         {/*   <button
@@ -244,7 +245,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <span>{t('dashboard.orderType.title')}</span>
 
             </button>
- */}
+          */}
             {/* User Management - Only for non-branch-only users */}
             {!isBranchOnly && (
               <button
@@ -349,7 +350,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   } ${isRTL ? 'text-right' : 'text-left'}`}
                 >
-                  <DollarSign className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  {currency.symbol}
                   <span>{t('dashboard.moneyCase.title')}</span>
                 </button>
 

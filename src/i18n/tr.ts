@@ -4019,6 +4019,7 @@ productModal: {
       total : 'Toplam',
       updateAction:"Güncele",
       subTotal:"Ara Toplam",
+      PaymentMethod:"Ödeme Yöntemi",
       modificationHistory:"değişiklik Geçmişi",
       showing:"Gösteriliyor",
       lastModifiedAt:"Son Değiştirilme Tarihi",
@@ -5884,5 +5885,11 @@ categoryConfigModal: {
     bulkFillTitle: 'Toplu Doldurma',
     scrollLeft: 'Sola Kaydır',
     scrollRight: 'Sağa Kaydır'
+  },
+  paymentMethod: {
+    title: 'Ödeme Yöntemi',
+    cash: 'Nakit',
+    creditCard: 'Kredi Kartı',
+    online: 'Online Ödeme'
   }
 };

@@ -709,6 +709,7 @@ export interface Order {
   serviceFeeApplied?:number
   orderTypeName:string
   orderTypeIcon:string
+  paymentMethod?: number;
 }
 export interface CategoryReorderRequest {
   categoryOrders: Array<{
@@ -1000,7 +1001,7 @@ export interface CreateSessionOrderDto {
   tableNumber?: string;
   deliveryAddress?: string;
   customerPhone?: string;
-  paymentMethod: string;
+  paymentMethod: number;
 
 }
 
@@ -1047,6 +1048,7 @@ export interface PendingOrder {
   orderTypeName:string
   orderTypeIcon:string;
   orderTypeCode:string
+  paymentMethod?: number;
 }
 
 
@@ -1074,6 +1076,7 @@ export interface BranchOrder {
   orderTypeName : string
   orderTypeIcon:string;
   orderTypeCode:string
+  paymentMethod?: number;
 
 }
 // Enhanced component state

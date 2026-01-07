@@ -95,23 +95,6 @@ const ResturantSettings: React.FC = () => {
     setHasChanges(false);
   };
 
-  const handleToggle = (key: keyof UserSettingsState) => {
-    setSettings(prev => {
-      const updated = { ...prev, [key]: !prev[key] };
-      localStorage.setItem('userSettings', JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  const handleLanguageChange = (value: string) => {
-    setSettings(prev => {
-      const updated = { ...prev, language: value };
-      localStorage.setItem('userSettings', JSON.stringify(updated));
-      return updated;
-    });
-    setLanguage(value as 'tr' | 'en' | 'ar');
-  };
-
 
 
   const tabs = [

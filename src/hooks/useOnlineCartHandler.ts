@@ -687,6 +687,22 @@ export const useOnlineCartHandler = ({
     setPriceChangeData(null);
   }, []);
 
+  // Helper function to map payment method strings to numbers
+  const getPaymentMethodNumber = useCallback((paymentMethod: string): number => {
+    switch (paymentMethod) {
+      case 'cash':
+        return 1;
+      case 'credit_card':
+      case 'creditCard':
+        return 2;
+      case 'online':
+      case 'onlinePayment':
+        return 3;
+      default:
+        return 1; // Default to cash
+    }
+  }, []);
+
   const validateForm = useCallback((
     acceptCash: boolean,
     acceptCreditCard: boolean,
@@ -755,7 +771,7 @@ export const useOnlineCartHandler = ({
       orderData.customerPhone = customerPhone.trim();
     }
     if (paymentMethod) {
-      orderData.paymentMethod = paymentMethod;
+      orderData.paymentMethod = getPaymentMethodNumber(paymentMethod);
     }
     if (orderNotes.trim()) {
       orderData.notes = orderNotes.trim();
@@ -796,7 +812,8 @@ export const useOnlineCartHandler = ({
     orderNotes,
     priceChangeData,
     onBasketUpdate,
-    addToast
+    addToast,
+    getPaymentMethodNumber
   ]);
 
   // ===================================

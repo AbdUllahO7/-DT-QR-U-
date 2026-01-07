@@ -1,5 +1,5 @@
 import React from 'react';
-import { Eye, CheckCircle, XCircle, Ban, Clock, Package, ArrowRight, CheckCheck } from 'lucide-react';
+import { Eye, CheckCircle, XCircle, Ban, Clock, Package, ArrowRight, CheckCheck, CreditCard, Banknote, Smartphone } from 'lucide-react';
 import { BranchOrder, PendingOrder } from '../../../../types/BranchManagement/type';
 import { orderService } from '../../../../services/Branch/OrderService';
 import OrderStatusUtils from '../../../../utils/OrderStatusUtils';
@@ -39,6 +39,22 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
   const rowVersion = order.rowVersion || '';
   const validStatuses = OrderStatusUtils.getValidStatusTransitions(status);
   const isRTL = lang === 'ar';
+
+  // Get payment method icon and label
+  const getPaymentMethodInfo = (paymentMethod?: number) => {
+    switch (paymentMethod) {
+      case 1:
+        return { icon: Banknote, label: t('paymentMethod.cash') || 'Cash', color: 'text-green-600 dark:text-green-400', bgColor: 'bg-green-100 dark:bg-green-900/30' };
+      case 2:
+        return { icon: CreditCard, label: t('paymentMethod.creditCard') || 'Card', color: 'text-blue-600 dark:text-blue-400', bgColor: 'bg-blue-100 dark:bg-blue-900/30' };
+      case 3:
+        return { icon: Smartphone, label: t('paymentMethod.onlinePayment') || 'Online', color: 'text-purple-600 dark:text-purple-400', bgColor: 'bg-purple-100 dark:bg-purple-900/30' };
+      default:
+        return null;
+    }
+  };
+
+  const paymentMethodInfo = getPaymentMethodInfo(order.paymentMethod);
 
   // Alternating row colors for better readability
   const rowBgClass = rowIndex % 2 === 0
@@ -114,6 +130,20 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
             </span>
           </div>
         </div>
+      </td>
+
+      {/* Payment Method */}
+      <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+        {paymentMethodInfo ? (
+          <div className={`inline-flex items-center gap-1.5 ${paymentMethodInfo.bgColor} px-3 py-1.5 rounded-lg`}>
+            <paymentMethodInfo.icon className={`w-3.5 h-3.5 ${paymentMethodInfo.color}`} />
+            <span className={`text-xs font-semibold ${paymentMethodInfo.color}`}>
+              {paymentMethodInfo.label}
+            </span>
+          </div>
+        ) : (
+          <span className="text-xs text-gray-400 dark:text-gray-500">-</span>
+        )}
       </td>
 
       {/* Time */}

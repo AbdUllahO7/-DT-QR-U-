@@ -709,6 +709,20 @@ export const useCartHandlers = ({
     }
   }
 
+  // Helper function to map payment method strings to numbers
+  const getPaymentMethodNumber = (paymentMethod: string): number => {
+    switch (paymentMethod) {
+      case 'cash':
+        return 1
+      case 'creditCard':
+        return 2
+      case 'onlinePayment':
+        return 3
+      default:
+        return 1 // Default to cash
+    }
+  }
+
   const createOrder = async () => {
     try {
       setLoading(true)
@@ -718,7 +732,7 @@ export const useCartHandlers = ({
       const cartErrors = validateCart()
       const formErrors = validateOrderForm()
       const allErrors = [...cartErrors, ...formErrors]
-      
+
       if (allErrors.length > 0) {
         setValidationErrors(allErrors)
         setLoading(false)
@@ -726,11 +740,11 @@ export const useCartHandlers = ({
       }
 
       const selectedOrderType = getSelectedOrderType()
-      
+
       const sessionOrderDto: CreateSessionOrderDto = {
         customerName: orderForm.customerName.trim(),
         notes: orderForm.notes.trim() || undefined,
-        paymentMethod:"",
+        paymentMethod: getPaymentMethodNumber(orderForm.paymentMethod),
         orderTypeId: orderForm.orderTypeId,
         ...(orderForm.tableId && { tableId: orderForm.tableId }),
         ...(orderForm.tableNumber?.trim() && { tableNumber: orderForm.tableNumber.trim() }),

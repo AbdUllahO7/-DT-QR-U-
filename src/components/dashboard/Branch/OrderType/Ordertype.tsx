@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, AlertCircle, CheckCircle, Loader2, Clock, DollarSign, Users, User, MapPin, Phone, Table } from 'lucide-react';
+import { Settings, Save, AlertCircle, CheckCircle, Loader2, Clock, Users, User, MapPin, Phone, Table } from 'lucide-react';
 import { OrderType, orderTypeService, UpdateOrderTypeDto } from '../../../../services/Branch/BranchOrderTypeService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface OrderTypeComponentProps {
   branchId?: number;
@@ -14,7 +15,7 @@ const OrderTypeComponent: React.FC<OrderTypeComponentProps> = ({ branchId }) => 
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState<Record<number, boolean>>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
-  
+  const currency = useCurrency();
 
   useEffect(() => {
     fetchOrderTypes();
@@ -349,7 +350,7 @@ const OrderTypeComponent: React.FC<OrderTypeComponentProps> = ({ branchId }) => 
                   {/* Min Order Amount */}
                   <div className="space-y-2">
                     <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <DollarSign className="w-4 h-4" />
+                                           <span className=''>{currency.symbol}</span>
                       {t('dashboard.orderType.minOrderAmount')}
                     </label>
                     <div className="relative">
@@ -368,7 +369,7 @@ const OrderTypeComponent: React.FC<OrderTypeComponentProps> = ({ branchId }) => 
                   {/* Service Charge */}
                   <div className="space-y-2">
                     <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <DollarSign className="w-4 h-4" />
+                      <span className=''>{currency.symbol}</span>
                       {t('dashboard.orderType.serviceCharge')}
                     </label>
                     <div className="relative">
