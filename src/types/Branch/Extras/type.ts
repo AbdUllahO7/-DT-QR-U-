@@ -14,6 +14,7 @@ export interface BranchProductExtraCategory {
   minTotalQuantity: number;
   maxTotalQuantity: number;
   isActive: boolean;
+  isRemovalCategory: boolean;
   displayOrder?: number;
   activeExtrasCount?: number;
 }

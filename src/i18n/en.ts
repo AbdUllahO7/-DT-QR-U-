@@ -5395,6 +5395,7 @@ categoryConfigModal: {
   title: 'Configure Branch Extras',
   productLabel: 'Configuring extras for:',
   searchPlaceholder: 'Search categories...',
+
   errors: {
     loadFailed: 'Failed to load configuration data',
     saveFailed: 'Failed to save configuration',
@@ -5415,7 +5416,8 @@ categoryConfigModal: {
   badges: {
     required: 'Required',
     optional: 'Optional',
-    removal: 'Removal'
+    removal: 'Removal',
+        removalCategory: 'Removal Category'
   },
   category: {
     availableExtras: 'extras available',

@@ -5409,6 +5409,7 @@ categoryConfigModal: {
   title: 'Şube Ekstralarını Yapılandır',
   productLabel: 'Ekstralar yapılandırılıyor:',
   searchPlaceholder: 'Kategorilerde ara...',
+
   errors: {
     loadFailed: 'Yapılandırma verileri yüklenemedi',
     saveFailed: 'Yapılandırma kaydedilemedi',
@@ -5429,7 +5430,9 @@ categoryConfigModal: {
   badges: {
     required: 'Zorunlu',
     optional: 'İsteğe Bağlı',
-    removal: 'Çıkarma'
+    removal: 'Çıkarma',
+        removalCategory: 'Kaldırma Kategorisi'
+
   },
   category: {
     availableExtras: 'ekstra mevcut',

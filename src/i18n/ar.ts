@@ -5384,6 +5384,7 @@ extrasManagement: {
   title: 'تكوين إضافات الفرع',
   productLabel: 'تكوين الإضافات للمنتج:',
   searchPlaceholder: 'بحث في الفئات...',
+
   errors: {
     loadFailed: 'فشل تحميل بيانات التكوين',
     saveFailed: 'فشل حفظ التكوين',
@@ -5404,7 +5405,8 @@ extrasManagement: {
   badges: {
     required: 'إلزامي',
     optional: 'اختياري',
-    removal: 'إزالة'
+    removal: 'إزالة',
+    removalCategory: 'فئة الإزالة'
   },
   category: {
     availableExtras: 'إضافات متاحة',
