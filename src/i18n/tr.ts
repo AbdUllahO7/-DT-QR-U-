@@ -3233,6 +3233,7 @@ BranchTableManagement: {
     title: 'Şube Yönetimi',
     description: 'Şube bilgilerinizi ve ayarlarınızı yönetin.',
     loading: 'Şube bilgileri yükleniyor...',
+    editBranchName: 'Şube Adını Düzenle',
     noBranchFound: 'Herhangi bir şube bulunamadı',
     uploadLogo: 'Logoyu Yükle',
     status: {

@@ -3233,6 +3233,7 @@ contact: {
     description: 'إدارة معلومات وإعدادات فرعك.',
     loading: 'جاري تحميل معلومات الفرع...',
     noBranchFound: 'لم يتم العثور على أي فرع',
+    editBranchName: 'تعديل اسم الفرع',
     uploadLogo: 'تحميل الشعار',
     status: {
       open: 'مفتوح',

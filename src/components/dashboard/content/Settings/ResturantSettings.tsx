@@ -17,7 +17,6 @@ import { useTheme } from '../../../../contexts/ThemeContext';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { UserSettingsState, BranchDropdownItem } from '../../../../types/BranchManagement/type';
 import { branchService } from '../../../../services/branchService';
-import BranchPreferencesComponent from './BranchPreferencesTab';
 import RestaurantPreferencesTab from './RestaurantPreferencesTab';
 import { BranchPreferences, UpdateBranchPreferencesDto } from '../../../../services/Branch/BranchPreferencesService';
 
@@ -99,7 +98,6 @@ const ResturantSettings: React.FC = () => {
 
   const tabs = [
     { id: 'restaurant', label: t('RestaurantPreferencesTab.title'), icon: Globe },
-    { id: 'branch', label: t('branchPreferences.title'), icon: SettingsIcon },
     { id: 'appearance', label: t('settings.tabs.appearance'), icon: Palette },
   ];
 
@@ -330,31 +328,7 @@ const ResturantSettings: React.FC = () => {
           </motion.div>
         )}
 
-        {activeTab === 'branch' && (
-          <motion.div
-            key="branch"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-          >
-            <BranchPreferencesComponent
-              selectedBranch={selectedBranch}
-              preferences={preferences}
-              setPreferences={setPreferences}
-              formData={formData}
-              setFormData={setFormData}
-              isSaving={isSaving}
-              setIsSaving={setIsSaving}
-              error={error}
-              setError={setError}
-              success={success}
-              setSuccess={setSuccess}
-              hasChanges={hasChanges}
-              setHasChanges={setHasChanges}
-            />
-          </motion.div>
-        )}
+     
 
         {activeTab === 'appearance' && (
           <motion.div

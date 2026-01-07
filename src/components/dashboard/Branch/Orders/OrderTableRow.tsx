@@ -171,7 +171,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
           <div className="flex items-center gap-2">
             
             {/* A: Confirm Button (The first step) */}
-            {shouldShowConfirmButton && (
+          {/*   {shouldShowConfirmButton && (
               <button
                 onClick={() => onOpenConfirm(order.id.toString(), rowVersion)}
                 className="group relative px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg font-bold text-xs flex items-center gap-2"
@@ -180,7 +180,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
                 <CheckCircle className="w-4 h-4" />
                 <span className="hidden sm:inline">{t('ordersManager.confirm')}</span>
               </button>
-            )}
+            )} */}
 
             {/* B: Next Step Buttons (Replaces the Select Dropdown) */}
             {/* This maps through valid next statuses and shows them as direct action buttons */}
@@ -207,7 +207,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
               className="flex items-center justify-center w-8 h-8 text-indigo-600 hover:text-white hover:bg-indigo-600 dark:text-indigo-400 dark:hover:bg-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg"
               title={t('ordersManager.viewDetails')}
             >
-              <Eye className="w-4 h-4" />
+          <Eye className="w-4 h-4" />
             </button>
           </div>
 
