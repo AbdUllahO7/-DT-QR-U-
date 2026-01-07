@@ -1,8 +1,9 @@
 // src/components/Restaurant/MoneyCase/QuickSummaryCards.tsx
 
 import React from 'react';
-import { DollarSign, TrendingUp, Clock, AlertCircle, ShoppingCart, Calendar } from 'lucide-react';
+import {  TrendingUp, Clock, AlertCircle, ShoppingCart, Calendar } from 'lucide-react';
 import { QuickSummary, ActiveMoneyCase } from '../../../../types/BranchManagement/MoneyCase';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface Props {
   quickSummary: QuickSummary | null;
@@ -22,6 +23,7 @@ const QuickSummaryCards: React.FC<Props> = ({
   currencySymbol = '₺'
 }) => {
 
+  const currency = useCurrency();
 
   if (loading && !activeCase && !quickSummary) {
     return (
@@ -110,7 +112,7 @@ const QuickSummaryCards: React.FC<Props> = ({
                 {formatCurrency(currentRevenue)}
               </p>
             </div>
-            <DollarSign className="h-8 w-8 text-yellow-500 flex-shrink-0" />
+            <span className=''>{currency.symbol}</span>
           </div>
         </div>
 

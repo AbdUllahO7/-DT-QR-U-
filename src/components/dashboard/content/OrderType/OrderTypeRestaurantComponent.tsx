@@ -6,7 +6,6 @@ import {
   CheckCircle, 
   Loader2, 
   Clock, 
-  DollarSign, 
   Users, 
   ChevronDown,
   User, 
@@ -23,6 +22,10 @@ import { branchService } from '../../../../services/branchService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../../hooks';
 import { BranchDropdownItem } from '../../../../types/BranchManagement/type';
+import { useCurrency } from '../../../../hooks/useCurrency';
+
+
+/* not used anymore because the resturant user can edit the order type for each branch when select the branch from the dropdown */
 
 const OrderTypeRestaurantComponent = () => {
   const { t, isRTL } = useLanguage();
@@ -31,6 +34,7 @@ const OrderTypeRestaurantComponent = () => {
   const [branches, setBranches] = useState<BranchDropdownItem[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<BranchDropdownItem | null>(null);
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
+    const currency = useCurrency()
   
   // Order types states
   const [orderTypes, setOrderTypes] = useState<OrderType[]>([]);
@@ -473,7 +477,7 @@ const OrderTypeRestaurantComponent = () => {
                     {/* Min Order Amount */}
                     <div className="space-y-2">
                       <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <DollarSign className="w-4 h-4" />
+                          {currency.symbol}
                         {t('dashboard.orderType.minOrderAmount')}
                       </label>
                       <div className="relative">
@@ -492,7 +496,7 @@ const OrderTypeRestaurantComponent = () => {
                     {/* Service Charge */}
                     <div className="space-y-2">
                       <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <DollarSign className="w-4 h-4" />
+                          {currency.symbol}
                         {t('dashboard.orderType.serviceCharge')}
                       </label>
                       <div className="relative">

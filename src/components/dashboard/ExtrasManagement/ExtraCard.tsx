@@ -1,7 +1,8 @@
 import React from 'react';
-import { Edit2, Trash2, DollarSign, Image as ImageIcon } from 'lucide-react';
+import { Edit2, Trash2, Image as ImageIcon } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { Extra } from '../../../types/Extras/type';
+import { useCurrency } from '../../../hooks/useCurrency';
 
 interface ExtraCardProps {
   extra: Extra;
@@ -11,6 +12,7 @@ interface ExtraCardProps {
 
 export const ExtraCard: React.FC<ExtraCardProps> = ({ extra, onEdit, onDelete }) => {
   const { t } = useLanguage();
+  const currency = useCurrency();
 
   return (
     <div className="group relative flex gap-3 p-3 rounded-lg border border-gray-100 hover:border-blue-200 dark:border-gray-700 dark:hover:border-blue-900 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-all">
@@ -38,7 +40,7 @@ export const ExtraCard: React.FC<ExtraCardProps> = ({ extra, onEdit, onDelete })
         </p>
         <div className="flex items-center justify-between mt-auto">
           <span className="text-sm font-bold text-gray-900 dark:text-white flex items-center">
-            <DollarSign className="w-3 h-3 mr-0.5 text-gray-400" />
+            {currency.symbol}
             {extra.basePrice.toFixed(2)}
           </span>
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">

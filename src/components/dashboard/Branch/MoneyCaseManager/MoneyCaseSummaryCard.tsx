@@ -1,8 +1,9 @@
 // src/components/Restaurant/MoneyCase/MoneyCaseSummaryCard.tsx
 
 import React from 'react';
-import { TrendingUp, DollarSign, ShoppingCart, AlertTriangle, Clock } from 'lucide-react';
+import { TrendingUp, ShoppingCart, AlertTriangle } from 'lucide-react';
 import { MoneyCaseSummary } from '../../../../types/BranchManagement/MoneyCase';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface Props {
   summary: MoneyCaseSummary | null;
@@ -25,6 +26,7 @@ const MoneyCaseSummaryCard: React.FC<Props> = ({
       maximumFractionDigits: 2
     }).format(value);
   };
+  const currency = useCurrency();
 
   const formatDuration = (duration?: string) => {
     if (!duration) return '-';
@@ -100,7 +102,7 @@ const MoneyCaseSummaryCard: React.FC<Props> = ({
                 {formatCurrency(summary.averageOrderValue)}
               </p>
             </div>
-            <DollarSign className="h-8 w-8 text-yellow-500" />
+              <span className=''>{currency.symbol}</span>
           </div>
         </div>
 

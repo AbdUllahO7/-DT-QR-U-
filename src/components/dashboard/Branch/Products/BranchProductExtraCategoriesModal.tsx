@@ -12,7 +12,6 @@ import {
   Grid3X3,
   Settings,
   Edit3,
-  DollarSign,
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { 
@@ -25,6 +24,7 @@ import {
 } from '../../../../types/Branch/Extras/type';
 import { branchProductExtraCategoriesService } from '../../../../services/Branch/Extras/BranchProductExtraCategoriesService';
 import { branchProductExtrasService } from '../../../../services/Branch/Extras/BranchProductExtrasService';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface BranchProductExtraCategoriesModalProps {
   isOpen: boolean;
@@ -78,6 +78,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
 
   // State management
   const [availableCategories, setAvailableCategories] = useState<CategoryWithExtras[]>([]);
+    const currency = useCurrency();
   
   // UI Selection State
   const [selectedCategories, setSelectedCategories] = useState<Set<number>>(new Set());
@@ -952,7 +953,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                   {isEditing && isExtraSelected && (
                                     <div className="border-t border-gray-200 dark:border-gray-600 p-4 bg-white dark:bg-gray-700/50">
                                       <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 mb-3`}>
-                                        <DollarSign className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                                        <span className="h-4 w-4 text-gray-600 dark:text-gray-400">{currency.symbol}</span>
                                         <h6 className="font-medium text-sm text-gray-900 dark:text-white">
                                           {t('extrasManagement.categoryConfigModal.labels.extraConfiguration')}
                                         </h6>

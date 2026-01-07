@@ -137,13 +137,6 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
   const handleCurrencySelect = (currency: CurrencyOption) => {
     handleFieldChange('defaultCurrency', currency.code);
 
-    // Save currency details to localStorage
-    localStorage.setItem('selectedCurrency', JSON.stringify({
-      code: currency.code,
-      symbol: currency.symbol,
-      displayName: currency.displayName
-    }));
-
     setIsCurrencyDropdownOpen(false);
     setCurrencySearchQuery('');
   };
@@ -181,6 +174,16 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
 
       // Reload preferences to get complete data including availableLanguages
       await loadPreferences();
+
+      // Save currency to localStorage after successful API call
+      const selectedCurrency = availableCurrencies.find(c => c.code === formData.defaultCurrency);
+      if (selectedCurrency) {
+        localStorage.setItem('selectedCurrency', JSON.stringify({
+          code: selectedCurrency.code,
+          symbol: selectedCurrency.symbol,
+          displayName: selectedCurrency.displayName
+        }));
+      }
 
       setHasChanges(false);
       setSuccess(t('branchPreferences.saveSuccess'));

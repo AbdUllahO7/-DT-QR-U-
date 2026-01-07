@@ -7,7 +7,6 @@ import {
   CheckCircle,
   Loader2,
   Languages,
-  DollarSign,
   ChevronDown,
   Search,
   Check
@@ -19,6 +18,7 @@ import {
   UpdateRestaurantPreferencesDto,
   CurrencyOption,
 } from '../../../../services/RestaurantPreferencesService';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface RestaurantPreferencesTabProps {
   className?: string;
@@ -35,6 +35,7 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const currency = useCurrency();
 
   // Currency selector state
   const [isCurrencyDropdownOpen, setIsCurrencyDropdownOpen] = useState(false);
@@ -108,13 +109,6 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
   const handleCurrencySelect = (currency: CurrencyOption) => {
     handleFieldChange('defaultCurrency', currency.code);
 
-    // Save currency details to localStorage
-    localStorage.setItem('selectedCurrency', JSON.stringify({
-      code: currency.code,
-      symbol: currency.symbol,
-      displayName: currency.displayName
-    }));
-
     setIsCurrencyDropdownOpen(false);
     setCurrencySearchQuery('');
   };
@@ -152,6 +146,16 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
 
       // Reload preferences to get updated data
       await loadPreferences();
+
+      // Save currency to localStorage after successful API call
+      const selectedCurrency = preferences?.availableCurrencies.find(c => c.code === formData.defaultCurrency);
+      if (selectedCurrency) {
+        localStorage.setItem('selectedCurrency', JSON.stringify({
+          code: selectedCurrency.code,
+          symbol: selectedCurrency.symbol,
+          displayName: selectedCurrency.displayName
+        }));
+      }
 
       setHasChanges(false);
       // Translation: Restaurant preferences updated successfully
@@ -375,7 +379,7 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
         {/* Currency Settings Section */}
         <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
           <div className="flex items-center space-x-3 rtl:space-x-reverse mb-4">
-            <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
+            {currency.symbol} 
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {t('RestaurantPreferencesTab.sections.currencySettings.title')}

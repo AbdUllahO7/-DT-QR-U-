@@ -22,8 +22,6 @@ import {
   Users,
   Settings,
   FileText,
-  DollarSign,
-  ArrowRight,
   CheckCircle,
   XCircle,
   Info,
@@ -35,6 +33,7 @@ import Pricing from '../../LandingPage/Pricing';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
 import { CardData, InvoiceData } from '../../../types/BranchManagement/type';
+import { useCurrency } from '../../../hooks/useCurrency';
 
 
 const Subscription: React.FC = () => {
@@ -90,6 +89,7 @@ const Subscription: React.FC = () => {
   const [isAddCardModalOpen, setIsAddCardModalOpen] = useState(false);
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'billing' | 'usage'>('overview');
+  const currency = useCurrency();
 
   const handleAddCard = () => {
     setIsAddCardModalOpen(true);
@@ -425,7 +425,7 @@ const Subscription: React.FC = () => {
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">₺597</p>
                   </div>
                   <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                    <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    <span className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400">{currency.symbol}</span>
                   </div>
                 </div>
               </div>

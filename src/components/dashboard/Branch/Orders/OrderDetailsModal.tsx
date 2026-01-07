@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import {
   Eye, XCircle, Clock, Package, AlertCircle, MapPin, Phone, User, Truck,
   Home, CheckCircle, Printer, Calendar, Hash, ShoppingBag, MessageSquare,
-  DollarSign, TrendingUp, Type, Maximize2, ChevronDown, ChevronUp,
-  Settings, EyeOff, Droplets, Plus
+   TrendingUp, Type, Maximize2, ChevronUp,
+  Settings, EyeOff, Droplets, Plus, CreditCard, Banknote, Smartphone
 } from 'lucide-react';
 import { orderService } from '../../../../services/Branch/OrderService';
 import { BranchOrder, Order } from '../../../../types/BranchManagement/type';
@@ -176,6 +176,22 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
 
   const cleanNotes = getCleanNotes((order as any).notes);
 
+  // Get payment method display info
+  const getPaymentMethodInfo = (paymentMethod?: number) => {
+    switch (paymentMethod) {
+      case 1:
+        return { label: t('paymentMethod.cash') || 'Cash', icon: Banknote, color: 'text-green-600 dark:text-green-400', bgColor: 'bg-green-100 dark:bg-green-800' };
+      case 2:
+        return { label: t('paymentMethod.creditCard') || 'Credit Card', icon: CreditCard, color: 'text-blue-600 dark:text-blue-400', bgColor: 'bg-blue-100 dark:bg-blue-800' };
+      case 3:
+        return { label: t('paymentMethod.onlinePayment') || 'Online Payment', icon: Smartphone, color: 'text-purple-600 dark:text-purple-400', bgColor: 'bg-purple-100 dark:bg-purple-800' };
+      default:
+        return null;
+    }
+  };
+
+  const paymentMethodInfo = getPaymentMethodInfo(order.paymentMethod);
+
   // Handle print using the service
   const handlePrint = () => {
     OrderPrintService.print({ order, status, lang, t });
@@ -250,7 +266,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <DollarSign className="w-3 h-3 text-gray-400" />
+                    <span className=''>{currency.symbol}</span>
                     <div>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400">Unit</p>
                       <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
@@ -260,7 +276,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                   </div>
                   {item.addonPrice && (
                     <div className="flex items-center gap-1.5">
-                      <DollarSign className="w-3 h-3 text-blue-500" />
+                      <span className=''>{currency.symbol}</span>
                       <div>
                         <p className="text-[10px] text-gray-500 dark:text-gray-400">Addon</p>
                         <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">
@@ -565,7 +581,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
               </div>
               
               <div className={`bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-800/30 ${densityPadding[viewDensity]} rounded-lg border border-green-200 dark:border-green-700 hover:shadow-md transition-all`}>
-                <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400 mb-1" />
+                <span className=''>{currency.symbol}</span>
                 <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">{t('ordersManager.total')}</p>
                 <p className="text-lg font-bold text-green-600 dark:text-green-400">
                   {currency.symbol}{order.totalPrice.toFixed(2)}
@@ -616,6 +632,21 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                       </p>
                       <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
                         {(order as any).customerPhone}
+                      </p>
+                    </div>
+                  </div>
+                )}
+                {paymentMethodInfo && (
+                  <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
+                    <div className={`p-1.5 ${paymentMethodInfo.bgColor} rounded-md`}>
+                      <paymentMethodInfo.icon className={`w-3 h-3 ${paymentMethodInfo.color}`} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
+                        {t('ordersManager.PaymentMethod') || 'Payment Method'}
+                      </p>
+                      <p className={`text-xs font-semibold ${paymentMethodInfo.color}`}>
+                        {paymentMethodInfo.label}
                       </p>
                     </div>
                   </div>

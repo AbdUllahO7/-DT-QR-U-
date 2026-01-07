@@ -4021,6 +4021,7 @@ productModal: {
   },
   ordersManager: {
     total : 'Total',
+    PaymentMethod:"Payment Method",
     clearFilters:"Clear Filters",
     subTotal:"Sub Total",
     filtered:"Filtered",
@@ -5881,6 +5882,11 @@ categoryConfigModal: {
     bulkFillTitle: 'Bulk Fill Target Language',
     scrollLeft: 'Scroll left',
     scrollRight: 'Scroll right'
-  }
+  },
+  paymentMethod:{
+    cash: 'Cash',
+    creditCard: 'Credit Card',
+    online: 'Online Payment'
+  },
 
 }; 

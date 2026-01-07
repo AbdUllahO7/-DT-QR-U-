@@ -23,7 +23,6 @@ import {
   Grid3X3,
   Info,
   Edit3,
-  DollarSign,
   Puzzle,
   ChefHat,
   Sparkles,
@@ -196,7 +195,7 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
       return (
         <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
           <div className="relative">
-            <DollarSign className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
+            <span className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400">{currency.symbol}</span>
             <input
               title='number'
               type="number"

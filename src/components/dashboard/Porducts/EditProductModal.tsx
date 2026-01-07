@@ -4,7 +4,7 @@ import { productService } from "../../../services/productService";
 import { mediaService } from "../../../services/mediaService";
 import { logger } from "../../../utils/logger";
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Edit3, Upload, Loader2, Tag, FileText, DollarSign, Sparkles, CheckCircle2, AlertCircle, Image } from "lucide-react";
+import { X, Edit3, Upload, Loader2,Sparkles, CheckCircle2, AlertCircle, Image } from "lucide-react";
 import { Category, Product } from "../../../types/BranchManagement/type";
 import { languageService } from "../../../services/LanguageService";
 import { MultiLanguageInput } from "../../common/MultiLanguageInput";

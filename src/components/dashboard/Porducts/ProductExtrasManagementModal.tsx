@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   X, Plus, Edit2, Trash2, Save, Loader2, Package,
-  DollarSign, Check, AlertCircle, ArrowLeft, Layers
+  AlertCircle, ArrowLeft, Layers
 } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -10,6 +10,7 @@ import { productExtrasService } from '../../../services/Extras/ProductExtrasServ
 import { extrasService } from '../../../services/Extras/ExtrasService';
 import { ConfirmationModal } from './ConfirmationModal';
 import { CreateProductExtraData, Extra, ProductExtra, UpdateProductExtraData } from '../../../types/Extras/type';
+import { useCurrency } from '../../../hooks/useCurrency';
 // Import ConfirmationModal here
 
 interface ProductExtrasManagementModalProps {
@@ -42,6 +43,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const currency = useCurrency();
 
   // Delete Confirmation
   const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; id: number | null }>({
@@ -340,7 +342,9 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                             {t('extrasManagement.productExtras.unitPrice')} <span className="text-red-500">*</span>
                           </label>
                           <div className="relative">
-                            <DollarSign className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-300`} />
+                            <span className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-300`}>
+                              {currency.symbol}
+                            </span>
                             <input
                               title='Unit Price'
                               type="number"
@@ -495,7 +499,9 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('extrasManagement.productExtras.priceAndSelection')}</label>
                                     <div className="relative mb-3">
-                                      <DollarSign className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-300`} />
+                                      <span className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-300`}>
+                                        {currency.symbol}
+                                      </span>
                                       <input
                                         title='Unit Price'
                                         type="number"
@@ -606,7 +612,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
 
                                 <div className="flex items-center gap-6 text-sm">
                                   <div className="flex items-center gap-1.5 text-gray-900 dark:text-white font-semibold bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-full border border-green-100 dark:border-green-900/30">
-                                    <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                    <span className="h-4 w-4 text-green-600 dark:text-green-400">{currency.symbol}</span>
                                     <span>{extra.unitPrice.toFixed(2)}</span>
                                   </div>
                                   <div className="text-gray-500 dark:text-gray-300">
