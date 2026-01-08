@@ -5130,7 +5130,7 @@ recommended: "Önerilen",
         "errorInvalid": "Geçersiz telefon numarası formatı (7-15 hane)."
       },
       "email": {
-        "label": "E-posta Adresi *",
+        "label": "E-posta Adresi ",
         "placeholder": "E-posta adresini girin",
         "error": "E-posta adresi gereklidir"
       },
