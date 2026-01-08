@@ -378,7 +378,6 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
         {/* Currency Settings Section */}
         <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
           <div className="flex items-center space-x-3 rtl:space-x-reverse mb-4">
-            {currency.symbol} 
             <div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 {t('RestaurantPreferencesTab.sections.currencySettings.title')}

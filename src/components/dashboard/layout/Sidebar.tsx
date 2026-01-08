@@ -350,7 +350,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                   } ${isRTL ? 'text-right' : 'text-left'}`}
                 >
-                  {currency.symbol}
+                  <span className='mr-2'> {currency.symbol}</span>
                   <span>{t('dashboard.moneyCase.title')}</span>
                 </button>
 

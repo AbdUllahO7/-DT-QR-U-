@@ -223,6 +223,9 @@ hero: {
         noData: 'Veri mevcut değil'
       }
     },
+    RestaurantManagement : {
+      title : "Restoran Yönetimi"
+    },
     branches: {
       title: 'Şube Yönetimi',
       description: 'Şubelerinizi yönetin ve yeni şubeler ekleyin.',

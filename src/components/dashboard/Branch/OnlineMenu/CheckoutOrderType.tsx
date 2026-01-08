@@ -657,7 +657,7 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
                         {paymentMethod === 'credit_card' && <CreditCard className={`h-4 w-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />}
                         {paymentMethod === 'online' && <Smartphone className={`h-4 w-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />}
                         <span>
-                          {t('order.form.payment')}: {availablePaymentMethods.find(m => m.id === paymentMethod)?.name}
+                           {availablePaymentMethods.find(m => m.id === paymentMethod)?.name}
                         </span>
                       </div>
                     )}

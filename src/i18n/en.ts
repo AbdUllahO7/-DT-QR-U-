@@ -1358,7 +1358,7 @@ hero: {
         branchName: 'Branch Name',
         branchNamePlaceholder: 'Enter branch name',
         branchNameRequired: 'Branch name is required',
-        whatsappNumber: 'WhatsApp Order Number *',
+        whatsappNumber: 'WhatsApp Order Number ',
         whatsappPlaceholder: 'Enter WhatsApp number',
         branchLogo: 'Branch Logo',
         logoUpload: 'Upload Logo',
@@ -5052,7 +5052,7 @@ productModal: {
           "error": "Branch name is required"
         },
         "whatsappNumber": {
-          "label": "WhatsApp Order Number *",
+          "label": "WhatsApp Order Number ",
           "placeholder": "555 123 4567",
           "ariaLabel": "Country Code",
           "errorRequired": "WhatsApp order number is required",
