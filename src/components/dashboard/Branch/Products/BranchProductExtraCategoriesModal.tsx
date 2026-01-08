@@ -985,10 +985,10 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                       <p className="text-sm text-gray-600 dark:text-gray-400">
                                         {!isExtraRemoval && (
                                           <>
-                                            ${(extraConfig.specialUnitPrice || extra.unitPrice).toFixed(2)}
+                                            <span>{currency.symbol}</span>{(extraConfig.specialUnitPrice || extra.unitPrice).toFixed(2)}
                                             {extraConfig.specialUnitPrice > 0 && extraConfig.specialUnitPrice !== extra.unitPrice && (
                                               <span className="ml-1 text-xs text-blue-600 dark:text-blue-400">
-                                                ({t('extrasManagement.categoryConfigModal.labels.originalPrice')}: ${extra.unitPrice.toFixed(2)})
+                                                ({t('extrasManagement.categoryConfigModal.labels.originalPrice')}: {currency.symbol}{extra.unitPrice.toFixed(2)})
                                               </span>
                                             )}
                                           </>

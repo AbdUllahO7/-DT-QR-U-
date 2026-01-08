@@ -105,7 +105,7 @@ const AddonCard: React.FC<AddonCardProps> = ({
               {/* Price and Category */}
               <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} flex-wrap gap-2`}>
                 <div className="flex items-center bg-gradient-to-r from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30 px-3 py-1.5 rounded-xl">
-                           <span className=''>{currency.symbol}</span>
+                           <span className='text-green-500'>{currency.symbol}</span>
 
                   <span className="text-emerald-700 dark:text-emerald-300 font-bold text-lg">
                     {addon.isAssigned && addon.editedSpecialPrice !== addon.addonPrice 

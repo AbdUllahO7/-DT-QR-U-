@@ -89,11 +89,11 @@ const QuickSummaryCards: React.FC<Props> = ({
                 {t('moneyCase.todayTotalSales')}
               </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                {formatCurrency(todaySales)}
+                <span>{currency.symbol}</span>{todaySales}
               </p>
               {closedRevenue > 0 && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {t('moneyCase.closedShifts')}: {formatCurrency(closedRevenue)}
+                  {t('moneyCase.closedShifts')}: <span>{currency.symbol}</span>{closedRevenue}
                 </p>
               )}
             </div>
@@ -109,10 +109,9 @@ const QuickSummaryCards: React.FC<Props> = ({
                 {t('moneyCase.currentShiftRevenue')}
               </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                {formatCurrency(currentRevenue)}
+                 <span>{currency.symbol}</span> {currentRevenue}
               </p>
             </div>
-            <span className=''>{currency.symbol}</span>
           </div>
         </div>
 
@@ -149,7 +148,7 @@ const QuickSummaryCards: React.FC<Props> = ({
                   {t('moneyCase.totalRevenue')}
                 </span>
                 <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  {formatCurrency(quickSummary.weekToDate.totalRevenue)}
+                     <span>{currency.symbol}</span>{quickSummary.weekToDate.totalRevenue}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -185,7 +184,7 @@ const QuickSummaryCards: React.FC<Props> = ({
                   {t('moneyCase.totalRevenue')}
                 </span>
                 <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  {formatCurrency(quickSummary.monthToDate.totalRevenue)}
+                  <span>{currency.symbol}</span>{quickSummary.monthToDate.totalRevenue}
                 </span>
               </div>
               <div className="flex justify-between items-center">
