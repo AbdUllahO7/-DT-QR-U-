@@ -4,16 +4,24 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Moon, Sun } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const ThemeToggle: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
-  const [isRTL, setIsRTL] = useState(false);
+  const { isRTL } = useLanguage();
+  const [mounted, setMounted] = useState(false);
 
-  // Detect direction on mount
+  // Ensure component is mounted before rendering
   useEffect(() => {
-    const isArabic = document.documentElement.dir === 'rtl' || document.documentElement.lang === 'ar';
-    setIsRTL(isArabic);
+    setMounted(true);
   }, []);
+
+  // Prevent hydration mismatch
+  if (!mounted) {
+    return (
+      <div className="relative flex items-center justify-between w-14 h-8 bg-slate-200/50 dark:bg-slate-800/50 backdrop-blur-md rounded-full p-1 shadow-inner border border-slate-300/50 dark:border-slate-700/50" />
+    );
+  }
 
   // In LTR: Dark mode moves +24px (Right)
   // In RTL: Dark mode moves -24px (Left)
@@ -22,9 +30,9 @@ const ThemeToggle: React.FC = () => {
   return (
     <motion.button
       onClick={toggleTheme}
-      // Use 'ltr' for the button's internal flex to keep Sun/Moon positions consistent
-      dir="ltr" 
-      className="relative flex items-center justify-between w-14 h-8 bg-slate-200/50 dark:bg-slate-800/50 backdrop-blur-md rounded-full p-1 shadow-inner focus:outline-none focus:ring-2 focus:ring-orange-500/50 border border-slate-300/50 dark:border-slate-700/50"
+      // Always use LTR for the button's internal layout
+      dir="ltr"
+      className="relative flex items-center justify-between w-14 h-8 bg-slate-200/50 dark:bg-slate-800/50 backdrop-blur-md rounded-full p-1 shadow-inner focus:outline-none focus:ring-2 focus:ring-orange-500/50 border border-slate-300/50 dark:border-slate-700/50 flex-shrink-0"
       whileTap={{ scale: 0.95 }}
     >
       {/* Moving Knob */}

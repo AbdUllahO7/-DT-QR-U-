@@ -6,15 +6,24 @@ import { logger } from "../../utils/logger";
 class ExtraCategoriesService {
   private baseUrl = '/api/ExtraCategories';
 
+  // Helper method to get language from localStorage
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
   async getExtraCategories(): Promise<ExtraCategory[]> {
     try {
-      logger.info('Extra kategori listesi getiriliyor');
-      
-      const response = await httpClient.get<APIExtraCategory[]>(`${this.baseUrl}`);
-      logger.info('Extra kategori listesi başarıyla getirildi', { 
-        count: response.data.length 
+      const language = this.getLanguageFromStorage();
+      logger.info('Extra kategori listesi getiriliyor', { language });
+
+      const response = await httpClient.get<APIExtraCategory[]>(`${this.baseUrl}`, {
+        params: { language }
       });
-      
+      logger.info('Extra kategori listesi başarıyla getirildi', {
+        count: response.data.length,
+        language
+      });
+
       return response.data;
     } catch (error: any) {
       logger.error('❌ Extra kategori listesi getirilirken hata:', error);
@@ -25,12 +34,15 @@ class ExtraCategoriesService {
   // GET - Get extra category by ID
   async getExtraCategoryById(id: number): Promise<ExtraCategory> {
     try {
-      logger.info('Extra kategori detayı getiriliyor', { id });
-      
-      const response = await httpClient.get<APIExtraCategory>(`${this.baseUrl}/${id}`);
-      
-      logger.info('Extra kategori detayı başarıyla getirildi', { data: response.data });
-      
+      const language = this.getLanguageFromStorage();
+      logger.info('Extra kategori detayı getiriliyor', { id, language });
+
+      const response = await httpClient.get<APIExtraCategory>(`${this.baseUrl}/${id}`, {
+        params: { language }
+      });
+
+      logger.info('Extra kategori detayı başarıyla getirildi', { data: response.data, language });
+
       return response.data;
     } catch (error: any) {
       logger.error('❌ Extra kategori detayı getirilirken hata:', error);
@@ -117,14 +129,18 @@ class ExtraCategoriesService {
   // GET - Get deleted extra categories
   async getDeletedExtraCategories(): Promise<ExtraCategory[]> {
     try {
-      logger.info('Silinmiş extra kategori listesi getiriliyor');
-      
-      const response = await httpClient.get<APIExtraCategory[]>(`${this.baseUrl}/deleted`);
-      
-      logger.info('Silinmiş extra kategori listesi başarıyla getirildi', { 
-        count: response.data.length 
+      const language = this.getLanguageFromStorage();
+      logger.info('Silinmiş extra kategori listesi getiriliyor', { language });
+
+      const response = await httpClient.get<APIExtraCategory[]>(`${this.baseUrl}/deleted`, {
+        params: { language }
       });
-      
+
+      logger.info('Silinmiş extra kategori listesi başarıyla getirildi', {
+        count: response.data.length,
+        language
+      });
+
       return response.data;
     } catch (error: any) {
       logger.error('❌ Silinmiş extra kategori listesi getirilirken hata:', error);

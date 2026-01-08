@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Plus, X, Search, Edit2, Trash2, Package, 
   Filter, ArrowUp, ChevronDown, Eye, EyeOff, SortAsc, SortDesc,
-  Grid3X3, List, AlertTriangle, Shield, Check
+  Grid3X3, List, Check, AlertTriangle, Shield 
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -10,6 +10,7 @@ import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
 import { AllergenService } from '../../../services/allergen';
 import { ingredientsService } from '../../../services/IngredientsService';
+import { languageService } from '../../../services/LanguageService';
 import IngredientFormModal from './IngredientFormModal';
 import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 import { Allergen, FilterAllergen, FilterOptions, FilterStatus, Ingredient, SortOption } from '../../../types/BranchManagement/type';
@@ -34,6 +35,10 @@ const IngredientsContent: React.FC = () => {
   const [allergens, setAllergens] = useState<Allergen[]>([]);
   const [loading, setLoading] = useState(false);
   
+  // Language States
+  const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
+  const [defaultLanguage, setDefaultLanguage] = useState<string>('en');
+
   // UI States
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
@@ -81,11 +86,24 @@ const IngredientsContent: React.FC = () => {
     try {
       const allergenService = new AllergenService();
       
-      const fetchedAllergens = await allergenService.getAllergens();
+      const [fetchedAllergens, transformedIngredients, languagesData] = await Promise.all([
+        allergenService.getAllergens(),
+        ingredientsService.getIngredients(),
+        languageService.getRestaurantLanguages()
+      ]);
+
       setAllergens(fetchedAllergens);
-      
-      const transformedIngredients = await ingredientsService.getIngredients();
       setIngredients(transformedIngredients);
+
+      // Process Languages
+      const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
+        if (!acc.find((l: any) => l.code === lang.code)) {
+          acc.push(lang);
+        }
+        return acc;
+      }, []);
+      setSupportedLanguages(uniqueLanguages);
+      setDefaultLanguage(languagesData.defaultLanguage || 'en');
      
       logger.info('Data loaded successfully', { 
         allergenCount: fetchedAllergens.length,
@@ -93,32 +111,30 @@ const IngredientsContent: React.FC = () => {
       });
     } catch (err) {
       logger.error('Data loading error:', err);
-      setAllergens([]);
-      setIngredients([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Load data on component mount
   useEffect(() => {
     loadData();
   }, []);
 
-  // Debounced search update
   const debouncedSetSearch = useMemo(() => debounce(setSearchQuery, 300), []);
 
-  // Utility Functions
-
-  // Get allergen names for display
-  const getAllergenNames = (allergenIds: number[]) => {
-    return allergens
-      .filter(a => allergenIds?.includes(a.id))
-      .map(a => `${a.icon || '🚨'} ${a.name}`)
-      .join(', ');
+  // Helper to get translated allergen name (Same logic as in Modal)
+  const getTranslatedAllergenName = (allergen: Allergen) => {
+    try {
+      const nameKey = `allergens.${allergen.code}.name`;
+      const translatedName = t(nameKey);
+      // If translation returns the key (missing translation), use original name
+      return translatedName === nameKey ? allergen.name : translatedName;
+    } catch (error) {
+      return allergen.name;
+    }
   };
 
-  // Clear all filters
+  // Utility Functions
   const clearFilters = () => {
     setFilters({
       status: 'all',
@@ -129,11 +145,9 @@ const IngredientsContent: React.FC = () => {
     setSortBy('name_asc');
   };
 
-  // Check if filters are active
   const hasActiveFilters = filters.status !== 'all' || filters.allergen !== 'all' || 
     filters.selectedAllergens.length > 0 || searchQuery !== '';
 
-  // Memoized processed ingredients
   const processedIngredients = useMemo(() => {
     let filtered = ingredients;
 
@@ -200,42 +214,19 @@ const IngredientsContent: React.FC = () => {
     try {
       await ingredientsService.deleteIngredient(selectedIngredient.id);
       setIngredients(prev => prev.filter(ing => ing.id !== selectedIngredient.id));
-      logger.info('Ingredient deleted', { id: selectedIngredient.id });
       setShowDeleteModal(false);
       setSelectedIngredient(null);
     } catch (err: any) {
-      logger.error('Ingredient deletion error:', err);
-
-      // Extract error message from API response
       let errorMessage = t('IngredientsContent.deleteError') || 'An error occurred while deleting the ingredient.';
-
-      if (err.response?.data) {
-        // If response.data is a string, use it directly
-        if (typeof err.response.data === 'string') {
-          errorMessage = err.response.data;
-        }
-        // If response.data has a message field
-        else if (err.response.data.message) {
-          errorMessage = err.response.data.message;
-        }
-        // If response.data has an error field
-        else if (err.response.data.error) {
-          errorMessage = err.response.data.error;
-        }
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
       }
-      // Fallback to top-level message if available
-      else if (err.message) {
-        errorMessage = err.message;
-      }
-
       setDeleteError(errorMessage);
-      throw err;
     } finally {
       setIsDeleting(false);
     }
   };
 
-  // Sort options configuration
   const sortOptions = [
     { value: 'name_asc', label: t('sort.name.asc') || 'Name (A-Z)', icon: SortAsc },
     { value: 'name_desc', label: t('sort.name.desc') || 'Name (Z-A)', icon: SortDesc },
@@ -245,29 +236,19 @@ const IngredientsContent: React.FC = () => {
     { value: 'allergen_desc', label: t('sort.allergen.desc') || 'Allergen (Allergenic first)', icon: SortDesc },
   ];
 
-  // Loading State
-  if (loading) {
+  if (loading && ingredients.length === 0) {
     return (
       <motion.div 
         initial={{ opacity: 0 }} 
         animate={{ opacity: 1 }} 
         className={`space-y-6 ${isRTL ? 'text-right' : 'text-left'}`}
       >
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200/50 dark:border-gray-700/50 p-6">
-          <div className="animate-pulse">
-            <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4 mb-4"></div>
-            <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          </div>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200/50 dark:border-gray-700/50 p-6 animate-pulse">
+           <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200/50 dark:border-gray-700/50 p-6 animate-pulse">
-              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3 mb-4"></div>
-              <div className="space-y-3">
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
-              </div>
-            </div>
+            <div key={i} className="h-40 bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200/50 dark:border-gray-700/50 p-6 animate-pulse"></div>
           ))}
         </div>
       </motion.div>
@@ -291,13 +272,12 @@ const IngredientsContent: React.FC = () => {
               type="text"
               placeholder={t('IngredientsContent.searchPlaceholder')}
               onChange={(e) => debouncedSetSearch(e.target.value)}
-              className={`w-full py-3 px-10 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 shadow-sm transition-shadow duration-200 focus:shadow-md`}
-              aria-label={t('IngredientsContent.accessibility.searchInput')}
+              className={`w-full py-3 px-10 border border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
             />
           </div>
           
           <div className={`flex items-center gap-3 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
-            {/* Active Filter Chips */}
+            {/* Filter Chips */}
             {hasActiveFilters && (
               <div className="flex flex-wrap gap-2">
                 {filters.status !== 'all' && (
@@ -310,27 +290,8 @@ const IngredientsContent: React.FC = () => {
                 )}
                 {filters.allergen !== 'all' && (
                   <span className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full">
-                    Allergen: {filters.allergen}
+                    Type: {filters.allergen}
                     <button onClick={() => setFilters(prev => ({ ...prev, allergen: 'all' }))}>
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                )}
-                {filters.selectedAllergens.map(id => {
-                  const allergen = allergens.find(a => a.id === id);
-                  return allergen ? (
-                    <span key={id} className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full">
-                      {allergen.name}
-                      <button onClick={() => setFilters(prev => ({ ...prev, selectedAllergens: prev.selectedAllergens.filter(a => a !== id) }))}>
-                        <X className="h-3 w-3" />
-                      </button>
-                    </span>
-                  ) : null;
-                })}
-                {searchQuery && (
-                  <span className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 rounded-full">
-                    Search: "{searchQuery}"
-                    <button onClick={() => setSearchQuery('')}>
                       <X className="h-3 w-3" />
                     </button>
                   </span>
@@ -339,32 +300,18 @@ const IngredientsContent: React.FC = () => {
                   onClick={clearFilters}
                   className="text-sm text-red-600 dark:text-red-400 hover:underline"
                 >
-                  Clear All
+                  {t('IngredientsContent.clearFilters') || 'Clear All'}
                 </button>
               </div>
             )}
 
             {/* View Mode Toggle */}
             <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-full p-1 shadow-sm">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`px-4 py-2 rounded-full transition-all duration-200 ${viewMode === 'grid'
-                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-md'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                  }`}
-                title={t('productsContent.viewMode.grid')}
-              >
-                <Grid3X3 className="h-4 w-4" />
+              <button onClick={() => setViewMode('grid')} className={`px-4 py-2 rounded-full transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-gray-600 shadow' : ''}`}>
+                <Grid3X3 className="h-4 w-4 dark:text-white" />
               </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`px-4 py-2 rounded-full transition-all duration-200 ${viewMode === 'list'
-                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-md'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                  }`}
-                title={t('productsContent.viewMode.list')}
-              >
-                <List className="h-4 w-4" />
+              <button onClick={() => setViewMode('list')} className={`px-4 py-2 rounded-full transition-all ${viewMode === 'list' ? 'bg-white dark:bg-gray-600 shadow' : ''}`}>
+                <List className="h-4 w-4 dark:text-white" />
               </button>
             </div>
 
@@ -372,18 +319,13 @@ const IngredientsContent: React.FC = () => {
             <div className="relative" ref={filterRef}>
               <button 
                 onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border rounded-xl transition-all duration-200 shadow-sm ${
-                  hasActiveFilters 
-                    ? 'text-primary-700 dark:text-primary-300 bg-gradient-to-r from-primary-50 to-primary-100 dark:from-primary-900/20 dark:to-primary-900/30 border-primary-200 dark:border-primary-800' 
-                    : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:shadow-md'
-                }`}
-                title={t('IngredientsContent.filter')}
+                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border dark:bg-slate-800 dark:text-white rounded-xl transition-all ${hasActiveFilters ? 'text-primary-700 bg-primary-50 border-primary-200' : 'text-gray-700 bg-white border-gray-200'}`}
               >
                 <Filter className="h-4 w-4" />
                 <span className="hidden sm:inline">{t('IngredientsContent.filter')}</span>
                 <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${showFilterDropdown ? 'rotate-180' : ''}`} />
               </button>
-
+              
               <AnimatePresence>
                 {showFilterDropdown && (
                   <motion.div 
@@ -459,22 +401,25 @@ const IngredientsContent: React.FC = () => {
                           {t('filter.specific.allergens') || 'Specific Allergens'}
                         </label>
                         <div className="max-h-40 overflow-y-auto space-y-3 pr-2">
-                          {allergens.map((allergen) => (
-                            <label key={allergen.id} className="flex items-center gap-3 cursor-pointer text-sm">
-                              <input
-                                type="checkbox"
-                                checked={filters.selectedAllergens.includes(allergen.id)}
-                                onChange={(e) => {
-                                  const newSelected = e.target.checked
-                                    ? [...filters.selectedAllergens, allergen.id]
-                                    : filters.selectedAllergens.filter(id => id !== allergen.id);
-                                  setFilters(prev => ({ ...prev, selectedAllergens: newSelected }));
-                                }}
-                                className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition-colors"
-                              />
-                              <span className="text-gray-800 dark:text-gray-200">{allergen.icon} {allergen.name}</span>
-                            </label>
-                          ))}
+                          {allergens.map((allergen) => {
+                            const translatedName = getTranslatedAllergenName(allergen);
+                            return (
+                              <label key={allergen.id} className="flex items-center gap-3 cursor-pointer text-sm">
+                                <input
+                                  type="checkbox"
+                                  checked={filters.selectedAllergens.includes(allergen.id)}
+                                  onChange={(e) => {
+                                    const newSelected = e.target.checked
+                                      ? [...filters.selectedAllergens, allergen.id]
+                                      : filters.selectedAllergens.filter(id => id !== allergen.id);
+                                    setFilters(prev => ({ ...prev, selectedAllergens: newSelected }));
+                                  }}
+                                  className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition-colors"
+                                />
+                                <span className="text-gray-800 dark:text-gray-200">{allergen.icon} {translatedName}</span>
+                              </label>
+                            );
+                          })}
                         </div>
                       </div>
 
@@ -482,7 +427,7 @@ const IngredientsContent: React.FC = () => {
                         onClick={() => setShowFilterDropdown(false)}
                         className="w-full py-2 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors shadow-sm"
                       >
-                        Apply Filters
+                        {t('IngredientsContent.applyFilters') || 'Apply Filters'}
                       </button>
                     </div>
                   </motion.div>
@@ -494,14 +439,13 @@ const IngredientsContent: React.FC = () => {
             <div className="relative" ref={sortRef}>
               <button 
                 onClick={() => setShowSortDropdown(!showSortDropdown)}
-                className="flex items-center gap-2 px-4 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl hover:shadow-md transition-all duration-200 shadow-sm"
-                title={t('IngredientsContent.sort')}
+                className="flex items-center gap-2 px-4 py-3 text-sm font-medium dark:text-white text-gray-700 dark:bg-slate-800 bg-white border border-gray-900 rounded-xl"
               >
                 <ArrowUp className="h-4 w-4" />
                 <span className="hidden sm:inline">{t('IngredientsContent.sort')}</span>
                 <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${showSortDropdown ? 'rotate-180' : ''}`} />
               </button>
-
+              
               <AnimatePresence>
                 {showSortDropdown && (
                   <motion.div 
@@ -541,8 +485,7 @@ const IngredientsContent: React.FC = () => {
             {/* Add New Button */}
             <button
               onClick={() => setShowCreateModal(true)}
-              className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl hover:from-primary-700 hover:to-primary-800 transition-all duration-200 shadow-md hover:shadow-lg ${isRTL ? 'flex-row-reverse' : ''}`}
-              aria-label={t('IngredientsContent.accessibility.addButton')}
+              className={`flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white rounded-xl shadow-md hover:shadow-lg transition-all ${isRTL ? 'flex-row-reverse' : ''}`}
             >
               <Plus className="w-5 h-5" />
               {t('IngredientsContent.newIngredient')}
@@ -551,7 +494,7 @@ const IngredientsContent: React.FC = () => {
         </div>
       </div>
 
-      {/* Ingredients Display */}
+      {/* Ingredients Display - Grid or List */}
       <AnimatePresence mode="wait">
         {viewMode === 'grid' ? (
           <motion.div 
@@ -562,16 +505,9 @@ const IngredientsContent: React.FC = () => {
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           >
             {processedIngredients.length === 0 ? (
-              <motion.div 
-                initial={{ scale: 0.95 }}
-                animate={{ scale: 1 }}
-                className="col-span-full flex flex-col items-center justify-center py-16 bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200/50 dark:border-gray-700/50"
-              >
-                <Package className="h-20 w-20 text-gray-300 dark:text-gray-600 mb-4" />
-                <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
-                  {searchQuery || hasActiveFilters ? t('IngredientsContent.noIngredientsFound') : t('IngredientsContent.noIngredientsYet')}
-                </p>
-              </motion.div>
+              <div className="col-span-full py-12 text-center text-gray-500">
+                {t('IngredientsContent.noIngredientsFound')}
+              </div>
             ) : (
               processedIngredients.map((ingredient, index) => (
                 <motion.div 
@@ -579,63 +515,38 @@ const IngredientsContent: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
                   className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200/50 dark:border-gray-700/50 p-6 hover:shadow-xl transition-shadow duration-300 group"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <h3 className="font-bold text-xl text-gray-900 dark:text-white">{ingredient.name}</h3>
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      <button
-                        onClick={() => handleEdit(ingredient)}
-                        className="p-2 text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        title={t('IngredientsContent.edit')}
-                      >
+                      <button onClick={() => handleEdit(ingredient)} className="p-2 text-primary-600 hover:bg-primary-50 rounded-full">
                         <Edit2 className="w-5 h-5" />
                       </button>
-                      <button
-                        onClick={() => handleDelete(ingredient)}
-                        className="p-2 text-gray-500 hover:text-red-600 dark:hover:text-red-400 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                        title={t('IngredientsContent.delete')}
-                      >
+                      <button onClick={() => handleDelete(ingredient)} className="p-2 text-red-600 hover:bg-red-50 rounded-full">
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
                   </div>
-
                   <div className="space-y-4">
-                    <span 
-                      className={`inline-flex px-4 py-1 text-sm font-semibold rounded-full shadow-sm ${
-                        ingredient.isAvailable
-                          ? 'bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-900/50 text-green-800 dark:text-green-300'
-                          : 'bg-gradient-to-r from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-900/50 text-red-800 dark:text-red-300'
-                      }`}
-                    >
+                     {/* Status Badge */}
+                    <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${ingredient.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                       {ingredient.isAvailable ? t('IngredientsContent.available') : t('IngredientsContent.unavailable')}
                     </span>
-
-                    {ingredient?.isAllergenic ? (
-                      <div className="space-y-2">
-                        <span 
-                          className="inline-flex px-4 py-1 text-sm font-semibold rounded-full shadow-sm bg-gradient-to-r from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-900/50 text-yellow-800 dark:text-yellow-300"
-                        >
-                          {t('IngredientsContent.containsAllergens')}
-                        </span>
-                        {ingredient?.allergenIds?.length > 0 && (
-                          <div className="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-400">
-                            {allergens.filter(a => ingredient.allergenIds.includes(a.id)).map(a => (
-                              <span key={a.id} className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full">
-                                {a.icon} {a.name}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+                    {/* Allergen Badges */}
+                    {ingredient.isAllergenic ? (
+                       <div className="flex flex-wrap gap-2 mt-2">
+                          {allergens.filter(a => ingredient.allergenIds?.includes(a.id)).map(a => {
+                             const translatedName = getTranslatedAllergenName(a);
+                             return (
+                               <span key={a.id} className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded flex items-center gap-1">
+                                 {a.icon} {translatedName}
+                               </span>
+                             );
+                          })}
+                       </div>
                     ) : (
-                      <span 
-                        className="inline-flex px-4 py-1 text-sm font-semibold rounded-full shadow-sm bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-900/50 text-green-800 dark:text-green-300"
-                      >
-                        {t('IngredientsContent.noAllergens')}
-                      </span>
+                      <div className="text-sm text-gray-500">{t('IngredientsContent.noAllergens')}</div>
                     )}
                   </div>
                 </motion.div>
@@ -643,127 +554,48 @@ const IngredientsContent: React.FC = () => {
             )}
           </motion.div>
         ) : (
-          <motion.div 
-            key="list"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200/50 dark:border-gray-700/50 overflow-hidden"
-          >
-            <div className="overflow-x-auto">
-              <table 
-                className="w-full divide-y divide-gray-200 dark:divide-gray-700"
-                role="table"
-                aria-label={t('IngredientsContent.accessibility.ingredientsTable')}
-              >
-                <thead className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 sticky top-0">
-                  <tr>
-                    <th className={`px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>
-                      {t('IngredientsContent.ingredientName')}
-                    </th>
-                    <th className={`px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>
-                      {t('IngredientsContent.status')}
-                    </th>
-                    <th className={`px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>
-                      {t('IngredientsContent.allergenInfo')}
-                    </th>
-                    <th className={`px-6 py-4 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>
-                      {t('IngredientsContent.actions')}
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                  {processedIngredients.length === 0 ? (
-                    <tr>
-                      <td colSpan={4} className="px-6 py-12 text-center">
-                        <div className="flex flex-col items-center">
-                          <Package className="h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />
-                          <p className="text-lg font-medium text-gray-500 dark:text-gray-400">
-                            {searchQuery || hasActiveFilters ? t('IngredientsContent.noIngredientsFound') : t('IngredientsContent.noIngredientsYet')}
-                          </p>
-                        </div>
-                      </td>
-                    </tr>
-                  ) : (
-                    processedIngredients.map((ingredient, index) => (
-                      <motion.tr 
-                        key={ingredient.id}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className="hover:bg-gradient-to-r hover:from-gray-50 hover:to-gray-100 dark:hover:from-gray-700/50 dark:hover:to-gray-800/50 transition-colors duration-200"
-                      >
-                        <td className="px-6 py-5 whitespace-nowrap font-medium text-gray-900 dark:text-white text-lg">
-                          {ingredient.name}
-                        </td>
-                        <td className="px-6 py-5 whitespace-nowrap">
-                          <span 
-                            className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full shadow-sm ${
-                              ingredient.isAvailable
-                                ? 'bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-900/50 text-green-800 dark:text-green-300'
-                                : 'bg-gradient-to-r from-red-100 to-red-200 dark:from-red-900/30 dark:to-red-900/50 text-red-800 dark:text-red-300'
-                            }`}
-                            aria-label={t('IngredientsContent.accessibility.statusBadge')}
-                          >
-                            {ingredient.isAvailable ? t('IngredientsContent.available') : t('IngredientsContent.unavailable')}
-                          </span>
-                        </td>
-                        <td className="px-6 py-5">
-                          <div className="text-sm text-gray-900 dark:text-white">
-                            {ingredient?.isAllergenic ? (
-                              <div className="space-y-1">
-                                <span 
-                                  className="inline-flex px-3 py-1 text-sm font-semibold rounded-full shadow-sm bg-gradient-to-r from-yellow-100 to-yellow-200 dark:from-yellow-900/30 dark:to-yellow-900/50 text-yellow-800 dark:text-yellow-300"
-                                  aria-label={t('IngredientsContent.accessibility.allergenBadge')}
-                                >
-                                  {t('IngredientsContent.containsAllergens')}
-                                </span>
-                                {ingredient?.allergenIds?.length > 0 && (
-                                  <div className="flex flex-wrap gap-2 text-sm text-gray-600 dark:text-gray-400">
-                                    {allergens.filter(a => ingredient.allergenIds.includes(a.id)).map(a => (
-                                      <span key={a.id} className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full">
-                                        {a.icon} {a.name}
-                                      </span>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            ) : (
-                              <span 
-                                className="inline-flex px-3 py-1 text-sm font-semibold rounded-full shadow-sm bg-gradient-to-r from-green-100 to-green-200 dark:from-green-900/30 dark:to-green-900/50 text-green-800 dark:text-green-300"
-                                aria-label={t('IngredientsContent.accessibility.allergenBadge')}
-                              >
-                                {t('IngredientsContent.noAllergens')}
+          <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+             {/* List View Table Implementation */}
+             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                   <thead className="bg-gray-50 dark:bg-gray-700">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('IngredientsContent.ingredientName')}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('IngredientsContent.status')}</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('IngredientsContent.allergenInfo')}</th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">{t('IngredientsContent.actions')}</th>
+                      </tr>
+                   </thead>
+                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                      {processedIngredients.map((ingredient) => (
+                        <tr key={ingredient.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{ingredient.name}</td>
+                           <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${ingredient.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                                 {ingredient.isAvailable ? t('IngredientsContent.available') : t('IngredientsContent.unavailable')}
                               </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className={`px-6 py-5 whitespace-nowrap ${isRTL ? 'text-left' : 'text-right'}`}>
-                          <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse justify-end' : ''}`}>
-                            <button
-                              onClick={() => handleEdit(ingredient)}
-                              className="p-2 text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 rounded-full hover:bg-primary-100 dark:hover:bg-primary-900/20 transition-colors"
-                              title={t('IngredientsContent.edit')}
-                              aria-label={t('IngredientsContent.accessibility.editButton')}
-                            >
-                              <Edit2 className="w-5 h-5" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(ingredient)}
-                              className="p-2 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 rounded-full hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
-                              title={t('IngredientsContent.delete')}
-                              aria-label={t('IngredientsContent.accessibility.deleteButton')}
-                            >
-                              <Trash2 className="w-5 h-5" />
-                            </button>
-                          </div>
-                        </td>
-                      </motion.tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                           </td>
+                           <td className="px-6 py-4">
+                              {ingredient.isAllergenic ? (
+                                <div className="flex flex-wrap gap-1">
+                                   {allergens.filter(a => ingredient.allergenIds?.includes(a.id)).map(a => {
+                                      const translatedName = getTranslatedAllergenName(a);
+                                      return (
+                                        <span key={a.id} className="text-xs text-gray-500">{a.icon} {translatedName}</span>
+                                      );
+                                   })}
+                                </div>
+                              ) : <span>-</span>}
+                           </td>
+                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                              <button onClick={() => handleEdit(ingredient)} className="text-primary-600 hover:text-primary-900 mr-4"><Edit2 className="w-4 h-4"/></button>
+                              <button onClick={() => handleDelete(ingredient)} className="text-red-600 hover:text-red-900"><Trash2 className="w-4 h-4"/></button>
+                           </td>
+                        </tr>
+                      ))}
+                   </tbody>
+                </table>
+             </div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -775,6 +607,8 @@ const IngredientsContent: React.FC = () => {
         onSuccess={loadData}
         allergens={allergens}
         isEdit={false}
+        supportedLanguages={supportedLanguages}
+        defaultLanguage={defaultLanguage}
       />
 
       <IngredientFormModal
@@ -787,6 +621,8 @@ const IngredientsContent: React.FC = () => {
         ingredient={selectedIngredient}
         allergens={allergens}
         isEdit={true}
+        supportedLanguages={supportedLanguages}
+        defaultLanguage={defaultLanguage}
       />
 
       <ConfirmDeleteModal

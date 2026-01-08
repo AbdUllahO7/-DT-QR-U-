@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Search, Plus, Filter, ArrowUp,  Package, Utensils, Loader2,
-  ChevronDown, Check, X, SortAsc, SortDesc, Eye, EyeOff, DollarSign, Hash, Users,
+  ChevronDown, Check, X, SortAsc, SortDesc, Eye, EyeOff, Hash, Users,
   Trash2, LayoutGrid, List
 } from 'lucide-react';
 import {
@@ -40,6 +40,7 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import { Category, Product } from '../../../types/BranchManagement/type';
 import { useNavigate } from 'react-router-dom';
 import ProductExtrasModal from './ProductExtrasModal';
+import { useCurrency } from '../../../hooks/useCurrency';
 
 // Branch dropdown item interface
 interface BranchDropdownItem {
@@ -103,6 +104,7 @@ const ProductsContent: React.FC = () => {
     categories: [],
     priceRange: { min: 0, max: 1000 }
   });
+  const currency = useCurrency();
 
   // View Mode State with localStorage persistence
   const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
@@ -462,8 +464,8 @@ useEffect(() => {
     { value: 'order_desc', label: t('sort.order.desc') || 'Order (Z-A)', icon: Hash },
     { value: 'name_asc', label: t('sort.name.asc') || 'Name (A-Z)', icon: SortAsc },
     { value: 'name_desc', label: t('sort.name.desc') || 'Name (Z-A)', icon: SortDesc },
-    { value: 'price_asc', label: t('sort.price.asc') || 'Price (Low-High)', icon: DollarSign },
-    { value: 'price_desc', label: t('sort.price.desc') || 'Price (High-Low)', icon: DollarSign },
+    { value: 'price_asc', label: t('sort.price.asc') || 'Price (Low-High)', icon: <span>{currency.symbol}</span> },
+    { value: 'price_desc', label: t('sort.price.desc') || 'Price (High-Low)', icon: <span>{currency.symbol}</span> },
   ];
 
   const toggleCategory = (categoryId: number) => {
@@ -1272,7 +1274,7 @@ useEffect(() => {
                   <div className="absolute top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 left-0 sm:right-0 sm:left-auto">
                     <div className="p-2">
                       {sortOptions.map((option) => {
-                        const Icon = option.icon;
+                        const icon = option.icon;
                         return (
                           <button
                             key={option.value}
@@ -1286,7 +1288,7 @@ useEffect(() => {
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                             }`}
                           >
-                            <Icon className="h-4 w-4" />
+                            {typeof icon === 'function' ? React.createElement(icon as any, { className: 'h-4 w-4' }) : icon}
                             <span>{option.label}</span>
                             {sortBy === option.value && <Check className="h-4 w-4 ml-auto" />}
                           </button>

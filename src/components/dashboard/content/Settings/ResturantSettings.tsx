@@ -1,22 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Check, 
-  MoonStar, 
-  Sun, 
+import {
+  Check,
+  MoonStar,
+  Sun,
   Settings as SettingsIcon,
   Palette,
   Eye,
   Zap,
   ChevronDown,
   Building2,
-  AlertCircle
+  AlertCircle,
+  Globe
 } from 'lucide-react';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { UserSettingsState, BranchDropdownItem } from '../../../../types/BranchManagement/type';
 import { branchService } from '../../../../services/branchService';
-import BranchPreferencesComponent from './BranchPreferencesTab';
+import RestaurantPreferencesTab from './RestaurantPreferencesTab';
 import { BranchPreferences, UpdateBranchPreferencesDto } from '../../../../services/Branch/BranchPreferencesService';
 
 const ResturantSettings: React.FC = () => {
@@ -35,7 +36,7 @@ const ResturantSettings: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
-  const [activeTab, setActiveTab] = useState<'general' | 'branch' | 'notifications' | 'privacy' | 'appearance' | 'data'>('branch');
+  const [activeTab, setActiveTab] = useState<'general' | 'restaurant' | 'branch' | 'notifications' | 'privacy' | 'appearance' | 'data'>('restaurant');
   const [settings, setSettings] = useState<UserSettingsState>({
     notificationsEnabled: true,
     emailNotificationsEnabled: true,
@@ -93,30 +94,10 @@ const ResturantSettings: React.FC = () => {
     setHasChanges(false);
   };
 
-  const handleToggle = (key: keyof UserSettingsState) => {
-    setSettings(prev => {
-      const updated = { ...prev, [key]: !prev[key] };
-      localStorage.setItem('userSettings', JSON.stringify(updated));
-      return updated;
-    });
-  };
 
-  const handleLanguageChange = (value: string) => {
-    setSettings(prev => {
-      const updated = { ...prev, language: value };
-      localStorage.setItem('userSettings', JSON.stringify(updated));
-      return updated;
-    });
-    setLanguage(value as 'tr' | 'en' | 'ar');
-  };
-
-  const handleSave = () => {
-    setSuccess(t('settings.saveSuccess'));
-    setTimeout(() => setSuccess(null), 3000);
-  };
 
   const tabs = [
-    { id: 'branch', label: t('branchPreferences.title'), icon: SettingsIcon },
+    { id: 'restaurant', label: t('RestaurantPreferencesTab.title'), icon: Globe },
     { id: 'appearance', label: t('settings.tabs.appearance'), icon: Palette },
   ];
 
@@ -335,31 +316,19 @@ const ResturantSettings: React.FC = () => {
 
       {/* Tab Content */}
       <AnimatePresence mode="wait">
-        {activeTab === 'branch' && (
+        {activeTab === 'restaurant' && (
           <motion.div
-            key="branch"
+            key="restaurant"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
           >
-            <BranchPreferencesComponent
-              selectedBranch={selectedBranch}
-              preferences={preferences}
-              setPreferences={setPreferences}
-              formData={formData}
-              setFormData={setFormData}
-              isSaving={isSaving}
-              setIsSaving={setIsSaving}
-              error={error}
-              setError={setError}
-              success={success}
-              setSuccess={setSuccess}
-              hasChanges={hasChanges}
-              setHasChanges={setHasChanges}
-            />
+            <RestaurantPreferencesTab />
           </motion.div>
         )}
+
+     
 
         {activeTab === 'appearance' && (
           <motion.div

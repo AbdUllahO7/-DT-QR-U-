@@ -7,6 +7,10 @@ import { logger } from "../../utils/logger";
 class ProductExtrasService {
   private baseUrl = '/api';
 
+    private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
   // Create Product Extra (POST)
   async createProductExtra(data: CreateProductExtraData): Promise<ProductExtra> {
     try {
@@ -58,9 +62,13 @@ class ProductExtrasService {
   async getProductExtrasByProductId(productId: number): Promise<ProductExtra[]> {
     try {
       logger.info('Ürün ekstrasları listesi getiriliyor', { productId });
-      
+            const language = this.getLanguageFromStorage();
       const response = await httpClient.get<APIProductExtra[]>(
-        `${this.baseUrl}/ProductExtras/product/${productId}`
+        `${this.baseUrl}/ProductExtras/product/${productId}`, {
+          params: {
+            'language': language
+          }
+        }
       );
       
       logger.info('Ürün ekstrasları listesi başarıyla getirildi', { 
@@ -158,9 +166,14 @@ class ProductExtrasService {
   async getDeletedProductExtras(): Promise<ProductExtra[]> {
     try {
       logger.info('Silinmiş ürün ekstrasları listesi getiriliyor');
-      
+                  const language = this.getLanguageFromStorage();
+
       const response = await httpClient.get<APIProductExtra[]>(
-        `${this.baseUrl}/ProductExtras/deleted`
+        `${this.baseUrl}/ProductExtras/deleted`, {
+          params: {
+            'language': language
+          }
+        }
       );
       
       logger.info('Silinmiş ürün ekstrasları listesi başarıyla getirildi', { 

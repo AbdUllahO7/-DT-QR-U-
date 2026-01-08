@@ -4,8 +4,14 @@ import { productService } from "../../../services/productService";
 import { mediaService } from "../../../services/mediaService";
 import { logger } from "../../../utils/logger";
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Edit3, Upload, Loader2, Tag, FileText, DollarSign, Sparkles, CheckCircle2, AlertCircle, Image } from "lucide-react";
+import { X, Edit3, Upload, Loader2,Sparkles, CheckCircle2, AlertCircle, Image } from "lucide-react";
 import { Category, Product } from "../../../types/BranchManagement/type";
+import { languageService } from "../../../services/LanguageService";
+import { MultiLanguageInput } from "../../common/MultiLanguageInput";
+import { MultiLanguageTextArea } from "../../common/MultiLanguageTextArea";
+import { useTranslatableFields, TranslatableFieldValue } from "../../../hooks/useTranslatableFields";
+import { productTranslationService } from "../../../services/Translations/ProductTranslationService";
+import { useCurrency } from "../../../hooks/useCurrency";
 
 export const EditProductModal: React.FC<{
   isOpen: boolean;
@@ -16,6 +22,17 @@ export const EditProductModal: React.FC<{
   onOpenIngredientUpdate?: (productId: number, productName: string) => void;
 }> = ({ isOpen, onClose, onSuccess, product, categories, onOpenIngredientUpdate }) => {
   const { t, isRTL } = useLanguage();
+  const translationHook = useTranslatableFields();
+  const currency = useCurrency();
+
+  // Supported languages - dynamically loaded
+  const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
+  const [defaultLanguage, setDefaultLanguage] = useState<string>('en');
+
+  // Translation states
+  const [productNameTranslations, setProductNameTranslations] = useState<TranslatableFieldValue>({});
+  const [descriptionTranslations, setDescriptionTranslations] = useState<TranslatableFieldValue>({});
+
   const [formData, setFormData] = useState({
     name: product.name,
     description: product.description || '',
@@ -34,13 +51,100 @@ export const EditProductModal: React.FC<{
   const [focusedField, setFocusedField] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Load languages on mount
   useEffect(() => {
-    if (isOpen && product.imageUrl && product.imageUrl !== 'string' && product.imageUrl.trim() !== '') {
-      setImagePreview(product.imageUrl);
-    } else {
-      setImagePreview('');
-    }
-  }, [isOpen, product.imageUrl]);
+    const loadLanguages = async () => {
+      try {
+        const languagesData = await languageService.getRestaurantLanguages();
+
+        // Deduplicate languages by code
+        const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
+          if (!acc.find((l: any) => l.code === lang.code)) {
+            acc.push(lang);
+          }
+          return acc;
+        }, []);
+
+        setSupportedLanguages(uniqueLanguages);
+        setDefaultLanguage(languagesData.defaultLanguage || 'en');
+
+        // Initialize empty translations
+        const languageCodes = uniqueLanguages.map((lang: any) => lang.code);
+        setProductNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setDescriptionTranslations(translationHook.getEmptyTranslations(languageCodes));
+      } catch (error) {
+        logger.error('Failed to load languages', error, { prefix: 'EditProductModal' });
+      }
+    };
+    loadLanguages();
+  }, []);
+
+  // Load existing product data and translations when modal opens
+  useEffect(() => {
+    if (!isOpen || !product) return;
+
+    const loadProductData = async () => {
+      setFormData({
+        name: product.name,
+        description: product.description || '',
+        price: product.price,
+        categoryId: product.categoryId,
+        isAvailable: product.isAvailable,
+        imageUrl: product.imageUrl || '',
+        imageFile: null
+      });
+
+      if (product.imageUrl && product.imageUrl !== 'string' && product.imageUrl.trim() !== '') {
+        setImagePreview(product.imageUrl);
+      } else {
+        setImagePreview('');
+      }
+
+      // Load existing translations
+      try {
+        const response = await productTranslationService.getProductTranslations(product.id);
+
+        const productNameTrans: TranslatableFieldValue = {
+          [defaultLanguage]: product.name
+        };
+        const descriptionTrans: TranslatableFieldValue = {
+          [defaultLanguage]: product.description || ''
+        };
+
+        // Handle API response structure - could be array or object with translations property
+        const translationsArray = Array.isArray(response) ? response : (response as any)?.translations || [];
+
+        // Process translations array
+        translationsArray.forEach((translation: any) => {
+          if (translation.name) {
+            productNameTrans[translation.languageCode] = translation.name;
+          }
+          if (translation.description) {
+            descriptionTrans[translation.languageCode] = translation.description;
+          }
+        });
+
+        setProductNameTranslations(productNameTrans);
+        setDescriptionTranslations(descriptionTrans);
+      } catch (error) {
+        logger.error('Failed to load product translations', error, { prefix: 'EditProductModal' });
+        // Initialize with default language values on error
+        const productNameTrans: TranslatableFieldValue = {
+          [defaultLanguage]: product.name
+        };
+        const descriptionTrans: TranslatableFieldValue = {
+          [defaultLanguage]: product.description || ''
+        };
+        setProductNameTranslations(productNameTrans);
+        setDescriptionTranslations(descriptionTrans);
+      }
+
+      setError(null);
+      setErrors({});
+    };
+
+    loadProductData();
+  }, [isOpen, product, defaultLanguage, supportedLanguages]);
 
   const handleChange = (field: keyof typeof formData, value: string | boolean | number | File | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -150,16 +254,42 @@ export const EditProductModal: React.FC<{
       };
 
       const updatedProduct = await productService.updateProduct(product.id, payload);
-      
-      logger.info('Ürün başarıyla güncellendi', { 
+
+      logger.info('Ürün başarıyla güncellendi', {
         productId: product.id,
-        updatedProductId: updatedProduct.id 
+        updatedProductId: updatedProduct.id
       });
-      
+
+      // Save translations
+      try {
+        const translationData = Object.keys(productNameTranslations)
+          .filter(lang => lang !== defaultLanguage)
+          .filter(lang =>
+            productNameTranslations[lang] ||
+            descriptionTranslations[lang]
+          )
+          .map(languageCode => ({
+            productId: product.id,
+            languageCode,
+            name: productNameTranslations[languageCode] || undefined,
+            description: descriptionTranslations[languageCode] || undefined,
+          }));
+
+        if (translationData.length > 0) {
+          await productTranslationService.batchUpsertProductTranslations({
+            translations: translationData
+          });
+          logger.info('Product translations saved', null, { prefix: 'EditProductModal' });
+        }
+      } catch (error) {
+        logger.error('Failed to save product translations', error, { prefix: 'EditProductModal' });
+        // Don't fail the whole operation if translations fail
+      }
+
       if (onOpenIngredientUpdate) {
         onOpenIngredientUpdate(product.id, product.name);
       }
-      
+
       onSuccess();
       onClose();
     } catch (err: any) {
@@ -197,11 +327,6 @@ export const EditProductModal: React.FC<{
     }
   };
 
-  const nameLength = formData.name.length;
-  const descriptionLength = formData.description.length;
-  const maxNameLength = 100;
-  const maxDescLength = 500;
-  const isNameValid = nameLength >= 2 && nameLength <= maxNameLength;
   const isFormValid = formData.name.trim() && formData.price > 0 && formData.categoryId;
 
   return (
@@ -401,44 +526,34 @@ export const EditProductModal: React.FC<{
                     </AnimatePresence>
                   </div>
 
-                  {/* Product Name */}
+                  {/* Product Name - Multi-language Input */}
                   <div>
-                    <label htmlFor="name" className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <Tag className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      <span>{t('editProductModal.form.productName.label')}</span>
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => handleChange('name', e.target.value)}
-                        onFocus={() => setFocusedField('name')}
-                        onBlur={() => setFocusedField('')}
-                        maxLength={maxNameLength}
-                        className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
-                          errors.name
-                            ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
-                            : focusedField === 'name'
-                            ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/10 focus:ring-4 focus:ring-blue-500/20'
-                            : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400'
-                        } focus:outline-none`}
-                        placeholder={t('editProductModal.form.productName.placeholder')}
-                        aria-required="true"
-                      />
-                      <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 flex items-center gap-2`}>
-                        {formData.name && isNameValid && !errors.name && (
-                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                          </motion.div>
-                        )}
-                        <span className="text-xs text-gray-400">{nameLength}/{maxNameLength}</span>
-                      </div>
-                    </div>
+                    <MultiLanguageInput
+                      label={t('editProductModal.form.productName.label')}
+                      value={productNameTranslations}
+                      onChange={(newTranslations) => {
+                        setProductNameTranslations(newTranslations);
+                        // Update base formData with default language value for validation
+                        const val = newTranslations[defaultLanguage] || '';
+                        setFormData(prev => ({ ...prev, name: val }));
+
+                        // Clear error if exists
+                        if (errors.name && val) {
+                          setErrors(prev => {
+                            const newErrors = { ...prev };
+                            delete newErrors.name;
+                            return newErrors;
+                          });
+                        }
+                      }}
+                      languages={supportedLanguages}
+                      placeholder={t('editProductModal.form.productName.placeholder')}
+                      defaultLanguage={defaultLanguage}
+                      required={true}
+                    />
                     <AnimatePresence>
                       {errors.name && (
-                        <motion.p 
+                        <motion.p
                           initial={{ opacity: 0, y: -5 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -5 }}
@@ -456,7 +571,8 @@ export const EditProductModal: React.FC<{
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label htmlFor="price" className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <DollarSign className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                                                {currency.symbol}
+
                         <span>{t('editProductModal.form.price.label')}</span>
                         <span className="text-red-500">*</span>
                       </label>
@@ -558,37 +674,25 @@ export const EditProductModal: React.FC<{
                     </div>
                   </div>
 
-                  {/* Description */}
+                  {/* Description - Multi-language TextArea */}
                   <div>
-                    <label htmlFor="description" className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      <span>{t('editProductModal.form.description.label')}</span>
-                    </label>
-                    <div className="relative">
-                      <textarea
-                        id="description"
-                        value={formData.description}
-                        onChange={(e) => handleChange('description', e.target.value)}
-                        onFocus={() => setFocusedField('description')}
-                        onBlur={() => setFocusedField('')}
-                        maxLength={maxDescLength}
-                        rows={3}
-                        className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 resize-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
-                          errors.description
-                            ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
-                            : focusedField === 'description'
-                            ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/10 focus:ring-4 focus:ring-blue-500/20'
-                            : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400'
-                        } focus:outline-none`}
-                        placeholder={t('editProductModal.form.description.placeholder')}
-                      />
-                      <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} bottom-3 text-xs text-gray-400`}>
-                        {descriptionLength}/{maxDescLength}
-                      </div>
-                    </div>
+                    <MultiLanguageTextArea
+                      label={t('editProductModal.form.description.label')}
+                      value={descriptionTranslations}
+                      onChange={(newTranslations) => {
+                        setDescriptionTranslations(newTranslations);
+                        // Update base formData with default language value
+                        const val = newTranslations[defaultLanguage] || '';
+                        setFormData(prev => ({ ...prev, description: val }));
+                      }}
+                      languages={supportedLanguages}
+                      placeholder={t('editProductModal.form.description.placeholder')}
+                      defaultLanguage={defaultLanguage}
+                      rows={3}
+                    />
                     <AnimatePresence>
                       {errors.description && (
-                        <motion.p 
+                        <motion.p
                           initial={{ opacity: 0, y: -5 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -5 }}

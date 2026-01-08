@@ -6,7 +6,6 @@ import {
   CheckCircle, 
   Loader2, 
   Clock, 
-  DollarSign, 
   Users, 
   ChevronDown,
   User, 
@@ -23,6 +22,10 @@ import { branchService } from '../../../../services/branchService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../../hooks';
 import { BranchDropdownItem } from '../../../../types/BranchManagement/type';
+import { useCurrency } from '../../../../hooks/useCurrency';
+
+
+/* not used anymore because the resturant user can edit the order type for each branch when select the branch from the dropdown */
 
 const OrderTypeRestaurantComponent = () => {
   const { t, isRTL } = useLanguage();
@@ -31,6 +34,7 @@ const OrderTypeRestaurantComponent = () => {
   const [branches, setBranches] = useState<BranchDropdownItem[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<BranchDropdownItem | null>(null);
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
+    const currency = useCurrency()
   
   // Order types states
   const [orderTypes, setOrderTypes] = useState<OrderType[]>([]);
@@ -120,9 +124,16 @@ const OrderTypeRestaurantComponent = () => {
       const updatedOrderType = await orderTypeService.updateOrderTypeSettings(orderType.id, updateData);
 
       if (updatedOrderType) {
-        setOrderTypes(prev => 
-          prev.map(ot => 
-            ot.id === orderType.id ? updatedOrderType : ot
+        // Filter out undefined values from the response to preserve existing fields
+        const filteredUpdate = Object.fromEntries(
+          Object.entries(updatedOrderType).filter(([_, value]) => value !== undefined)
+        );
+
+        setOrderTypes(prev =>
+          prev.map(ot =>
+            ot.id === orderType.id
+              ? { ...ot, ...filteredUpdate }
+              : ot
           )
         );
       } else {
@@ -152,6 +163,20 @@ const OrderTypeRestaurantComponent = () => {
 
   const handleSave = (orderType: OrderType) => {
     updateSettings(orderType);
+  };
+
+  // Helper function to get translated order type name and description
+  const getOrderTypeTranslation = (orderType: OrderType, field: 'name' | 'description'): string => {
+    const translationKey = `orderTypes.${orderType.code}.${field}`;
+    const translated = t(translationKey);
+
+    // If translation exists and is different from the key, use it; otherwise use API value
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+
+    // Fallback to API value
+    return field === 'name' ? orderType.name : orderType.description;
   };
 
   if (!selectedBranch) {
@@ -294,9 +319,9 @@ const OrderTypeRestaurantComponent = () => {
                       </div>
                       <div className={isRTL ? 'text-right' : 'text-left'}>
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
-                          {orderType.name}
+                          {getOrderTypeTranslation(orderType, 'name')}
                         </h3>
-                        <p className="text-gray-600 dark:text-gray-300 mt-1">{orderType.description}</p>
+                        <p className="text-gray-600 dark:text-gray-300 mt-1">{getOrderTypeTranslation(orderType, 'description')}</p>
                         <div className={`flex items-center gap-2 mt-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                           <Clock className="w-4 h-4 text-gray-400" />
                           <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -365,25 +390,27 @@ const OrderTypeRestaurantComponent = () => {
                           </label>
                         </div>
 
-                        {/* Requires Table */}
-                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                            <Table className="w-4 h-4 text-green-600 dark:text-green-400" />
-                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                              {t('dashboard.orderType.requiresTable') || 'Requires Table'}
+                        {/* Requires Table - Only show for DINE_IN order type */}
+                        {orderType.code === 'DINE_IN' && (
+                          <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                              <Table className="w-4 h-4 text-green-600 dark:text-green-400" />
+                              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                {t('dashboard.orderType.requiresTable') || 'Requires Table'}
+                              </label>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                              <input
+                                title={t('dashboard.orderType.requiresTable') || 'Requires Table'}
+                                type="checkbox"
+                                checked={orderType.requiresTable}
+                                onChange={(e) => handleSettingChange(orderType.id, 'requiresTable', e.target.checked)}
+                                className="sr-only peer"
+                              />
+                              <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer transition-all duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-green-600 dark:peer-checked:bg-green-500"></div>
                             </label>
                           </div>
-                          <label className="relative inline-flex items-center cursor-pointer">
-                            <input
-                              title={t('dashboard.orderType.requiresTable') || 'Requires Table'}
-                              type="checkbox"
-                              checked={orderType.requiresTable}
-                              onChange={(e) => handleSettingChange(orderType.id, 'requiresTable', e.target.checked)}
-                              className="sr-only peer"
-                            />
-                            <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer transition-all duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-green-600 dark:peer-checked:bg-green-500"></div>
-                          </label>
-                        </div>
+                        )}
 
                         {/* Requires Address */}
                         <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -450,7 +477,7 @@ const OrderTypeRestaurantComponent = () => {
                     {/* Min Order Amount */}
                     <div className="space-y-2">
                       <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <DollarSign className="w-4 h-4" />
+                          {currency.symbol}
                         {t('dashboard.orderType.minOrderAmount')}
                       </label>
                       <div className="relative">
@@ -469,7 +496,7 @@ const OrderTypeRestaurantComponent = () => {
                     {/* Service Charge */}
                     <div className="space-y-2">
                       <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <DollarSign className="w-4 h-4" />
+                          {currency.symbol}
                         {t('dashboard.orderType.serviceCharge')}
                       </label>
                       <div className="relative">

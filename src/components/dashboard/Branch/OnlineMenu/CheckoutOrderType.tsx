@@ -3,6 +3,7 @@ import { X, CheckCircle, Loader2, User, MapPin, Phone, Table, ShoppingBag, Alert
 import { OrderType, orderTypeService } from '../../../../services/Branch/BranchOrderTypeService';
 import { CreateSessionOrderDto } from '../../../../types/BranchManagement/type';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface CheckoutOrderTypeSidebarProps {
   isOpen: boolean;
@@ -32,7 +33,6 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
   isOpen,
   onClose,
   basketTotal,
-  currency = 'TRY',
   onSubmit,
   acceptCash = true,
   acceptCreditCard = false,
@@ -45,6 +45,7 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const { t, language } = useLanguage();
+  const currency = useCurrency()
 
   // Check if current language is RTL
   const isRTL = language === 'ar';
@@ -85,10 +86,9 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
       const types = await orderTypeService.getOrderTypesByOnlineSessionId();
       
       const availableTypes = types.filter(
-        type => 
-          type.isActive && 
-          basketTotal >= type.minOrderAmount && 
-          !type.requiresTable
+        type =>
+          type.isActive &&
+          basketTotal >= type.minOrderAmount
       );
       
       if (availableTypes.length === 0) {
@@ -103,11 +103,20 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
     }
   };
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: currency,
-    }).format(price);
+
+
+  // Helper function to get translated order type name and description
+  const getOrderTypeTranslation = (orderType: OrderType, field: 'name' | 'description'): string => {
+    const translationKey = `orderTypes.${orderType.code}.${field}`;
+    const translated = t(translationKey);
+
+    // If translation exists and is different from the key, use it; otherwise use API value
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+
+    // Fallback to API value
+    return field === 'name' ? orderType.name : orderType.description;
   };
 
   const handleOrderTypeSelect = (orderType: OrderType) => {
@@ -345,10 +354,10 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
                           <div className="flex items-start justify-between gap-2 mb-2">
                             <div>
                               <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">
-                                {orderType.name}
+                                {getOrderTypeTranslation(orderType, 'name')}
                               </h3>
                               <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                                {orderType.description}
+                                {getOrderTypeTranslation(orderType, 'description')}
                               </p>
                             </div>
                             {isSelected && (
@@ -386,12 +395,12 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
                           <div className="space-y-1 text-xs">
                             {orderType.minOrderAmount > 0 && (
                               <p className="text-blue-600 dark:text-blue-400">
-                                {t('order.form.minimumOrder')}: {formatPrice(orderType.minOrderAmount)}
+                                {t('order.form.minimumOrder')}: {currency.symbol}{(orderType.minOrderAmount)}
                               </p>
                             )}
                             {orderType.serviceCharge > 0 && (
                               <p className="text-orange-600 dark:text-orange-400">
-                                {t('order.form.serviceCharge')}: +{formatPrice(orderType.serviceCharge)}
+                                {t('order.form.serviceCharge')}: +{currency.symbol}{(orderType.serviceCharge)}
                               </p>
                             )}
                             {orderType.estimatedMinutes > 0 && (
@@ -400,7 +409,7 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
                               </p>
                             )}
                             <p className="text-lg font-bold text-orange-600 dark:text-orange-400 mt-2">
-                              {t('menu.cart.total')}: {formatPrice(calculatedTotal)}
+                              {t('menu.cart.total')}: {currency.symbol}{(calculatedTotal)}
                             </p>
                           </div>
                         </div>
@@ -419,10 +428,10 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
                       <div className="text-2xl">{selectedOrderType?.icon}</div>
                       <div>
                         <h4 className="font-bold text-slate-900 dark:text-slate-100">
-                          {selectedOrderType?.name}
+                          {selectedOrderType && getOrderTypeTranslation(selectedOrderType, 'name')}
                         </h4>
                         <p className="text-sm text-slate-600 dark:text-slate-400">
-                          {selectedOrderType?.description}
+                          {selectedOrderType && getOrderTypeTranslation(selectedOrderType, 'description')}
                         </p>
                       </div>
                     </div>
@@ -437,12 +446,12 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
                   <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-600 space-y-1 text-xs">
                     {selectedOrderType?.minOrderAmount && selectedOrderType.minOrderAmount > 0 && (
                       <p className="text-blue-600 dark:text-blue-400">
-                        {t('order.form.minimumOrder')}: {formatPrice(selectedOrderType.minOrderAmount)}
+                        {t('order.form.minimumOrder')}: {currency.symbol}{(selectedOrderType.minOrderAmount)}
                       </p>
                     )}
                     {selectedOrderType?.serviceCharge && selectedOrderType.serviceCharge > 0 && (
                       <p className="text-orange-600 dark:text-orange-400">
-                        {t('order.form.serviceCharge')}: +{formatPrice(selectedOrderType.serviceCharge)}
+                        {t('order.form.serviceCharge')}: +{currency.symbol}{(selectedOrderType.serviceCharge)}
                       </p>
                     )}
                     {selectedOrderType?.estimatedMinutes && selectedOrderType.estimatedMinutes > 0 && (
@@ -613,7 +622,7 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
                     <div className="flex justify-between">
                       <span className="text-slate-600 dark:text-slate-400">{t('order.form.subtotal')}:</span>
                       <span className="text-slate-800 dark:text-slate-200">
-                        {formatPrice(basketTotal)}
+                        {currency.symbol}{(basketTotal)}
                       </span>
                     </div>
 
@@ -621,7 +630,7 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
                       <div className="flex justify-between">
                         <span className="text-slate-600 dark:text-slate-400">{t('order.form.serviceCharge')}:</span>
                         <span className="text-slate-800 dark:text-slate-200">
-                          +{formatPrice(selectedOrderType.serviceCharge)}
+                          +{currency.symbol}{(selectedOrderType.serviceCharge)}
                         </span>
                       </div>
                     )}
@@ -629,7 +638,7 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
                     <div className="flex justify-between font-bold border-t border-slate-200 dark:border-slate-600 pt-2">
                       <span className="text-slate-800 dark:text-slate-200">{t('menu.cart.total')}:</span>
                       <span className="text-orange-600 dark:text-orange-400">
-                        {formatPrice(basketTotal + (selectedOrderType?.serviceCharge || 0))}
+                        {currency.symbol}{(basketTotal + (selectedOrderType?.serviceCharge || 0))}
                       </span>
                     </div>
 
@@ -648,7 +657,7 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
                         {paymentMethod === 'credit_card' && <CreditCard className={`h-4 w-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />}
                         {paymentMethod === 'online' && <Smartphone className={`h-4 w-4 ${isRTL ? 'ml-1' : 'mr-1'}`} />}
                         <span>
-                          {t('order.form.payment')}: {availablePaymentMethods.find(m => m.id === paymentMethod)?.name}
+                           {availablePaymentMethods.find(m => m.id === paymentMethod)?.name}
                         </span>
                       </div>
                     )}

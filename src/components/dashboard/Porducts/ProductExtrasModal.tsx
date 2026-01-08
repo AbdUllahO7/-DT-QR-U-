@@ -3,7 +3,6 @@ import { logger } from '../../../utils/logger';
 import ProductExtraCategoriesModal from './ProductExtraCategoriesModal';
 import ProductExtrasManagementModal from './ProductExtrasManagementModal';
 
-
 interface ProductExtrasModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -23,11 +22,15 @@ const ProductExtrasModal: React.FC<ProductExtrasModalProps> = ({
 }) => {
   const [currentView, setCurrentView] = useState<ModalView>('categories');
   
-  // Selection State
+  // Selection State - Updated to track isRemoval status
   const [selectedCategory, setSelectedCategory] = useState<{
     id: number;
     name: string;
+    isRemoval: boolean;
   } | null>(null);
+
+
+  console.log("selectedCategory",selectedCategory)
 
   // Reset view when modal opens
   useEffect(() => {
@@ -38,10 +41,15 @@ const ProductExtrasModal: React.FC<ProductExtrasModalProps> = ({
     }
   }, [isOpen, productId, productName]);
 
-  const handleSelectCategory = (categoryId: number, categoryName: string) => {
-    setSelectedCategory({ id: categoryId, name: categoryName });
+  // Updated to accept isRemoval flag from the categories modal
+  const handleSelectCategory = (categoryId: number, categoryName: string, isRemoval: boolean = false) => {
+    setSelectedCategory({ 
+      id: categoryId, 
+      name: categoryName, 
+      isRemoval: isRemoval 
+    });
     setCurrentView('extras');
-    logger.info('Selected category for extras management', { categoryId, categoryName });
+    logger.info('Selected category for extras management', { categoryId, categoryName, isRemoval });
   };
 
   const handleBackToCategories = () => {
@@ -66,6 +74,7 @@ const ProductExtrasModal: React.FC<ProductExtrasModalProps> = ({
           onClose={handleClose}
           productId={productId}
           productName={productName}
+          // Note: You must update ProductExtraCategoriesModal to pass the isRemoval boolean in this callback
           onSelectCategory={handleSelectCategory}
         />
       )}    
@@ -79,6 +88,8 @@ const ProductExtrasModal: React.FC<ProductExtrasModalProps> = ({
           productName={productName}
           extraCategoryId={selectedCategory.id}
           extraCategoryName={selectedCategory.name}
+          // Pass the removal flag down so the modal can enforce Single Select
+          isRemoval={selectedCategory.isRemoval}
         />
       )}
     </>

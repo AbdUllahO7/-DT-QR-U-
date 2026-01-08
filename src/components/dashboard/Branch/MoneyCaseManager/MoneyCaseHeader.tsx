@@ -1,15 +1,18 @@
 import React from 'react';
-import { DollarSign } from 'lucide-react';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface Props {
   t: (key: string) => string;
 }
 
 const MoneyCaseHeader: React.FC<Props> = ({ t }) => {
+  const currency = useCurrency();
+
+
   return (
     <div className="flex items-center space-x-3">
       <div className="bg-blue-100 dark:bg-blue-900 p-3 rounded-lg">
-        <DollarSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+          <span className=''>{currency.symbol}</span>
       </div>
       <div>
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">

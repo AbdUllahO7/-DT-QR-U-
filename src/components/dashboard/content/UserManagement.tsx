@@ -167,7 +167,6 @@ useEffect(() => {
         logger.error('Kullanıcılar yüklenirken hata', err, {
           prefix: 'UserManagement',
         });
-        console.log("err.response.data.message",err.response.data.message)
         setError(err.response.data.message );
         setUsers([]);
       } finally {
@@ -269,7 +268,6 @@ useEffect(() => {
   const fetchBranches = useCallback(async () => {
     try {
       const branchesData = await branchService.getBranches();
-      console.log("branchesData",branchesData)
       setBranches(branchesData);
       logger.info('Şubeler başarıyla yüklendi', branchesData, {
         prefix: 'UserManagement',

@@ -5,6 +5,10 @@ import { logger } from "../../../utils/logger";
 class BranchProductExtrasService {
   private baseUrl = '/api/BranchProductExtras';
 
+      private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
   // Get all branch product extras by branch product ID
   async getBranchProductExtrasByBranchProductId(
     branchProductId: number
@@ -12,10 +16,11 @@ class BranchProductExtrasService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
-      logger.info('Branch product extras listesi getiriliyor', { branchProductId, branchId });
+      logger.info('Branch product extras listesi getiriliyor', { branchProductId, branchId, language });
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : {};
       const response = await httpClient.get<APIBranchProductExtra[]>(
         `${this.baseUrl}/branch-product/${branchProductId}`,
         { params }
@@ -39,10 +44,11 @@ class BranchProductExtrasService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
-      logger.info('Gruplu branch product extras listesi getiriliyor', { branchProductId, branchId });
+      logger.info('Gruplu branch product extras listesi getiriliyor', { branchProductId, branchId, language });
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : {};
       const response = await httpClient.get<GroupedBranchProductExtra[]>(
         `${this.baseUrl}/branch-product/${branchProductId}/grouped`,
         { params }
@@ -65,10 +71,11 @@ class BranchProductExtrasService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
-      logger.info('Branch product extra detayı getiriliyor', { id, branchId });
+      logger.info('Branch product extra detayı getiriliyor', { id, branchId, language });
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : {};
       const response = await httpClient.get<APIBranchProductExtra>(`${this.baseUrl}/${id}`, { params });
 
       logger.info('Branch product extra detayı başarıyla getirildi', { data: response.data, branchId });
@@ -173,12 +180,14 @@ class BranchProductExtrasService {
     try {
       // Get effective branch ID (from parameter, localStorage, or token)
       const effectiveBranchId = params?.branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
-      logger.info('Mevcut product extras listesi getiriliyor', { params, branchId: effectiveBranchId });
+      logger.info('Mevcut product extras listesi getiriliyor', { params, branchId: effectiveBranchId, language });
       const response = await httpClient.get<AvailableProductExtra[]>(`${this.baseUrl}/available`, {
         params: {
           branchProductId: params?.branchProductId,
           ...(effectiveBranchId && { branchId: effectiveBranchId }),
+          language
         }
       });
 
@@ -246,10 +255,11 @@ class BranchProductExtrasService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
-      logger.info('Silinen branch product extras listesi getiriliyor', { branchId });
+      logger.info('Silinen branch product extras listesi getiriliyor', { branchId, language });
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : {};
       const response = await httpClient.get<APIBranchProductExtra[]>(`${this.baseUrl}/deleted`, { params });
 
       logger.info('Silinen branch product extras listesi başarıyla getirildi', {

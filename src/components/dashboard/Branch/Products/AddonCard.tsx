@@ -3,7 +3,6 @@ import {
   Plus,
   Star,
   Package,
-  DollarSign,
   Settings,
   Save,
   Loader2,
@@ -12,6 +11,7 @@ import {
   ChevronUp
 } from 'lucide-react';
 import { EnhancedAddon } from '../../../../types/BranchManagement/type';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface AddonCardProps {
   addon: EnhancedAddon;
@@ -34,6 +34,7 @@ const AddonCard: React.FC<AddonCardProps> = ({
 }) => {
   
   const [isExpanded, setIsExpanded] = useState(false);
+    const currency = useCurrency();
   
   const hasPropertyChanges = 
     addon.editedSpecialPrice !== addon.currentSpecialPrice ||
@@ -104,7 +105,8 @@ const AddonCard: React.FC<AddonCardProps> = ({
               {/* Price and Category */}
               <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} flex-wrap gap-2`}>
                 <div className="flex items-center bg-gradient-to-r from-emerald-100 to-green-100 dark:from-emerald-900/30 dark:to-green-900/30 px-3 py-1.5 rounded-xl">
-                  <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400 mr-0.5" />
+                           <span className=''>{currency.symbol}</span>
+
                   <span className="text-emerald-700 dark:text-emerald-300 font-bold text-lg">
                     {addon.isAssigned && addon.editedSpecialPrice !== addon.addonPrice 
                       ? addon.editedSpecialPrice 
@@ -196,7 +198,7 @@ const AddonCard: React.FC<AddonCardProps> = ({
                   {t('addonModal.configuration.specialPrice')}
                 </label>
                 <div className="relative">
-                  <DollarSign className={`absolute top-1/2 transform -translate-y-1/2 w-5 h-5 text-emerald-500 ${isRTL ? 'right-4' : 'left-4'}`} />
+                  <span className={`absolute top-1/2 transform -translate-y-1/2 w-5 h-5 text-emerald-500 ${isRTL ? 'right-4' : 'left-4'}`}>{currency.symbol}</span>
                   <input
                     title='number'
                     type="number"

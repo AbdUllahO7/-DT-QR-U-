@@ -74,6 +74,9 @@ const OrdersManager: React.FC<OrdersManagerProps> = ({ branchId }) => {
     ? state.branchOrders
     : state.pendingOrders;
 
+
+    console.log("displayOrders",displayOrders)
+
   const displayTotalFiltered = state.pagination.totalItems;
 
   const handlePageChangeInternal = state.viewMode === 'branch'

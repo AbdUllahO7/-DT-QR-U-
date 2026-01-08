@@ -1,8 +1,9 @@
 // src/components/Restaurant/MoneyCase/QuickSummaryCards.tsx
 
 import React from 'react';
-import { DollarSign, TrendingUp, Clock, AlertCircle, ShoppingCart, Calendar } from 'lucide-react';
+import {  TrendingUp, Clock, AlertCircle, ShoppingCart, Calendar } from 'lucide-react';
 import { QuickSummary, ActiveMoneyCase } from '../../../../types/BranchManagement/MoneyCase';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface Props {
   quickSummary: QuickSummary | null;
@@ -10,16 +11,19 @@ interface Props {
   loading: boolean;
   t: (key: string) => string;
   isRTL: boolean;
+  currencySymbol?: string;
 }
 
-const QuickSummaryCards: React.FC<Props> = ({ 
-  quickSummary, 
-  activeCase, 
-  loading, 
-  t, 
-  isRTL 
+const QuickSummaryCards: React.FC<Props> = ({
+  quickSummary,
+  activeCase,
+  loading,
+  t,
+  isRTL,
+  currencySymbol = '₺'
 }) => {
 
+  const currency = useCurrency();
 
   if (loading && !activeCase && !quickSummary) {
     return (
@@ -35,12 +39,10 @@ const QuickSummaryCards: React.FC<Props> = ({
   }
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return `${currencySymbol}${new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    }).format(value);
+    }).format(value)}`;
   };
 
   // Use quickSummary data first, then activeCase as fallback
@@ -110,7 +112,7 @@ const QuickSummaryCards: React.FC<Props> = ({
                 {formatCurrency(currentRevenue)}
               </p>
             </div>
-            <DollarSign className="h-8 w-8 text-yellow-500 flex-shrink-0" />
+            <span className=''>{currency.symbol}</span>
           </div>
         </div>
 

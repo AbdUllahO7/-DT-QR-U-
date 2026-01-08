@@ -9,14 +9,14 @@ import { logger } from '../../../utils/logger';
 import { CreateProductExtraCategoryData, ProductExtraCategory, UpdateProductExtraCategoryData, ExtraCategory } from '../../../types/Extras/type';
 import { productExtraCategoriesService } from '../../../services/Extras/ProductExtraCategoriesService';
 import { extraCategoriesService } from '../../../services/Extras/ExtraCategoriesService';
-import { ConfirmationModal } from './ConfirmationModal'; // Make sure this path is correct
+import { ConfirmationModal } from './ConfirmationModal';
 
 interface ProductExtraCategoriesModalProps {
   isOpen: boolean;
   onClose: () => void;
   productId: number;
   productName: string;
-  onSelectCategory: (categoryId: number, categoryName: string) => void;
+  onSelectCategory: (categoryId: number, categoryName: string, isRemoval: boolean) => void;
 }
 
 const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = ({
@@ -51,7 +51,8 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
     minSelectionCount: 0,
     maxSelectionCount: 1,
     minTotalQuantity: 0,
-    maxTotalQuantity: 10
+    maxTotalQuantity: 10,
+    isMaxSelectionUnlimited: false
   });
 
   const [editFormData, setEditFormData] = useState({
@@ -59,7 +60,8 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
     minSelectionCount: 0,
     maxSelectionCount: 1,
     minTotalQuantity: 0,
-    maxTotalQuantity: 10
+    maxTotalQuantity: 10,
+    isMaxSelectionUnlimited: false
   });
 
   // Load data
@@ -97,14 +99,23 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
     try {
       setIsSubmitting(true);
       setError(null);
+
+      // Check if removal to sanitize data before sending
+      const selectedCategory = allExtraCategories.find(c => c.id === formData.extraCategoryId);
+      const isRemoval = selectedCategory?.isRemovalCategory || false;
+
       const data: CreateProductExtraCategoryData = {
         productId: productId,
         extraCategoryId: formData.extraCategoryId,
         isRequiredOverride: formData.isRequiredOverride,
-        minSelectionCount: formData.minSelectionCount,
-        maxSelectionCount: formData.maxSelectionCount,
-        minTotalQuantity: formData.minTotalQuantity,
-        maxTotalQuantity: formData.maxTotalQuantity
+        // If removal, min selection is 0
+        minSelectionCount: isRemoval ? 0 : formData.minSelectionCount,
+        // If unlimited, send null or a very high number depending on backend, 
+        // assuming backend accepts null for unlimited or we handle it in UI logic
+        maxSelectionCount: formData.isMaxSelectionUnlimited ? null : formData.maxSelectionCount,
+        // If removal, quantities are 0/null
+        minTotalQuantity: isRemoval ? 0 : formData.minTotalQuantity,
+        maxTotalQuantity: isRemoval ? null : formData.maxTotalQuantity
       };
 
       await productExtraCategoriesService.createProductExtraCategory(data);
@@ -116,12 +127,13 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
         minSelectionCount: 0,
         maxSelectionCount: 1,
         minTotalQuantity: 0,
-        maxTotalQuantity: 10
+        maxTotalQuantity: 10,
+        isMaxSelectionUnlimited: false
       });
       setShowAddForm(false);
     } catch (error:any) {
       logger.error('Failed to add product extra category:', error);
-      setError(error.response?.data?.message );
+      setError(error.response?.data?.message || error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -131,13 +143,19 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
     try {
       setIsSubmitting(true);
       setError(null);
+
+      // Find original category to check if removal
+      const existingRecord = productExtraCategories.find(p => p.id === id);
+      const originalCategory = allExtraCategories.find(c => c.id === existingRecord?.extraCategoryId);
+      const isRemoval = originalCategory?.isRemovalCategory || false;
+
       const data: UpdateProductExtraCategoryData = {
         id: id,
         isRequiredOverride: editFormData.isRequiredOverride,
-        minSelectionCount: editFormData.minSelectionCount,
-        maxSelectionCount: editFormData.maxSelectionCount,
-        minTotalQuantity: editFormData.minTotalQuantity,
-        maxTotalQuantity: editFormData.maxTotalQuantity
+        minSelectionCount: isRemoval ? 0 : editFormData.minSelectionCount,
+        maxSelectionCount: editFormData.isMaxSelectionUnlimited ? null : editFormData.maxSelectionCount,
+        minTotalQuantity: isRemoval ? 0 : editFormData.minTotalQuantity,
+        maxTotalQuantity: isRemoval ? null : editFormData.maxTotalQuantity
       };
 
       await productExtraCategoriesService.updateProductExtraCategory(data);
@@ -175,12 +193,17 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
   const startEdit = (category: ProductExtraCategory) => {
     setError(null);
     setEditingId(category.id);
+    
+    // Check if max selection suggests unlimited
+    const isUnlimited = category.maxSelectionCount === null || category.maxSelectionCount > 1000;
+
     setEditFormData({
       isRequiredOverride: category.isRequiredOverride,
       minSelectionCount: category.minSelectionCount,
-      maxSelectionCount: category.maxSelectionCount,
+      maxSelectionCount: isUnlimited ? 0 : category.maxSelectionCount,
       minTotalQuantity: category.minTotalQuantity,
-      maxTotalQuantity: category.maxTotalQuantity
+      maxTotalQuantity: category.maxTotalQuantity,
+      isMaxSelectionUnlimited: isUnlimited
     });
   };
 
@@ -197,16 +220,33 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
   const handleCategorySelect = (categoryId: number) => {
     const category = allExtraCategories.find(cat => cat.id === categoryId);
     if (category) {
+      const isRemoval = category.isRemovalCategory;
       setFormData({
         ...formData,
         extraCategoryId: categoryId,
         isRequiredOverride: category.isRequired,
-        minSelectionCount: category.defaultMinSelectionCount,
+        minSelectionCount: isRemoval ? 0 : category.defaultMinSelectionCount,
         maxSelectionCount: category.defaultMaxSelectionCount,
-        minTotalQuantity: category.defaultMinTotalQuantity,
-        maxTotalQuantity: category.defaultMaxTotalQuantity
+        minTotalQuantity: isRemoval ? 0 : category.defaultMinTotalQuantity,
+        maxTotalQuantity: isRemoval ? 10 : category.defaultMaxTotalQuantity,
+        isMaxSelectionUnlimited: false
       });
     }
+  };
+
+  // Helper to determine if the currently selected (for Add) or currently edited category is removal
+  const isSelectedCategoryRemoval = () => {
+    if (!formData.extraCategoryId) return false;
+    const cat = allExtraCategories.find(c => c.id === formData.extraCategoryId);
+    return cat?.isRemovalCategory || false;
+  };
+
+  const isEditingCategoryRemoval = (categoryId: number) => {
+     // We need to look up the extraCategoryId from the ProductExtraCategory record
+     const productCat = productExtraCategories.find(pc => pc.id === categoryId);
+     if(!productCat) return false;
+     const cat = allExtraCategories.find(c => c.id === productCat.extraCategoryId);
+     return cat?.isRemovalCategory || false;
   };
 
   if (!isOpen) return null;
@@ -295,7 +335,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                             <option value={0}>{t('extrasManagement.productExtras.chooseCategory')}</option>
                             {getAvailableCategoriesToAdd().map(cat => (
                               <option key={cat.id} value={cat.id}>
-                                {cat.categoryName}
+                                {cat.categoryName} {cat.isRemovalCategory ? `(${t('extrasManagement.categoryConfigModal.badges.removal')})` : ''}
                               </option>
                             ))}
                           </select>
@@ -309,71 +349,122 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                             onChange={(e) => setFormData({ ...formData, isRequiredOverride: e.target.checked })}
                             className="w-5 h-5 rounded dark:text-gray-300 border-gray-300 text-primary-600 focus:ring-primary-500"
                           />
-                          <label htmlFor="add-required" className="ml-3 text-sm   font-medium text-gray-700 dark:text-gray-300 cursor-pointer select-none">
+                          <label htmlFor="add-required" className="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer select-none">
                             {t('extrasManagement.productExtras.required')}
                           </label>
                         </div>
                       </div>
 
-                      {/* Column 2 */}
+                      {/* Column 2: Selection Logic */}
                       <div className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-white mb-1 uppercase tracking-wider">
-                              {t('extrasManagement.productExtras.minSelection')}
-                            </label>
-                            <input
-                              title={t('extrasManagement.productExtras.minSelection')}
-                              type="number"
-                              min={0}
-                              value={formData.minSelectionCount}
-                              onChange={(e) => setFormData({ ...formData, minSelectionCount: parseInt(e.target.value) || 0 })}
-                              className="w-full px-3 py-2 border border-gray-300  dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-white mb-1 uppercase tracking-wider">
-                              {t('extrasManagement.productExtras.maxSelection')}
-                            </label>
-                            <input
-                              title={t('extrasManagement.productExtras.maxSelection')}
-                              type="number"
-                              min={1}
-                              value={formData.maxSelectionCount}
-                              onChange={(e) => setFormData({ ...formData, maxSelectionCount: parseInt(e.target.value) || 1 })}
-                              className="w-full px-3 py-2 border dark:text-gray-300 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
-                            />
-                          </div>
-                        </div>
+                        {isSelectedCategoryRemoval() ? (
+                           // REMOVAL UI: Only Max Selection with Unlimited
+                           <div className="space-y-4">
+                              <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-white mb-1 uppercase tracking-wider">
+                                  {t('extrasManagement.productExtras.maxSelection')}
+                                </label>
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    title={t('extrasManagement.productExtras.maxSelection')}
+                                    type="number"
+                                    min={1}
+                                    value={formData.isMaxSelectionUnlimited ? '' : formData.maxSelectionCount}
+                                    onChange={(e) => setFormData({ ...formData, maxSelectionCount: parseInt(e.target.value) || 1 })}
+                                    disabled={formData.isMaxSelectionUnlimited}
+                                    className="w-full px-3 py-2 border dark:text-gray-300 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  />
+                                  <label className="flex items-center gap-2 whitespace-nowrap cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={formData.isMaxSelectionUnlimited}
+                                      onChange={(e) => setFormData({ ...formData, isMaxSelectionUnlimited: e.target.checked })}
+                                      className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
+                                    />
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                                      {t('extrasManagement.categories.fields.unlimited')}
+                                    </span>
+                                  </label>
+                                </div>
+                               
+                              </div>
+                           </div>
+                        ) : (
+                           // STANDARD UI: Full Grid
+                           <div className="space-y-4">
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-white mb-1 uppercase tracking-wider">
+                                  {t('extrasManagement.productExtras.minSelection')}
+                                </label>
+                                <input
+                                  title={t('extrasManagement.productExtras.minSelection')}
+                                  type="number"
+                                  min={0}
+                                  value={formData.minSelectionCount}
+                                  onChange={(e) => setFormData({ ...formData, minSelectionCount: parseInt(e.target.value) || 0 })}
+                                  className="w-full px-3 py-2 border border-gray-300  dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-white mb-1 uppercase tracking-wider">
+                                  {t('extrasManagement.productExtras.maxSelection')}
+                                </label>
+                                <div className="flex items-center gap-2">
+                                  <input
+                                    title={t('extrasManagement.productExtras.maxSelection')}
+                                    type="number"
+                                    min={1}
+                                    value={formData.isMaxSelectionUnlimited ? '' : formData.maxSelectionCount}
+                                    onChange={(e) => setFormData({ ...formData, maxSelectionCount: parseInt(e.target.value) || 1 })}
+                                    disabled={formData.isMaxSelectionUnlimited}
+                                    className="w-full px-3 py-2 border dark:text-gray-300 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  />
+                                   <label className="flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+                                    <input
+                                      type="checkbox"
+                                      checked={formData.isMaxSelectionUnlimited}
+                                      onChange={(e) => setFormData({ ...formData, isMaxSelectionUnlimited: e.target.checked })}
+                                      className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
+                                    />
+                                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                                      {t('extrasManagement.categories.fields.unlimited')}
+                                    </span>
+                                  </label>
+                                </div>
+                              </div>
+                            </div>
 
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-white mb-1 uppercase tracking-wider">
-                              {t('extrasManagement.productExtras.minQuantity')}
-                            </label>
-                            <input
-                              title={t('extrasManagement.productExtras.minQuantity')}
-                              type="number"
-                              min={0}
-                              value={formData.minTotalQuantity}
-                              onChange={(e) => setFormData({ ...formData, minTotalQuantity: parseInt(e.target.value) || 0 })}
-                              className="w-full px-3 py-2 border dark:text-gray-300 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-500 dark:text-white mb-1 uppercase tracking-wider">
-                              {t('extrasManagement.productExtras.maxQuantity')}
-                            </label>
-                            <input
-                              title={t('extrasManagement.productExtras.maxQuantity')}
-                              type="number"
-                              min={1}
-                              value={formData.maxTotalQuantity}
-                              onChange={(e) => setFormData({ ...formData, maxTotalQuantity: parseInt(e.target.value) || 10 })}
-                              className="w-full px-3 py-2 border dark:text-gray-300 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
-                            />
-                          </div>
-                        </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-white mb-1 uppercase tracking-wider">
+                                  {t('extrasManagement.productExtras.minQuantity')}
+                                </label>
+                                <input
+                                  title={t('extrasManagement.productExtras.minQuantity')}
+                                  type="number"
+                                  min={0}
+                                  value={formData.minTotalQuantity}
+                                  onChange={(e) => setFormData({ ...formData, minTotalQuantity: parseInt(e.target.value) || 0 })}
+                                  className="w-full px-3 py-2 border dark:text-gray-300 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-semibold text-gray-500 dark:text-white mb-1 uppercase tracking-wider">
+                                  {t('extrasManagement.productExtras.maxQuantity')}
+                                </label>
+                                <input
+                                  title={t('extrasManagement.productExtras.maxQuantity')}
+                                  type="number"
+                                  min={1}
+                                  value={formData.maxTotalQuantity}
+                                  onChange={(e) => setFormData({ ...formData, maxTotalQuantity: parseInt(e.target.value) || 10 })}
+                                  className="w-full px-3 py-2 border dark:text-gray-300 border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700"
+                                />
+                              </div>
+                            </div>
+                           </div>
+                        )}
                       </div>
                     </div>
 
@@ -421,7 +512,10 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                   </div>
                 ) : (
                   <div className="grid gap-4">
-                    {productExtraCategories.map((category) => (
+                    {productExtraCategories.map((category) => {
+                      const isRemoval = isEditingCategoryRemoval(category.id);
+                      
+                      return (
                       <div
                         key={category.id}
                         className={`bg-white dark:bg-gray-800 rounded-xl border transition-all duration-200 ${
@@ -434,9 +528,16 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                           // Edit Mode
                           <div className="p-6">
                             <div className="flex items-center justify-between mb-6">
-                              <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                                {t('extrasManagement.buttons.edit')}: {getCategoryName(category.extraCategoryId)}
-                              </h3>
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                                  {t('extrasManagement.buttons.edit')}: {getCategoryName(category.extraCategoryId)}
+                                </h3>
+                                {isRemoval && (
+                                  <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
+                                    {t('extrasManagement.categoryConfigModal.badges.removal')}
+                                  </span>
+                                )}
+                              </div>
                               <div className="flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
                                 <input
                                   id={`edit-req-${category.id}`}
@@ -452,73 +553,128 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                               <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-                                  <h4 className="text-xs font-bold text-gray-500 uppercase dark:text-white tracking-wider mb-2">
-                                     {t('extrasManagement.productExtras.selectionLimits')}
-                                  </h4>
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                      <label className="block text-xs dark:text-white text-gray-500 mb-1">
-                                        {t('extrasManagement.productExtras.minSelectLabel')}
-                                      </label>
-                                      <input
-                                        title={t('extrasManagement.productExtras.minSelectLabel')}
-                                        type="number"
-                                        min={0}
-                                        value={editFormData.minSelectionCount}
-                                        onChange={(e) => setEditFormData({ ...editFormData, minSelectionCount: parseInt(e.target.value) || 0 })}
-                                        className="w-full px-3 py-2 border dark:text-white rounded-md dark:bg-gray-700 dark:border-gray-600"
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="block text-xs dark:text-white mb-1">
-                                        {t('extrasManagement.productExtras.maxSelectLabel')}
-                                      </label>
-                                      <input
-                                        title={t('extrasManagement.productExtras.maxSelectLabel')}
-                                        type="number"
-                                        min={1}
-                                        value={editFormData.maxSelectionCount}
-                                        onChange={(e) => setEditFormData({ ...editFormData, maxSelectionCount: parseInt(e.target.value) || 1 })}
-                                        className="w-full px-3 py-2 dark:text-white border rounded-md dark:bg-gray-700 dark:border-gray-600"
-                                      />
-                                    </div>
+                               {isRemoval ? (
+                                  // REMOVAL EDIT UI
+                                  <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg col-span-2">
+                                     <h4 className="text-xs font-bold text-gray-500 uppercase dark:text-white tracking-wider mb-2">
+                                        {t('extrasManagement.productExtras.selectionLimits')}
+                                     </h4>
+                                     <div className="grid grid-cols-1 gap-4 max-w-md">
+                                        <div>
+                                          <label className="block text-xs dark:text-white mb-1">
+                                            {t('extrasManagement.productExtras.maxSelectLabel')}
+                                          </label>
+                                          <div className="flex items-center gap-2">
+                                            <input
+                                              title={t('extrasManagement.productExtras.maxSelectLabel')}
+                                              type="number"
+                                              min={1}
+                                              value={editFormData.isMaxSelectionUnlimited ? '' : editFormData.maxSelectionCount}
+                                              onChange={(e) => setEditFormData({ ...editFormData, maxSelectionCount: parseInt(e.target.value) || 1 })}
+                                              disabled={editFormData.isMaxSelectionUnlimited}
+                                              className="w-full px-3 py-2 dark:text-white border rounded-md dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50"
+                                            />
+                                            <label className="flex items-center gap-2 whitespace-nowrap cursor-pointer">
+                                              <input
+                                                type="checkbox"
+                                                checked={editFormData.isMaxSelectionUnlimited}
+                                                onChange={(e) => setEditFormData({ ...editFormData, isMaxSelectionUnlimited: e.target.checked })}
+                                                className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
+                                              />
+                                              <span className="text-xs text-gray-600 dark:text-gray-400">
+                                                {t('extrasManagement.categories.fields.unlimited')}
+                                              </span>
+                                            </label>
+                                          </div>
+                                        </div>
+                                     </div>
                                   </div>
-                               </div>
+                               ) : (
+                                  // STANDARD EDIT UI
+                                  <>
+                                    <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                                        <h4 className="text-xs font-bold text-gray-500 uppercase dark:text-white tracking-wider mb-2">
+                                          {t('extrasManagement.productExtras.selectionLimits')}
+                                        </h4>
+                                        <div className="grid grid-cols-2 gap-4">
+                                          <div>
+                                            <label className="block text-xs dark:text-white text-gray-500 mb-1">
+                                              {t('extrasManagement.productExtras.minSelectLabel')}
+                                            </label>
+                                            <input
+                                              title={t('extrasManagement.productExtras.minSelectLabel')}
+                                              type="number"
+                                              min={0}
+                                              value={editFormData.minSelectionCount}
+                                              onChange={(e) => setEditFormData({ ...editFormData, minSelectionCount: parseInt(e.target.value) || 0 })}
+                                              className="w-full px-3 py-2 border dark:text-white rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                            />
+                                          </div>
+                                          <div>
+                                            <label className="block text-xs dark:text-white mb-1">
+                                              {t('extrasManagement.productExtras.maxSelectLabel')}
+                                            </label>
+                                            <div className="flex items-center gap-2">
+                                              <input
+                                                title={t('extrasManagement.productExtras.maxSelectLabel')}
+                                                type="number"
+                                                min={1}
+                                                value={editFormData.isMaxSelectionUnlimited ? '' : editFormData.maxSelectionCount}
+                                                onChange={(e) => setEditFormData({ ...editFormData, maxSelectionCount: parseInt(e.target.value) || 1 })}
+                                                disabled={editFormData.isMaxSelectionUnlimited}
+                                                className="w-full px-3 py-2 dark:text-white border rounded-md dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50"
+                                              />
+                                              <label className="flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+                                                <input
+                                                  type="checkbox"
+                                                  checked={editFormData.isMaxSelectionUnlimited}
+                                                  onChange={(e) => setEditFormData({ ...editFormData, isMaxSelectionUnlimited: e.target.checked })}
+                                                  className="w-4 h-4 text-primary-600 rounded focus:ring-primary-500"
+                                                />
+                                                <span className="text-xs text-gray-600 dark:text-gray-400">
+                                                  {t('extrasManagement.categories.fields.unlimited')}
+                                                </span>
+                                              </label>
+                                            </div>
+                                          </div>
+                                        </div>
+                                    </div>
 
-                               <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-                                  <h4 className="text-xs font-bold dark:text-white text-gray-500 uppercase tracking-wider mb-2">
-                                     {t('extrasManagement.productExtras.quantityLimits')}
-                                  </h4>
-                                  <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                      <label className="block text-xs dark:text-white mb-1">
-                                        {t('extrasManagement.productExtras.minTotalLabel')}
-                                      </label>
-                                      <input
-                                        title={t('extrasManagement.productExtras.minTotalLabel')}
-                                        type="number"
-                                        min={0}
-                                        value={editFormData.minTotalQuantity}
-                                        onChange={(e) => setEditFormData({ ...editFormData, minTotalQuantity: parseInt(e.target.value) || 0 })}
-                                        className="w-full px-3 py-2 dark:text-white border rounded-md dark:bg-gray-700 dark:border-gray-600"
-                                      />
+                                    <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+                                        <h4 className="text-xs font-bold dark:text-white text-gray-500 uppercase tracking-wider mb-2">
+                                          {t('extrasManagement.productExtras.quantityLimits')}
+                                        </h4>
+                                        <div className="grid grid-cols-2 gap-4">
+                                          <div>
+                                            <label className="block text-xs dark:text-white mb-1">
+                                              {t('extrasManagement.productExtras.minTotalLabel')}
+                                            </label>
+                                            <input
+                                              title={t('extrasManagement.productExtras.minTotalLabel')}
+                                              type="number"
+                                              min={0}
+                                              value={editFormData.minTotalQuantity}
+                                              onChange={(e) => setEditFormData({ ...editFormData, minTotalQuantity: parseInt(e.target.value) || 0 })}
+                                              className="w-full px-3 py-2 dark:text-white border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                            />
+                                          </div>
+                                          <div>
+                                            <label className="block text-xs text-gray-500 dark:text-white mb-1">
+                                              {t('extrasManagement.productExtras.maxTotalLabel')}
+                                            </label>
+                                            <input
+                                              title={t('extrasManagement.productExtras.maxTotalLabel')}
+                                              type="number"
+                                              min={1}
+                                              value={editFormData.maxTotalQuantity}
+                                              onChange={(e) => setEditFormData({ ...editFormData, maxTotalQuantity: parseInt(e.target.value) || 10 })}
+                                              className="w-full px-3 py-2 border dark:text-white rounded-md dark:bg-gray-700 dark:border-gray-600"
+                                            />
+                                          </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                      <label className="block text-xs text-gray-500 dark:text-white mb-1">
-                                         {t('extrasManagement.productExtras.maxTotalLabel')}
-                                      </label>
-                                      <input
-                                        title={t('extrasManagement.productExtras.maxTotalLabel')}
-                                        type="number"
-                                        min={1}
-                                        value={editFormData.maxTotalQuantity}
-                                        onChange={(e) => setEditFormData({ ...editFormData, maxTotalQuantity: parseInt(e.target.value) || 10 })}
-                                        className="w-full px-3 py-2 border dark:text-white rounded-md dark:bg-gray-700 dark:border-gray-600"
-                                      />
-                                    </div>
-                                  </div>
-                               </div>
+                                  </>
+                               )}
                             </div>
 
                             <div className="flex gap-3 justify-end">
@@ -547,6 +703,11 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                                   {getCategoryName(category.extraCategoryId)}
                                 </h3>
+                                {isRemoval && (
+                                  <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-medium">
+                                    {t('extrasManagement.categoryConfigModal.badges.removal')}
+                                  </span>
+                                )}
                                 {category.isRequiredOverride ? (
                                   <span className="px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300 rounded-full">
                                     {t('extrasManagement.productExtras.required')}
@@ -561,19 +722,29 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                               <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
                                 <div className="flex flex-col">
                                   <span className="text-xs text-gray-400 uppercase">{t('extrasManagement.productExtras.selection')}</span>
-                                  <span className="font-medium text-gray-900 dark:text-gray-200">{category.minSelectionCount} - {category.maxSelectionCount}</span>
+                                  <span className="font-medium text-gray-900 dark:text-gray-200">
+                                    {category.minSelectionCount} - {
+                                      (category.maxSelectionCount === null || category.maxSelectionCount > 1000) 
+                                      ? t('extrasManagement.categories.fields.unlimited') 
+                                      : category.maxSelectionCount
+                                    }
+                                  </span>
                                 </div>
-                                <div className="w-px bg-gray-200 dark:bg-gray-700 h-8"></div>
-                                <div className="flex flex-col">
-                                  <span className="text-xs text-gray-400 uppercase">{t('extrasManagement.productExtras.quantity')}</span>
-                                  <span className="font-medium text-gray-900 dark:text-gray-200">{category.minTotalQuantity} - {category.maxTotalQuantity}</span>
-                                </div>
+                                {!isRemoval && (
+                                  <>
+                                    <div className="w-px bg-gray-200 dark:bg-gray-700 h-8"></div>
+                                    <div className="flex flex-col">
+                                      <span className="text-xs text-gray-400 uppercase">{t('extrasManagement.productExtras.quantity')}</span>
+                                      <span className="font-medium text-gray-900 dark:text-gray-200">{category.minTotalQuantity} - {category.maxTotalQuantity}</span>
+                                    </div>
+                                  </>
+                                )}
                               </div>
                             </div>
 
                             <div className="flex items-center gap-2">
                               <button
-                                onClick={() => onSelectCategory(category.extraCategoryId, getCategoryName(category.extraCategoryId))}
+                                onClick={() => onSelectCategory(category.extraCategoryId, getCategoryName(category.extraCategoryId), isRemoval)}
                                 className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors mr-2"
                               >
                                 {t('extrasManagement.productExtras.manageExtras')}
@@ -600,7 +771,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                           </div>
                         )}
                       </div>
-                    ))}
+                    )})}
                   </div>
                 )}
               </div>

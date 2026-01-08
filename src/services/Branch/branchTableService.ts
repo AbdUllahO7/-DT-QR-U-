@@ -101,6 +101,11 @@ export interface TableOccupationToggleDto {
 class TableService {
   private baseUrl = '/api/branches';
 
+    private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
+
   // ==================== CATEGORY METHODS ====================
 
   /**
@@ -113,11 +118,13 @@ class TableService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
       logger.info('Masa kategorileri API çağrısı başlatılıyor', { onlyActive, includeTableCount, branchId }, { prefix: 'TableService' });
 
       const params = new URLSearchParams({
-        includeTableCount: includeTableCount.toString()
+        includeTableCount: includeTableCount.toString(),
+        language: language
       });
 
       // Add branchId if available
@@ -143,10 +150,11 @@ class TableService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
 
       logger.info('Kategori detayları API çağrısı başlatılıyor', { categoryId, branchId }, { prefix: 'TableService' });
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language: language } : { language: language };
       const response = await httpClient.get<TableCategory>(`${this.baseUrl}/table-categories/${categoryId}`, { params });
 
       logger.info('Kategori detayları alındı', response.data, { prefix: 'TableService' });
@@ -201,48 +209,48 @@ class TableService {
   /**
    * Update an existing table category
    */
-async updateCategory(categoryId: number, data: UpdateTableCategoryDto, branchId?: number): Promise<TableCategory> {
-  try {
-    // Get effective branch ID (from parameter, localStorage, or token)
-    const effectiveBranchId = branchId || getEffectiveBranchId();
+  async updateCategory(categoryId: number, data: UpdateTableCategoryDto, branchId?: number): Promise<TableCategory> {
+    try {
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
 
-    logger.info('Kategori güncelleme API çağrısı başlatılıyor', { categoryId, data, branchId: effectiveBranchId }, { prefix: 'TableService' });
+      logger.info('Kategori güncelleme API çağrısı başlatılıyor', { categoryId, data, branchId: effectiveBranchId }, { prefix: 'TableService' });
 
-    // Validate input data
-    if (!data.categoryName || !data.categoryName.trim()) {
-      throw new Error('Kategori adı gereklidir');
+      // Validate input data
+      if (!data.categoryName || !data.categoryName.trim()) {
+        throw new Error('Kategori adı gereklidir');
+      }
+
+      if (!data.colorCode) {
+        throw new Error('Renk kodu gereklidir');
+      }
+
+      if (!data.iconClass) {
+        throw new Error('İkon sınıfı gereklidir');
+      }
+
+      // Format the payload to match API schema
+      const payload = {
+        categoryName: data.categoryName,
+        description: data.description || "",
+        colorCode: data.colorCode,
+        iconClass: data.iconClass,
+        displayOrder: data.displayOrder || 0,
+        isActive: data.isActive,
+        rowVersion: data.rowVersion || ""
+      };
+
+      const params = effectiveBranchId ? { branchId: effectiveBranchId } : {};
+      const response = await httpClient.put<TableCategory>(`${this.baseUrl}/table-categories/${categoryId}`, payload, { params });
+
+      logger.info('Kategori başarıyla güncellendi', response.data, { prefix: 'TableService' });
+
+      return response.data;
+    } catch (error) {
+      logger.error('Kategori güncellenirken hata oluştu', error, { prefix: 'TableService' });
+      throw error;
     }
-
-    if (!data.colorCode) {
-      throw new Error('Renk kodu gereklidir');
-    }
-
-    if (!data.iconClass) {
-      throw new Error('İkon sınıfı gereklidir');
-    }
-
-    // Format the payload to match API schema
-    const payload = {
-      categoryName: data.categoryName,
-      description: data.description || "",
-      colorCode: data.colorCode,
-      iconClass: data.iconClass,
-      displayOrder: data.displayOrder || 0,
-      isActive: data.isActive,
-      rowVersion: data.rowVersion || ""
-    };
-
-    const params = effectiveBranchId ? { branchId: effectiveBranchId } : {};
-    const response = await httpClient.put<TableCategory>(`${this.baseUrl}/table-categories/${categoryId}`, payload, { params });
-
-    logger.info('Kategori başarıyla güncellendi', response.data, { prefix: 'TableService' });
-
-    return response.data;
-  } catch (error) {
-    logger.error('Kategori güncellenirken hata oluştu', error, { prefix: 'TableService' });
-    throw error;
   }
-}
 
   /**
    * Delete a table category
@@ -333,14 +341,14 @@ async updateCategory(categoryId: number, data: UpdateTableCategoryDto, branchId?
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
-
+      const language = this.getLanguageFromStorage();
       logger.info('Masalar API çağrısı başlatılıyor', { categoryId, onlyActive, includeCategory, branchId }, { prefix: 'TableService' });
 
       const params = new URLSearchParams({
         onlyActive: onlyActive.toString(),
         includeCategory: includeCategory.toString()
       });
-
+      params.append('language', language);
       if (categoryId) {
         params.append('categoryId', categoryId);
       }
@@ -349,9 +357,9 @@ async updateCategory(categoryId: number, data: UpdateTableCategoryDto, branchId?
       if (branchId) {
         params.append('branchId', branchId.toString());
       }
-
-      const response = await httpClient.get<TableData[]>(`${this.baseUrl}/tables?${params.toString()}`);
-      
+      const response = await httpClient.get<TableData[]>(`${this.baseUrl}/tables?`, {
+        params  : params
+      });
       logger.info('Masalar alındı', response.data, { prefix: 'TableService' });
       
       return response.data;
@@ -368,6 +376,7 @@ async updateCategory(categoryId: number, data: UpdateTableCategoryDto, branchId?
     onlyActive: boolean = true, 
     includeTableCount: boolean = true
   ): Promise<TableCategory[]> {
+    
     return this.getCategories(onlyActive, includeTableCount);
   }
 
@@ -569,10 +578,11 @@ async updateCategory(categoryId: number, data: UpdateTableCategoryDto, branchId?
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+          const language = this.getLanguageFromStorage();
 
       logger.info('Masa detayları API çağrısı başlatılıyor', { tableId, branchId }, { prefix: 'TableService' });
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : { language };
       const response = await httpClient.get<TableData>(`${this.baseUrl}/tables/${tableId}`, { params });
 
       logger.info('Masa detayları alındı', response.data, { prefix: 'TableService' });
@@ -644,10 +654,11 @@ async updateCategory(categoryId: number, data: UpdateTableCategoryDto, branchId?
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+          const language = this.getLanguageFromStorage();
 
       logger.info('Masa istatistikleri API çağrısı başlatılıyor', { branchId }, { prefix: 'TableService' });
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : { language };
       const response = await httpClient.get(`${this.baseUrl}/tables/statistics`, { params });
 
       logger.info('Masa istatistikleri alındı', response.data, { prefix: 'TableService' });
@@ -762,10 +773,11 @@ async updateCategory(categoryId: number, data: UpdateTableCategoryDto, branchId?
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+          const language = this.getLanguageFromStorage();
 
       logger.info('Silinmiş masa kategorileri API çağrısı başlatılıyor', { branchId }, { prefix: 'TableService' });
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : { language };
       const response = await httpClient.get<DeletedTableCategory[]>(`${this.baseUrl}/table-categories/deleted`, { params });
 
       logger.info('Silinmiş masa kategorileri alındı', {
@@ -811,8 +823,9 @@ async updateCategory(categoryId: number, data: UpdateTableCategoryDto, branchId?
       const effectiveBranchId = branchId || getEffectiveBranchId();
 
       logger.info('Silinmiş masalar API çağrısı başlatılıyor', { branchId: effectiveBranchId }, { prefix: 'TableService' });
+      const language = this.getLanguageFromStorage();
 
-      const params = effectiveBranchId ? { branchId: effectiveBranchId } : {};
+      const params = effectiveBranchId ? { branchId: effectiveBranchId, language } : { language };
       const response = await httpClient.get<DeletedTable[]>(`${this.baseUrl}/tables/deleted`, { params });
 
       logger.info('Silinmiş masalar alındı', {

@@ -5,6 +5,12 @@ import { logger } from "../utils/logger";
 // Ingredients Service Class
 class IngredientsService {
    private baseUrl = '/api';
+     // Helper method to get language from localStorage
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
+
 
   async createIngredient(ingredientData: CreateIngredientData): Promise<Ingredient> {
     try {
@@ -87,91 +93,98 @@ class IngredientsService {
       }
       }
 
-  // Tüm malzemeleri getir (GET) - FIXED
-  async getIngredients(): Promise<Ingredient[]> {
-    try {
-      logger.info('Malzeme listesi getiriliyor');
-      
-      const response = await httpClient.get<APIIngredient[]>(`${this.baseUrl}/Ingredients`, {
-        params: {
-          includes: 'allergens',
-        }
-      });
+    // Tüm malzemeleri getir (GET) - FIXED
+    async getIngredients(): Promise<Ingredient[]> {
+      try {
+        logger.info('Malzeme listesi getiriliyor');
+              const language = this.getLanguageFromStorage();
 
-      
-      logger.info('Malzeme listesi başarıyla getirildi', { 
-        count: response.data.length 
-      });
-      
-      // FIXED: Transform API response to internal format correctly
-      const transformedIngredients: Ingredient[] = response.data.map((apiIngredient: any) => {
+        const response = await httpClient.get<APIIngredient[]>(`${this.baseUrl}/Ingredients`, {
+          params: {
+            includes: 'allergens',
+            language
+          }
+        });
+
         
-        return {
-          id: apiIngredient.ingredientId,
-          name: apiIngredient.name,
-          isAllergenic: apiIngredient.isAllergenic,
-          isAvailable: apiIngredient.isAvailable,
-          // FIXED: Transform allergens array to allergenIds
-          allergenIds: apiIngredient.allergens?.map((allergen: any) => allergen.id) || [],
-          // FIXED: Transform allergens array to allergenDetails
-          allergenDetails: apiIngredient.allergens?.map((allergen: any) => ({
+        logger.info('Malzeme listesi başarıyla getirildi', { 
+          count: response.data.length 
+        });
+        
+        // FIXED: Transform API response to internal format correctly
+        const transformedIngredients: Ingredient[] = response.data.map((apiIngredient: any) => {
+          
+          return {
+            id: apiIngredient.ingredientId,
+            name: apiIngredient.name,
+            isAllergenic: apiIngredient.isAllergenic,
+            isAvailable: apiIngredient.isAvailable,
+            // FIXED: Transform allergens array to allergenIds
+            allergenIds: apiIngredient.allergens?.map((allergen: any) => allergen.id) || [],
+            // FIXED: Transform allergens array to allergenDetails
+            allergenDetails: apiIngredient.allergens?.map((allergen: any) => ({
+              allergenId: allergen.id,
+              containsAllergen: allergen.containsAllergen !== null ? allergen.containsAllergen : true,
+              note: allergen.note || ''
+            })) || []
+          };
+        });
+        
+        return transformedIngredients;
+      } catch (error: any) {
+        logger.error('❌ Malzeme listesi getirilirken hata:', error);
+        throw error;
+      }
+    }
+
+    // ID'ye göre malzeme getir (GET by ID)
+    async getIngredientById(id: number): Promise<Ingredient> {
+      try {
+        logger.info('Malzeme detayı getiriliyor', { id });
+        const language = this.getLanguageFromStorage();
+
+        const response = await httpClient.get<APIIngredient>(`${this.baseUrl}/Ingredients/${id}`, {
+          params: {
+            language
+          }
+        });
+
+        logger.info('Malzeme detayı başarıyla getirildi', { data: response.data });
+        
+        // Transform API response to internal format
+        const transformedIngredient: Ingredient = {
+          id: response.data.ingredientId,
+          name: response.data.name,
+          isAllergenic: response.data.isAllergenic,
+          isAvailable: response.data.isAvailable,
+          allergenIds: response.data.allergens?.map((allergen: any) => allergen.id) || [],
+          allergenDetails: response.data.allergens?.map((allergen: any) => ({
             allergenId: allergen.id,
             containsAllergen: allergen.containsAllergen !== null ? allergen.containsAllergen : true,
             note: allergen.note || ''
           })) || []
         };
-      });
-      
-      return transformedIngredients;
-    } catch (error: any) {
-      logger.error('❌ Malzeme listesi getirilirken hata:', error);
-      throw error;
+        
+        return transformedIngredient;
+      } catch (error: any) {
+        logger.error('❌ Malzeme detayı getirilirken hata:', error);
+        throw error;
+      }
     }
-  }
 
-  // ID'ye göre malzeme getir (GET by ID)
-  async getIngredientById(id: number): Promise<Ingredient> {
-    try {
-      logger.info('Malzeme detayı getiriliyor', { id });
-      
-      const response = await httpClient.get<APIIngredient>(`${this.baseUrl}/Ingredients/${id}`);
-      
-      logger.info('Malzeme detayı başarıyla getirildi', { data: response.data });
-      
-      // Transform API response to internal format
-      const transformedIngredient: Ingredient = {
-        id: response.data.ingredientId,
-        name: response.data.name,
-        isAllergenic: response.data.isAllergenic,
-        isAvailable: response.data.isAvailable,
-        allergenIds: response.data.allergens?.map((allergen: any) => allergen.id) || [],
-        allergenDetails: response.data.allergens?.map((allergen: any) => ({
-          allergenId: allergen.id,
-          containsAllergen: allergen.containsAllergen !== null ? allergen.containsAllergen : true,
-          note: allergen.note || ''
-        })) || []
-      };
-      
-      return transformedIngredient;
-    } catch (error: any) {
-      logger.error('❌ Malzeme detayı getirilirken hata:', error);
-      throw error;
+    // Malzeme silme (DELETE)
+    async deleteIngredient(id: number): Promise<void> {
+      try {
+        logger.info('Malzeme silme isteği gönderiliyor', { id });
+        
+        await httpClient.delete(`${this.baseUrl}/Ingredients/${id}`);
+        
+        logger.info('Malzeme başarıyla silindi', { id });
+      } catch (error: any) {
+        logger.error('❌ Malzeme silinirken hata:', error);
+        throw error;
+      }
     }
-  }
-
-  // Malzeme silme (DELETE)
-  async deleteIngredient(id: number): Promise<void> {
-    try {
-      logger.info('Malzeme silme isteği gönderiliyor', { id });
-      
-      await httpClient.delete(`${this.baseUrl}/Ingredients/${id}`);
-      
-      logger.info('Malzeme başarıyla silindi', { id });
-    } catch (error: any) {
-      logger.error('❌ Malzeme silinirken hata:', error);
-      throw error;
-    }
-  }
 
  
 }

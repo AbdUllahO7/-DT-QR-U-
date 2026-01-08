@@ -7,7 +7,10 @@ export const ar = {
     error: 'خطأ',
     actions: 'الإجراءات',
     change: 'تغيير',
+    removal: 'إزالة',
     success: 'نجح',
+    setAsDefault: 'تعيين كافتراضي',
+    default: 'افتراضي',
     cancel: 'إلغاء',
       "emailAddress": "عنوان البريد الإلكتروني",
       "emailPlaceholder": "you@example.com",
@@ -45,6 +48,7 @@ export const ar = {
   filter: {
       "status": "الحالة",
       "all": "الكل",
+      "allergen": "مسبب الحساسية",
       "active": "نشط",
       "inactive": "غير نشط",
       "categories": "الفئات",
@@ -65,7 +69,6 @@ export const ar = {
       "asc": "الاسم (أ-ي)",
       "desc": "الاسم (ي-أ)"
     },
-    "ar": {
     "status": {
       "label": "الحالة",
       "asc": "الحالة (أ-ي)",
@@ -75,8 +78,7 @@ export const ar = {
       "label": "مسببات الحساسية",
       "asc": "المسببات (أ-ي)",
       "desc": "المسببات (ي-أ)"
-    }
-  },
+    },
     "price": {
       "asc": "السعر (من الأقل إلى الأعلى)",
       "desc": "السعر (من الأعلى إلى الأقل)"
@@ -960,6 +962,13 @@ contact: {
 
   // Table Management
   tableManagement: {
+
+    areaTypes: {
+      indoor: 'داخلية',
+      outdoor: 'خارجية',
+      terrace: 'تراس',
+      garden: 'حديقة'
+    },
     addTable: 'إضافة طاولة',
     ActiveStatus :"الحالة النشطة",
     selectBranchPrompt:"لا توجد فروع",
@@ -1068,8 +1077,8 @@ contact: {
   // Products
   products: {
     status: {
-      outOfStock: 'غير متوفر',
-      inStock: 'متوفر',
+      outOfStock: 'غير متوفر في المخزون',
+      inStock: 'متوفر في المخزون',
       available: 'متاح',
       unavailable: 'غير متاح'
     },
@@ -1208,11 +1217,11 @@ contact: {
         supportText: 'تدعم صيغ PNG، JPG، GIF. الحد الأقصى لحجم الملف: 5 ميجابايت'
       },
       country: {
-        label: 'البلد *',
+        label: 'البلد',
         placeholder: 'أدخل اسم البلد'
       },
       city: {
-        label: 'المدينة *',
+        label: 'المدينة',
         placeholder: 'أدخل اسم المدينة'
       },
       street: {
@@ -1232,11 +1241,11 @@ contact: {
         placeholder: 'أدخل معلومات العنوان الإضافية (اختياري)'
       },
       phone: {
-        label: 'رقم الهاتف *',
+        label: 'رقم الهاتف ',
         placeholder: 'أدخل رقم الهاتف'
       },
       email: {
-        label: 'عنوان البريد الإلكتروني *',
+        label: 'عنوان البريد الإلكتروني',
         placeholder: 'أدخل عنوان البريد الإلكتروني'
       },
       location: {
@@ -1505,6 +1514,7 @@ contact: {
     manageIngredients: 'إدارة المكونات',
     updateIngredients: 'تحديث المكونات',
     manageAddons: 'إدارة الإضافات',
+    manageExtras: 'إدارة الإضافات',
     importSampleMenu: 'استيراد قائمة نموذجية',
     addFirstCategoryTitle: 'إضافة الفئة الأولى',
     RecycleBin:"سلة المحذوفات"
@@ -1876,8 +1886,8 @@ contact: {
 
     // Counter texts
     counters: {
-      selectedProducts: '{{count}} منتج محدد',
-      availableProducts: '{{count}} منتج متوفر'
+      selectedProducts: '{count} منتج محدد',
+      availableProducts: '{count} منتج متوفر'
     },
 
     // Error messages
@@ -2443,8 +2453,9 @@ contact: {
     searchPlaceholder: 'البحث عن المكونات...',
     filter: 'تصفية',
     sort: 'ترتيب',
+    applyFilters: 'تطبيق الفلاتر',
     newIngredient: 'مكون جديد',
-    
+    clearFilters: 'مسح جميع الفلاتر',
     // Table headers
     ingredientName: 'اسم المكون',
     status: 'الحالة',
@@ -2610,7 +2621,12 @@ contact: {
   TableCategoryModal: {
     title: 'إضافة منطقة طاولة',
     subtitle: 'إنشاء منطقة طاولة جديدة',
+    editCategoryTitle: 'تعديل منطقة الطاولة',
+    editCategorySubtitle: 'حدد خصائص منطقة الطاولة',
+    update: 'تحديث منطقة الطاولة',
+    addCategoryTitle: 'إضافة منطقة جديدة',
     categoryName: 'اسم المنطقة',
+    addCategorySubtitle: 'حدد خصائص المنطقة الجديدة',
     categoryNamePlaceholder: 'مثال: طاولات VIP، طاولات الحديقة',
     description: 'الوصف (اختياري)',
     descriptionPlaceholder: 'وصف قصير عن الفئة...',
@@ -3133,13 +3149,13 @@ contact: {
       createTables: "إنشاء الطاولات",
       creatingTables: "جارٍ إنشاء الطاولات...",
       batchCreateTables: "إنشاء طاولات دفعة واحدة",
-      header: "إدارة الفئات والطاولات",
-      subheader: "إدارة فئات المطعم والطاولات مع عرض الأكورديون",
-      totalCategories: "إجمالي الفئات",
+      header: "إدارة المناطق والطاولات",
+      subheader: "إدارة مناطق المطعم والطاولات",
+      totalCategories: "إجمالي المناطق",
       totalTables: "إجمالي الطاولات",
       occupiedTables: "الطاولات المشغولة",
       availableTables: "الطاولات المتاحة",
-      searchPlaceholder: "ابحث عن الفئات...",
+      searchPlaceholder: "ابحث عن المناطق...",
       refresh: "تحديث",
       addCategory: "إضافة منطقة",
       addCategoryTitle: "إضافة منطقة جديدة",
@@ -3153,8 +3169,8 @@ contact: {
       delete: "حذف",
       qrCode: "رمز الاستجابة السريعة",
       showQRCode: "عرض رمز الاستجابة السريعة",
-      noCategories: "لم يتم العثور على فئات",
-      addFirstCategory: "إضافة فئتك الأولى",
+      noCategories: "لم يتم العثور على مناطق",
+      addFirstCategory: "إضافة منطقتك الأولى",
       tablesCount: "طاولات",
       status: "الحالة",
       active: "نشط",
@@ -3218,6 +3234,7 @@ contact: {
     description: 'إدارة معلومات وإعدادات فرعك.',
     loading: 'جاري تحميل معلومات الفرع...',
     noBranchFound: 'لم يتم العثور على أي فرع',
+    editBranchName: 'تعديل اسم الفرع',
     uploadLogo: 'تحميل الشعار',
     status: {
       open: 'مفتوح',
@@ -3235,7 +3252,10 @@ contact: {
       deleting: 'جاري الحذف...',
       confirmDelete: 'تأكيد الحذف',
       deleteWarning: 'هل أنت متأكد من أنك تريد حذف هذا الفرع؟ لا يمكن التراجع عن هذا الإجراء.',
-      onlineMenu: 'عرض القائمة الإلكترونية'
+      onlineMenu: 'عرض القائمة الإلكترونية',
+      copyLink: 'نسخ الرابط',
+      copied: 'تم النسخ!',
+      linkCopied: 'تم نسخ الرابط إلى الحافظة!',
     },
     
     basicInfo: {
@@ -3282,6 +3302,14 @@ contact: {
       statusChangeError: 'حدث خطأ أثناء تغيير الحالة',
       loadError: 'حدث خطأ أثناء تحميل معلومات الفرع'
     },
+
+    errors: {
+      nameRequired: 'اسم الفرع مطلوب',
+      saveFailed: 'فشل حفظ اسم الفرع',
+      popupBlocked: 'يرجى السماح بالنوافذ المنبثقة لفتح القائمة الإلكترونية',
+      failedToGetPublicId: 'فشل الحصول على رابط القائمة الإلكترونية',
+      failedToCopyLink: 'فشل نسخ الرابط'
+    },
     
     placeholders: {
       branchName: 'أدخل اسم الفرع',
@@ -3298,6 +3326,10 @@ contact: {
   branchCategories: {
     // Header and Stats
     header: 'إدارة فئات الفرع',
+    originalName: 'الاسم الأصلي',
+    editCategoryName: 'تعديل اسم الفئة',
+    categoryName: 'اسم الفئة',
+    enterCategoryName: 'أدخل اسم الفئة',
     subheader: 'إدارة الفئات والمنتجات للفرع ',
     lastUpdated: 'آخر تحديث',
     stats: {
@@ -3677,6 +3709,8 @@ contact: {
       product: "المنتج",
       addToBasket: "أضف إلى السلة",
       addToOrder: "أضف إلى الطلب",
+      resetSession: "إعادة تعيين الجلسة",
+      closeSession: "إغلاق الجلسة",
       allergens: "مسببات الحساسية",
       loadingSubtitle: "نحضر لك أشهى المأكولات...",
       error: {
@@ -3907,6 +3941,21 @@ contact: {
     }
   },
 
+  orderTypes: {
+    DINE_IN: {
+      name: 'تناول الطعام في المطعم',
+      description: 'تناول الطعام على طاولة المطعم'
+    },
+    DELIVERY: {
+      name: 'التوصيل',
+      description: 'التوصيل إلى العنوان'
+    },
+    PICKUP: {
+      name: 'الاستلام',
+      description: 'اطلب عبر الإنترنت، استلم من المتجر'
+    }
+  },
+
   priceChange: {
     title: 'تم اكتشاف تغييرات في الأسعار',
     description: 'بعض العناصر في سلتك تحتوي على تغييرات في الأسعار تحتاج إلى تأكيد قبل المتابعة مع الطلب.',
@@ -3969,6 +4018,7 @@ contact: {
     clearFilters: 'مسح الفلاتر',
     filtered: 'تم التصفية',
     updateAction:"تحديث",
+    PaymentMethod:"طريقة الدفع",
     showing:"عرض",
     OrderType : 'نوع الطلب',
     subTotal: "المجموع الفرعي",
@@ -4154,7 +4204,8 @@ contact: {
         "defaultLanguage": "اللغة الافتراضية",
         "defaultCurrency": "العملة الافتراضية",
         "timeZone": "المنطقة الزمنية",
-        "supportedLanguages": "اللغات المدعومة"
+        "supportedLanguages": "اللغات المدعومة",
+        "languageRestaurantNote":"يمكن للفروع اختيار اللغات المدعومة فقط من قبل المطعم. اللغات المعروضة تحددها المطعم."
       },
       "sessionManagement": {
         "title": "إدارة الجلسات",
@@ -4162,11 +4213,10 @@ contact: {
         "sessionTimeout": "مهلة الجلسة (بالدقائق)",
         "cleanupMode": "وضع التنظيف",
         "cleanupDelay": "تأخير التنظيف بعد الإغلاق (بالدقائق)",
-        
-         "cleanupModeDesc": "اختر متى يتم تنظيف الجلسات المنتهية الصلاحية",
-    "sessionTimeoutDesc": "الدقائق قبل انتهاء صلاحية الجلسة بسبب عدم النشاط",
-    "cleanupDelayDesc": "الدقائق للانتظار بعد الإغلاق قبل التنظيف",
-    "cleanupDisabledMessage": "تنظيف الجلسات معطل. لن يتم تنظيف الجلسات تلقائياً."
+        "cleanupModeDesc": "اختر متى يتم تنظيف الجلسات المنتهية الصلاحية",
+        "sessionTimeoutDesc": "الدقائق قبل انتهاء صلاحية الجلسة بسبب عدم النشاط",
+        "cleanupDelayDesc": "الدقائق للانتظار بعد الإغلاق قبل التنظيف",
+        "cleanupDisabledMessage": "تنظيف الجلسات معطل. لن يتم تنظيف الجلسات تلقائياً."
       }
     },
     "currencies": {
@@ -4676,6 +4726,7 @@ recycleBin: {
    "productCard": {
     "chefsPick": "اختيار الشيف",
     "customizable": "قابل للتخصيص",
+    "outOfStock": "غير متوفر",
     "addons": "+إضافات",
     "allergens": "مسببات الحساسية",
     "ingredients": "المكونات",
@@ -4849,6 +4900,8 @@ recycleBin: {
     "backLink": "العودة إلى صفحة التسجيل",
     "progress": {
       "step1": "المعلومات الأساسية",
+      "languagesLabel": "اللغات",
+      "searchLanguages": "بحث عن اللغات",
       "step2": "معلومات الشركة",
       "step3": "المستندات القانونية"
     },
@@ -4870,11 +4923,11 @@ recycleBin: {
       "subtitle": "أدخل المعلومات الأساسية لمطعمك",
       "nameLabel": "اسم المطعم *",
       "namePlaceholder": "أدخل اسم مطعمك",
-      "logoLabel": "شعار المطعم *",
+      "logoLabel": "شعار المطعم",
       "logoUploading": "جاري تحميل الشعار...",
       "logoSuccess": "✓ تم تحميل الشعار بنجاح",
       "logoSuccessSub": "تم استلام رابط Cloudinary",
-      "cuisineLabel": "نوع المطبخ *",
+      "cuisineLabel": "نوع المطبخ ",
       "errors": {
         "nameRequired": "اسم المطعم مطلوب",
         "logoRequired": "شعار المطعم مطلوب",
@@ -4903,9 +4956,9 @@ recycleBin: {
     "step3": {
       "title": "المستندات القانونية",
       "subtitle": "أدخل معلومات الضرائب والمستندات",
-      "taxNumberLabel": "الرقم الضريبي *",
+      "taxNumberLabel": "الرقم الضريبي ",
       "taxNumberPlaceholder": "أدخل رقمك الضريبي",
-      "taxOfficeLabel": "مكتب الضرائب *",
+      "taxOfficeLabel": "مكتب الضرائب ",
       "taxOfficePlaceholder": "أدخل مكتب الضرائب الخاص بك",
       "workPermitLabel": "مستند تصريح العمل",
       "workPermitUploading": "جاري تحميل مستند تصريح العمل...",
@@ -5205,6 +5258,8 @@ extrasManagement: {
     fields: {
       categoryName: 'اسم الفئة',
       categoryNamePlaceholder: 'مثال: إضافات البيتزا',
+      description: 'الوصف',
+      descriptionPlaceholder: 'أدخل وصف الفئة (اختياري)',
       statusLabel: 'الحالة النشطة',
       requiredLabel: 'هل هو مطلوب؟',
       selectionRules: 'قواعد الاختيار',
@@ -5329,6 +5384,7 @@ extrasManagement: {
   title: 'تكوين إضافات الفرع',
   productLabel: 'تكوين الإضافات للمنتج:',
   searchPlaceholder: 'بحث في الفئات...',
+
   errors: {
     loadFailed: 'فشل تحميل بيانات التكوين',
     saveFailed: 'فشل حفظ التكوين',
@@ -5349,7 +5405,8 @@ extrasManagement: {
   badges: {
     required: 'إلزامي',
     optional: 'اختياري',
-    removal: 'إزالة'
+    removal: 'إزالة',
+    removalCategory: 'فئة الإزالة'
   },
   category: {
     availableExtras: 'إضافات متاحة',
@@ -5721,4 +5778,98 @@ extrasManagement: {
       }
     }
   },
+
+  // Multi-Language System
+  multiLanguage: {
+    noLanguagesConfigured: 'لم يتم تكوين اللغات. يرجى تكوين اللغات في التفضيلات.',
+    required: 'مطلوب',
+    currentLanguage: 'اللغة الحالية',
+    quickFill: 'تعبئة سريعة',
+    fieldRequired: 'هذا الحقل مطلوب'
+  },
+  RestaurantPreferencesTab: {
+  title: 'تفضيلات لغة المطعم',
+  subtitle: 'إدارة إعدادات لغة المطعم',
+  loading: 'جاري التحميل...',
+  buttons: {
+    refresh: 'تحديث',
+    save: 'حفظ التغييرات',
+    saving: 'جاري الحفظ...'
+  },
+  sections: {
+    languageSettings: {
+      title: 'إعدادات اللغة',
+      subtitle: 'قم بتعيين اللغات التي يدعمها مطعمك واللغة الافتراضية'
+    },
+       currencySettings: {
+      title: 'إعدادات العملة',
+      subtitle: 'قم بتعيين العملة الافتراضية لمطعمك'
+    },
+  },
+  form: {
+    defaultLanguage: {
+      label: 'اللغة الافتراضية',
+      helperText: 'إعداد اللغة الافتراضية للمطعم'
+    },
+    defaultCurrency: {
+      label: 'العملة الافتراضية',
+      helperText: 'إعداد العملة الافتراضية للمطعم'
+    },
+    supportedLanguages: {
+      label: 'اللغات المدعومة',
+      helperText: 'يجب اختيار لغة واحدة على الأقل. تظل اللغة الافتراضية محددة تلقائياً.'
+    }
+  },
+  alerts: {
+    success: 'تم تحديث تفضيلات المطعم بنجاح',
+    cascadeWarning: {
+      title: 'ملاحظة هامة:',
+      description: 'عند تقليل اللغات المدعومة، يتم تحديث تفضيلات الفرع تلقائياً:',
+      point1: 'يمكن للفروع دعم اللغات التي يدعمها المطعم فقط',
+      point2: 'إذا تمت إزالة اللغة الافتراضية للفرع، فسيتم تحديثها إلى اللغة الافتراضية للمطعم'
+    },
+    validationInfo: {
+      title: 'قواعد التحقق:',
+      point1: 'يجب دعم لغة واحدة على الأقل',
+      point2: 'يجب أن تكون اللغة الافتراضية من بين اللغات المدعومة'
+    }
+  },
+  errors: {
+    load: 'حدث خطأ أثناء تحميل تفضيلات المطعم',
+    loadGeneral: 'تعذر تحميل تفضيلات المطعم',
+    save: 'حدث خطأ أثناء حفظ تفضيلات المطعم'
+  }
+},
+BranchTableModal: {
+  addTitle: 'إضافة فئة جدول فرع',
+  addSubtitle: 'املأ التفاصيل لإنشاء فئة جدول فرع جديدة.',
+  editTitle: 'تحرير فئة جدول فرع',
+  tableNamePlaceholder: 'أدخل اسم الجدول',
+  capacity: 'أدخل سعة الجدول',
+  tableName: 'اسم الجدول',
+  cancel: 'إلغاء',
+  tableNameRequired: 'اسم الجدول مطلوب',
+  add: 'إضافة',
+  capacityPlaceholder: 'أدخل سعة الجدول',
+  editSubtitle: 'املأ التفاصيل لتحديث فئة جدول فرع.',
+  saving: 'جاري الحفظ...',
+  status: 'الحالة',
+  active: 'نشط',
+  update: 'تحديث'
+},
+  languageControl : {
+    editing: 'تحرير اللغة',
+    copyFrom: 'نسخ من',
+    quickFill: 'تعبئة سريعة',
+    fill: 'تعبئة',
+    bulkFillTitle: 'تعبئة جماعية',
+    scrollLeft: 'تمرير لليسار',
+    scrollRight: 'تمرير لليمين'
+  },
+  paymentMethod: {
+    title: 'طريقة الدفع',
+    cash: 'نقدي',
+    creditCard: 'بطاقة ائتمان',
+    online: 'دفع عبر الإنترنت'
+  }
 };

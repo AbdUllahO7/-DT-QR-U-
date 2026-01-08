@@ -1,8 +1,13 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import type { ApiError } from '../types/api';
 import { logger } from './logger';
 import { shouldRetryRequest } from './errorHandler';
 import { authStorage } from './authStorage';
+
+// Extend AxiosRequestConfig to include skipAuth flag
+interface CustomAxiosRequestConfig extends AxiosRequestConfig {
+  skipAuth?: boolean;
+}
 
 const BASE_URL = import.meta.env.DEV ? 'http://localhost:7001' : 'https://api.mertcode.com';
 // Network bağlantısı kontrolü
@@ -65,7 +70,7 @@ async function retryRequest(config: any, error: any, retryCount = 0): Promise<an
 
 // Request interceptor
 httpClient.interceptors.request.use(
-  (config) => {
+  (config: CustomAxiosRequestConfig) => {
     // Network bağlantısını kontrol et
     if (!checkNetworkConnection()) {
       const offlineError: ApiError = {
@@ -90,11 +95,11 @@ httpClient.interceptors.request.use(
           method: config.method?.toUpperCase(),
           url: config.url,
           data: config.data,
-          headers: config.headers
+          skipAuth: config.skipAuth
         });
       }
     }
-    
+
     // Batch işlemler için özel timeout konfigürasyonu
     if (config.url?.includes('/batch') || config.headers?.['X-Request-Type'] === 'batch-operation') {
       config.timeout = 120000; // 2 dakika
@@ -102,31 +107,36 @@ httpClient.interceptors.request.use(
         logger.info('⏱️ Batch işlem için uzun timeout ayarlandı');
       }
     }
-    
+
+    // Skip adding auth token if this is marked as a public request
+    if (config.skipAuth === true) {
+      if (import.meta.env.DEV) {
+        logger.info('🔓 Public request - NO authentication token will be sent for:', config.url);
+      }
+      return config;
+    }
+
     // Önce müşteri session token'ı kontrol et (for public menu access)
     const customerSessionToken = localStorage.getItem('customerSessionToken');
     if (customerSessionToken) {
+      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${customerSessionToken}`;
       if (import.meta.env.DEV) {
         logger.debug('Customer session token kullanılıyor');
       }
     } else {
-      // SECURITY FIX: Use authStorage instead of localStorage
-      const token = authStorage.getToken();
+      // SECURITY FIX: Use authStorage.getRawToken() to get token without validation
+      // Let the API validate the token and return 401 if invalid
+      const token = authStorage.getRawToken();
       if (token) {
+        config.headers = config.headers || {};
         config.headers.Authorization = `Bearer ${token}`;
         if (import.meta.env.DEV && !config.url?.includes('/api/Dashboard')) {
           logger.info('Token eklendi:', `Bearer ${token.substring(0, 15)}...`);
         }
-
-        // Validate token is still valid
-        if (!authStorage.isTokenValid()) {
-          logger.warn('⚠️ Token süresi dolmuş veya geçersiz!');
-          authStorage.clearAuth();
-        }
       }
     }
-    
+
     return config;
   },
   (error) => {
@@ -155,15 +165,7 @@ httpClient.interceptors.response.use(
 
       // Special logging for login endpoint
       if (response.config.url?.includes('/api/Auth/Login')) {
-        console.log('🔐 RAW API RESPONSE (in interceptor):', {
-          status: response.status,
-          statusText: response.statusText,
-          headers: response.headers,
-          data: response.data,
-          dataType: typeof response.data,
-          dataKeys: response.data ? Object.keys(response.data) : 'null',
-          hasAccessToken: !!(response.data?.accessToken)
-        });
+    
         logger.info('🔐 Login Response Details:', {
           status: response.status,
           dataType: typeof response.data,
@@ -222,8 +224,10 @@ httpClient.interceptors.response.use(
                                window.location.pathname.includes('/OnlineMenu');
       const isPublicEndpoint = originalRequest?.url?.includes('/api/Table/') ||
                               originalRequest?.url?.includes('/api/OnlineMenu/');
+      // Don't logout on currency API failures - currency is not critical
+      const isCurrencyEndpoint = originalRequest?.url?.includes('/api/Currencies/');
 
-      if (!isAuthEndpoint && !isOnboardingEndpoint && !isOnboardingPage && !isPublicMenuPage && !isPublicEndpoint) {
+      if (!isAuthEndpoint && !isOnboardingEndpoint && !isOnboardingPage && !isPublicMenuPage && !isPublicEndpoint && !isCurrencyEndpoint) {
         logger.warn('⚠️ 401 Unauthorized - Token geçersiz, kullanıcı oturumu kapatılıyor');
 
         // SECURITY FIX: Use authStorage for centralized auth clearing

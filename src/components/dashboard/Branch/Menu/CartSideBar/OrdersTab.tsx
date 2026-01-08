@@ -11,6 +11,7 @@ import { OrderItem } from "../../../../../types/BranchManagement/type"
 import { branchProductExtraCategoriesService } from "../../../../../services/Branch/Extras/BranchProductExtraCategoriesService"
 import { branchProductExtrasService } from "../../../../../services/Branch/Extras/BranchProductExtrasService"
 import { BranchProductExtraCategory, BranchProductExtra } from "../../../../../types/Branch/Extras/type"
+import { useCurrency } from "../../../../../hooks/useCurrency"
 
 interface ExtendedOrdersTabProps extends OrdersTabProps {
   updatableOrders: UpdatableOrder[]
@@ -45,6 +46,7 @@ const OrdersTab: React.FC<ExtendedOrdersTabProps> = ({
     await onRefreshUpdatableOrders()
     await onLoadOrderTracking(orderTag)
   }
+  const currency = useCurrency()
 
 
   const getStatusColor = (status: string) => {
@@ -131,6 +133,8 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
   updatableOrders,
   onUpdateOrder
 }) => {
+    const currency = useCurrency()
+
   const { t } = useLanguage()
   const [isEditing, setIsEditing] = useState(false)
   const [updating, setUpdating] = useState(false)
@@ -147,7 +151,6 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
   const isPending = order.trackingInfo.orderStatus.toLowerCase() === 'pending'
   const canEdit = isPending && updatableOrder?.isUpdatable
 
-  console.log("editableItems",editableItems)
 
   const canCancel = updatableOrder && orderService.canCancelOrder(order.trackingInfo.orderStatus);
 
@@ -221,7 +224,6 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
 
     // Initialize editable items from updatableOrder.items
     const items: EditableOrderItem[] = []
-    console.log("updatableOrder",updatableOrder)
     updatableOrder.items.forEach(item => {
       // 1. Add the parent item
       items.push({
@@ -248,7 +250,6 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
         })
       }
 
-      console.log("extras",item.extras)
 
       // 3. Add its extra items
       if (item.extras && item.extras.length > 0) {
@@ -257,7 +258,6 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
           const productExtras = extrasMap.get(item.branchProductId) || []
           const extraConstraint = productExtras.find(e => e.extraId === extra.branchProductExtraId)
 
-          console.log("extraConstraint",extraConstraint)
 
           items.push({
             id: extra.id,
@@ -302,7 +302,6 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
     setEditableItems(prev => {
       const item = prev.find(i => i.orderDetailId === itemId)
       if (!item) return prev
-      console.log("item",item)
       // For extras, apply special validation
       if (item.branchProductExtraId) {
         // Cannot change quantity of removal extras
@@ -563,25 +562,14 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
     const parentItems = editableItems.filter(item => {
       const isExtra = item.branchProductExtraId !== undefined && item.branchProductExtraId !== null;
       const shouldInclude = !item.isDeleted && item.count && item.count > 0 && !isExtra;
-      console.log('Parent item:', {
-        id: item.orderDetailId,
-        name: item.productName,
-        isExtra,
-        shouldInclude
-      });
+   
       return shouldInclude;
     });
 
     const extraItems = editableItems.filter(item => {
       const isExtra = item.branchProductExtraId !== undefined && item.branchProductExtraId !== null;
       const shouldInclude = !item.isDeleted && item.count && item.count > 0 && isExtra;
-      console.log('Extra item:', {
-        id: item.orderDetailId,
-        name: item.productName,
-        parentId: item.parentOrderDetailId,
-        isExtra,
-        shouldInclude
-      });
+    
       return shouldInclude;
     });
 
@@ -615,10 +603,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
         }))
       };
 
-      console.log('Mapped DTO item:', {
-        name: item.productName,
-        dto
-      });
+    
 
       return dto;
     });
@@ -631,7 +616,6 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
       rowVersion: updatableOrder.rowVersion
     }
 
-    console.log('Final Update DTO:', JSON.stringify(updateDto, null, 2));
 
     try {
       setUpdating(true)
@@ -1091,7 +1075,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
         <div className="flex justify-between text-sm">
           <span className="text-slate-600 dark:text-slate-400">{t('menu.cart.total')}</span>
           <span className="font-semibold text-green-600 dark:text-green-400">
-            ${order.trackingInfo.totalPrice.toFixed(2)}
+            {currency.symbol}{(order.trackingInfo.totalPrice.toFixed(2))}
           </span>
         </div>
 
@@ -1112,7 +1096,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
       </div>
 
       {/* Action Buttons */}
-      <div className="p-4 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-200 dark:border-slate-600 flex space-x-2">
+      <div className="p-4 gap-3 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-200 dark:border-slate-600 flex space-x-2">
         {canCancel && !isEditing && (
           <button
             onClick={handleCancelOrder}
@@ -1234,7 +1218,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ title, message, onClose, on
         <div className="p-4">
           <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap">{message}</p>
         </div>
-        <div className="p-4 flex justify-end gap-2 bg-slate-50 dark:bg-slate-700/50 rounded-b-lg">
+        <div className="p-4  flex justify-end gap-2 bg-slate-50 dark:bg-slate-700/50 rounded-b-lg">
           <button
             onClick={onClose}
             className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-lg text-sm font-medium hover:bg-slate-300 dark:hover:bg-slate-500"

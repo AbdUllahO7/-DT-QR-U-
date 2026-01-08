@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Bell, 
-  Check, 
-  Mail, 
-  MoonStar, 
-  Sun, 
+import {
+  Bell,
+  Mail,
+  MoonStar,
+  Sun,
   Settings as SettingsIcon,
   Shield,
   Palette,
@@ -55,7 +54,6 @@ const BranchSettings: React.FC<BranchSettingsProps> = ({ branchId }) => {
     currency: 'TRY'
   });
 
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<'general' | 'branch' | 'notifications' | 'privacy' | 'appearance' | 'data'>('branch');
 
   // Load settings from localStorage on mount
@@ -89,11 +87,6 @@ const BranchSettings: React.FC<BranchSettingsProps> = ({ branchId }) => {
     setLanguage(value as 'tr' | 'en' | 'ar');
   };
 
-  const handleSave = () => {
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
-  };
-
   const tabs = [
 /*     { id: 'general', label: t('settings.tabs.general'), icon: SettingsIcon },
  */    { id: 'branch', label: t('branchPreferences.title'), icon: SettingsIcon },
@@ -101,7 +94,7 @@ const BranchSettings: React.FC<BranchSettingsProps> = ({ branchId }) => {
  *//*     { id: 'privacy', label: t('settings.tabs.privacy'), icon: Shield },
  */    { id: 'appearance', label: t('settings.tabs.appearance'), icon: Palette },
 /*     { id: 'data', label: t('settings.tabs.data'), icon: Database }
- */  
+ */
 ];
 
   // Reusable switch component
@@ -211,42 +204,6 @@ const BranchSettings: React.FC<BranchSettingsProps> = ({ branchId }) => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-8" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('settings.title')}</h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            {t('settings.description')}
-          </p>
-        </div>
-        <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-          <motion.button
-            onClick={handleSave}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 rounded-lg transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Save className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-            {t('settings.save')}
-          </motion.button>
-        </div>
-      </div>
-
-      {/* Success Message */}
-      <AnimatePresence>
-        {saveSuccess && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center"
-          >
-            <Check className={`h-5 w-5 text-green-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-            <p className="text-sm text-green-600 dark:text-green-400">{t('settings.saveSuccess')}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-700">
         <nav className={`flex ${isRTL ? 'space-x-reverse space-x-8' : 'space-x-8'}`}>
@@ -385,8 +342,8 @@ const BranchSettings: React.FC<BranchSettingsProps> = ({ branchId }) => {
           </motion.div>
         )}
         {activeTab === 'branch' && (
-          <BranchPreferencesTab 
-          
+          <BranchPreferencesTab
+
           />
         )}
         {activeTab === 'notifications' && (

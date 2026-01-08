@@ -1,6 +1,6 @@
 // CartContent.tsx
 import type React from "react"
-import { ArrowRight, Loader2 } from "lucide-react"
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react"
 import CartItemComponent from "./CartItemComponent"
 import EmptyCartComponent from "./EmptyCartComponent"
 import { useLanguage } from "../../../../../contexts/LanguageContext"
@@ -23,10 +23,8 @@ const CartContent: React.FC<CartContentProps> = ({
   onExtraToggle ,onExtraQuantityDecrease
 , onExtraQuantityIncrease
 }) => {
-  const { t } = useLanguage()
+  const { t , isRTL} = useLanguage()
 
-  console.log("Rendering CartContent with cart items:", cart);
-  console.log("totalPrice", totalPrice);
 
 
   if (cart.length === 0) {
@@ -78,7 +76,7 @@ const CartContent: React.FC<CartContentProps> = ({
           ) : (
             <div className="flex items-center justify-center">
               <span>{t('menu.cart.proceed')}</span>
-              <ArrowRight className="h-4 w-4 ml-2" />
+              {isRTL && <ArrowLeft className="h-4 w-4 ml-2" />} {!isRTL && <ArrowRight className="h-4 w-4 ml-2" />}
             </div>
           )}
         </button>

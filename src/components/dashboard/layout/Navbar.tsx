@@ -129,12 +129,12 @@ const Navbar: React.FC<NavbarProps> = ({
           {/* Right - Controls (Responsive) */}
           <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2 md:space-x-3' : 'space-x-2 md:space-x-3'}`}>
             {/* SearchBox - Hidden on mobile, shown on md+ */}
-            <div className="hidden md:block">
+            <div className="hidden md:block ml-2">
               <SearchBox onSearch={onSearch} onResultClick={onSearchResultClick} />
             </div>
 
             {/* Language Selector - Hidden on mobile, shown on sm+ */}
-            <div className="hidden sm:block">
+            <div className="sm:block">
               <LanguageSelector variant="navbar" />
             </div>
 

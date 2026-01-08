@@ -47,7 +47,6 @@ class AuthStorage {
       localStorage.setItem(this.USER_ID_KEY, data.userId);
       localStorage.setItem(this.TOKEN_EXPIRY_KEY, data.tokenExpiry);
 
-      console.log('✅ Auth data saved to localStorage');
     } catch (error) {
       console.error('Error saving auth data:', error);
       throw new Error('Failed to save authentication data');
@@ -55,13 +54,29 @@ class AuthStorage {
   }
 
   /**
-   * Get the current authentication token
+   * Get the raw token from storage WITHOUT validation
+   * Use this for adding token to API requests
+   * Let the API validate the token and return 401 if invalid
+   * @returns Token string or null
+   */
+  getRawToken(): string | null {
+    try {
+      const storage = this.getStorage();
+      return storage.getItem(this.TOKEN_KEY);
+    } catch (error) {
+      console.error('Error getting raw token:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get the current authentication token WITH validation
+   * Use this when you need to check if user is authenticated
    * @returns Token if valid, null otherwise
    */
   getToken(): string | null {
     try {
-      const storage = this.getStorage();
-      const token = storage.getItem(this.TOKEN_KEY);
+      const token = this.getRawToken();
 
       if (!token) {
         return null;
@@ -69,7 +84,7 @@ class AuthStorage {
 
       // Validate token expiry
       if (!this.isTokenValid()) {
-        this.clearAuth();
+        // Don't clear auth here - let the API return 401 and handle it there
         return null;
       }
 
@@ -147,7 +162,6 @@ class AuthStorage {
       localStorage.removeItem('onboarding_userId');
       localStorage.removeItem('onboarding_restaurantId');
 
-      console.log('✅ Auth data cleared from localStorage');
     } catch (error) {
       console.error('Error clearing auth data:', error);
     }

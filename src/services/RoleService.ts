@@ -38,7 +38,6 @@ class RoleService {
         url: '/api/Roles/',
         params: apiParams
       });
-        console.log("getRoles",response)
 
       logger.info('✅ getRoles başarılı', response, { prefix: 'RoleService' });
       
@@ -106,7 +105,6 @@ class RoleService {
 
       });
 
-      console.log("getRoleById response:", response);
 
       logger.info('✅ getRoleById başarılı', response, { prefix: 'RoleService' });
       
@@ -231,7 +229,6 @@ async createRole(roleData: CreateRoleDto): Promise<ApiResponse<Role>> {
         url: '/api/Permissions/catalog',
         params: apiParams // Send the cleaned params
       });
-      console.log("getPermissionCatalog",response)
 
       logger.info('✅ getPermissionCatalog başarılı', response, { prefix: 'RoleService' });
       

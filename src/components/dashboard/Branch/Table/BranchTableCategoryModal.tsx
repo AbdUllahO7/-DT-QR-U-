@@ -16,6 +16,11 @@ import { useLanguage } from '../../../../contexts/LanguageContext';
 import { logger } from '../../../../utils/logger';
 import { tableService } from '../../../../services/Branch/branchTableService';
 import { colorPresets } from '../../../../types/BranchManagement/type';
+import { languageService } from '../../../../services/LanguageService';
+import { MultiLanguageInput } from '../../../common/MultiLanguageInput';
+import { MultiLanguageTextArea } from '../../../common/MultiLanguageTextArea';
+import { useTranslatableFields, TranslatableFieldValue } from '../../../../hooks/useTranslatableFields';
+import { tableCategoryTranslationService } from '../../../../services/Translations/TableCategoryTranslationService';
 
 interface TableCategoryFormData {
   categoryName: string;
@@ -47,10 +52,10 @@ interface Props {
 }
 
 const areaOptions = [
-  { value: 'indoor', label: 'Indoor', icon: Home },
-  { value: 'outdoor', label: 'Outdoor', icon: Umbrella },
-  { value: 'terrace', label: 'Terrace', icon: CloudSun },
-  { value: 'garden', label: 'Garden', icon: Trees },
+  { value: 'indoor', label: 'tableManagement.areaTypes.indoor', icon: Home },
+  { value: 'outdoor', label: 'tableManagement.areaTypes.outdoor', icon: Umbrella },
+  { value: 'terrace', label: 'tableManagement.areaTypes.terrace', icon: CloudSun },
+  { value: 'garden', label: 'tableManagement.areaTypes.garden', icon: Trees },
 ];
 
 const BranchTableCategoryModal: React.FC<Props> = ({
@@ -62,6 +67,16 @@ const BranchTableCategoryModal: React.FC<Props> = ({
   isEditMode = false
 }) => {
   const { t, isRTL } = useLanguage();
+  const translationHook = useTranslatableFields();
+
+  // Supported languages - dynamically loaded
+  const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
+  const [defaultLanguage, setDefaultLanguage] = useState<string>('en');
+
+  // Translation states
+  const [categoryNameTranslations, setCategoryNameTranslations] = useState<TranslatableFieldValue>({});
+  const [descriptionTranslations, setDescriptionTranslations] = useState<TranslatableFieldValue>({});
+
   const [formData, setFormData] = useState<TableCategoryFormData>({
     categoryName: '',
     description: '',
@@ -88,29 +103,103 @@ const BranchTableCategoryModal: React.FC<Props> = ({
   };
 
   useEffect(() => {
+    const loadLanguages = async () => {
+      try {
+        const languagesData = await languageService.getRestaurantLanguages();
+
+        // Deduplicate languages by code
+        const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
+          if (!acc.find((l: any) => l.code === lang.code)) {
+            acc.push(lang);
+          }
+          return acc;
+        }, []);
+
+        setSupportedLanguages(uniqueLanguages);
+        setDefaultLanguage(languagesData.defaultLanguage || 'en');
+
+        // Initialize empty translations
+        const languageCodes = uniqueLanguages.map((lang: any) => lang.code);
+        setCategoryNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setDescriptionTranslations(translationHook.getEmptyTranslations(languageCodes));
+      } catch (error) {
+        console.error('Failed to load languages:', error);
+      }
+    };
+    loadLanguages();
+  }, []);
+
+  useEffect(() => {
     if (!isOpen) return;
 
-    if (isEditMode && editingCategory) {
-      setFormData({
-        categoryName: editingCategory.categoryName,
-        description: editingCategory.description || '',
-        colorCode: editingCategory.colorCode || '#3b82f6',
-        iconClass: editingCategory.iconClass || 'indoor',
-        displayOrder: editingCategory.displayOrder || 0,
-        isActive: editingCategory.isActive,
-      });
-    } else {
-      setFormData({
-        categoryName: '',
-        description: '',
-        colorCode: '#3b82f6',
-        iconClass: 'indoor',
-        displayOrder: 0,
-        isActive: true,
-      });
-    }
-    setErrors({});
-  }, [isOpen, isEditMode, editingCategory]);
+    const loadCategoryData = async () => {
+      if (isEditMode && editingCategory) {
+        setFormData({
+          categoryName: editingCategory.categoryName,
+          description: editingCategory.description || '',
+          colorCode: editingCategory.colorCode || '#3b82f6',
+          iconClass: editingCategory.iconClass || 'indoor',
+          displayOrder: editingCategory.displayOrder || 0,
+          isActive: editingCategory.isActive,
+        });
+
+        // Load existing translations
+        try {
+          const response = await tableCategoryTranslationService.getTableCategoryTranslations(editingCategory.id);
+
+          const categoryNameTrans: TranslatableFieldValue = {
+            [defaultLanguage]: editingCategory.categoryName
+          };
+          const descriptionTrans: TranslatableFieldValue = {
+            [defaultLanguage]: editingCategory.description || ''
+          };
+
+          // Handle the API response structure: { baseValues: {...}, translations: [...] }
+          const translationsArray = response.translations || [];
+
+          translationsArray.forEach(translation => {
+            if (translation.categoryName) {
+              categoryNameTrans[translation.languageCode] = translation.categoryName;
+            }
+            if (translation.description) {
+              descriptionTrans[translation.languageCode] = translation.description;
+            }
+          });
+
+          setCategoryNameTranslations(categoryNameTrans);
+          setDescriptionTranslations(descriptionTrans);
+        } catch (error) {
+          logger.error('Failed to load table category translations', error, { prefix: 'BranchTableCategoryModal' });
+          // Initialize with default language values on error
+          const categoryNameTrans: TranslatableFieldValue = {
+            [defaultLanguage]: editingCategory.categoryName
+          };
+          const descriptionTrans: TranslatableFieldValue = {
+            [defaultLanguage]: editingCategory.description || ''
+          };
+          setCategoryNameTranslations(categoryNameTrans);
+          setDescriptionTranslations(descriptionTrans);
+        }
+      } else {
+        setFormData({
+          categoryName: '',
+          description: '',
+          colorCode: '#3b82f6',
+          iconClass: 'indoor',
+          displayOrder: 0,
+          isActive: true,
+        });
+
+        // Reset translations for new category
+        const languageCodes = supportedLanguages.map((lang: any) => lang.code);
+        setCategoryNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setDescriptionTranslations(translationHook.getEmptyTranslations(languageCodes));
+      }
+      setErrors({});
+    };
+
+    loadCategoryData();
+  }, [isOpen, isEditMode, editingCategory, supportedLanguages]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const target = e.target as HTMLInputElement;
@@ -138,6 +227,8 @@ const BranchTableCategoryModal: React.FC<Props> = ({
 
     setIsSubmitting(true);
     try {
+      let categoryId: number;
+
       if (isEditMode && editingCategory) {
         await tableService.updateCategory(editingCategory.id, {
           id: editingCategory.id,
@@ -149,6 +240,7 @@ const BranchTableCategoryModal: React.FC<Props> = ({
           rowVersion: editingCategory.rowVersion,
         }, branchId);
         logger.info('Category updated successfully', { categoryId: editingCategory.id });
+        categoryId = editingCategory.id;
       } else {
         const payload = {
           categoryName: formData.categoryName.trim(),
@@ -159,7 +251,64 @@ const BranchTableCategoryModal: React.FC<Props> = ({
         };
 
         await tableService.createCategory(payload);
-        logger.info('Category created successfully');
+        logger.info('Category created successfully', { prefix: 'BranchTableCategoryModal' });
+
+        // WORKAROUND: API returns malformed ID (empty object), so we need to fetch
+        // the category list to get the real ID of the newly created category
+        logger.info('Fetching categories to get the newly created category ID', { prefix: 'BranchTableCategoryModal' });
+
+        const categories = await tableService.getCategories(false, false);
+
+        // Find the newly created category by matching all properties
+        const newCategory = categories.find(cat =>
+          cat.categoryName === formData.categoryName.trim() &&
+          cat.colorCode === formData.colorCode &&
+          cat.iconClass === formData.iconClass &&
+          cat.isActive === formData.isActive
+        );
+
+        if (!newCategory || !newCategory.id || typeof newCategory.id !== 'number') {
+          throw new Error('Could not find the newly created category');
+        }
+
+        categoryId = newCategory.id;
+        logger.info('Found newly created category', { categoryId }, { prefix: 'BranchTableCategoryModal' });
+      }
+
+      // Save translations for table category
+      try {
+        // Log and validate categoryId before creating translations
+
+        // Additional validation: ensure categoryId is a valid number
+        if (!categoryId || typeof categoryId !== 'number' || isNaN(categoryId)) {
+          console.error('Invalid categoryId detected:', categoryId);
+          throw new Error(`Invalid category ID (${categoryId}) - cannot save translations`);
+        }
+
+        const translationData = Object.keys(categoryNameTranslations)
+          .filter(lang => lang !== defaultLanguage)
+          .filter(lang =>
+            categoryNameTranslations[lang] ||
+            descriptionTranslations[lang]
+          )
+          .map(languageCode => ({
+            menuTableCategoryId: categoryId,
+            languageCode,
+            categoryName: categoryNameTranslations[languageCode] || undefined,
+            description: descriptionTranslations[languageCode] || undefined,
+          }));
+
+
+        if (translationData.length > 0) {
+          await tableCategoryTranslationService.batchUpsertTableCategoryTranslations({
+            translations: translationData
+          });
+          logger.info('Table category translations saved', null, { prefix: 'BranchTableCategoryModal' });
+        }
+      } catch (error) {
+        console.error('Translation save failed:', error);
+        logger.error('Failed to save table category translations', error, { prefix: 'BranchTableCategoryModal' });
+        // Don't fail the whole operation if translations fail
       }
 
       onSuccess && onSuccess();
@@ -193,10 +342,10 @@ const BranchTableCategoryModal: React.FC<Props> = ({
           });
           setErrors(fieldErrors);
         } else {
-          setErrors({ general: error.response?.data?.message || t('TableCategoryModal.invalidData') });
+          setErrors({ general: error.response?.data?.message || t('TableCategoryModal.invalidData') || 'Invalid data provided' });
         }
       } else {
-        setErrors({ general: error.response?.data?.message || 'An error occurred' });
+        setErrors({ general: error.response?.data?.message || t('TableCategoryModal.errorOccurred') || 'An error occurred' });
       }
     } finally {
       setIsSubmitting(false);
@@ -217,8 +366,9 @@ const BranchTableCategoryModal: React.FC<Props> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-gradient-to-br from-purple-900/30 via-blue-900/40 to-indigo-900/30 backdrop-blur-md"
+            className="fixed inset-0 bg-gradient-to-br from-purple-900/30 via-blue-900/40 to-indigo-900/30 dark:from-purple-950/40 dark:via-blue-950/50 dark:to-indigo-950/40 backdrop-blur-md"
             onClick={onClose}
+            aria-hidden="true"
           >
             <motion.div
               animate={{
@@ -226,7 +376,7 @@ const BranchTableCategoryModal: React.FC<Props> = ({
                 opacity: [0.2, 0.4, 0.2],
               }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl"
+              className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-500/20 dark:bg-purple-600/15 rounded-full blur-3xl"
             />
             <motion.div
               animate={{
@@ -234,7 +384,7 @@ const BranchTableCategoryModal: React.FC<Props> = ({
                 opacity: [0.2, 0.4, 0.2],
               }}
               transition={{ duration: 8, repeat: Infinity, delay: 2, ease: "easeInOut" }}
-              className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
+              className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 dark:bg-blue-600/15 rounded-full blur-3xl"
             />
           </motion.div>
 
@@ -244,12 +394,12 @@ const BranchTableCategoryModal: React.FC<Props> = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 40 }}
               transition={{ type: "spring", duration: 0.6, bounce: 0.3 }}
-              className="relative w-full max-w-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/50 overflow-hidden"
+              className="relative w-full max-w-xl bg-white dark:bg-gray-800 backdrop-blur-2xl rounded-3xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden"
               onClick={(e) => e.stopPropagation()}
               dir={isRTL ? 'rtl' : 'ltr'}
             >
-              <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-400/30 to-purple-500/30 rounded-full blur-3xl" />
-              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-400/30 to-primary-500/30 rounded-full blur-3xl" />
+              <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-400/30 to-purple-500/30 dark:from-primary-500/20 dark:to-purple-600/20 rounded-full blur-3xl" />
+              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-400/30 to-primary-500/30 dark:from-blue-500/20 dark:to-primary-600/20 rounded-full blur-3xl" />
 
               <div className="relative bg-gradient-to-br from-primary-500 via-primary-600 to-purple-600 dark:from-primary-600 dark:via-primary-700 dark:to-purple-700 p-8 text-white overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
@@ -281,7 +431,10 @@ const BranchTableCategoryModal: React.FC<Props> = ({
                       transition={{ delay: 0.1 }}
                       className="text-2xl font-bold drop-shadow-md"
                     >
-                      {isEditMode ? t('TableCategoryModal.title') || 'Edit Area' : t('TableCategoryModal.addCategoryTitle') || 'Add New Area'}
+                      {isEditMode
+                        ? (t('TableCategoryModal.editCategoryTitle') || 'Edit Area')
+                        : (t('TableCategoryModal.addCategoryTitle') || 'Add New Area')
+                      }
                     </motion.h3>
                     <motion.p
                       initial={{ opacity: 0 }}
@@ -289,53 +442,50 @@ const BranchTableCategoryModal: React.FC<Props> = ({
                       transition={{ delay: 0.2 }}
                       className="text-primary-50/90 text-sm mt-1 drop-shadow"
                     >
-                      {isEditMode ? t('TableCategoryModal.subtitle') || 'Update area details' : t('TableCategoryModal.addCategorySubtitle') || 'Create a new area for your tables'}
+                      {isEditMode
+                        ? (t('TableCategoryModal.editCategorySubtitle') || 'Update area details')
+                        : (t('TableCategoryModal.addCategorySubtitle') || 'Create a new area for your tables')
+                      }
                     </motion.p>
                   </div>
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit} className="relative p-8 space-y-6" role="form">
+              <form onSubmit={handleSubmit} className="relative p-8 space-y-6 bg-white dark:bg-gray-800" role="form">
                 {errors.general && (
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="p-4 bg-gradient-to-r from-red-50 to-red-100/50 dark:from-red-900/30 dark:to-red-800/20 border-l-4 border-red-500 dark:border-red-400 rounded-xl text-red-700 dark:text-red-300 text-sm font-medium shadow-sm"
+                    className="p-4 text-primary-50/90  bg-gradient-to-r from-red-50 to-red-100/50 dark:from-red-900/30 dark:to-red-800/20 border-l-4 border-red-500 dark:border-red-400 rounded-xl text-red-700 dark:text-red-300 text-sm font-medium shadow-sm"
                   >
                     {errors.general}
                   </motion.div>
                 )}
 
                 <div className="space-y-2">
-                  <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
-                    <Tag className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                    {t('TableCategoryModal.categoryName') || 'Area Name'}
-                  </label>
-                  <div className="relative group">
-                    <input
-                      type="text"
-                      name="categoryName"
-                      value={formData.categoryName}
-                      onChange={handleChange}
-                      placeholder={t('TableCategoryModal.categoryNamePlaceholder') || 'Enter area name'}
-                      className={`
-                        w-full px-5 py-3.5 rounded-2xl border-2 transition-all duration-300
-                        bg-white dark:bg-gray-800/50
-                        text-gray-900 dark:text-gray-100
-                        placeholder-gray-400 dark:placeholder-gray-500
-                        border-gray-200 dark:border-gray-600
-                        hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg hover:shadow-primary-500/10
-                        focus:outline-none focus:ring-4 focus:ring-primary-500/30 focus:border-primary-500 focus:shadow-xl focus:shadow-primary-500/20
-                        ${errors.categoryName
-                          ? 'border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/30'
-                          : ''
-                        }
-                        ${isRTL ? 'text-right' : 'text-left'}
-                      `}
-                      dir={isRTL ? 'rtl' : 'ltr'}
-                    />
-                    <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary-500/0 via-primary-500/5 to-purple-500/0 rounded-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
-                  </div>
+                  <MultiLanguageInput
+                    label={t('TableCategoryModal.categoryName') || 'Area Name'}
+                    value={categoryNameTranslations}
+                    onChange={(newTranslations) => {
+                      setCategoryNameTranslations(newTranslations);
+                      // Update base formData with default language value for validation
+                      const val = newTranslations[defaultLanguage] || '';
+                      setFormData(prev => ({ ...prev, categoryName: val }));
+
+                      // Clear error if exists
+                      if (errors.categoryName && val) {
+                        setErrors(prev => {
+                          const newErrors = { ...prev };
+                          delete newErrors.categoryName;
+                          return newErrors;
+                        });
+                      }
+                    }}
+                    languages={supportedLanguages}
+                    placeholder={t('TableCategoryModal.categoryNamePlaceholder') || 'Enter area name'}
+                    defaultLanguage={defaultLanguage}
+                    required={true}
+                  />
                   {errors.categoryName && (
                     <motion.p
                       initial={{ opacity: 0, x: -10 }}
@@ -348,31 +498,20 @@ const BranchTableCategoryModal: React.FC<Props> = ({
                 </div>
 
                 <div className="space-y-2">
-                  <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
-                    <FileText className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                    {t('TableCategoryModal.description') || 'Description'}
-                  </label>
-                  <div className="relative group">
-                    <textarea
-                      name="description"
-                      value={formData.description}
-                      onChange={handleChange}
-                      rows={3}
-                      placeholder={t('TableCategoryModal.descriptionPlaceholder') || 'Enter description (optional)'}
-                      className={`
-                        w-full px-5 py-3.5 rounded-2xl border-2 transition-all duration-300 resize-none
-                        bg-white dark:bg-gray-800/50
-                        text-gray-900 dark:text-gray-100
-                        placeholder-gray-400 dark:placeholder-gray-500
-                        border-gray-200 dark:border-gray-600
-                        hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg hover:shadow-primary-500/10
-                        focus:outline-none focus:ring-4 focus:ring-primary-500/30 focus:border-primary-500 focus:shadow-xl focus:shadow-primary-500/20
-                        ${isRTL ? 'text-right' : 'text-left'}
-                      `}
-                      dir={isRTL ? 'rtl' : 'ltr'}
-                    />
-                    <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary-500/0 via-primary-500/5 to-purple-500/0 rounded-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
-                  </div>
+                  <MultiLanguageTextArea
+                    label={t('TableCategoryModal.description') || 'Description'}
+                    value={descriptionTranslations}
+                    onChange={(newTranslations) => {
+                      setDescriptionTranslations(newTranslations);
+                      // Update base formData with default language value
+                      const val = newTranslations[defaultLanguage] || '';
+                      setFormData(prev => ({ ...prev, description: val }));
+                    }}
+                    languages={supportedLanguages}
+                    placeholder={t('TableCategoryModal.descriptionPlaceholder') || 'Enter description (optional)'}
+                    defaultLanguage={defaultLanguage}
+                    rows={3}
+                  />
                 </div>
 
                 <div className="space-y-3">
@@ -417,6 +556,7 @@ const BranchTableCategoryModal: React.FC<Props> = ({
                       }}
                     />
                     <input
+                      title='Select color'
                       type="color"
                       name="colorCode"
                       value={formData.colorCode}

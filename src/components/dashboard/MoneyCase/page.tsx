@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Users, ChevronDown, Calendar, Filter, X, Check } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
+import { useCurrency } from '../../../hooks/useCurrency';
 import { branchService } from '../../../services/branchService';
 import { moneyCaseService } from '../../../services/Branch/MoneyCaseService';
 import QuickSummaryCards from '../Branch/MoneyCaseManager/QuickSummaryCards';
@@ -73,14 +74,12 @@ const CardIcon: React.FC<{ icon: 'dollar' | 'bank' | 'card' | 'cart' | 'scale' |
   );
 };
 
-const formatCurrency = (amount: number | undefined) => {
-  if (amount === undefined || amount === null) return '$0';
-  return new Intl.NumberFormat('en-US', { 
-    style: 'currency', 
-    currency: 'USD',
+const formatCurrency = (amount: number | undefined, symbol: string = '₺') => {
+  if (amount === undefined || amount === null) return `${symbol}0`;
+  return `${symbol}${new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
-  }).format(amount);
+  }).format(amount)}`;
 }
 
 const SummaryCard: React.FC<{ 
@@ -224,6 +223,7 @@ const getDatePresets = (t: any) => [
 
 export default function RestaurantSummaryPage() {
   const { t, isRTL } = useLanguage();
+  const currency = useCurrency();
 
   // Raw Data from API (contains everything, including list of cases)
   const [rawSummary, setRawSummary] = useState<MoneyCaseSummary | null>(null);
@@ -717,21 +717,21 @@ export default function RestaurantSummaryPage() {
         {/* Summary Cards */}
         <div className={`relative transition-opacity duration-300 ${loading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-            <SummaryCard 
+            <SummaryCard
               title={t('moneyCase.totalRevenue')}
-              value={formatCurrency(displaySummary?.totalSales)} 
+              value={formatCurrency(displaySummary?.totalSales, currency.symbol)}
               description={t('moneyCase.grossSalesDesc')}
               icon="dollar"
             />
-            <SummaryCard 
+            <SummaryCard
               title={t('moneyCase.netCash')}
-              value={formatCurrency(displaySummary?.totalCash)} 
+              value={formatCurrency(displaySummary?.totalCash, currency.symbol)}
               description={t('moneyCase.netCashDesc')}
               icon="bank"
             />
-            <SummaryCard 
+            <SummaryCard
               title={t('moneyCase.serviceFee')}
-              value={formatCurrency(displaySummary?.totalCard)} 
+              value={formatCurrency(displaySummary?.totalCard, currency.symbol)}
               description={t('moneyCase.serviceFeeDesc')}
               icon="card"
             />
@@ -747,21 +747,21 @@ export default function RestaurantSummaryPage() {
               description={t('moneyCase.totalOrdersDesc')}
               icon="cart"
             />
-            <SummaryCard 
+            <SummaryCard
               title={t('moneyCase.avgOrderValue')}
-              value={formatCurrency(displaySummary?.averageOrderValue)} 
+              value={formatCurrency(displaySummary?.averageOrderValue, currency.symbol)}
               description={t('moneyCase.avgOrderValueDesc')}
               icon="scale"
             />
-            <SummaryCard 
+            <SummaryCard
               title={t('moneyCase.totalShifts')}
-              value={displaySummary?.totalCases.toString() || '0'} 
+              value={displaySummary?.totalCases.toString() || '0'}
               description={t('moneyCase.totalShiftsDesc')}
               icon="clock"
             />
-            <SummaryCard 
+            <SummaryCard
               title={t('moneyCase.cashDiscrepancy')}
-              value={formatCurrency(displaySummary?.totalDifference)} 
+              value={formatCurrency(displaySummary?.totalDifference, currency.symbol)}
               description={t('moneyCase.cashDiscrepancyDesc', { count: displaySummary?.shiftsWithDiscrepancy || 0 })}
               icon="alert"
               className={discrepancyColorClass}

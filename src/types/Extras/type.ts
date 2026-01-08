@@ -60,6 +60,7 @@ export interface ExtraCategory {
   status: boolean;
   displayOrder?: number;
   createdAt?: string;
+  isRemovalCategory: boolean;
   updatedAt?: string;
   deletedAt?: string;
 }
@@ -184,18 +185,18 @@ export interface CreateProductExtraCategoryData {
   extraCategoryId: number;
   isRequiredOverride: boolean;
   minSelectionCount: number;
-  maxSelectionCount: number;
-  minTotalQuantity: number;
-  maxTotalQuantity: number;
+  maxSelectionCount: number | null;
+  minTotalQuantity: number | null;
+  maxTotalQuantity: number | null;
 }
 
 export interface UpdateProductExtraCategoryData {
   id: number;
   isRequiredOverride: boolean;
   minSelectionCount: number;
-  maxSelectionCount: number;
+  maxSelectionCount: number | null;
   minTotalQuantity: number;
-  maxTotalQuantity: number;
+  maxTotalQuantity: number | null;
 }
 
 export interface ReorderProductExtraCategoryItem {
@@ -220,9 +221,9 @@ export interface BranchProductExtraCategory {
   isRequired?: boolean;
   isRequiredOverride: boolean;
   minSelectionCount: number;
-  maxSelectionCount: number;
-  minTotalQuantity: number;
-  maxTotalQuantity: number;
+  maxSelectionCount: number | null;
+  minTotalQuantity: number | null;
+  maxTotalQuantity: number | null;
   isActive: boolean;
   displayOrder?: number;
   activeExtrasCount?: number;

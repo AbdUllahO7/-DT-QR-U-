@@ -1,11 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Upload, Image as ImageIcon, Loader2, Plus, DollarSign, Tag, FileText, Eye, EyeOff, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, Loader2, Plus, AlertCircle, Sparkles } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { logger } from '../../../utils/logger';
 import { mediaService } from '../../../services/mediaService';
 import { productService } from '../../../services/productService';
 import { CreateProductFormData, CreateProductModalProps, DEFAULT_IMAGE_URL } from '../../../types/BranchManagement/type';
+import { languageService } from '../../../services/LanguageService';
+import { MultiLanguageInput } from '../../common/MultiLanguageInput';
+import { MultiLanguageTextArea } from '../../common/MultiLanguageTextArea';
+import { useTranslatableFields, TranslatableFieldValue } from '../../../hooks/useTranslatableFields';
+import { productTranslationService } from '../../../services/Translations/ProductTranslationService';
+import { useCurrency } from '../../../hooks/useCurrency';
 
 const CreateProductModal: React.FC<CreateProductModalProps> = ({
   isOpen,
@@ -15,6 +21,17 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
   selectedCategoryId
 }) => {
   const { t, isRTL } = useLanguage();
+  const translationHook = useTranslatableFields();
+  const currency = useCurrency();
+
+  // Supported languages - dynamically loaded
+  const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
+  const [defaultLanguage, setDefaultLanguage] = useState<string>('en');
+
+  // Translation states
+  const [productNameTranslations, setProductNameTranslations] = useState<TranslatableFieldValue>({});
+  const [descriptionTranslations, setDescriptionTranslations] = useState<TranslatableFieldValue>({});
+
   const [formData, setFormData] = useState<CreateProductFormData>({
     name: '',
     description: '',
@@ -32,33 +49,67 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
   const [focusedField, setFocusedField] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Load languages on mount
+  useEffect(() => {
+    const loadLanguages = async () => {
+      try {
+        const languagesData = await languageService.getRestaurantLanguages();
+
+        // Deduplicate languages by code
+        const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
+          if (!acc.find((l: any) => l.code === lang.code)) {
+            acc.push(lang);
+          }
+          return acc;
+        }, []);
+
+        setSupportedLanguages(uniqueLanguages);
+        setDefaultLanguage(languagesData.defaultLanguage || 'en');
+
+        // Initialize empty translations
+        const languageCodes = uniqueLanguages.map((lang: any) => lang.code);
+        setProductNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setDescriptionTranslations(translationHook.getEmptyTranslations(languageCodes));
+      } catch (error) {
+        logger.error('Failed to load languages', error, { prefix: 'CreateProductModal' });
+      }
+    };
+    loadLanguages();
+  }, []);
+
   // Initialize categoryId when modal opens
   useEffect(() => {
     if (isOpen) {
-      logger.info('Modal açıldı', { 
-        selectedCategoryId, 
+      logger.info('Modal açıldı', {
+        selectedCategoryId,
         categoriesCount: categories.length,
         categories: categories.map(cat => ({ id: cat.categoryId, name: cat.categoryName }))
       });
-      
+
       let initialCategoryId = 0;
-      
+
       if (selectedCategoryId && categories.find(cat => cat.categoryId === selectedCategoryId)) {
         initialCategoryId = selectedCategoryId;
       } else if (categories.length > 0) {
         initialCategoryId = categories[0].categoryId;
       }
-      
+
       setFormData(prev => ({
         ...prev,
         categoryId: initialCategoryId,
         imageUrl: '',
         imageFile: null
       }));
+
+      // Reset translations
+      const languageCodes = supportedLanguages.map((lang: any) => lang.code);
+      setProductNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+      setDescriptionTranslations(translationHook.getEmptyTranslations(languageCodes));
+
       setImagePreview('');
       setErrors({});
     }
-  }, [isOpen, selectedCategoryId, categories]);
+  }, [isOpen, selectedCategoryId, categories, supportedLanguages]);
 
   // Form validation
   const validateForm = () => {
@@ -175,7 +226,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
     try {
       const imageUrl = await uploadImage();
@@ -190,15 +241,50 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
         displayOrder: 0,
         imageUrl: imageUrl,
       };
-      
+
       logger.info('Ürün ekleme isteği gönderiliyor', { payload });
       const response = await productService.createProduct(payload);
       logger.info('Ürün başarıyla eklendi', { data: response });
 
-      // Removed automatic ingredient selection - user can now manage ingredients via product card icon
+      // Get the product ID from response
+      let productId: number | null = null;
+
+      if (response?.id && typeof response.id === 'number') {
+        productId = response.id;
+      }
+
+      // Save translations if we have a valid product ID
+      if (productId) {
+        try {
+          const translationData = Object.keys(productNameTranslations)
+            .filter(lang => lang !== defaultLanguage)
+            .filter(lang =>
+              productNameTranslations[lang] ||
+              descriptionTranslations[lang]
+            )
+            .map(languageCode => ({
+              productId: productId!,
+              languageCode,
+              name: productNameTranslations[languageCode] || undefined,
+              description: descriptionTranslations[languageCode] || undefined,
+            }));
+
+          if (translationData.length > 0) {
+            await productTranslationService.batchUpsertProductTranslations({
+              translations: translationData
+            });
+            logger.info('Product translations saved', null, { prefix: 'CreateProductModal' });
+          }
+        } catch (error) {
+          logger.error('Failed to save product translations', error, { prefix: 'CreateProductModal' });
+          // Don't fail the whole operation if translations fail
+        }
+      } else {
+        logger.warn('Could not get product ID, skipping translation save', { prefix: 'CreateProductModal' });
+      }
 
       onSuccess(response.id);
-      
+
       setFormData({
         name: '',
         description: '',
@@ -451,44 +537,34 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
                     </AnimatePresence>
                   </div>
 
-                  {/* Product Name */}
+                  {/* Product Name - Multi-language Input */}
                   <div>
-                    <label htmlFor="name" className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <Tag className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      <span>{t('createProductModal.form.productName.label')}</span>
-                      <span className="text-red-500">*</span>
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => handleChange('name', e.target.value)}
-                        onFocus={() => setFocusedField('name')}
-                        onBlur={() => setFocusedField('')}
-                        maxLength={100}
-                        className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
-                          errors.name
-                            ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
-                            : focusedField === 'name'
-                            ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/10 focus:ring-4 focus:ring-blue-500/20'
-                            : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400'
-                        } focus:outline-none`}
-                        placeholder={t('createProductModal.form.productName.placeholder')}
-                        aria-required="true"
-                      />
-                      <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 flex items-center gap-2`}>
-                        {formData.name && formData.name.length >= 2 && !errors.name && (
-                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                          </motion.div>
-                        )}
-                        <span className="text-xs text-gray-400">{formData.name.length}/100</span>
-                      </div>
-                    </div>
+                    <MultiLanguageInput
+                      label={t('createProductModal.form.productName.label')}
+                      value={productNameTranslations}
+                      onChange={(newTranslations) => {
+                        setProductNameTranslations(newTranslations);
+                        // Update base formData with default language value for validation
+                        const val = newTranslations[defaultLanguage] || '';
+                        setFormData(prev => ({ ...prev, name: val }));
+
+                        // Clear error if exists
+                        if (errors.name && val) {
+                          setErrors(prev => {
+                            const newErrors = { ...prev };
+                            delete newErrors.name;
+                            return newErrors;
+                          });
+                        }
+                      }}
+                      languages={supportedLanguages}
+                      placeholder={t('createProductModal.form.productName.placeholder')}
+                      defaultLanguage={defaultLanguage}
+                      required={true}
+                    />
                     <AnimatePresence>
                       {errors.name && (
-                        <motion.p 
+                        <motion.p
                           initial={{ opacity: 0, y: -5 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -5 }}
@@ -507,7 +583,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
                     {/* Price */}
                     <div>
                       <label htmlFor="price" className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <DollarSign className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                           {currency.symbol}
                         <span>{t('createProductModal.form.price.label')}</span>
                         <span className="text-red-500">*</span>
                       </label>
@@ -613,37 +689,25 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Description */}
+                  {/* Description - Multi-language TextArea */}
                   <div>
-                    <label htmlFor="description" className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                      <span>{t('createProductModal.form.description.label')}</span>
-                    </label>
-                    <div className="relative">
-                      <textarea
-                        id="description"
-                        value={formData.description}
-                        onChange={(e) => handleChange('description', e.target.value)}
-                        onFocus={() => setFocusedField('description')}
-                        onBlur={() => setFocusedField('')}
-                        maxLength={500}
-                        rows={3}
-                        className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 resize-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
-                          errors.description
-                            ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
-                            : focusedField === 'description'
-                            ? 'border-blue-500 dark:border-blue-400 bg-blue-50/50 dark:bg-blue-900/10 focus:ring-4 focus:ring-blue-500/20'
-                            : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400'
-                        } focus:outline-none`}
-                        placeholder={t('createProductModal.form.description.placeholder')}
-                      />
-                      <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} bottom-3 text-xs text-gray-400`}>
-                        {formData.description.length}/500
-                      </div>
-                    </div>
+                    <MultiLanguageTextArea
+                      label={t('createProductModal.form.description.label')}
+                      value={descriptionTranslations}
+                      onChange={(newTranslations) => {
+                        setDescriptionTranslations(newTranslations);
+                        // Update base formData with default language value
+                        const val = newTranslations[defaultLanguage] || '';
+                        setFormData(prev => ({ ...prev, description: val }));
+                      }}
+                      languages={supportedLanguages}
+                      placeholder={t('createProductModal.form.description.placeholder')}
+                      defaultLanguage={defaultLanguage}
+                      rows={3}
+                    />
                     <AnimatePresence>
                       {errors.description && (
-                        <motion.p 
+                        <motion.p
                           initial={{ opacity: 0, y: -5 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -5 }}

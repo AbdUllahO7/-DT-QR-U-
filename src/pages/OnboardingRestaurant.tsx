@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -13,43 +14,45 @@ import {
   Utensils,
   Building,
   Hash,
-  Camera
+  Camera,
+  Search, // Added
+  Globe   // Added
 } from 'lucide-react';
 import { CuisineType } from '../types';
 import type { CreateRestaurantDto, ApiError } from '../types/api';
 import { restaurantService } from '../services/restaurantService';
 import { mediaService } from '../services/mediaService';
+import { languageService } from '../services/LanguageService';
 import { logger } from '../utils/logger';
 import { useLanguage } from '../contexts/LanguageContext';
+import type { AvailableLanguage } from '../types/Language/type';
 
 const OnboardingRestaurant: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t, isRTL } = useLanguage();
+  
+  // Steps & Status State
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
-  const [errors, setErrors] = useState<Partial<CreateRestaurantDto>>({});
+  
+  // Feedback State
+  const [errors, setErrors] = useState<Partial<CreateRestaurantDto> & { supportedLanguages?: string }>({});
   const [apiError, setApiError] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [userId, setUserId] = useState<string>('');
+  
+  // Language Data State
+  const [availableLanguages, setAvailableLanguages] = useState<AvailableLanguage[]>([]);
+  const [languageSearch, setLanguageSearch] = useState<string>(''); // For filtering languages
   
   // File upload loading states
   const [isUploadingLogo, setIsUploadingLogo] = useState<boolean>(false);
   const [isUploadingWorkPermit, setIsUploadingWorkPermit] = useState<boolean>(false);
   const [isUploadingFoodCertificate, setIsUploadingFoodCertificate] = useState<boolean>(false);
-  
-  // File upload progress (optional)
-  const [uploadProgress, setUploadProgress] = useState<{
-    logo: number;
-    workPermit: number;
-    foodCertificate: number;
-  }>({
-    logo: 0,
-    workPermit: 0,
-    foodCertificate: 0
-  });
 
+  // Main Form Data
   const [formData, setFormData] = useState<CreateRestaurantDto>({
     restaurantName: '',
     restaurantLogoPath: '',
@@ -64,28 +67,124 @@ const OnboardingRestaurant: React.FC = () => {
     legalType: '',
     workPermitFilePath: '',
     foodCertificateFilePath: '',
-    userId: ''
+    userId: '',
+    supportedLanguages: ['en'], // Default initialization
+    defaultLanguage: 'en'
   });
 
-  // Get userId from localStorage on component mount
+  // Get userId and fetch languages on mount
   useEffect(() => {
     const storedUserId = localStorage.getItem('onboarding_userId');
-    
+
     if (!storedUserId) {
       logger.error('UserId bulunamadı!');
       setApiError(t('onboardingRestaurant.messages.errors.sessionNotFound'));
-      // Redirect to register after 2 seconds
       setTimeout(() => {
         navigate('/register');
       }, 2000);
       return;
     }
-    
+
     setUserId(storedUserId);
-    // Update formData with userId
     setFormData(prev => ({ ...prev, userId: storedUserId }));
     logger.info('UserId yüklendi', { storedUserId });
+
+    // Fetch available languages
+    const fetchLanguages = async () => {
+      try {
+        const languages = await languageService.getAvailableLanguages();
+        setAvailableLanguages(languages);
+        
+        // Ensure English is selected by default if available, otherwise pick the first one
+        const defaultCode = languages.find(l => l.code === 'en') ? 'en' : languages[0]?.code;
+        
+        if (defaultCode) {
+          setFormData(prev => ({
+            ...prev,
+            supportedLanguages: [defaultCode],
+            defaultLanguage: defaultCode
+          }));
+        }
+        logger.info('Available languages loaded', { count: languages.length });
+      } catch (error) {
+        logger.error('Error loading available languages', error);
+      }
+    };
+
+    fetchLanguages();
   }, [navigate, t]);
+
+  // --- Helper Functions for Language Selection ---
+
+  // Filter languages based on search input
+  const filteredLanguages = availableLanguages.filter(lang => 
+    lang.displayName.toLowerCase().includes(languageSearch.toLowerCase()) ||
+    lang.nativeName.toLowerCase().includes(languageSearch.toLowerCase()) ||
+    lang.code.toLowerCase().includes(languageSearch.toLowerCase())
+  );
+
+  const handleLanguageToggle = (langCode: string) => {
+    setFormData(prev => {
+      const currentSupported = prev.supportedLanguages || [];
+      const isSelected = currentSupported.includes(langCode);
+      
+      let newSupported;
+      if (isSelected) {
+        // Remove language
+        newSupported = currentSupported.filter(code => code !== langCode);
+      } else {
+        // Add language
+        newSupported = [...currentSupported, langCode];
+      }
+
+      // Validation: Prevent removing the last language (optional, but good UX)
+      if (newSupported.length === 0) {
+        return prev; 
+      }
+
+      // Logic: If we remove the current default language, set a new default
+      let newDefault = prev.defaultLanguage;
+      if (isSelected && prev.defaultLanguage === langCode) {
+        // We are removing the default language, pick the first one remaining
+        newDefault = newSupported[0] || '';
+      }
+
+      // If we just added the first language, make it default
+      if (!isSelected && currentSupported.length === 0) {
+        newDefault = langCode;
+      }
+
+      return {
+        ...prev,
+        supportedLanguages: newSupported,
+        defaultLanguage: newDefault
+      };
+    });
+    
+    // Clear error if exists
+    if (errors.supportedLanguages) {
+      setErrors(prev => ({ ...prev, supportedLanguages: undefined }));
+    }
+  };
+
+  const handleDefaultLanguageSelect = (langCode: string) => {
+    // Ensure the language is supported before making it default
+    // If user clicks "Make Default" on an unselected language, select it first
+    if (!formData.supportedLanguages?.includes(langCode)) {
+      setFormData(prev => ({
+        ...prev,
+        supportedLanguages: [...(prev.supportedLanguages || []), langCode],
+        defaultLanguage: langCode
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        defaultLanguage: langCode
+      }));
+    }
+  };
+
+  // --- Constants ---
 
   const cuisineOptions = [
     { value: 0, label: t('onboardingRestaurant.cuisineTypes.0') },
@@ -128,6 +227,8 @@ const OnboardingRestaurant: React.FC = () => {
     t('onboardingRestaurant.legalTypes.other')
   ];
 
+  // --- Handlers ---
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value, type } = e.target;
     const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
@@ -137,12 +238,8 @@ const OnboardingRestaurant: React.FC = () => {
       [name]: checked !== undefined ? checked : value
     }));
     
-    // Clear error when user starts typing
     if (errors[name as keyof CreateRestaurantDto]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: null
-      }));
+      setErrors(prev => ({ ...prev, [name]: null }));
     }
   };
 
@@ -151,85 +248,49 @@ const OnboardingRestaurant: React.FC = () => {
       const file = e.target.files?.[0];
       if (!file) return;
 
-      // Set loading state based on field
       const setLoading = (loading: boolean) => {
         switch (fieldName) {
-          case 'restaurantLogoPath':
-            setIsUploadingLogo(loading);
-            break;
-          case 'workPermitFilePath':
-            setIsUploadingWorkPermit(loading);
-            break;
-          case 'foodCertificateFilePath':
-            setIsUploadingFoodCertificate(loading);
-            break;
+          case 'restaurantLogoPath': setIsUploadingLogo(loading); break;
+          case 'workPermitFilePath': setIsUploadingWorkPermit(loading); break;
+          case 'foodCertificateFilePath': setIsUploadingFoodCertificate(loading); break;
         }
       };
 
-      // Clear any previous errors for this field
-      setErrors(prev => ({
-        ...prev,
-        [fieldName]: null
-      }));
-
+      setErrors(prev => ({ ...prev, [fieldName]: null }));
       setLoading(true);
 
       try {
-        logger.info(`${fieldName} dosya yükleme başlatılıyor`, {
-          fileName: file.name,
-          fileSize: file.size
-        });
-
-        // Upload file to media service
         const filePath = await mediaService.uploadFile(file);
-
         if (filePath) {
-          // Update form data with file path
-          setFormData(prev => ({
-            ...prev,
-            [fieldName]: filePath
-          }));
-
-          logger.info(`${fieldName} başarıyla yüklendi`, { filePath });
+          setFormData(prev => ({ ...prev, [fieldName]: filePath }));
         } else {
           throw new Error(t('onboardingRestaurant.messages.errors.filePathError'));
         }
-
       } catch (error: any) {
-        logger.error(`${fieldName} yükleme hatası`, error);
-        
-        // Set error message
-        const errorMessage = error.message || t('onboardingRestaurant.messages.errors.fileUploadGeneric');
         setErrors(prev => ({
           ...prev,
-          [fieldName]: errorMessage
+          [fieldName]: error.message || t('onboardingRestaurant.messages.errors.fileUploadGeneric')
         }));
-
-        // Clear the form field on error
-        setFormData(prev => ({
-          ...prev,
-          [fieldName]: ''
-        }));
-
-        // Reset file input
         e.target.value = '';
-
       } finally {
         setLoading(false);
       }
     };
 
   const validateStep = (step: number): boolean => {
-    const newErrors: Partial<CreateRestaurantDto> = {};
+    const newErrors: any = {};
     
     switch (step) {
       case 1: // Basic Info
         if (!formData.restaurantName?.trim()) {
           newErrors.restaurantName = t('onboardingRestaurant.step1.errors.nameRequired');
         }
-      
         if (formData.cuisineType === undefined || formData.cuisineType === null) {
-          newErrors.cuisineType = t('onboardingRestaurant.step1.errors.cuisineRequired') as any;
+          newErrors.cuisineType = t('onboardingRestaurant.step1.errors.cuisineRequired');
+        }
+        // Validate Languages
+        if (!formData.supportedLanguages || formData.supportedLanguages.length === 0) {
+          newErrors.supportedLanguages = t('onboardingRestaurant.step1.errors.languageRequired') || 'Please select at least one language';
         }
         break;
         
@@ -240,13 +301,9 @@ const OnboardingRestaurant: React.FC = () => {
         if (!formData.legalType?.trim()) {
           newErrors.legalType = t('onboardingRestaurant.step2.errors.legalTypeRequired');
         }
-   
-        
         break;
         
-      case 3: // Legal Info - Optional fields
-        // Step 3 fields are optional, only validate format if provided
-        
+      case 3: // Legal Info
         break;
     }
     
@@ -255,157 +312,86 @@ const OnboardingRestaurant: React.FC = () => {
   };
 
   const handleNextStep = (e?: React.MouseEvent): void => {
-    // Prevent any default form submission
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
-
-    // Prevent concurrent transitions
-    if (isTransitioning || isSubmitting) {
-      return;
-    }
+    if (isTransitioning || isSubmitting) return;
 
     if (validateStep(currentStep)) {
       setIsTransitioning(true);
-      setErrors({}); // Clear errors when successfully moving to next step
+      setErrors({});
       setCurrentStep(prev => prev + 1);
-
-      // Reset transition flag after a short delay
-      setTimeout(() => {
-        setIsTransitioning(false);
-      }, 300);
+      setTimeout(() => setIsTransitioning(false), 300);
     }
   };
 
   const handlePreviousStep = (): void => {
-    setErrors({}); // Clear errors when moving backward
+    setErrors({});
     setCurrentStep(prev => prev - 1);
   };
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
+    if (isTransitioning || isSubmitting) return;
 
-    // Prevent any action if we're transitioning between steps or already submitting
-    if (isTransitioning || isSubmitting) {
-      return;
-    }
-
-    // IMPORTANT: Only allow submission from step 3
     if (currentStep !== 3) {
-      // If user pressed Enter on step 1 or 2, just move to next step
       handleNextStep();
       return;
     }
 
-    // Clear previous errors
     setApiError('');
     setSuccessMessage('');
 
-    // Validate all steps before submitting
-    const step1Valid = validateStep(1);
-    const step2Valid = validateStep(2);
-    const step3Valid = validateStep(3);
-    
-    // If any step is invalid, set errors and stop
-    if (!step1Valid || !step2Valid || !step3Valid) {
-      // Re-run validateStep to set combined errors
-      validateStep(currentStep); 
-      
-      // A full validation check is safer
-      if (!validateStep(1)) {
-        setCurrentStep(1);
-        return;
-      }
-      if (!validateStep(2)) {
-        setCurrentStep(2);
-        return;
-      }
-      if (!validateStep(3)) {
-        setCurrentStep(3);
-        return;
-      }
-      return;
+    if (!validateStep(1) || !validateStep(2) || !validateStep(3)) {
+       // Navigate back to the first step with error if needed, or just validate current
+       if(!validateStep(1)) setCurrentStep(1);
+       else if(!validateStep(2)) setCurrentStep(2);
+       return;
     }
 
     if (!userId) {
       setApiError(t('onboardingRestaurant.messages.errors.sessionNotFound'));
-      setTimeout(() => {
-        navigate('/register');
-      }, 2000);
       return;
     }
     
     setIsSubmitting(true);
     
     try {
-      logger.info('Restaurant verisi gönderiliyor', { formData });
-      
-      // Ensure cuisineType is sent as integer and add userId
       const processedData = {
         ...formData,
         userId: userId,
         cuisineType: parseInt(formData.cuisineType.toString(), 10)
       };
       
-      logger.info('Processed data with userId and integer cuisineType', { processedData });
-      
       const response = await restaurantService.createRestaurant(processedData);
-      logger.info('Restaurant Creation Response', { response });
       
       if (response && response.restaurantId !== undefined) {
         setSuccessMessage(t('onboardingRestaurant.messages.success'));
-        
-        // Clear onboarding data
         localStorage.removeItem('onboarding_userId');
-        
-        // Store restaurantId for branch creation
-        const restaurantId = response.restaurantId;
-        logger.info('Oluşturulan Restaurant ID', { restaurantId });
-        
-        localStorage.setItem('onboarding_restaurantId', restaurantId.toString());
-        logger.info('RestaurantId localStorage\'a kaydedildi', { restaurantId });
-
-        // Store restaurant logo path for branch creation
+        localStorage.setItem('onboarding_restaurantId', response.restaurantId.toString());
         if (formData.restaurantLogoPath) {
           localStorage.setItem('restaurantLogoPath', formData.restaurantLogoPath);
-          logger.info('Restaurant logo path localStorage\'a kaydedildi', { restaurantLogoPath: formData.restaurantLogoPath });
         }
         
-        // Redirect to branch onboarding after 2 seconds
         setTimeout(() => {
           navigate('/onboarding/branch', { 
             state: { 
               message: t('onboardingRestaurant.messages.welcome'),
-              restaurantId: restaurantId.toString()
+              restaurantId: response.restaurantId.toString()
             } 
           });
         }, 2000);
       } else {
-        console.error('RestaurantId alınamadı! Response:', response);
         setApiError(t('onboardingRestaurant.messages.errors.idNotFound'));
       }
     } catch (error: any) {
-      console.error('Restaurant creation error:', error);
-      
       const apiErr = error as ApiError;
-      
       if (apiErr.status === 400 && apiErr.errors) {
-        // Handle validation errors from API
-        const errorMessages = [];
-        for (const field in apiErr.errors) {
-          const fieldErrors = apiErr.errors[field];
-          if (Array.isArray(fieldErrors)) {
-            errorMessages.push(`${field}: ${fieldErrors.join(', ')}`);
-          } else {
-            errorMessages.push(`${field}: ${fieldErrors}`);
-          }
-        }
-        setApiError(errorMessages.join('\n'));
+        const errorMessages = Object.entries(apiErr.errors).map(([key, val]) => `${key}: ${val}`).join('\n');
+        setApiError(errorMessages);
       } else if (apiErr.status === 409) {
         setApiError(t('onboardingRestaurant.messages.errors.nameInUse'));
-      } else if (apiErr.status === 0) {
-        setApiError(t('onboardingRestaurant.messages.errors.serverConnection'));
       } else {
         setApiError(apiErr.message || t('onboardingRestaurant.messages.errors.genericCreate'));
       }
@@ -414,152 +400,234 @@ const OnboardingRestaurant: React.FC = () => {
     }
   };
 
+  // --- Render Steps ---
+
   const renderStep1 = () => (
-      <div className="space-y-6">
-        <div className="text-center mb-8">
-          <Store className="h-12 w-12 mx-auto text-primary-600 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-            {t('onboardingRestaurant.step1.title')}
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            {t('onboardingRestaurant.step1.subtitle')}
-          </p>
-        </div>
+    <div className="space-y-6">
+      <div className="text-center mb-8">
+        <Store className="h-12 w-12 mx-auto text-primary-600 mb-4" />
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          {t('onboardingRestaurant.step1.title')}
+        </h2>
+        <p className="text-gray-600 dark:text-gray-400">
+          {t('onboardingRestaurant.step1.subtitle')}
+        </p>
+      </div>
 
-        {/* Restaurant Name */}
-        <div>
-          {/* --- MODIFIED: Added flex container for label and counter --- */}
-          <div className={`flex justify-between items-center mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <label htmlFor="restaurantName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-              {t('onboardingRestaurant.step1.nameLabel')}
-            </label>
-            {/* --- ADDED: Character counter --- */}
-            <span className="text-sm text-gray-500 dark:text-gray-400" aria-live="polite">
-              {formData.restaurantName.length} / 50
-            </span>
-          </div>
-          <div className="relative">
-            <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-            <input
-              type="text"
-              id="restaurantName"
-              name="restaurantName"
-              value={formData.restaurantName}
-              onChange={handleInputChange}
-              maxLength={50} 
-              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                errors.restaurantName
-                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
-              placeholder={t('onboardingRestaurant.step1.namePlaceholder')}
-              dir={isRTL ? 'rtl' : 'ltr'}
-            />
-          </div>
-          {errors.restaurantName && (
-            <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.restaurantName}</p>
-          )}
-        </div>
-
-        {/* Restaurant Logo */}
-        <div>
-          <label htmlFor="restaurantLogo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            {t('onboardingRestaurant.step1.logoLabel')}
+      {/* Restaurant Name */}
+      <div>
+        <div className={`flex justify-between items-center mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <label htmlFor="restaurantName" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            {t('onboardingRestaurant.step1.nameLabel')}
           </label>
-          <div className="relative">
-            <Camera className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-            <input
-              type="file"
-              id="restaurantLogo"
-              accept="image/*"
-              onChange={handleFileUpload('restaurantLogoPath')}
-              disabled={isUploadingLogo}
-              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                isUploadingLogo 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : ''
-              } ${
-                errors.restaurantLogoPath
-                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-              } text-gray-900 dark:text-white`}
-            />
-            {isUploadingLogo && (
-              <div className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2`}>
-                <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            )}
-          </div>
-          
-          {/* Upload Status */}
-          {isUploadingLogo && (
-            <p className={`mt-1 text-sm text-blue-600 dark:text-blue-400 ${isRTL ? 'text-right' : 'text-left'}`}>
-              {t('onboardingRestaurant.step1.logoUploading')}
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {formData.restaurantName.length} / 50
+          </span>
+        </div>
+        <div className="relative">
+          <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+          <input
+            type="text"
+            id="restaurantName"
+            name="restaurantName"
+            value={formData.restaurantName}
+            onChange={handleInputChange}
+            maxLength={50}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+              errors.restaurantName
+                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            placeholder={t('onboardingRestaurant.step1.namePlaceholder')}
+            dir={isRTL ? 'rtl' : 'ltr'}
+          />
+        </div>
+        {errors.restaurantName && (
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.restaurantName}</p>
+        )}
+      </div>
+
+      {/* --- NEW LANGUAGE SELECTION SECTION --- */}
+      <div className="space-y-3">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+          {t('onboardingRestaurant.progress.languagesLabel') || 'Supported Languages'}
+        </label>
+        
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
+          <input
+            type="text"
+            value={languageSearch}
+            onChange={(e) => setLanguageSearch(e.target.value)}
+            placeholder={t('onboardingRestaurant.progress.searchLanguages') || 'Search languages...'}
+            className={`w-full ${isRTL ? 'pr-9 pl-4' : 'pl-9 pr-4'} py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
+            dir={isRTL ? 'rtl' : 'ltr'}
+          />
+        </div>
+
+        {/* Language Grid */}
+        <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800/50 max-h-60 overflow-y-auto">
+          {availableLanguages.length === 0 ? (
+            <div className="text-center text-gray-500 py-4">Loading languages...</div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {filteredLanguages.map((lang) => {
+                const isSelected = formData.supportedLanguages?.includes(lang.code);
+                const isDefault = formData.defaultLanguage === lang.code;
+
+                return (
+                  <button
+                    key={lang.code}
+                    type="button"
+                    onClick={() => handleLanguageToggle(lang.code)}
+                    className={`
+                      relative flex flex-col items-start p-3 rounded-lg border text-left transition-all duration-200
+                      ${isSelected 
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' 
+                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-700'
+                      }
+                    `}
+                  >
+                    <div className="flex items-center justify-between w-full mb-1">
+                      <span className={`text-sm font-medium truncate ${isSelected ? 'text-primary-700 dark:text-primary-300' : 'text-gray-900 dark:text-white'}`}>
+                        {lang.displayName}
+                      </span>
+                      {isSelected && (
+                        <CheckCircle className="h-4 w-4 text-primary-600 dark:text-primary-400 flex-shrink-0" />
+                      )}
+                    </div>
+                    <span className={`text-xs truncate ${isSelected ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                      {lang.nativeName}
+                    </span>
+                    
+                    {/* Default Language Logic */}
+                    {isSelected && (
+                      <div 
+                        className="mt-2 w-full pt-2 border-t border-primary-200 dark:border-primary-800"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDefaultLanguageSelect(lang.code);
+                        }}
+                      >
+                         <span className={`
+                            text-xs px-2 py-0.5 rounded-full cursor-pointer w-full block text-center transition-colors
+                            ${isDefault 
+                              ? 'bg-primary-600 text-white font-medium shadow-sm' 
+                              : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-600'
+                            }
+                         `}>
+                           {isDefault ? (t('common.default') || 'Default') : (t('common.setAsDefault') || 'Set Default')}
+                         </span>
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+          {filteredLanguages.length === 0 && (
+            <p className="text-center text-gray-500 py-2 text-sm">{t('common.noResults') || 'No languages found'}</p>
+          )}
+        </div>
+        {errors.supportedLanguages && (
+            <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+              {errors.supportedLanguages}
             </p>
-          )}
-          
-          {/* Error Message */}
-          {errors.restaurantLogoPath && (
-            <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.restaurantLogoPath}</p>
-          )}
-          
-          {/* Success Preview */}
-          {formData.restaurantLogoPath && !isUploadingLogo && (
-            <div className="mt-3">
-              <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                <img 
-                  src={formData.restaurantLogoPath} 
-                  alt="Restaurant Logo Preview" 
-                  className="h-16 w-16 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
-                />
-                <div>
-                  <p className={`text-sm text-green-600 dark:text-green-400 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
-                    {t('onboardingRestaurant.step1.logoSuccess')}
-                  </p>
-                  <p className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
-                    {t('onboardingRestaurant.step1.logoSuccessSub')}
-                  </p>
-                </div>
-              </div>
+        )}
+      </div>
+      {/* ------------------------------------- */}
+
+      {/* Restaurant Logo */}
+      <div>
+        <label htmlFor="restaurantLogo" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {t('onboardingRestaurant.step1.logoLabel')}
+        </label>
+        <div className="relative">
+          <Camera className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+          <input
+            type="file"
+            id="restaurantLogo"
+            accept="image/*"
+            onChange={handleFileUpload('restaurantLogoPath')}
+            disabled={isUploadingLogo}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+              isUploadingLogo 
+                ? 'opacity-50 cursor-not-allowed' 
+                : ''
+            } ${
+              errors.restaurantLogoPath
+                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+            } text-gray-900 dark:text-white`}
+          />
+          {isUploadingLogo && (
+            <div className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2`}>
+              <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
         </div>
-
-        {/* Cuisine Type */}
-        <div>
-          <label htmlFor="cuisineType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            {t('onboardingRestaurant.step1.cuisineLabel')}
-          </label>
-          <div className="relative">
-            <Utensils className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-            <select
-              id="cuisineType"
-              name="cuisineType"
-              value={formData.cuisineType}
-              onChange={handleInputChange}
-              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                errors.cuisineType
-                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-              } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
-              dir={isRTL ? 'rtl' : 'ltr'}
-            >
-              {cuisineOptions.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+        {isUploadingLogo && (
+          <p className={`mt-1 text-sm text-blue-600 dark:text-blue-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+            {t('onboardingRestaurant.step1.logoUploading')}
+          </p>
+        )}
+        {errors.restaurantLogoPath && (
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.restaurantLogoPath}</p>
+        )}
+        {formData.restaurantLogoPath && !isUploadingLogo && (
+          <div className="mt-3">
+            <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+              <img 
+                src={formData.restaurantLogoPath} 
+                alt="Restaurant Logo Preview" 
+                className="h-16 w-16 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
+              />
+              <div>
+                <p className={`text-sm text-green-600 dark:text-green-400 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('onboardingRestaurant.step1.logoSuccess')}
+                </p>
+                <p className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('onboardingRestaurant.step1.logoSuccessSub')}
+                </p>
+              </div>
+            </div>
           </div>
-          {errors.cuisineType && (
-            <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.cuisineType}</p>
-          )}
-        </div>
-
-      
-      
+        )}
       </div>
-    );
+
+      {/* Cuisine Type */}
+      <div>
+        <label htmlFor="cuisineType" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          {t('onboardingRestaurant.step1.cuisineLabel')}
+        </label>
+        <div className="relative">
+          <Utensils className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+          <select
+            id="cuisineType"
+            name="cuisineType"
+            value={formData.cuisineType}
+            onChange={handleInputChange}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+              errors.cuisineType
+                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+            } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
+            dir={isRTL ? 'rtl' : 'ltr'}
+          >
+            {cuisineOptions.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+        {errors.cuisineType && (
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.cuisineType}</p>
+        )}
+      </div>
+    </div>
+  );
 
   const renderStep2 = () => (
     <div className="space-y-6">
@@ -645,7 +713,6 @@ const OnboardingRestaurant: React.FC = () => {
             name="mersisNumber"
             value={formData.mersisNumber}
             onChange={handleInputChange}
-            // Updated className to toggle red border/bg on error
             className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.mersisNumber
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
@@ -655,11 +722,8 @@ const OnboardingRestaurant: React.FC = () => {
             dir={isRTL ? 'rtl' : 'ltr'}
           />
         </div>
-        {/* Added Error Message Display */}
         {errors.mersisNumber && (
-          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>
-            {errors.mersisNumber}
-          </p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.mersisNumber}</p>
         )}
       </div>
 
@@ -781,20 +845,14 @@ const OnboardingRestaurant: React.FC = () => {
             </div>
           )}
         </div>
-        
-        {/* Upload Status */}
         {isUploadingWorkPermit && (
           <p className={`mt-1 text-sm text-blue-600 dark:text-blue-400 ${isRTL ? 'text-right' : 'text-left'}`}>
             {t('onboardingRestaurant.step3.workPermitUploading')}
           </p>
         )}
-        
-        {/* Error Message */}
         {errors.workPermitFilePath && (
           <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.workPermitFilePath}</p>
         )}
-        
-        {/* Success Message */}
         {formData.workPermitFilePath && !isUploadingWorkPermit && (
           <p className={`mt-1 text-sm text-green-600 dark:text-green-400 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
             {t('onboardingRestaurant.step3.workPermitSuccess')}
@@ -831,20 +889,14 @@ const OnboardingRestaurant: React.FC = () => {
             </div>
           )}
         </div>
-        
-        {/* Upload Status */}
         {isUploadingFoodCertificate && (
           <p className={`mt-1 text-sm text-blue-600 dark:text-blue-400 ${isRTL ? 'text-right' : 'text-left'}`}>
             {t('onboardingRestaurant.step3.foodCertificateUploading')}
           </p>
         )}
-        
-        {/* Error Message */}
         {errors.foodCertificateFilePath && (
           <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.foodCertificateFilePath}</p>
         )}
-        
-        {/* Success Message */}
         {formData.foodCertificateFilePath && !isUploadingFoodCertificate && (
           <p className={`mt-1 text-sm text-green-600 dark:text-green-400 font-medium ${isRTL ? 'text-right' : 'text-left'}`}>
             {t('onboardingRestaurant.step3.foodCertificateSuccess')}
@@ -939,7 +991,7 @@ const OnboardingRestaurant: React.FC = () => {
               <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
                 <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <AlertCircle className={`h-5 w-5 text-red-600 dark:text-red-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                  <p className="text-red-800 dark:text-red-200">{apiError}</p>
+                  <p className="text-red-800 dark:text-red-200 whitespace-pre-line">{apiError}</p>
                 </div>
               </div>
             )}

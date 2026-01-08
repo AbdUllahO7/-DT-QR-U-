@@ -1,19 +1,23 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  Settings, 
-  Save, 
-  RefreshCw, 
-  ShoppingCart, 
-  Eye, 
-  CreditCard, 
-  Globe, 
+import {
+  Settings,
+  Save,
+  RefreshCw,
+  ShoppingCart,
+  Eye,
+  CreditCard,
+  Globe,
   Clock,
   AlertCircle,
   CheckCircle,
-  Loader2
+  Loader2,
+  ChevronDown,
+  Search,
+  Check
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { BranchPreferences, branchPreferencesService, UpdateBranchPreferencesDto } from '../../../../services/Branch/BranchPreferencesService';
+import { restaurantPreferencesService, CurrencyOption } from '../../../../services/RestaurantPreferencesService';
 
 interface BranchPreferencesComponentProps {
   className?: string;
@@ -21,7 +25,7 @@ interface BranchPreferencesComponentProps {
 
 const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({ className = '' }) => {
   const { t } = useLanguage();
-  
+
   // State management
   const [preferences, setPreferences] = useState<BranchPreferences | null>(null);
   const [formData, setFormData] = useState<UpdateBranchPreferencesDto | null>(null);
@@ -30,20 +34,12 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [availableCurrencies, setAvailableCurrencies] = useState<CurrencyOption[]>([]);
 
-  // Currency options
-  const currencies = [
-    { value: 'TRY', label: t('branchPreferences.currencies.TRY') },
-    { value: 'USD', label: t('branchPreferences.currencies.USD') },
-    { value: 'EUR', label: t('branchPreferences.currencies.EUR') }
-  ];
+  // Currency selector state
+  const [isCurrencyDropdownOpen, setIsCurrencyDropdownOpen] = useState(false);
+  const [currencySearchQuery, setCurrencySearchQuery] = useState('');
 
-  // Language options
-  const languages = [
-    { value: 'tr', label: t('branchPreferences.languages.tr') },
-    { value: 'en', label: t('branchPreferences.languages.en') },
-    { value: 'ar', label: t('branchPreferences.languages.ar') }
-  ];
 
   // Timezone options
   const timezones = [
@@ -61,30 +57,36 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
     try {
       setIsLoading(true);
       setError(null);
-      
-      const data = await branchPreferencesService.getBranchPreferences();
-      setPreferences(data);
-      
+
+      // Fetch both branch and restaurant preferences
+      const [branchData, restaurantData] = await Promise.all([
+        branchPreferencesService.getBranchPreferences(),
+        restaurantPreferencesService.getRestaurantPreferences()
+      ]);
+
+      setPreferences(branchData);
+      setAvailableCurrencies(restaurantData.availableCurrencies || []);
+
       // Initialize form data
       const initialFormData: UpdateBranchPreferencesDto = {
-        autoConfirmOrders: data.autoConfirmOrders,
-        useWhatsappForOrders: data.useWhatsappForOrders,
-        showProductDescriptions: data.showProductDescriptions,
-        enableAllergenDisplay: data.enableAllergenDisplay,
-        enableIngredientDisplay: data.enableIngredientDisplay,
-        acceptCash: data.acceptCash,
-        acceptCreditCard: data.acceptCreditCard,
-        acceptOnlinePayment: data.acceptOnlinePayment,
-        defaultCurrency: data.defaultCurrency,
-        supportedLanguages: data.supportedLanguages,
-        defaultLanguage: data.defaultLanguage,
-        timeZoneId: data.timeZoneId,
-        sessionTimeoutMinutes: data.sessionTimeoutMinutes,
-        cleanupMode: data.cleanupMode,
-        cleanupDelayAfterCloseMinutes: data.cleanupDelayAfterCloseMinutes,
-        rowVersion: data.rowVersion
+        autoConfirmOrders: branchData.autoConfirmOrders,
+        useWhatsappForOrders: branchData.useWhatsappForOrders,
+        showProductDescriptions: branchData.showProductDescriptions,
+        enableAllergenDisplay: branchData.enableAllergenDisplay,
+        enableIngredientDisplay: branchData.enableIngredientDisplay,
+        acceptCash: branchData.acceptCash,
+        acceptCreditCard: branchData.acceptCreditCard,
+        acceptOnlinePayment: branchData.acceptOnlinePayment,
+        defaultCurrency: branchData.defaultCurrency,
+        supportedLanguages: branchData.supportedLanguages,
+        defaultLanguage: branchData.defaultLanguage,
+        timeZoneId: branchData.timeZoneId,
+        sessionTimeoutMinutes: branchData.sessionTimeoutMinutes,
+        cleanupMode: branchData.cleanupMode,
+        cleanupDelayAfterCloseMinutes: branchData.cleanupDelayAfterCloseMinutes,
+        rowVersion: branchData.rowVersion
       };
-      
+
       setFormData(initialFormData);
       setHasChanges(false);
     } catch (err: any) {
@@ -101,32 +103,91 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
   // Handle form field changes
   const handleFieldChange = (field: keyof UpdateBranchPreferencesDto, value: any) => {
     if (!formData) return;
-    
+
     const updatedFormData = {
       ...formData,
       [field]: value
     };
-    
+
     setFormData(updatedFormData);
     setHasChanges(true);
     setError(null);
     setSuccess(null);
   };
 
+  // Toggle language support
+  const toggleLanguage = (languageCode: string) => {
+    if (!formData || !formData.supportedLanguages) return;
+
+    const currentLanguages = [...formData.supportedLanguages];
+    const index = currentLanguages.indexOf(languageCode);
+
+    if (index > -1) {
+      // Remove language
+      currentLanguages.splice(index, 1);
+    } else {
+      // Add language
+      currentLanguages.push(languageCode);
+    }
+
+    handleFieldChange('supportedLanguages', currentLanguages);
+  };
+
+  // Handle currency selection
+  const handleCurrencySelect = (currency: CurrencyOption) => {
+    handleFieldChange('defaultCurrency', currency.code);
+
+    setIsCurrencyDropdownOpen(false);
+    setCurrencySearchQuery('');
+  };
+
+  // Get filtered currencies based on search query
+  const getFilteredCurrencies = () => {
+    if (!availableCurrencies) return [];
+
+    if (!currencySearchQuery) return availableCurrencies;
+
+    const query = currencySearchQuery.toLowerCase();
+    return availableCurrencies.filter(
+      currency =>
+        currency.displayName.toLowerCase().includes(query) ||
+        currency.code.toLowerCase().includes(query) ||
+        currency.symbol.includes(query)
+    );
+  };
+
+  // Get selected currency object
+  const getSelectedCurrency = () => {
+    if (!formData?.defaultCurrency || !availableCurrencies) return null;
+    return availableCurrencies.find(c => c.code === formData.defaultCurrency) || null;
+  };
+
   // Save preferences
   const handleSave = async () => {
     if (!formData || !hasChanges) return;
-    
+
     try {
       setIsSaving(true);
       setError(null);
-      
-      const updatedPreferences = await branchPreferencesService.updateBranchPreferences(formData);
-      setPreferences(updatedPreferences);
-      setFormData({ ...formData, rowVersion: updatedPreferences.rowVersion });
+
+      await branchPreferencesService.updateBranchPreferences(formData);
+
+      // Reload preferences to get complete data including availableLanguages
+      await loadPreferences();
+
+      // Save currency to localStorage after successful API call
+      const selectedCurrency = availableCurrencies.find(c => c.code === formData.defaultCurrency);
+      if (selectedCurrency) {
+        localStorage.setItem('selectedCurrency', JSON.stringify({
+          code: selectedCurrency.code,
+          symbol: selectedCurrency.symbol,
+          displayName: selectedCurrency.displayName
+        }));
+      }
+
       setHasChanges(false);
       setSuccess(t('branchPreferences.saveSuccess'));
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
@@ -477,30 +538,91 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                 onChange={(e) => handleFieldChange('defaultLanguage', e.target.value)}
                 className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                {languages.map((lang) => (
-                  <option key={lang.value} value={lang.value}>
-                    {lang.label}
-                  </option>
-                ))}
+                {(preferences?.availableLanguages || [])
+                  .filter(lang => formData.supportedLanguages?.includes(lang.code))
+                  .map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      ({lang.nativeName})
+                    </option>
+                  ))}
               </select>
+          
             </div>
 
-            <div>
+            {/* Custom Currency Selector */}
+            <div className="relative">
               <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                 {t('branchPreferences.sections.localization.defaultCurrency')}
               </label>
-              <select
-                title='defaultCurrency'
-                value={formData.defaultCurrency}
-                onChange={(e) => handleFieldChange('defaultCurrency', e.target.value)}
-                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+
+              {/* Currency Display Button */}
+              <button
+                type="button"
+                onClick={() => setIsCurrencyDropdownOpen(!isCurrencyDropdownOpen)}
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:border-blue-500 dark:hover:border-blue-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all flex items-center justify-between"
               >
-                {currencies.map((currency) => (
-                  <option key={currency.value} value={currency.value}>
-                    {currency.label}
-                  </option>
-                ))}
-              </select>
+                <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                  <span className="text-2xl">{getSelectedCurrency()?.symbol || '$'}</span>
+                  <div className="text-left rtl:text-right">
+                    <div className="font-medium">{getSelectedCurrency()?.displayName || 'Select Currency'}</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">{getSelectedCurrency()?.code || ''}</div>
+                  </div>
+                </div>
+                <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isCurrencyDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Dropdown */}
+              {isCurrencyDropdownOpen && (
+                <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-96 overflow-hidden">
+                  {/* Search Input */}
+                  <div className="p-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
+                    <div className="relative">
+                      <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder="Search currencies..."
+                        value={currencySearchQuery}
+                        onChange={(e) => setCurrencySearchQuery(e.target.value)}
+                        className="w-full pl-10 rtl:pr-10 rtl:pl-3 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Currency List */}
+                  <div className="max-h-80 overflow-y-auto">
+                    {getFilteredCurrencies().map((currency) => {
+                      const isSelected = formData?.defaultCurrency === currency.code;
+                      return (
+                        <button
+                          key={currency.code}
+                          type="button"
+                          onClick={() => handleCurrencySelect(currency)}
+                          className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                            isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                            <span className="text-2xl w-8 text-center">{currency.symbol}</span>
+                            <div className="text-left rtl:text-right">
+                              <div className={`font-medium ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-gray-900 dark:text-white'}`}>
+                                {currency.displayName}
+                              </div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">{currency.code}</div>
+                            </div>
+                          </div>
+                          {isSelected && <Check className="w-5 h-5 text-blue-600 dark:text-blue-400" />}
+                        </button>
+                      );
+                    })}
+
+                    {getFilteredCurrencies().length === 0 && (
+                      <div className="px-4 py-8 text-center text-gray-500 dark:text-gray-400">
+                        No currencies found
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
@@ -522,42 +644,62 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
             </div>
 
 <div className="col-span-2">
-  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">
     {t('branchPreferences.sections.localization.supportedLanguages')}
   </label>
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-    {[
-      { flag: 1, code: 'tr', label: t('branchPreferences.languages.tr') },
-      { flag: 2, code: 'en', label: t('branchPreferences.languages.en') },
-      { flag: 4, code: 'ar', label: t('branchPreferences.languages.ar') },
-      { flag: 8, code: 'de', label: t('branchPreferences.languages.de') },
-      { flag: 16, code: 'fr', label: t('branchPreferences.languages.fr') },
-      { flag: 32, code: 'ru', label: t('branchPreferences.languages.ru') },
-      { flag: 64, code: 'es', label: t('branchPreferences.languages.es') }
-    ].map((lang) => (
-      <div key={lang.code} className="flex items-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
-        <input
-          id={`lang-${lang.code}`}
-          type="checkbox"
-          checked={(formData.supportedLanguages & lang.flag) === lang.flag}
-          onChange={(e) => {
-            const currentValue = formData.supportedLanguages;
-            const newValue = e.target.checked 
-              ? currentValue | lang.flag  // Add flag
-              : currentValue & ~lang.flag; // Remove flag
-            handleFieldChange('supportedLanguages', newValue);
-          }}
-          className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-        />
-        <label htmlFor={`lang-${lang.code}`} className="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300 cursor-pointer">
-          {lang.label}
-        </label>
-      </div>
-    ))}
+  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+    {(preferences?.availableLanguages || []).map((lang) => {
+      const isSupported = formData.supportedLanguages?.includes(lang.code) || false;
+      const isDefaultLang = formData.defaultLanguage === lang.code;
+
+      return (
+        <div
+          key={lang.code}
+          className={`flex items-center p-3 rounded-lg border transition-all ${
+            isSupported
+              ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
+              : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600'
+          }`}
+        >
+          <input
+            id={`lang-${lang.code}`}
+            type="checkbox"
+            checked={isSupported}
+            disabled={isDefaultLang}
+            onChange={() => toggleLanguage(lang.code)}
+            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50"
+          />
+          <label
+            htmlFor={`lang-${lang.code}`}
+            className={`ml-2 rtl:mr-2 rtl:ml-0 text-sm font-medium cursor-pointer ${
+              isDefaultLang ? 'opacity-50' : ''
+            } ${
+              isSupported
+                ? 'text-blue-900 dark:text-blue-300'
+                : 'text-gray-900 dark:text-gray-300'
+            }`}
+          >
+            <div className="flex flex-col">
+              <span>{lang.nativeName}</span>
+            </div>
+          </label>
+        </div>
+      );
+    })}
   </div>
-  <p className="text-xs text-gray-600 dark:text-gray-400 mt-2">
-    {t('branchPreferences.sections.localization.supportedLanguagesDesc')}
-  </p>
+
+
+  {/* Warning about available languages */}
+  <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+    <div className="flex items-start space-x-3 rtl:space-x-reverse">
+      <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+      <div className="text-sm text-blue-800 dark:text-blue-300">
+        <p>
+          {t('branchPreferences.sections.localization.languageRestaurantNote')}
+        </p>
+      </div>
+    </div>
+  </div>
 </div>
           </div>
         </div>

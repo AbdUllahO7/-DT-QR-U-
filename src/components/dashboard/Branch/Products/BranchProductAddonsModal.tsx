@@ -535,9 +535,7 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                   <div className="text-sm font-bold text-gray-900 dark:text-white">
                     {assignedCount} {t('addonModal.footer.summary')} {totalCount} {totalCount === 1 ? t('addonModal.footer.addon') : t('addonModal.footer.addons')} {t('addonModal.footer.assigned')}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    All changes saved automatically
-                  </div>
+                
                 </div>
               </div>
               

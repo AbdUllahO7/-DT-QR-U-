@@ -34,6 +34,8 @@ const TableCard: React.FC<TableCardProps> = ({
 }) => {
   const { t, isRTL } = useLanguage();
 
+
+
   // Determine if this is a simple card (Table Management) or full-featured card (Branch Tables)
   const isSimpleCard = !onUpdate && !onCancelEdit && !onTableChange;
 

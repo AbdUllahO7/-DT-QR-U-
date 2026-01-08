@@ -1,6 +1,22 @@
 import { httpClient, getEffectiveBranchId } from "../../utils/http";
 import { logger } from "../../utils/logger";
 
+// Interface for language option
+export interface LanguageOption {
+  code: string;
+  displayName: string;
+  nativeName: string;
+  isRtl: boolean;
+}
+
+// Interface for currency option
+export interface CurrencyOption {
+  code: string;
+  displayName: string;
+  symbol: string;
+  iconKey: string;
+}
+
 // Interface for the complete branch preferences response
 export interface BranchPreferences {
   id: number;
@@ -14,9 +30,11 @@ export interface BranchPreferences {
   acceptCreditCard: boolean;
   acceptOnlinePayment: boolean;
   defaultCurrency: string;
-  supportedLanguages: number;
+  supportedLanguages: string[];
   defaultLanguage: string;
   timeZoneId: string;
+  availableLanguages: LanguageOption[];
+  availableCurrencies: CurrencyOption[];
   sessionTimeoutMinutes: number;
   cleanupMode: number;
   cleanupDelayAfterCloseMinutes: number;
@@ -36,7 +54,7 @@ export interface UpdateBranchPreferencesDto {
   acceptCreditCard: boolean;
   acceptOnlinePayment: boolean;
   defaultCurrency: string;
-  supportedLanguages: number;
+  supportedLanguages: string[];
   defaultLanguage: string;
   timeZoneId: string;
   sessionTimeoutMinutes: number;
@@ -61,12 +79,15 @@ export interface UpdatePaymentSettingsDto {
 
 class BranchPreferencesService {
   private baseUrl = '/api/BranchPreferences';
-
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
   // UPDATED: Now accepts branchId parameter
   async getBranchPreferences(branchId?: number): Promise<BranchPreferences> {
     try {
       // Get effective branch ID (from parameter, localStorage, or token)
       const effectiveBranchId = branchId || getEffectiveBranchId();
+        const language = this.getLanguageFromStorage();
 
       logger.info('Branch preferences bilgileri getirme isteği gönderiliyor', { branchId: effectiveBranchId }, { prefix: 'BranchPreferencesService' });
 
@@ -74,8 +95,12 @@ class BranchPreferencesService {
         ? `${this.baseUrl}?branchId=${effectiveBranchId}`
         : this.baseUrl;
 
-      const response = await httpClient.get<BranchPreferences>(url);
-      
+      const params = {
+        language
+      };
+
+      const response = await httpClient.get<BranchPreferences>(url, { params });
+
       logger.info('Branch Preferences API Response:', response.data, { prefix: 'BranchPreferencesService' });
       logger.info('Branch preferences bilgileri başarıyla alındı', { branchId }, { prefix: 'BranchPreferencesService' });
       

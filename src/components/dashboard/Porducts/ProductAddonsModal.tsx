@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, Search, Check, Plus, Trash2, Star, 
-  Loader2, AlertCircle, Package, DollarSign, 
+  Loader2, AlertCircle, Package, 
   GripVertical, Edit3, Save, XCircle, Sparkles
 } from 'lucide-react';
 import { 
@@ -19,6 +19,7 @@ import { logger } from '../../../utils/logger';
 import { productService } from '../../../services/productService';
 import { AvailableAddonProduct, ProductAddon, productAddonsService } from '../../../services/ProductAddonsService';
 import { ProductAddonsModalProps, SelectedProductData } from '../../../types/BranchManagement/type';
+import { useCurrency } from '../../../hooks/useCurrency';
 
 // Sortable Addon Component
 const SortableAddonItem: React.FC<{
@@ -44,6 +45,7 @@ const SortableAddonItem: React.FC<{
     transition,
     isDragging
   } = useSortable({ id: addon.id });
+  const currency = useCurrency();
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -103,7 +105,7 @@ const SortableAddonItem: React.FC<{
               </h4>
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 text-sm font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg">
-                  <DollarSign className="h-3 w-3" />
+                  {currency.symbol}
                   {addonProduct?.price?.toFixed(2) || '0.00'} 
                 </span>
                 {addon.isRecommended && (
@@ -202,6 +204,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
   productName
 }) => {
   const { t, isRTL } = useLanguage();
+  const currency = useCurrency();
 
   const [currentAddons, setCurrentAddons] = useState<ProductAddon[]>([]);
   const [availableProducts, setAvailableProducts] = useState<AvailableAddonProduct[]>([]);
@@ -666,7 +669,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                                       )}
                                       <div className="flex items-center justify-between">
                                         <span className="inline-flex items-center gap-1 px-2.5 py-1 text-sm font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg">
-                                          <DollarSign className="h-3 w-3" />
+                                          {currency.symbol}
                                           {product.price.toFixed(2)} 
                                         </span>
                                         <span className="text-xs text-gray-500 dark:text-gray-400 px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded-lg">

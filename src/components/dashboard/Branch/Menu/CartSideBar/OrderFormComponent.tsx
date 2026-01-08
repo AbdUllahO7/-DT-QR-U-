@@ -43,6 +43,21 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
 
   const selectedOrderType = getSelectedOrderType();
 
+  // Translation helper for order type name and description
+  const getOrderTypeTranslation = (orderType: any, field: 'name' | 'description'): string => {
+    if (!orderType) return '';
+    const translationKey = `orderTypes.${orderType.code}.${field}`;
+    const translated = t(translationKey);
+
+    // If translation exists and is not the same as the key, use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+
+    // Otherwise, fall back to API value
+    return field === 'name' ? orderType.name : orderType.description;
+  };
+
   // Get available payment methods
   const getAvailablePaymentMethods = () => {
     const methods = [];
@@ -124,7 +139,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
           <option value={0}>{t('order.form.selectOrderType')}</option>
           {orderTypes.map((type) => (
             <option key={type.id} value={type.id}>
-              {type.name}{' '}
+              {getOrderTypeTranslation(type, 'name')}{' '}
               {type.serviceCharge > 0 &&
                 `(+${t('order.form.service')} $${type.serviceCharge.toFixed(2)})`}
               {type.minOrderAmount > 0 &&
@@ -137,7 +152,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
         {selectedOrderType && (
           <div className="mt-2 text-xs space-y-1">
             <p className="text-slate-500 dark:text-slate-400">
-              {selectedOrderType.description}
+              {getOrderTypeTranslation(selectedOrderType, 'description')}
             </p>
 
             {selectedOrderType.minOrderAmount > 0 && (
@@ -394,7 +409,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
       )}
 
       {/* Action Buttons */}
-      <div className="flex space-x-3">
+      <div className="flex gap-3 space-x-3">
         <button
           onClick={onBack}
           className="flex-1 py-3 px-4 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
@@ -404,7 +419,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
         <button
           onClick={onCreate}
           disabled={isButtonDisabled}
-          className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 bg-gradient-to-r  from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? (
             <div className="flex items-center justify-center">

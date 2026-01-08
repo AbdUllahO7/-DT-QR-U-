@@ -12,7 +12,6 @@ import {
   Grid3X3,
   Settings,
   Edit3,
-  DollarSign,
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { 
@@ -25,6 +24,7 @@ import {
 } from '../../../../types/Branch/Extras/type';
 import { branchProductExtraCategoriesService } from '../../../../services/Branch/Extras/BranchProductExtraCategoriesService';
 import { branchProductExtrasService } from '../../../../services/Branch/Extras/BranchProductExtrasService';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface BranchProductExtraCategoriesModalProps {
   isOpen: boolean;
@@ -38,6 +38,7 @@ interface BranchProductExtraCategoriesModalProps {
 interface CategoryWithExtras extends AvailableExtraCategory {
   isExpanded: boolean;
   extras: AvailableProductExtra[];
+  isRemovalCategory?: boolean; // Added to track if it is a removal category
 }
 
 interface ExtrasConfig {
@@ -78,6 +79,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
 
   // State management
   const [availableCategories, setAvailableCategories] = useState<CategoryWithExtras[]>([]);
+  const currency = useCurrency();
   
   // UI Selection State
   const [selectedCategories, setSelectedCategories] = useState<Set<number>>(new Set());
@@ -113,6 +115,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
           branchProductId: branchProductId,
           onlyActive: false
         }),
+
         branchProductExtrasService.getAvailableProductExtras({
           branchProductId: branchProductId,
           onlyActive: false
@@ -120,12 +123,16 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
         branchProductExtraCategoriesService.getBranchProductExtraCategories({ branchProductId: branchProductId }),
         branchProductExtrasService.getBranchProductExtrasByBranchProductId(branchProductId)
       ]);
+        console.log("allAvailableCategories",allAvailableCategories)
 
       const mergedCategories: CategoryWithExtras[] = allAvailableCategories.map((category) => ({
         ...category,
         isExpanded: false, 
-        extras: [] 
+        extras: [],
+        
+        isRemovalCategory: (category as any).isRemovalCategory
       }));
+
 
       existingCategoriesData.forEach((existingCat) => {
         const exists = mergedCategories.some(c => c.productExtraCategoryId === existingCat.productExtraCategoryId);
@@ -141,7 +148,8 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
             maxTotalQuantity: existingCat.maxTotalQuantity ?? 1,
             activeExtrasCount: 0,
             isExpanded: false,
-            extras: []
+            extras: [],
+            isRemovalCategory: existingCat.isRemovalCategory // Map here as well
           });
         }
       });
@@ -198,7 +206,10 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
             maxSelectionCount: cat.maxSelectionCount,
             minTotalQuantity: cat.minTotalQuantity,
             maxTotalQuantity: cat.maxTotalQuantity,
-            selectedExtras: new Set() 
+            selectedExtras: new Set(),
+            // Logic to determine if unlimited based on a high number or explicit flag if available
+            isMaxSelectionUnlimited: cat.maxSelectionCount === null || cat.maxSelectionCount > 1000, 
+            isMaxQuantityUnlimited: cat.maxTotalQuantity === null || cat.maxTotalQuantity > 1000
           };
         });
 
@@ -209,8 +220,9 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
           initialExtrasConfig[existingExtra.productExtraId] = {
             specialUnitPrice: existingExtra.specialUnitPrice ?? 0,
             minQuantity: existingExtra.minQuantity ?? 0,
-            maxQuantity: existingExtra.maxQuantity ,
+            maxQuantity: existingExtra.maxQuantity,
             isRequiredOverride: existingExtra.isRequiredOverride ?? false,
+            isMaxQuantityUnlimited: existingExtra.maxQuantity === null || existingExtra.maxQuantity > 1000
           };
 
           const parentCategory = mergedCategories.find(c => c.extraCategoryName === existingExtra.categoryName);
@@ -263,6 +275,8 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
             minTotalQuantity: category.minTotalQuantity,
             maxTotalQuantity: category.maxTotalQuantity,
             selectedExtras: new Set(),
+            isMaxSelectionUnlimited: false,
+            isMaxQuantityUnlimited: false
           },
         }));
         handleCategoryExpand(categoryId, true);
@@ -307,6 +321,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
               minQuantity: 0,
               maxQuantity: extra?.defaultMaxQuantity || 1,
               isRequiredOverride: false,
+              isMaxQuantityUnlimited: false
             }
           }));
         }
@@ -377,16 +392,25 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
         const config = extrasConfig[categoryId];
         if (!config) continue;
 
+        // Determine if removal based on the original category data
+        const originalCategory = availableCategories.find(c => c.productExtraCategoryId === categoryId);
+        const isRemoval = originalCategory?.isRemovalCategory || false;
+
         const existingRelationId = existingRelationIds.get(categoryId);
+        
+        // Prepare data values (handle removal logic where some values should be ignored/zeroed)
+        const finalMinSelection = isRemoval ? 0 : config.minSelectionCount;
+        const finalMinQuantity = isRemoval ? 0 : config.minTotalQuantity;
+        const finalMaxQuantity = isRemoval ? null : (config.isMaxQuantityUnlimited ? null : config.maxTotalQuantity);
 
         if (existingRelationId) {
           const updateData: UpdateBranchProductExtraCategoryData = {
             id: existingRelationId,
             isRequiredOverride: config.isRequiredOverride,
-            minSelectionCount: config.minSelectionCount,
+            minSelectionCount: finalMinSelection,
             maxSelectionCount: config.isMaxSelectionUnlimited ? null : config.maxSelectionCount,
-            minTotalQuantity: config.minTotalQuantity,
-            maxTotalQuantity: config.isMaxQuantityUnlimited ? null : config.maxTotalQuantity,
+            minTotalQuantity: finalMinQuantity,
+            maxTotalQuantity: finalMaxQuantity,
             isActive: true
           };
           await branchProductExtraCategoriesService.updateBranchProductExtraCategory(updateData);
@@ -395,10 +419,10 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
             branchProductId,
             productExtraCategoryId: categoryId,
             isRequiredOverride: config.isRequiredOverride,
-            minSelectionCount: config.minSelectionCount,
+            minSelectionCount: finalMinSelection,
             maxSelectionCount: config.isMaxSelectionUnlimited ? null : config.maxSelectionCount,
-            minTotalQuantity: config.minTotalQuantity,
-            maxTotalQuantity: config.isMaxQuantityUnlimited ? null : config.maxTotalQuantity,
+            minTotalQuantity: finalMinQuantity,
+            maxTotalQuantity: finalMaxQuantity,
             isActive: true,
           };
           await branchProductExtraCategoriesService.createBranchProductExtraCategory(createData);
@@ -437,6 +461,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
             minQuantity: 0,
             maxQuantity: 1,
             isRequiredOverride: false,
+            isMaxQuantityUnlimited: false
           };
 
           // Check if the extra is a removal type
@@ -636,6 +661,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                 {filteredCategories.map((category) => {
                   const isSelected = selectedCategories.has(category.productExtraCategoryId);
                   const config = extrasConfig[category.productExtraCategoryId];
+                  const isRemoval = category.isRemovalCategory;
 
                   return (
                     <div
@@ -661,9 +687,16 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                               {isSelected && <Check className="h-4 w-4 text-white" />}
                             </button>
                             <div>
-                              <h4 className="font-bold text-gray-900 dark:text-white">
-                                {category.extraCategoryName}
-                              </h4>
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-bold text-gray-900 dark:text-white">
+                                  {category.extraCategoryName}
+                                </h4>
+                                {isRemoval && (
+                                  <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
+                                    {t('extrasManagement.categoryConfigModal.badges.removalCategory')}
+                                  </span>
+                                )}
+                              </div>
                               <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 mt-1`}>
                                 <span className={`text-xs px-2 py-1 rounded-full ${
                                   category.isRequired
@@ -706,124 +739,174 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                               </h5>
                             </div>
 
-                            
-                            
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                  {t('extrasManagement.categoryConfigModal.fields.minSelection')}
-                                </label>
-                                <input
-                                  title={t('extrasManagement.categoryConfigModal.fields.minSelection')}
-                                  type="number"
-                                  min="0"
-                                  value={config.minSelectionCount}
-                                  onChange={(e) =>
-                                    handleConfigChange(
-                                      category.productExtraCategoryId,
-                                      'minSelectionCount',
-                                      parseInt(e.target.value) || 0
-                                    )
-                                  }
-                                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                />
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                  {t('extrasManagement.categoryConfigModal.fields.maxSelection')}
-                                </label>
-                                <div className="flex items-center gap-2">
+                            {isRemoval ? (
+                               // Removal Category Logic: Only Max Selection with Unlimited Checkbox
+                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                      {t('extrasManagement.categoryConfigModal.fields.maxSelection')}
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                      <input
+                                        title={t('extrasManagement.categoryConfigModal.fields.maxSelection')}
+                                        type="number"
+                                        min="0"
+                                        value={config.isMaxSelectionUnlimited ? '' : config.maxSelectionCount}
+                                        onChange={(e) =>
+                                          handleConfigChange(
+                                            category.productExtraCategoryId,
+                                            'maxSelectionCount',
+                                            parseInt(e.target.value) || 0
+                                          )
+                                        }
+                                        disabled={config.isMaxSelectionUnlimited}
+                                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                      />
+                                      <label className="flex items-center gap-2 whitespace-nowrap cursor-pointer">
+                                        <input
+                                          type="checkbox"
+                                          checked={config.isMaxSelectionUnlimited || false}
+                                          onChange={(e) =>
+                                            handleConfigChange(
+                                              category.productExtraCategoryId,
+                                              'isMaxSelectionUnlimited',
+                                              e.target.checked
+                                            )
+                                          }
+                                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                        />
+                                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                                          {t('extrasManagement.categories.fields.unlimited')}
+                                        </span>
+                                      </label>
+                                    </div>
+                                    
+                                  </div>
+                               </div>
+                            ) : (
+                              // Standard Category Logic: Grid of 4
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    {t('extrasManagement.categoryConfigModal.fields.minSelection')}
+                                  </label>
                                   <input
-                                    title={t('extrasManagement.categoryConfigModal.fields.maxSelection')}
+                                    title={t('extrasManagement.categoryConfigModal.fields.minSelection')}
                                     type="number"
                                     min="0"
-                                    value={config.isMaxSelectionUnlimited ? '' : config.maxSelectionCount}
+                                    value={config.minSelectionCount}
                                     onChange={(e) =>
                                       handleConfigChange(
                                         category.productExtraCategoryId,
-                                        'maxSelectionCount',
+                                        'minSelectionCount',
                                         parseInt(e.target.value) || 0
                                       )
                                     }
-                                    disabled={config.isMaxSelectionUnlimited}
-                                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                   />
-                                  <label className="flex items-center gap-2 whitespace-nowrap">
+                                </div>
+
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    {t('extrasManagement.categoryConfigModal.fields.maxSelection')}
+                                  </label>
+                                  <div className="flex items-center gap-2">
                                     <input
-                                      type="checkbox"
-                                      checked={config.isMaxSelectionUnlimited || false}
+                                      title={t('extrasManagement.categoryConfigModal.fields.maxSelection')}
+                                      type="number"
+                                      min="0"
+                                      value={config.isMaxSelectionUnlimited ? '' : config.maxSelectionCount}
                                       onChange={(e) =>
                                         handleConfigChange(
                                           category.productExtraCategoryId,
-                                          'isMaxSelectionUnlimited',
-                                          e.target.checked
+                                          'maxSelectionCount',
+                                          parseInt(e.target.value) || 0
                                         )
                                       }
-                                      className="w-4 h-4 text-blue-600 rounded"
+                                      disabled={config.isMaxSelectionUnlimited}
+                                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                                     />
-                                    <span className="text-sm text-gray-600 dark:text-gray-400">Unlimited</span>
-                                  </label>
+                                    <label className="flex items-center gap-2 whitespace-nowrap cursor-pointer">
+                                      <input
+                                        type="checkbox"
+                                        checked={config.isMaxSelectionUnlimited || false}
+                                        onChange={(e) =>
+                                          handleConfigChange(
+                                            category.productExtraCategoryId,
+                                            'isMaxSelectionUnlimited',
+                                            e.target.checked
+                                          )
+                                        }
+                                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                      />
+                                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                                        {t('extrasManagement.categories.fields.unlimited')}
+                                      </span>
+                                    </label>
+                                  </div>
                                 </div>
-                              </div>
 
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                  {t('extrasManagement.categoryConfigModal.fields.minQuantity')}
-                                </label>
-                                <input
-                                  title={t('extrasManagement.categoryConfigModal.fields.minQuantity')}
-                                  type="number"
-                                  min="0"
-                                  value={config.minTotalQuantity}
-                                  onChange={(e) =>
-                                    handleConfigChange(
-                                      category.productExtraCategoryId,
-                                      'minTotalQuantity',
-                                      parseInt(e.target.value) || 0
-                                    )
-                                  }
-                                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                                />
-                              </div>
-
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                  {t('extrasManagement.categoryConfigModal.fields.maxQuantity')}
-                                </label>
-                                <div className="flex items-center gap-2">
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    {t('extrasManagement.categoryConfigModal.fields.minQuantity')}
+                                  </label>
                                   <input
-                                    title={t('extrasManagement.categoryConfigModal.fields.maxQuantity')}
+                                    title={t('extrasManagement.categoryConfigModal.fields.minQuantity')}
                                     type="number"
                                     min="0"
-                                    value={config.isMaxQuantityUnlimited ? '' : config.maxTotalQuantity}
+                                    value={config.minTotalQuantity}
                                     onChange={(e) =>
                                       handleConfigChange(
                                         category.productExtraCategoryId,
-                                        'maxTotalQuantity',
+                                        'minTotalQuantity',
                                         parseInt(e.target.value) || 0
                                       )
                                     }
-                                    disabled={config.isMaxQuantityUnlimited}
-                                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                   />
-                                  <label className="flex items-center gap-2 whitespace-nowrap">
+                                </div>
+
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                    {t('extrasManagement.categoryConfigModal.fields.maxQuantity')}
+                                  </label>
+                                  <div className="flex items-center gap-2">
                                     <input
-                                      type="checkbox"
-                                      checked={config.isMaxQuantityUnlimited || false}
+                                      title={t('extrasManagement.categoryConfigModal.fields.maxQuantity')}
+                                      type="number"
+                                      min="0"
+                                      value={config.isMaxQuantityUnlimited ? '' : config.maxTotalQuantity}
                                       onChange={(e) =>
                                         handleConfigChange(
                                           category.productExtraCategoryId,
-                                          'isMaxQuantityUnlimited',
-                                          e.target.checked
+                                          'maxTotalQuantity',
+                                          parseInt(e.target.value) || 0
                                         )
                                       }
-                                      className="w-4 h-4 text-blue-600 rounded"
+                                      disabled={config.isMaxQuantityUnlimited}
+                                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                                     />
-                                    <span className="text-sm text-gray-600 dark:text-gray-400">Unlimited</span>
-                                  </label>
+                                    <label className="flex items-center gap-2 whitespace-nowrap cursor-pointer">
+                                      <input
+                                        type="checkbox"
+                                        checked={config.isMaxQuantityUnlimited || false}
+                                        onChange={(e) =>
+                                          handleConfigChange(
+                                            category.productExtraCategoryId,
+                                            'isMaxQuantityUnlimited',
+                                            e.target.checked
+                                          )
+                                        }
+                                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                      />
+                                      <span className="text-sm text-gray-600 dark:text-gray-400">
+                                        {t('extrasManagement.categories.fields.unlimited')}
+                                      </span>
+                                    </label>
+                                  </div>
                                 </div>
                               </div>
+                            )}
 
                             <div className={`mt-3 flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2`}>
                               <input
@@ -841,14 +924,12 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                               />
                               <label
                                 htmlFor={`required-${category.productExtraCategoryId}`}
-                                className="text-sm text-gray-700 dark:text-gray-300"
+                                className="text-sm text-gray-700 dark:text-gray-300 cursor-pointer"
                               >
                                 {t('extrasManagement.categoryConfigModal.fields.overrideRequired')}
                               </label>
                             </div>
-                            </div>
                             
-                           
                           </div>
                         )}
                       </div>
@@ -872,9 +953,10 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                 minQuantity: extra.defaultMinQuantity || 0,
                                 maxQuantity: extra.defaultMaxQuantity ,
                                 isRequiredOverride: false,
+                                isMaxQuantityUnlimited: false
                               };
                               const isEditing = editingExtraId === extra.productExtraId;
-                              const isRemoval = extra.isRemoval;
+                              const isExtraRemoval = extra.isRemoval;
 
                               return (
                                 <div
@@ -894,14 +976,14 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                         <p className="font-medium text-gray-900 dark:text-white">
                                           {extra.extraName}
                                         </p>
-                                        {isRemoval && (
+                                        {isExtraRemoval && (
                                           <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
                                             {t('extrasManagement.categoryConfigModal.badges.removal')}
                                           </span>
                                         )}
                                       </div>
                                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                                        {!isRemoval && (
+                                        {!isExtraRemoval && (
                                           <>
                                             ${(extraConfig.specialUnitPrice || extra.unitPrice).toFixed(2)}
                                             {extraConfig.specialUnitPrice > 0 && extraConfig.specialUnitPrice !== extra.unitPrice && (
@@ -911,7 +993,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                             )}
                                           </>
                                         )}
-                                        {isRemoval && (
+                                        {isExtraRemoval && (
                                           <span className="text-xs text-gray-500 dark:text-gray-400">
                                             {t('extrasManagement.categoryConfigModal.labels.removesIngredient')}
                                           </span>
@@ -951,14 +1033,14 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                   {isEditing && isExtraSelected && (
                                     <div className="border-t border-gray-200 dark:border-gray-600 p-4 bg-white dark:bg-gray-700/50">
                                       <div className={`flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2 mb-3`}>
-                                        <DollarSign className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                                        <span className="h-4 w-4 text-gray-600 dark:text-gray-400">{currency.symbol}</span>
                                         <h6 className="font-medium text-sm text-gray-900 dark:text-white">
                                           {t('extrasManagement.categoryConfigModal.labels.extraConfiguration')}
                                         </h6>
                                       </div>
                                       
                                       <div className="grid grid-cols-2 gap-3">
-                                        {!isRemoval && (
+                                        {!isExtraRemoval && (
                                           <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                                               {t('extrasManagement.categoryConfigModal.fields.specialPrice')}
@@ -982,7 +1064,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                           </div>
                                         )}
                                         
-                                        {isRemoval && (
+                                        {isExtraRemoval && (
                                           <div className="col-span-2">
                                             <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
                                               <p className="text-xs text-amber-700 dark:text-amber-400 flex items-center">
@@ -993,7 +1075,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                           </div>
                                         )}
 
-                                        {!isRemoval && (
+                                        {!isExtraRemoval && (
                                           <div>
                                             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
                                               {t('extrasManagement.categoryConfigModal.fields.minQty')}
@@ -1037,7 +1119,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                               disabled={extraConfig.isMaxQuantityUnlimited}
                                               className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white disabled:opacity-50 disabled:cursor-not-allowed"
                                             />
-                                            <label className="flex items-center gap-2 whitespace-nowrap">
+                                            <label className="flex items-center gap-2 whitespace-nowrap cursor-pointer">
                                               <input
                                                 type="checkbox"
                                                 checked={extraConfig.isMaxQuantityUnlimited || false}
@@ -1049,14 +1131,12 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
                                                   )
                                                 }
                                                 onClick={(e) => e.stopPropagation()}
-                                                className="w-4 h-4 text-blue-600 rounded"
+                                                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                                               />
                                               <span className="text-xs text-gray-600 dark:text-gray-400">Unlimited</span>
                                             </label>
                                           </div>
                                         </div>
-
-                                       
                                       </div>
                                     </div>
                                   )}

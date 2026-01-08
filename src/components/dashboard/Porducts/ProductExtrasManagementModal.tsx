@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   X, Plus, Edit2, Trash2, Save, Loader2, Package,
-  DollarSign, Check, AlertCircle, ArrowLeft, Layers
+  AlertCircle, ArrowLeft, Layers
 } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -10,7 +10,7 @@ import { productExtrasService } from '../../../services/Extras/ProductExtrasServ
 import { extrasService } from '../../../services/Extras/ExtrasService';
 import { ConfirmationModal } from './ConfirmationModal';
 import { CreateProductExtraData, Extra, ProductExtra, UpdateProductExtraData } from '../../../types/Extras/type';
-// Import ConfirmationModal here
+import { useCurrency } from '../../../hooks/useCurrency';
 
 interface ProductExtrasManagementModalProps {
   isOpen: boolean;
@@ -20,6 +20,7 @@ interface ProductExtrasManagementModalProps {
   productName: string;
   extraCategoryId: number;
   extraCategoryName: string;
+  isRemoval?: boolean; // Added this prop
 }
 
 const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> = ({
@@ -29,7 +30,8 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
   productId,
   productName,
   extraCategoryId,
-  extraCategoryName
+  extraCategoryName,
+  isRemoval = false // Default to false
 }) => {
   const { t, isRTL } = useLanguage();
   const { isDark } = useTheme();
@@ -42,6 +44,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const currency = useCurrency();
 
   // Delete Confirmation
   const [deleteConfirm, setDeleteConfirm] = useState<{ isOpen: boolean; id: number | null }>({
@@ -114,7 +117,8 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
       const data: CreateProductExtraData = {
         productId: productId,
         extraId: formData.extraId,
-        selectionMode: formData.selectionMode,
+        // Force selection mode to 0 (Single) if isRemoval is true
+        selectionMode: isRemoval ? 0 : formData.selectionMode,
         defaultQuantity: formData.defaultQuantity,
         defaultMinQuantity: formData.defaultMinQuantity,
         defaultMaxQuantity: formData.defaultMaxQuantity,
@@ -149,7 +153,8 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
       setError(null);
       const data: UpdateProductExtraData = {
         id: id,
-        selectionMode: editFormData.selectionMode,
+        // Force selection mode to 0 (Single) if isRemoval is true
+        selectionMode: isRemoval ? 0 : editFormData.selectionMode,
         defaultQuantity: editFormData.defaultQuantity,
         defaultMinQuantity: editFormData.defaultMinQuantity,
         defaultMaxQuantity: editFormData.defaultMaxQuantity,
@@ -249,10 +254,17 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                   <ArrowLeft className={`h-6 w-6 ${isRTL ? 'rotate-180' : ''}`} />
                 </button>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Layers className="h-6 w-6 text-primary-600" />
-                  {t('extrasManagement.productExtras.manageExtras')}
-                </h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                    <Layers className="h-6 w-6 text-primary-600" />
+                    {t('extrasManagement.productExtras.manageExtras')}
+                  </h2>
+                  {isRemoval && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-medium border border-red-200 dark:border-red-800">
+                      {t('extrasManagement.categoryConfigModal.badges.removal')}
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-300 mt-1">
                   <span>{productName}</span>
                   <span className="text-gray-300 mx-1">•</span>
@@ -340,7 +352,9 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                             {t('extrasManagement.productExtras.unitPrice')} <span className="text-red-500">*</span>
                           </label>
                           <div className="relative">
-                            <DollarSign className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-300`} />
+                            <span className={`absolute ${isRTL ? 'right-4' : 'left-4'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-300`}>
+                              {currency.symbol}
+                            </span>
                             <input
                               title='Unit Price'
                               type="number"
@@ -362,28 +376,39 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             {t('extrasManagement.productExtras.selectionMode')}
                           </label>
-                          <div className="grid grid-cols-2 gap-3">
-                            <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${formData.selectionMode === 0 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'}`}>
-                              <input
-                                type="radio"
-                                value={0}
-                                checked={formData.selectionMode === 0}
-                                onChange={() => setFormData({ ...formData, selectionMode: 0 })}
-                                className="hidden"
-                              />
-                              <span className="font-medium">{t('extrasManagement.productExtras.single')}</span>
-                            </label>
-                            <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${formData.selectionMode === 1 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'}`}>
-                              <input
-                                type="radio"
-                                value={1}
-                                checked={formData.selectionMode === 1}
-                                onChange={() => setFormData({ ...formData, selectionMode: 1 })}
-                                className="hidden"
-                              />
-                              <span className="font-medium">{t('extrasManagement.productExtras.multiple')}</span>
-                            </label>
-                          </div>
+                          
+                          {/* Conditional Rendering based on isRemoval */}
+                          {isRemoval ? (
+                            <div className="p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
+                              <p className="text-sm text-gray-600 dark:text-gray-400 font-medium flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                                {t('extrasManagement.productExtras.single')} ({t('extrasManagement.categoryConfigModal.badges.removal')})
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-2 gap-3">
+                              <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${formData.selectionMode === 0 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'}`}>
+                                <input
+                                  type="radio"
+                                  value={0}
+                                  checked={formData.selectionMode === 0}
+                                  onChange={() => setFormData({ ...formData, selectionMode: 0 })}
+                                  className="hidden"
+                                />
+                                <span className="font-medium">{t('extrasManagement.productExtras.single')}</span>
+                              </label>
+                              <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${formData.selectionMode === 1 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300'}`}>
+                                <input
+                                  type="radio"
+                                  value={1}
+                                  checked={formData.selectionMode === 1}
+                                  onChange={() => setFormData({ ...formData, selectionMode: 1 })}
+                                  className="hidden"
+                                />
+                                <span className="font-medium">{t('extrasManagement.productExtras.multiple')}</span>
+                              </label>
+                            </div>
+                          )}
                         </div>
 
                         <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl space-y-4">
@@ -495,7 +520,9 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                   <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('extrasManagement.productExtras.priceAndSelection')}</label>
                                     <div className="relative mb-3">
-                                      <DollarSign className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-300`} />
+                                      <span className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-300`}>
+                                        {currency.symbol}
+                                      </span>
                                       <input
                                         title='Unit Price'
                                         type="number"
@@ -506,20 +533,28 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                         className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500`}
                                       />
                                     </div>
-                                    <div className="flex gap-2">
-                                       <button
-                                        onClick={() => setEditFormData({...editFormData, selectionMode: 0})}
-                                        className={`flex-1 py-2 text-xs font-medium rounded border transition-colors ${editFormData.selectionMode === 0 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'}`}
-                                       >
-                                         {t('extrasManagement.productExtras.singleSelect')}
-                                       </button>
-                                       <button
-                                        onClick={() => setEditFormData({...editFormData, selectionMode: 1})}
-                                        className={`flex-1 py-2 text-xs font-medium rounded border transition-colors ${editFormData.selectionMode === 1 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'}`}
-                                       >
-                                         {t('extrasManagement.productExtras.multiSelect')}
-                                       </button>
-                                    </div>
+                                    
+                                    {/* Conditional Selection Mode in Edit */}
+                                    {isRemoval ? (
+                                      <div className="p-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded text-sm text-gray-600 dark:text-gray-400">
+                                         {t('extrasManagement.productExtras.single')} ({t('extrasManagement.categoryConfigModal.badges.removal')})
+                                      </div>
+                                    ) : (
+                                      <div className="flex gap-2">
+                                         <button
+                                          onClick={() => setEditFormData({...editFormData, selectionMode: 0})}
+                                          className={`flex-1 py-2 text-xs font-medium rounded border transition-colors ${editFormData.selectionMode === 0 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'}`}
+                                         >
+                                           {t('extrasManagement.productExtras.singleSelect')}
+                                         </button>
+                                         <button
+                                          onClick={() => setEditFormData({...editFormData, selectionMode: 1})}
+                                          className={`flex-1 py-2 text-xs font-medium rounded border transition-colors ${editFormData.selectionMode === 1 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'}`}
+                                         >
+                                           {t('extrasManagement.productExtras.multiSelect')}
+                                         </button>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
 
@@ -606,7 +641,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
 
                                 <div className="flex items-center gap-6 text-sm">
                                   <div className="flex items-center gap-1.5 text-gray-900 dark:text-white font-semibold bg-green-50 dark:bg-green-900/20 px-3 py-1 rounded-full border border-green-100 dark:border-green-900/30">
-                                    <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                    <span className="h-4 w-4 text-green-600 dark:text-green-400">{currency.symbol}</span>
                                     <span>{extra.unitPrice.toFixed(2)}</span>
                                   </div>
                                   <div className="text-gray-500 dark:text-gray-300">

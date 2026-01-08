@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, Calendar, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
+import { FileText, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
 import { MoneyCaseHistoryItem } from '../../../../types/BranchManagement/MoneyCase';
 
 interface Props {

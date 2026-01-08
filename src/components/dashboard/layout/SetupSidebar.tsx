@@ -8,13 +8,13 @@ import {
   LogOut,
   X,
   Type,
-  DollarSign,
   Table,
   HardHat,
   Store,
 } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { SetupSidebarProps } from '../../../types/BranchManagement/type';
+import { useCurrency } from '../../../hooks/useCurrency';
 
 const SetupSidebar: React.FC<SetupSidebarProps> = ({
   isOpen,
@@ -30,7 +30,8 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
-
+    const currency = useCurrency();
+  
   // Helper: Navigate to tab and update state
   const handleNavigate = (path: string, tab: string) => {
     navigate(`/dashboard/${path}`);
@@ -164,7 +165,7 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
               } ${isRTL ? 'text-right' : 'text-left'}`}
             
             >
-              <DollarSign className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+              {currency.symbol}
               <span>{t('dashboard.moneyCase.title')}</span>
             </button>
             {/* User Management - Only for non-branch-only users */}
@@ -196,6 +197,7 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
                 <span>{t('dashboard.settings.title')}</span>
               </button>
             )}
+            
 
           </nav>
 

@@ -12,7 +12,6 @@ const Hero: React.FC = () => {
     { icon: <Zap className="h-5 w-5" />, text: t('hero.features.instantUpdate') },
   ];
 
-  console.log("18/12/2025")
 
   return (
     <section id="hero" className="section-padding pt-24 lg:pt-32 bg-gradient-to-br from-primary-50 to-blue-100 dark:from-gray-900 dark:to-gray-800">

@@ -2,6 +2,15 @@ import React from 'react';
 import { X, AlertTriangle } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { CreateExtraCategoryData } from '../../../types/Extras/type';
+import { MultiLanguageInput } from '../../common/MultiLanguageInput';
+import { TranslatableFieldValue } from '../../../hooks/useTranslatableFields';
+
+interface LanguageOption {
+  code: string;
+  displayName: string;
+  nativeName: string;
+  isRtl: boolean;
+}
 
 interface CategoryModalProps {
   isEditMode: boolean;
@@ -11,6 +20,12 @@ interface CategoryModalProps {
   onChange: (data: CreateExtraCategoryData) => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
+  nameTranslations: TranslatableFieldValue;
+  descriptionTranslations: TranslatableFieldValue;
+  onNameTranslationsChange: (value: TranslatableFieldValue) => void;
+  onDescriptionTranslationsChange: (value: TranslatableFieldValue) => void;
+  supportedLanguages: LanguageOption[];
+  defaultLanguage: string;
 }
 
 export const CategoryModal: React.FC<CategoryModalProps> = ({
@@ -21,6 +36,10 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
   onChange,
   onSubmit,
   onClose,
+  nameTranslations,
+  onNameTranslationsChange,
+  supportedLanguages,
+  defaultLanguage,
 }) => {
   const { t } = useLanguage();
 
@@ -28,7 +47,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 transition-opacity bg-gray-900/75 backdrop-blur-sm" onClick={onClose}></div>
-        <div className="inline-block  align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
+        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
 
           {/* Modal Header */}
           <div className="bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
@@ -41,7 +60,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
           </div>
 
           {/* Modal Content */}
-          <div className="max-w-9xl px-6 py-6 max-h-[70vh] ">
+          <div className="max-w-9xl px-6 py-6 max-h-[70vh] overflow-y-auto">
             {error && (
               <div className="mb-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-lg">
                 <div className="flex items-start">
@@ -58,17 +77,23 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
             )}
 
             <form id="categoryForm" onSubmit={onSubmit} className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  {t('extrasManagement.categories.fields.categoryName')}
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.categoryName}
-                  onChange={(e) => onChange({ ...formData, categoryName: e.target.value })}
-                  className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2.5 px-3"
+              <div 
+                className="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-2"
+                style={{ 
+                  maxHeight: '300px', 
+                  overflowY: 'auto',
+                  display: 'block' 
+                }}
+              >
+                <MultiLanguageInput
+                  label={t('extrasManagement.categories.fields.categoryName')}
+                  value={nameTranslations}
+                  onChange={onNameTranslationsChange}
+                  languages={supportedLanguages}
+                  required={true}
+                  requiredLanguages={[defaultLanguage]}
                   placeholder={t('extrasManagement.categories.fields.categoryNamePlaceholder')}
+                  disabled={loading}
                 />
               </div>
 
@@ -106,7 +131,16 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                     <input
                       type="checkbox"
                       checked={formData.isRemovalCategory}
-                      onChange={(e) => onChange({ ...formData, isRemovalCategory: e.target.checked })}
+                      onChange={(e) => {
+                        const isRemoval = e.target.checked;
+                        onChange({ 
+                          ...formData, 
+                          isRemovalCategory: isRemoval,
+                          // Reset Max Quantity fields if removal is checked
+                          defaultMaxTotalQuantity: isRemoval ? 0 : formData.defaultMaxTotalQuantity,
+                          isMaxQuantityUnlimited: isRemoval ? false : formData.isMaxQuantityUnlimited
+                        });
+                      }}
                       className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                     />
                     <span className="text-sm font-medium text-gray-900 dark:text-white">
@@ -121,6 +155,8 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                 <h4 className="text-xs font-semibold uppercase text-gray-500 tracking-wider">
                   {t('extrasManagement.categories.fields.selectionRules')}
                 </h4>
+                
+                {/* Row 1: Min/Max Selection */}
                 <div className="grid grid-cols-2 gap-4">
                   {!formData.isRemovalCategory && (
                     <div>
@@ -130,6 +166,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                       <input
                         type="text"
                         inputMode="numeric"
+                        title={t('extrasManagement.categories.fields.minSelection')}
                         className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3"
                         value={formData.defaultMinSelectionCount}
                         onChange={(e) => {
@@ -168,8 +205,10 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                     </div>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  {!formData.isRemovalCategory && (
+                
+                {/* Row 2: Min/Max Quantity (Hidden completely if isRemovalCategory is true) */}
+                {!formData.isRemovalCategory && (
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                         {t('extrasManagement.categories.fields.minQuantity')}
@@ -177,6 +216,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                       <input
                         type="text"
                         inputMode="numeric"
+                        title={t('extrasManagement.categories.fields.minQuantity')}
                         className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3"
                         value={formData.defaultMinTotalQuantity}
                         onChange={(e) => {
@@ -185,36 +225,36 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                         }}
                       />
                     </div>
-                  )}
-                  <div>
-                    <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
-                      {t('extrasManagement.categories.fields.maxQuantity')}
-                    </label>
-                    <div className="flex items-center gap-2">
-                      <input
-                        title={t('extrasManagement.categories.fields.maxQuantity')}
-                        type="text"
-                        inputMode="numeric"
-                        className="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                        value={formData.isMaxQuantityUnlimited ? '' : (formData.defaultMaxTotalQuantity ?? '')}
-                        onChange={(e) => {
-                          const val = e.target.value.replace(/[^0-9]/g, '');
-                          onChange({ ...formData, defaultMaxTotalQuantity: val === '' ? 0 : parseInt(val) });
-                        }}
-                        disabled={formData.isMaxQuantityUnlimited}
-                      />
-                      <label className="flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={formData.isMaxQuantityUnlimited || false}
-                          onChange={(e) => onChange({ ...formData, isMaxQuantityUnlimited: e.target.checked })}
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                        />
-                        <span className="text-[11px] font-medium text-gray-700 dark:text-gray-300">{t('extrasManagement.categories.fields.unlimited')}</span>
+                    <div>
+                      <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        {t('extrasManagement.categories.fields.maxQuantity')}
                       </label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          title={t('extrasManagement.categories.fields.maxQuantity')}
+                          type="text"
+                          inputMode="numeric"
+                          className="flex-1 rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white py-2 px-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                          value={formData.isMaxQuantityUnlimited ? '' : (formData.defaultMaxTotalQuantity ?? '')}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '');
+                            onChange({ ...formData, defaultMaxTotalQuantity: val === '' ? 0 : parseInt(val) });
+                          }}
+                          disabled={formData.isMaxQuantityUnlimited}
+                        />
+                        <label className="flex items-center gap-1.5 whitespace-nowrap cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formData.isMaxQuantityUnlimited || false}
+                            onChange={(e) => onChange({ ...formData, isMaxQuantityUnlimited: e.target.checked })}
+                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                          />
+                          <span className="text-[11px] font-medium text-gray-700 dark:text-gray-300">{t('extrasManagement.categories.fields.unlimited')}</span>
+                        </label>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </form>
           </div>

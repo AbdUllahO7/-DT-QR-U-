@@ -6,6 +6,9 @@ export const en = {
   common: {
     loading: 'Loading...',
     error: 'Error',
+    removal: 'Removal',
+    setAsDefault: 'Set as Default',
+    default: 'Default',
     success: 'Success',
     cancel: 'Cancel',
     change: 'Change',
@@ -46,6 +49,7 @@ export const en = {
   filter: {
       "status": "Status",
       "all": "All",
+      "allergen": "Allergen",
       "active": "Active", 
       "inactive": "Inactive",
       "categories": "Categories",
@@ -966,19 +970,27 @@ hero: {
     title: 'Table Management',
     ActiveStatus :"Active Status",
     selectBranchPrompt:"No Branches",
-          selectBranch : "Select Branch",
+    selectBranch : "Select Branch",
 
-    descriptionActive : "Category is active and visible", 
-    descriptionInActive : "Category is inactive and hidden", 
+    descriptionActive : "Area is active",
+    descriptionInActive : "Area is inactive",
 
     description: 'Manage your QR codes and tables',
-            noCategories :"Not Found Area",
+    noCategories :"Not Found Area",
     createFirstCategory: "Create First Area",
+
+    areaTypes: {
+      indoor: 'Indoor',
+      outdoor: 'Outdoor',
+      terrace: 'Terrace',
+      garden: 'Garden'
+    },
+
     error: {
       loadFailed: 'Failed to load branch list',
       dataLoadFailed: 'An error occurred while loading data'
     },
-      deleteModal :{ title : "Are You Sure you want delete the item ? " },
+    deleteModal :{ title : "Are You Sure you want delete the item ? " },
     actions: {
       addTable: 'Add Table',
       addQRCode: 'Add QR Code',
@@ -1346,7 +1358,7 @@ hero: {
         branchName: 'Branch Name',
         branchNamePlaceholder: 'Enter branch name',
         branchNameRequired: 'Branch name is required',
-        whatsappNumber: 'WhatsApp Order Number *',
+        whatsappNumber: 'WhatsApp Order Number ',
         whatsappPlaceholder: 'Enter WhatsApp number',
         branchLogo: 'Branch Logo',
         logoUpload: 'Upload Logo',
@@ -1502,6 +1514,7 @@ hero: {
     editProduct: 'Edit Product',
     deleteProduct: 'Delete Product',
     manageIngredients: 'Manage Ingredients',
+    manageExtras: 'Manage Extras',
     updateIngredients: 'Update Ingredients',
     manageAddons: 'Manage Add-ons',
     importSampleMenu: 'Import Sample Menu',
@@ -1876,8 +1889,8 @@ hero: {
 
       // Counter texts
       counters: {
-        selectedProducts: '{{count}} products selected',
-        availableProducts: '{{count}} available products'
+        selectedProducts: '{count} products selected',
+        availableProducts: '{count} available products'
       },
 
       // Error messages
@@ -2442,7 +2455,9 @@ hero: {
     filter: 'Filter',
     sort: 'Sort',
     newIngredient: 'New Ingredient',
-    
+    applyFilters: 'Apply Filters',
+    clearFilters: 'Clear All Filters',
+
     // Table headers
     ingredientName: 'Ingredient Name',
     status: 'Status',
@@ -2606,40 +2621,46 @@ hero: {
   },
 
   TableCategoryModal: {
-    addCategoryTitle: 'Add Table Area',
-    addCategorySubtitle: 'Create a new table Area',
+    addCategoryTitle: 'Add New Area',
+    
+    editCategoryTitle: 'Edit Area',
+    update: 'Update Area',
+    addCategorySubtitle: 'Create a new area for your tables',
+    editCategorySubtitle: 'Update area details',
     categoryName: 'Area Name',
-    categoryNamePlaceholder: 'e.g. VIP Tables, Garden Tables',
-    description: 'Description (Optional)',
-    descriptionPlaceholder: 'Brief description about the Area...',
+    categoryNamePlaceholder: 'Enter area name',
+    description: 'Description',
+    descriptionPlaceholder: 'Enter description (optional)',
     colorSelection: 'Color Selection',
     customColor: 'Custom color',
-    iconSelection: 'Icon Selection',
+    iconSelection: 'Area Type',
     branchSelection: 'Branch Selection',
     cancel: 'Cancel',
     addCategory: 'Add Area',
     saving: 'Saving...',
-    
+
     // Icons
     table: 'Table',
     chair: 'Chair',
     service: 'Service',
     label: 'Label',
     layer: 'Layer',
-    
+
     // Validation errors
-    categoryNameRequired: 'Category name is required',
-    iconRequired: 'You must select an icon',
+    categoryNameRequired: 'Area name is required',
+    iconRequired: 'Icon is required',
     branchRequired: 'Branch selection is required',
-    invalidData: 'Invalid data sent',
+    invalidData: 'Invalid data provided',
+    errorOccurred: 'An error occurred',
     unauthorized: 'You are not authorized. Please log in again.',
     forbidden: 'You do not have permission for this operation.',
     branchNotFound: 'Selected branch not found.',
     serverError: 'Server error occurred. Please try again later.',
     unexpectedError: 'An unexpected error occurred while adding category',
-    
+
     accessibility: {
-      modal: 'Table Area creation modal',
+      modal: 'Table Area Modal',
+      close: 'Close',
       colorPalette: 'Color selection palette',
       colorPreset: 'Preset color option',
       customColorPicker: 'Custom color picker',
@@ -3119,28 +3140,28 @@ hero: {
   BranchTableManagement: {
         "capacityLabel": "Capacity",
     "tableNameLabel": "Table Name",
-    header: "Category & Table Management",
+    header: "Areas & Table Management",
     "clearTable": "Clear Table",
     "refreshTable": "Refresh Status", 
     "clearing": "Clearing...",
-    loading : "Loading...",
-    category : "Category",
+    loading: "Loading...",
+    category: "Area",
     createTables: "Create Tables",
     creatingTables: "Creating...",
-   SelectCategory: "Select Category", 
+   SelectCategory: "Select Area",
    Capacity: "Capacity",
    Quantity: "Quantity",
     batchCreateTables: "Batch Create Tables",
-    subheader: "Manage restaurant categories and tables with accordion view",
-    totalCategories: "Total Categories",
+    subheader: "Manage restaurant Areas and tables with accordion view",
+    totalCategories: "Total Areas",
     totalTables: "Total Tables",
     occupiedTables: "Occupied Tables",
     availableTables: "Available Tables",
-    searchPlaceholder: "Search categories...",
+    searchPlaceholder: "Search Areas...",
     refresh: "Refresh",
     addCategory: "Add Area",
     addCategoryTitle: "Add New Area",
-    multiCategory: "Create multiple tables across different categories at once",
+    multiCategory: "Create multiple tables across different Areas at once",
     categoryNameLabel: "Area Name",
     categoryNamePlaceholder: "Enter Area name",
     colorLabel: "Color",
@@ -3217,6 +3238,7 @@ hero: {
     loading: 'Loading branch information...',
     noBranchFound: 'No branch found',
     uploadLogo: 'Upload Logo',
+    editBranchName: 'Edit Branch Name',
     status: {
       open: 'Open',
       closed: 'Closed',
@@ -3224,7 +3246,7 @@ hero: {
       reopenBranch: 'Reopen Branch',
       temporaryClose: 'Temporary Close'
     },
-    
+
     actions: {
       edit: 'Edit',
       save: 'Save',
@@ -3234,8 +3256,11 @@ hero: {
       confirmDelete: 'Confirm Delete',
       deleteWarning: 'Are you sure you want to delete this branch? This action cannot be undone.',
       onlineMenu: 'Online Menu URL',
+      copyLink: 'Copy Link',
+      copied: 'Copied!',
+      linkCopied: 'Link copied to clipboard!',
     },
-    
+
     basicInfo: {
       title: 'Basic Information',
       branchName: 'Branch Name',
@@ -3243,7 +3268,7 @@ hero: {
       email: 'Email',
       notSpecified: 'Not specified'
     },
-    
+
     addressInfo: {
       title: 'Address Information',
       country: 'Country',
@@ -3252,7 +3277,7 @@ hero: {
       postalCode: 'Postal Code',
       region: 'Region'
     },
-    
+
     workingHours: {
       title: 'Working Hours',
       workingDay: 'Working day',
@@ -3269,7 +3294,7 @@ hero: {
         6: 'Saturday'
       }
     },
-    
+
     messages: {
       updateSuccess: 'Branch information updated successfully',
       deleteSuccess: 'Branch deleted successfully',
@@ -3278,9 +3303,19 @@ hero: {
       updateError: 'Error occurred during update',
       deleteError: 'Error occurred during deletion',
       statusChangeError: 'Error occurred while changing status',
-      loadError: 'Error occurred while loading branch information'
+      loadError: 'Error occurred while loading branch information',
+      nameUpdated: 'Branch name updated successfully',
+      nameUpdateError: 'Failed to update branch name'
     },
-    
+
+    errors: {
+      nameRequired: 'Branch name is required',
+      saveFailed: 'Failed to save branch name',
+      popupBlocked: 'Please allow popups to open the online menu',
+      failedToGetPublicId: 'Failed to get online menu link',
+      failedToCopyLink: 'Failed to copy link'
+    },
+
     placeholders: {
       branchName: 'Enter branch name',
       whatsappNumber: 'Enter WhatsApp number',
@@ -3295,9 +3330,14 @@ hero: {
 
   branchCategories: {
     // Header and Stats
+    editCategoryName: 'Edit Category Name',
+    originalName: 'Original Name',
+    categoryName: 'Category Name',
+    enterCategoryName: 'Enter Category Name',
     header: 'Branch Categories Management',
     subheader: 'Manage categories and products for Branch ',
     lastUpdated: 'Last Updated',
+
     stock : {
       inStock: 'In Stock',
       outOfStock: 'Out of Stock'
@@ -3386,6 +3426,7 @@ hero: {
       noCategoriesAddedDesc: 'No categories have been added to this branch yet',
       addCategories: 'Add Categories',
       original: 'Original:',
+      customized: 'Customized',
       added: 'added',
       available: 'available',
       total: 'Total',
@@ -3471,7 +3512,8 @@ hero: {
         categoryDeleted: 'Category deleted successfully',
         productAdded: 'Product {name} added successfully',
         productRemoved: 'Product {name} removed successfully',
-        orderSaved: 'Category order saved successfully'
+        orderSaved: 'Category order saved successfully',
+        nameUpdated: 'Category name updated successfully'
       },
       error: {
         cannotDelete: 'Cannot delete category "{name}" because it contains {count} products. Please remove all products first.',
@@ -3676,6 +3718,8 @@ hero: {
   products: "Products",
   addToBasket: "Add to Basket",
   addToOrder: "Add to Order",
+  resetSession: "Reset Session",
+  closeSession: "Close Session",
   loadingSubtitle: "Preparing our delicious selections for you...",
   error: {
     title: "Menu Unavailable",
@@ -3905,6 +3949,21 @@ cart: {
     }
   },
 
+  orderTypes: {
+    DINE_IN: {
+      name: 'Dine In',
+      description: 'Eat at restaurant table'
+    },
+    DELIVERY: {
+      name: 'Delivery',
+      description: 'Deliver to address'
+    },
+    PICKUP: {
+      name: 'Pickup',
+      description: 'Order online, pick up at store'
+    }
+  },
+
   priceChange: {
     title: 'Price Changes Detected',
     description: 'Some items in your basket have price changes that need to be confirmed before proceeding with the order.',
@@ -3963,6 +4022,7 @@ productModal: {
   },
   ordersManager: {
     total : 'Total',
+    PaymentMethod:"Payment Method",
     clearFilters:"Clear Filters",
     subTotal:"Sub Total",
     filtered:"Filtered",
@@ -4153,7 +4213,8 @@ productModal: {
       defaultLanguage: "Default Language",
       defaultCurrency: "Default Currency",
       timeZone: "Time Zone",
-      supportedLanguages: "Supported Languages"
+      supportedLanguages: "Supported Languages",
+      languageRestaurantNote:"Branches can only select languages supported by the restaurant. The displayed languages are determined by the restaurant."
     },
     sessionManagement: {
       title: "Session Management",
@@ -4676,6 +4737,7 @@ productModal: {
     "chefsPick": "Chef's Pick",
     "customizable": "Customizable",
     "addons": "+addons",
+    "outOfStock": "Out of Stock",
     "allergens": "Allergens",
     "ingredients": "Ingredients",
     "inCart": "in cart",
@@ -4852,6 +4914,8 @@ productModal: {
     "progress": {
       "step1": "Basic Info",
       "step2": "Company Info",
+      "searchLanguages": "Search Languages",
+      "languagesLabel": "Languages",
       "step3": "Legal Documents"
     },
     "messages": {
@@ -4872,11 +4936,11 @@ productModal: {
       "subtitle": "Enter your restaurant's basic information",
       "nameLabel": "Restaurant Name *",
       "namePlaceholder": "Enter your restaurant name",
-      "logoLabel": "Restaurant Logo *",
+      "logoLabel": "Restaurant Logo ",
       "logoUploading": "Logo uploading...",
       "logoSuccess": "✓ Logo uploaded successfully",
       "logoSuccessSub": "Cloudinary URL received",
-      "cuisineLabel": "Cuisine Type *",
+      "cuisineLabel": "Cuisine Type ",
       "errors": {
         "nameRequired": "Restaurant name is required",
         "logoRequired": "Restaurant logo is required",
@@ -4988,7 +5052,7 @@ productModal: {
           "error": "Branch name is required"
         },
         "whatsappNumber": {
-          "label": "WhatsApp Order Number *",
+          "label": "WhatsApp Order Number ",
           "placeholder": "555 123 4567",
           "ariaLabel": "Country Code",
           "errorRequired": "WhatsApp order number is required",
@@ -5206,6 +5270,8 @@ extrasManagement: {
     fields: {
       categoryName: 'Category Name',
       categoryNamePlaceholder: 'e.g., Pizza Toppings',
+      description: 'Description',
+      descriptionPlaceholder: 'Enter category description (optional)',
       statusLabel: 'Active Status',
       requiredLabel: 'Is it required?',
       selectionRules: 'Selection Rules',
@@ -5329,6 +5395,7 @@ categoryConfigModal: {
   title: 'Configure Branch Extras',
   productLabel: 'Configuring extras for:',
   searchPlaceholder: 'Search categories...',
+
   errors: {
     loadFailed: 'Failed to load configuration data',
     saveFailed: 'Failed to save configuration',
@@ -5349,7 +5416,8 @@ categoryConfigModal: {
   badges: {
     required: 'Required',
     optional: 'Optional',
-    removal: 'Removal'
+    removal: 'Removal',
+        removalCategory: 'Removal Category'
   },
   category: {
     availableExtras: 'extras available',
@@ -5719,6 +5787,109 @@ categoryConfigModal: {
         }
       }
     }
+  },
+
+  // Multi-Language System
+  multiLanguage: {
+    noLanguagesConfigured: 'No languages configured. Please configure languages in preferences.',
+    required: 'Required',
+    quickFill: 'Quick Fill',
+    currentLanguage: 'Current Language',
+    fieldRequired: 'This field is required'
+  },
+  RestaurantPreferencesTab: {
+  title: 'Restaurant Language Preferences',
+  subtitle: 'Manage restaurant language settings',
+  loading: 'Loading...',
+  buttons: {
+    refresh: 'Refresh',
+    save: 'Save Changes',
+    saving: 'Saving...'
+  },
+  sections: {
+    languageSettings: {
+      title: 'Language Settings',
+      subtitle: 'Set the languages supported by your restaurant and the default language'
+    },
+    currencySettings: {
+      title: 'Currency Settings',
+      subtitle: 'Set the default currency for your restaurant'
+    }
+  },
+  form: {
+    defaultLanguage: {
+      label: 'Default Language',
+      helperText: 'Default language setting for the restaurant'
+    },
+    defaultCurrency: {
+      label: 'Default Currency',
+      helperText: 'Default currency setting for the restaurant'
+    },
+    supportedLanguages: {
+      label: 'Supported Languages',
+      helperText: 'At least one language must be selected. The default language remains selected automatically.'
+    }
+  },
+  alerts: {
+    success: 'Restaurant preferences updated successfully',
+    cascadeWarning: {
+      title: 'Important Note:',
+      description: 'When you reduce supported languages, branch preferences are updated automatically:',
+      point1: 'Branches can only support languages supported by the restaurant',
+      point2: 'If a branch\'s default language is removed, it updates to the restaurant\'s default language'
+    },
+    validationInfo: {
+      title: 'Validation Rules:',
+      point1: 'At least one language must be supported',
+      point2: 'Default language must be among supported languages'
+    }
+  },
+  errors: {
+    load: 'Error loading restaurant preferences',
+    loadGeneral: 'Restaurant preferences could not be loaded',
+    save: 'Error saving restaurant preferences'
   }
+  },
+  BranchTableModal: {
+    'addTitle': 'Add New Table',
+    'editTitle': 'Edit Table',
+    'addSubtitle': 'Create a new table',
+    'tableNamePlaceholder': 'Enter table name',
+    'capacity': 'Capacity',
+    'tableName': 'Table Name',
+    'cancel': 'Cancel',
+    'tableNameRequired': 'Table name is required',
+    'capacityRequired': 'Capacity must be at least 1',
+    'editSubtitle': 'Update table details',
+    'add': 'Add Table',
+    'capacityPlaceholder': 'Enter capacity',
+    'saving': 'Saving...',
+    'status': 'Table Status',
+    'active': 'Table is active',
+    'inactive': 'Table is inactive',
+    'update': 'Update Table',
+    'invalidData': 'Invalid data provided',
+    'errorOccurred': 'An error occurred',
+    'accessibility': {
+      'modal': 'Table Modal',
+      'close': 'Close'
+    }
+  },
+
+  languageControl: {
+    editing: 'Editing',
+    copyFrom: 'Copy all from',
+    quickFill: 'Quick Fill Other Languages...',
+    fill: 'Fill',
+    
+    bulkFillTitle: 'Bulk Fill Target Language',
+    scrollLeft: 'Scroll left',
+    scrollRight: 'Scroll right'
+  },
+  paymentMethod:{
+    cash: 'Cash',
+    creditCard: 'Credit Card',
+    online: 'Online Payment'
+  },
 
 }; 

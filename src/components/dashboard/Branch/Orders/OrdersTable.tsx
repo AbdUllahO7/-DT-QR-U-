@@ -1,10 +1,11 @@
 import React from 'react';
-import { ChevronDown, ChevronUp, AlertCircle, Filter, Eye, CheckCircle, Clock, Package, DollarSign } from 'lucide-react';
+import { ChevronDown, ChevronUp, AlertCircle, Filter, Eye, CheckCircle, Clock, Package } from 'lucide-react';
 import OrderTableRow from './OrderTableRow';
 import { BranchOrder, PendingOrder } from '../../../../types/BranchManagement/type';
 import { OrderStatusEnums } from '../../../../types/Orders/type';
 import { orderService } from '../../../../services/Branch/OrderService';
 import OrderStatusUtils from '../../../../utils/OrderStatusUtils';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface OrdersTableProps {
   orders: (PendingOrder | BranchOrder)[];
@@ -40,6 +41,7 @@ const OrderMobileCard: React.FC<{
   const isPending = viewMode === 'pending';
   const status = isPending ? OrderStatusEnums.Pending : orderService.parseOrderStatus((order as BranchOrder).status);
   const rowVersion = order.rowVersion || '';
+  const currency = useCurrency();
 
   // Check if should show confirm button
   const shouldShowConfirmButton = orderService.canModifyOrder(status) &&
@@ -81,7 +83,7 @@ const OrderMobileCard: React.FC<{
         <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="flex items-center gap-2">
             <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <DollarSign className="w-5 h-5 text-green-600 dark:text-green-400" />
+              <span className=''>{currency.symbol}</span>
             </div>
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">{t('ordersManager.amount')}</p>
@@ -310,6 +312,9 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
                   </th>
                   <th className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'} text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider`}>
                     {t('ordersManager.orderType')}
+                  </th>
+                  <th className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'} text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider`}>
+                    {t('ordersManager.PaymentMethod') || 'Payment'}
                   </th>
                   <th className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'} text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider`}>
                     <button

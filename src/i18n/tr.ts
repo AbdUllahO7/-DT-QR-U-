@@ -4,11 +4,14 @@ export const tr = {
   common: {
     loading: 'Yükleniyor...',
     change: 'Değiştir',
+    removal: 'Kaldırma',
     error: 'Hata',
     success: 'Başarılı',
      "emailAddress": "E-posta Adresi",
       "emailPlaceholder": "you@example.com",
     cancel: 'İptal',
+    setAsDefault: 'Varsayılan Olarak Ayarla',
+    default: 'Varsayılan',
     save: 'Kaydet',
     delete: 'Sil',
     edit: 'Düzenle',
@@ -45,6 +48,7 @@ export const tr = {
   filter: {
       status: "Durum",
       all: "Tümü",
+      allergen: "Alerjen",
       active: "Aktif",
       inactive: "Pasif", 
       categories: "Kategoriler",
@@ -218,6 +222,9 @@ hero: {
         revenueComparison: 'Gelir Karşılaştırması',
         noData: 'Veri mevcut değil'
       }
+    },
+    RestaurantManagement : {
+      title : "Restoran Yönetimi"
     },
     branches: {
       title: 'Şube Yönetimi',
@@ -964,6 +971,12 @@ hero: {
 
   // Table Management
   tableManagement: {
+    areaTypes:{
+      indoor: 'Kapalı',
+      outdoor: 'Açık',
+      terrace: 'Terasta',
+      garden: 'Bahçe'
+    },
     addTable: 'Masa Ekle',
   ActiveStatus :"Aktif Durum", 
        selectBranch: "Şube Seç",
@@ -1071,7 +1084,7 @@ hero: {
   products: {
     status: {
       outOfStock: 'Stokta Yok',
-      inStock: 'Aktif',
+      inStock: 'Stokta Var',
       available: 'Mevcut',
       unavailable: 'Mevcut Değil'
     },
@@ -1210,15 +1223,15 @@ hero: {
         supportText: 'PNG, JPG, GIF formatları desteklenir. Maksimum dosya boyutu: 5MB'
       },
       country: {
-        label: 'Ülke *',
+        label: 'Ülke ',
         placeholder: 'Ülke adını girin'
       },
       city: {
-        label: 'Şehir *',
+        label: 'Şehir ',
         placeholder: 'Şehir adını girin'
       },
       street: {
-        label: 'Sokak *',
+        label: 'Sokak ',
         placeholder: 'Sokak adını girin'
       },
       zipCode: {
@@ -1226,7 +1239,7 @@ hero: {
         placeholder: 'Posta kodunu girin'
       },
       addressLine1: {
-        label: 'Adres Satırı 1 *',
+        label: 'Adres Satırı 1',
         placeholder: 'Detaylı adres bilgisi girin'
       },
       addressLine2: {
@@ -1234,15 +1247,15 @@ hero: {
         placeholder: 'Ek adres bilgisi girin (opsiyonel)'
       },
       phone: {
-        label: 'Telefon Numarası *',
+        label: 'Telefon Numarası ',
         placeholder: 'Telefon numarasını girin'
       },
       email: {
-        label: 'E-posta Adresi *',
+        label: 'E-posta Adresi ',
         placeholder: 'E-posta adresini girin'
       },
       location: {
-        label: 'Konum Bilgisi *',
+        label: 'Konum Bilgisi ',
         placeholder: 'Konum bilgisini girin (Örn: 40.9795,28.7225)'
       },
       contactHeader: {
@@ -1503,6 +1516,7 @@ hero: {
     editCategory: 'Kategoriyi Düzenle',
     deleteCategory: 'Kategoriyi Sil',
     editProduct: 'Ürünü Düzenle',
+    manageExtras: 'Eklentileri Yönet',
     deleteProduct: 'Ürünü Sil',
     manageIngredients: 'Malzemeleri Yönet',
     updateIngredients: 'Malzemeleri Güncelle',
@@ -1880,8 +1894,8 @@ hero: {
 
       // Counter texts
       counters: {
-        selectedProducts: '{{count}} ürün seçili',
-        availableProducts: '{{count}} mevcut ürün'
+        selectedProducts: '{count} ürün seçili',
+  availableProducts: '{count} mevcut ürün'
       },
 
       // Error messages
@@ -2448,7 +2462,8 @@ hero: {
     filter: 'Filtrele',
     sort: 'Sırala',
     newIngredient: 'Yeni Malzeme',
-    
+    clearFilters: 'Tüm Filtreleri Temizle',
+    applyFilters: 'Filtreleri Uygula',
     // Table headers
     ingredientName: 'Malzeme Adı',
     status: 'Durum',
@@ -2613,8 +2628,13 @@ hero: {
 
   TableCategoryModal: {
     title: 'Masa Alan Ekle',
+    update: 'Masa Alanını Güncelle',
+    editCategoryTitle: 'Masa Alanını Düzenle',
+    editCategorySubtitle: 'Masa alanının özelliklerini düzenleyin',
     subtitle: 'Yeni masa Alan oluşturun',
     categoryName: 'Alan Adı',
+    addCategoryTitle: 'Yeni Alan Ekle',
+    addCategorySubtitle: 'Yeni masa alanının özelliklerini tanımlayın',
     categoryNamePlaceholder: 'Örn: VIP Masalar, Bahçe Masaları',
     description: 'Açıklama (Opsiyonel)',
     descriptionPlaceholder: 'Alan hakkında kısa açıklama...',
@@ -3217,6 +3237,7 @@ BranchTableManagement: {
     title: 'Şube Yönetimi',
     description: 'Şube bilgilerinizi ve ayarlarınızı yönetin.',
     loading: 'Şube bilgileri yükleniyor...',
+    editBranchName: 'Şube Adını Düzenle',
     noBranchFound: 'Herhangi bir şube bulunamadı',
     uploadLogo: 'Logoyu Yükle',
     status: {
@@ -3235,7 +3256,10 @@ BranchTableManagement: {
       deleting: 'Siliniyor...',
       confirmDelete: 'Silmeyi Onayla',
       deleteWarning: 'Bu şubeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.',
-      onlineMenu: 'Çevrimiçi Menüye Git'
+      onlineMenu: 'Çevrimiçi Menüye Git',
+      copyLink: 'Bağlantıyı Kopyala',
+      copied: 'Kopyalandı!',
+      linkCopied: 'Bağlantı panoya kopyalandı!',
     },
     
     basicInfo: {
@@ -3282,6 +3306,14 @@ BranchTableManagement: {
       statusChangeError: 'Durum değiştirme sırasında hata oluştu',
       loadError: 'Şube bilgileri yüklenirken hata oluştu'
     },
+
+    errors: {
+      nameRequired: 'Şube adı gereklidir',
+      saveFailed: 'Şube adı kaydedilemedi',
+      popupBlocked: 'Çevrimiçi menüyü açmak için lütfen açılır pencerelere izin verin',
+      failedToGetPublicId: 'Çevrimiçi menü bağlantısı alınamadı',
+      failedToCopyLink: 'Bağlantı kopyalanamadı'
+    },
     
     placeholders: {
       branchName: 'Şube adını girin',
@@ -3296,6 +3328,10 @@ BranchTableManagement: {
   },
 
   branchCategories: {
+    categoryName: 'Kategori Adı',
+    originalName: 'Orijinal Ad',
+    editCategoryName: 'Kategori Adını Düzenle',
+    enterCategoryName: 'Kategori adını girin',
     header: 'Şube Kategori Yönetimi',
     subheader: ' Şubesi için kategorileri ve ürünleri yönet',
     lastUpdated: 'Son Güncelleme',
@@ -3462,7 +3498,7 @@ BranchTableManagement: {
       unavailable: 'Mevcut Değil'
     },
      stock : {
-      inStock: 'Aktif',
+      inStock: 'Stokta Var',
       outOfStock: 'Stokta Yok'
     },
 
@@ -3677,6 +3713,8 @@ BranchTableManagement: {
       product: "Ürün",
       addToBasket: "Sepete Ekle",
       addToOrder: "Siparişe Ekle",
+      resetSession: "Oturumu Sıfırla",
+      closeSession: "Oturumu Kapat",
       loadingSubtitle: "Lezzetli seçimlerimizi sizin için hazırlıyoruz...",
       error: {
         title: "Menü Mevcut Değil",
@@ -3910,6 +3948,21 @@ cart: {
     }
   },
 
+  orderTypes: {
+    DINE_IN: {
+      name: 'Restoranda Ye',
+      description: 'Restoran masasında yemek ye'
+    },
+    DELIVERY: {
+      name: 'Teslimat',
+      description: 'Adrese teslimat'
+    },
+    PICKUP: {
+      name: 'Gel Al',
+      description: 'Online sipariş ver, mağazadan al'
+    }
+  },
+
   priceChange: {
     title: 'Fiyat Değişiklikleri Tespit Edildi',
     description: 'Sepetinizdeki bazı ürünlerin fiyat değişiklikleri var ve siparişe devam etmeden önce onaylanması gerekiyor.',
@@ -3971,6 +4024,7 @@ productModal: {
       total : 'Toplam',
       updateAction:"Güncele",
       subTotal:"Ara Toplam",
+      PaymentMethod:"Ödeme Yöntemi",
       modificationHistory:"değişiklik Geçmişi",
       showing:"Gösteriliyor",
       lastModifiedAt:"Son Değiştirilme Tarihi",
@@ -4159,7 +4213,8 @@ productModal: {
         defaultLanguage: "Varsayılan Dil",
         defaultCurrency: "Varsayılan Para Birimi",
         timeZone: "Saat Dilimi",
-        supportedLanguages: "Desteklenen Diller"
+        supportedLanguages: "Desteklenen Diller",
+        languageRestaurantNote: "Şubeler sadece restoranın desteklediği dilleri seçebilir. Görüntülenen diller restoran tarafından belirlenir."
       },
       sessionManagement: {
         title: "Oturum Yönetimi",
@@ -4656,6 +4711,7 @@ recommended: "Önerilen",
   productCard: {
     chefsPick: "Şefin Seçimi",
     customizable: "Özelleştirilebilir",
+    outOfStock: "Stokta Yok",
     addons: "+ekstralar",
     allergens: "Alerjenler",
     ingredients: "Malzemeler",
@@ -4704,7 +4760,7 @@ recommended: "Önerilen",
     previousCloseInfo : "Önceki Kapanış Bilgisi",
     suggestedBalance : "Önerilen Bakiye",
     lastClosed: "Son Kapanış",
-    filtreler: {
+    filters: {
       title: "Filtreler",
       quickSelect: "Hızlı Seçim",
       today: "Bugün",
@@ -4714,15 +4770,15 @@ recommended: "Önerilen",
       thisMonth: "Bu Ay",
       lastMonth: "Geçen Ay",
       custom: "Özel",
-      fromDate: "Başlangıç ​​Tarihi",
+      fromDate: "Başlangıç Tarihi",
       toDate: "Bitiş Tarihi",
       apply: "Uygula",
       clear: "Temizle",
       clearAll: "Tümünü Temizle",
-      to: "Bitiş Tarihi",
-      from: "Başlangıç ​​Tarihi",
+      to: "e",
+      from: "den",
       active: "Aktif"
-} ,
+    } ,
     "status": "Durum",
     "open": "Açık",
     "closed": "Kapalı",
@@ -4829,6 +4885,8 @@ recommended: "Önerilen",
     "backLink": "Kayıt Sayfasına Dön",
     "progress": {
       "step1": "Temel Bilgiler",
+      "languagesLabel": "Diller",
+      "searchLanguages": "Dil Ara",
       "step2": "Şirket Bilgileri",
       "step3": "Yasal Belgeler"
     },
@@ -4850,11 +4908,11 @@ recommended: "Önerilen",
       "subtitle": "Restaurant'ınızın temel bilgilerini girin",
       "nameLabel": "Restaurant Adı *",
       "namePlaceholder": "Restaurant adınızı girin",
-      "logoLabel": "Restaurant Logosu *",
+      "logoLabel": "Restaurant Logosu",
       "logoUploading": "Logo yükleniyor...",
       "logoSuccess": "✓ Logo başarıyla yüklendi",
       "logoSuccessSub": "Cloudinary URL alındı",
-      "cuisineLabel": "Mutfak Türü *",
+      "cuisineLabel": "Mutfak Türü ",
       "errors": {
         "nameRequired": "Restaurant adı gereklidir",
         "logoRequired": "Restaurant logosu gereklidir",
@@ -4882,9 +4940,9 @@ recommended: "Önerilen",
     "step3": {
       "title": "Yasal Belgeler",
       "subtitle": "Vergi ve belge bilgilerinizi girin",
-      "taxNumberLabel": "Vergi Numarası *",
+      "taxNumberLabel": "Vergi Numarası ",
       "taxNumberPlaceholder": "Vergi numaranızı girin",
-      "taxOfficeLabel": "Vergi Dairesi *",
+      "taxOfficeLabel": "Vergi Dairesi",
       "taxOfficePlaceholder": "Vergi dairenizi girin",
       "workPermitLabel": "Çalışma İzni Belgesi",
       "workPermitUploading": "Çalışma izni belgesi yükleniyor...",
@@ -5031,12 +5089,12 @@ recommended: "Önerilen",
       "title": "Adres Bilgileri",
       "description": "Şubenizin adres bilgilerini girin",
       "country": {
-        "label": "Ülke *",
+        "label": "Ülke",
         "placeholder": "Ülke adını girin",
         "error": "Ülke gereklidir"
       },
       "city": {
-        "label": "Şehir *",
+        "label": "Şehir",
         "placeholder": "Şehir adını girin",
         "error": "Şehir gereklidir"
       },
@@ -5229,6 +5287,8 @@ extrasManagement: {
     fields: {
       categoryName: 'Kategori Adı',
       categoryNamePlaceholder: 'örn: Pizza Malzemeleri',
+      description: 'Açıklama',
+      descriptionPlaceholder: 'Kategori açıklaması girin (isteğe bağlı)',
       statusLabel: 'Aktif Durum',
       requiredLabel: 'Zorunlu mu?',
       selectionRules: 'Seçim Kuralları',
@@ -5352,6 +5412,7 @@ categoryConfigModal: {
   title: 'Şube Ekstralarını Yapılandır',
   productLabel: 'Ekstralar yapılandırılıyor:',
   searchPlaceholder: 'Kategorilerde ara...',
+
   errors: {
     loadFailed: 'Yapılandırma verileri yüklenemedi',
     saveFailed: 'Yapılandırma kaydedilemedi',
@@ -5372,7 +5433,9 @@ categoryConfigModal: {
   badges: {
     required: 'Zorunlu',
     optional: 'İsteğe Bağlı',
-    removal: 'Çıkarma'
+    removal: 'Çıkarma',
+        removalCategory: 'Kaldırma Kategorisi'
+
   },
   category: {
     availableExtras: 'ekstra mevcut',
@@ -5743,4 +5806,98 @@ categoryConfigModal: {
       }
     }
   },
+
+  // Multi-Language System
+  multiLanguage: {
+    noLanguagesConfigured: 'Dil yapılandırılmamış. Lütfen tercihlerden dilleri yapılandırın.',
+    required: 'Gerekli',
+    currentLanguage: 'Mevcut Dil',
+    quickFill: 'Hızlı Doldurma',
+    fieldRequired: 'Bu alan gereklidir'
+  },
+  RestaurantPreferencesTab: {
+  title: 'Restoran Dil Tercihleri',
+  subtitle: 'Restoran dil ayarlarını yönetin',
+  loading: 'Yükleniyor...',
+  buttons: {
+    refresh: 'Yenile',
+    save: 'Değişiklikleri Kaydet',
+    saving: 'Kaydediliyor...'
+  },
+  sections: {
+    languageSettings: {
+      title: 'Dil Ayarları',
+      subtitle: 'Restoranınızın desteklediği dilleri ve varsayılan dili ayarlayın'
+    },
+      currencySettings: {
+      title: 'Para Birimi Ayarları',
+      subtitle: 'Restoranınız için varsayılan para birimini ayarlayın'
+    }
+  },
+  form: {
+    defaultLanguage: {
+      label: 'Varsayılan Dil',
+      helperText: 'Restoran için varsayılan dil ayarı'
+    },
+     defaultCurrency: {
+      label: 'Varsayılan Para Birimi',
+      helperText: 'Restoran için varsayılan para birimi ayarı'
+    },
+    supportedLanguages: {
+      label: 'Desteklenen Diller',
+      helperText: 'En az bir dil seçilmelidir. Varsayılan dil otomatik olarak seçili kalır.'
+    }
+  },
+  alerts: {
+    success: 'Restoran tercihleri başarıyla güncellendi',
+    cascadeWarning: {
+      title: 'Önemli Not:',
+      description: 'Desteklenen dilleri azalttığınızda, şube tercihleri otomatik olarak güncellenir:',
+      point1: 'Şubeler sadece restoranın desteklediği dilleri destekleyebilir',
+      point2: 'Bir şubenin varsayılan dili kaldırılırsa, restoranın varsayılan diline güncellenir'
+    },
+    validationInfo: {
+      title: 'Doğrulama Kuralları:',
+      point1: 'En az bir dil desteklenmelidir',
+      point2: 'Varsayılan dil, desteklenen diller arasında olmalıdır'
+    }
+  },
+  errors: {
+    load: 'Restoran tercihleri yüklenirken hata oluştu',
+    loadGeneral: 'Restoran tercihleri yüklenemedi',
+    save: 'Restoran tercihleri kaydedilirken hata oluştu'
+  }
+},
+  BranchTableModal: {
+    addTitle: 'Yeni Şube Tablosu Ekle',
+    addSubtitle: 'Yeni bir şube tablosu oluşturmak için bilgileri doldurun.',
+    editTitle: 'Şube Tablosunu Düzenle',
+    tableNamePlaceholder: 'Tablo adını girin',
+    capacity: 'Tablo kapasitesini girin',
+    cancel: 'İptal',
+    tableName: 'Tablo Adı',
+    add: 'Ekle',
+    tableNameRequired: 'Tablo adı gereklidir',
+    capacityPlaceholder: 'Tablo kapasitesini girin',
+    saving: 'Kaydediliyor...',
+    status: 'Durum',
+    active: 'Aktif',
+    editSubtitle: 'Mevcut şube tablosu bilgilerini güncellemek için bilgileri doldurun.',
+    update: 'Güncelle'
+  },
+  languageControl: {
+    editing: 'Dili Düzenle',
+    copyFrom: 'Kopyala',
+    quickFill: 'Hızlı Doldurma',
+    fill: 'Doldur',
+    bulkFillTitle: 'Toplu Doldurma',
+    scrollLeft: 'Sola Kaydır',
+    scrollRight: 'Sağa Kaydır'
+  },
+  paymentMethod: {
+    title: 'Ödeme Yöntemi',
+    cash: 'Nakit',
+    creditCard: 'Kredi Kartı',
+    online: 'Online Ödeme'
+  }
 };

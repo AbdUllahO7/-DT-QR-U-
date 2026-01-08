@@ -279,29 +279,30 @@ const handleBranchItemsPerPageChange = (newItemsPerPage: number) => {
   // Handle confirm order - FIXED: Now passes branchId
   const handleConfirmOrder = async () => {
     if (!state.activeOrderId || !state.activeRowVersion) return;
-    
+
     const branchId = getCurrentBranchId();
-    setState(prev => ({ ...prev, loading: true, error: null, showConfirmModal: false }));
-    
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
     try {
       const data = { rowVersion: state.activeRowVersion };
       const updatedOrder = await orderService.confirmOrder(state.activeOrderId, data, branchId);
-      
+
+      // Refresh the orders list based on current view
       if (state.viewMode === 'pending') {
-        fetchPendingOrders();
+        await fetchPendingOrders(branchId);
       } else {
-        fetchBranchOrders();
+        await fetchBranchOrders(branchId);
       }
-      
-      setState(prev => ({ 
-        ...prev, 
-        selectedOrder: updatedOrder, 
-        loading: false, 
-        activeOrderId: null, 
-        activeRowVersion: null 
+
+      setState(prev => ({
+        ...prev,
+        selectedOrder: updatedOrder,
+        loading: false,
+        activeOrderId: null,
+        activeRowVersion: null,
+        showConfirmModal: false
       }));
     } catch (error: any) {
-      console.log("errror new",error)
       setState(prev => ({ 
         ...prev, 
         error: error.message, 
@@ -315,30 +316,32 @@ const handleBranchItemsPerPageChange = (newItemsPerPage: number) => {
   // Handle reject order - FIXED: Now passes branchId
   const handleRejectOrder = async () => {
     if (!state.activeOrderId || !state.activeRowVersion || !state.rejectReason) return;
-    
+
     const branchId = getCurrentBranchId();
-    setState(prev => ({ ...prev, loading: true, error: null, showRejectModal: false }));
-    
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
     try {
-      const data: RejectOrderDto = { 
-        rejectionReason: state.rejectReason, 
-        rowVersion: state.activeRowVersion 
+      const data: RejectOrderDto = {
+        rejectionReason: state.rejectReason,
+        rowVersion: state.activeRowVersion
       };
       const updatedOrder = await orderService.rejectOrder(state.activeOrderId, data, branchId);
-      
+
+      // Refresh the orders list based on current view
       if (state.viewMode === 'pending') {
-        fetchPendingOrders();
+        await fetchPendingOrders(branchId);
       } else {
-        fetchBranchOrders();
+        await fetchBranchOrders(branchId);
       }
-      
-      setState(prev => ({ 
-        ...prev, 
-        selectedOrder: updatedOrder, 
-        loading: false, 
-        activeOrderId: null, 
-        activeRowVersion: null, 
-        rejectReason: '' 
+
+      setState(prev => ({
+        ...prev,
+        selectedOrder: updatedOrder,
+        loading: false,
+        activeOrderId: null,
+        activeRowVersion: null,
+        rejectReason: '',
+        showRejectModal: false
       }));
     } catch (error: any) {
       setState(prev => ({ 
@@ -354,31 +357,33 @@ const handleBranchItemsPerPageChange = (newItemsPerPage: number) => {
 
   const handleCancelOrder = async () => {
     if (!state.activeOrderId || !state.activeRowVersion) return;
-    
+
     const branchId = getCurrentBranchId();
-    setState(prev => ({ ...prev, loading: true, error: null, showCancelModal: false }));
-    
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
     try {
       // Cancel order by updating status to Cancelled
-      const data: UpdateOrderStatusDto = { 
+      const data: UpdateOrderStatusDto = {
         newStatus: OrderStatusEnums.Cancelled,
-        rowVersion: state.activeRowVersion 
+        rowVersion: state.activeRowVersion
       };
       const updatedOrder = await orderService.updateOrderStatus(state.activeOrderId, data, branchId);
-      
+
+      // Refresh the orders list based on current view
       if (state.viewMode === 'pending') {
-        fetchPendingOrders();
+        await fetchPendingOrders(branchId);
       } else {
-        fetchBranchOrders();
+        await fetchBranchOrders(branchId);
       }
-      
-      setState(prev => ({ 
-        ...prev, 
-        selectedOrder: updatedOrder, 
-        loading: false, 
-        activeOrderId: null, 
-        activeRowVersion: null, 
-        cancelReason: '' 
+
+      setState(prev => ({
+        ...prev,
+        selectedOrder: updatedOrder,
+        loading: false,
+        activeOrderId: null,
+        activeRowVersion: null,
+        cancelReason: '',
+        showCancelModal: false
       }));
     } catch (error: any) {
       setState(prev => ({ 
@@ -395,30 +400,32 @@ const handleBranchItemsPerPageChange = (newItemsPerPage: number) => {
   // Handle update status - FIXED: Now passes branchId
   const handleUpdateStatus = async () => {
     if (!state.activeOrderId || !state.activeRowVersion || state.newStatus === null) return;
-    
+
     const branchId = getCurrentBranchId();
-    setState(prev => ({ ...prev, loading: true, error: null, showStatusModal: false }));
-    
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
     try {
-      const data: UpdateOrderStatusDto = { 
-        newStatus: state.newStatus, 
-        rowVersion: state.activeRowVersion 
+      const data: UpdateOrderStatusDto = {
+        newStatus: state.newStatus,
+        rowVersion: state.activeRowVersion
       };
       const updatedOrder = await orderService.updateOrderStatus(state.activeOrderId, data, branchId);
-      
+
+      // Refresh the orders list based on current view
       if (state.viewMode === 'pending') {
-        fetchPendingOrders();
+        await fetchPendingOrders(branchId);
       } else {
-        fetchBranchOrders();
+        await fetchBranchOrders(branchId);
       }
-      
-      setState(prev => ({ 
-        ...prev, 
-        selectedOrder: updatedOrder, 
-        loading: false, 
-        activeOrderId: null, 
-        activeRowVersion: null, 
-        newStatus: null 
+
+      setState(prev => ({
+        ...prev,
+        selectedOrder: updatedOrder,
+        loading: false,
+        activeOrderId: null,
+        activeRowVersion: null,
+        newStatus: null,
+        showStatusModal: false
       }));
     } catch (error: any) {
       let errorMessage = error.message;

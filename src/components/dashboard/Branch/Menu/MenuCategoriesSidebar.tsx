@@ -13,6 +13,7 @@ const CategoriesSidebar: React.FC<CategoriesSidebarProps> = ({
 }) => {
   const { t } = useLanguage()
 
+
   return (
     <div>
       {/* Mobile: Horizontal Scrolling Categories */}

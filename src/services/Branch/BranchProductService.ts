@@ -17,6 +17,7 @@ interface UpdateBranchProductRequest {
   displayOrder: number;
   branchCategoryId: number;
   maxQuantity?: number;
+  isOutOfStock?: boolean;
 }
 
 interface BranchProductReorderRequest {
@@ -102,6 +103,7 @@ interface APIBranchProduct {
   orderDetails?: any;
   ingredients?: APIIngredient[];
   allergens?: APIAllergen[];
+  isOutOfStock?: boolean;
 }
 
 // Simple API response for basic endpoints
@@ -117,6 +119,7 @@ interface SimpleBranchProduct {
   branchCategoryId: number;
   status?: boolean;
   maxQuantity?: number;
+  isOutOfStock?: boolean;
 }
 
 class BranchProductService {
@@ -130,8 +133,9 @@ class BranchProductService {
       description: '', 
       price: apiBranchProduct.price,
       imageUrl: apiBranchProduct.product?.imageUrl || '',
-      isAvailable: apiBranchProduct.isActive,
+      isAvailable: !apiBranchProduct.isOutOfStock,
       status: apiBranchProduct.isActive,
+      
       displayOrder: apiBranchProduct.displayOrder,
       categoryId: apiBranchProduct.branchCategoryId,
       // Add branch-specific fields
@@ -155,7 +159,7 @@ class BranchProductService {
       description: apiBranchProduct.description || '',
       price: apiBranchProduct.price,
       imageUrl: apiBranchProduct.imageUrl || '',
-      isAvailable: apiBranchProduct.isActive ?? apiBranchProduct.status ?? true,
+     isAvailable: apiBranchProduct.isOutOfStock !== undefined ? !apiBranchProduct.isOutOfStock : true,
       status: apiBranchProduct.isActive ?? apiBranchProduct.status ?? true,
       displayOrder: apiBranchProduct.displayOrder || 0,
       categoryId: apiBranchProduct.branchCategoryId,
@@ -172,7 +176,7 @@ class BranchProductService {
       description: apiBranchProduct.description || '',
       price: apiBranchProduct.price,
       imageUrl: apiBranchProduct.imageUrl || '',
-      isAvailable: apiBranchProduct.isActive ?? apiBranchProduct.status ?? true,
+      isAvailable: apiBranchProduct.isOutOfStock !== undefined ? !apiBranchProduct.isOutOfStock : true,
       status:  apiBranchProduct.status ?? true,
       displayOrder: apiBranchProduct.displayOrder || 0,
       categoryId: apiBranchProduct.branchCategoryId,
@@ -182,18 +186,26 @@ class BranchProductService {
     };
   }
 
+    private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
   // Get all branch products with optional includes
   async getBranchProducts(includes?: string[]): Promise<Product[]> {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
-
+      const language = this.getLanguageFromStorage();
+      
       // Build query parameters
       const params = new URLSearchParams();
 
       // Add branchId if available
       if (branchId) {
         params.append('branchId', branchId.toString());
+      }
+      if (language) {
+        params.append('language', language);
       }
 
       // Add includes parameter if provided
@@ -209,7 +221,6 @@ class BranchProductService {
 
       const url = params.toString() ? `${this.baseUrl}?${params.toString()}` : this.baseUrl;
       const response = await httpClient.get<APIBranchProduct[]>(url);
- 
       // Determine if response has complex structure (with includes) or simple structure
       const firstItem = response.data[0];
       const hasComplexStructure = firstItem && (
@@ -248,8 +259,8 @@ class BranchProductService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
-
-      const params = branchId ? { branchId } : {};
+      const language = this.getLanguageFromStorage();
+      const params = branchId ? { branchId, language } : { language };
       const response = await httpClient.get<SimpleBranchProduct>(`${this.baseUrl}/${id}`, { params });
 
       logger.info('Branch product retrieved successfully', { id, branchId });
@@ -266,12 +277,16 @@ class BranchProductService {
   try {
     // Get effective branch ID (from parameter, localStorage, or token)
     const effectiveBranchId = branchId || getEffectiveBranchId();
+    const language = this.getLanguageFromStorage();
 
     if (!effectiveBranchId) {
       throw new Error('Branch ID is required');
     }
 
     let url = `${this.baseUrl}/branch/${effectiveBranchId}/menu`;
+    const params = {
+      language
+    };
 
     // Add includes parameter if provided
     if (includes && includes.length > 0) {
@@ -279,7 +294,7 @@ class BranchProductService {
       url += `?includes=${encodeURIComponent(includesParam)}`;
     }
 
-    const response = await httpClient.get(url);
+    const response = await httpClient.get(url, { params });
     logger.info('Branch menu retrieved successfully', {
       branchId: effectiveBranchId,
       hasIncludes: !!includes?.length,
@@ -347,9 +362,10 @@ class BranchProductService {
     isActive?: boolean;
     displayOrder?: number;
     branchCategoryId?: number;
+    maxQuantity?: number; 
+    isOutOfStock?: boolean; 
   }): Promise<Product> {
     try {
-      // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
 
       const payload: UpdateBranchProductRequest = {
@@ -357,9 +373,14 @@ class BranchProductService {
         price: productData.price ?? 0,
         isActive: productData.isActive ?? true,
         displayOrder: productData.displayOrder ?? 0,
-        branchCategoryId: productData.branchCategoryId ?? 0
+        branchCategoryId: productData.branchCategoryId ?? 0,
+        isOutOfStock: productData.isOutOfStock ?? false 
       };
 
+      // Add maxQuantity only if it exists
+      if (productData.maxQuantity !== undefined) {
+        payload.maxQuantity = productData.maxQuantity;
+      }
       logger.info('Updating branch product', { id, payload, branchId });
       const params = branchId ? { branchId } : {};
       const response = await httpClient.put<SimpleBranchProduct>(`${this.baseUrl}/${id}`, payload, { params });
@@ -435,7 +456,6 @@ class BranchProductService {
   async activateBranchProducts(branchProductIds: number[]): Promise<void> {
     try {
       logger.info('Activating multiple branch products', { branchProductIds });
-      
       const updatePromises = branchProductIds.map(id => 
         this.updateBranchProduct(id, { isActive: true })
       );
@@ -500,10 +520,11 @@ class BranchProductService {
     try {
       // Get effective branch ID (from localStorage or token)
       const branchId = getEffectiveBranchId();
+              const language = this.getLanguageFromStorage();
 
       logger.info('Fetching deleted branch products', { branchId });
 
-      const params = branchId ? { branchId } : {};
+      const params = branchId ? { branchId, language } : { language };
       const response = await httpClient.get<DeletedBranchProduct[]>(`${this.baseUrl}/deleted`, { params });
 
       logger.info('Deleted branch products retrieved successfully', {

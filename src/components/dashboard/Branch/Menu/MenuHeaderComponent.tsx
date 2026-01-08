@@ -1,14 +1,16 @@
 "use client"
 
 import type React from "react"
-import { UtensilsCrossed, MapPin, ShoppingCart } from "lucide-react"
+import { UtensilsCrossed, MapPin, ShoppingCart, Sun, Moon } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import LanguageSelector from "../../../LanguageSelector"
 import ThemeToggle from "../../../ThemeToggle" // Assuming the file path
 import { HeaderProps } from "../../../../types/menu/type"
+import { useTheme } from "../../../../contexts/ThemeContext"
 
 const Header: React.FC<HeaderProps> = ({ menuData, totalItems, onCartToggle }) => {
-  const { t } = useLanguage()
+  const { t, isRTL } = useLanguage()
+  const { isDark, toggleTheme } = useTheme();
 
   return (
     <div className="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-700/50 sticky top-0 z-40 shadow-lg ">
@@ -45,18 +47,29 @@ const Header: React.FC<HeaderProps> = ({ menuData, totalItems, onCartToggle }) =
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             {/* Theme Toggle - Hidden on very small screens */}
             <div className="hidden sm:block">
-              <ThemeToggle />
+              <button
+                           onClick={toggleTheme}
+                           className="min-w-[44px] min-h-[44px] p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 flex items-center justify-center"
+                           title={isDark ? t('theme.toggleToLight') : t('theme.toggleToDark')}
+                           aria-label={t('accessibility.theme')}
+                         >
+                           {isDark ? (
+                             <Sun className="h-5 w-5" />
+                           ) : (
+                             <Moon className="h-5 w-5" />
+                           )}
+                         </button>
             </div>
 
             <div className="hidden sm:block h-6 w-[1px] bg-slate-200 dark:bg-slate-700" />
 
             <button
               onClick={onCartToggle}
-              className="relative bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white p-2 sm:p-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-orange-500/25 transform active:scale-95 sm:hover:scale-105 group"
+              className="relative bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white p-2 sm:p-3 rounded-xl transition-all duration-300 shadow-lg hover:shadow-orange-500/25 transform active:scale-95 sm:hover:scale-105 group flex-shrink-0"
             >
               <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 group-hover:rotate-12 transition-transform duration-300" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center font-bold shadow-lg animate-pulse">
+                <span className={`absolute -top-1 sm:-top-2 ${isRTL ? '-left-1 sm:-left-2' : '-right-1 sm:-right-2'} bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center font-bold shadow-lg animate-pulse`}>
                   {totalItems}
                 </span>
               )}

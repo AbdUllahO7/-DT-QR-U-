@@ -1,13 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { X, Upload, AlertCircle } from 'lucide-react';
+import React from 'react';
+import { X, Upload } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import { CreateExtraData, ExtraCategory, Extra } from '../../../types/Extras/type';
+import { CreateExtraData, ExtraCategory } from '../../../types/Extras/type';
+import { MultiLanguageInput } from '../../common/MultiLanguageInput';
+import { MultiLanguageTextArea } from '../../common/MultiLanguageTextArea';
+import { TranslatableFieldValue } from '../../../hooks/useTranslatableFields';
+
+interface LanguageOption {
+  code: string;
+  displayName: string;
+  nativeName: string;
+  isRtl: boolean;
+}
 
 interface ExtraModalProps {
   isEditMode: boolean;
   formData: CreateExtraData;
   categories: ExtraCategory[];
-  allExtras: Extra[];
   imagePreview: string;
   loading: boolean;
   uploading: boolean;
@@ -17,13 +26,21 @@ interface ExtraModalProps {
   onImageClear: () => void;
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
+  nameTranslations: TranslatableFieldValue;
+  descriptionTranslations: TranslatableFieldValue;
+  onNameTranslationsChange: (value: TranslatableFieldValue) => void;
+  onDescriptionTranslationsChange: (value: TranslatableFieldValue) => void;
+  supportedLanguages: LanguageOption[];
+  defaultLanguage: string;
+  error: string | null;
 }
+
 
 export const ExtraModal: React.FC<ExtraModalProps> = ({
   isEditMode,
   formData,
+  error,
   categories,
-  allExtras,
   imagePreview,
   loading,
   uploading,
@@ -33,133 +50,92 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
   onImageClear,
   onSubmit,
   onClose,
+  nameTranslations,
+  descriptionTranslations,
+  onNameTranslationsChange,
+  onDescriptionTranslationsChange,
+  supportedLanguages,
+  defaultLanguage,
 }) => {
   const { t } = useLanguage();
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [filteredExtras, setFilteredExtras] = useState<Extra[]>([]);
-  const [duplicateInSameCategory, setDuplicateInSameCategory] = useState(false);
-  const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const suggestionsRef = useRef<HTMLDivElement>(null);
 
-  // Filter extras based on input
-  useEffect(() => {
-    if (formData.name && !isEditMode) {
-      // Only validate if category is selected (not 0)
-      if (formData.extraCategoryId && formData.extraCategoryId !== 0) {
-        // Filter extras for suggestions (show all matching extras)
-        const filtered = allExtras.filter(extra =>
-          extra.name.toLowerCase().includes(formData.name.toLowerCase())
-        );
-        setFilteredExtras(filtered);
+  console.log("categories",categories)
 
-        // Check for exact duplicate ONLY in the same category
-        const duplicateInSameCategory = allExtras.some(extra =>
-          extra.name.toLowerCase().trim() === formData.name.toLowerCase().trim() &&
-          extra.extraCategoryId === formData.extraCategoryId
-        );
+  // Helper to find the currently selected category object
+  const currentCategory = categories.find((c) => c.id === formData.extraCategoryId);
 
-        // Debug logging
-        console.log('Duplicate Check:', {
-          name: formData.name,
-          categoryId: formData.extraCategoryId,
-          isDuplicate: duplicateInSameCategory,
-          allExtrasInCategory: allExtras.filter(e => e.extraCategoryId === formData.extraCategoryId).map(e => e.name)
-        });
-
-        setDuplicateInSameCategory(duplicateInSameCategory);
-
-        // Show warning with animation when duplicate is detected
-        if (duplicateInSameCategory) {
-          setShowDuplicateWarning(true);
-        } else {
-          setShowDuplicateWarning(false);
-        }
-      } else {
-        const filtered = allExtras.filter(extra =>
-          extra.name.toLowerCase().includes(formData.name.toLowerCase())
-        );
-        setFilteredExtras(filtered);
-        setDuplicateInSameCategory(false);
-        setShowDuplicateWarning(false);
-      }
-    } else {
-      setFilteredExtras([]);
-      setDuplicateInSameCategory(false);
-      setShowDuplicateWarning(false);
-    }
-  }, [formData.name, formData.extraCategoryId, allExtras, isEditMode]);
-
-  // Close suggestions when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node) &&
-          inputRef.current && !inputRef.current.contains(event.target as Node)) {
-        setShowSuggestions(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleSelectExtra = (extra: Extra) => {
-    // Check if this extra already exists in the current category
-    const isDuplicate = extra.extraCategoryId === formData.extraCategoryId;
-
-    onChange({
-      ...formData,
-      name: extra.name,
-      description: extra.description || '',
-      basePrice: extra.basePrice,
-      isRemoval: extra.isRemoval,
-      imageUrl: extra.imageUrl || '',
-      status: extra.status,
-    });
-    setShowSuggestions(false);
-
-    // If it's a duplicate, show warning
-    if (isDuplicate) {
-      setDuplicateInSameCategory(true);
-      setShowDuplicateWarning(true);
-    } else {
-      setDuplicateInSameCategory(false);
-      setShowDuplicateWarning(false);
-    }
-  };
-
-  const handleNameChange = (value: string) => {
-    onChange({ ...formData, name: value });
-    setShowSuggestions(value.length > 0);
-  };
+  // Helper to check if removal is allowed for the current selection
+  const isRemovalAllowed = currentCategory?.isRemovalCategory === true;
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (duplicateInSameCategory && !isEditMode) {
-      return; // Prevent submission if duplicate in same category
-    }
     onSubmit(e);
+  };
+
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newCategoryId = parseInt(e.target.value);
+    const newCategory = categories.find((c) => c.id === newCategoryId);
+
+    // If switching to a category that DOES NOT support removal, force isRemoval to false
+    const shouldResetRemoval = formData.isRemoval && newCategory && !newCategory.isRemovalCategory;
+
+    onChange({
+      ...formData,
+      extraCategoryId: newCategoryId,
+      isRemoval: shouldResetRemoval ? false : formData.isRemoval,
+      // If we forced removal off, we don't necessarily need to reset price, 
+      // but if we turned it ON (not handled here), we would.
+    });
+  };
+
+  const handleRemovalCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const isChecked = e.target.checked;
+
+    // 1. Validation: If trying to check it, ensure a category is selected
+    if (isChecked && !formData.extraCategoryId) {
+      alert(t('extrasManagement.errors.selectCategoryFirst') || 'Please select a category first.');
+      return;
+    }
+
+    // 2. Validation: Ensure the selected category allows removal
+    if (isChecked && !isRemovalAllowed) {
+      alert(t('extrasManagement.errors.categoryNotRemoval') || 'The selected category does not support removal items.');
+      return;
+    }
+
+    // 3. Update state
+    onChange({
+      ...formData,
+      isRemoval: isChecked,
+      basePrice: isChecked ? 0 : formData.basePrice,
+    });
   };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 transition-opacity bg-gray-900/75 backdrop-blur-sm" onClick={onClose}></div>
-        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
 
+
+        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+          
           {/* Modal Header */}
           <div className="bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">
               {isEditMode ? t('extrasManagement.extras.editExtra') : t('extrasManagement.extras.addExtra')}
             </h3>
+                    {error ? <div className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded">{error}</div> : null}
+
             <button onClick={onClose} className="text-gray-400 hover:text-gray-500 focus:outline-none">
               <X className="w-6 h-6" />
             </button>
           </div>
 
-          {/* Modal Content */}
-          <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
+          {/* Modal Content - Scrollable Area */}
+          <div className="px-6 py-6 max-h-[calc(100vh-16rem)] overflow-y-auto custom-scrollbar">
             <form id="extraForm" onSubmit={handleFormSubmit} className="space-y-5">
+              
+              {/* Parent Category Select */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   {t('extrasManagement.extras.fields.parentCategory')}
@@ -167,164 +143,67 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                 <select
                   title="Parent Category"
                   value={formData.extraCategoryId}
-                  onChange={(e) => onChange({ ...formData, extraCategoryId: parseInt(e.target.value) })}
+                  onChange={handleCategoryChange}
                   className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5"
                   disabled={!!selectedCategoryId}
                 >
                   <option value={0}>{t('extrasManagement.extras.fields.selectCategory')}</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
-                      {c.categoryName}
+                      {c.categoryName} {c.isRemovalCategory ? `(${t('common.removal') || 'Removal'})` : ''}
                     </option>
                   ))}
                 </select>
               </div>
 
-              {/* Duplicate Warning Banner with Transition */}
-              <div
-                className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                  showDuplicateWarning ? 'max-h-32 opacity-100' : 'max-h-0 opacity-0'
-                }`}
-              >
-                <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-lg">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <AlertCircle className="h-5 w-5 text-red-500 dark:text-red-400" />
-                    </div>
-                    <div className="ml-3 flex-1">
-                      <h3 className="text-sm font-medium text-red-800 dark:text-red-300">
-                        {t('extrasManagement.extras.duplicateWarning') || 'Extra Already Exists'}
-                      </h3>
-                      <div className="mt-1 text-sm text-red-700 dark:text-red-400">
-                        {t('extrasManagement.extras.duplicateMessage') || 'This extra already exists in the selected category. Please choose a different name.'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="col-span-2 relative">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {t('extrasManagement.extras.fields.itemName')}
-                  </label>
-                  <div className="relative">
-                    <input
-                      ref={inputRef}
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => handleNameChange(e.target.value)}
-                      onFocus={() => formData.name && !isEditMode && setShowSuggestions(true)}
-                      className={`w-full rounded-lg border ${
-                        duplicateInSameCategory
-                          ? 'border-red-500 dark:border-red-500'
-                          : 'border-gray-300 dark:border-gray-600'
-                      } bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5 px-3 ${
-                        duplicateInSameCategory ? 'focus:border-red-500 focus:ring-red-500' : ''
-                      }`}
-                      placeholder={t('extrasManagement.extras.fields.itemNamePlaceholder')}
-                    />
-                    {duplicateInSameCategory && (
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <AlertCircle className="h-5 w-5 text-red-500" />
-                      </div>
-                    )}
-                  </div>
-
-                 
-
-                  {/* Autocomplete Suggestions */}
-                  {showSuggestions && filteredExtras.length > 0 && !isEditMode && (
-                    <div
-                      ref={suggestionsRef}
-                      className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-auto"
-                    >
-                      <div className="px-3 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-600">
-                        Select from existing extras or create new
-                      </div>
-                      {filteredExtras.map((extra) => {
-                        const extraCategory = categories.find(cat => cat.id === extra.extraCategoryId);
-                        const isSameCategory = extra.extraCategoryId === formData.extraCategoryId;
-
-                        return (
-                          <button
-                            key={extra.id}
-                            type="button"
-                            onClick={() => handleSelectExtra(extra)}
-                            disabled={isSameCategory && extra.name.toLowerCase() === formData.name.toLowerCase()}
-                            className={`w-full text-left px-3 py-2 border-b border-gray-100 dark:border-gray-600 last:border-b-0 transition-colors ${
-                              isSameCategory && extra.name.toLowerCase() === formData.name.toLowerCase()
-                                ? 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800'
-                                : 'hover:bg-blue-50 dark:hover:bg-gray-600'
-                            }`}
-                          >
-                            <div className="flex justify-between items-start">
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                  <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                    {extra.name}
-                                  </div>
-                                  {isSameCategory && extra.name.toLowerCase() === formData.name.toLowerCase() && (
-                                    <span className="text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 px-2 py-0.5 rounded">
-                                      Already in Category
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="text-xs text-blue-600 dark:text-blue-400 mt-0.5 font-medium">
-                                  {extraCategory?.categoryName || 'Unknown Category'}
-                                </div>
-                                {extra.description && (
-                                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                    {extra.description}
-                                  </div>
-                                )}
-                              </div>
-                              <div className="ml-2 text-sm font-semibold text-blue-600 dark:text-blue-400">
-                                {extra.basePrice.toFixed(2)}
-                              </div>
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+                <div className="sm:col-span-2">
+                  <MultiLanguageInput
+                    label={t('extrasManagement.extras.fields.itemName')}
+                    value={nameTranslations}
+                    onChange={onNameTranslationsChange}
+                    languages={supportedLanguages}
+                    required={true}
+                    requiredLanguages={[defaultLanguage]}
+                    placeholder={t('extrasManagement.extras.fields.itemNamePlaceholder')}
+                    disabled={loading || uploading}
+                  />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     {t('extrasManagement.extras.fields.price')}
                   </label>
                   <div className="relative">
                     <input
                       title="Price"
-                      type="text"
-                      inputMode="decimal"
-                      required
-                      value={formData.basePrice}
+                      type="number"
+                      step="1"
+                      min="0"
+                      value={formData.basePrice || ''}
+                      // Disable input if removal is checked
+                      disabled={formData.isRemoval}
                       onChange={(e) => {
                         const val = e.target.value;
-                        if (/^\d*\.?\d*$/.test(val)) {
-                          onChange({ ...formData, basePrice: val === '' ? 0 : parseFloat(val) || 0 });
-                        }
+                        onChange({ ...formData, basePrice: val === '' ? 0 : parseFloat(val) || 0 });
                       }}
-                      className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5 pl-2 pr-3"
+                      className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5 px-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                      placeholder="0.00"
                     />
                   </div>
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  {t('extrasManagement.extras.fields.description')}
-                </label>
-                <textarea
-                  rows={2}
-                  value={formData.description}
-                  onChange={(e) => onChange({ ...formData, description: e.target.value })}
-                  className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2 px-3"
-                  placeholder={t('extrasManagement.extras.fields.descriptionPlaceholder')}
-                />
-              </div>
+              {/* Multi-Language Description TextArea */}
+              <MultiLanguageTextArea
+                label={t('extrasManagement.extras.fields.description')}
+                value={descriptionTranslations}
+                onChange={onDescriptionTranslationsChange}
+                languages={supportedLanguages}
+                required={false}
+                placeholder={t('extrasManagement.extras.fields.descriptionPlaceholder')}
+                disabled={loading || uploading}
+                rows={3}
+              />
 
               {/* Image Upload */}
               <div>
@@ -344,7 +223,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                       <button
                         type="button"
                         onClick={onImageClear}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600"
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -359,26 +238,31 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                 </div>
               </div>
 
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
+              {/* Checkboxes */}
+              <div className="flex gap-4 p-1">
+                <label className="flex items-center gap-2 cursor-pointer group">
                   <input
                     type="checkbox"
                     checked={formData.status}
                     onChange={(e) => onChange({ ...formData, status: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded"
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                     {t('extrasManagement.extras.fields.activeLabel')}
                   </span>
                 </label>
-                <label className="flex items-center gap-2 cursor-pointer">
+                
+                {/* Removal Checkbox */}
+                <label className={`flex items-center gap-2 group ${!isRemovalAllowed ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
                   <input
                     type="checkbox"
                     checked={formData.isRemoval}
-                    onChange={(e) => onChange({ ...formData, isRemoval: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded"
+                    onChange={handleRemovalCheckboxChange}
+                    // Optional: Physically disable the input if the category doesn't support it
+                    disabled={!isRemovalAllowed && !formData.isRemoval} 
+                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 disabled:cursor-not-allowed"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                     {t('extrasManagement.extras.fields.removalLabel')}
                   </span>
                 </label>
@@ -391,18 +275,11 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
             <button
               type="submit"
               form="extraForm"
-              disabled={loading || uploading || (duplicateInSameCategory && !isEditMode)}
-              className={`inline-flex justify-center rounded-lg border border-transparent shadow-sm px-5 py-2.5 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm transition-all duration-200 ${
-                duplicateInSameCategory && !isEditMode
-                  ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed opacity-60'
-                  : 'bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed'
-              }`}
-              title={duplicateInSameCategory && !isEditMode ? t('extrasManagement.extras.duplicateWarning') || 'Extra already exists in this category' : ''}
+              disabled={loading || uploading}
+              className="inline-flex justify-center rounded-lg border border-transparent shadow-sm px-5 py-2.5 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm transition-all duration-200 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading || uploading
                 ? t('extrasManagement.processing')
-                : duplicateInSameCategory && !isEditMode
-                ? t('extrasManagement.extras.alreadyExists') || 'Already Exists'
                 : isEditMode
                 ? t('extrasManagement.buttons.save')
                 : t('extrasManagement.buttons.add')}
