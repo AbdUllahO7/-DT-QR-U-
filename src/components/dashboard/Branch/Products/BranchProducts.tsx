@@ -1856,6 +1856,7 @@ const handleSaveProductExtras = async (
 
         {/* Delete Confirmation Modal */}
         <ConfirmDeleteModal
+        errorMessage=''
           isOpen={deleteModal.isOpen}
           onClose={closeDeleteModal}
           onConfirm={performDelete}

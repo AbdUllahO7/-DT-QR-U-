@@ -22,15 +22,12 @@ const ProductExtrasModal: React.FC<ProductExtrasModalProps> = ({
 }) => {
   const [currentView, setCurrentView] = useState<ModalView>('categories');
   
-  // Selection State - Updated to track isRemoval status
+  // Selection State - Tracks ID, Name, and Removal status
   const [selectedCategory, setSelectedCategory] = useState<{
     id: number;
     name: string;
     isRemoval: boolean;
   } | null>(null);
-
-
-  console.log("selectedCategory",selectedCategory)
 
   // Reset view when modal opens
   useEffect(() => {
@@ -41,7 +38,7 @@ const ProductExtrasModal: React.FC<ProductExtrasModalProps> = ({
     }
   }, [isOpen, productId, productName]);
 
-  // Updated to accept isRemoval flag from the categories modal
+  // Handle category selection from the first modal
   const handleSelectCategory = (categoryId: number, categoryName: string, isRemoval: boolean = false) => {
     setSelectedCategory({ 
       id: categoryId, 
@@ -68,17 +65,22 @@ const ProductExtrasModal: React.FC<ProductExtrasModalProps> = ({
 
   return (
     <>
+      {/* View 1: Categories List 
+        This modal is now responsive (Full screen on mobile, Card on desktop)
+      */}
       {currentView === 'categories' && (
         <ProductExtraCategoriesModal
           isOpen={true}
           onClose={handleClose}
           productId={productId}
           productName={productName}
-          // Note: You must update ProductExtraCategoriesModal to pass the isRemoval boolean in this callback
           onSelectCategory={handleSelectCategory}
         />
       )}    
 
+      {/* View 2: Extras Management 
+        This modal is now responsive and handles Removal logic
+      */}
       {currentView === 'extras' && selectedCategory && (
         <ProductExtrasManagementModal
           isOpen={true}
@@ -88,7 +90,7 @@ const ProductExtrasModal: React.FC<ProductExtrasModalProps> = ({
           productName={productName}
           extraCategoryId={selectedCategory.id}
           extraCategoryName={selectedCategory.name}
-          // Pass the removal flag down so the modal can enforce Single Select
+          // Pass the removal flag down so the modal can enforce Single Select UI
           isRemoval={selectedCategory.isRemoval}
         />
       )}
