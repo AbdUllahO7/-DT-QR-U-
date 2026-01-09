@@ -410,6 +410,9 @@ hero: {
     turkish: 'Türkçe',
     english: 'English',
     arabic: 'العربية',
+    azerbaijani: 'Azərbaycan dili',
+    albanian: 'Shqip',
+    bosnian: 'Bosanski',
     selectLanguage: 'Dil Seç'
   },
 

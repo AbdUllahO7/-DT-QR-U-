@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-export type Language = 'tr' | 'en' | 'ar';
+export type Language = 'tr' | 'en' | 'ar' | 'az' | 'sq' | 'bs';
 
 interface LanguageContextType {
   language: Language;
@@ -30,7 +30,7 @@ import { translations } from '../i18n';
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>(() => {
     const saved = localStorage.getItem('language') as Language;
-    return saved && ['tr', 'en', 'ar'].includes(saved) ? saved : 'tr';
+    return saved && ['tr', 'en', 'ar' , 'az', 'sq', 'bs'].includes(saved) ? saved : 'tr';
   });
 
   const isRTL = language === 'ar';
