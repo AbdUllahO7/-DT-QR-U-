@@ -348,7 +348,7 @@ const MoneyCaseManager: React.FC<MoneyCaseManagerProps> = ({ branchId }) => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header with Branch Selector */}
-        <div className={`flex items-center justify-between mb-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex flex-wrap justify-center items-center gap-3 mb-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <MoneyCaseHeader t={t} />
           
           <div className="relative" ref={dropdownRef}>

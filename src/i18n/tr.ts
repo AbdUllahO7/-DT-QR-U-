@@ -9,6 +9,8 @@ export const tr = {
     select: 'Seç',
     success: 'Başarılı',
      "emailAddress": "E-posta Adresi",
+         actions: 'İşlemler',
+
       "emailPlaceholder": "you@example.com",
     cancel: 'İptal',
     setAsDefault: 'Varsayılan Olarak Ayarla',

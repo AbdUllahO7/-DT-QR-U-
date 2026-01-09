@@ -29,7 +29,7 @@ interface DeletedEntity {
 
 const RecycleBin: React.FC = () => {
   const location = useLocation();
-  const { t } = useLanguage();
+  const { isRTL,t } = useLanguage();
   const [deletedItems, setDeletedItems] = useState<DeletedEntity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -634,7 +634,7 @@ const RecycleBin: React.FC = () => {
       </div>
 
       {/* Items List */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         {loading ? (
           <div className="p-12 text-center">
             <RefreshCw className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-4 animate-spin" />
@@ -646,7 +646,7 @@ const RecycleBin: React.FC = () => {
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               {searchTerm ? t('recycleBin.empty.titleFiltered') : t('recycleBin.empty.title')}
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto">
               {searchTerm 
                 ? t('recycleBin.empty.descriptionFiltered')
                 : t('recycleBin.empty.description')
@@ -660,28 +660,32 @@ const RecycleBin: React.FC = () => {
               const IconComponent = config.icon;
 
               return (
-                <div key={`${item.entityType}-${item.id}`}
-                  className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-start gap-4 flex-1">
+                <div 
+                  key={`${item.entityType}-${item.id}`}
+                  className="p-4 sm:p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200"
+                >
+                  <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                    
+                    {/* Content Group */}
+                    <div className={`flex items-start gap-3 sm:gap-4 flex-1 min-w-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       {/* Icon */}
-                      <div className={`p-2 rounded-lg ${config.bgClass}`}>
+                      <div className={`p-2 rounded-lg shrink-0 ${config.bgClass}`}>
                         <IconComponent className={`w-5 h-5 ${config.textClass}`} />
                       </div>
 
-                      {/* Content */}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                      {/* Text Content */}
+                      <div className={`flex-1 min-w-0 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        <div className={`flex flex-wrap items-center gap-2 mb-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white truncate max-w-full">
                             {item.displayName}
                           </h3>
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.badgeClass}`}>
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full whitespace-nowrap ${config.badgeClass}`}>
                             {config.label}
                           </span>
                         </div>
 
                         {item.description && (
-                          <p className="text-gray-600 dark:text-gray-400 mb-2">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
                             {item.description}
                           </p>
                         )}
@@ -689,47 +693,49 @@ const RecycleBin: React.FC = () => {
                         {/* Additional context information */}
                         <div className="flex flex-col gap-1 mb-2">
                           {(item.entityType === 'Product' || item.entityType === 'BranchProduct' || item.entityType === 'MenuTable' || item.entityType === 'Extra') && item.categoryName && (
-                            <p className="text-sm text-gray-500 dark:text-gray-500">
-                              {t('recycleBin.contextInfo.category')} {item.categoryName}
+                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 truncate">
+                              <span className="font-medium">{t('recycleBin.contextInfo.category')}:</span> {item.categoryName}
                             </p>
                           )}
 
                           {(item.entityType === 'BranchProduct' || item.entityType === 'BranchCategory' || item.entityType === 'MenuTable' || item.entityType === 'MenuTableCategory') && item.branchName && (
-                            <p className="text-sm text-gray-500 dark:text-gray-500">
-                              {t('recycleBin.contextInfo.branch')} {item.branchName}
+                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 truncate">
+                              <span className="font-medium">{t('recycleBin.contextInfo.branch')}:</span> {item.branchName}
                             </p>
                           )}
 
                           {item.entityType === 'Branch' && item.restaurantName && (
-                            <p className="text-sm text-gray-500 dark:text-gray-500">
-                              {t('recycleBin.contextInfo.restaurant')} {item.restaurantName}
+                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 truncate">
+                              <span className="font-medium">{t('recycleBin.contextInfo.restaurant')}:</span> {item.restaurantName}
                             </p>
                           )}
                         </div>
 
-                        <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-500">
-                          <Calendar className="w-4 h-4" />
+                        <div className={`flex items-center gap-1 text-xs sm:text-sm text-gray-400 dark:text-gray-500 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <Calendar className="w-3.5 h-3.5" />
                           <span>{t('recycleBin.deletedAt')} {formatDate(item.deletedAt)}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2">
+                    <div className="w-full sm:w-auto pt-2 sm:pt-0">
                       <button
                         onClick={() => handleRestoreClick(item)}
                         disabled={restoringIds.has(item.id)}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 
+                        className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-green-600 hover:bg-green-700 
                                  disabled:bg-gray-400 dark:disabled:bg-gray-600
                                  text-white rounded-lg transition-colors duration-200
-                                 disabled:cursor-not-allowed"
+                                 disabled:cursor-not-allowed text-sm font-medium ${isRTL ? 'flex-row-reverse' : ''}`}
                       >
                         {restoringIds.has(item.id) ? (
                           <RefreshCw className="w-4 h-4 animate-spin" />
                         ) : (
                           <RotateCcw className="w-4 h-4" />
                         )}
-                        {restoringIds.has(item.id) ? t('recycleBin.restore.restoring') : t('recycleBin.restore.button')}
+                        <span>
+                          {restoringIds.has(item.id) ? t('recycleBin.restore.restoring') : t('recycleBin.restore.button')}
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -739,7 +745,6 @@ const RecycleBin: React.FC = () => {
           </div>
         )}
       </div>
-
       {/* Branch Restore Modal */}
       {showBranchRestoreModal && branchToRestore && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">

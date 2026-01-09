@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X, Plus, Edit2, Trash2, Save, Loader2, Package, 
-  AlertCircle, ChevronRight, Layers
+  AlertCircle, ChevronRight, Layers, ChevronDown, Check, Search
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { logger } from '../../../utils/logger';
@@ -10,6 +11,139 @@ import { CreateProductExtraCategoryData, ProductExtraCategory, UpdateProductExtr
 import { productExtraCategoriesService } from '../../../services/Extras/ProductExtraCategoriesService';
 import { extraCategoriesService } from '../../../services/Extras/ExtraCategoriesService';
 import { ConfirmationModal } from './ConfirmationModal';
+
+// --- Custom Select Component ---
+interface SelectOption {
+  value: number;
+  label: string;
+  subLabel?: string;
+}
+
+interface CustomSelectProps {
+  options: SelectOption[];
+  value: number;
+  onChange: (value: number) => void;
+  placeholder: string;
+  disabled?: boolean;
+}
+
+const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, placeholder, disabled }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { isRTL } = useLanguage();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  const filteredOptions = options.filter(opt => 
+    opt.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (opt.subLabel && opt.subLabel.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
+        className={`w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-left transition-all duration-200 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 ${
+          disabled ? 'opacity-60 cursor-not-allowed bg-gray-50 dark:bg-gray-800' : 'hover:border-primary-400 cursor-pointer shadow-sm'
+        } ${isOpen ? 'ring-2 ring-primary-500/20 border-primary-500' : ''}`}
+      >
+        <span className={`block truncate ${!selectedOption ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+          {selectedOption ? (
+            <span className="flex flex-col text-left">
+              <span className="font-medium">{selectedOption.label}</span>
+              {selectedOption.subLabel && (
+                <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{selectedOption.subLabel}</span>
+              )}
+            </span>
+          ) : (
+            placeholder
+          )}
+        </span>
+        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.15 }}
+            className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[300px]"
+          >
+            {/* Search Input */}
+            <div className="p-2 border-b border-gray-100 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
+              <div className="relative">
+                <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400`} />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search..."
+                  className={`w-full ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'} py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500`}
+                  autoFocus
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            </div>
+
+            {/* Options List */}
+            <div className="overflow-y-auto flex-1 p-1 custom-scrollbar">
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      onChange(option.value);
+                      setIsOpen(false);
+                      setSearchTerm('');
+                    }}
+                    className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between group transition-colors ${
+                      value === option.value
+                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
+                        : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium text-sm">{option.label}</span>
+                      {option.subLabel && (
+                        <span className={`text-xs mt-0.5 ${value === option.value ? 'text-primary-600/80 dark:text-primary-400/80' : 'text-gray-500 dark:text-gray-400'}`}>
+                          {option.subLabel}
+                        </span>
+                      )}
+                    </div>
+                    {value === option.value && (
+                      <Check className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                    )}
+                  </button>
+                ))
+              ) : (
+                <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                  No options found
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+// --- End Custom Select ---
 
 interface ProductExtraCategoriesModalProps {
   isOpen: boolean;
@@ -326,19 +460,18 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             {t('extrasManagement.productExtras.selectCategory')} <span className="text-red-500">*</span>
                           </label>
-                          <select
-                            title={t('extrasManagement.productExtras.selectCategory')}
-                            value={formData.extraCategoryId}
-                            onChange={(e) => handleCategorySelect(parseInt(e.target.value))}
-                            className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
-                          >
-                            <option value={0}>{t('extrasManagement.productExtras.chooseCategory')}</option>
-                            {getAvailableCategoriesToAdd().map(cat => (
-                              <option key={cat.id} value={cat.id}>
-                                {cat.categoryName} {cat.isRemovalCategory ? `(${t('extrasManagement.categoryConfigModal.badges.removal')})` : ''}
-                              </option>
-                            ))}
-                          </select>
+                          <div className="relative z-20">
+                            <CustomSelect
+                              placeholder={t('extrasManagement.productExtras.chooseCategory')}
+                              value={formData.extraCategoryId}
+                              onChange={(val) => handleCategorySelect(val)}
+                              options={getAvailableCategoriesToAdd().map(cat => ({
+                                value: cat.id,
+                                label: cat.categoryName,
+                                subLabel: cat.isRemovalCategory ? t('extrasManagement.categoryConfigModal.badges.removal') : undefined
+                              }))}
+                            />
+                          </div>
                         </div>
                         
                         <div className="flex items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">

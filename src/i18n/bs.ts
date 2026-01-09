@@ -10,6 +10,7 @@ export const bs = {
         setAsDefault: 'Postavi kao zadano',
         default: 'Zadano',
         saving: 'Učitavanje...',
+        actions: 'Akcije',
         success: 'Uspjeh',
         cancel: 'Otkaži',
         select: 'Odaberi',

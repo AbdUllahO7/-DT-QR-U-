@@ -29,18 +29,14 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
     return time.substring(0, 5); // Takes only HH:MM part
   };
 
-  // Format time slots for display
-  const formatTimeSlots = (timeSlots: { openTime: string; closeTime: string }[] | undefined) => {
-    if (!timeSlots || timeSlots.length === 0) return '';
-    return timeSlots.map(slot => `${formatTime(slot.openTime)} - ${formatTime(slot.closeTime)}`).join(', ');
-  };
 
-  return (
+
+return (
     <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 transition-all duration-300 hover:shadow-2xl">
-      <div className="p-6">
-        <h2 className="text-2xl font-bold mb-6 text-slate-800 dark:text-slate-100 flex items-center">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 mr-4 shadow-lg">
-            <Calendar className="w-6 h-6 text-white" />
+      <div className="p-4 sm:p-6">
+        <h2 className="text-xl sm:text-2xl font-bold mb-6 text-slate-800 dark:text-slate-100 flex items-center">
+          <div className="p-2 sm:p-3 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 mr-3 sm:mr-4 shadow-lg">
+            <Calendar className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
           {t('branchManagementBranch.workingHours.title')}
         </h2>
@@ -50,7 +46,7 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
             {editData.createBranchWorkingHourCoreDto?.map((hour) => (
               <div
                 key={hour.dayOfWeek}
-                className={`p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-lg ${
+                className={`p-4 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-lg ${
                   hour.isWorkingDay
                     ? hour.isOpen24Hours
                       ? 'bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700'
@@ -58,11 +54,12 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                     : 'bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900/20 dark:to-slate-800/20 border-slate-200 dark:border-slate-700 opacity-75'
                 }`}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <span className="font-bold text-xl text-slate-800 dark:text-slate-100">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                  <span className="font-bold text-lg sm:text-xl text-slate-800 dark:text-slate-100">
                     {t(`branchManagementBranch.workingHours.days.${hour.dayOfWeek}`)}
                   </span>
-                  <div className="flex items-center space-x-4">
+                  
+                  <div className="flex flex-wrap items-center gap-4">
                     {hour.isWorkingDay && (
                       <label className="flex items-center space-x-3 cursor-pointer">
                         <input
@@ -73,7 +70,7 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                           }
                           className="w-5 h-5 text-blue-600 border-slate-300 dark:border-slate-600 rounded focus:ring-blue-500 focus:ring-2 bg-white dark:bg-slate-700 transition-colors duration-200"
                         />
-                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
                           {t('branchManagementBranch.workingHours.open24Hours') || '24 Hours'}
                         </span>
                       </label>
@@ -87,7 +84,7 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                         }
                         className="w-5 h-5 text-emerald-600 border-slate-300 dark:border-slate-600 rounded focus:ring-emerald-500 focus:ring-2 bg-white dark:bg-slate-700 transition-colors duration-200"
                       />
-                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                      <span className="text-sm font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
                         {t('branchManagementBranch.workingHours.workingDay')}
                       </span>
                     </label>
@@ -110,10 +107,10 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                 {hour.isWorkingDay && !hour.isOpen24Hours && (
                   <div className="space-y-4">
                     {hour.timeSlots?.map((slot, slotIndex) => (
-                      <div key={slotIndex} className="flex items-center gap-4">
-                        <div className="grid grid-cols-2 gap-6 flex-1">
+                      <div key={slotIndex} className="flex flex-col sm:flex-row items-start sm:items-center gap-4 bg-white/50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-200 dark:border-slate-600">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 w-full">
                           <div>
-                            <label className="block text-sm font-bold mb-3 text-slate-700 dark:text-slate-300">
+                            <label className="block text-xs sm:text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">
                               {t('branchManagementBranch.workingHours.openTime')}
                             </label>
                             <input
@@ -123,11 +120,11 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                 handleTimeSlotChange?.(hour.dayOfWeek, slotIndex, 'openTime', e.target.value + ':00')
                               }
-                              className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 shadow-sm hover:shadow-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-emerald-500 focus:border-transparent"
+                              className="w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 shadow-sm hover:shadow-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-emerald-500 focus:border-transparent"
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-bold mb-3 text-slate-700 dark:text-slate-300">
+                            <label className="block text-xs sm:text-sm font-bold mb-2 text-slate-700 dark:text-slate-300">
                               {t('branchManagementBranch.workingHours.closeTime')}
                             </label>
                             <input
@@ -137,7 +134,7 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                                 handleTimeSlotChange?.(hour.dayOfWeek, slotIndex, 'closeTime', e.target.value + ':00')
                               }
-                              className="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 shadow-sm hover:shadow-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-emerald-500 focus:border-transparent"
+                              className="w-full px-3 py-2 sm:px-4 sm:py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all duration-300 shadow-sm hover:shadow-md border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-emerald-500 focus:border-transparent"
                             />
                           </div>
                         </div>
@@ -146,7 +143,7 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                           <button
                             type="button"
                             onClick={() => handleRemoveTimeSlot?.(hour.dayOfWeek, slotIndex)}
-                            className="mt-8 p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors self-end sm:self-center mt-2 sm:mt-6"
                             title={t('common.remove') || 'Remove'}
                           >
                             <Trash2 className="w-5 h-5" />
@@ -158,7 +155,7 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                     <button
                       type="button"
                       onClick={() => handleAddTimeSlot?.(hour.dayOfWeek)}
-                      className="flex items-center space-x-2 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-semibold text-sm transition-colors"
+                      className="w-full sm:w-auto flex justify-center items-center space-x-2 px-4 py-2 border-2 border-dashed border-emerald-300 dark:border-emerald-700 rounded-xl text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 font-semibold text-sm transition-colors"
                     >
                       <Plus className="w-4 h-4" />
                       <span>{t('branchManagementBranch.workingHours.addTimeSlot') || 'Add Time Slot'}</span>
@@ -182,11 +179,11 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
           </div>
         ) : (
           selectedBranch?.workingHours && selectedBranch.workingHours.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {selectedBranch.workingHours.map((hour) => (
                 <div
                   key={hour.dayOfWeek}
-                  className={`p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-lg transform hover:scale-105 ${
+                  className={`p-4 sm:p-6 rounded-xl border-2 transition-all duration-300 hover:shadow-lg transform hover:scale-[1.02] ${
                     hour.isWorkingDay
                       ? hour.isOpen24Hours
                         ? 'bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700'
@@ -201,7 +198,7 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                   {hour.isWorkingDay ? (
                     hour.isOpen24Hours ? (
                       <div className="text-center">
-                        <div className="inline-flex items-center space-x-2 text-blue-600 dark:text-blue-400">
+                        <div className="inline-flex items-center space-x-2 text-blue-600 dark:text-blue-400 bg-white/50 dark:bg-slate-800/50 px-3 py-1 rounded-full">
                           <Clock className="w-4 h-4" />
                           <span className="font-semibold text-sm">
                             {t('branchManagementBranch.workingHours.open24HoursMessage') || '24 Hours'}
@@ -211,10 +208,10 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                     ) : (
                       <div className="text-sm text-slate-700 dark:text-slate-300">
                         {hour.timeSlots && hour.timeSlots.length > 0 ? (
-                          <div className="space-y-1">
+                          <div className="space-y-2">
                             {hour.timeSlots.map((slot, idx) => (
-                              <div key={idx} className="flex items-center justify-center">
-                                <Clock className="w-4 h-4 mr-2 text-emerald-500" />
+                              <div key={idx} className="flex items-center justify-center bg-white/50 dark:bg-slate-800/50 p-2 rounded-lg">
+                                <Clock className="w-4 h-4 mr-2 text-emerald-600 dark:text-emerald-400" />
                                 <span className="font-semibold">
                                   {formatTime(slot.openTime)} - {formatTime(slot.closeTime)}
                                 </span>
@@ -222,8 +219,8 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                             ))}
                           </div>
                         ) : (
-                          <div className="flex items-center justify-center">
-                            <Clock className="w-4 h-4 mr-2 text-emerald-500" />
+                          <div className="flex items-center justify-center bg-white/50 dark:bg-slate-800/50 p-2 rounded-lg">
+                            <Clock className="w-4 h-4 mr-2 text-emerald-600 dark:text-emerald-400" />
                             <span className="font-semibold">
                               {formatTime((hour as any).openTime || '')} - {formatTime((hour as any).closeTime || '')}
                             </span>
@@ -233,7 +230,7 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
                     )
                   ) : (
                     <div className="text-center">
-                      <div className="flex items-center justify-center space-x-2 text-red-600 dark:text-red-400">
+                      <div className="flex items-center justify-center space-x-2 text-red-600 dark:text-red-400 bg-white/50 dark:bg-slate-800/50 p-2 rounded-lg">
                         <X className="w-4 h-4" />
                         <span className="text-sm font-bold">
                           {t('branchManagementBranch.status.closed')}
@@ -245,9 +242,9 @@ const BranchWorkingHours: React.FC<BranchWorkingHoursProps> = ({
               ))}
             </div>
           ) : (
-            <div className="text-center py-12 bg-slate-50 dark:bg-slate-700 rounded-xl">
-              <Clock className="w-16 h-16 mx-auto mb-4 text-slate-400 dark:text-slate-500" />
-              <p className="text-xl font-semibold text-slate-600 dark:text-slate-400">
+            <div className="text-center py-12 bg-slate-50 dark:bg-slate-700 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-600">
+              <Clock className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-slate-400 dark:text-slate-500" />
+              <p className="text-lg sm:text-xl font-semibold text-slate-600 dark:text-slate-400">
                 {t('branchManagementBranch.workingHours.noWorkingHours')}
               </p>
             </div>

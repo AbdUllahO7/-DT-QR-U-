@@ -1,5 +1,18 @@
-import React from 'react';
-import { ChevronDown, ChevronUp, AlertCircle, Filter, Eye, CheckCircle, Clock, Package, XCircle, Ban, Zap } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { 
+  ChevronDown, 
+  ChevronUp, 
+  AlertCircle, 
+  Filter, 
+  Eye, 
+  CheckCircle, 
+  Clock, 
+  Package, 
+  XCircle, 
+  Ban, 
+  Zap,
+  Check
+} from 'lucide-react';
 import OrderTableRow from './OrderTableRow';
 import { BranchOrder, PendingOrder } from '../../../../types/BranchManagement/type';
 import { OrderStatusEnums } from '../../../../types/Orders/type';
@@ -55,8 +68,31 @@ const OrderMobileCard: React.FC<{
   const rowVersion = order.rowVersion || '';
   const currency = useCurrency();
   
+  // Status Menu State
+  const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsStatusMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+  
   // Logic for available actions
   const validStatuses = OrderStatusUtils.getValidStatusTransitions(status);
+  
+  // Filter valid statuses
+  const availableNextStatuses = validStatuses.filter((validStatus) => {
+    if (status === OrderStatusEnums.Preparing && validStatus === OrderStatusEnums.Completed) return false;
+    if (status === OrderStatusEnums.Ready && validStatus === OrderStatusEnums.Completed) return false;
+    return true;
+  });
+
   const shouldShowConfirmButton = orderService.canModifyOrder(status) && 
     status !== OrderStatusEnums.Completed && 
     status !== OrderStatusEnums.Confirmed &&
@@ -66,7 +102,7 @@ const OrderMobileCard: React.FC<{
 
   return (
     <div
-      className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-700 overflow-hidden"
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-700 overflow-visible relative"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* Card Header */}
@@ -150,7 +186,7 @@ const OrderMobileCard: React.FC<{
             {shouldShowConfirmButton && (
               <button
                 onClick={() => onOpenConfirm(order.id.toString(), rowVersion)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-semibold text-sm shadow-sm"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-semibold text-sm shadow-sm active:scale-95 transform duration-100"
               >
                 <CheckCircle className="w-4 h-4" />
                 <span>{t('ordersManager.confirm')}</span>
@@ -159,7 +195,7 @@ const OrderMobileCard: React.FC<{
             
             <button
               onClick={() => onOpenDetails(order)}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg transition-colors font-medium text-sm"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 rounded-lg transition-colors font-medium text-sm active:scale-95 transform duration-100"
             >
               <Eye className="w-4 h-4" />
               <span>{t('ordersManager.viewDetails')}</span>
@@ -172,7 +208,7 @@ const OrderMobileCard: React.FC<{
               {status === OrderStatusEnums.Pending && (
                 <button
                   onClick={() => onOpenReject(order.id.toString(), rowVersion)}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors text-sm font-medium border border-red-200 dark:border-red-800"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors text-sm font-medium border border-red-200 dark:border-red-800 active:scale-95 transform duration-100"
                 >
                   <XCircle className="w-4 h-4" />
                   <span>{t('ordersManager.reject')}</span>
@@ -182,7 +218,7 @@ const OrderMobileCard: React.FC<{
               {orderService.canCancelOrder(status) && (
                 <button
                   onClick={() => onOpenCancel(order.id.toString(), rowVersion)}
-                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 rounded-lg transition-colors text-sm font-medium border border-orange-200 dark:border-orange-800"
+                  className="flex-1 flex items-center justify-center gap-2 px-3 py-2 bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 hover:bg-orange-100 dark:hover:bg-orange-900/30 rounded-lg transition-colors text-sm font-medium border border-orange-200 dark:border-orange-800 active:scale-95 transform duration-100"
                 >
                   <Ban className="w-4 h-4" />
                   <span>{t('ordersManager.cancel')}</span>
@@ -191,42 +227,44 @@ const OrderMobileCard: React.FC<{
             </div>
           )}
 
-          {/* Status Change Selector */}
-          {validStatuses.length > 0 && (
-            <div className="relative">
-              <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                <Zap className="w-4 h-4 text-blue-500" />
-              </div>
-              <select
-                title='Change order status'
-                onChange={(e) => {
-                  const newStatus = parseInt(e.target.value) as OrderStatusEnums;
-                  if (newStatus !== status) {
-                    onOpenStatus(order.id.toString(), rowVersion, newStatus);
-                  }
-                  e.target.value = '';
-                }}
-                className={`w-full appearance-none bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-gray-900 dark:text-white text-sm font-medium rounded-lg block pl-10 pr-10 py-2.5 cursor-pointer hover:border-blue-400 transition-colors focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isRTL ? 'text-right' : 'text-left'}`}
-                defaultValue=""
+          {/* Status Change Selector (Custom Dropdown) */}
+          {availableNextStatuses.length > 0 && (
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setIsStatusMenuOpen(!isStatusMenuOpen)}
+                className={`w-full flex items-center justify-between px-4 py-2.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 rounded-lg transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/30 active:scale-95 transform duration-100 font-medium text-sm ${isRTL ? 'flex-row-reverse' : ''}`}
               >
-                <option value="" disabled>
-                  {t('ordersManager.changeStatus')}
-                </option>
-                {validStatuses
-                  .filter((validStatus) => {
-                    if (status === OrderStatusEnums.Preparing && validStatus === OrderStatusEnums.Completed) return false;
-                    if (status === OrderStatusEnums.Ready && validStatus === OrderStatusEnums.Completed) return false;
-                    return true;
-                  })
-                  .map((validStatus) => (
-                    <option key={validStatus} value={validStatus}>
-                      {orderService.getOrderStatusText(validStatus, lang)}
-                    </option>
-                  ))}
-              </select>
-              <div className={`absolute inset-y-0 ${isRTL ? 'left-3' : 'right-3'} flex items-center pointer-events-none`}>
-                <ChevronDown className="w-4 h-4 text-gray-500" />
-              </div>
+                <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <Zap className="w-4 h-4" />
+                  <span>{t('ordersManager.changeStatus')}</span>
+                </div>
+                <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isStatusMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {/* Mobile Dropdown Menu (Positioned Bottom-Up usually better on mobile, but standard absolute here) */}
+              {isStatusMenuOpen && (
+                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden z-20 animate-in fade-in slide-in-from-bottom-2">
+                  <div className="max-h-60 overflow-y-auto p-1">
+                    {availableNextStatuses.map((validStatus) => (
+                      <button
+                        key={validStatus}
+                        onClick={() => {
+                          onOpenStatus(order.id.toString(), rowVersion, validStatus);
+                          setIsStatusMenuOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg text-sm text-gray-700 dark:text-gray-200 transition-colors ${isRTL ? 'flex-row-reverse text-right' : 'text-left'}`}
+                      >
+                        <span className="font-medium">
+                          {orderService.getOrderStatusText(validStatus, lang)}
+                        </span>
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center bg-gray-100 dark:bg-gray-600 ${isRTL ? 'mr-auto' : 'ml-auto'}`}>
+                           <Check className="w-3.5 h-3.5 text-gray-500 dark:text-gray-300" />
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
