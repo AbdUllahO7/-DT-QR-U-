@@ -5113,7 +5113,7 @@ productModal: {
           "errorInvalid": "Invalid phone number format (7-15 digits)."
         },
         "email": {
-          "label": "Email Address *",
+          "label": "Email Address ",
           "placeholder": "Enter email address",
           "error": "Email address is required"
         },

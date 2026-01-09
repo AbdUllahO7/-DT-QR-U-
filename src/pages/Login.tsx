@@ -223,6 +223,9 @@ const Login: React.FC = () => {
               <Link to="/resetPassword" className="text-sm font-medium text-primary-600 hover:underline">
                 {t('pages.login.forgotPassword')}
               </Link>
+              <Link to="/confirmMail" className="text-sm font-medium text-primary-600 hover:underline">
+                {t('pages.login.confirimEmail')}
+              </Link>
             </div>
 
             <button

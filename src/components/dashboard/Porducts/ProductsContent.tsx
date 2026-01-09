@@ -285,11 +285,14 @@ useEffect(() => {
     setIsIngredientUpdateModalOpen(true);
   };
   
-  const loadCategories = async (newProductId?: number) => {
+  const loadCategories = async (newProductId?: number, isRefresh: boolean = false) => {
     if (!selectedBranch) return;
 
     try {
-      setLoading(true);
+      // Only show loading skeleton on initial load, not on refresh/update
+      if (!isRefresh) {
+        setLoading(true);
+      }
 
       let fetchedCategories: Category[];
       // Check if "Select All" is selected
@@ -1016,7 +1019,7 @@ useEffect(() => {
         <CreateCategoryModal
           isOpen={isCreateCategoryModalOpen}
           onClose={() => setIsCreateCategoryModalOpen(false)}
-          onSuccess={loadCategories}
+          onSuccess={() => loadCategories(undefined, true)}
         />
       </div>
     );
@@ -1415,7 +1418,7 @@ useEffect(() => {
       <CreateCategoryModal
         isOpen={isCreateCategoryModalOpen}
         onClose={() => setIsCreateCategoryModalOpen(false)}
-        onSuccess={loadCategories}
+        onSuccess={() => loadCategories(undefined, true)}
       />
       
       <CreateProductModal
@@ -1424,7 +1427,7 @@ useEffect(() => {
           setIsCreateProductModalOpen(false);
           setSelectedCategoryForProduct('');
         }}
-        onSuccess={(productId) => loadCategories(productId)}
+        onSuccess={(productId) => loadCategories(productId, true)}
         categories={categories}
         selectedCategoryId={selectedCategoryForProduct ? Number(selectedCategoryForProduct) : undefined}
       />
@@ -1436,7 +1439,7 @@ useEffect(() => {
             setIsEditCategoryModalOpen(false);
             setSelectedCategoryForEdit(null);
           }}
-          onSuccess={loadCategories}
+          onSuccess={() => loadCategories(undefined, true)}
           category={selectedCategoryForEdit}
         />
       )}
@@ -1448,7 +1451,7 @@ useEffect(() => {
             setIsEditProductModalOpen(false);
             setSelectedProductForEdit(null);
           }}
-          onSuccess={loadCategories}
+          onSuccess={() => loadCategories(undefined, true)}
           product={selectedProductForEdit}
           categories={categories}
         />
@@ -1461,7 +1464,7 @@ useEffect(() => {
             setIsIngredientUpdateModalOpen(false);
             setSelectedProductForIngredientUpdate(null);
           }}
-          onSuccess={loadCategories}
+          onSuccess={() => loadCategories(undefined, true)}
           productId={selectedProductForIngredientUpdate.productId}
           productName={selectedProductForIngredientUpdate.productName}
         />
@@ -1490,7 +1493,7 @@ useEffect(() => {
             setIsAddonsModalOpen(false);
             setSelectedProductForAddons(null);
           }}
-          onSuccess={loadCategories}
+          onSuccess={() => loadCategories(undefined, true)}
           productId={selectedProductForAddons.productId}
           productName={selectedProductForAddons.productName}
         />
@@ -1503,7 +1506,7 @@ useEffect(() => {
             setIsIngredientSelectionModalOpen(false);
             setSelectedProductForIngredients(null);
           }}
-          onSuccess={loadCategories}
+          onSuccess={() => loadCategories(undefined, true)}
           productId={selectedProductForIngredients.productId}
           productName={selectedProductForIngredients.productName}
         />
@@ -1516,7 +1519,7 @@ useEffect(() => {
             setIsProductExtrasModalOpen(false);
             setSelectedProductForExtras(null);
           }}
-          onSuccess={loadCategories}
+          onSuccess={() => loadCategories(undefined, true)}
           productId={selectedProductForExtras.productId}
           productName={selectedProductForExtras.productName}
         />

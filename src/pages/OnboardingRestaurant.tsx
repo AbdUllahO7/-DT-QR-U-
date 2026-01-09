@@ -2,21 +2,23 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  Building2, 
-  Upload, 
-  AlertCircle, 
-  CheckCircle, 
-  Store, 
-  FileText, 
-  Shield, 
+import {
+  ArrowLeft,
+  Building2,
+  Upload,
+  AlertCircle,
+  CheckCircle,
+  Store,
+  FileText,
+  Shield,
   Utensils,
   Building,
   Hash,
   Camera,
   Search, // Added
-  Globe   // Added
+  Globe,   // Added
+  ChevronDown,
+  Check
 } from 'lucide-react';
 import { CuisineType } from '../types';
 import type { CreateRestaurantDto, ApiError } from '../types/api';
@@ -51,6 +53,9 @@ const OnboardingRestaurant: React.FC = () => {
   const [isUploadingLogo, setIsUploadingLogo] = useState<boolean>(false);
   const [isUploadingWorkPermit, setIsUploadingWorkPermit] = useState<boolean>(false);
   const [isUploadingFoodCertificate, setIsUploadingFoodCertificate] = useState<boolean>(false);
+
+  // Legal Type dropdown state
+  const [isLegalTypeDropdownOpen, setIsLegalTypeDropdownOpen] = useState<boolean>(false);
 
   // Main Form Data
   const [formData, setFormData] = useState<CreateRestaurantDto>({
@@ -674,26 +679,66 @@ const OnboardingRestaurant: React.FC = () => {
           {t('onboardingRestaurant.step2.legalTypeLabel')}
         </label>
         <div className="relative">
-          <Shield className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-          <select
-            id="legalType"
-            name="legalType"
-            value={formData.legalType}
-            onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+          {/* Custom Dropdown Button */}
+          <button
+            type="button"
+            onClick={() => setIsLegalTypeDropdownOpen(!isLegalTypeDropdownOpen)}
+            className={`w-full ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
               errors.legalType
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
+            } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'} flex items-center justify-between`}
             dir={isRTL ? 'rtl' : 'ltr'}
           >
-            <option value="">{t('onboardingRestaurant.step2.legalTypePlaceholder')}</option>
-            {legalTypeOptions.map(option => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+            <Shield className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+            <span className={`flex-1 truncate ${!formData.legalType ? 'text-gray-500 dark:text-gray-400' : ''}`}>
+              {formData.legalType || t('onboardingRestaurant.step2.legalTypePlaceholder')}
+            </span>
+            <ChevronDown className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 transition-transform duration-200 ${isLegalTypeDropdownOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Dropdown Options */}
+          {isLegalTypeDropdownOpen && (
+            <>
+              {/* Backdrop to close dropdown */}
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsLegalTypeDropdownOpen(false)}
+              />
+
+              {/* Dropdown Menu */}
+              <div className={`absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto ${isRTL ? 'right-0' : 'left-0'}`}>
+                {legalTypeOptions.map((option, index) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => {
+                      setFormData(prev => ({ ...prev, legalType: option }));
+                      setIsLegalTypeDropdownOpen(false);
+                      // Clear error if it exists
+                      if (errors.legalType) {
+                        setErrors(prev => ({ ...prev, legalType: undefined }));
+                      }
+                    }}
+                    className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ${
+                      index === 0 ? 'rounded-t-lg' : ''
+                    } ${
+                      index === legalTypeOptions.length - 1 ? 'rounded-b-lg' : ''
+                    } ${
+                      formData.legalType === option
+                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+                        : 'text-gray-900 dark:text-white'
+                    } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+                  >
+                    <span className="truncate">{option}</span>
+                    {formData.legalType === option && (
+                      <Check className={`h-5 w-5 text-primary-600 dark:text-primary-400 flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                    )}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
         {errors.legalType && (
           <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.legalType}</p>
