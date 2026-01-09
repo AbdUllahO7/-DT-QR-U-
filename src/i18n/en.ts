@@ -8,6 +8,7 @@ export const en = {
     error: 'Error',
     removal: 'Removal',
     setAsDefault: 'Set as Default',
+    actions: 'Actions',
     default: 'Default',
     saving : 'Saving...',
     success: 'Success',
@@ -1567,7 +1568,7 @@ hero: {
   delete: {
     product: {
       title: 'Delete Product',
-      message: 'Are you sure you want to delete "{{productName}}"? This action cannot be undone.',
+      message: 'Are you sure you want to delete "{productName}"? This action cannot be undone.',
       success: 'Product deleted successfully'
     },
     category: {

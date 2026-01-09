@@ -976,10 +976,10 @@ useEffect(() => {
 
               <button
                 onClick={() => setIsCreateCategoryModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70 transition-colors duration-200"
+                className="flex items-center gap-2 px-2 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70 transition-colors duration-200"
               >
                 <Plus className="h-4 w-4" />
-                <span>{t('productsContent.actions.addFirstCategory')}</span>
+                <span className='w-fit'>{t('productsContent.actions.addFirstCategory')}</span>
               </button>
             </div>
           </div>
@@ -1101,241 +1101,247 @@ useEffect(() => {
                 )}
               </div>
             </div>
+{/* Second Row: Action Buttons - Responsive Layout */}
+            <div className={`flex flex-wrap items-center justify-between gap-3 w-full ${isRTL ? 'flex-row-reverse' : ''}`}>
+              
+              {/* Left Group: View & Filter Controls */}
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Clear Filters Button - Only shows when needed */}
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200"
+                    title={t('clear.filters') || 'Clear Filters'}
+                  >
+                    <X className="h-4 w-4" />
+                    <span className="hidden sm:inline">{t('clear.filters') || 'Clear'}</span>
+                  </button>
+                )}
 
-            {/* Second Row: Action Buttons - Responsive Layout */}
-            <div className={`flex flex-wrap items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              {/* Clear Filters Button */}
-              {hasActiveFilters && (
-                <button
-                  onClick={clearFilters}
-                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200"
-                  title={t('clear.filters') || 'Clear Filters'}
-                >
-                  <X className="h-4 w-4" />
-                  <span className="hidden xs:inline">{t('clear.filters') || 'Clear'}</span>
-                </button>
-              )}
+                {/* View Mode Toggle */}
+                <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                  <button
+                    onClick={() => {
+                      setViewMode('list');
+                      localStorage.setItem('productsViewMode', 'list');
+                    }}
+                    className={`p-1.5 sm:p-2 rounded-md transition-all duration-200 ${
+                      viewMode === 'list'
+                        ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }`}
+                    title={t('viewMode.list') || 'List View'}
+                  >
+                    <List className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setViewMode('grid');
+                      localStorage.setItem('productsViewMode', 'grid');
+                    }}
+                    className={`p-1.5 sm:p-2 rounded-md transition-all duration-200 ${
+                      viewMode === 'grid'
+                        ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }`}
+                    title={t('viewMode.grid') || 'Grid View'}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </button>
+                </div>
 
-              {/* View Mode Toggle */}
-              <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                <button
-                  onClick={() => {
-                    setViewMode('list');
-                    localStorage.setItem('productsViewMode', 'list');
-                  }}
-                  className={`p-2 rounded-md transition-all duration-200 ${
-                    viewMode === 'list'
-                      ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                  }`}
-                  title={t('viewMode.list') || 'List View'}
-                >
-                  <List className="h-4 w-4" />
-                </button>
-                <button
-                  onClick={() => {
-                    setViewMode('grid');
-                    localStorage.setItem('productsViewMode', 'grid');
-                  }}
-                  className={`p-2 rounded-md transition-all duration-200 ${
-                    viewMode === 'grid'
-                      ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                  }`}
-                  title={t('viewMode.grid') || 'Grid View'}
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                </button>
-              </div>
+                {/* Filter Dropdown */}
+                <div className="relative" ref={filterRef}>
+                  <button
+                    onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                    className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border rounded-lg transition-colors duration-200 ${
+                      hasActiveFilters
+                        ? 'text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800'
+                        : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                    }`}
+                    title={t('productsContent.search.filter')}
+                  >
+                    <Filter className="h-4 w-4" />
+                    <span className="hidden sm:inline">{t('productsContent.search.filter')}</span>
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showFilterDropdown ? 'rotate-180' : ''}`}/>
+                  </button>
 
-              {/* Filter Dropdown */}
-              <div className="relative" ref={filterRef}>
-                <button
-                  onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                  className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border rounded-lg transition-colors duration-200 ${
-                    hasActiveFilters
-                      ? 'text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800'
-                      : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
-                  }`}
-                  title={t('productsContent.search.filter')}
-                >
-                  <Filter className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('productsContent.search.filter')}</span>
-                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showFilterDropdown ? 'rotate-180' : ''}`}/>
-                </button>
-
-                {showFilterDropdown && (
-                  <div className="absolute top-full mt-2 w-80  bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 ">
-                    <div className="p-4 space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          {t('filter.status') || 'Status'}
-                        </label>
-                        <div className="grid grid-cols-3 gap-2">
-                          {[
-                            { value: 'all', label: t('filter.all') || 'All', icon: Package },
-                            { value: 'active', label: t('filter.active') || 'Active', icon: Eye },
-                            { value: 'inactive', label: t('filter.inactive') || 'Inactive', icon: EyeOff }
-                          ].map((status) => {
-                            const Icon = status.icon;
-                            return (
-                              <button
-                                key={status.value}
-                                onClick={() => setFilters(prev => ({ ...prev, status: status.value as FilterStatus }))}
-                                className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                  filters.status === status.value
-                                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                                }`}
-                              >
-                                <Icon className="h-4 w-4" />
-                                <span>{status.label}</span>
-                              </button>
-                            );
-                          })}
+                  {showFilterDropdown && (
+                    <div className={`absolute top-full mt-2 w-72 sm:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 ${isRTL ? 'right-0' : 'left-0'}`}>
+                      <div className="p-4 space-y-4">
+                        {/* Status Filter */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {t('filter.status') || 'Status'}
+                          </label>
+                          <div className="grid grid-cols-3 gap-2">
+                            {[
+                              { value: 'all', label: t('filter.all') || 'All', icon: Package },
+                              { value: 'active', label: t('filter.active') || 'Active', icon: Eye },
+                              { value: 'inactive', label: t('filter.inactive') || 'Inactive', icon: EyeOff }
+                            ].map((status) => {
+                              const Icon = status.icon;
+                              return (
+                                <button
+                                  key={status.value}
+                                  onClick={() => setFilters(prev => ({ ...prev, status: status.value as FilterStatus }))}
+                                  className={`flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-1 sm:gap-2 px-2 py-2 text-xs sm:text-sm rounded-lg transition-colors ${
+                                    filters.status === status.value
+                                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                  }`}
+                                >
+                                  <Icon className="h-4 w-4" />
+                                  <span className="truncate">{status.label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          {t('filter.categories') || 'Categories'}
-                        </label>
-                        <div className="max-h-32 overflow-y-auto space-y-2">
-                          {categories.map((category) => (
-                            <label key={category.categoryId} className="flex items-center gap-2 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={filters.categories.includes(category.categoryId)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setFilters(prev => ({
-                                      ...prev,
-                                      categories: [...prev.categories, category.categoryId]
-                                    }));
-                                  } else {
-                                    setFilters(prev => ({
-                                      ...prev,
-                                      categories: prev.categories.filter(id => id !== category.categoryId)
-                                    }));
-                                  }
-                                }}
-                                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                              />
-                              <span className="text-sm text-gray-700 dark:text-gray-300">
-                                {category.categoryName} ({category?.products?.length})
-                              </span>
-                            </label>
-                          ))}
+                        {/* Category Filter */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {t('filter.categories') || 'Categories'}
+                          </label>
+                          <div className="max-h-32 overflow-y-auto space-y-2 custom-scrollbar">
+                            {categories.map((category) => (
+                              <label key={category.categoryId} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 p-1 rounded">
+                                <input
+                                  type="checkbox"
+                                  checked={filters.categories.includes(category.categoryId)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setFilters(prev => ({
+                                        ...prev,
+                                        categories: [...prev.categories, category.categoryId]
+                                      }));
+                                    } else {
+                                      setFilters(prev => ({
+                                        ...prev,
+                                        categories: prev.categories.filter(id => id !== category.categoryId)
+                                      }));
+                                    }
+                                  }}
+                                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                />
+                                <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                                  {category.categoryName} <span className="text-xs text-gray-500">({category?.products?.length || 0})</span>
+                                </span>
+                              </label>
+                            ))}
+                          </div>
                         </div>
-                      </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          {t('filter.price.range') || 'Price Range'}
-                        </label>
-                        <div className="grid grid-cols-2 gap-2">
-                          <input
-                            type="number"
-                            placeholder="Min"
-                            value={filters.priceRange.min}
-                            onChange={(e) => setFilters(prev => ({
-                              ...prev,
-                              priceRange: { ...prev.priceRange, min: parseFloat(e.target.value) || 0 }
-                            }))}
-                            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                          />
-                          <input
-                            type="number"
-                            placeholder="Max"
-                            value={filters.priceRange.max}
-                            onChange={(e) => setFilters(prev => ({
-                              ...prev,
-                              priceRange: { ...prev.priceRange, max: parseFloat(e.target.value) || 1000 }
-                            }))}
-                            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                          />
+                        {/* Price Range Filter */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {t('filter.price.range') || 'Price Range'}
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              type="number"
+                              placeholder="Min"
+                              value={filters.priceRange.min}
+                              onChange={(e) => setFilters(prev => ({
+                                ...prev,
+                                priceRange: { ...prev.priceRange, min: parseFloat(e.target.value) || 0 }
+                              }))}
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-primary-500"
+                            />
+                            <input
+                              type="number"
+                              placeholder="Max"
+                              value={filters.priceRange.max}
+                              onChange={(e) => setFilters(prev => ({
+                                ...prev,
+                                priceRange: { ...prev.priceRange, max: parseFloat(e.target.value) || 1000 }
+                              }))}
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-primary-500"
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
+
+                {/* Sort Dropdown */}
+                <div className="relative" ref={sortRef}>
+                  <button
+                    onClick={() => setShowSortDropdown(!showSortDropdown)}
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
+                    title={t('productsContent.search.sort')}
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                    <span className="hidden sm:inline">{t('productsContent.search.sort')}</span>
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {showSortDropdown && (
+                    <div className={`absolute top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 ${isRTL ? 'right-0' : 'left-0'}`}>
+                      <div className="p-2">
+                        {sortOptions.map((option) => {
+                          const icon = option.icon;
+                          return (
+                            <button
+                              key={option.value}
+                              onClick={() => {
+                                setSortBy(option.value as SortOption);
+                                setShowSortDropdown(false);
+                              }}
+                              className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
+                                sortBy === option.value
+                                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                              }`}
+                            >
+                              {typeof icon === 'function' ? React.createElement(icon as any, { className: 'h-4 w-4' }) : icon}
+                              <span>{option.label}</span>
+                              {sortBy === option.value && <Check className="h-4 w-4 ml-auto" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Sort Dropdown */}
-              <div className="relative" ref={sortRef}>
+              {/* Right Group: Action Buttons (Create/Delete) */}
+              <div className="flex flex-wrap items-center gap-2">
                 <button
-                  onClick={() => setShowSortDropdown(!showSortDropdown)}
-                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
-                  title={t('productsContent.search.sort')}
+                  onClick={() => setIsCreateCategoryModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70 transition-colors duration-200"
+                  title={t('productsContent.actions.newCategory')}
                 >
-                  <ArrowUp className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('productsContent.search.sort')}</span>
-                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden lg:inline">{t('productsContent.actions.newCategory')}</span>
                 </button>
 
-                {showSortDropdown && (
-                  <div className="absolute top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 left-0 sm:right-0 sm:left-auto">
-                    <div className="p-2">
-                      {sortOptions.map((option) => {
-                        const icon = option.icon;
-                        return (
-                          <button
-                            key={option.value}
-                            onClick={() => {
-                              setSortBy(option.value as SortOption);
-                              setShowSortDropdown(false);
-                            }}
-                            className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
-                              sortBy === option.value
-                                ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            }`}
-                          >
-                            {typeof icon === 'function' ? React.createElement(icon as any, { className: 'h-4 w-4' }) : icon}
-                            <span>{option.label}</span>
-                            {sortBy === option.value && <Check className="h-4 w-4 ml-auto" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+                <button
+                  onClick={() => {
+                    setSelectedCategoryForProduct('');
+                    setIsCreateProductModalOpen(true);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200"
+                  title={t('productsContent.actions.newProduct')}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden md:inline">{t('productsContent.actions.newProduct')}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate('/dashboard/RecycleBin', { state: { source: 'products' } })
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
+                  title={t('productsContent.actions.RecycleBin')}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className="hidden md:inline">{t('productsContent.actions.RecycleBin')}</span>
+                </button>
               </div>
-
-              {/* Spacer to push action buttons to the right on larger screens */}
-              <div className="hidden md:block flex-1"></div>
-
-              <button
-                onClick={() => setIsCreateCategoryModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70 transition-colors duration-200"
-                title={t('productsContent.actions.newCategory')}
-              >
-                <Plus className="h-4 w-4" />
-                <span className="hidden lg:inline">{t('productsContent.actions.newCategory')}</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setSelectedCategoryForProduct('');
-                  setIsCreateProductModalOpen(true);
-                }}
-                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200"
-                title={t('productsContent.actions.newProduct')}
-              >
-                <Plus className="h-4 w-4" />
-                <span className="hidden md:inline">{t('productsContent.actions.newProduct')}</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  navigate('/dashboard/RecycleBin', { state: { source: 'products' } })
-                }}
-                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
-                title={t('productsContent.actions.RecycleBin')}
-              >
-                <Trash2 className="h-4 w-4" />
-                <span className="hidden md:inline">{t('productsContent.actions.RecycleBin')}</span>
-              </button>
             </div>
           </div>
         </div>

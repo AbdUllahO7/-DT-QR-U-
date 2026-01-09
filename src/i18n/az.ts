@@ -8,6 +8,7 @@ export const az = {
         select: 'Seç',
         default: 'Defolt',
         success: 'Uğurlu',
+        actions: 'İşlemlər',
         cancel: 'Ləğv et',
         change: 'Dəyişdir',
         save: 'Yadda saxla',

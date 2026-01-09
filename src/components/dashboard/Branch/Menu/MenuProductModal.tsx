@@ -985,7 +985,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
               <button
                 onClick={handleAddToCart}
-                className="bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white px-6 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
+                className="bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white px-6 lg:py-3 sm:py-1 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center space-x-2"
               >
                 <ShoppingCart className="h-4 w-4" />
                 <span>{t('productModal.addToCart')}</span>

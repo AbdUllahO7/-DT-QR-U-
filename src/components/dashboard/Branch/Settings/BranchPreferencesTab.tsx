@@ -24,7 +24,7 @@ interface BranchPreferencesComponentProps {
 }
 
 const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({ className = '' }) => {
-  const { t } = useLanguage();
+  const { t ,isRTL} = useLanguage();
 
   // State management
   const [preferences, setPreferences] = useState<BranchPreferences | null>(null);
@@ -232,43 +232,44 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg ${className}`}>
       {/* Header */}
-      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <Settings className="w-8 h-8 text-blue-600 dark:text-blue-400" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {t('branchPreferences.title')}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                {t('branchPreferences.description')}
-              </p>
-            </div>
+   {/* Header with actions */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+        <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
+          <Globe className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+          <div>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              {t('RestaurantPreferencesTab.title')}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+              {t('RestaurantPreferencesTab.subtitle')}
+            </p>
           </div>
-          
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <button
-              onClick={handleRefresh}
-              disabled={isLoading}
-              className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-            >
-              <RefreshCw className={`w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0 ${isLoading ? 'animate-spin' : ''}`} />
-              {t('branchPreferences.refresh')}
-            </button>
-            
-            <button
-              onClick={handleSave}
-              disabled={!hasChanges || isSaving}
-              className="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors disabled:opacity-50"
-            >
-              {isSaving ? (
-                <Loader2 className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0 animate-spin" />
-              ) : (
-                <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
-              )}
-              {isSaving ? t('branchPreferences.saving') : t('branchPreferences.saveChanges')}
-            </button>
-          </div>
+        </div>
+
+        <div className={`flex flex-wrap justify-center  gap-3 items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
+          <button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'} ${isLoading ? 'animate-spin' : ''}`} />
+            {t('RestaurantPreferencesTab.buttons.refresh')}
+          </button>
+
+          <button
+            onClick={handleSave}
+            disabled={!hasChanges || isSaving}
+            className="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors disabled:opacity-50"
+          >
+            {isSaving ? (
+              <Loader2 className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'} animate-spin`} />
+            ) : (
+              <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+            )}
+            {isSaving 
+              ? t('RestaurantPreferencesTab.buttons.saving') 
+              : t('RestaurantPreferencesTab.buttons.save')}
+          </button>
         </div>
       </div>
 

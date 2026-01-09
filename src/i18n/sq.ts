@@ -9,6 +9,7 @@ export const sq = {
         success: 'Sukses',
         cancel: 'Anulo',
         saving: 'Duke ruajtur...',
+        actions: 'Veprimet',
         change: 'Ndrysho',
         save: 'Ruaj',
         select: 'Zgjidh',

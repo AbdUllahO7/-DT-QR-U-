@@ -45,6 +45,7 @@ import ChangePasswordModal from './UserManagement/ChangePasswordModal';
 import AssignBranchModal from './UserManagement/AssignBranchModal';
 import { ChangePasswordDto } from '../../../types/users/users.type';
 import { RestaurantBranchDropdownItem } from '../../../types/RestaurantTypes';
+import { CustomSelect } from './branch-management/BranchEditModal';
 type ViewMode = 'grid' ;
 
 type TabMode = 'users' | 'roles';
@@ -886,6 +887,15 @@ useEffect(() => {
     </div>
   );
 
+  const categoryOptions = [
+    { value: 'all', label: t('userManagementPage.controls.filterAll') },
+    { value: 'RestaurantOwner', label: t('userManagementPage.controls.filterOwner') },
+    { value: 'BranchManager', label: t('userManagementPage.controls.filterManager') },
+    { value: 'Staff', label: t('userManagementPage.controls.filterStaff') },
+    { value: 'active', label: t('userManagementPage.controls.filterActive') },
+    { value: 'inactive', label: t('userManagementPage.controls.filterInactive') },
+  ];
+
   // Render Role Actions Dropdown
   const renderRoleActionsDropdown = (role: Role) => (
     <div
@@ -971,36 +981,17 @@ useEffect(() => {
   return (
     <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'} ref={containerRef}>
       {/* Header with Stats */}
-      <div
-        className={`flex flex-col lg:flex-row lg:items-center ${
-          isRTL ? 'lg:justify-between' : 'lg:justify-between'
-        } gap-4`}
-      >
+      <div className={`flex flex-col lg:flex-row lg:items-center ${isRTL ? 'lg:justify-between' : 'lg:justify-between'} gap-4`}>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {t('userManagementPage.title')}
-          </h2>
-          <div
-            className={`flex items-center ${
-              isRTL ? 'gap-4' : 'gap-4'
-            } mt-2 text-sm text-gray-500 dark:text-gray-400`}
-          >
-            <span
-              className={`flex items-center ${isRTL ? 'gap-1' : 'gap-1'}`}
-            >
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('userManagementPage.title')}</h2>
+          <div className={`flex items-center ${isRTL ? 'gap-4' : 'gap-4'} mt-2 text-sm text-gray-500 dark:text-gray-400`}>
+            <span className={`flex items-center ${isRTL ? 'gap-1' : 'gap-1'}`}>
               <Users className="h-4 w-4" />
-              {t('userManagementPage.stats.total')}{' '}
-              {activeTab === 'users' ? userStats.total : roleStats.total}{' '}
-              {activeTab === 'users'
-                ? t('userManagementPage.stats.users')
-                : t('userManagementPage.stats.roles')}
+              {t('userManagementPage.stats.total')} {activeTab === 'users' ? userStats.total : roleStats.total} {activeTab === 'users' ? t('userManagementPage.stats.users') : t('userManagementPage.stats.roles')}
             </span>
-            <span
-              className={`flex items-center ${isRTL ? 'gap-1' : 'gap-1'}`}
-            >
+            <span className={`flex items-center ${isRTL ? 'gap-1' : 'gap-1'}`}>
               <UserCheck className="h-4 w-4" />
-              {activeTab === 'users' ? userStats.active : roleStats.active}{' '}
-              {t('userManagementPage.stats.active')}
+              {activeTab === 'users' ? userStats.active : roleStats.active} {t('userManagementPage.stats.active')}
             </span>
           </div>
         </div>
@@ -1009,47 +1000,29 @@ useEffect(() => {
         {activeTab === 'users' ? (
           <div className={`flex ${isRTL ? 'gap-3' : 'gap-3'}`}>
             <div className="bg-purple-100 dark:bg-purple-900/30 rounded-lg p-3 min-w-0">
-              <div
-                className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}
-              >
+              <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
                 <Crown className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                 <div>
-                  <p className="text-xs text-purple-600 dark:text-purple-400">
-                    {t('userManagementPage.stats.owner')}
-                  </p>
-                  <p className="font-semibold text-purple-800 dark:text-purple-300">
-                    {userStats.owners}
-                  </p>
+                  <p className="text-xs text-purple-600 dark:text-purple-400">{t('userManagementPage.stats.owner')}</p>
+                  <p className="font-semibold text-purple-800 dark:text-purple-300">{userStats.owners}</p>
                 </div>
               </div>
             </div>
             <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-3 min-w-0">
-              <div
-                className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}
-              >
+              <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
                 <Star className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 <div>
-                  <p className="text-xs text-blue-600 dark:text-blue-400">
-                    {t('userManagementPage.stats.manager')}
-                  </p>
-                  <p className="font-semibold text-blue-800 dark:text-blue-300">
-                    {userStats.managers}
-                  </p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400">{t('userManagementPage.stats.manager')}</p>
+                  <p className="font-semibold text-blue-800 dark:text-blue-300">{userStats.managers}</p>
                 </div>
               </div>
             </div>
             <div className="bg-indigo-100 dark:bg-indigo-900/30 rounded-lg p-3 min-w-0">
-              <div
-                className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}
-              >
+              <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
                 <User className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                 <div>
-                  <p className="text-xs text-indigo-600 dark:text-indigo-400">
-                    {t('userManagementPage.stats.staff')}
-                  </p>
-                  <p className="font-semibold text-indigo-800 dark:text-indigo-300">
-                    {userStats.staff}
-                  </p>
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400">{t('userManagementPage.stats.staff')}</p>
+                  <p className="font-semibold text-indigo-800 dark:text-indigo-300">{userStats.staff}</p>
                 </div>
               </div>
             </div>
@@ -1057,47 +1030,29 @@ useEffect(() => {
         ) : (
           <div className={`flex ${isRTL ? 'gap-3' : 'gap-3'}`}>
             <div className="bg-emerald-100 dark:bg-emerald-900/30 rounded-lg p-3 min-w-0">
-              <div
-                className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}
-              >
+              <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
                 <Shield className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
                 <div>
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400">
-                    {t('userManagementPage.stats.system')}
-                  </p>
-                  <p className="font-semibold text-emerald-800 dark:text-emerald-300">
-                    {roleStats.system}
-                  </p>
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">{t('userManagementPage.stats.system')}</p>
+                  <p className="font-semibold text-emerald-800 dark:text-emerald-300">{roleStats.system}</p>
                 </div>
               </div>
             </div>
             <div className="bg-blue-100 dark:bg-blue-900/30 rounded-lg p-3 min-w-0">
-              <div
-                className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}
-              >
+              <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
                 <Star className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 <div>
-                  <p className="text-xs text-blue-600 dark:text-blue-400">
-                    {t('userManagementPage.stats.custom')}
-                  </p>
-                  <p className="font-semibold text-blue-800 dark:text-blue-300">
-                    {roleStats.custom}
-                  </p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400">{t('userManagementPage.stats.custom')}</p>
+                  <p className="font-semibold text-blue-800 dark:text-blue-300">{roleStats.custom}</p>
                 </div>
               </div>
             </div>
             <div className="bg-indigo-100 dark:bg-indigo-900/30 rounded-lg p-3 min-w-0">
-              <div
-                className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}
-              >
+              <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
                 <Users className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
                 <div>
-                  <p className="text-xs text-indigo-600 dark:text-indigo-400">
-                    {t('userManagementPage.stats.totalUsers')}
-                  </p>
-                  <p className="font-semibold text-indigo-800 dark:text-indigo-300">
-                    {roleStats.totalUsers}
-                  </p>
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400">{t('userManagementPage.stats.totalUsers')}</p>
+                  <p className="font-semibold text-indigo-800 dark:text-indigo-300">{roleStats.totalUsers}</p>
                 </div>
               </div>
             </div>
@@ -1107,112 +1062,44 @@ useEffect(() => {
 
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav
-          className={`-mb-px flex ${
-            isRTL ? 'space-x-reverse space-x-8' : 'space-x-8'
-          }`}
-        >
-          <button
-            onClick={() => setActiveTab('users')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-              activeTab === 'users'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-            }`}
-          >
+        <nav className={`-mb-px flex ${isRTL ? 'space-x-reverse space-x-8' : 'space-x-8'}`}>
+          <button onClick={() => setActiveTab('users')} className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'users' ? 'border-blue-500 text-blue-600 dark:text-blue-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'}`}>
             <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
-              <Users className="h-4 w-4" />
-              {t('userManagementPage.tabs.users')}
-              <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs">
-                {userStats.total}
-              </span>
+              <Users className="h-4 w-4" /> {t('userManagementPage.tabs.users')}
+              <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs">{userStats.total}</span>
             </div>
           </button>
-          <button
-            onClick={() => setActiveTab('roles')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-              activeTab === 'roles'
-                ? 'border-purple-500 text-purple-600 dark:text-purple-400'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-            }`}
-          >
+          <button onClick={() => setActiveTab('roles')} className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${activeTab === 'roles' ? 'border-purple-500 text-purple-600 dark:text-purple-400' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'}`}>
             <div className={`flex items-center ${isRTL ? 'gap-2' : 'gap-2'}`}>
-              <Shield className="h-4 w-4" />
-              {t('userManagementPage.tabs.roles')}
-              <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs">
-                {roleStats.total}
-              </span>
+              <Shield className="h-4 w-4" /> {t('userManagementPage.tabs.roles')}
+              <span className="bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full text-xs">{roleStats.total}</span>
             </div>
           </button>
         </nav>
       </div>
 
       {/* Controls */}
-      <div
-        className={`flex flex-col sm:flex-row gap-4 items-center ${
-          isRTL ? 'justify-between' : 'justify-between'
-        }`}
-      >
-        <div
-          className={`flex flex-1 ${
-            isRTL ? 'gap-4' : 'gap-4'
-          } w-full sm:w-auto`}
-        >
+      <div className={`flex flex-col sm:flex-row gap-4 items-center ${isRTL ? 'justify-between' : 'justify-between'}`}>
+        <div className={`flex flex-1 ${isRTL ? 'gap-4' : 'gap-4'} w-full sm:w-auto`}>
           {/* Search */}
           <div className="relative flex-1 max-w-md">
-            <Search
-              className={`absolute ${
-                isRTL ? 'right-3' : 'left-3'
-              } top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`}
-            />
+            <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
             <input
               type="text"
-              placeholder={
-                activeTab === 'users'
-                  ? t('userManagementPage.controls.search')
-                  : t('userManagementPage.controls.searchRoles')
-              }
+              placeholder={activeTab === 'users' ? t('userManagementPage.controls.search') : t('userManagementPage.controls.searchRoles')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className={`w-full ${
-                isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'
-              } py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
+              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
             />
           </div>
 
-          {/* Category Filter */}
-          <div className="relative">
-            <select
-              title="selectedCategory"
+          {/* Category Filter - Custom Select */}
+          <div className="w-48">
+            <CustomSelect
               value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className={`appearance-none bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 ${
-                isRTL ? 'pl-8 pr-4' : 'pr-8'
-              } text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
-            >
-              <option value="all">
-                {t('userManagementPage.controls.filterAll')}
-              </option>
-              <option value="RestaurantOwner">
-                {t('userManagementPage.controls.filterOwner')}
-              </option>
-              <option value="BranchManager">
-                {t('userManagementPage.controls.filterManager')}
-              </option>
-              <option value="Staff">
-                {t('userManagementPage.controls.filterStaff')}
-              </option>
-              <option value="active">
-                {t('userManagementPage.controls.filterActive')}
-              </option>
-              <option value="inactive">
-                {t('userManagementPage.controls.filterInactive')}
-              </option>
-            </select>
-            <ChevronDown
-              className={`absolute ${
-                isRTL ? 'left-2' : 'right-2'
-              } top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none`}
+              onChange={setSelectedCategory}
+              options={categoryOptions}
+              placeholder={t('userManagementPage.controls.filterAll')}
             />
           </div>
         </div>
@@ -1225,13 +1112,9 @@ useEffect(() => {
                 setIsFetchingModalRoles(true);
                 setIsUserModalOpen(true);
                 try {
-                  // Fetch assignable roles without branch filter (for restaurant-level roles)
                   const response = await roleService.getRolesAssignable({});
                   setRolesForModal(response.data || []);
                 } catch (err) {
-                  logger.error('Modal rolleri yüklenirken hata', err, {
-                    prefix: 'UserManagement',
-                  });
                   setRolesForModal([]);
                 } finally {
                   setIsFetchingModalRoles(false);
@@ -1239,9 +1122,7 @@ useEffect(() => {
               }}
               className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
             >
-              <UserPlus
-                className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`}
-              />
+              <UserPlus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
               {t('userManagementPage.controls.addUser')}
             </button>
           )}
@@ -1252,49 +1133,30 @@ useEffect(() => {
               onClick={() => setIsRoleModalOpen(true)}
               className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800"
             >
-              <Shield
-                className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`}
-              />
+              <Shield className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
               {t('userManagementPage.controls.addRole')}
             </button>
           )}
 
           {/* View Mode Toggle */}
           <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-            <button
-              onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === 'grid'
-                  ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
-              }`}
-            >
+            <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'}`}>
               <Grid className="h-4 w-4" />
             </button>
-          
           </div>
         </div>
       </div>
 
-      {/* Tab Content */}
+      {/* Content Rendering based on Tab */}
       {activeTab === 'users' ? (
         <>
-          {/* No Results - Users */}
           {filteredUsers.length === 0 && !isLoading && (
             <div className="text-center py-12">
               <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                {t('userManagementPage.noResults.usersNotFound')}
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                {searchTerm || selectedCategory !== 'all'
-                  ? t('userManagementPage.noResults.searchEmpty')
-                  : t('userManagementPage.noResults.usersEmpty')}
-              </p>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('userManagementPage.noResults.usersNotFound')}</h3>
+              <p className="text-gray-500 dark:text-gray-400">{searchTerm || selectedCategory !== 'all' ? t('userManagementPage.noResults.searchEmpty') : t('userManagementPage.noResults.usersEmpty')}</p>
             </div>
           )}
-
-          {/* Grid View - Users */}
           {viewMode === 'grid' && filteredUsers.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <AnimatePresence>
@@ -1307,31 +1169,21 @@ useEffect(() => {
                     transition={{ duration: 0.2 }}
                     className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
                   >
-                    {/* User Avatar & Name */}
                     <div className="flex items-center mb-4">
                       <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-lg">
                         {user.fullName.split(' ').map((n) => n[0]).join('').slice(0, 2)}
                       </div>
                       <div className={`${isRTL ? 'mr-3' : 'ml-3'} flex-1 min-w-0`}>
-                        <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                          {user.fullName}
-                        </h3>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">
-                          {user.email}
-                        </p>
+                        <h3 className="font-semibold text-gray-900 dark:text-white truncate">{user.fullName}</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate">{user.email}</p>
                       </div>
-                      <div className="relative" >
-                        <button
-                          onClick={() => setActiveDropdown(activeDropdown === user.id ? null : user.id)}
-                          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                        >
+                      <div className="relative">
+                        <button onClick={() => setActiveDropdown(activeDropdown === user.id ? null : user.id)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                           <MoreVertical className="h-5 w-5" />
                         </button>
                         {activeDropdown === user.id && renderUserActionsDropdown(user)}
                       </div>
                     </div>
-
-                    {/* User Info */}
                     <div className="space-y-3">
                       <div className="flex items-center text-sm">
                         <Phone className={`h-4 w-4 text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
@@ -1352,24 +1204,16 @@ useEffect(() => {
                         <span className="text-gray-600 dark:text-gray-300">{formatDate(user.createdDate)}</span>
                       </div>
                     </div>
-
-                    {/* Roles & Status */}
                     <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                       <div className="flex flex-wrap gap-2 mb-3">
                         {user.roles.map((role, index) => (
-                          <span
-                            key={index}
-                            className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(role)}`}
-                          >
-                            {getRoleIcon(role)}
-                            {role}
+                          <span key={index} className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getRoleColor(role)}`}>
+                            {getRoleIcon(role)} {role}
                           </span>
                         ))}
                       </div>
                       <div className="flex items-center justify-between">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.isActive)}`}
-                        >
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(user.isActive)}`}>
                           {user.isActive ? <UserCheck className="h-3 w-3" /> : <UserX className="h-3 w-3" />}
                           {user.isActive ? t('userManagementPage.status.active') : t('userManagementPage.status.inactive')}
                         </span>
@@ -1380,97 +1224,60 @@ useEffect(() => {
               </AnimatePresence>
             </div>
           )}
-
-         
         </>
       ) : (
-        /* Roles Tab Content */
         <>
-          {/* No Results - Roles */}
           {filteredRoles.length === 0 && !isLoading && (
             <div className="text-center py-12">
               <Shield className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                {t('userManagementPage.noResults.rolesNotFound')}
-              </h3>
-              <p className="text-gray-500 dark:text-gray-400">
-                {searchTerm || selectedCategory !== 'all'
-                  ? t('userManagementPage.noResults.searchEmptyRoles')
-                  : t('userManagementPage.noResults.rolesEmpty')}
-              </p>
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">{t('userManagementPage.noResults.rolesNotFound')}</h3>
+              <p className="text-gray-500 dark:text-gray-400">{searchTerm || selectedCategory !== 'all' ? t('userManagementPage.noResults.searchEmptyRoles') : t('userManagementPage.noResults.rolesEmpty')}</p>
             </div>
           )}
-
-          {/* Grid View - Roles */}
           {viewMode === 'grid' && filteredRoles.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               <AnimatePresence>
                 {filteredRoles.map((role) => (
                   <motion.div
-                   key={role.appRoleId}
+                    key={role.appRoleId}
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ duration: 0.2 }}
                     className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow"
                   >
-                    {/* Role Header */}
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${getRoleColor(role.name)}`}>
                           {getRoleIcon(role.name)}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 dark:text-white truncate">
-                            {getTranslatedRoleName(role.name, t)}
-                          </h3>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {role.category ? getTranslatedCategoryName(role.category, t) : t('userManagementPage.noCategory') || 'No Category'}
-                          </p>
+                          <h3 className="font-semibold text-gray-900 dark:text-white truncate">{getTranslatedRoleName(role.name, t)}</h3>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">{role.category ? getTranslatedCategoryName(role.category, t) : t('userManagementPage.noCategory') || 'No Category'}</p>
                         </div>
                       </div>
-                      <div className="relative" >
-                        <button
-                          onClick={() => setActiveDropdown(activeDropdown === role.appRoleId ? null : role.appRoleId)}
-                          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                        >
+                      <div className="relative">
+                        <button onClick={() => setActiveDropdown(activeDropdown === role.appRoleId ? null : role.appRoleId)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                           <MoreVertical className="h-5 w-5" />
                         </button>
                         {activeDropdown === role.appRoleId && renderRoleActionsDropdown(role)}
                       </div>
                     </div>
-
-                    {/* Role Description */}
-                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">
-                      {role.description || 'No description'}
-                    </p>
-
-                    {/* Role Info */}
+                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2">{role.description || 'No description'}</p>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">
-                          {t('userManagementPage.roleDetails.permissions')}
-                        </span>
-                        <span className="font-medium text-gray-900 dark:text-white">
-                          {role.permissions?.length || 0}
-                        </span>
+                        <span className="text-gray-500 dark:text-gray-400">{t('userManagementPage.roleDetails.permissions')}</span>
+                        <span className="font-medium text-gray-900 dark:text-white">{role.permissions?.length || 0}</span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-gray-500 dark:text-gray-400">
-                          {t('userManagementPage.roleDetails.created')}
-                        </span>
-                        <span className="text-gray-900 dark:text-white">
-                          {formatDate(role.createdDate)}
-                        </span>
+                        <span className="text-gray-500 dark:text-gray-400">{t('userManagementPage.roleDetails.created')}</span>
+                        <span className="text-gray-900 dark:text-white">{formatDate(role.createdDate)}</span>
                       </div>
                     </div>
-
-                    {/* Role Badges */}
                     <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex flex-wrap gap-2">
                       {role.isSystemRole && (
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
-                          <Shield className="h-3 w-3" />
-                          {t('userManagementPage.roleDetails.system')}
+                          <Shield className="h-3 w-3" /> {t('userManagementPage.roleDetails.system')}
                         </span>
                       )}
                       <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(role.isActive)}`}>
@@ -1479,8 +1286,7 @@ useEffect(() => {
                       </span>
                       {role.branchId && (
                         <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                          <Building className="h-3 w-3" />
-                          {t('userManagementPage.roleDetails.branchSpecific')}
+                          <Building className="h-3 w-3" /> {t('userManagementPage.roleDetails.branchSpecific')}
                         </span>
                       )}
                     </div>
@@ -1489,135 +1295,20 @@ useEffect(() => {
               </AnimatePresence>
             </div>
           )}
-
-    
         </>
       )}
 
-      {/* Modals */}
-      {isRoleModalOpen && (
-        <CreateRoleModal
-          isOpen={isRoleModalOpen}
-          onClose={() => setIsRoleModalOpen(false)}
-          onSuccess={handleRoleCreated}
-          branches={branches}
-        />
-      )}
-      {isUserModalOpen && (
-        <CreateUserModal
-          branches={branches}
-          isOpen={isUserModalOpen}
-          onClose={() => setIsUserModalOpen(false)}
-          onSubmit={handleCreateUser}
-          error = {error}
-          roles={rolesForModal}
-          isLoading={isCreatingUser}
-          isRolesLoading={isFetchingModalRoles}
-          onBranchChange={handleModalBranchChange}
-        />
-      )}
-      {isEditUserModalOpen && selectedUserForEdit && (
-        <EditUserModal
-          isOpen={isEditUserModalOpen}
-          onClose={() => {
-            setIsEditUserModalOpen(false);
-            setSelectedUserForEdit(null);
-          }}
-          onSubmit={handleEditUser}
-          user={selectedUserForEdit}
-          isLoading={isEditingUser}
-        />
-      )}
-      {isUpdateRolesModalOpen && selectedUserForRoles && (
-        <UpdateUserRolesModal
-          isOpen={isUpdateRolesModalOpen}
-          onClose={() => {
-            setIsUpdateRolesModalOpen(false);
-            setSelectedUserForRoles(null);
-          }}
-          onSubmit={handleUpdateRoles}
-          user={selectedUserForRoles}
-          allRoles={roles}
-          isLoading={isUpdatingRoles}
-        />
-      )}
-   
-      {isConfirmationModalOpen && confirmationConfig && (
-        <ConfirmationModal
-          isOpen={isConfirmationModalOpen}
-          onClose={() => {
-            setIsConfirmationModalOpen(false);
-            setConfirmationConfig(null);
-          }}
-          onConfirm={confirmationConfig.onConfirm}
-          title={confirmationConfig.title}
-          message={confirmationConfig.message}
-          confirmText={confirmationConfig.confirmText}
-          actionType={confirmationConfig.actionType}
-          isLoading={isConfirmationLoading}
-        />
-      )}
-
-      {/* View User Permissions Modal */}
-      {isPermissionsModalOpen && selectedUserForPermissions && (
-        <ViewPermissionsModal
-          isOpen={isPermissionsModalOpen}
-          onClose={handleClosePermissions}
-          user={selectedUserForPermissions}
-        />
-      )}
-
-      {/* View Role Permissions Modal */}
-      {isRolePermissionsModalOpen && selectedRoleForPermissions && (
-        <ViewRolePermissionsModal
-          isOpen={isRolePermissionsModalOpen}
-          onClose={handleCloseRolePermissions}
-          role={selectedRoleForPermissions}
-        /> 
-      )}
-
-      {/* Edit Role Modal */}
-      {isEditRoleModalOpen && selectedRoleForEdit && (
-        <EditRoleModal
-          isOpen={isEditRoleModalOpen}
-          onClose={() => {
-            setIsEditRoleModalOpen(false);
-            setSelectedRoleForEdit(null);
-          }}
-          onSubmit={handleEditRole}
-          role={selectedRoleForEdit}
-          branches={branches}
-          isLoading={isEditingRole}
-        />
-      )}
-      {/* Change Password Modal */}
-      {isChangePasswordModalOpen && selectedUserForPassword && (
-        <ChangePasswordModal
-          isOpen={isChangePasswordModalOpen}
-          onClose={() => {
-            setIsChangePasswordModalOpen(false);
-            setSelectedUserForPassword(null);
-          }}
-          onSubmit={handleChangePassword}
-          user={selectedUserForPassword}
-          isLoading={isChangingPassword}
-        />
-      )}
-
-      {/* Assign Branch Modal */}
-      {isAssignBranchModalOpen && selectedUserForBranch && (
-        <AssignBranchModal
-          isOpen={isAssignBranchModalOpen}
-          onClose={() => {
-            setIsAssignBranchModalOpen(false);
-            setSelectedUserForBranch(null);
-          }}
-          onSubmit={handleAssignBranch}
-          user={selectedUserForBranch}
-          branches={branches}
-          isLoading={isAssigningBranch}
-        />
-      )}
+      {/* All Modals */}
+      {isRoleModalOpen && <CreateRoleModal isOpen={isRoleModalOpen} onClose={() => setIsRoleModalOpen(false)} onSuccess={handleRoleCreated} branches={branches} />}
+      {isUserModalOpen && <CreateUserModal branches={branches} isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} onSubmit={handleCreateUser} error={error} roles={rolesForModal} isLoading={isCreatingUser} isRolesLoading={isFetchingModalRoles} onBranchChange={handleModalBranchChange} />}
+      {isEditUserModalOpen && selectedUserForEdit && <EditUserModal isOpen={isEditUserModalOpen} onClose={() => { setIsEditUserModalOpen(false); setSelectedUserForEdit(null); }} onSubmit={handleEditUser} user={selectedUserForEdit} isLoading={isEditingUser} />}
+      {isUpdateRolesModalOpen && selectedUserForRoles && <UpdateUserRolesModal isOpen={isUpdateRolesModalOpen} onClose={() => { setIsUpdateRolesModalOpen(false); setSelectedUserForRoles(null); }} onSubmit={handleUpdateRoles} user={selectedUserForRoles} allRoles={roles} isLoading={isUpdatingRoles} />}
+      {isConfirmationModalOpen && confirmationConfig && <ConfirmationModal isOpen={isConfirmationModalOpen} onClose={() => { setIsConfirmationModalOpen(false); setConfirmationConfig(null); }} onConfirm={confirmationConfig.onConfirm} title={confirmationConfig.title} message={confirmationConfig.message} confirmText={confirmationConfig.confirmText} actionType={confirmationConfig.actionType} isLoading={isConfirmationLoading} />}
+      {isPermissionsModalOpen && selectedUserForPermissions && <ViewPermissionsModal isOpen={isPermissionsModalOpen} onClose={handleClosePermissions} user={selectedUserForPermissions} />}
+      {isRolePermissionsModalOpen && selectedRoleForPermissions && <ViewRolePermissionsModal isOpen={isRolePermissionsModalOpen} onClose={handleCloseRolePermissions} role={selectedRoleForPermissions} />}
+      {isEditRoleModalOpen && selectedRoleForEdit && <EditRoleModal isOpen={isEditRoleModalOpen} onClose={() => { setIsEditRoleModalOpen(false); setSelectedRoleForEdit(null); }} onSubmit={handleEditRole} role={selectedRoleForEdit} branches={branches} isLoading={isEditingRole} />}
+      {isChangePasswordModalOpen && selectedUserForPassword && <ChangePasswordModal isOpen={isChangePasswordModalOpen} onClose={() => { setIsChangePasswordModalOpen(false); setSelectedUserForPassword(null); }} onSubmit={handleChangePassword} user={selectedUserForPassword} isLoading={isChangingPassword} />}
+      {isAssignBranchModalOpen && selectedUserForBranch && <AssignBranchModal isOpen={isAssignBranchModalOpen} onClose={() => { setIsAssignBranchModalOpen(false); setSelectedUserForBranch(null); }} onSubmit={handleAssignBranch} user={selectedUserForBranch} branches={branches} isLoading={isAssigningBranch} />}
     </div>
   );
 };
