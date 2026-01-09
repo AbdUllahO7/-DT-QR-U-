@@ -60,13 +60,13 @@ const BranchManagement: React.FC = () => {
   const [isPurgingBranch, setIsPurgingBranch] = useState(false);
 
   const defaultWorkingHours: CreateBranchWorkingHourCoreDto[] = [
-    { dayOfWeek: 1, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Monday
-    { dayOfWeek: 2, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Tuesday
-    { dayOfWeek: 3, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Wednesday
-    { dayOfWeek: 4, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Thursday
-    { dayOfWeek: 5, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Friday
-    { dayOfWeek: 6, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Saturday
-    { dayOfWeek: 0, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }  // Sunday
+    { dayOfWeek: 1, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] }, // Monday
+    { dayOfWeek: 2, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] }, // Tuesday
+    { dayOfWeek: 3, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] }, // Wednesday
+    { dayOfWeek: 4, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] }, // Thursday
+    { dayOfWeek: 5, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] }, // Friday
+    { dayOfWeek: 6, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] }, // Saturday
+    { dayOfWeek: 0, isWorkingDay: false, isOpen24Hours: false, timeSlots: [] }  // Sunday
   ];
 
   const getEmptyFormData = (): CreateBranchWithDetailsDto => {
@@ -275,9 +275,13 @@ const BranchManagement: React.FC = () => {
         },
         createBranchWorkingHourCoreDto: data.createBranchWorkingHourCoreDto?.map(hour => ({
           dayOfWeek: hour.dayOfWeek,
-          openTime: hour.openTime,
-          closeTime: hour.closeTime,
-          isWorkingDay: hour.isWorkingDay
+          isWorkingDay: hour.isWorkingDay,
+          isOpen24Hours: hour.isOpen24Hours,
+          timeSlots: hour.timeSlots?.map(slot => ({
+            id: slot.id,
+            openTime: slot.openTime,
+            closeTime: slot.closeTime,
+          })) || []
         })) || null
       };
 

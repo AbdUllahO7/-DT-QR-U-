@@ -9,8 +9,10 @@ export const en = {
     removal: 'Removal',
     setAsDefault: 'Set as Default',
     default: 'Default',
+    saving : 'Saving...',
     success: 'Success',
     cancel: 'Cancel',
+    select: 'Select',
     change: 'Change',
     save: 'Save',
     delete: 'Delete',
@@ -404,7 +406,7 @@ hero: {
     turkish: 'Türkçe',
     english: 'English',
     arabic: 'العربية',
-    azerbaijani: 'Azərbaycan dili',
+    azerbaijani: 'Azərbaycan',
     albanian: 'Shqip',
     bosnian: 'Bosanski',
     selectLanguage: 'Select Language'
@@ -1360,6 +1362,12 @@ hero: {
       form: {
         branchName: 'Branch Name',
         branchNamePlaceholder: 'Enter branch name',
+
+        closed: 'Closed',
+        addTimeSlot: 'Add Time Slot',
+        open24HoursMessage: 'This branch is open 24 hours.',
+        open24Hours: '24 Hours Open',
+
         branchNameRequired: 'Branch name is required',
         whatsappNumber: 'WhatsApp Order Number ',
         whatsappPlaceholder: 'Enter WhatsApp number',
@@ -3239,6 +3247,7 @@ hero: {
     title: 'Branch Management',
     description: 'Manage your branch information and settings.',
     loading: 'Loading branch information...',
+         
     noBranchFound: 'No branch found',
     uploadLogo: 'Upload Logo',
     editBranchName: 'Edit Branch Name',
@@ -3285,6 +3294,11 @@ hero: {
       title: 'Working Hours',
       workingDay: 'Working day',
       openTime: 'Open Time',
+         open24Hours: 'Open 24 Hours',
+      open24HoursMessage: 'This branch is open 24 hours.',
+      addTimeSlot: 'Add Time Slot',
+
+
       closeTime: 'Close Time',
       noWorkingHours: 'No working hours specified',
       days: {
@@ -5173,9 +5187,12 @@ productModal: {
         },
         "workingHours": {
           "title": "Working Hours",
+          "open24Hours": "Open 24 Hours",
+          "addSlot": "Add Time Slot",
           "description": "Set your working hours. You can stay open overnight (e.g., 23:00 - 02:00).",
           "openLabel": "Opening Time",
           "closeLabel": "Closing Time",
+          "open24HoursNote": "This restaurant is open 24 hours.",
           "dayNames": [
             "Monday",
             "Tuesday",

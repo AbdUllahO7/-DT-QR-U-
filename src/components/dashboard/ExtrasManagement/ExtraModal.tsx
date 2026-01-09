@@ -1,10 +1,120 @@
-import React from 'react';
-import { X, Upload } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Upload, ChevronDown, Check, AlertTriangle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { CreateExtraData, ExtraCategory } from '../../../types/Extras/type';
 import { MultiLanguageInput } from '../../common/MultiLanguageInput';
 import { MultiLanguageTextArea } from '../../common/MultiLanguageTextArea';
 import { TranslatableFieldValue } from '../../../hooks/useTranslatableFields';
+
+// --- Custom Select Component ---
+interface SelectOption {
+  value: number;
+  label: string;
+  subLabel?: string;
+}
+
+interface CustomSelectProps {
+  options: SelectOption[];
+  value: number;
+  onChange: (value: number) => void;
+  placeholder: string;
+  disabled?: boolean;
+}
+
+const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, placeholder, disabled }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { isRTL } = useLanguage();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
+        className={`w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-left transition-all duration-200 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 ${
+          disabled ? 'opacity-60 cursor-not-allowed bg-gray-50 dark:bg-gray-800' : 'hover:border-primary-400 cursor-pointer shadow-sm'
+        } ${isOpen ? 'ring-2 ring-primary-500/20 border-primary-500' : ''}`}
+      >
+        <span className={`block truncate ${!selectedOption ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+          {selectedOption ? (
+            <span className="flex flex-col text-left">
+              <span className="font-medium">{selectedOption.label}</span>
+              {selectedOption.subLabel && (
+                <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{selectedOption.subLabel}</span>
+              )}
+            </span>
+          ) : (
+            placeholder
+          )}
+        </span>
+        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.15 }}
+            className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[300px]"
+          >
+            <div className="overflow-y-auto flex-1 p-1 custom-scrollbar">
+              {options.length > 0 ? (
+                options.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      onChange(option.value);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between group transition-colors ${
+                      value === option.value
+                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
+                        : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium text-sm">{option.label}</span>
+                      {option.subLabel && (
+                        <span className={`text-xs mt-0.5 ${value === option.value ? 'text-primary-600/80 dark:text-primary-400/80' : 'text-gray-500 dark:text-gray-400'}`}>
+                          {option.subLabel}
+                        </span>
+                      )}
+                    </div>
+                    {value === option.value && (
+                      <Check className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                    )}
+                  </button>
+                ))
+              ) : (
+                <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                  No options found
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+// --- End Custom Select ---
 
 interface LanguageOption {
   code: string;
@@ -35,7 +145,6 @@ interface ExtraModalProps {
   error: string | null;
 }
 
-
 export const ExtraModal: React.FC<ExtraModalProps> = ({
   isEditMode,
   formData,
@@ -57,9 +166,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
   supportedLanguages,
   defaultLanguage,
 }) => {
-  const { t } = useLanguage();
-
-  console.log("categories",categories)
+  const { t, isRTL } = useLanguage();
 
   // Helper to find the currently selected category object
   const currentCategory = categories.find((c) => c.id === formData.extraCategoryId);
@@ -72,8 +179,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
     onSubmit(e);
   };
 
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newCategoryId = parseInt(e.target.value);
+  const handleCategoryChange = (newCategoryId: number) => {
     const newCategory = categories.find((c) => c.id === newCategoryId);
 
     // If switching to a category that DOES NOT support removal, force isRemoval to false
@@ -83,8 +189,9 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
       ...formData,
       extraCategoryId: newCategoryId,
       isRemoval: shouldResetRemoval ? false : formData.isRemoval,
-      // If we forced removal off, we don't necessarily need to reset price, 
-      // but if we turned it ON (not handled here), we would.
+      // Reset price if we were in removal mode and got switched out? 
+      // Usually better to keep price if user typed it, unless they were forced out of removal mode.
+      basePrice: shouldResetRemoval ? formData.basePrice : (formData.isRemoval ? 0 : formData.basePrice) 
     });
   };
 
@@ -113,50 +220,59 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div className="flex items-center justify-center min-h-screen p-0 sm:px-4 sm:pt-4 sm:pb-20 text-center">
         <div className="fixed inset-0 transition-opacity bg-gray-900/75 backdrop-blur-sm" onClick={onClose}></div>
 
-
-        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-none sm:rounded-2xl text-left overflow-hidden shadow-xl transform transition-all w-full h-full sm:h-auto sm:my-8 sm:align-middle sm:max-w-lg flex flex-col">
           
           {/* Modal Header */}
-          <div className="bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+          <div className="bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center shrink-0">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">
               {isEditMode ? t('extrasManagement.extras.editExtra') : t('extrasManagement.extras.addExtra')}
             </h3>
-                    {error ? <div className="absolute top-4 right-4 bg-red-500 text-white p-2 rounded">{error}</div> : null}
-
+            
             <button onClick={onClose} className="text-gray-400 hover:text-gray-500 focus:outline-none">
               <X className="w-6 h-6" />
             </button>
           </div>
 
+          {/* Error Message */}
+          {error && (
+            <div className="px-6 pt-4">
+              <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-lg flex items-start">
+                <AlertTriangle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+                <div className="ml-3 text-sm text-red-700 dark:text-red-400 font-medium">
+                  {error}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Modal Content - Scrollable Area */}
-          <div className="px-6 py-6 max-h-[calc(100vh-16rem)] overflow-y-auto custom-scrollbar">
-            <form id="extraForm" onSubmit={handleFormSubmit} className="space-y-5">
+          <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+            <form id="extraForm" onSubmit={handleFormSubmit} className="space-y-6">
               
-              {/* Parent Category Select */}
+              {/* Parent Category Select - Custom Component */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  {t('extrasManagement.extras.fields.parentCategory')}
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {t('extrasManagement.extras.fields.parentCategory')} <span className="text-red-500">*</span>
                 </label>
-                <select
-                  title="Parent Category"
-                  value={formData.extraCategoryId}
-                  onChange={handleCategoryChange}
-                  className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5"
-                  disabled={!!selectedCategoryId}
-                >
-                  <option value={0}>{t('extrasManagement.extras.fields.selectCategory')}</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.categoryName} {c.isRemovalCategory ? `(${t('common.removal') || 'Removal'})` : ''}
-                    </option>
-                  ))}
-                </select>
+                <div className="relative z-20">
+                  <CustomSelect
+                    placeholder={t('extrasManagement.extras.fields.selectCategory')}
+                    value={formData.extraCategoryId}
+                    onChange={handleCategoryChange}
+                    options={categories.map(c => ({
+                      value: c.id,
+                      label: c.categoryName,
+                      subLabel: c.isRemovalCategory ? t('common.removal') || 'Removal Category' : undefined
+                    }))}
+                    disabled={!!selectedCategoryId}
+                  />
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-start">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div className="sm:col-span-2">
                   <MultiLanguageInput
                     label={t('extrasManagement.extras.fields.itemName')}
@@ -177,7 +293,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                     <input
                       title="Price"
                       type="number"
-                      step="1"
+                      step="0.01"
                       min="0"
                       value={formData.basePrice || ''}
                       // Disable input if removal is checked
@@ -186,7 +302,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                         const val = e.target.value;
                         onChange({ ...formData, basePrice: val === '' ? 0 : parseFloat(val) || 0 });
                       }}
-                      className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-2.5 px-3 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
+                      className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-100 dark:disabled:bg-gray-800"
                       placeholder="0.00"
                     />
                   </div>
@@ -211,27 +327,32 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                   {t('extrasManagement.extras.fields.imageLabel')}
                 </label>
                 <div
-                  className={`relative border-2 border-dashed rounded-lg p-4 transition-colors ${
+                  className={`relative border-2 border-dashed rounded-xl p-6 transition-colors group cursor-pointer ${
                     imagePreview
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/10'
-                      : 'border-gray-300 hover:border-gray-400 dark:border-gray-600'
+                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10'
+                      : 'border-gray-300 hover:border-primary-400 dark:border-gray-600 dark:hover:border-primary-500'
                   }`}
                 >
                   {imagePreview ? (
-                    <div className="relative h-40 w-full">
-                      <img src={imagePreview} alt="Preview" className="h-full w-full object-contain rounded" />
+                    <div className="relative h-48 w-full flex items-center justify-center">
+                      <img src={imagePreview} alt="Preview" className="h-full object-contain rounded-lg shadow-sm" />
                       <button
                         type="button"
-                        onClick={onImageClear}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 transition-colors"
+                        onClick={(e) => { e.stopPropagation(); onImageClear(); }}
+                        className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full p-1.5 shadow-md hover:bg-red-600 transition-colors"
                       >
                         <X className="w-4 h-4" />
                       </button>
                     </div>
                   ) : (
-                    <label className="flex flex-col items-center justify-center h-32 cursor-pointer">
-                      <Upload className="w-8 h-8 text-gray-400 mb-2" />
-                      <span className="text-sm text-gray-500">{t('extrasManagement.extras.fields.uploadText')}</span>
+                    <label className="flex flex-col items-center justify-center h-32 cursor-pointer w-full">
+                      <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full mb-3 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/30 transition-colors">
+                        <Upload className="w-6 h-6 text-gray-400 group-hover:text-primary-600 dark:text-gray-500 dark:group-hover:text-primary-400" />
+                      </div>
+                      <span className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                        {t('extrasManagement.extras.fields.uploadText')}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">PNG, JPG, GIF up to 5MB</span>
                       <input type="file" className="hidden" accept="image/*" onChange={onFileSelect} />
                     </label>
                   )}
@@ -239,57 +360,64 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
               </div>
 
               {/* Checkboxes */}
-              <div className="flex gap-4 p-1">
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input
-                    type="checkbox"
-                    checked={formData.status}
-                    onChange={(e) => onChange({ ...formData, status: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+              <div className="flex flex-col sm:flex-row gap-4 p-4 bg-gray-50 dark:bg-gray-700/30 rounded-xl border border-gray-100 dark:border-gray-700">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.status}
+                      onChange={(e) => onChange({ ...formData, status: e.target.checked })}
+                      className="w-5 h-5 text-primary-600 rounded focus:ring-primary-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 transition-colors"
+                    />
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                     {t('extrasManagement.extras.fields.activeLabel')}
                   </span>
                 </label>
                 
-                {/* Removal Checkbox */}
-                <label className={`flex items-center gap-2 group ${!isRemovalAllowed ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
-                  <input
-                    type="checkbox"
-                    checked={formData.isRemoval}
-                    onChange={handleRemovalCheckboxChange}
-                    // Optional: Physically disable the input if the category doesn't support it
-                    disabled={!isRemovalAllowed && !formData.isRemoval} 
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 disabled:cursor-not-allowed"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                    {t('extrasManagement.extras.fields.removalLabel')}
-                  </span>
+                <div className="hidden sm:block w-px bg-gray-200 dark:bg-gray-600 h-6 self-center"></div>
+
+                <label className={`flex items-center gap-3 group transition-opacity ${!isRemovalAllowed ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
+                  <div className="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.isRemoval}
+                      onChange={handleRemovalCheckboxChange}
+                      disabled={!isRemovalAllowed && !formData.isRemoval} 
+                      className="w-5 h-5 text-red-600 rounded focus:ring-red-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 transition-colors disabled:cursor-not-allowed"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className={`text-sm font-medium transition-colors ${formData.isRemoval ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'}`}>
+                      {t('extrasManagement.extras.fields.removalLabel')}
+                    </span>
+                    
+                  </div>
                 </label>
               </div>
             </form>
           </div>
 
           {/* Footer Buttons */}
-          <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex flex-row-reverse gap-3 border-t border-gray-100 dark:border-gray-700">
+          <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex flex-col-reverse sm:flex-row gap-3 sm:justify-end border-t border-gray-100 dark:border-gray-700 shrink-0">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full sm:w-auto inline-flex justify-center rounded-xl border border-gray-300 dark:border-gray-600 px-6 py-3 bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors shadow-sm"
+            >
+              {t('extrasManagement.buttons.cancel')}
+            </button>
             <button
               type="submit"
               form="extraForm"
               disabled={loading || uploading}
-              className="inline-flex justify-center rounded-lg border border-transparent shadow-sm px-5 py-2.5 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm transition-all duration-200 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto inline-flex justify-center rounded-xl border border-transparent px-6 py-3 text-sm font-medium text-white shadow-sm bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
             >
               {loading || uploading
                 ? t('extrasManagement.processing')
                 : isEditMode
                 ? t('extrasManagement.buttons.save')
                 : t('extrasManagement.buttons.add')}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm px-5 py-2.5 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm"
-            >
-              {t('extrasManagement.buttons.cancel')}
             </button>
           </div>
         </div>

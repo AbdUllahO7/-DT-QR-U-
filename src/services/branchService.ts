@@ -173,9 +173,13 @@ class BranchService {
       if (data.createBranchWorkingHourCoreDto && data.createBranchWorkingHourCoreDto.length > 0) {
         batchUpdateData.batchUpdateBranchWorkingHourDto = data.createBranchWorkingHourCoreDto.map(hour => ({
           dayOfWeek: hour.dayOfWeek,
-          openTime: hour.openTime,
-          closeTime: hour.closeTime,
-          isWorkingDay: hour.isWorkingDay
+          isWorkingDay: hour.isWorkingDay,
+          isOpen24Hours: hour.isOpen24Hours ?? false,
+          timeSlots: hour.timeSlots?.map(slot => ({
+            id: slot.id,
+            openTime: slot.openTime,
+            closeTime: slot.closeTime
+          })) || []
         }));
       }
 
