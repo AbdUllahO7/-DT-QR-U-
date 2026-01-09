@@ -1,6 +1,7 @@
 import React from 'react'
 import { Plus, Minus, Settings, XCircle, PlusCircle, Trash2 } from 'lucide-react'
 import { useLanguage } from '../../../../../contexts/LanguageContext'
+import { useCurrency } from '../../../../../hooks/useCurrency'
 
 interface CartItemAddon {
   branchProductAddonId: number
@@ -79,7 +80,7 @@ const CartItemComponent: React.FC<CartItemProps> = ({
   onExtraQuantityDecrease
 }) => {
   const { t } = useLanguage()
-
+  const currency = useCurrency()
 
   return (
     <div className="bg-slate-50/50 dark:bg-slate-800/50 p-4 rounded-xl backdrop-blur-sm border border-slate-200/50 dark:border-slate-700/50">
@@ -120,7 +121,7 @@ const CartItemComponent: React.FC<CartItemProps> = ({
                   </span>
                 )}
                 <span className="text-sm text-slate-600 dark:text-slate-400">
-                  ${group.product.price.toFixed(2)} × {variant.quantity}
+                  <span>{currency.symbol}</span>{group.product.price.toFixed(2)} × {variant.quantity}
                 </span>
               </div>
 
@@ -167,7 +168,7 @@ const CartItemComponent: React.FC<CartItemProps> = ({
                             {addon.addonName}
                           </span>
                           <div className="text-xs text-orange-600 dark:text-orange-400">
-                            ${addon.price.toFixed(2)} {t('menu.cart.each')} × {addon.quantity}
+                            <span>{currency.symbol}</span>{addon.price.toFixed(2)} {t('menu.cart.each')} × {addon.quantity}
                           </div>
                           {(addon.minQuantity || addon.maxQuantity) && (
                             <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">

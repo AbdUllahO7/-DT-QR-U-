@@ -19,7 +19,12 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const languages = [
     { code: 'tr' as Language, name: t('language.turkish'), flag: '🇹🇷' },
     { code: 'en' as Language, name: t('language.english'), flag: '🇺🇸' },
-    { code: 'ar' as Language, name: t('language.arabic'), flag: '🇸🇦' }
+    { code: 'ar' as Language, name: t('language.arabic'), flag: '🇸🇦' },
+    { code: 'az' as Language, name: t('language.azerbaijani'), flag: '🇦🇿' },
+    { code: 'sq' as Language, name: t('language.albanian'), flag: '🇦🇱' },
+    { code: 'bs' as Language, name: t('language.bosnian'), flag: '🇧🇦' },
+
+    
   ];
 
   const currentLanguage = languages.find(lang => lang.code === language);

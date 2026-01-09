@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Building2,
   MapPin,
@@ -11,11 +11,14 @@ import {
   Info,
   Clock,
   MapPinned,
-  FileText,
   ArrowLeft,
   ArrowRight,
   Navigation,
-  Languages
+  Trash2,
+  Image as ImageIcon,
+  ChevronDown,
+  Search,
+  Check
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import type { CreateBranchWithDetailsDto, CreateBranchWorkingHourCoreDto } from '../../../../types/api';
@@ -46,6 +49,112 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+// --- Custom Select Component (Matches BranchEditModal) ---
+interface CustomSelectProps {
+  options: { label: string; value: string; searchTerms?: string }[];
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  label?: string;
+  icon?: React.ReactNode;
+}
+
+const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, placeholder, icon }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { isRTL } = useLanguage();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filter options
+  const filteredOptions = options.filter(option => 
+    option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    option.value.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    option.searchTerms?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  return (
+    <div className="relative w-full" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full flex items-center justify-between px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors focus:ring-2 focus:ring-blue-500 ${
+          isOpen ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-300 dark:border-gray-600'
+        }`}
+      >
+        <div className="flex items-center gap-2 overflow-hidden">
+          {icon}
+          <span className="truncate block text-sm">
+            {selectedOption ? selectedOption.label : <span className="text-gray-500">{placeholder}</span>}
+          </span>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-60 overflow-hidden flex flex-col"
+          >
+            <div className="p-2 border-b border-gray-100 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
+              <div className="relative">
+                <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400`} />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search..."
+                  className={`w-full ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'} py-1.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-white`}
+                  autoFocus
+                />
+              </div>
+            </div>
+            
+            <div className="overflow-y-auto flex-1">
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      onChange(option.value);
+                      setIsOpen(false);
+                      setSearchTerm('');
+                    }}
+                    className={`w-full px-4 py-2 text-sm text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                      value === option.value ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    <span>{option.label}</span>
+                    {value === option.value && <Check className="w-4 h-4" />}
+                  </button>
+                ))
+              ) : (
+                <div className="px-4 py-3 text-sm text-gray-500 text-center">No results found</div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 interface LanguageOption {
   code: string;
   displayName: string;
@@ -60,7 +169,7 @@ interface BranchModalProps {
   formData: CreateBranchWithDetailsDto;
   setFormData: React.Dispatch<React.SetStateAction<CreateBranchWithDetailsDto>>;
   isSubmitting: boolean;
-  hasChanges?: boolean; // Made optional
+  hasChanges?: boolean;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onWorkingHourChange: (dayIndex: number, field: keyof CreateBranchWorkingHourCoreDto, value: any) => void;
   
@@ -108,7 +217,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
   setOpenHoursTranslations
 }) => {
   const { t, language } = useLanguage();
-  // Default language for fallback in validations
   const defaultLanguage = 'en';
   const isRTL = language === 'ar';
 
@@ -158,6 +266,19 @@ const BranchModal: React.FC<BranchModalProps> = ({
     }
     return { code: '+90', number: fullNumber };
   };
+
+  // Prepare options for custom select
+  const countryCodeOptions = countriesWithCodes.map(c => ({
+    label: `${c.name} (${c.code})`,
+    value: c.code,
+    searchTerms: c.name
+  }));
+
+  const countryNameOptions = countryKeys.map(key => ({
+    label: t(key),
+    value: t(key),
+    searchTerms: key
+  }));
 
   const Toggle = ({ checked, onChange, disabled }: { checked: boolean; onChange: (checked: boolean) => void; disabled?: boolean }) => (
     <button
@@ -358,6 +479,11 @@ const BranchModal: React.FC<BranchModalProps> = ({
     }
   };
 
+  const handleRemoveImage = () => {
+    setBranchLogoPreview(null);
+    setFormData(prev => ({ ...prev, branchLogoPath: null }));
+  };
+
   const handleNextStep = () => {
     if (validateStep(currentStep) && currentStep < 3) {
       setCurrentStep(currentStep + 1);
@@ -488,12 +614,12 @@ const BranchModal: React.FC<BranchModalProps> = ({
 
     return (
       <AnimatePresence>
-        <div className="fixed inset-0 bg-black bg-opacity-60 dark:bg-opacity-80 z-[60] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 z-[9999] flex items-center justify-center p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className={`relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl ${isRTL ? 'rtl' : 'ltr'}`}
+            className={`relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-xl ${isRTL ? 'rtl' : 'ltr'}`}
           >
             <div className={`flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -501,7 +627,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
               </h3>
               <button
                 onClick={handleCloseMapModal}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
               >
                 <X className="h-6 w-6" />
               </button>
@@ -538,20 +664,20 @@ const BranchModal: React.FC<BranchModalProps> = ({
               </div>
             </div>
 
-            <div className={`flex ${isRTL ? 'flex-row-reverse space-x-reverse' : ''} space-x-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-xl`}>
+            <div className={`flex ${isRTL ? 'flex-row-reverse space-x-reverse' : ''} space-x-3 p-6 border-t border-gray-200 dark:border-gray-700`}>
               <button
                 type="button"
                 onClick={handleCloseMapModal}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-colors shadow-sm"
+                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
-                {t('branchModal.buttons.cancel')}
+                {t('common.cancel')}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmLocation}
-                className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
+                className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
               >
-                {t('branchModal.buttons.save')}
+                {t('common.save')}
               </button>
             </div>
           </motion.div>
@@ -606,28 +732,20 @@ const BranchModal: React.FC<BranchModalProps> = ({
               {t('branchModal.fields.whatsappNumber.label')} *
             </label>
             
-            <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <select
-                title='Country Code'
-                value={getPhoneParts(formData.whatsappOrderNumber).code}
-                onChange={(e) => handlePhoneCompositeChange(
-                  'whatsappOrderNumber', 
-                  formData.whatsappOrderNumber, 
-                  'code', 
-                  e.target.value
-                )}
-                className={`w-1/3 md:w-1/4 px-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                  formErrors.whatsappOrderNumber
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-white`}
-              >
-                {countriesWithCodes.map((country) => (
-                  <option key={country.code + country.name} value={country.code}>
-                    {country.name} ({country.code})
-                  </option>
-                ))}
-              </select>
+            <div className={`flex flex-col sm:flex-row gap-2 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+              <div className="w-full sm:w-1/3 md:w-1/4">
+                <CustomSelect
+                    options={countryCodeOptions}
+                    value={getPhoneParts(formData.whatsappOrderNumber).code}
+                    onChange={(newCode) => handlePhoneCompositeChange(
+                      'whatsappOrderNumber',
+                      formData.whatsappOrderNumber,
+                      'code',
+                      newCode
+                    )}
+                    placeholder="Code"
+                  />
+              </div>
               <input
                 type="tel"
                 maxLength={15}
@@ -638,7 +756,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                   'number', 
                   e.target.value
                 )}
-                className={`flex-1 px-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+                className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
                   formErrors.whatsappOrderNumber
                     ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                     : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
@@ -668,13 +786,10 @@ const BranchModal: React.FC<BranchModalProps> = ({
                     {!isUploadingLogo && (
                       <button
                         type="button"
-                        onClick={() => {
-                           setBranchLogoPreview(null);
-                           setFormData(prev => ({ ...prev, branchLogoPath: null }));
-                        }}
+                        onClick={handleRemoveImage}
                         className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors shadow-lg"
                       >
-                        <X className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
@@ -692,13 +807,29 @@ const BranchModal: React.FC<BranchModalProps> = ({
                 />
                 <label
                   htmlFor="branchLogo"
-                  className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 ${
+                  className={`inline-flex items-center px-4 py-2 border rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 ${
                     isUploadingLogo ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                   } border-gray-300 dark:border-gray-600`}
                 >
-                  <Upload className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                  {isUploadingLogo ? t('branchModal.fields.branchLogo.uploading') : t('branchModal.fields.branchLogo.select')}
+                  {isUploadingLogo ? (
+                    <>
+                      <div className={`animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 dark:border-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`}></div>
+                      {t('branchModal.fields.branchLogo.uploading')}
+                    </>
+                  ) : (
+                    <>
+                      <Upload className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                      {branchLogoPreview ? t('branchManagement.form.logoChange') : t('branchManagement.form.logoUpload')}
+                    </>
+                  )}
                 </label>
+                
+                {!branchLogoPreview && !isUploadingLogo && (
+                  <div className={`flex items-center text-gray-400 dark:text-gray-500 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+                    <ImageIcon className="h-5 w-5" />
+                    <span className="text-sm">{t('branchManagement.form.logoNotSelected')}</span>
+                  </div>
+                )}
               </div>
 
               <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -718,60 +849,52 @@ const BranchModal: React.FC<BranchModalProps> = ({
           {t('branchModal.sections.addressInfo')}
         </h4>
         <div className="space-y-6">
-          <div>
-            <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.country.label')} <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10`} />
-              <select
-                id="country"
-                name="address.country"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('branchModal.fields.country.label')} <span className="text-red-500">*</span>
+              </label>
+              <CustomSelect
+                options={countryNameOptions}
                 value={formData.createAddressDto.country || ''}
-                onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-8' : 'pl-10 pr-8'} py-3 border ${formErrors['address.country'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
-                dir={isRTL ? 'rtl' : 'ltr'}
-              >
-                <option value="" disabled>
-                  {t('branchModal.fields.country.placeholder')}
-                </option>
-                {countryKeys.map((countryKey) => (
-                  <option key={countryKey} value={t(countryKey)}>
-                    {t(countryKey)}
-                  </option>
-                ))}
-              </select>
-              <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-            {formErrors['address.country'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.country']}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.city.label')} <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-              <input
-                type="text"
-                id="city"
-                name="address.city"
-                value={formData.createAddressDto.city || ''}
-                onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${formErrors['address.city'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
-                placeholder={t('branchModal.fields.city.placeholder')}
-                dir={isRTL ? 'rtl' : 'ltr'}
+                onChange={(newCountry) => {
+                  const syntheticEvent = {
+                    target: {
+                      name: 'address.country',
+                      value: newCountry,
+                    },
+                  } as React.ChangeEvent<HTMLInputElement>;
+                  handleInputChange(syntheticEvent);
+                }}
+                placeholder={t('branchModal.fields.country.placeholder')}
+                icon={<Globe className="h-5 w-5 text-gray-400" />}
               />
+              {formErrors['address.country'] && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.country']}</p>
+              )}
             </div>
-            {formErrors['address.city'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.city']}</p>
-            )}
+
+            <div>
+              <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('branchModal.fields.city.label')} <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+                <input
+                  type="text"
+                  id="city"
+                  name="address.city"
+                  value={formData.createAddressDto.city || ''}
+                  onChange={handleInputChange}
+                  className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border ${formErrors['address.city'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                  placeholder={t('branchModal.fields.city.placeholder')}
+                  dir={isRTL ? 'rtl' : 'ltr'}
+                />
+              </div>
+              {formErrors['address.city'] && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.city']}</p>
+              )}
+            </div>
           </div>
 
           <div>
@@ -786,48 +909,52 @@ const BranchModal: React.FC<BranchModalProps> = ({
                 name="address.street"
                 value={formData.createAddressDto.street || ''}
                 onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
                 placeholder={t('branchModal.fields.street.placeholder')}
                 dir={isRTL ? 'rtl' : 'ltr'}
               />
             </div>
           </div>
 
-          <div>
-            <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.zipCode.label')}
-            </label>
-            <div className="relative">
-              <FileText className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-              <input
-                type="text"
-                id="zipCode"
-                name="address.zipCode"
-                value={formData.createAddressDto.zipCode || ''}
-                onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
-                placeholder={t('branchModal.fields.zipCode.placeholder')}
-                dir={isRTL ? 'rtl' : 'ltr'}
-              />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('branchModal.fields.zipCode.label')}
+              </label>
+              <div className="relative">
+                <div className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 flex items-center justify-center`}>
+                  <span className="text-gray-400 font-bold text-xs">#</span>
+                </div>
+                <input
+                  type="text"
+                  id="zipCode"
+                  name="address.zipCode"
+                  value={formData.createAddressDto.zipCode || ''}
+                  onChange={handleInputChange}
+                  className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                  placeholder={t('branchModal.fields.zipCode.placeholder')}
+                  dir={isRTL ? 'rtl' : 'ltr'}
+                />
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label htmlFor="addressLine1" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.addressLine1.label')}
-            </label>
-            <div className="relative">
-              <Home className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-              <input
-                type="text"
-                id="addressLine1"
-                name="address.addressLine1"
-                value={formData.createAddressDto.addressLine1 || ''}
-                onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
-                placeholder={t('branchModal.fields.addressLine1.placeholder')}
-                dir={isRTL ? 'rtl' : 'ltr'}
-              />
+            <div>
+              <label htmlFor="addressLine1" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('branchModal.fields.addressLine1.label')}
+              </label>
+              <div className="relative">
+                <Home className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+                <input
+                  type="text"
+                  id="addressLine1"
+                  name="address.addressLine1"
+                  value={formData.createAddressDto.addressLine1 || ''}
+                  onChange={handleInputChange}
+                  className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                  placeholder={t('branchModal.fields.addressLine1.placeholder')}
+                  dir={isRTL ? 'rtl' : 'ltr'}
+                />
+              </div>
             </div>
           </div>
 
@@ -843,7 +970,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                 name="address.addressLine2"
                 value={formData.createAddressDto.addressLine2 || ''}
                 onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
                 placeholder={t('branchModal.fields.addressLine2.placeholder')}
                 dir={isRTL ? 'rtl' : 'ltr'}
               />
@@ -861,67 +988,65 @@ const BranchModal: React.FC<BranchModalProps> = ({
           {t('branchModal.sections.contactInfo')}
         </h4>
         <div className="space-y-6">
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.phone.label')} <span className="text-red-500">*</span>
-            </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('branchModal.fields.phone.label')} <span className="text-red-500">*</span>
+              </label>
 
-            <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-               <select
-                title='Country Code'
-                value={getPhoneParts(formData.createContactDto.phone).code}
-                onChange={(e) => handlePhoneCompositeChange(
-                  'contact.phone',
-                  formData.createContactDto.phone,
-                  'code',
-                  e.target.value
-                )}
-                className={`w-1/3 md:w-1/4 px-3 py-3 border ${formErrors['contact.phone'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white`}
-              >
-                {countriesWithCodes.map((country) => (
-                  <option key={country.code + country.name} value={country.code}>
-                    {country.name} ({country.code})
-                  </option>
-                ))}
-              </select>
-              <input
-                type="tel"
-                maxLength={15}
-                value={getPhoneParts(formData.createContactDto.phone).number}
-                onChange={(e) => handlePhoneCompositeChange(
-                  'contact.phone',
-                  formData.createContactDto.phone,
-                  'number',
-                  e.target.value
-                )}
-                className={`flex-1 px-3 py-3 border ${formErrors['contact.phone'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
-                placeholder={t('branchModal.fields.phone.placeholder')}
-              />
+              <div className={`flex flex-col sm:flex-row gap-2 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                <div className="w-full sm:w-1/3">
+                  <CustomSelect
+                    options={countryCodeOptions}
+                    value={getPhoneParts(formData.createContactDto.phone).code}
+                    onChange={(newCode) => handlePhoneCompositeChange(
+                      'contact.phone',
+                      formData.createContactDto.phone,
+                      'code',
+                      newCode
+                    )}
+                    placeholder="Code"
+                  />
+                </div>
+                <input
+                  type="tel"
+                  maxLength={15}
+                  value={getPhoneParts(formData.createContactDto.phone).number}
+                  onChange={(e) => handlePhoneCompositeChange(
+                    'contact.phone',
+                    formData.createContactDto.phone,
+                    'number',
+                    e.target.value
+                  )}
+                  className={`flex-1 px-3 py-2 border ${formErrors['contact.phone'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                  placeholder={t('branchModal.fields.phone.placeholder')}
+                />
+              </div>
+              {formErrors['contact.phone'] && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.phone']}</p>
+              )}
             </div>
-            {formErrors['contact.phone'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.phone']}</p>
-            )}
-          </div>
 
-          <div>
-            <label htmlFor="mail" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.email.label')} <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <Mail className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-              <input
-                type="email"
-                id="mail"
-                name="contact.mail"
-                value={formData.createContactDto.mail || ''}
-                onChange={handleInputChange}
-                className={`w-full px-10 py-3 border ${formErrors['contact.mail'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-                placeholder={t('branchModal.fields.email.placeholder')}
-              />
+            <div>
+              <label htmlFor="mail" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('branchModal.fields.email.label')} <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Mail className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+                <input
+                  type="email"
+                  id="mail"
+                  name="contact.mail"
+                  value={formData.createContactDto.mail || ''}
+                  onChange={handleInputChange}
+                  className={`w-full px-10 py-2 border ${formErrors['contact.mail'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
+                  placeholder={t('branchModal.fields.email.placeholder')}
+                />
+              </div>
+              {formErrors['contact.mail'] && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.mail']}</p>
+              )}
             </div>
-            {formErrors['contact.mail'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.mail']}</p>
-            )}
           </div>
 
           <div>
@@ -938,7 +1063,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                   value={formData.createContactDto.location || ''}
                   onChange={handleInputChange}
                   readOnly
-                  className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
                   placeholder={t('branchModal.fields.location.placeholder')}
                 />
               </div>
@@ -973,23 +1098,43 @@ const BranchModal: React.FC<BranchModalProps> = ({
             showLanguageSelector={false}
           />
 
-          <MultiLanguageInput
-            label={t('branchModal.fields.footerTitle.label')}
-            value={footerTitleTranslations}
-            onChange={(val) => {
-              setFooterTitleTranslations(val);
-              const currentValue = val[language] || val[defaultLanguage] || '';
-              setFormData(prev => ({
-                ...prev,
-                createContactDto: { ...prev.createContactDto, footerTitle: currentValue }
-              }));
-            }}
-            languages={supportedLanguages}
-            placeholder={t('branchModal.fields.footerTitle.placeholder')}
-            defaultLanguage={defaultLanguage}
-            selectedLanguage={selectedFormLanguage}
-            showLanguageSelector={false}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <MultiLanguageInput
+              label={t('branchModal.fields.footerTitle.label')}
+              value={footerTitleTranslations}
+              onChange={(val) => {
+                setFooterTitleTranslations(val);
+                const currentValue = val[language] || val[defaultLanguage] || '';
+                setFormData(prev => ({
+                  ...prev,
+                  createContactDto: { ...prev.createContactDto, footerTitle: currentValue }
+                }));
+              }}
+              languages={supportedLanguages}
+              placeholder={t('branchModal.fields.footerTitle.placeholder')}
+              defaultLanguage={defaultLanguage}
+              selectedLanguage={selectedFormLanguage}
+              showLanguageSelector={false}
+            />
+
+            <MultiLanguageInput
+              label={t('branchModal.fields.openTitle.label')}
+              value={openTitleTranslations}
+              onChange={(val) => {
+                setOpenTitleTranslations(val);
+                const currentValue = val[language] || val[defaultLanguage] || '';
+                setFormData(prev => ({
+                  ...prev,
+                  createContactDto: { ...prev.createContactDto, openTitle: currentValue }
+                }));
+              }}
+              languages={supportedLanguages}
+              placeholder={t('branchModal.fields.openTitle.placeholder')}
+              defaultLanguage={defaultLanguage}
+              selectedLanguage={selectedFormLanguage}
+              showLanguageSelector={false}
+            />
+          </div>
 
           <MultiLanguageTextArea
             label={t('branchModal.fields.footerDescription.label')}
@@ -1010,59 +1155,43 @@ const BranchModal: React.FC<BranchModalProps> = ({
             showLanguageSelector={false}
           />
 
-          <MultiLanguageInput
-            label={t('branchModal.fields.openTitle.label')}
-            value={openTitleTranslations}
-            onChange={(val) => {
-              setOpenTitleTranslations(val);
-              const currentValue = val[language] || val[defaultLanguage] || '';
-              setFormData(prev => ({
-                ...prev,
-                createContactDto: { ...prev.createContactDto, openTitle: currentValue }
-              }));
-            }}
-            languages={supportedLanguages}
-            placeholder={t('branchModal.fields.openTitle.placeholder')}
-            defaultLanguage={defaultLanguage}
-            selectedLanguage={selectedFormLanguage}
-            showLanguageSelector={false}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <MultiLanguageInput
+              label={t('branchModal.fields.openDays.label')}
+              value={openDaysTranslations}
+              onChange={(val) => {
+                setOpenDaysTranslations(val);
+                const currentValue = val[language] || val[defaultLanguage] || '';
+                setFormData(prev => ({
+                  ...prev,
+                  createContactDto: { ...prev.createContactDto, openDays: currentValue }
+                }));
+              }}
+              languages={supportedLanguages}
+              placeholder={t('branchModal.fields.openDays.placeholder')}
+              defaultLanguage={defaultLanguage}
+              selectedLanguage={selectedFormLanguage}
+              showLanguageSelector={false}
+            />
 
-          <MultiLanguageInput
-            label={t('branchModal.fields.openDays.label')}
-            value={openDaysTranslations}
-            onChange={(val) => {
-              setOpenDaysTranslations(val);
-              const currentValue = val[language] || val[defaultLanguage] || '';
-              setFormData(prev => ({
-                ...prev,
-                createContactDto: { ...prev.createContactDto, openDays: currentValue }
-              }));
-            }}
-            languages={supportedLanguages}
-            placeholder={t('branchModal.fields.openDays.placeholder')}
-            defaultLanguage={defaultLanguage}
-            selectedLanguage={selectedFormLanguage}
-            showLanguageSelector={false}
-          />
-
-          <MultiLanguageInput
-            label={t('branchModal.fields.openHours.label')}
-            value={openHoursTranslations}
-            onChange={(val) => {
-              setOpenHoursTranslations(val);
-              const currentValue = val[language] || val[defaultLanguage] || '';
-              setFormData(prev => ({
-                ...prev,
-                createContactDto: { ...prev.createContactDto, openHours: currentValue }
-              }));
-            }}
-            languages={supportedLanguages}
-            placeholder={t('branchModal.fields.openHours.placeholder')}
-            defaultLanguage={defaultLanguage}
-            selectedLanguage={selectedFormLanguage}
-            showLanguageSelector={false}
-          />
+            <MultiLanguageInput
+              label={t('branchModal.fields.openHours.label')}
+              value={openHoursTranslations}
+              onChange={(val) => {
+                setOpenHoursTranslations(val);
+                const currentValue = val[language] || val[defaultLanguage] || '';
+                setFormData(prev => ({
+                  ...prev,
+                  createContactDto: { ...prev.createContactDto, openHours: currentValue }
+                }));
+              }}
+              languages={supportedLanguages}
+              placeholder={t('branchModal.fields.openHours.placeholder')}
+              defaultLanguage={defaultLanguage}
+              selectedLanguage={selectedFormLanguage}
+              showLanguageSelector={false}
+            />
+          </div>
         </div>
       </div>
 
@@ -1087,69 +1216,78 @@ const BranchModal: React.FC<BranchModalProps> = ({
                   : 'bg-gray-50 dark:bg-gray-800/50'
               }`}
             >
-              <div className="flex items-center justify-between">
-                <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
+              <div className="flex flex-col space-y-4">
+                {/* Header Row: Day Name and Toggle */}
+                <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className="min-w-[100px]">
-                    <span className="text-base font-medium text-gray-900 dark:text-gray-100">
-                      {dayNamesDisplay[day.dayOfWeek === 0 ? 6 : day.dayOfWeek - 1]}
+                    <span className={`text-base font-medium text-gray-900 dark:text-gray-100 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {dayNamesDisplay[index]}
                     </span>
                   </div>
-
-                  <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
+                  
+                  <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
                     <Toggle
                       checked={day.isWorkingDay}
                       onChange={(checked) => handleWorkingHourChange(index, 'isWorkingDay', checked)}
                     />
-                    <span
-                      className={`text-sm font-medium transition-colors ${
-                        day.isWorkingDay
-                          ? 'text-green-700 dark:text-green-400'
-                          : 'text-gray-500 dark:text-gray-400'
-                      }`}
-                    >
+                    <span className={`text-sm font-medium transition-colors hidden xs:block ${
+                      day.isWorkingDay 
+                        ? 'text-green-700 dark:text-green-400' 
+                        : 'text-gray-500 dark:text-gray-400'
+                    }`}>
                       {day.isWorkingDay ? t('branchModal.workingHours.open') : t('branchModal.workingHours.closed')}
                     </span>
                   </div>
                 </div>
 
-                <div
-                  className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} transition-opacity ${
-                    !day.isWorkingDay ? 'opacity-40' : ''
-                  }`}
-                >
-                  <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                {/* Time Inputs Row - Responsive Grid/Flex */}
+                <div className={`
+                  mt-2 
+                  grid grid-cols-2 gap-4 
+                  sm:flex sm:items-center sm:justify-center sm:gap-3 
+                  transition-opacity 
+                  ${!day.isWorkingDay ? 'opacity-40 pointer-events-none' : ''} 
+                  ${isRTL ? 'sm:flex-row-reverse' : ''}
+                `}>
+                  
+                  {/* Open Time Group */}
+                  <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                    <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
                       {t('branchModal.workingHours.openTime')}
                     </label>
                     <input
-                      title="time"
+                      title='time'
                       type="time"
                       value={formatTimeForInput(day.openTime)}
                       onChange={(e) => handleWorkingHourChange(index, 'openTime', e.target.value)}
                       disabled={!day.isWorkingDay}
-                      className={`px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                      className={`w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                         !day.isWorkingDay ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : 'hover:border-primary-300'
-                      }`}
+                      } ${isRTL ? 'text-right' : 'text-left'}`}
+                      dir="ltr"
                     />
                   </div>
-
-                  <div className="flex items-center justify-center">
-                    <div className="w-6 h-px bg-gray-300 dark:bg-gray-600"></div>
+                  
+                  {/* Separator - Hidden on Mobile, Visible on Desktop */}
+                  <div className="hidden sm:flex items-center justify-center">
+                    <div className="w-4 h-px bg-gray-300 dark:bg-gray-600"></div>
                   </div>
-
-                  <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                  
+                  {/* Close Time Group */}
+                  <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                    <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
                       {t('branchModal.workingHours.closeTime')}
                     </label>
                     <input
-                      title="time"
+                      title='time'
                       type="time"
                       value={formatTimeForInput(day.closeTime)}
                       onChange={(e) => handleWorkingHourChange(index, 'closeTime', e.target.value)}
                       disabled={!day.isWorkingDay}
-                      className={`px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
+                      className={`w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
                         !day.isWorkingDay ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : 'hover:border-primary-300'
-                      }`}
+                      } ${isRTL ? 'text-right' : 'text-left'}`}
+                      dir="ltr"
                     />
                   </div>
                 </div>
