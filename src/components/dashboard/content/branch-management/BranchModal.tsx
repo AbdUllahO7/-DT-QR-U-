@@ -18,7 +18,8 @@ import {
   Image as ImageIcon,
   ChevronDown,
   Search,
-  Check
+  Check,
+  Plus
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import type { CreateBranchWithDetailsDto, CreateBranchWorkingHourCoreDto } from '../../../../types/api';
@@ -426,24 +427,87 @@ const BranchModal: React.FC<BranchModalProps> = ({
     const updatedFormData = {
       ...formData,
       createBranchWorkingHourCoreDto: formData.createBranchWorkingHourCoreDto.map((day, index) => {
-        if (index === dayIndex) {
-          if (field === 'openTime' || field === 'closeTime') {
+        if (index !== dayIndex) return day;
+
+        // Handle special cases for backend validation rules
+        if (field === 'isWorkingDay') {
+          if (!value) {
+            // Non-working days cannot have time slots
+            return { ...day, isWorkingDay: value, timeSlots: [], isOpen24Hours: false };
+          } else {
+            // When enabling working day, add default time slot if none exists
             return {
               ...day,
-              [field]: formatTimeForApi(value)
+              isWorkingDay: value,
+              timeSlots: day.timeSlots?.length ? day.timeSlots : [{ openTime: '08:00:00', closeTime: '22:00:00' }]
             };
           }
-          if (field === 'isWorkingDay') {
-            return { ...day, isWorkingDay: value };
-          }
-          return { ...day, [field]: value };
         }
-        return day;
+
+        if (field === 'isOpen24Hours') {
+          if (value) {
+            // 24-hour open days cannot have time slots
+            return { ...day, isOpen24Hours: value, timeSlots: [] };
+          } else {
+            // When disabling 24 hours, add default time slot
+            return { ...day, isOpen24Hours: value, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] };
+          }
+        }
+
+        return { ...day, [field]: value };
       })
     };
 
     setFormData(updatedFormData);
     onWorkingHourChange(dayIndex, field, value);
+  };
+
+  const handleTimeSlotChange = (dayIndex: number, slotIndex: number, field: 'openTime' | 'closeTime', value: string) => {
+    if (!formData.createBranchWorkingHourCoreDto) return;
+
+    const updatedFormData = {
+      ...formData,
+      createBranchWorkingHourCoreDto: formData.createBranchWorkingHourCoreDto.map((day, index) => {
+        if (index !== dayIndex) return day;
+        const newTimeSlots = [...(day.timeSlots || [])];
+        if (newTimeSlots[slotIndex]) {
+          newTimeSlots[slotIndex] = { ...newTimeSlots[slotIndex], [field]: formatTimeForApi(value) };
+        }
+        return { ...day, timeSlots: newTimeSlots };
+      })
+    };
+
+    setFormData(updatedFormData);
+  };
+
+  const handleAddTimeSlot = (dayIndex: number) => {
+    if (!formData.createBranchWorkingHourCoreDto) return;
+
+    const updatedFormData = {
+      ...formData,
+      createBranchWorkingHourCoreDto: formData.createBranchWorkingHourCoreDto.map((day, index) => {
+        if (index !== dayIndex) return day;
+        const newTimeSlots = [...(day.timeSlots || []), { openTime: '08:00:00', closeTime: '22:00:00' }];
+        return { ...day, timeSlots: newTimeSlots };
+      })
+    };
+
+    setFormData(updatedFormData);
+  };
+
+  const handleRemoveTimeSlot = (dayIndex: number, slotIndex: number) => {
+    if (!formData.createBranchWorkingHourCoreDto) return;
+
+    const updatedFormData = {
+      ...formData,
+      createBranchWorkingHourCoreDto: formData.createBranchWorkingHourCoreDto.map((day, index) => {
+        if (index !== dayIndex) return day;
+        const newTimeSlots = (day.timeSlots || []).filter((_, i) => i !== slotIndex);
+        return { ...day, timeSlots: newTimeSlots };
+      })
+    };
+
+    setFormData(updatedFormData);
   };
 
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
@@ -1212,88 +1276,137 @@ const BranchModal: React.FC<BranchModalProps> = ({
               key={day.dayOfWeek}
               className={`relative group p-5 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 hover:shadow-md ${
                 day.isWorkingDay
-                  ? 'bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-green-200 dark:border-green-700'
+                  ? day.isOpen24Hours
+                    ? 'bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700'
+                    : 'bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-green-200 dark:border-green-700'
                   : 'bg-gray-50 dark:bg-gray-800/50'
               }`}
             >
               <div className="flex flex-col space-y-4">
-                {/* Header Row: Day Name and Toggle */}
+                {/* Header Row: Day Name, 24 Hours Toggle, and Working Day Toggle */}
                 <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className="min-w-[100px]">
                     <span className={`text-base font-medium text-gray-900 dark:text-gray-100 ${isRTL ? 'text-right' : 'text-left'}`}>
                       {dayNamesDisplay[index]}
                     </span>
                   </div>
-                  
-                  <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                    <Toggle
-                      checked={day.isWorkingDay}
-                      onChange={(checked) => handleWorkingHourChange(index, 'isWorkingDay', checked)}
-                    />
-                    <span className={`text-sm font-medium transition-colors hidden xs:block ${
-                      day.isWorkingDay 
-                        ? 'text-green-700 dark:text-green-400' 
-                        : 'text-gray-500 dark:text-gray-400'
-                    }`}>
-                      {day.isWorkingDay ? t('branchModal.workingHours.open') : t('branchModal.workingHours.closed')}
+
+                  <div className={`flex items-center space-x-4 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                    {/* 24 Hours Toggle - Only show when working day is enabled */}
+                    {day.isWorkingDay && (
+                      <div className={`flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                        <Toggle
+                          checked={day.isOpen24Hours}
+                          onChange={(checked) => handleWorkingHourChange(index, 'isOpen24Hours', checked)}
+                        />
+                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                          {t('branchModal.workingHours.open24Hours') || '24H'}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Working Day Toggle */}
+                    <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                      <Toggle
+                        checked={day.isWorkingDay}
+                        onChange={(checked) => handleWorkingHourChange(index, 'isWorkingDay', checked)}
+                      />
+                      <span className={`text-sm font-medium transition-colors hidden xs:block ${
+                        day.isWorkingDay
+                          ? 'text-green-700 dark:text-green-400'
+                          : 'text-gray-500 dark:text-gray-400'
+                      }`}>
+                        {day.isWorkingDay ? t('branchModal.workingHours.open') : t('branchModal.workingHours.closed')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 24 Hours Message */}
+                {day.isWorkingDay && day.isOpen24Hours && (
+                  <div className="text-center py-2">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
+                      <Clock className="w-4 h-4 mr-2" />
+                      {t('branchModal.workingHours.open24HoursMessage') || 'Open 24 hours'}
                     </span>
                   </div>
-                </div>
+                )}
 
-                {/* Time Inputs Row - Responsive Grid/Flex */}
-                <div className={`
-                  mt-2 
-                  grid grid-cols-2 gap-4 
-                  sm:flex sm:items-center sm:justify-center sm:gap-3 
-                  transition-opacity 
-                  ${!day.isWorkingDay ? 'opacity-40 pointer-events-none' : ''} 
-                  ${isRTL ? 'sm:flex-row-reverse' : ''}
-                `}>
-                  
-                  {/* Open Time Group */}
-                  <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
-                    <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
-                      {t('branchModal.workingHours.openTime')}
-                    </label>
-                    <input
-                      title='time'
-                      type="time"
-                      value={formatTimeForInput(day.openTime)}
-                      onChange={(e) => handleWorkingHourChange(index, 'openTime', e.target.value)}
-                      disabled={!day.isWorkingDay}
-                      className={`w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                        !day.isWorkingDay ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : 'hover:border-primary-300'
-                      } ${isRTL ? 'text-right' : 'text-left'}`}
-                      dir="ltr"
-                    />
+                {/* Time Slots - Show when working day is enabled and not 24 hours */}
+                {day.isWorkingDay && !day.isOpen24Hours && (
+                  <div className="space-y-3">
+                    {day.timeSlots?.map((slot, slotIndex) => (
+                      <div
+                        key={slotIndex}
+                        className={`
+                          grid grid-cols-2 gap-4
+                          sm:flex sm:items-center sm:justify-center sm:gap-3
+                          ${isRTL ? 'sm:flex-row-reverse' : ''}
+                        `}
+                      >
+                        {/* Open Time Group */}
+                        <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                          <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
+                            {t('branchModal.workingHours.openTime')}
+                          </label>
+                          <input
+                            title='time'
+                            type="time"
+                            value={formatTimeForInput(slot.openTime)}
+                            onChange={(e) => handleTimeSlotChange(index, slotIndex, 'openTime', e.target.value)}
+                            className={`w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                            dir="ltr"
+                          />
+                        </div>
+
+                        {/* Separator */}
+                        <div className="hidden sm:flex items-center justify-center">
+                          <div className="w-4 h-px bg-gray-300 dark:bg-gray-600"></div>
+                        </div>
+
+                        {/* Close Time Group */}
+                        <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                          <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
+                            {t('branchModal.workingHours.closeTime')}
+                          </label>
+                          <input
+                            title='time'
+                            type="time"
+                            value={formatTimeForInput(slot.closeTime)}
+                            onChange={(e) => handleTimeSlotChange(index, slotIndex, 'closeTime', e.target.value)}
+                            className={`w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                            dir="ltr"
+                          />
+                        </div>
+
+                        {/* Remove Slot Button - Show only if more than 1 slot */}
+                        {(day.timeSlots?.length || 0) > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTimeSlot(index, slotIndex)}
+                            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            title={t('common.remove') || 'Remove'}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* Add Time Slot Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleAddTimeSlot(index)}
+                      className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 flex items-center gap-1 font-medium"
+                    >
+                      <Plus className="w-4 h-4" />
+                      {t('branchModal.workingHours.addTimeSlot') || 'Add Time Slot'}
+                    </button>
                   </div>
-                  
-                  {/* Separator - Hidden on Mobile, Visible on Desktop */}
-                  <div className="hidden sm:flex items-center justify-center">
-                    <div className="w-4 h-px bg-gray-300 dark:bg-gray-600"></div>
-                  </div>
-                  
-                  {/* Close Time Group */}
-                  <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
-                    <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
-                      {t('branchModal.workingHours.closeTime')}
-                    </label>
-                    <input
-                      title='time'
-                      type="time"
-                      value={formatTimeForInput(day.closeTime)}
-                      onChange={(e) => handleWorkingHourChange(index, 'closeTime', e.target.value)}
-                      disabled={!day.isWorkingDay}
-                      className={`w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                        !day.isWorkingDay ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : 'hover:border-primary-300'
-                      } ${isRTL ? 'text-right' : 'text-left'}`}
-                      dir="ltr"
-                    />
-                  </div>
-                </div>
+                )}
               </div>
 
-              {day.isWorkingDay && (
+              {day.isWorkingDay && !day.isOpen24Hours && (
                 <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-700/50">
                   <p className="text-xs text-green-600 dark:text-green-400">
                     {t('branchModal.workingHours.canOrder')}

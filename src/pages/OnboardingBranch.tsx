@@ -117,13 +117,13 @@ const OnboardingBranch: React.FC = () => {
       openHours: ''
     },
     createBranchWorkingHourCoreDto: [
-      { dayOfWeek: 1, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
-      { dayOfWeek: 2, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
-      { dayOfWeek: 3, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
-      { dayOfWeek: 4, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
-      { dayOfWeek: 5, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
-      { dayOfWeek: 6, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
-      { dayOfWeek: 0, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: false }
+      { dayOfWeek: 1, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] },
+      { dayOfWeek: 2, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] },
+      { dayOfWeek: 3, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] },
+      { dayOfWeek: 4, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] },
+      { dayOfWeek: 5, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] },
+      { dayOfWeek: 6, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] },
+      { dayOfWeek: 0, isWorkingDay: false, isOpen24Hours: false, timeSlots: [] }
     ]
   });
 
@@ -391,21 +391,68 @@ const OnboardingBranch: React.FC = () => {
     }
   };
 
-  const handleWorkingHourChange = (dayIndex: number, field: keyof CreateBranchWorkingHourCoreDto, value: any): void => {
+  const handleWorkingHourChange = (dayIndex: number, field: string, value: any, slotIndex: number = 0): void => {
     setFormData(prev => ({
       ...prev,
       createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto?.map((day, index) => {
         if (index === dayIndex) {
           if (field === 'openTime' || field === 'closeTime') {
-            return { 
-              ...day, 
-              [field]: formatTimeForApi(value)
-            };
+            const updatedSlots = [...(day.timeSlots || [])];
+            if (updatedSlots[slotIndex]) {
+              updatedSlots[slotIndex] = {
+                ...updatedSlots[slotIndex],
+                [field]: formatTimeForApi(value)
+              };
+            }
+            return { ...day, timeSlots: updatedSlots };
           }
           if (field === 'isWorkingDay') {
+            // When enabling working day, ensure there's at least one time slot if not 24 hours
+            if (value && !day.isOpen24Hours && (!day.timeSlots || day.timeSlots.length === 0)) {
+              return { ...day, isWorkingDay: value, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] };
+            }
+            // When disabling working day, clear time slots (backend doesn't accept time slots for non-working days)
+            if (!value) {
+              return { ...day, isWorkingDay: value, timeSlots: [], isOpen24Hours: false };
+            }
             return { ...day, isWorkingDay: value };
           }
+          if (field === 'isOpen24Hours') {
+            // When enabling 24 hours, clear time slots (backend doesn't accept time slots for 24-hour days)
+            // When disabling 24 hours, add a default time slot
+            if (value) {
+              return { ...day, isOpen24Hours: value, timeSlots: [] };
+            } else {
+              return { ...day, isOpen24Hours: value, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] };
+            }
+          }
           return { ...day, [field]: value };
+        }
+        return day;
+      }) || []
+    }));
+  };
+
+  const addTimeSlot = (dayIndex: number): void => {
+    setFormData(prev => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto?.map((day, index) => {
+        if (index === dayIndex) {
+          const newSlots = [...(day.timeSlots || []), { openTime: "08:00:00", closeTime: "22:00:00" }];
+          return { ...day, timeSlots: newSlots };
+        }
+        return day;
+      }) || []
+    }));
+  };
+
+  const removeTimeSlot = (dayIndex: number, slotIndex: number): void => {
+    setFormData(prev => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto?.map((day, index) => {
+        if (index === dayIndex && day.timeSlots && day.timeSlots.length > 1) {
+          const newSlots = day.timeSlots.filter((_, i) => i !== slotIndex);
+          return { ...day, timeSlots: newSlots };
         }
         return day;
       }) || []
@@ -495,28 +542,41 @@ const OnboardingBranch: React.FC = () => {
           newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.minOneDay');
         } else {
           for (const day of workingDays) {
-            if (!day.openTime || !day.closeTime) {
-              newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.allTimesRequired');
+            // Each working day must have either isOpen24Hours or at least one valid time slot
+            if (!day.isOpen24Hours && (!day.timeSlots || day.timeSlots.length === 0)) {
+              newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.slotOrOpen24Required') || 'Each working day must have at least one time slot or be set to 24 hours';
               break;
             }
-            
-            if (!isValidTimeRange(day.openTime, day.closeTime)) {
-              const openTimeFormatted = formatTimeForInput(day.openTime);
-              const closeTimeFormatted = formatTimeForInput(day.closeTime);
-              
-              if (day.closeTime <= day.openTime) {
-                newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.invalidRange', {
-                  openTime: openTimeFormatted,
-                  closeTime: closeTimeFormatted
-                });
-              } else {
-                newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.openBeforeClose', {
-                  openTime: openTimeFormatted,
-                  closeTime: closeTimeFormatted
-                });
+
+            // Skip time validation for 24 hours days
+            if (day.isOpen24Hours) continue;
+
+            // Validate each time slot
+            for (const slot of day.timeSlots) {
+              if (!slot.openTime || !slot.closeTime) {
+                newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.allTimesRequired');
+                break;
               }
-              break;
+
+              if (!isValidTimeRange(slot.openTime, slot.closeTime)) {
+                const openTimeFormatted = formatTimeForInput(slot.openTime);
+                const closeTimeFormatted = formatTimeForInput(slot.closeTime);
+
+                if (slot.closeTime <= slot.openTime) {
+                  newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.invalidRange', {
+                    openTime: openTimeFormatted,
+                    closeTime: closeTimeFormatted
+                  });
+                } else {
+                  newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.openBeforeClose', {
+                    openTime: openTimeFormatted,
+                    closeTime: closeTimeFormatted
+                  });
+                }
+                break;
+              }
             }
+            if (newErrors.workingHours) break;
           }
         }
         break;
@@ -557,7 +617,7 @@ const OnboardingBranch: React.FC = () => {
     }
 
     const allWorkingHours = formData.createBranchWorkingHourCoreDto || [];
-    
+
     const workingDays = allWorkingHours.filter(day => day.isWorkingDay);
     if (workingDays.length === 0) {
       setApiError(t('onboardingBranch.form.step3.workingHours.error.minOneDay'));
@@ -565,9 +625,20 @@ const OnboardingBranch: React.FC = () => {
     }
 
     for (const day of workingDays) {
-      if (!day.openTime || !day.closeTime) {
-        setApiError(t('onboardingBranch.form.step3.workingHours.error.allTimesRequired'));
+      // Each working day must have either isOpen24Hours or at least one valid time slot
+      if (!day.isOpen24Hours && (!day.timeSlots || day.timeSlots.length === 0)) {
+        setApiError(t('onboardingBranch.form.step3.workingHours.error.slotOrOpen24Required') || 'Each working day must have at least one time slot or be set to 24 hours');
         return;
+      }
+
+      // Skip time validation for 24 hours days
+      if (day.isOpen24Hours) continue;
+
+      for (const slot of day.timeSlots) {
+        if (!slot.openTime || !slot.closeTime) {
+          setApiError(t('onboardingBranch.form.step3.workingHours.error.allTimesRequired'));
+          return;
+        }
       }
     }
 
@@ -641,7 +712,8 @@ const OnboardingBranch: React.FC = () => {
       } else {
         setApiError(t('onboardingBranch.messages.api.branchIdMissing'));
       }
-    } catch (error) {
+    } catch (error : any)  {
+      setErrors(error.message);
       if (import.meta.env.DEV) {
         console.error('Branch creation error:', error);
       }
@@ -664,7 +736,7 @@ const OnboardingBranch: React.FC = () => {
       } else if (apiErr.status === 0) {
         setApiError(t('onboardingBranch.messages.api.connectionError'));
       } else if (apiErr.status === 500) {
-        setApiError(t('onboardingBranch.messages.api.serverError'));
+        setApiError(error.message);
       } else {
         setApiError(apiErr.message || t('onboardingBranch.messages.api.genericCreateError'));
       }
@@ -1447,7 +1519,7 @@ const OnboardingBranch: React.FC = () => {
               type="tel"
               autoComplete="tel-national"
               maxLength={15}
-              value={formData.createContactDto.phone}
+              value={formData.createContactDto.phone || ''}
               onChange={handleContactNationalPhoneChange}
               className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
                 errors['createContactDto.phone']
@@ -1688,68 +1760,111 @@ const OnboardingBranch: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Time Inputs Row - Responsive Grid/Flex */}
-                <div className={`
-                  mt-2 
-                  grid grid-cols-2 gap-4 
-                  sm:flex sm:items-center sm:justify-center sm:gap-3 
-                  transition-opacity 
-                  ${!day.isWorkingDay ? 'opacity-40 pointer-events-none' : ''} 
-                  ${isRTL ? 'sm:flex-row-reverse' : ''}
-                `}>
-                  
-                  {/* Open Time Group */}
-                  <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
-                    <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
-                      {t('onboardingBranch.form.step3.workingHours.openLabel')}
-                    </label>
-                    <input
-                      title='time'
-                      type="time"
-                      value={formatTimeForInput(day.openTime)}
-                      onChange={(e) => handleWorkingHourChange(index, 'openTime', e.target.value)}
-                      disabled={!day.isWorkingDay}
-                      className={`w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                        !day.isWorkingDay ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : 'hover:border-primary-300'
-                      } ${isRTL ? 'text-right' : 'text-left'}`}
-                      dir="ltr"
+                {/* 24 Hours Toggle */}
+                {day.isWorkingDay && (
+                  <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                    <Toggle
+                      checked={day.isOpen24Hours}
+                      onChange={(checked) => handleWorkingHourChange(index, 'isOpen24Hours', checked)}
                     />
+                    <span className={`text-sm font-medium text-gray-600 dark:text-gray-400`}>
+                      {t('onboardingBranch.form.step3.workingHours.open24Hours') || '24 Hours'}
+                    </span>
                   </div>
-                  
-                  {/* Separator - Hidden on Mobile, Visible on Desktop */}
-                  <div className="hidden sm:flex items-center justify-center">
-                    <div className="w-4 h-px bg-gray-300 dark:bg-gray-600"></div>
+                )}
+
+                {/* Time Slots */}
+                {day.isWorkingDay && !day.isOpen24Hours && (
+                  <div className="space-y-3">
+                    {day.timeSlots?.map((slot, slotIndex) => (
+                      <div
+                        key={slotIndex}
+                        className={`
+                          grid grid-cols-2 gap-4
+                          sm:flex sm:items-center sm:justify-center sm:gap-3
+                          transition-opacity
+                          ${isRTL ? 'sm:flex-row-reverse' : ''}
+                        `}
+                      >
+                        {/* Open Time Group */}
+                        <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                          <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
+                            {t('onboardingBranch.form.step3.workingHours.openLabel')}
+                          </label>
+                          <input
+                            title='time'
+                            type="time"
+                            value={formatTimeForInput(slot.openTime)}
+                            onChange={(e) => handleWorkingHourChange(index, 'openTime', e.target.value, slotIndex)}
+                            className={`w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                            dir="ltr"
+                          />
+                        </div>
+
+                        {/* Separator - Hidden on Mobile, Visible on Desktop */}
+                        <div className="hidden sm:flex items-center justify-center">
+                          <div className="w-4 h-px bg-gray-300 dark:bg-gray-600"></div>
+                        </div>
+
+                        {/* Close Time Group */}
+                        <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                          <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
+                            {t('onboardingBranch.form.step3.workingHours.closeLabel')}
+                          </label>
+                          <input
+                            title='time'
+                            type="time"
+                            value={formatTimeForInput(slot.closeTime)}
+                            onChange={(e) => handleWorkingHourChange(index, 'closeTime', e.target.value, slotIndex)}
+                            className={`w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                            dir="ltr"
+                          />
+                        </div>
+
+                        {/* Remove Slot Button */}
+                        {day.timeSlots && day.timeSlots.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeTimeSlot(index, slotIndex)}
+                            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            title={t('onboardingBranch.form.step3.workingHours.removeSlot') || 'Remove time slot'}
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* Add Time Slot Button */}
+                    <button
+                      type="button"
+                      onClick={() => addTimeSlot(index)}
+                      className={`flex items-center space-x-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+                    >
+                      <span className="text-lg">+</span>
+                      <span>{t('onboardingBranch.form.step3.workingHours.addSlot') || 'Add time slot'}</span>
+                    </button>
                   </div>
-                  
-                  {/* Close Time Group */}
-                  <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
-                    <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
-                      {t('onboardingBranch.form.step3.workingHours.closeLabel')}
-                    </label>
-                    <input
-                      title='time'
-                      type="time"
-                      value={formatTimeForInput(day.closeTime)}
-                      onChange={(e) => handleWorkingHourChange(index, 'closeTime', e.target.value)}
-                      disabled={!day.isWorkingDay}
-                      className={`w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                        !day.isWorkingDay ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : 'hover:border-primary-300'
-                      } ${isRTL ? 'text-right' : 'text-left'}`}
-                      dir="ltr"
-                    />
-                  </div>
-                </div>
+                )}
               </div>
-              
-              {day.isWorkingDay && (
+
+              {day.isWorkingDay && !day.isOpen24Hours && day.timeSlots && day.timeSlots.length > 0 && (
                 <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-700/50">
                   <p className={`text-xs text-green-600 dark:text-green-400 ${isRTL ? 'text-right' : 'text-left'}`}>
                     {t('onboardingBranch.form.step3.workingHours.workingDayNote')}
-                    {formatTimeForInput(day.closeTime) <= formatTimeForInput(day.openTime) && (
+                    {formatTimeForInput(day.timeSlots[0].closeTime) <= formatTimeForInput(day.timeSlots[0].openTime) && (
                       <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-blue-600 dark:text-blue-400 font-semibold`}>
                         {t('onboardingBranch.form.step3.workingHours.overnightNote')}
                       </span>
                     )}
+                  </p>
+                </div>
+              )}
+
+              {day.isWorkingDay && day.isOpen24Hours && (
+                <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-700/50">
+                  <p className={`text-xs text-green-600 dark:text-green-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.workingHours.open24HoursNote') || 'This branch is open 24 hours on this day'}
                   </p>
                 </div>
               )}

@@ -226,13 +226,13 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
   const [openHoursTranslations, setOpenHoursTranslations] = useState<TranslatableFieldValue>({});
 
   const defaultWorkingHours: CreateBranchWorkingHourCoreDto[] = [
-    { dayOfWeek: 1, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
-    { dayOfWeek: 2, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
-    { dayOfWeek: 3, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
-    { dayOfWeek: 4, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
-    { dayOfWeek: 5, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
-    { dayOfWeek: 6, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
-    { dayOfWeek: 0, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }
+    { dayOfWeek: 1, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+    { dayOfWeek: 2, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+    { dayOfWeek: 3, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+    { dayOfWeek: 4, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+    { dayOfWeek: 5, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+    { dayOfWeek: 6, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+    { dayOfWeek: 0, isWorkingDay: false, isOpen24Hours: false, timeSlots: [] }
   ];
 
   const getDayName = (dayOfWeek: number): string => {
@@ -321,12 +321,24 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
           openHours: branchDetail.contact?.openHours || null,
         },
         createBranchWorkingHourCoreDto: branchDetail.workingHours?.length
-          ? branchDetail.workingHours.map(wh => ({
-              dayOfWeek: wh.dayOfWeek,
-              openTime: wh.openTime || '08:00:00',
-              closeTime: wh.closeTime || '22:00:00',
-              isWorkingDay: wh.isWorkingDay ?? true,
-            }))
+          ? branchDetail.workingHours.map(wh => {
+              // Handle backward compatibility with old API format that had openTime/closeTime at root level
+              const legacyWh = wh as any;
+              return {
+                dayOfWeek: wh.dayOfWeek,
+                isWorkingDay: wh.isWorkingDay ?? true,
+                isOpen24Hours: wh.isOpen24Hours ?? false,
+                timeSlots: wh.timeSlots && wh.timeSlots.length > 0
+                  ? wh.timeSlots.map(slot => ({
+                      id: slot.id,
+                      openTime: slot.openTime || '08:00:00',
+                      closeTime: slot.closeTime || '22:00:00',
+                    }))
+                  : wh.isWorkingDay && !wh.isOpen24Hours
+                    ? [{ openTime: legacyWh.openTime || '08:00:00', closeTime: legacyWh.closeTime || '22:00:00' }]
+                    : [],
+              };
+            })
           : defaultWorkingHours,
       };
 
@@ -476,6 +488,19 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
       errors.workingHours = t('branchManagement.form.workingHoursRequired');
     }
 
+    // Validate that each working day has either isOpen24Hours or at least one valid time slot
+    const workingDaysWithoutHours = formData.createBranchWorkingHourCoreDto?.filter(day => {
+      if (!day.isWorkingDay) return false;
+      if (day.isOpen24Hours) return false;
+      // Check if there's at least one valid time slot
+      const hasValidSlot = day.timeSlots?.some(slot => slot.openTime && slot.closeTime);
+      return !hasValidSlot;
+    });
+
+    if (workingDaysWithoutHours && workingDaysWithoutHours.length > 0) {
+      errors.workingHours = t('branchManagement.form.workingHoursSlotRequired') || 'Each working day must have either 24 hours or at least one time slot';
+    }
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -566,12 +591,39 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
   const handleWorkingHourChange = (dayIndex: number, field: keyof CreateBranchWorkingHourCoreDto, value: any) => {
     setFormData(prev => ({
       ...prev,
-      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hours, idx) =>
-        idx === dayIndex ? { ...hours, [field]: value } : hours
-      )
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hours, idx) => {
+        if (idx !== dayIndex) return hours;
+
+        // Handle special cases for backend validation rules
+        if (field === 'isWorkingDay') {
+          if (!value) {
+            // Non-working days cannot have time slots
+            return { ...hours, isWorkingDay: value, timeSlots: [], isOpen24Hours: false };
+          } else {
+            // When enabling working day, add default time slot if none exists
+            return {
+              ...hours,
+              isWorkingDay: value,
+              timeSlots: hours.timeSlots?.length ? hours.timeSlots : [{ openTime: '08:00:00', closeTime: '22:00:00' }]
+            };
+          }
+        }
+
+        if (field === 'isOpen24Hours') {
+          if (value) {
+            // 24-hour open days cannot have time slots
+            return { ...hours, isOpen24Hours: value, timeSlots: [] };
+          } else {
+            // When disabling 24 hours, add default time slot
+            return { ...hours, isOpen24Hours: value, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] };
+          }
+        }
+
+        return { ...hours, [field]: value };
+      })
     }));
     setHasChanges(true);
-    
+
     if (validationErrors.workingHours) {
       setValidationErrors(prev => {
         const newErrors = { ...prev };
@@ -579,6 +631,45 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
         return newErrors;
       });
     }
+  };
+
+  const handleTimeSlotChange = (dayIndex: number, slotIndex: number, field: 'openTime' | 'closeTime', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hours, idx) => {
+        if (idx !== dayIndex) return hours;
+        const newTimeSlots = [...(hours.timeSlots || [])];
+        if (newTimeSlots[slotIndex]) {
+          newTimeSlots[slotIndex] = { ...newTimeSlots[slotIndex], [field]: value };
+        }
+        return { ...hours, timeSlots: newTimeSlots };
+      })
+    }));
+    setHasChanges(true);
+  };
+
+  const handleAddTimeSlot = (dayIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hours, idx) => {
+        if (idx !== dayIndex) return hours;
+        const newTimeSlots = [...(hours.timeSlots || []), { openTime: '08:00:00', closeTime: '22:00:00' }];
+        return { ...hours, timeSlots: newTimeSlots };
+      })
+    }));
+    setHasChanges(true);
+  };
+
+  const handleRemoveTimeSlot = (dayIndex: number, slotIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hours, idx) => {
+        if (idx !== dayIndex) return hours;
+        const newTimeSlots = (hours.timeSlots || []).filter((_, i) => i !== slotIndex);
+        return { ...hours, timeSlots: newTimeSlots };
+      })
+    }));
+    setHasChanges(true);
   };
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -682,9 +773,13 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
         },
         createBranchWorkingHourCoreDto: formData.createBranchWorkingHourCoreDto?.map(hour => ({
           dayOfWeek: hour.dayOfWeek,
-          openTime: hour.openTime,
-          closeTime: hour.closeTime,
-          isWorkingDay: hour.isWorkingDay
+          isWorkingDay: hour.isWorkingDay,
+          isOpen24Hours: hour.isOpen24Hours,
+          timeSlots: hour.timeSlots?.map(slot => ({
+            id: slot.id,
+            openTime: slot.openTime,
+            closeTime: slot.closeTime,
+          })) || []
         })) || []
       };
 
@@ -1553,7 +1648,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                       {t('branchManagement.form.workingHours')}
                     </h4>
                   </div>
-                  
+
                   {validationErrors.workingHours && (
                     <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-4">
                       <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
@@ -1562,50 +1657,100 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                       </p>
                     </div>
                   )}
-                  
-                  {formData.createBranchWorkingHourCoreDto.map((hours, index) => (
-                    <div key={index} className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'} p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/50`}>
-                      <div className="w-24 flex-shrink-0">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {getDayName(hours.dayOfWeek)}
-                        </span>
-                      </div>
-                      
-                      <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
-                        <input
-                          title="isWorkingDay"
-                          type="checkbox"
-                          checked={hours.isWorkingDay}
-                          onChange={(e) => handleWorkingHourChange(index, 'isWorkingDay', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400"
-                        />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          {t('branchManagement.form.isOpen')}
-                        </span>
+
+                  {formData.createBranchWorkingHourCoreDto.map((hours, dayIndex) => (
+                    <div key={dayIndex} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                      <div className={`flex items-center justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className="flex items-center gap-4">
+                          <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 w-24">
+                            {getDayName(hours.dayOfWeek)}
+                          </span>
+
+                          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+                            <input
+                              title="isWorkingDay"
+                              type="checkbox"
+                              checked={hours.isWorkingDay}
+                              onChange={(e) => handleWorkingHourChange(dayIndex, 'isWorkingDay', e.target.checked)}
+                              className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400"
+                            />
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              {t('branchManagement.form.isOpen')}
+                            </span>
+                          </div>
+                        </div>
+
+                        {hours.isWorkingDay && (
+                          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+                            <input
+                              title="isOpen24Hours"
+                              type="checkbox"
+                              checked={hours.isOpen24Hours}
+                              onChange={(e) => handleWorkingHourChange(dayIndex, 'isOpen24Hours', e.target.checked)}
+                              className="h-4 w-4 text-green-600 border-gray-300 dark:border-gray-600 rounded focus:ring-green-500 dark:focus:ring-green-400"
+                            />
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              {t('branchManagement.form.open24Hours') || '24 Hours'}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
-                      {hours.isWorkingDay && (
-                        <>
-                          <div>
-                            <input
-                              title="time"
-                              type="time"
-                              value={hours.openTime}
-                              onChange={(e) => handleWorkingHourChange(index, 'openTime', e.target.value)}
-                              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
-                            />
-                          </div>
-                          <span className="text-gray-500 dark:text-gray-400">-</span>
-                          <div>
-                            <input
-                              title="time"
-                              type="time"
-                              value={hours.closeTime}
-                              onChange={(e) => handleWorkingHourChange(index, 'closeTime', e.target.value)}
-                              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
-                            />
-                          </div>
-                        </>
+                      {hours.isWorkingDay && !hours.isOpen24Hours && (
+                        <div className="space-y-3">
+                          {hours.timeSlots?.map((slot, slotIndex) => (
+                            <div key={slotIndex} className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                              <div className="flex items-center gap-2">
+                                <input
+                                  title="openTime"
+                                  type="time"
+                                  value={slot.openTime?.substring(0, 5) || '08:00'}
+                                  onChange={(e) => handleTimeSlotChange(dayIndex, slotIndex, 'openTime', e.target.value + ':00')}
+                                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
+                                />
+                                <span className="text-gray-500 dark:text-gray-400">-</span>
+                                <input
+                                  title="closeTime"
+                                  type="time"
+                                  value={slot.closeTime?.substring(0, 5) || '22:00'}
+                                  onChange={(e) => handleTimeSlotChange(dayIndex, slotIndex, 'closeTime', e.target.value + ':00')}
+                                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
+                                />
+                              </div>
+
+                              {(hours.timeSlots?.length || 0) > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveTimeSlot(dayIndex, slotIndex)}
+                                  className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                  title={t('common.remove') || 'Remove'}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+
+                          <button
+                            type="button"
+                            onClick={() => handleAddTimeSlot(dayIndex)}
+                            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
+                          >
+                            + {t('branchManagement.form.addTimeSlot') || 'Add Time Slot'}
+                          </button>
+                        </div>
+                      )}
+
+                      {hours.isWorkingDay && hours.isOpen24Hours && (
+                        <div className="text-sm text-green-600 dark:text-green-400 font-medium">
+                          {t('branchManagement.form.open24HoursMessage') || 'Open 24 hours'}
+                        </div>
+                      )}
+
+                      {!hours.isWorkingDay && (
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {t('branchManagement.form.closed') || 'Closed'}
+                        </div>
                       )}
                     </div>
                   ))}

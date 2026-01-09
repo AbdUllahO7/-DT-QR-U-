@@ -1362,6 +1362,10 @@ branchManagement: {
     form: {
         branchName: 'Ime Filijale',
             branchNamePlaceholder: 'Unesite ime filijale',
+            open24Hours: '24 sata otvoreno',
+            open24HoursMessage: 'Ova filijala je otvorena 24 sata.',
+            addTimeSlot: 'Dodaj vremenski interval',
+            closed: 'Zatvoreno',
                 branchNameRequired: 'Ime filijale je obavezno',
                     whatsappNumber: 'WhatsApp Broj za Narudžbe ',
                         whatsappPlaceholder: 'Unesite WhatsApp broj',
@@ -3286,6 +3290,11 @@ branchManagementBranch: {
         title: 'Radno Vrijeme',
             workingDay: 'Radni dan',
                 openTime: 'Vrijeme Otvaranja',
+
+         open24Hours: 'Otvoreno 24 Sata',
+      open24HoursMessage: 'Ova filijala je otvorena 24 sata.',
+      addTimeSlot: 'Dodaj Vremenski Interval',
+
                     closeTime: 'Vrijeme Zatvaranja',
                         noWorkingHours: 'Radno vrijeme nije navedeno',
                             days: {
@@ -5176,6 +5185,9 @@ user: {
                 "title": "Radno Vrijeme",
                     "description": "Postavite svoje radno vrijeme. Možete ostati otvoreni preko noći (npr., 23:00 - 02:00).",
                         "openLabel": "Vrijeme Otvaranja",
+                        "open24Hours": "Otvoreno 24 Sata",
+                        "open24HoursNote": "Ovaj restoran je otvoren 24 sata.",
+                        "addSlot": "Dodaj Vremenski Slot",
                             "closeLabel": "Vrijeme Zatvaranja",
                                 "dayNames": [
                                     "Ponedjeljak",

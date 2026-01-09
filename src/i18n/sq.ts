@@ -1357,11 +1357,15 @@ branchManagement: {
     form: {
         branchName: 'Emri i Degës',
             branchNamePlaceholder: 'Futni emrin e degës',
-                branchNameRequired: 'Emri i degës është i detyrueshëm',
-                    whatsappNumber: 'Numri i Porosive WhatsApp ',
-                        whatsappPlaceholder: 'Futni numrin WhatsApp',
-                            branchLogo: 'Logo e Degës',
-                                logoUpload: 'Ngarko Logo',
+            closed: 'E mbyllur',
+            open24HoursMessage: 'Kjo degë është e hapur 24 orë.',
+            open24Hours: '24 orë hapur',
+            addTimeSlot: 'Shto Intervalin e Kohës',
+            branchNameRequired: 'Emri i degës është i detyrueshëm',
+                whatsappNumber: 'Numri i Porosive WhatsApp ',
+                    whatsappPlaceholder: 'Futni numrin WhatsApp',
+                        branchLogo: 'Logo e Degës',
+                            logoUpload: 'Ngarko Logo',
                                     logoChange: 'Ndrysho Logo',
                                         logoRemove: 'Hiq Logo',
                                             logoNotSelected: 'Asnjë logo e zgjedhur',
@@ -3233,6 +3237,12 @@ BranchTableManagement: {
 
 branchManagementBranch: {
     title: 'Menaxhimi i Degëve',
+         open24Hours: 'Degë e Hapur 24 Orë',
+      open24HoursMessage: 'Kjo degë është e hapur 24 orë.',
+      openTime: 'Koha e Hapjes',
+      addTimeSlot: 'Shto Intervalin e Kohës',
+
+
         description: 'Menaxhoni informacionin dhe cilësimet e degës suaj.',
             loading: 'Duke ngarkuar informacionin e degës...',
                 noBranchFound: 'Dega nuk u gjet',
@@ -5171,7 +5181,10 @@ user: {
                 "title": "Orari i Punës",
                     "description": "Caktoni orarin tuaj të punës. Mund të qëndroni hapur gjatë natës (p.sh., 23:00 - 02:00).",
                         "openLabel": "Koha e Hapjes",
-                            "closeLabel": "Koha e Mbylljes",
+                        "open24Hours": "24 Orë e Hapur",
+                        "open24HoursNote": "Ky restorant është i hapur 24 orë.",
+                        "addSlot": "Shto Një Slot",
+                        "closeLabel": "Koha e Mbylljes",
                                 "dayNames": [
                                     "E Hënë",
                                     "E Martë",

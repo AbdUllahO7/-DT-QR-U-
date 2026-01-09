@@ -1367,6 +1367,10 @@ hero: {
       branchName: 'Şube Adı',
       branchNamePlaceholder: 'Şube adını girin',
       branchNameRequired: 'Şube adı gereklidir',
+      addTimeSlot: 'Zaman Dilimi Ekle',
+      open24Hours: '24 Saat Açık',
+      open24HoursMessage: 'Bu şube 24 saat açıktır.',
+      closed: 'Kapalı',
       whatsappNumber: 'WhatsApp Sipariş Numarası',
       whatsappPlaceholder: 'WhatsApp numarasını girin',
       branchLogo: 'Şube Logosu',
@@ -3287,7 +3291,12 @@ BranchTableManagement: {
     workingHours: {
       title: 'Çalışma Saatleri',
       workingDay: 'Çalışma günü',
+      
+      open24Hours: '24 Saat Açık',
+      open24HoursMessage: 'Bu şube 24 saat açıktır.',
       openTime: 'Açılış Saati',
+      addTimeSlot: 'Zaman Dilimi Ekle',
+
       closeTime: 'Kapanış Saati',
       noWorkingHours: 'Çalışma saatleri belirtilmemiş',
       days: {
@@ -5194,7 +5203,10 @@ recommended: "Önerilen",
         "title": "Çalışma Saatleri",
         "description": "İşletmenizin çalışma saatlerini belirleyin. Gece boyunca açık kalabilirsiniz (örn: 23:00 - 02:00).",
         "openLabel": "Açılış Saati",
+        "addSlot": "Yeni Zaman Dilimi Ekle",
+        "open24Hours": "24 Saat Açık",
         "closeLabel": "Kapanış Saati",
+        "open24HoursNote": "Bu restoran 24 saat açıktır.",
         "dayNames": [
           "Pazartesi",
           "Salı",

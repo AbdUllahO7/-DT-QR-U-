@@ -115,20 +115,32 @@ const BranchManagementBranch: React.FC<BranchManagementBranchProps> = ({ branchI
         openHours: branch?.createContactDto?.openHours || '',
       },
       createBranchWorkingHourCoreDto: branch.workingHours
-        ? branch.workingHours.map((hour) => ({
-            dayOfWeek: hour.dayOfWeek,
-            openTime: hour.openTime,
-            closeTime: hour.closeTime,
-            isWorkingDay: hour.isWorkingDay,
-          }))
+        ? branch.workingHours.map((hour) => {
+            // Handle backward compatibility with old API format
+            const legacyHour = hour as any;
+            return {
+              dayOfWeek: hour.dayOfWeek,
+              isWorkingDay: hour.isWorkingDay,
+              isOpen24Hours: hour.isOpen24Hours ?? false,
+              timeSlots: hour.timeSlots && hour.timeSlots.length > 0
+                ? hour.timeSlots.map(slot => ({
+                    id: slot.id,
+                    openTime: slot.openTime || '08:00:00',
+                    closeTime: slot.closeTime || '22:00:00',
+                  }))
+                : hour.isWorkingDay && !hour.isOpen24Hours
+                  ? [{ openTime: legacyHour.openTime || '08:00:00', closeTime: legacyHour.closeTime || '22:00:00' }]
+                  : [],
+            };
+          })
         : [
-            { dayOfWeek: 1, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },
-            { dayOfWeek: 2, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },
-            { dayOfWeek: 3, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },
-            { dayOfWeek: 4, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },
-            { dayOfWeek: 5, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },
-            { dayOfWeek: 6, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },
-            { dayOfWeek: 0, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },
+            { dayOfWeek: 1, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+            { dayOfWeek: 2, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+            { dayOfWeek: 3, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+            { dayOfWeek: 4, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+            { dayOfWeek: 5, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+            { dayOfWeek: 6, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+            { dayOfWeek: 0, isWorkingDay: false, isOpen24Hours: false, timeSlots: [] },
           ],
     });
   };
@@ -211,9 +223,72 @@ const BranchManagementBranch: React.FC<BranchManagementBranchProps> = ({ branchI
   const handleWorkingHourChange = (dayOfWeek: number, field: string, value: string | boolean): void => {
     setEditData((prev) => ({
       ...prev,
-      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hour) =>
-        hour.dayOfWeek === dayOfWeek ? { ...hour, [field]: value } : hour
-      ),
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hour) => {
+        if (hour.dayOfWeek !== dayOfWeek) return hour;
+
+        // Handle special cases for backend validation rules
+        if (field === 'isWorkingDay') {
+          if (!value) {
+            // Non-working days cannot have time slots
+            return { ...hour, isWorkingDay: value as boolean, timeSlots: [], isOpen24Hours: false };
+          } else {
+            // When enabling working day, add default time slot if none exists
+            return {
+              ...hour,
+              isWorkingDay: value as boolean,
+              timeSlots: hour.timeSlots?.length ? hour.timeSlots : [{ openTime: '08:00:00', closeTime: '22:00:00' }]
+            };
+          }
+        }
+
+        if (field === 'isOpen24Hours') {
+          if (value) {
+            // 24-hour open days cannot have time slots
+            return { ...hour, isOpen24Hours: value as boolean, timeSlots: [] };
+          } else {
+            // When disabling 24 hours, add default time slot
+            return { ...hour, isOpen24Hours: value as boolean, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] };
+          }
+        }
+
+        return { ...hour, [field]: value };
+      }),
+    }));
+  };
+
+  const handleTimeSlotChange = (dayOfWeek: number, slotIndex: number, field: 'openTime' | 'closeTime', value: string): void => {
+    setEditData((prev) => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hour) => {
+        if (hour.dayOfWeek !== dayOfWeek) return hour;
+        const newTimeSlots = [...(hour.timeSlots || [])];
+        if (newTimeSlots[slotIndex]) {
+          newTimeSlots[slotIndex] = { ...newTimeSlots[slotIndex], [field]: value };
+        }
+        return { ...hour, timeSlots: newTimeSlots };
+      }),
+    }));
+  };
+
+  const handleAddTimeSlot = (dayOfWeek: number): void => {
+    setEditData((prev) => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hour) => {
+        if (hour.dayOfWeek !== dayOfWeek) return hour;
+        const newTimeSlots = [...(hour.timeSlots || []), { openTime: '08:00:00', closeTime: '22:00:00' }];
+        return { ...hour, timeSlots: newTimeSlots };
+      }),
+    }));
+  };
+
+  const handleRemoveTimeSlot = (dayOfWeek: number, slotIndex: number): void => {
+    setEditData((prev) => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hour) => {
+        if (hour.dayOfWeek !== dayOfWeek) return hour;
+        const newTimeSlots = (hour.timeSlots || []).filter((_, i) => i !== slotIndex);
+        return { ...hour, timeSlots: newTimeSlots };
+      }),
     }));
   };
 
@@ -341,6 +416,9 @@ const BranchManagementBranch: React.FC<BranchManagementBranchProps> = ({ branchI
           editData={editData}
           t={t}
           handleWorkingHourChange={handleWorkingHourChange}
+          handleTimeSlotChange={handleTimeSlotChange}
+          handleAddTimeSlot={handleAddTimeSlot}
+          handleRemoveTimeSlot={handleRemoveTimeSlot}
         />
 
         {selectedBranch && (

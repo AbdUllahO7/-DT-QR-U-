@@ -105,11 +105,17 @@ export interface TimeSpan {
   minutes: number;
 }
 
-export interface CreateBranchWorkingHourCoreDto {
-  dayOfWeek: DayOfWeek;
+export interface WorkingHourTimeSlot {
+  id?: number;
   openTime: string;
   closeTime: string;
+}
+
+export interface CreateBranchWorkingHourCoreDto {
+  dayOfWeek: DayOfWeek;
   isWorkingDay: boolean;
+  isOpen24Hours: boolean;
+  timeSlots: WorkingHourTimeSlot[];
 }
 
 export enum DayOfWeek {
@@ -341,12 +347,18 @@ export interface BranchContact {
   openHours?: string | null;
 }
 
+export interface BranchWorkingHourTimeSlot {
+  id: number;
+  openTime: string;
+  closeTime: string;
+}
+
 export interface BranchWorkingHour {
   id: number;
-  dayOfWeek: number; 
-  openTime: string; 
-  closeTime: string; 
+  dayOfWeek: number;
   isWorkingDay: boolean;
+  isOpen24Hours: boolean;
+  timeSlots: BranchWorkingHourTimeSlot[];
 }
 
 export interface BranchDetailResponse {
@@ -429,9 +441,15 @@ export function convertBranchDetailToFormData(
     createBranchWorkingHourCoreDto: branchDetail.workingHours?.length
       ? branchDetail.workingHours.map(wh => ({
           dayOfWeek: wh.dayOfWeek,
-          openTime: wh.openTime || '08:00:00',
-          closeTime: wh.closeTime || '22:00:00',
           isWorkingDay: wh.isWorkingDay ?? true,
+          isOpen24Hours: wh.isOpen24Hours ?? false,
+          timeSlots: wh.timeSlots?.length
+            ? wh.timeSlots.map(ts => ({
+                id: ts.id,
+                openTime: ts.openTime || '08:00:00',
+                closeTime: ts.closeTime || '22:00:00',
+              }))
+            : [{ openTime: '08:00:00', closeTime: '22:00:00' }],
         }))
       : defaultWorkingHours,
   };
@@ -458,11 +476,17 @@ export interface BatchUpdateContactDto {
   openHours?: string | null;
 }
 
-export interface BatchUpdateBranchWorkingHourDto {
-  dayOfWeek: number;
+export interface BatchUpdateWorkingHourTimeSlot {
+  id?: number;
   openTime: string;
   closeTime: string;
+}
+
+export interface BatchUpdateBranchWorkingHourDto {
+  dayOfWeek: number;
   isWorkingDay: boolean;
+  isOpen24Hours: boolean;
+  timeSlots: BatchUpdateWorkingHourTimeSlot[];
 }
 
 export interface BatchUpdateBranchDto {

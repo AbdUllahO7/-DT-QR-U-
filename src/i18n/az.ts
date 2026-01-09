@@ -1359,6 +1359,10 @@ branchManagement: {
     form: {
         branchName: 'Filial Adı',
             branchNamePlaceholder: 'Filial adını daxil edin',
+            open24HoursMessage: 'Bu filial 24 saat açıqdır',
+            open24Hours: '24 saat açıq',
+            addTimeSlot: 'Zaman dilimi əlavə et',
+            closed: 'Bağlı',
                 branchNameRequired: 'Filial adı tələb olunur',
                     whatsappNumber: 'WhatsApp Sifariş Nömrəsi ',
                         whatsappPlaceholder: 'WhatsApp nömrəsini daxil edin',
@@ -3282,6 +3286,9 @@ branchManagementBranch: {
     workingHours: {
         title: 'İş Saatları',
             workingDay: 'İş günü',
+                     open24Hours: '24 Saat Açıq',
+      open24HoursMessage: 'Bu filiala 24 saat açıqdır.',
+      addTimeSlot: 'Zaman Dilimi Əlavə Et',
                 openTime: 'Açılış Vaxtı',
                     closeTime: 'Bağlanış Vaxtı',
                         noWorkingHours: 'İş saatları göstərilməyib',
@@ -5173,7 +5180,10 @@ user: {
                 "title": "İş Saatları",
                     "description": "İş saatlarınızı təyin edin. Gecə boyu açıq qala bilərsiniz (məs., 23:00 - 02:00).",
                         "openLabel": "Açılış Vaxtı",
-                            "closeLabel": "Bağlanış Vaxtı",
+                        "addSlot": "Yeni Vaxt Aralığı Əlavə Et",
+                        "open24Hours": "24 Saat Açıq",
+                        "closeLabel": "Bağlanış Vaxtı",
+                        "open24HoursNote": "Bu restoran 24 saat açıqdır.",
                                 "dayNames": [
                                     "Bazar ertəsi",
                                     "Çərşənbə axşamı",
