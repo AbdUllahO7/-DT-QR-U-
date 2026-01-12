@@ -771,7 +771,12 @@ pricing: {
         vatInfo: 'Qiymətlərə ƏDV daxildir. Müəssisə planları üçün fərdi qiymətlər mövcuddur.',
             perMonth: 'ay',
                 perYear: 'il',
-                    monthlyEquivalent: 'Aylıq {amount} (2 ay pulsuz)'
+                    monthlyEquivalent: 'Aylıq {amount} (2 ay pulsuz)',
+                    comingSoon: 'Tezliklə',
+                    freeTrial: 'Pulsuz Sınaq',
+                    free: 'PULSUZ',
+                    freeFor3Months: 'İlk 3 ay pulsuz',
+                    noCreditCard: 'Kredit kartı tələb olunmur'
 },
 
 // Testimonials
@@ -4187,6 +4192,10 @@ branchPreferences: {
             afterClosing: "Bağlandıqdan Sonra",
                 disabled: "Deaktiv"
     },
+    mobileGridLayout: {
+        oneColumn: "Bir Sütun",
+        twoColumns: "İki Sütun"
+    },
     sections: {
         orderManagement: {
             title: "Sifariş İdarəetməsi",
@@ -4204,7 +4213,9 @@ branchPreferences: {
                             enableAllergenDisplay: "Allergen Məlumatını Göstər",
                                 enableAllergenDisplayDesc: "Allergen xəbərdarlıqlarını və məlumatlarını göstərin",
                                     enableIngredientDisplay: "İnqrediyentləri Göstər",
-                                        enableIngredientDisplayDesc: "Məhsullar üçün inqrediyent siyahılarını göstərin"
+                                        enableIngredientDisplayDesc: "Məhsullar üçün inqrediyent siyahılarını göstərin",
+                                            mobileGridLayout: "Mobil Şəbəkə Tərtibatı",
+                                                mobileGridLayoutDesc: "Məhsulların mobil cihazlarda necə göstəriləcəyini seçin"
         },
         paymentMethods: {
             title: "Ödəniş Üsulları",

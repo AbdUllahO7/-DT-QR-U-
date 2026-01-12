@@ -26,6 +26,7 @@ export interface BranchPreferences {
   showProductDescriptions: boolean;
   enableAllergenDisplay: boolean;
   enableIngredientDisplay: boolean;
+  mobileGridLayout: number;
   acceptCash: boolean;
   acceptCreditCard: boolean;
   acceptOnlinePayment: boolean;
@@ -50,6 +51,7 @@ export interface UpdateBranchPreferencesDto {
   showProductDescriptions: boolean;
   enableAllergenDisplay: boolean;
   enableIngredientDisplay: boolean;
+  mobileGridLayout: number;
   acceptCash: boolean;
   acceptCreditCard: boolean;
   acceptOnlinePayment: boolean;
@@ -140,6 +142,7 @@ class BranchPreferencesService {
         showProductDescriptions: data.showProductDescriptions,
         enableAllergenDisplay: data.enableAllergenDisplay,
         enableIngredientDisplay: data.enableIngredientDisplay,
+        mobileGridLayout: data.mobileGridLayout,
         acceptCash: data.acceptCash,
         acceptCreditCard: data.acceptCreditCard,
         acceptOnlinePayment: data.acceptOnlinePayment,

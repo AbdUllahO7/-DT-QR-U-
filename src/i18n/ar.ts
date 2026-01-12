@@ -770,7 +770,12 @@ pricing: {
     vatInfo: 'جميع الأسعار شاملة ضريبة القيمة المضافة. تتوفر عروض خاصة للسلاسل الكبيرة.',
     perMonth: 'شهر',
     perYear: 'سنة',
-    monthlyEquivalent: 'فقط {amount} / شهر (عند الدفع السنوي)'
+    monthlyEquivalent: 'فقط {amount} / شهر (عند الدفع السنوي)',
+    comingSoon: 'قريباً',
+    freeTrial: 'تجربة مجانية',
+    free: 'مجاني',
+    freeFor3Months: 'مجاني لأول 3 أشهر',
+    noCreditCard: 'لا حاجة لبطاقة ائتمان'
   },
 
   // Testimonials
@@ -4180,9 +4185,13 @@ contact: {
     saveChanges: "حفظ التغييرات",
     saveSuccess: "تم حفظ إعدادات الفرع بنجاح!",
     cleanupModes: {
-    afterTimeout: "بعد انتهاء المهلة",
-    afterClosing: "بعد الإغلاق",
-    disabled: "معطل"
+      afterTimeout: "بعد انتهاء المهلة",
+      afterClosing: "بعد الإغلاق",
+      disabled: "معطل"
+    },
+    mobileGridLayout: {
+      oneColumn: "عمود واحد",
+      twoColumns: "عمودين"
     },
     sections: {
       orderManagement: {
@@ -4202,7 +4211,9 @@ contact: {
         enableAllergenDisplay: "عرض معلومات مسببات الحساسية",
         enableAllergenDisplayDesc: "إظهار تحذيرات ومعلومات مسببات الحساسية",
         enableIngredientDisplay: "عرض المكونات",
-        enableIngredientDisplayDesc: "إظهار قوائم المكونات للمنتجات"
+        enableIngredientDisplayDesc: "إظهار قوائم المكونات للمنتجات",
+        mobileGridLayout: "تخطيط شبكة الهاتف",
+        mobileGridLayoutDesc: "اختر كيفية عرض المنتجات على الأجهزة المحمولة"
       },
       "paymentMethods": {
         "title": "طرق الدفع",

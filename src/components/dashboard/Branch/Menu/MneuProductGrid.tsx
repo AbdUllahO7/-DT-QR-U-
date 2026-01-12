@@ -21,6 +21,7 @@ interface ProductGridProps {
   restaurantName: string
   onCustomize?: (product: MenuProduct) => void
   getCartItemQuantity: (branchProductId: number) => Promise<number>
+  mobileGridLayout?: number // 1 = one column, 2 = two columns (default)
 }
 
 const ProductGrid: React.FC<ProductGridProps> = ({
@@ -33,11 +34,21 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   onToggleFavorite,
   onCategorySelect,
   onCustomize,
-  getCartItemQuantity
+  getCartItemQuantity,
+  mobileGridLayout = 2 // Default to 2 columns
 }) => {
   const { t } = useLanguage()
   const [productQuantities, setProductQuantities] = useState<Map<number, number>>(new Map())
   const [loadingQuantities, setLoadingQuantities] = useState(false)
+
+  // Generate grid classes based on mobileGridLayout preference
+  // Mobile: 1 or 2 columns based on preference
+  // Tablet (sm): always 2 columns
+  // Desktop (lg): always 2 columns
+  const getGridClasses = () => {
+    const mobileClass = mobileGridLayout === 1 ? 'grid-cols-1' : 'grid-cols-2'
+    return `grid ${mobileClass} sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6`
+  }
 
 
   // Load quantities for all visible products
@@ -160,7 +171,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                 
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6">
+              <div className={getGridClasses()}>
                 {category.products.map((product) => (
                   <ProductCard
                     key={product.branchProductId}
@@ -188,7 +199,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6">
+          <div className={getGridClasses()}>
             {visibleProducts.map((product) => (
               <ProductCard
                 key={product.branchProductId}

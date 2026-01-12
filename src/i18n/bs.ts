@@ -774,7 +774,12 @@ pricing: {
         vatInfo: 'Cijene uključuju PDV. Dostupne prilagođene cijene za planove preduzeća.',
             perMonth: 'mjesec',
                 perYear: 'godina',
-                    monthlyEquivalent: 'Mjesečno {amount} (2 mjeseca besplatno)'
+                    monthlyEquivalent: 'Mjesečno {amount} (2 mjeseca besplatno)',
+                    comingSoon: 'Uskoro',
+                    freeTrial: 'Besplatna Proba',
+                    free: 'BESPLATNO',
+                    freeFor3Months: 'Besplatno prva 3 mjeseca',
+                    noCreditCard: 'Kreditna kartica nije potrebna'
 },
 
 // Testimonials
@@ -4192,6 +4197,10 @@ branchPreferences: {
             afterClosing: "Nakon Zatvaranja",
                 disabled: "Onemogućeno"
     },
+    mobileGridLayout: {
+        oneColumn: "Jedna Kolona",
+        twoColumns: "Dvije Kolone"
+    },
     sections: {
         orderManagement: {
             title: "Upravljanje Narudžbama",
@@ -4209,7 +4218,9 @@ branchPreferences: {
                             enableAllergenDisplay: "Prikaži Informacije o Alergenima",
                                 enableAllergenDisplayDesc: "Prikaži upozorenja i informacije o alergenima",
                                     enableIngredientDisplay: "Prikaži Sastojke",
-                                        enableIngredientDisplayDesc: "Prikaži liste sastojaka za proizvode"
+                                        enableIngredientDisplayDesc: "Prikaži liste sastojaka za proizvode",
+                                            mobileGridLayout: "Mobilni Raspored Mreže",
+                                                mobileGridLayoutDesc: "Odaberite kako se proizvodi prikazuju na mobilnim uređajima"
         },
         paymentMethods: {
             title: "Načini Plaćanja",

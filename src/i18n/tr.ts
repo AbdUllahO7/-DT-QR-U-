@@ -780,7 +780,12 @@ hero: {
     vatInfo: 'Fiyatlar KDV dahildir. Kurumsal planlar için özel fiyatlandırma mevcuttur.',
     perMonth: 'ay',
     perYear: 'yıl',
-    monthlyEquivalent: 'Aylık {amount} (2 ay ücretsiz)'
+    monthlyEquivalent: 'Aylık {amount} (2 ay ücretsiz)',
+    comingSoon: 'Çok Yakında',
+    freeTrial: 'Ücretsiz Deneme',
+    free: 'ÜCRETSİZ',
+    freeFor3Months: 'İlk 3 ay ücretsiz',
+    noCreditCard: 'Kredi kartı gerekmez'
   },
 
   // Testimonials
@@ -4194,6 +4199,10 @@ productModal: {
       afterClosing: "Kapatmadan Sonra",
       disabled: "Devre Dışı"
     },
+    mobileGridLayout: {
+      oneColumn: "Tek Sütun",
+      twoColumns: "İki Sütun"
+    },
     sections: {
       orderManagement: {
         title: "Sipariş Yönetimi",
@@ -4211,7 +4220,9 @@ productModal: {
         enableAllergenDisplay: "Alerjen Bilgilerini Göster",
         enableAllergenDisplayDesc: "Alerjen uyarılarını ve bilgilerini göster",
         enableIngredientDisplay: "İçerikleri Göster",
-        enableIngredientDisplayDesc: "Ürünler için içerik listelerini göster"
+        enableIngredientDisplayDesc: "Ürünler için içerik listelerini göster",
+        mobileGridLayout: "Mobil Izgara Düzeni",
+        mobileGridLayoutDesc: "Ürünlerin mobil cihazlarda nasıl görüntüleneceğini seçin"
       },
       paymentMethods: {
         title: "Ödeme Yöntemleri",
