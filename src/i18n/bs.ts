@@ -1213,7 +1213,7 @@ branchModal: {
     },
     fields: {
         branchName: {
-            label: 'Ime Filijale',
+            label: 'Ime Filijale *',
                 placeholder: 'Unesite ime filijale'
         },
         whatsappNumber: {

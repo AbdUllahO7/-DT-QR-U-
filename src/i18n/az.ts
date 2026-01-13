@@ -1210,7 +1210,7 @@ branchModal: {
     },
     fields: {
         branchName: {
-            label: 'Filial Adı',
+            label: 'Filial Adı *',
                 placeholder: 'Filial adını daxil edin'
         },
         whatsappNumber: {

@@ -1208,7 +1208,7 @@ branchModal: {
     },
     fields: {
         branchName: {
-            label: 'Emri i Degës',
+            label: 'Emri i Degës *',
                 placeholder: 'Futni emrin e degës'
         },
         whatsappNumber: {

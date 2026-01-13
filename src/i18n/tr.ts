@@ -1219,7 +1219,7 @@ hero: {
     },
     fields: {
       branchName: {
-        label: 'Şube Adı',
+        label: 'Şube Adı *',
         placeholder: 'Şube adını girin'
       },
       whatsappNumber: {

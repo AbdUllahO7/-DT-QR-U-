@@ -235,6 +235,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
     lat: 41.0082, // Default to Istanbul
     lng: 28.9784
   });
+  const [googleMapsLink, setGoogleMapsLink] = useState<string>('');
+  const [linkError, setLinkError] = useState<string>('');
 
   const dayNamesDisplay = Array.isArray(t('branchModal.workingHours.days'))
     ? t('branchModal.workingHours.days')
@@ -601,6 +603,67 @@ const BranchModal: React.FC<BranchModalProps> = ({
     }
   };
 
+  // Function to extract coordinates from Google Maps link
+  const extractCoordinatesFromLink = (link: string): { lat: number; lng: number } | null => {
+    try {
+      const pattern1 = /@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match1 = link.match(pattern1);
+      if (match1) return { lat: parseFloat(match1[1]), lng: parseFloat(match1[2]) };
+
+      const pattern2 = /q=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match2 = link.match(pattern2);
+      if (match2) return { lat: parseFloat(match2[1]), lng: parseFloat(match2[2]) };
+
+      const pattern3 = /place\/[^@]*@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match3 = link.match(pattern3);
+      if (match3) return { lat: parseFloat(match3[1]), lng: parseFloat(match3[2]) };
+
+      const pattern4 = /!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/;
+      const match4 = link.match(pattern4);
+      if (match4) return { lat: parseFloat(match4[1]), lng: parseFloat(match4[2]) };
+
+      return null;
+    } catch (error) {
+      console.error('Error extracting coordinates:', error);
+      return null;
+    }
+  };
+
+  const handleGoogleMapsLinkChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const link = e.target.value;
+    setGoogleMapsLink(link);
+    setLinkError('');
+
+    if (link.trim()) {
+      const coords = extractCoordinatesFromLink(link);
+      if (coords) {
+        setSelectedLatLng(coords);
+        setLinkError('');
+      } else if (link.includes('google.com/maps') || link.includes('maps.app.goo.gl')) {
+        setLinkError(t('onboardingBranch.form.step3.location.invalidLink') || 'Could not extract coordinates from this link. Please try a different format.');
+      }
+    }
+  };
+
+  const handleGetCurrentLocation = (): void => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setSelectedLatLng({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          alert(t('onboardingBranch.form.step3.location.geolocationError') || 'Could not get your location. Please select manually.');
+        }
+      );
+    } else {
+      alert(t('onboardingBranch.form.step3.location.geolocationNotSupported') || 'Geolocation is not supported by your browser.');
+    }
+  };
+
   // --- MAP HANDLERS ---
   const handleOpenMapModal = (): void => {
     if (formData.createContactDto.location) {
@@ -613,6 +676,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
         console.error('Failed to parse location', error);
       }
     }
+    setGoogleMapsLink('');
+    setLinkError('');
     setIsMapModalOpen(true);
   };
 
@@ -622,7 +687,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
 
   const handleConfirmLocation = (): void => {
     const locationString = `${selectedLatLng.lat.toFixed(6)},${selectedLatLng.lng.toFixed(6)}`;
-    
+
     setFormData(prev => ({
       ...prev,
       createContactDto: {
@@ -630,7 +695,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
         location: locationString
       }
     }));
-    
+
     // Synthetic event to update parent state/validation
     const syntheticEvent = {
         target: {
@@ -678,73 +743,243 @@ const BranchModal: React.FC<BranchModalProps> = ({
 
     return (
       <AnimatePresence>
-        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 z-[9999] flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className={`relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-xl ${isRTL ? 'rtl' : 'ltr'}`}
-          >
-            <div className={`flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                {t('onboardingBranch.form.step3.location.mapTitle')}
-              </h3>
-              <button
-                onClick={handleCloseMapModal}
-                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
+        <div className="fixed inset-0 z-[9999] overflow-y-auto" dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className="flex min-h-screen items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleCloseMapModal}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            />
 
-            <div className="p-6">
-              <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                {t('onboardingBranch.form.step3.location.clickToPin')}
-              </div>
-
-              <div className="relative w-full h-[400px] bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 shadow-inner">
-                <MapContainer
-                  center={[selectedLatLng.lat, selectedLatLng.lng]}
-                  zoom={13}
-                  style={{ height: '100%', width: '100%' }}
-                  scrollWheelZoom={true}
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-5xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+            >
+              {/* Header */}
+              <div className={`flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                  <MapPin className="h-6 w-6 text-primary-600" />
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    {t('onboardingBranch.form.step3.location.mapTitle')}
+                  </h3>
+                </div>
+                <button
+                  onClick={handleCloseMapModal}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <MapUpdater center={[selectedLatLng.lat, selectedLatLng.lng]} />
-                  <LocationMarker />
-                </MapContainer>
+                  <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                </button>
               </div>
 
-              <div className="mt-4 flex items-center justify-between">
-                <div className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  <span className="font-medium">{t('onboardingBranch.form.step3.location.selectedCoordinates')}</span>
-                  <code className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400" dir="ltr">
-                    {selectedLatLng.lat.toFixed(6)}, {selectedLatLng.lng.toFixed(6)}
-                  </code>
+              {/* Content - Scrollable */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {/* Google Maps Link Input */}
+                <div className="space-y-2">
+                  <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.googleMapsLink') || 'Google Maps Link (optional)'}
+                  </label>
+                  <div className="relative">
+                    <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+                    <input
+                      type="text"
+                      value={googleMapsLink}
+                      onChange={handleGoogleMapsLinkChange}
+                      placeholder={t('onboardingBranch.form.step3.location.googleMapsLinkPlaceholder') || 'https://maps.google.com/...'}
+                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${
+                        linkError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
+                      } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                      dir="ltr"
+                    />
+                  </div>
+                  {linkError && (
+                    <p className={`text-xs text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {linkError}
+                    </p>
+                  )}
+                  <p className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.googleMapsLinkHelper') || 'Paste a Google Maps link and coordinates will be extracted automatically'}
+                  </p>
+                </div>
+
+                {/* Current Location Button */}
+                <button
+                  type="button"
+                  onClick={handleGetCurrentLocation}
+                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all duration-200 border border-blue-200 dark:border-blue-700 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+                >
+                  <Navigation className="h-5 w-5" />
+                  <span className="font-medium">
+                    {t('onboardingBranch.form.step3.location.useCurrentLocation') || 'Use my current location'}
+                  </span>
+                </button>
+
+                {/* Interactive Map Container */}
+                <div className="space-y-2">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <label className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.interactiveMap') || 'Interactive Map'}
+                    </label>
+                    <span className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.clickToPin') || 'Click on the map to pin location'}
+                    </span>
+                  </div>
+                  <div className="relative w-full h-[400px] bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 shadow-inner">
+                    <MapContainer
+                      center={[selectedLatLng.lat, selectedLatLng.lng]}
+                      zoom={13}
+                      style={{ height: '100%', width: '100%' }}
+                      scrollWheelZoom={true}
+                    >
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <MapUpdater center={[selectedLatLng.lat, selectedLatLng.lng]} />
+                      <LocationMarker />
+                    </MapContainer>
+
+                    {/* Overlay with instructions */}
+                    <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-[1000] pointer-events-none">
+                      <div className="bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-600">
+                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-primary-600" />
+                          {t('onboardingBranch.form.step3.location.markerPosition') || 'Marker position'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* External Map Link */}
+                  <a
+                    href={`https://www.openstreetmap.org/?mlat=${selectedLatLng.lat}&mlon=${selectedLatLng.lng}#map=15/${selectedLatLng.lat}/${selectedLatLng.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 ${isRTL ? 'flex-row-reverse' : ''}`}
+                  >
+                    <span>{t('onboardingBranch.form.step3.location.openFullMap') || 'Open in full map'}</span>
+                    <ArrowRight className={`h-3 w-3 ${isRTL ? 'mr-1 rotate-180' : 'ml-1'}`} />
+                  </a>
+                </div>
+
+                {/* Coordinate Inputs */}
+                <div className="space-y-3">
+                  <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.manualCoordinates') || 'Manual Coordinates'}
+                  </label>
+                  <div className={`grid grid-cols-2 gap-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    <div>
+                      <label className={`block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('onboardingBranch.form.step3.location.latitude') || 'Latitude'}
+                      </label>
+                      <input
+                        title='number'
+                        type="number"
+                        step="0.000001"
+                        value={selectedLatLng.lat}
+                        onChange={(e) => {
+                          const newLat = parseFloat(e.target.value) || 0;
+                          if (newLat >= -90 && newLat <= 90) {
+                            setSelectedLatLng(prev => ({ ...prev, lat: newLat }));
+                          }
+                        }}
+                        className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                        dir="ltr"
+                        min="-90"
+                        max="90"
+                      />
+                    </div>
+                    <div>
+                      <label className={`block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('onboardingBranch.form.step3.location.longitude') || 'Longitude'}
+                      </label>
+                      <input
+                        title='number2'
+                        type="number"
+                        step="0.000001"
+                        value={selectedLatLng.lng}
+                        onChange={(e) => {
+                          const newLng = parseFloat(e.target.value) || 0;
+                          if (newLng >= -180 && newLng <= 180) {
+                            setSelectedLatLng(prev => ({ ...prev, lng: newLng }));
+                          }
+                        }}
+                        className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                        dir="ltr"
+                        min="-180"
+                        max="180"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Info Box */}
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-xl">
+                  <div className={`flex items-start space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                    <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                    <div className={`text-sm text-blue-700 dark:text-blue-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      <p className="font-medium mb-2">
+                        {t('onboardingBranch.form.step3.location.mapHelp') || 'How to use the map:'}
+                      </p>
+                      <ul className={`space-y-1.5 ${isRTL ? 'mr-4' : 'ml-4'}`}>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">1.</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp1') || 'Paste a Google Maps link in the field above'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">2.</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp2') || 'Or click "Use my current location"'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">3.</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp3') || 'Or enter coordinates manually'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">4.</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp4') || 'Click on the map to pin your exact location'}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Current Selected Coordinates Display */}
+                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <span className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.selectedCoordinates') || 'Selected Coordinates:'}
+                    </span>
+                    <code className="text-sm font-mono text-primary-600 dark:text-primary-400" dir="ltr">
+                      {selectedLatLng.lat.toFixed(6)}, {selectedLatLng.lng.toFixed(6)}
+                    </code>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className={`flex ${isRTL ? 'flex-row-reverse space-x-reverse' : ''} space-x-3 p-6 border-t border-gray-200 dark:border-gray-700`}>
-              <button
-                type="button"
-                onClick={handleCloseMapModal}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmLocation}
-                className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-              >
-                {t('common.save')}
-              </button>
-            </div>
-          </motion.div>
+              {/* Footer */}
+              <div className={`flex ${isRTL ? 'flex-row-reverse space-x-reverse' : ''} space-x-3 p-6 border-t border-gray-200 dark:border-gray-700`}>
+                <button
+                  type="button"
+                  onClick={handleCloseMapModal}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmLocation}
+                  className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                >
+                  {t('common.save')}
+                </button>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </AnimatePresence>
     );
@@ -781,7 +1016,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                 }}
                 languages={supportedLanguages}
                 placeholder={t('branchModal.fields.branchName.placeholder')}
-                required={true}
+                required={false} // Enforces default language requirement
                 defaultLanguage={defaultLanguage}
                 selectedLanguage={selectedFormLanguage}
                 showLanguageSelector={false}
@@ -1525,6 +1760,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
             selectedLanguage={selectedFormLanguage}
             onLanguageChange={setSelectedFormLanguage}
             defaultLanguage={defaultLanguage}
+            required={true}
             showBulkFill={true}
             onBulkFill={handleBulkFillLanguage}
             fieldValues={{

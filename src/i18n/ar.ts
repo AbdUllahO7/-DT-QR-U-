@@ -1211,7 +1211,7 @@ contact: {
     },
     fields: {
       branchName: {
-        label: 'اسم الفرع',
+        label: 'اسم الفرع *',
         placeholder: 'أدخل اسم الفرع'
       },
       whatsappNumber: {

@@ -1213,7 +1213,7 @@ hero: {
     },
     fields: {
       branchName: {
-        label: 'Branch Name',
+        label: 'Branch Name *',
         placeholder: 'Enter branch name'
       },
       whatsappNumber: {
@@ -1671,7 +1671,7 @@ hero: {
   // Form fields
   form: {
     categoryName: {
-      label: 'Category Name *',
+      label: 'Category Name',
       placeholder: 'e.g: Main Dishes, Beverages, Desserts',
       required: 'Category name is required'
     },
