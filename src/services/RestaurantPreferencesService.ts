@@ -51,7 +51,7 @@ class RestaurantPreferencesService {
       logger.info('Restaurant preferences bilgileri getirme isteği gönderiliyor', {}, { prefix: 'RestaurantPreferencesService' });
 
       const response = await httpClient.get<RestaurantPreferences>(this.baseUrl);
-
+      console.log('Restaurant Preferences API Response:', response.data);
       logger.info('Restaurant Preferences API Response:', response.data, { prefix: 'RestaurantPreferencesService' });
       logger.info('Restaurant preferences bilgileri başarıyla alındı', {}, { prefix: 'RestaurantPreferencesService' });
 
