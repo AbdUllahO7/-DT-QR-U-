@@ -226,6 +226,7 @@ export interface MenuPreferences {
   showProductDescriptions: boolean;
   enableAllergenDisplay: boolean;
   enableIngredientDisplay: boolean;
+  mobileGridLayout: number;
   acceptCash: boolean;
   acceptCreditCard: boolean;
   acceptOnlinePayment: boolean;

@@ -36,10 +36,14 @@ export interface BranchData {
     openHours: string | null;
   };
   workingHours?: Array<{
-    openTime: string;
-    closeTime: string;
     dayOfWeek: number;
-    isWorkingDay:boolean
+    isWorkingDay: boolean;
+    isOpen24Hours: boolean;
+    timeSlots: Array<{
+      id?: number;
+      openTime: string;
+      closeTime: string;
+    }>;
   }>;
 }
 
@@ -70,9 +74,13 @@ export interface EditDataType {
   };
   createBranchWorkingHourCoreDto: Array<{
     dayOfWeek: number;
-    openTime: string;
-    closeTime: string;
     isWorkingDay: boolean;
+    isOpen24Hours: boolean;
+    timeSlots: Array<{
+      id?: number;
+      openTime: string;
+      closeTime: string;
+    }>;
   }>;
 }
 

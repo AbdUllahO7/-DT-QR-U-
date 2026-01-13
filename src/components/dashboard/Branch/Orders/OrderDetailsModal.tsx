@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   Eye, XCircle, Clock, Package, AlertCircle, MapPin, Phone, User, Truck,
   Home, CheckCircle, Printer, Calendar, Hash, ShoppingBag, MessageSquare,
-   TrendingUp, Type, Maximize2, ChevronUp,
+  TrendingUp, Type, Maximize2, ChevronUp,
   Settings, EyeOff, Droplets, Plus, CreditCard, Banknote, Smartphone
 } from 'lucide-react';
 import { orderService } from '../../../../services/Branch/OrderService';
@@ -49,10 +49,10 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
 
   // View density state
   const [viewDensity, setViewDensity] = useState<ViewDensity>('comfortable');
-  
+
   // Blur intensity state
   const [blurIntensity, setBlurIntensity] = useState<BlurIntensity>('medium');
-  
+
   // Section visibility state
   const [sectionVisibility, setSectionVisibility] = useState<SectionVisibility>({
     stats: true,
@@ -63,48 +63,48 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
     pricing: true,
     timeline: true
   });
-  
+
   // Settings panel toggle
   const [showSettings, setShowSettings] = useState(false);
-  
+
   const fontSizeClasses = {
     small: 'text-xs',
     medium: 'text-sm',
     large: 'text-base'
   };
-  
+
   const densityClasses = {
     compact: 'space-y-2 p-3',
     comfortable: 'space-y-4 p-4',
     spacious: 'space-y-6 p-6'
   };
-  
+
   const densityPadding = {
     compact: 'p-2',
     comfortable: 'p-3',
     spacious: 'p-4'
   };
-  
+
   const densityGap = {
     compact: 'gap-1',
     comfortable: 'gap-2',
     spacious: 'gap-3'
   };
-  
+
   const blurClasses = {
     none: 'backdrop-blur-none',
     light: 'backdrop-blur-sm',
     medium: 'backdrop-blur-md',
     heavy: 'backdrop-blur-xl'
   };
-  
+
   const blurOpacity = {
     none: 'bg-black/40',
     light: 'bg-black/50',
     medium: 'bg-black/60',
     heavy: 'bg-black/70'
   };
-  
+
   const cycleFontSize = () => {
     setFontSize(prev => {
       if (prev === 'small') return 'medium';
@@ -112,7 +112,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
       return 'small';
     });
   };
-  
+
   const cycleViewDensity = () => {
     setViewDensity(prev => {
       if (prev === 'compact') return 'comfortable';
@@ -120,7 +120,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
       return 'compact';
     });
   };
-  
+
   const cycleBlurIntensity = () => {
     setBlurIntensity(prev => {
       if (prev === 'none') return 'light';
@@ -129,14 +129,14 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
       return 'none';
     });
   };
-  
+
   const toggleSection = (section: keyof SectionVisibility) => {
     setSectionVisibility(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
   };
-  
+
   const toggleAllSections = (visible: boolean) => {
     setSectionVisibility({
       stats: visible,
@@ -148,26 +148,12 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
       timeline: visible
     });
   };
-  
+
   if (!show || !order) return null;
-  
-  const status = viewMode === 'branch' 
+
+  const status = viewMode === 'branch'
     ? orderService.parseOrderStatus((order as unknown as BranchOrder).status)
     : OrderStatusEnums.Pending;
-
-  // Parse metadata from notes
-  const parseMetadata = (notes: string | null) => {
-    if (!notes) return null;
-    const metadataMatch = notes.match(/\[METADATA:(.*?)\]/);
-    if (metadataMatch) {
-      try {
-        return JSON.parse(metadataMatch[1]);
-      } catch {
-        return null;
-      }
-    }
-    return null;
-  };
 
   const getCleanNotes = (notes: string | null) => {
     if (!notes) return null;
@@ -176,7 +162,6 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
 
   const cleanNotes = getCleanNotes((order as any).notes);
 
-  // Get payment method display info
   const getPaymentMethodInfo = (paymentMethod?: number) => {
     switch (paymentMethod) {
       case 1:
@@ -192,70 +177,67 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
 
   const paymentMethodInfo = getPaymentMethodInfo(order.paymentMethod);
 
-  // Handle print using the service
   const handlePrint = () => {
     OrderPrintService.print({ order, status, lang, t });
   };
 
-  // Render Items Function (Updated to handle Extras and correct Pricing)
+  // Render Items Function
   const renderItems = (itemList: any[], isAddon = false, level = 0) => {
     return itemList.map((item, index) => {
-      // Calculate Extras Total for this specific item
       const extrasTotal = item.extras?.reduce((sum: number, extra: any) => sum + (extra.totalPrice || 0), 0) || 0;
-      
-      // Calculate the display price (Item Total + Extras Total) to match the Order Total
-      // Use item.totalPrice if it exists, otherwise count * price
       const baseTotal = item.totalPrice !== undefined ? item.totalPrice : (item.price * item.count);
       const displayTotal = baseTotal + extrasTotal;
 
       return (
-        <div 
-          key={`${level}-${index}`} 
-          className={`group transition-all duration-200 ${isAddon ? 'ml-4' : ''}`}
+        <div
+          key={`${level}-${index}`}
+          className={`group transition-all duration-200 ${isAddon ? 'ml-2 sm:ml-4' : ''}`}
         >
-          <div 
+          <div
             className={`relative ${densityPadding[viewDensity]} rounded-lg border transition-all hover:shadow-md ${
-              isAddon 
-                ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-600' 
+              isAddon
+                ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-600'
                 : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:border-indigo-300 dark:hover:border-indigo-600'
             } ${item.isProductDeleted ? 'opacity-60 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-700' : ''}`}
           >
             {isAddon && (
-              <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-4 h-0.5 bg-blue-300 dark:bg-blue-600"></div>
+              <div className="absolute -left-2 sm:-left-4 top-1/2 -translate-y-1/2 w-2 sm:w-4 h-0.5 bg-blue-300 dark:bg-blue-600"></div>
             )}
-            
-            <div className={`flex justify-between items-start ${densityGap[viewDensity]}`}>
+
+            <div className={`flex flex-col sm:flex-row justify-between sm:items-start gap-3 sm:gap-4`}>
               <div className="flex-1 min-w-0">
-                <div className={`flex items-center ${densityGap[viewDensity]} mb-2`}>
-                  <div className={`p-1.5 rounded-md ${
-                    isAddon 
-                      ? 'bg-blue-100 dark:bg-blue-800' 
+                {/* Product Name Header */}
+                <div className={`flex items-center gap-2 mb-2`}>
+                  <div className={`p-1.5 rounded-md flex-shrink-0 ${
+                    isAddon
+                      ? 'bg-blue-100 dark:bg-blue-800'
                       : 'bg-indigo-100 dark:bg-indigo-800'
                   }`}>
                     <ShoppingBag className={`w-3 h-3 ${
-                      isAddon 
-                        ? 'text-blue-600 dark:text-blue-300' 
+                      isAddon
+                        ? 'text-blue-600 dark:text-blue-300'
                         : 'text-indigo-600 dark:text-indigo-300'
                     }`} />
                   </div>
-                  <h5 className={`font-semibold text-gray-900 dark:text-gray-100 text-sm truncate ${
+                  <h5 className={`font-semibold text-gray-900 dark:text-gray-100 text-sm break-words ${
                     item.isProductDeleted ? 'line-through text-red-600 dark:text-red-400' : ''
                   }`}>
-                    {item.productName || item.extraName} {/* Handle extraName if rendering extras recursively */}
+                    {item.productName || item.extraName}
                   </h5>
                   {item.isProductDeleted && (
-                    <span className="ml-2 px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-[10px] rounded-full font-medium">
+                    <span className="flex-shrink-0 ml-1 px-1.5 py-0.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-[10px] rounded-full font-medium">
                       {t('ordersManager.deleted') || 'Deleted'}
                     </span>
                   )}
                   {isAddon && !item.isProductDeleted && (
-                    <span className="ml-2 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 text-[10px] rounded-full font-medium">
+                    <span className="flex-shrink-0 ml-1 px-1.5 py-0.5 bg-blue-100 dark:bg-blue-800 text-blue-700 dark:text-blue-300 text-[10px] rounded-full font-medium">
                       Add-on
                     </span>
                   )}
                 </div>
-                
-                <div className={`grid grid-cols-2 md:grid-cols-3 ${densityGap[viewDensity]} mb-2`}>
+
+                {/* Details Grid */}
+                <div className={`grid grid-cols-2 sm:grid-cols-3 ${densityGap[viewDensity]} mb-2`}>
                   <div className="flex items-center gap-1.5">
                     <Hash className="w-3 h-3 text-gray-400" />
                     <div>
@@ -266,7 +248,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     </div>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className=''>{currency.symbol}</span>
+                    <span className='text-xs text-gray-400'>{currency.symbol}</span>
                     <div>
                       <p className="text-[10px] text-gray-500 dark:text-gray-400">Unit</p>
                       <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
@@ -275,8 +257,8 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     </div>
                   </div>
                   {item.addonPrice && (
-                    <div className="flex items-center gap-1.5">
-                      <span className=''>{currency.symbol}</span>
+                    <div className="flex items-center gap-1.5 col-span-2 sm:col-span-1">
+                      <span className='text-xs text-gray-400'>{currency.symbol}</span>
                       <div>
                         <p className="text-[10px] text-gray-500 dark:text-gray-400">Addon</p>
                         <p className="text-xs font-semibold text-blue-600 dark:text-blue-400">
@@ -295,7 +277,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                         <p className="text-[10px] font-semibold text-amber-900 dark:text-amber-200 mb-0.5">
                           Note:
                         </p>
-                        <p className="text-xs text-amber-800 dark:text-amber-300">
+                        <p className="text-xs text-amber-800 dark:text-amber-300 break-words">
                           {item.note || item.addonNote}
                         </p>
                       </div>
@@ -303,69 +285,69 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                   </div>
                 )}
               </div>
-              
-              <div className="flex flex-col items-end">
-                <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5">Total</p>
+
+              {/* Total Price Column */}
+              <div className="flex sm:flex-col justify-between sm:justify-start items-center sm:items-end pt-2 sm:pt-0 border-t sm:border-0 border-gray-100 dark:border-gray-600">
+                <p className="text-[10px] text-gray-500 dark:text-gray-400 mb-0.5 sm:block">Total</p>
                 <p className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
-                  {/* Display calculated total including extras if valid, else fallback */}
                   {currency.symbol}{!isAddon && !Number.isNaN(displayTotal) ? displayTotal.toFixed(2) : (item.totalPrice || 0).toFixed(2)}
                 </p>
               </div>
             </div>
           </div>
-          
+
           {/* RENDER EXTRAS */}
           {item.extras && item.extras.length > 0 && (
-            <div className="mt-2 ml-4 relative space-y-2">
-               <div className="absolute left-[-16px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-green-300 to-transparent dark:from-green-600"></div>
-               {item.extras.map((extra: any, extraIndex: number) => {
-                 const isRemoval = extra.isRemoval === true;
-                 return (
-                 <div key={`extra-${extraIndex}`} className={`relative ${densityPadding[viewDensity]} rounded-lg border ${
-                   isRemoval
-                     ? 'bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200 dark:border-red-600'
-                     : 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-600'
-                 }`}>
-                   <div className={`absolute -left-4 top-1/2 -translate-y-1/2 w-4 h-0.5 ${
-                     isRemoval ? 'bg-red-300 dark:bg-red-600' : 'bg-green-300 dark:bg-green-600'
-                   }`}></div>
+            <div className="mt-2 ml-2 sm:ml-4 relative space-y-2">
+              <div className="absolute left-[-8px] sm:left-[-16px] top-0 bottom-0 w-0.5 bg-gradient-to-b from-green-300 to-transparent dark:from-green-600"></div>
+              {item.extras.map((extra: any, extraIndex: number) => {
+                const isRemoval = extra.isRemoval === true;
+                return (
+                  <div key={`extra-${extraIndex}`} className={`relative ${densityPadding[viewDensity]} rounded-lg border ${
+                    isRemoval
+                      ? 'bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border-red-200 dark:border-red-600'
+                      : 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-600'
+                  }`}>
+                    <div className={`absolute -left-2 sm:-left-4 top-1/2 -translate-y-1/2 w-2 sm:w-4 h-0.5 ${
+                      isRemoval ? 'bg-red-300 dark:bg-red-600' : 'bg-green-300 dark:bg-green-600'
+                    }`}></div>
 
-                   <div className={`flex justify-between items-center ${densityGap[viewDensity]}`}>
-                     <div className="flex items-center gap-2">
-                        <div className={`p-1.5 rounded-md ${
+                    <div className={`flex justify-between items-center ${densityGap[viewDensity]}`}>
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <div className={`p-1.5 rounded-md flex-shrink-0 ${
                           isRemoval ? 'bg-red-100 dark:bg-red-800' : 'bg-green-100 dark:bg-green-800'
                         }`}>
                           <Plus className={`w-3 h-3 ${
                             isRemoval ? 'text-red-600 dark:text-red-300' : 'text-green-600 dark:text-green-300'
                           }`} />
                         </div>
-                        <div>
-                          <h6 className="text-xs font-semibold text-gray-800 dark:text-gray-200">{extra.extraName}</h6>
-                          <span className="text-[10px] text-gray-500 dark:text-gray-400  px-1.5 rounded">{extra.extraCategoryName}</span>
+                        <div className="min-w-0">
+                          <h6 className="text-xs font-semibold text-gray-800 dark:text-gray-200 truncate">{extra.extraName}</h6>
+                          <span className="text-[10px] text-gray-500 dark:text-gray-400 px-1.5 rounded hidden sm:inline-block">{extra.extraCategoryName}</span>
                         </div>
-                     </div>
-                     <div className="flex items-center gap-4">
+                      </div>
+                      <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
                         <div className="text-right">
-                          <p className="text-[10px] text-gray-500">Qty</p>
-                          <p className="text-xs font-medium text-gray-900 dark:text-gray-100">{extra.quantity}</p>
+                          <p className="text-[10px] text-gray-500 hidden sm:block">Qty</p>
+                          <p className="text-xs font-medium text-gray-900 dark:text-gray-100">x{extra.quantity}</p>
                         </div>
                         <div className="text-right min-w-[3rem]">
-                           <p className="text-[10px] text-gray-500">Price</p>
-                           <p className={`text-xs font-bold ${
-                             isRemoval ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
-                           }`}>
-                              {currency.symbol}{extra.totalPrice > 0 ? `+${extra.totalPrice.toFixed(2)}` : 'Free'}
-                           </p>
+                          <p className="text-[10px] text-gray-500 hidden sm:block">Price</p>
+                          <p className={`text-xs font-bold ${
+                            isRemoval ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
+                          }`}>
+                            {currency.symbol}{extra.totalPrice > 0 ? `+${extra.totalPrice.toFixed(2)}` : 'Free'}
+                          </p>
                         </div>
-                     </div>
-                   </div>
-                 </div>
-                 );
-               })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
 
-          {/* RENDER ADDONS (Existing Logic) */}
+          {/* RENDER ADDONS */}
           {item.addonItems && item.addonItems.length > 0 && (
             <div className={`mt-2 space-y-2 relative`}>
               <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-300 to-transparent dark:from-blue-600"></div>
@@ -378,154 +360,175 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
   };
 
   return (
-    <div className={`fixed inset-0 dark:bg-black/80 flex items-center justify-center z-50 p-3 animate-fadeIn transition-all duration-300 ${blurOpacity[blurIntensity]} ${blurClasses[blurIntensity]}`}>
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-5xl w-full max-h-[95vh] overflow-hidden flex flex-col animate-slideUp">
+    <div className={`fixed inset-0 dark:bg-black/80 flex items-center justify-center z-50 p-0 sm:p-3 animate-fadeIn transition-all duration-300 ${blurOpacity[blurIntensity]} ${blurClasses[blurIntensity]}`}>
+      <div className="bg-white dark:bg-gray-800 h-full sm:h-auto sm:rounded-xl shadow-2xl w-full max-w-5xl max-h-[100vh] sm:max-h-[95vh] overflow-hidden flex flex-col animate-slideUp">
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 px-4 py-3">
-          <div className="flex items-center justify-between">
+        <div className="relative bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-700 dark:to-purple-700 px-4 py-3 shrink-0">
+          <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 backdrop-blur-sm rounded-lg">
                 <Eye className="w-4 h-4 text-white" />
               </div>
-              <div>
-                <h3 className="text-lg font-bold text-white">
+              <div className="min-w-0">
+                <h3 className="text-base sm:text-lg font-bold text-white truncate">
                   {t('ordersManager.orderDetailsTitle')}
                 </h3>
-                <p className="text-indigo-100 text-xs">
+                <p className="text-indigo-100 text-xs truncate">
                   Order #{order.orderTag}
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-1.5">
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className={`p-1.5 backdrop-blur-sm rounded-md transition-all text-white ${
+                className={`p-2 sm:p-1.5 backdrop-blur-sm rounded-md transition-all text-white ${
                   showSettings ? 'bg-white/30' : 'bg-white/20 hover:bg-white/30'
                 }`}
                 title="Settings"
               >
-                <Settings className="w-4 h-4" />
+                <Settings className="w-5 h-5 sm:w-4 sm:h-4" />
               </button>
-              
+
+              {/* These buttons hidden on mobile, available in settings panel */}
               <button
                 onClick={cycleBlurIntensity}
-                className="p-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-md transition-all text-white flex items-center gap-1"
+                className="hidden md:flex p-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-md transition-all text-white items-center gap-1"
                 title={`Blur: ${blurIntensity}`}
               >
                 <Droplets className="w-4 h-4" />
                 <span className="text-[10px] font-semibold uppercase">{blurIntensity[0]}</span>
               </button>
-              
+
               <button
                 onClick={cycleFontSize}
-                className="p-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-md transition-all text-white flex items-center gap-1"
+                className="hidden md:flex p-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-md transition-all text-white items-center gap-1"
                 title={`Font Size: ${fontSize}`}
               >
                 <Type className="w-4 h-4" />
                 <span className="text-[10px] font-semibold uppercase">{fontSize[0]}</span>
               </button>
-              
+
               <button
                 onClick={cycleViewDensity}
-                className="p-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-md transition-all text-white flex items-center gap-1"
+                className="hidden md:flex p-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-md transition-all text-white items-center gap-1"
                 title={`Density: ${viewDensity}`}
               >
                 <Maximize2 className="w-4 h-4" />
                 <span className="text-[10px] font-semibold uppercase">{viewDensity[0]}</span>
               </button>
-              
+
               <button
                 onClick={handlePrint}
-                className="p-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-md transition-all text-white"
+                className="p-2 sm:p-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-md transition-all text-white"
                 title="Print Order"
               >
-                <Printer className="w-4 h-4" />
+                <Printer className="w-5 h-5 sm:w-4 sm:h-4" />
               </button>
-              
+
               <button
                 onClick={onClose}
-                className="p-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-md transition-all text-white"
+                className="p-2 sm:p-1.5 bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-md transition-all text-white"
               >
-                <XCircle className="w-4 h-4" />
+                <XCircle className="w-5 h-5 sm:w-4 sm:h-4" />
               </button>
             </div>
           </div>
 
-          {/* Settings Panel */}
+          {/* Settings Panel - Extended for mobile */}
           {showSettings && (
-            <div className="mt-3 bg-white/10 backdrop-blur-md rounded-lg p-3 border border-white/20">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <Droplets className="w-4 h-4 text-white" />
-                  <span className="text-sm font-semibold text-white">Background Blur</span>
+            <div className="mt-3 bg-white/10 backdrop-blur-md rounded-lg p-3 border border-white/20 animate-in fade-in slide-in-from-top-2">
+              <div className="flex flex-col gap-3">
+                {/* Mobile-only view controls */}
+                <div className="md:hidden grid grid-cols-3 gap-2 pb-2 border-b border-white/20">
+                   <button onClick={cycleBlurIntensity} className="flex flex-col items-center p-2 bg-white/10 rounded">
+                      <Droplets className="w-4 h-4 text-white mb-1" />
+                      <span className="text-[10px] text-white">Blur</span>
+                   </button>
+                   <button onClick={cycleFontSize} className="flex flex-col items-center p-2 bg-white/10 rounded">
+                      <Type className="w-4 h-4 text-white mb-1" />
+                      <span className="text-[10px] text-white">Font</span>
+                   </button>
+                   <button onClick={cycleViewDensity} className="flex flex-col items-center p-2 bg-white/10 rounded">
+                      <Maximize2 className="w-4 h-4 text-white mb-1" />
+                      <span className="text-[10px] text-white">Density</span>
+                   </button>
                 </div>
-                <div className="flex gap-1">
-                  {(['none', 'light', 'medium', 'heavy'] as BlurIntensity[]).map((blur) => (
-                    <button
-                      key={blur}
-                      onClick={() => setBlurIntensity(blur)}
-                      className={`px-2 py-1 text-[10px] rounded transition-all ${
-                        blurIntensity === blur
-                          ? 'bg-white/30 text-white font-bold border border-white/40'
-                          : 'bg-white/10 text-white/70 hover:bg-white/20'
-                      }`}
-                    >
-                      {blur}
-                    </button>
-                  ))}
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Droplets className="w-4 h-4 text-white" />
+                    <span className="text-sm font-semibold text-white">Background Blur (Desktop)</span>
+                  </div>
+                  <div className="flex gap-1">
+                    {(['none', 'light', 'medium', 'heavy'] as BlurIntensity[]).map((blur) => (
+                      <button
+                        key={blur}
+                        onClick={() => setBlurIntensity(blur)}
+                        className={`px-2 py-1 text-[10px] rounded transition-all ${
+                          blurIntensity === blur
+                            ? 'bg-white/30 text-white font-bold border border-white/40'
+                            : 'bg-white/10 text-white/70 hover:bg-white/20'
+                        }`}
+                      >
+                        {blur}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="text-sm font-semibold text-white">Section Visibility</h4>
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => toggleAllSections(true)}
-                    className="px-2 py-1 text-[10px] bg-white/20 hover:bg-white/30 rounded text-white transition-all"
-                  >
-                    Show All
-                  </button>
-                  <button
-                    onClick={() => toggleAllSections(false)}
-                    className="px-2 py-1 text-[10px] bg-white/20 hover:bg-white/30 rounded text-white transition-all"
-                  >
-                    Hide All
-                  </button>
+
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-semibold text-white">Sections</h4>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => toggleAllSections(true)}
+                        className="px-2 py-1 text-[10px] bg-white/20 hover:bg-white/30 rounded text-white transition-all"
+                      >
+                        Show All
+                      </button>
+                      <button
+                        onClick={() => toggleAllSections(false)}
+                        className="px-2 py-1 text-[10px] bg-white/20 hover:bg-white/30 rounded text-white transition-all"
+                      >
+                        Hide All
+                      </button>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {Object.entries(sectionVisibility).map(([key, value]) => (
+                      <button
+                        key={key}
+                        onClick={() => toggleSection(key as keyof SectionVisibility)}
+                        className={`px-2 py-1.5 rounded text-xs font-medium transition-all flex items-center gap-1.5 ${
+                          value
+                            ? 'bg-white/20 text-white border border-white/30'
+                            : 'bg-white/5 text-white/50 border border-white/10'
+                        }`}
+                      >
+                        {value ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {Object.entries(sectionVisibility).map(([key, value]) => (
-                  <button
-                    key={key}
-                    onClick={() => toggleSection(key as keyof SectionVisibility)}
-                    className={`px-2 py-1.5 rounded text-xs font-medium transition-all flex items-center gap-1.5 ${
-                      value 
-                        ? 'bg-white/20 text-white border border-white/30' 
-                        : 'bg-white/5 text-white/50 border border-white/10'
-                    }`}
-                  >
-                    {value ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                    {key.charAt(0).toUpperCase() + key.slice(1)}
-                  </button>
-                ))}
               </div>
             </div>
           )}
 
-          <div className="mt-3 flex items-center justify-between">
-            <div className="flex items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2 min-w-0">
               <span className="text-3xl">{(order as any).orderTypeIcon || '📦'}</span>
-              <div>
-                <h4 className="text-sm font-semibold text-white">
+              <div className="min-w-0">
+                <h4 className="text-sm font-semibold text-white truncate">
                   {(order as any).orderTypeName || 'Order'}
                 </h4>
-                <p className="text-xs text-indigo-100">
+                <p className="text-xs text-indigo-100 truncate">
                   {(order as any).orderTypeCode}
                 </p>
               </div>
             </div>
-            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold shadow-md ${OrderStatusUtils.getStatusBadgeClass(status)}`}>
+            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold shadow-md whitespace-nowrap ${OrderStatusUtils.getStatusBadgeClass(status)}`}>
               <span>{OrderStatusUtils.getStatusIcon(status)}</span>
               <span className="ml-1">
                 {orderService.getOrderStatusText(status, lang)}
@@ -536,18 +539,18 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
 
         {/* Content */}
         <div className={`flex-1 overflow-y-auto ${densityClasses[viewDensity]} ${fontSizeClasses[fontSize]}`}>
-          
+
           {/* Quick Stats */}
           {sectionVisibility.stats && (
             <div className={`grid grid-cols-2 md:grid-cols-4 ${densityGap[viewDensity]}`}>
               <div className={`bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 ${densityPadding[viewDensity]} rounded-lg border border-blue-200 dark:border-blue-700 hover:shadow-md transition-all`}>
                 <Hash className="w-4 h-4 text-blue-600 dark:text-blue-400 mb-1" />
                 <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">{t('ordersManager.OrderTag')}</p>
-                <p className="text-sm font-bold text-gray-900 dark:text-gray-100 font-mono">
+                <p className="text-sm font-bold text-gray-900 dark:text-gray-100 font-mono truncate">
                   {order.orderTag}
                 </p>
               </div>
-              
+
               <div className={`bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 ${densityPadding[viewDensity]} rounded-lg border border-purple-200 dark:border-purple-700 hover:shadow-md transition-all`}>
                 <Package className="w-4 h-4 text-purple-600 dark:text-purple-400 mb-1" />
                 <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">{t('ordersManager.ItemCount')}</p>
@@ -555,7 +558,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                   {(order as any).itemCount || (order as any).items?.length || 0}
                 </p>
               </div>
-              
+
               <div className={`bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 ${densityPadding[viewDensity]} rounded-lg border border-amber-200 dark:border-amber-700 hover:shadow-md transition-all`}>
                 <ShoppingBag className="w-4 h-4 text-amber-600 dark:text-amber-400 mb-1" />
                 <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">{t('ordersManager.quantity')}</p>
@@ -579,11 +582,11 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                   })()}
                 </p>
               </div>
-              
+
               <div className={`bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900/30 dark:to-emerald-800/30 ${densityPadding[viewDensity]} rounded-lg border border-green-200 dark:border-green-700 hover:shadow-md transition-all`}>
-                <span className=''>{currency.symbol}</span>
+                <span className='text-xs text-green-600 dark:text-green-400'>{currency.symbol}</span>
                 <p className="text-[10px] text-gray-600 dark:text-gray-400 mb-0.5">{t('ordersManager.total')}</p>
-                <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                <p className="text-lg font-bold text-green-600 dark:text-green-400 truncate">
                   {currency.symbol}{order.totalPrice.toFixed(2)}
                 </p>
               </div>
@@ -607,30 +610,30 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 </div>
                 <ChevronUp className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-blue-600 transition-colors" />
               </button>
-              <div className={`grid grid-cols-1 md:grid-cols-2 ${densityGap[viewDensity]}`}>
+              <div className={`grid grid-cols-1 sm:grid-cols-2 ${densityGap[viewDensity]}`}>
                 <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
-                  <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
+                  <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md flex-shrink-0">
                     <User className="w-3 h-3 text-gray-600 dark:text-gray-400" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
                       {t('ordersManager.CustomerName')}
                     </p>
-                    <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                    <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
                       {order.customerName || 'N/A'}
                     </p>
                   </div>
                 </div>
                 {(order as any).customerPhone && (
                   <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
-                    <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
+                    <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md flex-shrink-0">
                       <Phone className="w-3 h-3 text-gray-600 dark:text-gray-400" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
                         {t('ordersManager.PhoneNumber')}
                       </p>
-                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
                         {(order as any).customerPhone}
                       </p>
                     </div>
@@ -638,14 +641,14 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 )}
                 {paymentMethodInfo && (
                   <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
-                    <div className={`p-1.5 ${paymentMethodInfo.bgColor} rounded-md`}>
+                    <div className={`p-1.5 ${paymentMethodInfo.bgColor} rounded-md flex-shrink-0`}>
                       <paymentMethodInfo.icon className={`w-3 h-3 ${paymentMethodInfo.color}`} />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
                         {t('ordersManager.PaymentMethod') || 'Payment Method'}
                       </p>
-                      <p className={`text-xs font-semibold ${paymentMethodInfo.color}`}>
+                      <p className={`text-xs font-semibold ${paymentMethodInfo.color} truncate`}>
                         {paymentMethodInfo.label}
                       </p>
                     </div>
@@ -671,7 +674,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     )}
                   </div>
                   <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                    {(order as any).deliveryAddress 
+                    {(order as any).deliveryAddress
                       ? t('ordersManager.DeliveryInformation')
                       : t('ordersManager.TableInformation')
                     }
@@ -682,14 +685,14 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
               <div className={`space-y-2`}>
                 {(order as any).deliveryAddress && (
                   <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
-                    <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
+                    <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md flex-shrink-0">
                       <MapPin className="w-3 h-3 text-gray-600 dark:text-gray-400" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
                         {t('ordersManager.DeliveryAddress')}
                       </p>
-                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 break-words">
                         {(order as any).deliveryAddress}
                       </p>
                     </div>
@@ -697,14 +700,14 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 )}
                 {(order as any).tableName && (
                   <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
-                    <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
+                    <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md flex-shrink-0">
                       <Home className="w-3 h-3 text-gray-600 dark:text-gray-400" />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
                         {t('ordersManager.table')}
                       </p>
-                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+                      <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 truncate">
                         {(order as any).tableName} {(order as any).tableId && `(ID: ${(order as any).tableId})`}
                       </p>
                     </div>
@@ -718,14 +721,14 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
           {sectionVisibility.notes && cleanNotes && (
             <div className={`bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-lg ${densityPadding[viewDensity]} border border-amber-200 dark:border-amber-700`}>
               <div className="flex items-start gap-2">
-                <div className="p-1.5 bg-amber-100 dark:bg-amber-800 rounded-md">
+                <div className="p-1.5 bg-amber-100 dark:bg-amber-800 rounded-md flex-shrink-0">
                   <MessageSquare className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <p className="text-xs font-bold text-amber-900 dark:text-amber-200 mb-1">
                     {t('ordersManager.OrderNotes')}
                   </p>
-                  <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
+                  <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed break-words">
                     {cleanNotes}
                   </p>
                 </div>
@@ -750,10 +753,10 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 </div>
                 <ChevronUp className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-indigo-600 transition-colors" />
               </button>
-              
+
               {(() => {
                 const items = (order as any).items;
-                
+
                 if (!items || items.length === 0) {
                   return (
                     <div className="p-8 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-700">
@@ -799,7 +802,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
 
               <div className="space-y-2">
                 <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
-                  <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
+                  <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md flex-shrink-0">
                     <Calendar className="w-3 h-3 text-gray-600 dark:text-gray-400" />
                   </div>
                   <div>
@@ -814,9 +817,9 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     </p>
                   </div>
                 </div>
-                
+
                 <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
-                  <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
+                  <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md flex-shrink-0">
                     <User className="w-3 h-3 text-gray-600 dark:text-gray-400" />
                   </div>
                   <div>
@@ -883,14 +886,14 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     // Fallback for non-JSON or malformed log
                     return (
                       <div className={`flex items-start gap-2 ${densityPadding[viewDensity]} bg-white dark:bg-gray-800 rounded-md`}>
-                        <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md">
+                        <div className="p-1.5 bg-gray-100 dark:bg-gray-700 rounded-md flex-shrink-0">
                           <AlertCircle className="w-3 h-3 text-gray-600 dark:text-gray-400" />
                         </div>
-                        <div>
+                        <div className="min-w-0">
                           <p className="text-[10px] font-medium text-gray-500 dark:text-gray-400 mb-0.5">
                             {t('ordersManager.modificationLog') || 'Raw Log'}
                           </p>
-                          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 break-all">
+                          <p className="text-xs font-semibold text-gray-900 dark:text-gray-100 break-words">
                             {(order as any).modificationLog}
                           </p>
                         </div>
@@ -928,7 +931,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     {currency.symbol}{(order.subTotal || 0).toFixed(2)}
                   </span>
                 </div>
-                
+
                 {order.serviceFeeApplied !== undefined && order.serviceFeeApplied > 0 && (
                   <div className={`flex justify-between items-center ${densityPadding[viewDensity]} bg-blue-50 dark:bg-blue-900/20 rounded-md`}>
                     <span className="text-xs text-gray-700 dark:text-gray-300 font-medium">
@@ -939,11 +942,9 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     </span>
                   </div>
                 )}
-                
-             
-                
+
                 <div className="h-px bg-gradient-to-r from-transparent via-gray-300 dark:via-gray-600 to-transparent my-2"></div>
-                
+
                 <div className={`flex justify-between items-center ${densityPadding[viewDensity]} bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 rounded-md border border-green-200 dark:border-green-700`}>
                   <span className="text-base font-bold text-gray-900 dark:text-gray-100">
                     {t('ordersManager.total')}
@@ -973,7 +974,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 </div>
                 <ChevronUp className="w-4 h-4 text-gray-600 dark:text-gray-400 group-hover:text-slate-600 transition-colors" />
               </button>
-              
+
               <div className="space-y-3">
                 <div className="relative pl-8">
                   <div className="absolute left-0 top-0.5 w-5 h-5 bg-indigo-500 rounded-full border-2 border-white dark:border-gray-800 shadow-md flex items-center justify-center">
@@ -997,7 +998,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                     </p>
                   </div>
                 </div>
-                
+
                 {(order as any).confirmedAt && (
                   <div className="relative pl-8">
                     <div className="absolute left-0 top-0.5 w-5 h-5 bg-green-500 rounded-full border-2 border-white dark:border-gray-800 shadow-md flex items-center justify-center">
@@ -1056,7 +1057,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        
+
         @keyframes slideUp {
           from {
             opacity: 0;
@@ -1067,11 +1068,11 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
             transform: translateY(0);
           }
         }
-        
+
         .animate-fadeIn {
           animation: fadeIn 0.2s ease-out;
         }
-        
+
         .animate-slideUp {
           animation: slideUp 0.3s ease-out;
         }

@@ -227,10 +227,10 @@ class BranchService {
           openHours: apiBranch?.contact.openHours || '',
       },
       workingHours: apiBranch.workingHours?.map(wh => ({
-        openTime: wh.openTime,
-        closeTime: wh.closeTime,
         dayOfWeek: wh.dayOfWeek,
-        isWorkingDay : wh.isWorkingDay
+        isWorkingDay: wh.isWorkingDay,
+        isOpen24Hours: (wh as any).isOpen24Hours ?? false,
+        timeSlots: (wh as any).timeSlots || [{ openTime: wh.openTime, closeTime: wh.closeTime }]
       })) || []
     };
   }
@@ -280,9 +280,13 @@ class BranchService {
       if (data.createBranchWorkingHourCoreDto && data.createBranchWorkingHourCoreDto.length > 0) {
         batchUpdateData.batchUpdateBranchWorkingHourDto = data.createBranchWorkingHourCoreDto.map(hour => ({
           dayOfWeek: hour.dayOfWeek,
-          openTime: hour.openTime,
-          closeTime: hour.closeTime,
-          isWorkingDay: hour.isWorkingDay
+          isWorkingDay: hour.isWorkingDay,
+          isOpen24Hours: hour.isOpen24Hours ?? false,
+          timeSlots: hour.timeSlots?.map(slot => ({
+            id: slot.id,
+            openTime: slot.openTime,
+            closeTime: slot.closeTime
+          })) || []
         }));
       }
 

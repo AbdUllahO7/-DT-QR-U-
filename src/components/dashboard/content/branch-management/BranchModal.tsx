@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Building2,
   MapPin,
@@ -11,11 +11,15 @@ import {
   Info,
   Clock,
   MapPinned,
-  FileText,
   ArrowLeft,
   ArrowRight,
   Navigation,
-  Languages
+  Trash2,
+  Image as ImageIcon,
+  ChevronDown,
+  Search,
+  Check,
+  Plus
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import type { CreateBranchWithDetailsDto, CreateBranchWorkingHourCoreDto } from '../../../../types/api';
@@ -46,6 +50,112 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
+// --- Custom Select Component (Matches BranchEditModal) ---
+interface CustomSelectProps {
+  options: { label: string; value: string; searchTerms?: string }[];
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  label?: string;
+  icon?: React.ReactNode;
+}
+
+const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, placeholder, icon }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const { isRTL } = useLanguage();
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Filter options
+  const filteredOptions = options.filter(option => 
+    option.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    option.value.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    option.searchTerms?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  return (
+    <div className="relative w-full" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-full flex items-center justify-between px-3 py-2 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors focus:ring-2 focus:ring-blue-500 ${
+          isOpen ? 'border-blue-500 ring-2 ring-blue-500' : 'border-gray-300 dark:border-gray-600'
+        }`}
+      >
+        <div className="flex items-center gap-2 overflow-hidden">
+          {icon}
+          <span className="truncate block text-sm">
+            {selectedOption ? selectedOption.label : <span className="text-gray-500">{placeholder}</span>}
+          </span>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-60 overflow-hidden flex flex-col"
+          >
+            <div className="p-2 border-b border-gray-100 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800">
+              <div className="relative">
+                <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400`} />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search..."
+                  className={`w-full ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'} py-1.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-900 dark:text-white`}
+                  autoFocus
+                />
+              </div>
+            </div>
+            
+            <div className="overflow-y-auto flex-1">
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      onChange(option.value);
+                      setIsOpen(false);
+                      setSearchTerm('');
+                    }}
+                    className={`w-full px-4 py-2 text-sm text-left flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                      value === option.value ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
+                    }`}
+                  >
+                    <span>{option.label}</span>
+                    {value === option.value && <Check className="w-4 h-4" />}
+                  </button>
+                ))
+              ) : (
+                <div className="px-4 py-3 text-sm text-gray-500 text-center">No results found</div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 interface LanguageOption {
   code: string;
   displayName: string;
@@ -60,7 +170,7 @@ interface BranchModalProps {
   formData: CreateBranchWithDetailsDto;
   setFormData: React.Dispatch<React.SetStateAction<CreateBranchWithDetailsDto>>;
   isSubmitting: boolean;
-  hasChanges?: boolean; // Made optional
+  hasChanges?: boolean;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onWorkingHourChange: (dayIndex: number, field: keyof CreateBranchWorkingHourCoreDto, value: any) => void;
   
@@ -108,7 +218,6 @@ const BranchModal: React.FC<BranchModalProps> = ({
   setOpenHoursTranslations
 }) => {
   const { t, language } = useLanguage();
-  // Default language for fallback in validations
   const defaultLanguage = 'en';
   const isRTL = language === 'ar';
 
@@ -126,6 +235,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
     lat: 41.0082, // Default to Istanbul
     lng: 28.9784
   });
+  const [googleMapsLink, setGoogleMapsLink] = useState<string>('');
+  const [linkError, setLinkError] = useState<string>('');
 
   const dayNamesDisplay = Array.isArray(t('branchModal.workingHours.days'))
     ? t('branchModal.workingHours.days')
@@ -158,6 +269,19 @@ const BranchModal: React.FC<BranchModalProps> = ({
     }
     return { code: '+90', number: fullNumber };
   };
+
+  // Prepare options for custom select
+  const countryCodeOptions = countriesWithCodes.map(c => ({
+    label: `${c.name} (${c.code})`,
+    value: c.code,
+    searchTerms: c.name
+  }));
+
+  const countryNameOptions = countryKeys.map(key => ({
+    label: t(key),
+    value: t(key),
+    searchTerms: key
+  }));
 
   const Toggle = ({ checked, onChange, disabled }: { checked: boolean; onChange: (checked: boolean) => void; disabled?: boolean }) => (
     <button
@@ -305,24 +429,87 @@ const BranchModal: React.FC<BranchModalProps> = ({
     const updatedFormData = {
       ...formData,
       createBranchWorkingHourCoreDto: formData.createBranchWorkingHourCoreDto.map((day, index) => {
-        if (index === dayIndex) {
-          if (field === 'openTime' || field === 'closeTime') {
+        if (index !== dayIndex) return day;
+
+        // Handle special cases for backend validation rules
+        if (field === 'isWorkingDay') {
+          if (!value) {
+            // Non-working days cannot have time slots
+            return { ...day, isWorkingDay: value, timeSlots: [], isOpen24Hours: false };
+          } else {
+            // When enabling working day, add default time slot if none exists
             return {
               ...day,
-              [field]: formatTimeForApi(value)
+              isWorkingDay: value,
+              timeSlots: day.timeSlots?.length ? day.timeSlots : [{ openTime: '08:00:00', closeTime: '22:00:00' }]
             };
           }
-          if (field === 'isWorkingDay') {
-            return { ...day, isWorkingDay: value };
-          }
-          return { ...day, [field]: value };
         }
-        return day;
+
+        if (field === 'isOpen24Hours') {
+          if (value) {
+            // 24-hour open days cannot have time slots
+            return { ...day, isOpen24Hours: value, timeSlots: [] };
+          } else {
+            // When disabling 24 hours, add default time slot
+            return { ...day, isOpen24Hours: value, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] };
+          }
+        }
+
+        return { ...day, [field]: value };
       })
     };
 
     setFormData(updatedFormData);
     onWorkingHourChange(dayIndex, field, value);
+  };
+
+  const handleTimeSlotChange = (dayIndex: number, slotIndex: number, field: 'openTime' | 'closeTime', value: string) => {
+    if (!formData.createBranchWorkingHourCoreDto) return;
+
+    const updatedFormData = {
+      ...formData,
+      createBranchWorkingHourCoreDto: formData.createBranchWorkingHourCoreDto.map((day, index) => {
+        if (index !== dayIndex) return day;
+        const newTimeSlots = [...(day.timeSlots || [])];
+        if (newTimeSlots[slotIndex]) {
+          newTimeSlots[slotIndex] = { ...newTimeSlots[slotIndex], [field]: formatTimeForApi(value) };
+        }
+        return { ...day, timeSlots: newTimeSlots };
+      })
+    };
+
+    setFormData(updatedFormData);
+  };
+
+  const handleAddTimeSlot = (dayIndex: number) => {
+    if (!formData.createBranchWorkingHourCoreDto) return;
+
+    const updatedFormData = {
+      ...formData,
+      createBranchWorkingHourCoreDto: formData.createBranchWorkingHourCoreDto.map((day, index) => {
+        if (index !== dayIndex) return day;
+        const newTimeSlots = [...(day.timeSlots || []), { openTime: '08:00:00', closeTime: '22:00:00' }];
+        return { ...day, timeSlots: newTimeSlots };
+      })
+    };
+
+    setFormData(updatedFormData);
+  };
+
+  const handleRemoveTimeSlot = (dayIndex: number, slotIndex: number) => {
+    if (!formData.createBranchWorkingHourCoreDto) return;
+
+    const updatedFormData = {
+      ...formData,
+      createBranchWorkingHourCoreDto: formData.createBranchWorkingHourCoreDto.map((day, index) => {
+        if (index !== dayIndex) return day;
+        const newTimeSlots = (day.timeSlots || []).filter((_, i) => i !== slotIndex);
+        return { ...day, timeSlots: newTimeSlots };
+      })
+    };
+
+    setFormData(updatedFormData);
   };
 
   const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
@@ -356,6 +543,11 @@ const BranchModal: React.FC<BranchModalProps> = ({
     } finally {
       setIsUploadingLogo(false);
     }
+  };
+
+  const handleRemoveImage = () => {
+    setBranchLogoPreview(null);
+    setFormData(prev => ({ ...prev, branchLogoPath: null }));
   };
 
   const handleNextStep = () => {
@@ -411,6 +603,67 @@ const BranchModal: React.FC<BranchModalProps> = ({
     }
   };
 
+  // Function to extract coordinates from Google Maps link
+  const extractCoordinatesFromLink = (link: string): { lat: number; lng: number } | null => {
+    try {
+      const pattern1 = /@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match1 = link.match(pattern1);
+      if (match1) return { lat: parseFloat(match1[1]), lng: parseFloat(match1[2]) };
+
+      const pattern2 = /q=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match2 = link.match(pattern2);
+      if (match2) return { lat: parseFloat(match2[1]), lng: parseFloat(match2[2]) };
+
+      const pattern3 = /place\/[^@]*@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match3 = link.match(pattern3);
+      if (match3) return { lat: parseFloat(match3[1]), lng: parseFloat(match3[2]) };
+
+      const pattern4 = /!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/;
+      const match4 = link.match(pattern4);
+      if (match4) return { lat: parseFloat(match4[1]), lng: parseFloat(match4[2]) };
+
+      return null;
+    } catch (error) {
+      console.error('Error extracting coordinates:', error);
+      return null;
+    }
+  };
+
+  const handleGoogleMapsLinkChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const link = e.target.value;
+    setGoogleMapsLink(link);
+    setLinkError('');
+
+    if (link.trim()) {
+      const coords = extractCoordinatesFromLink(link);
+      if (coords) {
+        setSelectedLatLng(coords);
+        setLinkError('');
+      } else if (link.includes('google.com/maps') || link.includes('maps.app.goo.gl')) {
+        setLinkError(t('onboardingBranch.form.step3.location.invalidLink') || 'Could not extract coordinates from this link. Please try a different format.');
+      }
+    }
+  };
+
+  const handleGetCurrentLocation = (): void => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setSelectedLatLng({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          alert(t('onboardingBranch.form.step3.location.geolocationError') || 'Could not get your location. Please select manually.');
+        }
+      );
+    } else {
+      alert(t('onboardingBranch.form.step3.location.geolocationNotSupported') || 'Geolocation is not supported by your browser.');
+    }
+  };
+
   // --- MAP HANDLERS ---
   const handleOpenMapModal = (): void => {
     if (formData.createContactDto.location) {
@@ -423,6 +676,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
         console.error('Failed to parse location', error);
       }
     }
+    setGoogleMapsLink('');
+    setLinkError('');
     setIsMapModalOpen(true);
   };
 
@@ -432,7 +687,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
 
   const handleConfirmLocation = (): void => {
     const locationString = `${selectedLatLng.lat.toFixed(6)},${selectedLatLng.lng.toFixed(6)}`;
-    
+
     setFormData(prev => ({
       ...prev,
       createContactDto: {
@@ -440,7 +695,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
         location: locationString
       }
     }));
-    
+
     // Synthetic event to update parent state/validation
     const syntheticEvent = {
         target: {
@@ -488,73 +743,243 @@ const BranchModal: React.FC<BranchModalProps> = ({
 
     return (
       <AnimatePresence>
-        <div className="fixed inset-0 bg-black bg-opacity-60 dark:bg-opacity-80 z-[60] flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className={`relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-xl shadow-2xl ${isRTL ? 'rtl' : 'ltr'}`}
-          >
-            <div className={`flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                {t('onboardingBranch.form.step3.location.mapTitle')}
-              </h3>
-              <button
-                onClick={handleCloseMapModal}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
+        <div className="fixed inset-0 z-[9999] overflow-y-auto" dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className="flex min-h-screen items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleCloseMapModal}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            />
 
-            <div className="p-6">
-              <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                {t('onboardingBranch.form.step3.location.clickToPin')}
-              </div>
-
-              <div className="relative w-full h-[400px] bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 shadow-inner">
-                <MapContainer
-                  center={[selectedLatLng.lat, selectedLatLng.lng]}
-                  zoom={13}
-                  style={{ height: '100%', width: '100%' }}
-                  scrollWheelZoom={true}
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-5xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+            >
+              {/* Header */}
+              <div className={`flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                  <MapPin className="h-6 w-6 text-primary-600" />
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    {t('onboardingBranch.form.step3.location.mapTitle')}
+                  </h3>
+                </div>
+                <button
+                  onClick={handleCloseMapModal}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <MapUpdater center={[selectedLatLng.lat, selectedLatLng.lng]} />
-                  <LocationMarker />
-                </MapContainer>
+                  <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                </button>
               </div>
 
-              <div className="mt-4 flex items-center justify-between">
-                <div className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  <span className="font-medium">{t('onboardingBranch.form.step3.location.selectedCoordinates')}</span>
-                  <code className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400" dir="ltr">
-                    {selectedLatLng.lat.toFixed(6)}, {selectedLatLng.lng.toFixed(6)}
-                  </code>
+              {/* Content - Scrollable */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {/* Google Maps Link Input */}
+                <div className="space-y-2">
+                  <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.googleMapsLink') || 'Google Maps Link (optional)'}
+                  </label>
+                  <div className="relative">
+                    <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+                    <input
+                      type="text"
+                      value={googleMapsLink}
+                      onChange={handleGoogleMapsLinkChange}
+                      placeholder={t('onboardingBranch.form.step3.location.googleMapsLinkPlaceholder') || 'https://maps.google.com/...'}
+                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${
+                        linkError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
+                      } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                      dir="ltr"
+                    />
+                  </div>
+                  {linkError && (
+                    <p className={`text-xs text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {linkError}
+                    </p>
+                  )}
+                  <p className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.googleMapsLinkHelper') || 'Paste a Google Maps link and coordinates will be extracted automatically'}
+                  </p>
+                </div>
+
+                {/* Current Location Button */}
+                <button
+                  type="button"
+                  onClick={handleGetCurrentLocation}
+                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all duration-200 border border-blue-200 dark:border-blue-700 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+                >
+                  <Navigation className="h-5 w-5" />
+                  <span className="font-medium">
+                    {t('onboardingBranch.form.step3.location.useCurrentLocation') || 'Use my current location'}
+                  </span>
+                </button>
+
+                {/* Interactive Map Container */}
+                <div className="space-y-2">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <label className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.interactiveMap') || 'Interactive Map'}
+                    </label>
+                    <span className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.clickToPin') || 'Click on the map to pin location'}
+                    </span>
+                  </div>
+                  <div className="relative w-full h-[400px] bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 shadow-inner">
+                    <MapContainer
+                      center={[selectedLatLng.lat, selectedLatLng.lng]}
+                      zoom={13}
+                      style={{ height: '100%', width: '100%' }}
+                      scrollWheelZoom={true}
+                    >
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <MapUpdater center={[selectedLatLng.lat, selectedLatLng.lng]} />
+                      <LocationMarker />
+                    </MapContainer>
+
+                    {/* Overlay with instructions */}
+                    <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-[1000] pointer-events-none">
+                      <div className="bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-600">
+                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-primary-600" />
+                          {t('onboardingBranch.form.step3.location.markerPosition') || 'Marker position'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* External Map Link */}
+                  <a
+                    href={`https://www.openstreetmap.org/?mlat=${selectedLatLng.lat}&mlon=${selectedLatLng.lng}#map=15/${selectedLatLng.lat}/${selectedLatLng.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 ${isRTL ? 'flex-row-reverse' : ''}`}
+                  >
+                    <span>{t('onboardingBranch.form.step3.location.openFullMap') || 'Open in full map'}</span>
+                    <ArrowRight className={`h-3 w-3 ${isRTL ? 'mr-1 rotate-180' : 'ml-1'}`} />
+                  </a>
+                </div>
+
+                {/* Coordinate Inputs */}
+                <div className="space-y-3">
+                  <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.manualCoordinates') || 'Manual Coordinates'}
+                  </label>
+                  <div className={`grid grid-cols-2 gap-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    <div>
+                      <label className={`block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('onboardingBranch.form.step3.location.latitude') || 'Latitude'}
+                      </label>
+                      <input
+                        title='number'
+                        type="number"
+                        step="0.000001"
+                        value={selectedLatLng.lat}
+                        onChange={(e) => {
+                          const newLat = parseFloat(e.target.value) || 0;
+                          if (newLat >= -90 && newLat <= 90) {
+                            setSelectedLatLng(prev => ({ ...prev, lat: newLat }));
+                          }
+                        }}
+                        className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                        dir="ltr"
+                        min="-90"
+                        max="90"
+                      />
+                    </div>
+                    <div>
+                      <label className={`block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('onboardingBranch.form.step3.location.longitude') || 'Longitude'}
+                      </label>
+                      <input
+                        title='number2'
+                        type="number"
+                        step="0.000001"
+                        value={selectedLatLng.lng}
+                        onChange={(e) => {
+                          const newLng = parseFloat(e.target.value) || 0;
+                          if (newLng >= -180 && newLng <= 180) {
+                            setSelectedLatLng(prev => ({ ...prev, lng: newLng }));
+                          }
+                        }}
+                        className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                        dir="ltr"
+                        min="-180"
+                        max="180"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Info Box */}
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-xl">
+                  <div className={`flex items-start space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                    <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                    <div className={`text-sm text-blue-700 dark:text-blue-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      <p className="font-medium mb-2">
+                        {t('onboardingBranch.form.step3.location.mapHelp') || 'How to use the map:'}
+                      </p>
+                      <ul className={`space-y-1.5 ${isRTL ? 'mr-4' : 'ml-4'}`}>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">1.</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp1') || 'Paste a Google Maps link in the field above'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">2.</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp2') || 'Or click "Use my current location"'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">3.</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp3') || 'Or enter coordinates manually'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">4.</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp4') || 'Click on the map to pin your exact location'}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Current Selected Coordinates Display */}
+                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <span className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.selectedCoordinates') || 'Selected Coordinates:'}
+                    </span>
+                    <code className="text-sm font-mono text-primary-600 dark:text-primary-400" dir="ltr">
+                      {selectedLatLng.lat.toFixed(6)}, {selectedLatLng.lng.toFixed(6)}
+                    </code>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className={`flex ${isRTL ? 'flex-row-reverse space-x-reverse' : ''} space-x-3 p-6 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 rounded-b-xl`}>
-              <button
-                type="button"
-                onClick={handleCloseMapModal}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-colors shadow-sm"
-              >
-                {t('branchModal.buttons.cancel')}
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmLocation}
-                className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
-              >
-                {t('branchModal.buttons.save')}
-              </button>
-            </div>
-          </motion.div>
+              {/* Footer */}
+              <div className={`flex ${isRTL ? 'flex-row-reverse space-x-reverse' : ''} space-x-3 p-6 border-t border-gray-200 dark:border-gray-700`}>
+                <button
+                  type="button"
+                  onClick={handleCloseMapModal}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmLocation}
+                  className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                >
+                  {t('common.save')}
+                </button>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </AnimatePresence>
     );
@@ -591,7 +1016,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                 }}
                 languages={supportedLanguages}
                 placeholder={t('branchModal.fields.branchName.placeholder')}
-                required={true}
+                required={false} // Enforces default language requirement
                 defaultLanguage={defaultLanguage}
                 selectedLanguage={selectedFormLanguage}
                 showLanguageSelector={false}
@@ -606,28 +1031,20 @@ const BranchModal: React.FC<BranchModalProps> = ({
               {t('branchModal.fields.whatsappNumber.label')} *
             </label>
             
-            <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <select
-                title='Country Code'
-                value={getPhoneParts(formData.whatsappOrderNumber).code}
-                onChange={(e) => handlePhoneCompositeChange(
-                  'whatsappOrderNumber', 
-                  formData.whatsappOrderNumber, 
-                  'code', 
-                  e.target.value
-                )}
-                className={`w-1/3 md:w-1/4 px-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                  formErrors.whatsappOrderNumber
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-white`}
-              >
-                {countriesWithCodes.map((country) => (
-                  <option key={country.code + country.name} value={country.code}>
-                    {country.name} ({country.code})
-                  </option>
-                ))}
-              </select>
+            <div className={`flex flex-col sm:flex-row gap-2 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+              <div className="w-full sm:w-1/3 md:w-1/4">
+                <CustomSelect
+                    options={countryCodeOptions}
+                    value={getPhoneParts(formData.whatsappOrderNumber).code}
+                    onChange={(newCode) => handlePhoneCompositeChange(
+                      'whatsappOrderNumber',
+                      formData.whatsappOrderNumber,
+                      'code',
+                      newCode
+                    )}
+                    placeholder="Code"
+                  />
+              </div>
               <input
                 type="tel"
                 maxLength={15}
@@ -638,7 +1055,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                   'number', 
                   e.target.value
                 )}
-                className={`flex-1 px-3 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+                className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
                   formErrors.whatsappOrderNumber
                     ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                     : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
@@ -668,13 +1085,10 @@ const BranchModal: React.FC<BranchModalProps> = ({
                     {!isUploadingLogo && (
                       <button
                         type="button"
-                        onClick={() => {
-                           setBranchLogoPreview(null);
-                           setFormData(prev => ({ ...prev, branchLogoPath: null }));
-                        }}
+                        onClick={handleRemoveImage}
                         className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 transition-colors shadow-lg"
                       >
-                        <X className="w-4 h-4" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
@@ -692,13 +1106,29 @@ const BranchModal: React.FC<BranchModalProps> = ({
                 />
                 <label
                   htmlFor="branchLogo"
-                  className={`inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 ${
+                  className={`inline-flex items-center px-4 py-2 border rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 ${
                     isUploadingLogo ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                   } border-gray-300 dark:border-gray-600`}
                 >
-                  <Upload className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                  {isUploadingLogo ? t('branchModal.fields.branchLogo.uploading') : t('branchModal.fields.branchLogo.select')}
+                  {isUploadingLogo ? (
+                    <>
+                      <div className={`animate-spin rounded-full h-4 w-4 border-b-2 border-gray-600 dark:border-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`}></div>
+                      {t('branchModal.fields.branchLogo.uploading')}
+                    </>
+                  ) : (
+                    <>
+                      <Upload className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                      {branchLogoPreview ? t('branchManagement.form.logoChange') : t('branchManagement.form.logoUpload')}
+                    </>
+                  )}
                 </label>
+                
+                {!branchLogoPreview && !isUploadingLogo && (
+                  <div className={`flex items-center text-gray-400 dark:text-gray-500 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+                    <ImageIcon className="h-5 w-5" />
+                    <span className="text-sm">{t('branchManagement.form.logoNotSelected')}</span>
+                  </div>
+                )}
               </div>
 
               <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -718,60 +1148,52 @@ const BranchModal: React.FC<BranchModalProps> = ({
           {t('branchModal.sections.addressInfo')}
         </h4>
         <div className="space-y-6">
-          <div>
-            <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.country.label')} <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none z-10`} />
-              <select
-                id="country"
-                name="address.country"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('branchModal.fields.country.label')} <span className="text-red-500">*</span>
+              </label>
+              <CustomSelect
+                options={countryNameOptions}
                 value={formData.createAddressDto.country || ''}
-                onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-8' : 'pl-10 pr-8'} py-3 border ${formErrors['address.country'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
-                dir={isRTL ? 'rtl' : 'ltr'}
-              >
-                <option value="" disabled>
-                  {t('branchModal.fields.country.placeholder')}
-                </option>
-                {countryKeys.map((countryKey) => (
-                  <option key={countryKey} value={t(countryKey)}>
-                    {t(countryKey)}
-                  </option>
-                ))}
-              </select>
-              <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
-                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-            {formErrors['address.country'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.country']}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.city.label')} <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-              <input
-                type="text"
-                id="city"
-                name="address.city"
-                value={formData.createAddressDto.city || ''}
-                onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${formErrors['address.city'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
-                placeholder={t('branchModal.fields.city.placeholder')}
-                dir={isRTL ? 'rtl' : 'ltr'}
+                onChange={(newCountry) => {
+                  const syntheticEvent = {
+                    target: {
+                      name: 'address.country',
+                      value: newCountry,
+                    },
+                  } as React.ChangeEvent<HTMLInputElement>;
+                  handleInputChange(syntheticEvent);
+                }}
+                placeholder={t('branchModal.fields.country.placeholder')}
+                icon={<Globe className="h-5 w-5 text-gray-400" />}
               />
+              {formErrors['address.country'] && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.country']}</p>
+              )}
             </div>
-            {formErrors['address.city'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.city']}</p>
-            )}
+
+            <div>
+              <label htmlFor="city" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('branchModal.fields.city.label')} <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+                <input
+                  type="text"
+                  id="city"
+                  name="address.city"
+                  value={formData.createAddressDto.city || ''}
+                  onChange={handleInputChange}
+                  className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border ${formErrors['address.city'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                  placeholder={t('branchModal.fields.city.placeholder')}
+                  dir={isRTL ? 'rtl' : 'ltr'}
+                />
+              </div>
+              {formErrors['address.city'] && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['address.city']}</p>
+              )}
+            </div>
           </div>
 
           <div>
@@ -786,48 +1208,52 @@ const BranchModal: React.FC<BranchModalProps> = ({
                 name="address.street"
                 value={formData.createAddressDto.street || ''}
                 onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
                 placeholder={t('branchModal.fields.street.placeholder')}
                 dir={isRTL ? 'rtl' : 'ltr'}
               />
             </div>
           </div>
 
-          <div>
-            <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.zipCode.label')}
-            </label>
-            <div className="relative">
-              <FileText className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-              <input
-                type="text"
-                id="zipCode"
-                name="address.zipCode"
-                value={formData.createAddressDto.zipCode || ''}
-                onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
-                placeholder={t('branchModal.fields.zipCode.placeholder')}
-                dir={isRTL ? 'rtl' : 'ltr'}
-              />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="zipCode" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('branchModal.fields.zipCode.label')}
+              </label>
+              <div className="relative">
+                <div className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 flex items-center justify-center`}>
+                  <span className="text-gray-400 font-bold text-xs">#</span>
+                </div>
+                <input
+                  type="text"
+                  id="zipCode"
+                  name="address.zipCode"
+                  value={formData.createAddressDto.zipCode || ''}
+                  onChange={handleInputChange}
+                  className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                  placeholder={t('branchModal.fields.zipCode.placeholder')}
+                  dir={isRTL ? 'rtl' : 'ltr'}
+                />
+              </div>
             </div>
-          </div>
 
-          <div>
-            <label htmlFor="addressLine1" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.addressLine1.label')}
-            </label>
-            <div className="relative">
-              <Home className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-              <input
-                type="text"
-                id="addressLine1"
-                name="address.addressLine1"
-                value={formData.createAddressDto.addressLine1 || ''}
-                onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
-                placeholder={t('branchModal.fields.addressLine1.placeholder')}
-                dir={isRTL ? 'rtl' : 'ltr'}
-              />
+            <div>
+              <label htmlFor="addressLine1" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('branchModal.fields.addressLine1.label')}
+              </label>
+              <div className="relative">
+                <Home className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+                <input
+                  type="text"
+                  id="addressLine1"
+                  name="address.addressLine1"
+                  value={formData.createAddressDto.addressLine1 || ''}
+                  onChange={handleInputChange}
+                  className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                  placeholder={t('branchModal.fields.addressLine1.placeholder')}
+                  dir={isRTL ? 'rtl' : 'ltr'}
+                />
+              </div>
             </div>
           </div>
 
@@ -843,7 +1269,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                 name="address.addressLine2"
                 value={formData.createAddressDto.addressLine2 || ''}
                 onChange={handleInputChange}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
                 placeholder={t('branchModal.fields.addressLine2.placeholder')}
                 dir={isRTL ? 'rtl' : 'ltr'}
               />
@@ -861,67 +1287,65 @@ const BranchModal: React.FC<BranchModalProps> = ({
           {t('branchModal.sections.contactInfo')}
         </h4>
         <div className="space-y-6">
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.phone.label')} <span className="text-red-500">*</span>
-            </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('branchModal.fields.phone.label')} <span className="text-red-500">*</span>
+              </label>
 
-            <div className={`flex gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-               <select
-                title='Country Code'
-                value={getPhoneParts(formData.createContactDto.phone).code}
-                onChange={(e) => handlePhoneCompositeChange(
-                  'contact.phone',
-                  formData.createContactDto.phone,
-                  'code',
-                  e.target.value
-                )}
-                className={`w-1/3 md:w-1/4 px-3 py-3 border ${formErrors['contact.phone'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white`}
-              >
-                {countriesWithCodes.map((country) => (
-                  <option key={country.code + country.name} value={country.code}>
-                    {country.name} ({country.code})
-                  </option>
-                ))}
-              </select>
-              <input
-                type="tel"
-                maxLength={15}
-                value={getPhoneParts(formData.createContactDto.phone).number}
-                onChange={(e) => handlePhoneCompositeChange(
-                  'contact.phone',
-                  formData.createContactDto.phone,
-                  'number',
-                  e.target.value
-                )}
-                className={`flex-1 px-3 py-3 border ${formErrors['contact.phone'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
-                placeholder={t('branchModal.fields.phone.placeholder')}
-              />
+              <div className={`flex flex-col sm:flex-row gap-2 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                <div className="w-full sm:w-1/3">
+                  <CustomSelect
+                    options={countryCodeOptions}
+                    value={getPhoneParts(formData.createContactDto.phone).code}
+                    onChange={(newCode) => handlePhoneCompositeChange(
+                      'contact.phone',
+                      formData.createContactDto.phone,
+                      'code',
+                      newCode
+                    )}
+                    placeholder="Code"
+                  />
+                </div>
+                <input
+                  type="tel"
+                  maxLength={15}
+                  value={getPhoneParts(formData.createContactDto.phone).number}
+                  onChange={(e) => handlePhoneCompositeChange(
+                    'contact.phone',
+                    formData.createContactDto.phone,
+                    'number',
+                    e.target.value
+                  )}
+                  className={`flex-1 px-3 py-2 border ${formErrors['contact.phone'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                  placeholder={t('branchModal.fields.phone.placeholder')}
+                />
+              </div>
+              {formErrors['contact.phone'] && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.phone']}</p>
+              )}
             </div>
-            {formErrors['contact.phone'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.phone']}</p>
-            )}
-          </div>
 
-          <div>
-            <label htmlFor="mail" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              {t('branchModal.fields.email.label')} <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <Mail className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-              <input
-                type="email"
-                id="mail"
-                name="contact.mail"
-                value={formData.createContactDto.mail || ''}
-                onChange={handleInputChange}
-                className={`w-full px-10 py-3 border ${formErrors['contact.mail'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-                placeholder={t('branchModal.fields.email.placeholder')}
-              />
+            <div>
+              <label htmlFor="mail" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t('branchModal.fields.email.label')} <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Mail className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+                <input
+                  type="email"
+                  id="mail"
+                  name="contact.mail"
+                  value={formData.createContactDto.mail || ''}
+                  onChange={handleInputChange}
+                  className={`w-full px-10 py-2 border ${formErrors['contact.mail'] ? 'border-red-500 dark:border-red-500' : 'border-gray-300 dark:border-gray-600'} bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
+                  placeholder={t('branchModal.fields.email.placeholder')}
+                />
+              </div>
+              {formErrors['contact.mail'] && (
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.mail']}</p>
+              )}
             </div>
-            {formErrors['contact.mail'] && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors['contact.mail']}</p>
-            )}
           </div>
 
           <div>
@@ -938,7 +1362,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                   value={formData.createContactDto.location || ''}
                   onChange={handleInputChange}
                   readOnly
-                  className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
                   placeholder={t('branchModal.fields.location.placeholder')}
                 />
               </div>
@@ -973,23 +1397,43 @@ const BranchModal: React.FC<BranchModalProps> = ({
             showLanguageSelector={false}
           />
 
-          <MultiLanguageInput
-            label={t('branchModal.fields.footerTitle.label')}
-            value={footerTitleTranslations}
-            onChange={(val) => {
-              setFooterTitleTranslations(val);
-              const currentValue = val[language] || val[defaultLanguage] || '';
-              setFormData(prev => ({
-                ...prev,
-                createContactDto: { ...prev.createContactDto, footerTitle: currentValue }
-              }));
-            }}
-            languages={supportedLanguages}
-            placeholder={t('branchModal.fields.footerTitle.placeholder')}
-            defaultLanguage={defaultLanguage}
-            selectedLanguage={selectedFormLanguage}
-            showLanguageSelector={false}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <MultiLanguageInput
+              label={t('branchModal.fields.footerTitle.label')}
+              value={footerTitleTranslations}
+              onChange={(val) => {
+                setFooterTitleTranslations(val);
+                const currentValue = val[language] || val[defaultLanguage] || '';
+                setFormData(prev => ({
+                  ...prev,
+                  createContactDto: { ...prev.createContactDto, footerTitle: currentValue }
+                }));
+              }}
+              languages={supportedLanguages}
+              placeholder={t('branchModal.fields.footerTitle.placeholder')}
+              defaultLanguage={defaultLanguage}
+              selectedLanguage={selectedFormLanguage}
+              showLanguageSelector={false}
+            />
+
+            <MultiLanguageInput
+              label={t('branchModal.fields.openTitle.label')}
+              value={openTitleTranslations}
+              onChange={(val) => {
+                setOpenTitleTranslations(val);
+                const currentValue = val[language] || val[defaultLanguage] || '';
+                setFormData(prev => ({
+                  ...prev,
+                  createContactDto: { ...prev.createContactDto, openTitle: currentValue }
+                }));
+              }}
+              languages={supportedLanguages}
+              placeholder={t('branchModal.fields.openTitle.placeholder')}
+              defaultLanguage={defaultLanguage}
+              selectedLanguage={selectedFormLanguage}
+              showLanguageSelector={false}
+            />
+          </div>
 
           <MultiLanguageTextArea
             label={t('branchModal.fields.footerDescription.label')}
@@ -1010,59 +1454,43 @@ const BranchModal: React.FC<BranchModalProps> = ({
             showLanguageSelector={false}
           />
 
-          <MultiLanguageInput
-            label={t('branchModal.fields.openTitle.label')}
-            value={openTitleTranslations}
-            onChange={(val) => {
-              setOpenTitleTranslations(val);
-              const currentValue = val[language] || val[defaultLanguage] || '';
-              setFormData(prev => ({
-                ...prev,
-                createContactDto: { ...prev.createContactDto, openTitle: currentValue }
-              }));
-            }}
-            languages={supportedLanguages}
-            placeholder={t('branchModal.fields.openTitle.placeholder')}
-            defaultLanguage={defaultLanguage}
-            selectedLanguage={selectedFormLanguage}
-            showLanguageSelector={false}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <MultiLanguageInput
+              label={t('branchModal.fields.openDays.label')}
+              value={openDaysTranslations}
+              onChange={(val) => {
+                setOpenDaysTranslations(val);
+                const currentValue = val[language] || val[defaultLanguage] || '';
+                setFormData(prev => ({
+                  ...prev,
+                  createContactDto: { ...prev.createContactDto, openDays: currentValue }
+                }));
+              }}
+              languages={supportedLanguages}
+              placeholder={t('branchModal.fields.openDays.placeholder')}
+              defaultLanguage={defaultLanguage}
+              selectedLanguage={selectedFormLanguage}
+              showLanguageSelector={false}
+            />
 
-          <MultiLanguageInput
-            label={t('branchModal.fields.openDays.label')}
-            value={openDaysTranslations}
-            onChange={(val) => {
-              setOpenDaysTranslations(val);
-              const currentValue = val[language] || val[defaultLanguage] || '';
-              setFormData(prev => ({
-                ...prev,
-                createContactDto: { ...prev.createContactDto, openDays: currentValue }
-              }));
-            }}
-            languages={supportedLanguages}
-            placeholder={t('branchModal.fields.openDays.placeholder')}
-            defaultLanguage={defaultLanguage}
-            selectedLanguage={selectedFormLanguage}
-            showLanguageSelector={false}
-          />
-
-          <MultiLanguageInput
-            label={t('branchModal.fields.openHours.label')}
-            value={openHoursTranslations}
-            onChange={(val) => {
-              setOpenHoursTranslations(val);
-              const currentValue = val[language] || val[defaultLanguage] || '';
-              setFormData(prev => ({
-                ...prev,
-                createContactDto: { ...prev.createContactDto, openHours: currentValue }
-              }));
-            }}
-            languages={supportedLanguages}
-            placeholder={t('branchModal.fields.openHours.placeholder')}
-            defaultLanguage={defaultLanguage}
-            selectedLanguage={selectedFormLanguage}
-            showLanguageSelector={false}
-          />
+            <MultiLanguageInput
+              label={t('branchModal.fields.openHours.label')}
+              value={openHoursTranslations}
+              onChange={(val) => {
+                setOpenHoursTranslations(val);
+                const currentValue = val[language] || val[defaultLanguage] || '';
+                setFormData(prev => ({
+                  ...prev,
+                  createContactDto: { ...prev.createContactDto, openHours: currentValue }
+                }));
+              }}
+              languages={supportedLanguages}
+              placeholder={t('branchModal.fields.openHours.placeholder')}
+              defaultLanguage={defaultLanguage}
+              selectedLanguage={selectedFormLanguage}
+              showLanguageSelector={false}
+            />
+          </div>
         </div>
       </div>
 
@@ -1083,79 +1511,137 @@ const BranchModal: React.FC<BranchModalProps> = ({
               key={day.dayOfWeek}
               className={`relative group p-5 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 hover:shadow-md ${
                 day.isWorkingDay
-                  ? 'bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-green-200 dark:border-green-700'
+                  ? day.isOpen24Hours
+                    ? 'bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700'
+                    : 'bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-green-200 dark:border-green-700'
                   : 'bg-gray-50 dark:bg-gray-800/50'
               }`}
             >
-              <div className="flex items-center justify-between">
-                <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
+              <div className="flex flex-col space-y-4">
+                {/* Header Row: Day Name, 24 Hours Toggle, and Working Day Toggle */}
+                <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className="min-w-[100px]">
-                    <span className="text-base font-medium text-gray-900 dark:text-gray-100">
-                      {dayNamesDisplay[day.dayOfWeek === 0 ? 6 : day.dayOfWeek - 1]}
+                    <span className={`text-base font-medium text-gray-900 dark:text-gray-100 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {dayNamesDisplay[index]}
                     </span>
                   </div>
 
-                  <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-                    <Toggle
-                      checked={day.isWorkingDay}
-                      onChange={(checked) => handleWorkingHourChange(index, 'isWorkingDay', checked)}
-                    />
-                    <span
-                      className={`text-sm font-medium transition-colors ${
+                  <div className={`flex items-center space-x-4 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                    {/* 24 Hours Toggle - Only show when working day is enabled */}
+                    {day.isWorkingDay && (
+                      <div className={`flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                        <Toggle
+                          checked={day.isOpen24Hours}
+                          onChange={(checked) => handleWorkingHourChange(index, 'isOpen24Hours', checked)}
+                        />
+                        <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
+                          {t('branchModal.workingHours.open24Hours') || '24H'}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Working Day Toggle */}
+                    <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                      <Toggle
+                        checked={day.isWorkingDay}
+                        onChange={(checked) => handleWorkingHourChange(index, 'isWorkingDay', checked)}
+                      />
+                      <span className={`text-sm font-medium transition-colors hidden xs:block ${
                         day.isWorkingDay
                           ? 'text-green-700 dark:text-green-400'
                           : 'text-gray-500 dark:text-gray-400'
-                      }`}
-                    >
-                      {day.isWorkingDay ? t('branchModal.workingHours.open') : t('branchModal.workingHours.closed')}
+                      }`}>
+                        {day.isWorkingDay ? t('branchModal.workingHours.open') : t('branchModal.workingHours.closed')}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 24 Hours Message */}
+                {day.isWorkingDay && day.isOpen24Hours && (
+                  <div className="text-center py-2">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200">
+                      <Clock className="w-4 h-4 mr-2" />
+                      {t('branchModal.workingHours.open24HoursMessage') || 'Open 24 hours'}
                     </span>
                   </div>
-                </div>
+                )}
 
-                <div
-                  className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} transition-opacity ${
-                    !day.isWorkingDay ? 'opacity-40' : ''
-                  }`}
-                >
-                  <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                      {t('branchModal.workingHours.openTime')}
-                    </label>
-                    <input
-                      title="time"
-                      type="time"
-                      value={formatTimeForInput(day.openTime)}
-                      onChange={(e) => handleWorkingHourChange(index, 'openTime', e.target.value)}
-                      disabled={!day.isWorkingDay}
-                      className={`px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                        !day.isWorkingDay ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : 'hover:border-primary-300'
-                      }`}
-                    />
-                  </div>
+                {/* Time Slots - Show when working day is enabled and not 24 hours */}
+                {day.isWorkingDay && !day.isOpen24Hours && (
+                  <div className="space-y-3">
+                    {day.timeSlots?.map((slot, slotIndex) => (
+                      <div
+                        key={slotIndex}
+                        className={`
+                          grid grid-cols-2 gap-4
+                          sm:flex sm:items-center sm:justify-center sm:gap-3
+                          ${isRTL ? 'sm:flex-row-reverse' : ''}
+                        `}
+                      >
+                        {/* Open Time Group */}
+                        <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                          <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
+                            {t('branchModal.workingHours.openTime')}
+                          </label>
+                          <input
+                            title='time'
+                            type="time"
+                            value={formatTimeForInput(slot.openTime)}
+                            onChange={(e) => handleTimeSlotChange(index, slotIndex, 'openTime', e.target.value)}
+                            className={`w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                            dir="ltr"
+                          />
+                        </div>
 
-                  <div className="flex items-center justify-center">
-                    <div className="w-6 h-px bg-gray-300 dark:bg-gray-600"></div>
-                  </div>
+                        {/* Separator */}
+                        <div className="hidden sm:flex items-center justify-center">
+                          <div className="w-4 h-px bg-gray-300 dark:bg-gray-600"></div>
+                        </div>
 
-                  <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
-                    <label className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                      {t('branchModal.workingHours.closeTime')}
-                    </label>
-                    <input
-                      title="time"
-                      type="time"
-                      value={formatTimeForInput(day.closeTime)}
-                      onChange={(e) => handleWorkingHourChange(index, 'closeTime', e.target.value)}
-                      disabled={!day.isWorkingDay}
-                      className={`px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                        !day.isWorkingDay ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : 'hover:border-primary-300'
-                      }`}
-                    />
+                        {/* Close Time Group */}
+                        <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                          <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
+                            {t('branchModal.workingHours.closeTime')}
+                          </label>
+                          <input
+                            title='time'
+                            type="time"
+                            value={formatTimeForInput(slot.closeTime)}
+                            onChange={(e) => handleTimeSlotChange(index, slotIndex, 'closeTime', e.target.value)}
+                            className={`w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                            dir="ltr"
+                          />
+                        </div>
+
+                        {/* Remove Slot Button - Show only if more than 1 slot */}
+                        {(day.timeSlots?.length || 0) > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTimeSlot(index, slotIndex)}
+                            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            title={t('common.remove') || 'Remove'}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* Add Time Slot Button */}
+                    <button
+                      type="button"
+                      onClick={() => handleAddTimeSlot(index)}
+                      className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 flex items-center gap-1 font-medium"
+                    >
+                      <Plus className="w-4 h-4" />
+                      {t('branchModal.workingHours.addTimeSlot') || 'Add Time Slot'}
+                    </button>
                   </div>
-                </div>
+                )}
               </div>
 
-              {day.isWorkingDay && (
+              {day.isWorkingDay && !day.isOpen24Hours && (
                 <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-700/50">
                   <p className="text-xs text-green-600 dark:text-green-400">
                     {t('branchModal.workingHours.canOrder')}
@@ -1274,6 +1760,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
             selectedLanguage={selectedFormLanguage}
             onLanguageChange={setSelectedFormLanguage}
             defaultLanguage={defaultLanguage}
+            required={true}
             showBulkFill={true}
             onBulkFill={handleBulkFillLanguage}
             fieldValues={{

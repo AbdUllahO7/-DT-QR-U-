@@ -28,7 +28,6 @@ class CurrencyService {
       const response = await httpClient.get<SessionCurrency>(`${this.baseUrl}/session-current`);
 
       logger.info('Session currency fetched successfully:', response.data, { prefix: 'CurrencyService' });
-
       return response.data;
     } catch (error: any) {
       logger.error('Error fetching session currency:', error, { prefix: 'CurrencyService' });

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   X, Building2, MapPin, Phone, Clock, Upload, Trash2,
   Image as ImageIcon, AlertTriangle, Globe, Navigation,
-  ChevronDown, Search, Check
+  ChevronDown, Search, Check, Info
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import {
@@ -47,7 +47,7 @@ interface CustomSelectProps {
   icon?: React.ReactNode;
 }
 
-const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, placeholder, icon }) => {
+export const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, placeholder, icon }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -212,6 +212,8 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     lat: 41.0082, // Default to Istanbul
     lng: 28.9784
   });
+  const [googleMapsLink, setGoogleMapsLink] = useState<string>('');
+  const [linkError, setLinkError] = useState<string>('');
 
   // Translation state for branch fields
   const [branchNameTranslations, setBranchNameTranslations] = useState<TranslatableFieldValue>({});
@@ -226,13 +228,13 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
   const [openHoursTranslations, setOpenHoursTranslations] = useState<TranslatableFieldValue>({});
 
   const defaultWorkingHours: CreateBranchWorkingHourCoreDto[] = [
-    { dayOfWeek: 1, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
-    { dayOfWeek: 2, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
-    { dayOfWeek: 3, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
-    { dayOfWeek: 4, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
-    { dayOfWeek: 5, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
-    { dayOfWeek: 6, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true },
-    { dayOfWeek: 0, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }
+    { dayOfWeek: 1, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+    { dayOfWeek: 2, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+    { dayOfWeek: 3, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+    { dayOfWeek: 4, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+    { dayOfWeek: 5, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+    { dayOfWeek: 6, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+    { dayOfWeek: 0, isWorkingDay: false, isOpen24Hours: false, timeSlots: [] }
   ];
 
   const getDayName = (dayOfWeek: number): string => {
@@ -321,12 +323,24 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
           openHours: branchDetail.contact?.openHours || null,
         },
         createBranchWorkingHourCoreDto: branchDetail.workingHours?.length
-          ? branchDetail.workingHours.map(wh => ({
-              dayOfWeek: wh.dayOfWeek,
-              openTime: wh.openTime || '08:00:00',
-              closeTime: wh.closeTime || '22:00:00',
-              isWorkingDay: wh.isWorkingDay ?? true,
-            }))
+          ? branchDetail.workingHours.map(wh => {
+              // Handle backward compatibility with old API format that had openTime/closeTime at root level
+              const legacyWh = wh as any;
+              return {
+                dayOfWeek: wh.dayOfWeek,
+                isWorkingDay: wh.isWorkingDay ?? true,
+                isOpen24Hours: wh.isOpen24Hours ?? false,
+                timeSlots: wh.timeSlots && wh.timeSlots.length > 0
+                  ? wh.timeSlots.map(slot => ({
+                      id: slot.id,
+                      openTime: slot.openTime || '08:00:00',
+                      closeTime: slot.closeTime || '22:00:00',
+                    }))
+                  : wh.isWorkingDay && !wh.isOpen24Hours
+                    ? [{ openTime: legacyWh.openTime || '08:00:00', closeTime: legacyWh.closeTime || '22:00:00' }]
+                    : [],
+              };
+            })
           : defaultWorkingHours,
       };
 
@@ -476,6 +490,19 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
       errors.workingHours = t('branchManagement.form.workingHoursRequired');
     }
 
+    // Validate that each working day has either isOpen24Hours or at least one valid time slot
+    const workingDaysWithoutHours = formData.createBranchWorkingHourCoreDto?.filter(day => {
+      if (!day.isWorkingDay) return false;
+      if (day.isOpen24Hours) return false;
+      // Check if there's at least one valid time slot
+      const hasValidSlot = day.timeSlots?.some(slot => slot.openTime && slot.closeTime);
+      return !hasValidSlot;
+    });
+
+    if (workingDaysWithoutHours && workingDaysWithoutHours.length > 0) {
+      errors.workingHours = t('branchManagement.form.workingHoursSlotRequired') || 'Each working day must have either 24 hours or at least one time slot';
+    }
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -566,12 +593,39 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
   const handleWorkingHourChange = (dayIndex: number, field: keyof CreateBranchWorkingHourCoreDto, value: any) => {
     setFormData(prev => ({
       ...prev,
-      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hours, idx) =>
-        idx === dayIndex ? { ...hours, [field]: value } : hours
-      )
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hours, idx) => {
+        if (idx !== dayIndex) return hours;
+
+        // Handle special cases for backend validation rules
+        if (field === 'isWorkingDay') {
+          if (!value) {
+            // Non-working days cannot have time slots
+            return { ...hours, isWorkingDay: value, timeSlots: [], isOpen24Hours: false };
+          } else {
+            // When enabling working day, add default time slot if none exists
+            return {
+              ...hours,
+              isWorkingDay: value,
+              timeSlots: hours.timeSlots?.length ? hours.timeSlots : [{ openTime: '08:00:00', closeTime: '22:00:00' }]
+            };
+          }
+        }
+
+        if (field === 'isOpen24Hours') {
+          if (value) {
+            // 24-hour open days cannot have time slots
+            return { ...hours, isOpen24Hours: value, timeSlots: [] };
+          } else {
+            // When disabling 24 hours, add default time slot
+            return { ...hours, isOpen24Hours: value, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] };
+          }
+        }
+
+        return { ...hours, [field]: value };
+      })
     }));
     setHasChanges(true);
-    
+
     if (validationErrors.workingHours) {
       setValidationErrors(prev => {
         const newErrors = { ...prev };
@@ -579,6 +633,45 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
         return newErrors;
       });
     }
+  };
+
+  const handleTimeSlotChange = (dayIndex: number, slotIndex: number, field: 'openTime' | 'closeTime', value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hours, idx) => {
+        if (idx !== dayIndex) return hours;
+        const newTimeSlots = [...(hours.timeSlots || [])];
+        if (newTimeSlots[slotIndex]) {
+          newTimeSlots[slotIndex] = { ...newTimeSlots[slotIndex], [field]: value };
+        }
+        return { ...hours, timeSlots: newTimeSlots };
+      })
+    }));
+    setHasChanges(true);
+  };
+
+  const handleAddTimeSlot = (dayIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hours, idx) => {
+        if (idx !== dayIndex) return hours;
+        const newTimeSlots = [...(hours.timeSlots || []), { openTime: '08:00:00', closeTime: '22:00:00' }];
+        return { ...hours, timeSlots: newTimeSlots };
+      })
+    }));
+    setHasChanges(true);
+  };
+
+  const handleRemoveTimeSlot = (dayIndex: number, slotIndex: number) => {
+    setFormData(prev => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hours, idx) => {
+        if (idx !== dayIndex) return hours;
+        const newTimeSlots = (hours.timeSlots || []).filter((_, i) => i !== slotIndex);
+        return { ...hours, timeSlots: newTimeSlots };
+      })
+    }));
+    setHasChanges(true);
   };
 
   const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -682,9 +775,13 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
         },
         createBranchWorkingHourCoreDto: formData.createBranchWorkingHourCoreDto?.map(hour => ({
           dayOfWeek: hour.dayOfWeek,
-          openTime: hour.openTime,
-          closeTime: hour.closeTime,
-          isWorkingDay: hour.isWorkingDay
+          isWorkingDay: hour.isWorkingDay,
+          isOpen24Hours: hour.isOpen24Hours,
+          timeSlots: hour.timeSlots?.map(slot => ({
+            id: slot.id,
+            openTime: slot.openTime,
+            closeTime: slot.closeTime,
+          })) || []
         })) || []
       };
 
@@ -846,6 +943,67 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     }
   };
 
+  // Function to extract coordinates from Google Maps link
+  const extractCoordinatesFromLink = (link: string): { lat: number; lng: number } | null => {
+    try {
+      const pattern1 = /@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match1 = link.match(pattern1);
+      if (match1) return { lat: parseFloat(match1[1]), lng: parseFloat(match1[2]) };
+
+      const pattern2 = /q=(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match2 = link.match(pattern2);
+      if (match2) return { lat: parseFloat(match2[1]), lng: parseFloat(match2[2]) };
+
+      const pattern3 = /place\/[^@]*@(-?\d+\.?\d*),(-?\d+\.?\d*)/;
+      const match3 = link.match(pattern3);
+      if (match3) return { lat: parseFloat(match3[1]), lng: parseFloat(match3[2]) };
+
+      const pattern4 = /!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/;
+      const match4 = link.match(pattern4);
+      if (match4) return { lat: parseFloat(match4[1]), lng: parseFloat(match4[2]) };
+
+      return null;
+    } catch (error) {
+      console.error('Error extracting coordinates:', error);
+      return null;
+    }
+  };
+
+  const handleGoogleMapsLinkChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const link = e.target.value;
+    setGoogleMapsLink(link);
+    setLinkError('');
+
+    if (link.trim()) {
+      const coords = extractCoordinatesFromLink(link);
+      if (coords) {
+        setSelectedLatLng(coords);
+        setLinkError('');
+      } else if (link.includes('google.com/maps') || link.includes('maps.app.goo.gl')) {
+        setLinkError(t('onboardingBranch.form.step3.location.invalidLink') || 'Could not extract coordinates from this link. Please try a different format.');
+      }
+    }
+  };
+
+  const handleGetCurrentLocation = (): void => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setSelectedLatLng({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude
+          });
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          alert(t('onboardingBranch.form.step3.location.geolocationError') || 'Could not get your location. Please select manually.');
+        }
+      );
+    } else {
+      alert(t('onboardingBranch.form.step3.location.geolocationNotSupported') || 'Geolocation is not supported by your browser.');
+    }
+  };
+
   // Map handlers
   const handleOpenMapModal = (): void => {
     // Try to parse existing location
@@ -859,6 +1017,8 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
         logger.error('Failed to parse location', error);
       }
     }
+    setGoogleMapsLink('');
+    setLinkError('');
     setIsMapModalOpen(true);
   };
 
@@ -923,73 +1083,243 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
 
     return (
       <AnimatePresence>
-        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 z-[9999] flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className={`relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-xl ${isRTL ? 'rtl' : 'ltr'}`}
-          >
-            <div className={`flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                {t('onboardingBranch.form.step3.location.mapTitle')}
-              </h3>
-              <button
-                onClick={handleCloseMapModal}
-                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-              >
-                <X className="h-6 w-6" />
-              </button>
-            </div>
+        <div className="fixed inset-0 z-[9999] overflow-y-auto" dir={isRTL ? 'rtl' : 'ltr'}>
+          <div className="flex min-h-screen items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleCloseMapModal}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            />
 
-            <div className="p-6">
-              <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-                {t('onboardingBranch.form.step3.location.clickToPin')}
-              </div>
-
-              <div className="relative w-full h-[400px] bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 shadow-inner">
-                <MapContainer
-                  center={[selectedLatLng.lat, selectedLatLng.lng]}
-                  zoom={13}
-                  style={{ height: '100%', width: '100%' }}
-                  scrollWheelZoom={true}
+            {/* Modal */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-5xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
+            >
+              {/* Header */}
+              <div className={`flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                  <MapPin className="h-6 w-6 text-primary-600" />
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                    {t('onboardingBranch.form.step3.location.mapTitle')}
+                  </h3>
+                </div>
+                <button
+                  onClick={handleCloseMapModal}
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                 >
-                  <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <MapUpdater center={[selectedLatLng.lat, selectedLatLng.lng]} />
-                  <LocationMarker />
-                </MapContainer>
+                  <X className="h-5 w-5 text-gray-500 dark:text-gray-400" />
+                </button>
               </div>
 
-              <div className="mt-4 flex items-center justify-between">
-                <div className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  <span className="font-medium">{t('onboardingBranch.form.step3.location.selectedCoordinates')}</span>
-                  <code className="ml-2 text-sm font-mono text-primary-600 dark:text-primary-400" dir="ltr">
-                    {selectedLatLng.lat.toFixed(6)}, {selectedLatLng.lng.toFixed(6)}
-                  </code>
+              {/* Content - Scrollable */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {/* Google Maps Link Input */}
+                <div className="space-y-2">
+                  <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.googleMapsLink') || 'Google Maps Link (optional)'}
+                  </label>
+                  <div className="relative">
+                    <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+                    <input
+                      type="text"
+                      value={googleMapsLink}
+                      onChange={handleGoogleMapsLinkChange}
+                      placeholder={t('onboardingBranch.form.step3.location.googleMapsLinkPlaceholder') || 'https://maps.google.com/...'}
+                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${
+                        linkError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
+                      } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                      dir="ltr"
+                    />
+                  </div>
+                  {linkError && (
+                    <p className={`text-xs text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {linkError}
+                    </p>
+                  )}
+                  <p className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.googleMapsLinkHelper') || 'Paste a Google Maps link and coordinates will be extracted automatically'}
+                  </p>
+                </div>
+
+                {/* Current Location Button */}
+                <button
+                  type="button"
+                  onClick={handleGetCurrentLocation}
+                  className={`w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 text-blue-700 dark:text-blue-300 rounded-lg hover:from-blue-100 hover:to-indigo-100 dark:hover:from-blue-900/30 dark:hover:to-indigo-900/30 transition-all duration-200 border border-blue-200 dark:border-blue-700 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+                >
+                  <Navigation className="h-5 w-5" />
+                  <span className="font-medium">
+                    {t('onboardingBranch.form.step3.location.useCurrentLocation') || 'Use my current location'}
+                  </span>
+                </button>
+
+                {/* Interactive Map Container */}
+                <div className="space-y-2">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <label className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.interactiveMap') || 'Interactive Map'}
+                    </label>
+                    <span className={`text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.clickToPin') || 'Click on the map to pin location'}
+                    </span>
+                  </div>
+                  <div className="relative w-full h-[400px] bg-gray-100 dark:bg-gray-700 rounded-xl overflow-hidden border-2 border-gray-300 dark:border-gray-600 shadow-inner">
+                    <MapContainer
+                      center={[selectedLatLng.lat, selectedLatLng.lng]}
+                      zoom={13}
+                      style={{ height: '100%', width: '100%' }}
+                      scrollWheelZoom={true}
+                    >
+                      <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <MapUpdater center={[selectedLatLng.lat, selectedLatLng.lng]} />
+                      <LocationMarker />
+                    </MapContainer>
+
+                    {/* Overlay with instructions */}
+                    <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-[1000] pointer-events-none">
+                      <div className="bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-600">
+                        <p className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                          <MapPin className="h-4 w-4 text-primary-600" />
+                          {t('onboardingBranch.form.step3.location.markerPosition') || 'Marker position'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* External Map Link */}
+                  <a
+                    href={`https://www.openstreetmap.org/?mlat=${selectedLatLng.lat}&mlon=${selectedLatLng.lng}#map=15/${selectedLatLng.lat}/${selectedLatLng.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`inline-flex items-center text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 ${isRTL ? 'flex-row-reverse' : ''}`}
+                  >
+                    <span>{t('onboardingBranch.form.step3.location.openFullMap') || 'Open in full map'}</span>
+                    <span className={`h-3 w-3 ${isRTL ? 'mr-1' : 'ml-1'}`}>→</span>
+                  </a>
+                </div>
+
+                {/* Coordinate Inputs */}
+                <div className="space-y-3">
+                  <label className={`block text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.location.manualCoordinates') || 'Manual Coordinates'}
+                  </label>
+                  <div className={`grid grid-cols-2 gap-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    <div>
+                      <label className={`block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('onboardingBranch.form.step3.location.latitude') || 'Latitude'}
+                      </label>
+                      <input
+                        title='number'
+                        type="number"
+                        step="0.000001"
+                        value={selectedLatLng.lat}
+                        onChange={(e) => {
+                          const newLat = parseFloat(e.target.value) || 0;
+                          if (newLat >= -90 && newLat <= 90) {
+                            setSelectedLatLng(prev => ({ ...prev, lat: newLat }));
+                          }
+                        }}
+                        className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                        dir="ltr"
+                        min="-90"
+                        max="90"
+                      />
+                    </div>
+                    <div>
+                      <label className={`block text-xs font-medium text-gray-600 dark:text-gray-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        {t('onboardingBranch.form.step3.location.longitude') || 'Longitude'}
+                      </label>
+                      <input
+                        title='number2'
+                        type="number"
+                        step="0.000001"
+                        value={selectedLatLng.lng}
+                        onChange={(e) => {
+                          const newLng = parseFloat(e.target.value) || 0;
+                          if (newLng >= -180 && newLng <= 180) {
+                            setSelectedLatLng(prev => ({ ...prev, lng: newLng }));
+                          }
+                        }}
+                        className={`w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                        dir="ltr"
+                        min="-180"
+                        max="180"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Info Box */}
+                <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-700 rounded-xl">
+                  <div className={`flex items-start space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                    <AlertTriangle className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                    <div className={`text-sm text-blue-700 dark:text-blue-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      <p className="font-medium mb-2">
+                        {t('onboardingBranch.form.step3.location.mapHelp') || 'How to use the map:'}
+                      </p>
+                      <ul className={`space-y-1.5 ${isRTL ? 'mr-4' : 'ml-4'}`}>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">1.</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp1') || 'Paste a Google Maps link in the field above'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">2.</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp2') || 'Or click "Use my current location"'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">3.</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp3') || 'Or enter coordinates manually'}</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-blue-600 dark:text-blue-400">4.</span>
+                          <span>{t('onboardingBranch.form.step3.location.mapHelp4') || 'Click on the map to pin your exact location'}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Current Selected Coordinates Display */}
+                <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
+                  <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <span className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
+                      {t('onboardingBranch.form.step3.location.selectedCoordinates') || 'Selected Coordinates:'}
+                    </span>
+                    <code className="text-sm font-mono text-primary-600 dark:text-primary-400" dir="ltr">
+                      {selectedLatLng.lat.toFixed(6)}, {selectedLatLng.lng.toFixed(6)}
+                    </code>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className={`flex ${isRTL ? 'flex-row-reverse space-x-reverse' : ''} space-x-3 p-6 border-t border-gray-200 dark:border-gray-700`}>
-              <button
-                type="button"
-                onClick={handleCloseMapModal}
-                className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmLocation}
-                className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-              >
-                {t('common.save')}
-              </button>
-            </div>
-          </motion.div>
+              {/* Footer */}
+              <div className={`flex ${isRTL ? 'flex-row-reverse space-x-reverse' : ''} space-x-3 p-6 border-t border-gray-200 dark:border-gray-700`}>
+                <button
+                  type="button"
+                  onClick={handleCloseMapModal}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  {t('common.cancel')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirmLocation}
+                  className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                >
+                  {t('common.save')}
+                </button>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </AnimatePresence>
     );
@@ -1147,7 +1477,8 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                       selectedLanguage={selectedFormLanguage}
                       showLanguageSelector={false}
                       placeholder={t('branchManagement.form.branchNamePlaceholder')}
-                      required={true}
+                      required={false}
+                      defaultLanguage={defaultLanguage}
                     />
                     {validationErrors.branchName && (
                       <p className="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
@@ -1553,7 +1884,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                       {t('branchManagement.form.workingHours')}
                     </h4>
                   </div>
-                  
+
                   {validationErrors.workingHours && (
                     <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-4">
                       <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
@@ -1562,50 +1893,100 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                       </p>
                     </div>
                   )}
-                  
-                  {formData.createBranchWorkingHourCoreDto.map((hours, index) => (
-                    <div key={index} className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'} p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/50`}>
-                      <div className="w-24 flex-shrink-0">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          {getDayName(hours.dayOfWeek)}
-                        </span>
-                      </div>
-                      
-                      <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
-                        <input
-                          title="isWorkingDay"
-                          type="checkbox"
-                          checked={hours.isWorkingDay}
-                          onChange={(e) => handleWorkingHourChange(index, 'isWorkingDay', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400"
-                        />
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          {t('branchManagement.form.isOpen')}
-                        </span>
+
+                  {formData.createBranchWorkingHourCoreDto.map((hours, dayIndex) => (
+                    <div key={dayIndex} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                      <div className={`flex items-center justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        <div className="flex items-center gap-4">
+                          <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 w-24">
+                            {getDayName(hours.dayOfWeek)}
+                          </span>
+
+                          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+                            <input
+                              title="isWorkingDay"
+                              type="checkbox"
+                              checked={hours.isWorkingDay}
+                              onChange={(e) => handleWorkingHourChange(dayIndex, 'isWorkingDay', e.target.checked)}
+                              className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400"
+                            />
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              {t('branchManagement.form.isOpen')}
+                            </span>
+                          </div>
+                        </div>
+
+                        {hours.isWorkingDay && (
+                          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+                            <input
+                              title="isOpen24Hours"
+                              type="checkbox"
+                              checked={hours.isOpen24Hours}
+                              onChange={(e) => handleWorkingHourChange(dayIndex, 'isOpen24Hours', e.target.checked)}
+                              className="h-4 w-4 text-green-600 border-gray-300 dark:border-gray-600 rounded focus:ring-green-500 dark:focus:ring-green-400"
+                            />
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              {t('branchManagement.form.open24Hours') || '24 Hours'}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
-                      {hours.isWorkingDay && (
-                        <>
-                          <div>
-                            <input
-                              title="time"
-                              type="time"
-                              value={hours.openTime}
-                              onChange={(e) => handleWorkingHourChange(index, 'openTime', e.target.value)}
-                              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
-                            />
-                          </div>
-                          <span className="text-gray-500 dark:text-gray-400">-</span>
-                          <div>
-                            <input
-                              title="time"
-                              type="time"
-                              value={hours.closeTime}
-                              onChange={(e) => handleWorkingHourChange(index, 'closeTime', e.target.value)}
-                              className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
-                            />
-                          </div>
-                        </>
+                      {hours.isWorkingDay && !hours.isOpen24Hours && (
+                        <div className="space-y-3">
+                          {hours.timeSlots?.map((slot, slotIndex) => (
+                            <div key={slotIndex} className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                              <div className="flex items-center gap-2">
+                                <input
+                                  title="openTime"
+                                  type="time"
+                                  value={slot.openTime?.substring(0, 5) || '08:00'}
+                                  onChange={(e) => handleTimeSlotChange(dayIndex, slotIndex, 'openTime', e.target.value + ':00')}
+                                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
+                                />
+                                <span className="text-gray-500 dark:text-gray-400">-</span>
+                                <input
+                                  title="closeTime"
+                                  type="time"
+                                  value={slot.closeTime?.substring(0, 5) || '22:00'}
+                                  onChange={(e) => handleTimeSlotChange(dayIndex, slotIndex, 'closeTime', e.target.value + ':00')}
+                                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
+                                />
+                              </div>
+
+                              {(hours.timeSlots?.length || 0) > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveTimeSlot(dayIndex, slotIndex)}
+                                  className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                  title={t('common.remove') || 'Remove'}
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              )}
+                            </div>
+                          ))}
+
+                          <button
+                            type="button"
+                            onClick={() => handleAddTimeSlot(dayIndex)}
+                            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
+                          >
+                            + {t('branchManagement.form.addTimeSlot') || 'Add Time Slot'}
+                          </button>
+                        </div>
+                      )}
+
+                      {hours.isWorkingDay && hours.isOpen24Hours && (
+                        <div className="text-sm text-green-600 dark:text-green-400 font-medium">
+                          {t('branchManagement.form.open24HoursMessage') || 'Open 24 hours'}
+                        </div>
+                      )}
+
+                      {!hours.isWorkingDay && (
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          {t('branchManagement.form.closed') || 'Closed'}
+                        </div>
                       )}
                     </div>
                   ))}

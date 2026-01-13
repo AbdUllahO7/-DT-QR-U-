@@ -6,14 +6,18 @@ export const tr = {
     change: 'Değiştir',
     removal: 'Kaldırma',
     error: 'Hata',
+    select: 'Seç',
     success: 'Başarılı',
      "emailAddress": "E-posta Adresi",
+         actions: 'İşlemler',
+
       "emailPlaceholder": "you@example.com",
     cancel: 'İptal',
     setAsDefault: 'Varsayılan Olarak Ayarla',
     default: 'Varsayılan',
     save: 'Kaydet',
     delete: 'Sil',
+    saving: 'Kaydediliyor...',
     edit: 'Düzenle',
     add: 'Ekle',
     search: 'Ara',
@@ -410,6 +414,9 @@ hero: {
     turkish: 'Türkçe',
     english: 'English',
     arabic: 'العربية',
+    azerbaijani: 'Azərbaycan',
+    albanian: 'Shqip',
+    bosnian: 'Bosanski',
     selectLanguage: 'Dil Seç'
   },
 
@@ -773,7 +780,12 @@ hero: {
     vatInfo: 'Fiyatlar KDV dahildir. Kurumsal planlar için özel fiyatlandırma mevcuttur.',
     perMonth: 'ay',
     perYear: 'yıl',
-    monthlyEquivalent: 'Aylık {amount} (2 ay ücretsiz)'
+    monthlyEquivalent: 'Aylık {amount} (2 ay ücretsiz)',
+    comingSoon: 'Çok Yakında',
+    freeTrial: 'Ücretsiz Deneme',
+    free: 'ÜCRETSİZ',
+    freeFor3Months: 'İlk 3 ay ücretsiz',
+    noCreditCard: 'Kredi kartı gerekmez'
   },
 
   // Testimonials
@@ -1207,7 +1219,7 @@ hero: {
     },
     fields: {
       branchName: {
-        label: 'Şube Adı',
+        label: 'Şube Adı *',
         placeholder: 'Şube adını girin'
       },
       whatsappNumber: {
@@ -1362,6 +1374,10 @@ hero: {
       branchName: 'Şube Adı',
       branchNamePlaceholder: 'Şube adını girin',
       branchNameRequired: 'Şube adı gereklidir',
+      addTimeSlot: 'Zaman Dilimi Ekle',
+      open24Hours: '24 Saat Açık',
+      open24HoursMessage: 'Bu şube 24 saat açıktır.',
+      closed: 'Kapalı',
       whatsappNumber: 'WhatsApp Sipariş Numarası',
       whatsappPlaceholder: 'WhatsApp numarasını girin',
       branchLogo: 'Şube Logosu',
@@ -3282,7 +3298,12 @@ BranchTableManagement: {
     workingHours: {
       title: 'Çalışma Saatleri',
       workingDay: 'Çalışma günü',
+      
+      open24Hours: '24 Saat Açık',
+      open24HoursMessage: 'Bu şube 24 saat açıktır.',
       openTime: 'Açılış Saati',
+      addTimeSlot: 'Zaman Dilimi Ekle',
+
       closeTime: 'Kapanış Saati',
       noWorkingHours: 'Çalışma saatleri belirtilmemiş',
       days: {
@@ -4178,6 +4199,10 @@ productModal: {
       afterClosing: "Kapatmadan Sonra",
       disabled: "Devre Dışı"
     },
+    mobileGridLayout: {
+      oneColumn: "Tek Sütun",
+      twoColumns: "İki Sütun"
+    },
     sections: {
       orderManagement: {
         title: "Sipariş Yönetimi",
@@ -4195,7 +4220,9 @@ productModal: {
         enableAllergenDisplay: "Alerjen Bilgilerini Göster",
         enableAllergenDisplayDesc: "Alerjen uyarılarını ve bilgilerini göster",
         enableIngredientDisplay: "İçerikleri Göster",
-        enableIngredientDisplayDesc: "Ürünler için içerik listelerini göster"
+        enableIngredientDisplayDesc: "Ürünler için içerik listelerini göster",
+        mobileGridLayout: "Mobil Izgara Düzeni",
+        mobileGridLayoutDesc: "Ürünlerin mobil cihazlarda nasıl görüntüleneceğini seçin"
       },
       paymentMethods: {
         title: "Ödeme Yöntemleri",
@@ -5189,7 +5216,10 @@ recommended: "Önerilen",
         "title": "Çalışma Saatleri",
         "description": "İşletmenizin çalışma saatlerini belirleyin. Gece boyunca açık kalabilirsiniz (örn: 23:00 - 02:00).",
         "openLabel": "Açılış Saati",
+        "addSlot": "Yeni Zaman Dilimi Ekle",
+        "open24Hours": "24 Saat Açık",
         "closeLabel": "Kapanış Saati",
+        "open24HoursNote": "Bu restoran 24 saat açıktır.",
         "dayNames": [
           "Pazartesi",
           "Salı",

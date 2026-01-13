@@ -226,7 +226,7 @@ const OrdersManagerRestaurant: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        <div className={`flex items-center justify-between mb-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex flex-wrap items-center justify-between mb-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <OrdersHeader t={t} />
           
           <div className="relative" ref={dropdownRef}>

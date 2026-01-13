@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   X, Plus, Edit2, Trash2, Save, Loader2, Package, 
-  AlertCircle, ChevronRight, Layers
+  AlertCircle, ChevronRight, Layers, ChevronDown, Check, Search
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { logger } from '../../../utils/logger';
@@ -10,6 +11,139 @@ import { CreateProductExtraCategoryData, ProductExtraCategory, UpdateProductExtr
 import { productExtraCategoriesService } from '../../../services/Extras/ProductExtraCategoriesService';
 import { extraCategoriesService } from '../../../services/Extras/ExtraCategoriesService';
 import { ConfirmationModal } from './ConfirmationModal';
+
+// --- Custom Select Component ---
+interface SelectOption {
+  value: number;
+  label: string;
+  subLabel?: string;
+}
+
+interface CustomSelectProps {
+  options: SelectOption[];
+  value: number;
+  onChange: (value: number) => void;
+  placeholder: string;
+  disabled?: boolean;
+}
+
+const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, placeholder, disabled }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { isRTL } = useLanguage();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  const filteredOptions = options.filter(opt => 
+    opt.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (opt.subLabel && opt.subLabel.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
+        className={`w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-left transition-all duration-200 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 ${
+          disabled ? 'opacity-60 cursor-not-allowed bg-gray-50 dark:bg-gray-800' : 'hover:border-primary-400 cursor-pointer shadow-sm'
+        } ${isOpen ? 'ring-2 ring-primary-500/20 border-primary-500' : ''}`}
+      >
+        <span className={`block truncate ${!selectedOption ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+          {selectedOption ? (
+            <span className="flex flex-col text-left">
+              <span className="font-medium">{selectedOption.label}</span>
+              {selectedOption.subLabel && (
+                <span className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{selectedOption.subLabel}</span>
+              )}
+            </span>
+          ) : (
+            placeholder
+          )}
+        </span>
+        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.15 }}
+            className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[300px]"
+          >
+            {/* Search Input */}
+            <div className="p-2 border-b border-gray-100 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
+              <div className="relative">
+                <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400`} />
+                <input
+                  type="text"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Search..."
+                  className={`w-full ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'} py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500`}
+                  autoFocus
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
+            </div>
+
+            {/* Options List */}
+            <div className="overflow-y-auto flex-1 p-1 custom-scrollbar">
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      onChange(option.value);
+                      setIsOpen(false);
+                      setSearchTerm('');
+                    }}
+                    className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between group transition-colors ${
+                      value === option.value
+                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
+                        : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium text-sm">{option.label}</span>
+                      {option.subLabel && (
+                        <span className={`text-xs mt-0.5 ${value === option.value ? 'text-primary-600/80 dark:text-primary-400/80' : 'text-gray-500 dark:text-gray-400'}`}>
+                          {option.subLabel}
+                        </span>
+                      )}
+                    </div>
+                    {value === option.value && (
+                      <Check className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                    )}
+                  </button>
+                ))
+              ) : (
+                <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+                  No options found
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+// --- End Custom Select ---
 
 interface ProductExtraCategoriesModalProps {
   isOpen: boolean;
@@ -253,21 +387,21 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-0 sm:p-4 animate-in fade-in duration-200">
         <div 
-          className={`bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden flex flex-col ${
+          className={`bg-white dark:bg-gray-800 rounded-none sm:rounded-2xl shadow-2xl w-full max-w-4xl h-full sm:h-auto sm:max-h-[85vh] overflow-hidden flex flex-col ${
             isRTL ? 'rtl' : 'ltr'
           }`}
           dir={isRTL ? 'rtl' : 'ltr'}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 z-10">
+          <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 z-10 shrink-0">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-                <Layers className="h-6 w-6 text-primary-600" />
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <Layers className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600" />
                 {t('extrasManagement.productExtras.manageCategories')}
               </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 pl-8">
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 pl-7 sm:pl-8 truncate max-w-[200px] sm:max-w-md">
                 {productName}
               </p>
             </div>
@@ -280,7 +414,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-6 bg-gray-50 dark:bg-gray-900/50">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-gray-50 dark:bg-gray-900/50">
             {error && (
               <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3 text-red-700 dark:text-red-400 animate-in slide-in-from-top-2">
                 <AlertCircle className="h-5 w-5 flex-shrink-0" />
@@ -309,7 +443,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
 
                 {/* Add Form */}
                 {showAddForm && (
-                  <div className="bg-white dark:bg-gray-800 rounded-xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg animate-in fade-in slide-in-from-bottom-4">
+                  <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-200 dark:border-gray-700 shadow-lg animate-in fade-in slide-in-from-bottom-4">
                     <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 dark:border-gray-700">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                         {t('extrasManagement.productExtras.addCategory')}
@@ -326,19 +460,18 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                             {t('extrasManagement.productExtras.selectCategory')} <span className="text-red-500">*</span>
                           </label>
-                          <select
-                            title={t('extrasManagement.productExtras.selectCategory')}
-                            value={formData.extraCategoryId}
-                            onChange={(e) => handleCategorySelect(parseInt(e.target.value))}
-                            className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white transition-all"
-                          >
-                            <option value={0}>{t('extrasManagement.productExtras.chooseCategory')}</option>
-                            {getAvailableCategoriesToAdd().map(cat => (
-                              <option key={cat.id} value={cat.id}>
-                                {cat.categoryName} {cat.isRemovalCategory ? `(${t('extrasManagement.categoryConfigModal.badges.removal')})` : ''}
-                              </option>
-                            ))}
-                          </select>
+                          <div className="relative z-20">
+                            <CustomSelect
+                              placeholder={t('extrasManagement.productExtras.chooseCategory')}
+                              value={formData.extraCategoryId}
+                              onChange={(val) => handleCategorySelect(val)}
+                              options={getAvailableCategoriesToAdd().map(cat => ({
+                                value: cat.id,
+                                label: cat.categoryName,
+                                subLabel: cat.isRemovalCategory ? t('extrasManagement.categoryConfigModal.badges.removal') : undefined
+                              }))}
+                            />
+                          </div>
                         </div>
                         
                         <div className="flex items-center p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
@@ -468,10 +601,10 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                       </div>
                     </div>
 
-                    <div className="mt-6 flex gap-3 justify-end pt-4 border-t border-gray-100 dark:border-gray-700">
+                    <div className="mt-6 flex flex-col sm:flex-row gap-3 justify-end pt-4 border-t border-gray-100 dark:border-gray-700">
                       <button
                         onClick={() => setShowAddForm(false)}
-                        className="px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                        className="w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                         disabled={isSubmitting}
                       >
                         {t('extrasManagement.buttons.cancel')}
@@ -479,7 +612,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                       <button
                         onClick={handleAddCategory}
                         disabled={isSubmitting || !formData.extraCategoryId}
-                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full sm:w-auto flex justify-center items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isSubmitting ? (
                           <>
@@ -526,8 +659,8 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                       >
                         {editingId === category.id ? (
                           // Edit Mode
-                          <div className="p-6">
-                            <div className="flex items-center justify-between mb-6">
+                          <div className="p-4 sm:p-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-6">
                               <div className="flex items-center gap-2">
                                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                                   {t('extrasManagement.buttons.edit')}: {getCategoryName(category.extraCategoryId)}
@@ -538,7 +671,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                                   </span>
                                 )}
                               </div>
-                              <div className="flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded">
+                              <div className="flex items-center p-2 bg-gray-50 dark:bg-gray-700 rounded w-fit">
                                 <input
                                   id={`edit-req-${category.id}`}
                                   type="checkbox"
@@ -555,7 +688,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                {isRemoval ? (
                                   // REMOVAL EDIT UI
-                                  <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg col-span-2">
+                                  <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg col-span-1 md:col-span-2">
                                      <h4 className="text-xs font-bold text-gray-500 uppercase dark:text-white tracking-wider mb-2">
                                         {t('extrasManagement.productExtras.selectionLimits')}
                                      </h4>
@@ -596,7 +729,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                                         <h4 className="text-xs font-bold text-gray-500 uppercase dark:text-white tracking-wider mb-2">
                                           {t('extrasManagement.productExtras.selectionLimits')}
                                         </h4>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                           <div>
                                             <label className="block text-xs dark:text-white text-gray-500 mb-1">
                                               {t('extrasManagement.productExtras.minSelectLabel')}
@@ -644,7 +777,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                                         <h4 className="text-xs font-bold dark:text-white text-gray-500 uppercase tracking-wider mb-2">
                                           {t('extrasManagement.productExtras.quantityLimits')}
                                         </h4>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                           <div>
                                             <label className="block text-xs dark:text-white mb-1">
                                               {t('extrasManagement.productExtras.minTotalLabel')}
@@ -697,8 +830,8 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                           </div>
                         ) : (
                           // View Mode
-                          <div className="p-5 flex items-center justify-between group">
-                            <div className="flex-1">
+                          <div className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 group">
+                            <div className="flex-1 w-full">
                               <div className="flex items-center gap-3 mb-2">
                                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                                   {getCategoryName(category.extraCategoryId)}
@@ -719,7 +852,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                                 )}
                               </div>
                               
-                              <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
+                              <div className="flex flex-row flex-wrap gap-4 sm:gap-6 text-sm text-gray-600 dark:text-gray-400 mt-2 sm:mt-0">
                                 <div className="flex flex-col">
                                   <span className="text-xs text-gray-400 uppercase">{t('extrasManagement.productExtras.selection')}</span>
                                   <span className="font-medium text-gray-900 dark:text-gray-200">
@@ -732,7 +865,7 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                                 </div>
                                 {!isRemoval && (
                                   <>
-                                    <div className="w-px bg-gray-200 dark:bg-gray-700 h-8"></div>
+                                    <div className="hidden sm:block w-px bg-gray-200 dark:bg-gray-700 h-8"></div>
                                     <div className="flex flex-col">
                                       <span className="text-xs text-gray-400 uppercase">{t('extrasManagement.productExtras.quantity')}</span>
                                       <span className="font-medium text-gray-900 dark:text-gray-200">{category.minTotalQuantity} - {category.maxTotalQuantity}</span>
@@ -742,16 +875,16 @@ const ProductExtraCategoriesModal: React.FC<ProductExtraCategoriesModalProps> = 
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-2 w-full sm:w-auto mt-2 sm:mt-0 border-t sm:border-t-0 border-gray-100 dark:border-gray-700 pt-3 sm:pt-0">
                               <button
                                 onClick={() => onSelectCategory(category.extraCategoryId, getCategoryName(category.extraCategoryId), isRemoval)}
-                                className="flex items-center gap-1 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors mr-2"
+                                className="flex justify-center sm:justify-start items-center gap-1 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/30 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/50 transition-colors sm:mr-2"
                               >
                                 {t('extrasManagement.productExtras.manageExtras')}
                                 <ChevronRight className="h-4 w-4" />
                               </button>
                               
-                              <div className="flex items-center gap-1 border-l border-gray-200 dark:border-gray-700 pl-3">
+                              <div className="flex justify-center sm:justify-start items-center gap-1 sm:border-l border-gray-200 dark:border-gray-700 sm:pl-3">
                                 <button
                                   onClick={() => startEdit(category)}
                                   className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all"

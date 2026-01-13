@@ -1,13 +1,19 @@
 import { tr } from './tr';
 import { en } from './en';
 import { ar } from './ar';
+import { az } from './az';
+import  { sq } from './sq';
+import  { bs } from './bs';
 
-export { tr, en, ar };
+
 
 export const translations = {
   tr,
   en,
-  ar
+  ar,
+  az,
+  sq,
+  bs
 };
 
 export type TranslationKeys = typeof tr; 

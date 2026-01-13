@@ -1,10 +1,43 @@
-import React from 'react';
-import { Eye, CheckCircle, XCircle, Ban, Clock, Package, ArrowRight, CheckCheck, CreditCard, Banknote, Smartphone } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Eye,
+  XCircle,
+  Ban,
+  Clock,
+  Package,
+  CreditCard,
+  Banknote,
+  Smartphone,
+  ChevronDown,
+  Search,
+  Check
+} from 'lucide-react';
 import { BranchOrder, PendingOrder } from '../../../../types/BranchManagement/type';
 import { orderService } from '../../../../services/Branch/OrderService';
 import OrderStatusUtils from '../../../../utils/OrderStatusUtils';
 import { OrderStatusEnums } from '../../../../types/Orders/type';
 import { useCurrency } from '../../../../hooks/useCurrency';
+import { useLanguage } from '../../../../contexts/LanguageContext';
+
+// --- Types ---
+
+interface Option {
+  value: any;
+  label: string;
+  searchTerms?: string;
+}
+
+interface CustomSelectProps {
+  options: Option[];
+  value: any;
+  onChange: (value: any) => void;
+  placeholder: string;
+  disabled?: boolean;
+  searchable?: boolean;
+  className?: string;
+}
 
 interface OrderTableRowProps {
   order: PendingOrder | BranchOrder;
@@ -21,12 +54,165 @@ interface OrderTableRowProps {
   rowIndex: number;
 }
 
+// --- Custom Select Component (Fixed for Table Overflow) ---
+
+const CustomSelect: React.FC<CustomSelectProps> = ({
+  options,
+  value,
+  onChange,
+  placeholder,
+  disabled,
+  searchable = false,
+  className = ""
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const { isRTL } = useLanguage();
+
+  useEffect(() => {
+    // Update position when opening
+    if (isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom + window.scrollY,
+        left: rect.left + window.scrollX,
+        width: rect.width
+      });
+    }
+  }, [isOpen]);
+
+  // Handle outside clicks
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // If clicking inside the button, don't close (toggle logic handles it)
+      if (buttonRef.current && buttonRef.current.contains(event.target as Node)) {
+        return;
+      }
+      // If clicking inside the dropdown menu (which is in a portal), don't close
+      const dropdownElement = document.getElementById('custom-select-dropdown');
+      if (dropdownElement && dropdownElement.contains(event.target as Node)) {
+        return;
+      }
+      setIsOpen(false);
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      // Handle scroll to update position or close
+      window.addEventListener('scroll', () => setIsOpen(false), { capture: true });
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('scroll', () => setIsOpen(false), { capture: true });
+    };
+  }, [isOpen]);
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  const filteredOptions = options.filter(opt =>
+    opt.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    opt.searchTerms?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className={`relative ${className}`}>
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
+        disabled={disabled}
+        className={`w-full flex items-center justify-between px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
+          disabled ? 'opacity-60 cursor-not-allowed' : 'hover:border-blue-400 cursor-pointer'
+        } ${isOpen ? 'ring-2 ring-blue-500/20 border-blue-500' : ''}`}
+      >
+        <span className={`block truncate text-xs font-medium ${!selectedOption ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <ChevronDown className={`w-3.5 h-3.5 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {/* Render Dropdown via Portal to break out of Table Overflow */}
+      {isOpen && createPortal(
+        <AnimatePresence>
+          <motion.div
+            id="custom-select-dropdown"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.15 }}
+            style={{
+              position: 'absolute',
+              top: coords.top + 4, // Add a little gap
+              left: coords.left,
+              width: coords.width,
+              zIndex: 9999 // Ensure it's on top of everything
+            }}
+            className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[200px]"
+          >
+            {searchable && (
+              <div className="p-2 border-b border-gray-100 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
+                <div className="relative">
+                  <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400`} />
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search..."
+                    className={`w-full ${isRTL ? 'pr-8 pl-2' : 'pl-8 pr-2'} py-1.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-md text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500`}
+                    autoFocus
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="overflow-y-auto flex-1 p-1 custom-scrollbar">
+              {filteredOptions.length > 0 ? (
+                filteredOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => {
+                      onChange(option.value);
+                      setIsOpen(false);
+                      setSearchTerm('');
+                    }}
+                    className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between group transition-colors ${
+                      value === option.value
+                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
+                        : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
+                    }`}
+                  >
+                    <span className="font-medium text-xs truncate">{option.label}</span>
+                    {value === option.value && (
+                      <Check className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 shrink-0 ml-2" />
+                    )}
+                  </button>
+                ))
+              ) : (
+                <div className="p-3 text-center text-xs text-gray-500 dark:text-gray-400">
+                  No options found
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </AnimatePresence>,
+        document.body // Portal to body
+      )}
+    </div>
+  );
+};
+
+// --- Main Order Row Component ---
+
 const OrderTableRow: React.FC<OrderTableRowProps> = ({
   order,
   viewMode,
   lang,
   onOpenDetails,
-  onOpenConfirm,
   onOpenReject,
   onOpenStatus,
   onOpenCancel,
@@ -40,7 +226,6 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
   const validStatuses = OrderStatusUtils.getValidStatusTransitions(status);
   const isRTL = lang === 'ar';
 
-  // Get payment method icon and label
   const getPaymentMethodInfo = (paymentMethod?: number) => {
     switch (paymentMethod) {
       case 1:
@@ -55,36 +240,21 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
   };
 
   const paymentMethodInfo = getPaymentMethodInfo(order.paymentMethod);
+  const rowBgClass = rowIndex % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-800/50';
 
-  // Alternating row colors for better readability
-  const rowBgClass = rowIndex % 2 === 0
-    ? 'bg-white dark:bg-gray-800'
-    : 'bg-gray-50 dark:bg-gray-800/50';
+  const statusOptions: Option[] = validStatuses.map((validStatus) => ({
+    value: validStatus,
+    label: orderService.getOrderStatusText(validStatus, lang),
+  }));
 
-  // Logic to determine which buttons to show
-  // We filter out statuses that shouldn't appear in the quick-action flow
-  const nextStepStatuses = validStatuses.filter((validStatus) => {
-    if (status === OrderStatusEnums.Preparing && validStatus === OrderStatusEnums.Completed) {
-      return false;
-    }
-    if (status === OrderStatusEnums.Ready && validStatus === OrderStatusEnums.Completed) {
-      return false;
-    }
-    return true;
-  });
-
-  // Check if order is completed or confirmed - hide confirm button logic from original code
-  const shouldShowConfirmButton = orderService.canModifyOrder(status) &&
-    status !== OrderStatusEnums.Completed &&
-    status !== OrderStatusEnums.Confirmed &&
-    status !== OrderStatusEnums.Delivered &&
-    status !== OrderStatusEnums.Cancelled &&
-    status !== OrderStatusEnums.Rejected;
+  const handleStatusChange = (newStatus: number) => {
+    onOpenStatus(order.id.toString(), rowVersion, newStatus);
+  };
 
   return (
     <tr className={`${rowBgClass} hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 border-b border-gray-100 dark:border-gray-700`}>
 
-      {/* Order Number */}
+      {/* 1. Order Number */}
       <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
         <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-800">
           <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
@@ -94,7 +264,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
         </div>
       </td>
 
-      {/* Status (Branch View Only) */}
+      {/* 2. Status Badge */}
       {viewMode === 'branch' && (
         <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
           <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold border-2 ${OrderStatusUtils.getStatusBadgeClass(status)} shadow-sm`}>
@@ -104,7 +274,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
         </td>
       )}
 
-      {/* Amount */}
+      {/* 3. Amount */}
       <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
         <div className="flex flex-col gap-1">
           <div className="text-lg font-black text-green-600 dark:text-green-400">
@@ -117,7 +287,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
         </div>
       </td>
 
-      {/* Order Type */}
+      {/* 4. Type */}
       <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
         <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <span className="text-2xl">{order.orderTypeIcon}</span>
@@ -132,7 +302,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
         </div>
       </td>
 
-      {/* Payment Method */}
+      {/* 5. Payment */}
       <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
         {paymentMethodInfo ? (
           <div className={`inline-flex items-center gap-1.5 ${paymentMethodInfo.bgColor} px-3 py-1.5 rounded-lg`}>
@@ -146,7 +316,7 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
         )}
       </td>
 
-      {/* Time */}
+      {/* 6. Time */}
       <td className={`px-4 py-4 ${isRTL ? 'text-right' : 'text-left'}`}>
         <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className="p-1.5 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
@@ -163,79 +333,53 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
         </div>
       </td>
 
-      {/* Actions */}
+      {/* 7. Actions */}
       <td className={`px-4 py-4 ${isRTL ? 'text-left' : 'text-right'}`}>
         <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-end'}`}>
           
-          {/* 1. Primary Flow Actions (Next Step Buttons) */}
-          <div className="flex items-center gap-2">
-            
-            {/* A: Confirm Button (The first step) */}
-          {/*   {shouldShowConfirmButton && (
-              <button
-                onClick={() => onOpenConfirm(order.id.toString(), rowVersion)}
-                className="group relative px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg font-bold text-xs flex items-center gap-2"
-                title={t('ordersManager.confirm')}
-              >
-                <CheckCircle className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('ordersManager.confirm')}</span>
-              </button>
-            )} */}
+          {/* Custom Select for Status Changes - Fixed with Portal */}
+          {statusOptions.length > 0 && (
+            <div className="w-40 relative">
+              <CustomSelect
+                placeholder={t('ordersManager.changeStatus')}
+                options={statusOptions}
+                value={null}
+                onChange={handleStatusChange}
+                disabled={false}
+              />
+            </div>
+          )}
 
-            {/* B: Next Step Buttons (Replaces the Select Dropdown) */}
-            {/* This maps through valid next statuses and shows them as direct action buttons */}
-            {nextStepStatuses.map((nextStatus) => (
-              <button
-                key={nextStatus}
-                onClick={() => onOpenStatus(order.id.toString(), rowVersion, nextStatus)}
-                className="flex items-center gap-1.5 px-3 py-2 border-2 border-blue-500/20 hover:border-blue-500 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 text-xs font-bold shadow-sm"
-                title={`${t('ordersManager.changeStatus')} -> ${orderService.getOrderStatusText(nextStatus, lang)}`}
-              >
-                {/* Different icon based on final status or intermediate status */}
-                {nextStatus === OrderStatusEnums.Delivered || nextStatus === OrderStatusEnums.Completed ? (
-                   <CheckCheck className="w-4 h-4" />
-                ) : (
-                   <ArrowRight className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
-                )}
-                <span>{orderService.getOrderStatusText(nextStatus, lang)}</span>
-              </button>
-            ))}
+          {/* View Details */}
+          <button
+            onClick={() => onOpenDetails(order)}
+            className="p-2 text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+            title={t('ordersManager.viewDetails')}
+          >
+            <Eye className="w-5 h-5" />
+          </button>
 
-            {/* View Details (Always visible) */}
+          {/* Reject (Pending Only) */}
+          {status === OrderStatusEnums.Pending && (
             <button
-              onClick={() => onOpenDetails(order)}
-              className="flex items-center justify-center w-8 h-8 text-indigo-600 hover:text-white hover:bg-indigo-600 dark:text-indigo-400 dark:hover:bg-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg transition-all duration-200 hover:scale-105 hover:shadow-lg"
-              title={t('ordersManager.viewDetails')}
+              onClick={() => onOpenReject(order.id.toString(), rowVersion)}
+              className="p-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+              title={t('ordersManager.reject')}
             >
-          <Eye className="w-4 h-4" />
+              <XCircle className="w-5 h-5" />
             </button>
-          </div>
+          )}
 
-          {/* 2. Secondary/Negative Actions (Separated visually) */}
-          <div className="flex items-center gap-1 pl-2 border-l-2 border-gray-100 dark:border-gray-700 ml-2">
-            
-            {/* Reject Button (Only for Pending) */}
-            {status === OrderStatusEnums.Pending && (
-              <button
-                onClick={() => onOpenReject(order.id.toString(), rowVersion)}
-                className="flex items-center justify-center w-8 h-8 text-red-600 hover:text-white hover:bg-red-600 dark:text-red-400 dark:hover:bg-red-500 bg-red-50 dark:bg-red-900/20 rounded-lg transition-all duration-200 hover:scale-105"
-                title={t('ordersManager.reject')}
-              >
-                <XCircle className="w-4 h-4" />
-              </button>
-            )}
-
-            {/* Cancel Button */}
-            {orderService.canCancelOrder(status) && (
-              <button
-                onClick={() => onOpenCancel(order.id.toString(), rowVersion)}
-                className="flex items-center justify-center w-8 h-8 text-orange-600 hover:text-white hover:bg-orange-600 dark:text-orange-400 dark:hover:bg-orange-500 bg-orange-50 dark:bg-orange-900/20 rounded-lg transition-all duration-200 hover:scale-105"
-                title={t('ordersManager.cancel')}
-              >
-                <Ban className="w-4 h-4" />
-              </button>
-            )}
-          </div>
+          {/* Cancel */}
+          {orderService.canCancelOrder(status) && (
+            <button
+              onClick={() => onOpenCancel(order.id.toString(), rowVersion)}
+              className="p-2 text-orange-600 hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
+              title={t('ordersManager.cancel')}
+            >
+              <Ban className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </td>
     </tr>

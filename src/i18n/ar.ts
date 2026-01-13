@@ -6,14 +6,16 @@ export const ar = {
     loading: 'جاري التحميل...',
     error: 'خطأ',
     actions: 'الإجراءات',
+    select: 'تحديد',
     change: 'تغيير',
     removal: 'إزالة',
     success: 'نجح',
     setAsDefault: 'تعيين كافتراضي',
     default: 'افتراضي',
     cancel: 'إلغاء',
-      "emailAddress": "عنوان البريد الإلكتروني",
-      "emailPlaceholder": "you@example.com",
+    saving: 'جاري الحفظ...',
+    "emailAddress": "عنوان البريد الإلكتروني",
+    "emailPlaceholder": "you@example.com",
     save: 'حفظ',
     delete: 'حذف',
     edit: 'تعديل',
@@ -402,6 +404,9 @@ hero: {
     turkish: 'Türkçe',
     english: 'English',
     arabic: 'العربية',
+    azerbaijani: 'Azərbaycan',
+    albanian: 'Shqip',
+    bosnian: 'Bosanski',
     selectLanguage: 'اختر اللغة'
   },
 
@@ -765,7 +770,12 @@ pricing: {
     vatInfo: 'جميع الأسعار شاملة ضريبة القيمة المضافة. تتوفر عروض خاصة للسلاسل الكبيرة.',
     perMonth: 'شهر',
     perYear: 'سنة',
-    monthlyEquivalent: 'فقط {amount} / شهر (عند الدفع السنوي)'
+    monthlyEquivalent: 'فقط {amount} / شهر (عند الدفع السنوي)',
+    comingSoon: 'قريباً',
+    freeTrial: 'تجربة مجانية',
+    free: 'مجاني',
+    freeFor3Months: 'مجاني لأول 3 أشهر',
+    noCreditCard: 'لا حاجة لبطاقة ائتمان'
   },
 
   // Testimonials
@@ -1201,7 +1211,7 @@ contact: {
     },
     fields: {
       branchName: {
-        label: 'اسم الفرع',
+        label: 'اسم الفرع *',
         placeholder: 'أدخل اسم الفرع'
       },
       whatsappNumber: {
@@ -1313,6 +1323,7 @@ contact: {
 
   branchManagement: {
     title: 'إدارة الفروع',
+
     description: 'إدارة فروع المطعم وتحديث معلوماتها',
     loading: 'جاري تحميل الفروع...',
     addBranch: 'إضافة فرع جديد',
@@ -1357,6 +1368,12 @@ contact: {
       branchNamePlaceholder: 'أدخل اسم الفرع',
       branchNameRequired: 'اسم الفرع مطلوب',
       whatsappNumber: 'رقم واتساب للطلبات',
+
+      open24HoursMessage: 'هذا الفرع مفتوح على مدار 24 ساعة',
+      open24Hours: 'مفتوح على مدار 24 ساعة',
+      addTimeSlot: 'إضافة شريحة زمنية',
+      closed: 'مغلق',
+
       whatsappPlaceholder: 'أدخل رقم الواتساب',
       branchLogo: 'شعار الفرع',
       logoUpload: 'رفع الشعار',
@@ -3278,6 +3295,10 @@ contact: {
     workingHours: {
       title: 'ساعات العمل',
       workingDay: 'يوم عمل',
+      open24Hours: 'مفتوح 24 ساعة',
+      open24HoursMessage: 'هذه الفرع مفتوح 24 ساعة.',
+      addTimeSlot: 'إضافة فترة زمنية',
+
       openTime: 'وقت الفتح',
       closeTime: 'وقت الإغلاق',
       noWorkingHours: 'لم يتم تحديد ساعات العمل',
@@ -4164,9 +4185,13 @@ contact: {
     saveChanges: "حفظ التغييرات",
     saveSuccess: "تم حفظ إعدادات الفرع بنجاح!",
     cleanupModes: {
-    afterTimeout: "بعد انتهاء المهلة",
-    afterClosing: "بعد الإغلاق",
-    disabled: "معطل"
+      afterTimeout: "بعد انتهاء المهلة",
+      afterClosing: "بعد الإغلاق",
+      disabled: "معطل"
+    },
+    mobileGridLayout: {
+      oneColumn: "عمود واحد",
+      twoColumns: "عمودين"
     },
     sections: {
       orderManagement: {
@@ -4186,7 +4211,9 @@ contact: {
         enableAllergenDisplay: "عرض معلومات مسببات الحساسية",
         enableAllergenDisplayDesc: "إظهار تحذيرات ومعلومات مسببات الحساسية",
         enableIngredientDisplay: "عرض المكونات",
-        enableIngredientDisplayDesc: "إظهار قوائم المكونات للمنتجات"
+        enableIngredientDisplayDesc: "إظهار قوائم المكونات للمنتجات",
+        mobileGridLayout: "تخطيط شبكة الهاتف",
+        mobileGridLayoutDesc: "اختر كيفية عرض المنتجات على الأجهزة المحمولة"
       },
       "paymentMethods": {
         "title": "طرق الدفع",
@@ -4514,18 +4541,7 @@ recycleBin: {
         "message": "تم تحديث كلمة المرور الخاصة بك بنجاح. يمكنك الآن تسجيل الدخول."
       }
     },
-    "confirmMail": {
-      "submitted": {
-        "title": "تحقق من بريدك الإلكتروني",
-        "line1": "لقد أرسلنا رابط تأكيد جديد إلى",
-        "line2": "يرجى التحقق من صندوق الوارد الخاص بك (ومجلد البريد العشوائي!)."
-      },
-      "form": {
-        "title": "تأكيد بريدك الإلكتروني",
-        "subtitle": "أدخل بريدك الإلكتروني لإعادة إرسال رابط التأكيد.",
-        "button": "إعادة إرسال التأكيد"
-      }
-    },
+   
 
     sections: {
       restaurantDetails: "تفاصيل المطعم",
@@ -4576,7 +4592,18 @@ recycleBin: {
       "na": "غير متوفر"
     }
   },
-
+ "confirmMail": {
+      "submitted": {
+        "title": "تحقق من بريدك الإلكتروني",
+        "line1": "لقد أرسلنا رابط تأكيد جديد إلى",
+        "line2": "يرجى التحقق من صندوق الوارد الخاص بك (ومجلد البريد العشوائي!)."
+      },
+      "form": {
+        "title": "تأكيد بريدك الإلكتروني",
+        "subtitle": "أدخل بريدك الإلكتروني لإعادة إرسال رابط التأكيد.",
+        "button": "إعادة إرسال التأكيد"
+      }
+    },
   branches: {
   status: {
     active: "نشط",
@@ -5160,6 +5187,9 @@ recycleBin: {
           "title": "ساعات العمل",
           "description": "حدد ساعات عملك. يمكنك البقاء مفتوحًا طوال الليل (مثل: 23:00 - 02:00).",
           "openLabel": "وقت الفتح",
+          "open24Hours": "مفتوح 24 ساعة",
+          "addSlot": "إضافة فترة",
+          "open24HoursNote": "هذا المطعم مفتوح 24 ساعة.",
           "closeLabel": "وقت الإغلاق",
           "dayNames": [
             "الاثنين",

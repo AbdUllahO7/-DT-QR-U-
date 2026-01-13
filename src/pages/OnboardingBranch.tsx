@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Store, Building2, Phone, Mail, MapPin, Clock, 
-  ArrowLeft, AlertCircle, CheckCircle, Globe, 
-  MapPinned, FileText, Home, Info, ArrowRight, Upload, X, Navigation
+import {
+  Store, Building2, Phone, Mail, MapPin, Clock,
+  ArrowLeft, AlertCircle, CheckCircle, Globe,
+  MapPinned, FileText, Home, Info, ArrowRight, Upload, X, Navigation,
+  ChevronDown, Check
 } from 'lucide-react';
 import type { 
   CreateBranchWithDetailsDto, 
@@ -74,6 +75,13 @@ const OnboardingBranch: React.FC = () => {
   const [contactCountryCode, setContactCountryCode] = useState<string>('+90');
   const [contactPlaceholder, setContactPlaceholder] = useState<string>(getPlaceholderByDialCode('+90'));
 
+  // Country dropdown state
+  const [isCountryDropdownOpen, setIsCountryDropdownOpen] = useState<boolean>(false);
+
+  // Country code dropdown states
+  const [isWhatsappCountryCodeOpen, setIsWhatsappCountryCodeOpen] = useState<boolean>(false);
+  const [isContactCountryCodeOpen, setIsContactCountryCodeOpen] = useState<boolean>(false);
+
   // Map modal state
   const [isMapModalOpen, setIsMapModalOpen] = useState<boolean>(false);
   const [selectedLatLng, setSelectedLatLng] = useState<{ lat: number; lng: number }>({
@@ -109,13 +117,13 @@ const OnboardingBranch: React.FC = () => {
       openHours: ''
     },
     createBranchWorkingHourCoreDto: [
-      { dayOfWeek: 1, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
-      { dayOfWeek: 2, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
-      { dayOfWeek: 3, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
-      { dayOfWeek: 4, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
-      { dayOfWeek: 5, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
-      { dayOfWeek: 6, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: true },
-      { dayOfWeek: 0, openTime: "08:00:00", closeTime: "22:00:00", isWorkingDay: false }
+      { dayOfWeek: 1, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] },
+      { dayOfWeek: 2, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] },
+      { dayOfWeek: 3, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] },
+      { dayOfWeek: 4, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] },
+      { dayOfWeek: 5, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] },
+      { dayOfWeek: 6, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] },
+      { dayOfWeek: 0, isWorkingDay: false, isOpen24Hours: false, timeSlots: [] }
     ]
   });
 
@@ -269,12 +277,6 @@ const OnboardingBranch: React.FC = () => {
     }
   };
 
-  const handleWhatsappCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    const code = e.target.value;
-    setWhatsappCountryCode(code);
-    setWhatsappPlaceholder(getPlaceholderByDialCode(code));
-  };
-
   // Handlers for Contact Phone Number
   const handleContactNationalPhoneChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { value } = e.target;
@@ -291,12 +293,6 @@ const OnboardingBranch: React.FC = () => {
     if (errors['createContactDto.phone']) {
       setErrors(prev => ({ ...prev, 'createContactDto.phone': undefined }));
     }
-  };
-
-  const handleContactCountryCodeChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    const code = e.target.value;
-    setContactCountryCode(code);
-    setContactPlaceholder(getPlaceholderByDialCode(code));
   };
 
   // Function to extract coordinates from Google Maps link
@@ -395,21 +391,68 @@ const OnboardingBranch: React.FC = () => {
     }
   };
 
-  const handleWorkingHourChange = (dayIndex: number, field: keyof CreateBranchWorkingHourCoreDto, value: any): void => {
+  const handleWorkingHourChange = (dayIndex: number, field: string, value: any, slotIndex: number = 0): void => {
     setFormData(prev => ({
       ...prev,
       createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto?.map((day, index) => {
         if (index === dayIndex) {
           if (field === 'openTime' || field === 'closeTime') {
-            return { 
-              ...day, 
-              [field]: formatTimeForApi(value)
-            };
+            const updatedSlots = [...(day.timeSlots || [])];
+            if (updatedSlots[slotIndex]) {
+              updatedSlots[slotIndex] = {
+                ...updatedSlots[slotIndex],
+                [field]: formatTimeForApi(value)
+              };
+            }
+            return { ...day, timeSlots: updatedSlots };
           }
           if (field === 'isWorkingDay') {
+            // When enabling working day, ensure there's at least one time slot if not 24 hours
+            if (value && !day.isOpen24Hours && (!day.timeSlots || day.timeSlots.length === 0)) {
+              return { ...day, isWorkingDay: value, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] };
+            }
+            // When disabling working day, clear time slots (backend doesn't accept time slots for non-working days)
+            if (!value) {
+              return { ...day, isWorkingDay: value, timeSlots: [], isOpen24Hours: false };
+            }
             return { ...day, isWorkingDay: value };
           }
+          if (field === 'isOpen24Hours') {
+            // When enabling 24 hours, clear time slots (backend doesn't accept time slots for 24-hour days)
+            // When disabling 24 hours, add a default time slot
+            if (value) {
+              return { ...day, isOpen24Hours: value, timeSlots: [] };
+            } else {
+              return { ...day, isOpen24Hours: value, timeSlots: [{ openTime: "08:00:00", closeTime: "22:00:00" }] };
+            }
+          }
           return { ...day, [field]: value };
+        }
+        return day;
+      }) || []
+    }));
+  };
+
+  const addTimeSlot = (dayIndex: number): void => {
+    setFormData(prev => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto?.map((day, index) => {
+        if (index === dayIndex) {
+          const newSlots = [...(day.timeSlots || []), { openTime: "08:00:00", closeTime: "22:00:00" }];
+          return { ...day, timeSlots: newSlots };
+        }
+        return day;
+      }) || []
+    }));
+  };
+
+  const removeTimeSlot = (dayIndex: number, slotIndex: number): void => {
+    setFormData(prev => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto?.map((day, index) => {
+        if (index === dayIndex && day.timeSlots && day.timeSlots.length > 1) {
+          const newSlots = day.timeSlots.filter((_, i) => i !== slotIndex);
+          return { ...day, timeSlots: newSlots };
         }
         return day;
       }) || []
@@ -499,28 +542,41 @@ const OnboardingBranch: React.FC = () => {
           newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.minOneDay');
         } else {
           for (const day of workingDays) {
-            if (!day.openTime || !day.closeTime) {
-              newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.allTimesRequired');
+            // Each working day must have either isOpen24Hours or at least one valid time slot
+            if (!day.isOpen24Hours && (!day.timeSlots || day.timeSlots.length === 0)) {
+              newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.slotOrOpen24Required') || 'Each working day must have at least one time slot or be set to 24 hours';
               break;
             }
-            
-            if (!isValidTimeRange(day.openTime, day.closeTime)) {
-              const openTimeFormatted = formatTimeForInput(day.openTime);
-              const closeTimeFormatted = formatTimeForInput(day.closeTime);
-              
-              if (day.closeTime <= day.openTime) {
-                newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.invalidRange', {
-                  openTime: openTimeFormatted,
-                  closeTime: closeTimeFormatted
-                });
-              } else {
-                newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.openBeforeClose', {
-                  openTime: openTimeFormatted,
-                  closeTime: closeTimeFormatted
-                });
+
+            // Skip time validation for 24 hours days
+            if (day.isOpen24Hours) continue;
+
+            // Validate each time slot
+            for (const slot of day.timeSlots) {
+              if (!slot.openTime || !slot.closeTime) {
+                newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.allTimesRequired');
+                break;
               }
-              break;
+
+              if (!isValidTimeRange(slot.openTime, slot.closeTime)) {
+                const openTimeFormatted = formatTimeForInput(slot.openTime);
+                const closeTimeFormatted = formatTimeForInput(slot.closeTime);
+
+                if (slot.closeTime <= slot.openTime) {
+                  newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.invalidRange', {
+                    openTime: openTimeFormatted,
+                    closeTime: closeTimeFormatted
+                  });
+                } else {
+                  newErrors.workingHours = t('onboardingBranch.form.step3.workingHours.error.openBeforeClose', {
+                    openTime: openTimeFormatted,
+                    closeTime: closeTimeFormatted
+                  });
+                }
+                break;
+              }
             }
+            if (newErrors.workingHours) break;
           }
         }
         break;
@@ -561,7 +617,7 @@ const OnboardingBranch: React.FC = () => {
     }
 
     const allWorkingHours = formData.createBranchWorkingHourCoreDto || [];
-    
+
     const workingDays = allWorkingHours.filter(day => day.isWorkingDay);
     if (workingDays.length === 0) {
       setApiError(t('onboardingBranch.form.step3.workingHours.error.minOneDay'));
@@ -569,9 +625,20 @@ const OnboardingBranch: React.FC = () => {
     }
 
     for (const day of workingDays) {
-      if (!day.openTime || !day.closeTime) {
-        setApiError(t('onboardingBranch.form.step3.workingHours.error.allTimesRequired'));
+      // Each working day must have either isOpen24Hours or at least one valid time slot
+      if (!day.isOpen24Hours && (!day.timeSlots || day.timeSlots.length === 0)) {
+        setApiError(t('onboardingBranch.form.step3.workingHours.error.slotOrOpen24Required') || 'Each working day must have at least one time slot or be set to 24 hours');
         return;
+      }
+
+      // Skip time validation for 24 hours days
+      if (day.isOpen24Hours) continue;
+
+      for (const slot of day.timeSlots) {
+        if (!slot.openTime || !slot.closeTime) {
+          setApiError(t('onboardingBranch.form.step3.workingHours.error.allTimesRequired'));
+          return;
+        }
       }
     }
 
@@ -645,7 +712,8 @@ const OnboardingBranch: React.FC = () => {
       } else {
         setApiError(t('onboardingBranch.messages.api.branchIdMissing'));
       }
-    } catch (error) {
+    } catch (error : any)  {
+      setErrors(error.message);
       if (import.meta.env.DEV) {
         console.error('Branch creation error:', error);
       }
@@ -668,7 +736,7 @@ const OnboardingBranch: React.FC = () => {
       } else if (apiErr.status === 0) {
         setApiError(t('onboardingBranch.messages.api.connectionError'));
       } else if (apiErr.status === 500) {
-        setApiError(t('onboardingBranch.messages.api.serverError'));
+        setApiError(error.message);
       } else {
         setApiError(apiErr.message || t('onboardingBranch.messages.api.genericCreateError'));
       }
@@ -1006,38 +1074,72 @@ const OnboardingBranch: React.FC = () => {
         )}
       </div>
 
-      {/* WhatsApp Phone Input */}
+     {/* WhatsApp Phone Input */}
       <div>
         <label htmlFor="whatsappOrderNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           {t('onboardingBranch.form.step1.whatsappNumber.label')} <span className="text-red-500">*</span>
         </label>
-        <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
-          {/* Country Code Selector */}
-          <div className="relative">
-            <select
-            title='whatsappCountryCode'
-              id="whatsappCountryCode"
-              name="whatsappCountryCode"
-              value={whatsappCountryCode}
-              onChange={handleWhatsappCountryCodeChange}
-              className={`h-full py-3 ${isRTL ? 'pr-8 pl-3' : 'pl-3 pr-8'} border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 appearance-none`}
+        
+        {/* Changed container to Column on mobile, Row on Desktop */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          
+          {/* Country Code Selector - Full width on mobile */}
+          <div className="relative w-full sm:w-auto">
+            {/* Custom Dropdown Button */}
+            <button
+              type="button"
+              onClick={() => setIsWhatsappCountryCodeOpen(!isWhatsappCountryCodeOpen)}
+              className={`w-full sm:w-[200px] py-3 ${isRTL ? 'pr-3 pl-10' : 'pl-3 pr-10'} border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 text-left flex items-center`}
             >
-              {sortedCountryCodes.map(country => (
-                <option key={country.name} value={country.dialCode}>
-                  {country.name} ({country.dialCode})
-                </option>
-              ))}
-            </select>
-             {/* Chevron for select */}
-            <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-2' : 'right-0 pr-2'} flex items-center pointer-events-none`}>
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
+              <span className="truncate">
+                {sortedCountryCodes.find(c => c.dialCode === whatsappCountryCode)?.name || ''} ({whatsappCountryCode})
+              </span>
+              <ChevronDown className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 transition-transform duration-200 ${isWhatsappCountryCodeOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* Dropdown Options */}
+            {isWhatsappCountryCodeOpen && (
+              <>
+                {/* Backdrop to close dropdown */}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsWhatsappCountryCodeOpen(false)}
+                />
+
+                {/* Dropdown Menu */}
+                <div className={`absolute z-50 mt-1 w-full sm:w-[280px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto ${isRTL ? 'right-0' : 'left-0'}`}>
+                  {sortedCountryCodes.map((country, index) => (
+                    <button
+                      key={country.name}
+                      type="button"
+                      onClick={() => {
+                        setWhatsappCountryCode(country.dialCode);
+                        setWhatsappPlaceholder(getPlaceholderByDialCode(country.dialCode));
+                        setIsWhatsappCountryCodeOpen(false);
+                      }}
+                      className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ${
+                        index === 0 ? 'rounded-t-lg' : ''
+                      } ${
+                        index === sortedCountryCodes.length - 1 ? 'rounded-b-lg' : ''
+                      } ${
+                        whatsappCountryCode === country.dialCode
+                          ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+                          : 'text-gray-900 dark:text-white'
+                      } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+                    >
+                      <span className="truncate">{country.name} ({country.dialCode})</span>
+                      {whatsappCountryCode === country.dialCode && (
+                        <Check className={`h-5 w-5 text-primary-600 dark:text-primary-400 flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
-          {/* Phone Number Input */}
-          <div className="relative flex-1">
+          {/* Phone Number Input - Full width mobile, Flex-1 on desktop */}
+          <div className="relative w-full sm:flex-1">
             <Phone className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 z-10`} />
             <input
               id="whatsappOrderNumber"
@@ -1058,6 +1160,7 @@ const OnboardingBranch: React.FC = () => {
             />
           </div>
         </div>
+        
         {errors.whatsappOrderNumber && (
           <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.whatsappOrderNumber}</p>
         )}
@@ -1130,41 +1233,87 @@ const OnboardingBranch: React.FC = () => {
 
   const renderStep2 = () => (
     <div className="space-y-6">
+      {/* Country */}
       <div>
         <label htmlFor="address.country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           {t('onboardingBranch.form.step2.country.label')} <span className="text-red-500">*</span>
         </label>
         <div className="relative">
-          <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
-         <select
-          id="address.country"
-          name="address.country"
-          value={formData.createAddressDto.country || ''}
-          onChange={handleInputChange}
-          className={`w-full ${isRTL ? 'pr-10 pl-8' : 'pl-10 pr-8'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-            errors['createAddressDto.country']
-              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-          } text-gray-900 dark:text-white appearance-none ${isRTL ? 'text-right' : 'text-left'}`}
-          dir={isRTL ? 'rtl' : 'ltr'}
-          required
-        >
-          <option value="" disabled>
-            {t('onboardingBranch.form.step2.country.placeholder')}
-          </option>
-          {countryKeys.map((countryKey) => (
-            <option key={countryKey} value={t(countryKey)}>
-              {t(countryKey)}
-            </option>
-          ))}
-        </select>
-        {/* Custom dropdown arrow */}
-        <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-3' : 'right-0 pr-3'} flex items-center pointer-events-none`}>
-          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-          </svg>
+          {/* Custom Dropdown Button */}
+          <button
+            type="button"
+            onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
+            className={`w-full ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
+              errors['createAddressDto.country']
+                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+            } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'} flex items-center justify-between`}
+            dir={isRTL ? 'rtl' : 'ltr'}
+          >
+            <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
+            <span className={`flex-1 truncate ${!formData.createAddressDto.country ? 'text-gray-500 dark:text-gray-400' : ''}`}>
+              {formData.createAddressDto.country || t('onboardingBranch.form.step2.country.placeholder')}
+            </span>
+            <ChevronDown className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 transition-transform duration-200 ${isCountryDropdownOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {/* Dropdown Options */}
+          {isCountryDropdownOpen && (
+            <>
+              {/* Backdrop to close dropdown */}
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setIsCountryDropdownOpen(false)}
+              />
+
+              {/* Dropdown Menu */}
+              <div className={`absolute z-50 mt-1 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto ${isRTL ? 'right-0' : 'left-0'}`}>
+                {countryKeys.map((countryKey, index) => {
+                  const countryName = t(countryKey);
+                  return (
+                    <button
+                      key={countryKey}
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          createAddressDto: {
+                            ...prev.createAddressDto,
+                            country: countryName
+                          }
+                        }));
+                        setIsCountryDropdownOpen(false);
+                        // Clear error if it exists
+                        if (errors['createAddressDto.country']) {
+                          setErrors(prev => ({ ...prev, 'createAddressDto.country': undefined }));
+                        }
+                      }}
+                      className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ${
+                        index === 0 ? 'rounded-t-lg' : ''
+                      } ${
+                        index === countryKeys.length - 1 ? 'rounded-b-lg' : ''
+                      } ${
+                        formData.createAddressDto.country === countryName
+                          ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+                          : 'text-gray-900 dark:text-white'
+                      } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+                    >
+                      <span className="truncate">{countryName}</span>
+                      {formData.createAddressDto.country === countryName && (
+                        <Check className={`h-5 w-5 text-primary-600 dark:text-primary-400 flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
-      </div>
+        {errors['createAddressDto.country'] && (
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+            {errors['createAddressDto.country']}
+          </p>
+        )}
       </div>
 
       <div>
@@ -1310,24 +1459,57 @@ const OnboardingBranch: React.FC = () => {
         <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
           {/* Country Code Selector */}
           <div className="relative">
-            <select
-            title='contactCountryCode'
-              value={contactCountryCode}
-              onChange={handleContactCountryCodeChange}
-              className={`h-full py-3 ${isRTL ? 'pr-8 pl-3' : 'pl-3 pr-8'} border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 appearance-none`}
+            {/* Custom Dropdown Button */}
+            <button
+              type="button"
+              onClick={() => setIsContactCountryCodeOpen(!isContactCountryCodeOpen)}
+              className={`w-full sm:w-[200px] py-3 ${isRTL ? 'pr-3 pl-10' : 'pl-3 pr-10'} border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-200 border-gray-300 dark:border-gray-600 text-left flex items-center`}
             >
-              {sortedCountryCodes.map(country => (
-                <option key={country.name} value={country.dialCode}>
-                  {country.name} ({country.dialCode})
-                </option>
-              ))}
-            </select>
-             {/* Chevron for select */}
-            <div className={`absolute inset-y-0 ${isRTL ? 'left-0 pl-2' : 'right-0 pr-2'} flex items-center pointer-events-none`}>
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
+              <span className="truncate">
+                {sortedCountryCodes.find(c => c.dialCode === contactCountryCode)?.name || ''} ({contactCountryCode})
+              </span>
+              <ChevronDown className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 transition-transform duration-200 ${isContactCountryCodeOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {/* Dropdown Options */}
+            {isContactCountryCodeOpen && (
+              <>
+                {/* Backdrop to close dropdown */}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsContactCountryCodeOpen(false)}
+                />
+
+                {/* Dropdown Menu */}
+                <div className={`absolute z-50 mt-1 w-full sm:w-[280px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto ${isRTL ? 'right-0' : 'left-0'}`}>
+                  {sortedCountryCodes.map((country, index) => (
+                    <button
+                      key={country.name}
+                      type="button"
+                      onClick={() => {
+                        setContactCountryCode(country.dialCode);
+                        setContactPlaceholder(getPlaceholderByDialCode(country.dialCode));
+                        setIsContactCountryCodeOpen(false);
+                      }}
+                      className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ${
+                        index === 0 ? 'rounded-t-lg' : ''
+                      } ${
+                        index === sortedCountryCodes.length - 1 ? 'rounded-b-lg' : ''
+                      } ${
+                        contactCountryCode === country.dialCode
+                          ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+                          : 'text-gray-900 dark:text-white'
+                      } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+                    >
+                      <span className="truncate">{country.name} ({country.dialCode})</span>
+                      {contactCountryCode === country.dialCode && (
+                        <Check className={`h-5 w-5 text-primary-600 dark:text-primary-400 flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
           {/* Phone Number Input */}
@@ -1337,7 +1519,7 @@ const OnboardingBranch: React.FC = () => {
               type="tel"
               autoComplete="tel-national"
               maxLength={15}
-              value={formData.createContactDto.phone}
+              value={formData.createContactDto.phone || ''}
               onChange={handleContactNationalPhoneChange}
               className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
                 errors['createContactDto.phone']
@@ -1542,19 +1724,20 @@ const OnboardingBranch: React.FC = () => {
           {t('onboardingBranch.form.step3.workingHours.description')}
         </p>
         
-        <div className="space-y-3">
+      <div className="space-y-3">
           {formData.createBranchWorkingHourCoreDto?.map((day, index) => (
             <div 
               key={day.dayOfWeek} 
-              className={`relative group p-5 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 hover:shadow-md ${
+              className={`relative group p-4 sm:p-5 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 hover:shadow-md ${
                 day.isWorkingDay 
                   ? 'bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-green-200 dark:border-green-700' 
                   : 'bg-gray-50 dark:bg-gray-800/50'
               }`}
             >
-              {/* Mobile/Tablet: Stack vertically */}
+              {/* Main Container */}
               <div className="flex flex-col space-y-4">
-                {/* Day name and toggle */}
+                
+                {/* Header Row: Day Name and Toggle */}
                 <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className="min-w-[100px]">
                     <span className={`text-base font-medium text-gray-900 dark:text-gray-100 ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -1567,7 +1750,7 @@ const OnboardingBranch: React.FC = () => {
                       checked={day.isWorkingDay}
                       onChange={(checked) => handleWorkingHourChange(index, 'isWorkingDay', checked)}
                     />
-                    <span className={`text-sm font-medium transition-colors ${
+                    <span className={`text-sm font-medium transition-colors hidden xs:block ${
                       day.isWorkingDay 
                         ? 'text-green-700 dark:text-green-400' 
                         : 'text-gray-500 dark:text-gray-400'
@@ -1577,66 +1760,117 @@ const OnboardingBranch: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Time inputs - Now in a separate row */}
-                <div className={`flex items-center justify-center gap-3 transition-opacity ${
-                  !day.isWorkingDay ? 'opacity-40' : ''
-                } ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
-                      {t('onboardingBranch.form.step3.workingHours.openLabel')}
-                    </label>
-                    <input
-                      title='time'
-                      type="time"
-                      value={formatTimeForInput(day.openTime)}
-                      onChange={(e) => handleWorkingHourChange(index, 'openTime', e.target.value)}
-                      disabled={!day.isWorkingDay}
-                      className={`px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                        !day.isWorkingDay ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : 'hover:border-primary-300'
-                      } ${isRTL ? 'text-right' : 'text-left'}`}
-                      dir="ltr"
+                {/* 24 Hours Toggle */}
+                {day.isWorkingDay && (
+                  <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                    <Toggle
+                      checked={day.isOpen24Hours}
+                      onChange={(checked) => handleWorkingHourChange(index, 'isOpen24Hours', checked)}
                     />
+                    <span className={`text-sm font-medium text-gray-600 dark:text-gray-400`}>
+                      {t('onboardingBranch.form.step3.workingHours.open24Hours') || '24 Hours'}
+                    </span>
                   </div>
-                  
-                  <div className="flex items-center justify-center">
-                    <div className="w-4 h-px bg-gray-300 dark:bg-gray-600"></div>
+                )}
+
+                {/* Time Slots */}
+                {day.isWorkingDay && !day.isOpen24Hours && (
+                  <div className="space-y-3">
+                    {day.timeSlots?.map((slot, slotIndex) => (
+                      <div
+                        key={slotIndex}
+                        className={`
+                          grid grid-cols-2 gap-4
+                          sm:flex sm:items-center sm:justify-center sm:gap-3
+                          transition-opacity
+                          ${isRTL ? 'sm:flex-row-reverse' : ''}
+                        `}
+                      >
+                        {/* Open Time Group */}
+                        <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                          <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
+                            {t('onboardingBranch.form.step3.workingHours.openLabel')}
+                          </label>
+                          <input
+                            title='time'
+                            type="time"
+                            value={formatTimeForInput(slot.openTime)}
+                            onChange={(e) => handleWorkingHourChange(index, 'openTime', e.target.value, slotIndex)}
+                            className={`w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                            dir="ltr"
+                          />
+                        </div>
+
+                        {/* Separator - Hidden on Mobile, Visible on Desktop */}
+                        <div className="hidden sm:flex items-center justify-center">
+                          <div className="w-4 h-px bg-gray-300 dark:bg-gray-600"></div>
+                        </div>
+
+                        {/* Close Time Group */}
+                        <div className={`flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                          <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
+                            {t('onboardingBranch.form.step3.workingHours.closeLabel')}
+                          </label>
+                          <input
+                            title='time'
+                            type="time"
+                            value={formatTimeForInput(slot.closeTime)}
+                            onChange={(e) => handleWorkingHourChange(index, 'closeTime', e.target.value, slotIndex)}
+                            className={`w-full sm:w-auto px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 hover:border-primary-300 ${isRTL ? 'text-right' : 'text-left'}`}
+                            dir="ltr"
+                          />
+                        </div>
+
+                        {/* Remove Slot Button */}
+                        {day.timeSlots && day.timeSlots.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeTimeSlot(index, slotIndex)}
+                            className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            title={t('onboardingBranch.form.step3.workingHours.removeSlot') || 'Remove time slot'}
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+
+                    {/* Add Time Slot Button */}
+                    <button
+                      type="button"
+                      onClick={() => addTimeSlot(index)}
+                      className={`flex items-center space-x-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+                    >
+                      <span className="text-lg">+</span>
+                      <span>{t('onboardingBranch.form.step3.workingHours.addSlot') || 'Add time slot'}</span>
+                    </button>
                   </div>
-                  
-                  <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <label className={`text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide whitespace-nowrap ${isRTL ? 'text-right' : 'text-left'}`}>
-                      {t('onboardingBranch.form.step3.workingHours.closeLabel')}
-                    </label>
-                    <input
-                      title='time'
-                      type="time"
-                      value={formatTimeForInput(day.closeTime)}
-                      onChange={(e) => handleWorkingHourChange(index, 'closeTime', e.target.value)}
-                      disabled={!day.isWorkingDay}
-                      className={`px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium transition-all focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${
-                        !day.isWorkingDay ? 'cursor-not-allowed bg-gray-100 dark:bg-gray-800' : 'hover:border-primary-300'
-                      } ${isRTL ? 'text-right' : 'text-left'}`}
-                      dir="ltr"
-                    />
-                  </div>
-                </div>
+                )}
               </div>
-              
-              {day.isWorkingDay && (
+
+              {day.isWorkingDay && !day.isOpen24Hours && day.timeSlots && day.timeSlots.length > 0 && (
                 <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-700/50">
                   <p className={`text-xs text-green-600 dark:text-green-400 ${isRTL ? 'text-right' : 'text-left'}`}>
                     {t('onboardingBranch.form.step3.workingHours.workingDayNote')}
-                    {formatTimeForInput(day.closeTime) <= formatTimeForInput(day.openTime) && (
-                      <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-blue-600 dark:text-blue-400`}>
+                    {formatTimeForInput(day.timeSlots[0].closeTime) <= formatTimeForInput(day.timeSlots[0].openTime) && (
+                      <span className={`${isRTL ? 'mr-2' : 'ml-2'} text-blue-600 dark:text-blue-400 font-semibold`}>
                         {t('onboardingBranch.form.step3.workingHours.overnightNote')}
                       </span>
                     )}
                   </p>
                 </div>
               )}
+
+              {day.isWorkingDay && day.isOpen24Hours && (
+                <div className="mt-3 pt-3 border-t border-green-200 dark:border-green-700/50">
+                  <p className={`text-xs text-green-600 dark:text-green-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.form.step3.workingHours.open24HoursNote') || 'This branch is open 24 hours on this day'}
+                  </p>
+                </div>
+              )}
             </div>
           ))}
         </div>
-        
         {errors.workingHours && (
           <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg">
             <div className={`flex items-start space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>

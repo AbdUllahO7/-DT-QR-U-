@@ -8,9 +8,12 @@ export const en = {
     error: 'Error',
     removal: 'Removal',
     setAsDefault: 'Set as Default',
+    actions: 'Actions',
     default: 'Default',
+    saving : 'Saving...',
     success: 'Success',
     cancel: 'Cancel',
+    select: 'Select',
     change: 'Change',
     save: 'Save',
     delete: 'Delete',
@@ -404,6 +407,9 @@ hero: {
     turkish: 'Türkçe',
     english: 'English',
     arabic: 'العربية',
+    azerbaijani: 'Azərbaycan',
+    albanian: 'Shqip',
+    bosnian: 'Bosanski',
     selectLanguage: 'Select Language'
   },
 
@@ -768,7 +774,12 @@ hero: {
     vatInfo: 'Prices include VAT. Custom pricing available for enterprise plans.',
     perMonth: 'month',
     perYear: 'year',
-    monthlyEquivalent: 'Monthly {amount} (2 months free)'
+    monthlyEquivalent: 'Monthly {amount} (2 months free)',
+    comingSoon: 'Coming Soon',
+    freeTrial: 'Free Trial',
+    free: 'FREE',
+    freeFor3Months: 'Free for first 3 months',
+    noCreditCard: 'No credit card required'
   },
 
   // Testimonials
@@ -1202,7 +1213,7 @@ hero: {
     },
     fields: {
       branchName: {
-        label: 'Branch Name',
+        label: 'Branch Name *',
         placeholder: 'Enter branch name'
       },
       whatsappNumber: {
@@ -1357,6 +1368,12 @@ hero: {
       form: {
         branchName: 'Branch Name',
         branchNamePlaceholder: 'Enter branch name',
+
+        closed: 'Closed',
+        addTimeSlot: 'Add Time Slot',
+        open24HoursMessage: 'This branch is open 24 hours.',
+        open24Hours: '24 Hours Open',
+
         branchNameRequired: 'Branch name is required',
         whatsappNumber: 'WhatsApp Order Number ',
         whatsappPlaceholder: 'Enter WhatsApp number',
@@ -1556,7 +1573,7 @@ hero: {
   delete: {
     product: {
       title: 'Delete Product',
-      message: 'Are you sure you want to delete "{{productName}}"? This action cannot be undone.',
+      message: 'Are you sure you want to delete "{productName}"? This action cannot be undone.',
       success: 'Product deleted successfully'
     },
     category: {
@@ -1654,7 +1671,7 @@ hero: {
   // Form fields
   form: {
     categoryName: {
-      label: 'Category Name *',
+      label: 'Category Name',
       placeholder: 'e.g: Main Dishes, Beverages, Desserts',
       required: 'Category name is required'
     },
@@ -3236,6 +3253,7 @@ hero: {
     title: 'Branch Management',
     description: 'Manage your branch information and settings.',
     loading: 'Loading branch information...',
+         
     noBranchFound: 'No branch found',
     uploadLogo: 'Upload Logo',
     editBranchName: 'Edit Branch Name',
@@ -3282,6 +3300,11 @@ hero: {
       title: 'Working Hours',
       workingDay: 'Working day',
       openTime: 'Open Time',
+         open24Hours: 'Open 24 Hours',
+      open24HoursMessage: 'This branch is open 24 hours.',
+      addTimeSlot: 'Add Time Slot',
+
+
       closeTime: 'Close Time',
       noWorkingHours: 'No working hours specified',
       days: {
@@ -4175,8 +4198,12 @@ productModal: {
   saveSuccess: "Branch preferences saved successfully!",
   cleanupModes: {
     afterTimeout: "After Timeout",
-    afterClosing: "After Closing", 
+    afterClosing: "After Closing",
     disabled: "Disabled"
+  },
+  mobileGridLayout: {
+    oneColumn: "One Column",
+    twoColumns: "Two Columns"
   },
   sections: {
     orderManagement: {
@@ -4195,7 +4222,9 @@ productModal: {
       enableAllergenDisplay: "Display Allergen Information",
       enableAllergenDisplayDesc: "Show allergen warnings and information",
       enableIngredientDisplay: "Display Ingredients",
-      enableIngredientDisplayDesc: "Show ingredient lists for products"
+      enableIngredientDisplayDesc: "Show ingredient lists for products",
+      mobileGridLayout: "Mobile Grid Layout",
+      mobileGridLayoutDesc: "Choose how products are displayed on mobile devices"
     },
     paymentMethods: {
       title: "Payment Methods",
@@ -5113,7 +5142,7 @@ productModal: {
           "errorInvalid": "Invalid phone number format (7-15 digits)."
         },
         "email": {
-          "label": "Email Address *",
+          "label": "Email Address ",
           "placeholder": "Enter email address",
           "error": "Email address is required"
         },
@@ -5170,9 +5199,12 @@ productModal: {
         },
         "workingHours": {
           "title": "Working Hours",
+          "open24Hours": "Open 24 Hours",
+          "addSlot": "Add Time Slot",
           "description": "Set your working hours. You can stay open overnight (e.g., 23:00 - 02:00).",
           "openLabel": "Opening Time",
           "closeLabel": "Closing Time",
+          "open24HoursNote": "This restaurant is open 24 hours.",
           "dayNames": [
             "Monday",
             "Tuesday",

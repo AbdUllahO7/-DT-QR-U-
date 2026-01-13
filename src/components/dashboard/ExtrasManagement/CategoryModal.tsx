@@ -21,9 +21,7 @@ interface CategoryModalProps {
   onSubmit: (e: React.FormEvent) => void;
   onClose: () => void;
   nameTranslations: TranslatableFieldValue;
-  descriptionTranslations: TranslatableFieldValue;
   onNameTranslationsChange: (value: TranslatableFieldValue) => void;
-  onDescriptionTranslationsChange: (value: TranslatableFieldValue) => void;
   supportedLanguages: LanguageOption[];
   defaultLanguage: string;
 }
@@ -45,22 +43,24 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div className="flex items-center justify-center min-h-screen p-0 sm:px-4 sm:pt-4 sm:pb-20 text-center">
         <div className="fixed inset-0 transition-opacity bg-gray-900/75 backdrop-blur-sm" onClick={onClose}></div>
-        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl w-full">
+        
+        {/* Modal Panel - Full screen on mobile, rounded card on desktop */}
+        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-none sm:rounded-2xl text-left overflow-hidden shadow-xl transform transition-all w-full h-full sm:h-auto sm:my-8 sm:align-middle sm:max-w-2xl flex flex-col">
 
           {/* Modal Header */}
-          <div className="bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+          <div className="bg-white dark:bg-gray-800 px-4 sm:px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center shrink-0">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
               {isEditMode ? t('extrasManagement.categories.editCategory') : t('extrasManagement.categories.addCategory')}
             </h3>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-500 focus:outline-none">
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-500 focus:outline-none p-1">
               <X className="w-6 h-6" />
             </button>
           </div>
 
-          {/* Modal Content */}
-          <div className="max-w-9xl px-6 py-6 max-h-[70vh] overflow-y-auto">
+          {/* Modal Content - Scrollable */}
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
             {error && (
               <div className="mb-6 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-lg">
                 <div className="flex items-start">
@@ -97,7 +97,8 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              {/* Settings Checkboxes - Stack on mobile, Row on desktop */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                 <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg border border-gray-200 dark:border-gray-600">
                   <label className="flex items-center gap-2 cursor-pointer">
                     <input
@@ -136,8 +137,10 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                         onChange({ 
                           ...formData, 
                           isRemovalCategory: isRemoval,
-                          // Reset Max Quantity fields if removal is checked
-                          defaultMaxTotalQuantity: isRemoval ? 0 : formData.defaultMaxTotalQuantity,
+                          // If removal, reset quantities
+                          defaultMinSelectionCount: isRemoval ? 0 : formData.defaultMinSelectionCount,
+                          defaultMinTotalQuantity: isRemoval ? 0 : formData.defaultMinTotalQuantity,
+                          defaultMaxTotalQuantity: isRemoval ? null : formData.defaultMaxTotalQuantity, // Set null as requested
                           isMaxQuantityUnlimited: isRemoval ? false : formData.isMaxQuantityUnlimited
                         });
                       }}
@@ -156,8 +159,8 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                   {t('extrasManagement.categories.fields.selectionRules')}
                 </h4>
                 
-                {/* Row 1: Min/Max Selection */}
-                <div className="grid grid-cols-2 gap-4">
+                {/* Row 1: Min/Max Selection - Stack on mobile */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {!formData.isRemovalCategory && (
                     <div>
                       <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
@@ -206,9 +209,9 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
                   </div>
                 </div>
                 
-                {/* Row 2: Min/Max Quantity (Hidden completely if isRemovalCategory is true) */}
+                {/* Row 2: Min/Max Quantity (Completely HIDDEN if isRemovalCategory is true) */}
                 {!formData.isRemovalCategory && (
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1">
                         {t('extrasManagement.categories.fields.minQuantity')}
@@ -259,20 +262,20 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
             </form>
           </div>
 
-          {/* Footer Buttons */}
-          <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex flex-row-reverse gap-3 border-t border-gray-100 dark:border-gray-700">
+          {/* Footer Buttons - Fixed to bottom on mobile or normal flow on desktop */}
+          <div className="bg-gray-50 dark:bg-gray-800/50 px-4 sm:px-6 py-4 flex flex-col sm:flex-row-reverse gap-3 border-t border-gray-100 dark:border-gray-700 shrink-0">
             <button
               type="submit"
               form="categoryForm"
               disabled={loading}
-              className="inline-flex justify-center rounded-lg border border-transparent shadow-sm px-5 py-2.5 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto inline-flex justify-center rounded-lg border border-transparent shadow-sm px-5 py-2.5 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? t('extrasManagement.processing') : (isEditMode ? t('extrasManagement.buttons.save') : t('extrasManagement.buttons.add'))}
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm px-5 py-2.5 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:w-auto sm:text-sm"
+              className="w-full sm:w-auto inline-flex justify-center rounded-lg border border-gray-300 dark:border-gray-600 shadow-sm px-5 py-2.5 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm"
             >
               {t('extrasManagement.buttons.cancel')}
             </button>
