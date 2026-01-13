@@ -1,18 +1,26 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Check, Star } from 'lucide-react';
+import { Check, Star, Clock } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import type { PricingPlan } from '../../types';
 
+interface ExtendedPricingPlan extends PricingPlan {
+  isComingSoon?: boolean;
+  isFree?: boolean;
+  freeTrialMonths?: number;
+}
+
 const Pricing: React.FC = () => {
   const { t, isRTL } = useLanguage();
+  const navigate = useNavigate();
   const [isYearly, setIsYearly] = useState<boolean>(false);
 
-  const getPlans = (): PricingPlan[] => {
+  const getPlans = (): ExtendedPricingPlan[] => {
     // Feature keys that will be translated
     const basicFeatures = [
       'pricing.plans.basic.features.0',
-      'pricing.plans.basic.features.1', 
+      'pricing.plans.basic.features.1',
       'pricing.plans.basic.features.2',
       'pricing.plans.basic.features.3',
       'pricing.plans.basic.features.4',
@@ -22,7 +30,7 @@ const Pricing: React.FC = () => {
     const proFeatures = [
       'pricing.plans.pro.features.0',
       'pricing.plans.pro.features.1',
-      'pricing.plans.pro.features.2', 
+      'pricing.plans.pro.features.2',
       'pricing.plans.pro.features.3',
       'pricing.plans.pro.features.4',
       'pricing.plans.pro.features.5',
@@ -34,21 +42,23 @@ const Pricing: React.FC = () => {
       'pricing.plans.enterprise.features.0',
       'pricing.plans.enterprise.features.1',
       'pricing.plans.enterprise.features.2',
-      'pricing.plans.enterprise.features.3', 
+      'pricing.plans.enterprise.features.3',
       'pricing.plans.enterprise.features.4',
       'pricing.plans.enterprise.features.5',
       'pricing.plans.enterprise.features.6',
       'pricing.plans.enterprise.features.7'
     ];
 
-    const basePlans = [
+    const basePlans: ExtendedPricingPlan[] = [
       {
         id: 'basic',
         name: t('pricing.plans.basic.name'),
-        price: isYearly ? 990 : 99,
-        period: isYearly ? t('pricing.perYear') : t('pricing.perMonth'),
+        price: 0,
+        period: t('pricing.perMonth'),
         features: basicFeatures.map(key => t(key)),
-        buttonText: t('pricing.plans.basic.button')
+        buttonText: t('pricing.plans.basic.button'),
+        isFree: true,
+        freeTrialMonths: 3
       },
       {
         id: 'pro',
@@ -57,7 +67,8 @@ const Pricing: React.FC = () => {
         period: isYearly ? t('pricing.perYear') : t('pricing.perMonth'),
         features: proFeatures.map(key => t(key)),
         isPopular: true,
-        buttonText: t('pricing.plans.pro.button')
+        buttonText: t('pricing.comingSoon'),
+        isComingSoon: true
       },
       {
         id: 'enterprise',
@@ -65,11 +76,16 @@ const Pricing: React.FC = () => {
         price: isYearly ? 3990 : 399,
         period: isYearly ? t('pricing.perYear') : t('pricing.perMonth'),
         features: enterpriseFeatures.map(key => t(key)),
-        buttonText: t('pricing.plans.enterprise.button')
+        buttonText: t('pricing.comingSoon'),
+        isComingSoon: true
       }
     ];
 
     return basePlans;
+  };
+
+  const handleStarterClick = () => {
+    navigate('/login');
   };
 
   const currentPlans = getPlans();
@@ -132,16 +148,29 @@ const Pricing: React.FC = () => {
               transition={{ duration: 0.6, delay: index * 0.1 }}
               viewport={{ once: true }}
               className={`relative bg-white dark:bg-gray-900 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 p-8 ${
-                plan.isPopular 
-                  ? 'border-2 border-primary-500 scale-105' 
-                  : 'border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
+                plan.isComingSoon
+                  ? 'opacity-75 border border-gray-200 dark:border-gray-700'
+                  : plan.isFree
+                    ? 'border-2 border-green-500 scale-105'
+                    : 'border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
               }`}
             >
-              {plan.isPopular && (
+              {/* Coming Soon Badge */}
+              {plan.isComingSoon && (
                 <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                  <span className={`bg-primary-600 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center space-x-1 ${isRTL ? 'space-x-reverse' : ''}`}>
+                  <span className={`bg-gray-500 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center space-x-1 ${isRTL ? 'space-x-reverse' : ''}`}>
+                    <Clock className="h-4 w-4" />
+                    <span>{t('pricing.comingSoon')}</span>
+                  </span>
+                </div>
+              )}
+
+              {/* Free Trial Badge for Starter */}
+              {plan.isFree && (
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <span className={`bg-green-600 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center space-x-1 ${isRTL ? 'space-x-reverse' : ''}`}>
                     <Star className="h-4 w-4" />
-                    <span>{t('pricing.mostPopular')}</span>
+                    <span>{t('pricing.freeTrial')}</span>
                   </span>
                 </div>
               )}
@@ -150,35 +179,58 @@ const Pricing: React.FC = () => {
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
                   {plan.name}
                 </h3>
-                <div className={`flex items-end justify-center space-x-1 ${isRTL ? 'space-x-reverse' : ''}`}>
-                  <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                    {plan.price}
-                  </span>
-                  <span className="text-gray-500 dark:text-gray-400 text-lg">
-                    /{plan.period}
-                  </span>
-                </div>
-                {isYearly && (
-                  <p className="text-sm text-green-600 dark:text-green-400 mt-1">
-                    {t('pricing.monthlyEquivalent', { amount: Math.round(plan.price / 12) })}
-                  </p>
+
+                {plan.isFree ? (
+                  <>
+                    <div className={`flex items-end justify-center space-x-1 ${isRTL ? 'space-x-reverse' : ''}`}>
+                      <span className="text-4xl font-bold text-green-600 dark:text-green-400">
+                        {t('pricing.free')}
+                      </span>
+                    </div>
+                    <p className="text-sm text-green-600 dark:text-green-400 mt-2 font-medium">
+                      {t('pricing.freeFor3Months')}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {t('pricing.noCreditCard')}
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <div className={`flex items-end justify-center space-x-1 ${isRTL ? 'space-x-reverse' : ''}`}>
+                      <span className={`text-4xl font-bold ${plan.isComingSoon ? 'text-gray-400 dark:text-gray-500' : 'text-gray-900 dark:text-white'}`}>
+                        {plan.price}
+                      </span>
+                      <span className="text-gray-500 dark:text-gray-400 text-lg">
+                        /{plan.period}
+                      </span>
+                    </div>
+                    {isYearly && !plan.isComingSoon && (
+                      <p className="text-sm text-green-600 dark:text-green-400 mt-1">
+                        {t('pricing.monthlyEquivalent', { amount: Math.round(plan.price / 12) })}
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
 
-              <ul className="space-y-4 mb-8">
+              <ul className={`space-y-4 mb-8 ${plan.isComingSoon ? 'opacity-60' : ''}`}>
                 {plan.features.map((feature, featureIndex) => (
                   <li key={featureIndex} className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
-                    <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
+                    <Check className={`h-5 w-5 flex-shrink-0 ${plan.isComingSoon ? 'text-gray-400' : 'text-green-500'}`} />
                     <span className="text-gray-700 dark:text-gray-300">{feature}</span>
                   </li>
                 ))}
               </ul>
 
               <button
+                onClick={plan.isFree ? handleStarterClick : undefined}
+                disabled={plan.isComingSoon}
                 className={`w-full py-4 px-6 rounded-lg font-semibold transition-all duration-300 ${
-                  plan.isPopular
-                    ? 'bg-primary-600 hover:bg-primary-700 text-white shadow-lg hover:shadow-xl'
-                    : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white'
+                  plan.isComingSoon
+                    ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                    : plan.isFree
+                      ? 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-xl'
+                      : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white'
                 }`}
               >
                 {plan.buttonText}

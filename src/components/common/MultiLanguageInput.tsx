@@ -35,7 +35,7 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
   placeholder = '',
   disabled = false,
   className = '',
-  defaultLanguage = 'en',
+  defaultLanguage = '',
   selectedLanguage: externalSelectedLanguage,
   showLanguageSelector = true,
 }) => {
@@ -101,8 +101,11 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
     }
   };
 
+  // --- MODIFIED LOGIC HERE ---
   const isLanguageRequired = (langCode: string) => {
-    return requiredLanguages.includes(langCode) || (required && langCode === languages[0]?.code);
+    // Check if specifically required in requiredLanguages array
+    // OR if the component is required globally AND this is the default language
+    return requiredLanguages.includes(langCode) || (required && langCode === defaultLanguage);
   };
 
   const hasError = (langCode: string) => {
@@ -160,6 +163,7 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
       
       <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
         {label}
+        {/* Show asterisk if required globally (implies default language is required) */}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
 
@@ -253,7 +257,7 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
-                 {currentLanguage?.nativeName || currentLanguage?.nativeName}
+                 {currentLanguage?.nativeName || currentLanguage?.displayName}
               </span>
               
               {isLanguageRequired(selectedLanguage) && (

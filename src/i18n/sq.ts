@@ -769,7 +769,12 @@ pricing: {
         vatInfo: 'Çmimet përfshijnë TVSH. Çmime të personalizuara të disponueshme për planet e ndërmarrjeve.',
             perMonth: 'muaj',
                 perYear: 'vit',
-                    monthlyEquivalent: 'Mujore {amount} (2 muaj falas)'
+                    monthlyEquivalent: 'Mujore {amount} (2 muaj falas)',
+                    comingSoon: 'Së Shpejti',
+                    freeTrial: 'Provë Falas',
+                    free: 'FALAS',
+                    freeFor3Months: 'Falas për 3 muajt e parë',
+                    noCreditCard: 'Nuk kërkohet kartë krediti'
 },
 
 // Testimonials
@@ -1203,7 +1208,7 @@ branchModal: {
     },
     fields: {
         branchName: {
-            label: 'Emri i Degës',
+            label: 'Emri i Degës *',
                 placeholder: 'Futni emrin e degës'
         },
         whatsappNumber: {
@@ -4188,6 +4193,10 @@ branchPreferences: {
             afterClosing: "Pas Mbylljes",
                 disabled: "I Çaktivizuar"
     },
+    mobileGridLayout: {
+        oneColumn: "Një Kolonë",
+        twoColumns: "Dy Kolona"
+    },
     sections: {
         orderManagement: {
             title: "Menaxhimi i Porosive",
@@ -4205,7 +4214,9 @@ branchPreferences: {
                             enableAllergenDisplay: "Shfaq Informacionin e Alergjenit",
                                 enableAllergenDisplayDesc: "Shfaq paralajmërimet dhe informacionin e alergjenëve",
                                     enableIngredientDisplay: "Shfaq Përbërësit",
-                                        enableIngredientDisplayDesc: "Shfaq listat e përbërësve për produktet"
+                                        enableIngredientDisplayDesc: "Shfaq listat e përbërësve për produktet",
+                                            mobileGridLayout: "Paraqitja e Rrjetit Celular",
+                                                mobileGridLayoutDesc: "Zgjidhni si do të shfaqen produktet në pajisjet celulare"
         },
         paymentMethods: {
             title: "Mënyrat e Pagesës",

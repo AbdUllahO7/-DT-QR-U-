@@ -426,6 +426,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
               restaurantName={menuData.restaurantName}
               onCustomize={handleCustomizeProduct}
               getCartItemQuantity={getCartItemQuantity}
+              mobileGridLayout={menuData.preferences?.mobileGridLayout}
             />
           </div>
         </div>

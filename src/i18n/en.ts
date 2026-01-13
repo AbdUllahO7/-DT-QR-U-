@@ -774,7 +774,12 @@ hero: {
     vatInfo: 'Prices include VAT. Custom pricing available for enterprise plans.',
     perMonth: 'month',
     perYear: 'year',
-    monthlyEquivalent: 'Monthly {amount} (2 months free)'
+    monthlyEquivalent: 'Monthly {amount} (2 months free)',
+    comingSoon: 'Coming Soon',
+    freeTrial: 'Free Trial',
+    free: 'FREE',
+    freeFor3Months: 'Free for first 3 months',
+    noCreditCard: 'No credit card required'
   },
 
   // Testimonials
@@ -1208,7 +1213,7 @@ hero: {
     },
     fields: {
       branchName: {
-        label: 'Branch Name',
+        label: 'Branch Name *',
         placeholder: 'Enter branch name'
       },
       whatsappNumber: {
@@ -1666,7 +1671,7 @@ hero: {
   // Form fields
   form: {
     categoryName: {
-      label: 'Category Name *',
+      label: 'Category Name',
       placeholder: 'e.g: Main Dishes, Beverages, Desserts',
       required: 'Category name is required'
     },
@@ -4193,8 +4198,12 @@ productModal: {
   saveSuccess: "Branch preferences saved successfully!",
   cleanupModes: {
     afterTimeout: "After Timeout",
-    afterClosing: "After Closing", 
+    afterClosing: "After Closing",
     disabled: "Disabled"
+  },
+  mobileGridLayout: {
+    oneColumn: "One Column",
+    twoColumns: "Two Columns"
   },
   sections: {
     orderManagement: {
@@ -4213,7 +4222,9 @@ productModal: {
       enableAllergenDisplay: "Display Allergen Information",
       enableAllergenDisplayDesc: "Show allergen warnings and information",
       enableIngredientDisplay: "Display Ingredients",
-      enableIngredientDisplayDesc: "Show ingredient lists for products"
+      enableIngredientDisplayDesc: "Show ingredient lists for products",
+      mobileGridLayout: "Mobile Grid Layout",
+      mobileGridLayoutDesc: "Choose how products are displayed on mobile devices"
     },
     paymentMethods: {
       title: "Payment Methods",

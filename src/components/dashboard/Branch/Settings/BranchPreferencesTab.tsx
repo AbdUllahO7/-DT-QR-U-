@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Settings,
@@ -13,7 +14,8 @@ import {
   Loader2,
   ChevronDown,
   Search,
-  Check
+  Check,
+  LayoutGrid
 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { BranchPreferences, branchPreferencesService, UpdateBranchPreferencesDto } from '../../../../services/Branch/BranchPreferencesService';
@@ -24,7 +26,7 @@ interface BranchPreferencesComponentProps {
 }
 
 const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({ className = '' }) => {
-  const { t ,isRTL} = useLanguage();
+  const { t, isRTL } = useLanguage();
 
   // State management
   const [preferences, setPreferences] = useState<BranchPreferences | null>(null);
@@ -52,6 +54,12 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
     { value: 1, label: t('branchPreferences.cleanupModes.afterClosing') },
     { value: 2, label: t('branchPreferences.cleanupModes.disabled') }
   ];
+
+  // Mobile grid layout options
+  const mobileGridLayoutOptions = [
+    { value: 1, label: t('branchPreferences.mobileGridLayout.oneColumn') },
+    { value: 2, label: t('branchPreferences.mobileGridLayout.twoColumns') }
+  ];
   // Load preferences on component mount
   const loadPreferences = useCallback(async () => {
     try {
@@ -74,6 +82,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
         showProductDescriptions: branchData.showProductDescriptions,
         enableAllergenDisplay: branchData.enableAllergenDisplay,
         enableIngredientDisplay: branchData.enableIngredientDisplay,
+        mobileGridLayout: branchData.mobileGridLayout,
         acceptCash: branchData.acceptCash,
         acceptCreditCard: branchData.acceptCreditCard,
         acceptOnlinePayment: branchData.acceptOnlinePayment,
@@ -230,10 +239,11 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
   }
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg ${className}`}>
-      {/* Header */}
-   {/* Header with actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+    // Added pb-24 to prevent content from being hidden behind the floating bar
+    <div className={`bg-white  dark:bg-gray-800 rounded-lg shadow-lg ${className} pb-24`}>
+      
+      {/* Header - Buttons removed from here */}
+      <div className="flex flex-col p-5 sm:flex-row sm:items-center justify-between mb-6 gap-4">
         <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
           <Globe className="w-8 h-8 text-blue-600 dark:text-blue-400" />
           <div>
@@ -244,32 +254,6 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               {t('RestaurantPreferencesTab.subtitle')}
             </p>
           </div>
-        </div>
-
-        <div className={`flex flex-wrap justify-center  gap-3 items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-          <button
-            onClick={handleRefresh}
-            disabled={isLoading}
-            className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-          >
-            <RefreshCw className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'} ${isLoading ? 'animate-spin' : ''}`} />
-            {t('RestaurantPreferencesTab.buttons.refresh')}
-          </button>
-
-          <button
-            onClick={handleSave}
-            disabled={!hasChanges || isSaving}
-            className="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors disabled:opacity-50"
-          >
-            {isSaving ? (
-              <Loader2 className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'} animate-spin`} />
-            ) : (
-              <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-            )}
-            {isSaving 
-              ? t('RestaurantPreferencesTab.buttons.saving') 
-              : t('RestaurantPreferencesTab.buttons.save')}
-          </button>
         </div>
       </div>
 
@@ -431,6 +415,33 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
             </div>
+
+            {/* Mobile Grid Layout */}
+            <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+              <div className="flex items-center space-x-3 rtl:space-x-reverse mb-3">
+                <LayoutGrid className="w-5 h-5 text-green-600 dark:text-green-400" />
+                <div>
+                  <label className="text-sm font-medium text-gray-900 dark:text-white">
+                    {t('branchPreferences.sections.displaySettings.mobileGridLayout')}
+                  </label>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    {t('branchPreferences.sections.displaySettings.mobileGridLayoutDesc')}
+                  </p>
+                </div>
+              </div>
+              <select
+                title='mobileGridLayout'
+                value={formData.mobileGridLayout}
+                onChange={(e) => handleFieldChange('mobileGridLayout', parseInt(e.target.value))}
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              >
+                {mobileGridLayoutOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -491,7 +502,15 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               </label>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+            <div 
+              className={`
+                flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-600 transition-colors duration-200
+                ${true
+                  ? 'bg-gray-100 dark:bg-gray-900 opacity-60 cursor-not-allowed pointer-events-none' 
+                  : 'bg-white dark:bg-gray-800'
+                }
+              `}
+            >
               <div>
                 <label className="text-sm font-medium text-gray-900 dark:text-white">
                   {t('branchPreferences.sections.paymentMethods.acceptOnlinePayment')}
@@ -500,9 +519,11 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                   {t('branchPreferences.sections.paymentMethods.acceptOnlinePaymentDesc')}
                 </p>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
+              
+              <label className="relative inline-flex items-center">
                 <input
-                title='acceptOnlinePayment'
+                  disabled={true} 
+                  title='acceptOnlinePayment'
                   type="checkbox"
                   checked={formData.acceptOnlinePayment}
                   onChange={(e) => handleFieldChange('acceptOnlinePayment', e.target.checked)}
@@ -644,162 +665,189 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
               </select>
             </div>
 
-<div className="col-span-2">
-  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">
-    {t('branchPreferences.sections.localization.supportedLanguages')}
-  </label>
-  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-    {(preferences?.availableLanguages || []).map((lang) => {
-      const isSupported = formData.supportedLanguages?.includes(lang.code) || false;
-      const isDefaultLang = formData.defaultLanguage === lang.code;
+            <div className="col-span-2">
+              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-3">
+                {t('branchPreferences.sections.localization.supportedLanguages')}
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                {(preferences?.availableLanguages || []).map((lang) => {
+                  const isSupported = formData.supportedLanguages?.includes(lang.code) || false;
+                  const isDefaultLang = formData.defaultLanguage === lang.code;
 
-      return (
-        <div
-          key={lang.code}
-          className={`flex items-center p-3 rounded-lg border transition-all ${
-            isSupported
-              ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
-              : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600'
-          }`}
-        >
-          <input
-            id={`lang-${lang.code}`}
-            type="checkbox"
-            checked={isSupported}
-            disabled={isDefaultLang}
-            onChange={() => toggleLanguage(lang.code)}
-            className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50"
-          />
-          <label
-            htmlFor={`lang-${lang.code}`}
-            className={`ml-2 rtl:mr-2 rtl:ml-0 text-sm font-medium cursor-pointer ${
-              isDefaultLang ? 'opacity-50' : ''
-            } ${
-              isSupported
-                ? 'text-blue-900 dark:text-blue-300'
-                : 'text-gray-900 dark:text-gray-300'
-            }`}
-          >
-            <div className="flex flex-col">
-              <span>{lang.nativeName}</span>
+                  return (
+                    <div
+                      key={lang.code}
+                      className={`flex items-center p-3 rounded-lg border transition-all ${
+                        isSupported
+                          ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 dark:border-blue-700'
+                          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600'
+                      }`}
+                    >
+                      <input
+                        id={`lang-${lang.code}`}
+                        type="checkbox"
+                        checked={isSupported}
+                        disabled={isDefaultLang}
+                        onChange={() => toggleLanguage(lang.code)}
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 disabled:opacity-50"
+                      />
+                      <label
+                        htmlFor={`lang-${lang.code}`}
+                        className={`ml-2 rtl:mr-2 rtl:ml-0 text-sm font-medium cursor-pointer ${
+                          isDefaultLang ? 'opacity-50' : ''
+                        } ${
+                          isSupported
+                            ? 'text-blue-900 dark:text-blue-300'
+                            : 'text-gray-900 dark:text-gray-300'
+                        }`}
+                      >
+                        <div className="flex flex-col">
+                          <span>{lang.nativeName}</span>
+                        </div>
+                      </label>
+                    </div>
+                  );
+                })}
+              </div>
+
+
+              {/* Warning about available languages */}
+              <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div className="flex items-start space-x-3 rtl:space-x-reverse">
+                  <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                  <div className="text-sm text-blue-800 dark:text-blue-300">
+                    <p>
+                      {t('branchPreferences.sections.localization.languageRestaurantNote')}
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </label>
-        </div>
-      );
-    })}
-  </div>
-
-
-  {/* Warning about available languages */}
-  <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-    <div className="flex items-start space-x-3 rtl:space-x-reverse">
-      <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-      <div className="text-sm text-blue-800 dark:text-blue-300">
-        <p>
-          {t('branchPreferences.sections.localization.languageRestaurantNote')}
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
           </div>
         </div>
 
         {/* Session Management Section */}
- <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
-  <div className="flex items-center space-x-3 rtl:space-x-reverse mb-4">
-    <Clock className="w-6 h-6 text-orange-600 dark:text-orange-400" />
-    <div>
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-        {t('branchPreferences.sections.sessionManagement.title')}
-      </h3>
-      <p className="text-gray-600 dark:text-gray-400 text-sm">
-        {t('branchPreferences.sections.sessionManagement.description')}
-      </p>
-    </div>
-  </div>
-  
-  <div className="space-y-4">
-    <div>
-      <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-        {t('branchPreferences.sections.sessionManagement.cleanupMode')}
-      </label>
-      <select
-        title='cleanupMode'
-        name='cleanupMode'
-        value={formData.cleanupMode}
-        onChange={(e) => handleFieldChange('cleanupMode', parseInt(e.target.value))}
-        className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-      >
-        {cleanupModes.map((mode) => (
-          <option key={mode.value} value={mode.value}>
-            {mode.label}
-          </option>
-        ))}
-      </select>
-      <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-        {t('branchPreferences.sections.sessionManagement.cleanupModeDesc')}
-      </p>
-    </div>
+        <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
+          <div className="flex items-center space-x-3 rtl:space-x-reverse mb-4">
+            <Clock className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                {t('branchPreferences.sections.sessionManagement.title')}
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                {t('branchPreferences.sections.sessionManagement.description')}
+              </p>
+            </div>
+          </div>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                {t('branchPreferences.sections.sessionManagement.cleanupMode')}
+              </label>
+              <select
+                title='cleanupMode'
+                name='cleanupMode'
+                value={formData.cleanupMode}
+                onChange={(e) => handleFieldChange('cleanupMode', parseInt(e.target.value))}
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+              >
+                {cleanupModes.map((mode) => (
+                  <option key={mode.value} value={mode.value}>
+                    {mode.label}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                {t('branchPreferences.sections.sessionManagement.cleanupModeDesc')}
+              </p>
+            </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {/* Session Timeout - Only shown when cleanup mode is "After Timeout" (0) */}
-      {formData.cleanupMode === 0 && (
-        <div className="transition-all duration-300 ease-in-out">
-          <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-            {t('branchPreferences.sections.sessionManagement.sessionTimeout')}
-          </label>
-          <input
-            title='sessionTimeoutMinutes'
-            type="number"
-            min="5"
-            max="1440"
-            value={formData.sessionTimeoutMinutes}
-            onChange={(e) => handleFieldChange('sessionTimeoutMinutes', parseInt(e.target.value) || 30)}
-            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-          />
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-            {t('branchPreferences.sections.sessionManagement.sessionTimeoutDesc')}
-          </p>
-        </div>
-      )}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Session Timeout - Only shown when cleanup mode is "After Timeout" (0) */}
+              {formData.cleanupMode === 0 && (
+                <div className="transition-all duration-300 ease-in-out">
+                  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                    {t('branchPreferences.sections.sessionManagement.sessionTimeout')}
+                  </label>
+                  <input
+                    title='sessionTimeoutMinutes'
+                    type="number"
+                    min="5"
+                    max="1440"
+                    value={formData.sessionTimeoutMinutes}
+                    onChange={(e) => handleFieldChange('sessionTimeoutMinutes', parseInt(e.target.value) || 30)}
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  />
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    {t('branchPreferences.sections.sessionManagement.sessionTimeoutDesc')}
+                  </p>
+                </div>
+              )}
 
-      {/* Cleanup Delay - Only shown when cleanup mode is "After Closing" (1) */}
-      {formData.cleanupMode === 1 && (
-        <div className="transition-all duration-300 ease-in-out">
-          <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-            {t('branchPreferences.sections.sessionManagement.cleanupDelay')}
-          </label>
-          <input
-            title='cleanupDelayAfterCloseMinutes'
-            name='cleanupDelayAfterCloseMinutes'
-            type="number"
-            min="0"
-            max="60"
-            value={formData.cleanupDelayAfterCloseMinutes}
-            onChange={(e) => handleFieldChange('cleanupDelayAfterCloseMinutes', parseInt(e.target.value) || 5)}
-            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
-          />
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-            {t('branchPreferences.sections.sessionManagement.cleanupDelayDesc')}
-          </p>
-        </div>
-      )}
+              {/* Cleanup Delay - Only shown when cleanup mode is "After Closing" (1) */}
+              {formData.cleanupMode === 1 && (
+                <div className="transition-all duration-300 ease-in-out">
+                  <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                    {t('branchPreferences.sections.sessionManagement.cleanupDelay')}
+                  </label>
+                  <input
+                    title='cleanupDelayAfterCloseMinutes'
+                    name='cleanupDelayAfterCloseMinutes'
+                    type="number"
+                    min="0"
+                    max="60"
+                    value={formData.cleanupDelayAfterCloseMinutes}
+                    onChange={(e) => handleFieldChange('cleanupDelayAfterCloseMinutes', parseInt(e.target.value) || 5)}
+                    className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+                  />
+                  <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                    {t('branchPreferences.sections.sessionManagement.cleanupDelayDesc')}
+                  </p>
+                </div>
+              )}
 
-      {/* Disabled message - shown when cleanup mode is "Disabled" (2) */}
-      {formData.cleanupMode === 2 && (
-        <div className="transition-all duration-300 ease-in-out p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-          <div className="flex items-center space-x-3 rtl:space-x-reverse">
-            <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
-            <span className="text-yellow-800 dark:text-yellow-300 text-sm">
-              {t('branchPreferences.sections.sessionManagement.cleanupDisabledMessage')}
-            </span>
+              {/* Disabled message - shown when cleanup mode is "Disabled" (2) */}
+              {formData.cleanupMode === 2 && (
+                <div className="transition-all duration-300 ease-in-out p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                  <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                    <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                    <span className="text-yellow-800 dark:text-yellow-300 text-sm">
+                      {t('branchPreferences.sections.sessionManagement.cleanupDisabledMessage')}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      )}
-    </div>
-  </div>
-</div>
+      </div>
+
+      {/* FLOATING ACTION BAR */}
+      <div className="fixed rounded-lg bottom-10 w-fit  right-24 p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end items-center gap-3">
+        <button
+          onClick={handleRefresh}
+          disabled={isLoading}
+          className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+        >
+          <RefreshCw className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'} ${isLoading ? 'animate-spin' : ''}`} />
+          {t('RestaurantPreferencesTab.buttons.refresh')}
+        </button>
+
+        <button
+          onClick={handleSave}
+          disabled={!hasChanges || isSaving}
+          className="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors disabled:opacity-50"
+        >
+          {isSaving ? (
+            <Loader2 className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'} animate-spin`} />
+          ) : (
+            <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+          )}
+          {isSaving 
+            ? t('RestaurantPreferencesTab.buttons.saving') 
+            : t('RestaurantPreferencesTab.buttons.save')}
+        </button>
       </div>
     </div>
   );

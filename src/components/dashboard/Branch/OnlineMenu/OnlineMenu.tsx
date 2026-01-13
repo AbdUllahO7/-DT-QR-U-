@@ -701,6 +701,7 @@ const initializeMenu = async () => {
                       restaurantName={menuData.restaurantName}
                       onCustomize={openProductModal}
                       getCartItemQuantity={getCartItemQuantity}
+                      mobileGridLayout={menuData.preferences?.mobileGridLayout}
                     />
                   </div>
                 </div>

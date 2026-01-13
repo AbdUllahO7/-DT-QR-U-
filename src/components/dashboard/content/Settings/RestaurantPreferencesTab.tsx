@@ -19,7 +19,6 @@ import {
   UpdateRestaurantPreferencesDto,
   CurrencyOption,
 } from '../../../../services/RestaurantPreferencesService';
-import { useCurrency } from '../../../../hooks/useCurrency';
 
 // --- Reusable Custom Select Component ---
 interface SelectOption {
@@ -127,7 +126,6 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
-  const currency = useCurrency();
 
   // Currency selector state
   const [isCurrencyDropdownOpen, setIsCurrencyDropdownOpen] = useState(false);
