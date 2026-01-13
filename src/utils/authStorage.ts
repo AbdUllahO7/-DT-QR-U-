@@ -22,9 +22,10 @@ class AuthStorage {
   private readonly REMEMBER_ME_KEY = 'dashboard_remember_me';
 
   // Legacy keys for migration (will be removed after transition)
-  private readonly LEGACY_TOKEN_KEY = 'dashboard_token';
-  private readonly LEGACY_USER_ID_KEY = 'dashboard_userId';
-  private readonly LEGACY_TOKEN_EXPIRY_KEY = 'dashboard_token_expiry';
+  // These are the OLD keys that users might still have from before the namespace change
+  private readonly LEGACY_TOKEN_KEY = 'token';
+  private readonly LEGACY_USER_ID_KEY = 'userId';
+  private readonly LEGACY_TOKEN_EXPIRY_KEY = 'tokenExpiry';
 
   /**
    * Always use localStorage for token storage
