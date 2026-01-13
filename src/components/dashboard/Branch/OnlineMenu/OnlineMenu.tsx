@@ -123,9 +123,9 @@ const OnlineMenu: React.FC = () => {
         sessionStorage.setItem('online_menu_initialized', 'true');
       }
 
-      // Check for existing session
+      // Check for existing session - using namespaced keys to avoid conflicts with dashboard
       const existingSessionId = localStorage.getItem('online_menu_session_id');
-      const existingToken = localStorage.getItem('token');
+      const existingToken = localStorage.getItem('online_menu_token');
       const existingPublicId = localStorage.getItem('online_menu_public_id');
 
       if (existingSessionId && existingToken && existingPublicId === pid) {
@@ -138,9 +138,9 @@ const OnlineMenu: React.FC = () => {
         } catch (error: any) {
           console.warn('⚠️ Existing session failed, creating new session:', error);
           localStorage.removeItem('online_menu_session_id');
-          localStorage.removeItem('token');
+          localStorage.removeItem('online_menu_token');
           localStorage.removeItem('online_menu_public_id');
-          localStorage.removeItem('tokenExpiry');
+          localStorage.removeItem('online_menu_token_expiry');
         }
       }
 
@@ -160,11 +160,12 @@ const OnlineMenu: React.FC = () => {
       } as StartSessionDto);
 
       setSessionId(session.sessionId);
+      // Using namespaced keys to avoid conflicts with dashboard session
       localStorage.setItem('online_menu_session_id', session.sessionId);
-      localStorage.setItem('token', session.sessionToken);
+      localStorage.setItem('online_menu_token', session.sessionToken);
       localStorage.setItem('online_menu_public_id', pid);
       localStorage.setItem('online_menu_branch_id', session.branchId.toString());
-      localStorage.setItem('tokenExpiry', session.expiresAt);
+      localStorage.setItem('online_menu_token_expiry', session.expiresAt);
 
       setIsSessionInitialized(true);
       await loadBasket();
@@ -499,11 +500,11 @@ const initializeMenu = async () => {
         }
       }
 
-      // Clear session data from localStorage
+      // Clear session data from localStorage (using namespaced keys)
       localStorage.removeItem('online_menu_session_id');
-      localStorage.removeItem('token');
+      localStorage.removeItem('online_menu_token');
       localStorage.removeItem('online_menu_public_id');
-      localStorage.removeItem('tokenExpiry');
+      localStorage.removeItem('online_menu_token_expiry');
 
       // Reinitialize session
       await initializeSession(publicId!);
@@ -527,11 +528,12 @@ const initializeMenu = async () => {
         }
       }
 
-      // Clear all session data
+      // Clear all session data (using namespaced keys)
       localStorage.removeItem('online_menu_session_id');
-      localStorage.removeItem('token');
+      localStorage.removeItem('online_menu_token');
       localStorage.removeItem('online_menu_public_id');
-      localStorage.removeItem('tokenExpiry');
+      localStorage.removeItem('online_menu_token_expiry');
+      localStorage.removeItem('online_menu_branch_id');
       localStorage.removeItem('customer_identifier');
 
       // Reset states

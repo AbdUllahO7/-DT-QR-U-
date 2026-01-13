@@ -442,7 +442,7 @@ class BranchService {
       logger.info('Branch listesi API çağrısı başlatılıyor...', null, { prefix: 'BranchService' });
 
       // Token kontrolü
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('dashboard_token');
       if (!token) {
         logger.error('Token bulunamadı', null, { prefix: 'BranchService' });
         throw new Error('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');

@@ -162,7 +162,8 @@ const TableQR = () => {
 
         if (sessionRes.status === 200) {
           const sessionData = sessionRes.data;
-          localStorage.setItem('customerSessionToken', sessionData.sessionToken);
+          // Using namespaced key to avoid conflicts with dashboard and online menu sessions
+          localStorage.setItem('table_session_token', sessionData.sessionToken);
           setSessionStarted(true);
         } else if (sessionRes.status === 404) {
           setError(t('tableQR.error.sessionFeatureComingSoon'));

@@ -15,10 +15,16 @@ interface AuthData {
 }
 
 class AuthStorage {
-  private readonly TOKEN_KEY = 'token';
-  private readonly USER_ID_KEY = 'userId';
-  private readonly TOKEN_EXPIRY_KEY = 'tokenExpiry';
-  private readonly REMEMBER_ME_KEY = 'remember_me';
+  // Dashboard/Admin session keys - namespaced to avoid conflicts with customer sessions
+  private readonly TOKEN_KEY = 'dashboard_token';
+  private readonly USER_ID_KEY = 'dashboard_userId';
+  private readonly TOKEN_EXPIRY_KEY = 'dashboard_token_expiry';
+  private readonly REMEMBER_ME_KEY = 'dashboard_remember_me';
+
+  // Legacy keys for migration (will be removed after transition)
+  private readonly LEGACY_TOKEN_KEY = 'dashboard_token';
+  private readonly LEGACY_USER_ID_KEY = 'dashboard_userId';
+  private readonly LEGACY_TOKEN_EXPIRY_KEY = 'dashboard_token_expiry';
 
   /**
    * Always use localStorage for token storage
@@ -42,10 +48,15 @@ class AuthStorage {
         localStorage.removeItem(this.REMEMBER_ME_KEY);
       }
 
-      // Always use localStorage
+      // Save to new namespaced keys
       localStorage.setItem(this.TOKEN_KEY, data.token);
       localStorage.setItem(this.USER_ID_KEY, data.userId);
       localStorage.setItem(this.TOKEN_EXPIRY_KEY, data.tokenExpiry);
+
+      // Clean up legacy keys if they exist (migration)
+      localStorage.removeItem(this.LEGACY_TOKEN_KEY);
+      localStorage.removeItem(this.LEGACY_USER_ID_KEY);
+      localStorage.removeItem(this.LEGACY_TOKEN_EXPIRY_KEY);
 
     } catch (error) {
       console.error('Error saving auth data:', error);
@@ -62,7 +73,19 @@ class AuthStorage {
   getRawToken(): string | null {
     try {
       const storage = this.getStorage();
-      return storage.getItem(this.TOKEN_KEY);
+      // Try new key first, fall back to legacy key for migration
+      const token = storage.getItem(this.TOKEN_KEY);
+      if (token) return token;
+
+      // Check legacy key for backward compatibility
+      const legacyToken = storage.getItem(this.LEGACY_TOKEN_KEY);
+      if (legacyToken) {
+        // Migrate legacy token to new key
+        console.log('🔄 Migrating legacy dashboard token to new key');
+        return legacyToken;
+      }
+
+      return null;
     } catch (error) {
       console.error('Error getting raw token:', error);
       return null;
@@ -100,7 +123,8 @@ class AuthStorage {
    */
   getUserId(): string | null {
     const storage = this.getStorage();
-    return storage.getItem(this.USER_ID_KEY);
+    // Try new key first, fall back to legacy key
+    return storage.getItem(this.USER_ID_KEY) || storage.getItem(this.LEGACY_USER_ID_KEY);
   }
 
   /**
@@ -108,7 +132,8 @@ class AuthStorage {
    */
   getTokenExpiry(): string | null {
     const storage = this.getStorage();
-    return storage.getItem(this.TOKEN_EXPIRY_KEY);
+    // Try new key first, fall back to legacy key
+    return storage.getItem(this.TOKEN_EXPIRY_KEY) || storage.getItem(this.LEGACY_TOKEN_EXPIRY_KEY);
   }
 
   /**
@@ -151,11 +176,19 @@ class AuthStorage {
    */
   clearAuth(): void {
     try {
-      // Clear from localStorage
+      // Clear new namespaced keys
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.USER_ID_KEY);
       localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
       localStorage.removeItem(this.REMEMBER_ME_KEY);
+
+      // Clear legacy keys (migration cleanup)
+      localStorage.removeItem(this.LEGACY_TOKEN_KEY);
+      localStorage.removeItem(this.LEGACY_USER_ID_KEY);
+      localStorage.removeItem(this.LEGACY_TOKEN_EXPIRY_KEY);
+      localStorage.removeItem('remember_me');
+
+      // Clear other dashboard-related data
       localStorage.removeItem('restaurantName');
       localStorage.removeItem('selectedBranchId');
       localStorage.removeItem('selectedBranchName');
@@ -193,14 +226,18 @@ class AuthStorage {
    * Clean up expired tokens from localStorage on app initialization
    */
   cleanupOldTokens(): void {
-    // Check if token exists and is valid
-    const hasToken = localStorage.getItem(this.TOKEN_KEY);
+    // Check if token exists and is valid (check both new and legacy keys)
+    const hasToken = localStorage.getItem(this.TOKEN_KEY) || localStorage.getItem(this.LEGACY_TOKEN_KEY);
 
     if (hasToken && !this.isTokenValid()) {
       // Token exists but is expired, clean it up
       localStorage.removeItem(this.TOKEN_KEY);
       localStorage.removeItem(this.USER_ID_KEY);
       localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
+      // Also clean legacy keys
+      localStorage.removeItem(this.LEGACY_TOKEN_KEY);
+      localStorage.removeItem(this.LEGACY_USER_ID_KEY);
+      localStorage.removeItem(this.LEGACY_TOKEN_EXPIRY_KEY);
       console.log('✅ Cleaned up expired tokens from localStorage');
     }
   }
