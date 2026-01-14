@@ -116,24 +116,35 @@ httpClient.interceptors.request.use(
       return config;
     }
 
-    // Önce müşteri session token'ı kontrol et (for public menu access)
-    const customerSessionToken = localStorage.getItem('customerSessionToken');
-    if (customerSessionToken) {
+    // Context-aware token selection based on current page and request URL
+    // This prevents session conflicts between Dashboard, OnlineMenu, and TableQR
+    const currentPath = window.location.pathname;
+    const requestUrl = config.url || '';
+
+    let token: string | null = null;
+    let tokenSource = '';
+
+    // 1. TableQR context - uses table_session_token
+    if (currentPath.includes('/table/qr/') || requestUrl.includes('/api/session/') || requestUrl.includes('/api/table/')) {
+      token = localStorage.getItem('table_session_token');
+      tokenSource = 'TableQR';
+    }
+    // 2. OnlineMenu context - uses online_menu_token
+    else if (currentPath.includes('/OnlineMenu') || requestUrl.includes('/api/online/')) {
+      token = localStorage.getItem('online_menu_token');
+      tokenSource = 'OnlineMenu';
+    }
+    // 3. Dashboard/Admin context - uses dashboard_token via authStorage
+    else {
+      token = authStorage.getRawToken();
+      tokenSource = 'Dashboard';
+    }
+
+    if (token) {
       config.headers = config.headers || {};
-      config.headers.Authorization = `Bearer ${customerSessionToken}`;
-      if (import.meta.env.DEV) {
-        logger.debug('Customer session token kullanılıyor');
-      }
-    } else {
-      // SECURITY FIX: Use authStorage.getRawToken() to get token without validation
-      // Let the API validate the token and return 401 if invalid
-      const token = authStorage.getRawToken();
-      if (token) {
-        config.headers = config.headers || {};
-        config.headers.Authorization = `Bearer ${token}`;
-        if (import.meta.env.DEV && !config.url?.includes('/api/Dashboard')) {
-          logger.info('Token eklendi:', `Bearer ${token.substring(0, 15)}...`);
-        }
+      config.headers.Authorization = `Bearer ${token}`;
+      if (import.meta.env.DEV && !config.url?.includes('/api/Dashboard')) {
+        logger.info(`🔑 Token added (${tokenSource}):`, `Bearer ${token.substring(0, 15)}...`);
       }
     }
 
@@ -270,12 +281,12 @@ export const decodeToken = (token: string): any => {
   }
 };
 
-// Get restaurant ID from token
+// Get restaurant ID from token (uses dashboard token)
 export const getRestaurantIdFromToken = (): number | null => {
   try {
-    const token = localStorage.getItem('token');
+    const token = authStorage.getRawToken();
     if (!token) return null;
-    
+
     const decoded = decodeToken(token);
     return decoded?.restaurant_id || null;
   } catch (error) {
@@ -284,12 +295,12 @@ export const getRestaurantIdFromToken = (): number | null => {
   }
 };
 
-// Get branch ID from token
+// Get branch ID from token (uses dashboard token)
 export const getBranchIdFromToken = (): number | null => {
   try {
-    const token = localStorage.getItem('token');
+    const token = authStorage.getRawToken();
     if (!token) return null;
-    
+
     const decoded = decodeToken(token);
     return decoded?.branch_id || null;
   } catch (error) {
@@ -301,7 +312,7 @@ export const getBranchIdFromToken = (): number | null => {
 // Check if user is branch-only user (has branch_id but no restaurant_id)
 export const isBranchOnlyUser = (): boolean => {
   try {
-    const token = localStorage.getItem('token');
+    const token = authStorage.getRawToken();
     if (!token) return false;
 
     const decoded = decodeToken(token);

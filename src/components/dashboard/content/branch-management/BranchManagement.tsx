@@ -138,7 +138,7 @@ const BranchManagement: React.FC = () => {
     logger.info('BranchManagement component mount oldu', null, { prefix: 'BranchManagement' });
 
     // Token kontrolü
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('dashboard_token');
     if (!token) {
       logger.error('Token bulunamadı', null, { prefix: 'BranchManagement' });
       setError(t('branchManagement.error.sessionExpired'));
