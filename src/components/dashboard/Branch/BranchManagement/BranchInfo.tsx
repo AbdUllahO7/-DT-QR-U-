@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { BranchInfoProps } from '../../../../types/BranchManagement/type';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { countryKeys } from '../../../../data/mockData';
+import { CustomSelect } from '../../../common/CustomSelect';
 
 // --- Custom Select Component ---
 interface SelectOption {
@@ -12,126 +13,7 @@ interface SelectOption {
   searchTerms?: string;
 }
 
-interface CustomSelectProps {
-  options: SelectOption[];
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  disabled?: boolean;
-  searchable?: boolean;
-  className?: string;
-}
 
-const CustomSelect: React.FC<CustomSelectProps> = ({ 
-  options, 
-  value, 
-  onChange, 
-  placeholder, 
-  disabled, 
-  searchable = false,
-  className = ""
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { isRTL } = useLanguage();
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const selectedOption = options.find(opt => opt.value === value);
-  
-  const filteredOptions = options.filter(opt => 
-    opt.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    opt.searchTerms?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  return (
-    <div className={`relative ${className}`} ref={containerRef}>
-      <button
-        type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        disabled={disabled}
-        className={`w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-          disabled ? 'opacity-60 cursor-not-allowed' : 'hover:border-blue-400 cursor-pointer'
-        } ${isOpen ? 'ring-2 ring-blue-500/20 border-blue-500' : ''}`}
-      >
-        <span className={`block truncate ${!selectedOption ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
-          {selectedOption ? selectedOption.label : placeholder}
-        </span>
-        <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.15 }}
-            className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[300px]"
-          >
-            {searchable && (
-              <div className="p-2 border-b border-gray-100 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
-                <div className="relative">
-                  <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400`} />
-                  <input
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Search..."
-                    className={`w-full ${isRTL ? 'pr-9 pl-3' : 'pl-9 pr-3'} py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500`}
-                    autoFocus
-                    onClick={(e) => e.stopPropagation()}
-                  />
-                </div>
-              </div>
-            )}
-
-            <div className="overflow-y-auto flex-1 p-1 custom-scrollbar">
-              {filteredOptions.length > 0 ? (
-                filteredOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => {
-                      onChange(option.value);
-                      setIsOpen(false);
-                      setSearchTerm('');
-                    }}
-                    className={`w-full text-left px-3 py-2.5 rounded-lg flex items-center justify-between group transition-colors ${
-                      value === option.value
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                        : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    <span className="font-medium text-sm truncate">{option.label}</span>
-                    {value === option.value && (
-                      <Check className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 ml-2" />
-                    )}
-                  </button>
-                ))
-              ) : (
-                <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                  No options found
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-
-// --- End Custom Select ---
 
 interface ExtendedBranchInfoProps extends BranchInfoProps {
   countries: { name: string; code: string }[];
@@ -226,10 +108,9 @@ const BranchInfo: React.FC<ExtendedBranchInfoProps> = ({
                         'whatsappOrderNumber',
                         editData.whatsappOrderNumber,
                         'code',
-                        newCode
+                        String(newCode)
                       )}
                       placeholder="Code"
-                      searchable={true}
                     />
                   </div>
                   <input
@@ -298,9 +179,8 @@ const BranchInfo: React.FC<ExtendedBranchInfoProps> = ({
                   <CustomSelect
                     options={countryNameOptions}
                     value={editData.createAddressDto?.country || ''}
-                    onChange={(val) => handleInputChange('createAddressDto.country', val)}
+                    onChange={(val) => handleInputChange('createAddressDto.country', String(val))}
                     placeholder={t('branchManagementBranch.placeholders.country')}
-                    searchable={true}
                   />
                 ) : (
                   <p className="text-gray-900 dark:text-gray-100 font-medium flex items-center">

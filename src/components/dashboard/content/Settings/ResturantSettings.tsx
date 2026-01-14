@@ -20,6 +20,7 @@ import { UserSettingsState, BranchDropdownItem } from '../../../../types/BranchM
 import { branchService } from '../../../../services/branchService';
 import RestaurantPreferencesTab from './RestaurantPreferencesTab';
 import { BranchPreferences, UpdateBranchPreferencesDto } from '../../../../services/Branch/BranchPreferencesService';
+import { CustomSelect } from '../../../common/CustomSelect';
 
 // --- Custom Select Component (Reusable) ---
 interface SelectOption {
@@ -27,116 +28,7 @@ interface SelectOption {
   label: string;
 }
 
-interface CustomSelectProps {
-  options: SelectOption[];
-  value: string | number | null;
-  onChange: (value: any) => void;
-  placeholder: string;
-  disabled?: boolean;
-  icon?: React.ReactNode;
-}
 
-const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, placeholder, disabled, icon }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { isRTL } = useLanguage();
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const selectedOption = options.find(opt => opt.value === value);
-  const filteredOptions = options.filter(opt => 
-    opt.label.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  return (
-    <div className="relative w-full sm:w-64" ref={containerRef}>
-      <button
-        type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        disabled={disabled}
-        className={`w-full flex items-center justify-between px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl text-left transition-all duration-200 focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 ${
-          disabled ? 'opacity-60 cursor-not-allowed bg-gray-50 dark:bg-gray-900' : 'hover:border-primary-400 cursor-pointer shadow-sm'
-        } ${isOpen ? 'ring-2 ring-primary-500/20 border-primary-500' : ''}`}
-      >
-        <div className="flex items-center gap-2 truncate">
-          {icon && <span className="text-gray-500 dark:text-gray-400 shrink-0">{icon}</span>}
-          <span className={`block truncate ${!selectedOption ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white font-medium'}`}>
-            {selectedOption ? selectedOption.label : placeholder}
-          </span>
-        </div>
-        <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.15 }}
-            className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden flex flex-col max-h-[300px]"
-          >
-            {/* Search Input */}
-            <div className="p-2 border-b border-gray-100 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
-              <div className="relative">
-                <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-gray-400`} />
-                <input
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Search..."
-                  className={`w-full ${isRTL ? 'pr-8 pl-3' : 'pl-8 pr-3'} py-1.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500`}
-                  autoFocus
-                  onClick={(e) => e.stopPropagation()}
-                />
-              </div>
-            </div>
-
-            <div className="overflow-y-auto flex-1 p-1 custom-scrollbar">
-              {filteredOptions.length > 0 ? (
-                filteredOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => {
-                      onChange(option.value);
-                      setIsOpen(false);
-                      setSearchTerm('');
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between group transition-colors ${
-                      value === option.value
-                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
-                        : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    <span className="font-medium text-sm truncate">{option.label}</span>
-                    {value === option.value && (
-                      <Check className="w-3.5 h-3.5 text-primary-600 dark:text-primary-400 shrink-0" />
-                    )}
-                  </button>
-                ))
-              ) : (
-                <div className="p-3 text-center text-xs text-gray-500 dark:text-gray-400">
-                  No options found
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-// --- End Custom Select ---
 
 const ResturantSettings: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();

@@ -45,7 +45,7 @@ import ChangePasswordModal from './UserManagement/ChangePasswordModal';
 import AssignBranchModal from './UserManagement/AssignBranchModal';
 import { ChangePasswordDto } from '../../../types/users/users.type';
 import { RestaurantBranchDropdownItem } from '../../../types/RestaurantTypes';
-import { CustomSelect } from './branch-management/BranchEditModal';
+import { CustomSelect } from '../../common/CustomSelect';
 type ViewMode = 'grid' ;
 
 type TabMode = 'users' | 'roles';
@@ -1097,7 +1097,7 @@ useEffect(() => {
           <div className="w-48">
             <CustomSelect
               value={selectedCategory}
-              onChange={setSelectedCategory}
+              onChange={(val) => setSelectedCategory(String(val))}
               options={categoryOptions}
               placeholder={t('userManagementPage.controls.filterAll')}
             />

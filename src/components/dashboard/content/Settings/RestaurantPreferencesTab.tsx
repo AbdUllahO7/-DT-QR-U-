@@ -19,6 +19,7 @@ import {
   UpdateRestaurantPreferencesDto,
   CurrencyOption,
 } from '../../../../services/RestaurantPreferencesService';
+import { CustomSelect } from '../../../common/CustomSelect';
 
 // --- Reusable Custom Select Component ---
 interface SelectOption {
@@ -26,90 +27,6 @@ interface SelectOption {
   label: string;
 }
 
-interface CustomSelectProps {
-  options: SelectOption[];
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  disabled?: boolean;
-}
-
-const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, placeholder, disabled }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { isRTL } = useLanguage();
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const selectedOption = options.find(opt => opt.value === value);
-
-  return (
-    <div className="relative w-full" ref={containerRef}>
-      <button
-        type="button"
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        disabled={disabled}
-        className={`w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-          disabled ? 'opacity-60 cursor-not-allowed bg-gray-50 dark:bg-gray-900' : 'hover:border-blue-400 cursor-pointer shadow-sm'
-        } ${isOpen ? 'ring-2 ring-blue-500/20 border-blue-500' : ''}`}
-      >
-        <span className={`block truncate ${!selectedOption ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white font-medium'}`}>
-          {selectedOption ? selectedOption.label : placeholder}
-        </span>
-        <ChevronDown className={`w-4 h-4 text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.15 }}
-            className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl overflow-hidden max-h-60 overflow-y-auto custom-scrollbar"
-          >
-            <div className="p-1">
-              {options.length > 0 ? (
-                options.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => {
-                      onChange(option.value);
-                      setIsOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2.5 rounded-md flex items-center justify-between group transition-colors ${
-                      value === option.value
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                        : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    <span className="font-medium text-sm truncate">{option.label}</span>
-                    {value === option.value && (
-                      <Check className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 ml-2" />
-                    )}
-                  </button>
-                ))
-              ) : (
-                <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                  No options available
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
 
 interface RestaurantPreferencesTabProps {
   className?: string;
@@ -369,8 +286,8 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
               </label>
               
               <CustomSelect
-                value={formData.defaultLanguage}
-                onChange={(val) => handleFieldChange('defaultLanguage', val)}
+                value={formData.defaultLanguage || ''}
+                onChange={(val) => handleFieldChange('defaultLanguage', String(val))}
                 options={preferences?.availableLanguages
                   .filter(lang => formData.supportedLanguages?.includes(lang.code))
                   .map(lang => ({

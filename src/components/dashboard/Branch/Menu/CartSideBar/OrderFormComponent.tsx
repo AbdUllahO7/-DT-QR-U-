@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../../../../contexts/LanguageContext';
 import { OrderFormProps } from '../../../../../types/menu/carSideBarTypes';
+import { CustomSelect } from '../../../../common/CustomSelect';
 
 // --- Types ---
 
@@ -33,187 +34,7 @@ interface Option {
   searchTerms?: string;
 }
 
-interface CustomSelectProps {
-  options: Option[];
-  value: any;
-  onChange: (value: any) => void;
-  placeholder: string;
-  disabled?: boolean;
-  searchable?: boolean;
-  className?: string;
-}
 
-// --- Custom Select Component (Fixed Positioning Strategy) ---
-
-const CustomSelect: React.FC<CustomSelectProps> = ({
-  options,
-  value,
-  onChange,
-  placeholder,
-  disabled,
-  searchable = false,
-  className = ""
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const { isRTL } = useLanguage();
-
-  // Calculate position relative to the VIEWPORT (Fixed)
-  const updatePosition = () => {
-    if (buttonRef.current && isOpen) {
-      const rect = buttonRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const spaceAbove = rect.top;
-      const dropdownHeight = 250; // Approx max height
-
-      // Decide whether to open up or down
-      const showAbove = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
-
-      setPosition({
-        top: showAbove ? rect.top - dropdownHeight - 5 : rect.bottom + 5,
-        left: rect.left,
-        width: rect.width
-      });
-    }
-  };
-
-  // Handle Scroll/Resize to update position
-  useEffect(() => {
-    if (isOpen) {
-      updatePosition();
-      window.addEventListener('scroll', updatePosition, true);
-      window.addEventListener('resize', updatePosition);
-    }
-    return () => {
-      window.removeEventListener('scroll', updatePosition, true);
-      window.removeEventListener('resize', updatePosition);
-    };
-  }, [isOpen]);
-
-  // Close on click outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      // If clicking inside the button, don't close (toggle logic handles it)
-      if (buttonRef.current && buttonRef.current.contains(event.target as Node)) {
-        return;
-      }
-      setIsOpen(false);
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen]);
-
-  const selectedOption = options.find(opt => opt.value === value);
-
-  const filteredOptions = options.filter(opt =>
-    opt.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    opt.searchTerms?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  return (
-    <div className={`relative ${className}`}>
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={() => {
-          if (!disabled) {
-            setIsOpen(!isOpen);
-            setTimeout(updatePosition, 0); 
-          }
-        }}
-        disabled={disabled}
-        className={`w-full flex items-center justify-between p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-orange-500/20 ${
-          disabled ? 'opacity-60 cursor-not-allowed' : 'hover:border-orange-400 cursor-pointer'
-        } ${isOpen ? 'ring-2 ring-orange-500/20 border-orange-500' : ''}`}
-      >
-        <span className={`block truncate text-sm ${!selectedOption ? 'text-slate-500 dark:text-slate-400' : 'text-slate-900 dark:text-slate-100'}`}>
-          {selectedOption ? selectedOption.label : placeholder}
-        </span>
-        <ChevronDown className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-
-      {/* PORTAL TO BODY with FIXED POSITION */}
-      {isOpen && createPortal(
-        <div className="fixed inset-0 z-[99999]" style={{ zIndex: 99999 }}>
-          {/* Invisible Backdrop to close on click outside (fallback) */}
-          <div className="absolute inset-0" onClick={() => setIsOpen(false)} />
-
-          <AnimatePresence>
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.1 }}
-              style={{
-                position: 'fixed',
-                top: position.top,
-                left: position.left,
-                width: position.width,
-                maxHeight: '250px',
-              }}
-              className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-2xl overflow-hidden flex flex-col"
-            >
-              {searchable && (
-                <div className="p-2 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/95 backdrop-blur-sm">
-                  <div className="relative">
-                    <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-3.5 h-3.5 text-slate-400`} />
-                    <input
-                      type="text"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Search..."
-                      className={`w-full ${isRTL ? 'pr-8 pl-2' : 'pl-8 pr-2'} py-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-1 focus:ring-orange-500`}
-                      autoFocus
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="overflow-y-auto flex-1 p-1 custom-scrollbar">
-                {filteredOptions.length > 0 ? (
-                  filteredOptions.map((option) => (
-                    <button
-                      key={option.value}
-                      type="button"
-                      onClick={() => {
-                        onChange(option.value);
-                        setIsOpen(false);
-                        setSearchTerm('');
-                      }}
-                      className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between group transition-colors ${
-                        value === option.value
-                          ? 'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300'
-                          : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700'
-                      }`}
-                    >
-                      <span className="font-medium text-sm truncate">{option.label}</span>
-                      {value === option.value && (
-                        <Check className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400 shrink-0 ml-2" />
-                      )}
-                    </button>
-                  ))
-                ) : (
-                  <div className="p-3 text-center text-xs text-slate-500 dark:text-slate-400">
-                    No options found
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          </AnimatePresence>
-        </div>,
-        document.body
-      )}
-    </div>
-  );
-};
-
-// --- Main Component ---
 
 const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
   orderForm,
@@ -339,7 +160,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
           placeholder={t('order.form.selectOrderType')}
           options={orderTypeOptions}
           value={orderForm.orderTypeId || null}
-          onChange={(value) => setOrderForm((prev) => ({ ...prev, orderTypeId: value }))}
+          onChange={(value) => setOrderForm((prev) => ({ ...prev, orderTypeId: Number(value) }))}
           disabled={orderTypes.length === 0}
         />
         
