@@ -4,6 +4,7 @@ import { MapPin, Building, Store, CheckCircle2, X, ChevronDown, Check } from 'lu
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { AssignBranchDto, UserData } from '../../../../types/users/users.type';
 import { BranchInfo } from '../../../../types/api';
+import { CustomSelect } from '../../../common/CustomSelect';
 
 export interface AssignBranchModalProps {
   isOpen: boolean;
@@ -22,97 +23,7 @@ interface SelectOption {
   label: string;
 }
 
-interface CustomSelectProps {
-  options: SelectOption[];
-  value: string;
-  onChange: (value: string) => void;
-  placeholder: string;
-  error?: boolean;
-}
 
-const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange, placeholder, error }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { isRTL } = useLanguage();
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const selectedOption = options.find(opt => opt.value === value);
-
-  return (
-    <div className="relative" ref={containerRef}>
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-700 border rounded-lg text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-500/20 ${
-          error 
-            ? 'border-red-500 ring-1 ring-red-500/20' 
-            : isOpen 
-              ? 'border-green-500 ring-2 ring-green-500/20' 
-              : 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
-        }`}
-      >
-        <span className={`block truncate ${!selectedOption ? 'text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}`}>
-          {selectedOption ? selectedOption.label : placeholder}
-        </span>
-        <ChevronDown 
-          className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
-        />
-      </button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.15 }}
-            className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl overflow-hidden max-h-60 overflow-y-auto custom-scrollbar"
-          >
-            <div className="p-1">
-              {options.length > 0 ? (
-                options.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    onClick={() => {
-                      onChange(option.value);
-                      setIsOpen(false);
-                    }}
-                    className={`w-full text-left px-3 py-2.5 rounded-md flex items-center justify-between group transition-colors ${
-                      value === option.value
-                        ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
-                        : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700'
-                    }`}
-                  >
-                    <span className="font-medium text-sm truncate">{option.label}</span>
-                    {value === option.value && (
-                      <Check className="w-4 h-4 text-green-600 dark:text-green-400 shrink-0 ml-2" />
-                    )}
-                  </button>
-                ))
-              ) : (
-                <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
-                  No options available
-                </div>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
-// --- End Custom Select ---
 
 const AssignBranchModal: React.FC<AssignBranchModalProps> = ({
   isOpen,
@@ -304,7 +215,7 @@ const AssignBranchModal: React.FC<AssignBranchModalProps> = ({
                         <CustomSelect
                           value={newBranchId}
                           onChange={(val) => {
-                            setNewBranchId(val);
+                            setNewBranchId(String(val));
                             setError('');
                           }}
                           options={availableBranches.map(b => ({

@@ -9,10 +9,7 @@ import {
   Hash,
   Briefcase,
   Scale,
-  Wine,
-  Upload,
   Image as ImageIcon,
-  CheckCircle2,
   Trash2,
   AlertTriangle,
   Loader2
@@ -329,7 +326,6 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
           <div className="flex justify-between items-center p-6">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                <Briefcase className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white">

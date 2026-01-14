@@ -117,10 +117,7 @@ const handleNavigateToOnlineMenu = async () => {
       // Users can manually open this in incognito mode by right-clicking
       const newWindow = window.open(onlineMenuUrl, '_blank', 'noopener,noreferrer');
 
-      // If popup was blocked, show a message
-      if (!newWindow) {
-        toast.error(t('branchManagementBranch.errors.popupBlocked') || 'Please allow popups to open the online menu');
-      }
+   
 
     } catch (error: any) {
       console.error('Failed to get public ID:', error);
