@@ -4038,6 +4038,7 @@ errors: {
 ordersManager: {
     total: 'Totale',
         PaymentMethod: "Mënyra e Pagesës",
+        order: 'Porosi',
             clearFilters: "Pastro Filtrat",
                 subTotal: "Nëntotali",
                     filtered: "Filtruar",
