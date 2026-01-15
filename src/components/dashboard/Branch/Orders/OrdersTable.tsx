@@ -311,7 +311,6 @@ const OrdersTable: React.FC<OrdersTableProps> = ({
       : 'ordersManager.branchOrders';
     
     const orderType = t(orderTypeKey).toLowerCase();
-    return `${t('ordersManager.no')} ${orderType} ${t('ordersManager.found')}` || `No ${orderType} found`;
   };
 
   if (loading) {

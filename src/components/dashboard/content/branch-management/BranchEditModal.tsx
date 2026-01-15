@@ -1792,70 +1792,76 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                   )}
 
                   {formData.createBranchWorkingHourCoreDto.map((hours, dayIndex) => (
-                    <div key={dayIndex} className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-700/50">
-                      <div className={`flex items-center justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <div className="flex items-center gap-4">
-                          <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 w-24">
-                            {getDayName(hours.dayOfWeek)}
-                          </span>
+                    <div key={dayIndex} className={`p-3 border rounded-lg ${hours.isWorkingDay ? 'border-green-200 dark:border-green-700 bg-green-50/50 dark:bg-green-900/10' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50'}`}>
+                      {/* Header Row - Day name and all controls on one line */}
+                      <div className={`flex items-center justify-between flex-wrap gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                        {/* Day Name */}
+                        <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 min-w-[80px]">
+                          {getDayName(hours.dayOfWeek)}
+                        </span>
 
-                          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+                        {/* Controls Container */}
+                        <div className={`flex items-center gap-4 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          {/* Open Checkbox */}
+                          <label className={`flex items-center gap-1.5 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
                             <input
                               title="isWorkingDay"
                               type="checkbox"
                               checked={hours.isWorkingDay}
                               onChange={(e) => handleWorkingHourChange(dayIndex, 'isWorkingDay', e.target.checked)}
-                              className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400"
-                            />
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              {t('branchManagement.form.isOpen')}
-                            </span>
-                          </div>
-                        </div>
-
-                        {hours.isWorkingDay && (
-                          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
-                            <input
-                              title="isOpen24Hours"
-                              type="checkbox"
-                              checked={hours.isOpen24Hours}
-                              onChange={(e) => handleWorkingHourChange(dayIndex, 'isOpen24Hours', e.target.checked)}
                               className="h-4 w-4 text-green-600 border-gray-300 dark:border-gray-600 rounded focus:ring-green-500 dark:focus:ring-green-400"
                             />
-                            <span className="text-sm text-gray-600 dark:text-gray-400">
-                              {t('branchManagement.form.open24Hours') || '24 Hours'}
+                            <span className="text-xs text-gray-600 dark:text-gray-400">
+                              {t('branchManagement.form.isOpen')}
                             </span>
-                          </div>
-                        )}
+                          </label>
+
+                          {/* 24 Hours Checkbox - Always visible when working day */}
+                          {hours.isWorkingDay && (
+                            <label className={`flex items-center gap-1.5 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
+                              <input
+                                title="isOpen24Hours"
+                                type="checkbox"
+                                checked={hours.isOpen24Hours}
+                                onChange={(e) => handleWorkingHourChange(dayIndex, 'isOpen24Hours', e.target.checked)}
+                                className="h-4 w-4 text-blue-600 border-gray-300 dark:border-gray-600 rounded focus:ring-blue-500 dark:focus:ring-blue-400"
+                              />
+                              <span className="text-xs text-gray-600 dark:text-gray-400">
+                                {t('branchManagement.form.open24Hours') || '24H'}
+                              </span>
+                            </label>
+                          )}
+                        </div>
                       </div>
 
+                      {/* Time Slots - Below header when working day and not 24 hours */}
                       {hours.isWorkingDay && !hours.isOpen24Hours && (
-                        <div className="space-y-3">
+                        <div className={`mt-3 pt-3 border-t border-gray-200 dark:border-gray-600 space-y-2`}>
                           {hours.timeSlots?.map((slot, slotIndex) => (
-                            <div key={slotIndex} className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                              <div className="flex items-center gap-2">
-                                <input
-                                  title="openTime"
-                                  type="time"
-                                  value={slot.openTime?.substring(0, 5) || '08:00'}
-                                  onChange={(e) => handleTimeSlotChange(dayIndex, slotIndex, 'openTime', e.target.value + ':00')}
-                                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
-                                />
-                                <span className="text-gray-500 dark:text-gray-400">-</span>
-                                <input
-                                  title="closeTime"
-                                  type="time"
-                                  value={slot.closeTime?.substring(0, 5) || '22:00'}
-                                  onChange={(e) => handleTimeSlotChange(dayIndex, slotIndex, 'closeTime', e.target.value + ':00')}
-                                  className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors"
-                                />
-                              </div>
+                            <div key={slotIndex} className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                              <input
+                                title="openTime"
+                                type="time"
+                                value={slot.openTime?.substring(0, 5) || '08:00'}
+                                onChange={(e) => handleTimeSlotChange(dayIndex, slotIndex, 'openTime', e.target.value + ':00')}
+                                className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors w-[100px]"
+                                dir="ltr"
+                              />
+                              <span className="text-gray-400 dark:text-gray-500 text-sm">—</span>
+                              <input
+                                title="closeTime"
+                                type="time"
+                                value={slot.closeTime?.substring(0, 5) || '22:00'}
+                                onChange={(e) => handleTimeSlotChange(dayIndex, slotIndex, 'closeTime', e.target.value + ':00')}
+                                className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 transition-colors w-[100px]"
+                                dir="ltr"
+                              />
 
                               {(hours.timeSlots?.length || 0) > 1 && (
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveTimeSlot(dayIndex, slotIndex)}
-                                  className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                  className="p-1 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                                   title={t('common.remove') || 'Remove'}
                                 >
                                   <Trash2 className="w-4 h-4" />
@@ -1867,21 +1873,23 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                           <button
                             type="button"
                             onClick={() => handleAddTimeSlot(dayIndex)}
-                            className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1"
+                            className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 flex items-center gap-1 mt-1"
                           >
-                            + {t('branchManagement.form.addTimeSlot') || 'Add Time Slot'}
+                            + {t('branchManagement.form.addTimeSlot') || 'Add Slot'}
                           </button>
                         </div>
                       )}
 
+                      {/* 24 Hours Message */}
                       {hours.isWorkingDay && hours.isOpen24Hours && (
-                        <div className="text-sm text-green-600 dark:text-green-400 font-medium">
+                        <div className="mt-2 text-xs text-blue-600 dark:text-blue-400 font-medium">
                           {t('branchManagement.form.open24HoursMessage') || 'Open 24 hours'}
                         </div>
                       )}
 
+                      {/* Closed Message */}
                       {!hours.isWorkingDay && (
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                        <div className="mt-1 text-xs text-gray-400 dark:text-gray-500">
                           {t('branchManagement.form.closed') || 'Closed'}
                         </div>
                       )}

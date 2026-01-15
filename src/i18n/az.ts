@@ -4036,6 +4036,7 @@ errors: {
 },
 ordersManager: {
     total: 'Cəmi',
+    order: 'Sifariş',
         PaymentMethod: "Ödəniş Üsulu",
             clearFilters: "Filtrləri Təmizlə",
                 subTotal: "Ara Cəmi",

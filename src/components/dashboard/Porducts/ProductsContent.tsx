@@ -463,12 +463,12 @@ useEffect(() => {
 
   // Filter options
   const sortOptions = [
-    { value: 'order_asc', label: t('sort.order.asc') || 'Order (A-Z)', icon: Hash },
-    { value: 'order_desc', label: t('sort.order.desc') || 'Order (Z-A)', icon: Hash },
-    { value: 'name_asc', label: t('sort.name.asc') || 'Name (A-Z)', icon: SortAsc },
-    { value: 'name_desc', label: t('sort.name.desc') || 'Name (Z-A)', icon: SortDesc },
-    { value: 'price_asc', label: t('sort.price.asc') || 'Price (Low-High)', icon: <span>{currency.symbol}</span> },
-    { value: 'price_desc', label: t('sort.price.desc') || 'Price (High-Low)', icon: <span>{currency.symbol}</span> },
+    { value: 'order_asc', label: t('sort.order.asc') || 'Order (A-Z)', Icon: Hash },
+    { value: 'order_desc', label: t('sort.order.desc') || 'Order (Z-A)', Icon: Hash },
+    { value: 'name_asc', label: t('sort.name.asc') || 'Name (A-Z)', Icon: SortAsc },
+    { value: 'name_desc', label: t('sort.name.desc') || 'Name (Z-A)', Icon: SortDesc },
+    { value: 'price_asc', label: t('sort.price.asc') || 'Price (Low-High)', Icon: null, iconText: currency.symbol },
+    { value: 'price_desc', label: t('sort.price.desc') || 'Price (High-Low)', Icon: null, iconText: currency.symbol },
   ];
 
   const toggleCategory = (categoryId: number) => {
@@ -1282,7 +1282,7 @@ useEffect(() => {
                     <div className={`absolute top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 ${isRTL ? 'right-0' : 'left-0'}`}>
                       <div className="p-2">
                         {sortOptions.map((option) => {
-                          const icon = option.icon;
+                          const IconComponent = option.Icon;
                           return (
                             <button
                               key={option.value}
@@ -1296,7 +1296,11 @@ useEffect(() => {
                                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
                               }`}
                             >
-                              {typeof icon === 'function' ? React.createElement(icon as any, { className: 'h-4 w-4' }) : icon}
+                              {IconComponent ? (
+                                <IconComponent className="h-4 w-4" />
+                              ) : (
+                                <span className="h-4 w-4 flex items-center justify-center text-xs font-medium">{option.iconText}</span>
+                              )}
                               <span>{option.label}</span>
                               {sortBy === option.value && <Check className="h-4 w-4 ml-auto" />}
                             </button>
