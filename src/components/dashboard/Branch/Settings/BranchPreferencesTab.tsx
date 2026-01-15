@@ -352,7 +352,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
           </div>
           
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+           {/*  <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
               <div>
                 <label className="text-sm font-medium text-gray-900 dark:text-white">
                   {t('branchPreferences.sections.displaySettings.showProductDescriptions')}
@@ -414,7 +414,7 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
                 />
                 <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
               </label>
-            </div>
+            </div> */}
 
             {/* Mobile Grid Layout */}
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
@@ -824,31 +824,36 @@ const BranchPreferencesComponent: React.FC<BranchPreferencesComponentProps> = ({
       </div>
 
       {/* FLOATING ACTION BAR */}
-      <div className="fixed rounded-lg bottom-10 w-fit  right-24 p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end items-center gap-3">
-        <button
-          onClick={handleRefresh}
-          disabled={isLoading}
-          className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
-        >
-          <RefreshCw className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'} ${isLoading ? 'animate-spin' : ''}`} />
-          {t('RestaurantPreferencesTab.buttons.refresh')}
-        </button>
+     {/* FLOATING ACTION BAR */}
+<div 
+  className={`fixed rounded-lg bottom-10 w-fit p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end items-center gap-3 ${
+    isRTL ? 'left-24' : 'right-24'
+  }`}
+>
+  <button
+    onClick={handleRefresh}
+    disabled={isLoading}
+    className="flex items-center px-4 py-2 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+  >
+    <RefreshCw className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'} ${isLoading ? 'animate-spin' : ''}`} />
+    {t('RestaurantPreferencesTab.buttons.refresh')}
+  </button>
 
-        <button
-          onClick={handleSave}
-          disabled={!hasChanges || isSaving}
-          className="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors disabled:opacity-50"
-        >
-          {isSaving ? (
-            <Loader2 className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'} animate-spin`} />
-          ) : (
-            <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-          )}
-          {isSaving 
-            ? t('RestaurantPreferencesTab.buttons.saving') 
-            : t('RestaurantPreferencesTab.buttons.save')}
-        </button>
-      </div>
+  <button
+    onClick={handleSave}
+    disabled={!hasChanges || isSaving}
+    className="flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white rounded-lg transition-colors disabled:opacity-50"
+  >
+    {isSaving ? (
+      <Loader2 className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'} animate-spin`} />
+    ) : (
+      <Save className={`w-4 h-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+    )}
+    {isSaving 
+      ? t('RestaurantPreferencesTab.buttons.saving') 
+      : t('RestaurantPreferencesTab.buttons.save')}
+  </button>
+</div>
     </div>
   );
 };

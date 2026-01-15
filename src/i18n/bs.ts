@@ -4041,6 +4041,7 @@ errors: {
 },
 ordersManager: {
     total: 'Ukupno',
+    order: 'Narudžba',
         PaymentMethod: "Način Plaćanja",
             clearFilters: "Očisti Filtere",
                 subTotal: "Međuzbir",
