@@ -603,6 +603,9 @@ const MoneyCaseManager: React.FC<MoneyCaseManagerProps> = ({ branchId }) => {
           onViewZReport={fetchZReport}
           t={t}
           isRTL={isRTL}
+          branchName={state.selectedBranch?.branchName}
+          fromDate={fromDate}
+          toDate={toDate}
         />
 
         {/* Modals */}

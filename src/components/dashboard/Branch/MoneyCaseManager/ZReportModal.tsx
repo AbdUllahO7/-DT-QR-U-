@@ -1,8 +1,9 @@
 // src/components/Restaurant/MoneyCase/ZReportModal.tsx
 
 import React from 'react';
-import { X, FileText, Printer, Download, Clock } from 'lucide-react';
+import { X, FileText, Printer, Download, FileSpreadsheet, Clock } from 'lucide-react';
 import { ZReport } from '../../../../types/BranchManagement/MoneyCase';
+import { exportToCSV, getZReportColumns, generateFilename } from '../../../../utils/csvExport';
 
 interface Props {
   show: boolean;
@@ -219,6 +220,14 @@ Generated: ${new Date().toLocaleString()}
     URL.revokeObjectURL(url);
   };
 
+  const handleDownloadCSV = () => {
+    if (!zReport) return;
+
+    const columns = getZReportColumns(t);
+    const filename = generateFilename('z-report', zReport.branchName, zReport.reportDate.split('T')[0]);
+    exportToCSV([zReport], filename, columns);
+  };
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto print-modal-container">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
@@ -250,9 +259,16 @@ Generated: ${new Date().toLocaleString()}
                 <button
                   onClick={handleDownload}
                   className="p-2 text-white hover:bg-blue-700 rounded-lg transition-colors"
-                  title={t('common.download')}
+                  title={t('common.download') + ' (TXT)'}
                 >
                   <Download className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={handleDownloadCSV}
+                  className="p-2 text-white hover:bg-blue-700 rounded-lg transition-colors"
+                  title={t('moneyCase.export.exportCSV') || 'Export CSV'}
+                >
+                  <FileSpreadsheet className="h-5 w-5" />
                 </button>
                 <button
                   onClick={onClose}
