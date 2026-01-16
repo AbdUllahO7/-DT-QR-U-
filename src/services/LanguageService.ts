@@ -86,6 +86,31 @@ class LanguageService {
     }
   }
 
+  async getMenuLanguages(branchId?: number): Promise<BranchLanguagesDto> {
+    try {
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      if (!effectiveBranchId) {
+        throw new Error('Branch ID is required for menu languages');
+      }
+
+      logger.info('Fetching menu languages', { branchId: effectiveBranchId }, { prefix: 'LanguageService' });
+
+      const response = await httpClient.get<BranchLanguagesDto>(`${this.baseUrl}/menu/${effectiveBranchId}`);
+
+      logger.info('Menu languages fetched successfully', {
+        branchId: effectiveBranchId,
+        languageCount: response.data.availableLanguages?.length || 0,
+        defaultLanguage: response.data.defaultLanguage
+      }, { prefix: 'LanguageService' });
+
+      return response.data;
+    } catch (error: any) {
+      logger.error('Error fetching menu languages', error, { prefix: 'LanguageService' });
+      throw this.handleError(error, 'Error fetching menu languages');
+    }
+  }
+
   private handleError(error: any, defaultMessage: string): never {
     if (error?.response?.status === 400) {
       const errorData = error?.response?.data;

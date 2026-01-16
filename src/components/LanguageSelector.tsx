@@ -1,33 +1,72 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Globe, ChevronDown } from 'lucide-react';
 import { useLanguage, Language } from '../contexts/LanguageContext';
+import { languageService } from '../services/LanguageService';
+import { LanguageOptionDto } from '../types/Language/type';
 
 interface LanguageSelectorProps {
   variant?: 'header' | 'navbar';
   showLabel?: boolean;
+  branchId?: number;
+  useMenuLanguages?: boolean;
 }
 
-const LanguageSelector: React.FC<LanguageSelectorProps> = ({ 
+
+const allLanguages = [
+  { code: 'tr' as Language, name: 'Türkçe', countryCode: 'tr' },
+  { code: 'en' as Language, name: 'English', countryCode: 'us' },
+  { code: 'ar' as Language, name: 'العربية', countryCode: 'sa' },
+  { code: 'az' as Language, name: 'Azərbaycanca', countryCode: 'az' },
+  { code: 'sq' as Language, name: 'Shqip', countryCode: 'al' },
+  { code: 'bs' as Language, name: 'Bosanski', countryCode: 'ba' },
+];
+
+const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   variant = 'header',
-  showLabel = false 
+  showLabel = false,
+  branchId,
+  useMenuLanguages = false
 }) => {
   const { language, setLanguage, t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
+  const [menuLanguages, setMenuLanguages] = useState<LanguageOptionDto[] | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isRTL = language === 'ar';
 
-  const languages = [
-    { code: 'tr' as Language, name: t('language.turkish'), flag: '🇹🇷' },
-    { code: 'en' as Language, name: t('language.english'), flag: '🇺🇸' },
-    { code: 'ar' as Language, name: t('language.arabic'), flag: '🇸🇦' },
-    { code: 'az' as Language, name: t('language.azerbaijani'), flag: '🇦🇿' },
-    { code: 'sq' as Language, name: t('language.albanian'), flag: '🇦🇱' },
-    { code: 'bs' as Language, name: t('language.bosnian'), flag: '🇧🇦' },
+  useEffect(() => {
+    if (useMenuLanguages && branchId) {
+      const fetchMenuLanguages = async () => {
+        try {
+          const data = await languageService.getMenuLanguages(branchId);
+          setMenuLanguages(data.availableLanguages || []);
+        } catch (error) {
+          console.error('Failed to fetch menu languages:', error);
+          setMenuLanguages(null);
+        }
+      };
+      fetchMenuLanguages();
+    }
+  }, [branchId, useMenuLanguages]);
 
-    
-  ];
+  const getDisplayLanguages = () => {
+    if (useMenuLanguages && menuLanguages && menuLanguages.length > 0) {
+      return menuLanguages.map(ml => {
+        const langInfo = allLanguages.find(l => l.code === ml.code);
+        return {
+          code: ml.code as Language,
+          name: langInfo?.name || ml.displayName || ml.code,
+          countryCode: langInfo?.countryCode || ml.code // Fallback to code if unknown
+        };
+      });
+    }
+    return allLanguages.map(lang => ({
+      ...lang,
+      name: t(`language.${lang.code === 'tr' ? 'turkish' : lang.code === 'en' ? 'english' : lang.code === 'ar' ? 'arabic' : lang.code === 'az' ? 'azerbaijani' : lang.code === 'sq' ? 'albanian' : 'bosnian'}`)
+    }));
+  };
 
-  const currentLanguage = languages.find(lang => lang.code === language);
+  const languages = getDisplayLanguages();
+  const currentLanguage = languages.find(lang => lang.code === language) || languages[0];
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -43,7 +82,6 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
   const handleLanguageChange = (langCode: Language) => {
     setLanguage(langCode);
     setIsOpen(false);
-    // Refresh the page to apply language changes across all components
     window.location.reload();
   };
 
@@ -81,7 +119,16 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                 language === lang.code ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : ''
               }`}
             >
-              <span className="text-lg">{lang.flag}</span>
+              {/* 2. Replaced Emoji <span> with <img> tag */}
+              <img
+                src={`https://flagcdn.com/w40/${lang.countryCode}.png`}
+                srcSet={`https://flagcdn.com/w80/${lang.countryCode}.png 2x`}
+                width="24"
+                height="16" // Aspect ratio is usually 3:2 for flags, but 24x16 works well for icons
+                alt={lang.name}
+                className="object-contain rounded-sm" 
+              />
+              
               <span className="font-medium">{lang.name}</span>
               {language === lang.code && (
                 <span className={`${isRTL ? 'mr-auto' : 'ml-auto'} text-primary-600 dark:text-primary-400`}>
