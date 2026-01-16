@@ -3744,6 +3744,14 @@ BranchTableManagement: {
       search: {
         placeholder: "Lezzetli yemekler ara..."
       },
+      favorites: {
+        title: "Favoriler",
+        toggle: "Sadece favorileri göster",
+        item: "öğe",
+        items: "öğe"
+      },
+      noFavorites: "Henüz favori yok",
+      noFavoritesDesc: "Favorilerinize eklemek için beğendiğiniz ürünlerdeki kalp simgesine dokunun",
       categories: "Kategoriler",
       ingredients: "Malzemeler",
       open: "Açık",
@@ -4142,6 +4150,13 @@ productModal: {
       CompletedAt: "Tamamlanma Tarihi",
       time: "saat",
       Status: "Durum",
+      statusActions: {
+        confirm: "Onayla",
+        startPreparing: "Hazırlamaya Başla",
+        markReady: "Hazır İşaretle",
+        markDelivered: "Teslim Edildi",
+        complete: "Tamamla"
+      }
   },
 
   orderService: {
@@ -4909,6 +4924,39 @@ recommended: "Önerilen",
       "zReportTitle": "Z Raporu - Detaylı Özet",
       "confirmOpenMessage": "Yeni bir kasa açmak istediğinizden emin misiniz?",
       "confirmCloseMessage": "Mevcut kasayı kapatmak istediğinizden emin misiniz? Bu işlem geri alınamaz."
+    },
+    "export": {
+      "csv": "CSV",
+      "exportCSV": "CSV'ye Aktar",
+      "branchName": "Şube Adı",
+      "openedAt": "Açılış Zamanı",
+      "closedAt": "Kapanış Zamanı",
+      "shiftDuration": "Vardiya Süresi",
+      "openingBalance": "Açılış Bakiyesi",
+      "closingBalance": "Kapanış Bakiyesi",
+      "actualCash": "Gerçek Nakit",
+      "discrepancy": "Fark",
+      "transactionCount": "İşlem Sayısı",
+      "openedBy": "Açan",
+      "closedBy": "Kapatan",
+      "notes": "Notlar",
+      "reportDate": "Rapor Tarihi",
+      "totalOrders": "Toplam Sipariş",
+      "subtotal": "Ara Toplam",
+      "serviceFee": "Servis Ücreti",
+      "totalRevenue": "Toplam Gelir",
+      "expectedCash": "Beklenen Nakit",
+      "difference": "Fark",
+      "fromDate": "Başlangıç Tarihi",
+      "toDate": "Bitiş Tarihi",
+      "totalShifts": "Toplam Vardiya",
+      "totalCash": "Toplam Nakit",
+      "totalCard": "Toplam Kart",
+      "averageOrderValue": "Ortalama Sipariş Değeri",
+      "totalTransactions": "Toplam İşlem",
+      "totalDiscrepancy": "Toplam Fark",
+      "shiftsWithDiscrepancy": "Farkı Olan Vardiyalar",
+      "averageShiftDuration": "Ortalama Vardiya Süresi"
     }
   },
   "onboardingRestaurant": {

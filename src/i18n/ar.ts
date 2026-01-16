@@ -3741,6 +3741,14 @@ contact: {
       search: {
         placeholder: "ابحث عن الأطباق الشهية..."
       },
+      favorites: {
+        title: "المفضلة",
+        toggle: "عرض المفضلة فقط",
+        item: "عنصر",
+        items: "عناصر"
+      },
+      noFavorites: "لا يوجد مفضلات بعد",
+      noFavoritesDesc: "اضغط على أيقونة القلب على العناصر التي تحبها لإضافتها إلى مفضلاتك",
       categories: "الفئات",
       ingredients: "المكونات",
       open: "مفتوح",
@@ -4131,6 +4139,13 @@ contact: {
     MinOrderAmount: "الحد الأدنى لمبلغ الطلب",
     CompletedAt: "تاريخ الاكتمال",
     time: "الوقت",
+    statusActions: {
+      confirm: "تأكيد",
+      startPreparing: "بدء التحضير",
+      markReady: "تحديد كجاهز",
+      markDelivered: "تم التوصيل",
+      complete: "إكمال"
+    }
   },
 
   orderService: {
@@ -4923,6 +4938,39 @@ recycleBin: {
       "zReportTitle": "تقرير Z - ملخص تفصيلي",
       "confirmOpenMessage": "هل أنت متأكد من رغبتك في فتح صندوق جديد؟",
       "confirmCloseMessage": "هل أنت متأكد من رغبتك في إغلاق الصندوق الحالي؟ لا يمكن التراجع عن هذا الإجراء."
+    },
+    "export": {
+      "csv": "CSV",
+      "exportCSV": "تصدير إلى CSV",
+      "branchName": "اسم الفرع",
+      "openedAt": "وقت الفتح",
+      "closedAt": "وقت الإغلاق",
+      "shiftDuration": "مدة المناوبة",
+      "openingBalance": "الرصيد الافتتاحي",
+      "closingBalance": "الرصيد الختامي",
+      "actualCash": "النقد الفعلي",
+      "discrepancy": "الفرق",
+      "transactionCount": "عدد المعاملات",
+      "openedBy": "فتح بواسطة",
+      "closedBy": "أغلق بواسطة",
+      "notes": "ملاحظات",
+      "reportDate": "تاريخ التقرير",
+      "totalOrders": "إجمالي الطلبات",
+      "subtotal": "المجموع الفرعي",
+      "serviceFee": "رسوم الخدمة",
+      "totalRevenue": "إجمالي الإيرادات",
+      "expectedCash": "النقد المتوقع",
+      "difference": "الفرق",
+      "fromDate": "من تاريخ",
+      "toDate": "إلى تاريخ",
+      "totalShifts": "إجمالي المناوبات",
+      "totalCash": "إجمالي النقد",
+      "totalCard": "إجمالي البطاقات",
+      "averageOrderValue": "متوسط قيمة الطلب",
+      "totalTransactions": "إجمالي المعاملات",
+      "totalDiscrepancy": "إجمالي الفرق",
+      "shiftsWithDiscrepancy": "المناوبات ذات الفروقات",
+      "averageShiftDuration": "متوسط مدة المناوبة"
     }
   },
   "onboardingRestaurant": {

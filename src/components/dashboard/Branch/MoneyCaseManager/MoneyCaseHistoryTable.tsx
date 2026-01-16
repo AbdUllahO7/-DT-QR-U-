@@ -1,6 +1,7 @@
 import React from 'react';
-import { FileText, Calendar, TrendingUp, TrendingDown } from 'lucide-react';
+import { FileText, Calendar, TrendingUp, TrendingDown, Download } from 'lucide-react';
 import { MoneyCaseHistoryItem } from '../../../../types/BranchManagement/MoneyCase';
+import { exportToCSV, getMoneyCaseHistoryColumns, generateFilename } from '../../../../utils/csvExport';
 
 interface Props {
   history: MoneyCaseHistoryItem[];
@@ -8,6 +9,9 @@ interface Props {
   onViewZReport: (moneyCaseId: number) => void;
   t: (key: string) => string;
   isRTL: boolean;
+  branchName?: string;
+  fromDate?: string;
+  toDate?: string;
 }
 
 const MoneyCaseHistoryTable: React.FC<Props> = ({
@@ -15,8 +19,18 @@ const MoneyCaseHistoryTable: React.FC<Props> = ({
   loading,
   onViewZReport,
   t,
-  isRTL
+  isRTL,
+  branchName,
+  fromDate,
+  toDate
 }) => {
+  const handleExportCSV = () => {
+    if (history.length === 0) return;
+
+    const columns = getMoneyCaseHistoryColumns(t);
+    const filename = generateFilename('money-case-history', branchName, fromDate, toDate);
+    exportToCSV(history, filename, columns);
+  };
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -98,9 +112,21 @@ const MoneyCaseHistoryTable: React.FC<Props> = ({
             {t('moneyCase.history')}
           </h2>
         </div>
-        <span className="text-sm text-gray-500 dark:text-gray-400">
-          {history.length} {t('moneyCase.records')}
-        </span>
+        <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {history.length} {t('moneyCase.records')}
+          </span>
+          {history.length > 0 && (
+            <button
+              onClick={handleExportCSV}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 dark:text-green-400 dark:bg-green-900/30 dark:hover:bg-green-900/50 rounded-lg transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+              title={t('moneyCase.export.exportCSV')}
+            >
+              <Download className="h-4 w-4" />
+              {t('moneyCase.export.csv')}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Table */}

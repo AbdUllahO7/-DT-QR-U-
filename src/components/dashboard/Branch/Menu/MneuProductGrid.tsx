@@ -14,6 +14,7 @@ interface ProductGridProps {
   searchTerm: string
   cart: any[] // No longer used but kept for compatibility
   favorites: Set<number>
+  favoritesOnly?: boolean // Filter to show only favorites
   onAddToCart: (product: MenuProduct, addons?: any[]) => Promise<void>
   onRemoveFromCart: (branchProductId: number) => Promise<void>
   onToggleFavorite: (branchProductId: number) => void
@@ -29,6 +30,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   selectedCategory,
   searchTerm,
   favorites,
+  favoritesOnly = false,
   onAddToCart,
   onRemoveFromCart,
   onToggleFavorite,
@@ -80,9 +82,22 @@ const ProductGrid: React.FC<ProductGridProps> = ({
   const getVisibleProducts = (): MenuProduct[] => {
     let products: MenuProduct[] = []
 
-    if (searchTerm) {
+    if (favoritesOnly) {
+      // Show only favorited products
+      products = categories.flatMap(category =>
+        category.products.filter(product =>
+          favorites.has(product.branchProductId)
+        )
+      )
+      // If also searching, filter favorites by search term
+      if (searchTerm) {
+        products = products.filter(product =>
+          product.productName.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      }
+    } else if (searchTerm) {
       // When searching, show all matching products
-      products = categories.flatMap(category => 
+      products = categories.flatMap(category =>
         category.products.filter(product =>
           product.productName.toLowerCase().includes(searchTerm.toLowerCase())
         )
@@ -105,7 +120,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
     if (visibleProducts.length > 0) {
       loadQuantities(visibleProducts)
     }
-  }, [selectedCategory, searchTerm, categories])
+  }, [selectedCategory, searchTerm, categories, favoritesOnly, favorites])
 
   // Enhanced add to cart handler that refreshes quantities
   const handleAddToCart = async (product: MenuProduct, addons?: any[]) => {
@@ -143,10 +158,16 @@ const ProductGrid: React.FC<ProductGridProps> = ({
       <div className="text-center py-16">
         <div className="bg-slate-50/50 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl p-8 border border-slate-200/50 dark:border-slate-700/50">
           <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-3">
-            {searchTerm ? t('menu.noSearchResults') : t('menu.noProducts')}
+            {favoritesOnly
+              ? t('menu.noFavorites')
+              : searchTerm
+              ? t('menu.noSearchResults')
+              : t('menu.noProducts')}
           </h3>
           <p className="text-slate-600 dark:text-slate-400">
-            {searchTerm 
+            {favoritesOnly
+              ? t('menu.noFavoritesDesc')
+              : searchTerm
               ? `${t('menu.noSearchResultsDesc')} "${searchTerm}"`
               : t('menu.noProductsDesc')
             }
@@ -158,8 +179,35 @@ const ProductGrid: React.FC<ProductGridProps> = ({
 
   return (
     <div className="space-y-8">
-      {/* Show category sections when not searching */}
-      {!searchTerm ? (
+      {/* Show favorites section when favoritesOnly is active */}
+      {favoritesOnly ? (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+              {t('menu.favorites.title')}
+            </h2>
+            <span className="text-sm text-slate-600 dark:text-slate-400 bg-pink-100/50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 px-3 py-1 rounded-full">
+              {visibleProducts.length} {visibleProducts.length === 1 ? t('menu.favorites.item') : t('menu.favorites.items')}
+            </span>
+          </div>
+
+          <div className={getGridClasses()}>
+            {visibleProducts.map((product) => (
+              <ProductCard
+                key={product.branchProductId}
+                product={product}
+                cartQuantity={productQuantities.get(product.branchProductId) || 0}
+                isFavorite={favorites.has(product.branchProductId)}
+                onAddToCart={handleAddToCart}
+                onRemoveFromCart={handleRemoveFromCart}
+                onToggleFavorite={onToggleFavorite}
+                onCustomize={onCustomize}
+              />
+            ))}
+          </div>
+        </div>
+      ) : !searchTerm ? (
+        /* Show category sections when not searching */
         categories
           .filter(category => !selectedCategory || category.categoryId === selectedCategory)
           .map((category) => (
@@ -168,7 +216,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                 <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
                   {category.categoryName}
                 </h2>
-                
+
               </div>
 
               <div className={getGridClasses()}>
@@ -224,9 +272,9 @@ const ProductGrid: React.FC<ProductGridProps> = ({
                 const categoryResults = category.products.filter(product =>
                   product.productName.toLowerCase().includes(searchTerm.toLowerCase())
                 )
-                
+
                 if (categoryResults.length === 0) return null
-                
+
                 return (
                   <button
                     key={category.categoryId}

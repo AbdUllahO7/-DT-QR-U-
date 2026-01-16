@@ -63,6 +63,7 @@ const OnlineMenu: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [favoritesOnly, setFavoritesOnly] = useState<boolean>(false);
 
   // ───── Product Modal ─────
   const [selectedProduct, setSelectedProduct] = useState<MenuProduct | null>(null);
@@ -658,7 +659,14 @@ const initializeMenu = async () => {
               className={`${theme.background.card} backdrop-blur-xl rounded-3xl shadow-xl dark:border-slate-700/50 overflow-hidden min-h-[80vh]`}
             >
               <div className="p-4 sm:p-8 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 h-full">
-                <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+                <SearchBar
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                  showFavoritesFilter={true}
+                  favoritesOnly={favoritesOnly}
+                  onFavoritesToggle={() => setFavoritesOnly(!favoritesOnly)}
+                  favoritesCount={favorites.size}
+                />
 
                 {/* Session Control Buttons */}
              {/*    <div className="mb-4 flex gap-2 justify-end">
@@ -696,6 +704,7 @@ const initializeMenu = async () => {
                       searchTerm={searchTerm}
                       cart={basket?.items || []}
                       favorites={favorites}
+                      favoritesOnly={favoritesOnly}
                       onAddToCart={handleProductGridAddToCart}
                       onRemoveFromCart={handleRemoveFromCart}
                       onToggleFavorite={handleToggleFavorite}
