@@ -3751,6 +3751,14 @@ hero: {
   search: {
     placeholder: "Search for delicious dishes..."
   },
+  favorites: {
+    title: "Favorites",
+    toggle: "Show favorites only",
+    item: "item",
+    items: "items"
+  },
+  noFavorites: "No favorites yet",
+  noFavoritesDesc: "Tap the heart icon on items you love to add them to your favorites",
   categories: "Categories",
   ingredients: "Ingredients",
   open: "Open",
@@ -4144,6 +4152,13 @@ productModal: {
     CompletedAt: "Completed At",
     time: "Time",
     Status: "Status",
+    statusActions: {
+      confirm: "Confirm",
+      startPreparing: "Start Preparing",
+      markReady: "Mark Ready",
+      markDelivered: "Mark Delivered",
+      complete: "Complete"
+    }
   },
 
   orderService: {
@@ -4935,6 +4950,39 @@ productModal: {
       "zReportTitle": "Z Report - Detailed Summary",
       "confirmOpenMessage": "Are you sure you want to open a new money case?",
       "confirmCloseMessage": "Are you sure you want to close the current money case? This action cannot be undone."
+    },
+    "export": {
+      "csv": "CSV",
+      "exportCSV": "Export to CSV",
+      "branchName": "Branch Name",
+      "openedAt": "Opened At",
+      "closedAt": "Closed At",
+      "shiftDuration": "Shift Duration",
+      "openingBalance": "Opening Balance",
+      "closingBalance": "Closing Balance",
+      "actualCash": "Actual Cash",
+      "discrepancy": "Discrepancy",
+      "transactionCount": "Transaction Count",
+      "openedBy": "Opened By",
+      "closedBy": "Closed By",
+      "notes": "Notes",
+      "reportDate": "Report Date",
+      "totalOrders": "Total Orders",
+      "subtotal": "Subtotal",
+      "serviceFee": "Service Fee",
+      "totalRevenue": "Total Revenue",
+      "expectedCash": "Expected Cash",
+      "difference": "Difference",
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "totalShifts": "Total Shifts",
+      "totalCash": "Total Cash",
+      "totalCard": "Total Card",
+      "averageOrderValue": "Average Order Value",
+      "totalTransactions": "Total Transactions",
+      "totalDiscrepancy": "Total Discrepancy",
+      "shiftsWithDiscrepancy": "Shifts with Discrepancy",
+      "averageShiftDuration": "Average Shift Duration"
     }
   },
             user:{

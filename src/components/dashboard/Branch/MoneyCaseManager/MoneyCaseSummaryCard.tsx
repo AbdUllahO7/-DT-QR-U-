@@ -1,9 +1,10 @@
 // src/components/Restaurant/MoneyCase/MoneyCaseSummaryCard.tsx
 
 import React from 'react';
-import { TrendingUp, ShoppingCart, AlertTriangle } from 'lucide-react';
+import { TrendingUp, ShoppingCart, AlertTriangle, Download } from 'lucide-react';
 import { MoneyCaseSummary } from '../../../../types/BranchManagement/MoneyCase';
 import { useCurrency } from '../../../../hooks/useCurrency';
+import { exportToCSV, getBranchSummaryColumns, generateFilename } from '../../../../utils/csvExport';
 
 interface Props {
   summary: MoneyCaseSummary | null;
@@ -18,6 +19,19 @@ const MoneyCaseSummaryCard: React.FC<Props> = ({
   t,
   isRTL
 }) => {
+  const handleExportCSV = () => {
+    if (!summary) return;
+
+    const columns = getBranchSummaryColumns(t);
+    const filename = generateFilename(
+      'branch-summary',
+      summary.branchName,
+      summary.fromDate?.split('T')[0],
+      summary.toDate?.split('T')[0]
+    );
+    exportToCSV([summary], filename, columns);
+  };
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -56,9 +70,19 @@ const MoneyCaseSummaryCard: React.FC<Props> = ({
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-        {t('moneyCase.periodSummary')}
-      </h3>
+      <div className={`flex items-center justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          {t('moneyCase.periodSummary')}
+        </h3>
+        <button
+          onClick={handleExportCSV}
+          className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 hover:bg-green-100 dark:text-green-400 dark:bg-green-900/30 dark:hover:bg-green-900/50 rounded-lg transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+          title={t('moneyCase.export.exportCSV')}
+        >
+          <Download className="h-4 w-4" />
+          {t('moneyCase.export.csv')}
+        </button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Revenue */}

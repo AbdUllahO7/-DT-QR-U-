@@ -55,7 +55,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         return {
           code: ml.code as Language,
           name: langInfo?.name || ml.displayName || ml.code,
-          countryCode: langInfo?.countryCode || ml.code // Fallback to code if unknown
+          countryCode: langInfo?.countryCode || ml.code 
         };
       });
     }

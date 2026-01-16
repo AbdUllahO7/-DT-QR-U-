@@ -1,6 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import React from 'react';
 import {
   Eye,
   XCircle,
@@ -10,27 +8,18 @@ import {
   CreditCard,
   Banknote,
   Smartphone,
-  ChevronDown,
-  Search,
-  Check
+  Check,
+  ChefHat,
+  Bell,
+  Truck,
+  CheckCircle2,
+  ArrowRight
 } from 'lucide-react';
 import { BranchOrder, PendingOrder } from '../../../../types/BranchManagement/type';
 import { orderService } from '../../../../services/Branch/OrderService';
 import OrderStatusUtils from '../../../../utils/OrderStatusUtils';
 import { OrderStatusEnums } from '../../../../types/Orders/type';
 import { useCurrency } from '../../../../hooks/useCurrency';
-import { useLanguage } from '../../../../contexts/LanguageContext';
-import { CustomSelect } from '../../../common/CustomSelect';
-
-// --- Types ---
-
-interface Option {
-  value: any;
-  label: string;
-  searchTerms?: string;
-}
-
-
 
 interface OrderTableRowProps {
   order: PendingOrder | BranchOrder;
@@ -47,6 +36,72 @@ interface OrderTableRowProps {
   rowIndex: number;
 }
 
+// Get the next logical status in the order flow
+// Flow: Pending → Confirmed → Preparing → Ready → Delivered → Completed
+const getNextStatus = (currentStatus: OrderStatusEnums): OrderStatusEnums | null => {
+  switch (currentStatus) {
+    case OrderStatusEnums.Pending:
+      return OrderStatusEnums.Confirmed;
+    case OrderStatusEnums.Confirmed:
+      return OrderStatusEnums.Preparing;
+    case OrderStatusEnums.Preparing:
+      return OrderStatusEnums.Ready;
+    case OrderStatusEnums.Ready:
+      return OrderStatusEnums.Delivered;
+    case OrderStatusEnums.Delivered:
+      return OrderStatusEnums.Completed;
+    default:
+      return null;
+  }
+};
+
+// Get button configuration for each status transition
+const getNextStatusButtonConfig = (nextStatus: OrderStatusEnums, t: (key: string) => string) => {
+  switch (nextStatus) {
+    case OrderStatusEnums.Confirmed:
+      return {
+        icon: Check,
+        label: t('ordersManager.statusActions.confirm') || 'Confirm',
+        bgColor: 'bg-blue-500 hover:bg-blue-600',
+        textColor: 'text-white',
+        shadowColor: 'shadow-blue-500/30'
+      };
+    case OrderStatusEnums.Preparing:
+      return {
+        icon: ChefHat,
+        label: t('ordersManager.statusActions.startPreparing') || 'Start Preparing',
+        bgColor: 'bg-orange-500 hover:bg-orange-600',
+        textColor: 'text-white',
+        shadowColor: 'shadow-orange-500/30'
+      };
+    case OrderStatusEnums.Ready:
+      return {
+        icon: Bell,
+        label: t('ordersManager.statusActions.markReady') || 'Mark Ready',
+        bgColor: 'bg-purple-500 hover:bg-purple-600',
+        textColor: 'text-white',
+        shadowColor: 'shadow-purple-500/30'
+      };
+    case OrderStatusEnums.Delivered:
+      return {
+        icon: Truck,
+        label: t('ordersManager.statusActions.markDelivered') || 'Mark Delivered',
+        bgColor: 'bg-indigo-500 hover:bg-indigo-600',
+        textColor: 'text-white',
+        shadowColor: 'shadow-indigo-500/30'
+      };
+    case OrderStatusEnums.Completed:
+      return {
+        icon: CheckCircle2,
+        label: t('ordersManager.statusActions.complete') || 'Complete',
+        bgColor: 'bg-green-500 hover:bg-green-600',
+        textColor: 'text-white',
+        shadowColor: 'shadow-green-500/30'
+      };
+    default:
+      return null;
+  }
+};
 
 const OrderTableRow: React.FC<OrderTableRowProps> = ({
   order,
@@ -63,8 +118,11 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
   const isPending = viewMode === 'pending';
   const status = isPending ? OrderStatusEnums.Pending : orderService.parseOrderStatus((order as BranchOrder).status);
   const rowVersion = order.rowVersion || '';
-  const validStatuses = OrderStatusUtils.getValidStatusTransitions(status);
   const isRTL = lang === 'ar';
+
+  // Get the next status and button config
+  const nextStatus = getNextStatus(status);
+  const nextButtonConfig = nextStatus ? getNextStatusButtonConfig(nextStatus, t) : null;
 
   const getPaymentMethodInfo = (paymentMethod?: number) => {
     switch (paymentMethod) {
@@ -82,13 +140,10 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
   const paymentMethodInfo = getPaymentMethodInfo(order.paymentMethod);
   const rowBgClass = rowIndex % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-800/50';
 
-  const statusOptions: Option[] = validStatuses.map((validStatus) => ({
-    value: validStatus,
-    label: orderService.getOrderStatusText(validStatus, lang),
-  }));
-
-  const handleStatusChange = (newStatus: string | number) => {
-    onOpenStatus(order.id.toString(), rowVersion, Number(newStatus));
+  const handleNextStatusClick = () => {
+    if (nextStatus !== null) {
+      onOpenStatus(order.id.toString(), rowVersion, nextStatus);
+    }
   };
 
   return (
@@ -176,18 +231,18 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
       {/* 7. Actions */}
       <td className={`px-4 py-4 ${isRTL ? 'text-left' : 'text-right'}`}>
         <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse justify-end' : 'justify-end'}`}>
-          
-          {/* Custom Select for Status Changes - Fixed with Portal */}
-          {statusOptions.length > 0 && (
-            <div className="w-40 relative">
-              <CustomSelect
-                placeholder={t('ordersManager.changeStatus')}
-                options={statusOptions}
-                value={null}
-                onChange={handleStatusChange}
-                disabled={false}
-              />
-            </div>
+
+          {/* Next Status Action Button */}
+          {nextButtonConfig && (
+            <button
+              onClick={handleNextStatusClick}
+              className={`inline-flex items-center gap-1.5 px-4 py-2 ${nextButtonConfig.bgColor} ${nextButtonConfig.textColor} rounded-lg transition-all duration-200 text-xs font-semibold shadow-lg ${nextButtonConfig.shadowColor} hover:shadow-xl hover:scale-105 ${isRTL ? 'flex-row-reverse' : ''}`}
+              title={nextButtonConfig.label}
+            >
+              <nextButtonConfig.icon className="w-4 h-4" />
+              <span>{nextButtonConfig.label}</span>
+              <ArrowRight className={`w-3 h-3 opacity-70 ${isRTL ? 'rotate-180' : ''}`} />
+            </button>
           )}
 
           {/* View Details */}
