@@ -6,7 +6,6 @@ import {
   Plus,
   AlertCircle,
   CheckCircle,
-  Calendar,
   Package,
   PlusSquare,
 } from 'lucide-react';
@@ -1778,72 +1777,72 @@ const handleSaveProductExtras = async (
         )}
 
         {/* Main Content */}
-    <CategoriesContent
-        activeTab={activeTab}
-        branchId={branchId}
-        categories={categories}
-        branchCategories={branchCategories}
-        selectedCategories={selectedCategories}
-        selectedProducts={selectedProducts}
-        categoriesWithProducts={categoriesWithProducts}
-        currentStep={currentStep}
-        expandedCategories={expandedCategories}
-        expandedBranchCategories={expandedBranchCategories}
-        isReorderMode={isReorderMode}
-        hasUnsavedChanges={hasUnsavedChanges}
-        isReordering={isReordering}
-        isLoading={isLoading}
-        isSaving={isSaving}
-        isLoadingProducts={isLoadingProducts}
-        isLoadingBranchProducts={isLoadingBranchProducts}
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-        setSelectedCategories={setSelectedCategories}
-        setSelectedProducts={setSelectedProducts}
-        setCurrentStep={setCurrentStep}
-        setExpandedCategories={setExpandedCategories}
-        setExpandedBranchCategories={setExpandedBranchCategories}
-        setIsReorderMode={setIsReorderMode}
-        setEditingProductId={setEditingProductId}
-        setEditingCategoryId={setEditingCategoryId}
-        handleShowProductAddons={handleShowProductAddons}
-        handleShowProductExtras={handleShowProductExtras}  // ADD THIS LINE
-        handleShowProductDetails={handleShowProductDetails}
-        onCategorySelect={handleCategorySelect}
-        onProductSelect={handleProductSelect}
-        onSelectAllProducts={handleSelectAllProducts}
-        onClearAllProducts={handleClearAllProducts}
-        onProceedToProductSelection={proceedToProductSelection}
-        onProceedToReview={proceedToReview}
-        onBackToCategorySelection={backToCategorySelection}
-        onBackToProductSelection={backToProductSelection}
-        onSave={handleSave}
-        onMoveUp={handleMoveUp}
-        onMoveDown={handleMoveDown}
-        onSaveOrder={handleSaveOrder}
-        onAddProduct={handleAddProductToCategory}
-        onRemoveProduct={handleRemoveProductFromCategory}
-        onDeleteCategory={openDeleteModal}
-        onRefresh={fetchAvailableCategories}
-        setActiveTab={setActiveTab}
-        editedProductPrices={editedProductPrices}
-        editedCategoryNames={editedCategoryNames}
-        editingProductId={editingProductId}
-        editingCategoryId={editingCategoryId}
-        onProductPriceEdit={handleProductPriceEdit}
-        onProductPriceChange={handleProductPriceChange}
-        onProductPriceSave={handleProductPriceSave}
-        onProductPriceCancel={handleProductPriceCancel}
-        onCategoryNameEdit={handleCategoryNameEdit}
-        onCategoryNameChange={handleCategoryNameChange}
-        onCategoryNameSave={handleCategoryNameSave}
-        onCategoryNameCancel={handleCategoryNameCancel}
-        getProductPrice={getProductPrice}
-        getCategoryName={getCategoryName}
-        isCategoryActive={isCategoryActive}
-        onToggleProductStatus={handleToggleProductStatus}
-        onToggleProductAvailability={handleToggleProductAvailability}
-      />
+      <CategoriesContent
+          activeTab={activeTab}
+          branchId={branchId}
+          categories={categories}
+          branchCategories={branchCategories}
+          selectedCategories={selectedCategories}
+          selectedProducts={selectedProducts}
+          categoriesWithProducts={categoriesWithProducts}
+          currentStep={currentStep}
+          expandedCategories={expandedCategories}
+          expandedBranchCategories={expandedBranchCategories}
+          isReorderMode={isReorderMode}
+          hasUnsavedChanges={hasUnsavedChanges}
+          isReordering={isReordering}
+          isLoading={isLoading}
+          isSaving={isSaving}
+          isLoadingProducts={isLoadingProducts}
+          isLoadingBranchProducts={isLoadingBranchProducts}
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          setSelectedCategories={setSelectedCategories}
+          setSelectedProducts={setSelectedProducts}
+          setCurrentStep={setCurrentStep}
+          setExpandedCategories={setExpandedCategories}
+          setExpandedBranchCategories={setExpandedBranchCategories}
+          setIsReorderMode={setIsReorderMode}
+          setEditingProductId={setEditingProductId}
+          setEditingCategoryId={setEditingCategoryId}
+          handleShowProductAddons={handleShowProductAddons}
+          handleShowProductExtras={handleShowProductExtras}  // ADD THIS LINE
+          handleShowProductDetails={handleShowProductDetails}
+          onCategorySelect={handleCategorySelect}
+          onProductSelect={handleProductSelect}
+          onSelectAllProducts={handleSelectAllProducts}
+          onClearAllProducts={handleClearAllProducts}
+          onProceedToProductSelection={proceedToProductSelection}
+          onProceedToReview={proceedToReview}
+          onBackToCategorySelection={backToCategorySelection}
+          onBackToProductSelection={backToProductSelection}
+          onSave={handleSave}
+          onMoveUp={handleMoveUp}
+          onMoveDown={handleMoveDown}
+          onSaveOrder={handleSaveOrder}
+          onAddProduct={handleAddProductToCategory}
+          onRemoveProduct={handleRemoveProductFromCategory}
+          onDeleteCategory={openDeleteModal}
+          onRefresh={fetchAvailableCategories}
+          setActiveTab={setActiveTab}
+          editedProductPrices={editedProductPrices}
+          editedCategoryNames={editedCategoryNames}
+          editingProductId={editingProductId}
+          editingCategoryId={editingCategoryId}
+          onProductPriceEdit={handleProductPriceEdit}
+          onProductPriceChange={handleProductPriceChange}
+          onProductPriceSave={handleProductPriceSave}
+          onProductPriceCancel={handleProductPriceCancel}
+          onCategoryNameEdit={handleCategoryNameEdit}
+          onCategoryNameChange={handleCategoryNameChange}
+          onCategoryNameSave={handleCategoryNameSave}
+          onCategoryNameCancel={handleCategoryNameCancel}
+          getProductPrice={getProductPrice}
+          getCategoryName={getCategoryName}
+          isCategoryActive={isCategoryActive}
+          onToggleProductStatus={handleToggleProductStatus}
+          onToggleProductAvailability={handleToggleProductAvailability}
+        />
 
       <BranchProductExtraCategoriesModal
           isOpen={isProductExtrasModalOpen}

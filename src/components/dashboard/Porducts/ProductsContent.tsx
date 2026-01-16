@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Search, Plus, Filter, ArrowUp,  Package, Utensils, Loader2,
+  Search, Plus, Filter, ArrowUp, Package, Utensils, Loader2,
   ChevronDown, Check, X, SortAsc, SortDesc, Eye, EyeOff, Hash, Users,
   Trash2, LayoutGrid, List
 } from 'lucide-react';
@@ -72,6 +72,20 @@ const customStyles = `
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+  /* Hide scrollbar for category filter but allow scroll */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 20px;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #475569;
+  }
 `;
 
 // Inject styles
@@ -140,32 +154,30 @@ const ProductsContent: React.FC = () => {
     productName: string;
   } | null>(null);
   const [isProductExtrasModalOpen, setIsProductExtrasModalOpen] = useState(false);
-const [selectedProductForExtras, setSelectedProductForExtras] = useState<{
-  productId: number;
-  productName: string;
-} | null>(null);
+  const [selectedProductForExtras, setSelectedProductForExtras] = useState<{
+    productId: number;
+    productName: string;
+  } | null>(null);
 
-const handleOpenProductExtras = (productId: number, productName: string) => {
-
-
-  if (!productId || productId === 0 || isNaN(productId)) {
-    console.error('❌ Invalid productId provided:', productId);
-    alert(t('productsContent.error.invalidData'));
-    return;
-  }
-  
-  if (!productName || productName.trim() === '') {
-    console.error('❌ Invalid productName provided:', productName);
-    alert(t('productsContent.error.invalidData'));
-    return;
-  }
-  
-  setSelectedProductForExtras({ 
-    productId: productId, 
-    productName: productName 
-  });
-  setIsProductExtrasModalOpen(true);
-};
+  const handleOpenProductExtras = (productId: number, productName: string) => {
+    if (!productId || productId === 0 || isNaN(productId)) {
+      console.error('❌ Invalid productId provided:', productId);
+      alert(t('productsContent.error.invalidData'));
+      return;
+    }
+    
+    if (!productName || productName.trim() === '') {
+      console.error('❌ Invalid productName provided:', productName);
+      alert(t('productsContent.error.invalidData'));
+      return;
+    }
+    
+    setSelectedProductForExtras({ 
+      productId: productId, 
+      productName: productName 
+    });
+    setIsProductExtrasModalOpen(true);
+  };
   
   const [deleteConfig, setDeleteConfig] = useState<{
     type: 'product' | 'category';
@@ -193,40 +205,37 @@ const handleOpenProductExtras = (productId: number, productName: string) => {
   useClickOutside(branchDropdownRef, () => setIsBranchDropdownOpen(false));
 
   // Load branches on component mount
-// Load branches on component mount AND when language changes
-useEffect(() => {
-  const fetchBranches = async () => {
-    setIsLoadingBranches(true);
-    try {
-      const branchList = await branchService.getBranchesDropdown();
-      
-      // The label is now recalculated every time 't' updates
-      const selectAllOption: BranchDropdownItem = {
-        branchId: SELECT_ALL_BRANCH_ID,
-        branchName: t('productsContent.branch.selectAll') || 'All Branches'
-      };
-      
-      const branchesWithSelectAll = [selectAllOption, ...branchList];
-      setBranches(branchesWithSelectAll);
-      
-      // Update the selected branch label if "All" was selected
-      setSelectedBranch(prev => {
-        if (!prev || prev.branchId === SELECT_ALL_BRANCH_ID) {
-          return selectAllOption;
-        }
-        return prev;
-      });
-      
-      logger.info('Şube listesi başarıyla yüklendi');
-    } catch (error) {
-      logger.error('Şube listesi yüklenirken hata:', error);
-    } finally {
-      setIsLoadingBranches(false);
-    }
-  };
+  useEffect(() => {
+    const fetchBranches = async () => {
+      setIsLoadingBranches(true);
+      try {
+        const branchList = await branchService.getBranchesDropdown();
+        
+        const selectAllOption: BranchDropdownItem = {
+          branchId: SELECT_ALL_BRANCH_ID,
+          branchName: t('productsContent.branch.selectAll') || 'All Branches'
+        };
+        
+        const branchesWithSelectAll = [selectAllOption, ...branchList];
+        setBranches(branchesWithSelectAll);
+        
+        setSelectedBranch(prev => {
+          if (!prev || prev.branchId === SELECT_ALL_BRANCH_ID) {
+            return selectAllOption;
+          }
+          return prev;
+        });
+        
+        logger.info('Şube listesi başarıyla yüklendi');
+      } catch (error) {
+        logger.error('Şube listesi yüklenirken hata:', error);
+      } finally {
+        setIsLoadingBranches(false);
+      }
+    };
 
-  fetchBranches();
-}, [t]); // Added 't' as a dependency
+    fetchBranches();
+  }, [t]);
 
   // Load categories when branch changes
   useEffect(() => {
@@ -289,36 +298,23 @@ useEffect(() => {
     if (!selectedBranch) return;
 
     try {
-      // Only show loading skeleton on initial load, not on refresh/update
       if (!isRefresh) {
         setLoading(true);
       }
 
       let fetchedCategories: Category[];
-      // Check if "Select All" is selected
       if (selectedBranch.branchId === SELECT_ALL_BRANCH_ID) {
-        // Use getCategories for all branches
         fetchedCategories = await productService.getCategories();
-        logger.info('Tüm kategori verileri başarıyla yüklendi', {
-          categoryCount: fetchedCategories.length
-        });
       } else {
-        // Use getBranchCategories for specific branch
         fetchedCategories = await productService.getBranchCategories(selectedBranch.branchId);
-        logger.info('Şube kategori verileri başarıyla yüklendi', {
-          branchId: selectedBranch.branchId,
-          categoryCount: fetchedCategories.length
-        });
       }
 
-      // If a new product was created, expand its category and mark for highlight
       if (newProductId) {
         const categoryWithNewProduct = fetchedCategories.find(cat =>
           cat.products?.some(p => p.id === newProductId)
         );
 
         if (categoryWithNewProduct) {
-          // Expand the category containing the new product
           fetchedCategories = fetchedCategories.map(cat =>
             cat.categoryId === categoryWithNewProduct.categoryId
               ? { ...cat, isExpanded: true }
@@ -333,116 +329,56 @@ useEffect(() => {
 
     } catch (error) {
       logger.error('Kategori verileri alınamadı:', error);
-      // Handle error - you might want to show a toast or error message
     } finally {
       setLoading(false);
     }
   };
 
-  // Toggle view mode and persist to localStorage
-  const toggleViewMode = () => {
-    const newMode = viewMode === 'list' ? 'grid' : 'list';
-    setViewMode(newMode);
-    localStorage.setItem('productsViewMode', newMode);
-  };
-
-  // Auto-scroll to newly created product
-  useEffect(() => {
-    if (newlyCreatedProductId) {
-      // Wait for the DOM to update and category to expand
-      setTimeout(() => {
-        // Find the product element using data attribute
-        const productElement = document.querySelector(`[data-product-id="${newlyCreatedProductId}"]`);
-
-        if (productElement) {
-          // Scroll to the product with smooth behavior
-          productElement.scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-          });
-        }
-
-        // Clear the highlight after animation
-        setTimeout(() => {
-          setNewlyCreatedProductId(null);
-        }, 3000);
-      }, 500); // Increased timeout to ensure category expansion completes
-    }
-  }, [newlyCreatedProductId, categories]);
-
-  // Sort categories and products
   const applySorting = (categoriesToSort: Category[]): Category[] => {
     const sortedCategories = [...categoriesToSort];
 
-    // Sort categories
     sortedCategories.sort((a, b) => {
       switch (sortBy) {
-        case 'name_asc':
-          return a.categoryName.localeCompare(b.categoryName);
-        case 'name_desc':
-          return b.categoryName.localeCompare(a.categoryName);
-        case 'order_asc':
-          return a.displayOrder - b.displayOrder;
-        case 'order_desc':
-          return b.displayOrder - a.displayOrder;
-        default:
-          return a.displayOrder - b.displayOrder;
+        case 'name_asc': return a.categoryName.localeCompare(b.categoryName);
+        case 'name_desc': return b.categoryName.localeCompare(a.categoryName);
+        case 'order_asc': return a.displayOrder - b.displayOrder;
+        case 'order_desc': return b.displayOrder - a.displayOrder;
+        default: return a.displayOrder - b.displayOrder;
       }
     });
 
-    // Sort products within each category
     return sortedCategories.map(category => ({
       ...category,
       products: [...category.products].sort((a, b) => {
         switch (sortBy) {
-          case 'name_asc':
-            return a.name.localeCompare(b.name);
-          case 'name_desc':
-            return b.name.localeCompare(a.name);
-          case 'price_asc':
-            return a.price - b.price;
-          case 'price_desc':
-            return b.price - a.price;
-          case 'order_asc':
-            return a.displayOrder - b.displayOrder;
-          case 'order_desc':
-            return b.displayOrder - a.displayOrder;
-          default:
-            return a.displayOrder - b.displayOrder;
+          case 'name_asc': return a.name.localeCompare(b.name);
+          case 'name_desc': return b.name.localeCompare(a.name);
+          case 'price_asc': return a.price - b.price;
+          case 'price_desc': return b.price - a.price;
+          case 'order_asc': return a.displayOrder - b.displayOrder;
+          case 'order_desc': return b.displayOrder - a.displayOrder;
+          default: return a.displayOrder - b.displayOrder;
         }
       })
     }));
   };
 
-  // Apply filters
   const applyFilters = (categoriesToFilter: Category[]): Category[] => {
     return categoriesToFilter.map(category => {
-      // Filter products within category
       let filteredProducts = category?.products?.filter(product => {
-        // Status filter
         if (filters.status === 'active' && !product.isAvailable) return false;
         if (filters.status === 'inactive' && product.isAvailable) return false;
-        
-        // Price range filter
         if (product.price < filters.priceRange.min || product.price > filters.priceRange.max) return false;
-        
-        // Category filter (if specific categories are selected)
         if (filters.categories.length > 0 && !filters.categories.includes(category.categoryId)) return false;
-        
         return true;
       });
 
-      return {
-        ...category,
-        products: filteredProducts
-      };
+      return { ...category, products: filteredProducts };
     }).filter(category => 
-      // Show category if it has products or if no search/filter is applied
       category?.products?.length > 0 || (searchQuery === '' && filters.status === 'all' && filters.categories.length === 0)
     );
   };
 
-  // Apply search
   const applySearch = (categoriesToSearch: Category[]): Category[] => {
     if (!searchQuery.trim()) return categoriesToSearch;
 
@@ -458,10 +394,8 @@ useEffect(() => {
     );
   };
 
-  // Get filtered and sorted categories
   const processedCategories = applySorting(applyFilters(applySearch(categories)));
 
-  // Filter options
   const sortOptions = [
     { value: 'order_asc', label: t('sort.order.asc') || 'Order (A-Z)', Icon: Hash },
     { value: 'order_desc', label: t('sort.order.desc') || 'Order (Z-A)', Icon: Hash },
@@ -484,10 +418,7 @@ useEffect(() => {
       .flatMap(cat => cat.products)
       .find(product => product.id === productId);
 
-    if (!product) {
-      logger.error('Silinecek ürün bulunamadı:', { productId });
-      return;
-    }
+    if (!product) return;
 
     setDeleteConfig({
       type: 'product',
@@ -496,28 +427,22 @@ useEffect(() => {
       message: t('productsContent.delete.product.message', { productName: product.name }),
       onConfirm: async () => {
         setIsDeleting(true);
-        setDeleteError(''); // Clear previous errors
+        setDeleteError('');
         try {
           await productService.deleteProduct(productId);
           setCategories(categories.map(cat => ({
             ...cat,
             products: cat.products?.filter(product => product.id !== productId)
           })));
-          logger.info('Ürün başarıyla silindi', { productId });
         } catch (error: any) {
-          logger.error('Ürün silinirken hata:', error);
-          // Extract error message from API response
-          const errorMessage = error.response?.data?.message ||
-                             error.message ||
-                             t('productsContent.error.deleteFailed');
+          const errorMessage = error.response?.data?.message || error.message || t('productsContent.error.deleteFailed');
           setDeleteError(errorMessage);
-          throw error; // Re-throw to prevent modal from closing
+          throw error;
         } finally {
           setIsDeleting(false);
         }
       }
     });
-    setDeleteError(''); // Clear error when opening modal
     setIsConfirmDeleteModalOpen(true);
   };
 
@@ -530,18 +455,13 @@ useEffect(() => {
       setSelectedProductForEdit(productToEdit);
       setIsEditProductModalOpen(true);
     } else {
-      logger.error('Düzenlenecek ürün bulunamadı:', { productId });
       alert(t('productsContent.error.productNotFound') + ' ' + t('productsContent.error.refreshPage'));
     }
   };
 
   const handleDeleteCategory = (categoryId: number) => {
     const category = categories.find(cat => cat.categoryId === categoryId);
-
-    if (!category) {
-      alert(t('productsContent.error.categoryNotFound'));
-      return;
-    }
+    if (!category) return;
 
     setDeleteConfig({
       type: 'category',
@@ -550,41 +470,32 @@ useEffect(() => {
       message: t('productsContent.delete.category.messageEmpty', { categoryName: category.categoryName }),
       onConfirm: async () => {
         setIsDeleting(true);
-        setDeleteError(''); // Clear previous errors
+        setDeleteError('');
         try {
           await productService.deleteCategory(categoryId);
           setCategories(categories.filter(cat => cat.categoryId !== categoryId));
-          logger.info('Kategori başarıyla silindi', { categoryId });
         } catch (error: any) {
-          logger.error('Kategori silinirken hata:', error);
-          // Extract error message from API response
-          const errorMessage = error.response?.data?.message ||
-                             error.message ||
-                             t('productsContent.error.deleteFailed');
+          const errorMessage = error.response?.data?.message || error.message || t('productsContent.error.deleteFailed');
           setDeleteError(errorMessage);
-          throw error; // Re-throw to prevent modal from closing
+          throw error;
         } finally {
           setIsDeleting(false);
         }
       }
     });
-    setDeleteError(''); // Clear error when opening modal
     setIsConfirmDeleteModalOpen(true);
   };
 
   const handleEditCategory = (categoryId: number) => {
     const categoryToEdit = categories.find(cat => cat.categoryId === categoryId);
-    
     if (categoryToEdit) {
       setSelectedCategoryForEdit(categoryToEdit);
       setIsEditCategoryModalOpen(true);
     } else {
-      logger.error('Düzenlenecek kategori bulunamadı:', { categoryId });
       alert(t('productsContent.error.categoryNotFound') + ' ' + t('productsContent.error.refreshPage'));
     }
   };
 
-  // Clear all filters
   const clearFilters = () => {
     setFilters({
       status: 'all',
@@ -595,19 +506,12 @@ useEffect(() => {
     setSortBy('order_asc');
   };
 
-  // Check if filters are active
   const hasActiveFilters = filters.status !== 'all' || filters.categories.length > 0 || 
     filters.priceRange.min > 0 || filters.priceRange.max < 1000 || searchQuery !== '';
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -616,63 +520,43 @@ useEffect(() => {
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-
     if (!over) return;
-
     const activeId = active.id as number;
     const overId = over.id as number;
-
     if (activeId === overId) return;
 
-    const activeProduct = categories
-      .flatMap(cat => cat.products)
-      .find(product => product.id === activeId);
+    const activeProduct = categories.flatMap(cat => cat.products).find(product => product.id === activeId);
 
     if (activeProduct) {
       const overCategory = categories.find(cat => cat.categoryId === overId);
-      const overProduct = categories
-        .flatMap(cat => cat.products)
-        .find(product => product.id === overId);
+      const overProduct = categories.flatMap(cat => cat.products).find(product => product.id === overId);
 
       if (overCategory) {
         setCategories(prev => {
           const newCategories = [...prev];
-          const sourceCategory = newCategories.find(cat =>
-            cat.products?.some(product => product.id === activeId)
-          );
+          const sourceCategory = newCategories.find(cat => cat.products?.some(product => product.id === activeId));
           if (sourceCategory) {
-            sourceCategory.products = sourceCategory.products?.filter(
-              product => product.id !== activeId
-            );
+            sourceCategory.products = sourceCategory.products?.filter(product => product.id !== activeId);
           }
-
           const targetCategory = newCategories.find(cat => cat.categoryId === overId);
           if (targetCategory) {
-            const updatedProduct = { ...activeProduct, categoryId: overId };
-            targetCategory.products?.push(updatedProduct);
+            targetCategory.products?.push({ ...activeProduct, categoryId: overId });
           }
-
           return newCategories;
         });
       } else if (overProduct && activeProduct.categoryId !== overProduct.categoryId) {
         setCategories(prev => {
           const newCategories = [...prev];
-          const sourceCategory = newCategories.find(cat =>
-            cat.products?.some(product => product.id === activeId)
-          );
+          const sourceCategory = newCategories.find(cat => cat.products?.some(product => product.id === activeId));
           if (sourceCategory) {
-            sourceCategory.products = sourceCategory.products?.filter(
-              product => product.id !== activeId
-            );
+            sourceCategory.products = sourceCategory.products?.filter(product => product.id !== activeId);
           }
-
           const targetCategory = newCategories.find(cat => cat.categoryId === overProduct.categoryId);
           if (targetCategory) {
             const updatedProduct = { ...activeProduct, categoryId: overProduct.categoryId };
             const overIndex = targetCategory.products?.findIndex(product => product.id === overId);
             targetCategory.products?.splice(overIndex, 0, updatedProduct);
           }
-
           return newCategories;
         });
       }
@@ -682,24 +566,25 @@ useEffect(() => {
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
-
     if (!over || active.id === over.id) return;
 
     const activeId = active.id as number;
     const overId = over.id as number;
 
-    // Identify what we're dealing with
     const activeCategory = categories.find(cat => cat.categoryId === activeId);
     const overCategory = categories.find(cat => cat.categoryId === overId);
     const activeProduct = categories.flatMap(cat => cat.products).find(product => product.id === activeId);
     const overProduct = categories.flatMap(cat => cat.products).find(product => product.id === overId);
 
-    // CASE 1: Category to Category - Reorder categories
+    // Reorder Categories
     if (activeCategory && overCategory) {
       const oldIndex = categories.findIndex(cat => cat.categoryId === activeId);
       const newIndex = categories.findIndex(cat => cat.categoryId === overId);
-      
-      const newCategories = arrayMove(categories, oldIndex, newIndex);
+      const reorderedCategories = arrayMove(categories, oldIndex, newIndex);
+      const newCategories = reorderedCategories.map((category, index) => ({
+        ...category,
+        displayOrder: index + 1
+      }));
       setCategories(newCategories);
       setIsReorderingCategories(true);
 
@@ -708,11 +593,9 @@ useEffect(() => {
           categoryId: category.categoryId,
           newDisplayOrder: index + 1
         }));
-
         await productService.reorderCategories(categoryOrders);
       } catch (error: any) {
-        console.error('❌ Category reordering failed:', error);
-        setCategories(categories); // Revert
+        setCategories(categories);
         alert(t('productsContent.dragDrop.categoryOrderSaveError'));
       } finally {
         setIsReorderingCategories(false);
@@ -720,20 +603,22 @@ useEffect(() => {
       return;
     }
 
-    // CASE 2: Product to Product (Same Category) - Reorder products
+    // Reorder Products same category
     if (activeProduct && overProduct && activeProduct.categoryId === overProduct.categoryId) {
       const categoryId = activeProduct.categoryId;
       const categoryIndex = categories.findIndex(cat => cat.categoryId === categoryId);
       const category = categories[categoryIndex];
-      
       const oldIndex = category?.products?.findIndex(product => product.id === activeId);
       const newIndex = category?.products?.findIndex(product => product.id === overId);
 
-      // Update local state
+      const reorderedProducts = arrayMove(category?.products, oldIndex, newIndex);
+      const newProducts = reorderedProducts.map((product, index) => ({
+        ...product,
+        displayOrder: index + 1
+      }));
+
       const newCategories = [...categories];
-      const newProducts = arrayMove(category?.products, oldIndex, newIndex);
       newCategories[categoryIndex] = { ...category, products: newProducts };
-      
       setCategories(newCategories);
       setIsReorderingProducts(true);
       setReorderingCategoryId(categoryId);
@@ -743,88 +628,10 @@ useEffect(() => {
           productId: product.id,
           newDisplayOrder: index + 1
         }));
-
         await productService.reorderProducts(productOrders);
       } catch (error: any) {
-        console.error('❌ Product reordering failed:', error);
-        setCategories(categories); // Revert
+        setCategories(categories);
         alert(t('productsContent.dragDrop.productOrderSaveError'));
-      } finally {
-        setIsReorderingProducts(false);
-        setReorderingCategoryId(null);
-      }
-      return;
-    }
-
-    // CASE 3: Product to Category - Move product to different category
-    if (activeProduct && overCategory) {
-      if (activeProduct.categoryId === overCategory.categoryId) {
-        return;
-      }
-
-      setIsReorderingProducts(true);
-      setReorderingCategoryId(overCategory.categoryId);
-
-      try {
-        await productService.updateProduct(activeProduct.id, {
-          categoryId: overCategory.categoryId
-        });
-        
-        await loadCategories();
-      } catch (error: any) {
-        console.error('❌ Product category move failed:', error);
-        alert(t('productsContent.dragDrop.productMoveError'));
-      } finally {
-        setIsReorderingProducts(false);
-        setReorderingCategoryId(null);
-      }
-      return;
-    }
-
-    // CASE 4: Product to Product (Different Categories) - Move to different category at specific position
-    if (activeProduct && overProduct && activeProduct.categoryId !== overProduct.categoryId) {
-      const targetCategoryId = overProduct.categoryId;
-      setIsReorderingProducts(true);
-      setReorderingCategoryId(targetCategoryId);
-
-      try {
-        await productService.updateProduct(activeProduct.id, {
-          categoryId: targetCategoryId
-        });
-
-        const updatedCategories = await productService.getBranchCategories(selectedBranch!.branchId);
-        setCategories(updatedCategories);
-        
-        const targetCategory = updatedCategories.find(cat => cat.categoryId === targetCategoryId);
-        if (targetCategory) {
-          const movedProduct = targetCategory.products?.find((p: { id: number; }) => p.id === activeProduct.id);
-          const targetProduct = targetCategory.products?.find((p: { id: number; }) => p.id === overProduct.id);
-          
-          if (movedProduct && targetProduct) {
-            const currentIndex = targetCategory.products?.findIndex((p: { id: number; }) => p.id === activeProduct.id);
-            const targetIndex = targetCategory.products?.findIndex((p: { id: number; }) => p.id === overProduct.id);
-            
-            if (currentIndex !== targetIndex) {
-              const reorderedProducts = arrayMove(targetCategory.products, currentIndex, targetIndex);
-              
-              const finalCategories = [...updatedCategories];
-              const catIndex = finalCategories.findIndex(cat => cat.categoryId === targetCategoryId);
-              finalCategories[catIndex] = { ...targetCategory, products: reorderedProducts };
-              setCategories(finalCategories);
-              
-              const productOrders = reorderedProducts.map((product, index) => ({
-                productId: product.id,
-                newDisplayOrder: index + 1
-              }));
-              
-              await productService.reorderProducts(productOrders);
-            }
-          }
-        }
-      } catch (error: any) {
-        console.error('❌ Cross-category product move failed:', error);
-        loadCategories();
-        alert(t('productsContent.dragDrop.productMoveError'));
       } finally {
         setIsReorderingProducts(false);
         setReorderingCategoryId(null);
@@ -859,71 +666,7 @@ useEffect(() => {
     );
   }
 
-  // No branch selected state (this shouldn't happen now since we auto-select "Select All")
-  if (!selectedBranch) {
-    return (
-      <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
-              <input
-                type="text"
-                placeholder={t('productsContent.search.placeholder')}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-                disabled
-              />
-            </div>
-
-            {/* Branch Selector */}
-            <div className="relative" ref={branchDropdownRef}>
-              <button
-                onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
-                className={`flex items-center justify-between min-w-[200px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRTL ? 'flex-row-reverse' : ''}`}
-                disabled={isLoadingBranches}
-              >
-                <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                  {isLoadingBranches ? t('productsContent.branch.loading') : t('productsContent.branch.selectBranch')}
-                </span>
-                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
-              </button>
-
-              {isBranchDropdownOpen && (
-                <div className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'}`}>
-                  {branches.length === 0 ? (
-                    <div className="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
-                      {t('productsContent.branch.noBranches')}
-                    </div>
-                  ) : (
-                    branches.map(branch => (
-                      <button
-                        key={branch.branchId}
-                        onClick={() => handleBranchSelect(branch)}
-                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`}
-                      >
-                        {branch.branchName}
-                      </button>
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">
-              {t('productsContent.branch.selectBranchMessage')}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  // Initial Empty State (if categories empty)
   if (categories.length === 0) {
     return (
       <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -936,36 +679,29 @@ useEffect(() => {
                 placeholder={t('productsContent.search.placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
+                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
                 disabled
               />
             </div>
-
-            <div className="flex items-center gap-3">
-              {/* Branch Selector */}
+            <div className="flex flex-wrap items-center gap-3">
               <div className="relative" ref={branchDropdownRef}>
                 <button
                   onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
-                  className={`flex items-center justify-between min-w-[200px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRTL ? 'flex-row-reverse' : ''}`}
+                  className={`flex items-center justify-between min-w-[200px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700`}
                 >
-                  <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <span className={`flex items-center`}>
                     <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     {selectedBranch ? selectedBranch.branchName : t('productsContent.branch.selectBranch')}
                   </span>
                   <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
                 </button>
-
                 {isBranchDropdownOpen && (
                   <div className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'}`}>
                     {branches.map(branch => (
                       <button
                         key={branch.branchId}
                         onClick={() => handleBranchSelect(branch)}
-                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                          selectedBranch?.branchId === branch.branchId
-                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                            : 'text-gray-700 dark:text-gray-200'
-                        } ${isRTL ? 'text-right' : 'text-left'}`}
+                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${selectedBranch?.branchId === branch.branchId ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'} ${isRTL ? 'text-right' : 'text-left'}`}
                       >
                         {branch.branchName}
                       </button>
@@ -973,10 +709,9 @@ useEffect(() => {
                   </div>
                 )}
               </div>
-
               <button
                 onClick={() => setIsCreateCategoryModalOpen(true)}
-                className="flex items-center gap-2 px-2 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70 transition-colors duration-200"
+                className="flex items-center gap-2 px-2 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70"
               >
                 <Plus className="h-4 w-4" />
                 <span className='w-fit'>{t('productsContent.actions.addFirstCategory')}</span>
@@ -984,26 +719,21 @@ useEffect(() => {
             </div>
           </div>
         </div>
-
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
-          <div className="flex justify-center mb-6">
+            <div className="flex justify-center mb-6">
             <div className="relative">
               <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-                <Utensils className="h-12 w-12 text-gray-400" />
+              <Utensils className="h-12 w-12 text-gray-400" />
               </div>
               <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center">
-                <Plus className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+              <Plus className="h-4 w-4 text-primary-600 dark:text-primary-400" />
               </div>
             </div>
-          </div>
-          
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+            </div>
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
             {t('productsContent.emptyState.noCategories.title')}
-          </h3>
-          
-       
-          
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            </h3>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={() => setIsCreateCategoryModalOpen(true)}
               className="flex items-center gap-2 px-6 py-3 text-white bg-primary-600 hover:bg-primary-700 rounded-lg font-medium transition-colors duration-200"
@@ -1011,20 +741,14 @@ useEffect(() => {
               <Plus className="h-5 w-5" />
               {t('productsContent.emptyState.noCategories.addFirstCategory')}
             </button>
-            
-         
-          </div>
+            </div>
         </div>
-
-        <CreateCategoryModal
-          isOpen={isCreateCategoryModalOpen}
-          onClose={() => setIsCreateCategoryModalOpen(false)}
-          onSuccess={() => loadCategories(undefined, true)}
-        />
+        <CreateCategoryModal isOpen={isCreateCategoryModalOpen} onClose={() => setIsCreateCategoryModalOpen(false)} onSuccess={() => loadCategories(undefined, true)} />
       </div>
     );
   }
 
+  // Main Render
   return (
     <DndContext
       sensors={sensors}
@@ -1049,9 +773,12 @@ useEffect(() => {
         )}
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 md:p-6">
-          <div className="flex flex-col gap-3">
+          {/* Main Toolbar Container */}
+          <div className="flex flex-col gap-4">
+            
             {/* First Row: Search + Branch Selector */}
             <div className="flex flex-col sm:flex-row gap-3">
+              {/* Search Input */}
               <div className="relative flex-1">
                 <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
                 <input
@@ -1067,17 +794,17 @@ useEffect(() => {
               <div className="relative flex-shrink-0" ref={branchDropdownRef}>
                 <button
                   onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
-                  className={`flex items-center justify-between w-full sm:min-w-[180px] px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRTL ? 'flex-row-reverse' : ''}`}
+                  className="flex items-center justify-between w-full sm:w-auto sm:min-w-[180px] px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  <span className={`flex items-center truncate ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <span className="flex items-center truncate">
                     <Users className={`h-4 w-4 flex-shrink-0 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                    <span className="truncate">{selectedBranch ? selectedBranch.branchName : t('productsContent.branch.selectBranch')}</span>
+                    <span className="truncate max-w-[140px]">{selectedBranch ? selectedBranch.branchName : t('productsContent.branch.selectBranch')}</span>
                   </span>
                   <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
                 </button>
 
                 {isBranchDropdownOpen && (
-                  <div className={`absolute z-20 mt-1 w-full min-w-[200px] bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'}`}>
+                  <div className={`fixed inset-x-4 mt-1 z-50 sm:absolute sm:inset-x-auto sm:w-full sm:min-w-[200px] bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'sm:right-0' : 'sm:left-0'}`}>
                     {branches.map(branch => (
                       <button
                         key={branch.branchId}
@@ -1086,12 +813,12 @@ useEffect(() => {
                           selectedBranch?.branchId === branch.branchId
                             ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
                             : 'text-gray-700 dark:text-gray-200'
-                        } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+                        } ${isRTL ? 'text-right' : 'text-left'}`}
                       >
                         {branch.branchId === SELECT_ALL_BRANCH_ID && (
                           <Users className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         )}
-                        <span>{branch.branchName}</span>
+                        <span className="flex-1">{branch.branchName}</span>
                         {selectedBranch?.branchId === branch.branchId && (
                           <Check className={`h-4 w-4 ${isRTL ? 'mr-auto' : 'ml-auto'}`} />
                         )}
@@ -1101,12 +828,14 @@ useEffect(() => {
                 )}
               </div>
             </div>
-{/* Second Row: Action Buttons - Responsive Layout */}
-            <div className={`flex flex-wrap items-center justify-between gap-3 w-full ${isRTL ? 'flex-row-reverse' : ''}`}>
+
+            {/* Second Row: Action Buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-3 w-full">
               
               {/* Left Group: View & Filter Controls */}
               <div className="flex flex-wrap items-center gap-2">
-                {/* Clear Filters Button - Only shows when needed */}
+                
+                {/* Clear Filters Button */}
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
@@ -1167,7 +896,9 @@ useEffect(() => {
                   </button>
 
                   {showFilterDropdown && (
-                    <div className={`absolute top-full mt-2 w-72 sm:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 ${isRTL ? 'right-0' : 'left-0'}`}>
+                    <div className={`fixed inset-x-4 mt-2 z-50 sm:absolute sm:inset-x-auto sm:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg 
+                      ${isRTL ? 'sm:right-0 sm:left-auto' : 'sm:left-0 sm:right-auto'}`}
+                    >
                       <div className="p-4 space-y-4">
                         {/* Status Filter */}
                         <div>
@@ -1212,20 +943,14 @@ useEffect(() => {
                                   checked={filters.categories.includes(category.categoryId)}
                                   onChange={(e) => {
                                     if (e.target.checked) {
-                                      setFilters(prev => ({
-                                        ...prev,
-                                        categories: [...prev.categories, category.categoryId]
-                                      }));
+                                      setFilters(prev => ({ ...prev, categories: [...prev.categories, category.categoryId] }));
                                     } else {
-                                      setFilters(prev => ({
-                                        ...prev,
-                                        categories: prev.categories.filter(id => id !== category.categoryId)
-                                      }));
+                                      setFilters(prev => ({ ...prev, categories: prev.categories.filter(id => id !== category.categoryId) }));
                                     }
                                   }}
                                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                                 />
-                                <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                                <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1">
                                   {category.categoryName} <span className="text-xs text-gray-500">({category?.products?.length || 0})</span>
                                 </span>
                               </label>
@@ -1243,21 +968,15 @@ useEffect(() => {
                               type="number"
                               placeholder="Min"
                               value={filters.priceRange.min}
-                              onChange={(e) => setFilters(prev => ({
-                                ...prev,
-                                priceRange: { ...prev.priceRange, min: parseFloat(e.target.value) || 0 }
-                              }))}
-                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-primary-500"
+                              onChange={(e) => setFilters(prev => ({ ...prev, priceRange: { ...prev.priceRange, min: parseFloat(e.target.value) || 0 } }))}
+                              className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
                             />
                             <input
                               type="number"
                               placeholder="Max"
                               value={filters.priceRange.max}
-                              onChange={(e) => setFilters(prev => ({
-                                ...prev,
-                                priceRange: { ...prev.priceRange, max: parseFloat(e.target.value) || 1000 }
-                              }))}
-                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-primary-500"
+                              onChange={(e) => setFilters(prev => ({ ...prev, priceRange: { ...prev.priceRange, max: parseFloat(e.target.value) || 1000 } }))}
+                              className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
                             />
                           </div>
                         </div>
@@ -1279,7 +998,9 @@ useEffect(() => {
                   </button>
 
                   {showSortDropdown && (
-                    <div className={`absolute top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 ${isRTL ? 'right-0' : 'left-0'}`}>
+                    <div className={`fixed inset-x-4 mt-2 z-50 sm:absolute sm:inset-x-auto sm:w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg 
+                      ${isRTL ? 'sm:right-0 sm:left-auto' : 'sm:left-0 sm:right-auto'}`}
+                    >
                       <div className="p-2">
                         {sortOptions.map((option) => {
                           const IconComponent = option.Icon;
@@ -1294,15 +1015,15 @@ useEffect(() => {
                                 sortBy === option.value
                                   ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
                                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                              }`}
+                              } ${isRTL ? 'text-right' : 'text-left'}`}
                             >
                               {IconComponent ? (
                                 <IconComponent className="h-4 w-4" />
                               ) : (
                                 <span className="h-4 w-4 flex items-center justify-center text-xs font-medium">{option.iconText}</span>
                               )}
-                              <span>{option.label}</span>
-                              {sortBy === option.value && <Check className="h-4 w-4 ml-auto" />}
+                              <span className="flex-1">{option.label}</span>
+                              {sortBy === option.value && <Check className="h-4 w-4" />}
                             </button>
                           );
                         })}
@@ -1373,8 +1094,6 @@ useEffect(() => {
                   />
               ))}
             </div>
-
-
           </SortableContext>
 
         <DragOverlay>
@@ -1396,7 +1115,7 @@ useEffect(() => {
                 const hasValidImage = activeProduct.imageUrl && activeProduct.imageUrl !== 'string' && activeProduct.imageUrl.trim() !== '';
                 return (
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-lg border border-gray-200 dark:border-gray-600 rotate-3 scale-105">
-                    <div className={`flex items-start gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className="flex items-start gap-3">
                       {hasValidImage ? (
                         <img
                           src={activeProduct.imageUrl}
@@ -1487,7 +1206,7 @@ useEffect(() => {
           onClose={() => {
             setIsConfirmDeleteModalOpen(false);
             setDeleteConfig(null);
-            setDeleteError(''); // Clear error when closing modal
+            setDeleteError('');
           }}
           onConfirm={deleteConfig.onConfirm}
           title={deleteConfig.title}

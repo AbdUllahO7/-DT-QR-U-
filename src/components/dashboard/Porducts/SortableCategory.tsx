@@ -1,4 +1,4 @@
-import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { SortableContext, useSortable, verticalListSortingStrategy, rectSortingStrategy } from "@dnd-kit/sortable";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import { CSS } from "@dnd-kit/utilities";
 import { Edit2, GripVertical, Loader2, Package, Trash2, Plus, Eye, EyeOff, ChevronDown, ChevronUp, Sparkles, Layers } from "lucide-react";
@@ -7,7 +7,7 @@ import { Category } from "../../../types/BranchManagement/type";
 import { useState, useEffect } from "react";
 import { logger } from "../../../utils/logger";
 import { productExtrasService } from "../../../services/Extras/ProductExtrasService";
-import { BranchProductExtra } from "../../../types/Extras/type";
+import { BranchProductExtra, ProductExtra } from "../../../types/Extras/type";
 
 export const SortableCategory: React.FC<{
 category: Category;
@@ -51,7 +51,7 @@ category: Category;
   } = useSortable({ id: category.categoryId });
 
   // State for batch extras loading in grid view
-  const [productExtras, setProductExtras] = useState<Map<number, BranchProductExtra[]>>(new Map());
+  const [productExtras, setProductExtras] = useState<Map<number, ProductExtra[]>>(new Map());
   const [loadingExtras, setLoadingExtras] = useState<Set<number>>(new Set());
 
   const style = {
@@ -96,7 +96,7 @@ category: Category;
     }
   }, [category.products, viewMode, productExtras, loadingExtras]);
 
-  const GridProductCard = ({
+  const SortableGridProductCard = ({
     product,
     isNew,
     extras = [],
@@ -104,19 +104,48 @@ category: Category;
   }: {
     product: any;
     isNew?: boolean;
-    extras?: BranchProductExtra[];
+    extras?: ProductExtra[];
     isLoadingExtras?: boolean;
   }) => {
+    const {
+      attributes: productAttributes,
+      listeners: productListeners,
+      setNodeRef: setProductNodeRef,
+      transform: productTransform,
+      transition: productTransition,
+      isDragging: isProductDragging
+    } = useSortable({ id: product.id });
+
+    const productStyle = {
+      transform: CSS.Transform.toString(productTransform),
+      transition: productTransition,
+      opacity: isProductDragging ? 0.5 : 1
+    };
+
     const hasValidImage = product.imageUrl && product.imageUrl !== 'string' && product.imageUrl.trim() !== '';
 
     return (
       <div
+        ref={setProductNodeRef}
+        style={productStyle}
         data-product-id={product.id}
         className={`group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden border transition-all duration-300 hover:shadow-2xl hover:shadow-primary-500/10 hover:-translate-y-1 ${
-        isNew
+        isProductDragging
+          ? 'shadow-2xl shadow-primary-500/25 ring-2 ring-primary-500 scale-105 z-50'
+          : isNew
           ? 'border-2 border-primary-400 dark:border-primary-500 ring-4 ring-primary-200 dark:ring-primary-800 shadow-xl shadow-primary-500/30'
           : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
       }`}>
+        {/* Drag Handle for Grid View */}
+        <button
+          {...productAttributes}
+          {...productListeners}
+          className="absolute top-3 left-3 z-20 p-2 bg-white/90 dark:bg-gray-800/90 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-110 shadow-md backdrop-blur-sm"
+          title={t('SortableCategory.dragProduct') || 'Drag to reorder'}
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+
         {/* Product Image Container */}
         <div className="relative h-48 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
           {hasValidImage ? (
@@ -133,13 +162,13 @@ category: Category;
               </div>
             </div>
           )}
-          
+
           {/* Gradient Overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
           {/* NEW Badge - only for newly created products */}
           {isNew && (
-            <div className="absolute top-3 left-3 z-10">
+            <div className="absolute top-3 left-14 z-10">
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-primary-500 to-purple-500 text-white shadow-lg animate-bounce">
                 <Sparkles className="w-3 h-3" />
                 <span>NEW!</span>
@@ -150,8 +179,8 @@ category: Category;
           {/* Status Badge - Modern Pill */}
           <div className="absolute top-3 right-3 z-10">
             <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium backdrop-blur-md border transition-all duration-200 ${
-              product.isAvailable 
-                ? 'bg-emerald-500/90 border-emerald-400/50 text-white shadow-lg shadow-emerald-500/25' 
+              product.isAvailable
+                ? 'bg-emerald-500/90 border-emerald-400/50 text-white shadow-lg shadow-emerald-500/25'
                 : 'bg-gray-500/90 border-gray-400/50 text-white shadow-lg shadow-gray-500/25'
             }`}>
               {product.isAvailable ? (
@@ -188,7 +217,7 @@ category: Category;
                 <Plus className="w-4 h-4" />
               </button>
             )}
-         
+
             <button
               onClick={() => onDeleteProduct(product.id)}
               className="p-3 bg-red-600 hover:bg-red-700 text-white rounded-xl shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-200"
@@ -264,18 +293,16 @@ category: Category;
 
         <div className={`relative flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
           <div className={`flex items-center gap-3 md:gap-4 flex-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            {/* Drag Handle - Enhanced */}
-            {viewMode === 'list' && (
-              <button
-                {...attributes}
-                {...listeners}
-                className="p-2.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-xl cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-110"
-                aria-label={t('SortableCategory.accessibility.dragHandle')}
-                title={t('SortableCategory.dragCategory')}
-              >
-                <GripVertical className="h-5 w-5" />
-              </button>
-            )}
+            {/* Drag Handle - Always visible for category reordering */}
+            <button
+              {...attributes}
+              {...listeners}
+              className="p-2.5 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-xl cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-110"
+              aria-label={t('SortableCategory.accessibility.dragHandle')}
+              title={t('SortableCategory.dragCategory')}
+            >
+              <GripVertical className="h-5 w-5" />
+            </button>
             
             <div className="flex-1 min-w-0">
               <div className={`flex flex-wrap items-center gap-2 md:gap-3 mb-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -389,17 +416,19 @@ category: Category;
         // Grid View
         <div className="p-3 md:p-6 bg-gray-50 dark:bg-gray-900/30">
           {category.products.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
-              {category.products.map((product) => (
-                <GridProductCard
-                  key={product.id}
-                  product={product}
-                  isNew={newlyCreatedProductId === product.id}
-                  extras={productExtras.get(product.id) || []}
-                  isLoadingExtras={loadingExtras.has(product.id)}
-                />
-              ))}
-            </div>
+            <SortableContext items={category.products.map(p => p.id)} strategy={rectSortingStrategy}>
+              <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 ${isReorderingProducts ? 'opacity-70 pointer-events-none' : ''}`}>
+                {category.products.map((product) => (
+                  <SortableGridProductCard
+                    key={product.id}
+                    product={product}
+                    isNew={newlyCreatedProductId === product.id}
+                    extras={productExtras.get(product.id) || []}
+                    isLoadingExtras={loadingExtras.has(product.id)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
           ) : (
             <div className="text-center py-16">
               <div className="relative inline-block">
@@ -409,7 +438,7 @@ category: Category;
               <p className="text-gray-500 dark:text-gray-400 font-medium mb-1">
                 {t('SortableCategory.noCategoryProducts') || 'No products yet'}
               </p>
-             
+
             </div>
           )}
         </div>
