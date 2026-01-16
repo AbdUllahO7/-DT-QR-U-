@@ -193,20 +193,22 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
           {/* View Details */}
           <button
             onClick={() => onOpenDetails(order)}
-            className="p-2 text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-2 text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/20 rounded-lg transition-colors text-xs font-medium"
             title={t('ordersManager.viewDetails')}
           >
-            <Eye className="w-5 h-5" />
+            <Eye className="w-4 h-4" />
+            <span className="hidden sm:inline">{t('ordersManager.viewDetails')}</span>
           </button>
 
           {/* Reject (Pending Only) */}
           {status === OrderStatusEnums.Pending && (
             <button
               onClick={() => onOpenReject(order.id.toString(), rowVersion)}
-              className="p-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-colors text-xs font-medium"
               title={t('ordersManager.reject')}
             >
-              <XCircle className="w-5 h-5" />
+              <XCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('ordersManager.reject')}</span>
             </button>
           )}
 
@@ -214,10 +216,11 @@ const OrderTableRow: React.FC<OrderTableRowProps> = ({
           {orderService.canCancelOrder(status) && (
             <button
               onClick={() => onOpenCancel(order.id.toString(), rowVersion)}
-              className="p-2 text-orange-600 hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
-              title={t('ordersManager.cancel')}
+              className="inline-flex items-center gap-1.5 px-3 py-2 text-orange-600 hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-900/20 rounded-lg transition-colors text-xs font-medium"
+              title={t('ordersManager.cancelOrder')}
             >
-              <Ban className="w-5 h-5" />
+              <Ban className="w-4 h-4" />
+              <span className="hidden sm:inline">{t('ordersManager.cancelOrder')}</span>
             </button>
           )}
         </div>

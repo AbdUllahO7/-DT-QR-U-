@@ -75,7 +75,7 @@ const Header: React.FC<HeaderProps> = ({ menuData, totalItems, onCartToggle }) =
               )}
             </button>
 
-            <LanguageSelector variant="header" />
+            <LanguageSelector variant="header" branchId={menuData.branchId} useMenuLanguages={true} />
           </div>
         </div>
       </div>

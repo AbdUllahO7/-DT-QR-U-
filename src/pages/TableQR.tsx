@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { useLanguage } from "../contexts/LanguageContext";
 import { useTheme } from "../contexts/ThemeContext";
@@ -16,14 +16,12 @@ import {
   MapPin,
   Smartphone,
   Utensils,
-  Globe,
-  ChevronDown,
   Moon,
   Sun
 } from 'lucide-react';
 import MenuComponent from "../components/dashboard/Branch/Menu/MenuComponent";
 import { httpClient } from "../utils/http";
-import ThemeToggle from "../components/ThemeToggle";
+import LanguageSelector from "../components/LanguageSelector";
 
 interface TableInfo {
   valid: boolean;
@@ -39,75 +37,6 @@ interface TableInfo {
     expiresAt: string | null;
   };
 }
-
-// Language Selector Component
-const LanguageSelector: React.FC = () => {
-  const { language, setLanguage, t } = useLanguage();
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-  const isRTL = language === 'ar';
-
-  const languages = [
-    { code: 'tr', name: 'Türkçe', flag: '🇹🇷' },
-    { code: 'en', name: 'English', flag: '🇺🇸' },
-    { code: 'ar', name: 'العربية', flag: '🇸🇦' }
-  ];
-
-  const currentLanguage = languages.find(lang => lang.code === language);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleLanguageChange = (langCode: string) => {
-    setLanguage(langCode as any);
-    setIsOpen(false);
-  };
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`p-2 rounded-lg bg-white/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300 hover:bg-white dark:hover:bg-gray-700 transition-colors duration-200 flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} border border-gray-200 dark:border-gray-700`}
-      >
-        <Globe className="h-5 w-5" />
-        <span className="text-sm font-medium">{currentLanguage?.flag}</span>
-        <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
-      </button>
-
-      {isOpen && (
-        <div className={`absolute top-full mt-2 ${isRTL ? 'left-0' : 'right-0'} z-50 min-w-[180px] bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1`}>
-          {languages.map((lang) => (
-            <button
-              key={lang.code}
-              onClick={() => handleLanguageChange(lang.code)}
-              className={`w-full flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
-                language === lang.code ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400' : ''
-              }`}
-            >
-              <span className="text-lg">{lang.flag}</span>
-              <span className="font-medium">{lang.name}</span>
-              {language === lang.code && (
-                <span className={`${isRTL ? 'mr-auto' : 'ml-auto'} text-blue-600 dark:text-blue-400`}>
-                  ✓
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
-
-
 
 const TableQR = () => {
   const { qrToken } = useParams();
@@ -281,7 +210,7 @@ const TableQR = () => {
                              <Moon className="h-5 w-5" />
                            )}
                          </button>
-              <LanguageSelector />
+              <LanguageSelector branchId={tableInfo.branchId} useMenuLanguages={true} />
             </div>
           </div>
         </div>
