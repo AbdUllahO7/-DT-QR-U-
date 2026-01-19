@@ -5951,5 +5951,83 @@ BranchTableModal: {
     cash: 'نقدي',
     creditCard: 'بطاقة ائتمان',
     online: 'دفع عبر الإنترنت'
+  },
+
+  // نافذة نجاح الطلب
+  orderSuccess: {
+    title: 'تم استلام الطلب!',
+    subtitle: 'تم استلام طلبك بنجاح',
+    orderNumber: 'رقم الطلب',
+    copy: 'نسخ',
+    estimatedTime: 'الوقت المقدر',
+    orderType: 'نوع الطلب',
+    thankYou: 'شكراً لك',
+    trackOrder: 'تتبع طلبك',
+    continueBrowsing: 'متابعة التصفح'
+  },
+
+  // تتبع الطلب
+  orderTracker: {
+    // جاري التحميل
+    loading: {
+      title: 'جاري تحميل الطلب',
+      subtitle: 'جاري جلب تفاصيل طلبك...'
+    },
+    // خطأ
+    error: {
+      title: 'الطلب غير موجود',
+      noOrderTag: 'لم يتم تقديم رقم الطلب',
+      fetchFailed: 'فشل في جلب تفاصيل الطلب',
+      retry: 'حاول مرة أخرى',
+      goBack: 'العودة'
+    },
+    // الرأس
+    back: 'رجوع',
+    refresh: 'تحديث',
+    orderNumber: 'رقم الطلب',
+    copyOrderTag: 'نسخ رقم الطلب',
+    lastUpdated: 'آخر تحديث',
+    // الحالة
+    statusTitle: 'حالة الطلب',
+    status: {
+      pending: 'تم الاستلام',
+      confirmed: 'تم التأكيد',
+      preparing: 'قيد التحضير',
+      ready: 'جاهز',
+      delivered: 'تم التوصيل',
+      completed: 'مكتمل',
+      cancelled: 'ملغي',
+      rejected: 'مرفوض'
+    },
+    // الرسائل
+    message: {
+      completed: 'شكراً لك! تم إكمال طلبك.',
+      cancelled: 'تم إلغاء هذا الطلب.',
+      rejected: 'تم رفض هذا الطلب من قبل المطعم.'
+    },
+    // الوقت
+    time: {
+      estimatedReady: 'الوقت المقدر للجاهزية',
+      preparingOrder: 'يتم تحضير طلبك',
+      takingLonger: 'يستغرق وقتاً أطول من المتوقع',
+      pleaseWait: 'يرجى الانتظار، تقريباً جاهز',
+      almostReady: 'تقريباً جاهز!',
+      min: 'د',
+      sec: 'ث'
+    },
+    // معلومات الطلب
+    orderType: 'نوع الطلب',
+    orderDate: 'تاريخ الطلب',
+    customerName: 'العميل',
+    table: 'الطاولة',
+    notes: 'ملاحظات',
+    // العناصر
+    orderDetails: 'تفاصيل الطلب',
+    item: 'عنصر',
+    items: 'عناصر',
+    noItems: 'لا توجد عناصر في هذا الطلب',
+    total: 'المجموع',
+    // الإجراءات
+    backToMenu: 'العودة للقائمة'
   }
 };
