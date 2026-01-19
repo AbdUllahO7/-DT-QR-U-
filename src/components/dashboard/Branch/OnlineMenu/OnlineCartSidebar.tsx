@@ -11,6 +11,7 @@ import { orderService } from '../../../../services/Branch/OrderService';
 import WhatsAppConfirmationModal from '../Menu/CartSideBar/WhatsAppConfirmationModal';
 import { WhatsAppService } from '../../../../services/WhatsAppService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { OrderSuccessModal } from './OrderTracker';
 import ToastComponent from '../Menu/CartSideBar/ToastComponenet';
 import { TrackedOrder } from '../../../../types/menu/carSideBarTypes';
 import { UpdatableOrder } from '../../../../types/Orders/type';
@@ -132,6 +133,15 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const [pendingWhatsAppData, setPendingWhatsAppData] = useState<any>(null);
   const [whatsappSending, setWhatsappSending] = useState<boolean>(false);
   const [createdOrderTag, setCreatedOrderTag] = useState<string | null>(null);
+
+  // Order Success Modal States
+  const [showOrderSuccessModal, setShowOrderSuccessModal] = useState<boolean>(false);
+  const [successOrderData, setSuccessOrderData] = useState<{
+    orderTag: string;
+    customerName?: string;
+    estimatedMinutes?: number;
+    orderTypeName?: string;
+  } | null>(null);
 
   // Order Tracking States
   const [trackedOrders, setTrackedOrders] = useState<TrackedOrder[]>([]);
@@ -375,6 +385,17 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
     const selectedPaymentMethodName = availablePaymentMethods.find(m => m.id === paymentMethod)?.name || paymentMethod;
 
+    // Show success modal with order tracking option
+    if (order.orderTag) {
+      setSuccessOrderData({
+        orderTag: order.orderTag,
+        customerName: customerName || undefined,
+        estimatedMinutes: selectedOrderType?.estimatedMinutes,
+        orderTypeName: selectedOrderType?.name,
+      });
+      setShowOrderSuccessModal(true);
+    }
+
     if (shouldShowWhatsApp) {
       const whatsappData = {
         orderTag: order.orderTag,
@@ -383,7 +404,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         customerPhone: customerPhone,
         tableNumber: tableNumber || undefined,
         deliveryAddress: deliveryAddress || undefined,
-        
+
         orderType: selectedOrderType!.name,
         paymentMethod: selectedPaymentMethodName,
         notes: orderNotes,
@@ -415,14 +436,8 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
       setPendingWhatsAppData(whatsappData);
       setShowWhatsAppConfirmation(true);
-      
+
       return;
-    } else {
-      setTimeout(() => {
-        resetForm();
-        setCartStep('cart'); 
-        setActiveTab('orders'); 
-      }, 1000);
     }
   };
 
@@ -1402,7 +1417,27 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         </div>
       </div>
 
-      <WhatsAppConfirmationModal
+     
+
+      {/* Order Success Modal with Track Order button */}
+      {successOrderData && (
+        <OrderSuccessModal
+          isOpen={showOrderSuccessModal}
+          onClose={() => {
+            setShowOrderSuccessModal(false);
+            setSuccessOrderData(null);
+            resetForm();
+            setCartStep('cart');
+            setActiveTab('orders');
+          }}
+          orderTag={successOrderData.orderTag}
+          customerName={successOrderData.customerName}
+          estimatedMinutes={successOrderData.estimatedMinutes}
+          orderTypeName={successOrderData.orderTypeName}
+        />
+
+      )}
+       <WhatsAppConfirmationModal
         isVisible={showWhatsAppConfirmation}
         restaurantName={restaurantName}
         whatsappNumber={whatsAppPhoneNumber}

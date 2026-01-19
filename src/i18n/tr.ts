@@ -5980,5 +5980,83 @@ categoryConfigModal: {
     cash: 'Nakit',
     creditCard: 'Kredi Kartı',
     online: 'Online Ödeme'
+  },
+
+  // Sipariş Başarı Modalı
+  orderSuccess: {
+    title: 'Sipariş Alındı!',
+    subtitle: 'Siparişiniz başarıyla alındı',
+    orderNumber: 'Sipariş Numarası',
+    copy: 'Kopyala',
+    estimatedTime: 'Tah. Süre',
+    orderType: 'Sipariş Türü',
+    thankYou: 'Teşekkürler',
+    trackOrder: 'Siparişini Takip Et',
+    continueBrowsing: 'Alışverişe Devam Et'
+  },
+
+  // Sipariş Takibi
+  orderTracker: {
+    // Yükleniyor
+    loading: {
+      title: 'Sipariş Yükleniyor',
+      subtitle: 'Sipariş detayları getiriliyor...'
+    },
+    // Hata
+    error: {
+      title: 'Sipariş Bulunamadı',
+      noOrderTag: 'Sipariş numarası belirtilmedi',
+      fetchFailed: 'Sipariş detayları alınamadı',
+      retry: 'Tekrar Dene',
+      goBack: 'Geri Dön'
+    },
+    // Başlık
+    back: 'Geri',
+    refresh: 'Yenile',
+    orderNumber: 'Sipariş Numarası',
+    copyOrderTag: 'Sipariş numarasını kopyala',
+    lastUpdated: 'Son güncelleme',
+    // Durum
+    statusTitle: 'Sipariş Durumu',
+    status: {
+      pending: 'Alındı',
+      confirmed: 'Onaylandı',
+      preparing: 'Hazırlanıyor',
+      ready: 'Hazır',
+      delivered: 'Teslim Edildi',
+      completed: 'Tamamlandı',
+      cancelled: 'İptal Edildi',
+      rejected: 'Reddedildi'
+    },
+    // Mesajlar
+    message: {
+      completed: 'Teşekkürler! Siparişiniz tamamlandı.',
+      cancelled: 'Bu sipariş iptal edildi.',
+      rejected: 'Bu sipariş restoran tarafından reddedildi.'
+    },
+    // Zaman
+    time: {
+      estimatedReady: 'Tahmini Hazır Olma Süresi',
+      preparingOrder: 'Siparişiniz hazırlanıyor',
+      takingLonger: 'Beklenenden Uzun Sürüyor',
+      pleaseWait: 'Lütfen bekleyin, neredeyse hazır',
+      almostReady: 'Neredeyse Hazır!',
+      min: 'dk',
+      sec: 'sn'
+    },
+    // Sipariş Bilgileri
+    orderType: 'Sipariş Türü',
+    orderDate: 'Sipariş Tarihi',
+    customerName: 'Müşteri',
+    table: 'Masa',
+    notes: 'Notlar',
+    // Ürünler
+    orderDetails: 'Sipariş Detayları',
+    item: 'ürün',
+    items: 'ürün',
+    noItems: 'Bu siparişte ürün yok',
+    total: 'Toplam',
+    // Eylemler
+    backToMenu: 'Menüye Dön'
   }
 };

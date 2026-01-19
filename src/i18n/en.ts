@@ -5975,4 +5975,82 @@ categoryConfigModal: {
     online: 'Online Payment'
   },
 
+  // Order Success Modal
+  orderSuccess: {
+    title: 'Order Placed!',
+    subtitle: 'Your order has been received',
+    orderNumber: 'Order Number',
+    copy: 'Copy',
+    estimatedTime: 'Est. Time',
+    orderType: 'Order Type',
+    thankYou: 'Thank you',
+    trackOrder: 'Track Your Order',
+    continueBrowsing: 'Continue Browsing'
+  },
+
+  // Order Tracker
+  orderTracker: {
+    // Loading
+    loading: {
+      title: 'Loading Order',
+      subtitle: 'Fetching your order details...'
+    },
+    // Error
+    error: {
+      title: 'Order Not Found',
+      noOrderTag: 'No order tag provided',
+      fetchFailed: 'Failed to fetch order details',
+      retry: 'Try Again',
+      goBack: 'Go Back'
+    },
+    // Header
+    back: 'Back',
+    refresh: 'Refresh',
+    orderNumber: 'Order Number',
+    copyOrderTag: 'Copy order number',
+    lastUpdated: 'Last updated',
+    // Status
+    statusTitle: 'Order Status',
+    status: {
+      pending: 'Received',
+      confirmed: 'Confirmed',
+      preparing: 'Preparing',
+      ready: 'Ready',
+      delivered: 'Delivered',
+      completed: 'Completed',
+      cancelled: 'Cancelled',
+      rejected: 'Rejected'
+    },
+    // Messages
+    message: {
+      completed: 'Thank you! Your order has been completed.',
+      cancelled: 'This order has been cancelled.',
+      rejected: 'This order has been rejected by the restaurant.'
+    },
+    // Time
+    time: {
+      estimatedReady: 'Estimated Ready Time',
+      preparingOrder: 'Your order is being prepared',
+      takingLonger: 'Taking Longer Than Expected',
+      pleaseWait: 'Please wait, almost ready',
+      almostReady: 'Almost Ready!',
+      min: 'min',
+      sec: 'sec'
+    },
+    // Order Info
+    orderType: 'Order Type',
+    orderDate: 'Order Date',
+    customerName: 'Customer',
+    table: 'Table',
+    notes: 'Notes',
+    // Items
+    orderDetails: 'Order Details',
+    item: 'item',
+    items: 'items',
+    noItems: 'No items in this order',
+    total: 'Total',
+    // Actions
+    backToMenu: 'Back to Menu'
+  },
+
 }; 
