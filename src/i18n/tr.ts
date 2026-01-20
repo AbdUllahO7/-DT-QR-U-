@@ -39,6 +39,7 @@ export const tr = {
     dateRange: 'Tarih Aralığı',
     today: 'Bugün',
     yesterday: 'Dün',
+    daysAgo: 'gün önce',
     last7Days: 'Son 7 Gün',
     last30Days: 'Son 30 Gün',
     thisMonth: 'Bu Ay',
@@ -3721,6 +3722,20 @@ BranchTableManagement: {
   menu: {
       title: "Menü",
       basePrice: "Temel Fiyat",
+     quickReorder: {
+  title: 'Hızlı Yeniden Sipariş',
+  previousOrders: 'Önceki Siparişler',
+  confirmClear: 'Tüm geçmiş silinsin mi?',
+  clearHistory: 'Geçmişi Sil',
+  items: 'Ürünler',
+  itemsUnavailable: 'Mevcut olmayan ürün(ler)',
+  hideDetails: 'Detayları Gizle',
+  showDetails: 'Detayları Göster',
+  unavailable: 'Mevcut Değil',
+  reorderAll: 'Tümünü Yeniden Sipariş Et',
+  reorderAvailable: 'Mevcut Ürünleri Yeniden Sipariş Et',
+  itemsAdded: 'Ürünler sepete eklendi!'
+},
       availableExtras: "Mevcut Ekstralar",
       loading: "Menü Yükleniyor",
       allergens: "Alerjen Bilgisi",
@@ -3974,6 +3989,20 @@ cart: {
       orderTypeRequired: 'Lütfen bir sipariş türü seçin',
       addressRequired: 'Bu sipariş türü için teslimat adresi gerekli',
       phoneRequired: 'Bu sipariş türü için telefon numarası gerekli'
+    },
+    quickReorder: {
+      title: 'Hızlı Tekrar Sipariş',
+      previousOrders: 'önceki sipariş',
+      confirmClear: 'Tüm geçmişi temizle?',
+      clearHistory: 'Geçmişi Temizle',
+      items: 'ürün',
+      itemsUnavailable: 'ürün mevcut değil',
+      hideDetails: 'Detayları gizle',
+      showDetails: 'Detayları göster',
+      unavailable: 'Mevcut Değil',
+      reorderAll: 'Hepsini Tekrar Sipariş Et',
+      reorderAvailable: 'Mevcut Ürünleri Sipariş Et',
+      itemsAdded: 'Ürünler sepete eklendi!'
     }
   },
 

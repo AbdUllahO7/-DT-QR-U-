@@ -723,7 +723,12 @@ export const useCartHandlers = ({
     }
   }
 
-  const createOrder = async () => {
+  const createOrder = async (): Promise<{
+    orderTag: string;
+    customerName?: string;
+    estimatedMinutes?: number;
+    orderTypeName?: string;
+  } | null> => {
     try {
       setLoading(true)
       setError(null)
@@ -736,7 +741,7 @@ export const useCartHandlers = ({
       if (allErrors.length > 0) {
         setValidationErrors(allErrors)
         setLoading(false)
-        return
+        return null
       }
 
       const selectedOrderType = getSelectedOrderType()
@@ -751,13 +756,13 @@ export const useCartHandlers = ({
         ...(selectedOrderType?.requiresAddress || orderForm.deliveryAddress?.trim() ? { deliveryAddress: orderForm.deliveryAddress?.trim() } : {}),
         ...(selectedOrderType?.requiresPhone || orderForm.customerPhone?.trim() ? { customerPhone: orderForm.customerPhone?.trim() } : {})
       }
-      
+
       const order = await orderService.createSessionOrder(sessionOrderDto)
-      
+
       if (order.orderTag) {
         await addOrderToTracking(order.orderTag)
       }
-      
+
       const serviceChargeAmount = selectedOrderType?.serviceCharge || 0
       if (order.orderTag && WhatsAppService.isWhatsAppEnabled(restaurantPreferences)) {
         const whatsappData = {
@@ -778,16 +783,34 @@ export const useCartHandlers = ({
           setPendingWhatsAppData(whatsappData)
           setShowWhatsAppConfirmation(true)
           setLoading(false)
-          return
+          // Return the order data for success modal
+          return {
+            orderTag: order.orderTag,
+            customerName: orderForm.customerName || undefined,
+            estimatedMinutes: selectedOrderType?.estimatedMinutes,
+            orderTypeName: selectedOrderType?.name,
+          }
         } else {
           console.warn('❌ WhatsApp confirmation functions not available')
         }
-      } 
-      
+      }
+
       setCart([])
       setBasketId(null)
       setShowOrderForm(false)
-      
+
+      // Ensure orderTag exists before returning
+      if (!order.orderTag) {
+        return null
+      }
+
+      const orderResult = {
+        orderTag: order.orderTag,
+        customerName: orderForm.customerName || undefined,
+        estimatedMinutes: selectedOrderType?.estimatedMinutes,
+        orderTypeName: selectedOrderType?.name,
+      }
+
       setOrderForm({
         customerName: '',
         notes: '',
@@ -798,16 +821,19 @@ export const useCartHandlers = ({
         paymentMethod: '',
         tableNumber: ''
       })
-      
+
       if (onOrderCreated) {
         onOrderCreated(order.orderId)
       }
 
       setError(null)
 
+      return orderResult
+
     } catch (err: any) {
       console.error('❌ Error creating order:', err)
       setShowPriceChangeModal(true)
+      return null
     } finally {
       setLoading(false)
     }

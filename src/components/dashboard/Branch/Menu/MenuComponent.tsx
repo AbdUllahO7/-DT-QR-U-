@@ -18,8 +18,10 @@ import { LoadingState, ErrorState } from "./Menustate"
 import ProductGrid from "./MneuProductGrid"
 import CartSidebar from "./CartSideBar/MenuCartSidebar"
 import ProductModal from "./MenuProductModal"
+import QuickReorderSection from "./QuickReorderSection"
 import { basketService } from "../../../../services/Branch/BasketService"
 import { ProductExtraMenu } from "../../../../types/Extras/type"
+import { OrderedProduct } from "../../../../hooks/useQuickReorder"
 
 const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
   const { t, isRTL } = useLanguage()
@@ -309,6 +311,24 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
     setShowCart(!showCart)
   }
 
+  // Handle quick reorder - add all items from a previous order to cart
+  const handleQuickReorder = async (items: OrderedProduct[]) => {
+    for (const item of items) {
+      const product = findProduct(item.branchProductId)
+      if (product) {
+        // Add each item to basket
+        await addToBasket(product, [], [])
+      }
+    }
+    toast.success(t('menu.quickReorder.itemsAdded') || 'Items added to cart!')
+  }
+
+  // Get all available products for quick reorder
+  const getAllProducts = (): MenuProduct[] => {
+    if (!menuData?.categories) return []
+    return menuData.categories.flatMap(cat => cat.products)
+  }
+
   // Handle reset session - clear basket
   const handleResetSession = async () => {
     const loadingToast = toast.loading(t('menu.resetSession') + '...')
@@ -383,6 +403,14 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
             onSearchChange={setSearchTerm}
           />
         </div>
+
+        {/* Quick Reorder Section */}
+        <QuickReorderSection
+          availableProducts={getAllProducts()}
+          onReorder={handleQuickReorder}
+          context="tableQR"
+          className="mb-4"
+        />
 
         {/* Session Control Buttons */}
        {/*  <div className="mb-4 flex gap-2 justify-end">

@@ -22,9 +22,11 @@ import Header from '../Menu/MenuHeaderComponent';
 import CategoriesSidebar from '../Menu/MenuCategoriesSidebar';
 import Footer from '../Menu/MneuFooter';
 import SearchBar from '../Menu/MenuSearchBar';
+import QuickReorderSection from '../Menu/QuickReorderSection';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import ProductModal from '../Menu/MenuProductModal';
 import { ProductExtraMenu } from '../../../../types/Extras/type';
+import { OrderedProduct } from '../../../../hooks/useQuickReorder';
 
 // Re-export interfaces for use in other components
 export interface SelectedAddon {
@@ -488,6 +490,27 @@ const initializeMenu = async () => {
     return item?.quantity || 0;
   };
 
+  // Get all available products for quick reorder
+  const getAllProducts = (): MenuProduct[] => {
+    if (!menuData?.categories) return [];
+    return menuData.categories.flatMap(cat => cat.products);
+  };
+
+  // Handle quick reorder - add all items from a previous order to cart
+  const handleQuickReorder = async (items: OrderedProduct[]) => {
+    for (const item of items) {
+      const product = getAllProducts().find(p => p.branchProductId === item.branchProductId);
+      if (product && !product.isOutOfStock) {
+        try {
+          await addToBasket(product, item.quantity || 1, [], []);
+        } catch (err) {
+          console.error('Error adding reorder item:', err);
+        }
+      }
+    }
+    toast.success(t('menu.quickReorder.itemsAdded') || 'Items added to cart!');
+  };
+
   // Handle reset session - clear basket and create new session
   const handleResetSession = async () => {
     const loadingToast = toast.loading(t('menu.resetSession') + '...');
@@ -666,6 +689,14 @@ const initializeMenu = async () => {
                   favoritesOnly={favoritesOnly}
                   onFavoritesToggle={() => setFavoritesOnly(!favoritesOnly)}
                   favoritesCount={favorites.size}
+                />
+
+                {/* Quick Reorder Section */}
+                <QuickReorderSection
+                  availableProducts={getAllProducts()}
+                  onReorder={handleQuickReorder}
+                  context="onlineMenu"
+                  className="mt-4"
                 />
 
                 {/* Session Control Buttons */}

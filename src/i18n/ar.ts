@@ -39,6 +39,7 @@ export const ar = {
     dateRange: 'نطاق التاريخ',
     today: 'اليوم',
     yesterday: 'أمس',
+    daysAgo: 'أيام مضت',
     last7Days: 'آخر 7 أيام',
     last30Days: 'آخر 30 يوم',
     thisMonth: 'هذا الشهر',
@@ -3716,6 +3717,20 @@ contact: {
 
   menu: {
       noCategories :"لايوجد قائمة",
+       quickReorder: {
+      title: 'إعادة الطلب السريع',
+      previousOrders: 'طلبات سابقة',
+      confirmClear: 'مسح كل السجل؟',
+      clearHistory: 'مسح السجل',
+      items: 'عناصر',
+      itemsUnavailable: 'عنصر(عناصر) غير متوفرة',
+      hideDetails: 'إخفاء التفاصيل',
+      showDetails: 'عرض التفاصيل',
+      unavailable: 'غير متوفر',
+      reorderAll: 'إعادة طلب الكل',
+      reorderAvailable: 'إعادة طلب العناصر المتوفرة',
+      itemsAdded: 'تمت إضافة العناصر إلى السلة!'
+    },
       noCategoriesDesc :"لايوجد قائمة",
       title: "القائمة",
       availableExtras: "الإضافات المتاحة",
@@ -3967,6 +3982,20 @@ contact: {
       orderTypeRequired: 'يرجى اختيار نوع الطلب',
       addressRequired: 'عنوان التوصيل مطلوب لهذا النوع من الطلبات',
       phoneRequired: 'رقم الهاتف مطلوب لهذا النوع من الطلبات'
+    },
+    quickReorder: {
+      title: 'إعادة الطلب السريع',
+      previousOrders: 'طلبات سابقة',
+      confirmClear: 'مسح كل السجل؟',
+      clearHistory: 'مسح السجل',
+      items: 'عناصر',
+      itemsUnavailable: 'عنصر(عناصر) غير متوفرة',
+      hideDetails: 'إخفاء التفاصيل',
+      showDetails: 'عرض التفاصيل',
+      unavailable: 'غير متوفر',
+      reorderAll: 'إعادة طلب الكل',
+      reorderAvailable: 'إعادة طلب العناصر المتوفرة',
+      itemsAdded: 'تمت إضافة العناصر إلى السلة!'
     }
   },
 
