@@ -279,7 +279,8 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   }
 
   useEffect(() => {
-    const savedOrders = localStorage.getItem('trackedOrders')
+    // Use namespaced key to avoid conflicts with OnlineMenu tracked orders
+    const savedOrders = localStorage.getItem('tableQR_trackedOrders')
     if (savedOrders) {
       try {
         const parsed = JSON.parse(savedOrders)
@@ -294,8 +295,11 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   }, [])
 
   useEffect(() => {
+    // Use namespaced key to avoid conflicts with OnlineMenu tracked orders
     if (trackedOrders.length > 0) {
-      localStorage.setItem('trackedOrders', JSON.stringify(trackedOrders))
+      localStorage.setItem('tableQR_trackedOrders', JSON.stringify(trackedOrders))
+    } else {
+      localStorage.removeItem('tableQR_trackedOrders')
     }
   }, [trackedOrders])
 

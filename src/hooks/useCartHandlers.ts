@@ -867,7 +867,8 @@ export const useCartHandlers = ({
     const updated = trackedOrders.filter(order => order.orderTag !== orderTag)
     setTrackedOrders(updated)
     if (updated.length === 0) {
-      localStorage.removeItem('trackedOrders')
+      // Use namespaced key to avoid conflicts with OnlineMenu tracked orders
+      localStorage.removeItem('tableQR_trackedOrders')
     }
   }
 

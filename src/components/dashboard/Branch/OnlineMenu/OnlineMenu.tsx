@@ -472,7 +472,8 @@ const initializeMenu = async () => {
       } else {
         newFavorites.add(branchProductId);
       }
-      localStorage.setItem('menu_favorites', JSON.stringify([...newFavorites]));
+      // Use namespaced key to avoid conflicts with TableQR favorites
+      localStorage.setItem('onlineMenu_favorites', JSON.stringify([...newFavorites]));
       return newFavorites;
     });
   };
@@ -582,7 +583,8 @@ const initializeMenu = async () => {
 
   
   useEffect(() => {
-    const storedFavorites = localStorage.getItem('menu_favorites');
+    // Use namespaced key to avoid conflicts with TableQR favorites
+    const storedFavorites = localStorage.getItem('onlineMenu_favorites');
     if (storedFavorites) {
       try {
         const favArray = JSON.parse(storedFavorites);

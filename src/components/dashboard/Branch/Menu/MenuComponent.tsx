@@ -34,6 +34,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [showCart, setShowCart] = useState(false)
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
+  const [favoritesOnly, setFavoritesOnly] = useState(false)
   const [basketItemCount, setBasketItemCount] = useState(0)
   const [basketId, setBasketId] = useState<string | null>(null)
   
@@ -75,6 +76,19 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       // Ignore errors for item count - basket might not exist yet
       setBasketItemCount(0)
       setBasketId(null)
+    }
+  }, [])
+
+  // Load favorites from localStorage on mount
+  useEffect(() => {
+    const storedFavorites = localStorage.getItem('tableQR_menu_favorites')
+    if (storedFavorites) {
+      try {
+        const favArray = JSON.parse(storedFavorites)
+        setFavorites(new Set(favArray))
+      } catch (e) {
+        console.error('Failed to load favorites:', e)
+      }
     }
   }, [])
 
@@ -252,6 +266,8 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       } else {
         newFavorites.add(branchProductId)
       }
+      // Persist to localStorage with tableQR-specific key
+      localStorage.setItem('tableQR_menu_favorites', JSON.stringify([...newFavorites]))
       return newFavorites
     })
   }
@@ -396,11 +412,15 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       />
 
       <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        {/* Search Bar */}
+        {/* Search Bar with Favorites Filter */}
         <div className="mb-4">
           <SearchBar
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
+            showFavoritesFilter={true}
+            favoritesOnly={favoritesOnly}
+            onFavoritesToggle={() => setFavoritesOnly(!favoritesOnly)}
+            favoritesCount={favorites.size}
           />
         </div>
 
@@ -447,6 +467,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
               searchTerm={searchTerm}
               cart={[]}
               favorites={favorites}
+              favoritesOnly={favoritesOnly}
               onAddToCart={handleQuickAddToCart}
               onRemoveFromCart={removeFromBasket}
               onToggleFavorite={toggleFavorite}
