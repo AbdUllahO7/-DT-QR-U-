@@ -3,6 +3,7 @@ export const az = {
     common: {
         loading: 'Yüklənir...',
         error: 'Xəta',
+        wait: 'Zəhmət olmasa gözləyin...',
         removal: 'Silinmə',
         setAsDefault: 'Defolt kimi təyin et',
         select: 'Seç',
@@ -37,6 +38,7 @@ export const az = {
         dateRange: 'Tarix Aralığı',
         today: 'Bu gün',
         yesterday: 'Dünən',
+        daysAgo: 'gün əvvəl',
         last7Days: 'Son 7 Gün',
         last30Days: 'Son 30 Gün',
         thisMonth: 'Bu Ay',
@@ -3725,6 +3727,20 @@ menu: {
                         availableExtras: "Mövcud Əlavələr",
                             no: "Xeyr",
                                 basePrice: "Əsas Qiymət",
+                                quickReorder: {
+  title: 'Sürətli Yenidən Sifariş',
+  previousOrders: 'Əvvəlki Sifarişlər',
+  confirmClear: 'Bütün tarixçə silinsin?',
+  clearHistory: 'Tarixçəni Sil',
+  items: 'Məhsullar',
+  itemsUnavailable: 'Mövcud olmayan məhsul(lar)',
+  hideDetails: 'Detalları Gizlət',
+  showDetails: 'Detalları Göstər',
+  unavailable: 'Mövcud Deyil',
+  reorderAll: 'Hamısını Yenidən Sifariş Et',
+  reorderAvailable: 'Mövcud Məhsulları Yenidən Sifariş Et',
+  itemsAdded: 'Məhsullar səbətə əlavə olundu!'
+},
                                     loading: "Menyu Yüklənir",
                                         allergens: "Allergenlər",
                                             quantity: "Miqdar",
@@ -3960,6 +3976,20 @@ order: {
                 orderTypeRequired: 'Zəhmət olmasa sifariş növü seçin',
                     addressRequired: 'Bu sifariş növü üçün çatdırılma ünvanı tələb olunur',
                         phoneRequired: 'Bu sifariş növü üçün telefon nömrəsi tələb olunur'
+    },
+    quickReorder: {
+      title: 'Sürətli Yenidən Sifariş',
+      previousOrders: 'əvvəlki sifariş',
+      confirmClear: 'Bütün tarixçəni silin?',
+      clearHistory: 'Tarixçəni Sil',
+      items: 'məhsul',
+      itemsUnavailable: 'məhsul mövcud deyil',
+      hideDetails: 'Detalları gizlət',
+      showDetails: 'Detalları göstər',
+      unavailable: 'Mövcud Deyil',
+      reorderAll: 'Hamısını Yenidən Sifariş Et',
+      reorderAvailable: 'Mövcud Məhsulları Sifariş Et',
+      itemsAdded: 'Məhsullar səbətə əlavə edildi!'
     }
 },
 

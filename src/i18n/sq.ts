@@ -37,6 +37,7 @@ export const sq = {
         dateRange: 'Gama e Datave',
         today: 'Sot',
         yesterday: 'Dje',
+        daysAgo: 'ditë më parë',
         last7Days: '7 Ditët e Fundit',
         last30Days: '30 Ditët e Fundit',
         thisMonth: 'Ky Muaj',
@@ -3726,6 +3727,20 @@ menu: {
                         availableExtras: "Shtesa të Disponueshme",
                             no: "Jo",
                                 basePrice: "Çmimi Bazë",
+                                quickReorder: {
+  title: 'Riporosje e Shpejtë',
+  previousOrders: 'Porositë e Mëparshme',
+  confirmClear: 'Të fshihet i gjithë historiku?',
+  clearHistory: 'Fshi Historikun',
+  items: 'Artikuj',
+  itemsUnavailable: 'Artikull(et) nuk janë të disponueshme',
+  hideDetails: 'Fshih Detajet',
+  showDetails: 'Shfaq Detajet',
+  unavailable: 'Jo i Disponueshëm',
+  reorderAll: 'Riporosit Të Gjitha',
+  reorderAvailable: 'Riporosit Artikujt e Disponueshëm',
+  itemsAdded: 'Artikujt u shtuan në shportë!'
+},
                                     loading: "Duke ngarkuar Menunë",
                                         allergens: "Alergjenët",
                                             quantity: "Sasia",
@@ -3961,6 +3976,20 @@ order: {
                 orderTypeRequired: 'Ju lutemi zgjidhni një lloj porosie',
                     addressRequired: 'Adresa e dorëzimit kërkohet për këtë lloj porosie',
                         phoneRequired: 'Numri i telefonit kërkohet për këtë lloj porosie'
+    },
+    quickReorder: {
+      title: 'Riporosit e Shpejtë',
+      previousOrders: 'porosi të mëparshme',
+      confirmClear: 'Fshi të gjithë historikun?',
+      clearHistory: 'Fshi Historikun',
+      items: 'artikuj',
+      itemsUnavailable: 'artikull nuk është i disponueshëm',
+      hideDetails: 'Fshih detajet',
+      showDetails: 'Shfaq detajet',
+      unavailable: 'Jo i Disponueshëm',
+      reorderAll: 'Riporosit të Gjithë',
+      reorderAvailable: 'Riporosit Artikujt e Disponueshëm',
+      itemsAdded: 'Artikujt u shtuan në shportë!'
     }
 },
 

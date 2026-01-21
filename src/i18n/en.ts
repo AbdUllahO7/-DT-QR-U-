@@ -6,6 +6,7 @@ export const en = {
   common: {
     loading: 'Loading...',
     error: 'Error',
+    wait: 'Please wait...',
     removal: 'Removal',
     setAsDefault: 'Set as Default',
     actions: 'Actions',
@@ -40,6 +41,7 @@ export const en = {
     dateRange: 'Date Range',
     today: 'Today',
     yesterday: 'Yesterday',
+    daysAgo: 'days ago',
     last7Days: 'Last 7 Days',
     last30Days: 'Last 30 Days',
     thisMonth: 'This Month',
@@ -3727,6 +3729,20 @@ hero: {
 
   menu: {
   title: "Menu",
+  quickReorder: {
+  title: 'Quick Reorder',
+  previousOrders: 'Previous Orders',
+  confirmClear: 'Clear all history?',
+  clearHistory: 'Clear History',
+  items: 'Items',
+  itemsUnavailable: 'Item(s) unavailable',
+  hideDetails: 'Hide Details',
+  showDetails: 'Show Details',
+  unavailable: 'Unavailable',
+  reorderAll: 'Reorder All',
+  reorderAvailable: 'Reorder Available Items',
+  itemsAdded: 'Items have been added to the cart!'
+},
   noCategories: "No list",
   customizations: "Customizations",
   extras: "Extras",
@@ -3977,6 +3993,20 @@ cart: {
       orderTypeRequired: 'Please select an order type',
       addressRequired: 'Delivery address is required for this order type',
       phoneRequired: 'Phone number is required for this order type'
+    },
+    quickReorder: {
+      title: 'Quick Reorder',
+      previousOrders: 'previous orders',
+      confirmClear: 'Clear all history?',
+      clearHistory: 'Clear History',
+      items: 'items',
+      itemsUnavailable: 'item(s) unavailable',
+      hideDetails: 'Hide details',
+      showDetails: 'Show details',
+      unavailable: 'Unavailable',
+      reorderAll: 'Reorder All',
+      reorderAvailable: 'Reorder Available Items',
+      itemsAdded: 'Items added to cart!'
     }
   },
 

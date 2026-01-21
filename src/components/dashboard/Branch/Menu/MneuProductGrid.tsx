@@ -186,7 +186,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({
             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
               {t('menu.favorites.title')}
             </h2>
-            <span className="text-sm text-slate-600 dark:text-slate-400 bg-pink-100/50 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 px-3 py-1 rounded-full">
+            <span className="text-sm text-slate-600 dark:text-slate-400 bg-pink-100/50 dark:bg-pink-900/30  px-3 py-1 rounded-full">
               {visibleProducts.length} {visibleProducts.length === 1 ? t('menu.favorites.item') : t('menu.favorites.items')}
             </span>
           </div>

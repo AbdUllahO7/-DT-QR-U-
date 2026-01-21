@@ -131,7 +131,7 @@ const Footer: React.FC = () => {
                 {t('menu.footer.description')}
               </p>
               <div className="flex space-x-2">
-                <a href="#" className="w-8 h-8 bg-slate-800/50 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-all duration-300 backdrop-blur-sm border border-slate-700 hover:border-blue-500 group">
+                <a  href="#" className="w-8 h-8 bg-slate-800/50 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-all duration-300 backdrop-blur-sm border border-slate-700 hover:border-blue-500 group">
                   <Facebook className="h-4 w-4 text-slate-400 group-hover:text-white transition-colors" />
                 </a>
                 <a href="#" className="w-8 h-8 bg-slate-800/50 hover:bg-pink-600 rounded-lg flex items-center justify-center transition-all duration-300 backdrop-blur-sm border border-slate-700 hover:border-pink-500 group">
@@ -162,7 +162,7 @@ const Footer: React.FC = () => {
                   t('menu.footer.links.giftCards')
                 ].map((link) => (
                   <li key={link}>
-                    <a href="#" className="text-slate-400 hover:text-white transition-colors duration-200 text-sm hover:translate-x-1 inline-block transform transition-transform">
+                    <a href="#" className="text-slate-400 hover:text-white  duration-200 text-sm hover:translate-x-1 inline-block transform transition-transform">
                       {link}
                     </a>
                   </li>
@@ -186,7 +186,7 @@ const Footer: React.FC = () => {
                   t('menu.footer.services.corporateMeals')
                 ].map((service) => (
                   <li key={service}>
-                    <a href="#" className="text-slate-400 hover:text-white transition-colors duration-200 text-sm hover:translate-x-1 inline-block transform transition-transform">
+                    <a href="#" className="text-slate-400 hover:text-white  duration-200 text-sm hover:translate-x-1 inline-block transform transition-transform">
                       {service}
                     </a>
                   </li>

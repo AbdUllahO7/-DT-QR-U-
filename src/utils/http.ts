@@ -125,6 +125,7 @@ httpClient.interceptors.request.use(
     let tokenSource = '';
 
     // 1. TableQR context - uses table_session_token
+    // Includes /api/Basket since MenuComponent on TableQR page uses basketService
     if (currentPath.includes('/table/qr/') || requestUrl.includes('/api/session/') || requestUrl.includes('/api/table/')) {
       token = localStorage.getItem('table_session_token');
       tokenSource = 'TableQR';

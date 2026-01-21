@@ -18,8 +18,10 @@ import { LoadingState, ErrorState } from "./Menustate"
 import ProductGrid from "./MneuProductGrid"
 import CartSidebar from "./CartSideBar/MenuCartSidebar"
 import ProductModal from "./MenuProductModal"
+import QuickReorderSection from "./QuickReorderSection"
 import { basketService } from "../../../../services/Branch/BasketService"
 import { ProductExtraMenu } from "../../../../types/Extras/type"
+import { OrderedProduct } from "../../../../hooks/useQuickReorder"
 
 const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
   const { t, isRTL } = useLanguage()
@@ -32,6 +34,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [showCart, setShowCart] = useState(false)
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
+  const [favoritesOnly, setFavoritesOnly] = useState(false)
   const [basketItemCount, setBasketItemCount] = useState(0)
   const [basketId, setBasketId] = useState<string | null>(null)
   
@@ -73,6 +76,19 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       // Ignore errors for item count - basket might not exist yet
       setBasketItemCount(0)
       setBasketId(null)
+    }
+  }, [])
+
+  // Load favorites from localStorage on mount
+  useEffect(() => {
+    const storedFavorites = localStorage.getItem('tableQR_menu_favorites')
+    if (storedFavorites) {
+      try {
+        const favArray = JSON.parse(storedFavorites)
+        setFavorites(new Set(favArray))
+      } catch (e) {
+        console.error('Failed to load favorites:', e)
+      }
     }
   }, [])
 
@@ -250,6 +266,8 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       } else {
         newFavorites.add(branchProductId)
       }
+      // Persist to localStorage with tableQR-specific key
+      localStorage.setItem('tableQR_menu_favorites', JSON.stringify([...newFavorites]))
       return newFavorites
     })
   }
@@ -307,6 +325,24 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       await loadBasketItemCount()
     }
     setShowCart(!showCart)
+  }
+
+  // Handle quick reorder - add all items from a previous order to cart
+  const handleQuickReorder = async (items: OrderedProduct[]) => {
+    for (const item of items) {
+      const product = findProduct(item.branchProductId)
+      if (product) {
+        // Add each item to basket
+        await addToBasket(product, [], [])
+      }
+    }
+    toast.success(t('menu.quickReorder.itemsAdded') || 'Items added to cart!')
+  }
+
+  // Get all available products for quick reorder
+  const getAllProducts = (): MenuProduct[] => {
+    if (!menuData?.categories) return []
+    return menuData.categories.flatMap(cat => cat.products)
   }
 
   // Handle reset session - clear basket
@@ -376,13 +412,25 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       />
 
       <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        {/* Search Bar */}
+        {/* Search Bar with Favorites Filter */}
         <div className="mb-4">
           <SearchBar
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
+            showFavoritesFilter={true}
+            favoritesOnly={favoritesOnly}
+            onFavoritesToggle={() => setFavoritesOnly(!favoritesOnly)}
+            favoritesCount={favorites.size}
           />
         </div>
+
+        {/* Quick Reorder Section */}
+        <QuickReorderSection
+          availableProducts={getAllProducts()}
+          onReorder={handleQuickReorder}
+          context="tableQR"
+          className="mb-4"
+        />
 
         {/* Session Control Buttons */}
        {/*  <div className="mb-4 flex gap-2 justify-end">
@@ -419,6 +467,7 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
               searchTerm={searchTerm}
               cart={[]}
               favorites={favorites}
+              favoritesOnly={favoritesOnly}
               onAddToCart={handleQuickAddToCart}
               onRemoveFromCart={removeFromBasket}
               onToggleFavorite={toggleFavorite}

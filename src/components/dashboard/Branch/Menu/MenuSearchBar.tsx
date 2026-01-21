@@ -77,35 +77,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
             )}
           </div>
         </div>
-
-        {/* Favorites Filter Button */}
-        {showFavoritesFilter && onFavoritesToggle && (
-          <button
-            onClick={onFavoritesToggle}
-            className={`relative flex items-center gap-2 px-4 py-3 rounded-2xl font-medium text-sm transition-all duration-200 shadow-lg ${
-              favoritesOnly
-                ? 'bg-gradient-to-r from-pink-500 to-red-500 text-white'
-                : 'bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border border-slate-200/50 dark:border-slate-700/50 text-slate-600 dark:text-slate-300 hover:border-pink-300 dark:hover:border-pink-600'
-            } ${isRTL ? 'flex-row-reverse' : ''}`}
-            aria-label={t('menu.favorites.toggle')}
-          >
-            <Heart
-              className={`h-4 w-4 ${favoritesOnly ? 'fill-current' : ''}`}
-            />
-            <span className="hidden sm:inline">
-              {t('menu.favorites.title')}
-            </span>
-            {favoritesCount > 0 && (
-              <span className={`absolute -top-1 -right-1 min-w-[20px] h-5 flex items-center justify-center text-xs font-bold rounded-full ${
-                favoritesOnly
-                  ? 'bg-white text-pink-500'
-                  : 'bg-pink-500 text-white'
-              }`}>
-                {favoritesCount}
-              </span>
-            )}
-          </button>
-        )}
       </div>
     </div>
   )

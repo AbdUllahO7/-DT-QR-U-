@@ -15,6 +15,7 @@ import WhatsAppConfirmationModal from "./WhatsAppConfirmationModal"
 import ToastComponent from "./ToastComponenet"
 import { UpdatableOrder } from "../../../../../types/Orders/type"
 import { orderService } from "../../../../../services/Branch/OrderService"
+import { OrderSuccessModal } from "../../OnlineMenu/OrderTracker"
 
 interface UpdatedCartSidebarProps extends CartSidebarProps {
   restaurantPreferences?: any
@@ -72,6 +73,15 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   const [pendingWhatsAppData, setPendingWhatsAppData] = useState<any>(null)
   const [whatsappSending, setWhatsappSending] = useState(false)
   const [updatableOrders, setUpdatableOrders] = useState<UpdatableOrder[]>([])
+
+  // Order Success Modal States
+  const [showOrderSuccessModal, setShowOrderSuccessModal] = useState<boolean>(false)
+  const [successOrderData, setSuccessOrderData] = useState<{
+    orderTag: string;
+    customerName?: string;
+    estimatedMinutes?: number;
+    orderTypeName?: string;
+  } | null>(null)
   const [showOrderForm, setShowOrderForm] = useState(false)
   const [orderTypes, setOrderTypes] = useState<OrderType[]>([])
   const [loadingOrderTypes, setLoadingOrderTypes] = useState(false)
@@ -166,17 +176,24 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
     let toastId: string | null = null
     try {
       toastId = showToast('loading', t('menu.cart.creating_order') || 'Creating order...')
-      await originalCreateOrder()
+      const orderResult = await originalCreateOrder()
       if (toastId) {
         updateToast(toastId, 'success', t('menu.cart.order_created_success') || 'Order created successfully!')
       } else {
         showToast('success', t('menu.cart.order_created_success') || 'Order created successfully!')
       }
-      setActiveTab('orders')
+
+      // Show success modal with tracking option
+      if (orderResult && orderResult.orderTag) {
+        setSuccessOrderData(orderResult)
+        setShowOrderSuccessModal(true)
+      } else {
+        setActiveTab('orders')
+      }
     } catch (error: any) {
       console.error('Error creating order:', error)
-      const errorMessage = error?.message || 
-        t('menu.cart.order_creation_failed') || 
+      const errorMessage = error?.message ||
+        t('menu.cart.order_creation_failed') ||
         'Failed to create order. Please try again.'
       if (toastId) {
         updateToast(toastId, 'error', errorMessage)
@@ -262,7 +279,8 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   }
 
   useEffect(() => {
-    const savedOrders = localStorage.getItem('trackedOrders')
+    // Use namespaced key to avoid conflicts with OnlineMenu tracked orders
+    const savedOrders = localStorage.getItem('tableQR_trackedOrders')
     if (savedOrders) {
       try {
         const parsed = JSON.parse(savedOrders)
@@ -277,8 +295,11 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
   }, [])
 
   useEffect(() => {
+    // Use namespaced key to avoid conflicts with OnlineMenu tracked orders
     if (trackedOrders.length > 0) {
-      localStorage.setItem('trackedOrders', JSON.stringify(trackedOrders))
+      localStorage.setItem('tableQR_trackedOrders', JSON.stringify(trackedOrders))
+    } else {
+      localStorage.removeItem('tableQR_trackedOrders')
     }
   }, [trackedOrders])
 
@@ -624,6 +645,23 @@ const CartSidebar: React.FC<UpdatedCartSidebarProps> = ({
           onCancel={handleWhatsAppCancel}
           loading={whatsappSending}
         />
+
+        {/* Order Success Modal with Track Order button */}
+        {successOrderData && (
+          <OrderSuccessModal
+            isOpen={showOrderSuccessModal}
+            onClose={() => {
+              setShowOrderSuccessModal(false)
+              setSuccessOrderData(null)
+              setShowOrderForm(false)
+              setActiveTab('orders')
+            }}
+            orderTag={successOrderData.orderTag}
+            customerName={successOrderData.customerName}
+            estimatedMinutes={successOrderData.estimatedMinutes}
+            orderTypeName={successOrderData.orderTypeName}
+          />
+        )}
       </div>
     </>
   )
