@@ -77,8 +77,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
             )}
           </div>
         </div>
-
-     
       </div>
     </div>
   )

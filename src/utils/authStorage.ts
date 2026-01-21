@@ -81,8 +81,6 @@ class AuthStorage {
       // Check legacy key for backward compatibility
       const legacyToken = storage.getItem(this.LEGACY_TOKEN_KEY);
       if (legacyToken) {
-        // Migrate legacy token to new key
-        console.log('🔄 Migrating legacy dashboard token to new key');
         return legacyToken;
       }
 
@@ -239,7 +237,6 @@ class AuthStorage {
       localStorage.removeItem(this.LEGACY_TOKEN_KEY);
       localStorage.removeItem(this.LEGACY_USER_ID_KEY);
       localStorage.removeItem(this.LEGACY_TOKEN_EXPIRY_KEY);
-      console.log('✅ Cleaned up expired tokens from localStorage');
     }
   }
 }

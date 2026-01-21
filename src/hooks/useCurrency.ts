@@ -78,7 +78,6 @@ export const useCurrency = () => {
     };
   }, []);
 
-  console.log('useCurrency - current currency:', currency, 'isLoading:', isLoading);
 
   return { ...currency, isLoading };
 };
