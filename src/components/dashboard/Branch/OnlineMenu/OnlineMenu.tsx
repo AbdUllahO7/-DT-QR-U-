@@ -22,9 +22,11 @@ import Header from '../Menu/MenuHeaderComponent';
 import CategoriesSidebar from '../Menu/MenuCategoriesSidebar';
 import Footer from '../Menu/MneuFooter';
 import SearchBar from '../Menu/MenuSearchBar';
+import QuickReorderSection from '../Menu/QuickReorderSection';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import ProductModal from '../Menu/MenuProductModal';
 import { ProductExtraMenu } from '../../../../types/Extras/type';
+import { OrderedProduct } from '../../../../hooks/useQuickReorder';
 
 // Re-export interfaces for use in other components
 export interface SelectedAddon {
@@ -470,7 +472,8 @@ const initializeMenu = async () => {
       } else {
         newFavorites.add(branchProductId);
       }
-      localStorage.setItem('menu_favorites', JSON.stringify([...newFavorites]));
+      // Use namespaced key to avoid conflicts with TableQR favorites
+      localStorage.setItem('onlineMenu_favorites', JSON.stringify([...newFavorites]));
       return newFavorites;
     });
   };
@@ -486,6 +489,27 @@ const initializeMenu = async () => {
       (i) => i.branchProductId === branchProductId && !i.isAddon
     );
     return item?.quantity || 0;
+  };
+
+  // Get all available products for quick reorder
+  const getAllProducts = (): MenuProduct[] => {
+    if (!menuData?.categories) return [];
+    return menuData.categories.flatMap(cat => cat.products);
+  };
+
+  // Handle quick reorder - add all items from a previous order to cart
+  const handleQuickReorder = async (items: OrderedProduct[]) => {
+    for (const item of items) {
+      const product = getAllProducts().find(p => p.branchProductId === item.branchProductId);
+      if (product && !product.isOutOfStock) {
+        try {
+          await addToBasket(product, item.quantity || 1, [], []);
+        } catch (err) {
+          console.error('Error adding reorder item:', err);
+        }
+      }
+    }
+    toast.success(t('menu.quickReorder.itemsAdded') || 'Items added to cart!');
   };
 
   // Handle reset session - clear basket and create new session
@@ -559,7 +583,8 @@ const initializeMenu = async () => {
 
   
   useEffect(() => {
-    const storedFavorites = localStorage.getItem('menu_favorites');
+    // Use namespaced key to avoid conflicts with TableQR favorites
+    const storedFavorites = localStorage.getItem('onlineMenu_favorites');
     if (storedFavorites) {
       try {
         const favArray = JSON.parse(storedFavorites);
@@ -666,6 +691,14 @@ const initializeMenu = async () => {
                   favoritesOnly={favoritesOnly}
                   onFavoritesToggle={() => setFavoritesOnly(!favoritesOnly)}
                   favoritesCount={favorites.size}
+                />
+
+                {/* Quick Reorder Section */}
+                <QuickReorderSection
+                  availableProducts={getAllProducts()}
+                  onReorder={handleQuickReorder}
+                  context="onlineMenu"
+                  className="mt-4"
                 />
 
                 {/* Session Control Buttons */}

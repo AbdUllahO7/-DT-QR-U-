@@ -6,6 +6,7 @@ export const en = {
   common: {
     loading: 'Loading...',
     error: 'Error',
+    wait: 'Please wait...',
     removal: 'Removal',
     setAsDefault: 'Set as Default',
     actions: 'Actions',
@@ -40,6 +41,7 @@ export const en = {
     dateRange: 'Date Range',
     today: 'Today',
     yesterday: 'Yesterday',
+    daysAgo: 'days ago',
     last7Days: 'Last 7 Days',
     last30Days: 'Last 30 Days',
     thisMonth: 'This Month',
@@ -3727,6 +3729,20 @@ hero: {
 
   menu: {
   title: "Menu",
+  quickReorder: {
+  title: 'Quick Reorder',
+  previousOrders: 'Previous Orders',
+  confirmClear: 'Clear all history?',
+  clearHistory: 'Clear History',
+  items: 'Items',
+  itemsUnavailable: 'Item(s) unavailable',
+  hideDetails: 'Hide Details',
+  showDetails: 'Show Details',
+  unavailable: 'Unavailable',
+  reorderAll: 'Reorder All',
+  reorderAvailable: 'Reorder Available Items',
+  itemsAdded: 'Items have been added to the cart!'
+},
   noCategories: "No list",
   customizations: "Customizations",
   extras: "Extras",
@@ -3977,6 +3993,20 @@ cart: {
       orderTypeRequired: 'Please select an order type',
       addressRequired: 'Delivery address is required for this order type',
       phoneRequired: 'Phone number is required for this order type'
+    },
+    quickReorder: {
+      title: 'Quick Reorder',
+      previousOrders: 'previous orders',
+      confirmClear: 'Clear all history?',
+      clearHistory: 'Clear History',
+      items: 'items',
+      itemsUnavailable: 'item(s) unavailable',
+      hideDetails: 'Hide details',
+      showDetails: 'Show details',
+      unavailable: 'Unavailable',
+      reorderAll: 'Reorder All',
+      reorderAvailable: 'Reorder Available Items',
+      itemsAdded: 'Items added to cart!'
     }
   },
 
@@ -5973,6 +6003,84 @@ categoryConfigModal: {
     cash: 'Cash',
     creditCard: 'Credit Card',
     online: 'Online Payment'
+  },
+
+  // Order Success Modal
+  orderSuccess: {
+    title: 'Order Placed!',
+    subtitle: 'Your order has been received',
+    orderNumber: 'Order Number',
+    copy: 'Copy',
+    estimatedTime: 'Est. Time',
+    orderType: 'Order Type',
+    thankYou: 'Thank you',
+    trackOrder: 'Track Your Order',
+    continueBrowsing: 'Continue Browsing'
+  },
+
+  // Order Tracker
+  orderTracker: {
+    // Loading
+    loading: {
+      title: 'Loading Order',
+      subtitle: 'Fetching your order details...'
+    },
+    // Error
+    error: {
+      title: 'Order Not Found',
+      noOrderTag: 'No order tag provided',
+      fetchFailed: 'Failed to fetch order details',
+      retry: 'Try Again',
+      goBack: 'Go Back'
+    },
+    // Header
+    back: 'Back',
+    refresh: 'Refresh',
+    orderNumber: 'Order Number',
+    copyOrderTag: 'Copy order number',
+    lastUpdated: 'Last updated',
+    // Status
+    statusTitle: 'Order Status',
+    status: {
+      pending: 'Received',
+      confirmed: 'Confirmed',
+      preparing: 'Preparing',
+      ready: 'Ready',
+      delivered: 'Delivered',
+      completed: 'Completed',
+      cancelled: 'Cancelled',
+      rejected: 'Rejected'
+    },
+    // Messages
+    message: {
+      completed: 'Thank you! Your order has been completed.',
+      cancelled: 'This order has been cancelled.',
+      rejected: 'This order has been rejected by the restaurant.'
+    },
+    // Time
+    time: {
+      estimatedReady: 'Estimated Ready Time',
+      preparingOrder: 'Your order is being prepared',
+      takingLonger: 'Taking Longer Than Expected',
+      pleaseWait: 'Please wait, almost ready',
+      almostReady: 'Almost Ready!',
+      min: 'min',
+      sec: 'sec'
+    },
+    // Order Info
+    orderType: 'Order Type',
+    orderDate: 'Order Date',
+    customerName: 'Customer',
+    table: 'Table',
+    notes: 'Notes',
+    // Items
+    orderDetails: 'Order Details',
+    item: 'item',
+    items: 'items',
+    noItems: 'No items in this order',
+    total: 'Total',
+    // Actions
+    backToMenu: 'Back to Menu'
   },
 
 }; 

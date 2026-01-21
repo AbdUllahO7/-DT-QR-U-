@@ -15,8 +15,8 @@ import OnboardingComplete from './pages/OnboardingComplete';
 import SelectionScreen from './pages/SelectionScreen';
 import Dashboard from './pages/Dashboard';
 import TableQR from './pages/TableQR';
-import RecycleBin from './components/dashboard/Porducts/RecycleBinProducts';
 import OnlineMenu from './components/dashboard/Branch/OnlineMenu/OnlineMenu';
+import { OrderTracker } from './components/dashboard/Branch/OnlineMenu/OrderTracker';
 import ResetPassword from './pages/Pass/ResetPassword';
 import ConfirmMail from './pages/Pass/ConfirimMail';
 import SetNewPassword from './pages/Pass/SetNewPassword';
@@ -31,9 +31,7 @@ const App: React.FC = () => {
         <Toaster position="top-right" richColors expand={false} />
         <Router>
           <Routes>
-            {/* Wrap all routes that need the Header/Footer 
-              inside a parent <Route> using the MainLayout.
-            */}
+            {/* --- Main Website Routes (Wrapped in Header/Footer) --- */}
             <Route element={<MainLayout />}>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
@@ -46,11 +44,10 @@ const App: React.FC = () => {
               <Route path="/onboarding/complete" element={<OnboardingComplete />} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
+              {/* Removed /track/:orderTag from here to fix the redirect loop */}
             </Route>
 
-            {/* These routes will NOT have the Header/Footer
-              because they are not children of MainLayout.
-            */}
+            {/* --- Protected App Routes --- */}
             <Route path="/selection" element={
               <ProtectedRoute>
                 <SelectionScreen />
@@ -61,9 +58,20 @@ const App: React.FC = () => {
                 <Dashboard />
               </ProtectedRoute>
             } />
-            <Route path="/table/qr/:qrToken" element={<TableQR />} />
-            <Route path="/OnlineMenu/:publicId" element={<OnlineMenu />} />
+
+            {/* --- Public Menu & Tracking Routes (No Header/Footer) --- */}
             
+            {/* 1. Table QR Flow */}
+            <Route path="/table/qr/:qrToken" element={<TableQR />} />
+            <Route path="/table/qr/:qrToken/track/:orderTag" element={<OrderTracker />} />
+
+            {/* 2. Online Menu Flow */}
+            <Route path="/OnlineMenu/:publicId" element={<OnlineMenu />} />
+            <Route path="/OnlineMenu/:publicId/track/:orderTag" element={<OrderTracker />} />
+
+            {/* 3. Direct Tracking Fallback (e.g. from SMS/Email links) */}
+            <Route path="/track/:orderTag" element={<OrderTracker />} />
+
             {/* Fallback route */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>

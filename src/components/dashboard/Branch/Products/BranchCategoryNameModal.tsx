@@ -78,8 +78,6 @@ export const BranchCategoryNameModal: React.FC<BranchCategoryNameModalProps> = (
       try {
         const response = await branchCategoryTranslationService.getBranchCategoryTranslations(branchCategoryId);
 
-        console.log('Fetched translations response:', response);
-        // Initialize with the current name for the default language
         const nameTrans: TranslatableFieldValue = {
           [defaultLanguage]: currentName
         };
@@ -96,7 +94,6 @@ export const BranchCategoryNameModal: React.FC<BranchCategoryNameModalProps> = (
           translationsArray = [response];
         }
 
-        console.log('Processing translations:', translationsArray);
 
         translationsArray.forEach((translation: any) => {
           // 1. Get the language code

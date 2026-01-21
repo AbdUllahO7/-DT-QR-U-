@@ -4,6 +4,7 @@ export const ar = {
   // Common
   common: {
     loading: 'جاري التحميل...',
+    wait: 'يرجى الانتظار...',
     error: 'خطأ',
     actions: 'الإجراءات',
     select: 'تحديد',
@@ -39,6 +40,7 @@ export const ar = {
     dateRange: 'نطاق التاريخ',
     today: 'اليوم',
     yesterday: 'أمس',
+    daysAgo: 'أيام مضت',
     last7Days: 'آخر 7 أيام',
     last30Days: 'آخر 30 يوم',
     thisMonth: 'هذا الشهر',
@@ -3716,6 +3718,20 @@ contact: {
 
   menu: {
       noCategories :"لايوجد قائمة",
+       quickReorder: {
+      title: 'إعادة الطلب السريع',
+      previousOrders: 'طلبات سابقة',
+      confirmClear: 'مسح كل السجل؟',
+      clearHistory: 'مسح السجل',
+      items: 'عناصر',
+      itemsUnavailable: 'عنصر(عناصر) غير متوفرة',
+      hideDetails: 'إخفاء التفاصيل',
+      showDetails: 'عرض التفاصيل',
+      unavailable: 'غير متوفر',
+      reorderAll: 'إعادة طلب الكل',
+      reorderAvailable: 'إعادة طلب العناصر المتوفرة',
+      itemsAdded: 'تمت إضافة العناصر إلى السلة!'
+    },
       noCategoriesDesc :"لايوجد قائمة",
       title: "القائمة",
       availableExtras: "الإضافات المتاحة",
@@ -3967,6 +3983,20 @@ contact: {
       orderTypeRequired: 'يرجى اختيار نوع الطلب',
       addressRequired: 'عنوان التوصيل مطلوب لهذا النوع من الطلبات',
       phoneRequired: 'رقم الهاتف مطلوب لهذا النوع من الطلبات'
+    },
+    quickReorder: {
+      title: 'إعادة الطلب السريع',
+      previousOrders: 'طلبات سابقة',
+      confirmClear: 'مسح كل السجل؟',
+      clearHistory: 'مسح السجل',
+      items: 'عناصر',
+      itemsUnavailable: 'عنصر(عناصر) غير متوفرة',
+      hideDetails: 'إخفاء التفاصيل',
+      showDetails: 'عرض التفاصيل',
+      unavailable: 'غير متوفر',
+      reorderAll: 'إعادة طلب الكل',
+      reorderAvailable: 'إعادة طلب العناصر المتوفرة',
+      itemsAdded: 'تمت إضافة العناصر إلى السلة!'
     }
   },
 
@@ -4609,6 +4639,20 @@ recycleBin: {
       "na": "غير متوفر"
     }
   },
+     "resetPassword": {
+      "submitted": {
+        "title": "تحقق من بريدك الإلكتروني",
+        "line1": "لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى",
+        "line2": "يرجى التحقق من صندوق الوارد الخاص بك (ومجلد البريد العشوائي!)."
+      },
+      "form": {
+        "title": "إعادة تعيين كلمة المرور",
+        "subtitle": "أدخل بريدك الإلكتروني للحصول على رابط إعادة التعيين.",
+        "button": "إرسال رابط إعادة التعيين",
+        "emailAddress": "عنوان البريد الإلكتروني",
+        "emailPlaceholder": "you@example.com"
+      }
+    },
  "confirmMail": {
       "submitted": {
         "title": "تحقق من بريدك الإلكتروني",
@@ -5951,5 +5995,83 @@ BranchTableModal: {
     cash: 'نقدي',
     creditCard: 'بطاقة ائتمان',
     online: 'دفع عبر الإنترنت'
+  },
+
+  // نافذة نجاح الطلب
+  orderSuccess: {
+    title: 'تم استلام الطلب!',
+    subtitle: 'تم استلام طلبك بنجاح',
+    orderNumber: 'رقم الطلب',
+    copy: 'نسخ',
+    estimatedTime: 'الوقت المقدر',
+    orderType: 'نوع الطلب',
+    thankYou: 'شكراً لك',
+    trackOrder: 'تتبع طلبك',
+    continueBrowsing: 'متابعة التصفح'
+  },
+
+  // تتبع الطلب
+  orderTracker: {
+    // جاري التحميل
+    loading: {
+      title: 'جاري تحميل الطلب',
+      subtitle: 'جاري جلب تفاصيل طلبك...'
+    },
+    // خطأ
+    error: {
+      title: 'الطلب غير موجود',
+      noOrderTag: 'لم يتم تقديم رقم الطلب',
+      fetchFailed: 'فشل في جلب تفاصيل الطلب',
+      retry: 'حاول مرة أخرى',
+      goBack: 'العودة'
+    },
+    // الرأس
+    back: 'رجوع',
+    refresh: 'تحديث',
+    orderNumber: 'رقم الطلب',
+    copyOrderTag: 'نسخ رقم الطلب',
+    lastUpdated: 'آخر تحديث',
+    // الحالة
+    statusTitle: 'حالة الطلب',
+    status: {
+      pending: 'تم الاستلام',
+      confirmed: 'تم التأكيد',
+      preparing: 'قيد التحضير',
+      ready: 'جاهز',
+      delivered: 'تم التوصيل',
+      completed: 'مكتمل',
+      cancelled: 'ملغي',
+      rejected: 'مرفوض'
+    },
+    // الرسائل
+    message: {
+      completed: 'شكراً لك! تم إكمال طلبك.',
+      cancelled: 'تم إلغاء هذا الطلب.',
+      rejected: 'تم رفض هذا الطلب من قبل المطعم.'
+    },
+    // الوقت
+    time: {
+      estimatedReady: 'الوقت المقدر للجاهزية',
+      preparingOrder: 'يتم تحضير طلبك',
+      takingLonger: 'يستغرق وقتاً أطول من المتوقع',
+      pleaseWait: 'يرجى الانتظار، تقريباً جاهز',
+      almostReady: 'تقريباً جاهز!',
+      min: 'د',
+      sec: 'ث'
+    },
+    // معلومات الطلب
+    orderType: 'نوع الطلب',
+    orderDate: 'تاريخ الطلب',
+    customerName: 'العميل',
+    table: 'الطاولة',
+    notes: 'ملاحظات',
+    // العناصر
+    orderDetails: 'تفاصيل الطلب',
+    item: 'عنصر',
+    items: 'عناصر',
+    noItems: 'لا توجد عناصر في هذا الطلب',
+    total: 'المجموع',
+    // الإجراءات
+    backToMenu: 'العودة للقائمة'
   }
 };

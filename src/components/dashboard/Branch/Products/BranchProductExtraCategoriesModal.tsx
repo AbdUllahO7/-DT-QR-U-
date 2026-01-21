@@ -123,7 +123,6 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
         branchProductExtraCategoriesService.getBranchProductExtraCategories({ branchProductId: branchProductId }),
         branchProductExtrasService.getBranchProductExtrasByBranchProductId(branchProductId)
       ]);
-        console.log("allAvailableCategories",allAvailableCategories)
 
       const mergedCategories: CategoryWithExtras[] = allAvailableCategories.map((category) => ({
         ...category,

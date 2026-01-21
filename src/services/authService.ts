@@ -35,11 +35,15 @@ class AuthService {
     const { logger } = await import('../utils/logger');
     try {
       logger.info('Register isteği gönderiliyor:', { email: userData.email });
-      
+
+      // Add language from localStorage
+      const language = localStorage.getItem('language') || 'en';
+      const dataWithLanguage = { ...userData, language };
+
       const response = await apiRequest<RegisterResponse>({
         method: 'POST',
         url: '/api/Auth/Register',
-        data: userData
+        data: dataWithLanguage
       });
       
       logger.info('Register API yanıtı:', response);

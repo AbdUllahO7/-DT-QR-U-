@@ -28,8 +28,9 @@ export interface RegisterDto {
   password: string;
   passwordConfirm: string;
   phoneNumber: string;
-  profileImagePath: string; 
+  profileImagePath: string;
   termsofUserService: boolean;
+  language?: string;
 }
 
 export interface LoginResponse {

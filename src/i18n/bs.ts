@@ -40,6 +40,7 @@ export const bs = {
         dateRange: 'Vremenski Raspon',
         today: 'Danas',
         yesterday: 'Juče',
+        daysAgo: 'dana prije',
         last7Days: 'Zadnjih 7 dana',
         last30Days: 'Zadnjih 30 dana',
         thisMonth: 'Ovaj mjesec',
@@ -3730,6 +3731,20 @@ menu: {
                         availableExtras: "Dostupni Dodaci",
                             no: "Ne",
                                 basePrice: "Osnovna Cijena",
+                                quickReorder: {
+  title: 'Brza Ponovna Narudžba',
+  previousOrders: 'Prethodne Narudžbe',
+  confirmClear: 'Obrisati cijelu historiju?',
+  clearHistory: 'Obriši Historiju',
+  items: 'Artikli',
+  itemsUnavailable: 'Artikal(i) nisu dostupni',
+  hideDetails: 'Sakrij Detalje',
+  showDetails: 'Prikaži Detalje',
+  unavailable: 'Nedostupno',
+  reorderAll: 'Ponovo Naruči Sve',
+  reorderAvailable: 'Ponovo Naruči Dostupne Artikle',
+  itemsAdded: 'Artikli su dodani u korpu!'
+},
                                     loading: "Učitavanje Menija",
                                         allergens: "Alergeni",
                                             quantity: "Količina",
@@ -3965,6 +3980,20 @@ order: {
                 orderTypeRequired: 'Molimo odaberite tip narudžbe',
                     addressRequired: 'Adresa za dostavu je obavezna za ovaj tip narudžbe',
                         phoneRequired: 'Broj telefona je obavezan za ovaj tip narudžbe'
+    },
+    quickReorder: {
+      title: 'Brza Ponovna Narudžba',
+      previousOrders: 'prethodnih narudžbi',
+      confirmClear: 'Obriši svu historiju?',
+      clearHistory: 'Obriši Historiju',
+      items: 'stavki',
+      itemsUnavailable: 'stavka nije dostupna',
+      hideDetails: 'Sakrij detalje',
+      showDetails: 'Prikaži detalje',
+      unavailable: 'Nije Dostupno',
+      reorderAll: 'Naruči Ponovo Sve',
+      reorderAvailable: 'Naruči Dostupne Stavke',
+      itemsAdded: 'Stavke dodane u korpu!'
     }
 },
 
