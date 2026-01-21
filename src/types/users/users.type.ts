@@ -52,6 +52,7 @@ export interface CreateUserDto {
   userCreatorId: string;
   roleIdsList: string[];
   isActive: boolean;
+  language?: string;
 }
 
 export interface UsersResponse {
