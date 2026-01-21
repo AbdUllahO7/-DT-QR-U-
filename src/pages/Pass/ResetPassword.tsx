@@ -85,7 +85,7 @@ const ResetPassword = () => {
       
     } catch (err) {
       console.error('Failed to send reset password email:', err);
-      setError(t('resetPassword.form.error'));
+      setError(err.response.data.details.message);
     } finally {
       setLoading(false);
     }

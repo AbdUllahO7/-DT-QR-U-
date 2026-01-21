@@ -3,6 +3,7 @@ export const az = {
     common: {
         loading: 'Yüklənir...',
         error: 'Xəta',
+        wait: 'Zəhmət olmasa gözləyin...',
         removal: 'Silinmə',
         setAsDefault: 'Defolt kimi təyin et',
         select: 'Seç',

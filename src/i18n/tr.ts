@@ -7,6 +7,7 @@ export const tr = {
     removal: 'Kaldırma',
     error: 'Hata',
     select: 'Seç',
+    wait: 'Lütfen bekleyin...',
     success: 'Başarılı',
      "emailAddress": "E-posta Adresi",
          actions: 'İşlemler',
