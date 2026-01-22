@@ -45,7 +45,7 @@ const CheckoutOrderTypeSidebar: React.FC<CheckoutOrderTypeSidebarProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState<boolean>(false);
   const { t, language } = useLanguage();
-  const currency = useCurrency()
+  const currency = useCurrency({ fetchFromApi: true })
 
   // Check if current language is RTL
   const isRTL = language === 'ar';

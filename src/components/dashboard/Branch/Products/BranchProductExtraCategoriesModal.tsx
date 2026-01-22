@@ -538,7 +538,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen p-0 sm:px-4 sm:pt-4 sm:pb-20 text-center">
+      <div className="flex items-center justify-center min-h-screen px-0 sm:px-4 text-center">
         {/* Backdrop */}
         <div
           className="fixed inset-0 transition-opacity bg-gray-500 dark:bg-gray-900 bg-opacity-75 dark:bg-opacity-75"
@@ -546,7 +546,7 @@ const BranchProductExtraCategoriesModal: React.FC<BranchProductExtraCategoriesMo
         />
 
         {/* Modal Panel - Full screen on mobile, Card on desktop */}
-        <div className="relative inline-block w-full h-full sm:h-auto sm:max-h-[85vh] sm:rounded-2xl bg-white dark:bg-gray-800 shadow-xl overflow-hidden text-left align-middle flex flex-col">
+        <div className="relative w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-4xl sm:rounded-2xl bg-white dark:bg-gray-800 shadow-xl overflow-hidden text-left flex flex-col sm:my-8">
           
           {/* Header */}
           <div className="px-4 sm:px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shrink-0">

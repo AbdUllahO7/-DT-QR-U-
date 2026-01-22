@@ -7,7 +7,7 @@ import { Category } from "../../../types/BranchManagement/type";
 import { useState, useEffect } from "react";
 import { logger } from "../../../utils/logger";
 import { productExtrasService } from "../../../services/Extras/ProductExtrasService";
-import { BranchProductExtra, ProductExtra } from "../../../types/Extras/type";
+import { ProductExtra } from "../../../types/Extras/type";
 
 export const SortableCategory: React.FC<{
 category: Category;

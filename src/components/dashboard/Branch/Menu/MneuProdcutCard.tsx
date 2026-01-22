@@ -36,7 +36,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onCustomize
 }) => {
   const { t } = useLanguage()
-  const currency = useCurrency()
+  const currency = useCurrency({ fetchFromApi: true })
   const [isHovered, setIsHovered] = useState(false)
   const hasAddons = product.availableAddons && product.availableAddons.length > 0
   

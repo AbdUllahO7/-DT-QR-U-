@@ -37,7 +37,7 @@ const QuickReorderSection: React.FC<QuickReorderSectionProps> = ({
   context = 'menu',
 }) => {
   const { t, isRTL } = useLanguage();
-  const currency = useCurrency();
+  const currency = useCurrency({ fetchFromApi: true });
   const {
     orderHistory,
     isLoaded,

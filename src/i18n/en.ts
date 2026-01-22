@@ -2439,6 +2439,11 @@ hero: {
     price: 'Price',
     buttons: {
       view: 'View',
+      markOutOfStock: 'Mark Out of Stock',
+      markInStock: 'Mark In Stock',
+      viewDetails: 'View Details',
+      deactivate: 'Deactivate',
+      activate: 'Activate',
       addons: 'Addons',
       extras: 'Extras',
       ingredients: 'Ingredients',

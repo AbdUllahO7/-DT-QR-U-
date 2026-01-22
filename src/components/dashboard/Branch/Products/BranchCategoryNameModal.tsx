@@ -170,7 +170,7 @@ export const BranchCategoryNameModal: React.FC<BranchCategoryNameModalProps> = (
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto" dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+      <div className="flex items-center justify-center min-h-screen px-0 sm:px-4 text-center">
         {/* Backdrop */}
         <div
           className="fixed inset-0 transition-opacity bg-gray-900/75 backdrop-blur-sm"
@@ -178,7 +178,7 @@ export const BranchCategoryNameModal: React.FC<BranchCategoryNameModalProps> = (
         />
 
         {/* Modal */}
-        <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+        <div className="relative w-full h-full sm:h-auto sm:max-w-lg bg-white dark:bg-gray-800 sm:rounded-2xl text-left overflow-hidden shadow-xl sm:my-8 flex flex-col">
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4 flex justify-between items-center">
             <h3 className="text-xl font-bold text-white">
