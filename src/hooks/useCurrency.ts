@@ -7,12 +7,23 @@ interface CurrencyData {
   displayName: string;
 }
 
+interface UseCurrencyOptions {
+  /**
+   * Whether to fetch currency from API.
+   * Set to true only for Menu and OnlineMenu pages.
+   * Default is false (only use localStorage).
+   */
+  fetchFromApi?: boolean;
+}
+
 /**
  * Custom hook to access the selected currency
- * Fetches from API first, then falls back to localStorage
+ * @param options.fetchFromApi - Set to true to fetch from API (only for Menu/OnlineMenu pages)
  * Returns the currency symbol, code, and display name
  */
-export const useCurrency = () => {
+export const useCurrency = (options: UseCurrencyOptions = {}) => {
+  const { fetchFromApi = false } = options;
+
   const [currency, setCurrency] = useState<CurrencyData>({
     code: 'TRY',
     symbol: '₺',
@@ -34,26 +45,28 @@ export const useCurrency = () => {
         console.error('Error loading currency from localStorage:', storageError);
       }
 
-      // Then try to fetch fresh data from API in the background
-      try {
-        const sessionCurrency = await currencyService.getSessionCurrency();
-        const currencyData: CurrencyData = {
-          code: sessionCurrency.code,
-          symbol: sessionCurrency.symbol,
-          displayName: sessionCurrency.displayName
-        };
+      // Only fetch from API if explicitly enabled (for Menu/OnlineMenu pages)
+      if (fetchFromApi) {
+        try {
+          const sessionCurrency = await currencyService.getSessionCurrency();
+          const currencyData: CurrencyData = {
+            code: sessionCurrency.code,
+            symbol: sessionCurrency.symbol,
+            displayName: sessionCurrency.displayName
+          };
 
-        setCurrency(currencyData);
+          setCurrency(currencyData);
 
-        // Save to localStorage for next time
-        localStorage.setItem('selectedCurrency', JSON.stringify(currencyData));
-      } catch (error: any) {
-        // Silently fail on currency API errors - don't let them trigger logout
-        // Currency is not critical enough to interrupt the user's session
-        console.warn('Currency API call failed, using cached currency:', error?.message || error);
-      } finally {
-        setIsLoading(false);
+          // Save to localStorage for next time
+          localStorage.setItem('selectedCurrency', JSON.stringify(currencyData));
+        } catch (error: any) {
+          // Silently fail on currency API errors - don't let them trigger logout
+          // Currency is not critical enough to interrupt the user's session
+          console.warn('Currency API call failed, using cached currency:', error?.message || error);
+        }
       }
+
+      setIsLoading(false);
     };
 
     // Load on mount
@@ -76,7 +89,7 @@ export const useCurrency = () => {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, []);
+  }, [fetchFromApi]);
 
 
   return { ...currency, isLoading };

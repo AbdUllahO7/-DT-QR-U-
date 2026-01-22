@@ -296,10 +296,10 @@ const BranchProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
 
   return (
     <div dir={isRTL ? 'rtl' : 'ltr'} className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen px-0 sm:px-4 pt-0 sm:pt-4 pb-0 sm:pb-20 text-center sm:block sm:p-0">
+      <div className="flex items-center justify-center min-h-screen px-0 sm:px-4 text-center">
         <div className="fixed inset-0 transition-opacity bg-gradient-to-br from-gray-900/80 via-purple-900/50 to-blue-900/80 backdrop-blur-md" onClick={resetAndClose} />
-        
-        <div className="inline-block w-full max-w-6xl h-full sm:h-auto min-h-screen sm:min-h-0 bg-white dark:bg-gray-900 shadow-2xl sm:rounded-3xl border-0 sm:border border-gray-200/50 dark:border-gray-700/50 flex flex-col overflow-hidden text-left align-bottom transition-all transform sm:my-8 sm:align-middle">
+
+        <div className="relative w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-6xl bg-white dark:bg-gray-900 shadow-2xl sm:rounded-3xl border-0 sm:border border-gray-200/50 dark:border-gray-700/50 flex flex-col overflow-hidden text-left sm:my-8">
           
           {/* Header */}
           <div className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 px-4 sm:px-8 py-4 sm:py-6 text-white shrink-0">

@@ -46,7 +46,7 @@ const OrdersTab: React.FC<ExtendedOrdersTabProps> = ({
     await onRefreshUpdatableOrders()
     await onLoadOrderTracking(orderTag)
   }
-  const currency = useCurrency()
+  const currency = useCurrency({ fetchFromApi: true })
 
 
   const getStatusColor = (status: string) => {
@@ -133,7 +133,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
   updatableOrders,
   onUpdateOrder
 }) => {
-    const currency = useCurrency()
+    const currency = useCurrency({ fetchFromApi: true })
 
   const { t } = useLanguage()
   const [isEditing, setIsEditing] = useState(false)

@@ -216,12 +216,12 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
       } catch (error: any) {
         logger.error('❌ Görsel yüklenirken hata:', error);
         setErrors(prev => ({ ...prev, image: t('createProductModal.errors.imageUploadFailed') }));
-        return DEFAULT_IMAGE_URL;
+        return "";
       } finally {
         setIsUploadingImage(false);
       }
     }
-    return DEFAULT_IMAGE_URL;
+    return "";
   };
 
   const handleSubmit = async () => {

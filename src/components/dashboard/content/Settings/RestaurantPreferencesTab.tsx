@@ -146,23 +146,45 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
       setIsSaving(true);
       setError(null);
 
+      // Get the selected currency BEFORE the API call (from current preferences state)
+      const selectedCurrency = preferences?.availableCurrencies?.find(c => c.code === formData.defaultCurrency);
+
+      console.log('Saving preferences - formData.defaultCurrency:', formData.defaultCurrency);
+      console.log('Available currencies:', preferences?.availableCurrencies);
+      console.log('Selected currency found:', selectedCurrency);
+
       await restaurantPreferencesService.updateRestaurantPreferences(formData);
-      await loadPreferences();
 
       // Save currency to localStorage after successful API call
-      const selectedCurrency = preferences?.availableCurrencies.find(c => c.code === formData.defaultCurrency);
       if (selectedCurrency) {
-        localStorage.setItem('selectedCurrency', JSON.stringify({
+        const currencyData = {
           code: selectedCurrency.code,
           symbol: selectedCurrency.symbol,
           displayName: selectedCurrency.displayName
+        };
+
+        console.log('Saving to localStorage - selectedCurrency:', currencyData);
+        localStorage.setItem('selectedCurrency', JSON.stringify(currencyData));
+
+        // Verify it was saved
+        console.log('Verified localStorage value:', localStorage.getItem('selectedCurrency'));
+
+        // Dispatch storage event so other tabs/components can react to the change
+        window.dispatchEvent(new StorageEvent('storage', {
+          key: 'selectedCurrency',
+          newValue: JSON.stringify(currencyData)
         }));
+      } else {
+        console.warn('Could not find selected currency in availableCurrencies for code:', formData.defaultCurrency);
       }
+
+      await loadPreferences();
 
       setHasChanges(false);
       setSuccess(t('RestaurantPreferencesTab.alerts.success'));
       setTimeout(() => setSuccess(null), 3000);
     } catch (err: any) {
+      console.error('Error saving preferences:', err);
       setError(err.message || t('RestaurantPreferencesTab.errors.save'));
     } finally {
       setIsSaving(false);
@@ -372,7 +394,8 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
           </div>
         </div>
 
-        {/* Currency Settings Section */}
+
+{/* 
         <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-6">
           <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} mb-4`}>
             <div>
@@ -386,13 +409,11 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
           </div>
 
           <div className="space-y-6">
-            {/* Custom Currency Selector */}
             <div className="relative">
               <label className="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                 {t('RestaurantPreferencesTab.form.defaultCurrency.label')}
               </label>
 
-              {/* Currency Display Button */}
               <button
                 type="button"
                 onClick={() => setIsCurrencyDropdownOpen(!isCurrencyDropdownOpen)}
@@ -408,7 +429,6 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
                 <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isCurrencyDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              {/* Dropdown */}
               <AnimatePresence>
                 {isCurrencyDropdownOpen && (
                   <motion.div 
@@ -418,7 +438,6 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
                     transition={{ duration: 0.15 }}
                     className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-96 overflow-hidden flex flex-col"
                   >
-                    {/* Search Input */}
                     <div className="p-3 border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-gray-800 z-10">
                       <div className="relative">
                         <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400`} />
@@ -433,7 +452,6 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
                       </div>
                     </div>
 
-                    {/* Currency List */}
                     <div className="max-h-80 overflow-y-auto custom-scrollbar">
                       {getFilteredCurrencies().map((currency) => {
                         const isSelected = formData?.defaultCurrency === currency.code;
@@ -475,7 +493,7 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
               </p>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Info Section */}
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
@@ -496,3 +514,6 @@ const RestaurantPreferencesTab: React.FC<RestaurantPreferencesTabProps> = ({ cla
 };
 
 export default RestaurantPreferencesTab;
+
+
+
