@@ -659,30 +659,55 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                               showEditButton={isSelected}
                             />
                           </div>
-
+                          {/* Action buttons for product */}
                           <div className={`flex flex-wrap items-center gap-1.5 w-full sm:w-auto ${isRTL ? 'justify-start' : 'justify-end'}`}>
                             {hasDetailedInfo && (
-                              <button onClick={(e) => { e.stopPropagation(); handleShowProductDetails(product); }} className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                                <Eye className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                              <button
+                                onClick={(e) => { e.stopPropagation(); handleShowProductDetails(product); }}
+                                className="flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-xs font-medium text-gray-600 dark:text-gray-300"
+                                title={t('SortableProduct.buttons.viewDetails')}
+                              >
+                                <Eye className="h-3.5 w-3.5" />
+                                <span>{t('SortableProduct.buttons.viewDetails')}</span>
                               </button>
                             )}
 
                             {product.isSelected && product.branchProductId && (
                               <>
-                                <button onClick={(e) => { e.stopPropagation(); onToggleProductStatus && onToggleProductStatus(product.branchProductId!, product.status); }} className={`p-2 rounded-lg transition-colors ${product.status ? 'text-green-600 bg-green-50' : 'text-gray-500 bg-gray-100'}`}>
-                                  <Power className="h-4 w-4" />
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); onToggleProductStatus && onToggleProductStatus(product.branchProductId!, product.status); }}
+                                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-medium ${product.status ? 'text-green-600 bg-green-50 hover:bg-green-100' : 'text-gray-500 bg-gray-100 hover:bg-gray-200'}`}
+                                  title={product.status ? t('SortableProduct.buttons.deactivate') : t('SortableProduct.buttons.activate')}
+                                >
+                                  <Power className="h-3.5 w-3.5" />
+                                  <span>{product.status ? t('SortableProduct.buttons.deactivate') : t('SortableProduct.buttons.activate')}</span>
                                 </button>
-                                <button onClick={(e) => { e.stopPropagation(); onToggleProductAvailability && onToggleProductAvailability(product.branchProductId!, product.isAvailable ?? true); }} className={`p-2 rounded-lg transition-colors ${product.isAvailable !== false ? 'text-blue-600 bg-blue-50' : 'text-orange-600 bg-orange-50'}`}>
-                                  <ShoppingBag className="h-4 w-4" />
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); onToggleProductAvailability && onToggleProductAvailability(product.branchProductId!, product.isAvailable ?? true); }}
+                                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-colors text-xs font-medium ${product.isAvailable !== false ? 'text-blue-600 bg-blue-50 hover:bg-blue-100' : 'text-orange-600 bg-orange-50 hover:bg-orange-100'}`}
+                                  title={product.isAvailable !== false ? t('SortableProduct.buttons.markOutOfStock') : t('SortableProduct.buttons.markInStock')}
+                                >
+                                  <ShoppingBag className="h-3.5 w-3.5" />
+                                  <span>{product.isAvailable !== false ? t('SortableProduct.buttons.markOutOfStock') : t('SortableProduct.buttons.markInStock')}</span>
                                 </button>
                                 {handleShowProductAddons && (
-                                  <button onClick={(e) => { e.stopPropagation(); handleShowProductAddons(product); }} className="p-2 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors">
-                                    <Puzzle className="h-4 w-4" />
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleShowProductAddons(product); }}
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-purple-50 text-purple-600 rounded-lg hover:bg-purple-100 transition-colors text-xs font-medium"
+                                    title={t('SortableProduct.buttons.addons')}
+                                  >
+                                    <Puzzle className="h-3.5 w-3.5" />
+                                    <span>{t('SortableProduct.buttons.addons')}</span>
                                   </button>
                                 )}
                                 {handleShowProductExtras && (
-                                  <button onClick={(e) => { e.stopPropagation(); handleShowProductExtras(product); }} className="p-2 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors">
-                                    <Grid3X3 className="h-4 w-4" />
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); handleShowProductExtras(product); }}
+                                    className="flex items-center gap-1.5 px-2.5 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors text-xs font-medium"
+                                    title={t('SortableProduct.buttons.extras')}
+                                  >
+                                    <Grid3X3 className="h-3.5 w-3.5" />
+                                    <span>{t('SortableProduct.buttons.extras')}</span>
                                   </button>
                                 )}
                               </>
@@ -693,17 +718,21 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                                 <button
                                   onClick={(e) => { e.stopPropagation(); onRemoveProduct(product.branchProductId || product.id, product.name); }}
                                   disabled={isLoading || isLoadingBranchProducts}
-                                  className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors text-xs font-medium"
+                                  title={t('SortableProduct.buttons.delete')}
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                  <span>{t('SortableProduct.buttons.delete')}</span>
                                 </button>
                               ) : (
                                 <button
                                   onClick={(e) => { e.stopPropagation(); onAddProduct(product.id, branchCategory.branchCategoryId); }}
                                   disabled={isLoading}
-                                  className="p-2 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors"
+                                  className="flex items-center gap-1.5 px-2.5 py-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors text-xs font-medium"
+                                  title={t('branchProductsPage.products.addToBranch')}
                                 >
-                                  <Plus className="h-4 w-4" />
+                                  <Plus className="h-3.5 w-3.5" />
+                                  <span>{t('branchProductsPage.products.addToBranch')}</span>
                                 </button>
                               )
                             )}
@@ -788,11 +817,13 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
 
                       {/* Action Bar */}
                       <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
-                        {/* Only show 3 main actions in grid view to save space, maybe a 'more' menu? 
-                            For now, simplified row. */}
                          <div className="flex gap-1">
                             {isSelected && product.branchProductId && (
-                                <button onClick={(e) => { e.stopPropagation(); onToggleProductStatus && onToggleProductStatus(product.branchProductId!, product.status); }} className={`p-1.5 rounded transition ${product.status ? 'text-green-600 bg-green-50' : 'text-gray-400 bg-gray-100'}`}>
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); onToggleProductStatus && onToggleProductStatus(product.branchProductId!, product.status); }}
+                                  className={`p-1.5 rounded transition ${product.status ? 'text-green-600 bg-green-50' : 'text-gray-400 bg-gray-100'}`}
+                                  title={product.status ? t('branchProductsPage.products.deactivate') : t('branchProductsPage.products.activate')}
+                                >
                                   <Power className="h-3.5 w-3.5" />
                                 </button>
                             )}
@@ -801,11 +832,19 @@ const CategoriesContent: React.FC<CategoriesContentProps> = ({
                          <div>
                             {categoryIsActive && product.status && (
                               isSelected ? (
-                                <button onClick={(e) => { e.stopPropagation(); onRemoveProduct(product.branchProductId || product.id, product.name); }} className="p-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); onRemoveProduct(product.branchProductId || product.id, product.name); }}
+                                  className="p-1.5 bg-red-50 text-red-600 rounded hover:bg-red-100"
+                                  title={t('branchProductsPage.products.removeFromBranch')}
+                                >
                                   <Trash2 className="h-3.5 w-3.5" />
                                 </button>
                               ) : (
-                                <button onClick={(e) => { e.stopPropagation(); onAddProduct(product.id, branchCategory.branchCategoryId); }} className="p-1.5 bg-green-50 text-green-600 rounded hover:bg-green-100">
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); onAddProduct(product.id, branchCategory.branchCategoryId); }}
+                                  className="p-1.5 bg-green-50 text-green-600 rounded hover:bg-green-100"
+                                  title={t('branchProductsPage.products.addToBranch')}
+                                >
                                   <Plus className="h-3.5 w-3.5" />
                                 </button>
                               )

@@ -147,7 +147,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const [trackedOrders, setTrackedOrders] = useState<TrackedOrder[]>([]);
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [updatableOrders, setUpdatableOrders] = useState<UpdatableOrder[]>([]);
-  const currency = useCurrency()
+  const currency = useCurrency({ fetchFromApi: true })
 
   // Get restaurant preferences
   const restaurantPreferences = menuData?.preferences || menuData?.restaurantPreferences || {};

@@ -44,7 +44,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
   onAddToCart
 }) => {
   const { t } = useLanguage()
-  const currency = useCurrency()
+  const currency = useCurrency({ fetchFromApi: true })
   const [selectedAddons, setSelectedAddons] = useState<SelectedAddon[]>([])
   const [selectedExtras, setSelectedExtras] = useState<Map<number, number>>(new Map())
   const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set())
