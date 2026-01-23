@@ -2,6 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send, MessageCircle, PhoneCall } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import emailjs from '@emailjs/browser';
+
+// EmailJS Configuration - Replace with your actual credentials from https://www.emailjs.com/
+const EMAILJS_SERVICE_ID = 'service_li14tz9'; // Your EmailJS Service ID
+const EMAILJS_TEMPLATE_ID = 'template_kuc7egk'; // Your EmailJS Template ID
+const EMAILJS_PUBLIC_KEY = '8-hq10jjGSQgsW6fK'; // Your EmailJS Public Key
 
 interface FormData {
   name: string;
@@ -21,6 +27,7 @@ const Contact: React.FC = () => {
   
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   
   // Phone menu state
   const [showPhoneMenu, setShowPhoneMenu] = useState(false);
@@ -55,16 +62,40 @@ const Contact: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    setSubmitted(true);
-    setIsSubmitting(false);
-    
-    setTimeout(() => {
-      setSubmitted(false);
+    setError(null);
+
+    const templateParams = {
+      name: formData.name,
+      email: formData.email,
+      reply_to: formData.email,
+      company: formData.company || 'N/A',
+      message: formData.message,
+      time: new Date().toLocaleString('en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short'
+      })
+    };
+
+    try {
+      await emailjs.send(
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
+        templateParams,
+        EMAILJS_PUBLIC_KEY
+      );
+
+      setSubmitted(true);
       setFormData({ name: '', email: '', company: '', message: '' });
-    }, 3000);
+
+      setTimeout(() => {
+        setSubmitted(false);
+      }, 5000);
+    } catch (err) {
+      console.error('EmailJS Error:', err);
+      setError(t('contact.form.error') || 'Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -284,7 +315,13 @@ const Contact: React.FC = () => {
                       placeholder={t('contact.form.messagePlaceholder')}
                     />
                   </div>
-                  
+
+                  {error && (
+                    <div className="p-4 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg text-red-700 dark:text-red-400">
+                      {error}
+                    </div>
+                  )}
+
                   <button
                     type="submit"
                     disabled={isSubmitting}

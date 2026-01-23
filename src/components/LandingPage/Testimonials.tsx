@@ -160,7 +160,7 @@ const Testimonials: React.FC = () => {
           </div>
           <div className="text-center">
             <div className="text-3xl lg:text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">
-              5 Dak
+              {t('testimonials.stats.setupValue')}
             </div>
             <div className="text-gray-600 dark:text-gray-400 font-medium">
               {t('testimonials.stats.setup')}

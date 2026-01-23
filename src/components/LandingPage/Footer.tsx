@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
 
   const rawPhoneNumber = t('footer.contact.phone');
   const cleanPhoneNumber = rawPhoneNumber.replace(/[^\d+]/g, '');
-  
+
   const address = t('footer.contact.address');
   const mapLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 
@@ -41,7 +41,7 @@ const Footer: React.FC = () => {
       { label: t('footer.sections.support.links.faq'), href: '#faq' },
 
     ],
-  
+
   };
 
   const socialLinks = [
@@ -68,10 +68,14 @@ const Footer: React.FC = () => {
           {/* Company Info */}
           <div className="lg:col-span-2">
             <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} mb-6`}>
-              <QrCode className="h-8 w-8 text-primary-400" />
+              <img
+                src="/assets/logos/iDiGiTeK-Logo-iDT-.png"
+                alt="iDiGiTeK Logo"
+                className="h-24 w-24 "
+              />
               <span className="text-2xl font-bold">{t('brand.name')}</span>
             </div>
-            
+
             <p className="text-gray-400 text-lg mb-6 leading-relaxed">
               {t('footer.description')}
             </p>
@@ -80,7 +84,7 @@ const Footer: React.FC = () => {
             <div className="space-y-3">
               {/* Phone Interaction */}
               <div className="relative" ref={phoneMenuRef}>
-                <button 
+                <button
                   onClick={() => setShowPhoneMenu(!showPhoneMenu)}
                   className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} group hover:text-primary-400 transition-colors duration-200`}
                 >
@@ -91,16 +95,16 @@ const Footer: React.FC = () => {
                 {/* Phone Options Dropdown (Opens Upwards) */}
                 {showPhoneMenu && (
                   <div className={`absolute bottom-full mb-2 ${isRTL ? 'right-0' : 'left-0'} w-48 bg-gray-800 rounded-lg shadow-xl border border-gray-700 overflow-hidden z-50`}>
-                    <a 
+                    <a
                       href={`tel:${cleanPhoneNumber}`}
                       className="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors space-x-3 rtl:space-x-reverse"
                     >
                       <PhoneCall className="h-4 w-4" />
                       <span>Call</span>
                     </a>
-                    <a 
+                    <a
                       href={`https://wa.me/${cleanPhoneNumber}`}
-                      target="_blank" 
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors space-x-3 rtl:space-x-reverse"
                     >
@@ -113,7 +117,7 @@ const Footer: React.FC = () => {
 
               {/* Email Link */}
               <div>
-                <a 
+                <a
                   href={`mailto:${t('footer.contact.email')}`}
                   className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''} group hover:text-primary-400 transition-colors duration-200`}
                 >
@@ -124,7 +128,7 @@ const Footer: React.FC = () => {
 
               {/* Address Link (Click to Map) */}
               <div>
-                <a 
+                <a
                   href={mapLink}
                   target="_blank"
                   rel="noopener noreferrer"

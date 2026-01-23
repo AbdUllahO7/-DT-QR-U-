@@ -5,7 +5,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 
 const Hero: React.FC = () => {
   const { t, isRTL } = useLanguage();
-  
+
   const features = [
     { icon: <QrCode className="h-5 w-5" />, text: t('hero.features.qrAccess') },
     { icon: <Smartphone className="h-5 w-5" />, text: t('hero.features.mobileOptimized') },
@@ -31,7 +31,7 @@ const Hero: React.FC = () => {
               <br />
               <span className="text-primary-600 dark:text-primary-400">{t('hero.title.line3')}</span>
             </h1>
-            
+
             <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl">
               {t('hero.subtitle')}
             </p>
@@ -61,13 +61,13 @@ const Hero: React.FC = () => {
               transition={{ duration: 0.6, delay: 0.4 }}
               className={`flex flex-col sm:flex-row gap-4 justify-center lg:${isRTL ? 'justify-end' : 'justify-start'}`}
             >
-              <button 
+              <button
                 onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
                 className="btn-primary text-lg px-8 py-4"
               >
                 {t('hero.cta.getStarted')}
               </button>
-              <button 
+              <button
                 onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
                 className="btn-secondary text-lg px-8 py-4"
               >
@@ -114,12 +114,16 @@ const Hero: React.FC = () => {
                         <div className="w-4 h-2 bg-white rounded-sm"></div>
                       </div>
                     </div>
-                 {/* QR Code Area within Mockup */}
+                    {/* QR Code Area within Mockup */}
                     <div className="text-center">
-                      <QrCode className="h-16 w-16 mx-auto mb-4" />
+                      <img
+                        src="/assets/logos/iDiGiTeK-Logo-iDT-.png"
+                        alt="iDiGiTeK Logo"
+                        className="h-24 w-24 mx-auto"
+                      />
                       <h3 className="text-lg font-semibold mb-2">{t('hero.mockup.restaurantName')}</h3>
                       <p className="text-sm opacity-90 mb-6">{t('hero.mockup.scanPrompt')}</p>
-                      
+
                       {/* Sample Menu Items */}
                       <div className="space-y-3 text-left">
                         <div className="bg-white/20 rounded-lg p-3">
@@ -148,11 +152,11 @@ const Hero: React.FC = () => {
 
               {/* Floating QR Code */}
               <motion.div
-                animate={{ 
+                animate={{
                   y: [0, -10, 0],
                   rotate: [0, 5, 0]
                 }}
-                transition={{ 
+                transition={{
                   duration: 3,
                   repeat: Infinity,
                   ease: "easeInOut"
