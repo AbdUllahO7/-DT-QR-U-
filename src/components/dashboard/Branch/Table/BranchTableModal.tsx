@@ -321,7 +321,7 @@ const BranchTableModal: React.FC<Props> = ({
 
                 <div className="space-y-2">
                   <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
-                    <Users className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                    <Users className="w-4 h-4 " />
                     {t('BranchTableModal.capacity') || 'Capacity'}
                   </label>
                   <div className="relative group">
@@ -339,7 +339,7 @@ const BranchTableModal: React.FC<Props> = ({
                         text-gray-900 dark:text-gray-100
                         placeholder-gray-400 dark:placeholder-gray-400
                         border-gray-300 dark:border-gray-700
-                        hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-lg hover:shadow-primary-500/10
+                        hover:border-primary-800 dark:hover:border-primary-500 hover:shadow-lg hover:shadow-primary-500/10
                         focus:outline-none focus:ring-4 focus:ring-primary-500/20 dark:focus:ring-primary-500/20 focus:border-primary-500 dark:focus:border-primary-500
                         ${errors.capacity
                           ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20'
@@ -376,20 +376,18 @@ const BranchTableModal: React.FC<Props> = ({
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, isActive: !prev.isActive }))}
-                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all duration-300 shadow-sm ${
-                        formData.isActive
-                          ? 'bg-gradient-to-r from-primary-500 to-primary-600'
-                          : 'bg-gray-300 dark:bg-gray-600'
-                      }`}
+                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all duration-300 shadow-sm ${formData.isActive
+                        ? 'bg-gradient-to-r from-primary-500 to-primary-800'
+                        : 'bg-gray-300 dark:bg-gray-600'
+                        }`}
                     >
                       <motion.span
                         layout
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md ${
-                          isRTL
-                            ? (formData.isActive ? 'translate-x-1' : 'translate-x-8')
-                            : (formData.isActive ? 'translate-x-8' : 'translate-x-1')
-                        }`}
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md ${isRTL
+                          ? (formData.isActive ? 'translate-x-1' : 'translate-x-8')
+                          : (formData.isActive ? 'translate-x-8' : 'translate-x-1')
+                          }`}
                       />
                     </button>
                   </motion.div>

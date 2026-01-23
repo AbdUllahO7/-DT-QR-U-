@@ -33,22 +33,22 @@ const OnboardingRestaurant: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { t, isRTL } = useLanguage();
-  
+
   // Steps & Status State
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
-  
+
   // Feedback State
   const [errors, setErrors] = useState<Partial<CreateRestaurantDto> & { supportedLanguages?: string }>({});
   const [apiError, setApiError] = useState<string>('');
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [userId, setUserId] = useState<string>('');
-  
+
   // Language Data State
   const [availableLanguages, setAvailableLanguages] = useState<AvailableLanguage[]>([]);
   const [languageSearch, setLanguageSearch] = useState<string>(''); // For filtering languages
-  
+
   // File upload loading states
   const [isUploadingLogo, setIsUploadingLogo] = useState<boolean>(false);
   const [isUploadingWorkPermit, setIsUploadingWorkPermit] = useState<boolean>(false);
@@ -99,10 +99,10 @@ const OnboardingRestaurant: React.FC = () => {
       try {
         const languages = await languageService.getAvailableLanguages();
         setAvailableLanguages(languages);
-        
+
         // Ensure English is selected by default if available, otherwise pick the first one
         const defaultCode = languages.find(l => l.code === 'en') ? 'en' : languages[0]?.code;
-        
+
         if (defaultCode) {
           setFormData(prev => ({
             ...prev,
@@ -122,7 +122,7 @@ const OnboardingRestaurant: React.FC = () => {
   // --- Helper Functions for Language Selection ---
 
   // Filter languages based on search input
-  const filteredLanguages = availableLanguages.filter(lang => 
+  const filteredLanguages = availableLanguages.filter(lang =>
     lang.displayName.toLowerCase().includes(languageSearch.toLowerCase()) ||
     lang.nativeName.toLowerCase().includes(languageSearch.toLowerCase()) ||
     lang.code.toLowerCase().includes(languageSearch.toLowerCase())
@@ -132,7 +132,7 @@ const OnboardingRestaurant: React.FC = () => {
     setFormData(prev => {
       const currentSupported = prev.supportedLanguages || [];
       const isSelected = currentSupported.includes(langCode);
-      
+
       let newSupported;
       if (isSelected) {
         // Remove language
@@ -144,7 +144,7 @@ const OnboardingRestaurant: React.FC = () => {
 
       // Validation: Prevent removing the last language (optional, but good UX)
       if (newSupported.length === 0) {
-        return prev; 
+        return prev;
       }
 
       // Logic: If we remove the current default language, set a new default
@@ -165,7 +165,7 @@ const OnboardingRestaurant: React.FC = () => {
         defaultLanguage: newDefault
       };
     });
-    
+
     // Clear error if exists
     if (errors.supportedLanguages) {
       setErrors(prev => ({ ...prev, supportedLanguages: undefined }));
@@ -237,12 +237,12 @@ const OnboardingRestaurant: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value, type } = e.target;
     const checked = type === 'checkbox' ? (e.target as HTMLInputElement).checked : undefined;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: checked !== undefined ? checked : value
     }));
-    
+
     if (errors[name as keyof CreateRestaurantDto]) {
       setErrors(prev => ({ ...prev, [name]: null }));
     }
@@ -284,7 +284,7 @@ const OnboardingRestaurant: React.FC = () => {
 
   const validateStep = (step: number): boolean => {
     const newErrors: any = {};
-    
+
     switch (step) {
       case 1: // Basic Info
         if (!formData.restaurantName?.trim()) {
@@ -298,7 +298,7 @@ const OnboardingRestaurant: React.FC = () => {
           newErrors.supportedLanguages = t('onboardingRestaurant.step1.errors.languageRequired') || 'Please select at least one language';
         }
         break;
-        
+
       case 2: // Company Info
         if (!formData.companyTitle?.trim()) {
           newErrors.companyTitle = t('onboardingRestaurant.step2.errors.companyTitleRequired');
@@ -307,11 +307,11 @@ const OnboardingRestaurant: React.FC = () => {
           newErrors.legalType = t('onboardingRestaurant.step2.errors.legalTypeRequired');
         }
         break;
-        
+
       case 3: // Legal Info
         break;
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -349,28 +349,28 @@ const OnboardingRestaurant: React.FC = () => {
     setSuccessMessage('');
 
     if (!validateStep(1) || !validateStep(2) || !validateStep(3)) {
-       // Navigate back to the first step with error if needed, or just validate current
-       if(!validateStep(1)) setCurrentStep(1);
-       else if(!validateStep(2)) setCurrentStep(2);
-       return;
+      // Navigate back to the first step with error if needed, or just validate current
+      if (!validateStep(1)) setCurrentStep(1);
+      else if (!validateStep(2)) setCurrentStep(2);
+      return;
     }
 
     if (!userId) {
       setApiError(t('onboardingRestaurant.messages.errors.sessionNotFound'));
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       const processedData = {
         ...formData,
         userId: userId,
         cuisineType: parseInt(formData.cuisineType.toString(), 10)
       };
-      
+
       const response = await restaurantService.createRestaurant(processedData);
-      
+
       if (response && response.restaurantId !== undefined) {
         setSuccessMessage(t('onboardingRestaurant.messages.success'));
         localStorage.removeItem('onboarding_userId');
@@ -378,13 +378,13 @@ const OnboardingRestaurant: React.FC = () => {
         if (formData.restaurantLogoPath) {
           localStorage.setItem('restaurantLogoPath', formData.restaurantLogoPath);
         }
-        
+
         setTimeout(() => {
-          navigate('/onboarding/branch', { 
-            state: { 
+          navigate('/onboarding/branch', {
+            state: {
               message: t('onboardingRestaurant.messages.welcome'),
               restaurantId: response.restaurantId.toString()
-            } 
+            }
           });
         }, 2000);
       } else {
@@ -410,7 +410,7 @@ const OnboardingRestaurant: React.FC = () => {
   const renderStep1 = () => (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <Store className="h-12 w-12 mx-auto text-primary-600 mb-4" />
+        <Store className="h-12 w-12 mx-auto text-primary-800 mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           {t('onboardingRestaurant.step1.title')}
         </h2>
@@ -438,11 +438,10 @@ const OnboardingRestaurant: React.FC = () => {
             value={formData.restaurantName}
             onChange={handleInputChange}
             maxLength={50}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors.restaurantName
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors.restaurantName
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingRestaurant.step1.namePlaceholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
           />
@@ -457,7 +456,7 @@ const OnboardingRestaurant: React.FC = () => {
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
           {t('onboardingRestaurant.progress.languagesLabel') || 'Supported Languages'}
         </label>
-        
+
         {/* Search Bar */}
         <div className="relative">
           <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
@@ -488,8 +487,8 @@ const OnboardingRestaurant: React.FC = () => {
                     onClick={() => handleLanguageToggle(lang.code)}
                     className={`
                       relative flex flex-col items-start p-3 rounded-lg border text-left transition-all duration-200
-                      ${isSelected 
-                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' 
+                      ${isSelected
+                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20'
                         : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-gray-700'
                       }
                     `}
@@ -499,31 +498,31 @@ const OnboardingRestaurant: React.FC = () => {
                         {lang.displayName}
                       </span>
                       {isSelected && (
-                        <CheckCircle className="h-4 w-4 text-primary-600 dark:text-primary-400 flex-shrink-0" />
+                        <CheckCircle className="h-4 w-4 text-primary-800 dark:text-primary-800 flex-shrink-0" />
                       )}
                     </div>
-                    <span className={`text-xs truncate ${isSelected ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'}`}>
+                    <span className={`text-xs truncate ${isSelected ? 'text-primary-800 dark:text-primary-800' : 'text-gray-500 dark:text-gray-400'}`}>
                       {lang.nativeName}
                     </span>
-                    
+
                     {/* Default Language Logic */}
                     {isSelected && (
-                      <div 
+                      <div
                         className="mt-2 w-full pt-2 border-t border-primary-200 dark:border-primary-800"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDefaultLanguageSelect(lang.code);
                         }}
                       >
-                         <span className={`
+                        <span className={`
                             text-xs px-2 py-0.5 rounded-full cursor-pointer w-full block text-center transition-colors
-                            ${isDefault 
-                              ? 'bg-primary-600 text-white font-medium shadow-sm' 
-                              : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-600'
-                            }
+                            ${isDefault
+                            ? 'text-primary-800 text-white font-medium shadow-sm'
+                            : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-600'
+                          }
                          `}>
-                           {isDefault ? (t('common.default') || 'Default') : (t('common.setAsDefault') || 'Set Default')}
-                         </span>
+                          {isDefault ? (t('common.default') || 'Default') : (t('common.setAsDefault') || 'Set Default')}
+                        </span>
                       </div>
                     )}
                   </button>
@@ -536,9 +535,9 @@ const OnboardingRestaurant: React.FC = () => {
           )}
         </div>
         {errors.supportedLanguages && (
-            <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>
-              {errors.supportedLanguages}
-            </p>
+          <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+            {errors.supportedLanguages}
+          </p>
         )}
       </div>
       {/* ------------------------------------- */}
@@ -556,19 +555,17 @@ const OnboardingRestaurant: React.FC = () => {
             accept="image/*"
             onChange={handleFileUpload('restaurantLogoPath')}
             disabled={isUploadingLogo}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              isUploadingLogo 
-                ? 'opacity-50 cursor-not-allowed' 
-                : ''
-            } ${
-              errors.restaurantLogoPath
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${isUploadingLogo
+              ? 'opacity-50 cursor-not-allowed'
+              : ''
+              } ${errors.restaurantLogoPath
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white`}
+              } text-gray-900 dark:text-white`}
           />
           {isUploadingLogo && (
             <div className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2`}>
-              <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-4 h-4 border-2 border-primary-800 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
         </div>
@@ -583,9 +580,9 @@ const OnboardingRestaurant: React.FC = () => {
         {formData.restaurantLogoPath && !isUploadingLogo && (
           <div className="mt-3">
             <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
-              <img 
-                src={formData.restaurantLogoPath} 
-                alt="Restaurant Logo Preview" 
+              <img
+                src={formData.restaurantLogoPath}
+                alt="Restaurant Logo Preview"
                 className="h-16 w-16 object-cover rounded-lg border border-gray-300 dark:border-gray-600"
               />
               <div>
@@ -613,11 +610,10 @@ const OnboardingRestaurant: React.FC = () => {
             name="cuisineType"
             value={formData.cuisineType}
             onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors.cuisineType
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors.cuisineType
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'}`}
             dir={isRTL ? 'rtl' : 'ltr'}
           >
             {cuisineOptions.map(option => (
@@ -637,7 +633,7 @@ const OnboardingRestaurant: React.FC = () => {
   const renderStep2 = () => (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <Building className="h-12 w-12 mx-auto text-primary-600 mb-4" />
+        <Building className="h-12 w-12 mx-auto text-primary-800 mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           {t('onboardingRestaurant.step2.title')}
         </h2>
@@ -659,11 +655,10 @@ const OnboardingRestaurant: React.FC = () => {
             name="companyTitle"
             value={formData.companyTitle}
             onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors.companyTitle
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors.companyTitle
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingRestaurant.step2.companyTitlePlaceholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
           />
@@ -683,11 +678,10 @@ const OnboardingRestaurant: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsLegalTypeDropdownOpen(!isLegalTypeDropdownOpen)}
-            className={`w-full ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors.legalType
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'} flex items-center justify-between`}
+            className={`w-full ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors.legalType
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'} flex items-center justify-between`}
             dir={isRTL ? 'rtl' : 'ltr'}
           >
             <Shield className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
@@ -720,19 +714,16 @@ const OnboardingRestaurant: React.FC = () => {
                         setErrors(prev => ({ ...prev, legalType: undefined }));
                       }
                     }}
-                    className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ${
-                      index === 0 ? 'rounded-t-lg' : ''
-                    } ${
-                      index === legalTypeOptions.length - 1 ? 'rounded-b-lg' : ''
-                    } ${
-                      formData.legalType === option
-                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+                    className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ${index === 0 ? 'rounded-t-lg' : ''
+                      } ${index === legalTypeOptions.length - 1 ? 'rounded-b-lg' : ''
+                      } ${formData.legalType === option
+                        ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-800 dark:text-primary-800'
                         : 'text-gray-900 dark:text-white'
-                    } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+                      } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
                   >
                     <span className="truncate">{option}</span>
                     {formData.legalType === option && (
-                      <Check className={`h-5 w-5 text-primary-600 dark:text-primary-400 flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                      <Check className={`h-5 w-5 text-primary-800 dark:text-primary-800 flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'}`} />
                     )}
                   </button>
                 ))}
@@ -758,11 +749,10 @@ const OnboardingRestaurant: React.FC = () => {
             name="mersisNumber"
             value={formData.mersisNumber}
             onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors.mersisNumber
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors.mersisNumber
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingRestaurant.step2.mersisPlaceholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
           />
@@ -797,7 +787,7 @@ const OnboardingRestaurant: React.FC = () => {
   const renderStep3 = () => (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <FileText className="h-12 w-12 mx-auto text-primary-600 mb-4" />
+        <FileText className="h-12 w-12 mx-auto text-primary-800 mb-4" />
         <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
           {t('onboardingRestaurant.step3.title')}
         </h2>
@@ -820,11 +810,10 @@ const OnboardingRestaurant: React.FC = () => {
             value={formData.taxNumber}
             onChange={handleInputChange}
             maxLength={10}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors.taxNumber
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors.taxNumber
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingRestaurant.step3.taxNumberPlaceholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
           />
@@ -847,11 +836,10 @@ const OnboardingRestaurant: React.FC = () => {
             name="taxOffice"
             value={formData.taxOffice}
             onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors.taxOffice
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors.taxOffice
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingRestaurant.step3.taxOfficePlaceholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
           />
@@ -874,19 +862,17 @@ const OnboardingRestaurant: React.FC = () => {
             accept=".pdf,.jpg,.jpeg,.png"
             onChange={handleFileUpload('workPermitFilePath')}
             disabled={isUploadingWorkPermit}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              isUploadingWorkPermit 
-                ? 'opacity-50 cursor-not-allowed' 
-                : ''
-            } ${
-              errors.workPermitFilePath
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${isUploadingWorkPermit
+              ? 'opacity-50 cursor-not-allowed'
+              : ''
+              } ${errors.workPermitFilePath
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white`}
+              } text-gray-900 dark:text-white`}
           />
           {isUploadingWorkPermit && (
             <div className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2`}>
-              <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-4 h-4 border-2 border-primary-800 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
         </div>
@@ -918,19 +904,17 @@ const OnboardingRestaurant: React.FC = () => {
             accept=".pdf,.jpg,.jpeg,.png"
             onChange={handleFileUpload('foodCertificateFilePath')}
             disabled={isUploadingFoodCertificate}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              isUploadingFoodCertificate 
-                ? 'opacity-50 cursor-not-allowed' 
-                : ''
-            } ${
-              errors.foodCertificateFilePath
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${isUploadingFoodCertificate
+              ? 'opacity-50 cursor-not-allowed'
+              : ''
+              } ${errors.foodCertificateFilePath
                 ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
                 : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white`}
+              } text-gray-900 dark:text-white`}
           />
           {isUploadingFoodCertificate && (
             <div className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 transform -translate-y-1/2`}>
-              <div className="w-4 h-4 border-2 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="w-4 h-4 border-2 border-primary-800 border-t-transparent rounded-full animate-spin"></div>
             </div>
           )}
         </div>
@@ -963,7 +947,7 @@ const OnboardingRestaurant: React.FC = () => {
         >
           <Link
             to="/register"
-            className={`inline-flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+            className={`inline-flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-primary-800 dark:hover:text-primary-800 transition-colors duration-200 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
           >
             <ArrowLeft className={`h-4 w-4 ${isRTL ? 'rotate-180' : ''}`} />
             <span>{t('onboardingRestaurant.backLink')}</span>
@@ -982,8 +966,8 @@ const OnboardingRestaurant: React.FC = () => {
               <div key={step} className={`flex items-center ${isRTL && step < 3 ? 'flex-row-reverse' : ''}`}>
                 <div className={`
                   w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium
-                  ${currentStep >= step 
-                    ? 'bg-primary-600 text-white' 
+                  ${currentStep >= step
+                    ? 'text-primary-800 text-white'
                     : 'bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400'
                   }
                 `}>
@@ -992,8 +976,8 @@ const OnboardingRestaurant: React.FC = () => {
                 {step < 3 && (
                   <div className={`
                     w-full h-1 ${isRTL ? 'mr-4' : 'ml-4'}
-                    ${currentStep > step 
-                      ? 'bg-primary-600' 
+                    ${currentStep > step
+                      ? 'text-primary-800'
                       : 'bg-gray-300 dark:bg-gray-600'
                     }
                   `} style={{ width: '100px' }} />
@@ -1067,15 +1051,15 @@ const OnboardingRestaurant: React.FC = () => {
                   {t('onboardingRestaurant.navigation.previous')}
                 </button>
               )}
-              
+
               <div className="flex-1"></div>
-              
+
               {currentStep < 3 ? (
                 <button
                   type="button"
                   onClick={handleNextStep}
                   disabled={isTransitioning || isSubmitting}
-                  className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  className="px-6 py-3 text-primary-800 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 >
                   {t('onboardingRestaurant.navigation.next')}
                 </button>
@@ -1083,7 +1067,7 @@ const OnboardingRestaurant: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting || isTransitioning || isUploadingLogo || isUploadingWorkPermit || isUploadingFoodCertificate}
-                  className={`px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+                  className={`px-6 py-3 text-primary-800 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
                 >
                   {isSubmitting ? (
                     <>

@@ -11,7 +11,7 @@ const PrivacyPolicy: React.FC = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-6">
-            <Shield className="w-8 h-8 text-primary-600 dark:text-primary-400" />
+            <Shield className="w-8 h-8 text-primary-800 dark:text-primary-800" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
             {t('legal.privacy.title')}
@@ -39,7 +39,7 @@ const PrivacyPolicy: React.FC = () => {
             {/* Information We Collect */}
             <section>
               <div className={`flex items-center gap-3 mb-4 `}>
-                <Eye className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                <Eye className="w-6 h-6 text-primary-800 dark:text-primary-800" />
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {t('legal.privacy.sections.dataCollection.title')}
                 </h2>
@@ -76,7 +76,7 @@ const PrivacyPolicy: React.FC = () => {
             {/* Data Security */}
             <section>
               <div className={`flex items-center gap-3 mb-4 `}>
-                <Lock className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                <Lock className="w-6 h-6 text-primary-800 dark:text-primary-800" />
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {t('legal.privacy.sections.dataSecurity.title')}
                 </h2>
@@ -106,7 +106,7 @@ const PrivacyPolicy: React.FC = () => {
             {/* Cookies */}
             <section>
               <div className={`flex items-center gap-3 mb-4 `}>
-                <Cookie className="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                <Cookie className="w-6 h-6 text-primary-800 dark:text-primary-800" />
                 <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
                   {t('legal.privacy.sections.cookies.title')}
                 </h2>
@@ -157,7 +157,7 @@ const PrivacyPolicy: React.FC = () => {
             <section className="border-t border-gray-200 dark:border-gray-700 pt-8">
               <div className="bg-primary-50 dark:bg-primary-900/20 rounded-xl p-6">
                 <div className={`flex items-start gap-4 `}>
-                  <AlertCircle className="w-6 h-6 text-primary-600 dark:text-primary-400 flex-shrink-0 mt-1" />
+                  <AlertCircle className="w-6 h-6 text-primary-800 dark:text-primary-800 flex-shrink-0 mt-1" />
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
                       {t('legal.privacy.sections.contact.title')}
@@ -165,7 +165,7 @@ const PrivacyPolicy: React.FC = () => {
                     <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                       {t('legal.privacy.sections.contact.content')}
                     </p>
-                    <p className="text-primary-600 dark:text-primary-400 mt-2">
+                    <p className="text-primary-800 dark:text-primary-800 mt-2">
                       {t('footer.contact.email')}
                     </p>
                   </div>

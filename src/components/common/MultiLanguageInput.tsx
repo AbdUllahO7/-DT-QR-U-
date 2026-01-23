@@ -41,13 +41,13 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
 }) => {
   const { t } = useLanguage();
   const [internalSelectedLanguage, setInternalSelectedLanguage] = useState(defaultLanguage || languages[0]?.code || '');
-  
+
   // Refs for Scrolling Logic
   const tabsRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
-  
+
   // State for Arrow Visibility
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -74,13 +74,13 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
     if (tabsRef.current) {
       const scrollAmount = 200;
       const currentScroll = tabsRef.current.scrollLeft;
-      
+
       tabsRef.current.scrollTo({
         left: direction === 'left' ? currentScroll - scrollAmount : currentScroll + scrollAmount,
         behavior: 'smooth'
       });
-      
-      setTimeout(checkScrollButtons, 100); 
+
+      setTimeout(checkScrollButtons, 100);
     }
   };
 
@@ -160,7 +160,7 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
           scrollbar-width: none;
         }
       `}</style>
-      
+
       <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-2">
         {label}
         {/* Show asterisk if required globally (implies default language is required) */}
@@ -169,11 +169,11 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
 
       {/* Main Card Container */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl overflow-hidden w-full shadow-sm">
-        
+
         {/* Header: Scrollable Tabs */}
         {showLanguageSelector && (
           <div className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 w-full relative group">
-            
+
             {/* --- Left Scroll Button --- */}
             <div className={`absolute left-0 top-0 bottom-0 z-20 flex items-center transition-opacity duration-300 ${canScrollLeft ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
               <div className="absolute inset-0 bg-gradient-to-r from-gray-50 via-gray-50/90 to-transparent dark:from-gray-900 dark:via-gray-900/90 w-12 pointer-events-none" />
@@ -188,8 +188,8 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
 
             {/* --- Right Scroll Button --- */}
             <div className={`absolute right-0 top-0 bottom-0 z-20 flex items-center justify-end transition-opacity duration-300 ${canScrollRight ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-               <div className="absolute inset-0 bg-gradient-to-l from-gray-50 via-gray-50/90 to-transparent dark:from-gray-900 dark:via-gray-900/90 w-12 pointer-events-none" />
-               <button
+              <div className="absolute inset-0 bg-gradient-to-l from-gray-50 via-gray-50/90 to-transparent dark:from-gray-900 dark:via-gray-900/90 w-12 pointer-events-none" />
+              <button
                 type="button"
                 onClick={() => scrollContainer('right')}
                 className="relative z-10 p-1 mr-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
@@ -199,7 +199,7 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
             </div>
 
             {/* --- Scrollable Container --- */}
-            <div 
+            <div
               ref={tabsRef}
               className={`flex overflow-x-auto hide-scrollbar w-full flex-nowrap ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
               onWheel={handleWheel}
@@ -212,7 +212,7 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
               {languages.map((lang) => {
                 const isActive = selectedLanguage === lang.code;
                 const error = hasError(lang.code);
-                
+
                 return (
                   <button
                     key={lang.code}
@@ -221,8 +221,8 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
                     disabled={disabled}
                     className={`
                       relative flex items-center gap-2 px-6 py-3.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 flex-shrink-0 select-none border-r border-gray-100 dark:border-gray-800/50
-                      ${isActive 
-                        ? 'text-primary-600 dark:text-blue-400 bg-white dark:bg-gray-800' 
+                      ${isActive
+                        ? 'text-primary-800 dark:text-blue-400 bg-white dark:bg-gray-800'
                         : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800/50'
                       }
                     `}
@@ -238,14 +238,14 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
                     )}
 
                     <span>{lang.nativeName}</span>
-                    
+
                     {error && (
                       <AlertCircle className="w-3.5 h-3.5 text-red-500" />
                     )}
                   </button>
                 );
               })}
-              
+
               <div className="w-8 flex-shrink-0" />
             </div>
           </div>
@@ -253,13 +253,13 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
 
         {/* Input Body */}
         <div className="p-5 bg-white dark:bg-gray-800">
-          
+
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
               <span className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
-                 {currentLanguage?.nativeName || currentLanguage?.displayName}
+                {currentLanguage?.nativeName || currentLanguage?.displayName}
               </span>
-              
+
               {isLanguageRequired(selectedLanguage) && (
                 <span className="text-[10px] font-bold text-white bg-red-500 dark:bg-red-600 px-2 py-0.5 rounded-sm shadow-sm tracking-wider">
                   REQUIRED
@@ -268,14 +268,14 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
             </div>
 
             {selectedLanguage !== defaultLanguage && value[defaultLanguage] && (
-               <button
+              <button
                 type="button"
                 onClick={handleCopyFromDefault}
-                className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-400 hover:text-primary-600 dark:hover:text-white transition-colors opacity-70 hover:opacity-100"
-               >
-                 <Copy className="w-3 h-3" />
-                 <span>Copy Default</span>
-               </button>
+                className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-400 hover:text-primary-800 dark:hover:text-white transition-colors opacity-70 hover:opacity-100"
+              >
+                <Copy className="w-3 h-3" />
+                <span>Copy Default</span>
+              </button>
             )}
           </div>
 
@@ -295,12 +295,11 @@ export const MultiLanguageInput: React.FC<MultiLanguageInputProps> = ({
                 ${disabled ? 'cursor-not-allowed opacity-50' : ''}
               `}
             />
-            
-            <div className={`absolute -bottom-2 left-0 right-0 h-px transition-all duration-300 ${
-              hasError(selectedLanguage) 
-                ? 'bg-red-500 h-0.5' 
-                : 'bg-gray-200 dark:bg-gray-700 group-focus-within/input:bg-primary-500 dark:group-focus-within/input:bg-blue-500 group-focus-within/input:h-0.5'
-            }`} />
+
+            <div className={`absolute -bottom-2 left-0 right-0 h-px transition-all duration-300 ${hasError(selectedLanguage)
+              ? 'bg-red-500 h-0.5'
+              : 'bg-gray-200 dark:bg-gray-700 group-focus-within/input:bg-primary-500 dark:group-focus-within/input:bg-blue-500 group-focus-within/input:h-0.5'
+              }`} />
           </div>
 
           {hasError(selectedLanguage) && (

@@ -112,41 +112,37 @@ const ResturantSettings: React.FC = () => {
   ];
 
   // Reusable switch component
-  const Switch: React.FC<{ 
-    checked: boolean; 
-    onChange: () => void; 
-    label: string; 
+  const Switch: React.FC<{
+    checked: boolean;
+    onChange: () => void;
+    label: string;
     description?: string;
     Icon: any;
     disabled?: boolean;
   }> = ({ checked, onChange, label, description, Icon, disabled = false }) => (
-    <motion.div 
-      className={`flex items-center justify-between py-4 px-4 rounded-lg border transition-all duration-200 ${
-        disabled 
-          ? 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700' 
-          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
-      }`}
+    <motion.div
+      className={`flex items-center justify-between py-4 px-4 rounded-lg border transition-all duration-200 ${disabled
+        ? 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'
+        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
+        }`}
       whileHover={!disabled ? { scale: 1.01 } : {}}
       transition={{ type: "spring", stiffness: 300 }}
     >
       <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} flex-1`}>
-        <div className={`p-2 rounded-lg shrink-0 ${
-          disabled 
-            ? 'bg-gray-100 dark:bg-gray-700' 
-            : 'bg-primary-100 dark:bg-primary-900/30'
-        }`}>
-          <Icon className={`h-5 w-5 ${
-            disabled 
-              ? 'text-gray-400 dark:text-gray-500' 
-              : 'text-primary-600 dark:text-primary-400'
-          }`} />
+        <div className={`p-2 rounded-lg shrink-0 ${disabled
+          ? 'bg-gray-100 dark:bg-gray-700'
+          : 'bg-primary-100 dark:bg-primary-900/30'
+          }`}>
+          <Icon className={`h-5 w-5 ${disabled
+            ? 'text-gray-400 dark:text-gray-500'
+            : 'text-primary-800 dark:text-primary-800'
+            }`} />
         </div>
         <div>
-          <p className={`text-sm font-medium ${
-            disabled 
-              ? 'text-gray-500 dark:text-gray-400' 
-              : 'text-gray-900 dark:text-white'
-          }`}>
+          <p className={`text-sm font-medium ${disabled
+            ? 'text-gray-500 dark:text-gray-400'
+            : 'text-gray-900 dark:text-white'
+            }`}>
             {label}
           </p>
           {description && (
@@ -158,23 +154,21 @@ const ResturantSettings: React.FC = () => {
       </div>
       <label className={`relative inline-flex items-center cursor-pointer shrink-0 ml-4 ${disabled ? 'opacity-50' : ''}`}>
         <input
-          title='checkbox' 
-          type="checkbox" 
-          className="sr-only peer" 
-          checked={checked} 
+          title='checkbox'
+          type="checkbox"
+          className="sr-only peer"
+          checked={checked}
           onChange={onChange}
           disabled={disabled}
         />
-        <div className={`w-11 h-6 rounded-full peer transition-all duration-200 ${
-          disabled
-            ? 'bg-gray-200 dark:bg-gray-600'
-            : checked
-              ? 'bg-primary-600 dark:bg-primary-500'
-              : 'bg-gray-200 dark:bg-gray-600'
-        }`}>
-          <div className={`w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform duration-200 ${
-            checked ? (isRTL ? '-translate-x-5' : 'translate-x-5') : (isRTL ? '-translate-x-0.5' : 'translate-x-0.5')
-          }`} />
+        <div className={`w-11 h-6 rounded-full peer transition-all duration-200 ${disabled
+          ? 'bg-gray-200 dark:bg-gray-600'
+          : checked
+            ? 'text-primary-800 dark:bg-primary-500'
+            : 'bg-gray-200 dark:bg-gray-600'
+          }`}>
+          <div className={`w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform duration-200 ${checked ? (isRTL ? '-translate-x-5' : 'translate-x-5') : (isRTL ? '-translate-x-0.5' : 'translate-x-0.5')
+            }`} />
         </div>
       </label>
     </motion.div>
@@ -190,7 +184,7 @@ const ResturantSettings: React.FC = () => {
             {t('settings.description')}
           </p>
         </div>
-        
+
         {/* Branch Selector - Visible on relevant tabs */}
         {activeTab === 'branch' && (
           <div className="w-full sm:w-auto">
@@ -245,11 +239,10 @@ const ResturantSettings: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
+                className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} py-4 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${activeTab === tab.id
+                  ? 'border-primary-500 text-primary-800 dark:text-primary-800'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
               >
                 <Icon className="h-4 w-4" />
                 <span>{tab.label}</span>
@@ -308,7 +301,7 @@ const ResturantSettings: React.FC = () => {
 
                 <Switch
                   checked={false}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   label={t('settings.appearance.compact')}
                   description={t('settings.appearance.compactDesc')}
                   Icon={Eye}
@@ -317,7 +310,7 @@ const ResturantSettings: React.FC = () => {
 
                 <Switch
                   checked={true}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   label={t('settings.appearance.animations')}
                   description={t('settings.appearance.animationsDesc')}
                   Icon={Zap}

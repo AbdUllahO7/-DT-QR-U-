@@ -126,13 +126,13 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
         <div className="fixed inset-0 transition-opacity bg-gray-900/75 backdrop-blur-sm" onClick={onClose}></div>
 
         <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-none sm:rounded-2xl text-left overflow-hidden shadow-xl transform transition-all w-full h-full sm:h-auto sm:my-8 sm:align-middle sm:max-w-lg flex flex-col">
-          
+
           {/* Modal Header */}
           <div className="bg-white dark:bg-gray-800 px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center shrink-0">
             <h3 className="text-xl font-bold text-gray-900 dark:text-white">
               {isEditMode ? t('extrasManagement.extras.editExtra') : t('extrasManagement.extras.addExtra')}
             </h3>
-            
+
             <button onClick={onClose} className="text-gray-400 hover:text-gray-500 focus:outline-none">
               <X className="w-6 h-6" />
             </button>
@@ -153,7 +153,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
           {/* Modal Content - Scrollable Area */}
           <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
             <form id="extraForm" onSubmit={handleFormSubmit} className="space-y-6">
-              
+
               {/* Parent Category Select - Custom Component */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -229,11 +229,10 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                   {t('extrasManagement.extras.fields.imageLabel')}
                 </label>
                 <div
-                  className={`relative border-2 border-dashed rounded-xl p-6 transition-colors group cursor-pointer ${
-                    imagePreview
-                      ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10'
-                      : 'border-gray-300 hover:border-primary-400 dark:border-gray-600 dark:hover:border-primary-500'
-                  }`}
+                  className={`relative border-2 border-dashed rounded-xl p-6 transition-colors group cursor-pointer ${imagePreview
+                    ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/10'
+                    : 'border-gray-300 hover:border-primary-800 dark:border-gray-600 dark:hover:border-primary-500'
+                    }`}
                 >
                   {imagePreview ? (
                     <div className="relative h-48 w-full flex items-center justify-center">
@@ -249,9 +248,9 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                   ) : (
                     <label className="flex flex-col items-center justify-center h-32 cursor-pointer w-full">
                       <div className="p-3 bg-gray-100 dark:bg-gray-700 rounded-full mb-3 group-hover:bg-primary-100 dark:group-hover:bg-primary-900/30 transition-colors">
-                        <Upload className="w-6 h-6 text-gray-400 group-hover:text-primary-600 dark:text-gray-500 dark:group-hover:text-primary-400" />
+                        <Upload className="w-6 h-6 text-gray-400 group-hover:text-primary-800 dark:text-gray-500 dark:group-hover:text-primary-800" />
                       </div>
-                      <span className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                      <span className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-primary-800 dark:group-hover:text-primary-800 transition-colors">
                         {t('extrasManagement.extras.fields.uploadText')}
                       </span>
                       <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">PNG, JPG, GIF up to 5MB</span>
@@ -269,14 +268,14 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                       type="checkbox"
                       checked={formData.status}
                       onChange={(e) => onChange({ ...formData, status: e.target.checked })}
-                      className="w-5 h-5 text-primary-600 rounded focus:ring-primary-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 transition-colors"
+                      className="w-5 h-5 text-primary-800 rounded focus:ring-primary-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 transition-colors"
                     />
                   </div>
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
                     {t('extrasManagement.extras.fields.activeLabel')}
                   </span>
                 </label>
-                
+
                 <div className="hidden sm:block w-px bg-gray-200 dark:bg-gray-600 h-6 self-center"></div>
 
                 <label className={`flex items-center gap-3 group transition-opacity ${!isRemovalAllowed ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}>
@@ -285,7 +284,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                       type="checkbox"
                       checked={formData.isRemoval}
                       onChange={handleRemovalCheckboxChange}
-                      disabled={!isRemovalAllowed && !formData.isRemoval} 
+                      disabled={!isRemovalAllowed && !formData.isRemoval}
                       className="w-5 h-5 text-red-600 rounded focus:ring-red-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 transition-colors disabled:cursor-not-allowed"
                     />
                   </div>
@@ -293,7 +292,7 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
                     <span className={`text-sm font-medium transition-colors ${formData.isRemoval ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'}`}>
                       {t('extrasManagement.extras.fields.removalLabel')}
                     </span>
-                    
+
                   </div>
                 </label>
               </div>
@@ -313,13 +312,13 @@ export const ExtraModal: React.FC<ExtraModalProps> = ({
               type="submit"
               form="extraForm"
               disabled={loading || uploading}
-              className="w-full sm:w-auto inline-flex justify-center rounded-xl border border-transparent px-6 py-3 text-sm font-medium text-white shadow-sm bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+              className="w-full sm:w-auto inline-flex justify-center rounded-xl border border-transparent px-6 py-3 text-sm font-medium text-white shadow-sm text-primary-800 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
             >
               {loading || uploading
                 ? t('extrasManagement.processing')
                 : isEditMode
-                ? t('extrasManagement.buttons.save')
-                : t('extrasManagement.buttons.add')}
+                  ? t('extrasManagement.buttons.save')
+                  : t('extrasManagement.buttons.add')}
             </button>
           </div>
         </div>

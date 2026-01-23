@@ -498,14 +498,14 @@ export const ar = {
 
   // Brand
   brand: {
-    name: 'idigitek QR',
+    name: 'iDIGITEK QR',
     slogan: 'حل المطاعم الرقمي'
   },
 
   // Features
   features: {
     title: 'لماذا تختار',
-    titleHighlight: 'نظام المنيو الرقمي؟',
+    titleHighlight: 'نظام  iDIGITEK QR Menu؟',
     subtitle: 'انقل تجربة ضيوفك لمستوى آخر من الاحترافية والسرعة مع أدوات مصممة خصيصاً لنمو المطاعم الحديثة.',
     list: {
       qrAccess: {
@@ -2470,9 +2470,14 @@ export const ar = {
     price: 'السعر',
     buttons: {
       view: 'عرض',
-      ingredients: 'مكونات',
+      markOutOfStock: 'نفد المخزون',
+      markInStock: 'متوفر في المخزون',
+      viewDetails: 'تفاصيل المنتج',
+      deactivate: 'إلغاء النشاط',
+      activate: 'تفعيل',
       addons: 'إضافات',
-      extras: 'إضافية',
+      extras: 'إضافات',
+      ingredients: 'المكونات',
       edit: 'تعديل',
       delete: 'حذف',
       add: 'إضافة',

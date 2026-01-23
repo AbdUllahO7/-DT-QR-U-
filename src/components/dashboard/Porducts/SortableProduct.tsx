@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Edit2,  GripVertical, Package, Trash2, AlertCircle, Loader2, Plus, Sparkles, ChefHat, Layers } from "lucide-react";
+import { Edit2, GripVertical, Package, Trash2, AlertCircle, Loader2, Plus, Sparkles, ChefHat, Layers } from "lucide-react";
 import { productService } from "../../../services/productService";
 import { logger } from "../../../utils/logger";
 import { productAddonsService } from "../../../services/ProductAddonsService";
@@ -39,7 +39,7 @@ export const SortableProduct: React.FC<{
     transform,
     transition,
     isDragging,
-    
+
   } = useSortable({ id: product.id });
 
   const style = {
@@ -117,13 +117,12 @@ export const SortableProduct: React.FC<{
       ref={setNodeRef}
       style={style}
       data-product-id={product.id}
-      className={`group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden transition-all duration-300 ${
-        isDragging
-          ? 'shadow-2xl shadow-primary-500/20 ring-2 ring-primary-500 scale-105'
-          : isNew
-          ? 'shadow-xl shadow-primary-500/30 border-2 border-primary-400 dark:border-primary-500 ring-4 ring-primary-200 dark:ring-primary-800'
+      className={`group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden transition-all duration-300 ${isDragging
+        ? 'shadow-2xl shadow-primary-500/20 ring-2 ring-primary-500 scale-105'
+        : isNew
+          ? 'shadow-xl shadow-primary-500/30 border-2 border-primary-800 dark:border-primary-500 ring-4 ring-primary-200 dark:ring-primary-800'
           : 'shadow-sm hover:shadow-xl border border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
-      }`}
+        }`}
       role="article"
       aria-label={t('SortableProduct.accessibility.productCard')}
     >
@@ -155,7 +154,7 @@ export const SortableProduct: React.FC<{
           )}
 
           {/* Display order badge */}
-          <div className="absolute -bottom-1.5 -right-1.5 md:-bottom-2 md:-right-2 bg-gradient-to-br from-primary-500 to-primary-600 text-white text-xs font-bold px-2 md:px-2.5 py-0.5 md:py-1 rounded-lg shadow-lg">
+          <div className="absolute -bottom-1.5 -right-1.5 md:-bottom-2 md:-right-2 bg-gradient-to-br from-primary-500 to-primary-800 text-white text-xs font-bold px-2 md:px-2.5 py-0.5 md:py-1 rounded-lg shadow-lg">
             #{product.displayOrder}
           </div>
         </div>
@@ -167,7 +166,7 @@ export const SortableProduct: React.FC<{
             <button
               {...attributes}
               {...listeners}
-              className="mt-1 p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-110"
+              className="mt-1 p-2 text-gray-400 hover:text-primary-800 dark:hover:text-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-110"
               aria-label={t('SortableProduct.accessibility.dragHandle')}
               title={t('SortableProduct.dragProduct')}
             >
@@ -177,7 +176,7 @@ export const SortableProduct: React.FC<{
             <div className="flex-1 min-w-0 space-y-3">
               {/* Header: Name + Status Badge */}
               <div className={`flex items-start gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <h4 className="flex-1 font-semibold text-lg text-gray-900 dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                <h4 className="flex-1 font-semibold text-lg text-gray-900 dark:text-white group-hover:text-primary-800 dark:group-hover:text-primary-800 transition-colors">
                   {product.name}
                 </h4>
                 {/* NEW Badge for newly created products */}
@@ -195,7 +194,7 @@ export const SortableProduct: React.FC<{
                   {product.description}
                 </p>
               )}
-              
+
               {/* Ingredients Section */}
               <div className="space-y-2">
                 {isLoadingIngredients ? (
@@ -223,16 +222,15 @@ export const SortableProduct: React.FC<{
                       {ingredients.map((ingredient) => (
                         <span
                           key={ingredient.id}
-                          className={`inline-flex items-center gap-1 text-xs bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2.5 py-1 rounded-lg border ${
-                            ingredient.isAllergenic 
-                              ? 'border-yellow-300 dark:border-yellow-700 ring-1 ring-yellow-200 dark:ring-yellow-800' 
-                              : 'border-orange-200 dark:border-orange-800'
-                          }`}
+                          className={`inline-flex items-center gap-1 text-xs bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 px-2.5 py-1 rounded-lg border ${ingredient.isAllergenic
+                            ? 'border-yellow-300 dark:border-yellow-700 ring-1 ring-yellow-200 dark:ring-yellow-800'
+                            : 'border-orange-200 dark:border-orange-800'
+                            }`}
                         >
                           {ingredient.ingredientName}
                           {ingredient.isAllergenic && (
                             <span title="Allergen">
-                              <AlertCircle 
+                              <AlertCircle
                                 className="h-3 w-3 text-yellow-500 dark:text-yellow-400"
                                 aria-label={t('SortableProduct.accessibility.allergenWarning')}
                               />
@@ -357,7 +355,7 @@ export const SortableProduct: React.FC<{
               {/* Footer: Price + Actions */}
               <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-3 border-t border-gray-100 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <div className="flex items-baseline gap-2">
-                  <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 dark:from-primary-400 dark:to-primary-600 bg-clip-text text-transparent">
+                  <span className="text-xl md:text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-800 dark:from-primary-400 dark:to-primary-800 bg-clip-text text-transparent">
                     {product.price.toFixed(2)}
                   </span>
                 </div>
@@ -399,7 +397,7 @@ export const SortableProduct: React.FC<{
 
                   <button
                     onClick={() => onEdit(product.id)}
-                    className="flex items-center gap-1 px-2 md:px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all duration-200 bg-gray-100 dark:bg-gray-700/50"
+                    className="flex items-center gap-1 px-2 md:px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-primary-800 dark:hover:text-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all duration-200 bg-gray-100 dark:bg-gray-700/50"
                     title={t('SortableProduct.editProduct')}
                     aria-label={t('SortableProduct.accessibility.editButton')}
                   >

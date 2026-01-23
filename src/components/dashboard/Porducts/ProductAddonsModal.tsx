@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  X, Search, Check, Plus, Trash2, Star, 
-  Loader2, AlertCircle, Package, 
+import {
+  X, Search, Check, Plus, Trash2, Star,
+  Loader2, AlertCircle, Package,
   GripVertical, Edit3, Save, XCircle, Sparkles
 } from 'lucide-react';
-import { 
-  DndContext, closestCenter, KeyboardSensor, PointerSensor, 
-  useSensor, useSensors, DragEndEvent 
+import {
+  DndContext, closestCenter, KeyboardSensor, PointerSensor,
+  useSensor, useSensors, DragEndEvent
 } from '@dnd-kit/core';
-import { 
-  arrayMove, SortableContext, sortableKeyboardCoordinates, 
-  verticalListSortingStrategy, useSortable 
+import {
+  arrayMove, SortableContext, sortableKeyboardCoordinates,
+  verticalListSortingStrategy, useSortable
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useLanguage } from '../../../contexts/LanguageContext';
@@ -32,172 +32,171 @@ const SortableAddonItem: React.FC<{
   onCancelEdit: () => void;
   editingData: { marketingText: string; isRecommended: boolean };
   onEditingDataChange: (field: string, value: any) => void;
-}> = ({ 
-  addon, onRemove, isEditing, onEdit, onSaveEdit, 
-  onCancelEdit, editingData, onEditingDataChange 
+}> = ({
+  addon, onRemove, isEditing, onEdit, onSaveEdit,
+  onCancelEdit, editingData, onEditingDataChange
 }) => {
-  const { t } = useLanguage();
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({ id: addon.id });
-  const currency = useCurrency();
+    const { t } = useLanguage();
+    const {
+      attributes,
+      listeners,
+      setNodeRef,
+      transform,
+      transition,
+      isDragging
+    } = useSortable({ id: addon.id });
+    const currency = useCurrency();
 
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-    zIndex: isDragging ? 999 : 'auto',
-    position: 'relative' as const,
-    touchAction: 'none' // Important for mobile dragging
-  };
+    const style = {
+      transform: CSS.Transform.toString(transform),
+      transition,
+      opacity: isDragging ? 0.5 : 1,
+      zIndex: isDragging ? 999 : 'auto',
+      position: 'relative' as const,
+      touchAction: 'none' // Important for mobile dragging
+    };
 
-  const addonProduct = addon.addonProduct;
-  const hasValidImage = addonProduct?.imageUrl && addonProduct.imageUrl.trim() !== '';
+    const addonProduct = addon.addonProduct;
+    const hasValidImage = addonProduct?.imageUrl && addonProduct.imageUrl.trim() !== '';
 
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`group relative bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-300 ${
-        isDragging 
-          ? 'shadow-2xl shadow-primary-500/20 ring-2 ring-primary-500 scale-105' 
+    return (
+      <div
+        ref={setNodeRef}
+        style={style}
+        className={`group relative bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-300 ${isDragging
+          ? 'shadow-2xl shadow-primary-500/20 ring-2 ring-primary-500 scale-105'
           : 'shadow-sm hover:shadow-lg border border-gray-200 dark:border-gray-700'
-      }`}
-    >
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
-      
-      <div className="p-3 sm:p-4 flex items-start gap-3 sm:gap-4">
-        {/* Drag Handle */}
-        <button
-          {...attributes}
-          {...listeners}
-          className="mt-2 p-1.5 sm:p-2 text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-110 flex-shrink-0"
-        >
-          <GripVertical className="h-4 w-4 sm:h-5 sm:w-5" />
-        </button>
+          }`}
+      >
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"></div>
 
-        {/* Product Image */}
-        <div className="flex-shrink-0 hidden xs:block">
-          {hasValidImage ? (
-            <div className="relative group/image">
-              <img
-                src={addonProduct.imageUrl}
-                alt={addonProduct?.name}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl object-cover bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 ring-2 ring-gray-200 dark:ring-gray-700"
-                loading="lazy"
-              />
-            </div>
-          ) : (
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center ring-2 ring-gray-200 dark:ring-gray-700">
-              <Package className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
-            </div>
-          )}
-        </div>
+        <div className="p-3 sm:p-4 flex items-start gap-3 sm:gap-4">
+          {/* Drag Handle */}
+          <button
+            {...attributes}
+            {...listeners}
+            className="mt-2 p-1.5 sm:p-2 text-gray-400 hover:text-primary-800 dark:hover:text-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg cursor-grab active:cursor-grabbing transition-all duration-200 hover:scale-110 flex-shrink-0"
+          >
+            <GripVertical className="h-4 w-4 sm:h-5 sm:w-5" />
+          </button>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
-            <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-gray-900 dark:text-white mb-1 truncate text-sm sm:text-base">
-                {addonProduct?.name || `Product ID: ${addon.addonProductId}`}
-              </h4>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 text-xs sm:text-sm font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg">
-                  {currency.symbol}
-                  {addonProduct?.price?.toFixed(2) || '0.00'} 
-                </span>
-                {addon.isRecommended && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-lg whitespace-nowrap">
-                    <Star className="h-3 w-3 fill-current" />
-                    {t('productAddonsModal.form.isRecommended.badge')}
+          {/* Product Image */}
+          <div className="flex-shrink-0 hidden xs:block">
+            {hasValidImage ? (
+              <div className="relative group/image">
+                <img
+                  src={addonProduct.imageUrl}
+                  alt={addonProduct?.name}
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl object-cover bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 ring-2 ring-gray-200 dark:ring-gray-700"
+                  loading="lazy"
+                />
+              </div>
+            ) : (
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg sm:rounded-xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 flex items-center justify-center ring-2 ring-gray-200 dark:ring-gray-700">
+                <Package className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" />
+              </div>
+            )}
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-gray-900 dark:text-white mb-1 truncate text-sm sm:text-base">
+                  {addonProduct?.name || `Product ID: ${addon.addonProductId}`}
+                </h4>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 text-xs sm:text-sm font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg">
+                    {currency.symbol}
+                    {addonProduct?.price?.toFixed(2) || '0.00'}
                   </span>
+                  {addon.isRecommended && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 text-[10px] sm:text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-lg whitespace-nowrap">
+                      <Star className="h-3 w-3 fill-current" />
+                      {t('productAddonsModal.form.isRecommended.badge')}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700/50 rounded-xl p-1 self-start">
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={() => onSaveEdit(addon.id)}
+                      className="p-1.5 sm:p-2 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200"
+                    >
+                      <Save className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={onCancelEdit}
+                      className="p-1.5 sm:p-2 text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
+                    >
+                      <XCircle className="h-4 w-4" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => onEdit(addon.id)}
+                      className="p-1.5 sm:p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200"
+                    >
+                      <Edit3 className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => onRemove(addon.id)}
+                      className="p-1.5 sm:p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </>
                 )}
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700/50 rounded-xl p-1 self-start">
-              {isEditing ? (
-                <>
-                  <button
-                    onClick={() => onSaveEdit(addon.id)}
-                    className="p-1.5 sm:p-2 text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200"
-                  >
-                    <Save className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={onCancelEdit}
-                    className="p-1.5 sm:p-2 text-gray-600 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-lg transition-all duration-200"
-                  >
-                    <XCircle className="h-4 w-4" />
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => onEdit(addon.id)}
-                    className="p-1.5 sm:p-2 text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200"
-                  >
-                    <Edit3 className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => onRemove(addon.id)}
-                    className="p-1.5 sm:p-2 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Marketing Text */}
-          {isEditing ? (
-            <div className="space-y-3 mt-3 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
-              <textarea
-                value={editingData.marketingText}
-                onChange={(e) => onEditingDataChange('marketingText', e.target.value)}
-                placeholder={t('productAddonsModal.form.marketingText.placeholder')}
-                className="w-full px-3 py-2 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none transition-all duration-200"
-                rows={2}
-              />
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={editingData.isRecommended}
-                  onChange={(e) => onEditingDataChange('isRecommended', e.target.checked)}
-                  className="sr-only peer"
+            {/* Marketing Text */}
+            {isEditing ? (
+              <div className="space-y-3 mt-3 p-3 bg-gray-50 dark:bg-gray-700/30 rounded-xl">
+                <textarea
+                  value={editingData.marketingText}
+                  onChange={(e) => onEditingDataChange('marketingText', e.target.value)}
+                  placeholder={t('productAddonsModal.form.marketingText.placeholder')}
+                  className="w-full px-3 py-2 text-sm border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white resize-none transition-all duration-200"
+                  rows={2}
                 />
-                <div className="w-10 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-yellow-500 peer-checked:to-yellow-600"></div>
-                <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                  {t('productAddonsModal.form.isRecommended.label')}
-                </span>
-              </label>
-            </div>
-          ) : (
-            <>
-              {addon.marketingText && (
-                <p className="text-sm text-gray-600 dark:text-gray-400 italic mt-2 p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg line-clamp-2">
-                  "{addon.marketingText}"
-                </p>
-              )}
-              {addonProduct?.description && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-1.5">
-                  {addonProduct.description}
-                </p>
-              )}
-            </>
-          )}
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editingData.isRecommended}
+                    onChange={(e) => onEditingDataChange('isRecommended', e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-10 h-5 bg-gray-300 dark:bg-gray-600 peer-focus:ring-2 peer-focus:ring-primary-500 rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-yellow-500 peer-checked:to-yellow-600"></div>
+                  <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                    {t('productAddonsModal.form.isRecommended.label')}
+                  </span>
+                </label>
+              </div>
+            ) : (
+              <>
+                {addon.marketingText && (
+                  <p className="text-sm text-gray-600 dark:text-gray-400 italic mt-2 p-2 bg-gray-50 dark:bg-gray-700/30 rounded-lg line-clamp-2">
+                    "{addon.marketingText}"
+                  </p>
+                )}
+                {addonProduct?.description && (
+                  <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mt-1.5">
+                    {addonProduct.description}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
   isOpen,
@@ -236,7 +235,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
         productService.getCategories()
       ]);
 
-      const allProducts: AvailableAddonProduct[] = categoriesResponse.flatMap(category => 
+      const allProducts: AvailableAddonProduct[] = categoriesResponse.flatMap(category =>
         category.products.map((product: any) => ({
           id: product.id,
           name: product.name,
@@ -251,7 +250,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
 
       setCurrentAddons(addonsResponse);
       setAvailableProducts(allProducts);
-      
+
       const newSelectedProductsData = new Map<number, SelectedProductData>();
       addonsResponse.forEach(addon => {
         newSelectedProductsData.set(addon.addonProductId, {
@@ -262,8 +261,8 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
       });
       setSelectedProductsData(newSelectedProductsData);
 
-      logger.info('Eklenti verileri yüklendi', { 
-        productId, 
+      logger.info('Eklenti verileri yüklendi', {
+        productId,
         currentAddons: addonsResponse.length,
         availableProducts: allProducts.length
       });
@@ -385,7 +384,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
     try {
       const currentAddonProductIds = new Set(currentAddons.map(addon => addon.addonProductId));
       const selectedProductIds = new Set(selectedProductsData.keys());
-      
+
       const toAdd = Array.from(selectedProductIds).filter(id => !currentAddonProductIds.has(id));
       const toRemove = currentAddons.filter(addon => !selectedProductIds.has(addon.addonProductId));
 
@@ -432,7 +431,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
   const filteredProducts = availableProducts.filter(product => {
     if (product.id === productId) return false;
     return product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-           (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()));
+      (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()));
   });
 
   const addonsWithProductDetails = currentAddons.map(addon => {
@@ -452,7 +451,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
             className="fixed inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70 backdrop-blur-md"
             onClick={onClose}
           />
-          
+
           <div className="flex h-full sm:min-h-screen items-center justify-center p-0 sm:p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 40 }}
@@ -462,7 +461,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
               className="relative w-full h-full sm:h-[90vh] max-w-7xl flex flex-col"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-3xl rounded-3xl hidden sm:block"></div>
-              
+
               <div className="relative bg-white dark:bg-gray-800 sm:rounded-3xl shadow-2xl border-0 sm:border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col h-full">
                 {/* Header */}
                 <div className="relative overflow-hidden flex-shrink-0">
@@ -471,7 +470,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                     <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full blur-3xl"></div>
                     <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
                   </div>
-                  
+
                   <div className="relative px-4 sm:px-8 py-4 sm:py-6">
                     <button
                       onClick={onClose}
@@ -479,9 +478,9 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                     >
                       <X className="w-5 h-5" />
                     </button>
-                  
+
                     <div className={`flex items-start gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <motion.div 
+                      <motion.div
                         initial={{ scale: 0, rotate: -180 }}
                         animate={{ scale: 1, rotate: 0 }}
                         transition={{ type: "spring", delay: 0.2, duration: 0.6 }}
@@ -492,9 +491,9 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                           <Sparkles className="w-8 h-8 text-white" />
                         </div>
                       </motion.div>
-                      
+
                       <div className="flex-1 pt-1 pr-8 sm:pr-0">
-                        <motion.h3 
+                        <motion.h3
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.1 }}
@@ -502,7 +501,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                         >
                           {t('productAddonsModal.title')}
                         </motion.h3>
-                        <motion.p 
+                        <motion.p
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.15 }}
@@ -517,7 +516,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
 
                 {/* Content - Responsive Stack */}
                 <div className="flex-1 overflow-hidden flex flex-col lg:flex-row">
-                  
+
                   {/* Current Addons Panel */}
                   <div className="w-full lg:w-1/2 h-1/2 lg:h-auto border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-700 flex flex-col bg-gray-50/50 dark:bg-gray-900/30">
                     <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 lg:bg-transparent">
@@ -533,11 +532,11 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                         </p>
                       )}
                     </div>
-                    
+
                     <div className="flex-1 overflow-y-auto p-3 sm:p-6">
                       {loading ? (
                         <div className="flex flex-col items-center justify-center py-8 sm:py-12">
-                          <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-primary-600 mb-3" />
+                          <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-primary-800 mb-3" />
                           <span className="text-sm text-gray-600 dark:text-gray-400">{t('productAddonsModal.loading.addons')}</span>
                         </div>
                       ) : addonsWithProductDetails.length === 0 ? (
@@ -580,7 +579,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                       <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
                         {t('productAddonsModal.panels.availableProducts.title')}
                       </h3>
-                      
+
                       {/* Search */}
                       <div className="relative">
                         <Search className={`absolute top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 ${isRTL ? 'right-3 sm:right-4' : 'left-3 sm:left-4'}`} />
@@ -593,11 +592,11 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                         />
                       </div>
                     </div>
-                    
+
                     <div className="flex-1 overflow-y-auto p-3 sm:p-6">
                       {loading ? (
                         <div className="flex flex-col items-center justify-center py-8 sm:py-12">
-                          <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-primary-600 mb-3" />
+                          <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-primary-800 mb-3" />
                           <span className="text-sm text-gray-600 dark:text-gray-400">{t('productAddonsModal.loading.products')}</span>
                         </div>
                       ) : filteredProducts.length === 0 ? (
@@ -607,8 +606,8 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                             <Package className="relative w-10 h-10 sm:w-12 sm:h-12 opacity-50" />
                           </div>
                           <p className="text-sm sm:text-base text-center px-4">
-                            {searchQuery 
-                              ? t('productAddonsModal.panels.availableProducts.emptyState.noResults') 
+                            {searchQuery
+                              ? t('productAddonsModal.panels.availableProducts.emptyState.noResults')
                               : t('productAddonsModal.panels.availableProducts.emptyState.noProducts')
                             }
                           </p>
@@ -623,11 +622,10 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                             return (
                               <div
                                 key={product.id}
-                                className={`rounded-xl sm:rounded-2xl transition-all duration-300 ${
-                                  isSelected
-                                    ? 'ring-2 ring-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-lg'
-                                    : 'bg-white dark:bg-gray-700 hover:shadow-md border border-gray-200 dark:border-gray-600'
-                                } ${!product.isAvailable ? 'opacity-60' : ''}`}
+                                className={`rounded-xl sm:rounded-2xl transition-all duration-300 ${isSelected
+                                  ? 'ring-2 ring-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-lg'
+                                  : 'bg-white dark:bg-gray-700 hover:shadow-md border border-gray-200 dark:border-gray-600'
+                                  } ${!product.isAvailable ? 'opacity-60' : ''}`}
                               >
                                 <div className="p-3 sm:p-4">
                                   <div className="flex items-start gap-3">
@@ -635,11 +633,10 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                                     <div className="pt-1">
                                       <button
                                         onClick={() => toggleProductSelection(product.id)}
-                                        className={`w-5 h-5 sm:w-6 sm:h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${
-                                          isSelected
-                                            ? 'bg-primary-600 border-primary-600 text-white scale-110'
-                                            : 'border-gray-300 dark:border-gray-600 hover:border-primary-400 hover:scale-105'
-                                        }`}
+                                        className={`w-5 h-5 sm:w-6 sm:h-6 rounded-lg border-2 flex items-center justify-center transition-all duration-200 ${isSelected
+                                          ? 'text-primary-800 border-primary-800 text-white scale-110'
+                                          : 'border-gray-300 dark:border-gray-600 hover:border-primary-800 hover:scale-105'
+                                          }`}
                                       >
                                         {isSelected && <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" />}
                                       </button>
@@ -674,13 +671,13 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                                       <div className="flex items-center justify-between">
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 sm:px-2.5 sm:py-1 text-xs sm:text-sm font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg">
                                           {currency.symbol}
-                                          {product.price.toFixed(2)} 
+                                          {product.price.toFixed(2)}
                                         </span>
                                         <span className="text-[10px] sm:text-xs text-gray-500 dark:text-gray-400 px-2 py-0.5 sm:py-1 bg-gray-100 dark:bg-gray-600 rounded-lg">
                                           {product.categoryName}
                                         </span>
                                       </div>
-                                      
+
                                       {!product.isAvailable && (
                                         <span className="inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] sm:text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 mt-2">
                                           {t('productAddonsModal.status.outOfStock')}
@@ -757,7 +754,7 @@ const ProductAddonsModal: React.FC<ProductAddonsModalProps> = ({
                         {t('productAddonsModal.counters.availableProducts', { count: filteredProducts.length })}
                       </span>
                     </div>
-                    
+
                     <div className="flex gap-3 w-full sm:w-auto">
                       <button
                         type="button"

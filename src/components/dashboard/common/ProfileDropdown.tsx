@@ -29,7 +29,7 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
   // Kullanıcı bilgilerini al
   useEffect(() => {
     let isMounted = true;
-    
+
     const fetchUserProfile = async () => {
       try {
         const res = await authService.getUserProfile();
@@ -47,9 +47,9 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
         }
       }
     };
-    
+
     fetchUserProfile();
-    
+
     return () => {
       isMounted = false;
     };
@@ -106,35 +106,32 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
             </p>
           )}
         </div>
-        <div className="h-8 w-8 bg-primary-600 rounded-full flex items-center justify-center">
+        <div className="h-8 w-8 text-primary-800 rounded-full flex items-center justify-center">
           <span className="text-sm font-medium text-white">
             {initials}
           </span>
         </div>
-        <ChevronDown className={`h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
-          isOpen ? 'rotate-180' : ''
-        }`} />
+        <ChevronDown className={`h-4 w-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''
+          }`} />
       </button>
 
       {/* Profile Dropdown Menu */}
       {isOpen && (
-        <div className={`absolute mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 ${
-          isRTL ? 'left-0' : 'right-0'
-        }`}>
+        <div className={`absolute mt-2 w-56 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 ${isRTL ? 'left-0' : 'right-0'
+          }`}>
           <div className="py-2">
             <button
               onClick={() => {
                 onTabChange('profile');
                 setIsOpen(false);
               }}
-              className={`w-full px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center ${
-                isRTL ? 'text-right space-x-reverse space-x-3' : 'text-left space-x-3'
-              }`}
+              className={`w-full px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center ${isRTL ? 'text-right space-x-reverse space-x-3' : 'text-left space-x-3'
+                }`}
             >
               <User className="h-4 w-4" />
               <span>{t('profile.title')}</span>
             </button>
-           {/*  <button
+            {/*  <button
               onClick={() => {
                 onTabChange('subscription');
                 setIsOpen(false);
@@ -146,16 +143,15 @@ const ProfileDropdown: React.FC<ProfileDropdownProps> = ({
               <FileText className="h-4 w-4" />
               <span>{t('subscription.title')}</span>
             </button> */}
-     
+
             <hr className="my-2 border-gray-200 dark:border-gray-700" />
             <button
               onClick={() => {
                 onLogout();
                 setIsOpen(false);
               }}
-              className={`w-full px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center ${
-                isRTL ? 'text-right space-x-reverse space-x-3' : 'text-left space-x-3'
-              }`}
+              className={`w-full px-4 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center ${isRTL ? 'text-right space-x-reverse space-x-3' : 'text-left space-x-3'
+                }`}
             >
               <LogOut className="h-4 w-4" />
               <span>{t('auth.logout')}</span>

@@ -495,14 +495,14 @@ export const sq = {
 
     // Brand
     brand: {
-        name: 'idigitek QR',
+        name: 'iDIGITEK QR',
         slogan: 'Zgjidhje Dixhitale për Restorante'
     },
 
     // Features,
     features: {
         title: 'Pse',
-        titleHighlight: 'Menu QR?',
+        titleHighlight: 'iDIGITEK Menu QR?',
         subtitle: 'Përmirësoni përvojën e klientit dhe çoni biznesin tuaj në epokën dixhitale me veçori të fuqishme të dizajnuara për restorante moderne.',
         list: {
             qrAccess: {
@@ -2461,14 +2461,19 @@ export const sq = {
         recommended: 'E rekomanduar',
         price: 'Çmimi',
         buttons: {
-            view: 'Shiko',
+            view: 'Bax',
+            markOutOfStock: 'Stokda Yoxdur',
+            markInStock: 'Stokda Yoxdur',
+            viewDetails: 'Detayları Görüntüle',
+            deactivate: 'Deaktif',
+            activate: 'Aktiv',
             addons: 'Shtojcat',
             extras: 'Shtesat',
             ingredients: 'Përbërësit',
             edit: 'Redakto',
             delete: 'Fshi',
             add: 'Shto',
-            remove: 'Hiq'
+            remove: 'Kaldır'
         },
         errors: {
             loadingIngredients: 'Ndodhi një gabim gjatë ngarkimit të përbërësve.',

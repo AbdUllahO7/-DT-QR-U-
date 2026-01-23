@@ -7,8 +7,8 @@ import {
   MapPinned, FileText, Home, Info, ArrowRight, Upload, X, Navigation,
   ChevronDown, Check
 } from 'lucide-react';
-import type { 
-  CreateBranchWithDetailsDto, 
+import type {
+  CreateBranchWithDetailsDto,
   CreateBranchWorkingHourCoreDto,
   ApiError,
 } from '../types/api';
@@ -62,7 +62,7 @@ const OnboardingBranch: React.FC = () => {
   const [successMessage, setSuccessMessage] = useState<string>('');
   const [restaurantId, setRestaurantId] = useState<number | null>(null);
   const [restaurantLogoPath, setRestaurantLogoPath] = useState<string | null>(null);
-  
+
   // Logo upload states
   const [branchLogo, setBranchLogo] = useState<File | null>(null);
   const [branchLogoPreview, setBranchLogoPreview] = useState<string | null>(null);
@@ -141,13 +141,13 @@ const OnboardingBranch: React.FC = () => {
   const isValidTimeRange = (openTime: string, closeTime: string): boolean => {
     const open = new Date(`2000-01-01T${openTime}`);
     const close = new Date(`2000-01-01T${closeTime}`);
-    
+
     if (close <= open) {
       const nextDayClose = new Date(`2000-01-02T${closeTime}`);
       const hoursSpan = (nextDayClose.getTime() - open.getTime()) / (1000 * 60 * 60);
       return hoursSpan <= 12 && hoursSpan > 0;
     }
-    
+
     return close > open;
   };
 
@@ -165,16 +165,16 @@ const OnboardingBranch: React.FC = () => {
   useEffect(() => {
     const restaurantIdFromState = location.state?.restaurantId;
     const restaurantIdFromStorage = localStorage.getItem('onboarding_restaurantId');
-    
+
     if (import.meta.env.DEV) {
       logger.info('RestaurantId kontrol ediliyor', {
         state: restaurantIdFromState,
         localStorage: restaurantIdFromStorage
       });
     }
-    
+
     let finalRestaurantId: number | null = null;
-    
+
     if (restaurantIdFromState) {
       const id = parseInt(restaurantIdFromState);
       if (!isNaN(id) && id > 0) {
@@ -217,7 +217,7 @@ const OnboardingBranch: React.FC = () => {
       }
 
       const restaurantInfo = await restaurantService.getRestaurantManagementInfo();
-      
+
       if (restaurantInfo && restaurantInfo.restaurantLogoPath) {
         setRestaurantLogoPath(restaurantInfo.restaurantLogoPath);
       }
@@ -228,7 +228,7 @@ const OnboardingBranch: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>): void => {
     const { name, value } = e.target;
-    
+
     if (name.startsWith('address.')) {
       const addressField = name.split('.')[1];
       setFormData(prev => ({
@@ -253,7 +253,7 @@ const OnboardingBranch: React.FC = () => {
         [name]: value || ''
       }));
     }
-    
+
     if (errors[name as keyof typeof errors]) {
       setErrors(prev => ({
         ...prev,
@@ -266,12 +266,12 @@ const OnboardingBranch: React.FC = () => {
   const handleWhatsappNationalPhoneChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { value } = e.target;
     const digitsOnly = value.replace(/\D/g, '');
-    
+
     setFormData(prev => ({
       ...prev,
       whatsappOrderNumber: digitsOnly
     }));
-    
+
     if (errors.whatsappOrderNumber) {
       setErrors(prev => ({ ...prev, whatsappOrderNumber: undefined }));
     }
@@ -281,7 +281,7 @@ const OnboardingBranch: React.FC = () => {
   const handleContactNationalPhoneChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { value } = e.target;
     const digitsOnly = value.replace(/\D/g, '');
-    
+
     setFormData(prev => ({
       ...prev,
       createContactDto: {
@@ -289,7 +289,7 @@ const OnboardingBranch: React.FC = () => {
         phone: digitsOnly
       }
     }));
-    
+
     if (errors['createContactDto.phone']) {
       setErrors(prev => ({ ...prev, 'createContactDto.phone': undefined }));
     }
@@ -463,13 +463,13 @@ const OnboardingBranch: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       setBranchLogo(file);
-      
+
       const reader = new FileReader();
       reader.onload = (event) => {
         setBranchLogoPreview(event.target?.result as string);
       };
       reader.readAsDataURL(file);
-      
+
       await handleLogoUpload(file);
     }
   };
@@ -483,20 +483,20 @@ const OnboardingBranch: React.FC = () => {
       if (import.meta.env.DEV) {
         logger.info('branchLogoPath dosya yükleme başlatılıyor', { uploadFile });
       }
-      
+
       const responseUrl = await mediaService.uploadFile(uploadFile);
-      
+
       if (import.meta.env.DEV) {
         logger.info('branchLogoPath başarıyla yüklendi', { responseUrl });
       }
-      
+
       setFormData(prev => ({
         ...prev,
         branchLogoPath: responseUrl
       }));
-      
+
       setBranchLogo(null);
-      
+
     } catch (error) {
       console.error('Logo yükleme hatası:', error);
       setApiError(t('onboardingBranch.messages.api.logoUploadError'));
@@ -507,13 +507,13 @@ const OnboardingBranch: React.FC = () => {
 
   const validateStep = (step: number): boolean => {
     const newErrors: any = {};
-    
+
     switch (step) {
       case 1: // Basic Info
         if (!formData.branchName?.trim()) {
           newErrors.branchName = t('onboardingBranch.form.step1.branchName.error');
         }
-        
+
         // WhatsApp number is required
         if (!formData.whatsappOrderNumber?.trim()) {
           newErrors.whatsappOrderNumber = t('onboardingBranch.form.step1.whatsappNumber.error');
@@ -521,7 +521,7 @@ const OnboardingBranch: React.FC = () => {
           newErrors.whatsappOrderNumber = t('onboardingBranch.form.step1.whatsappNumber.errorInvalid');
         }
         break;
-        
+
       case 2: // Address Info
         if (!formData.createAddressDto.country?.trim()) {
           newErrors['createAddressDto.country'] = t('onboardingBranch.form.step2.country.error');
@@ -530,12 +530,12 @@ const OnboardingBranch: React.FC = () => {
           newErrors['createAddressDto.city'] = t('onboardingBranch.form.step2.city.error');
         }
         break;
-        
+
       case 3: // Contact Info & Working Hours
         if (!formData.createContactDto.mail?.trim()) {
           newErrors['createContactDto.mail'] = t('onboardingBranch.form.step3.email.error');
         }
-        
+
         // eslint-disable-next-line no-case-declarations
         const workingDays = formData.createBranchWorkingHourCoreDto?.filter(day => day.isWorkingDay) || [];
         if (workingDays.length === 0) {
@@ -581,7 +581,7 @@ const OnboardingBranch: React.FC = () => {
         }
         break;
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -600,10 +600,10 @@ const OnboardingBranch: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
-    
+
     setApiError('');
     setSuccessMessage('');
-    
+
     if (!validateStep(3)) {
       return;
     }
@@ -650,18 +650,18 @@ const OnboardingBranch: React.FC = () => {
     if (!finalBranchLogoPath) {
       finalBranchLogoPath = DEFAULT_LOGO_URL;
     }
-    
+
     // Combine Country Code and National Number
-    const fullWhatsappNumber = formData.whatsappOrderNumber 
+    const fullWhatsappNumber = formData.whatsappOrderNumber
       ? `${whatsappCountryCode}${(formData.whatsappOrderNumber).replace(/\D/g, '')}`
-      : ''; 
-      
+      : '';
+
     // Handle Contact Phone Number if it exists, else fallback to WhatsApp number
     let fullContactPhone = '';
     if (formData.createContactDto.phone) {
-         fullContactPhone = `${contactCountryCode}${formData.createContactDto.phone.replace(/\D/g, '')}`;
+      fullContactPhone = `${contactCountryCode}${formData.createContactDto.phone.replace(/\D/g, '')}`;
     } else {
-         fullContactPhone = fullWhatsappNumber;
+      fullContactPhone = fullWhatsappNumber;
     }
 
     const finalFormData: CreateBranchWithDetailsDto = {
@@ -690,36 +690,36 @@ const OnboardingBranch: React.FC = () => {
       },
       createBranchWorkingHourCoreDto: allWorkingHours
     };
-    
+
     setIsSubmitting(true);
-    
+
     try {
       if (import.meta.env.DEV) {
         logger.info('Branch verisi gönderiliyor', { finalFormData });
       }
-      
+
       const response = await branchService.createOnboardingBranch(finalFormData);
-      
+
       if (response.branchId) {
         setSuccessMessage(t('onboardingBranch.messages.successMessage'));
-        
+
         const branchId = response.branchId;
         localStorage.setItem('onboarding_branchId', branchId.toString());
-        
+
         setTimeout(() => {
           navigate('/onboarding/complete');
         }, 2000);
       } else {
         setApiError(t('onboardingBranch.messages.api.branchIdMissing'));
       }
-    } catch (error : any)  {
+    } catch (error: any) {
       setErrors(error.message);
       if (import.meta.env.DEV) {
         console.error('Branch creation error:', error);
       }
-      
+
       const apiErr = error as ApiError;
-      
+
       if (apiErr.status === 400 && apiErr.errors) {
         const errorMessages = [];
         for (const field in apiErr.errors) {
@@ -805,7 +805,7 @@ const OnboardingBranch: React.FC = () => {
               {/* Header */}
               <div className={`flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                  <MapPin className="h-6 w-6 text-primary-600" />
+                  <MapPin className="h-6 w-6 text-primary-800" />
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                     {t('onboardingBranch.form.step3.location.mapTitle') || 'حدد الموقع'}
                   </h3>
@@ -832,9 +832,8 @@ const OnboardingBranch: React.FC = () => {
                       value={googleMapsLink}
                       onChange={handleGoogleMapsLinkChange}
                       placeholder={t('onboardingBranch.form.step3.location.googleMapsLinkPlaceholder') || 'https://maps.google.com/...'}
-                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${
-                        linkError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
-                      } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${linkError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
+                        } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
                       dir="ltr"
                     />
                   </div>
@@ -890,19 +889,19 @@ const OnboardingBranch: React.FC = () => {
                     <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-[1000] pointer-events-none">
                       <div className="bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-600">
                         <p className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-primary-600" />
+                          <MapPin className="h-4 w-4 text-primary-800" />
                           {t('onboardingBranch.form.step3.location.markerPosition') || 'موقع العلامة'}
                         </p>
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* External Map Link */}
                   <a
                     href={`https://www.openstreetmap.org/?mlat=${selectedLatLng.lat}&mlon=${selectedLatLng.lng}#map=15/${selectedLatLng.lat}/${selectedLatLng.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`inline-flex items-center text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 ${isRTL ? 'flex-row-reverse' : ''}`}
+                    className={`inline-flex items-center text-xs text-primary-800 dark:text-primary-800 hover:text-primary-700 dark:hover:text-primary-300 ${isRTL ? 'flex-row-reverse' : ''}`}
                   >
                     <span>{t('onboardingBranch.form.step3.location.openFullMap') || 'فتح في خريطة كاملة'}</span>
                     <ArrowRight className={`h-3 w-3 ${isRTL ? 'mr-1 rotate-180' : 'ml-1'}`} />
@@ -996,7 +995,7 @@ const OnboardingBranch: React.FC = () => {
                     <span className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
                       {t('onboardingBranch.form.step3.location.selectedCoordinates') || 'الإحداثيات المحددة:'}
                     </span>
-                    <code className="text-sm font-mono text-primary-600 dark:text-primary-400" dir="ltr">
+                    <code className="text-sm font-mono text-primary-800 dark:text-primary-800" dir="ltr">
                       {selectedLatLng.lat.toFixed(6)}, {selectedLatLng.lng.toFixed(6)}
                     </code>
                   </div>
@@ -1015,7 +1014,7 @@ const OnboardingBranch: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleConfirmLocation}
-                  className="px-5 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium shadow-sm"
+                  className="px-5 py-2.5 text-primary-800 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium shadow-sm"
                 >
                   {t('onboardingBranch.buttons.confirm') || 'تأكيد الموقع'}
                 </button>
@@ -1032,15 +1031,13 @@ const OnboardingBranch: React.FC = () => {
       type="button"
       onClick={() => !disabled && onChange(!checked)}
       disabled={disabled}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-        checked ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
-      }`}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${checked ? 'text-primary-800' : 'bg-gray-200 dark:bg-gray-700'
+        }`}
       dir="ltr"
     >
       <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-          checked ? 'translate-x-6' : 'translate-x-1'
-        }`}
+        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? 'translate-x-6' : 'translate-x-1'
+          }`}
       />
     </button>
   );
@@ -1059,11 +1056,10 @@ const OnboardingBranch: React.FC = () => {
             name="branchName"
             value={formData.branchName || ''}
             onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors.branchName
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors.branchName
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingBranch.form.step1.branchName.placeholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
             required
@@ -1074,15 +1070,15 @@ const OnboardingBranch: React.FC = () => {
         )}
       </div>
 
-     {/* WhatsApp Phone Input */}
+      {/* WhatsApp Phone Input */}
       <div>
         <label htmlFor="whatsappOrderNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           {t('onboardingBranch.form.step1.whatsappNumber.label')} <span className="text-red-500">*</span>
         </label>
-        
+
         {/* Changed container to Column on mobile, Row on Desktop */}
         <div className="flex flex-col sm:flex-row gap-3">
-          
+
           {/* Country Code Selector - Full width on mobile */}
           <div className="relative w-full sm:w-auto">
             {/* Custom Dropdown Button */}
@@ -1117,19 +1113,16 @@ const OnboardingBranch: React.FC = () => {
                         setWhatsappPlaceholder(getPlaceholderByDialCode(country.dialCode));
                         setIsWhatsappCountryCodeOpen(false);
                       }}
-                      className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ${
-                        index === 0 ? 'rounded-t-lg' : ''
-                      } ${
-                        index === sortedCountryCodes.length - 1 ? 'rounded-b-lg' : ''
-                      } ${
-                        whatsappCountryCode === country.dialCode
-                          ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+                      className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ${index === 0 ? 'rounded-t-lg' : ''
+                        } ${index === sortedCountryCodes.length - 1 ? 'rounded-b-lg' : ''
+                        } ${whatsappCountryCode === country.dialCode
+                          ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-800 dark:text-primary-800'
                           : 'text-gray-900 dark:text-white'
-                      } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+                        } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
                     >
                       <span className="truncate">{country.name} ({country.dialCode})</span>
                       {whatsappCountryCode === country.dialCode && (
-                        <Check className={`h-5 w-5 text-primary-600 dark:text-primary-400 flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                        <Check className={`h-5 w-5 text-primary-800 dark:text-primary-800 flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'}`} />
                       )}
                     </button>
                   ))}
@@ -1149,18 +1142,17 @@ const OnboardingBranch: React.FC = () => {
               maxLength={15}
               value={formData.whatsappOrderNumber || ''}
               onChange={handleWhatsappNationalPhoneChange}
-              className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
-                errors.whatsappOrderNumber
-                  ? 'border-red-500 dark:border-red-500'
-                  : 'border-gray-300 dark:border-gray-600'
-              }`}
+              className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${errors.whatsappOrderNumber
+                ? 'border-red-500 dark:border-red-500'
+                : 'border-gray-300 dark:border-gray-600'
+                }`}
               placeholder={whatsappPlaceholder}
               dir="ltr"
               required
             />
           </div>
         </div>
-        
+
         {errors.whatsappOrderNumber && (
           <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors.whatsappOrderNumber}</p>
         )}
@@ -1198,9 +1190,8 @@ const OnboardingBranch: React.FC = () => {
             />
             <label
               htmlFor="branchLogo"
-              className={`inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 ${
-                isUploadingLogo ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-              } ${isRTL ? 'flex-row-reverse' : ''}`}
+              className={`inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 ${isUploadingLogo ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                } ${isRTL ? 'flex-row-reverse' : ''}`}
             >
               <Upload className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
               {isUploadingLogo ? t('onboardingBranch.form.step1.branchLogo.buttonUploading') : t('onboardingBranch.form.step1.branchLogo.button')}
@@ -1243,11 +1234,10 @@ const OnboardingBranch: React.FC = () => {
           <button
             type="button"
             onClick={() => setIsCountryDropdownOpen(!isCountryDropdownOpen)}
-            className={`w-full ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors['createAddressDto.country']
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'} flex items-center justify-between`}
+            className={`w-full ${isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors['createAddressDto.country']
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white ${isRTL ? 'text-right' : 'text-left'} flex items-center justify-between`}
             dir={isRTL ? 'rtl' : 'ltr'}
           >
             <Globe className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
@@ -1288,19 +1278,16 @@ const OnboardingBranch: React.FC = () => {
                           setErrors(prev => ({ ...prev, 'createAddressDto.country': undefined }));
                         }
                       }}
-                      className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ${
-                        index === 0 ? 'rounded-t-lg' : ''
-                      } ${
-                        index === countryKeys.length - 1 ? 'rounded-b-lg' : ''
-                      } ${
-                        formData.createAddressDto.country === countryName
-                          ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+                      className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ${index === 0 ? 'rounded-t-lg' : ''
+                        } ${index === countryKeys.length - 1 ? 'rounded-b-lg' : ''
+                        } ${formData.createAddressDto.country === countryName
+                          ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-800 dark:text-primary-800'
                           : 'text-gray-900 dark:text-white'
-                      } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+                        } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
                     >
                       <span className="truncate">{countryName}</span>
                       {formData.createAddressDto.country === countryName && (
-                        <Check className={`h-5 w-5 text-primary-600 dark:text-primary-400 flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                        <Check className={`h-5 w-5 text-primary-800 dark:text-primary-800 flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'}`} />
                       )}
                     </button>
                   );
@@ -1328,11 +1315,10 @@ const OnboardingBranch: React.FC = () => {
             name="address.city"
             value={formData.createAddressDto.city || ''}
             onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors['createAddressDto.city']
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors['createAddressDto.city']
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingBranch.form.step2.city.placeholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
             required
@@ -1355,11 +1341,10 @@ const OnboardingBranch: React.FC = () => {
             name="address.street"
             value={formData.createAddressDto.street || ''}
             onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors['createAddressDto.street']
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors['createAddressDto.street']
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingBranch.form.step2.street.placeholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
           />
@@ -1381,11 +1366,10 @@ const OnboardingBranch: React.FC = () => {
             name="address.zipCode"
             value={formData.createAddressDto.zipCode || ''}
             onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors['createAddressDto.zipCode']
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors['createAddressDto.zipCode']
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingBranch.form.step2.zipCode.placeholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
           />
@@ -1407,11 +1391,10 @@ const OnboardingBranch: React.FC = () => {
             name="address.addressLine1"
             value={formData.createAddressDto.addressLine1 || ''}
             onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors['createAddressDto.addressLine1']
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors['createAddressDto.addressLine1']
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingBranch.form.step2.addressLine1.placeholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
           />
@@ -1433,11 +1416,10 @@ const OnboardingBranch: React.FC = () => {
             name="address.addressLine2"
             value={formData.createAddressDto.addressLine2 || ''}
             onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors['createAddressDto.addressLine2']
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors['createAddressDto.addressLine2']
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingBranch.form.step2.addressLine2.placeholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
           />
@@ -1454,7 +1436,7 @@ const OnboardingBranch: React.FC = () => {
       {/* Contact Phone - UPDATED STYLE */}
       <div>
         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-           {t('onboardingBranch.form.step3.phone.label') || 'Contact Phone'}
+          {t('onboardingBranch.form.step3.phone.label') || 'Contact Phone'}
         </label>
         <div className={`flex space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
           {/* Country Code Selector */}
@@ -1491,19 +1473,16 @@ const OnboardingBranch: React.FC = () => {
                         setContactPlaceholder(getPlaceholderByDialCode(country.dialCode));
                         setIsContactCountryCodeOpen(false);
                       }}
-                      className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ${
-                        index === 0 ? 'rounded-t-lg' : ''
-                      } ${
-                        index === sortedCountryCodes.length - 1 ? 'rounded-b-lg' : ''
-                      } ${
-                        contactCountryCode === country.dialCode
-                          ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+                      className={`w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-150 ${index === 0 ? 'rounded-t-lg' : ''
+                        } ${index === sortedCountryCodes.length - 1 ? 'rounded-b-lg' : ''
+                        } ${contactCountryCode === country.dialCode
+                          ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-800 dark:text-primary-800'
                           : 'text-gray-900 dark:text-white'
-                      } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+                        } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
                     >
                       <span className="truncate">{country.name} ({country.dialCode})</span>
                       {contactCountryCode === country.dialCode && (
-                        <Check className={`h-5 w-5 text-primary-600 dark:text-primary-400 flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                        <Check className={`h-5 w-5 text-primary-800 dark:text-primary-800 flex-shrink-0 ${isRTL ? 'mr-2' : 'ml-2'}`} />
                       )}
                     </button>
                   ))}
@@ -1521,21 +1500,20 @@ const OnboardingBranch: React.FC = () => {
               maxLength={15}
               value={formData.createContactDto.phone || ''}
               onChange={handleContactNationalPhoneChange}
-              className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
-                errors['createContactDto.phone']
-                  ? 'border-red-500 dark:border-red-500'
-                  : 'border-gray-300 dark:border-gray-600'
-              }`}
+              className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${errors['createContactDto.phone']
+                ? 'border-red-500 dark:border-red-500'
+                : 'border-gray-300 dark:border-gray-600'
+                }`}
               placeholder={contactPlaceholder}
               dir="ltr"
             />
           </div>
         </div>
-         {errors['createContactDto.phone'] && (
+        {errors['createContactDto.phone'] && (
           <p className={`mt-1 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'text-right' : 'text-left'}`}>{errors['createContactDto.phone']}</p>
         )}
       </div>
-      
+
       <div>
         <label htmlFor="contact.mail" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           {t('onboardingBranch.form.step3.email.label')} <span className="text-red-500">*</span>
@@ -1548,11 +1526,10 @@ const OnboardingBranch: React.FC = () => {
             name="contact.mail"
             value={formData.createContactDto.mail || ''}
             onChange={handleInputChange}
-            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-              errors['createContactDto.mail']
-                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-            } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+            className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors['createContactDto.mail']
+              ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+              : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
             placeholder={t('onboardingBranch.form.step3.email.placeholder')}
             dir={isRTL ? 'rtl' : 'ltr'}
             required
@@ -1576,11 +1553,10 @@ const OnboardingBranch: React.FC = () => {
               name="contact.location"
               value={formData.createContactDto.location || ''}
               onChange={handleInputChange}
-              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                errors['createContactDto.location']
-                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-              } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+              className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${errors['createContactDto.location']
+                ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+                } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
               placeholder={t('onboardingBranch.form.step3.location.placeholder')}
               dir="ltr"
             />
@@ -1588,7 +1564,7 @@ const OnboardingBranch: React.FC = () => {
           <button
             type="button"
             onClick={handleOpenMapModal}
-            className={`px-4 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 flex items-center space-x-2 whitespace-nowrap ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+            className={`px-4 py-3 text-primary-800 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 flex items-center space-x-2 whitespace-nowrap ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
           >
             <MapPinned className="h-5 w-5" />
             <span className="hidden sm:inline">{t('onboardingBranch.form.step3.location.selectOnMap') || 'اختر من الخريطة'}</span>
@@ -1715,7 +1691,7 @@ const OnboardingBranch: React.FC = () => {
 
       <div className="space-y-6">
         <div className={`flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
-          <Clock className="h-6 w-6 text-primary-600" />
+          <Clock className="h-6 w-6 text-primary-800" />
           <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
             {t('onboardingBranch.form.step3.workingHours.title')}
           </h3>
@@ -1723,20 +1699,19 @@ const OnboardingBranch: React.FC = () => {
         <p className={`text-sm text-gray-600 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
           {t('onboardingBranch.form.step3.workingHours.description')}
         </p>
-        
-      <div className="space-y-3">
+
+        <div className="space-y-3">
           {formData.createBranchWorkingHourCoreDto?.map((day, index) => (
-            <div 
-              key={day.dayOfWeek} 
-              className={`relative group p-4 sm:p-5 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 hover:shadow-md ${
-                day.isWorkingDay 
-                  ? 'bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-green-200 dark:border-green-700' 
-                  : 'bg-gray-50 dark:bg-gray-800/50'
-              }`}
+            <div
+              key={day.dayOfWeek}
+              className={`relative group p-4 sm:p-5 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 hover:shadow-md ${day.isWorkingDay
+                ? 'bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-green-200 dark:border-green-700'
+                : 'bg-gray-50 dark:bg-gray-800/50'
+                }`}
             >
               {/* Main Container */}
               <div className="flex flex-col space-y-4">
-                
+
                 {/* Header Row: Day Name and Toggle */}
                 <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <div className="min-w-[100px]">
@@ -1744,17 +1719,16 @@ const OnboardingBranch: React.FC = () => {
                       {dayNamesDisplay[index]}
                     </span>
                   </div>
-                  
+
                   <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
                     <Toggle
                       checked={day.isWorkingDay}
                       onChange={(checked) => handleWorkingHourChange(index, 'isWorkingDay', checked)}
                     />
-                    <span className={`text-sm font-medium transition-colors hidden xs:block ${
-                      day.isWorkingDay 
-                        ? 'text-green-700 dark:text-green-400' 
-                        : 'text-gray-500 dark:text-gray-400'
-                    }`}>
+                    <span className={`text-sm font-medium transition-colors hidden xs:block ${day.isWorkingDay
+                      ? 'text-green-700 dark:text-green-400'
+                      : 'text-gray-500 dark:text-gray-400'
+                      }`}>
                       {day.isWorkingDay ? t('onboardingBranch.form.step3.workingHours.toggleOpen') : t('onboardingBranch.form.step3.workingHours.toggleClosed')}
                     </span>
                   </div>
@@ -1839,7 +1813,7 @@ const OnboardingBranch: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => addTimeSlot(index)}
-                      className={`flex items-center space-x-2 text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+                      className={`flex items-center space-x-2 text-sm text-primary-800 dark:text-primary-800 hover:text-primary-700 dark:hover:text-primary-300 transition-colors ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
                     >
                       <span className="text-lg">+</span>
                       <span>{t('onboardingBranch.form.step3.workingHours.addSlot') || 'Add time slot'}</span>
@@ -1881,7 +1855,7 @@ const OnboardingBranch: React.FC = () => {
             </div>
           </div>
         )}
-        
+
         <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg">
           <div className={`flex items-start space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
             <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
@@ -1906,217 +1880,211 @@ const OnboardingBranch: React.FC = () => {
     <>
       <MapPickerModal />
       <div className="min-h-screen bg-gradient-to-b from-gray-50 mt-[100px] to-white dark:from-gray-900 dark:to-gray-800" dir={isRTL ? 'rtl' : 'ltr'}>
-      <header className="bg-white dark:bg-gray-800 shadow-sm">
-        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-          <div className="md:flex md:items-center md:justify-between">
-            <div className="flex-1 min-w-0">
-              <Link
-                to="/onboarding/restaurant"
-                className={`inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}
-              >
-                <ArrowLeft className={`w-4 h-4 ${isRTL ? 'ml-1 rotate-180' : 'mr-1'}`} />
-                {t('onboardingBranch.header.backLink')}
-              </Link>
-              <h2 className={`text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate ${isRTL ? 'text-right' : 'text-left'}`}>
-                {t('onboardingBranch.header.title')}
-              </h2>
-              <p className={`mt-1 text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
-                {t('onboardingBranch.header.subtitle')}
-              </p>
+        <header className="bg-white dark:bg-gray-800 shadow-sm">
+          <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+            <div className="md:flex md:items-center md:justify-between">
+              <div className="flex-1 min-w-0">
+                <Link
+                  to="/onboarding/restaurant"
+                  className={`inline-flex items-center text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 mb-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                >
+                  <ArrowLeft className={`w-4 h-4 ${isRTL ? 'ml-1 rotate-180' : 'mr-1'}`} />
+                  {t('onboardingBranch.header.backLink')}
+                </Link>
+                <h2 className={`text-2xl font-bold leading-7 text-gray-900 dark:text-white sm:text-3xl sm:truncate ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('onboardingBranch.header.title')}
+                </h2>
+                <p className={`mt-1 text-sm text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
+                  {t('onboardingBranch.header.subtitle')}
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 sm:px-0 mb-8">
-          <nav aria-label="Progress">
-            <ol role="list" className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-              {[
-                { id: 1, name: t('onboardingBranch.steps.basic'), icon: Store },
-                { id: 2, name: t('onboardingBranch.steps.address'), icon: MapPinned },
-                { id: 3, name: t('onboardingBranch.steps.contact'), icon: Phone }
-              ].map((step, stepIdx) => {
-                const StepIcon = step.icon;
-                return (
-                  <li
-                    key={step.name}
-                    className={`relative ${stepIdx !== 2 ? (isRTL ? 'pl-8 sm:pl-20' : 'pr-8 sm:pr-20') : ''}`}
-                  >
-                    <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <div
-                        className={`${
-                          currentStep >= step.id
-                            ? 'bg-primary-600 border-primary-600'
-                            : 'bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600'
-                        } rounded-full transition-colors duration-200 h-8 w-8 flex items-center justify-center border-2`}
-                      >
-                        <StepIcon
-                          className={`w-4 h-4 ${
-                            currentStep >= step.id ? 'text-white' : 'text-gray-500 dark:text-gray-400'
-                          }`}
-                        />
-                      </div>
-                      <div
-                        className={`hidden sm:block text-sm font-medium ${
-                          currentStep >= step.id ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'
-                        } ${isRTL ? 'mr-2' : 'ml-2'}`}
-                      >
-                        {step.name}
-                      </div>
-                      {stepIdx !== 2 && (
+        <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+          <div className="px-4 sm:px-0 mb-8">
+            <nav aria-label="Progress">
+              <ol role="list" className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                {[
+                  { id: 1, name: t('onboardingBranch.steps.basic'), icon: Store },
+                  { id: 2, name: t('onboardingBranch.steps.address'), icon: MapPinned },
+                  { id: 3, name: t('onboardingBranch.steps.contact'), icon: Phone }
+                ].map((step, stepIdx) => {
+                  const StepIcon = step.icon;
+                  return (
+                    <li
+                      key={step.name}
+                      className={`relative ${stepIdx !== 2 ? (isRTL ? 'pl-8 sm:pl-20' : 'pr-8 sm:pr-20') : ''}`}
+                    >
+                      <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <div
-                          className={`hidden sm:block absolute top-4 ${isRTL ? 'left-0' : 'right-0'} w-16 h-0.5 transition-colors duration-200 ${
-                            currentStep > step.id ? 'bg-primary-600 dark:bg-primary-400' : 'bg-gray-300 dark:bg-gray-600'
-                          }`}
-                        />
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-          </nav>
-        </div>
+                          className={`${currentStep >= step.id
+                            ? 'text-primary-800 border-primary-600'
+                            : 'bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600'
+                            } rounded-full transition-colors duration-200 h-8 w-8 flex items-center justify-center border-2`}
+                        >
+                          <StepIcon
+                            className={`w-4 h-4 ${currentStep >= step.id ? 'text-white' : 'text-gray-500 dark:text-gray-400'
+                              }`}
+                          />
+                        </div>
+                        <div
+                          className={`hidden sm:block text-sm font-medium ${currentStep >= step.id ? 'text-primary-800 dark:text-primary-800' : 'text-gray-500 dark:text-gray-400'
+                            } ${isRTL ? 'mr-2' : 'ml-2'}`}
+                        >
+                          {step.name}
+                        </div>
+                        {stepIdx !== 2 && (
+                          <div
+                            className={`hidden sm:block absolute top-4 ${isRTL ? 'left-0' : 'right-0'} w-16 h-0.5 transition-colors duration-200 ${currentStep > step.id ? 'text-primary-800 dark:bg-primary-400' : 'bg-gray-300 dark:bg-gray-600'
+                              }`}
+                          />
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </nav>
+          </div>
 
-        {apiError && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4 rounded-md bg-red-50 dark:bg-red-900/20 p-4 mx-4 sm:mx-0"
-          >
-            <div className={`flex ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className="flex-shrink-0">
-                <AlertCircle className="h-5 w-5 text-red-400" />
-              </div>
-              <div className={`${isRTL ? 'mr-3' : 'ml-3'}`}>
-                <h3 className={`text-sm font-medium text-red-800 dark:text-red-200 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  {t('onboardingBranch.messages.errorTitle')}
-                </h3>
-                <div className={`mt-2 text-sm text-red-700 dark:text-red-300 whitespace-pre-line ${isRTL ? 'text-right' : 'text-left'}`}>
-                  {apiError}
+          {apiError && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 rounded-md bg-red-50 dark:bg-red-900/20 p-4 mx-4 sm:mx-0"
+            >
+              <div className={`flex ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className="flex-shrink-0">
+                  <AlertCircle className="h-5 w-5 text-red-400" />
+                </div>
+                <div className={`${isRTL ? 'mr-3' : 'ml-3'}`}>
+                  <h3 className={`text-sm font-medium text-red-800 dark:text-red-200 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.messages.errorTitle')}
+                  </h3>
+                  <div className={`mt-2 text-sm text-red-700 dark:text-red-300 whitespace-pre-line ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {apiError}
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
 
-        {successMessage && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4 rounded-md bg-green-50 dark:bg-green-900/20 p-4 mx-4 sm:mx-0"
-          >
-            <div className={`flex ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <div className="flex-shrink-0">
-                <CheckCircle className="h-5 w-5 text-green-400" />
-              </div>
-              <div className={`${isRTL ? 'mr-3' : 'ml-3'}`}>
-                <h3 className={`text-sm font-medium text-green-800 dark:text-green-200 ${isRTL ? 'text-right' : 'text-left'}`}>
-                  {t('onboardingBranch.messages.successTitle')}
-                </h3>
-                <div className={`mt-2 text-sm text-green-700 dark:text-green-300 ${isRTL ? 'text-right' : 'text-left'}`}>{successMessage}</div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-
-        <div className="bg-white dark:bg-gray-800 shadow rounded-lg mx-4 sm:mx-0">
-          <form onSubmit={handleSubmit} className="space-y-8 divide-y divide-gray-200 dark:divide-gray-700">
-            {currentStep === 1 && (
-              <div className="p-8">
-                <div className="text-center mb-8">
-                  <Store className="h-12 w-12 mx-auto text-primary-600 mb-4" />
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    {t('onboardingBranch.form.step1.title')}
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {t('onboardingBranch.form.step1.description')}
-                  </p>
+          {successMessage && (
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 rounded-md bg-green-50 dark:bg-green-900/20 p-4 mx-4 sm:mx-0"
+            >
+              <div className={`flex ${isRTL ? 'flex-row-reverse' : ''}`}>
+                <div className="flex-shrink-0">
+                  <CheckCircle className="h-5 w-5 text-green-400" />
                 </div>
-                {renderStep1()}
-              </div>
-            )}
-
-            {currentStep === 2 && (
-              <div className="p-8">
-                <div className="text-center mb-8">
-                  <MapPin className="h-12 w-12 mx-auto text-primary-600 mb-4" />
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    {t('onboardingBranch.form.step2.title')}
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {t('onboardingBranch.form.step2.description')}
-                  </p>
+                <div className={`${isRTL ? 'mr-3' : 'ml-3'}`}>
+                  <h3 className={`text-sm font-medium text-green-800 dark:text-green-200 ${isRTL ? 'text-right' : 'text-left'}`}>
+                    {t('onboardingBranch.messages.successTitle')}
+                  </h3>
+                  <div className={`mt-2 text-sm text-green-700 dark:text-green-300 ${isRTL ? 'text-right' : 'text-left'}`}>{successMessage}</div>
                 </div>
-                {renderStep2()}
               </div>
-            )}
+            </motion.div>
+          )}
 
-            {currentStep === 3 && (
-              <div className="p-8">
-                <div className="text-center mb-8">
-                  <Phone className="h-12 w-12 mx-auto text-primary-600 mb-4" />
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                    {t('onboardingBranch.form.step3.title')}
-                  </h2>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {t('onboardingBranch.form.step3.description')}
-                  </p>
+          <div className="bg-white dark:bg-gray-800 shadow rounded-lg mx-4 sm:mx-0">
+            <form onSubmit={handleSubmit} className="space-y-8 divide-y divide-gray-200 dark:divide-gray-700">
+              {currentStep === 1 && (
+                <div className="p-8">
+                  <div className="text-center mb-8">
+                    <Store className="h-12 w-12 mx-auto text-primary-800 mb-4" />
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                      {t('onboardingBranch.form.step1.title')}
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {t('onboardingBranch.form.step1.description')}
+                    </p>
+                  </div>
+                  {renderStep1()}
                 </div>
-                {renderStep3()}
-              </div>
-            )}
+              )}
 
-            <div className={`px-8 py-4 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <button
-                type="button"
-                onClick={handlePreviousStep}
-                disabled={currentStep === 1}
-                className={`inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md shadow-sm ${
-                  currentStep === 1
-                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
-                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600'
-                } ${isRTL ? 'flex-row-reverse' : ''}`}
-              >
-                <ArrowLeft className={`w-4 h-4 ${isRTL ? 'ml-2 rotate-180' : 'mr-2'}`} />
-                {t('onboardingBranch.buttons.back')}
-              </button>
+              {currentStep === 2 && (
+                <div className="p-8">
+                  <div className="text-center mb-8">
+                    <MapPin className="h-12 w-12 mx-auto text-primary-800 mb-4" />
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                      {t('onboardingBranch.form.step2.title')}
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {t('onboardingBranch.form.step2.description')}
+                    </p>
+                  </div>
+                  {renderStep2()}
+                </div>
+              )}
 
-              {currentStep < 3 ? (
+              {currentStep === 3 && (
+                <div className="p-8">
+                  <div className="text-center mb-8">
+                    <Phone className="h-12 w-12 mx-auto text-primary-800 mb-4" />
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                      {t('onboardingBranch.form.step3.title')}
+                    </h2>
+                    <p className="text-gray-600 dark:text-gray-400">
+                      {t('onboardingBranch.form.step3.description')}
+                    </p>
+                  </div>
+                  {renderStep3()}
+                </div>
+              )}
+
+              <div className={`px-8 py-4 bg-gray-50 dark:bg-gray-800/50 flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <button
                   type="button"
-                  onClick={handleNextStep}
-                  className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${isRTL ? 'flex-row-reverse' : ''}`}
+                  onClick={handlePreviousStep}
+                  disabled={currentStep === 1}
+                  className={`inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md shadow-sm ${currentStep === 1
+                    ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600'
+                    } ${isRTL ? 'flex-row-reverse' : ''}`}
                 >
-                  {t('onboardingBranch.buttons.next')}
-                  <ArrowRight className={`w-4 h-4 ${isRTL ? 'mr-2 rotate-180' : 'ml-2'}`} />
+                  <ArrowLeft className={`w-4 h-4 ${isRTL ? 'ml-2 rotate-180' : 'mr-2'}`} />
+                  {t('onboardingBranch.buttons.back')}
                 </button>
-              ) : (
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
-                    isSubmitting
+
+                {currentStep < 3 ? (
+                  <button
+                    type="button"
+                    onClick={handleNextStep}
+                    className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white text-primary-800 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${isRTL ? 'flex-row-reverse' : ''}`}
+                  >
+                    {t('onboardingBranch.buttons.next')}
+                    <ArrowRight className={`w-4 h-4 ${isRTL ? 'mr-2 rotate-180' : 'ml-2'}`} />
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${isSubmitting
                       ? 'bg-primary-400 cursor-not-allowed'
-                      : 'bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
-                  } ${isRTL ? 'flex-row-reverse' : ''}`}
-                >
-                  {isSubmitting ? (
-                    <>
-                      <div className={`w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin ${isRTL ? 'ml-2' : 'mr-2'}`}></div>
-                      {t('onboardingBranch.buttons.saving')}
-                    </>
-                  ) : (
-                    t('onboardingBranch.buttons.save')
-                  )}
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
-      </main>
-    </div>
+                      : 'text-primary-800 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
+                      } ${isRTL ? 'flex-row-reverse' : ''}`}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className={`w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin ${isRTL ? 'ml-2' : 'mr-2'}`}></div>
+                        {t('onboardingBranch.buttons.saving')}
+                      </>
+                    ) : (
+                      t('onboardingBranch.buttons.save')
+                    )}
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+        </main>
+      </div>
     </>
   );
 };

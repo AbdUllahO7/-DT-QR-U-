@@ -19,17 +19,17 @@ interface SelectionCardProps {
   onSelect: (id: number | string) => void;
 }
 
-const SelectionCard: React.FC<SelectionCardProps> = ({ 
-  item, 
-  isActive, 
-  index, 
-  onClick, 
-  onSelect 
+const SelectionCard: React.FC<SelectionCardProps> = ({
+  item,
+  isActive,
+  index,
+  onClick,
+  onSelect
 }) => {
   const cardClasses = `
     relative w-80 h-[520px] transition-all duration-700 ease-out cursor-pointer
-    ${isActive 
-      ? 'z-20 scale-100 opacity-100' 
+    ${isActive
+      ? 'z-20 scale-100 opacity-100'
       : 'scale-[0.85] opacity-70 hover:opacity-90 hover:scale-[0.87]'
     }
     bg-white/95 dark:bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-2xl
@@ -56,7 +56,7 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
     if (item.type === 'branch' && item.isTemporarilyClosed) {
       return 'bg-amber-500/90 text-white border-amber-400/50 shadow-amber-500/25';
     }
-    return item.status 
+    return item.status
       ? 'bg-emerald-500/90 text-white border-emerald-400/50 shadow-emerald-500/25'
       : 'bg-red-500/90 text-white border-red-400/50 shadow-red-500/25';
   };
@@ -65,13 +65,13 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
     if (item.isTemporarilyClosed) {
       return 'bg-amber-50/80 dark:bg-amber-900/30 border-amber-200/50 dark:border-amber-700/50 text-amber-700 dark:text-amber-300';
     }
-    return item.isOpenNow 
+    return item.isOpenNow
       ? 'bg-emerald-50/80 dark:bg-emerald-900/30 border-emerald-200/50 dark:border-emerald-700/50 text-emerald-700 dark:text-emerald-300'
       : 'bg-red-50/80 dark:bg-red-900/30 border-red-200/50 dark:border-red-700/50 text-red-700 dark:text-red-300';
   };
 
   const getIconColors = () => {
-    return item.type === 'restaurant' 
+    return item.type === 'restaurant'
       ? 'from-primary-500 via-primary-600 to-primary-700'
       : 'from-blue-500 via-blue-600 to-blue-700';
   };
@@ -86,15 +86,15 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
     <motion.div
       className={cardClasses}
       initial={false}
-      animate={{ 
+      animate={{
         scale: isActive ? 1 : 0.85,
         opacity: isActive ? 1 : 0.7
       }}
-      whileHover={{ 
+      whileHover={{
         scale: isActive ? 1.02 : 0.87,
         opacity: isActive ? 1 : 0.9
       }}
-      transition={{ 
+      transition={{
         duration: 0.4,
         ease: [0.4, 0, 0.2, 1]
       }}
@@ -102,12 +102,12 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
     >
       {/* Background Gradient Overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 via-primary-600/5 to-primary-700/5 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-      
+
       {/* Floating Particles Effect */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
         <div className="absolute top-10 left-10 w-2 h-2 bg-primary-400/30 rounded-full animate-ping"></div>
         <div className="absolute top-20 right-20 w-1 h-1 bg-primary-500/40 rounded-full animate-pulse delay-300"></div>
-        <div className="absolute bottom-20 left-20 w-1.5 h-1.5 bg-primary-600/35 rounded-full animate-ping delay-700"></div>
+        <div className="absolute bottom-20 left-20 w-1.5 h-1.5 text-primary-800/35 rounded-full animate-ping delay-700"></div>
       </div>
 
       {/* Status Badge */}
@@ -147,8 +147,8 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
               overflow-hidden
             `}>
               {item.logoPath ? (
-                <img 
-                  src={item.logoPath} 
+                <img
+                  src={item.logoPath}
                   alt={`${item.name} logo`}
                   className="w-12 h-12 object-cover rounded-2xl bg-white/10"
                   onError={(e) => {
@@ -190,7 +190,7 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
           {/* Description */}
           <div className="text-center mb-6">
             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-              {item.type === 'restaurant' 
+              {item.type === 'restaurant'
                 ? 'Tüm restoran operasyonlarınızı yönetin, menülerinizi düzenleyin ve genel ayarlarınızı kontrol edin.'
                 : 'Bu şubenin siparişlerini takip edin, masa durumlarını görüntüleyin ve günlük operasyonları yönetin.'
               }
@@ -215,7 +215,7 @@ const SelectionCard: React.FC<SelectionCardProps> = ({
         >
           {/* Button Background Effect */}
           <div className="absolute inset-0 bg-white/20 transform -skew-x-12 -translate-x-full group-hover/button:translate-x-full transition-transform duration-700"></div>
-          
+
           {item.type === 'restaurant' ? (
             <>
               <Building2 className="w-5 h-5 mr-3 transition-transform duration-300 group-hover/button:scale-110" />

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  CreditCard, 
-  Plus, 
-  Check, 
-  Star, 
-  Crown, 
-  Zap, 
-  Shield, 
+import {
+  CreditCard,
+  Plus,
+  Check,
+  Star,
+  Crown,
+  Zap,
+  Shield,
   Clock,
   ChevronRight,
   Trash2,
@@ -121,7 +121,7 @@ const Subscription: React.FC = () => {
       case 'basic':
         return 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
       case 'pro':
-        return 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400';
+        return 'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-800';
       case 'enterprise':
         return 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400';
       default:
@@ -176,7 +176,7 @@ const Subscription: React.FC = () => {
             <Settings className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
             {t('subscription.actions.settings')}
           </button>
-          <button className={`inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 rounded-lg transition-colors`}>
+          <button className={`inline-flex items-center px-4 py-2 text-sm font-medium text-white text-primary-800 hover:bg-primary-700 dark:bg-primary-500 dark:hover:text-primary-800 rounded-lg transition-colors`}>
             <Plus className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
             {t('subscription.actions.upgrade')}
           </button>
@@ -192,11 +192,10 @@ const Subscription: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
+                className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
+                  ? 'border-primary-500 text-primary-800 dark:text-primary-800'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
               >
                 <Icon className="h-4 w-4" />
                 <span>{tab.label}</span>
@@ -253,7 +252,7 @@ const Subscription: React.FC = () => {
 
                 <div className="flex items-center space-x-3 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                   <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
-                    <Calendar className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                    <Calendar className="h-4 w-4 text-primary-800 dark:text-primary-800" />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{t('subscription.renewal')}</p>
@@ -283,7 +282,7 @@ const Subscription: React.FC = () => {
               </div>
 
               <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
+                <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-800 dark:text-primary-800 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
                   <span>{t('subscription.changePlan')}</span>
                   <ChevronRight className="ml-1 h-4 w-4" />
                 </button>
@@ -312,7 +311,7 @@ const Subscription: React.FC = () => {
                 </div>
                 <button
                   onClick={handleAddCard}
-                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-colors"
+                  className="inline-flex items-center px-4 py-2 text-sm font-medium text-white text-primary-800 hover:bg-primary-700 dark:bg-primary-500 dark:hover:text-primary-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-colors"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Kart Ekle
@@ -326,25 +325,22 @@ const Subscription: React.FC = () => {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.1 }}
-                    className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-200 ${
-                      card.isDefault 
-                        ? 'border-primary-200 bg-primary-50 dark:border-primary-700 dark:bg-primary-900/20' 
-                        : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50'
-                    }`}
+                    className={`flex items-center justify-between p-4 rounded-lg border transition-all duration-200 ${card.isDefault
+                      ? 'border-primary-200 bg-primary-50 dark:border-primary-700 dark:bg-primary-900/20'
+                      : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/50'
+                      }`}
                     onMouseEnter={() => setSelectedCard(card.id)}
                     onMouseLeave={() => setSelectedCard(null)}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className={`p-2 rounded-lg ${
-                        card.isDefault 
-                          ? 'bg-primary-100 dark:bg-primary-900/30' 
-                          : 'bg-gray-100 dark:bg-gray-600'
-                      }`}>
-                        <CreditCard className={`h-5 w-5 ${
-                          card.isDefault 
-                            ? 'text-primary-600 dark:text-primary-400' 
-                            : 'text-gray-500 dark:text-gray-400'
-                        }`} />
+                      <div className={`p-2 rounded-lg ${card.isDefault
+                        ? 'bg-primary-100 dark:bg-primary-900/30'
+                        : 'bg-gray-100 dark:bg-gray-600'
+                        }`}>
+                        <CreditCard className={`h-5 w-5 ${card.isDefault
+                          ? 'text-primary-800 dark:text-primary-800'
+                          : 'text-gray-500 dark:text-gray-400'
+                          }`} />
                       </div>
                       <div>
                         <div className="flex items-center space-x-2">
@@ -364,10 +360,10 @@ const Subscription: React.FC = () => {
                         </p>
                       </div>
                     </div>
-                    
+
                     <AnimatePresence>
                       {selectedCard === card.id && (
-                        <motion.div 
+                        <motion.div
                           className="flex items-center space-x-1"
                           initial={{ opacity: 0, scale: 0.8 }}
                           animate={{ opacity: 1, scale: 1 }}
@@ -377,7 +373,7 @@ const Subscription: React.FC = () => {
                           {!card.isDefault && (
                             <button
                               onClick={() => handleSetDefault(card.id)}
-                              className="p-1.5 text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-900/30 rounded-md transition-colors"
+                              className="p-1.5 text-primary-800 dark:text-primary-800 hover:bg-primary-100 dark:hover:bg-primary-900/30 rounded-md transition-colors"
                               title="Varsayılan yap"
                             >
                               <Edit3 className="h-4 w-4" />
@@ -407,7 +403,7 @@ const Subscription: React.FC = () => {
                   </p>
                   <button
                     onClick={handleAddCard}
-                    className="mt-3 inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
+                    className="mt-3 inline-flex items-center px-4 py-2 text-sm font-medium text-primary-800 dark:text-primary-800 hover:text-primary-700 dark:hover:text-primary-300 transition-colors"
                   >
                     <Plus className="h-4 w-4 mr-1" />
                     İlk kartınızı ekleyin
@@ -437,7 +433,7 @@ const Subscription: React.FC = () => {
                     <p className="text-2xl font-bold text-gray-900 dark:text-white">₺199</p>
                   </div>
                   <div className="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
-                    <Calendar className="h-6 w-6 text-primary-600 dark:text-primary-400" />
+                    <Calendar className="h-6 w-6 text-primary-800 dark:text-primary-800" />
                   </div>
                 </div>
               </div>
@@ -475,7 +471,7 @@ const Subscription: React.FC = () => {
                     Son 12 ayın fatura geçmişi
                   </p>
                 </div>
-                <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
+                <button className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary-800 dark:text-primary-800 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
                   <Download className="h-4 w-4 mr-2" />
                   Tümünü İndir
                 </button>
@@ -504,7 +500,7 @@ const Subscription: React.FC = () => {
             {/* Invoice List */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">Fatura Geçmişi</h3>
-              
+
               <div className="space-y-4">
                 {invoices.map((invoice, index) => (
                   <motion.div
@@ -529,13 +525,13 @@ const Subscription: React.FC = () => {
                         <p className="text-xs text-gray-500 dark:text-gray-500">{invoice.date}</p>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-3">
                       <div className="text-right">
                         <div className="font-semibold text-gray-900 dark:text-white">₺{invoice.amount}</div>
                         <div className="text-xs text-gray-600 dark:text-gray-400">{invoice.plan}</div>
                       </div>
-                      <button className="flex items-center gap-1 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-sm font-medium">
+                      <button className="flex items-center gap-1 px-3 py-2 text-gray-600 dark:text-gray-400 hover:text-primary-800 dark:hover:text-primary-800 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors text-sm font-medium">
                         <Download className="h-4 w-4" />
                         <span>{t('common.download') || 'Download'}</span>
                       </button>
@@ -622,7 +618,7 @@ const Subscription: React.FC = () => {
                     {t('subscription.availablePlans')}
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                                          {t('subscription.selectPlan')}
+                    {t('subscription.selectPlan')}
                   </p>
                 </div>
               </div>
@@ -635,22 +631,22 @@ const Subscription: React.FC = () => {
       {/* Add Card Modal */}
       <AnimatePresence>
         {isAddCardModalOpen && (
-          <motion.div 
+          <motion.div
             className="fixed inset-0 z-50 overflow-y-auto"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
             <div className="flex min-h-screen items-center justify-center p-4">
-              <motion.div 
-                className="fixed inset-0 bg-black/50" 
+              <motion.div
+                className="fixed inset-0 bg-black/50"
                 onClick={() => setIsAddCardModalOpen(false)}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               />
-              
-              <motion.div 
+
+              <motion.div
                 className="relative w-full max-w-md rounded-xl bg-white dark:bg-gray-800 p-6 shadow-xl border border-gray-200 dark:border-gray-700"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -665,7 +661,7 @@ const Subscription: React.FC = () => {
                     Yeni Kart Ekle
                   </h3>
                 </div>
-                
+
                 <form className="space-y-4">
                   <div>
                     <label htmlFor="cardNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -675,10 +671,10 @@ const Subscription: React.FC = () => {
                       type="text"
                       id="cardNumber"
                       placeholder="1234 5678 9012 3456"
-                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-gray-900 dark:text-white focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
+                      className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-gray-900 dark:text-white focus:border-primary-500 dark:focus:border-primary-800 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
                     />
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="expiry" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -688,10 +684,10 @@ const Subscription: React.FC = () => {
                         type="text"
                         id="expiry"
                         placeholder="MM/YY"
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-gray-900 dark:text-white focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-gray-900 dark:text-white focus:border-primary-500 dark:focus:border-primary-800 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
                       />
                     </div>
-                    
+
                     <div>
                       <label htmlFor="cvc" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         CVC
@@ -700,11 +696,11 @@ const Subscription: React.FC = () => {
                         type="text"
                         id="cvc"
                         placeholder="123"
-                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-gray-900 dark:text-white focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
+                        className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-4 py-2 text-gray-900 dark:text-white focus:border-primary-500 dark:focus:border-primary-800 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
                       />
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-end space-x-3 pt-4">
                     <button
                       type="button"
@@ -715,7 +711,7 @@ const Subscription: React.FC = () => {
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-colors"
+                      className="px-4 py-2 text-sm font-medium text-white text-primary-800 hover:bg-primary-700 dark:bg-primary-500 dark:hover:text-primary-800 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-colors"
                     >
                       Ekle
                     </button>

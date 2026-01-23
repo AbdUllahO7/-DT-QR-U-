@@ -14,7 +14,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { t, isRTL } = useLanguage();
   const { isOnline, testConnection } = useNetworkStatus();
-  
+
   const [formData, setFormData] = useState<LoginDto>({
     email: '',
     password: '',
@@ -107,11 +107,11 @@ const Login: React.FC = () => {
       }
     } catch (error: any) {
       logError(error, 'Login error');
-      
+
       // Extraction logic for your specific API response structure
-      const apiErrorMessage = 
-        error.response?.data?.errorMessage || 
-        error.message || 
+      const apiErrorMessage =
+        error.response?.data?.errorMessage ||
+        error.message ||
         "An unexpected error occurred";
 
       setErrors({ general: apiErrorMessage });
@@ -129,7 +129,7 @@ const Login: React.FC = () => {
         >
           <Link
             to="/"
-            className={`inline-flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} text-gray-600 dark:text-gray-400 hover:text-primary-600 transition-colors`}
+            className={`inline-flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} text-gray-600 dark:text-gray-400 hover:text-primary-800 transition-colors`}
           >
             <ArrowLeft className={`h-4 w-4 ${isRTL ? 'rotate-180' : ''}`} />
             <span>{t('pages.login.backToHome')}</span>
@@ -214,16 +214,16 @@ const Login: React.FC = () => {
                   type="checkbox"
                   checked={formData.rememberMe}
                   onChange={handleInputChange}
-                  className="h-4 w-4 text-primary-600 rounded border-gray-300"
+                  className="h-4 w-4 text-primary-800 rounded border-gray-300"
                 />
                 <label htmlFor="rememberMe" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
                   {t('pages.login.rememberMe')}
                 </label>
               </div>
-              <Link to="/resetPassword" className="text-sm font-medium text-primary-600 hover:underline">
+              <Link to="/resetPassword" className="text-sm font-medium text-primary-800 hover:underline">
                 {t('pages.login.forgotPassword')}
               </Link>
-              <Link to="/confirmMail" className="text-sm font-medium text-primary-600 hover:underline">
+              <Link to="/confirmMail" className="text-sm font-medium text-primary-800 hover:underline">
                 {t('pages.login.confirimEmail')}
               </Link>
             </div>
@@ -231,7 +231,7 @@ const Login: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full flex justify-center items-center py-3 px-4 rounded-lg text-white font-medium ${isSubmitting ? 'bg-primary-400' : 'bg-primary-600 hover:bg-primary-700'} transition-all`}
+              className={`w-full flex justify-center items-center py-3 px-4 rounded-lg text-white font-medium ${isSubmitting ? 'bg-primary-400' : 'text-primary-800 hover:bg-primary-700'} transition-all`}
             >
               {isSubmitting ? (
                 <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
@@ -243,7 +243,7 @@ const Login: React.FC = () => {
 
             <div className="text-center text-sm text-gray-600 dark:text-gray-400">
               {t('pages.login.noAccount')}{' '}
-              <Link to="/register" className="font-medium text-primary-600 hover:underline">
+              <Link to="/register" className="font-medium text-primary-800 hover:underline">
                 {t('pages.login.registerNow')}
               </Link>
             </div>

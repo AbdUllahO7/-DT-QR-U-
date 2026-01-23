@@ -508,14 +508,14 @@ export const tr = {
 
   // Brand
   brand: {
-    name: 'idigitek QR',
+    name: 'iDIGITEK QR',
     slogan: 'Dijital Restoran Çözümü'
   },
 
   // Features
   features: {
     title: 'Neden',
-    titleHighlight: 'QR Menu?',
+    titleHighlight: 'iDIGITEK QR Menu?',
     subtitle: 'Modern restoranlar için tasarlanmış güçlü özellikler ile müşteri deneyimini artırın ve işletmenizi dijital çağa taşıyın.',
     list: {
       qrAccess: {
@@ -2477,11 +2477,16 @@ export const tr = {
     price: 'Fiyat',
     buttons: {
       view: 'Görüntüle',
+      markOutOfStock: 'Stokta Yok',
+      markInStock: 'Stokta Var',
+      viewDetails: 'Detayları Görüntüle',
+      deactivate: 'Deaktif',
+      activate: 'Aktif',
       addons: 'Eklentiler',
       extras: 'Ekstralar',
+      ingredients: 'Malzemeler',
       edit: 'Düzenle',
       delete: 'Sil',
-      ingredients: 'Malzemeler',
       add: 'Ekle',
       remove: 'Kaldır'
     },

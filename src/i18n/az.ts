@@ -498,14 +498,14 @@ export const az = {
 
     // Brand
     brand: {
-        name: 'idigitek QR',
+        name: 'iDIGITEK QR',
         slogan: 'Rəqəmsal Restoran Həlli'
     },
 
     // Features,
     features: {
         title: 'Niyə',
-        titleHighlight: 'QR Menyu?',
+        titleHighlight: 'iDIGITEK QR Menyu?',
         subtitle: 'Müasir restoranlar üçün nəzərdə tutulmuş güclü xüsusiyyətlərlə müştəri təcrübəsini təkmilləşdirin və biznesinizi rəqəmsal əsrə daşıyın.',
         list: {
             qrAccess: {
@@ -2465,13 +2465,18 @@ export const az = {
         price: 'Qiymət',
         buttons: {
             view: 'Bax',
+            markOutOfStock: 'Stokda Yoxdur',
+            markInStock: 'Stokda Yoxdur',
+            viewDetails: 'Detayları Görüntüle',
+            deactivate: 'Deaktif',
+            activate: 'Aktif',
             addons: 'Əlavələr',
             extras: 'Əlavələr',
             ingredients: 'İnqrediyentlər',
             edit: 'Düzəliş et',
             delete: 'Sil',
             add: 'Əlavə et',
-            remove: 'Çıxar'
+            remove: 'Kaldır'
         },
         errors: {
             loadingIngredients: 'İnqrediyentlər yüklənərkən xəta baş verdi.',

@@ -4,7 +4,6 @@ import type React from "react"
 import { UtensilsCrossed, MapPin, ShoppingCart, Sun, Moon } from "lucide-react"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import LanguageSelector from "../../../LanguageSelector"
-import ThemeToggle from "../../../ThemeToggle" // Assuming the file path
 import { HeaderProps } from "../../../../types/menu/type"
 import { useTheme } from "../../../../contexts/ThemeContext"
 
@@ -31,11 +30,10 @@ const Header: React.FC<HeaderProps> = ({ menuData, totalItems, onCartToggle }) =
                   <MapPin className="h-2.5 w-2.5 sm:h-3 sm:w-3 flex-shrink-0" />
                   <p className="text-xs font-medium truncate max-w-[100px] sm:max-w-none">{menuData.branchName}</p>
                 </div>
-                <div className={`flex items-center gap-1 px-2 py-0.5 sm:py-1 rounded-full backdrop-blur-sm ${
-                  menuData.isOpen
-                    ? "bg-emerald-100/50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
-                    : "bg-red-100/50 dark:bg-red-900/30 text-red-700 dark:text-red-300"
-                }`}>
+                <div className={`flex items-center gap-1 px-2 py-0.5 sm:py-1 rounded-full backdrop-blur-sm ${menuData.isOpen
+                  ? "bg-emerald-100/50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300"
+                  : "bg-red-100/50 dark:bg-red-900/30 text-red-700 dark:text-red-300"
+                  }`}>
                   <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${menuData.isOpen ? "bg-emerald-500" : "bg-red-500"} animate-pulse`} />
                   <span className="text-xs font-semibold whitespace-nowrap">{menuData.isOpen ? t('menu.open') : t('menu.closed')}</span>
                 </div>
@@ -48,17 +46,17 @@ const Header: React.FC<HeaderProps> = ({ menuData, totalItems, onCartToggle }) =
             {/* Theme Toggle - Hidden on very small screens */}
             <div className="hidden sm:block">
               <button
-                           onClick={toggleTheme}
-                           className="min-w-[44px] min-h-[44px] p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 flex items-center justify-center"
-                           title={isDark ? t('theme.toggleToLight') : t('theme.toggleToDark')}
-                           aria-label={t('accessibility.theme')}
-                         >
-                           {isDark ? (
-                             <Sun className="h-5 w-5" />
-                           ) : (
-                             <Moon className="h-5 w-5" />
-                           )}
-                         </button>
+                onClick={toggleTheme}
+                className="min-w-[44px] min-h-[44px] p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 flex items-center justify-center"
+                title={isDark ? t('theme.toggleToLight') : t('theme.toggleToDark')}
+                aria-label={t('accessibility.theme')}
+              >
+                {isDark ? (
+                  <Sun className="h-5 w-5" />
+                ) : (
+                  <Moon className="h-5 w-5" />
+                )}
+              </button>
             </div>
 
             <div className="hidden sm:block h-6 w-[1px] bg-slate-200 dark:bg-slate-700" />

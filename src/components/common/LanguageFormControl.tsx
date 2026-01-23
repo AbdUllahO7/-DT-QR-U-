@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect, MouseEvent as ReactMouseEvent } from 'react';
-import { 
-  Languages, 
-  ChevronLeft, 
-  ChevronRight, 
-  Copy, 
-  Check, 
-  ChevronDown, 
-  Search 
+import {
+  Languages,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Check,
+  ChevronDown,
+  Search
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -90,7 +90,7 @@ export const LanguageFormControl: React.FC<LanguageFormControlProps> = ({
   };
 
   const currentLanguage = languages.find(lang => lang.code === selectedLanguage);
-  
+
   // --- Logic: Scroll Buttons ---
   const checkScrollButtons = () => {
     if (tabsRef.current) {
@@ -203,7 +203,7 @@ export const LanguageFormControl: React.FC<LanguageFormControlProps> = ({
           </div>
 
           {/* Tabs Track */}
-          <div 
+          <div
             ref={tabsRef}
             className={`flex overflow-x-auto hide-scrollbar w-full flex-nowrap ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
             onWheel={handleWheel}
@@ -217,7 +217,7 @@ export const LanguageFormControl: React.FC<LanguageFormControlProps> = ({
               const isActive = selectedLanguage === lang.code;
               const completion = getLanguageCompletion(lang.code);
               const isComplete = completion.percentage === 100 && completion.total > 0;
-              
+
               return (
                 <button
                   key={lang.code}
@@ -226,7 +226,7 @@ export const LanguageFormControl: React.FC<LanguageFormControlProps> = ({
                   className={`
                     relative flex items-center gap-2 px-6 py-3.5 text-sm font-medium whitespace-nowrap transition-colors duration-200 flex-shrink-0 select-none border-r border-gray-100 dark:border-gray-800/50
                     ${isActive
-                      ? 'text-primary-600 dark:text-blue-400 bg-white dark:bg-gray-800'
+                      ? 'text-primary-800 dark:text-blue-400 bg-white dark:bg-gray-800'
                       : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800/50'
                     }
                   `}
@@ -274,29 +274,29 @@ export const LanguageFormControl: React.FC<LanguageFormControlProps> = ({
 
             {/* Action 1: Copy Default -> Current (Only if not default) */}
             {selectedLanguage !== defaultLanguage && onBulkFill && (
-               <button
-                 type="button"
-                 onClick={() => onBulkFill(selectedLanguage)}
-                 className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-blue-400 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 rounded-md transition-colors whitespace-nowrap h-[42px]"
-               >
-                 <Copy className="w-3.5 h-3.5" />
-                 {t('languageControl.copyFrom') || 'Copy all from'} {languages.find(l => l.code === defaultLanguage)?.nativeName}
-               </button>
+              <button
+                type="button"
+                onClick={() => onBulkFill(selectedLanguage)}
+                className="flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-primary-800 dark:hover:text-blue-400 bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 border border-gray-200 dark:border-gray-600 rounded-md transition-colors whitespace-nowrap h-[42px]"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                {t('languageControl.copyFrom') || 'Copy all from'} {languages.find(l => l.code === defaultLanguage)?.nativeName}
+              </button>
             )}
 
             {/* Action 2: Bulk Fill Other Languages (Updated with CustomSelect) */}
             {showBulkFill && onBulkFill && (
-               <CustomSelect
-                 value={bulkFillTarget}
-                 onChange={(val) => {
-                   const strVal = String(val);
-                   setBulkFillTarget(strVal);
-                   handleBulkFill(strVal);
-                 }}
-                 options={bulkFillOptions}
-                 placeholder={t('languageControl.quickFill') || 'Quick Fill Other Languages...'}
-                 icon={<Copy className="w-4 h-4 text-gray-400" />}
-               />
+              <CustomSelect
+                value={bulkFillTarget}
+                onChange={(val) => {
+                  const strVal = String(val);
+                  setBulkFillTarget(strVal);
+                  handleBulkFill(strVal);
+                }}
+                options={bulkFillOptions}
+                placeholder={t('languageControl.quickFill') || 'Quick Fill Other Languages...'}
+                icon={<Copy className="w-4 h-4 text-gray-400" />}
+              />
             )}
           </div>
         </div>
