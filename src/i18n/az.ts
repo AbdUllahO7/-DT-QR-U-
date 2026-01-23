@@ -783,7 +783,7 @@ export const az = {
                 button: 'Tezliklə'
             },
             proPlus: {
-                name: 'Enterprise',
+                name: 'Pro+',
                 features: {
                     '0': 'Pro Planındakı Hər Şey',
                     '1': 'Çağrı Mərkəzi İnteqrasiyası',

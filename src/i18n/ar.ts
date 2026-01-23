@@ -744,7 +744,7 @@ export const ar = {
     mostPopular: 'الخيار المفضل',
     plans: {
       starter: {
-        name: 'الباقة الأساسية',
+        name: 'أساسي',
         features: {
           '0': 'مطعم واحد',
           '1': 'فروع غير محدودة',
@@ -764,7 +764,7 @@ export const ar = {
         button: 'ابدأ الآن'
       },
       pro: {
-        name: 'برو',
+        name: 'إحترافي',
         features: {
           '0': 'كل ما في الباقة الأساسية',
           '1': 'تكامل نقاط البيع',
@@ -782,7 +782,7 @@ export const ar = {
         button: 'قريباً'
       },
       proPlus: {
-        name: 'Enterprise',
+        name: 'إحترافي+',
         features: {
           '0': 'كل ما في باقة برو',
           '1': 'تكامل مركز الاتصال',

@@ -792,7 +792,7 @@ export const tr = {
         button: 'Çok Yakında'
       },
       proPlus: {
-        name: 'Enterprise',
+        name: 'Pro+',
         features: {
           '0': 'Pro Planındaki Her Şey',
           '1': 'Çağrı Merkezi Entegrasyonu',

@@ -780,7 +780,7 @@ export const sq = {
                 button: 'Së Shpejti'
             },
             proPlus: {
-                name: 'Enterprise',
+                name: 'Pro+',
                 features: {
                     '0': 'Gjithçka në Planin Pro',
                     '1': 'Integrim Qendra e Thirrjeve',

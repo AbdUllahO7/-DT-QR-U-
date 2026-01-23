@@ -786,14 +786,14 @@ export const en = {
         button: 'Coming Soon'
       },
       proPlus: {
-        name: 'Enterprise',
+        name: 'Pro+',
         features: {
           '0': 'Everything in Pro',
           '1': 'Call Center Integration',
           '2': 'Custom Design',
           '3': 'Private Domain',
           '4': 'API Access',
-          '5': 'Enterprise Analytics',
+          '5': 'Pro+ Analytics',
           '6': 'Dedicated Account Manager',
           '7': 'Data Migrations',
           '8': 'Delivery Tracking'
@@ -802,7 +802,7 @@ export const en = {
       }
     },
     additionalInfo: 'All plans include 14-day free trial • No credit card required • Cancel anytime',
-    vatInfo: 'Prices include VAT. Custom plans available for enterprise plans.',
+    vatInfo: 'Prices include VAT. Custom plans available for Pro+ plans.',
     perMonth: 'month',
     perYear: 'year',
     monthlyEquivalent: 'Monthly {amount} (2 months free)',
@@ -902,7 +902,7 @@ export const en = {
       },
       '8': {
         question: 'Can I manage multiple restaurants?',
-        answer: 'With our Professional and Enterprise plans, you can manage multiple restaurants from a single account. Separate menu and analytics for each restaurant.'
+        answer: 'With our Professional and Pro+ plans, you can manage multiple restaurants from a single account. Separate menu and analytics for each restaurant.'
       }
     },
     cta: {

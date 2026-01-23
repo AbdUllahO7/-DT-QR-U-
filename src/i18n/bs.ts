@@ -785,7 +785,7 @@ export const bs = {
                 button: 'Uskoro'
             },
             proPlus: {
-                name: 'Enterprise',
+                name: 'Pro+',
                 features: {
                     '0': 'Sve iz Pro Plana',
                     '1': 'Integracija Pozivnog Centra',

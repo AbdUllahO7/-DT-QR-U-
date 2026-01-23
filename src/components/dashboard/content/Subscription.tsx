@@ -109,7 +109,7 @@ const Subscription: React.FC = () => {
         return <Zap className="h-5 w-5" />;
       case 'pro':
         return <Crown className="h-5 w-5" />;
-      case 'enterprise':
+      case 'proPlus':
         return <Shield className="h-5 w-5" />;
       default:
         return <Star className="h-5 w-5" />;
@@ -122,7 +122,7 @@ const Subscription: React.FC = () => {
         return 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
       case 'pro':
         return 'bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-800';
-      case 'enterprise':
+      case 'proPlus':
         return 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400';
       default:
         return 'bg-gray-100 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400';
