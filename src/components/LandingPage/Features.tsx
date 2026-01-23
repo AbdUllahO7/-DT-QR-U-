@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { QrCode, Smartphone, Zap, BarChart3, Clock, Shield, Palette, Globe } from 'lucide-react';
+import { QrCode, Smartphone, Zap, BarChart3, Clock, Shield, Palette, Globe, ShoppingCart, Building2, Users, Utensils } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import type { Feature } from '../../types';
 
@@ -12,7 +12,11 @@ const iconComponents = {
   Clock,
   Shield,
   Palette,
-  Globe
+  Globe,
+  ShoppingCart,
+  Building2,
+  Users,
+  Utensils
 };
 
 const Features: React.FC = () => {
@@ -66,6 +70,30 @@ const Features: React.FC = () => {
       title: t('features.list.multiLanguage.title'),
       description: t('features.list.multiLanguage.description'),
       icon: 'Globe'
+    },
+    {
+      id: '9',
+      title: t('features.list.tableOrders.title'),
+      description: t('features.list.tableOrders.description'),
+      icon: 'ShoppingCart'
+    },
+    {
+      id: '10',
+      title: t('features.list.multiBranch.title'),
+      description: t('features.list.multiBranch.description'),
+      icon: 'Building2'
+    },
+    {
+      id: '11',
+      title: t('features.list.userRoles.title'),
+      description: t('features.list.userRoles.description'),
+      icon: 'Users'
+    },
+    {
+      id: '12',
+      title: t('features.list.productCustomization.title'),
+      description: t('features.list.productCustomization.description'),
+      icon: 'Utensils'
     }
   ];
 

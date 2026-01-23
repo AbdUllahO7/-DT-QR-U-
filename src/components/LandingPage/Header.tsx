@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 // Import useLocation here
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Moon, Sun, QrCode, LogIn, UserPlus, LayoutDashboard, LogOut } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X, Moon, Sun, LogIn, UserPlus, LayoutDashboard, LogOut } from 'lucide-react';
 // Reverting imports to not use .jsx extension, as in your original file
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth, useScrollSpy } from '../../hooks';
@@ -23,7 +23,7 @@ const Header: React.FC = () => {
 
   // Ref for the header element to detect clicks outside
   const headerRef = useRef<HTMLElement>(null);
-  
+
   const navItems: NavItem[] = [
     { id: 'home', label: t('nav.home'), href: '#hero' },
     { id: 'features', label: t('nav.features'), href: '#features' },
@@ -32,26 +32,26 @@ const Header: React.FC = () => {
     { id: 'faq', label: t('nav.faq'), href: '#faq' },
     { id: 'contact', label: t('nav.contact'), href: '#contact' },
   ];
-  
+
   // Only activate scroll spy if on the home page
   const activeSection = useScrollSpy(
-    isHomePage ? navItems.map(item => item.id) : [], 
+    isHomePage ? navItems.map(item => item.id) : [],
     100
   );
 
 
   useEffect(() => {
     if (location.hash && isHomePage) {
-      const id = location.hash.substring(1); 
-      
+      const id = location.hash.substring(1);
+
       setTimeout(() => {
         const element = document.getElementById(id);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth' });
         }
-      }, 100); 
+      }, 100);
     }
-  }, [isHomePage, location.hash]); 
+  }, [isHomePage, location.hash]);
 
 
   useEffect(() => {
@@ -82,7 +82,7 @@ const Header: React.FC = () => {
   const handleNavClick = (href: string): void => {
     setIsOpen(false); // Close mobile menu regardless
 
-    navigate(`/${href}`); 
+    navigate(`/${href}`);
   };
 
   const handleLogin = (): void => {
@@ -129,17 +129,20 @@ const Header: React.FC = () => {
   return (
     <header
       ref={headerRef}
-      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
-        isScrolled
-          ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg'
-          : 'bg-transparent'
-      }`}
+      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${isScrolled
+        ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg'
+        : 'bg-transparent'
+        }`}
     >
       <nav className="container-max w-full" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
-            <QrCode className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+            <img
+              src="/assets/logos/iDiGiTeK-Logo-iDT-.png"
+              alt="iDiGiTeK Logo"
+              className="h-8 w-auto"
+            />
             <span className="text-xl font-bold text-gray-900 dark:text-white">
               {t('brand.name')}
             </span>
@@ -156,7 +159,7 @@ const Header: React.FC = () => {
                   activeSection === item.id && isHomePage
                     ? 'text-primary-600 dark:text-primary-400'
                     : 'text-gray-700 dark:text-gray-300'
-                }`}
+                  }`}
               >
                 {item.label}
               </button>
@@ -247,7 +250,7 @@ const Header: React.FC = () => {
                     activeSection === item.id && isHomePage
                       ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
                       : 'text-gray-700 dark:text-gray-300'
-                  }`}
+                    }`}
                 >
                   {item.label}
                 </button>

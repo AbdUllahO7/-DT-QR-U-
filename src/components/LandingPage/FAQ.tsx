@@ -6,16 +6,10 @@ import type { FAQ as FAQType } from '../../types';
 
 const FAQ: React.FC = () => {
   const { t, isRTL } = useLanguage();
-  const [openItems, setOpenItems] = useState<Set<string>>(new Set());
+  const [openItem, setOpenItem] = useState<string | null>(null);
 
   const toggleItem = (id: string): void => {
-    const newOpenItems = new Set(openItems);
-    if (newOpenItems.has(id)) {
-      newOpenItems.delete(id);
-    } else {
-      newOpenItems.add(id);
-    }
-    setOpenItems(newOpenItems);
+    setOpenItem(openItem === id ? null : id);
   };
 
   // Generate FAQ data from translations
@@ -68,15 +62,15 @@ const FAQ: React.FC = () => {
                 <span className="text-lg font-semibold text-gray-900 dark:text-white">
                   {faq.question}
                 </span>
-                <ChevronDown 
+                <ChevronDown
                   className={`h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
-                    openItems.has(faq.id) ? 'transform rotate-180' : ''
+                    openItem === faq.id ? 'transform rotate-180' : ''
                   }`}
                 />
               </button>
               
               <AnimatePresence>
-                {openItems.has(faq.id) && (
+                {openItem === faq.id && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
