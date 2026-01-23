@@ -1059,7 +1059,7 @@ const OnboardingRestaurant: React.FC = () => {
                   type="button"
                   onClick={handleNextStep}
                   disabled={isTransitioning || isSubmitting}
-                  className="px-6 py-3 text-primary-800 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                  className="px-6 py-3 bg-primary-800 text-primary-800 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 >
                   {t('onboardingRestaurant.navigation.next')}
                 </button>
@@ -1067,16 +1067,16 @@ const OnboardingRestaurant: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting || isTransitioning || isUploadingLogo || isUploadingWorkPermit || isUploadingFoodCertificate}
-                  className={`px-6 py-3 text-primary-800 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+                  className={`px-6 py-3 text-primary-800 bg-primary-800 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center space-x-2 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 bg-primary-800 border-primary-800 border-t-transparent rounded-full animate-spin"></div>
                       <span>{t('onboardingRestaurant.navigation.submitting')}</span>
                     </>
                   ) : (isUploadingLogo || isUploadingWorkPermit || isUploadingFoodCertificate) ? (
                     <>
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 bg-primary-800 border-primary-800 border-t-transparent rounded-full animate-spin"></div>
                       <span>{t('onboardingRestaurant.navigation.uploading')}</span>
                     </>
                   ) : (

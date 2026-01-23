@@ -174,7 +174,7 @@ const Header: React.FC = () => {
                 <>
                   <button
                     onClick={handleGoToPanel}
-                    className={`flex items-center px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-primary-800 hover:bg-primary-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg ${isRTL ? 'space-x-reverse space-x-1 sm:space-x-2' : 'space-x-1 sm:space-x-2'}`}
+                    className={`flex items-center bg-primary-800  px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-primary-800 hover:bg-primary-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg ${isRTL ? 'space-x-reverse space-x-1 sm:space-x-2' : 'space-x-1 sm:space-x-2'}`}
                     aria-label={t('nav.goToPanel')}
                   >
                     <LayoutDashboard className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -194,7 +194,7 @@ const Header: React.FC = () => {
                 <>
                   <button
                     onClick={handleLogin}
-                    className={`flex items-center text-white px-2 bg-primary-800 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-800 dark:hover:text-primary-800 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 ${isRTL ? 'space-x-reverse space-x-1 sm:space-x-2' : 'space-x-1 sm:space-x-2'}`}
+                    className={`flex items-center mr-2 ml-2 text-white px-2 bg-primary-800 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-800 dark:hover:text-primary-800 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 ${isRTL ? 'space-x-reverse space-x-1 sm:space-x-2' : 'space-x-1 sm:space-x-2'}`}
                     aria-label={t('auth.login')}
                   >
                     <LogIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

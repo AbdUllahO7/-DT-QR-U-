@@ -9,7 +9,6 @@ import {
 } from 'lucide-react';
 import type {
   CreateBranchWithDetailsDto,
-  CreateBranchWorkingHourCoreDto,
   ApiError,
 } from '../types/api';
 import { branchService } from '../services/branchService';
@@ -1031,7 +1030,7 @@ const OnboardingBranch: React.FC = () => {
       type="button"
       onClick={() => !disabled && onChange(!checked)}
       disabled={disabled}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${checked ? 'text-primary-800' : 'bg-gray-200 dark:bg-gray-700'
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${checked ? 'bg-primary-800' : 'bg-gray-200 dark:bg-gray-700'
         }`}
       dir="ltr"
     >
@@ -1564,7 +1563,7 @@ const OnboardingBranch: React.FC = () => {
           <button
             type="button"
             onClick={handleOpenMapModal}
-            className={`px-4 py-3 text-primary-800 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 flex items-center space-x-2 whitespace-nowrap ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
+            className={`px-4 py-3 bg-primary-500 text-primary-800 text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 flex items-center space-x-2 whitespace-nowrap ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}
           >
             <MapPinned className="h-5 w-5" />
             <span className="hidden sm:inline">{t('onboardingBranch.form.step3.location.selectOnMap') || 'اختر من الخريطة'}</span>
@@ -1726,8 +1725,8 @@ const OnboardingBranch: React.FC = () => {
                       onChange={(checked) => handleWorkingHourChange(index, 'isWorkingDay', checked)}
                     />
                     <span className={`text-sm font-medium transition-colors hidden xs:block ${day.isWorkingDay
-                      ? 'text-green-700 dark:text-green-400'
-                      : 'text-gray-500 dark:text-gray-400'
+                      ? 'text-green-700 bg-primary-800 dark:text-green-400'
+                      : 'text-gray-500 bg-primary-50 dark:text-gray-400'
                       }`}>
                       {day.isWorkingDay ? t('onboardingBranch.form.step3.workingHours.toggleOpen') : t('onboardingBranch.form.step3.workingHours.toggleClosed')}
                     </span>
@@ -1925,7 +1924,7 @@ const OnboardingBranch: React.FC = () => {
                             } rounded-full transition-colors duration-200 h-8 w-8 flex items-center justify-center border-2`}
                         >
                           <StepIcon
-                            className={`w-4 h-4 ${currentStep >= step.id ? 'text-white' : 'text-gray-500 dark:text-gray-400'
+                            className={`w-4 h-4 ${currentStep >= step.id ? 'text-primary' : 'text-gray-500 dark:text-gray-400'
                               }`}
                           />
                         </div>
@@ -2056,7 +2055,7 @@ const OnboardingBranch: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleNextStep}
-                    className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white text-primary-800 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${isRTL ? 'flex-row-reverse' : ''}`}
+                    className={`inline-flex bg-primary-800 items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white text-primary-800 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${isRTL ? 'flex-row-reverse' : ''}`}
                   >
                     {t('onboardingBranch.buttons.next')}
                     <ArrowRight className={`w-4 h-4 ${isRTL ? 'mr-2 rotate-180' : 'ml-2'}`} />
@@ -2065,7 +2064,7 @@ const OnboardingBranch: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${isSubmitting
+                    className={`inline-flex  bg-primary-800 items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${isSubmitting
                       ? 'bg-primary-400 cursor-not-allowed'
                       : 'text-primary-800 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500'
                       } ${isRTL ? 'flex-row-reverse' : ''}`}

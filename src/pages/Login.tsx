@@ -231,7 +231,7 @@ const Login: React.FC = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full flex justify-center items-center py-3 px-4 rounded-lg text-white font-medium ${isSubmitting ? 'bg-primary-400' : 'text-primary-800 hover:bg-primary-700'} transition-all`}
+              className={`w-full bg-primary-800 flex justify-center items-center py-3 px-4 rounded-lg text-white font-medium ${isSubmitting ? 'bg-primary-400' : 'text-primary-800 hover:bg-primary-700'} transition-all`}
             >
               {isSubmitting ? (
                 <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
