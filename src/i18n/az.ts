@@ -577,7 +577,7 @@ export const az = {
                 title: 'Məhsul',
                 links: {
                     features: 'Xüsusiyyətlər',
-                    pricing: 'Qiymətlər',
+                    pricing: 'Planlar',
                     demo: 'Demo',
                     api: 'API Sənədləri'
                 }
@@ -586,7 +586,7 @@ export const az = {
                 title: 'Şirkət',
                 links: {
                     about: 'Haqqımızda',
-                    pricing: 'Qiymətlər',
+                    pricing: 'Planlar',
                     careers: 'Karyera',
                     contact: 'Əlaqə'
                 }
@@ -783,7 +783,7 @@ export const az = {
                 button: 'Tezliklə'
             },
             proPlus: {
-                name: 'Pro+',
+                name: 'Enterprise',
                 features: {
                     '0': 'Pro Planındakı Hər Şey',
                     '1': 'Çağrı Mərkəzi İnteqrasiyası',

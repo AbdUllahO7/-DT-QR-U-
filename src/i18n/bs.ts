@@ -579,7 +579,7 @@ export const bs = {
                 title: 'Proizvod',
                 links: {
                     features: 'Karakteristike',
-                    pricing: 'Cijene',
+                    pricing: 'Planovi',
                     demo: 'Demo',
                     api: 'API Dokumentacija'
                 }
@@ -588,7 +588,7 @@ export const bs = {
                 title: 'Kompanija',
                 links: {
                     about: 'O nama',
-                    pricing: 'Cijene',
+                    pricing: 'Planovi',
                     careers: 'Karijere',
                     contact: 'Kontakt'
                 }
@@ -785,7 +785,7 @@ export const bs = {
                 button: 'Uskoro'
             },
             proPlus: {
-                name: 'Pro+',
+                name: 'Enterprise',
                 features: {
                     '0': 'Sve iz Pro Plana',
                     '1': 'Integracija Pozivnog Centra',

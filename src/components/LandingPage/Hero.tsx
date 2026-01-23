@@ -63,7 +63,7 @@ const Hero: React.FC = () => {
             >
               <button
                 onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-                className="btn-primary text-lg px-8 py-4"
+                className="btn-primary text-lg px-8 py-4 dark:text-white text-black"
               >
                 {t('hero.cta.getStarted')}
               </button>

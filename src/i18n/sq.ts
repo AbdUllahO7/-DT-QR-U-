@@ -574,7 +574,7 @@ export const sq = {
                 title: 'Produkti',
                 links: {
                     features: 'Veçoritë',
-                    pricing: 'Çmimet',
+                    pricing: 'Planet',
                     demo: 'Demo',
                     api: 'Dokumentacioni i API'
                 }
@@ -583,7 +583,7 @@ export const sq = {
                 title: 'Kompania',
                 links: {
                     about: 'Rreth Nesh',
-                    pricing: 'Çmimet',
+                    pricing: 'Planet',
                     careers: 'Karriera',
                     contact: 'Kontakt'
                 }
@@ -780,7 +780,7 @@ export const sq = {
                 button: 'Së Shpejti'
             },
             proPlus: {
-                name: 'Pro+',
+                name: 'Enterprise',
                 features: {
                     '0': 'Gjithçka në Planin Pro',
                     '1': 'Integrim Qendra e Thirrjeve',

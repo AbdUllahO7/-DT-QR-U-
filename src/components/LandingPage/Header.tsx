@@ -194,7 +194,7 @@ const Header: React.FC = () => {
                 <>
                   <button
                     onClick={handleLogin}
-                    className={`flex items-center px-2 bg-primary-800 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-800 dark:hover:text-primary-800 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 ${isRTL ? 'space-x-reverse space-x-1 sm:space-x-2' : 'space-x-1 sm:space-x-2'}`}
+                    className={`flex items-center text-white px-2 bg-primary-800 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-800 dark:hover:text-primary-800 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 ${isRTL ? 'space-x-reverse space-x-1 sm:space-x-2' : 'space-x-1 sm:space-x-2'}`}
                     aria-label={t('auth.login')}
                   >
                     <LogIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -203,7 +203,7 @@ const Header: React.FC = () => {
 
                   <button
                     onClick={handleRegister}
-                    className={`flex items-center px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-primary-800 hover:bg-primary-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg ${isRTL ? 'space-x-reverse space-x-1 sm:space-x-2' : 'space-x-1 sm:space-x-2'}`}
+                    className={`flex dark:text-white items-center px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-primary hover:bg-primary-700 hover:text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg ${isRTL ? 'space-x-reverse space-x-1 sm:space-x-2' : 'space-x-1 sm:space-x-2'}`}
                     aria-label={t('auth.register')}
                   >
                     <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -280,7 +280,7 @@ const Header: React.FC = () => {
                   <>
                     <button
                       onClick={handleLogin}
-                      className={`flex items-center w-full px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
+                      className={`flex items-center text-white w-full px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
                     >
                       <LogIn className="h-4 w-4" />
                       <span>{t('nav.login')}</span>
@@ -288,7 +288,7 @@ const Header: React.FC = () => {
 
                     <button
                       onClick={handleRegister}
-                      className={`flex items-center w-full px-3 py-2 mt-1 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-700 text-white transition-colors duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
+                      className={`flex items-center w-full px-3 py-2 mt-1 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-700 text-primary transition-colors duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
                     >
                       <UserPlus className="h-4 w-4" />
                       <span>{t('nav.register')}</span>

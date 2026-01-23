@@ -114,7 +114,7 @@ export const ar = {
   nav: {
     home: 'الرئيسية',
     features: 'المميزات',
-    pricing: 'الأسعار',
+    pricing: 'الخطط',
     testimonials: 'الشهادات',
     faq: 'الأسئلة الشائعة',
     contact: 'اتصل بنا',
@@ -577,7 +577,7 @@ export const ar = {
         title: 'المنتج',
         links: {
           features: 'المميزات',
-          pricing: 'الأسعار',
+          pricing: 'الخطط',
           demo: 'عرض توضيحي',
           api: 'وثائق API'
         }
@@ -586,7 +586,7 @@ export const ar = {
         title: 'الشركة',
         links: {
           about: 'معلومات عنا',
-          pricing: 'الأسعار',
+          pricing: 'الخطط',
           careers: 'الوظائف',
           contact: 'اتصل بنا'
         }
@@ -782,7 +782,7 @@ export const ar = {
         button: 'قريباً'
       },
       proPlus: {
-        name: 'برو+',
+        name: 'Enterprise',
         features: {
           '0': 'كل ما في باقة برو',
           '1': 'تكامل مركز الاتصال',

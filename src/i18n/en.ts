@@ -786,7 +786,7 @@ export const en = {
         button: 'Coming Soon'
       },
       proPlus: {
-        name: 'Pro+',
+        name: 'Enterprise',
         features: {
           '0': 'Everything in Pro',
           '1': 'Call Center Integration',

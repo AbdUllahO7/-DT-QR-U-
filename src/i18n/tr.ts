@@ -119,7 +119,7 @@ export const tr = {
   nav: {
     home: 'Ana Sayfa',
     features: 'Özellikler',
-    pricing: 'Fiyatlandırma',
+    pricing: 'Planlar',
     testimonials: 'Yorumlar',
     faq: 'SSS',
     contact: 'İletişim',
@@ -587,7 +587,7 @@ export const tr = {
         title: 'Ürün',
         links: {
           features: 'Özellikler',
-          pricing: 'Fiyatlandırma',
+          pricing: 'Planlar',
           demo: 'Demo',
           api: 'API Dokümantasyonu'
         }
@@ -596,7 +596,7 @@ export const tr = {
         title: 'Şirket',
         links: {
           about: 'Hakkımızda',
-          pricing: 'Fiyatlandırma',
+          pricing: 'Planlar',
           careers: 'Kariyer',
           contact: 'İletişim'
         }
@@ -792,7 +792,7 @@ export const tr = {
         button: 'Çok Yakında'
       },
       proPlus: {
-        name: 'Pro+',
+        name: 'Enterprise',
         features: {
           '0': 'Pro Planındaki Her Şey',
           '1': 'Çağrı Merkezi Entegrasyonu',

@@ -105,7 +105,7 @@ const FAQ: React.FC = () => {
           </p>
           <button
             onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-            className="btn-primary"
+            className="btn-primary bg-primary-800 dark:bg-primary-800"
           >
             {t('faq.cta.button')}
           </button>

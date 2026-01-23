@@ -325,7 +325,7 @@ const Contact: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`w-full btn-primary ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`w-full btn-primary bg-primary-800 dark:bg-primary-800 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {isSubmitting ? (
                       <span className={`flex items-center justify-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
