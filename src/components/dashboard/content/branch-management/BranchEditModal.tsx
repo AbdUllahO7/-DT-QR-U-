@@ -92,7 +92,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     },
     createBranchWorkingHourCoreDto: []
   });
-  
+
   const [hasChanges, setHasChanges] = useState(false);
   const [activeTab, setActiveTab] = useState<'general' | 'address' | 'contact' | 'workingHours'>('general');
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
@@ -141,18 +141,18 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
   // Helper to parse full phone number into code and local number
   const getPhoneParts = (fullNumber: string | null) => {
     if (!fullNumber) return { code: '+90', number: '' }; // Default to TR if empty
-    
+
     // Sort countries by code length desc to match longest prefix first
     const sortedCountries = [...countriesWithCodes].sort((a, b) => b.code.length - a.code.length);
     const country = sortedCountries.find(c => fullNumber.startsWith(c.code));
-    
+
     if (country) {
       return {
         code: country.code,
         number: fullNumber.slice(country.code.length)
       };
     }
-    
+
     return { code: '+90', number: fullNumber };
   };
 
@@ -221,23 +221,23 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
         },
         createBranchWorkingHourCoreDto: branchDetail.workingHours?.length
           ? branchDetail.workingHours.map(wh => {
-              // Handle backward compatibility with old API format that had openTime/closeTime at root level
-              const legacyWh = wh as any;
-              return {
-                dayOfWeek: wh.dayOfWeek,
-                isWorkingDay: wh.isWorkingDay ?? true,
-                isOpen24Hours: wh.isOpen24Hours ?? false,
-                timeSlots: wh.timeSlots && wh.timeSlots.length > 0
-                  ? wh.timeSlots.map(slot => ({
-                      id: slot.id,
-                      openTime: slot.openTime || '08:00:00',
-                      closeTime: slot.closeTime || '22:00:00',
-                    }))
-                  : wh.isWorkingDay && !wh.isOpen24Hours
-                    ? [{ openTime: legacyWh.openTime || '08:00:00', closeTime: legacyWh.closeTime || '22:00:00' }]
-                    : [],
-              };
-            })
+            // Handle backward compatibility with old API format that had openTime/closeTime at root level
+            const legacyWh = wh as any;
+            return {
+              dayOfWeek: wh.dayOfWeek,
+              isWorkingDay: wh.isWorkingDay ?? true,
+              isOpen24Hours: wh.isOpen24Hours ?? false,
+              timeSlots: wh.timeSlots && wh.timeSlots.length > 0
+                ? wh.timeSlots.map(slot => ({
+                  id: slot.id,
+                  openTime: slot.openTime || '08:00:00',
+                  closeTime: slot.closeTime || '22:00:00',
+                }))
+                : wh.isWorkingDay && !wh.isOpen24Hours
+                  ? [{ openTime: legacyWh.openTime || '08:00:00', closeTime: legacyWh.closeTime || '22:00:00' }]
+                  : [],
+            };
+          })
           : defaultWorkingHours,
       };
 
@@ -475,9 +475,9 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
     newValue: string
   ) => {
     const { code, number } = getPhoneParts(currentFullValue);
-    
+
     let newFullNumber = '';
-    
+
     if (partType === 'code') {
       newFullNumber = newValue + number;
     } else {
@@ -597,15 +597,15 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
 
       const previousUrl = formData.branchLogoPath;
       const newImageUrl = await mediaService.uploadFile(file, previousUrl || undefined);
-      
+
       setFormData(prev => ({
         ...prev,
         branchLogoPath: newImageUrl
       }));
-      
+
       setHasChanges(true);
       logger.info('Image uploaded successfully', { newImageUrl }, { prefix: 'BranchEditModal' });
-      
+
     } catch (error) {
       logger.error('Image upload failed', error, { prefix: 'BranchEditModal' });
       setUploadError(t('branchManagement.modal.errors.imageUploadError'));
@@ -636,7 +636,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       if (validationErrors.branchName) setActiveTab('general');
       if (validationErrors.workingHours) setActiveTab('workingHours');
@@ -786,12 +786,12 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
 
     } catch (error: any) {
       logger.error('Branch update failed', error, { prefix: 'BranchEditModal' });
-      
+
       if (error?.response?.status === 400) {
         const errorData = error?.response?.data;
         if (errorData?.errors) {
           const apiErrors: Record<string, string> = {};
-          
+
           Object.entries(errorData.errors).forEach(([field, messages]) => {
             if (Array.isArray(messages) && messages.length > 0) {
               const formField = field.toLowerCase();
@@ -811,7 +811,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
               }
             }
           });
-          
+
           setValidationErrors(apiErrors);
           setUploadError(t('branchManagement.modal.errors.validationFailed'));
         } else {
@@ -833,7 +833,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
         setUploadError(t('branchManagement.error.connectionError'));
       } else {
         setUploadError(
-          error?.message || 
+          error?.message ||
           t('branchManagement.error.unknownError')
         );
       }
@@ -1001,7 +1001,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
               {/* Header */}
               <div className={`flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                  <MapPin className="h-6 w-6 text-primary-600" />
+                  <MapPin className="h-6 w-6 text-primary-800" />
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                     {t('onboardingBranch.form.step3.location.mapTitle')}
                   </h3>
@@ -1028,9 +1028,8 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                       value={googleMapsLink}
                       onChange={handleGoogleMapsLinkChange}
                       placeholder={t('onboardingBranch.form.step3.location.googleMapsLinkPlaceholder') || 'https://maps.google.com/...'}
-                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${
-                        linkError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
-                      } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${linkError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
+                        } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
                       dir="ltr"
                     />
                   </div>
@@ -1085,7 +1084,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                     <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-[1000] pointer-events-none">
                       <div className="bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-600">
                         <p className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-primary-600" />
+                          <MapPin className="h-4 w-4 text-primary-800" />
                           {t('onboardingBranch.form.step3.location.markerPosition') || 'Marker position'}
                         </p>
                       </div>
@@ -1097,7 +1096,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                     href={`https://www.openstreetmap.org/?mlat=${selectedLatLng.lat}&mlon=${selectedLatLng.lng}#map=15/${selectedLatLng.lat}/${selectedLatLng.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`inline-flex items-center text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 ${isRTL ? 'flex-row-reverse' : ''}`}
+                    className={`inline-flex items-center text-xs text-primary-800 dark:text-primary-800 hover:text-primary-700 dark:hover:text-primary-300 ${isRTL ? 'flex-row-reverse' : ''}`}
                   >
                     <span>{t('onboardingBranch.form.step3.location.openFullMap') || 'Open in full map'}</span>
                     <span className={`h-3 w-3 ${isRTL ? 'mr-1' : 'ml-1'}`}>→</span>
@@ -1191,7 +1190,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                     <span className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
                       {t('onboardingBranch.form.step3.location.selectedCoordinates') || 'Selected Coordinates:'}
                     </span>
-                    <code className="text-sm font-mono text-primary-600 dark:text-primary-400" dir="ltr">
+                    <code className="text-sm font-mono text-primary-800 dark:text-primary-800" dir="ltr">
                       {selectedLatLng.lat.toFixed(6)}, {selectedLatLng.lng.toFixed(6)}
                     </code>
                   </div>
@@ -1210,7 +1209,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                 <button
                   type="button"
                   onClick={handleConfirmLocation}
-                  className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                  className="flex-1 px-4 py-2 text-primary-800 text-white rounded-lg hover:bg-primary-700"
                 >
                   {t('common.save')}
                 </button>
@@ -1287,7 +1286,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
           <div className="px-6 pt-4 pb-2">
             <LanguageFormControl
               languages={supportedLanguages}
-                      selectedLanguage={selectedFormLanguage}
+              selectedLanguage={selectedFormLanguage}
               onLanguageChange={setSelectedFormLanguage}
               defaultLanguage={defaultLanguage}
               showBulkFill={true}
@@ -1310,27 +1309,27 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
             <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
               <nav className={`-mb-px flex ${isRTL ? 'space-x-reverse space-x-8' : 'space-x-8'} overflow-x-auto`}>
                 {[
-                  { 
-                    id: 'general', 
-                    label: t('branchManagement.modal.tabs.general'), 
+                  {
+                    id: 'general',
+                    label: t('branchManagement.modal.tabs.general'),
                     icon: <Building2 className="w-4 h-4" />,
                     hasError: !!validationErrors.branchName
                   },
-                  { 
-                    id: 'address', 
-                    label: t('branchManagement.modal.tabs.address'), 
+                  {
+                    id: 'address',
+                    label: t('branchManagement.modal.tabs.address'),
                     icon: <MapPin className="w-4 h-4" />,
                     hasError: !!validationErrors.address
                   },
-                  { 
-                    id: 'contact', 
-                    label: t('branchManagement.modal.tabs.contact'), 
+                  {
+                    id: 'contact',
+                    label: t('branchManagement.modal.tabs.contact'),
                     icon: <Phone className="w-4 h-4" />,
                     hasError: !!validationErrors.contact
                   },
-                  { 
-                    id: 'workingHours', 
-                    label: t('branchManagement.modal.tabs.workingHours'), 
+                  {
+                    id: 'workingHours',
+                    label: t('branchManagement.modal.tabs.workingHours'),
                     icon: <Clock className="w-4 h-4" />,
                     hasError: !!validationErrors.workingHours
                   }
@@ -1338,13 +1337,12 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`py-3 px-1 border-b-2 font-medium text-sm flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} transition-colors whitespace-nowrap ${
-                      activeTab === tab.id
-                        ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                        : tab.hasError
+                    className={`py-3 px-1 border-b-2 font-medium text-sm flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} transition-colors whitespace-nowrap ${activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600 dark:text-blue-400'
+                      : tab.hasError
                         ? 'border-red-300 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300'
                         : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-                    }`}
+                      }`}
                   >
                     {tab.icon}
                     <span>{tab.label}</span>
@@ -1362,7 +1360,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                 <div className="space-y-6">
                   <div>
                     <MultiLanguageInput
-                      label={t('branchManagement.form.branchName') }
+                      label={t('branchManagement.form.branchName')}
                       value={branchNameTranslations}
                       onChange={(newTranslations) => {
                         setBranchNameTranslations(newTranslations);
@@ -1408,9 +1406,9 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                         type="tel"
                         value={getPhoneParts(formData.whatsappOrderNumber).number}
                         onChange={(e) => handlePhoneCompositeChange(
-                          'whatsappOrderNumber', 
-                          formData.whatsappOrderNumber, 
-                          'number', 
+                          'whatsappOrderNumber',
+                          formData.whatsappOrderNumber,
+                          'number',
                           e.target.value
                         )}
                         className="w-full sm:flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors text-base"
@@ -1424,7 +1422,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                       {t('branchManagement.form.branchLogo')}
                     </label>
-                    
+
                     {/* Current Logo Display */}
                     {imagePreview && (
                       <div className="mb-4">
@@ -1466,9 +1464,8 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                         />
                         <label
                           htmlFor="logoUpload"
-                          className={`inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                            isUploadingImage ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                          }`}
+                          className={`inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${isUploadingImage ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                            }`}
                         >
                           {isUploadingImage ? (
                             <>
@@ -1482,7 +1479,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                             </>
                           )}
                         </label>
-                        
+
                         {!imagePreview && !isUploadingImage && (
                           <div className={`flex items-center text-gray-400 dark:text-gray-500 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
                             <ImageIcon className="h-5 w-5" />
@@ -1618,9 +1615,9 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                           type="tel"
                           value={getPhoneParts(formData.createContactDto.phone).number}
                           onChange={(e) => handlePhoneCompositeChange(
-                            'createContactDto.phone', 
-                            formData.createContactDto.phone, 
-                            'number', 
+                            'createContactDto.phone',
+                            formData.createContactDto.phone,
+                            'number',
                             e.target.value
                           )}
                           className="w-full sm:flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-colors text-base"
@@ -1661,7 +1658,7 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                       <button
                         type="button"
                         onClick={handleOpenMapModal}
-                        className={`px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+                        className={`px-4 py-2 text-primary-800 hover:bg-primary-700 text-white rounded-lg transition-colors flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
                       >
                         <Navigation className="w-4 h-4" />
                         <span className="hidden sm:inline">{t('onboardingBranch.form.step3.location.selectOnMap')}</span>
@@ -1696,8 +1693,8 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                           updateFormData('createContactDto.footerTitle', currentValue);
                         }}
                         languages={supportedLanguages}
-                      selectedLanguage={selectedFormLanguage}
-                      showLanguageSelector={false}
+                        selectedLanguage={selectedFormLanguage}
+                        showLanguageSelector={false}
                         placeholder={t('branchManagement.form.footerTitlePlaceholder')}
                       />
                     </div>
@@ -1712,8 +1709,8 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                           updateFormData('createContactDto.openTitle', currentValue);
                         }}
                         languages={supportedLanguages}
-                      selectedLanguage={selectedFormLanguage}
-                      showLanguageSelector={false}
+                        selectedLanguage={selectedFormLanguage}
+                        showLanguageSelector={false}
                         placeholder={t('branchManagement.form.openTitlePlaceholder')}
                       />
                     </div>
@@ -1747,8 +1744,8 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                           updateFormData('createContactDto.openDays', currentValue);
                         }}
                         languages={supportedLanguages}
-                      selectedLanguage={selectedFormLanguage}
-                      showLanguageSelector={false}
+                        selectedLanguage={selectedFormLanguage}
+                        showLanguageSelector={false}
                         placeholder={t('branchManagement.form.openDaysPlaceholder')}
                       />
                     </div>
@@ -1763,8 +1760,8 @@ const BranchEditModal: React.FC<BranchEditModalProps> = ({
                           updateFormData('createContactDto.openHours', currentValue);
                         }}
                         languages={supportedLanguages}
-                      selectedLanguage={selectedFormLanguage}
-                      showLanguageSelector={false}
+                        selectedLanguage={selectedFormLanguage}
+                        showLanguageSelector={false}
                         placeholder={t('branchManagement.form.openHoursPlaceholder')}
                       />
                     </div>

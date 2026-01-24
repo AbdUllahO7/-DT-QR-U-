@@ -55,7 +55,7 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
         return {
           code: ml.code as Language,
           name: langInfo?.name || ml.displayName || ml.code,
-          countryCode: langInfo?.countryCode || ml.code 
+          countryCode: langInfo?.countryCode || ml.code
         };
       });
     }
@@ -115,9 +115,8 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
             <button
               key={lang.code}
               onClick={() => handleLanguageChange(lang.code)}
-              className={`w-full flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${
-                language === lang.code ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400' : ''
-              }`}
+              className={`w-full flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ${language === lang.code ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-400 dark:text-primary-400' : ''
+                }`}
             >
               {/* 2. Replaced Emoji <span> with <img> tag */}
               <img
@@ -126,12 +125,12 @@ const LanguageSelector: React.FC<LanguageSelectorProps> = ({
                 width="24"
                 height="16" // Aspect ratio is usually 3:2 for flags, but 24x16 works well for icons
                 alt={lang.name}
-                className="object-contain rounded-sm" 
+                className="object-contain rounded-sm"
               />
-              
+
               <span className="font-medium">{lang.name}</span>
               {language === lang.code && (
-                <span className={`${isRTL ? 'mr-auto' : 'ml-auto'} text-primary-600 dark:text-primary-400`}>
+                <span className={`${isRTL ? 'mr-auto' : 'ml-auto'} text-primary-400 dark:text-primary-400`}>
                   ✓
                 </span>
               )}

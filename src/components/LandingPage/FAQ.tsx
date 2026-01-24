@@ -34,9 +34,9 @@ const FAQ: React.FC = () => {
           className={`text-center mb-16 ${isRTL ? 'text-right' : ''}`}
         >
           <div className={`flex items-center justify-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} mb-4`}>
-            <HelpCircle className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+            <HelpCircle className="h-8 w-8 text-primary-800 dark:text-primary-800" />
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
-              {t('faq.title')} <span className="text-primary-600 dark:text-primary-400">{t('faq.titleHighlight')}</span>
+              {t('faq.title')} <span className="text-primary-800 dark:text-primary-800">{t('faq.titleHighlight')}</span>
             </h2>
           </div>
           <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
@@ -63,12 +63,11 @@ const FAQ: React.FC = () => {
                   {faq.question}
                 </span>
                 <ChevronDown
-                  className={`h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
-                    openItem === faq.id ? 'transform rotate-180' : ''
-                  }`}
+                  className={`h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${openItem === faq.id ? 'transform rotate-180' : ''
+                    }`}
                 />
               </button>
-              
+
               <AnimatePresence>
                 {openItem === faq.id && (
                   <motion.div
@@ -104,9 +103,9 @@ const FAQ: React.FC = () => {
           <p className="text-gray-600 dark:text-gray-400 mb-8">
             {t('faq.cta.subtitle')}
           </p>
-          <button 
+          <button
             onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-            className="btn-primary"
+            className="btn-primary bg-primary-800 dark:bg-primary-800"
           >
             {t('faq.cta.button')}
           </button>

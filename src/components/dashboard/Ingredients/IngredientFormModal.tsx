@@ -15,19 +15,19 @@ interface ExtendedIngredientFormModalProps extends IngredientFormModalProps {
   defaultLanguage: string;
 }
 
-const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  onSuccess, 
-  ingredient, 
-  allergens, 
+const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
+  isOpen,
+  onClose,
+  onSuccess,
+  ingredient,
+  allergens,
   isEdit = false,
   supportedLanguages,
   defaultLanguage
 }) => {
   const { t, isRTL } = useLanguage();
   const translationHook = useTranslatableFields();
-  
+
   // State for non-translatable fields
   const [formData, setFormData] = useState({
     isAllergenic: false,
@@ -36,12 +36,12 @@ const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
 
   // State for translations
   const [nameTranslations, setNameTranslations] = useState<TranslatableFieldValue>({});
-  
+
   const [selectedAllergens, setSelectedAllergens] = useState<Allergen[]>([]);
   const [allergenDetails, setAllergenDetails] = useState<Record<number, AllergenDetail>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // UI Controls State
   const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
   const [viewDensity, setViewDensity] = useState<ViewDensity>('comfortable');
@@ -215,12 +215,12 @@ const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
     // Basic validation: Check if default language name is present
     if (!nameTranslations[defaultLanguage]?.trim()) {
       // We rely on MultiLanguageInput's internal error display, but we stop here
-      return; 
+      return;
     }
 
     setLoading(true);
     setError(null);
-    
+
     try {
       // 1. Get default language value
       const defaultName = translationHook.getTranslationWithFallback(nameTranslations, defaultLanguage);
@@ -234,9 +234,9 @@ const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
         allergenIds: formData.isAllergenic ? selectedAllergens?.map(a => a.id) : [],
         allergenDetails: formData.isAllergenic ? Object.values(allergenDetails) : []
       };
-      
+
       let savedIngredient;
-      
+
       // 3. Save Base Entity
       if (isEdit) {
         savedIngredient = await ingredientsService.updateIngredient(ingredientData as UpdateIngredientData);
@@ -246,7 +246,7 @@ const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
 
       // 4. Save Translations (for non-default languages)
       const ingredientId = isEdit && ingredient ? ingredient.id : savedIngredient.id;
-      
+
       const translationsToSave = supportedLanguages
         .filter((lang: any) => lang.code !== defaultLanguage)
         .map((lang: any) => ({
@@ -259,11 +259,11 @@ const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
       if (translationsToSave.length > 0) {
         await ingredientTranslationService.batchUpsertIngredientTranslations({ translations: translationsToSave });
       }
-      
+
       logger.info(isEdit ? 'Ingredient updated' : 'Ingredient added', ingredientData);
       onSuccess();
       onClose();
-      
+
     } catch (err: any) {
       logger.error('Error saving ingredient', err);
       if (err.response?.data?.message) {
@@ -286,7 +286,7 @@ const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div 
+      <div
         className={`bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto ${isRTL ? 'text-right' : 'text-left'} ${fontSizeClasses[fontSize]}`}
       >
         {/* Header */}
@@ -294,7 +294,7 @@ const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
             {isEdit ? t('IngredientsContent.editIngredient') : t('IngredientsContent.addNewIngredient')}
           </h2>
-          
+
           <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
             {/* Font/Density Controls... (Same as before) */}
             <button onClick={cycleFontSize} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md">
@@ -308,7 +308,7 @@ const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
             </button>
           </div>
         </div>
-        
+
         <div className={`${densityPadding[viewDensity]} ${densitySpacing[viewDensity]}`}>
           {error && (
             <div className={`bg-red-50 dark:bg-red-900/20 border border-red-200 p-4 flex items-center gap-2 rounded-lg ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -323,28 +323,28 @@ const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">{t('IngredientsContent.basicInfo')}</h3>
               {collapsedSections.basicInfo ? <ChevronDown className="w-5 h-5 dark:text-white" /> : <ChevronUp className="w-5 h-5 dark:text-white" />}
             </button>
-            
+
             {!collapsedSections.basicInfo && (
               <div className={`${densityPadding[viewDensity]} pt-0`}>
                 <div className={`grid grid-cols-1 md:grid-cols-1 ${densityGap[viewDensity]}`}>
-                  
+
                   {/* Multi Language Input for Name */}
                   <div className="w-full">
                     {/* Using a wrapper div to handle internal spacing of the relative dropdown */}
                     <div className="w-full">
-                       <MultiLanguageInput
-                          label={t('IngredientsContent.ingredientName')}
-                          value={nameTranslations}
-                          onChange={setNameTranslations}
-                          languages={supportedLanguages}
-                          required={true}
-                          requiredLanguages={[defaultLanguage]}
-                          placeholder={t('IngredientsContent.enterIngredientName')}
-                          disabled={loading}
-                       />
+                      <MultiLanguageInput
+                        label={t('IngredientsContent.ingredientName')}
+                        value={nameTranslations}
+                        onChange={setNameTranslations}
+                        languages={supportedLanguages}
+                        required={true}
+                        requiredLanguages={[defaultLanguage]}
+                        placeholder={t('IngredientsContent.enterIngredientName')}
+                        disabled={loading}
+                      />
                     </div>
                   </div>
-                  
+
                   <div className={`${densitySpacing[viewDensity]} pt-6`}>
                     <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <input
@@ -353,13 +353,13 @@ const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
                         checked={formData.isAllergenic}
                         onChange={(e) => handleInputChange('isAllergenic', e.target.checked)}
                         disabled={loading}
-                        className="w-4 h-4 mr-2 text-primary-600 rounded"
+                        className="w-4 h-4 mr-2 text-primary-800 rounded"
                       />
                       <label htmlFor="isAllergenic" className={`font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'mr-2' : 'ml-2'}`}>
                         {t('IngredientsContent.containsAllergensCheckbox')}
                       </label>
                     </div>
-                    
+
                     <div className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
                       <input
                         type="checkbox"
@@ -367,7 +367,7 @@ const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
                         checked={formData.isAvailable}
                         onChange={(e) => handleInputChange('isAvailable', e.target.checked)}
                         disabled={loading}
-                        className="w-4 h-4 mr-2 text-primary-600 rounded"
+                        className="w-4 h-4 mr-2 text-primary-800 rounded"
                       />
                       <label htmlFor="isAvailable" className={`font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'mr-2' : 'ml-2'}`}>
                         {t('IngredientsContent.availableForUse')}
@@ -385,36 +385,35 @@ const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
               <h3 className="text-lg font-semibold text-gray-800 dark:text-white">{t('IngredientsContent.allergenInfo')}</h3>
               {collapsedSections.allergenInfo ? <ChevronDown className="w-5 h-5 dark:text-white" /> : <ChevronUp className="w-5 h-5 dark:text-white" />}
             </button>
-            
+
             {!collapsedSections.allergenInfo && (
               <div className={`${densityPadding[viewDensity]} pt-0`}>
                 <div className="mb-4 text-gray-600 dark:text-gray-400">
-                    {formData.isAllergenic ? t('IngredientsContent.selectAllergensMessage') : t('IngredientsContent.enableAllergenMessage')}
+                  {formData.isAllergenic ? t('IngredientsContent.selectAllergensMessage') : t('IngredientsContent.enableAllergenMessage')}
                 </div>
-                
+
                 <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 ${viewDensity === 'compact' ? 'gap-3' : 'gap-4'}`}>
                   {allergens.sort((a, b) => a.displayOrder - b.displayOrder).map((allergen) => {
                     const isSelected = selectedAllergens.find(a => a.id === allergen.id);
                     const isDisabled = !formData.isAllergenic || loading;
                     const translatedAllergen = getTranslatedAllergen(allergen);
-                    
+
                     return (
                       <div
                         key={allergen.id}
                         onClick={() => !isDisabled && handleAllergenSelect(allergen)}
-                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
-                          isDisabled ? 'opacity-50 cursor-not-allowed border-gray-200' : 
+                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${isDisabled ? 'opacity-50 cursor-not-allowed border-gray-200' :
                           isSelected ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30' : 'border-gray-200 dark:border-gray-600 hover:border-primary-300'
-                        }`}
+                          }`}
                       >
                         <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                           <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                              <span className="text-2xl">{allergen.icon}</span>
-                              <div>
-                                 <h4 className="font-medium dark:text-white">{translatedAllergen.name}</h4>
-                              </div>
-                           </div>
-                           {isSelected && !isDisabled && <div className="bg-primary-500 rounded-full p-0.5"><Check className="w-3 h-3 text-white" /></div>}
+                          <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <span className="text-2xl">{allergen.icon}</span>
+                            <div>
+                              <h4 className="font-medium dark:text-white">{translatedAllergen.name}</h4>
+                            </div>
+                          </div>
+                          {isSelected && !isDisabled && <div className="bg-primary-500 rounded-full p-0.5"><Check className="w-3 h-3 text-white" /></div>}
                         </div>
                       </div>
                     );
@@ -429,10 +428,10 @@ const IngredientFormModal: React.FC<ExtendedIngredientFormModalProps> = ({
             <button onClick={handleClose} disabled={loading} className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700">
               {t('IngredientsContent.cancel')}
             </button>
-            <button 
-              onClick={handleSubmit} 
-              disabled={loading || !nameTranslations[defaultLanguage]} 
-              className="px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 flex items-center gap-2"
+            <button
+              onClick={handleSubmit}
+              disabled={loading || !nameTranslations[defaultLanguage]}
+              className="px-6 py-3 text-primary-800 text-white rounded-lg hover:bg-primary-700 disabled:bg-gray-400 flex items-center gap-2"
             >
               {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Plus className="w-5 h-5" />}
               {isEdit ? t('IngredientsContent.update') : t('IngredientsContent.add')}

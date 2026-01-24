@@ -72,8 +72,8 @@ const OnboardingComplete: React.FC = () => {
               className="mt-6 flex items-center justify-center"
             >
               <div className="relative">
-                <Timer className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-                <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-sm font-medium text-primary-600 dark:text-primary-400">
+                <Timer className="h-6 w-6 text-primary-800 dark:text-primary-800" />
+                <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-sm font-medium text-primary-800 dark:text-primary-800">
                   {countdown}
                 </span>
               </div>

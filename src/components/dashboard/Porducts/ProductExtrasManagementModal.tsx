@@ -30,7 +30,7 @@ interface ProductExtrasManagementModalProps {
   productName: string;
   extraCategoryId: number;
   extraCategoryName: string;
-  isRemoval?: boolean; 
+  isRemoval?: boolean;
 }
 
 const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> = ({
@@ -41,7 +41,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
   productName,
   extraCategoryId,
   extraCategoryName,
-  isRemoval = false 
+  isRemoval = false
 }) => {
   const { t, isRTL } = useLanguage();
   const { isDark } = useTheme();
@@ -65,7 +65,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
   // Form state
   const [formData, setFormData] = useState({
     extraId: 0,
-    selectionMode: 0, 
+    selectionMode: 0,
     defaultQuantity: 1,
     defaultMinQuantity: 0,
     defaultMaxQuantity: 1,
@@ -99,13 +99,13 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
         extra => extra.extraCategoryId === extraCategoryId && extra.status
       );
       setAllExtras(categoryExtras);
-      
+
       const productExtrasData = await productExtrasService.getProductExtrasByProductId(productId);
       const filtered = productExtrasData.filter(pe => {
         const extra = allExtrasData.find(e => e.id === pe.extraId);
         return extra && extra.extraCategoryId === extraCategoryId;
       });
-      
+
       setProductExtras(filtered);
     } catch (error) {
       logger.error('Failed to load product extras:', error);
@@ -148,9 +148,9 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
         isRequired: false
       });
       setShowAddForm(false);
-    } catch (error:any) {
+    } catch (error: any) {
       logger.error('Failed to add product extra:', error);
-      setError(error.response?.data?.message );
+      setError(error.response?.data?.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -173,7 +173,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
       await productExtrasService.updateProductExtra(data);
       await loadData();
       setEditingId(null);
-    } catch (error :any) {
+    } catch (error: any) {
       logger.error('Failed to update product extra:', error);
       setError(error.message);
     } finally {
@@ -186,7 +186,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
   };
 
   const confirmDelete = async () => {
-    if(!deleteConfirm.id) return;
+    if (!deleteConfirm.id) return;
     try {
       setIsSubmitting(true);
       setError(null);
@@ -247,25 +247,24 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
     <>
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-0 sm:p-4 animate-in fade-in duration-200">
         <div
-          className={`bg-white dark:bg-gray-800 rounded-none sm:rounded-2xl shadow-2xl w-full max-w-5xl h-full sm:h-auto sm:max-h-[85vh] overflow-hidden flex flex-col ${
-            isRTL ? 'rtl' : 'ltr'
-          }`}
+          className={`bg-white dark:bg-gray-800 rounded-none sm:rounded-2xl shadow-2xl w-full max-w-5xl h-full sm:h-auto sm:max-h-[85vh] overflow-hidden flex flex-col ${isRTL ? 'rtl' : 'ltr'
+            }`}
           dir={isRTL ? 'rtl' : 'ltr'}
         >
           {/* Header */}
           <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 z-10 shrink-0">
             <div className="flex items-center gap-2 sm:gap-4 overflow-hidden">
-               <button
-                  onClick={onBack}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-500 hover:text-gray-700 transition-colors shrink-0"
-                  title={t('common.back')}
-                >
-                  <ArrowLeft className={`h-5 w-5 sm:h-6 sm:w-6 ${isRTL ? 'rotate-180' : ''}`} />
-                </button>
+              <button
+                onClick={onBack}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full text-gray-500 hover:text-gray-700 transition-colors shrink-0"
+                title={t('common.back')}
+              >
+                <ArrowLeft className={`h-5 w-5 sm:h-6 sm:w-6 ${isRTL ? 'rotate-180' : ''}`} />
+              </button>
               <div className="min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2 truncate">
-                    <Layers className="h-5 w-5 sm:h-6 sm:w-6 text-primary-600 shrink-0" />
+                    <Layers className="h-5 w-5 sm:h-6 sm:w-6 text-primary-800 shrink-0" />
                     <span className="truncate">{t('extrasManagement.productExtras.manageExtras')}</span>
                   </h2>
                   {isRemoval && (
@@ -277,7 +276,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-300 mt-1 truncate">
                   <span className="truncate max-w-[200px]">{productName}</span>
                   <span className="hidden sm:inline text-gray-300 mx-1">•</span>
-                  <span className="font-medium text-primary-600 dark:text-primary-400 truncate">{extraCategoryName}</span>
+                  <span className="font-medium text-primary-800 dark:text-primary-800 truncate">{extraCategoryName}</span>
                 </div>
               </div>
             </div>
@@ -300,7 +299,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
 
             {loading ? (
               <div className="flex items-center justify-center py-20">
-                <Loader2 className="h-10 w-10 animate-spin text-primary-600" />
+                <Loader2 className="h-10 w-10 animate-spin text-primary-800" />
               </div>
             ) : (
               <div className="space-y-6">
@@ -308,7 +307,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                 {!showAddForm && getAvailableExtrasToAdd().length > 0 && (
                   <button
                     onClick={() => setShowAddForm(true)}
-                    className="group w-full flex items-center justify-center gap-3 px-6 py-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-300 hover:border-primary-500 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-all duration-200"
+                    className="group w-full flex items-center justify-center gap-3 px-6 py-4 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-gray-600 dark:text-gray-300 hover:border-primary-500 hover:text-primary-800 dark:hover:text-primary-800 hover:bg-primary-50 dark:hover:bg-primary-900/10 transition-all duration-200"
                   >
                     <div className="bg-gray-200 dark:bg-gray-700 rounded-full p-1 group-hover:bg-primary-100 dark:group-hover:bg-primary-900 transition-colors">
                       <Plus className="h-5 w-5" />
@@ -320,7 +319,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                 {/* Add Form */}
                 {showAddForm && (
                   <div className="bg-white dark:bg-gray-800 rounded-xl p-4 sm:p-6 border border-gray-200 dark:border-gray-700 shadow-lg animate-in fade-in slide-in-from-bottom-4">
-                     <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 dark:border-gray-700">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                         {t('extrasManagement.productExtras.addExtra')}
                       </h3>
@@ -336,7 +335,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             {t('extrasManagement.productExtras.selectExtra')} <span className="text-red-500">*</span>
                           </label>
-                          
+
                           {/* --- New Custom Select --- */}
                           <div className="relative z-20">
                             <CustomSelect
@@ -350,7 +349,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                               }))}
                             />
                           </div>
-                          
+
                           {formData.extraId > 0 && (
                             <div className="mt-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-100 dark:border-gray-700">
                               <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
@@ -361,7 +360,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                         </div>
 
                         <div>
-                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             {t('extrasManagement.productExtras.unitPrice')} <span className="text-red-500">*</span>
                           </label>
                           <div className="relative">
@@ -387,7 +386,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             {t('extrasManagement.productExtras.selectionMode')}
                           </label>
-                          
+
                           {/* Conditional Rendering based on isRemoval */}
                           {isRemoval ? (
                             <div className="p-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-lg">
@@ -398,7 +397,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                             </div>
                           ) : (
                             <div className="grid grid-cols-2 gap-3">
-                              <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${formData.selectionMode === 0 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400 ring-1 ring-primary-500' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700'}`}>
+                              <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${formData.selectionMode === 0 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-800 ring-1 ring-primary-500' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700'}`}>
                                 <input
                                   type="radio"
                                   value={0}
@@ -408,7 +407,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                 />
                                 <span className="font-medium text-sm sm:text-base">{t('extrasManagement.productExtras.single')}</span>
                               </label>
-                              <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${formData.selectionMode === 1 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400 ring-1 ring-primary-500' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700'}`}>
+                              <label className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition-all ${formData.selectionMode === 1 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-800 ring-1 ring-primary-500' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700'}`}>
                                 <input
                                   type="radio"
                                   value={1}
@@ -423,8 +422,8 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                         </div>
 
                         <div className="p-4 bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-100 dark:border-gray-700 space-y-4">
-                           <h4 className="text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">{t('extrasManagement.productExtras.quantityConfiguration')}</h4>
-                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                          <h4 className="text-xs font-bold text-gray-500 dark:text-gray-300 uppercase tracking-wider">{t('extrasManagement.productExtras.quantityConfiguration')}</h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                               <label className="block text-xs text-gray-500 dark:text-gray-400 mb-1.5">{t('extrasManagement.productExtras.default')}</label>
                               <input
@@ -474,7 +473,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                       <button
                         onClick={handleAddExtra}
                         disabled={isSubmitting || !formData.extraId}
-                        className="w-full sm:w-auto flex justify-center items-center gap-2 px-6 py-3 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full sm:w-auto flex justify-center items-center gap-2 px-6 py-3 text-sm font-medium text-white text-primary-800 hover:bg-primary-700 rounded-lg shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {isSubmitting ? (
                           <>
@@ -510,11 +509,10 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                       return (
                         <div
                           key={extra.id}
-                           className={`bg-white dark:bg-gray-800 rounded-xl border transition-all duration-200 ${
-                            editingId === extra.id 
-                              ? 'border-primary-500 ring-2 ring-primary-500/10 shadow-lg z-10' 
-                              : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-md'
-                          }`}
+                          className={`bg-white dark:bg-gray-800 rounded-xl border transition-all duration-200 ${editingId === extra.id
+                            ? 'border-primary-500 ring-2 ring-primary-500/10 shadow-lg z-10'
+                            : 'border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-700 hover:shadow-md'
+                            }`}
                         >
                           {editingId === extra.id ? (
                             // Edit Mode
@@ -523,7 +521,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                 <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                                   {t('common.edit')}: {getExtraName(extra.extraId)}
                                 </h3>
-                               
+
                               </div>
 
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -544,26 +542,26 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                         className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500`}
                                       />
                                     </div>
-                                    
+
                                     {/* Conditional Selection Mode in Edit */}
                                     {isRemoval ? (
                                       <div className="p-2 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded text-sm text-gray-600 dark:text-gray-400">
-                                         {t('extrasManagement.productExtras.single')} ({t('extrasManagement.categoryConfigModal.badges.removal')})
+                                        {t('extrasManagement.productExtras.single')} ({t('extrasManagement.categoryConfigModal.badges.removal')})
                                       </div>
                                     ) : (
                                       <div className="flex gap-2">
-                                         <button
-                                          onClick={() => setEditFormData({...editFormData, selectionMode: 0})}
-                                          className={`flex-1 py-2 text-xs font-medium rounded border transition-colors ${editFormData.selectionMode === 0 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'}`}
-                                         >
-                                           {t('extrasManagement.productExtras.singleSelect')}
-                                         </button>
-                                         <button
-                                          onClick={() => setEditFormData({...editFormData, selectionMode: 1})}
-                                          className={`flex-1 py-2 text-xs font-medium rounded border transition-colors ${editFormData.selectionMode === 1 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-400' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'}`}
-                                         >
-                                           {t('extrasManagement.productExtras.multiSelect')}
-                                         </button>
+                                        <button
+                                          onClick={() => setEditFormData({ ...editFormData, selectionMode: 0 })}
+                                          className={`flex-1 py-2 text-xs font-medium rounded border transition-colors ${editFormData.selectionMode === 0 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-800' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'}`}
+                                        >
+                                          {t('extrasManagement.productExtras.singleSelect')}
+                                        </button>
+                                        <button
+                                          onClick={() => setEditFormData({ ...editFormData, selectionMode: 1 })}
+                                          className={`flex-1 py-2 text-xs font-medium rounded border transition-colors ${editFormData.selectionMode === 1 ? 'bg-primary-50 dark:bg-primary-900/30 border-primary-500 text-primary-700 dark:text-primary-800' : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300'}`}
+                                        >
+                                          {t('extrasManagement.productExtras.multiSelect')}
+                                        </button>
                                       </div>
                                     )}
                                   </div>
@@ -617,7 +615,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                 <button
                                   onClick={() => handleUpdateExtra(extra.id)}
                                   disabled={isSubmitting}
-                                  className="flex items-center gap-2 px-6 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg shadow-sm"
+                                  className="flex items-center gap-2 px-6 py-2 text-sm font-medium text-white text-primary-800 hover:bg-primary-700 rounded-lg shadow-sm"
                                 >
                                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                                   {t('common.save')}
@@ -643,7 +641,7 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
                                     </span>
                                   </div>
                                 </div>
-                                
+
                                 {extraDetails?.description && (
                                   <p className="text-sm text-gray-500 dark:text-gray-300 mb-3 line-clamp-1">
                                     {extraDetails.description}
@@ -688,14 +686,14 @@ const ProductExtrasManagementModal: React.FC<ProductExtrasManagementModalProps> 
         </div>
       </div>
 
-       <ConfirmationModal
+      <ConfirmationModal
         isOpen={deleteConfirm.isOpen}
         onClose={() => setDeleteConfirm({ isOpen: false, id: null })}
         onConfirm={confirmDelete}
         title="Delete Extra Assignment"
-        message={t('extrasManagement.productExtras.confirmDeleteExtra')} 
-        
-        />
+        message={t('extrasManagement.productExtras.confirmDeleteExtra')}
+
+      />
     </>
   );
 };

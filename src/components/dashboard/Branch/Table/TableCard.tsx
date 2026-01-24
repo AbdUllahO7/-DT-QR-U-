@@ -128,9 +128,9 @@ const TableCard: React.FC<TableCardProps> = ({
 
       {/* Status Indicators */}
       <div className={`flex items-center gap-4 mt-3 mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-        
+
         {/* Active/Inactive Indicator */}
-        <div 
+        <div
           onClick={() => onToggleStatus(table.id, !table.isActive)}
           className={`flex items-center gap-2 cursor-pointer select-none transition-opacity hover:opacity-80 ${isRTL ? 'flex-row-reverse' : ''}`}
         >
@@ -148,7 +148,7 @@ const TableCard: React.FC<TableCardProps> = ({
 
         {/* Occupied/Available Indicator */}
         {onToggleOccupation && (
-          <div 
+          <div
             onClick={() => onToggleOccupation(table.id, !table.isOccupied)}
             className={`flex items-center gap-2 cursor-pointer select-none transition-opacity hover:opacity-80 ${isRTL ? 'flex-row-reverse' : ''}`}
           >
@@ -170,11 +170,10 @@ const TableCard: React.FC<TableCardProps> = ({
           <button
             onClick={() => onClearTable(table.id)}
             disabled={!table.isActive || isClearing || isToggling}
-            className={`w-full px-3 py-2 text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-              table.isOccupied
+            className={`w-full px-3 py-2 text-xs font-medium rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${table.isOccupied
                 ? 'bg-orange-50 hover:bg-orange-100 text-orange-600 dark:bg-orange-900/20 dark:hover:bg-orange-900/30 dark:text-orange-400'
                 : 'bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400'
-            } flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
+              } flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}
             title={table.isOccupied ? t('BranchTableManagement.clearTable') : t('BranchTableManagement.refreshTable')}
           >
             {isClearing ? (

@@ -70,7 +70,7 @@ interface BranchModalProps {
   hasChanges?: boolean;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   onWorkingHourChange: (dayIndex: number, field: keyof CreateBranchWorkingHourCoreDto, value: any) => void;
-  
+
   // Translation Props
   supportedLanguages: LanguageOption[];
   branchNameTranslations: TranslatableFieldValue;
@@ -125,7 +125,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
   const [isUploadingLogo, setIsUploadingLogo] = useState<boolean>(false);
   const [isCurrentStepValid, setIsCurrentStepValid] = useState<boolean>(false);
   const [selectedFormLanguage, setSelectedFormLanguage] = useState<string>(defaultLanguage);
-  
+
   // --- MAP STATE ---
   const [isMapModalOpen, setIsMapModalOpen] = useState<boolean>(false);
   const [selectedLatLng, setSelectedLatLng] = useState<{ lat: number; lng: number }>({
@@ -138,8 +138,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
   const dayNamesDisplay = Array.isArray(t('branchModal.workingHours.days'))
     ? t('branchModal.workingHours.days')
     : language === 'ar'
-    ? ['الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد']
-    : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+      ? ['الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت', 'الأحد']
+      : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
   useEffect(() => {
     setBranchLogoPreview(formData.branchLogoPath || null);
@@ -158,7 +158,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
   };
 
   const getPhoneParts = (fullNumber: string | null) => {
-    if (!fullNumber) return { code: '+90', number: '' }; 
+    if (!fullNumber) return { code: '+90', number: '' };
     const sortedCountries = [...countriesWithCodes].sort((a, b) => b.code.length - a.code.length);
     const country = sortedCountries.find(c => fullNumber.startsWith(c.code));
     if (country) {
@@ -185,14 +185,12 @@ const BranchModal: React.FC<BranchModalProps> = ({
       type="button"
       onClick={() => !disabled && onChange(!checked)}
       disabled={disabled}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-        checked ? 'bg-primary-600' : 'bg-gray-200 dark:bg-gray-700'
-      }`}
+      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${checked ? 'text-primary-800' : 'bg-gray-200 dark:bg-gray-700'
+        }`}
     >
       <span
-        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-          checked ? (isRTL ? '-translate-x-6' : 'translate-x-6') : (isRTL ? '-translate-x-1' : 'translate-x-1')
-        }`}
+        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${checked ? (isRTL ? '-translate-x-6' : 'translate-x-6') : (isRTL ? '-translate-x-1' : 'translate-x-1')
+          }`}
       />
     </button>
   );
@@ -291,9 +289,9 @@ const BranchModal: React.FC<BranchModalProps> = ({
   };
 
   const handlePhoneCompositeChange = (
-    fullFieldName: string, 
-    currentFullValue: string | null, 
-    partType: 'code' | 'number', 
+    fullFieldName: string,
+    currentFullValue: string | null,
+    partType: 'code' | 'number',
     newValue: string
   ) => {
     if (partType === 'number') {
@@ -303,7 +301,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
 
     const { code, number } = getPhoneParts(currentFullValue);
     let newFullNumber = '';
-    
+
     if (partType === 'code') {
       newFullNumber = newValue + number;
     } else {
@@ -595,11 +593,11 @@ const BranchModal: React.FC<BranchModalProps> = ({
 
     // Synthetic event to update parent state/validation
     const syntheticEvent = {
-        target: {
-          name: 'contact.location',
-          value: locationString,
-        },
-      } as React.ChangeEvent<HTMLInputElement>;
+      target: {
+        name: 'contact.location',
+        value: locationString,
+      },
+    } as React.ChangeEvent<HTMLInputElement>;
     onInputChange(syntheticEvent);
 
     setIsMapModalOpen(false);
@@ -661,7 +659,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
               {/* Header */}
               <div className={`flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                  <MapPin className="h-6 w-6 text-primary-600" />
+                  <MapPin className="h-6 w-6 text-primary-800" />
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                     {t('onboardingBranch.form.step3.location.mapTitle')}
                   </h3>
@@ -688,9 +686,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
                       value={googleMapsLink}
                       onChange={handleGoogleMapsLinkChange}
                       placeholder={t('onboardingBranch.form.step3.location.googleMapsLinkPlaceholder') || 'https://maps.google.com/...'}
-                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${
-                        linkError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
-                      } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                      className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border ${linkError ? 'border-red-300 dark:border-red-600' : 'border-gray-300 dark:border-gray-600'
+                        } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
                       dir="ltr"
                     />
                   </div>
@@ -745,7 +742,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                     <div className="absolute top-3 left-1/2 transform -translate-x-1/2 z-[1000] pointer-events-none">
                       <div className="bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-lg border border-gray-200 dark:border-gray-600">
                         <p className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
-                          <MapPin className="h-4 w-4 text-primary-600" />
+                          <MapPin className="h-4 w-4 text-primary-800" />
                           {t('onboardingBranch.form.step3.location.markerPosition') || 'Marker position'}
                         </p>
                       </div>
@@ -757,7 +754,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                     href={`https://www.openstreetmap.org/?mlat=${selectedLatLng.lat}&mlon=${selectedLatLng.lng}#map=15/${selectedLatLng.lat}/${selectedLatLng.lng}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={`inline-flex items-center text-xs text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 ${isRTL ? 'flex-row-reverse' : ''}`}
+                    className={`inline-flex items-center text-xs text-primary-800 dark:text-primary-800 hover:text-primary-700 dark:hover:text-primary-300 ${isRTL ? 'flex-row-reverse' : ''}`}
                   >
                     <span>{t('onboardingBranch.form.step3.location.openFullMap') || 'Open in full map'}</span>
                     <ArrowRight className={`h-3 w-3 ${isRTL ? 'mr-1 rotate-180' : 'ml-1'}`} />
@@ -851,7 +848,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                     <span className={`text-sm font-medium text-gray-700 dark:text-gray-300 ${isRTL ? 'text-right' : 'text-left'}`}>
                       {t('onboardingBranch.form.step3.location.selectedCoordinates') || 'Selected Coordinates:'}
                     </span>
-                    <code className="text-sm font-mono text-primary-600 dark:text-primary-400" dir="ltr">
+                    <code className="text-sm font-mono text-primary-800 dark:text-primary-800" dir="ltr">
                       {selectedLatLng.lat.toFixed(6)}, {selectedLatLng.lng.toFixed(6)}
                     </code>
                   </div>
@@ -870,7 +867,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                 <button
                   type="button"
                   onClick={handleConfirmLocation}
-                  className="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+                  className="flex-1 px-4 py-2 text-primary-800 text-white rounded-lg hover:bg-primary-700"
                 >
                   {t('common.save')}
                 </button>
@@ -891,72 +888,71 @@ const BranchModal: React.FC<BranchModalProps> = ({
         <div className="space-y-6">
 
           <div>
-             <MultiLanguageInput
-                label={t('branchModal.fields.branchName.label')}
-                value={branchNameTranslations}
-                onChange={(newTranslations) => {
-                  setBranchNameTranslations(newTranslations);
-                  // Update base DTO with current/default language value for validation
-                  const val = newTranslations[language] || newTranslations[defaultLanguage] || '';
+            <MultiLanguageInput
+              label={t('branchModal.fields.branchName.label')}
+              value={branchNameTranslations}
+              onChange={(newTranslations) => {
+                setBranchNameTranslations(newTranslations);
+                // Update base DTO with current/default language value for validation
+                const val = newTranslations[language] || newTranslations[defaultLanguage] || '';
 
-                  // Update main formData
-                  setFormData(prev => ({ ...prev, branchName: val }));
+                // Update main formData
+                setFormData(prev => ({ ...prev, branchName: val }));
 
-                  // Clear error if exists
-                  if (formErrors.branchName && val) {
-                    setFormErrors(prev => {
-                      const newErrors = { ...prev };
-                      delete newErrors.branchName;
-                      return newErrors;
-                    });
-                  }
-                }}
-                languages={supportedLanguages}
-                placeholder={t('branchModal.fields.branchName.placeholder')}
-                required={false} // Enforces default language requirement
-                defaultLanguage={defaultLanguage}
-                selectedLanguage={selectedFormLanguage}
-                showLanguageSelector={false}
-              />
-              {formErrors.branchName && (
-                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.branchName}</p>
-              )}
+                // Clear error if exists
+                if (formErrors.branchName && val) {
+                  setFormErrors(prev => {
+                    const newErrors = { ...prev };
+                    delete newErrors.branchName;
+                    return newErrors;
+                  });
+                }
+              }}
+              languages={supportedLanguages}
+              placeholder={t('branchModal.fields.branchName.placeholder')}
+              required={false} // Enforces default language requirement
+              defaultLanguage={defaultLanguage}
+              selectedLanguage={selectedFormLanguage}
+              showLanguageSelector={false}
+            />
+            {formErrors.branchName && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{formErrors.branchName}</p>
+            )}
           </div>
 
           <div>
             <label htmlFor="whatsappOrderNumber" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               {t('branchModal.fields.whatsappNumber.label')} *
             </label>
-            
+
             <div className={`flex flex-col sm:flex-row gap-2 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
               <div className="w-full sm:w-1/3 md:w-1/4">
                 <CustomSelect
-                    options={countryCodeOptions}
-                    value={getPhoneParts(formData.whatsappOrderNumber).code}
-                    onChange={(newCode) => handlePhoneCompositeChange(
-                      'whatsappOrderNumber',
-                      formData.whatsappOrderNumber,
-                      'code',
-                      String(newCode)
-                    )}
-                    placeholder="Code"
-                  />
+                  options={countryCodeOptions}
+                  value={getPhoneParts(formData.whatsappOrderNumber).code}
+                  onChange={(newCode) => handlePhoneCompositeChange(
+                    'whatsappOrderNumber',
+                    formData.whatsappOrderNumber,
+                    'code',
+                    String(newCode)
+                  )}
+                  placeholder="Code"
+                />
               </div>
               <input
                 type="tel"
                 maxLength={15}
                 value={getPhoneParts(formData.whatsappOrderNumber).number}
                 onChange={(e) => handlePhoneCompositeChange(
-                  'whatsappOrderNumber', 
-                  formData.whatsappOrderNumber, 
-                  'number', 
+                  'whatsappOrderNumber',
+                  formData.whatsappOrderNumber,
+                  'number',
                   e.target.value
                 )}
-                className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${
-                  formErrors.whatsappOrderNumber
-                    ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
-                } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 ${formErrors.whatsappOrderNumber
+                  ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                  : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700'
+                  } text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}
                 placeholder={t('branchModal.fields.whatsappNumber.placeholder')}
               />
             </div>
@@ -971,7 +967,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
               {t('branchModal.fields.branchLogo.label')}
             </label>
             <div className="space-y-4">
-               {branchLogoPreview && (
+              {branchLogoPreview && (
                 <div className="mb-4">
                   <div className="relative inline-block">
                     <img
@@ -1003,9 +999,8 @@ const BranchModal: React.FC<BranchModalProps> = ({
                 />
                 <label
                   htmlFor="branchLogo"
-                  className={`inline-flex items-center px-4 py-2 border rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 ${
-                    isUploadingLogo ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
-                  } border-gray-300 dark:border-gray-600`}
+                  className={`inline-flex items-center px-4 py-2 border rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200 ${isUploadingLogo ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                    } border-gray-300 dark:border-gray-600`}
                 >
                   {isUploadingLogo ? (
                     <>
@@ -1019,7 +1014,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                     </>
                   )}
                 </label>
-                
+
                 {!branchLogoPreview && !isUploadingLogo && (
                   <div className={`flex items-center text-gray-400 dark:text-gray-500 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
                     <ImageIcon className="h-5 w-5" />
@@ -1266,7 +1261,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
               <button
                 type="button"
                 onClick={handleOpenMapModal}
-                className={`px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}
+                className={`px-4 py-2 text-primary-800 hover:bg-primary-700 text-white rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap ${isRTL ? 'flex-row-reverse' : ''}`}
               >
                 <Navigation className="w-5 h-5" />
                 <span className="hidden sm:inline">{t('onboardingBranch.form.step3.location.selectOnMap')}</span>
@@ -1393,7 +1388,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
 
       <div className="space-y-6">
         <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
-          <Clock className="h-6 w-6 text-primary-600" />
+          <Clock className="h-6 w-6 text-primary-800" />
           <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
             {t('branchModal.sections.workingHours')}
           </h4>
@@ -1406,13 +1401,12 @@ const BranchModal: React.FC<BranchModalProps> = ({
           {formData.createBranchWorkingHourCoreDto?.map((day, index) => (
             <div
               key={day.dayOfWeek}
-              className={`relative group p-5 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 hover:shadow-md ${
-                day.isWorkingDay
-                  ? day.isOpen24Hours
-                    ? 'bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700'
-                    : 'bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-green-200 dark:border-green-700'
-                  : 'bg-gray-50 dark:bg-gray-800/50'
-              }`}
+              className={`relative group p-5 border border-gray-200 dark:border-gray-700 rounded-xl transition-all duration-200 hover:shadow-md ${day.isWorkingDay
+                ? day.isOpen24Hours
+                  ? 'bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200 dark:border-blue-700'
+                  : 'bg-gradient-to-r from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 border-green-200 dark:border-green-700'
+                : 'bg-gray-50 dark:bg-gray-800/50'
+                }`}
             >
               <div className="flex flex-col space-y-4">
                 {/* Header Row: Day Name, 24 Hours Toggle, and Working Day Toggle */}
@@ -1443,11 +1437,10 @@ const BranchModal: React.FC<BranchModalProps> = ({
                         checked={day.isWorkingDay}
                         onChange={(checked) => handleWorkingHourChange(index, 'isWorkingDay', checked)}
                       />
-                      <span className={`text-sm font-medium transition-colors hidden xs:block ${
-                        day.isWorkingDay
-                          ? 'text-green-700 dark:text-green-400'
-                          : 'text-gray-500 dark:text-gray-400'
-                      }`}>
+                      <span className={`text-sm font-medium transition-colors hidden xs:block ${day.isWorkingDay
+                        ? 'text-green-700 dark:text-green-400'
+                        : 'text-gray-500 dark:text-gray-400'
+                        }`}>
                         {day.isWorkingDay ? t('branchModal.workingHours.open') : t('branchModal.workingHours.closed')}
                       </span>
                     </div>
@@ -1529,7 +1522,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
                     <button
                       type="button"
                       onClick={() => handleAddTimeSlot(index)}
-                      className="text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 flex items-center gap-1 font-medium"
+                      className="text-sm text-primary-800 dark:text-primary-800 hover:text-primary-700 dark:hover:text-primary-300 flex items-center gap-1 font-medium"
                     >
                       <Plus className="w-4 h-4" />
                       {t('branchModal.workingHours.addTimeSlot') || 'Add Time Slot'}
@@ -1615,31 +1608,27 @@ const BranchModal: React.FC<BranchModalProps> = ({
                         aria-label={step.name}
                       >
                         <div
-                          className={`${
-                            currentStep >= step.id
-                              ? 'bg-primary-600 border-primary-600'
-                              : 'bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600'
-                          } rounded-full transition-colors duration-200 h-10 w-10 flex items-center justify-center border-2`}
+                          className={`${currentStep >= step.id
+                            ? 'text-primary-800 border-primary-600'
+                            : 'bg-gray-200 dark:bg-gray-700 border-gray-300 dark:border-gray-600'
+                            } rounded-full transition-colors duration-200 h-10 w-10 flex items-center justify-center border-2`}
                         >
                           <StepIcon
-                            className={`w-5 h-5 ${
-                              currentStep >= step.id ? 'text-white' : 'text-gray-500 dark:text-gray-400'
-                            }`}
+                            className={`w-5 h-5 ${currentStep >= step.id ? 'text-white' : 'text-gray-500 dark:text-gray-400'
+                              }`}
                           />
                         </div>
                       </button>
                       <div
-                        className={`hidden sm:block text-sm font-medium ${
-                          currentStep >= step.id ? 'text-primary-600 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'
-                        } ${isRTL ? 'mr-3' : 'ml-3'}`}
+                        className={`hidden sm:block text-sm font-medium ${currentStep >= step.id ? 'text-primary-800 dark:text-primary-800' : 'text-gray-500 dark:text-gray-400'
+                          } ${isRTL ? 'mr-3' : 'ml-3'}`}
                       >
                         {step.name}
                       </div>
                       {stepIdx !== 2 && (
                         <div
-                          className={`hidden sm:block absolute top-5 ${isRTL ? 'left-0' : 'right-0'} w-20 h-0.5 transition-colors duration-200 ${
-                            currentStep > step.id ? 'bg-primary-600 dark:bg-primary-400' : 'bg-gray-300 dark:bg-gray-600'
-                          }`}
+                          className={`hidden sm:block absolute top-5 ${isRTL ? 'left-0' : 'right-0'} w-20 h-0.5 transition-colors duration-200 ${currentStep > step.id ? 'text-primary-800 dark:bg-primary-400' : 'bg-gray-300 dark:bg-gray-600'
+                            }`}
                         />
                       )}
                     </div>
@@ -1690,7 +1679,7 @@ const BranchModal: React.FC<BranchModalProps> = ({
           <button
             type="button"
             onClick={currentStep === 3 ? handleSubmit : handleNextStep}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md bg-primary-600 text-white hover:bg-primary-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-primary-800 text-white hover:bg-primary-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={isSubmitting || !isCurrentStepValid}
           >
             {currentStep === 3 ? (isSubmitting ? t('branchModal.buttons.saving') : t('branchModal.buttons.save')) : t('branchModal.buttons.next')}

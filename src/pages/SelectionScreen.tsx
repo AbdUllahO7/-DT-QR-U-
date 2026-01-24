@@ -46,8 +46,8 @@ const SelectionScreen: React.FC = () => {
   ] : [];
 
   // Use carousel hook
-  const { currentSlide, goToSlide, handlers } = useCarousel({ 
-    totalItems: allCards.length 
+  const { currentSlide, goToSlide, handlers } = useCarousel({
+    totalItems: allCards.length
   });
 
   // "Tekrar Dene" butonu için kullanılacak fonksiyon
@@ -55,12 +55,12 @@ const SelectionScreen: React.FC = () => {
     if (requestInProgress.current) {
       return;
     }
-    
+
     if (!requireAuth()) {
       setIsLoading(false);
       return;
     }
-    
+
     setIsLoading(true);
     try {
       requestInProgress.current = true;
@@ -87,27 +87,27 @@ const SelectionScreen: React.FC = () => {
   useEffect(() => {
     const initialize = async () => {
       isMounted.current = true;
-      
+
       // Auth kontrolü
       const isAuth = requireAuth();
       if (!isAuth) {
         return;
       }
-      
+
       // Branch-only kullanıcı kontrolü
       if (isBranchOnlyUser()) {
         logger.info('Branch-only user detected, redirecting to dashboard');
         navigate('/dashboard');
         return;
       }
-      
+
       setAuthChecked(true);
-      
+
       // API çağrısı
       if (requestInProgress.current) {
         return;
       }
-      
+
       setIsLoading(true);
       try {
         requestInProgress.current = true;
@@ -129,9 +129,9 @@ const SelectionScreen: React.FC = () => {
         requestInProgress.current = false;
       }
     };
-    
+
     initialize();
-    
+
     return () => {
       isMounted.current = false;
     };
@@ -140,11 +140,11 @@ const SelectionScreen: React.FC = () => {
   const handleRestaurantSelect = () => {
     if (data?.restaurantId) {
       logger.info('Restaurant selected:', data.restaurantId);
-      
+
       localStorage.setItem('restaurantName', data.restaurantName);
       localStorage.removeItem('selectedBranchId');
       localStorage.removeItem('selectedBranchName');
-      
+
       navigate('/dashboard');
     }
   };
@@ -153,10 +153,10 @@ const SelectionScreen: React.FC = () => {
     if (branchId) {
       logger.info('Branch selected:', branchId);
       const selectedBranch = data?.availableBranches.find(b => b.branchId === Number(branchId));
-      
+
       localStorage.setItem('selectedBranchId', branchId.toString());
       localStorage.setItem('selectedBranchName', selectedBranch?.branchName || 'Bilinmeyen Şube');
-      
+
       navigate('/dashboard');
     }
   };
@@ -188,7 +188,7 @@ const SelectionScreen: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 via-blue-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <ModernError 
+        <ModernError
           message={error}
           onRetry={() => {
             requestInProgress.current = false;
@@ -202,7 +202,7 @@ const SelectionScreen: React.FC = () => {
   if (!data) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 via-blue-50 to-gray-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-        <ModernError 
+        <ModernError
           title="Veri Bulunamadı"
           message="Lütfen daha sonra tekrar deneyin."
           onRetry={() => {
@@ -226,8 +226,8 @@ const SelectionScreen: React.FC = () => {
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-400/20 to-primary-600/20 rounded-full blur-3xl"
-          animate={{ 
+          className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-400/20 to-primary-800/20 rounded-full blur-3xl"
+          animate={{
             scale: [1, 1.2, 1],
             rotate: [0, 90, 0]
           }}
@@ -235,7 +235,7 @@ const SelectionScreen: React.FC = () => {
         />
         <motion.div
           className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400/20 to-blue-600/20 rounded-full blur-3xl"
-          animate={{ 
+          animate={{
             scale: [1.2, 1, 1.2],
             rotate: [90, 0, 90]
           }}
@@ -252,7 +252,7 @@ const SelectionScreen: React.FC = () => {
             transition={{ duration: 0.5 }}
             className="flex items-center gap-4"
           >
-            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl shadow-xl">
+            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-800 rounded-2xl shadow-xl">
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
@@ -264,7 +264,7 @@ const SelectionScreen: React.FC = () => {
               </p>
             </div>
           </motion.div>
-          
+
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -286,7 +286,7 @@ const SelectionScreen: React.FC = () => {
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center p-8 relative z-10">
         <div className="relative w-full max-w-6xl mx-auto">
-          
+
           {/* Welcome Message */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -303,7 +303,7 @@ const SelectionScreen: React.FC = () => {
           </motion.div>
 
           {/* Cards Container */}
-          <div 
+          <div
             className="relative flex justify-center items-center min-h-[600px]"
             onTouchStart={handlers.handleTouchStart}
             onTouchMove={handlers.handleTouchMove}
@@ -315,7 +315,7 @@ const SelectionScreen: React.FC = () => {
             {allCards.map((card, index) => {
               const position = index - currentSlide;
               const isActive = position === 0;
-              
+
               return (
                 <div
                   key={`${card.type}-${card.id}`}
@@ -349,19 +349,17 @@ const SelectionScreen: React.FC = () => {
               <motion.button
                 key={index}
                 onClick={() => goToSlide(index)}
-                className={`relative transition-all duration-300 ${
-                  currentSlide === index
+                className={`relative transition-all duration-300 ${currentSlide === index
                     ? 'w-10 h-3'
                     : 'w-3 h-3 hover:w-5'
-                }`}
+                  }`}
                 whileHover={{ scale: 1.2 }}
                 whileTap={{ scale: 0.9 }}
               >
-                <div className={`w-full h-full rounded-full transition-all duration-300 ${
-                  currentSlide === index
+                <div className={`w-full h-full rounded-full transition-all duration-300 ${currentSlide === index
                     ? 'bg-gradient-to-r from-primary-600 to-primary-700 shadow-lg'
                     : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
-                }`} />
+                  }`} />
                 {currentSlide === index && (
                   <motion.div
                     className="absolute inset-0 rounded-full bg-gradient-to-r from-primary-600 to-primary-700"

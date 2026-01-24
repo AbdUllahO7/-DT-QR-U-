@@ -2,9 +2,9 @@ import React, { useState, useCallback, useEffect } from 'react';
 // import { Link, useNavigate } from 'react-router-dom'; // Mocked below
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, AlertCircle, User, Mail, Phone, Lock, ArrowLeft } from 'lucide-react';
- import { authService } from '../services/authService'; // Mocked below
- import { useLanguage } from '../contexts/LanguageContext'; // Mocked below
- import type { RegisterDto } from '../types/api'; // Mocked below
+import { authService } from '../services/authService'; // Mocked below
+import { useLanguage } from '../contexts/LanguageContext'; // Mocked below
+import type { RegisterDto } from '../types/api'; // Mocked below
 import { Link, useNavigate } from 'react-router-dom';
 import { logger } from '../utils/logger';
 import { sortedCountryCodes, getPlaceholderByDialCode } from '../data/countryCodes';
@@ -14,7 +14,7 @@ import { sortedCountryCodes, getPlaceholderByDialCode } from '../data/countryCod
 const Register: React.FC = () => {
   const navigate = useNavigate();
   const { t, isRTL } = useLanguage();
-  
+
   const [formData, setFormData] = useState({
     name: '',
     surName: '',
@@ -38,7 +38,7 @@ const Register: React.FC = () => {
     email?: string;
     password?: string;
     passwordConfirm?: string;
-    phoneNumber?: string; 
+    phoneNumber?: string;
     termsofUserService?: string;
     general?: string;
   }>({});
@@ -48,9 +48,9 @@ const Register: React.FC = () => {
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-useEffect(() => {
-  window.scrollTo(0, 0);
-}, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
     const { name, value, type } = e.target;
@@ -81,12 +81,12 @@ useEffect(() => {
   const handleNationalPhoneChange = useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
     const { value } = e.target;
     const digitsOnly = value.replace(/\D/g, ''); // Allow only digits
-    
+
     setFormData(prev => ({
       ...prev,
       phoneNumber: digitsOnly
     }));
-    
+
     // Clear error when user starts typing
     if (errors.phoneNumber) {
       setErrors(prev => ({
@@ -142,7 +142,7 @@ useEffect(() => {
       newErrors.phoneNumber = t('pages.register.validation.phoneRequired');
     } else {
       // Generic regex for 7-15 digits. This can be adjusted.
-      const phoneRegex = /^\d{7,15}$/; 
+      const phoneRegex = /^\d{7,15}$/;
       const cleanPhone = formData.phoneNumber.replace(/[\s\-\(\)]/g, '');
       if (!phoneRegex.test(cleanPhone)) {
         newErrors.phoneNumber = t('pages.register.validation.phoneInvalid');
@@ -158,7 +158,7 @@ useEffect(() => {
     return Object.keys(newErrors).length === 0;
   };
 
-const handleSubmit = async (e: React.FormEvent): Promise<void> => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -196,11 +196,11 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
       localStorage.setItem('onboarding_userId', response.data.userId);
 
       // Redirect to restaurant onboarding
-      navigate('/onboarding/restaurant', { 
-        state: { 
+      navigate('/onboarding/restaurant', {
+        state: {
           message: t('pages.register.success.message'),
-          userId: response.data.userId 
-        } 
+          userId: response.data.userId
+        }
       });
 
     } catch (error: any) {
@@ -211,10 +211,10 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
 
       // CHANGED: Get status from error.response
       const status = error.response?.status;
-      
+
       // CHANGED: Get validation errors from error.response.data
       const validationErrorsFromApi = error.response?.data?.errors;
-      
+
       // CHANGED: Get server messages from error.response.data
       const detailedMessage = error.response?.data?.details?.message;
       const dataMessage = error.response?.data?.message;
@@ -222,18 +222,18 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
       if (status === 400) {
         // Validation errors
         const validationErrors: typeof errors = {};
-        
+
         // CHANGED: Use validationErrorsFromApi
         if (validationErrorsFromApi) {
           Object.entries(validationErrorsFromApi).forEach(([key, value]) => {
             // ProfileImagePath hatasını gösterme
             if (key !== 'profileImagePath' && key !== 'ProfileImagePath') {
-              validationErrors[key as keyof typeof errors] = Array.isArray(value) 
-                ? (value as string[])[0] 
+              validationErrors[key as keyof typeof errors] = Array.isArray(value)
+                ? (value as string[])[0]
                 : value as string;
             }
           });
-          
+
           if (Object.keys(validationErrors).length > 0) {
             setErrors(validationErrors);
           } else {
@@ -257,7 +257,7 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         });
       } else {
         // This is the new logic to handle 500 errors and other cases
-        
+
         // 1. Get the generic axios message
         const genericMessage = error.message;
 
@@ -283,13 +283,13 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
   // Password strength indicator
   const getPasswordStrength = (password: string): { score: number; text: string; color: string } => {
     let score = 0;
-    
+
     if (password.length >= 8) score++;
     if (/[a-z]/.test(password)) score++;
     if (/[A-Z]/.test(password)) score++;
     if (/\d/.test(password)) score++; // Corrected regex (was /\d]/)
     if (/[^a-zA-Z\d]/.test(password)) score++;
-    
+
     const levels = [
       { text: t('pages.register.passwordStrength.veryWeak'), color: 'text-red-500' },
       { text: t('pages.register.passwordStrength.weak'), color: 'text-red-400' },
@@ -297,13 +297,13 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
       { text: t('pages.register.passwordStrength.good'), color: 'text-blue-500' },
       { text: t('pages.register.passwordStrength.strong'), color: 'text-green-500' }
     ];
-    
+
     return { score, ...levels[Math.min(score, 4)] };
   };
 
   // Real-time validation state
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  
+
   const handleBlur = useCallback((fieldName: string) => {
     setTouched(prev => ({ ...prev, [fieldName]: true }));
   }, []);
@@ -320,7 +320,7 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         >
           <Link
             to="/"
-            className={`inline-flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200`}
+            className={`inline-flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} text-gray-600 dark:text-gray-400 hover:text-primary-800 dark:hover:text-primary-800 transition-colors duration-200`}
           >
             <ArrowLeft className={`h-4 w-4 ${isRTL ? 'rotate-180' : ''}`} />
             <span>{t('pages.register.backToHome')}</span>
@@ -389,13 +389,12 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                     value={formData.name}
                     onChange={handleInputChange}
                     onBlur={() => handleBlur('name')}
-                    className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
-                      errors.name 
-                        ? 'border-red-500 dark:border-red-500' 
-                        : touched.name && formData.name.trim() 
-                          ? 'border-green-500 dark:border-green-400'
-                          : 'border-gray-300 dark:border-gray-600'
-                    }`}
+                    className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${errors.name
+                      ? 'border-red-500 dark:border-red-500'
+                      : touched.name && formData.name.trim()
+                        ? 'border-green-500 dark:border-green-400'
+                        : 'border-gray-300 dark:border-gray-600'
+                      }`}
                     placeholder={t('pages.register.placeholders.firstName')}
                   />
                 </div>
@@ -421,13 +420,12 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                     value={formData.surName}
                     onChange={handleInputChange}
                     onBlur={() => handleBlur('surName')}
-                    className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
-                      errors.surName 
-                        ? 'border-red-500 dark:border-red-500' 
-                        : touched.surName && formData.surName.trim()
-                          ? 'border-green-500 dark:border-green-400'
-                          : 'border-gray-300 dark:border-gray-600'
-                    }`}
+                    className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${errors.surName
+                      ? 'border-red-500 dark:border-red-500'
+                      : touched.surName && formData.surName.trim()
+                        ? 'border-green-500 dark:border-green-400'
+                        : 'border-gray-300 dark:border-gray-600'
+                      }`}
                     placeholder={t('pages.register.placeholders.lastName')}
                   />
                 </div>
@@ -454,13 +452,12 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                   value={formData.email}
                   onChange={handleInputChange}
                   onBlur={() => handleBlur('email')}
-                  className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
-                    errors.email 
-                      ? 'border-red-500 dark:border-red-500' 
-                      : touched.email && formData.email.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())
-                        ? 'border-green-500 dark:border-green-400'
-                        : 'border-gray-300 dark:border-gray-600'
-                  }`}
+                  className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${errors.email
+                    ? 'border-red-500 dark:border-red-500'
+                    : touched.email && formData.email.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())
+                      ? 'border-green-500 dark:border-green-400'
+                      : 'border-gray-300 dark:border-gray-600'
+                    }`}
                   placeholder={t('pages.register.placeholders.email')}
                 />
               </div>
@@ -514,14 +511,13 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                     onChange={handleNationalPhoneChange} // Use new handler
                     onBlur={() => handleBlur('phoneNumber')}
                     maxLength={15}
-                    className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
-                      errors.phoneNumber
-                        ? 'border-red-500 dark:border-red-500'
-                        // Updated validation check for green border
-                        : touched.phoneNumber && formData.phoneNumber.trim() && /^\d{7,15}$/.test(formData.phoneNumber.trim())
-                          ? 'border-green-500 dark:border-green-400'
-                          : 'border-gray-300 dark:border-gray-600'
-                    }`}
+                    className={`w-full ${isRTL ? 'pr-10 pl-2' : 'pl-12 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${errors.phoneNumber
+                      ? 'border-red-500 dark:border-red-500'
+                      // Updated validation check for green border
+                      : touched.phoneNumber && formData.phoneNumber.trim() && /^\d{7,15}$/.test(formData.phoneNumber.trim())
+                        ? 'border-green-500 dark:border-green-400'
+                        : 'border-gray-300 dark:border-gray-600'
+                      }`}
                     // Dynamic placeholder based on selected country
                     placeholder={phonePlaceholder}
                   />
@@ -551,11 +547,10 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                   value={formData.password}
                   onChange={handleInputChange}
                   onBlur={() => handleBlur('password')}
-                  className={`w-full ${isRTL ? 'pr-10 pl-12' : 'pl-12 pr-12'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
-                    errors.password 
-                      ? 'border-red-500 dark:border-red-500' 
-                      : 'border-gray-300 dark:border-gray-600'
-                  }`}
+                  className={`w-full ${isRTL ? 'pr-10 pl-12' : 'pl-12 pr-12'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${errors.password
+                    ? 'border-red-500 dark:border-red-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                    }`}
                   placeholder={t('pages.register.placeholders.password')}
                 />
                 <button
@@ -570,7 +565,7 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                   )}
                 </button>
               </div>
-              
+
               {/* Password Strength Indicator */}
               {formData.password && touched.password && (
                 <div className="mt-2">
@@ -579,13 +574,12 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                     return (
                       <div className={`flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''}`}>
                         <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                          <div 
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                              strength.score <= 1 ? 'bg-red-500' :
+                          <div
+                            className={`h-2 rounded-full transition-all duration-300 ${strength.score <= 1 ? 'bg-red-500' :
                               strength.score <= 2 ? 'bg-yellow-500' :
-                              strength.score <= 3 ? 'bg-blue-500' :
-                              'bg-green-500'
-                            } ${isRTL ? 'ml-auto' : ''}`}
+                                strength.score <= 3 ? 'bg-blue-500' :
+                                  'bg-green-500'
+                              } ${isRTL ? 'ml-auto' : ''}`}
                             style={{ width: `${(strength.score / 5) * 100}%` }}
                           />
                         </div>
@@ -597,7 +591,7 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                   })()}
                 </div>
               )}
-              
+
               {errors.password && (
                 <p className="mt-1 text-sm text-red-500">{errors.password}</p>
               )}
@@ -619,11 +613,10 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                   autoComplete="new-password"
                   value={formData.passwordConfirm}
                   onChange={handleInputChange}
-                  className={`w-full ${isRTL ? 'pr-10 pl-12' : 'pl-12 pr-12'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${
-                    errors.passwordConfirm 
-                      ? 'border-red-500 dark:border-red-500' 
-                      : 'border-gray-300 dark:border-gray-600'
-                  }`}
+                  className={`w-full ${isRTL ? 'pr-10 pl-12' : 'pl-12 pr-12'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-colors duration-200 ${errors.passwordConfirm
+                    ? 'border-red-500 dark:border-red-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                    }`}
                   placeholder={t('pages.register.placeholders.confirmPassword')}
                 />
                 <button
@@ -650,30 +643,29 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                 type="checkbox"
                 checked={formData.termsofUserService}
                 onChange={handleInputChange}
-                className={`h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded ${
-                  errors.termsofUserService ? 'border-red-500' : ''
-                }`}
+                className={`h-4 w-4 text-primary-800 focus:ring-primary-500 border-gray-300 dark:border-gray-600 rounded ${errors.termsofUserService ? 'border-red-500' : ''
+                  }`}
               />
-           <label htmlFor="termsofUserService" className={`${isRTL ? 'mr-2' : 'ml-2'} block text-sm text-gray-700 dark:text-gray-300`}>
-            <Link 
-              to="/terms" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-primary-600 dark:text-primary-400 hover:underline"
-            >
-              {t('pages.register.terms.service')}
-            </Link>
-            {' '}{t('pages.register.terms.and')}{' '}
-            <Link 
-              to="/privacy" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="text-primary-600 dark:text-primary-400 hover:underline"
-            >
-              {t('pages.register.terms.privacy')}
-            </Link>
-            {' '}{t('pages.register.terms.accept')}
-          </label>
+              <label htmlFor="termsofUserService" className={`${isRTL ? 'mr-2' : 'ml-2'} block text-sm text-gray-700 dark:text-gray-300`}>
+                <Link
+                  to="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-800 dark:text-primary-800 hover:underline"
+                >
+                  {t('pages.register.terms.service')}
+                </Link>
+                {' '}{t('pages.register.terms.and')}{' '}
+                <Link
+                  to="/privacy"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary-800 dark:text-primary-800 hover:underline"
+                >
+                  {t('pages.register.terms.privacy')}
+                </Link>
+                {' '}{t('pages.register.terms.accept')}
+              </label>
             </div>
             {errors.termsofUserService && (
               <p className="mt-1 text-sm text-red-500">{errors.termsofUserService}</p>
@@ -685,11 +677,10 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                 disabled={isSubmitting}
                 whileHover={!isSubmitting ? { scale: 1.02 } : {}}
                 whileTap={!isSubmitting ? { scale: 0.98 } : {}}
-                className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-lg text-white text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${
-                  isSubmitting
-                    ? 'bg-primary-400 cursor-not-allowed'
-                    : 'bg-primary-600 hover:bg-primary-700 hover:shadow-lg'
-                }`}
+                className={`w-full flex bg-primary-800 justify-center items-center py-3 px-4 border border-transparent rounded-lg text-white text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 ${isSubmitting
+                  ? 'bg-primary-400 cursor-not-allowed'
+                  : 'text-primary-800 hover:bg-primary-700 hover:shadow-lg'
+                  }`}
               >
                 {isSubmitting ? (
                   <motion.div
@@ -723,7 +714,7 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                   t('pages.register.createAccount')
                 )}
               </motion.button>
-              
+
               {/* Form Progress Indicator */}
               <div className="mt-4 text-center">
                 <div className={`flex items-center justify-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} text-xs text-gray-500 dark:text-gray-400`}>
@@ -737,16 +728,16 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
                       formData.passwordConfirm.trim(),
                       formData.termsofUserService
                     ].filter(Boolean).length;
-                    
+
                     const totalFields = 7;
                     const progress = (completedFields / totalFields) * 100;
-                    
+
                     return (
                       <>
                         <span>{t('pages.register.formProgress')}:</span>
                         <div className="w-16 bg-gray-200 dark:bg-gray-700 rounded-full h-1">
-                          <div 
-                            className={`bg-primary-600 h-1 rounded-full transition-all duration-300 ${isRTL ? 'ml-auto' : ''}`}
+                          <div
+                            className={`text-primary-800 h-1 rounded-full transition-all duration-300 ${isRTL ? 'ml-auto' : ''}`}
                             style={{ width: `${progress}%` }}
                           />
                         </div>
@@ -761,9 +752,9 @@ const handleSubmit = async (e: React.FormEvent): Promise<void> => {
             <div className="text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {t('pages.register.haveAccount')}{' '}
-                <Link 
-                  to="/login" 
-                  className="font-medium text-primary-600 dark:text-primary-400 hover:underline"
+                <Link
+                  to="/login"
+                  className="font-medium text-primary-800 dark:text-primary-800 hover:underline"
                 >
                   {t('pages.register.signInNow')}
                 </Link>

@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
-  Tag,
   Palette,
-  FileText,
   Building2,
   Sparkles,
   Home,
@@ -399,7 +397,7 @@ const BranchTableCategoryModal: React.FC<Props> = ({
               dir={isRTL ? 'rtl' : 'ltr'}
             >
               <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-400/30 to-purple-500/30 dark:from-primary-500/20 dark:to-purple-600/20 rounded-full blur-3xl" />
-              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-400/30 to-primary-500/30 dark:from-blue-500/20 dark:to-primary-600/20 rounded-full blur-3xl" />
+              <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-400/30 to-primary-500/30 dark:from-blue-500/20 dark:to-primary-800/20 rounded-full blur-3xl" />
 
               <div className="relative bg-gradient-to-br from-primary-500 via-primary-600 to-purple-600 dark:from-primary-600 dark:via-primary-700 dark:to-purple-700 p-8 text-white overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
@@ -516,7 +514,7 @@ const BranchTableCategoryModal: React.FC<Props> = ({
 
                 <div className="space-y-3">
                   <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
-                    <Palette className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                    <Palette className="w-4 h-4" />
                     {t('TableCategoryModal.colorSelection') || 'Color Selection'}
                   </label>
 
@@ -571,7 +569,7 @@ const BranchTableCategoryModal: React.FC<Props> = ({
 
                 <div className="space-y-3">
                   <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
-                    <Building2 className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                    <Building2 className="w-4 h-4 " />
                     {t('TableCategoryModal.iconSelection') || 'Area Type'}
                   </label>
                   <div
@@ -589,7 +587,7 @@ const BranchTableCategoryModal: React.FC<Props> = ({
                           p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-2 shadow-md
                           ${formData.iconClass === option.value
                             ? 'border-primary-500 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/40 dark:to-primary-800/30 text-primary-700 dark:text-primary-300 shadow-xl shadow-primary-500/30 scale-105'
-                            : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-xl hover:shadow-primary-500/20'
+                            : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:border-primary-300 dark:hover:border-primary-800 hover:shadow-xl hover:shadow-primary-500/20'
                           }
                         `}
                       >
@@ -624,20 +622,18 @@ const BranchTableCategoryModal: React.FC<Props> = ({
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, isActive: !prev.isActive }))}
-                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all duration-300 shadow-lg ${
-                        formData.isActive
-                          ? 'bg-gradient-to-r from-primary-500 to-primary-600 shadow-primary-500/50'
-                          : 'bg-gray-300 dark:bg-gray-600 shadow-gray-400/30'
-                      }`}
+                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all duration-300 shadow-lg ${formData.isActive
+                        ? 'bg-gradient-to-r from-primary-500 to-primary-800 shadow-primary-500/50'
+                        : 'bg-gray-300 dark:bg-gray-600 shadow-gray-400/30'
+                        }`}
                     >
                       <motion.span
                         layout
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ${
-                          isRTL
-                            ? (formData.isActive ? 'translate-x-1' : 'translate-x-8')
-                            : (formData.isActive ? 'translate-x-8' : 'translate-x-1')
-                        }`}
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ${isRTL
+                          ? (formData.isActive ? 'translate-x-1' : 'translate-x-8')
+                          : (formData.isActive ? 'translate-x-8' : 'translate-x-1')
+                          }`}
                       />
                     </button>
                   </motion.div>
