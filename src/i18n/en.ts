@@ -5170,10 +5170,10 @@ export const en = {
       "28": "Fast Food"
     },
     "legalTypes": {
-      "as": "Incorporated (A.Ş.)",
-      "ltd": "Limited Liability (Ltd. Şti.)",
-      "collective": "Collective Company",
-      "partnership": "Limited Partnership",
+      "as": "Joint Stock Company (Inc.)",
+      "ltd": "Limited Liability Company (LLC)",
+      "collective": "General Partnership",
+      "partnership": "Limited Partnership (LP)",
       "sole": "Sole Proprietorship",
       "other": "Other"
     }
