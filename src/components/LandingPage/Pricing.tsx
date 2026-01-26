@@ -212,9 +212,7 @@ const Pricing: React.FC = () => {
           viewport={{ once: true }}
           className="text-center mt-12"
         >
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            {t('pricing.additionalInfo')}
-          </p>
+         
           <p className="text-sm text-gray-500 dark:text-gray-500">
             {t('pricing.vatInfo')}
           </p>
