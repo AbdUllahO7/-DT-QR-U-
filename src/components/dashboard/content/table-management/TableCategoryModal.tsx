@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  X, 
-  Tag, 
-  Palette, 
-  FileText, 
-  Building2, 
-  Users, 
+import {
+  X,
+  Tag,
+  Palette,
+  FileText,
+  Building2,
+  Users,
   Sparkles,
   // New specific icons
   Home,       // Indoor
@@ -38,10 +38,10 @@ const areaOptions = [
   { value: 'garden', label: 'Garden', icon: Trees },
 ];
 
-const TableCategoryModal: React.FC<Props> = ({ 
-  isOpen, 
-  onClose, 
-  selectedBranch, 
+const TableCategoryModal: React.FC<Props> = ({
+  isOpen,
+  onClose,
+  selectedBranch,
   onSuccess,
   editingCategory = null,
   isEditMode = false
@@ -63,14 +63,14 @@ const TableCategoryModal: React.FC<Props> = ({
   // Form validation
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.categoryName.trim()) {
       newErrors.categoryName = t('TableCategoryModal.categoryNameRequired');
     }
     if (!formData.iconClass) {
       newErrors.iconClass = t('TableCategoryModal.iconRequired');
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -126,7 +126,7 @@ const TableCategoryModal: React.FC<Props> = ({
     const target = e.target as HTMLInputElement;
     const { name, type } = target;
     const value = type === 'checkbox' ? target.checked : target.value;
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: value,
@@ -143,9 +143,9 @@ const TableCategoryModal: React.FC<Props> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     if (!branchId) {
       setErrors({ general: t('TableCategoryModal.branchRequired') });
       return;
@@ -154,14 +154,14 @@ const TableCategoryModal: React.FC<Props> = ({
     setIsSubmitting(true);
     try {
       if (isEditMode && editingCategory) {
-        await tableService.updateCategory(editingCategory.id,   {
+        await tableService.updateCategory(editingCategory.id, {
           id: editingCategory.id,
           categoryName: formData.categoryName.trim(),
           colorCode: formData.colorCode,
           iconClass: formData.iconClass,
           isActive: formData.isActive,
           rowVersion: editingCategory.rowVersion,
-        }, branchId );
+        }, branchId);
         logger.info('Kategori başarıyla güncellendi', { categoryId: editingCategory.id });
       } else {
         const payload: TableCategoryPayload = {
@@ -172,13 +172,13 @@ const TableCategoryModal: React.FC<Props> = ({
           displayOrder: formData.displayOrder,
           isActive: formData.isActive
         };
-        
+
         if (branchId) {
           localStorage.setItem('menutable_create_selected_branchId', String(branchId));
         }
-        
+
         const response = await httpClient.post(`/api/branches/table-categories?branchId=${branchId}`, payload);
-        
+
         if (branchId) {
           try {
             await httpClient.get(`/api/branches/table-categories?branchId=${branchId}`);
@@ -187,10 +187,10 @@ const TableCategoryModal: React.FC<Props> = ({
           }
         }
       }
-      
+
       onSuccess && onSuccess();
       onClose();
-      
+
       setFormData({
         categoryName: '',
         description: '',
@@ -202,7 +202,7 @@ const TableCategoryModal: React.FC<Props> = ({
       setErrors({});
     } catch (error: any) {
       console.error('❌ Kategori işlemi sırasında hata:', error);
-      
+
       if (error.response?.status === 400) {
         const apiErrors = error.response?.data?.errors;
         if (apiErrors) {
@@ -231,13 +231,13 @@ const TableCategoryModal: React.FC<Props> = ({
     }
   };
 
-return (
+  return (
     <AnimatePresence>
       {isOpen && (
-        <div 
-          className="fixed inset-0 z-50 overflow-y-auto" 
-          role="dialog" 
-          aria-modal="true" 
+        <div
+          className="fixed inset-0 z-50 overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
           aria-label={t('TableCategoryModal.accessibility.modal')}
           dir={isRTL ? 'rtl' : 'ltr'}
         >
@@ -265,7 +265,7 @@ return (
               className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl"
             />
           </motion.div>
-          
+
           <div className="flex min-h-screen items-center justify-center p-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 40 }}
@@ -277,22 +277,22 @@ return (
             >
               <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-primary-400/30 to-purple-500/30 rounded-full blur-3xl" />
               <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-blue-400/30 to-primary-500/30 rounded-full blur-3xl" />
-              
+
               <div className="relative bg-gradient-to-br from-primary-500 via-primary-600 to-purple-600 dark:from-primary-600 dark:via-primary-700 dark:to-purple-700 p-8 text-white overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-transparent" />
                 <div className="absolute inset-0 opacity-30">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
                 </div>
-                
-              <button
-                onClick={onClose}
-                className={`absolute top-6 p-2.5 hover:bg-white/25 dark:hover:bg-white/15 rounded-xl transition-all duration-300 hover:scale-110 hover:rotate-90 group z-10 ${isRTL ? 'left-6' : 'right-6'}`}
-                aria-label={t('TableCategoryModal.accessibility.close')}
-              >
-                <X className="w-5 h-5 group-hover:drop-shadow-lg" />
-              </button>
+
+                <button
+                  onClick={onClose}
+                  className={`absolute top-6 p-2.5 hover:bg-white/25 dark:hover:bg-white/15 rounded-xl transition-all duration-300 hover:scale-110 hover:rotate-90 group z-10 ${isRTL ? 'left-6' : 'right-6'}`}
+                  aria-label={t('TableCategoryModal.accessibility.close')}
+                >
+                  <X className="w-5 h-5 group-hover:drop-shadow-lg" />
+                </button>
                 <div className={`flex items-center gap-4 relative ${isRTL ? 'text-right' : ''}`}>
-                  <motion.div 
+                  <motion.div
                     initial={{ scale: 0, rotate: -180 }}
                     animate={{ scale: 1, rotate: 0 }}
                     transition={{ delay: 0.2, type: "spring" }}
@@ -301,21 +301,21 @@ return (
                     <Sparkles className="w-7 h-7 drop-shadow-lg" />
                   </motion.div>
                   <div className={isRTL ? 'text-right' : 'text-left'}>
-                    <motion.h3 
+                    <motion.h3
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.1 }}
                       className="text-2xl font-bold drop-shadow-md"
                     >
-                      {isEditMode ?  t('TableCategoryModal.title') : t('TableCategoryModal.addCategoryTitle')}
+                      {isEditMode ? t('TableCategoryModal.title') : t('TableCategoryModal.addCategoryTitle')}
                     </motion.h3>
-                    <motion.p 
+                    <motion.p
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.2 }}
                       className="text-primary-50/90 text-sm mt-1 drop-shadow"
                     >
-                      {isEditMode ?  t('TableCategoryModal.subtitle') : t('TableCategoryModal.addCategorySubtitle')}
+                      {isEditMode ? t('TableCategoryModal.subtitle') : t('TableCategoryModal.addCategorySubtitle')}
                     </motion.p>
                   </div>
                 </div>
@@ -334,7 +334,7 @@ return (
 
                 <div className="space-y-2">
                   <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
-                    <Tag className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                    <Tag className="w-4 h-4 text-primary-800 dark:text-primary-800" />
                     {t('TableCategoryModal.categoryName')}
                   </label>
                   <div className="relative group">
@@ -350,10 +350,10 @@ return (
                         text-gray-900 dark:text-gray-100
                         placeholder-gray-400 dark:placeholder-gray-500
                         border-gray-200 dark:border-gray-600
-                        hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg hover:shadow-primary-500/10
+                        hover:border-primary-300 dark:hover:border-primary-800 hover:shadow-lg hover:shadow-primary-500/10
                         focus:outline-none focus:ring-4 focus:ring-primary-500/30 focus:border-primary-500 focus:shadow-xl focus:shadow-primary-500/20
-                        ${errors.categoryName 
-                          ? 'border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/30' 
+                        ${errors.categoryName
+                          ? 'border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-500/30'
                           : ''
                         }
                         ${isRTL ? 'text-right' : 'text-left'}
@@ -364,10 +364,10 @@ return (
                     <div className="absolute inset-0 -z-10 bg-gradient-to-r from-primary-500/0 via-primary-500/5 to-purple-500/0 rounded-2xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
                   </div>
                   {errors.categoryName && (
-                    <motion.p 
+                    <motion.p
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      id="category-name-error" 
+                      id="category-name-error"
                       className="text-red-600 dark:text-red-400 text-xs font-medium flex items-center gap-1"
                     >
                       {errors.categoryName}
@@ -377,7 +377,7 @@ return (
 
                 <div className="space-y-2">
                   <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
-                    <FileText className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                    <FileText className="w-4 h-4 text-primary-800 dark:text-primary-800" />
                     {t('TableCategoryModal.description')}
                   </label>
                   <div className="relative group">
@@ -393,7 +393,7 @@ return (
                         text-gray-900 dark:text-gray-100
                         placeholder-gray-400 dark:placeholder-gray-500
                         border-gray-200 dark:border-gray-600
-                        hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg hover:shadow-primary-500/10
+                        hover:border-primary-300 dark:hover:border-primary-800 hover:shadow-lg hover:shadow-primary-500/10
                         focus:outline-none focus:ring-4 focus:ring-primary-500/30 focus:border-primary-500 focus:shadow-xl focus:shadow-primary-500/20
                         ${isRTL ? 'text-right' : 'text-left'}
                       `}
@@ -405,11 +405,11 @@ return (
 
                 <div className="space-y-3">
                   <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
-                    <Palette className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                    <Palette className="w-4 h-4 text-primary-800 dark:text-primary-800" />
                     {t('TableCategoryModal.colorSelection')}
                   </label>
-                  
-                  <div 
+
+                  <div
                     className="grid grid-cols-8 gap-2.5 p-4 bg-gradient-to-br from-gray-50/50 to-gray-100/50 dark:from-gray-800/30 dark:to-gray-700/30 rounded-2xl backdrop-blur-sm border border-gray-200/50 dark:border-gray-700/50"
                     role="group"
                     aria-label={t('TableCategoryModal.accessibility.colorPalette')}
@@ -423,12 +423,12 @@ return (
                         whileTap={{ scale: 0.95 }}
                         className={`
                           w-9 h-9 rounded-xl border-2 transition-all duration-300 shadow-lg
-                          ${formData.colorCode === color 
-                            ? 'border-white dark:border-gray-200 ring-4 ring-primary-500/50 shadow-2xl scale-110' 
+                          ${formData.colorCode === color
+                            ? 'border-white dark:border-gray-200 ring-4 ring-primary-500/50 shadow-2xl scale-110'
                             : 'border-gray-300/50 dark:border-gray-600/50 hover:border-white dark:hover:border-gray-300 hover:shadow-2xl'
                           }
                         `}
-                        style={{ 
+                        style={{
                           backgroundColor: color,
                           boxShadow: `0 4px 20px ${color}40`
                         }}
@@ -441,7 +441,7 @@ return (
                     <motion.div
                       whileHover={{ scale: 1.05 }}
                       className="w-12 h-12 rounded-xl border-3 border-white dark:border-gray-600 overflow-hidden shadow-xl"
-                      style={{ 
+                      style={{
                         backgroundColor: formData.colorCode,
                         boxShadow: `0 8px 25px ${formData.colorCode}60`
                       }}
@@ -463,10 +463,10 @@ return (
                 {/* Area Type Selection */}
                 <div className="space-y-3">
                   <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
-                    <Building2 className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                    <Building2 className="w-4 h-4 text-primary-800 dark:text-primary-800" />
                     {t('TableCategoryModal.iconSelection')}
                   </label>
-                  <div 
+                  <div
                     className="grid grid-cols-4 gap-3"
                     role="group"
                     aria-label={t('TableCategoryModal.accessibility.iconGrid')}
@@ -482,7 +482,7 @@ return (
                           p-4 rounded-2xl border-2 transition-all duration-300 flex flex-col items-center gap-2 shadow-md
                           ${formData.iconClass === option.value
                             ? 'border-primary-500 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/40 dark:to-primary-800/30 text-primary-700 dark:text-primary-300 shadow-xl shadow-primary-500/30 scale-105'
-                            : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-xl hover:shadow-primary-500/20'
+                            : 'border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 hover:border-primary-300 dark:hover:border-primary-800 hover:shadow-xl hover:shadow-primary-500/20'
                           }
                         `}
                         aria-label={`${t('TableCategoryModal.accessibility.iconOption')} ${option.label}`}
@@ -493,7 +493,7 @@ return (
                     ))}
                   </div>
                   {errors.iconClass && (
-                    <motion.p 
+                    <motion.p
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       className="text-red-600 dark:text-red-400 text-xs font-medium flex items-center gap-1"
@@ -504,7 +504,7 @@ return (
                 </div>
 
                 {isEditMode && (
-                  <motion.div 
+                  <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={`flex items-center justify-between p-5 bg-gradient-to-r from-gray-50 to-gray-100/80 dark:from-gray-800/50 dark:to-gray-700/30 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm ${isRTL ? 'flex-row-reverse' : ''}`}
@@ -518,21 +518,19 @@ return (
                     <button
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, isActive: !prev.isActive }))}
-                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all duration-300 shadow-lg ${
-                        formData.isActive 
-                          ? 'bg-gradient-to-r from-primary-500 to-primary-600 shadow-primary-500/50' 
-                          : 'bg-gray-300 dark:bg-gray-600 shadow-gray-400/30'
-                      }`}
+                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-all duration-300 shadow-lg ${formData.isActive
+                        ? 'bg-gradient-to-r from-primary-500 to-primary-800 shadow-primary-500/50'
+                        : 'bg-gray-300 dark:bg-gray-600 shadow-gray-400/30'
+                        }`}
                       aria-label="Toggle active status"
                     >
-                    <motion.span
+                      <motion.span
                         layout
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ${
-                          isRTL
-                            ? (formData.isActive ? 'translate-x-1' : 'translate-x-8') 
-                            : (formData.isActive ? 'translate-x-8' : 'translate-x-1') 
-                        }`}
+                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ${isRTL
+                          ? (formData.isActive ? 'translate-x-1' : 'translate-x-8')
+                          : (formData.isActive ? 'translate-x-8' : 'translate-x-1')
+                          }`}
                       />
                     </button>
                   </motion.div>
@@ -541,7 +539,7 @@ return (
                 {!isEditMode && !selectedBranch && branches.length > 0 && (
                   <div className="space-y-2">
                     <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : ''}`}>
-                      <Users className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                      <Users className="w-4 h-4 text-primary-800 dark:text-primary-800" />
                       {t('TableCategoryModal.branchSelection')}
                     </label>
                     <div className="relative group">
@@ -553,7 +551,7 @@ return (
                           bg-white dark:bg-gray-800/50 
                           text-gray-900 dark:text-gray-100
                           border-gray-200 dark:border-gray-600
-                          hover:border-primary-300 dark:hover:border-primary-600 hover:shadow-lg hover:shadow-primary-500/10
+                          hover:border-primary-300 dark:hover:border-primary-800 hover:shadow-lg hover:shadow-primary-500/10
                           focus:outline-none focus:ring-4 focus:ring-primary-500/30 focus:border-primary-500 focus:shadow-xl focus:shadow-primary-500/20
                           ${isRTL ? 'text-right' : 'text-left'}
                         `}
@@ -590,7 +588,7 @@ return (
                   >
                     {isSubmitting ? (
                       <div className={`flex items-center justify-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <motion.div 
+                        <motion.div
                           animate={{ rotate: 360 }}
                           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                           className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full"

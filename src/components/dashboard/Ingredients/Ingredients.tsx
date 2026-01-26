@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { 
-  Plus, X, Search, Edit2, Trash2, Package, 
+import {
+  Plus, X, Search, Edit2, Trash2, Package,
   Filter, ArrowUp, ChevronDown, Eye, EyeOff, SortAsc, SortDesc,
-  Grid3X3, List, Check, AlertTriangle, Shield 
+  Grid3X3, List, Check, AlertTriangle, Shield
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -29,12 +29,12 @@ const debounce = <F extends (...args: any[]) => void>(func: F, wait: number) => 
 
 const IngredientsContent: React.FC = () => {
   const { t, isRTL } = useLanguage();
-  
+
   // Data States
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [allergens, setAllergens] = useState<Allergen[]>([]);
   const [loading, setLoading] = useState(false);
-  
+
   // Language States
   const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
   const [defaultLanguage, setDefaultLanguage] = useState<string>('en');
@@ -42,7 +42,7 @@ const IngredientsContent: React.FC = () => {
   // UI States
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
-  
+
   // Filter and Sort States
   const [sortBy, setSortBy] = useState<SortOption>('name_asc');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
@@ -52,11 +52,11 @@ const IngredientsContent: React.FC = () => {
     allergen: 'all',
     selectedAllergens: []
   });
-  
+
   // Refs for dropdown management
   const filterRef = useRef<HTMLDivElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
-  
+
   // Modal states
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -85,7 +85,7 @@ const IngredientsContent: React.FC = () => {
     setLoading(true);
     try {
       const allergenService = new AllergenService();
-      
+
       const [fetchedAllergens, transformedIngredients, languagesData] = await Promise.all([
         allergenService.getAllergens(),
         ingredientsService.getIngredients(),
@@ -104,8 +104,8 @@ const IngredientsContent: React.FC = () => {
       }, []);
       setSupportedLanguages(uniqueLanguages);
       setDefaultLanguage(languagesData.defaultLanguage || 'en');
-     
-      logger.info('Data loaded successfully', { 
+
+      logger.info('Data loaded successfully', {
         allergenCount: fetchedAllergens.length,
         ingredientCount: transformedIngredients.length
       });
@@ -145,7 +145,7 @@ const IngredientsContent: React.FC = () => {
     setSortBy('name_asc');
   };
 
-  const hasActiveFilters = filters.status !== 'all' || filters.allergen !== 'all' || 
+  const hasActiveFilters = filters.status !== 'all' || filters.allergen !== 'all' ||
     filters.selectedAllergens.length > 0 || searchQuery !== '';
 
   const processedIngredients = useMemo(() => {
@@ -165,7 +165,7 @@ const IngredientsContent: React.FC = () => {
       if (filters.allergen === 'allergenic' && !ingredient.isAllergenic) return false;
       if (filters.allergen === 'non-allergenic' && ingredient.isAllergenic) return false;
       if (filters.selectedAllergens.length > 0) {
-        const hasSelectedAllergen = filters.selectedAllergens.some(allergenId => 
+        const hasSelectedAllergen = filters.selectedAllergens.some(allergenId =>
           ingredient.allergenIds?.includes(allergenId)
         );
         if (!hasSelectedAllergen) return false;
@@ -238,13 +238,13 @@ const IngredientsContent: React.FC = () => {
 
   if (loading && ingredients.length === 0) {
     return (
-      <motion.div 
-        initial={{ opacity: 0 }} 
-        animate={{ opacity: 1 }} 
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
         className={`space-y-6 ${isRTL ? 'text-right' : 'text-left'}`}
       >
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-md border border-gray-200/50 dark:border-gray-700/50 p-6 animate-pulse">
-           <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map(i => (
@@ -256,9 +256,9 @@ const IngredientsContent: React.FC = () => {
   }
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }} 
-      animate={{ opacity: 1, y: 0 }} 
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className={`space-y-6 ${isRTL ? 'text-right' : 'text-left'}`}
     >
@@ -319,7 +319,7 @@ const IngredientsContent: React.FC = () => {
                 <Filter className="h-4 w-4" />
                 <span className="hidden xs:inline sm:inline">{t('IngredientsContent.filter')}</span>
                 {hasActiveFilters && (
-                  <span className="flex items-center justify-center w-5 h-5 text-xs bg-primary-600 text-white rounded-full">
+                  <span className="flex items-center justify-center w-5 h-5 text-xs text-primary-800 text-white rounded-full">
                     {(filters.status !== 'all' ? 1 : 0) + (filters.allergen !== 'all' ? 1 : 0) + filters.selectedAllergens.length}
                   </span>
                 )}
@@ -351,11 +351,10 @@ const IngredientsContent: React.FC = () => {
                               <button
                                 key={status.value}
                                 onClick={() => setFilters(prev => ({ ...prev, status: status.value as FilterStatus }))}
-                                className={`flex flex-col items-center justify-center gap-1 p-2 text-xs rounded-lg transition-all duration-200 ${
-                                  filters.status === status.value
-                                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 ring-2 ring-primary-500'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
-                                }`}
+                                className={`flex flex-col items-center justify-center gap-1 p-2 text-xs rounded-lg transition-all duration-200 ${filters.status === status.value
+                                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 ring-2 ring-primary-500'
+                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
+                                  }`}
                               >
                                 <Icon className="h-4 w-4" />
                                 <span className="truncate w-full text-center">{status.label}</span>
@@ -381,11 +380,10 @@ const IngredientsContent: React.FC = () => {
                               <button
                                 key={allergenType.value}
                                 onClick={() => setFilters(prev => ({ ...prev, allergen: allergenType.value as FilterAllergen }))}
-                                className={`flex flex-col items-center justify-center gap-1 p-2 text-xs rounded-lg transition-all duration-200 ${
-                                  filters.allergen === allergenType.value
-                                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 ring-2 ring-primary-500'
-                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
-                                }`}
+                                className={`flex flex-col items-center justify-center gap-1 p-2 text-xs rounded-lg transition-all duration-200 ${filters.allergen === allergenType.value
+                                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 ring-2 ring-primary-500'
+                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600'
+                                  }`}
                               >
                                 <Icon className="h-4 w-4" />
                                 <span className="truncate w-full text-center">{allergenType.label}</span>
@@ -414,7 +412,7 @@ const IngredientsContent: React.FC = () => {
                                       : filters.selectedAllergens.filter(id => id !== allergen.id);
                                     setFilters(prev => ({ ...prev, selectedAllergens: newSelected }));
                                   }}
-                                  className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500 transition-colors flex-shrink-0"
+                                  className="h-4 w-4 rounded border-gray-300 text-primary-800 focus:ring-primary-500 transition-colors flex-shrink-0"
                                 />
                                 <span className="text-gray-800 dark:text-gray-200">{allergen.icon} {translatedName}</span>
                               </label>
@@ -433,7 +431,7 @@ const IngredientsContent: React.FC = () => {
                         </button>
                         <button
                           onClick={() => setShowFilterDropdown(false)}
-                          className="flex-1 py-2.5 text-sm font-medium bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-colors shadow-sm"
+                          className="flex-1 py-2.5 text-sm font-medium text-primary-800 text-white rounded-xl hover:bg-primary-700 transition-colors shadow-sm"
                         >
                           {t('IngredientsContent.applyFilters') || 'Apply'}
                         </button>
@@ -473,15 +471,14 @@ const IngredientsContent: React.FC = () => {
                               setSortBy(option.value as SortOption);
                               setShowSortDropdown(false);
                             }}
-                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-xl transition-all duration-200 ${isRTL ? 'flex-row-reverse' : ''} ${
-                              sortBy === option.value
-                                ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 ring-2 ring-primary-500'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            }`}
+                            className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm rounded-xl transition-all duration-200 ${isRTL ? 'flex-row-reverse' : ''} ${sortBy === option.value
+                              ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 ring-2 ring-primary-500'
+                              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                              }`}
                           >
                             <Icon className="h-4 w-4 flex-shrink-0" />
                             <span className="flex-1 text-left">{option.label}</span>
-                            {sortBy === option.value && <Check className="h-4 w-4 flex-shrink-0 text-primary-600" />}
+                            {sortBy === option.value && <Check className="h-4 w-4 flex-shrink-0 text-primary-800" />}
                           </button>
                         );
                       })}
@@ -527,7 +524,7 @@ const IngredientsContent: React.FC = () => {
       {/* Ingredients Display - Grid or List */}
       <AnimatePresence mode="wait">
         {viewMode === 'grid' ? (
-          <motion.div 
+          <motion.div
             key="grid"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -540,7 +537,7 @@ const IngredientsContent: React.FC = () => {
               </div>
             ) : (
               processedIngredients.map((ingredient, index) => (
-                <motion.div 
+                <motion.div
                   key={ingredient.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -550,7 +547,7 @@ const IngredientsContent: React.FC = () => {
                   <div className="flex items-start justify-between mb-4">
                     <h3 className="font-bold text-xl text-gray-900 dark:text-white">{ingredient.name}</h3>
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                      <button onClick={() => handleEdit(ingredient)} className="p-2 text-primary-600 hover:bg-primary-50 rounded-full">
+                      <button onClick={() => handleEdit(ingredient)} className="p-2 text-primary-800 hover:bg-primary-50 rounded-full">
                         <Edit2 className="w-5 h-5" />
                       </button>
                       <button onClick={() => handleDelete(ingredient)} className="p-2 text-red-600 hover:bg-red-50 rounded-full">
@@ -559,22 +556,22 @@ const IngredientsContent: React.FC = () => {
                     </div>
                   </div>
                   <div className="space-y-4">
-                     {/* Status Badge */}
+                    {/* Status Badge */}
                     <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${ingredient.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                       {ingredient.isAvailable ? t('IngredientsContent.available') : t('IngredientsContent.unavailable')}
                     </span>
                     {/* Allergen Badges */}
                     {ingredient.isAllergenic ? (
-                       <div className="flex flex-wrap gap-2 mt-2">
-                          {allergens.filter(a => ingredient.allergenIds?.includes(a.id)).map(a => {
-                             const translatedName = getTranslatedAllergenName(a);
-                             return (
-                               <span key={a.id} className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded flex items-center gap-1">
-                                 {a.icon} {translatedName}
-                               </span>
-                             );
-                          })}
-                       </div>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {allergens.filter(a => ingredient.allergenIds?.includes(a.id)).map(a => {
+                          const translatedName = getTranslatedAllergenName(a);
+                          return (
+                            <span key={a.id} className="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded flex items-center gap-1">
+                              {a.icon} {translatedName}
+                            </span>
+                          );
+                        })}
+                      </div>
                     ) : (
                       <div className="text-sm text-gray-500">{t('IngredientsContent.noAllergens')}</div>
                     )}
@@ -585,57 +582,57 @@ const IngredientsContent: React.FC = () => {
           </motion.div>
         ) : (
           <motion.div key="list" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-             {/* List View Table Implementation */}
-             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden overflow-x-auto">
-                <table className={`min-w-full divide-y divide-gray-200 dark:divide-gray-700 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
-                   <thead className="bg-gray-50 dark:bg-gray-700">
-                      <tr>
-                        <th className={`px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>{t('IngredientsContent.ingredientName')}</th>
-                        <th className={`px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>{t('IngredientsContent.status')}</th>
-                        <th className={`px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell ${isRTL ? 'text-right' : 'text-left'}`}>{t('IngredientsContent.allergenInfo')}</th>
-                        <th className={`px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider ${isRTL ? 'text-left' : 'text-right'}`}>{t('IngredientsContent.actions')}</th>
+            {/* List View Table Implementation */}
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow overflow-hidden overflow-x-auto">
+              <table className={`min-w-full divide-y divide-gray-200 dark:divide-gray-700 ${isRTL ? 'text-right' : 'text-left'}`} dir={isRTL ? 'rtl' : 'ltr'}>
+                <thead className="bg-gray-50 dark:bg-gray-700">
+                  <tr>
+                    <th className={`px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>{t('IngredientsContent.ingredientName')}</th>
+                    <th className={`px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider ${isRTL ? 'text-right' : 'text-left'}`}>{t('IngredientsContent.status')}</th>
+                    <th className={`px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider hidden sm:table-cell ${isRTL ? 'text-right' : 'text-left'}`}>{t('IngredientsContent.allergenInfo')}</th>
+                    <th className={`px-4 sm:px-6 py-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider ${isRTL ? 'text-left' : 'text-right'}`}>{t('IngredientsContent.actions')}</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                  {processedIngredients.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                        {t('IngredientsContent.noIngredientsFound')}
+                      </td>
+                    </tr>
+                  ) : (
+                    processedIngredients.map((ingredient) => (
+                      <tr key={ingredient.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{ingredient.name}</td>
+                        <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${ingredient.isAvailable ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'}`}>
+                            {ingredient.isAvailable ? t('IngredientsContent.available') : t('IngredientsContent.unavailable')}
+                          </span>
+                        </td>
+                        <td className="px-4 sm:px-6 py-4 hidden sm:table-cell">
+                          {ingredient.isAllergenic ? (
+                            <div className={`flex flex-wrap gap-1 ${isRTL ? 'justify-end' : 'justify-start'}`}>
+                              {allergens.filter(a => ingredient.allergenIds?.includes(a.id)).map(a => {
+                                const translatedName = getTranslatedAllergenName(a);
+                                return (
+                                  <span key={a.id} className="text-xs text-gray-500 dark:text-gray-400">{a.icon} {translatedName}</span>
+                                );
+                              })}
+                            </div>
+                          ) : <span className="text-gray-400">-</span>}
+                        </td>
+                        <td className={`px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium ${isRTL ? 'text-left' : 'text-right'}`}>
+                          <div className={`flex items-center gap-2 ${isRTL ? 'justify-start flex-row-reverse' : 'justify-end'}`}>
+                            <button onClick={() => handleEdit(ingredient)} className="text-primary-800 hover:text-primary-900 dark:text-primary-800 dark:hover:text-primary-300 p-1"><Edit2 className="w-4 h-4" /></button>
+                            <button onClick={() => handleDelete(ingredient)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        </td>
                       </tr>
-                   </thead>
-                   <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                      {processedIngredients.length === 0 ? (
-                        <tr>
-                          <td colSpan={4} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
-                            {t('IngredientsContent.noIngredientsFound')}
-                          </td>
-                        </tr>
-                      ) : (
-                        processedIngredients.map((ingredient) => (
-                          <tr key={ingredient.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
-                             <td className="px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{ingredient.name}</td>
-                             <td className="px-4 sm:px-6 py-4 whitespace-nowrap">
-                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${ingredient.isAvailable ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'}`}>
-                                   {ingredient.isAvailable ? t('IngredientsContent.available') : t('IngredientsContent.unavailable')}
-                                </span>
-                             </td>
-                             <td className="px-4 sm:px-6 py-4 hidden sm:table-cell">
-                                {ingredient.isAllergenic ? (
-                                  <div className={`flex flex-wrap gap-1 ${isRTL ? 'justify-end' : 'justify-start'}`}>
-                                     {allergens.filter(a => ingredient.allergenIds?.includes(a.id)).map(a => {
-                                        const translatedName = getTranslatedAllergenName(a);
-                                        return (
-                                          <span key={a.id} className="text-xs text-gray-500 dark:text-gray-400">{a.icon} {translatedName}</span>
-                                        );
-                                     })}
-                                  </div>
-                                ) : <span className="text-gray-400">-</span>}
-                             </td>
-                             <td className={`px-4 sm:px-6 py-4 whitespace-nowrap text-sm font-medium ${isRTL ? 'text-left' : 'text-right'}`}>
-                                <div className={`flex items-center gap-2 ${isRTL ? 'justify-start flex-row-reverse' : 'justify-end'}`}>
-                                  <button onClick={() => handleEdit(ingredient)} className="text-primary-600 hover:text-primary-900 dark:text-primary-400 dark:hover:text-primary-300 p-1"><Edit2 className="w-4 h-4"/></button>
-                                  <button onClick={() => handleDelete(ingredient)} className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1"><Trash2 className="w-4 h-4"/></button>
-                                </div>
-                             </td>
-                          </tr>
-                        ))
-                      )}
-                   </tbody>
-                </table>
-             </div>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

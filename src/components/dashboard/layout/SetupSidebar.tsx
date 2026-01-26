@@ -30,8 +30,8 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
-    const currency = useCurrency();
-  
+  const currency = useCurrency();
+
   // Helper: Navigate to tab and update state
   const handleNavigate = (path: string, tab: string) => {
     navigate(`/dashboard/${path}`);
@@ -57,9 +57,8 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-30 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'
-        }`}
+        className={`fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-30 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'
+          }`}
       >
         <div className="h-full flex flex-col">
           {/* Logo */}
@@ -68,7 +67,7 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
               onClick={handleHomeClick}
               className="flex items-center hover:opacity-80 transition-opacity duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 rounded-lg p-1"
             >
-              <Building2 className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+              <Building2 className="h-8 w-8 text-primary-800 dark:text-primary-800" />
               <span className={`${isRTL ? 'mr-3' : 'ml-3'} text-xl font-bold text-gray-900 dark:text-white`}>{t('dashboard.sidebar.title')}</span>
             </button>
             <button
@@ -86,7 +85,7 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
             </h2>
             {branchName && (
               <div className={`mt-1 flex items-center ${isRTL ? 'space-x-reverse' : ''} space-x-2`}>
-                <span className="text-sm text-primary-600 dark:text-primary-400 font-medium">
+                <span className="text-sm text-primary-800 dark:text-primary-800 font-medium">
                   {branchName}
                 </span>
                 <span className={`px-2 py-0.5 text-xs rounded-full bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-300`}>
@@ -95,29 +94,27 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
               </div>
             )}
 
-          
+
           </div>
 
           {/* Navigation */}
           <nav className="mt-5 flex-1 px-3 space-y-1">
             <button
               onClick={() => handleNavigate('branchProducts', 'branchProducts')}
-              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                activeTab === 'branchProducts'
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              } ${isRTL ? 'text-right' : 'text-left'}`}
+              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'branchProducts'
+                ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                } ${isRTL ? 'text-right' : 'text-left'}`}
             >
               <ShoppingCart className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.products.title')}</span>
             </button>
             <button
               onClick={() => handleNavigate('TableManagement', 'TableManagement')}
-              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                activeTab === 'TableManagement'
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              } ${isRTL ? 'text-right' : 'text-left'}`}
+              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'TableManagement'
+                ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                } ${isRTL ? 'text-right' : 'text-left'}`}
             >
               <Table className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.tables.title')}</span>
@@ -125,45 +122,41 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
 
             <button
               onClick={() => handleNavigate('BranchManagement', 'BranchManagement')}
-              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                activeTab === 'BranchManagement'
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              } ${isRTL ? 'text-right' : 'text-left'}`}
+              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'BranchManagement'
+                ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                } ${isRTL ? 'text-right' : 'text-left'}`}
             >
               <Store className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.branchManagementTitle')}</span>
             </button>
             <button
               onClick={() => handleNavigate('Branchorders', 'Branchorders')}
-              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                activeTab === 'Branchorders'
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              } ${isRTL ? 'text-right' : 'text-left'}`}
+              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'Branchorders'
+                ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                } ${isRTL ? 'text-right' : 'text-left'}`}
             >
               <HardHat className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.orders.title')}</span>
             </button>
             <button
               onClick={() => handleNavigate('orderType', 'orderType')}
-              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                activeTab === 'orderType'
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              } ${isRTL ? 'text-right' : 'text-left'}`}
+              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'orderType'
+                ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                } ${isRTL ? 'text-right' : 'text-left'}`}
             >
               <Type className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.orderType.title')}</span>
             </button>
-              <button
+            <button
               onClick={() => handleNavigate('moneyCase', 'moneyCase')}
-               className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                activeTab === 'moneyCase'
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              } ${isRTL ? 'text-right' : 'text-left'}`}
-            
+              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'moneyCase'
+                ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                } ${isRTL ? 'text-right' : 'text-left'}`}
+
             >
               {currency.symbol}
               <span>{t('dashboard.moneyCase.title')}</span>
@@ -172,11 +165,10 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
             {!isBranchOnly && (
               <button
                 onClick={() => handleNavigate('users', 'users')}
-                className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                  activeTab === 'users'
-                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                } ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'users'
+                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  } ${isRTL ? 'text-right' : 'text-left'}`}
               >
                 <Users className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
                 <span>{t('dashboard.users.title')}</span>
@@ -187,17 +179,16 @@ const SetupSidebar: React.FC<SetupSidebarProps> = ({
             {!isBranchOnly && (
               <button
                 onClick={() => handleNavigate('BranchSettings', 'BranchSettings')}
-                className={`w-full flex items-center px-4 py-3 rounded-lg ${
-                  activeTab === 'BranchSettings'
-                    ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                } ${isRTL ? 'text-right' : 'text-left'}`}
+                className={`w-full flex items-center px-4 py-3 rounded-lg ${activeTab === 'BranchSettings'
+                  ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300'
+                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  } ${isRTL ? 'text-right' : 'text-left'}`}
               >
                 <Settings className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
                 <span>{t('dashboard.settings.title')}</span>
               </button>
             )}
-            
+
 
           </nav>
 

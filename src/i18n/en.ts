@@ -115,7 +115,7 @@ export const en = {
   nav: {
     home: 'Home',
     features: 'Features',
-    pricing: 'Pricing',
+    pricing: 'Plans',
     testimonials: 'Testimonials',
     faq: 'FAQ',
     contact: 'Contact',
@@ -501,14 +501,14 @@ export const en = {
 
   // Brand
   brand: {
-    name: 'idigitek QR',
+    name: 'iDIGITEK QR',
     slogan: 'Digital Restaurant Solution'
   },
 
   // Features
   features: {
     title: 'Why',
-    titleHighlight: 'QR Menu?',
+    titleHighlight: 'iDIGITEK QR Menu?',
     subtitle: 'Enhance customer experience and take your business to the digital age with powerful features designed for modern restaurants.',
     list: {
       qrAccess: {
@@ -549,7 +549,7 @@ export const en = {
       },
       multiBranch: {
         title: 'Multi-Branch Management',
-        description: 'Manage multiple branches from one place. Create separate menus and pricing for each location.'
+        description: 'Manage multiple branches from one place. Create separate menus and plans for each location.'
       },
       userRoles: {
         title: 'User & Role Management',
@@ -580,7 +580,7 @@ export const en = {
         title: 'Product',
         links: {
           features: 'Features',
-          pricing: 'Pricing',
+          pricing: 'Plans',
           demo: 'Demo',
           api: 'API Documentation'
         }
@@ -589,7 +589,7 @@ export const en = {
         title: 'Company',
         links: {
           about: 'About Us',
-          pricing: 'Pricing',
+          pricing: 'Plans',
           careers: 'Careers',
           contact: 'Contact'
         }
@@ -741,7 +741,7 @@ export const en = {
     title: 'Choose Your',
     titleHighlight: 'Perfect',
     titleEnd: 'Plan',
-    subtitle: 'Flexible pricing options designed for your needs. You can change or cancel your plan anytime.',
+    subtitle: 'Flexible plans options designed for your needs. You can change or cancel your plan anytime.',
     monthly: 'Monthly',
     yearly: 'Yearly',
     freeMonths: '2 MONTHS FREE',
@@ -793,7 +793,7 @@ export const en = {
           '2': 'Custom Design',
           '3': 'Private Domain',
           '4': 'API Access',
-          '5': 'Enterprise Analytics',
+          '5': 'Pro+ Analytics',
           '6': 'Dedicated Account Manager',
           '7': 'Data Migrations',
           '8': 'Delivery Tracking'
@@ -802,7 +802,7 @@ export const en = {
       }
     },
     additionalInfo: 'All plans include 14-day free trial • No credit card required • Cancel anytime',
-    vatInfo: 'Prices include VAT. Custom pricing available for enterprise plans.',
+    vatInfo: 'Prices include VAT. Custom plans available for Pro+ plans.',
     perMonth: 'month',
     perYear: 'year',
     monthlyEquivalent: 'Monthly {amount} (2 months free)',
@@ -848,7 +848,7 @@ export const en = {
         name: 'Emre Şahin',
         role: 'Chain Restaurant Owner',
         company: 'Burger House',
-        content: 'We manage all our branches from one place. We can create separate menus and pricing for each branch. Magnificent system!'
+        content: 'We manage all our branches from one place. We can create separate menus and plans for each branch. Magnificent system!'
       },
       {
         name: 'Zeynep Arslan',
@@ -902,7 +902,7 @@ export const en = {
       },
       '8': {
         question: 'Can I manage multiple restaurants?',
-        answer: 'With our Professional and Enterprise plans, you can manage multiple restaurants from a single account. Separate menu and analytics for each restaurant.'
+        answer: 'With our Professional and Pro+ plans, you can manage multiple restaurants from a single account. Separate menu and analytics for each restaurant.'
       }
     },
     cta: {
@@ -5841,7 +5841,7 @@ export const en = {
         },
         payment: {
           title: '5. Payment Terms',
-          content: 'Subscription fees are billed in advance on a monthly or annual basis depending on your chosen plan. All fees are non-refundable except as required by law. We reserve the right to modify our pricing with 30 days notice to existing customers. Failure to pay fees may result in suspension or termination of your account.'
+          content: 'Subscription fees are billed in advance on a monthly or annual basis depending on your chosen plan. All fees are non-refundable except as required by law. We reserve the right to modify our plans with 30 days notice to existing customers. Failure to pay fees may result in suspension or termination of your account.'
         },
         termination: {
           title: '6. Termination',
@@ -5878,7 +5878,7 @@ export const en = {
           content: 'We collect several types of information to provide and improve our services:',
           items: {
             0: 'Personal Information: Name, email address, phone number, and business details provided during registration',
-            1: 'Business Information: Restaurant details, menu items, pricing, and operational data',
+            1: 'Business Information: Restaurant details, menu items, plans, and operational data',
             2: 'Usage Data: Information about how you interact with our platform, including access times and features used',
             3: 'Device Information: IP address, browser type, operating system, and device identifiers',
             4: 'Payment Information: Billing details and transaction history (processed securely through third-party payment providers)'

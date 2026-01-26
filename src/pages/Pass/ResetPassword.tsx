@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'; // --- UPDATED ---
-import { 
-  Mail, 
-  Send, 
-  LockKeyhole, 
+import {
+  Mail,
+  Send,
+  LockKeyhole,
   ArrowLeft,
   Loader2,
   AlertCircle
@@ -23,9 +23,9 @@ const ResetPassword = () => {
   const [cooldownTime, setCooldownTime] = useState(0);
   const { t, isRTL } = useLanguage();
 
-      useEffect(() => {
-        window.scrollTo(0, 0);
-      }, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     let interval: number;
@@ -61,7 +61,7 @@ const ResetPassword = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading || cooldownTime > 0) return; 
+    if (loading || cooldownTime > 0) return;
 
     setLoading(true);
     setError(null);
@@ -69,7 +69,7 @@ const ResetPassword = () => {
     try {
       await userService.sendResetPasswordEmail(email);
       setSubmitted(true);
-      
+
       localStorage.setItem(COOLDOWN_KEY, Date.now().toString());
       setCooldownTime(COOLDOWN_SECONDS);
       const interval = setInterval(() => {
@@ -82,7 +82,7 @@ const ResetPassword = () => {
           return prevTime - 1;
         });
       }, 1000);
-      
+
     } catch (err) {
       console.error('Failed to send reset password email:', err);
       setError(err.response.data.details.message);
@@ -94,10 +94,10 @@ const ResetPassword = () => {
   return (
     <div
       className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900 p-4"
-      dir={isRTL ? 'rtl' : 'ltr'} 
+      dir={isRTL ? 'rtl' : 'ltr'}
     >
       <div className="w-full max-w-md">
-         <motion.div
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
@@ -105,7 +105,7 @@ const ResetPassword = () => {
         >
           <Link
             to="/"
-            className={`inline-flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200`}
+            className={`inline-flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} text-gray-600 dark:text-gray-400 hover:text-primary-800 dark:hover:text-primary-800 transition-colors duration-200`}
           >
             <ArrowLeft className={`h-4 w-4 ${isRTL ? 'rotate-180' : ''}`} />
             <span>{t('pages.login.backToHome')}</span>
@@ -143,7 +143,7 @@ const ResetPassword = () => {
                 {t('resetPassword.form.subtitle')}
               </p>
             </div>
-            
+
             {/* ... (Error message block - no change) ... */}
             {error && (
               <motion.div

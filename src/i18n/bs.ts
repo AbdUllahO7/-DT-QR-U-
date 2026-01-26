@@ -114,7 +114,7 @@ export const bs = {
     nav: {
         home: 'Početna',
         features: 'Karakteristike',
-        pricing: 'Cijene',
+        pricing: 'Planovi',
         testimonials: 'Svjedočanstva',
         faq: 'Česta Pitanja',
         contact: 'Kontakt',
@@ -500,14 +500,14 @@ export const bs = {
 
     // Brand
     brand: {
-        name: 'idigitek QR',
+        name: 'iDIGITEK QR',
         slogan: 'Digitalno Restoransko Rješenje'
     },
 
     // Features,
     features: {
         title: 'Zašto',
-        titleHighlight: 'QR Meni?',
+        titleHighlight: 'iDIGITEK QR Meni?',
         subtitle: 'Poboljšajte iskustvo kupaca i odvedite svoj posao u digitalno doba sa moćnim karakteristikama dizajniranim za moderne restorane.',
         list: {
             qrAccess: {
@@ -579,7 +579,7 @@ export const bs = {
                 title: 'Proizvod',
                 links: {
                     features: 'Karakteristike',
-                    pricing: 'Cijene',
+                    pricing: 'Planovi',
                     demo: 'Demo',
                     api: 'API Dokumentacija'
                 }
@@ -588,7 +588,7 @@ export const bs = {
                 title: 'Kompanija',
                 links: {
                     about: 'O nama',
-                    pricing: 'Cijene',
+                    pricing: 'Planovi',
                     careers: 'Karijere',
                     contact: 'Kontakt'
                 }
@@ -2466,8 +2466,13 @@ export const bs = {
         recommended: 'Preporučeno',
         price: 'Cijena',
         buttons: {
-            view: 'Vidi',
-            addons: 'Prilozi',
+            view: 'Pogledaj',
+            markOutOfStock: 'Nema na stanju',
+            markInStock: 'Ima na stanju',
+            viewDetails: 'Detalji',
+            deactivate: 'Deaktiviraj',
+            activate: 'Aktiviraj',
+            addons: 'Dodaci',
             extras: 'Dodaci',
             ingredients: 'Sastojci',
             edit: 'Uredi',

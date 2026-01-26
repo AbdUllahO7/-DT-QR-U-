@@ -114,7 +114,7 @@ export const ar = {
   nav: {
     home: 'الرئيسية',
     features: 'المميزات',
-    pricing: 'الأسعار',
+    pricing: 'الخطط',
     testimonials: 'الشهادات',
     faq: 'الأسئلة الشائعة',
     contact: 'اتصل بنا',
@@ -498,14 +498,14 @@ export const ar = {
 
   // Brand
   brand: {
-    name: 'idigitek QR',
+    name: 'iDIGITEK QR',
     slogan: 'حل المطاعم الرقمي'
   },
 
   // Features
   features: {
     title: 'لماذا تختار',
-    titleHighlight: 'نظام المنيو الرقمي؟',
+    titleHighlight: 'نظام  iDIGITEK QR Menu؟',
     subtitle: 'انقل تجربة ضيوفك لمستوى آخر من الاحترافية والسرعة مع أدوات مصممة خصيصاً لنمو المطاعم الحديثة.',
     list: {
       qrAccess: {
@@ -577,7 +577,7 @@ export const ar = {
         title: 'المنتج',
         links: {
           features: 'المميزات',
-          pricing: 'الأسعار',
+          pricing: 'الخطط',
           demo: 'عرض توضيحي',
           api: 'وثائق API'
         }
@@ -586,7 +586,7 @@ export const ar = {
         title: 'الشركة',
         links: {
           about: 'معلومات عنا',
-          pricing: 'الأسعار',
+          pricing: 'الخطط',
           careers: 'الوظائف',
           contact: 'اتصل بنا'
         }
@@ -744,11 +744,11 @@ export const ar = {
     mostPopular: 'الخيار المفضل',
     plans: {
       starter: {
-        name: 'الباقة الأساسية',
+        name: 'أساسي',
         features: {
           '0': 'مطعم واحد',
           '1': 'فروع غير محدودة',
-          '2': 'مستخدمين غير محدود',
+          '2': 'عدد مستخدمين غير محدود',
           '3': 'منتجات غير محدودة (المكونات، المواد المسببة للحساسية، الإضافات)',
           '4': 'إدارة نفاد المخزون',
           '5': 'ساعات العمل/الورديات',
@@ -759,12 +759,12 @@ export const ar = {
           '10': 'مولد رمز QR',
           '11': 'تحسين للجوال',
           '12': 'دعم متعدد اللغات',
-          '13': 'طلبات واتساب اختيارية'
+          '13': 'الطلب عبر الواتس اب (اختياري)'
         },
         button: 'ابدأ الآن'
       },
       pro: {
-        name: 'برو',
+        name: 'إحترافي',
         features: {
           '0': 'كل ما في الباقة الأساسية',
           '1': 'تكامل نقاط البيع',
@@ -782,9 +782,9 @@ export const ar = {
         button: 'قريباً'
       },
       proPlus: {
-        name: 'برو+',
+        name: 'إحترافي+',
         features: {
-          '0': 'كل ما في باقة برو',
+          '0': 'كل ما في باقة احترافي',
           '1': 'تكامل مركز الاتصال',
           '2': 'تصميم مخصص',
           '3': 'نطاق خاص',
@@ -2470,9 +2470,14 @@ export const ar = {
     price: 'السعر',
     buttons: {
       view: 'عرض',
-      ingredients: 'مكونات',
+      markOutOfStock: 'نفد المخزون',
+      markInStock: 'متوفر في المخزون',
+      viewDetails: 'تفاصيل المنتج',
+      deactivate: 'إلغاء النشاط',
+      activate: 'تفعيل',
       addons: 'إضافات',
-      extras: 'إضافية',
+      extras: 'إضافات',
+      ingredients: 'المكونات',
       edit: 'تعديل',
       delete: 'حذف',
       add: 'إضافة',

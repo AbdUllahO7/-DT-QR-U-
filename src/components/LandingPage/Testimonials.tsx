@@ -70,7 +70,7 @@ const Testimonials: React.FC = () => {
           className={`text-center mb-16 ${isRTL ? 'text-right' : ''}`}
         >
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            {t('testimonials.title')} <span className="text-primary-600 dark:text-primary-400">{t('testimonials.titleHighlight')}</span>
+            {t('testimonials.title')} <span className="text-primary-800 dark:text-primary-800">{t('testimonials.titleHighlight')}</span>
           </h2>
           <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             {t('testimonials.subtitle')}
@@ -89,7 +89,7 @@ const Testimonials: React.FC = () => {
               className="card relative"
             >
               {/* Quote Icon */}
-              <div className={`absolute -top-4 ${isRTL ? '-right-4' : '-left-4'} w-8 h-8 bg-primary-600 dark:bg-primary-500 rounded-full flex items-center justify-center`}>
+              <div className={`absolute -top-4 ${isRTL ? '-right-4' : '-left-4'} w-8 h-8 text-primary-800 dark:bg-primary-500 rounded-full flex items-center justify-center`}>
                 <Quote className="h-4 w-4 text-white" />
               </div>
 
@@ -107,7 +107,7 @@ const Testimonials: React.FC = () => {
 
               {/* Author */}
               <div className={`flex items-center space-x-3 ${isRTL ? 'space-x-reverse' : ''}`}>
-                <div className="w-12 h-12 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center text-white text-xl">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary-400 to-primary-800 rounded-full flex items-center justify-center text-white text-xl">
                   {testimonial.avatar}
                 </div>
                 <div>
@@ -117,7 +117,7 @@ const Testimonials: React.FC = () => {
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     {testimonial.role}
                   </p>
-                  <p className="text-sm text-primary-600 dark:text-primary-400 font-medium">
+                  <p className="text-sm text-primary-800 dark:text-primary-800 font-medium">
                     {testimonial.company}
                   </p>
                 </div>
@@ -135,7 +135,7 @@ const Testimonials: React.FC = () => {
           className="grid grid-cols-2 lg:grid-cols-4 gap-8 mt-16 pt-16 border-t border-gray-200 dark:border-gray-700"
         >
           <div className="text-center">
-            <div className="text-3xl lg:text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">
+            <div className="text-3xl lg:text-4xl font-bold text-primary-800 dark:text-primary-800 mb-2">
               500+
             </div>
             <div className="text-gray-600 dark:text-gray-400 font-medium">
@@ -143,7 +143,7 @@ const Testimonials: React.FC = () => {
             </div>
           </div>
           <div className="text-center">
-            <div className="text-3xl lg:text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">
+            <div className="text-3xl lg:text-4xl font-bold text-primary-800 dark:text-primary-800 mb-2">
               %99
             </div>
             <div className="text-gray-600 dark:text-gray-400 font-medium">
@@ -151,7 +151,7 @@ const Testimonials: React.FC = () => {
             </div>
           </div>
           <div className="text-center">
-            <div className="text-3xl lg:text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">
+            <div className="text-3xl lg:text-4xl font-bold text-primary-800 dark:text-primary-800 mb-2">
               24/7
             </div>
             <div className="text-gray-600 dark:text-gray-400 font-medium">
@@ -159,7 +159,7 @@ const Testimonials: React.FC = () => {
             </div>
           </div>
           <div className="text-center">
-            <div className="text-3xl lg:text-4xl font-bold text-primary-600 dark:text-primary-400 mb-2">
+            <div className="text-3xl lg:text-4xl font-bold text-primary-800 dark:text-primary-800 mb-2">
               {t('testimonials.stats.setupValue')}
             </div>
             <div className="text-gray-600 dark:text-gray-400 font-medium">

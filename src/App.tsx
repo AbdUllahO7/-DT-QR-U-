@@ -23,6 +23,7 @@ import SetNewPassword from './pages/Pass/SetNewPassword';
 import MainLayout from './pages/MainLayout';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import ScrollToTop from './components/ScrollToTop';
 
 const App: React.FC = () => {
   return (
@@ -30,6 +31,7 @@ const App: React.FC = () => {
       <ThemeProvider>
         <Toaster position="top-right" richColors expand={false} />
         <Router>
+          <ScrollToTop />
           <Routes>
             {/* --- Main Website Routes (Wrapped in Header/Footer) --- */}
             <Route element={<MainLayout />}>
@@ -60,7 +62,7 @@ const App: React.FC = () => {
             } />
 
             {/* --- Public Menu & Tracking Routes (No Header/Footer) --- */}
-            
+
             {/* 1. Table QR Flow */}
             <Route path="/table/qr/:qrToken" element={<TableQR />} />
             <Route path="/table/qr/:qrToken/track/:orderTag" element={<OrderTracker />} />

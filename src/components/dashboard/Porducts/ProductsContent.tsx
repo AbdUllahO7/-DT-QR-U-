@@ -108,7 +108,7 @@ const ProductsContent: React.FC = () => {
   const [selectedBranch, setSelectedBranch] = useState<BranchDropdownItem | null>(null);
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
   const [isLoadingBranches, setIsLoadingBranches] = useState(false);
-  
+
   // Filter and Sort States
   const [sortBy, setSortBy] = useState<SortOption>('order_asc');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
@@ -128,7 +128,7 @@ const ProductsContent: React.FC = () => {
 
   // Auto-scroll state for newly created products
   const [newlyCreatedProductId, setNewlyCreatedProductId] = useState<number | null>(null);
-  
+
   const filterRef = useRef<HTMLDivElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
   const branchDropdownRef = useRef<HTMLDivElement>(null);
@@ -165,20 +165,20 @@ const ProductsContent: React.FC = () => {
       alert(t('productsContent.error.invalidData'));
       return;
     }
-    
+
     if (!productName || productName.trim() === '') {
       console.error('❌ Invalid productName provided:', productName);
       alert(t('productsContent.error.invalidData'));
       return;
     }
-    
-    setSelectedProductForExtras({ 
-      productId: productId, 
-      productName: productName 
+
+    setSelectedProductForExtras({
+      productId: productId,
+      productName: productName
     });
     setIsProductExtrasModalOpen(true);
   };
-  
+
   const [deleteConfig, setDeleteConfig] = useState<{
     type: 'product' | 'category';
     id: number;
@@ -210,22 +210,22 @@ const ProductsContent: React.FC = () => {
       setIsLoadingBranches(true);
       try {
         const branchList = await branchService.getBranchesDropdown();
-        
+
         const selectAllOption: BranchDropdownItem = {
           branchId: SELECT_ALL_BRANCH_ID,
           branchName: t('productsContent.branch.selectAll') || 'All Branches'
         };
-        
+
         const branchesWithSelectAll = [selectAllOption, ...branchList];
         setBranches(branchesWithSelectAll);
-        
+
         setSelectedBranch(prev => {
           if (!prev || prev.branchId === SELECT_ALL_BRANCH_ID) {
             return selectAllOption;
           }
           return prev;
         });
-        
+
         logger.info('Şube listesi başarıyla yüklendi');
       } catch (error) {
         logger.error('Şube listesi yüklenirken hata:', error);
@@ -255,16 +255,16 @@ const ProductsContent: React.FC = () => {
       alert(t('productsContent.error.invalidData'));
       return;
     }
-    
+
     if (!productName || productName.trim() === '') {
       console.error('❌ Invalid productName provided:', productName);
       alert(t('productsContent.error.invalidData'));
       return;
     }
-    
-    setSelectedProductForAddons({ 
-      productId: productId, 
-      productName: productName 
+
+    setSelectedProductForAddons({
+      productId: productId,
+      productName: productName
     });
     setIsAddonsModalOpen(true);
   };
@@ -280,20 +280,20 @@ const ProductsContent: React.FC = () => {
       alert(t('productsContent.error.invalidData'));
       return;
     }
-    
+
     if (!productName || productName.trim() === '') {
       console.error('❌ Invalid productName provided:', productName);
       alert(t('productsContent.error.invalidData'));
       return;
     }
-    
-    setSelectedProductForIngredientUpdate({ 
-      productId: productId, 
-      productName: productName 
+
+    setSelectedProductForIngredientUpdate({
+      productId: productId,
+      productName: productName
     });
     setIsIngredientUpdateModalOpen(true);
   };
-  
+
   const loadCategories = async (newProductId?: number, isRefresh: boolean = false) => {
     if (!selectedBranch) return;
 
@@ -374,7 +374,7 @@ const ProductsContent: React.FC = () => {
       });
 
       return { ...category, products: filteredProducts };
-    }).filter(category => 
+    }).filter(category =>
       category?.products?.length > 0 || (searchQuery === '' && filters.status === 'all' && filters.categories.length === 0)
     );
   };
@@ -388,8 +388,8 @@ const ProductsContent: React.FC = () => {
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()))
       )
-    })).filter(category => 
-      category?.products?.length > 0 || 
+    })).filter(category =>
+      category?.products?.length > 0 ||
       category.categoryName.toLowerCase().includes(searchQuery.toLowerCase())
     );
   };
@@ -506,7 +506,7 @@ const ProductsContent: React.FC = () => {
     setSortBy('order_asc');
   };
 
-  const hasActiveFilters = filters.status !== 'all' || filters.categories.length > 0 || 
+  const hasActiveFilters = filters.status !== 'all' || filters.categories.length > 0 ||
     filters.priceRange.min > 0 || filters.priceRange.max < 1000 || searchQuery !== '';
 
   const sensors = useSensors(
@@ -720,28 +720,28 @@ const ProductsContent: React.FC = () => {
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
-            <div className="flex justify-center mb-6">
+          <div className="flex justify-center mb-6">
             <div className="relative">
               <div className="w-24 h-24 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
-              <Utensils className="h-12 w-12 text-gray-400" />
+                <Utensils className="h-12 w-12 text-gray-400" />
               </div>
               <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center">
-              <Plus className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                <Plus className="h-4 w-4 text-primary-800 dark:text-primary-800" />
               </div>
             </div>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
             {t('productsContent.emptyState.noCategories.title')}
-            </h3>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          </h3>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={() => setIsCreateCategoryModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 text-white bg-primary-600 hover:bg-primary-700 rounded-lg font-medium transition-colors duration-200"
+              className="flex items-center gap-2 px-6 py-3 text-white text-primary-800 hover:bg-primary-700 rounded-lg font-medium transition-colors duration-200"
             >
               <Plus className="h-5 w-5" />
               {t('productsContent.emptyState.noCategories.addFirstCategory')}
             </button>
-            </div>
+          </div>
         </div>
         <CreateCategoryModal isOpen={isCreateCategoryModalOpen} onClose={() => setIsCreateCategoryModalOpen(false)} onSuccess={() => loadCategories(undefined, true)} />
       </div>
@@ -759,12 +759,12 @@ const ProductsContent: React.FC = () => {
     >
       <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
         {(isReorderingCategories || isReorderingProducts) && (
-          <div className={`fixed top-4 ${isRTL ? 'left-4' : 'right-4'} z-50 bg-primary-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2`}>
+          <div className={`fixed top-4 ${isRTL ? 'left-4' : 'right-4'} z-50 text-primary-800 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2`}>
             <Loader2 className="w-4 h-4 animate-spin" />
             <span className="text-sm">
-              {isReorderingCategories 
-                ? t('productsContent.dragDrop.categoryReordering') 
-                : reorderingCategoryId 
+              {isReorderingCategories
+                ? t('productsContent.dragDrop.categoryReordering')
+                : reorderingCategoryId
                   ? t('productsContent.dragDrop.productMoving')
                   : t('productsContent.dragDrop.productReordering')
               }
@@ -775,7 +775,7 @@ const ProductsContent: React.FC = () => {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 md:p-6">
           {/* Main Toolbar Container */}
           <div className="flex flex-col gap-4">
-            
+
             {/* First Row: Search + Branch Selector */}
             <div className="flex flex-col sm:flex-row gap-3">
               {/* Search Input */}
@@ -809,11 +809,10 @@ const ProductsContent: React.FC = () => {
                       <button
                         key={branch.branchId}
                         onClick={() => handleBranchSelect(branch)}
-                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
-                          selectedBranch?.branchId === branch.branchId
-                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                            : 'text-gray-700 dark:text-gray-200'
-                        } ${isRTL ? 'text-right' : 'text-left'}`}
+                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${selectedBranch?.branchId === branch.branchId
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                          : 'text-gray-700 dark:text-gray-200'
+                          } ${isRTL ? 'text-right' : 'text-left'}`}
                       >
                         {branch.branchId === SELECT_ALL_BRANCH_ID && (
                           <Users className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
@@ -831,10 +830,10 @@ const ProductsContent: React.FC = () => {
 
             {/* Second Row: Action Buttons */}
             <div className="flex flex-wrap items-center justify-between gap-3 w-full">
-              
+
               {/* Left Group: View & Filter Controls */}
               <div className="flex flex-wrap items-center gap-2">
-                
+
                 {/* Clear Filters Button */}
                 {hasActiveFilters && (
                   <button
@@ -854,11 +853,10 @@ const ProductsContent: React.FC = () => {
                       setViewMode('list');
                       localStorage.setItem('productsViewMode', 'list');
                     }}
-                    className={`p-1.5 sm:p-2 rounded-md transition-all duration-200 ${
-                      viewMode === 'list'
-                        ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                    }`}
+                    className={`p-1.5 sm:p-2 rounded-md transition-all duration-200 ${viewMode === 'list'
+                      ? 'bg-white dark:bg-gray-800 text-primary-800 dark:text-primary-800 shadow-sm'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                      }`}
                     title={t('viewMode.list') || 'List View'}
                   >
                     <List className="h-4 w-4" />
@@ -868,11 +866,10 @@ const ProductsContent: React.FC = () => {
                       setViewMode('grid');
                       localStorage.setItem('productsViewMode', 'grid');
                     }}
-                    className={`p-1.5 sm:p-2 rounded-md transition-all duration-200 ${
-                      viewMode === 'grid'
-                        ? 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 shadow-sm'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-                    }`}
+                    className={`p-1.5 sm:p-2 rounded-md transition-all duration-200 ${viewMode === 'grid'
+                      ? 'bg-white dark:bg-gray-800 text-primary-800 dark:text-primary-800 shadow-sm'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                      }`}
                     title={t('viewMode.grid') || 'Grid View'}
                   >
                     <LayoutGrid className="h-4 w-4" />
@@ -883,16 +880,15 @@ const ProductsContent: React.FC = () => {
                 <div className="relative" ref={filterRef}>
                   <button
                     onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                    className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border rounded-lg transition-colors duration-200 ${
-                      hasActiveFilters
-                        ? 'text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800'
-                        : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
-                    }`}
+                    className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border rounded-lg transition-colors duration-200 ${hasActiveFilters
+                      ? 'text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800'
+                      : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
+                      }`}
                     title={t('productsContent.search.filter')}
                   >
                     <Filter className="h-4 w-4" />
                     <span className="hidden sm:inline">{t('productsContent.search.filter')}</span>
-                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showFilterDropdown ? 'rotate-180' : ''}`}/>
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showFilterDropdown ? 'rotate-180' : ''}`} />
                   </button>
 
                   {showFilterDropdown && (
@@ -916,11 +912,10 @@ const ProductsContent: React.FC = () => {
                                 <button
                                   key={status.value}
                                   onClick={() => setFilters(prev => ({ ...prev, status: status.value as FilterStatus }))}
-                                  className={`flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-1 sm:gap-2 px-2 py-2 text-xs sm:text-sm rounded-lg transition-colors ${
-                                    filters.status === status.value
-                                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                                  }`}
+                                  className={`flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-1 sm:gap-2 px-2 py-2 text-xs sm:text-sm rounded-lg transition-colors ${filters.status === status.value
+                                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                    }`}
                                 >
                                   <Icon className="h-4 w-4" />
                                   <span className="truncate">{status.label}</span>
@@ -948,7 +943,7 @@ const ProductsContent: React.FC = () => {
                                       setFilters(prev => ({ ...prev, categories: prev.categories.filter(id => id !== category.categoryId) }));
                                     }
                                   }}
-                                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                                  className="rounded border-gray-300 text-primary-800 focus:ring-primary-500"
                                 />
                                 <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1">
                                   {category.categoryName} <span className="text-xs text-gray-500">({category?.products?.length || 0})</span>
@@ -1011,11 +1006,10 @@ const ProductsContent: React.FC = () => {
                                 setSortBy(option.value as SortOption);
                                 setShowSortDropdown(false);
                               }}
-                              className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                sortBy === option.value
-                                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                              } ${isRTL ? 'text-right' : 'text-left'}`}
+                              className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${sortBy === option.value
+                                ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                                } ${isRTL ? 'text-right' : 'text-left'}`}
                             >
                               {IconComponent ? (
                                 <IconComponent className="h-4 w-4" />
@@ -1049,7 +1043,7 @@ const ProductsContent: React.FC = () => {
                     setSelectedCategoryForProduct('');
                     setIsCreateProductModalOpen(true);
                   }}
-                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200"
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white text-primary-800 hover:bg-primary-700 rounded-lg transition-colors duration-200"
                   title={t('productsContent.actions.newProduct')}
                 >
                   <Plus className="h-4 w-4" />
@@ -1072,29 +1066,29 @@ const ProductsContent: React.FC = () => {
         </div>
 
         <SortableContext items={processedCategories.map(cat => cat.categoryId)} strategy={verticalListSortingStrategy}>
-            <div className={viewMode === 'grid' ? 'space-y-6' : 'space-y-4'}>
-              {processedCategories.map((category) => (
-                <SortableCategory
-                    key={category.categoryId}
-                    category={category}
-                    isDark={isDark}
-                    onToggle={toggleCategory}
-                    onEditProduct={handleEditProduct}
-                    onDeleteProduct={handleDeleteProduct}
-                    onEditCategory={handleEditCategory}
-                    onDeleteCategory={handleDeleteCategory}
-                    activeId={activeId}
-                    onOpenAddonsManagement={handleOpenAddonsManagement}
-                    onOpenProductExtras={handleOpenProductExtras}
-                    onOpenIngredientUpdate={handleOpenIngredientUpdate}
-                    allCategories={categories}
-                    isReorderingProducts={isReorderingProducts && reorderingCategoryId === category.categoryId}
-                    viewMode={viewMode}
-                    newlyCreatedProductId={newlyCreatedProductId}
-                  />
-              ))}
-            </div>
-          </SortableContext>
+          <div className={viewMode === 'grid' ? 'space-y-6' : 'space-y-4'}>
+            {processedCategories.map((category) => (
+              <SortableCategory
+                key={category.categoryId}
+                category={category}
+                isDark={isDark}
+                onToggle={toggleCategory}
+                onEditProduct={handleEditProduct}
+                onDeleteProduct={handleDeleteProduct}
+                onEditCategory={handleEditCategory}
+                onDeleteCategory={handleDeleteCategory}
+                activeId={activeId}
+                onOpenAddonsManagement={handleOpenAddonsManagement}
+                onOpenProductExtras={handleOpenProductExtras}
+                onOpenIngredientUpdate={handleOpenIngredientUpdate}
+                allCategories={categories}
+                isReorderingProducts={isReorderingProducts && reorderingCategoryId === category.categoryId}
+                viewMode={viewMode}
+                newlyCreatedProductId={newlyCreatedProductId}
+              />
+            ))}
+          </div>
+        </SortableContext>
 
         <DragOverlay>
           {activeId ? (
@@ -1149,7 +1143,7 @@ const ProductsContent: React.FC = () => {
         onClose={() => setIsCreateCategoryModalOpen(false)}
         onSuccess={() => loadCategories(undefined, true)}
       />
-      
+
       <CreateProductModal
         isOpen={isCreateProductModalOpen}
         onClose={() => {

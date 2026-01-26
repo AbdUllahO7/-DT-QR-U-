@@ -37,8 +37,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   const navigate = useNavigate();
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
-    const currency = useCurrency();
-  
+  const currency = useCurrency();
+
   // Yardımcı: Sekmeye git ve durumu güncelle
   const handleNavigate = (path: string, tab: string) => {
     navigate(`/dashboard/${path}`);
@@ -68,9 +68,8 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-30 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'
-        }`}
+        className={`fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-30 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 ${isOpen ? 'translate-x-0' : isRTL ? 'translate-x-full' : '-translate-x-full'
+          }`}
       >
         <div className="h-full flex flex-col">
           {/* Logo */}
@@ -79,7 +78,11 @@ const Sidebar: React.FC<SidebarProps> = ({
               onClick={handleHomeClick}
               className="flex items-center hover:opacity-80 transition-opacity duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 rounded-lg p-1"
             >
-              <Building2 className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+              <img
+                src="/assets/logos/iDiGiTeK-Logo-iDT-.png"
+                alt="iDiGiTeK Logo"
+                className="h-8 w-auto"
+              />
               <span className={`${isRTL ? 'mr-3' : 'ml-3'} text-xl font-bold text-gray-900 dark:text-white`}>{t('dashboard.sidebar.title')}</span>
             </button>
             <button
@@ -130,88 +133,81 @@ const Sidebar: React.FC<SidebarProps> = ({
               <>
                 <button
                   onClick={() => handleNavigate('overview', 'overview')}
-                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                    activeTab === 'overview'
-                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'overview'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 dark:text-white'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
                 >
                   <BarChart3 className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
                   <span className="truncate">{t('dashboard.overview.title')}</span>
                 </button>
-             <button
-              onClick={() => handleNavigate('RestaurantManagement', 'RestaurantManagement')}
-              className={`w-full flex items-center text-sm px-3 py-2 rounded-md transition-colors duration-200 ${
-                activeTab === 'RestaurantManagement'
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              } ${isRTL ? 'text-right' : 'text-left'}`}
-            >
-              <Settings2 className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-              <span className="truncate">{t('dashboard.RestaurantManagement.title')}</span>
-            </button>
-            {/* Branch Management - Only for non-branch-only users */}
-            {!branchName && !isBranchOnly && (
-              <button
-                onClick={() => handleNavigate('branches', 'branches')}
-                className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                  activeTab === 'branches'
-                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                <button
+                  onClick={() => handleNavigate('RestaurantManagement', 'RestaurantManagement')}
+                  className={`w-full flex items-center text-sm px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'RestaurantManagement'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 dark:text-white'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                } ${isRTL ? 'text-right' : 'text-left'}`}
-              >
-                <Store className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-                <span className="truncate">{t('dashboard.branches.title')}</span>
-              </button>
-            )}
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <Settings2 className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  <span className="truncate">{t('dashboard.RestaurantManagement.title')}</span>
+                </button>
+                {/* Branch Management - Only for non-branch-only users */}
+                {!branchName && !isBranchOnly && (
+                  <button
+                    onClick={() => handleNavigate('branches', 'branches')}
+                    className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'branches'
+                      ? 'bg-primary-100 dark:bg-primary-900/50 dark:text-white'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      } ${isRTL ? 'text-right' : 'text-left'}`}
+                  >
+                    <Store className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                    <span className="truncate">{t('dashboard.branches.title')}</span>
+                  </button>
+                )}
 
-            <button
-              onClick={() => handleNavigate('ResturantOrders', 'ResturantOrders')}
-              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                activeTab === 'ResturantOrders'
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              } ${isRTL ? 'text-right' : 'text-left'}`}
-            >
-              <HardHat className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-              <span>{t('dashboard.orders.title')}</span>
-            </button>
+                <button
+                  onClick={() => handleNavigate('ResturantOrders', 'ResturantOrders')}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'ResturantOrders'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 dark:text-white'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <HardHat className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  <span>{t('dashboard.orders.title')}</span>
+                </button>
 
-            <button
-              onClick={() => handleNavigate('products', 'products')}
-              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                activeTab === 'products'
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              } ${isRTL ? 'text-right' : 'text-left'}`}
-            >
-              <ShoppingCart className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-              <span>{t('dashboard.products.title')}</span>
-            </button>
-              <button
-              onClick={() => handleNavigate('ingredients', 'ingredients')}
-              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                activeTab === 'ingredients'
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              } ${isRTL ? 'text-right' : 'text-left'}`}
-            >
-              <FolderPlus className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-              <span>{t('dashboard.ingredients.title')}</span>
-            </button>
-               <button
-              onClick={() => handleNavigate('extras', 'extras')}
-              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                activeTab === 'extras'
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              } ${isRTL ? 'text-right' : 'text-left'}`}
-            >
-              <FolderPlus className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-              <span>{t('dashboard.extras.title')}</span>
-            </button>
+                <button
+                  onClick={() => handleNavigate('products', 'products')}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'products'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 dark:text-white'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <ShoppingCart className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  <span>{t('dashboard.products.title')}</span>
+                </button>
+                <button
+                  onClick={() => handleNavigate('ingredients', 'ingredients')}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'ingredients'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 dark:text-white'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <FolderPlus className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  <span>{t('dashboard.ingredients.title')}</span>
+                </button>
+                <button
+                  onClick={() => handleNavigate('extras', 'extras')}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'extras'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 dark:text-white'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <FolderPlus className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  <span>{t('dashboard.extras.title')}</span>
+                </button>
 
-           {/*  <button
+                {/*  <button
               onClick={() => handleNavigate('tables', 'tables')}
               className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
                 activeTab === 'tables'
@@ -222,18 +218,17 @@ const Sidebar: React.FC<SidebarProps> = ({
               <Table className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.tables.title')}</span>
             </button> */}
-              <button
-              onClick={() => handleNavigate('moneyCaseResturant', 'moneyCaseResturant')}
-              className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                activeTab === 'moneyCaseResturant'
-                  ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              } ${isRTL ? 'text-right' : 'text-left'}`}
-            >
-                <span className='mr-2'>{currency.symbol}</span>
-                <span>{t('dashboard.moneyCase.title')}</span>
-            </button>
-        {/*   <button
+                <button
+                  onClick={() => handleNavigate('moneyCaseResturant', 'moneyCaseResturant')}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'moneyCaseResturant'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 dark:text-white'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <span className='mr-2'>{currency.symbol}</span>
+                  <span>{t('dashboard.moneyCase.title')}</span>
+                </button>
+                {/*   <button
               onClick={() => handleNavigate('orderTypeResturant', 'orderTypeResturant')}
               className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
                 activeTab === 'orderTypeResturant'
@@ -246,36 +241,34 @@ const Sidebar: React.FC<SidebarProps> = ({
 
             </button>
           */}
-            {/* User Management - Only for non-branch-only users */}
-            {!isBranchOnly && (
-              <button
-                onClick={() => handleNavigate('users', 'users')}
-                className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                  activeTab === 'users'
-                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                } ${isRTL ? 'text-right' : 'text-left'}`}
-              >
-                <Users className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-                <span>{t('dashboard.users.title')}</span>
-              </button>
-            )}
+                {/* User Management - Only for non-branch-only users */}
+                {!isBranchOnly && (
+                  <button
+                    onClick={() => handleNavigate('users', 'users')}
+                    className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'users'
+                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      } ${isRTL ? 'text-right' : 'text-left'}`}
+                  >
+                    <Users className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                    <span>{t('dashboard.users.title')}</span>
+                  </button>
+                )}
 
 
-           {!isBranchOnly && (
-              <button
-                onClick={() => handleNavigate('ResturantSettings', 'ResturantSettings')}
-                className={`w-full flex items-center px-4 py-3 rounded-lg ${
-                  activeTab === 'ResturantSettings'
-                    ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                } ${isRTL ? 'text-right' : 'text-left'}`}
-              >
-                <Settings className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-                <span>{t('dashboard.settings.title')}</span>
-              </button>
+                {!isBranchOnly && (
+                  <button
+                    onClick={() => handleNavigate('ResturantSettings', 'ResturantSettings')}
+                    className={`w-full flex items-center px-4 py-3 rounded-lg ${activeTab === 'ResturantSettings'
+                      ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/50 dark:text-primary-300'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                      } ${isRTL ? 'text-right' : 'text-left'}`}
+                  >
+                    <Settings className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                    <span>{t('dashboard.settings.title')}</span>
+                  </button>
 
-            )}
+                )}
               </>
             )}
 
@@ -284,11 +277,10 @@ const Sidebar: React.FC<SidebarProps> = ({
               <>
                 <button
                   onClick={() => handleNavigate('branchProducts', 'branchProducts')}
-                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                    activeTab === 'branchProducts'
-                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'branchProducts'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
                 >
                   <ShoppingCart className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
                   <span>{t('dashboard.branchProducts.title') || 'Branch Products'}</span>
@@ -296,11 +288,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                 <button
                   onClick={() => handleNavigate('TableManagement', 'TableManagement')}
-                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                    activeTab === 'TableManagement'
-                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'TableManagement'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
                 >
                   <Table className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
                   <span>{t('dashboard.tables.title')}</span>
@@ -308,11 +299,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                 <button
                   onClick={() => handleNavigate('BranchManagement', 'BranchManagement')}
-                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                    activeTab === 'BranchManagement'
-                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'BranchManagement'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
                 >
                   <Building2 className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
                   <span>{t('dashboard.branchManagement.title') || 'Branch Management'}</span>
@@ -320,11 +310,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                 <button
                   onClick={() => handleNavigate('Branchorders', 'Branchorders')}
-                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                    activeTab === 'Branchorders'
-                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'Branchorders'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
                 >
                   <HardHat className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
                   <span>{t('dashboard.orders.title')}</span>
@@ -332,11 +321,10 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                 <button
                   onClick={() => handleNavigate('orderType', 'orderType')}
-                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                    activeTab === 'orderType'
-                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'orderType'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
                 >
                   <Type className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
                   <span>{t('dashboard.orderType.title')}</span>
@@ -344,35 +332,32 @@ const Sidebar: React.FC<SidebarProps> = ({
 
                 <button
                   onClick={() => handleNavigate('moneyCase', 'moneyCase')}
-                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                    activeTab === 'moneyCase'
-                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'moneyCase'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
                 >
                   <span className='mr-2'> {currency.symbol}</span>
                   <span>{t('dashboard.moneyCase.title')}</span>
                 </button>
 
-                  <button
-                onClick={() => handleNavigate('users', 'users')}
-                className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                  activeTab === 'users'
+                <button
+                  onClick={() => handleNavigate('users', 'users')}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'users'
                     ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                } ${isRTL ? 'text-right' : 'text-left'}`}
-              >
-                <Users className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
-                <span>{t('dashboard.users.title')}</span>
-              </button>
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
+                >
+                  <Users className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
+                  <span>{t('dashboard.users.title')}</span>
+                </button>
 
                 <button
                   onClick={() => handleNavigate('BranchSettings', 'BranchSettings')}
-                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${
-                    activeTab === 'BranchSettings'
-                      ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
-                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                  } ${isRTL ? 'text-right' : 'text-left'}`}
+                  className={`w-full flex items-center px-3 py-2 rounded-md transition-colors duration-200 ${activeTab === 'BranchSettings'
+                    ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                    } ${isRTL ? 'text-right' : 'text-left'}`}
                 >
                   <Settings className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
                   <span>{t('dashboard.settings.title')}</span>
@@ -380,10 +365,10 @@ const Sidebar: React.FC<SidebarProps> = ({
               </>
             )}
 
-          </nav>
+          </nav >
 
           {/* Logout */}
-          <div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700">
+          < div className="px-4 py-4 border-t border-gray-200 dark:border-gray-700" >
             <button
               onClick={onLogout}
               className={`w-full flex items-center px-4 py-3 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg ${isRTL ? 'text-right' : 'text-left'}`}
@@ -391,9 +376,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               <LogOut className={`h-5 w-5 ${isRTL ? 'ml-3' : 'mr-3'}`} />
               <span>{t('dashboard.sidebar.logout')}</span>
             </button>
-          </div>
-        </div>
-      </aside>
+          </div >
+        </div >
+      </aside >
     </>
   );
 };

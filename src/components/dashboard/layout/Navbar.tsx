@@ -4,7 +4,6 @@ import {
   Sun,
   Moon,
   Bell,
-  ChevronDown,
   Building2
 } from 'lucide-react';
 import { useTheme } from '../../../contexts/ThemeContext';
@@ -91,11 +90,10 @@ const Navbar: React.FC<NavbarProps> = ({
   const { title, description } = getTabTitle();
 
   return (
-    <div className={`fixed top-0 z-40 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm ${
-      isRTL
-        ? 'left-0 right-0 lg:left-0 lg:right-64'
-        : 'left-0 right-0 lg:left-64 lg:right-0'
-    }`}>
+    <div className={`fixed top-0 z-40 bg-white pt-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm ${isRTL
+      ? 'left-0 right-0 lg:left-0 lg:right-64'
+      : 'left-0 right-0 lg:left-64 lg:right-0'
+      }`}>
       <nav className="w-full px-3 md:px-4 lg:px-8 py-3 md:py-4">
         <div className="flex items-center justify-between gap-2">
           {/* Left - Menu and Title */}
@@ -115,7 +113,11 @@ const Navbar: React.FC<NavbarProps> = ({
                 {/* Branch Mode Indicator */}
                 {branchName && (
                   <span className="inline-flex items-center px-2 md:px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 whitespace-nowrap">
-                    <Building2 className="h-3 w-3 mr-1" />
+                    <img
+                      src="/assets/logos/iDiGiTeK-Logo-iDT-.png"
+                      alt="iDiGiTeK Logo"
+                      className="h-8 w-auto"
+                    />
                     <span className="hidden sm:inline">{branchName}</span>
                   </span>
                 )}
