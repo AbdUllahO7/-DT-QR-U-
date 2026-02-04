@@ -1,6 +1,4 @@
-// hooks/useCartHandlers.ts (Fixed version)
-
-import { basketService } from "../services/Branch/BasketService"
+import { BasketExtraItem, basketService, ProductExtraDto } from "../services/Branch/BasketService"
 import { orderService } from "../services/Branch/OrderService"
 import { WhatsAppService } from "../services/WhatsAppService"
 import { CreateSessionOrderDto } from "../types/BranchManagement/type"
@@ -15,15 +13,16 @@ interface CartItemAddon {
   basketItemId?: number
 }
 
-interface CartItem {
-  basketItemId?: number
-  branchProductId: number
-  productName: string
-  price: number
-  quantity: number
-  productImageUrl?: string
-  addons?: CartItemAddon[]
-  totalItemPrice: number
+export interface CartItem {
+  basketItemId: number;
+  branchProductId: number;
+  productName: string;
+  price: number;
+  quantity: number;
+  productImageUrl?: string;
+  addons?: any[];
+  extras?: BasketExtraItem[];  
+  totalItemPrice: number;
 }
 
 interface OrderForm {
@@ -63,7 +62,6 @@ interface UseCartHandlersProps {
   setShowOrderForm: (show: boolean) => void
   setOrderForm: (form: OrderForm) => void
   tableId?: number
-  // FIXED: Add WhatsApp confirmation modal controls
   restaurantPreferences?: any
   setPendingWhatsAppData?: (data: any) => void
   setShowWhatsAppConfirmation?: (show: boolean) => void
@@ -90,10 +88,10 @@ export const useCartHandlers = ({
   setOrderForm,
   tableId,
   restaurantPreferences,
-  // FIXED: Add these parameters
   setPendingWhatsAppData,
   setShowWhatsAppConfirmation
 }: UseCartHandlersProps) => {
+
 
   // Helper function to get clean session ID
   const getCleanSessionId = (sessionId?: string | null): string | null => {
@@ -109,17 +107,35 @@ export const useCartHandlers = ({
     return cleanId
   }
 
-  // Helper function to calculate item total price including addons
+  // Helper to calculate TOTAL line price for a cart item
+  // - Prefers backend's totalItemPrice (already includes quantity, addons, extras)
+  // - Falls back to client-side calculation when needed
   const calculateItemTotalPrice = (item: CartItem): number => {
-    let itemTotal = item.price
-    
+    if (item.totalItemPrice && item.totalItemPrice > 0) {
+      return item.totalItemPrice
+    }
+
+    // Base product total = unit price × quantity
+    let itemTotal = (item.price || 0) * (item.quantity || 0)
+
+    // Add addons total (quantities are already scaled by backend)
     if (item.addons && item.addons.length > 0) {
       const addonTotal = item.addons.reduce((addonSum, addon) => {
-        return addonSum + (addon.price * addon.quantity)
+        return addonSum + addon.price * addon.quantity
       }, 0)
       itemTotal += addonTotal
     }
-    
+
+    // Add extras total (only non-removal extras, quantities are scaled totals)
+    if (item.extras && item.extras.length > 0) {
+      const extrasTotal = item.extras
+        .filter(extra => !extra.isRemoval)
+        .reduce((extrasSum, extra) => {
+          return extrasSum + extra.unitPrice * extra.quantity
+        }, 0)
+      itemTotal += extrasTotal
+    }
+
     return itemTotal
   }
 
@@ -139,7 +155,7 @@ export const useCartHandlers = ({
       
     } catch (error) {
       console.error('Error sending WhatsApp notification:', error)
-      throw error // Re-throw so the caller can handle it
+      throw error
     }
   }
 
@@ -150,6 +166,7 @@ export const useCartHandlers = ({
       setError(null)
       
       const basket = await basketService.getMyBasket()
+      
       setBasketId(basket.basketId)
       
       const cartItems: CartItem[] = basket.items.map((item) => {
@@ -163,6 +180,44 @@ export const useCartHandlers = ({
           basketItemId: addon.basketItemId
         }))
         
+        const mappedExtras = item.extras?.map(extra => ({
+          branchProductExtraId: extra.branchProductExtraId,
+          productExtraId: extra.productExtraId,
+          extraId: extra.extraId,
+          extraName: extra.extraName,
+          extraCategoryName: extra.extraCategoryName,
+          selectionMode: extra.selectionMode,
+          isRequired: extra.isRequired,
+          isRemoval: extra.isRemoval,
+          unitPrice: extra.unitPrice,
+          quantity: extra.quantity,
+          minQuantity: extra.minQuantity,
+          maxQuantity: extra.maxQuantity,
+          note: extra.note
+        })) || []
+        
+        // Calculate the correct total price for this item
+        // Base price * quantity
+        let itemTotal = (item.price || 0) * (item.quantity || 1)
+        
+        // Add addons total
+        if (mappedAddons && mappedAddons.length > 0) {
+          const addonTotal = mappedAddons.reduce((sum, addon) => {
+            return sum + (addon.price * addon.quantity)
+          }, 0)
+          itemTotal += addonTotal
+        }
+        
+        // Add extras total (only non-removal extras)
+        if (mappedExtras && mappedExtras.length > 0) {
+          const extrasTotal = mappedExtras
+            .filter(extra => !extra.isRemoval)
+            .reduce((sum, extra) => {
+              return sum + (extra.unitPrice * extra.quantity)
+            }, 0)
+          itemTotal += extrasTotal
+        }
+        
         return {
           basketItemId: item.basketItemId,
           branchProductId: item.branchProductId,
@@ -171,14 +226,17 @@ export const useCartHandlers = ({
           quantity: item.quantity,
           productImageUrl: item.imageUrl ?? undefined,
           addons: mappedAddons,
-          totalItemPrice: item.totalPrice || 0
+          extras: mappedExtras,  
+          totalItemPrice: itemTotal
         }
       })
       
       setCart(cartItems)
+      
     } catch (err: any) {
-      console.error('Error loading basket:', err)
+      console.error('❌ Error loading basket:', err)
       setError('Failed to load basket')
+      setCart([])
     } finally {
       setLoading(false)
     }
@@ -217,47 +275,270 @@ export const useCartHandlers = ({
     }
   }
 
-  // Handle quantity increase
+  // ✅ FIXED: Handle quantity increase - UPDATE existing item quantity (not add new)
+  // This triggers backend auto-scaling for extras
   const handleQuantityIncrease = async (basketItemId?: number) => {
     if (!basketItemId) return
-    
+
     try {
       setLoading(true)
       setError(null)
 
       const cartItem = cart.find(item => item.basketItemId === basketItemId)
       if (!cartItem) {
-        console.error('Cart item not found')
+        console.error('❌ Cart item not found')
+        setError('Cart item not found. Please refresh.')
         return
       }
 
-      await basketService.addUnifiedItemToMyBasket({
-        branchProductId: cartItem.branchProductId,
-        quantity: 1
-      })
+      const newQuantity = cartItem.quantity + 1
+
+    
+
+      
+      await basketService.updateMyBasketItem(basketItemId, newQuantity)
 
       await loadBasket()
+
     } catch (err: any) {
-      console.error('Error increasing parent item quantity:', err)
-      setError('Failed to increase item quantity')
+      console.error('❌ Error updating product quantity:', err)
+      console.error('❌ Full error response:', {
+        message: err.message,
+        status: err.response?.status,
+        data: err.response?.data
+      })
+
+      const errorMessage = err.response?.data?.message ||
+                          err.response?.data?.title ||
+                          err.message ||
+                          'Failed to update product quantity'
+
+      setError(errorMessage)
+
+      // Always reload basket to sync state
+      try {
+        await loadBasket()
+      } catch (loadErr) {
+        console.error('❌ Failed to reload basket after error:', loadErr)
+      }
     } finally {
       setLoading(false)
     }
   }
 
-  // Handle quantity decrease
-  const handleQuantityDecrease = async (basketItemId?: number) => {
-    if (!basketItemId) return
-    
+  // ✅ NEW: Handle extra toggle using dedicated endpoint
+  const handleExtraToggle = async (branchProductExtraId: number, basketItemId: number, currentIsRemoval: boolean) => {
+    if (!currentIsRemoval) {
+      console.warn('⚠️ Toggle should only be used for removed items (isRemoval: true)')
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
 
-      await basketService.deleteMyBasketItem(basketItemId)
+   
+
+      // ✅ SIMPLE: Just delete the extra - that's it!
+      await basketService.deleteBasketItemExtra(basketItemId, branchProductExtraId)
+
+
+      // Reload basket to reflect changes
+      await loadBasket()
+
+    } catch (err: any) {
+      console.error('❌ Error toggling extra:', err)
+      console.error('Error response:', err.response?.data)
+      
+      setError(err.response?.data?.message || err.message || 'Failed to update extra')
+      
+      // Always reload to sync state
+      try {
+        await loadBasket()
+      } catch (loadErr) {
+        console.error('❌ Failed to reload basket after error:', loadErr)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // ✅ NEW: Handle extra quantity increase using dedicated endpoint
+  const handleExtraQuantityIncrease = async (branchProductExtraId: number, basketItemId: number) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const cartItem = cart.find(item => item.basketItemId === basketItemId)
+      if (!cartItem) {
+        console.error('❌ Cart item not found')
+        setError('Cart item not found')
+        return
+      }
+
+      const extra = cartItem.extras?.find(e => e.branchProductExtraId === branchProductExtraId)
+      if (!extra) {
+        console.error('❌ Extra not found')
+        setError('Extra not found')
+        return
+      }
+
+      if (extra.isRemoval) {
+        console.error('❌ Cannot increase quantity of removal extra')
+        setError('Cannot increase quantity of removal extra')
+        return
+      }
+
+      // TOTAL quantity semantics: backend UpdateExtraQuantity expects absolute quantity
+      const maxQty = extra.maxQuantity !== null && extra.maxQuantity !== undefined ? extra.maxQuantity : 999;
+      if (extra.quantity >= maxQty) {
+        setError(`Maximum quantity for ${extra.extraName} is ${extra.maxQuantity}`)
+        return
+      }
+
+      // Increment by 1 total unit
+      const newQuantity = extra.quantity + 1
+
+    
+      // Update with new scaled quantity
+      await basketService.updateBasketItemExtra(
+        basketItemId,
+        branchProductExtraId,
+        { quantity: newQuantity }
+      )
+
+
+      // Reload basket
+      await loadBasket()
+
+    } catch (err: any) {
+      console.error('❌ Error increasing extra quantity:', err)
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      })
+      
+      setError(err.response?.data?.message || 'Failed to increase extra quantity')
+      
+      // Always reload basket
+      await loadBasket()
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // ✅ NEW: Handle extra quantity decrease using dedicated endpoint
+  const handleExtraQuantityDecrease = async (branchProductExtraId: number, basketItemId: number) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      const cartItem = cart.find(item => item.basketItemId === basketItemId)
+      if (!cartItem) {
+        console.error('❌ Cart item not found')
+        setError('Cart item not found. Please refresh.')
+        return
+      }
+
+      const extra = cartItem.extras?.find(e => e.branchProductExtraId === branchProductExtraId)
+      if (!extra) {
+        console.error('❌ Extra not found')
+        setError('Extra not found')
+        return
+      }
+
+      if (extra.isRemoval) {
+        console.error('❌ Cannot decrease quantity of removal extra')
+        setError('Cannot decrease quantity of removal extra')
+        return
+      }
+
+      // Check minimum quantity
+      const minQty = extra.minQuantity !== null && extra.minQuantity !== undefined ? extra.minQuantity : 0;
+
+      // Decrement by 1 total unit
+      const newQuantity = extra.quantity - 1
+
+   
+
+      if (newQuantity < minQty) {
+        setError(`Minimum quantity for ${extra.extraName} is ${extra.minQuantity}`)
+        return
+      }
+
+      if (newQuantity <= 0) {
+        // ✅ If quantity would be 0 or less, just delete the extra
+        await basketService.deleteBasketItemExtra(basketItemId, branchProductExtraId)
+      } else {
+        // ✅ Otherwise, update the quantity
+        await basketService.updateBasketItemExtra(
+          basketItemId,
+          branchProductExtraId,
+          { quantity: newQuantity }
+        )
+      }
+
+
+      await loadBasket()
+
+    } catch (err: any) {
+      console.error('❌ Error decreasing extra quantity:', err)
+      console.error('Error response:', err.response?.data)
+      
+      setError(err.response?.data?.message || err.message || 'Failed to decrease extra quantity')
+      
+      // Always reload
+      try {
+        await loadBasket()
+      } catch (loadErr) {
+        console.error('❌ Failed to reload basket after error:', loadErr)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // ✅ FIXED: Handle quantity decrease - UPDATE when quantity > 1 (auto-scales extras)
+  const handleQuantityDecrease = async (basketItemId?: number) => {
+    if (!basketItemId) return
+
+    try {
+      setLoading(true)
+      setError(null)
+
+      const cartItem = cart.find(item => item.basketItemId === basketItemId)
+      if (!cartItem) {
+        console.error('❌ Cart item not found')
+        setError('Cart item not found. Please refresh.')
+        return
+      }
+
+      if (cartItem.quantity <= 1) {
+        // If quantity is 1 or less, delete the entire item
+        await basketService.deleteMyBasketItem(basketItemId)
+      } else {
+        // If quantity > 1, update to decrease (backend auto-scales extras)
+        const newQuantity = cartItem.quantity - 1
+   
+
+        await basketService.updateMyBasketItem(basketItemId, newQuantity)
+      }
+
       await loadBasket()
     } catch (err: any) {
-      console.error('Error decreasing parent item quantity:', err)
-      setError('Failed to decrease item quantity')
+      console.error('❌ Error decreasing product quantity:', err)
+      const errorMessage = err.response?.data?.message ||
+                          err.message ||
+                          'Failed to decrease item quantity'
+      setError(errorMessage)
+
+      // Reload to sync state
+      try {
+        await loadBasket()
+      } catch (loadErr) {
+        console.error('❌ Failed to reload basket after error:', loadErr)
+      }
     } finally {
       setLoading(false)
     }
@@ -355,40 +636,33 @@ export const useCartHandlers = ({
     return errors
   }
 
-// In useCartHandlers.ts - Update validateOrderForm function
-const validateOrderForm = (): string[] => {
-  const errors: string[] = []
-  
-  if (!orderForm.orderTypeId) {
-    errors.push('Please select an order type')
-    return errors // Return early if no order type selected
+  const validateOrderForm = (): string[] => {
+    const errors: string[] = []
+    
+    if (!orderForm.orderTypeId) {
+      errors.push('Please select an order type')
+      return errors
+    }
+    
+    const selectedOrderType = getSelectedOrderType()
+    
+    if (selectedOrderType?.requiresName && !orderForm.customerName?.trim()) {
+      errors.push('Customer name is required for this order type')
+    }
+    
+    if (selectedOrderType?.requiresAddress && !orderForm.deliveryAddress?.trim()) {
+      errors.push('Delivery address is required for this order type')
+    }
+    
+    if (selectedOrderType?.requiresPhone && !orderForm.customerPhone?.trim()) {
+      errors.push('Phone number is required for this order type')
+    }
+    
+    const minOrderErrors = validateMinimumOrder()
+    errors.push(...minOrderErrors)
+    
+    return errors
   }
-  
-  const selectedOrderType = getSelectedOrderType()
-  
-  // Validate required fields based on order type
-  if (selectedOrderType?.requiresName && !orderForm.customerName?.trim()) {
-    errors.push('Customer name is required for this order type')
-  }
-  
-  if (selectedOrderType?.requiresAddress && !orderForm.deliveryAddress?.trim()) {
-    errors.push('Delivery address is required for this order type')
-  }
-  
-  if (selectedOrderType?.requiresPhone && !orderForm.customerPhone?.trim()) {
-    errors.push('Phone number is required for this order type')
-  }
-  
-  if (selectedOrderType?.requiresTable && !(orderForm as any).tableNumber?.trim()) {
-    errors.push('Table number is required for this order type')
-  }
-  
-  // Validate minimum order
-  const minOrderErrors = validateMinimumOrder()
-  errors.push(...minOrderErrors)
-  
-  return errors
-}
 
   // Order creation and tracking functions
   const addOrderToTracking = async (orderTag: string) => {
@@ -407,9 +681,8 @@ const validateOrderForm = (): string[] => {
     }
   }
 
-   const handlePriceChangeConfirmation = async () => {
+  const handlePriceChangeConfirmation = async () => {
     try {
-      
       const cleanSessionId = getCleanSessionId(sessionId)
       if (cleanSessionId) {
         try {
@@ -436,103 +709,135 @@ const validateOrderForm = (): string[] => {
     }
   }
 
-  // FIXED: Create order function with proper WhatsApp confirmation
-// FIXED: Create order function with proper WhatsApp confirmation
-const createOrder = async () => {
-  try {
-    setLoading(true)
-    setError(null)
-    setValidationErrors([])
-
-    const cartErrors = validateCart()
-    const formErrors = validateOrderForm()
-    const allErrors = [...cartErrors, ...formErrors]
-    
-    if (allErrors.length > 0) {
-      setValidationErrors(allErrors)
-      setLoading(false)
-      return
+  // Helper function to map payment method strings to numbers
+  const getPaymentMethodNumber = (paymentMethod: string): number => {
+    switch (paymentMethod) {
+      case 'cash':
+        return 1
+      case 'creditCard':
+        return 2
+      case 'onlinePayment':
+        return 3
+      default:
+        return 1 // Default to cash
     }
-
-    const selectedOrderType = getSelectedOrderType()
-    
-    const sessionOrderDto: CreateSessionOrderDto = {
-      customerName: orderForm.customerName.trim(),
-      notes: orderForm.notes.trim() || undefined,
-      paymentMethod:"",
-      orderTypeId: orderForm.orderTypeId,
-      ...(orderForm.tableId && { tableId: orderForm.tableId }),
-      ...(orderForm.tableNumber?.trim() && { tableNumber: orderForm.tableNumber.trim() }),
-      ...(selectedOrderType?.requiresAddress || orderForm.deliveryAddress?.trim() ? { deliveryAddress: orderForm.deliveryAddress?.trim() } : {}),
-      ...(selectedOrderType?.requiresPhone || orderForm.customerPhone?.trim() ? { customerPhone: orderForm.customerPhone?.trim() } : {})
-    }
-    
-    const order = await orderService.createSessionOrder(sessionOrderDto)
-    // Add order to tracking immediately
-    if (order.orderTag) {
-      await addOrderToTracking(order.orderTag)
-    }
-    // Calculate order total for WhatsApp message
-    const serviceChargeAmount = selectedOrderType?.serviceCharge || 0
-    if (order.orderTag && WhatsAppService.isWhatsAppEnabled(restaurantPreferences)) {
-      
-      const whatsappData = {
-        orderTag: order.orderTag,
-        customerName: orderForm.customerName,
-        cart,
-        totalPrice,
-        orderType: selectedOrderType?.name || 'Standard',
-        notes: orderForm.notes,
-        tableId: orderForm.tableId,
-        tableNumber: orderForm.tableNumber,
-        deliveryAddress: orderForm.deliveryAddress,
-        estimatedTime: selectedOrderType?.estimatedMinutes,
-        serviceCharge: serviceChargeAmount
-      }
-
-      // Set WhatsApp data and show modal
-      if (setPendingWhatsAppData && setShowWhatsAppConfirmation) {
-        setPendingWhatsAppData(whatsappData)
-        setShowWhatsAppConfirmation(true)
-        
-        // DON'T clear cart and form here - let the WhatsApp handlers do it
-        setLoading(false)
-        return // Exit early to let WhatsApp modal show
-      } else {
-        console.warn('❌ WhatsApp confirmation functions not available')
-      }
-    } 
-    
-    // If we reach here, WhatsApp is not enabled or not available
-    // Clean up and complete the order
-    setCart([])
-    setBasketId(null)
-    setShowOrderForm(false)
-    
-    setOrderForm({
-      customerName: '',
-      notes: '',
-      orderTypeId: 0,
-      tableId: tableId,
-      deliveryAddress: '',
-      customerPhone: '',
-      paymentMethod: '',
-      tableNumber: ''
-    })
-    
-    if (onOrderCreated) {
-      onOrderCreated(order.orderId)
-    }
-
-    setError(null)
-
-  } catch (err: any) {
-    console.error('❌ Error creating order:', err)
-    setShowPriceChangeModal(true)
-  } finally {
-      setLoading(false)
   }
-}
+
+  const createOrder = async (): Promise<{
+    orderTag: string;
+    customerName?: string;
+    estimatedMinutes?: number;
+    orderTypeName?: string;
+  } | null> => {
+    try {
+      setLoading(true)
+      setError(null)
+      setValidationErrors([])
+
+      const cartErrors = validateCart()
+      const formErrors = validateOrderForm()
+      const allErrors = [...cartErrors, ...formErrors]
+
+      if (allErrors.length > 0) {
+        setValidationErrors(allErrors)
+        setLoading(false)
+        return null
+      }
+
+      const selectedOrderType = getSelectedOrderType()
+
+      const sessionOrderDto: CreateSessionOrderDto = {
+        customerName: orderForm.customerName.trim(),
+        notes: orderForm.notes.trim() || undefined,
+        paymentMethod: getPaymentMethodNumber(orderForm.paymentMethod),
+        orderTypeId: orderForm.orderTypeId,
+        ...(orderForm.tableId && { tableId: orderForm.tableId }),
+        ...(orderForm.tableNumber?.trim() && { tableNumber: orderForm.tableNumber.trim() }),
+        ...(selectedOrderType?.requiresAddress || orderForm.deliveryAddress?.trim() ? { deliveryAddress: orderForm.deliveryAddress?.trim() } : {}),
+        ...(selectedOrderType?.requiresPhone || orderForm.customerPhone?.trim() ? { customerPhone: orderForm.customerPhone?.trim() } : {})
+      }
+
+      const order = await orderService.createSessionOrder(sessionOrderDto)
+
+      if (order.orderTag) {
+        await addOrderToTracking(order.orderTag)
+      }
+
+      const serviceChargeAmount = selectedOrderType?.serviceCharge || 0
+      if (order.orderTag && WhatsAppService.isWhatsAppEnabled(restaurantPreferences)) {
+        const whatsappData = {
+          orderTag: order.orderTag,
+          customerName: orderForm.customerName,
+          cart,
+          totalPrice,
+          orderType: selectedOrderType?.name || 'Standard',
+          notes: orderForm.notes,
+          tableId: orderForm.tableId,
+          tableNumber: orderForm.tableNumber,
+          deliveryAddress: orderForm.deliveryAddress,
+          estimatedTime: selectedOrderType?.estimatedMinutes,
+          serviceCharge: serviceChargeAmount
+        }
+
+        if (setPendingWhatsAppData && setShowWhatsAppConfirmation) {
+          setPendingWhatsAppData(whatsappData)
+          setShowWhatsAppConfirmation(true)
+          setLoading(false)
+          // Return the order data for success modal
+          return {
+            orderTag: order.orderTag,
+            customerName: orderForm.customerName || undefined,
+            estimatedMinutes: selectedOrderType?.estimatedMinutes,
+            orderTypeName: selectedOrderType?.name,
+          }
+        } else {
+          console.warn('❌ WhatsApp confirmation functions not available')
+        }
+      }
+
+      setCart([])
+      setBasketId(null)
+      setShowOrderForm(false)
+
+      // Ensure orderTag exists before returning
+      if (!order.orderTag) {
+        return null
+      }
+
+      const orderResult = {
+        orderTag: order.orderTag,
+        customerName: orderForm.customerName || undefined,
+        estimatedMinutes: selectedOrderType?.estimatedMinutes,
+        orderTypeName: selectedOrderType?.name,
+      }
+
+      setOrderForm({
+        customerName: '',
+        notes: '',
+        orderTypeId: 0,
+        tableId: tableId,
+        deliveryAddress: '',
+        customerPhone: '',
+        paymentMethod: '',
+        tableNumber: ''
+      })
+
+      if (onOrderCreated) {
+        onOrderCreated(order.orderId)
+      }
+
+      setError(null)
+
+      return orderResult
+
+    } catch (err: any) {
+      console.error('❌ Error creating order:', err)
+      setShowPriceChangeModal(true)
+      return null
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Order tracking functions
   const loadOrderTracking = async (orderTag: string) => {
@@ -549,7 +854,6 @@ const createOrder = async () => {
             : order
         )
       )
-
       
     } catch (err: any) {
       console.error('Error loading order tracking:', err)
@@ -563,7 +867,8 @@ const createOrder = async () => {
     const updated = trackedOrders.filter(order => order.orderTag !== orderTag)
     setTrackedOrders(updated)
     if (updated.length === 0) {
-      localStorage.removeItem('trackedOrders')
+      // Use namespaced key to avoid conflicts with OnlineMenu tracked orders
+      localStorage.removeItem('tableQR_trackedOrders')
     }
   }
 
@@ -588,43 +893,44 @@ const createOrder = async () => {
     }
   }
 
-  // Add this new function to clean up after order
-const cleanupAfterOrder = () => {
-  setCart([])
-  setBasketId(null)
-  setShowOrderForm(false)
-  
-  setOrderForm({
-    customerName: '',
-    notes: '',
-    orderTypeId: 0,
-    tableId: tableId,
-    deliveryAddress: '',
-    customerPhone: '',
-    paymentMethod: '',
-    tableNumber: ''
-  })
-}
+  const cleanupAfterOrder = () => {
+    setCart([])
+    setBasketId(null)
+    setShowOrderForm(false)
+    
+    setOrderForm({
+      customerName: '',
+      notes: '',
+      orderTypeId: 0,
+      tableId: tableId,
+      deliveryAddress: '',
+      customerPhone: '',
+      paymentMethod: '',
+      tableNumber: ''
+    })
+  }
 
-// Add cleanupAfterOrder to the return statement
-return {
-  loadBasket,
-  clearBasket,
-  removeFromBasket,
-  handleQuantityIncrease,
-  handleQuantityDecrease,
-  handleAddonQuantityIncrease,
-  canIncreaseAddonQuantity,
-  canDecreaseAddonQuantity,
-  getAddonQuantityError,
-  createOrder,
-  loadOrderTracking,
-  removeOrderFromTracking,
-  refreshAllPendingOrders,
-  calculateItemTotalPrice,
-  getSelectedOrderType,
-  handlePriceChangeConfirmation,
-  sendOrderToWhatsApp,
-  cleanupAfterOrder 
-}
+  return {
+    loadBasket,
+    clearBasket,
+    removeFromBasket,
+    handleQuantityIncrease,
+    handleQuantityDecrease,
+    handleAddonQuantityIncrease,
+    canIncreaseAddonQuantity,
+    canDecreaseAddonQuantity,
+    getAddonQuantityError,
+    createOrder,
+    loadOrderTracking,
+    removeOrderFromTracking,
+    refreshAllPendingOrders,
+    calculateItemTotalPrice,
+    getSelectedOrderType,
+    handlePriceChangeConfirmation,
+    sendOrderToWhatsApp,
+    cleanupAfterOrder,
+    handleExtraToggle,
+    handleExtraQuantityIncrease,
+    handleExtraQuantityDecrease 
+  }
 }

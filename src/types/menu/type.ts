@@ -1,4 +1,4 @@
-import { Product } from '../BranchManagement/type';
+import { ProductExtraMenu } from '../Extras/type';
 export interface MenuAllergen {
   id: number
   code: string
@@ -23,6 +23,17 @@ export interface MenuIngredient {
   allergens: MenuAllergen[]
 }
 
+export interface ExtraCategory {
+  categoryId: number
+  categoryName: string
+  extras: ProductExtraMenu[]
+  isRequired: boolean
+  minSelectionCount: number
+  maxSelectionCount: number
+  minTotalQuantity: number
+  maxTotalQuantity: number
+}
+
 export interface MenuProduct {
   branchProductId: number
   productId: number
@@ -30,10 +41,13 @@ export interface MenuProduct {
   productDescription: string
   productImageUrl: string
   price: number
+  isOutOfStock: boolean
   isRecommended: boolean
   ingredients: MenuIngredient[]
   allergens: MenuAllergen[]
   availableAddons: any[]
+    availableExtras?: ExtraCategory[]
+
 }
 
 export  interface MenuCategory {
@@ -91,5 +105,5 @@ export interface ProductModalProps {
   isOpen: boolean
   product: MenuProduct | null
   onClose: () => void
-  onAddToCart: (product: MenuProduct, addons: SelectedAddon[]) => void
+  onAddToCart: (product: MenuProduct, addons: SelectedAddon[],  extras: ProductExtraMenu[] ) => void
 }

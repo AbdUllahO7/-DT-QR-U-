@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
-import {  CreateBranchWithDetailsDto } from '../../../../types/api';
+import { CreateBranchWithDetailsDto } from '../../../../types/api';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import BranchHeader from './BranchHeader';
 import BranchInfo from './BranchInfo';
 import { branchService } from '../../../../services/Branch/BranchService';
 import BranchWorkingHours from './BranchWorkingHours';
 import { BranchData, EditDataType } from '../../../../types/BranchManagement/type';
+import { countriesWithCodes } from '../../../../data/mockData';
+import { BranchNameModal } from './BranchNameModal';
 
-const BranchManagementBranch: React.FC = () => {
+interface BranchManagementBranchProps {
+  branchId?: number;
+}
+
+const BranchManagementBranch: React.FC<BranchManagementBranchProps> = ({ branchId }) => {
   const { t, isRTL } = useLanguage();
   const [branches, setBranches] = useState<BranchData[]>([]);
   const [selectedBranch, setSelectedBranch] = useState<BranchData | null>(null);
@@ -16,6 +22,7 @@ const BranchManagementBranch: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
+  const [isBranchNameModalOpen, setIsBranchNameModalOpen] = useState<boolean>(false);
   const [editData, setEditData] = useState<EditDataType>({
     branchName: '',
     whatsappOrderNumber: '',
@@ -43,10 +50,27 @@ const BranchManagementBranch: React.FC = () => {
     createBranchWorkingHourCoreDto: [],
   });
 
-
   useEffect(() => {
     loadBranches();
   }, []);
+
+  // --- ADDED: Helper to parse full phone number into code and local number ---
+  const getPhoneParts = (fullNumber: string | null) => {
+    if (!fullNumber) return { code: '+90', number: '' }; // Default to TR if empty
+    
+    // Sort countries by code length desc to match longest prefix first
+    const sortedCountries = [...countriesWithCodes].sort((a, b) => b.code.length - a.code.length);
+    const country = sortedCountries.find(c => fullNumber.startsWith(c.code));
+    
+    if (country) {
+      return {
+        code: country.code,
+        number: fullNumber.slice(country.code.length)
+      };
+    }
+    
+    return { code: '+90', number: fullNumber };
+  };
 
   const loadBranches = async (): Promise<void> => {
     try {
@@ -70,7 +94,7 @@ const BranchManagementBranch: React.FC = () => {
       branchName: branch.branchName || '',
       whatsappOrderNumber: branch.whatsappOrderNumber || '',
       email: branch.email || '',
-      branchLogoPath: branch.branchLogoPath || '', // Initialize branchLogoPath
+      branchLogoPath: branch.branchLogoPath || '',
       createAddressDto: {
         country: branch.createAddressDto?.country || '',
         city: branch.createAddressDto?.city || '',
@@ -80,31 +104,43 @@ const BranchManagementBranch: React.FC = () => {
         addressLine2: branch.createAddressDto?.addressLine2 || '',
       },
       createContactDto: {
-        phone: branch.whatsappOrderNumber || '',
+        phone: branch.createContactDto?.phone || '', // Fixed: was reading from whatsappOrderNumber in your original code, standardized to contact phone
         mail: branch.email || '',
-        location: branch?.createContactDto.location || '',
-        contactHeader: branch?.createContactDto.contactHeader || '',
-        footerTitle: branch?.createContactDto.footerTitle || '',
-        footerDescription: branch?.createContactDto.footerDescription || '',
-        openTitle: branch?.createContactDto.openTitle || '',
-        openDays: branch?.createContactDto.openDays || '',
-        openHours: branch?.createContactDto.openHours || '',
+        location: branch?.createContactDto?.location || '',
+        contactHeader: branch?.createContactDto?.contactHeader || '',
+        footerTitle: branch?.createContactDto?.footerTitle || '',
+        footerDescription: branch?.createContactDto?.footerDescription || '',
+        openTitle: branch?.createContactDto?.openTitle || '',
+        openDays: branch?.createContactDto?.openDays || '',
+        openHours: branch?.createContactDto?.openHours || '',
       },
       createBranchWorkingHourCoreDto: branch.workingHours
-        ? branch.workingHours.map((hour) => ({
-            dayOfWeek: hour.dayOfWeek,
-            openTime: hour.openTime,
-            closeTime: hour.closeTime,
-            isWorkingDay: hour.isWorkingDay,
-          }))
+        ? branch.workingHours.map((hour) => {
+            // Handle backward compatibility with old API format
+            const legacyHour = hour as any;
+            return {
+              dayOfWeek: hour.dayOfWeek,
+              isWorkingDay: hour.isWorkingDay,
+              isOpen24Hours: hour.isOpen24Hours ?? false,
+              timeSlots: hour.timeSlots && hour.timeSlots.length > 0
+                ? hour.timeSlots.map(slot => ({
+                    id: slot.id,
+                    openTime: slot.openTime || '08:00:00',
+                    closeTime: slot.closeTime || '22:00:00',
+                  }))
+                : hour.isWorkingDay && !hour.isOpen24Hours
+                  ? [{ openTime: legacyHour.openTime || '08:00:00', closeTime: legacyHour.closeTime || '22:00:00' }]
+                  : [],
+            };
+          })
         : [
-            { dayOfWeek: 1, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },
-            { dayOfWeek: 2, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },
-            { dayOfWeek: 3, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },
-            { dayOfWeek: 4, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },
-            { dayOfWeek: 5, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },
-            { dayOfWeek: 6, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },
-            { dayOfWeek: 0, openTime: '09:00', closeTime: '22:00', isWorkingDay: true },
+            { dayOfWeek: 1, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+            { dayOfWeek: 2, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+            { dayOfWeek: 3, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+            { dayOfWeek: 4, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+            { dayOfWeek: 5, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+            { dayOfWeek: 6, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] },
+            { dayOfWeek: 0, isWorkingDay: false, isOpen24Hours: false, timeSlots: [] },
           ],
     });
   };
@@ -116,7 +152,7 @@ const BranchManagementBranch: React.FC = () => {
       setError('');
       const updateData: Partial<CreateBranchWithDetailsDto> = {
         ...editData,
-        branchLogoPath: editData.branchLogoPath, // Include branchLogoPath in update
+        branchLogoPath: editData.branchLogoPath,
       };
       await branchService.updateBranch(selectedBranch.id, updateData);
       setSuccess(t('branchManagementBranch.messages.updateSuccess'));
@@ -164,13 +200,136 @@ const BranchManagementBranch: React.FC = () => {
     });
   };
 
+  // --- ADDED: Handler for Country Code + Phone Number updates ---
+  const handlePhoneCompositeChange = (
+    fullFieldName: string, 
+    currentFullValue: string, 
+    partType: 'code' | 'number', 
+    newValue: string
+  ) => {
+    const { code, number } = getPhoneParts(currentFullValue);
+    
+    let newFullNumber = '';
+    
+    if (partType === 'code') {
+      newFullNumber = newValue + number;
+    } else {
+      newFullNumber = code + newValue;
+    }
+
+    handleInputChange(fullFieldName, newFullNumber);
+  };
+
   const handleWorkingHourChange = (dayOfWeek: number, field: string, value: string | boolean): void => {
     setEditData((prev) => ({
       ...prev,
-      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hour) =>
-        hour.dayOfWeek === dayOfWeek ? { ...hour, [field]: value } : hour
-      ),
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hour) => {
+        if (hour.dayOfWeek !== dayOfWeek) return hour;
+
+        // Handle special cases for backend validation rules
+        if (field === 'isWorkingDay') {
+          if (!value) {
+            // Non-working days cannot have time slots
+            return { ...hour, isWorkingDay: value as boolean, timeSlots: [], isOpen24Hours: false };
+          } else {
+            // When enabling working day, add default time slot if none exists
+            return {
+              ...hour,
+              isWorkingDay: value as boolean,
+              timeSlots: hour.timeSlots?.length ? hour.timeSlots : [{ openTime: '08:00:00', closeTime: '22:00:00' }]
+            };
+          }
+        }
+
+        if (field === 'isOpen24Hours') {
+          if (value) {
+            // 24-hour open days cannot have time slots
+            return { ...hour, isOpen24Hours: value as boolean, timeSlots: [] };
+          } else {
+            // When disabling 24 hours, add default time slot
+            return { ...hour, isOpen24Hours: value as boolean, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] };
+          }
+        }
+
+        return { ...hour, [field]: value };
+      }),
     }));
+  };
+
+  const handleTimeSlotChange = (dayOfWeek: number, slotIndex: number, field: 'openTime' | 'closeTime', value: string): void => {
+    setEditData((prev) => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hour) => {
+        if (hour.dayOfWeek !== dayOfWeek) return hour;
+        const newTimeSlots = [...(hour.timeSlots || [])];
+        if (newTimeSlots[slotIndex]) {
+          newTimeSlots[slotIndex] = { ...newTimeSlots[slotIndex], [field]: value };
+        }
+        return { ...hour, timeSlots: newTimeSlots };
+      }),
+    }));
+  };
+
+  const handleAddTimeSlot = (dayOfWeek: number): void => {
+    setEditData((prev) => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hour) => {
+        if (hour.dayOfWeek !== dayOfWeek) return hour;
+        const newTimeSlots = [...(hour.timeSlots || []), { openTime: '08:00:00', closeTime: '22:00:00' }];
+        return { ...hour, timeSlots: newTimeSlots };
+      }),
+    }));
+  };
+
+  const handleRemoveTimeSlot = (dayOfWeek: number, slotIndex: number): void => {
+    setEditData((prev) => ({
+      ...prev,
+      createBranchWorkingHourCoreDto: prev.createBranchWorkingHourCoreDto.map((hour) => {
+        if (hour.dayOfWeek !== dayOfWeek) return hour;
+        const newTimeSlots = (hour.timeSlots || []).filter((_, i) => i !== slotIndex);
+        return { ...hour, timeSlots: newTimeSlots };
+      }),
+    }));
+  };
+
+  const handleOpenBranchNameModal = (): void => {
+    setIsBranchNameModalOpen(true);
+  };
+
+  const handleCloseBranchNameModal = (): void => {
+    setIsBranchNameModalOpen(false);
+  };
+
+  const handleBranchNameModalSuccess = async (newName: string): Promise<void> => {
+    if (!selectedBranch) return;
+
+    try {
+      setIsLoading(true);
+      setError('');
+
+      // Update the branch name
+      const updateData: Partial<CreateBranchWithDetailsDto> = {
+        branchName: newName.trim()
+      };
+
+      await branchService.updateBranch(selectedBranch.id, updateData);
+
+      // Update local state
+      setEditData(prev => ({
+        ...prev,
+        branchName: newName.trim()
+      }));
+
+      setSuccess(t('branchManagementBranch.messages.nameUpdated') || 'Branch name updated successfully');
+      await loadBranches();
+      setTimeout(() => setSuccess(''), 3000);
+    } catch (err: any) {
+      setError(err.message || t('branchManagementBranch.messages.nameUpdateError') || 'Failed to update branch name');
+      setTimeout(() => setError(''), 3000);
+      throw err; // Re-throw to let modal handle it
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isLoading && !selectedBranch) {
@@ -236,20 +395,41 @@ const BranchManagementBranch: React.FC = () => {
           initializeEditData={initializeEditData}
           setEditData={setEditData} 
         />
+        
+        {/* --- MODIFIED: Passing new phone handling props to BranchInfo --- */}
         <BranchInfo
           selectedBranch={selectedBranch}
           isEditing={isEditing}
           editData={editData}
           t={t}
           handleInputChange={handleInputChange}
+          // Pass these new props:
+          countries={countriesWithCodes}
+          getPhoneParts={getPhoneParts}
+          handlePhoneCompositeChange={handlePhoneCompositeChange}
+          onEditBranchName={handleOpenBranchNameModal}
         />
+        
         <BranchWorkingHours
           selectedBranch={selectedBranch}
           isEditing={isEditing}
           editData={editData}
           t={t}
           handleWorkingHourChange={handleWorkingHourChange}
+          handleTimeSlotChange={handleTimeSlotChange}
+          handleAddTimeSlot={handleAddTimeSlot}
+          handleRemoveTimeSlot={handleRemoveTimeSlot}
         />
+
+        {selectedBranch && (
+          <BranchNameModal
+            isOpen={isBranchNameModalOpen}
+            onClose={handleCloseBranchNameModal}
+            onSuccess={handleBranchNameModalSuccess}
+            branchId={selectedBranch.id}
+            currentName={selectedBranch.branchName || ''}
+          />
+        )}
       </div>
     </div>
   );

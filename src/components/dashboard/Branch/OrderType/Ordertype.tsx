@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, Save, AlertCircle, CheckCircle, Loader2, Clock, DollarSign, Users, User, MapPin, Phone, Table } from 'lucide-react';
+import { Settings, Save, AlertCircle, CheckCircle, Loader2, Clock, Users, User, MapPin, Phone, Table } from 'lucide-react';
 import { OrderType, orderTypeService, UpdateOrderTypeDto } from '../../../../services/Branch/BranchOrderTypeService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
-const OrderTypeComponent = () => {
+interface OrderTypeComponentProps {
+  branchId?: number;
+}
+
+const OrderTypeComponent: React.FC<OrderTypeComponentProps> = ({ branchId }) => {
   const { t, isRTL } = useLanguage();
   const [orderTypes, setOrderTypes] = useState<OrderType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState<Record<number, boolean>>({});
   const [successMessage, setSuccessMessage] = useState<string>('');
-  
+  const currency = useCurrency();
 
   useEffect(() => {
     fetchOrderTypes();
@@ -30,14 +35,12 @@ const OrderTypeComponent = () => {
     }
   };
 
-  // Updated function to use updateOrderType for full control
   const updateOrderTypeData = async (orderType: OrderType) => {
     try {
       setUpdating(prev => ({ ...prev, [orderType.id]: true }));
       setError(null);
       setSuccessMessage('');
 
-      // Prepare update data with all fields including the requirements
       const updateData: UpdateOrderTypeDto = {
         id: orderType.id,
         name: orderType.name,
@@ -52,37 +55,34 @@ const OrderTypeComponent = () => {
         requiresPhone: orderType.requiresPhone,
         minOrderAmount: orderType.minOrderAmount,
         serviceCharge: orderType.serviceCharge,
-        estimatedMinutes: orderType.estimatedMinutes,
+        estimatedMinutes: orderType.estimatedMinutes, // Included in update
         rowVersion: orderType.rowVersion
       };
 
-      // ✅ FIXED: Use updateOrderType instead of updateOrderTypeSettings
       const updatedOrderType = await orderTypeService.updateOrderTypeSettings(orderType.id, updateData);
-      
-      // Update local state with the response
+
       if (updatedOrderType) {
-        setOrderTypes(prev => 
-          prev.map(ot => 
-            ot.id === orderType.id ? updatedOrderType : ot
+        // Filter out undefined values from the response to preserve existing fields
+        const filteredUpdate = Object.fromEntries(
+          Object.entries(updatedOrderType).filter(([_, value]) => value !== undefined)
+        );
+
+        setOrderTypes(prev =>
+          prev.map(ot =>
+            ot.id === orderType.id
+              ? { ...ot, ...filteredUpdate }
+              : ot
           )
         );
       } else {
-        // If no response, refetch all data
         await fetchOrderTypes();
       }
 
       setSuccessMessage(t('dashboard.orderType.settingsUpdated'));
-      
-      // Clear success message after 3 seconds
       setTimeout(() => setSuccessMessage(''), 3000);
       
     } catch (err: any) {
       console.error('Update error:', err);
-      console.error('Error details:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
       setError(err.message || t('dashboard.orderType.updateError'));
     } finally {
       setUpdating(prev => ({ ...prev, [orderType.id]: false }));
@@ -103,6 +103,20 @@ const OrderTypeComponent = () => {
     updateOrderTypeData(orderType);
   };
 
+  // Translation helper for order type name and description
+  const getOrderTypeTranslation = (orderType: OrderType, field: 'name' | 'description'): string => {
+    const translationKey = `orderTypes.${orderType.code}.${field}`;
+    const translated = t(translationKey);
+
+    // If translation exists and is not the same as the key, use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+
+    // Otherwise, fall back to API value
+    return field === 'name' ? orderType.name : orderType.description;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-96 bg-gray-50 dark:bg-gray-900">
@@ -110,9 +124,6 @@ const OrderTypeComponent = () => {
           <Loader2 className="w-10 h-10 animate-spin mx-auto mb-6 text-indigo-600 dark:text-indigo-400" />
           <p className="text-gray-600 dark:text-gray-300 text-lg font-medium">
             {t('dashboard.orderType.loading')}
-          </p>
-          <p className="text-gray-500 dark:text-gray-400 text-sm mt-2">
-            {t('dashboard.orderType.pleaseWait')}
           </p>
         </div>
       </div>
@@ -144,9 +155,7 @@ const OrderTypeComponent = () => {
           <div className={`mb-8 p-4 rounded-xl border-l-4 border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 shadow-lg animate-fade-in ${isRTL ? 'border-r-4 border-l-0' : ''}`}>
             <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
               <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              <p className="text-emerald-800 dark:text-emerald-200 font-medium">
-                {successMessage}
-              </p>
+              <p className="text-emerald-800 dark:text-emerald-200 font-medium">{successMessage}</p>
             </div>
           </div>
         )}
@@ -181,9 +190,11 @@ const OrderTypeComponent = () => {
                     </div>
                     <div className={isRTL ? 'text-right' : 'text-left'}>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors duration-200">
-                        {orderType.name}
+                        {getOrderTypeTranslation(orderType, 'name')}
                       </h3>
-                      <p className="text-gray-600 dark:text-gray-300 mt-1">{orderType.description}</p>
+                      <p className="text-gray-600 dark:text-gray-300 mt-1">{getOrderTypeTranslation(orderType, 'description')}</p>
+                      
+                      {/* Display Estimated Time in Header */}
                       <div className={`flex items-center gap-2 mt-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <Clock className="w-4 h-4 text-gray-400" />
                         <span className="text-sm text-gray-500 dark:text-gray-400">
@@ -216,13 +227,13 @@ const OrderTypeComponent = () => {
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
-                        title={t('dashboard.orderType.activeStatus')}
+                        title='isActive'
                         type="checkbox"
                         checked={orderType.isActive}
                         onChange={(e) => handleSettingChange(orderType.id, 'isActive', e.target.checked)}
                         className="sr-only peer"
                       />
-                      <div className="w-14 h-7 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer transition-all duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all after:shadow-md peer-checked:bg-indigo-600 dark:peer-checked:bg-indigo-500"></div>
+                      <div className="w-14 h-7 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer transition-all duration-300 peer-checked:bg-indigo-600 dark:peer-checked:bg-indigo-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all after:shadow-md"></div>
                     </label>
                   </div>
 
@@ -242,35 +253,37 @@ const OrderTypeComponent = () => {
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
-                            title={t('dashboard.orderType.requiresName') || 'Requires Name'}
+                          title='requiresName'
                             type="checkbox"
                             checked={orderType.requiresName ?? false}
                             onChange={(e) => handleSettingChange(orderType.id, 'requiresName', e.target.checked)}
                             className="sr-only peer"
                           />
-                          <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer transition-all duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-blue-600 dark:peer-checked:bg-blue-500"></div>
+                          <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer transition-all duration-300 peer-checked:bg-blue-600 dark:peer-checked:bg-blue-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md"></div>
                         </label>
                       </div>
 
-                      {/* Requires Table */}
-                      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                          <Table className="w-4 h-4 text-green-600 dark:text-green-400" />
-                          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            {t('dashboard.orderType.requiresTable') || 'Requires Table'}
+                      {/* Requires Table - Only show for DINE_IN order type */}
+                      {orderType.code === 'DINE_IN' && (
+                        <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                            <Table className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                              {t('dashboard.orderType.requiresTable') || 'Requires Table'}
+                            </label>
+                          </div>
+                          <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                              title='requiresTable'
+                              type="checkbox"
+                              checked={orderType.requiresTable}
+                              onChange={(e) => handleSettingChange(orderType.id, 'requiresTable', e.target.checked)}
+                              className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer transition-all duration-300 peer-checked:bg-green-600 dark:peer-checked:bg-green-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md"></div>
                           </label>
                         </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                          <input
-                            title={t('dashboard.orderType.requiresTable') || 'Requires Table'}
-                            type="checkbox"
-                            checked={orderType.requiresTable}
-                            onChange={(e) => handleSettingChange(orderType.id, 'requiresTable', e.target.checked)}
-                            className="sr-only peer"
-                          />
-                          <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-green-300 dark:peer-focus:ring-green-800 rounded-full peer transition-all duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-green-600 dark:peer-checked:bg-green-500"></div>
-                        </label>
-                      </div>
+                      )}
 
                       {/* Requires Address */}
                       <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
@@ -282,13 +295,13 @@ const OrderTypeComponent = () => {
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
-                            title={t('dashboard.orderType.requiresAddress') || 'Requires Address'}
+                          title='requiresAddress'
                             type="checkbox"
                             checked={orderType.requiresAddress}
                             onChange={(e) => handleSettingChange(orderType.id, 'requiresAddress', e.target.checked)}
                             className="sr-only peer"
                           />
-                          <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer transition-all duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-purple-600 dark:peer-checked:bg-purple-500"></div>
+                          <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer transition-all duration-300 peer-checked:bg-purple-600 dark:peer-checked:bg-purple-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md"></div>
                         </label>
                       </div>
 
@@ -302,22 +315,42 @@ const OrderTypeComponent = () => {
                         </div>
                         <label className="relative inline-flex items-center cursor-pointer">
                           <input
-                            title={t('dashboard.orderType.requiresPhone') || 'Requires Phone'}
+                            title='requiresPhone'
                             type="checkbox"
                             checked={orderType.requiresPhone}
                             onChange={(e) => handleSettingChange(orderType.id, 'requiresPhone', e.target.checked)}
                             className="sr-only peer"
                           />
-                          <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 rounded-full peer transition-all duration-300 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md peer-checked:bg-orange-600 dark:peer-checked:bg-orange-500"></div>
+                          <div className="w-11 h-6 bg-gray-200 dark:bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 dark:peer-focus:ring-orange-800 rounded-full peer transition-all duration-300 peer-checked:bg-orange-600 dark:peer-checked:bg-orange-500 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-md"></div>
                         </label>
                       </div>
                     </div>
                   </div>
 
+                  {/* --- NEW ADDITION: Estimated Minutes --- */}
+                  <div className="space-y-2">
+                    <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <Clock className="w-4 h-4" />
+                      {t('dashboard.orderType.estimatedMinutes') || 'Estimated Minutes'}
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={orderType.estimatedMinutes}
+                        onChange={(e) => handleSettingChange(orderType.id, 'estimatedMinutes', parseInt(e.target.value) || 0)}
+                        className={`w-full px-4 py-3 ${isRTL ? 'pl-10 text-right' : 'pr-10'} border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all duration-200 shadow-sm`}
+                        placeholder="0"
+                      />
+                     
+                    </div>
+                  </div>
+
                   {/* Min Order Amount */}
                   <div className="space-y-2">
-                    <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? '' : ''}`}>
-                      <DollarSign className="w-4 h-4" />
+                    <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                           <span className=''>{currency.symbol}</span>
                       {t('dashboard.orderType.minOrderAmount')}
                     </label>
                     <div className="relative">
@@ -330,14 +363,13 @@ const OrderTypeComponent = () => {
                         className={`w-full px-4 py-3 ${isRTL ? 'pr-10 text-right' : 'pl-10'} border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all duration-200 shadow-sm`}
                         placeholder="0.00"
                       />
-                      <span className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400`}>₺</span>
                     </div>
                   </div>
 
                   {/* Service Charge */}
                   <div className="space-y-2">
-                    <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? '' : ''}`}>
-                      <DollarSign className="w-4 h-4" />
+                    <label className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <span className=''>{currency.symbol}</span>
                       {t('dashboard.orderType.serviceCharge')}
                     </label>
                     <div className="relative">
@@ -350,7 +382,6 @@ const OrderTypeComponent = () => {
                         className={`w-full px-4 py-3 ${isRTL ? 'pr-10 text-right' : 'pl-10'} border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 focus:border-transparent transition-all duration-200 shadow-sm`}
                         placeholder="0.00"
                       />
-                      <span className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-gray-400`}>₺</span>
                     </div>
                   </div>
 

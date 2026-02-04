@@ -41,13 +41,13 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
 
 
   return (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-0 sm:p-4"
       onClick={handleOverlayClick}
     >
-      <div className={`bg-white dark:bg-gray-800 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden shadow-2xl ${isRTL ? 'rtl' : 'ltr'}`}>
+      <div className={`bg-white dark:bg-gray-800 sm:rounded-2xl w-full h-full sm:h-auto sm:max-w-4xl sm:max-h-[90vh] overflow-hidden shadow-2xl flex flex-col ${isRTL ? 'rtl' : 'ltr'}`}>
         {/* Modal Header */}
-        <div className="p-6 border-b border-gray-200 dark:border-gray-600 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
+        <div className="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-600 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
           <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
             <div className={`flex items-center space-x-4 ${isRTL ? 'space-x-reverse' : ''}`}>
               {product.imageUrl && (
@@ -84,8 +84,8 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
         </div>
 
         {/* Modal Content */}
-        <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
-          <div className="p-6 space-y-8">
+        <div className="overflow-y-auto flex-1 sm:max-h-[calc(90vh-120px)]">
+          <div className="p-4 sm:p-6 space-y-6 sm:space-y-8">
             {/* Allergens Section */}
             {product.allergens && product.allergens.length > 0 && (
               <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-6 border border-red-200 dark:border-red-800">
@@ -261,7 +261,7 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="p-6 border-t border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50">
+        <div className="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50">
           <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
             <div className="text-sm text-gray-600 dark:text-gray-300">
               {t('branchCategories.productDetails.lastUpdated')} {new Date().toLocaleDateString()}

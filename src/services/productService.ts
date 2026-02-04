@@ -13,6 +13,7 @@ interface APIProduct {
   displayOrder: number;
   description?: string; // May or may not be included
   categoryId: number;
+  maxQuantity?: number;
 }
 interface DeletedEntity {
   id: number;
@@ -84,6 +85,9 @@ interface ProductIngredient {
 
 class ProductService {
   private baseUrl = '/api';
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
 
   // Transform API response to match component expectations
   private transformAPIDataToComponentData(apiCategories: APICategory[]): Category[] {
@@ -96,15 +100,16 @@ class ProductService {
       restaurantId: apiCategory.restaurantId,
       isExpanded: true, 
       products: apiCategory.products.map(apiProduct => ({
-        id: apiProduct.productId, 
+        id: apiProduct.productId,
         name: apiProduct.name,
-        description: apiProduct.description || '', 
+        description: apiProduct.description || '',
         price: apiProduct.price,
         imageUrl: apiProduct.imageUrl || '',
-        isAvailable: apiProduct.status, 
+        isAvailable: apiProduct.status,
         status: apiProduct.status,
         displayOrder: apiProduct.displayOrder,
         categoryId: apiCategory.categoryId,
+        maxQuantity: apiProduct.maxQuantity,
       }))
     }));
   }
@@ -136,11 +141,13 @@ class ProductService {
   // Kategori listesini getirir
   async getCategories(): Promise<Category[]> {
     try {
+            const language = this.getLanguageFromStorage();
       // Include products in the request
       const response = await httpClient.get<APICategory[]>(`${this.baseUrl}/categories`, {
         params: {
           includes: 'Products',
-          onlyActive:""
+          onlyActive: "",
+          language
         }
       });
       // Transform the API response to match component expectations
@@ -159,8 +166,13 @@ class ProductService {
         branchId: branchId.toString(),
         includes: "products",
       });
-      const response = await httpClient.get<BranchCategoryResponse[]>(`${this.baseUrl}/BranchCategories?${params.toString()}`);
-    
+      const language = this.getLanguageFromStorage();
+      const response = await httpClient.get<BranchCategoryResponse[]>(`${this.baseUrl}/BranchCategories?${params.toString()}`, {
+        params: {
+          language
+        }
+      });
+
       // Transform the branch categories response to match component expectations
       const transformedData = this.transformBranchCategoriesToComponentData(response.data);
       return transformedData;
@@ -434,11 +446,15 @@ class ProductService {
   async getDeletedCategories(): Promise<DeletedEntity[]> {
     try {
       logger.info('Silinmiş kategoriler getiriliyor');
-      
-      const response = await httpClient.get<DeletedEntity[]>(`${this.baseUrl}/Categories/deleted`);
-      
-      logger.info('Silinmiş kategoriler başarıyla getirildi', { 
-        count: response.data?.length || 0 
+      const language = this.getLanguageFromStorage();
+      const response = await httpClient.get<DeletedEntity[]>(`${this.baseUrl}/Categories/deleted`, {
+        params: {
+          language
+        }
+      });
+
+      logger.info('Silinmiş kategoriler başarıyla getirildi', {
+        count: response.data?.length || 0
       });
       
       return response.data || [];
@@ -486,7 +502,7 @@ class ProductService {
         } else if (error.response?.status === 400) {
           throw new Error('Geçersiz ürün geri yükleme isteği');
         } else {
-          throw new Error('Ürün geri yüklenirken bir hata oluştu');
+          throw new Error(error.message);
         }
       }
     }
@@ -529,11 +545,15 @@ class ProductService {
   async getDeletedProducts(): Promise<DeletedEntity[]> {
     try {
       logger.info('Silinmiş ürünler getiriliyor');
-      
-      const response = await httpClient.get<DeletedEntity[]>(`${this.baseUrl}/Products/deleted`);
-      
-      logger.info('Silinmiş ürünler başarıyla getirildi', { 
-        count: response.data?.length || 0 
+      const language = this.getLanguageFromStorage();
+      const response = await httpClient.get<DeletedEntity[]>(`${this.baseUrl}/Products/deleted`, {
+        params: {
+          language
+        }
+      });
+
+      logger.info('Silinmiş ürünler başarıyla getirildi', {
+        count: response.data?.length || 0
       });
       
       return response.data || [];
@@ -702,12 +722,17 @@ class ProductService {
   async getProductIngredients(productId: number): Promise<any[]> {
     try {
       logger.info('Ürün malzemeleri getiriliyor', { productId });
-      
-      const response = await httpClient.get(`${this.baseUrl}/Products/${productId}/ingredients`);
-      
-      logger.info('Ürün malzemeleri başarıyla getirildi', { 
-        productId, 
-        ingredientCount: response.data?.length || 0 
+      const language = this.getLanguageFromStorage();
+
+      const response = await httpClient.get(`${this.baseUrl}/Products/${productId}/ingredients`, {
+        params: {
+          language
+        }
+      });
+
+      logger.info('Ürün malzemeleri başarıyla getirildi', {
+        productId,
+        ingredientCount: response.data?.length || 0
       });
       
       return response.data || [];

@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Bell, 
-  Check, 
-  Mail, 
-  MoonStar, 
-  Sun, 
+import {
+  Bell,
+  Mail,
+  MoonStar,
+  Sun,
   Settings as SettingsIcon,
-  User,
   Shield,
   Palette,
-  Globe,
   Smartphone,
   Volume2,
   Eye,
@@ -19,10 +16,8 @@ import {
   Upload,
   Trash2,
   Save,
-  AlertCircle,
   Info,
-  ChevronRight,
-  EyeOff,
+
   Languages,
   Clock,
   Calendar,
@@ -30,7 +25,6 @@ import {
   Database,
   HardDrive,
   Wifi,
-  WifiOff
 } from 'lucide-react';
 import { useTheme } from '../../../../contexts/ThemeContext';
 import { useLanguage } from '../../../../contexts/LanguageContext';
@@ -38,8 +32,11 @@ import BranchPreferencesTab from './BranchPreferencesTab';
 import { UserSettingsState } from '../../../../types/BranchManagement/type';
 
 
+interface BranchSettingsProps {
+  branchId?: number;
+}
 
-const BranchSettings: React.FC = () => {
+const BranchSettings: React.FC<BranchSettingsProps> = ({ branchId }) => {
   const { isDark, toggleTheme } = useTheme();
   const { t, language, setLanguage } = useLanguage();
   const isRTL = language === 'ar';
@@ -57,7 +54,6 @@ const BranchSettings: React.FC = () => {
     currency: 'TRY'
   });
 
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<'general' | 'branch' | 'notifications' | 'privacy' | 'appearance' | 'data'>('branch');
 
   // Load settings from localStorage on mount
@@ -91,57 +87,48 @@ const BranchSettings: React.FC = () => {
     setLanguage(value as 'tr' | 'en' | 'ar');
   };
 
-  const handleSave = () => {
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 3000);
-  };
-
   const tabs = [
 /*     { id: 'general', label: t('settings.tabs.general'), icon: SettingsIcon },
  */    { id: 'branch', label: t('branchPreferences.title'), icon: SettingsIcon },
 /*     { id: 'notifications', label: t('settings.tabs.notifications'), icon: Bell },
  *//*     { id: 'privacy', label: t('settings.tabs.privacy'), icon: Shield },
  */    { id: 'appearance', label: t('settings.tabs.appearance'), icon: Palette },
-/*     { id: 'data', label: t('settings.tabs.data'), icon: Database }
- */  
-];
+    /*     { id: 'data', label: t('settings.tabs.data'), icon: Database }
+     */
+  ];
 
   // Reusable switch component
-  const Switch: React.FC<{ 
-    checked: boolean; 
-    onChange: () => void; 
-    label: string; 
+  const Switch: React.FC<{
+    checked: boolean;
+    onChange: () => void;
+    label: string;
     description?: string;
     Icon: any;
     disabled?: boolean;
   }> = ({ checked, onChange, label, description, Icon, disabled = false }) => (
-    <motion.div 
-      className={`flex items-center justify-between py-4 px-4 rounded-lg border transition-all duration-200 ${
-        disabled 
-          ? 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700' 
-          : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
-      }`}
+    <motion.div
+      className={`flex items-center justify-between py-4 px-4 rounded-lg border transition-all duration-200 ${disabled
+        ? 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'
+        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-primary-300 dark:hover:border-primary-600'
+        }`}
       whileHover={!disabled ? { scale: 1.01 } : {}}
       transition={{ type: "spring", stiffness: 300 }}
     >
       <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-        <div className={`p-2 rounded-lg ${
-          disabled 
-            ? 'bg-gray-100 dark:bg-gray-700' 
-            : 'bg-primary-100 dark:bg-primary-900/30'
-        }`}>
-          <Icon className={`h-5 w-5 ${
-            disabled 
-              ? 'text-gray-400 dark:text-gray-500' 
-              : 'text-primary-600 dark:text-primary-400'
-          }`} />
+        <div className={`p-2 rounded-lg ${disabled
+          ? 'bg-gray-100 dark:bg-gray-700'
+          : 'bg-primary-100 dark:bg-primary-900/30'
+          }`}>
+          <Icon className={`h-5 w-5 ${disabled
+            ? 'text-gray-400 dark:text-gray-500'
+            : 'text-primary-400 dark:text-primary-400'
+            }`} />
         </div>
         <div>
-          <p className={`text-sm font-medium ${
-            disabled 
-              ? 'text-gray-500 dark:text-gray-400' 
-              : 'text-gray-900 dark:text-white'
-          }`}>
+          <p className={`text-sm font-medium ${disabled
+            ? 'text-gray-500 dark:text-gray-400'
+            : 'text-gray-900 dark:text-white'
+            }`}>
             {label}
           </p>
           {description && (
@@ -153,23 +140,21 @@ const BranchSettings: React.FC = () => {
       </div>
       <label className={`relative inline-flex items-center cursor-pointer ${disabled ? 'opacity-50' : ''}`}>
         <input
-          title='checkbox' 
-          type="checkbox" 
-          className="sr-only peer" 
-          checked={checked} 
+          title='checkbox'
+          type="checkbox"
+          className="sr-only peer"
+          checked={checked}
           onChange={onChange}
           disabled={disabled}
         />
-        <div className={`w-11 h-6 rounded-full peer transition-all duration-200 ${
-          disabled
-            ? 'bg-gray-200 dark:bg-gray-600'
-            : checked
-              ? 'bg-primary-600 dark:bg-primary-500'
-              : 'bg-gray-200 dark:bg-gray-600'
-        }`}>
-          <div className={`w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform duration-200 ${
-            checked ? (isRTL ? '-translate-x-5' : 'translate-x-5') : (isRTL ? '-translate-x-0.5' : 'translate-x-0.5')
-          }`} />
+        <div className={`w-11 h-6 rounded-full peer transition-all duration-200 ${disabled
+          ? 'bg-gray-200 dark:bg-gray-600'
+          : checked
+            ? 'text-primary-400 dark:bg-primary-500'
+            : 'bg-gray-200 dark:bg-gray-600'
+          }`}>
+          <div className={`w-5 h-5 bg-white rounded-full shadow-sm transform transition-transform duration-200 ${checked ? (isRTL ? '-translate-x-5' : 'translate-x-5') : (isRTL ? '-translate-x-0.5' : 'translate-x-0.5')
+            }`} />
         </div>
       </label>
     </motion.div>
@@ -183,14 +168,14 @@ const BranchSettings: React.FC = () => {
     options: { value: string; label: string }[];
     Icon: any;
   }> = ({ label, value, onChange, options, Icon }) => (
-    <motion.div 
-      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200"
+    <motion.div
+      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:border-primary-300 dark:hover:border-primary-800 transition-all duration-200"
       whileHover={{ scale: 1.01 }}
       transition={{ type: "spring", stiffness: 300 }}
     >
       <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} mb-3`}>
         <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
-          <Icon className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+          <Icon className="h-5 w-5 text-primary-400 dark:text-primary-400" />
         </div>
         <label className="text-sm font-medium text-gray-900 dark:text-white">
           {label}
@@ -200,7 +185,7 @@ const BranchSettings: React.FC = () => {
         title='value'
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
+        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:border-primary-500 dark:focus:border-primary-800 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -213,42 +198,6 @@ const BranchSettings: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-8" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('settings.title')}</h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            {t('settings.description')}
-          </p>
-        </div>
-        <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-          <motion.button
-            onClick={handleSave}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 rounded-lg transition-colors"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <Save className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-            {t('settings.save')}
-          </motion.button>
-        </div>
-      </div>
-
-      {/* Success Message */}
-      <AnimatePresence>
-        {saveSuccess && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg flex items-center"
-          >
-            <Check className={`h-5 w-5 text-green-500 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-            <p className="text-sm text-green-600 dark:text-green-400">{t('settings.saveSuccess')}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-700">
         <nav className={`flex ${isRTL ? 'space-x-reverse space-x-8' : 'space-x-8'}`}>
@@ -258,11 +207,10 @@ const BranchSettings: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
-                  activeTab === tab.id
-                    ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                    : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
+                className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} py-4 px-1 border-b-2 font-medium text-sm transition-colors ${activeTab === tab.id
+                  ? 'border-primary-500 text-primary-400 dark:text-primary-400'
+                  : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
               >
                 <Icon className="h-4 w-4" />
                 <span>{tab.label}</span>
@@ -287,7 +235,7 @@ const BranchSettings: React.FC = () => {
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
               <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} mb-6`}>
                 <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
-                  <SettingsIcon className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                  <SettingsIcon className="h-5 w-5 text-primary-400 dark:text-primary-400" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -387,8 +335,8 @@ const BranchSettings: React.FC = () => {
           </motion.div>
         )}
         {activeTab === 'branch' && (
-          <BranchPreferencesTab 
-          
+          <BranchPreferencesTab
+
           />
         )}
         {activeTab === 'notifications' && (
@@ -479,7 +427,7 @@ const BranchSettings: React.FC = () => {
               <div className="space-y-3">
                 <Switch
                   checked={true}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   label={t('settings.privacy.twoFactor')}
                   description={t('settings.privacy.twoFactorDesc')}
                   Icon={Lock}
@@ -488,7 +436,7 @@ const BranchSettings: React.FC = () => {
 
                 <Switch
                   checked={true}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   label={t('settings.privacy.autoLogout')}
                   description={t('settings.privacy.autoLogoutDesc')}
                   Icon={Clock}
@@ -497,7 +445,7 @@ const BranchSettings: React.FC = () => {
 
                 <Switch
                   checked={false}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   label={t('settings.privacy.analytics')}
                   description={t('settings.privacy.analyticsDesc')}
                   Icon={Info}
@@ -543,7 +491,7 @@ const BranchSettings: React.FC = () => {
 
                 <Switch
                   checked={false}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   label={t('settings.appearance.compact')}
                   description={t('settings.appearance.compactDesc')}
                   Icon={Eye}
@@ -552,7 +500,7 @@ const BranchSettings: React.FC = () => {
 
                 <Switch
                   checked={true}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   label={t('settings.appearance.animations')}
                   description={t('settings.appearance.animationsDesc')}
                   Icon={Zap}
@@ -589,11 +537,11 @@ const BranchSettings: React.FC = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <motion.button
-                  className={`flex items-center justify-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200`}
+                  className={`flex items-center justify-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 dark:hover:border-primary-800 transition-all duration-200`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Download className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                  <Download className="h-5 w-5 text-primary-800 dark:text-primary-800" />
                   <div className={isRTL ? 'text-right' : 'text-left'}>
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.data.download')}</p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">{t('settings.data.downloadDesc')}</p>
@@ -601,11 +549,11 @@ const BranchSettings: React.FC = () => {
                 </motion.button>
 
                 <motion.button
-                  className={`flex items-center justify-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200`}
+                  className={`flex items-center justify-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 dark:hover:border-primary-800 transition-all duration-200`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <Upload className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                  <Upload className="h-5 w-5 text-primary-800 dark:text-primary-800" />
                   <div className={isRTL ? 'text-right' : 'text-left'}>
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.data.upload')}</p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">{t('settings.data.uploadDesc')}</p>
@@ -625,11 +573,11 @@ const BranchSettings: React.FC = () => {
                 </motion.button>
 
                 <motion.button
-                  className={`flex items-center justify-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 dark:hover:border-primary-600 transition-all duration-200`}
+                  className={`flex items-center justify-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'} p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-300 dark:hover:border-primary-800 transition-all duration-200`}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <HardDrive className="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                  <HardDrive className="h-5 w-5 text-primary-800 dark:text-primary-800" />
                   <div className={isRTL ? 'text-right' : 'text-left'}>
                     <p className="text-sm font-medium text-gray-900 dark:text-white">{t('settings.data.storage')}</p>
                     <p className="text-xs text-gray-600 dark:text-gray-400">{t('settings.data.storageDesc')}</p>

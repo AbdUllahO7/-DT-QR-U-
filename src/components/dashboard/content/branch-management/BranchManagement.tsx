@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Building2, AlertTriangle, Plus, Trash2 } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
-import { 
-  BranchInfo, 
-  CreateBranchWithDetailsDto, 
+import {
+  BranchInfo,
+  CreateBranchWithDetailsDto,
   CreateBranchWorkingHourCoreDto,
   BranchDetailResponse,
 } from '../../../../types/api';
@@ -18,17 +18,36 @@ import { logger } from '../../../../utils/logger';
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 import { useNavigate } from 'react-router-dom';
 import { purgeService } from '../../../../services/purge/PurgeService';
+import { useTranslatableFields, TranslatableFieldValue } from '../../../../hooks/useTranslatableFields';
+import { branchTranslationService } from '../../../../services/Translations/BranchTranslationService';
+import { contactTranslationService } from '../../../../services/Translations/ContactTranslationService';
+import { languageService } from '../../../../services/LanguageService';
 
 const BranchManagement: React.FC = () => {
   const { t, isRTL } = useLanguage();
+  const translationHook = useTranslatableFields();
   const [branches, setBranches] = useState<BranchInfo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string>("");
+  const [validationErrors, setValidationErrors] = useState<Record<string, string[]> | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingBranch, setEditingBranch] = useState<BranchDetailResponse | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  // Supported languages - dynamically loaded
+  const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
+  const [defaultLanguage, setDefaultLanguage] = useState<string>('en');
+
+  // Translation state for create branch
+  const [branchNameTranslations, setBranchNameTranslations] = useState<TranslatableFieldValue>({});
+  const [contactHeaderTranslations, setContactHeaderTranslations] = useState<TranslatableFieldValue>({});
+  const [footerTitleTranslations, setFooterTitleTranslations] = useState<TranslatableFieldValue>({});
+  const [footerDescriptionTranslations, setFooterDescriptionTranslations] = useState<TranslatableFieldValue>({});
+  const [openTitleTranslations, setOpenTitleTranslations] = useState<TranslatableFieldValue>({});
+  const [openDaysTranslations, setOpenDaysTranslations] = useState<TranslatableFieldValue>({});
+  const [openHoursTranslations, setOpenHoursTranslations] = useState<TranslatableFieldValue>({});
   
   // Delete confirmation modal states
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -41,13 +60,13 @@ const BranchManagement: React.FC = () => {
   const [isPurgingBranch, setIsPurgingBranch] = useState(false);
 
   const defaultWorkingHours: CreateBranchWorkingHourCoreDto[] = [
-    { dayOfWeek: 1, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Monday
-    { dayOfWeek: 2, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Tuesday
-    { dayOfWeek: 3, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Wednesday
-    { dayOfWeek: 4, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Thursday
-    { dayOfWeek: 5, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Friday
-    { dayOfWeek: 6, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }, // Saturday
-    { dayOfWeek: 0, openTime: '08:00:00', closeTime: '22:00:00', isWorkingDay: true }  // Sunday
+    { dayOfWeek: 1, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] }, // Monday
+    { dayOfWeek: 2, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] }, // Tuesday
+    { dayOfWeek: 3, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] }, // Wednesday
+    { dayOfWeek: 4, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] }, // Thursday
+    { dayOfWeek: 5, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] }, // Friday
+    { dayOfWeek: 6, isWorkingDay: true, isOpen24Hours: false, timeSlots: [{ openTime: '08:00:00', closeTime: '22:00:00' }] }, // Saturday
+    { dayOfWeek: 0, isWorkingDay: false, isOpen24Hours: false, timeSlots: [] }  // Sunday
   ];
 
   const getEmptyFormData = (): CreateBranchWithDetailsDto => {
@@ -84,16 +103,48 @@ const BranchManagement: React.FC = () => {
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
+    const loadLanguages = async () => {
+      try {
+        const languagesData = await languageService.getRestaurantLanguages();
+
+        // Deduplicate languages by code
+        const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
+          if (!acc.find((l: any) => l.code === lang.code)) {
+            acc.push(lang);
+          }
+          return acc;
+        }, []);
+
+        setSupportedLanguages(uniqueLanguages);
+        setDefaultLanguage(languagesData.defaultLanguage || 'en');
+
+        // Initialize empty translations
+        const languageCodes = uniqueLanguages.map((lang: any) => lang.code);
+        setBranchNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setContactHeaderTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setFooterTitleTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setFooterDescriptionTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setOpenTitleTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setOpenDaysTranslations(translationHook.getEmptyTranslations(languageCodes));
+        setOpenHoursTranslations(translationHook.getEmptyTranslations(languageCodes));
+      } catch (error) {
+        console.error('Failed to load languages:', error);
+      }
+    };
+    loadLanguages();
+  }, []);
+
+  useEffect(() => {
     logger.info('BranchManagement component mount oldu', null, { prefix: 'BranchManagement' });
-    
+
     // Token kontrolü
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('dashboard_token');
     if (!token) {
       logger.error('Token bulunamadı', null, { prefix: 'BranchManagement' });
       setError(t('branchManagement.error.sessionExpired'));
       return;
     }
-    
+
     // Restaurant ID kontrolü
     const restaurantId = getRestaurantIdFromToken();
     if (!restaurantId) {
@@ -101,15 +152,27 @@ const BranchManagement: React.FC = () => {
       setError(t('branchManagement.error.restaurantIdNotFound'));
       return;
     }
-    
+
     logger.info(`Restaurant ID: ${restaurantId} ile şube listesi isteniyor`, null, { prefix: 'BranchManagement' });
     fetchBranches();
   }, [t]);
 
+  // Helper function to format field names for display
+  const formatFieldName = (fieldName: string): string => {
+    // Remove DTO prefixes and convert to readable format
+    const cleanName = fieldName
+      .replace('CreateAddressDto.', '')
+      .replace('CreateContactDto.', '')
+      .replace(/([A-Z])/g, ' $1')
+      .trim();
+    return cleanName.charAt(0).toUpperCase() + cleanName.slice(1);
+  };
+
   const fetchBranches = async () => {
     setIsLoading(true);
     setError('');
-    
+    setValidationErrors(null);
+
     try {
       logger.info('Şube listesi alınıyor...', null, { prefix: 'BranchManagement' });
       const branchesData = await branchService.getBranches();
@@ -142,7 +205,7 @@ const BranchManagement: React.FC = () => {
     }
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
@@ -174,8 +237,11 @@ const BranchManagement: React.FC = () => {
     setHasChanges(true);
   };
 
-  const handleSubmit = async (data: CreateBranchWithDetailsDto) => {
+  const handleSubmit = async (data: CreateBranchWithDetailsDto): Promise<void> => {
     setIsSubmitting(true);
+    setError('');
+    setValidationErrors(null);
+
     try {
       const restaurantId = getRestaurantIdFromToken();
       if (!restaurantId) {
@@ -209,43 +275,116 @@ const BranchManagement: React.FC = () => {
         },
         createBranchWorkingHourCoreDto: data.createBranchWorkingHourCoreDto?.map(hour => ({
           dayOfWeek: hour.dayOfWeek,
-          openTime: hour.openTime,
-          closeTime: hour.closeTime,
-          isWorkingDay: hour.isWorkingDay
+          isWorkingDay: hour.isWorkingDay,
+          isOpen24Hours: hour.isOpen24Hours,
+          timeSlots: hour.timeSlots?.map(slot => ({
+            id: slot.id,
+            openTime: slot.openTime,
+            closeTime: slot.closeTime,
+          })) || []
         })) || null
       };
 
       if (isEditMode && editingBranch) {
         await branchService.updateBranch(editingBranch.branchId, transformedData);
         logger.info('Branch successfully updated', { branchId: editingBranch.branchId }, { prefix: 'BranchManagement' });
+        // Note: BranchEditModal will handle translation saving and closing
+        // Don't call handleCloseModal here for edit mode
       } else {
-        await branchService.createBranch(transformedData);
-        logger.info('Branch successfully created', null, { prefix: 'BranchManagement' });
+        const result = await branchService.createBranch(transformedData);
+        logger.info('Branch successfully created', result, { prefix: 'BranchManagement' });
+
+        // Save translations for newly created branch
+        if (result && result.branchId) {
+          try {
+            // Save branch name translations
+            const branchTranslationData = Object.keys(branchNameTranslations)
+              .filter(lang => lang !== defaultLanguage && branchNameTranslations[lang])
+              .map(languageCode => ({
+                branchId: result.branchId,
+                languageCode,
+                branchName: branchNameTranslations[languageCode] || undefined,
+                description: undefined,
+                address: undefined
+              }));
+
+            if (branchTranslationData.length > 0) {
+              await branchTranslationService.batchUpsertBranchTranslations({
+                translations: branchTranslationData
+              });
+              logger.info('Branch translations saved for new branch', null, { prefix: 'BranchManagement' });
+            }
+
+            // Save contact translations (if the branch creation returned contact info)
+            // We'll need to fetch the branch details to get the contact ID
+            const branchDetails = await branchService.getBranchById(result.branchId);
+            if (branchDetails && branchDetails.contact?.contactId) {
+              const contactTranslationData = Object.keys(contactHeaderTranslations)
+                .filter(lang => lang !== defaultLanguage)
+                .filter(lang =>
+                  contactHeaderTranslations[lang] ||
+                  footerTitleTranslations[lang] ||
+                  footerDescriptionTranslations[lang] ||
+                  openTitleTranslations[lang] ||
+                  openDaysTranslations[lang] ||
+                  openHoursTranslations[lang]
+                )
+                .map(languageCode => ({
+                  contactId: branchDetails.contact!.contactId,
+                  languageCode,
+                  contactHeader: contactHeaderTranslations[languageCode] || undefined,
+                  footerTitle: footerTitleTranslations[languageCode] || undefined,
+                  footerDescription: footerDescriptionTranslations[languageCode] || undefined,
+                  openTitle: openTitleTranslations[languageCode] || undefined,
+                  openDays: openDaysTranslations[languageCode] || undefined,
+                  openHours: openHoursTranslations[languageCode] || undefined
+                }));
+
+              if (contactTranslationData.length > 0) {
+                await contactTranslationService.batchUpsertContactTranslations(
+                  { translations: contactTranslationData },
+                  result.branchId
+                );
+                logger.info('Contact translations saved for new branch', null, { prefix: 'BranchManagement' });
+              }
+            }
+          } catch (translationError) {
+            logger.error('Failed to save translations for new branch', translationError, { prefix: 'BranchManagement' });
+            // Don't fail the whole operation
+          }
+        }
+
+        // For create mode, close modal and refresh
+        await fetchBranches();
+        handleCloseModal();
       }
-      
-      await fetchBranches();
-      handleCloseModal();
     } catch (err: any) {
       logger.error('Error submitting branch:', err, { prefix: 'BranchManagement' });
-      
-      let errorMessage = isEditMode 
-        ? t('branchManagement.error.updateFailed') 
-        : t('branchManagement.error.createFailed');
-      
-      // Handle specific error types
-      if (err?.response?.status === 401) {
-        errorMessage = t('branchManagement.error.sessionExpired');
-      } else if (err?.response?.status === 403) {
-        errorMessage = t('branchManagement.error.noPermission');
-      } else if (err?.response?.status === 404) {
-        errorMessage = t('branchManagement.error.branchNotFound');
-      } else if (err?.response?.status === 0 || !navigator.onLine) {
-        errorMessage = t('branchManagement.error.connectionError');
-      } else if (err?.message) {
-        errorMessage = err.message;
+
+      // Check if this is a validation error (400 status)
+      if (err?.response?.status === 400 && err?.response?.data?.errors) {
+        setValidationErrors(err.response.data.errors);
+        setError(t('branchManagement.error.validationFailed') || 'Please fix the validation errors below');
+      } else {
+        // Handle other error types
+        let errorMessage = isEditMode
+          ? t('branchManagement.error.updateFailed')
+          : t('branchManagement.error.createFailed');
+
+        if (err?.response?.status === 401) {
+          errorMessage = t('branchManagement.error.sessionExpired');
+        } else if (err?.response?.status === 403) {
+          errorMessage = t('branchManagement.error.noPermission');
+        } else if (err?.response?.status === 404) {
+          errorMessage = t('branchManagement.error.branchNotFound');
+        } else if (err?.response?.status === 0 || !navigator.onLine) {
+          errorMessage = t('branchManagement.error.connectionError');
+        } else if (err?.message) {
+          errorMessage = err.message;
+        }
+
+        setError(errorMessage);
       }
-      
-      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -254,9 +393,9 @@ const BranchManagement: React.FC = () => {
   const handleEditBranch = async (branch: BranchInfo) => {
     try {
       logger.info(`Fetching branch details for branchId: ${branch.branchId}`, null, { prefix: 'BranchManagement' });
-      
+
       // Use the new API with includes to get full branch details
-      const branchDetail = await branchService.getBranchById(branch.branchId);
+      const branchDetail = await branchService.getBranchById(Number(branch.branchId));
       logger.info('Branch details fetched with includes', branchDetail, { prefix: 'BranchManagement' });
 
       if (branchDetail) {
@@ -308,7 +447,7 @@ const BranchManagement: React.FC = () => {
     setBranches(prev => prev.filter(branch => branch.branchId !== branchToDelete.branchId));
 
     try {
-      await branchService.deleteBranch(branchToDelete.branchId);
+      await branchService.deleteBranch(Number(branchToDelete.branchId));
       logger.info('Branch deleted successfully', { branchId: branchToDelete.branchId }, { prefix: 'BranchManagement' });
       
       // Reset modal states
@@ -320,10 +459,10 @@ const BranchManagement: React.FC = () => {
 
     } catch (err: any) {
       logger.error('Error deleting branch:', err, { prefix: 'BranchManagement' });
-      
+
       // Revert optimistic update on error
-      setBranches(prev => [...prev, branchBackup].sort((a, b) => a.branchId - b.branchId));
-      
+      setBranches(prev => [...prev, branchBackup].sort((a, b) => Number(a.branchId) - Number(b.branchId)));
+
       let errorMessage = t('branchManagement.error.deleteFailed');
       
       if (err?.response?.status === 401) {
@@ -337,11 +476,10 @@ const BranchManagement: React.FC = () => {
       } else if (err?.message) {
         errorMessage = err.message;
       }
-      
-      setError(errorMessage);
-      
+      setError(err.response.data);
+
       // Clear error after 5 seconds
-      setTimeout(() => setError(null), 5000);
+      setTimeout(() => setError(""), 5000);
       
       // Re-throw error to be handled by the modal
       throw new Error(errorMessage);
@@ -377,7 +515,7 @@ const BranchManagement: React.FC = () => {
     setBranches(prev => prev.filter(branch => branch.branchId !== branchToPurge.branchId));
 
     try {
-      await purgeService.purgeBranch(branchToPurge.branchId);
+      await purgeService.purgeBranch(Number(branchToPurge.branchId));
       logger.info('Branch purged successfully', { branchId: branchToPurge.branchId }, { prefix: 'BranchManagement' });
       
       // Reset modal states
@@ -391,10 +529,10 @@ const BranchManagement: React.FC = () => {
       logger.error('Error purging branch:', err, { prefix: 'BranchManagement' });
       
       // Revert optimistic update on error
-      setBranches(prev => [...prev, branchBackup].sort((a, b) => a.branchId - b.branchId));
-      
+      setBranches(prev => [...prev, branchBackup].sort((a, b) => Number(a.branchId) - Number(b.branchId)));
+
       let errorMessage = t('branchManagement.error.purgeFailed') || 'Failed to permanently delete branch';
-      
+
       if (err?.response?.status === 401) {
         errorMessage = t('branchManagement.error.sessionExpired');
       } else if (err?.response?.status === 403) {
@@ -404,11 +542,11 @@ const BranchManagement: React.FC = () => {
       } else if (err?.message) {
         errorMessage = err.message;
       }
-      
+
       setError(errorMessage);
-      
+
       // Clear error after 5 seconds
-      setTimeout(() => setError(null), 5000);
+      setTimeout(() => setError(""), 5000);
       
       // Re-throw error to be handled by the modal
       throw new Error(errorMessage);
@@ -437,31 +575,40 @@ const BranchManagement: React.FC = () => {
     setEditingBranch(null);
     setFormData(getEmptyFormData());
     setHasChanges(false);
+
+    // Reset translation state
+    setBranchNameTranslations({});
+    setContactHeaderTranslations({});
+    setFooterTitleTranslations({});
+    setFooterDescriptionTranslations({});
+    setOpenTitleTranslations({});
+    setOpenDaysTranslations({});
+    setOpenHoursTranslations({});
   };
 
   const handleToggleTemporaryClose = async (branchId: number, isTemporarilyClosed: boolean) => {
-    const branch = branches.find(b => b.branchId === branchId);
+    const branch = branches.find(b => Number(b.branchId) === branchId);
     const isOpenNow = branch ? branch.isOpenNow : false;
-    
+
     try {
       // Optimistic update
-      setBranches(prev => prev.map(branch => 
-        branch.branchId === branchId 
-          ? { ...branch, isTemporarilyClosed } 
+      setBranches(prev => prev.map(branch =>
+        Number(branch.branchId) === branchId
+          ? { ...branch, isTemporarilyClosed }
           : branch
       ));
 
       await branchService.toggleTemporaryClose(branchId, isTemporarilyClosed, isOpenNow);
     } catch (err: any) {
       // Revert on error
-      setBranches(prev => prev.map(branch => 
-        branch.branchId === branchId 
-          ? { ...branch, isTemporarilyClosed: !isTemporarilyClosed } 
+      setBranches(prev => prev.map(branch =>
+        Number(branch.branchId) === branchId
+          ? { ...branch, isTemporarilyClosed: !isTemporarilyClosed }
           : branch
       ));
-      
+
       let errorMessage = t('branchManagement.error.statusUpdateFailed');
-      
+
       if (err?.response?.status === 401) {
         errorMessage = t('branchManagement.error.sessionExpired');
       } else if (err?.response?.status === 403) {
@@ -471,14 +618,15 @@ const BranchManagement: React.FC = () => {
       } else if (err?.message) {
         errorMessage = err.message;
       }
-      
+
       setError(errorMessage);
-      setTimeout(() => setError(null), 3000);
+      setTimeout(() => setError(""), 3000);
     }
   };
 
   const dismissError = () => {
-    setError(null);
+    setError("");
+    setValidationErrors(null);
   };
 
   return (
@@ -504,33 +652,54 @@ const BranchManagement: React.FC = () => {
         </div>
 
         {/* Error message */}
-        {error && (
-          <motion.div 
+        {(error || validationErrors) && (
+          <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] max-w-2xl w-full mx-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg shadow-lg overflow-hidden"
           >
-            <div className="flex items-start">
-              <div className="flex-shrink-0">
-                <AlertTriangle className="h-5 w-5 text-red-400 dark:text-red-500" />
+            <div className="p-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <AlertTriangle className="h-5 w-5 text-red-400 dark:text-red-500" />
+                </div>
+                <div className={`${isRTL ? 'mr-3' : 'ml-3'} flex-1`}>
+                  {error && (
+                    <p className="text-sm font-medium text-red-800 dark:text-red-200">
+                      {error}
+                    </p>
+                  )}
+
+                  {validationErrors && (
+                    <div className="mt-3 space-y-2">
+                      {Object.entries(validationErrors).map(([field, messages]) => (
+                        <div key={field} className="flex items-start">
+                          <span className="inline-block w-2 h-2 mt-1.5 mr-2 bg-red-400 dark:bg-red-500 rounded-full flex-shrink-0"></span>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-red-700 dark:text-red-300">
+                              {formatFieldName(field)}:
+                            </p>
+                            {messages.map((message, idx) => (
+                              <p key={idx} className="text-sm text-red-600 dark:text-red-400 ml-2">
+                                {message}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={dismissError}
+                  className={`${isRTL ? 'mr-auto' : 'ml-auto'} flex-shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors`}
+                  aria-label={t('common.dismiss')}
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
               </div>
-              <div className={`${isRTL ? 'mr-3' : 'ml-3'} flex-1`}>
-                <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-                  {t('branchManagement.error.title')}
-                </h3>
-                <p className="mt-1 text-sm text-red-700 dark:text-red-300">
-                  {error}
-                </p>
-              </div>
-              <button
-                onClick={dismissError}
-                className={`${isRTL ? 'mr-auto' : 'ml-auto'} flex-shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors`}
-                aria-label={t('common.dismiss')}
-              >
-                <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
-              </button>
             </div>
           </motion.div>
         )}
@@ -612,16 +781,33 @@ const BranchManagement: React.FC = () => {
               onSubmit={handleSubmit}
               branchDetail={editingBranch}
               isSubmitting={isSubmitting}
+              onSuccess={fetchBranches}
             />
           ) : (
-            <BranchModal
+         <BranchModal
               isOpen={isModalOpen}
               onClose={handleCloseModal}
-              onSubmit={handleSubmit}
+              supportedLanguages={supportedLanguages}
+              // Pass Translation States
+              branchNameTranslations={branchNameTranslations}
+              setBranchNameTranslations={setBranchNameTranslations}
+              contactHeaderTranslations={contactHeaderTranslations}
+              setContactHeaderTranslations={setContactHeaderTranslations}
+              footerTitleTranslations={footerTitleTranslations}
+              setFooterTitleTranslations={setFooterTitleTranslations}
+              footerDescriptionTranslations={footerDescriptionTranslations}
+              setFooterDescriptionTranslations={setFooterDescriptionTranslations}
+              openTitleTranslations={openTitleTranslations}
+              setOpenTitleTranslations={setOpenTitleTranslations}
+              openDaysTranslations={openDaysTranslations}
+              setOpenDaysTranslations={setOpenDaysTranslations}
+              openHoursTranslations={openHoursTranslations}
+              setOpenHoursTranslations={setOpenHoursTranslations}
+              // Pass Form Logic
               formData={formData}
               setFormData={setFormData}
+              onSubmit={handleSubmit}
               isSubmitting={isSubmitting}
-              hasChanges={hasChanges}
               onInputChange={handleInputChange}
               onWorkingHourChange={handleWorkingHourChange}
             />
@@ -639,6 +825,7 @@ const BranchManagement: React.FC = () => {
         isSubmitting={isDeletingBranch}
         itemType="branch"
         itemName={branchToDelete?.branchName || ''}
+        errorMessage={error}
       />
 
       {/* Purge Confirmation Modal */}
@@ -651,6 +838,7 @@ const BranchManagement: React.FC = () => {
         isSubmitting={isPurgingBranch}
         itemType="branch-purge"
         itemName={branchToPurge?.branchName || ''}
+        errorMessage={error}
       />
     </div>
   );

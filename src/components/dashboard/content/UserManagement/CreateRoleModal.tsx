@@ -1,17 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Building, ChevronDown, Loader2, ArrowLeft, ArrowRight, Check } from 'lucide-react';
+import { Shield, Building, ChevronDown, Loader2, ArrowLeft, ArrowRight, Check, X, CheckSquare } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../../hooks';
 import { roleService } from '../../../../services/RoleService';
 import { logger } from '../../../../utils/logger';
 import type { BranchInfo } from '../../../../types/api';
 import { CreateRoleDto, PermissionCatalog } from '../../../../types/users/users.type';
+import { getTranslatedPermissionName, getTranslatedCategoryName } from '../../../../utils/permissionTranslation';
 
 export interface CreateRoleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void; 
+  onSuccess: () => void;
   branches: BranchInfo[];
 }
 
@@ -32,8 +33,6 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
     category: '',
   });
 
-
-
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
 
@@ -41,27 +40,23 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
   const [selectedPermissions, setSelectedPermissions] = useState<number[]>([]);
   const [permissionCatalog, setPermissionCatalog] = useState<PermissionCatalog[]>([]);
   const [isFetchingPermissions, setIsFetchingPermissions] = useState(false);
-    const [chooseBranchId, setChooseBranchId] = useState(0);
+  const [chooseBranchId, setChooseBranchId] = useState(0);
 
   // Loading states
-  const [isCreatingRole, setIsCreatingRole] = useState(false);
-  const [isAssigningPermissions, setIsAssigningPermissions] = useState(false);
-  
-  // Store created role ID
-  const [createdRoleId, setCreatedRoleId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setIsBranchDropdownOpen(false));
 
   // Combined loading state
-  const isBusy = isCreatingRole || isAssigningPermissions || isFetchingPermissions;
+  const isBusy = isSubmitting || isFetchingPermissions;
 
   // Fetch permissions when moving to step 2 or if branchId changes
   useEffect(() => {
     if (currentStep === 2) {
       fetchPermissions();
     }
-  }, [currentStep, formData.branchId]); 
+  }, [currentStep, formData.branchId]);
 
   // Reset state when modal closes
   useEffect(() => {
@@ -76,22 +71,18 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
       setErrors({});
       setSelectedPermissions([]);
       setPermissionCatalog([]);
-      setCreatedRoleId(null);
     }
   }, [isOpen]);
 
   const fetchPermissions = async () => {
     setIsFetchingPermissions(true);
-    
-    // Create params object
+
     const params: { branchId?: number } = {};
-    // Only add branchId if it's a valid number (not 0, null, or undefined)
     if (formData.branchId && Number(formData.branchId) > 0) {
       params.branchId = Number(formData.branchId);
     }
 
     try {
-      // Pass params to the service call
       const response = await roleService.getPermissionCatalog(params);
       if (response.success && response.data) {
         setPermissionCatalog(response.data);
@@ -99,19 +90,18 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
         logger.error('Failed to fetch permission catalog', response, {
           prefix: 'CreateRoleModal',
         });
-        setPermissionCatalog([]); // Clear old data on failure
+        setPermissionCatalog([]); 
       }
     } catch (error) {
       logger.error('Error fetching permission catalog', error, {
         prefix: 'CreateRoleModal',
       });
-      setPermissionCatalog([]); // Clear old data on error
+      setPermissionCatalog([]);
     } finally {
       setIsFetchingPermissions(false);
     }
   };
 
-  // Get selected branch name
   const selectedBranchName = formData.branchId
     ? branches.find((b) => Number(b.branchId) === Number(formData.branchId))?.branchName
     : null;
@@ -119,120 +109,89 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
     if (!formData.name || formData.name.length < 3) {
-      newErrors.name = t('userManagementPage.createRole.errors.nameRequired');
+      newErrors.name = t('userManagementPage.createRole.validation.nameRequired');
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // Step 1: Create the role
-  const handleStep1Continue = async () => {
+  const handleStep1Continue = () => {
     if (!validateForm()) return;
+    // Just move to step 2 without creating the role yet
+    setCurrentStep(2);
+  };
 
+  const handleStep2Submit = async () => {
+    // Validate that at least one permission is selected
+    if (selectedPermissions.length === 0) {
+      logger.warn('No permissions selected', {}, { prefix: 'CreateRoleModal' });
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
-      setIsCreatingRole(true);
-      
-      // Prepare payload - only include branchId if it's a valid number
+      // First, create the role
       const payload: CreateRoleDto = {
         name: formData.name,
         description: formData.description,
         category: formData.category,
       };
 
-      // Only add branchId if it's defined and greater than 0
       if (formData.branchId && Number(formData.branchId) > 0) {
         payload.branchId = Number(formData.branchId);
       }
 
-      console.log("form data payload", payload);
+      const createResponse = await roleService.createRole(payload);
 
-      const response = await roleService.createRole(payload); 
-      
-      if (!response.success || !response.data) {
+      if (!createResponse.success || !createResponse.data) {
         throw new Error(t('userManagementPage.error.createRoleFailed'));
       }
 
-      logger.info('Rol başarıyla oluşturuldu', response.data, {
+      logger.info('Rol başarıyla oluşturuldu', createResponse.data, {
         prefix: 'CreateRoleModal',
       });
-      setCreatedRoleId(response.data.roleId ?? null);
 
-      setCurrentStep(2);
-      
-    } catch (error: any) {
-      logger.error('Rol oluşturulurken hata', error, {
-        prefix: 'CreateRoleModal',
-      });
-      setErrors({ 
-        name: error.message || t('userManagementPage.error.createRoleFailed') 
-      });
-    } finally {
-      setIsCreatingRole(false);
-    }
-  };
+      const roleId = createResponse.data.roleId;
 
-  // Step 2: Assign permissions to the created role (FIXED)
-  const handleStep2Submit = async () => {
-    if (!createdRoleId) {
-      logger.error('No role ID available', {}, { prefix: 'CreateRoleModal' });
-      return;
-    }
+      // Then, assign permissions
+      if (roleId) {
+        const response = await roleService.updateRolePermissions(
+          roleId,
+          { permissionIds: selectedPermissions }
+        );
 
-    setIsAssigningPermissions(true);
-    try {
-      // If no permissions are selected, we are done.
-      // This is considered a success (creating a role with no permissions).
-      if (selectedPermissions.length === 0) {
-        logger.info('No permissions selected, skipping assignment.', {}, { prefix: 'CreateRoleModal' });
-        onSuccess();
-        onClose();
-        return; // Exit the function
+        if (response.success) {
+          logger.info(
+            'Rol izinleri başarıyla eklendi',
+            response.data,
+            { prefix: 'CreateRoleModal' }
+          );
+        } else {
+          logger.warn(
+            'Rol izinleri güncellenirken uyarı',
+            response,
+            { prefix: 'CreateRoleModal' }
+          );
+        }
       }
 
-      // If permissions ARE selected, try to update them
-      const response = await roleService.updateRolePermissions(
-        createdRoleId,
-        { permissionIds: selectedPermissions }
-      );
+      onSuccess();
+      onClose();
 
-      if (response.success) {
-        logger.info(
-          'Rol izinleri başarıyla eklendi',
-          response.data,
-          { prefix: 'CreateRoleModal' }
-        );
-        // THIS is the only place it should close on success
-        onSuccess();
-        onClose();
-      } else {
-        // API returned success: false
-        logger.warn(
-          'Rol izinleri güncellenirken uyarı',
-          response,
-          { prefix: 'CreateRoleModal' }
-        );
-        // Do not close the modal, show an error (or just log)
-        // You could add a new state here to show an error message to the user
-      }
-      
     } catch (error: any) {
-      logger.error('Rol izinleri atanırken hata', error, {
+      logger.error('Rol oluşturulurken veya izinler atanırken hata', error, {
         prefix: 'CreateRoleModal',
       });
-      // API call threw an error
-      // Do not close the modal, show an error (or just log)
-      // You could add a new state here to show an error message to the user
+      setErrors({
+        name: error.message || t('userManagementPage.error.createRoleFailed')
+      });
+      // Go back to step 1 to show the error
+      setCurrentStep(1);
     } finally {
-      setIsAssigningPermissions(false);
+      setIsSubmitting(false);
     }
   };
 
-  // Skip permissions and finish
-  const handleSkipPermissions = async () => {
-    // Just close and notify success since role is already created
-    onSuccess();
-    onClose();
-  };
 
   const handlePermissionToggle = (permissionId: number) => {
     setSelectedPermissions((prev) =>
@@ -259,6 +218,19 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
       setSelectedPermissions((prev) => [...new Set([...prev, ...categoryIds])]);
     }
   };
+
+  // --- NEW: Global Select/Deselect Logic ---
+  const handleSelectAllGlobal = () => {
+    const allIds = permissionCatalog.flatMap((cat) =>
+      cat.permissions.map((p) => p.permissionId)
+    );
+    setSelectedPermissions(allIds);
+  };
+
+  const handleDeselectAllGlobal = () => {
+    setSelectedPermissions([]);
+  };
+  // ----------------------------------------
 
   if (!isOpen) return null;
 
@@ -306,11 +278,10 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
               {/* Step 1 */}
               <div className="flex items-center flex-1">
                 <div
-                  className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                    currentStep === 1
+                  className={`flex items-center justify-center w-8 h-8 rounded-full ${currentStep === 1
                       ? 'bg-purple-600 text-white'
                       : 'bg-green-600 text-white'
-                  }`}
+                    }`}
                 >
                   {currentStep === 2 ? (
                     <Check className="h-5 w-5" />
@@ -319,11 +290,10 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                   )}
                 </div>
                 <span
-                  className={`ml-2 text-sm font-medium ${
-                    currentStep === 1
+                  className={`ml-2 text-sm font-medium ${currentStep === 1
                       ? 'text-gray-900 dark:text-white'
                       : 'text-gray-500 dark:text-gray-400'
-                  }`}
+                    }`}
                 >
                   {t('userManagementPage.createRole.stepBasicInfo')}
                 </span>
@@ -332,29 +302,26 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
               {/* Connector */}
               <div className="flex-1 h-0.5 mx-4 bg-gray-200 dark:bg-gray-600">
                 <div
-                  className={`h-full transition-all duration-300 ${
-                    currentStep === 2 ? 'bg-purple-600 w-full' : 'bg-transparent w-0'
-                  }`}
+                  className={`h-full transition-all duration-300 ${currentStep === 2 ? 'bg-purple-600 w-full' : 'bg-transparent w-0'
+                    }`}
                 ></div>
               </div>
 
               {/* Step 2 */}
               <div className="flex items-center flex-1 justify-end">
                 <span
-                  className={`mr-2 text-sm font-medium ${
-                    currentStep === 2
+                  className={`mr-2 text-sm font-medium ${currentStep === 2
                       ? 'text-gray-900 dark:text-white'
                       : 'text-gray-500 dark:text-gray-400'
-                  }`}
+                    }`}
                 >
                   {t('userManagementPage.createRole.stepPermissions')}
                 </span>
                 <div
-                  className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                    currentStep === 2
+                  className={`flex items-center justify-center w-8 h-8 rounded-full ${currentStep === 2
                       ? 'bg-purple-600 text-white'
                       : 'bg-gray-300 dark:bg-gray-600 text-gray-600 dark:text-gray-400'
-                  }`}
+                    }`}
                 >
                   <span className="text-sm font-semibold">2</span>
                 </div>
@@ -403,11 +370,10 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                         onChange={(e) =>
                           setFormData({ ...formData, name: e.target.value })
                         }
-                        className={`w-full px-3 py-2 border ${
-                          errors.name
+                        className={`w-full px-3 py-2 border ${errors.name
                             ? 'border-red-500'
                             : 'border-gray-300 dark:border-gray-600'
-                        } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
+                          } rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent`}
                         placeholder={t('userManagementPage.createRole.roleNamePlaceholder')}
                         disabled={isBusy}
                       />
@@ -460,35 +426,30 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                           type="button"
                           onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
                           disabled={isBusy || branches.length === 0}
-                          className={`flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${
-                            isRTL ? 'flex-row-reverse' : ''
-                          }`}
+                          className={`flex items-center justify-between w-full px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed ${isRTL ? 'flex-row-reverse' : ''
+                            }`}
                         >
                           <span
-                            className={`flex items-center ${
-                              isRTL ? 'flex-row-reverse' : ''
-                            }`}
+                            className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''
+                              }`}
                           >
                             <Building
-                              className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${
-                                isRTL ? 'ml-2' : 'mr-2'
-                              }`}
+                              className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'
+                                }`}
                             />
                             {selectedBranchName ||
                               t('userManagementPage.createRole.selectBranch')}
                           </span>
                           <ChevronDown
-                            className={`h-4 w-4 transition-transform duration-200 ${
-                              isBranchDropdownOpen ? 'transform rotate-180' : ''
-                            } ${isRTL ? 'mr-2' : 'ml-2'}`}
+                            className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''
+                              } ${isRTL ? 'mr-2' : 'ml-2'}`}
                           />
                         </button>
 
                         {isBranchDropdownOpen && (
                           <div
-                            className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-700 rounded-md shadow-lg border border-gray-200 dark:border-gray-600 py-1 max-h-60 overflow-auto ${
-                              isRTL ? 'right-0' : 'left-0'
-                            }`}
+                            className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-700 rounded-md shadow-lg border border-gray-200 dark:border-gray-600 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'
+                              }`}
                           >
                             <button
                               type="button"
@@ -496,15 +457,14 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                                 setFormData({ ...formData, branchId: undefined });
                                 setIsBranchDropdownOpen(false);
                               }}
-                              className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 ${
-                                !formData.branchId
+                              className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 ${!formData.branchId
                                   ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
                                   : 'text-gray-700 dark:text-gray-200'
-                              } ${isRTL ? 'text-right' : 'text-left'}`}
+                                } ${isRTL ? 'text-right' : 'text-left'}`}
                             >
                               {t('userManagementPage.createRole.noBranch')}
                             </button>
-                            
+
                             {branches.map((branch) => (
                               <button
                                 key={branch.branchId}
@@ -512,16 +472,15 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                                 onClick={() => {
                                   setFormData({
                                     ...formData,
-                                    branchId: Number(branch.branchId), 
+                                    branchId: Number(branch.branchId),
                                   });
-                                                                  setChooseBranchId(Number(branch.branchId))
+                                  setChooseBranchId(Number(branch.branchId))
                                   setIsBranchDropdownOpen(false);
                                 }}
-                                className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 ${
-                                  formData.branchId === Number(branch.branchId) // Compare numbers
+                                className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 ${formData.branchId === Number(branch.branchId) // Compare numbers
                                     ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
                                     : 'text-gray-700 dark:text-gray-200'
-                                } ${isRTL ? 'text-right' : 'text-left'}`}
+                                  } ${isRTL ? 'text-right' : 'text-left'}`}
                               >
                                 {branch.branchName}
                               </button>
@@ -551,16 +510,11 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                       disabled={isBusy}
                       className="px-6 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
-                      {isCreatingRole ? (
-                        <>
-                          <Loader2 className="animate-spin h-4 w-4" />
-                          {t('userManagementPage.createRole.creating')}
-                        </>
+                      {t('userManagementPage.createRole.continue')}
+                      {isRTL ? (
+                        <ArrowLeft className="h-4 w-4" />
                       ) : (
-                        <>
-                          {t('userManagementPage.createRole.continue')}
-                          <ArrowRight className="h-4 w-4" />
-                        </>
+                        <ArrowRight className="h-4 w-4" />
                       )}
                     </button>
                   </div>
@@ -585,15 +539,43 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                         <p className="text-sm text-purple-800 dark:text-purple-300">
                           {t('userManagementPage.createRole.step2Description')}
                         </p>
+                        <p className="text-sm text-purple-800 dark:text-purple-300 mt-2 font-medium">
+                          {t('userManagementPage.createRole.permissionsRequired') || '* At least one permission is required'}
+                        </p>
                       </div>
                     </div>
                   </div>
 
                   {/* Permissions Selection */}
                   <div className="space-y-4">
-                    <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      {t('userManagementPage.createRole.permissions')}
-                    </h4>
+                    
+                    {/* --- UPDATED: Header with Select All / Clear Buttons --- */}
+                    <div className="flex items-center justify-between">
+                      <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        {t('userManagementPage.createRole.permissions')}
+                      </h4>
+                      <div className="flex gap-2">
+                         <button
+                           type="button"
+                           onClick={handleSelectAllGlobal}
+                           disabled={isBusy || permissionCatalog.length === 0}
+                           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-md transition-colors disabled:opacity-50"
+                         >
+                           <CheckSquare className="h-3.5 w-3.5" />
+                           {t('userManagementPage.createRole.selectAll') || 'Select All'}
+                         </button>
+                         <button
+                           type="button"
+                           onClick={handleDeselectAllGlobal}
+                           disabled={isBusy || selectedPermissions.length === 0}
+                           className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors disabled:opacity-50"
+                         >
+                           <X className="h-3.5 w-3.5" />
+                           {t('userManagementPage.createRole.clear') || 'Clear'}
+                         </button>
+                      </div>
+                    </div>
+                    {/* ----------------------------------------------------- */}
 
                     <div className="max-h-80 min-h-[10rem] overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700/50">
                       {isFetchingPermissions ? (
@@ -623,18 +605,17 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                               {/* Category Header */}
                               <div className="bg-gray-100 dark:bg-gray-700 px-4 py-2 flex items-center justify-between sticky top-0 z-10">
                                 <span className="font-medium text-sm text-gray-700 dark:text-gray-300">
-                                  {catalog.category}
+                                  {getTranslatedCategoryName(catalog.category, t)}
                                 </span>
                                 <button
                                   type="button"
                                   onClick={() => handleSelectAllInCategory(catalog.category)}
-                                  className={`text-xs px-2 py-1 rounded ${
-                                    allSelected
+                                  className={`text-xs px-2 py-1 rounded ${allSelected
                                       ? 'bg-purple-600 text-white'
                                       : someSelected
-                                      ? 'bg-purple-300 dark:bg-purple-700 text-gray-700 dark:text-gray-200'
-                                      : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
-                                  } hover:opacity-80 transition-opacity`}
+                                        ? 'bg-purple-300 dark:bg-purple-700 text-gray-700 dark:text-gray-200'
+                                        : 'bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300'
+                                    } hover:opacity-80 transition-opacity`}
                                   disabled={isBusy}
                                 >
                                   {allSelected
@@ -645,26 +626,30 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
 
                               {/* Permissions List */}
                               <div className="p-2">
-                                {catalog.permissions.map((permission) => (
-                                  <label
-                                    key={permission.permissionId}
-                                    className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 cursor-pointer"
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      checked={selectedPermissions.includes(permission.permissionId)}
-                                      onChange={() => handlePermissionToggle(permission.permissionId)}
-                                      disabled={isBusy}
-                                      className="mt-0.5 h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
-                                    />
-                                    <div className="flex-1 min-w-0">
-                                      <div className="font-medium text-sm text-gray-900 dark:text-white">
-                                        {permission.description}
+                                {catalog.permissions.map((permission) => {
+                                  const translatedName = getTranslatedPermissionName(permission, t);
+
+                                  return (
+                                    <label
+                                      key={permission.permissionId}
+                                      className="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600/50 cursor-pointer"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        checked={selectedPermissions.includes(permission.permissionId)}
+                                        onChange={() => handlePermissionToggle(permission.permissionId)}
+                                        disabled={isBusy}
+                                        className="mt-0.5 h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                                      />
+                                      <div className="flex-1 min-w-0">
+                                        <div className="font-medium text-sm text-gray-900 dark:text-white">
+                                          {translatedName}
+                                        </div>
+
                                       </div>
-                                      
-                                    </div>
-                                  </label>
-                                ))}
+                                    </label>
+                                  );
+                                })}
                               </div>
                             </div>
                           );
@@ -682,44 +667,38 @@ const CreateRoleModal: React.FC<CreateRoleModalProps> = ({
                   </div>
 
                   {/* Step 2 Footer */}
-                  <div className="flex justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex justify-end space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
                     <button
                       type="button"
-                      onClick={handleSkipPermissions}
+                      onClick={() => setCurrentStep(1)}
                       disabled={isBusy}
-                      className="px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white focus:outline-none disabled:opacity-50"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none disabled:opacity-50 flex items-center gap-2"
                     >
-                      {t('userManagementPage.createRole.skipPermissions')}
-                    </button>
-                    <div className="flex space-x-4">
-                      <button
-                        type="button"
-                        onClick={() => setCurrentStep(1)}
-                        disabled={isBusy}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white focus:outline-none disabled:opacity-50 flex items-center gap-2"
-                      >
+                      {isRTL ? (
+                        <ArrowRight className="h-4 w-4" />
+                      ) : (
                         <ArrowLeft className="h-4 w-4" />
-                        {t('userManagementPage.createRole.back')}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleStep2Submit}
-                        disabled={isBusy}
-                        className="px-6 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                      >
-                        {isAssigningPermissions ? (
-                          <>
-                            <Loader2 className="animate-spin h-4 w-4" />
-                            {t('userManagementPage.createRole.assigningPermissions')}
-                          </>
-                        ) : (
-                          <>
-                            <Check className="h-4 w-4" />
-                            {t('userManagementPage.createRole.finish')}
-                          </>
-                        )}
-                      </button>
-                    </div>
+                      )}
+                      {t('userManagementPage.createRole.back')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleStep2Submit}
+                      disabled={isBusy || selectedPermissions.length === 0}
+                      className="px-6 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="animate-spin h-4 w-4" />
+                          {t('userManagementPage.createRole.creating')}
+                        </>
+                      ) : (
+                        <>
+                          <Check className="h-4 w-4" />
+                          {t('userManagementPage.createRole.finish')}
+                        </>
+                      )}
+                    </button>
                   </div>
                 </motion.div>
               )}

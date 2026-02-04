@@ -49,7 +49,9 @@ export interface AvailableAddonProduct {
 
 class ProductAddonsService {
   private baseUrl = '/api/ProductAddons';
-
+ private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
   /**
    * Add a product as an addon to another product
    */
@@ -130,10 +132,14 @@ class ProductAddonsService {
   async getProductAddon(addonId: number): Promise<ProductAddon> {
     try {
       logger.info('Ürün eklentisi getiriliyor', { addonId });
-      
-      const response = await httpClient.get<ProductAddon>(`${this.baseUrl}/${addonId}`);
-      
-      logger.info('Ürün eklentisi başarıyla getirildi', { 
+      const language = this.getLanguageFromStorage();
+      const response = await httpClient.get<ProductAddon>(`${this.baseUrl}/${addonId}`, {
+        params: {
+          'language': language
+        }
+      });
+
+      logger.info('Ürün eklentisi başarıyla getirildi', {
         addonId,
         response: response.data 
       });
@@ -151,10 +157,15 @@ class ProductAddonsService {
   async getProductAddons(productId: number): Promise<ProductAddon[]> {
     try {
       logger.info('Ürün eklentileri getiriliyor', { productId });
-      
-      const response = await httpClient.get<ProductAddon[]>(`${this.baseUrl}/product/${productId}`);
-      
-      logger.info('Ürün eklentileri başarıyla getirildi', { 
+      const language = this.getLanguageFromStorage();
+
+      const response = await httpClient.get<ProductAddon[]>(`${this.baseUrl}/product/${productId}`, {
+        params: {
+          'language': language
+        }
+      });
+
+      logger.info('Ürün eklentileri başarıyla getirildi', {
         productId,
         addonCount: response.data?.length || 0 
       });
@@ -172,11 +183,11 @@ class ProductAddonsService {
   async getAvailableAddonProducts(): Promise<AvailableAddonProduct[]> {
     try {
       logger.info('Mevcut eklenti ürünleri getiriliyor');
-      
-      const response = await httpClient.get<AvailableAddonProduct[]>(`${this.baseUrl}/available`);
-      
-      logger.info('Mevcut eklenti ürünleri başarıyla getirildi', { 
-        productCount: response.data?.length || 0 
+      const language = this.getLanguageFromStorage();
+      const response = await httpClient.get<AvailableAddonProduct[]>(`${this.baseUrl}/available`, {
+        params: {
+          'language': language
+        }
       });
       
       return response.data || [];

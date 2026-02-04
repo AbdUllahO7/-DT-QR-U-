@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { OrdersManagerActions, OrdersManagerState, OrderStatusEnums } from '../types/Orders/type';
 import { orderService } from '../services/Branch/OrderService';
 import { branchService } from '../services/branchService';
@@ -50,11 +50,11 @@ export const useOrdersManager = () => {
       tableName: ''
     },
     pagination: {
-      currentPage: 1,
-      itemsPerPage: 10,
-      totalItems: 0,
-      totalPages: 0
-    },
+    currentPage: 1,
+    itemsPerPage: 10,
+    totalItems: 0,  
+    totalPages: 0   
+  },
     showAdvancedFilters: false,
     filteredOrders: []
   });
@@ -79,50 +79,131 @@ export const useOrdersManager = () => {
   };
 
   // Handle branch selection
-  const handleBranchSelect = (branch: BranchDropdownItem) => {
+const handleBranchSelect = (branch: BranchDropdownItem) => {
+  setState(prev => ({ 
+    ...prev, 
+    selectedBranch: branch,
+    isBranchDropdownOpen: false,
+    error: null,
+    pagination: { ...prev.pagination, currentPage: 1 }
+  }));
+  
+  orderService.clearOrderTypesCache();
+  
+
+};
+
+  // Fetch pending orders with branch filter and pagination
+ const fetchPendingOrders = useCallback(async (branchId?: number, page?: number, pageSize?: number) => {
+    const targetBranchId = branchId || getCurrentBranchId();
+    const targetPage = page !== undefined ? page : state.pagination.currentPage;
+    const targetPageSize = pageSize !== undefined ? pageSize : state.pagination.itemsPerPage;
+
+    setState(prev => ({ ...prev, loading: true, error: null }));
+    try {
+      const result = await orderService.getPendingOrders(targetBranchId, targetPage, targetPageSize);
+      setState(prev => ({
+        ...prev,
+        pendingOrders: result.orders,
+        loading: false,
+        pagination: {
+          ...prev.pagination,
+          totalItems: result.totalItems,
+          totalPages: result.totalPages
+        }
+      }));
+    } catch (error: any) {
+      setState(prev => ({
+        ...prev,
+        error: error.message,
+        loading: false,
+        pendingOrders: [],
+        pagination: {
+          ...prev.pagination,
+          totalItems: 0,
+          totalPages: 0
+        }
+      }));
+    }
+  }, []);
+
+const fetchBranchOrders = useCallback(async (branchId?: number, page?: number, pageSize?: number) => {
+  const targetBranchId = branchId || state.selectedBranch?.branchId;
+  const targetPage = page !== undefined ? page : state.pagination.currentPage;
+  const targetPageSize = pageSize !== undefined ? pageSize : state.pagination.itemsPerPage;
+  
+
+  setState(prev => ({ ...prev, loading: true, error: null }));
+  
+  try {
+    const result = await orderService.getBranchOrders(targetBranchId, targetPage, targetPageSize);
+    
+    // ✅ FIXED: Don't update currentPage/itemsPerPage here - only update the results
+    setState(prev => ({
+      ...prev, 
+      branchOrders: result.orders, 
+      loading: false,
+      pagination: {
+        ...prev.pagination, // ✅ Preserve current pagination state
+        totalItems: result.totalItems,
+        totalPages: result.totalPages
+      }
+    }));
+  } catch (error: any) {
     setState(prev => ({ 
       ...prev, 
-      selectedBranch: branch,
-      isBranchDropdownOpen: false,
-      error: null,
-      // Reset pagination when switching branches
-      pagination: { ...prev.pagination, currentPage: 1 }
+      error: error.message, 
+      loading: false,
+      branchOrders: [],
+      pagination: {
+        ...prev.pagination, // ✅ Preserve current pagination state
+        totalItems: 0,
+        totalPages: 0
+      }
     }));
-    
-    // Clear order types cache when switching branches to force refresh
-    orderService.clearOrderTypesCache();
-    
-    // Refetch orders for the new branch
-    if (state.viewMode === 'pending') {
-      fetchPendingOrders(branch.branchId);
-    } else {
-      fetchBranchOrders(branch.branchId);
-    }
-  };
+  }
+}, []); // ✅ Empty dependencies
 
-  // Fetch pending orders with branch filter
-  const fetchPendingOrders = async (branchId?: number) => {
-    const targetBranchId = branchId || getCurrentBranchId();
-    setState(prev => ({ ...prev, loading: true, error: null }));
-    try {
-      const orders = await orderService.getPendingOrders(targetBranchId);
-      setState(prev => ({ ...prev, pendingOrders: orders, loading: false }));
-    } catch (error: any) {
-      setState(prev => ({ ...prev, error: error.message, loading: false }));
-    }
-  };
+const handleBranchPageChange = (newPage: number) => {
+  
+  // ✅ Update state first - useEffect will trigger fetch
+  setState(prev => ({
+    ...prev,
+    pagination: { ...prev.pagination, currentPage: newPage }
+  }));
+};
 
-  // Fetch branch orders with branch filter
-  const fetchBranchOrders = async (branchId?: number) => {
-    const targetBranchId = branchId || getCurrentBranchId();
-    setState(prev => ({ ...prev, loading: true, error: null }));
-    try {
-      const orders = await orderService.getBranchOrders(targetBranchId);
-      setState(prev => ({ ...prev, branchOrders: orders, loading: false }));
-    } catch (error: any) {
-      setState(prev => ({ ...prev, error: error.message, loading: false }));
+const handleBranchItemsPerPageChange = (newItemsPerPage: number) => {
+  
+  // ✅ Update state first - useEffect will trigger fetch
+  setState(prev => ({
+    ...prev,
+    pagination: { 
+      ...prev.pagination, 
+      itemsPerPage: newItemsPerPage, 
+      currentPage: 1 // Reset to page 1
     }
-  };
+  }));
+};
+    // Handle page change for pending orders
+    const handlePendingPageChange = (newPage: number) => {
+      setState(prev => ({
+        ...prev,
+        pagination: { ...prev.pagination, currentPage: newPage }
+      }));
+    };
+
+    // Handle items per page change for pending orders
+    const handlePendingItemsPerPageChange = (newItemsPerPage: number) => {
+      setState(prev => ({
+        ...prev,
+        pagination: {
+          ...prev.pagination,
+          itemsPerPage: newItemsPerPage,
+          currentPage: 1
+        }
+      }));
+    };
 
   // Fetch table basket summary with branch filter
   const fetchTableBasketSummary = async (): Promise<TableBasketSummary[]> => {
@@ -198,26 +279,28 @@ export const useOrdersManager = () => {
   // Handle confirm order - FIXED: Now passes branchId
   const handleConfirmOrder = async () => {
     if (!state.activeOrderId || !state.activeRowVersion) return;
-    
+
     const branchId = getCurrentBranchId();
-    setState(prev => ({ ...prev, loading: true, error: null, showConfirmModal: false }));
-    
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
     try {
       const data = { rowVersion: state.activeRowVersion };
       const updatedOrder = await orderService.confirmOrder(state.activeOrderId, data, branchId);
-      
+
+      // Refresh the orders list based on current view
       if (state.viewMode === 'pending') {
-        fetchPendingOrders();
+        await fetchPendingOrders(branchId);
       } else {
-        fetchBranchOrders();
+        await fetchBranchOrders(branchId);
       }
-      
-      setState(prev => ({ 
-        ...prev, 
-        selectedOrder: updatedOrder, 
-        loading: false, 
-        activeOrderId: null, 
-        activeRowVersion: null 
+
+      setState(prev => ({
+        ...prev,
+        selectedOrder: updatedOrder,
+        loading: false,
+        activeOrderId: null,
+        activeRowVersion: null,
+        showConfirmModal: false
       }));
     } catch (error: any) {
       setState(prev => ({ 
@@ -233,30 +316,32 @@ export const useOrdersManager = () => {
   // Handle reject order - FIXED: Now passes branchId
   const handleRejectOrder = async () => {
     if (!state.activeOrderId || !state.activeRowVersion || !state.rejectReason) return;
-    
+
     const branchId = getCurrentBranchId();
-    setState(prev => ({ ...prev, loading: true, error: null, showRejectModal: false }));
-    
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
     try {
-      const data: RejectOrderDto = { 
-        rejectionReason: state.rejectReason, 
-        rowVersion: state.activeRowVersion 
+      const data: RejectOrderDto = {
+        rejectionReason: state.rejectReason,
+        rowVersion: state.activeRowVersion
       };
       const updatedOrder = await orderService.rejectOrder(state.activeOrderId, data, branchId);
-      
+
+      // Refresh the orders list based on current view
       if (state.viewMode === 'pending') {
-        fetchPendingOrders();
+        await fetchPendingOrders(branchId);
       } else {
-        fetchBranchOrders();
+        await fetchBranchOrders(branchId);
       }
-      
-      setState(prev => ({ 
-        ...prev, 
-        selectedOrder: updatedOrder, 
-        loading: false, 
-        activeOrderId: null, 
-        activeRowVersion: null, 
-        rejectReason: '' 
+
+      setState(prev => ({
+        ...prev,
+        selectedOrder: updatedOrder,
+        loading: false,
+        activeOrderId: null,
+        activeRowVersion: null,
+        rejectReason: '',
+        showRejectModal: false
       }));
     } catch (error: any) {
       setState(prev => ({ 
@@ -270,34 +355,35 @@ export const useOrdersManager = () => {
     }
   };
 
-  // NEW: Handle cancel order
   const handleCancelOrder = async () => {
     if (!state.activeOrderId || !state.activeRowVersion) return;
-    
+
     const branchId = getCurrentBranchId();
-    setState(prev => ({ ...prev, loading: true, error: null, showCancelModal: false }));
-    
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
     try {
       // Cancel order by updating status to Cancelled
-      const data: UpdateOrderStatusDto = { 
+      const data: UpdateOrderStatusDto = {
         newStatus: OrderStatusEnums.Cancelled,
-        rowVersion: state.activeRowVersion 
+        rowVersion: state.activeRowVersion
       };
       const updatedOrder = await orderService.updateOrderStatus(state.activeOrderId, data, branchId);
-      
+
+      // Refresh the orders list based on current view
       if (state.viewMode === 'pending') {
-        fetchPendingOrders();
+        await fetchPendingOrders(branchId);
       } else {
-        fetchBranchOrders();
+        await fetchBranchOrders(branchId);
       }
-      
-      setState(prev => ({ 
-        ...prev, 
-        selectedOrder: updatedOrder, 
-        loading: false, 
-        activeOrderId: null, 
-        activeRowVersion: null, 
-        cancelReason: '' 
+
+      setState(prev => ({
+        ...prev,
+        selectedOrder: updatedOrder,
+        loading: false,
+        activeOrderId: null,
+        activeRowVersion: null,
+        cancelReason: '',
+        showCancelModal: false
       }));
     } catch (error: any) {
       setState(prev => ({ 
@@ -314,30 +400,32 @@ export const useOrdersManager = () => {
   // Handle update status - FIXED: Now passes branchId
   const handleUpdateStatus = async () => {
     if (!state.activeOrderId || !state.activeRowVersion || state.newStatus === null) return;
-    
+
     const branchId = getCurrentBranchId();
-    setState(prev => ({ ...prev, loading: true, error: null, showStatusModal: false }));
-    
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
     try {
-      const data: UpdateOrderStatusDto = { 
-        newStatus: state.newStatus, 
-        rowVersion: state.activeRowVersion 
+      const data: UpdateOrderStatusDto = {
+        newStatus: state.newStatus,
+        rowVersion: state.activeRowVersion
       };
       const updatedOrder = await orderService.updateOrderStatus(state.activeOrderId, data, branchId);
-      
+
+      // Refresh the orders list based on current view
       if (state.viewMode === 'pending') {
-        fetchPendingOrders();
+        await fetchPendingOrders(branchId);
       } else {
-        fetchBranchOrders();
+        await fetchBranchOrders(branchId);
       }
-      
-      setState(prev => ({ 
-        ...prev, 
-        selectedOrder: updatedOrder, 
-        loading: false, 
-        activeOrderId: null, 
-        activeRowVersion: null, 
-        newStatus: null 
+
+      setState(prev => ({
+        ...prev,
+        selectedOrder: updatedOrder,
+        loading: false,
+        activeOrderId: null,
+        activeRowVersion: null,
+        newStatus: null,
+        showStatusModal: false
       }));
     } catch (error: any) {
       let errorMessage = error.message;
@@ -417,21 +505,20 @@ export const useOrdersManager = () => {
     }
   };
 
-  // Switch view mode
-  const switchViewMode = (mode: 'pending' | 'branch' | 'deletedOrders') => {
-    setState(prev => ({ 
-      ...prev, 
-      viewMode: mode,
-      pagination: { ...prev.pagination, currentPage: 1 }
-    }));
-    if (mode === 'pending') {
-      fetchPendingOrders();
-    } else if (mode === 'branch') {
-      fetchBranchOrders();
-    } else {
-      return null
+const switchViewMode = (mode: 'pending' | 'branch' | 'deletedOrders') => {
+  
+  setState(prev => ({ 
+    ...prev, 
+    viewMode: mode,
+    pagination: { 
+      currentPage: 1,
+      itemsPerPage: prev.pagination.itemsPerPage,
+      totalItems: 0,
+      totalPages: 0
     }
-  };
+  }));
+  
+};
 
   // Modal handlers
   const openConfirmModal = (orderId: string, rowVersion: string) => {
@@ -532,7 +619,7 @@ export const useOrdersManager = () => {
     getAllOrderTypes,
     handleConfirmOrder,
     handleRejectOrder,
-    handleCancelOrder, 
+    handleCancelOrder,
     handleUpdateStatus,
     getOrderDetails,
     getTableOrders,
@@ -541,13 +628,17 @@ export const useOrdersManager = () => {
     switchViewMode,
     openConfirmModal,
     openRejectModal,
-    openCancelModal, 
+    openCancelModal,
     openStatusModal,
     openDetailsModal,
     closeModals,
     toggleRowExpansion,
     handleSort,
-    setState
+    setState,
+    handlePendingPageChange,
+    handlePendingItemsPerPageChange,
+    handleBranchPageChange,
+    handleBranchItemsPerPageChange
   };
 
   return { state, actions };

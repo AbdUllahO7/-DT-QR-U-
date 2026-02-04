@@ -1,8 +1,9 @@
 // src/components/Restaurant/MoneyCase/QuickSummaryCards.tsx
 
 import React from 'react';
-import { DollarSign, TrendingUp, Clock, AlertCircle, ShoppingCart, Calendar } from 'lucide-react';
+import {  TrendingUp, Clock, AlertCircle, ShoppingCart, Calendar } from 'lucide-react';
 import { QuickSummary, ActiveMoneyCase } from '../../../../types/BranchManagement/MoneyCase';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface Props {
   quickSummary: QuickSummary | null;
@@ -10,16 +11,19 @@ interface Props {
   loading: boolean;
   t: (key: string) => string;
   isRTL: boolean;
+  currencySymbol?: string;
 }
 
-const QuickSummaryCards: React.FC<Props> = ({ 
-  quickSummary, 
-  activeCase, 
-  loading, 
-  t, 
-  isRTL 
+const QuickSummaryCards: React.FC<Props> = ({
+  quickSummary,
+  activeCase,
+  loading,
+  t,
+  isRTL,
+  currencySymbol = '₺'
 }) => {
 
+  const currency = useCurrency();
 
   if (loading && !activeCase && !quickSummary) {
     return (
@@ -35,12 +39,10 @@ const QuickSummaryCards: React.FC<Props> = ({
   }
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return `${currencySymbol}${new Intl.NumberFormat('en-US', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    }).format(value);
+    }).format(value)}`;
   };
 
   // Use quickSummary data first, then activeCase as fallback
@@ -87,11 +89,11 @@ const QuickSummaryCards: React.FC<Props> = ({
                 {t('moneyCase.todayTotalSales')}
               </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                {formatCurrency(todaySales)}
+                <span>{currency.symbol}</span>{todaySales}
               </p>
               {closedRevenue > 0 && (
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {t('moneyCase.closedShifts')}: {formatCurrency(closedRevenue)}
+                  {t('moneyCase.closedShifts')}: <span>{currency.symbol}</span>{closedRevenue}
                 </p>
               )}
             </div>
@@ -107,10 +109,9 @@ const QuickSummaryCards: React.FC<Props> = ({
                 {t('moneyCase.currentShiftRevenue')}
               </p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
-                {formatCurrency(currentRevenue)}
+                 <span>{currency.symbol}</span> {currentRevenue}
               </p>
             </div>
-            <DollarSign className="h-8 w-8 text-yellow-500 flex-shrink-0" />
           </div>
         </div>
 
@@ -147,7 +148,7 @@ const QuickSummaryCards: React.FC<Props> = ({
                   {t('moneyCase.totalRevenue')}
                 </span>
                 <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  {formatCurrency(quickSummary.weekToDate.totalRevenue)}
+                     <span>{currency.symbol}</span>{quickSummary.weekToDate.totalRevenue}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -183,7 +184,7 @@ const QuickSummaryCards: React.FC<Props> = ({
                   {t('moneyCase.totalRevenue')}
                 </span>
                 <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  {formatCurrency(quickSummary.monthToDate.totalRevenue)}
+                  <span>{currency.symbol}</span>{quickSummary.monthToDate.totalRevenue}
                 </span>
               </div>
               <div className="flex justify-between items-center">

@@ -4,13 +4,19 @@ export const ar = {
   // Common
   common: {
     loading: 'جاري التحميل...',
+    wait: 'يرجى الانتظار...',
     error: 'خطأ',
     actions: 'الإجراءات',
+    select: 'تحديد',
     change: 'تغيير',
+    removal: 'إزالة',
     success: 'نجح',
+    setAsDefault: 'تعيين كافتراضي',
+    default: 'افتراضي',
     cancel: 'إلغاء',
-      "emailAddress": "عنوان البريد الإلكتروني",
-      "emailPlaceholder": "you@example.com",
+    saving: 'جاري الحفظ...',
+    "emailAddress": "عنوان البريد الإلكتروني",
+    "emailPlaceholder": "you@example.com",
     save: 'حفظ',
     delete: 'حذف',
     edit: 'تعديل',
@@ -34,33 +40,48 @@ export const ar = {
     dateRange: 'نطاق التاريخ',
     today: 'اليوم',
     yesterday: 'أمس',
+    daysAgo: 'أيام مضت',
     last7Days: 'آخر 7 أيام',
     last30Days: 'آخر 30 يوم',
     thisMonth: 'هذا الشهر',
-    lastMonth: 'الشهر الماضي'
+    lastMonth: 'الشهر الماضي',
+    remove: 'إزالة',
+    dismiss: 'رفض',
+    download: 'تحميل'
   },
   filter: {
-      "status": "الحالة",
-      "all": "الكل",
-      "active": "نشط",
-      "inactive": "غير نشط",
-      "categories": "الفئات",
-      allergenic:"مسببات الحساسية",
-      nonallergenic:"غير مسبب للحساسية",
-      specific:{
-        allergens : "مسببات الحساسية"
-      },
-      "price": {
-        "range": "نطاق السعر",
-        "min": "أقل سعر",
-        "max": "أعلى سعر"
-      }
+    "status": "الحالة",
+    "all": "الكل",
+    "allergen": "مسبب الحساسية",
+    "active": "نشط",
+    "inactive": "غير نشط",
+    "categories": "الفئات",
+    allergenic: "مسببات الحساسية",
+    nonallergenic: "غير مسبب للحساسية",
+    specific: {
+      allergens: "مسببات الحساسية"
+    },
+    "price": {
+      "range": "نطاق السعر",
+      "min": "أقل سعر",
+      "max": "أعلى سعر"
+    }
   },
   sort: {
     "title": "ترتيب حسب",
     "name": {
       "asc": "الاسم (أ-ي)",
       "desc": "الاسم (ي-أ)"
+    },
+    "status": {
+      "label": "الحالة",
+      "asc": "الحالة (أ-ي)",
+      "desc": "الحالة (ي-أ)"
+    },
+    "allergen": {
+      "label": "مسببات الحساسية",
+      "asc": "المسببات (أ-ي)",
+      "desc": "المسببات (ي-أ)"
     },
     "price": {
       "asc": "السعر (من الأقل إلى الأعلى)",
@@ -79,13 +100,13 @@ export const ar = {
     "filters": "مسح المرشحات",
     "all": "مسح الكل"
   },
-  restaurantManagement : {
-    tabs : {
-      general : "عام",
-      legal : "قانوني",
-        about : "حول",
+  restaurantManagement: {
+    tabs: {
+      general: "عام",
+      legal: "قانوني",
+      about: "حول",
     },
-        GeneralInformation: "معلومات عامة"
+    GeneralInformation: "معلومات عامة"
 
   },
 
@@ -93,7 +114,7 @@ export const ar = {
   nav: {
     home: 'الرئيسية',
     features: 'المميزات',
-    pricing: 'الأسعار',
+    pricing: 'الخطط',
     testimonials: 'الشهادات',
     faq: 'الأسئلة الشائعة',
     contact: 'اتصل بنا',
@@ -123,78 +144,85 @@ export const ar = {
   },
 
   // Hero Section
- hero: {
+  hero: {
     title: {
-      line1: 'ارتقِ بتجربة مطعمك', 
+      line1: 'ارتقِ بتجربة مطعمك',
       line2: 'مع',
-      line3: 'قائمة QR الذكية' 
+      line3: 'قائمة QR الذكية'
     },
     subtitle: 'امنح ضيوفك إمكانية تصفح القائمة فوراً بمجرد مسح الكود. وفر تجربة طلب عصرية، سريعة، وآمنة.',
     features: {
       qrAccess: 'وصول فوري للمنيو',
-      mobileOptimized: 'تصميم مثالي للجوال', 
-      instantUpdate: 'تحديث مباشر للأسعار' 
+      mobileOptimized: 'تصميم مثالي للجوال',
+      instantUpdate: 'تحديث مباشر للأسعار'
     },
     cta: {
-      getStarted: 'ابدأ رحلتك مجاناً', 
+      getStarted: 'ابدأ رحلتك مجاناً',
       features: 'اكتشف المزايا'
     },
     socialProof: {
-      restaurants: 'أكثر من 500 مطعم يثق بنا', 
+      restaurants: 'أكثر من 500 مطعم يثق بنا',
       satisfaction: '99% نسبة رضا العملاء'
+    },
+    mockup: {
+      restaurantName: 'iDIGITEK',
+      scanPrompt: 'امسح الرمز لعرض القائمة',
+      pizza: 'مارغريتا بيتزا',
+      salad: 'سلطة سيزر',
+      dessert: 'تيراميسو'
     }
   },
 
   // Dashboard Navigation
   dashboard: {
-overview: {
-  title: 'نظرة عامة',
-  description: 'اعرض الحالة المالية والتشغيلية لمطعمك.',
-  loading: 'جاري تحميل البيانات...',
-  refresh: 'تحديث',
-  errorTitle: 'فشل تحميل بيانات لوحة التحكم',
-  kpis: {
-    totalViews: 'إجمالي المشاهدات',
-    qrScans: 'مسح رموز QR',
-    totalOrders: 'إجمالي الطلبات',
-    customerRating: 'تقييم العملاء',
-    todaySales: 'مبيعات اليوم',
-    currentBalance: 'الرصيد الحالي',
-    weekRevenue: 'إيرادات الأسبوع',
-    monthRevenue: 'إيرادات الشهر',
-    avgOrderValue: 'متوسط قيمة الطلب',
-    totalShifts: 'إجمالي الورديات',
-    changeTexts: {
-      lastWeek: 'مقارنة بالأسبوع الماضي',
-      lastMonth: 'مقارنة بالشهر الماضي',
-      thisWeek: 'هذا الأسبوع',
-      today: 'اليوم'
-    }
-  },
-  quickStats: {
-    thisMonth: 'هذا الشهر',
-    totalOrders: 'إجمالي الطلبات',
-    average: 'متوسط',
-    dailyOrders: 'الطلبات اليومية',
-    new: 'جديد',
-    customers: 'العملاء',
-    rating: 'التقييم',
-    totalCount: 'العدد الإجمالي',
-    cashSales: 'المبيعات النقدية',
-    cardSales: 'مبيعات البطاقة',
-    status: 'الحالة',
-    open: 'مفتوح',
-    closed: 'مغلق'
-  },
-  charts: {
-    weeklyActivity: 'النشاط الأسبوعي',
-    popularProducts: 'المنتجات الشائعة',
-    monthlyRevenue: 'الإيرادات الشهرية',
-    paymentMethods: 'طرق الدفع',
-    revenueComparison: 'مقارنة الإيرادات',
-    noData: 'لا توجد بيانات متاحة'
-  }
-},
+    overview: {
+      title: 'نظرة عامة',
+      description: 'اعرض الحالة المالية والتشغيلية لمطعمك.',
+      loading: 'جاري تحميل البيانات...',
+      refresh: 'تحديث',
+      errorTitle: 'فشل تحميل بيانات لوحة التحكم',
+      kpis: {
+        totalViews: 'إجمالي المشاهدات',
+        qrScans: 'مسح رموز QR',
+        totalOrders: 'إجمالي الطلبات',
+        customerRating: 'تقييم العملاء',
+        todaySales: 'مبيعات اليوم',
+        currentBalance: 'الرصيد الحالي',
+        weekRevenue: 'إيرادات الأسبوع',
+        monthRevenue: 'إيرادات الشهر',
+        avgOrderValue: 'متوسط قيمة الطلب',
+        totalShifts: 'إجمالي الورديات',
+        changeTexts: {
+          lastWeek: 'مقارنة بالأسبوع الماضي',
+          lastMonth: 'مقارنة بالشهر الماضي',
+          thisWeek: 'هذا الأسبوع',
+          today: 'اليوم'
+        }
+      },
+      quickStats: {
+        thisMonth: 'هذا الشهر',
+        totalOrders: 'إجمالي الطلبات',
+        average: 'متوسط',
+        dailyOrders: 'الطلبات اليومية',
+        new: 'جديد',
+        customers: 'العملاء',
+        rating: 'التقييم',
+        totalCount: 'العدد الإجمالي',
+        cashSales: 'المبيعات النقدية',
+        cardSales: 'مبيعات البطاقة',
+        status: 'الحالة',
+        open: 'مفتوح',
+        closed: 'مغلق'
+      },
+      charts: {
+        weeklyActivity: 'النشاط الأسبوعي',
+        popularProducts: 'المنتجات الشائعة',
+        monthlyRevenue: 'الإيرادات الشهرية',
+        paymentMethods: 'طرق الدفع',
+        revenueComparison: 'مقارنة الإيرادات',
+        noData: 'لا توجد بيانات متاحة'
+      }
+    },
     branches: {
       title: 'إدارة الفروع',
       description: 'إدارة فروعك وإضافة فروع جديدة.',
@@ -209,7 +237,7 @@ overview: {
       },
       delete: {
         title: 'حذف الفرع',
-        confirmMessage: 'هل أنت متأكد من أنك تريد حذف الفرع "{branchName}"؟ لا يمكن التراجع عن هذا الإجراء.'
+        confirmMessage: 'هل أنت متأكد من أنك تريد حذف الفرع ؟ لا يمكن التراجع عن هذا الإجراء.'
       }
     },
     orders: {
@@ -217,6 +245,9 @@ overview: {
       description: 'عرض وإدارة الطلبات.',
       loading: 'جاري تحميل الطلبات...',
       refresh: 'تحديث',
+      selectBranch: "اختر الفرع",
+      selectBranchToView: "اختر الفرع المراد عرضه",
+      noBranches: "لا توجد فروع",
       newOrder: 'طلب جديد',
       tabs: {
         all: 'الكل',
@@ -239,44 +270,48 @@ overview: {
         pendingOrders: 'الطلبات المعلقة',
         avgOrderValue: 'متوسط قيمة الطلب'
       }
-    },        
-    moneyCase : {
-      title : "إدارة الصندوق النقدي",
     },
-    ingredients : {
-      title : "المكونات"
+    moneyCase: {
+      title: "إدارة الصندوق النقدي",
+    },
+    ingredients: {
+      title: "المكونات"
+    },
+    extras: {
+      title: "الإضافات",
     },
     orderType: {
-        title: "إعدادات أنواع الطلبات",
-        subtitle: "إدارة حالة التفعيل والحد الأدنى لقيمة الطلب ورسوم الخدمة لأنواع الطلبات",
-        loading: "جاري تحميل أنواع الطلبات...",
-        pleaseWait: "يرجى الانتظار",
-        settingsUpdated: "تم تحديث الإعدادات بنجاح",
-        updateError: "حدث خطأ أثناء تحديث الإعدادات",
-        loadingError: "حدث خطأ أثناء تحميل أنواع الطلبات",
-        active: "نشط",
-        requiresAddress: "يتطلب عنوان",
-        requiresTable: "يتطلب اختيار طاولة",
-        requiresName: "يتطلب اسم العميل",
-        requiresPhone: "يتطلب رقم الهاتف",
-        minutes: "دقيقة",
-        requirements: "المتطلبات",
-        table: "طاولة",
-        address: "عنوان",
-        phone: "هاتف",
-        activeStatus: "الحالة النشطة",
-        activeStatusDescription: "تفعيل/إلغاء تفعيل نوع الطلب هذا",
-        minOrderAmount: "الحد الأدنى لقيمة الطلب",
-        serviceCharge: "رسوم الخدمة",
-        saveSettings: "حفظ الإعدادات",
-        updating: "جاري التحديث...",
-        totalOrderTypes: "إجمالي أنواع الطلبات",
-        activeTypes: "الأنواع النشطة",
-        totalActiveOrders: "إجمالي الطلبات النشطة",
-        estimatedTime: "الوقت المقدر"
-      },
-    products : {
-      title : "المنتجات",
+      title: "إعدادات أنواع الطلبات",
+      subtitle: "إدارة حالة التفعيل والحد الأدنى لقيمة الطلب ورسوم الخدمة لأنواع الطلبات",
+      loading: "جاري تحميل أنواع الطلبات...",
+      pleaseWait: "يرجى الانتظار",
+      estimatedMinutes: "دقائق مقدرة",
+      settingsUpdated: "تم تحديث الإعدادات بنجاح",
+      updateError: "حدث خطأ أثناء تحديث الإعدادات",
+      loadingError: "حدث خطأ أثناء تحميل أنواع الطلبات",
+      active: "نشط",
+      requiresAddress: "يتطلب عنوان",
+      requiresTable: "يتطلب اختيار طاولة",
+      requiresName: "يتطلب اسم العميل",
+      requiresPhone: "يتطلب رقم الهاتف",
+      minutes: "دقيقة",
+      requirements: "المتطلبات",
+      table: "طاولة",
+      address: "عنوان",
+      phone: "هاتف",
+      activeStatus: "الحالة النشطة",
+      activeStatusDescription: "تفعيل/إلغاء تفعيل نوع الطلب هذا",
+      minOrderAmount: "الحد الأدنى لقيمة الطلب",
+      serviceCharge: "رسوم الخدمة",
+      saveSettings: "حفظ الإعدادات",
+      updating: "جاري التحديث...",
+      totalOrderTypes: "إجمالي أنواع الطلبات",
+      activeTypes: "الأنواع النشطة",
+      totalActiveOrders: "إجمالي الطلبات النشطة",
+      estimatedTime: "الوقت المقدر"
+    },
+    products: {
+      title: "المنتجات",
       description: 'عرض وإدارة المنتجات.',
     },
     tables: {
@@ -333,7 +368,7 @@ overview: {
       restaurantLogo: 'شعار المطعم',
       companyInfo: 'معلومات الشركة',
       addAboutInfo: 'إضافة معلومات حول المطعم',
-      refresh : "تحديث",
+      refresh: "تحديث",
       placeholders: {
         restaurantName: 'أدخل اسم المطعم',
         aboutStory: 'قصة مطعمنا',
@@ -341,14 +376,21 @@ overview: {
       }
     },
     sidebar: {
-      title : "قائمة QR",
+      title: "قائمة QR",
       logout: 'تسجيل الخروج',
-      branch: 'فرع'
+      branch: 'فرع',
+      backToRestaurant: 'العودة إلى لوحة المطعم'
     },
-    RestaurantManagement : {
-      title : "إدارة المطعم"
+    branchProducts: {
+      title: 'منتجات الفرع'
     },
-    branchManagementTitle: "إدارة الفروع" 
+    branchManagement: {
+      title: 'إدارة الفرع'
+    },
+    RestaurantManagement: {
+      title: "إدارة المطعم"
+    },
+    branchManagementTitle: "إدارة الفروع"
   },
 
   // Theme
@@ -364,6 +406,9 @@ overview: {
     turkish: 'Türkçe',
     english: 'English',
     arabic: 'العربية',
+    azerbaijani: 'Azərbaycan',
+    albanian: 'Shqip',
+    bosnian: 'Bosanski',
     selectLanguage: 'اختر اللغة'
   },
 
@@ -453,14 +498,14 @@ overview: {
 
   // Brand
   brand: {
-    name: 'QR Menu',
+    name: 'iDIGITEK QR',
     slogan: 'حل المطاعم الرقمي'
   },
 
   // Features
-features: {
+  features: {
     title: 'لماذا تختار',
-    titleHighlight: 'نظام المنيو الرقمي؟',
+    titleHighlight: 'نظام  iDIGITEK QR Menu؟',
     subtitle: 'انقل تجربة ضيوفك لمستوى آخر من الاحترافية والسرعة مع أدوات مصممة خصيصاً لنمو المطاعم الحديثة.',
     list: {
       qrAccess: {
@@ -494,6 +539,22 @@ features: {
       multiLanguage: {
         title: 'تحدث لغة ضيوفك',
         description: 'اكسر حاجز اللغة وقدم قائمتك بعدة لغات تلقائياً لخدمة السياح والزوار من مختلف الجنسيات بسهولة.'
+      },
+      tableOrders: {
+        title: 'استقبل الطلبات من الطاولات',
+        description: 'يمكن للعملاء تقديم طلباتهم مباشرة من طاولاتهم. بسّط عملية الطلب وقلل أوقات الانتظار.'
+      },
+      multiBranch: {
+        title: 'إدارة الفروع المتعددة',
+        description: 'أدر جميع فروعك من مكان واحد. أنشئ قوائم وأسعار مختلفة لكل موقع.'
+      },
+      userRoles: {
+        title: 'إدارة المستخدمين والأدوار',
+        description: 'أضف وأدر المستخدمين بأدوار وصلاحيات مختلفة. تحكم في مستويات الوصول لفريقك.'
+      },
+      productCustomization: {
+        title: 'تخصيص المنتجات',
+        description: 'خصص المنتجات بالمكونات والحساسية والإضافات والكومبو والمزيد. امنح العملاء تحكماً كاملاً في طلباتهم.'
       }
     },
     cta: {
@@ -505,18 +566,18 @@ features: {
 
   // Footer
   footer: {
-    description: 'حل قائمة رقمية حديث وسريع وآمن للمطاعم. حسن تجربة العملاء ورقمن عملك.',
+    description: 'حل قائمة رقمية حديث وسريع وآمن للمطاعم. حسن تجربة العملاء  .',
     contact: {
       phone: '+90 531 732 47 31',
-      email: 'services@idigitek.com',
-      address: 'Istanbul , KayaŞehir'
+      email: 'info@idigitek.com',
+      address: 'Kayabaşı, 75. Yıl Cd MERKEZ KAYAŞEHIR PLAZA APT NO:9. D:69, 34494 Başakşehir/İstanbul'
     },
     sections: {
       product: {
         title: 'المنتج',
         links: {
           features: 'المميزات',
-          pricing: 'الأسعار', 
+          pricing: 'الخطط',
           demo: 'عرض توضيحي',
           api: 'وثائق API'
         }
@@ -525,7 +586,7 @@ features: {
         title: 'الشركة',
         links: {
           about: 'معلومات عنا',
-          blog: 'المدونة',
+          pricing: 'الخطط',
           careers: 'الوظائف',
           contact: 'اتصل بنا'
         }
@@ -571,7 +632,7 @@ features: {
       password: 'كلمة المرور',
       rememberMe: 'تذكرني',
       forgotPassword: 'نسيت كلمة المرور',
-      confirimEmail : "تأكيد  البريد الإلكتروني",
+      confirimEmail: "تأكيد  البريد الإلكتروني",
       signIn: 'تسجيل الدخول',
       signingIn: 'جاري تسجيل الدخول...',
       noAccount: 'ليس لديك حساب؟',
@@ -586,7 +647,7 @@ features: {
     },
     register: {
       title: 'إنشاء حساب',
-      subtitle: 'انضم إلى عائلة QR Menu ورقمن مطعمك',
+      subtitle: 'انضم إلى عائلة QR Menu  ',
       backToHome: 'العودة إلى الرئيسية',
       firstName: 'الاسم الأول',
       lastName: 'اسم العائلة',
@@ -602,7 +663,7 @@ features: {
       placeholders: {
         firstName: 'اسمك الأول',
         lastName: 'اسم العائلة',
-        email: 'إكزامبل@إيميل.كوم',
+        email: 'example@email.com',
         phone: '05XX XXX XX XX',
         password: '••••••••',
         confirmPassword: 'أعد إدخال كلمة المرور'
@@ -672,7 +733,7 @@ features: {
   },
 
   // Pricing
-pricing: {
+  pricing: {
     title: 'اختر الباقة',
     titleHighlight: 'المناسبة',
     titleEnd: 'لنمو أعمالك',
@@ -682,56 +743,75 @@ pricing: {
     freeMonths: 'وفر قيمة شهرين',
     mostPopular: 'الخيار المفضل',
     plans: {
-      basic: {
-        name: 'الباقة الأساسية',
+      starter: {
+        name: 'أساسي',
         features: {
-          '0': 'إدارة فرع واحد',
-          '1': 'قائمة حتى 50 صنف',
-          '2': 'لوحة تحكم وإحصائيات أساسية',
-          '3': 'دعم فني عبر البريد الإلكتروني',
-          '4': 'إنشاء كود QR فوري',
-          '5': 'تصميم متجاوب مع الجوال'
+          '0': 'مطعم واحد',
+          '1': 'فروع غير محدودة',
+          '2': 'عدد مستخدمين غير محدود',
+          '3': 'منتجات غير محدودة (المكونات، المواد المسببة للحساسية، الإضافات)',
+          '4': 'إدارة نفاد المخزون',
+          '5': 'ساعات العمل/الورديات',
+          '6': 'طلبات الطاولات',
+          '7': 'طلبات الاستلام',
+          '8': 'طلبات التوصيل',
+          '9': 'تحليلات أساسية',
+          '10': 'مولد رمز QR',
+          '11': 'تحسين للجوال',
+          '12': 'دعم متعدد اللغات',
+          '13': 'الطلب عبر الواتس اب (اختياري)'
         },
-        button: 'ابدأ مجاناً'
+        button: 'ابدأ الآن'
       },
       pro: {
-        name: 'الباقة الاحترافية',
+        name: 'إحترافي',
         features: {
-          '0': 'إدارة حتى 3 فروع',
-          '1': 'عدد غير محدود من الأصناف',
-          '2': 'تحليلات مبيعات متقدمة',
-          '3': 'أولوية في الدعم الفني',
-          '4': 'تخصيص كامل للألوان والهوية',
-          '5': 'قائمة متعددة اللغات تلقائياً',
-          '6': 'ربط برمجي (API Access)',
-          '7': 'إزالة شعار المنصة (White Label)'
+          '0': 'كل ما في الباقة الأساسية',
+          '1': 'تكامل نقاط البيع',
+          '2': 'برنامج الولاء',
+          '3': 'العروض والترويج',
+          '4': 'إدارة العملاء',
+          '5': 'الدفع الإلكتروني',
+          '6': 'نظام الحجوزات',
+          '7': 'طلبات السيارات',
+          '8': 'نسخ احتياطي تلقائي',
+          '9': 'تحليلات متقدمة',
+          '10': 'دعم 24/7',
+          '11': 'التقارير'
         },
-        button: 'اشترك الآن'
+        button: 'قريباً'
       },
-      enterprise: {
-        name: 'باقة المؤسسات',
+      proPlus: {
+        name: 'إحترافي+',
         features: {
-          '0': 'عدد فروع غير محدود',
-          '1': 'قوائم وأصناف غير محدودة',
-          '2': 'تقارير أداء مؤسسية شاملة',
-          '3': 'مدير حساب خاص ودعم هاتفي',
-          '4': 'ربط مخصص مع أنظمة الكاشير',
-          '5': 'جلسات تدريب واستشارة',
-          '6': 'ضمان مستوى الخدمة (SLA)',
-          '7': 'فريق دعم مخصص 24/7'
+          '0': 'كل ما في باقة احترافي',
+          '1': 'تكامل مركز الاتصال',
+          '2': 'تصميم مخصص',
+          '3': 'نطاق خاص',
+          '4': 'الوصول لـ API',
+          '5': 'تحليلات مؤسسية',
+          '6': 'مدير حساب مخصص',
+          '7': 'نقل البيانات',
+          '8': 'تتبع التوصيل'
         },
-        button: 'تواصل مع المبيعات'
+        button: 'تواصل معنا'
       }
     },
     additionalInfo: 'جميع الباقات تتضمن فترة تجربة مجانية لمدة 14 يوماً • لا نطلب بطاقة ائتمان للتجربة • يمكنك الإلغاء في أي لحظة',
     vatInfo: 'جميع الأسعار شاملة ضريبة القيمة المضافة. تتوفر عروض خاصة للسلاسل الكبيرة.',
     perMonth: 'شهر',
     perYear: 'سنة',
-    monthlyEquivalent: 'فقط ₺{amount} / شهر (عند الدفع السنوي)'
+    monthlyEquivalent: 'فقط {amount} / شهر (عند الدفع السنوي)',
+    comingSoon: 'قريباً',
+    freeTrial: 'تجربة مجانية',
+    free: 'مجاني',
+    starter: 'الأساسية',
+    freeFor3Months: 'مجاني لأول 3 أشهر',
+    noCreditCard: 'لا حاجة لبطاقة ائتمان'
   },
 
   // Testimonials
-testimonials: {
+  testimonials: {
     title: 'آراء',
     titleHighlight: 'شركاء النجاح',
     subtitle: 'تجارب حقيقية لرواد أعمال ومطاعم اختاروا نظامنا الرقمي لرفع كفاءة الخدمة وزيادة المبيعات.',
@@ -777,12 +857,13 @@ testimonials: {
       restaurants: 'مطعم يثق بنا',
       satisfaction: 'نسبة رضا العملاء',
       support: 'دعم فني متواصل',
-      setup: 'سرعة التفعيل'
+      setup: 'سرعة التفعيل',
+      setupValue: '5 دقائق'
     }
   },
 
   // FAQ
-faq: {
+  faq: {
     title: 'الأسئلة',
     titleHighlight: 'الشائعة',
     subtitle: 'لقد جمعنا لك إجابات وافية لأكثر الاستفسارات تداولاً. هدفنا توضيح كل التفاصيل لتنطلق بثقة.',
@@ -828,7 +909,7 @@ faq: {
   },
 
   // Contact
-contact: {
+  contact: {
     title: 'تواصل',
     titleHighlight: 'معنا',
     titleEnd: '',
@@ -857,7 +938,8 @@ contact: {
       success: {
         title: 'تم الإرسال بنجاح!',
         subtitle: 'شكراً لتواصلك معنا. سيقوم فريقنا بمراجعة رسالتك والرد عليك في أقرب وقت.'
-      }
+      },
+      error: 'فشل إرسال الرسالة. يرجى المحاولة مرة أخرى أو التواصل معنا مباشرة على info@idigitek.com'
     }
   },
 
@@ -878,6 +960,9 @@ contact: {
     orderNumber: 'طلب',
     table: 'طاولة',
     items: 'عناصر',
+    selectBranch: "اختر الفرع",
+    selectBranchToView: "اختر الفرع المراد عرضه",
+    noBranches: "لا توجد فروع",
     tabs: {
       all: 'جميع الطلبات',
       pending: 'في الانتظار',
@@ -921,13 +1006,23 @@ contact: {
 
   // Table Management
   tableManagement: {
-    ActiveStatus :"الحالة النشطة",
-      descriptionActive: "الفئة نشطة ومرئية",
-      descriptionInActive: "الفئة غير نشطة ومخفية",
+
+    areaTypes: {
+      indoor: 'داخلية',
+      outdoor: 'خارجية',
+      terrace: 'تراس',
+      garden: 'حديقة'
+    },
+    addTable: 'إضافة طاولة',
+    ActiveStatus: "الحالة النشطة",
+    selectBranchPrompt: "لا توجد فروع",
+    selectBranch: "اختر الفرع",
+    descriptionActive: "الفئة نشطة ومرئية",
+    descriptionInActive: "الفئة غير نشطة ومخفية",
     loading: 'جاري تحميل الطاولات...',
     title: 'إدارة الطاولات',
     description: 'إدارة رموز QR والطاولات الخاصة بك',
-    noCategories :"لايوجد فئات",
+    noCategories: "لايوجد فئات",
     createFirstCategory: "أنشئ اول فئة",
     error: {
       loadFailed: 'فشل في تحميل قائمة الفروع',
@@ -941,8 +1036,8 @@ contact: {
       editTable: 'تعديل الطاولة',
       deleteTable: 'حذف الطاولة'
     },
-    deleteModal :{
-      title : "تأكيد الحذف"
+    deleteModal: {
+      title: "تأكيد الحذف"
     },
     categories: {
       title: 'إدارة منطقة',
@@ -1026,8 +1121,8 @@ contact: {
   // Products
   products: {
     status: {
-      outOfStock: 'غير متوفر',
-      inStock: 'متوفر',
+      outOfStock: 'غير متوفر في المخزون',
+      inStock: 'متوفر في المخزون',
       available: 'متاح',
       unavailable: 'غير متاح'
     },
@@ -1042,18 +1137,18 @@ contact: {
   },
 
   branchSelector: {
-  status: {
-    loading: 'جاري التحميل...',
-    error: 'تعذر جلب قائمة الفروع'
-  },
-  empty: 'لم يتم العثور على خيارات',
-  actions: {
-    changeBranchRestaurant: 'تغيير الفرع/المطعم'
-  },
-  labels: {
-    mainRestaurant: 'المطعم الرئيسي',
-    branches: 'الفروع'
-  }
+    status: {
+      loading: 'جاري التحميل...',
+      error: 'تعذر جلب قائمة الفروع'
+    },
+    empty: 'لم يتم العثور على خيارات',
+    actions: {
+      changeBranchRestaurant: 'تغيير الفرع/المطعم'
+    },
+    labels: {
+      mainRestaurant: 'المطعم الرئيسي',
+      branches: 'الفروع'
+    }
   },
 
   popularProducts: {
@@ -1086,7 +1181,7 @@ contact: {
   },
 
   monthlyRevenue: {
-      QuickStats : "إحصائيات سريعة",
+    QuickStats: "إحصائيات سريعة",
     title: 'اتجاه الإيرادات الشهرية',
     empty: {
       primary: 'لا توجد بيانات إيرادات متاحة بعد',
@@ -1095,11 +1190,11 @@ contact: {
     labels: {
       total: 'المجموع:',
       revenue: 'الإيرادات'
-      
+
     },
     currency: {
-      symbol: '₺',
-      format: (value: { toLocaleString: (arg0: string) => any; }) => `${value.toLocaleString('ar-SA')} ₺`
+      symbol: '',
+      format: (value: { toLocaleString: (arg0: string) => any; }) => `${value.toLocaleString('ar-SA')} `
     }
   },
 
@@ -1139,7 +1234,7 @@ contact: {
     subtitle: 'يمكنك إدخال معلومات الفرع خطوة بخطوة',
     steps: {
       basic: 'المعلومات الأساسية',
-      address: 'معلومات العنوان', 
+      address: 'معلومات العنوان',
       contact: 'الاتصال وساعات العمل'
     },
     sections: {
@@ -1154,7 +1249,7 @@ contact: {
         placeholder: 'أدخل اسم الفرع'
       },
       whatsappNumber: {
-        label: 'رقم الطلبات واتساب *',
+        label: 'رقم الطلبات واتساب',
         placeholder: 'أدخل رقم الطلبات واتساب'
       },
       branchLogo: {
@@ -1166,23 +1261,23 @@ contact: {
         supportText: 'تدعم صيغ PNG، JPG، GIF. الحد الأقصى لحجم الملف: 5 ميجابايت'
       },
       country: {
-        label: 'البلد *',
+        label: 'البلد',
         placeholder: 'أدخل اسم البلد'
       },
       city: {
-        label: 'المدينة *',
+        label: 'المدينة',
         placeholder: 'أدخل اسم المدينة'
       },
       street: {
-        label: 'الشارع *',
+        label: 'الشارع ',
         placeholder: 'أدخل اسم الشارع'
       },
       zipCode: {
-        label: 'الرمز البريدي *',
+        label: 'الرمز البريدي ',
         placeholder: 'أدخل الرمز البريدي'
       },
       addressLine1: {
-        label: 'سطر العنوان 1 *',
+        label: 'سطر العنوان 1 ',
         placeholder: 'أدخل معلومات العنوان التفصيلية'
       },
       addressLine2: {
@@ -1190,15 +1285,15 @@ contact: {
         placeholder: 'أدخل معلومات العنوان الإضافية (اختياري)'
       },
       phone: {
-        label: 'رقم الهاتف *',
+        label: 'رقم الهاتف ',
         placeholder: 'أدخل رقم الهاتف'
       },
       email: {
-        label: 'عنوان البريد الإلكتروني *',
+        label: 'عنوان البريد الإلكتروني',
         placeholder: 'أدخل عنوان البريد الإلكتروني'
       },
       location: {
-        label: 'معلومات الموقع *',
+        label: 'معلومات الموقع',
         placeholder: 'أدخل معلومات الموقع (مثال: 40.9795,28.7225)'
       },
       contactHeader: {
@@ -1248,8 +1343,8 @@ contact: {
       phone: 'رقم الهاتف مطلوب',
       email: 'عنوان البريد الإلكتروني مطلوب',
       location: 'معلومات الموقع مطلوبة',
-      branchModal : "الشعار مطلوب",
-      addressLine2:"العنوان التفصيلي مطلوب"
+      branchModal: "الشعار مطلوب",
+      addressLine2: "العنوان التفصيلي مطلوب"
     },
     buttons: {
       cancel: 'إلغاء',
@@ -1262,10 +1357,11 @@ contact: {
 
   branchManagement: {
     title: 'إدارة الفروع',
+
     description: 'إدارة فروع المطعم وتحديث معلوماتها',
     loading: 'جاري تحميل الفروع...',
     addBranch: 'إضافة فرع جديد',
-    
+
     // Error messages
     error: {
       loadFailed: 'فشل في تحميل الفروع',
@@ -1291,7 +1387,13 @@ contact: {
     // Delete confirmation
     deleteConfirm: {
       title: 'تأكيد حذف الفرع',
-      description: 'هل أنت متأكد من حذف فرع "{{branchName}}"؟ لا يمكن التراجع عن هذا الإجراء.'
+      description: 'هل أنت متأكد من حذف فرع ؟ لا يمكن التراجع عن هذا الإجراء.'
+    },
+
+    // تأكيد الحذف الدائم
+    purgeConfirm: {
+      title: 'تحذير الحذف الدائم',
+      description: 'سيؤدي هذا إلى حذف الفرع وجميع البيانات المرتبطة به بشكل دائم. لا يمكن التراجع عن هذا الإجراء!'
     },
 
     // Form labels and fields
@@ -1300,6 +1402,12 @@ contact: {
       branchNamePlaceholder: 'أدخل اسم الفرع',
       branchNameRequired: 'اسم الفرع مطلوب',
       whatsappNumber: 'رقم واتساب للطلبات',
+
+      open24HoursMessage: 'هذا الفرع مفتوح على مدار 24 ساعة',
+      open24Hours: 'مفتوح على مدار 24 ساعة',
+      addTimeSlot: 'إضافة شريحة زمنية',
+      closed: 'مغلق',
+
       whatsappPlaceholder: 'أدخل رقم الواتساب',
       branchLogo: 'شعار الفرع',
       logoUpload: 'رفع الشعار',
@@ -1361,9 +1469,9 @@ contact: {
     modal: {
       createTitle: 'إضافة فرع جديد',
       createDescription: 'أدخل معلومات الفرع الجديد',
-      editTitle: 'تعديل الفرع - {branchName}',
+      editTitle: 'تعديل الفرع ',
       editDescription: 'تعديل معلومات الفرع',
-      
+
       tabs: {
         general: 'المعلومات العامة',
         address: 'العنوان',
@@ -1422,168 +1530,167 @@ contact: {
   },
 
   productsContent: {
-    branch : {
-    selectAll:"الكل",
+    branch: {
+      selectAll: "الكل",
 
     },
-  title: 'إدارة المنتجات',
-  description: 'إدارة فئات ومنتجات القائمة',
-  
-  // Search and filters
-  search: {
-    placeholder: 'البحث في عناصر القائمة...',
-    filter: 'تصفية',
-    sort: 'ترتيب',
-    noResults: 'لم يتم العثور على منتجات'
-  },
+    title: 'إدارة المنتجات',
+    description: 'إدارة فئات ومنتجات القائمة',
 
-  // View modes
-  viewMode: {
-    list: 'عرض قائمة',
-    grid: 'عرض شبكة'
-  },
-
-  // Buttons and actions
-  actions: {
-    addFirstCategory: 'إضافة أول فئة',
-    addCategory: 'فئة جديدة',
-    newCategory: 'فئة جديدة',
-    addProduct: 'منتج جديد',
-    newProduct: 'منتج جديد',
-    editCategory: 'تعديل الفئة',
-    deleteCategory: 'حذف الفئة',
-    editProduct: 'تعديل المنتج',
-    deleteProduct: 'حذف المنتج',
-    manageIngredients: 'إدارة المكونات',
-    updateIngredients: 'تحديث المكونات',
-    manageAddons: 'إدارة الإضافات',
-    importSampleMenu: 'استيراد قائمة نموذجية',
-    addFirstCategoryTitle: 'إضافة الفئة الأولى',
-    RecycleBin:"سلة المحذوفات"
-  },
-
-  // Empty states
-  emptyState: {
-    noCategories: {
-      title: 'لا توجد فئات قائمة بعد',
-      description: 'ابدأ في إنشاء قائمة مطعمك عن طريق إضافة الفئة الأولى. على سبيل المثال "الأطباق الرئيسية"، "المشروبات" أو "الحلويات".',
-      addFirstCategory: 'إضافة الفئة الأولى',
-
-    }
-  },
-
-  // Loading states
-  loading: {
-    categories: 'جاري تحميل الفئات...',
-    products: 'جاري تحميل المنتجات...',
-    savingOrder: 'جاري حفظ الترتيب...',
-    savingCategoryOrder: 'جاري حفظ ترتيب الفئات...',
-    savingProductOrder: 'جاري حفظ ترتيب المنتجات...',
-    movingProduct: 'جاري نقل المنتج...',
-    deleting: 'جاري الحذف...'
-  },
-
-  // Drag and drop
-  dragDrop: {
-    categoryReordering: 'جاري حفظ ترتيب الفئات...',
-    productReordering: 'جاري حفظ ترتيب المنتجات...',
-    productMoving: 'جاري نقل المنتج...',
-    categoryOrderSaveError: 'حدث خطأ أثناء حفظ ترتيب الفئات.',
-    productOrderSaveError: 'حدث خطأ أثناء حفظ ترتيب المنتجات.',
-    productMoveError: 'حدث خطأ أثناء نقل المنتج.'
-  },
-
-  // Delete confirmations
-  delete: {
-    product: {
-      title: 'حذف المنتج',
-      message: 'هل أنت متأكد من رغبتك في حذف "{{productName}}"؟ لا يمكن التراجع عن هذا الإجراء.',
-      success: 'تم حذف المنتج بنجاح'
+    // Search and filters
+    search: {
+      placeholder: 'البحث في عناصر القائمة...',
+      filter: 'تصفية',
+      sort: 'ترتيب',
+      noResults: 'لم يتم العثور على منتجات'
     },
+
+    // View modes
+    viewMode: {
+      list: 'عرض قائمة',
+      grid: 'عرض شبكة'
+    },
+
+    // Buttons and actions
+    actions: {
+      addFirstCategory: 'إضافة أول فئة',
+      addCategory: 'فئة جديدة',
+      newCategory: 'فئة جديدة',
+      addProduct: 'منتج جديد',
+      newProduct: 'منتج جديد',
+      editCategory: 'تعديل الفئة',
+      deleteCategory: 'حذف الفئة',
+      editProduct: 'تعديل المنتج',
+      deleteProduct: 'حذف المنتج',
+      manageIngredients: 'إدارة المكونات',
+      updateIngredients: 'تحديث المكونات',
+      manageAddons: 'إدارة الإضافات',
+      manageExtras: 'إدارة الإضافات',
+      importSampleMenu: 'استيراد قائمة نموذجية',
+      addFirstCategoryTitle: 'إضافة الفئة الأولى',
+      RecycleBin: "سلة المحذوفات"
+    },
+
+    // Empty states
+    emptyState: {
+      noCategories: {
+        title: 'لا توجد فئات قائمة بعد',
+        description: 'ابدأ في إنشاء قائمة مطعمك عن طريق إضافة الفئة الأولى. على سبيل المثال "الأطباق الرئيسية"، "المشروبات" أو "الحلويات".',
+        addFirstCategory: 'إضافة الفئة الأولى',
+
+      }
+    },
+
+    // Loading states
+    loading: {
+      categories: 'جاري تحميل الفئات...',
+      products: 'جاري تحميل المنتجات...',
+      savingOrder: 'جاري حفظ الترتيب...',
+      savingCategoryOrder: 'جاري حفظ ترتيب الفئات...',
+      savingProductOrder: 'جاري حفظ ترتيب المنتجات...',
+      movingProduct: 'جاري نقل المنتج...',
+      deleting: 'جاري الحذف...'
+    },
+
+    // Drag and drop
+    dragDrop: {
+      categoryReordering: 'جاري حفظ ترتيب الفئات...',
+      productReordering: 'جاري حفظ ترتيب المنتجات...',
+      productMoving: 'جاري نقل المنتج...',
+      categoryOrderSaveError: 'حدث خطأ أثناء حفظ ترتيب الفئات.',
+      productOrderSaveError: 'حدث خطأ أثناء حفظ ترتيب المنتجات.',
+      productMoveError: 'حدث خطأ أثناء نقل المنتج.'
+    },
+
+    delete: {
+      product: {
+        title: 'حذف المنتج',
+        message: 'هل أنت متأكد من رغبتك في حذف "{{productName}}"؟ لا يمكن التراجع عن هذا الإجراء.',
+        success: 'تم حذف المنتج بنجاح'
+      },
+      category: {
+        title: 'حذف الفئة',
+        messageWithProducts: 'تحتوي فئة "{categoryName}" على {productCount} منتج. حذف هذه الفئة سيحذف جميع المنتجات أيضاً. هل أنت متأكد من رغبتك في المتابعة؟',
+        messageEmpty: 'هل أنت متأكد من رغبتك في حذف فئة "{categoryName}"؟',
+        success: 'تم حذف الفئة بنجاح'
+      }
+    },
+
+    error: {
+      loadFailed: 'فشل في تحميل البيانات',
+      categoryNotFound: 'الفئة غير موجودة',
+      productNotFound: 'المنتج غير موجود',
+      deleteFailed: 'فشل في الحذف',
+      updateFailed: 'فشل في التحديث',
+      createFailed: 'فشل في الإنشاء',
+      reorderFailed: 'فشل في إعادة الترتيب',
+      invalidData: 'بيانات غير صالحة',
+      networkError: 'خطأ في الاتصال بالشبكة',
+      refreshPage: 'يرجى تحديث الصفحة والمحاولة مرة أخرى.'
+    },
+
+    // Success messages
+    success: {
+      categoryCreated: 'تم إنشاء الفئة بنجاح',
+      categoryUpdated: 'تم تحديث الفئة بنجاح',
+      categoryDeleted: 'تم حذف الفئة بنجاح',
+      productCreated: 'تم إنشاء المنتج بنجاح',
+      productUpdated: 'تم تحديث المنتج بنجاح',
+      productDeleted: 'تم حذف المنتج بنجاح',
+      orderSaved: 'تم حفظ الترتيب بنجاح',
+      ingredientsUpdated: 'تم تحديث المكونات بنجاح',
+      addonsUpdated: 'تم تحديث الإضافات بنجاح'
+    },
+
+    // Categories
     category: {
-      title: 'حذف الفئة',
-      messageWithProducts: 'تحتوي فئة "{{categoryName}}" على {{productCount}} منتج. حذف هذه الفئة سيحذف جميع المنتجات أيضاً. هل أنت متأكد من رغبتك في المتابعة؟',
-      messageEmpty: 'هل أنت متأكد من رغبتك في حذف فئة "{{categoryName}}"؟',
-      success: 'تم حذف الفئة بنجاح'
+      products: 'منتجات',
+      productCount: 'منتج',
+      noProducts: 'لا توجد منتجات في هذه الفئة',
+      expand: 'توسيع',
+      collapse: 'طي'
+    },
+
+    // Products
+    product: {
+      price: 'السعر',
+      description: 'الوصف',
+      ingredients: 'المكونات',
+      addons: 'الإضافات',
+      category: 'الفئة',
+      image: 'الصورة',
+      status: 'الحالة',
+      available: 'متاح',
+      unavailable: 'غير متاح'
+    },
+
+    // Currency
+    currency: {
+      symbol: '',
+      format: '{{amount}}'
+    },
+
+    // Status indicators
+    status: {
+      active: 'نشط',
+      inactive: 'غير نشط',
+      available: 'متاح',
+      unavailable: 'غير متاح'
+    },
+
+    // Tooltips
+    tooltips: {
+      dragToReorder: 'اسحب لإعادة الترتيب',
+      dragToMoveCategory: 'اسحب لنقل المنتج إلى فئة أخرى',
+      expandCategory: 'توسيع الفئة',
+      collapseCategory: 'طي الفئة',
+      editCategory: 'تعديل الفئة',
+      deleteCategory: 'حذف الفئة',
+      editProduct: 'تعديل المنتج',
+      deleteProduct: 'حذف المنتج',
+      manageIngredients: 'إدارة مكونات المنتج',
+      manageAddons: 'إدارة إضافات المنتج'
     }
-  },
-
-  // Error messages
-  error: {
-    loadFailed: 'فشل في تحميل البيانات',
-    categoryNotFound: 'الفئة غير موجودة',
-    productNotFound: 'المنتج غير موجود',
-    deleteFailed: 'فشل في الحذف',
-    updateFailed: 'فشل في التحديث',
-    createFailed: 'فشل في الإنشاء',
-    reorderFailed: 'فشل في إعادة الترتيب',
-    invalidData: 'بيانات غير صالحة',
-    networkError: 'خطأ في الاتصال بالشبكة',
-    refreshPage: 'يرجى تحديث الصفحة والمحاولة مرة أخرى.'
-  },
-
-  // Success messages
-  success: {
-    categoryCreated: 'تم إنشاء الفئة بنجاح',
-    categoryUpdated: 'تم تحديث الفئة بنجاح',
-    categoryDeleted: 'تم حذف الفئة بنجاح',
-    productCreated: 'تم إنشاء المنتج بنجاح',
-    productUpdated: 'تم تحديث المنتج بنجاح',
-    productDeleted: 'تم حذف المنتج بنجاح',
-    orderSaved: 'تم حفظ الترتيب بنجاح',
-    ingredientsUpdated: 'تم تحديث المكونات بنجاح',
-    addonsUpdated: 'تم تحديث الإضافات بنجاح'
-  },
-
-  // Categories
-  category: {
-    products: 'منتجات',
-    productCount: 'منتج',
-    noProducts: 'لا توجد منتجات في هذه الفئة',
-    expand: 'توسيع',
-    collapse: 'طي'
-  },
-
-  // Products
-  product: {
-    price: 'السعر',
-    description: 'الوصف',
-    ingredients: 'المكونات',
-    addons: 'الإضافات',
-    category: 'الفئة',
-    image: 'الصورة',
-    status: 'الحالة',
-    available: 'متاح',
-    unavailable: 'غير متاح'
-  },
-
-  // Currency
-  currency: {
-    symbol: '₺',
-    format: '{{amount}} ₺'
-  },
-
-  // Status indicators
-  status: {
-    active: 'نشط',
-    inactive: 'غير نشط',
-    available: 'متاح',
-    unavailable: 'غير متاح'
-  },
-
-  // Tooltips
-  tooltips: {
-    dragToReorder: 'اسحب لإعادة الترتيب',
-    dragToMoveCategory: 'اسحب لنقل المنتج إلى فئة أخرى',
-    expandCategory: 'توسيع الفئة',
-    collapseCategory: 'طي الفئة',
-    editCategory: 'تعديل الفئة',
-    deleteCategory: 'حذف الفئة',
-    editProduct: 'تعديل المنتج',
-    deleteProduct: 'حذف المنتج',
-    manageIngredients: 'إدارة مكونات المنتج',
-    manageAddons: 'إدارة إضافات المنتج'
-  }
   },
 
   createCategoryModal: {
@@ -1647,116 +1754,116 @@ contact: {
   },
 
   createProductModal: {
-  // Header
-  title: 'إضافة منتج جديد',
-  subtitle: 'أضف منتجاً إلى قائمتك',
-  close: 'إغلاق',
+    // Header
+    title: 'إضافة منتج جديد',
+    subtitle: 'أضف منتجاً إلى قائمتك',
+    close: 'إغلاق',
 
-  // Form fields
-  form: {
-    productImage: {
-      label: 'صورة المنتج',
+    // Form fields
+    form: {
+      productImage: {
+        label: 'صورة المنتج',
+        dragActive: 'اسقط الملف هنا',
+        uploadText: 'رفع صورة',
+        supportedFormats: 'PNG، JPG، GIF (حد أقصى 5 ميجابايت)',
+        removeImage: 'إزالة الصورة'
+      },
+      productName: {
+        label: 'اسم المنتج',
+        placeholder: 'مثال: بيتزا مارجريتا',
+        required: 'اسم المنتج مطلوب'
+      },
+      price: {
+        label: 'السعر',
+        placeholder: '0',
+        required: 'السعر مطلوب',
+        mustBePositive: 'السعر يجب أن يكون أكبر من 0',
+        currency: ''
+      },
+      category: {
+        label: 'الفئة',
+        placeholder: 'اختر فئة',
+        required: 'اختيار الفئة مطلوب',
+        invalidCategory: 'الفئة المختارة غير صالحة. الفئات المتاحة: {{categories}}'
+      },
+      description: {
+        label: 'الوصف',
+        placeholder: 'وصف المنتج...',
+        required: 'وصف المنتج مطلوب'
+      },
+      status: {
+        label: 'تفعيل المنتج',
+        description: 'يظهر في القائمة',
+        active: 'نشط',
+        inactive: 'غير نشط'
+      }
+    },
+
+    // Buttons
+    buttons: {
+      cancel: 'إلغاء',
+      create: 'إضافة منتج',
+      creating: 'جاري الإضافة...',
+      uploading: 'جاري الرفع...'
+    },
+
+    // Image upload
+    imageUpload: {
+      dragToUpload: 'اسحب الصورة هنا أو انقر للرفع',
+      clickToUpload: 'انقر لرفع صورة',
       dragActive: 'اسقط الملف هنا',
-      uploadText: 'رفع صورة',
-      supportedFormats: 'PNG، JPG، GIF (حد أقصى 5 ميجابايت)',
-      removeImage: 'إزالة الصورة'
+      supportedFormats: 'PNG، JPG، GIF',
+      maxSize: 'حد أقصى 5 ميجابايت',
+      preview: 'معاينة الصورة',
+      remove: 'إزالة'
     },
-    productName: {
-      label: 'اسم المنتج',
-      placeholder: 'مثال: بيتزا مارجريتا',
-      required: 'اسم المنتج مطلوب'
+
+    // Error messages
+    errors: {
+      general: 'حدث خطأ أثناء إضافة المنتج. يرجى المحاولة مرة أخرى.',
+      nameRequired: 'اسم المنتج مطلوب',
+      descriptionRequired: 'وصف المنتج مطلوب',
+      priceRequired: 'السعر مطلوب',
+      priceMustBePositive: 'السعر يجب أن يكون أكبر من 0',
+      categoryRequired: 'اختيار الفئة مطلوب',
+      categoryInvalid: 'الفئة المختارة غير صالحة',
+      imageInvalid: 'يرجى اختيار ملف صورة صالح',
+      imageTooLarge: 'حجم ملف الصورة يجب أن يكون أقل من 5 ميجابايت',
+      imageUploadFailed: 'فشل في رفع الصورة',
+      networkError: 'خطأ في الاتصال بالشبكة. تحقق من الاتصال وحاول مرة أخرى.',
+      serverError: 'حدث خطأ في الخادم. يرجى المحاولة لاحقاً.',
+      unknownError: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
+      errorLabel: 'خطأ:'
     },
-    price: {
-      label: 'السعر (₺)',
-      placeholder: '0',
-      required: 'السعر مطلوب',
-      mustBePositive: 'السعر يجب أن يكون أكبر من 0',
-      currency: '₺'
+
+    // Success messages
+    success: {
+      productCreated: 'تم إنشاء المنتج بنجاح',
+      productAdded: 'تمت إضافة المنتج بنجاح إلى القائمة'
     },
-    category: {
-      label: 'الفئة',
-      placeholder: 'اختر فئة',
-      required: 'اختيار الفئة مطلوب',
-      invalidCategory: 'الفئة المختارة غير صالحة. الفئات المتاحة: {{categories}}'
+
+    // Validation messages
+    validation: {
+      nameMinLength: 'يجب أن يكون اسم المنتج أكثر من حرفين',
+      nameMaxLength: 'يجب أن يكون اسم المنتج أقل من 100 حرف',
+      descriptionMinLength: 'يجب أن يكون الوصف أكثر من 5 أحرف',
+      descriptionMaxLength: 'يجب أن يكون الوصف أقل من 500 حرف',
+      priceMin: 'السعر يجب أن يكون أكبر من 0',
+      priceMax: 'السعر يجب أن يكون أقل من 10000'
     },
-    description: {
-      label: 'الوصف',
-      placeholder: 'وصف المنتج...',
-      required: 'وصف المنتج مطلوب'
-    },
-    status: {
-      label: 'تفعيل المنتج',
-      description: 'يظهر في القائمة',
-      active: 'نشط',
-      inactive: 'غير نشط'
+
+    // Accessibility
+    accessibility: {
+      closeModal: 'إغلاق نافذة إضافة المنتج',
+      formTitle: 'نموذج إضافة منتج جديد',
+      requiredField: 'حقل مطلوب',
+      optionalField: 'حقل اختياري',
+      imageUpload: 'رفع صورة المنتج',
+      removeImage: 'إزالة صورة المنتج',
+      priceInput: 'إدخال سعر المنتج',
+      categorySelect: 'اختيار فئة المنتج',
+      statusToggle: 'تبديل حالة المنتج'
     }
-  },
-
-  // Buttons
-  buttons: {
-    cancel: 'إلغاء',
-    create: 'إضافة منتج',
-    creating: 'جاري الإضافة...',
-    uploading: 'جاري الرفع...'
-  },
-
-  // Image upload
-  imageUpload: {
-    dragToUpload: 'اسحب الصورة هنا أو انقر للرفع',
-    clickToUpload: 'انقر لرفع صورة',
-    dragActive: 'اسقط الملف هنا',
-    supportedFormats: 'PNG، JPG، GIF',
-    maxSize: 'حد أقصى 5 ميجابايت',
-    preview: 'معاينة الصورة',
-    remove: 'إزالة'
-  },
-
-  // Error messages
-  errors: {
-    general: 'حدث خطأ أثناء إضافة المنتج. يرجى المحاولة مرة أخرى.',
-    nameRequired: 'اسم المنتج مطلوب',
-    descriptionRequired: 'وصف المنتج مطلوب',
-    priceRequired: 'السعر مطلوب',
-    priceMustBePositive: 'السعر يجب أن يكون أكبر من 0',
-    categoryRequired: 'اختيار الفئة مطلوب',
-    categoryInvalid: 'الفئة المختارة غير صالحة',
-    imageInvalid: 'يرجى اختيار ملف صورة صالح',
-    imageTooLarge: 'حجم ملف الصورة يجب أن يكون أقل من 5 ميجابايت',
-    imageUploadFailed: 'فشل في رفع الصورة',
-    networkError: 'خطأ في الاتصال بالشبكة. تحقق من الاتصال وحاول مرة أخرى.',
-    serverError: 'حدث خطأ في الخادم. يرجى المحاولة لاحقاً.',
-    unknownError: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
-    errorLabel: 'خطأ:'
-  },
-
-  // Success messages
-  success: {
-    productCreated: 'تم إنشاء المنتج بنجاح',
-    productAdded: 'تمت إضافة المنتج بنجاح إلى القائمة'
-  },
-
-  // Validation messages
-  validation: {
-    nameMinLength: 'يجب أن يكون اسم المنتج أكثر من حرفين',
-    nameMaxLength: 'يجب أن يكون اسم المنتج أقل من 100 حرف',
-    descriptionMinLength: 'يجب أن يكون الوصف أكثر من 5 أحرف',
-    descriptionMaxLength: 'يجب أن يكون الوصف أقل من 500 حرف',
-    priceMin: 'السعر يجب أن يكون أكبر من 0',
-    priceMax: 'السعر يجب أن يكون أقل من 10000'
-  },
-
-  // Accessibility
-  accessibility: {
-    closeModal: 'إغلاق نافذة إضافة المنتج',
-    formTitle: 'نموذج إضافة منتج جديد',
-    requiredField: 'حقل مطلوب',
-    optionalField: 'حقل اختياري',
-    imageUpload: 'رفع صورة المنتج',
-    removeImage: 'إزالة صورة المنتج',
-    priceInput: 'إدخال سعر المنتج',
-    categorySelect: 'اختيار فئة المنتج',
-    statusToggle: 'تبديل حالة المنتج'
-  }
   },
 
   productAddonsModal: {
@@ -1830,8 +1937,8 @@ contact: {
 
     // Counter texts
     counters: {
-      selectedProducts: '{{count}} منتج محدد',
-      availableProducts: '{{count}} منتج متوفر'
+      selectedProducts: '{count} منتج محدد',
+      availableProducts: '{count} منتج متوفر'
     },
 
     // Error messages
@@ -1945,10 +2052,10 @@ contact: {
     // Common titles (can be overridden by props)
     defaultTitle: 'تأكيد الحذف',
     deleteTitle: 'حذف العنصر',
-    deleteTableWarning:"تأكد من عدم وجود طلب معلق قبل حذف الطاولة",
+    deleteTableWarning: "تأكد من عدم وجود طلب معلق قبل حذف الطاولة",
     // Warning message
     warning: 'لا يمكن التراجع عن هذا الإجراء. سيتم حذف العنصر نهائياً.',
-    
+
     // Item types
     itemTypes: {
       category: 'الفئة',
@@ -2023,311 +2130,320 @@ contact: {
   },
 
   editProductModal: {
-      // Header
-      title: 'تحرير المنتج',
-      subtitle: 'تحديث معلومات المنتج',
-      close: 'إغلاق',
+    // Header
+    title: 'تحرير المنتج',
+    subtitle: 'تحديث معلومات المنتج',
+    close: 'إغلاق',
 
-      // Form fields
-      form: {
-        productImage: {
-          label: 'صورة المنتج',
-          optional: 'اختياري'
-        },
-        productName: {
-          label: 'اسم المنتج',
-          placeholder: 'مثال: بيتزا مارغريتا',
-          required: 'اسم المنتج مطلوب'
-        },
-        description: {
-          label: 'الوصف',
-          placeholder: 'وصف المنتج...',
-          optional: 'اختياري'
-        },
-        price: {
-          label: 'السعر (₺)',
-          placeholder: '0',
-          required: 'السعر مطلوب',
-          currency: '₺'
-        },
-        category: {
-          label: 'الفئة',
-          placeholder: 'اختر الفئة',
-          required: 'اختيار الفئة مطلوب'
-        },
-        status: {
-          label: 'متوفر في المخزون',
-          description: 'سيكون المنتج مرئياً في القائمة عندما يكون متوفراً',
-          available: 'متوفر',
-          unavailable: 'غير متوفر'
-        }
+    // Form fields
+    form: {
+      productImage: {
+        label: 'صورة المنتج',
+        optional: 'اختياري'
       },
-
-      // Buttons
-      buttons: {
-        cancel: 'إلغاء',
-        update: 'تحديث المنتج',
-        updating: 'جاري التحديث...',
-        save: 'حفظ التغييرات',
-        saving: 'جاري الحفظ...',
-        uploading: 'جاري تحميل الصورة...'
+      productName: {
+        label: 'اسم المنتج',
+        placeholder: 'مثال: بيتزا مارغريتا',
+        required: 'اسم المنتج مطلوب'
       },
-
-      // Image upload
-      imageUpload: {
-        clickToUpload: 'انقر لتحميل الصورة',
-        dragToUpload: 'اسحب الصورة هنا أو انقر للتحميل',
-        dragActive: 'أسقط الملف هنا',
-        supportedFormats: 'PNG, JPG, GIF',
-        maxSize: 'حد أقصى 5 ميجابايت',
-        preview: 'معاينة الصورة',
-        remove: 'إزالة الصورة',
-        changeImage: 'تغيير الصورة'
+      description: {
+        label: 'الوصف',
+        placeholder: 'وصف المنتج...',
+        optional: 'اختياري'
       },
-
-      // Error messages
-      errors: {
-        errorLabel: 'خطأ:',
-        updateFailed: 'حدث خطأ أثناء تحديث المنتج. يرجى المحاولة مرة أخرى.',
-        nameRequired: 'اسم المنتج مطلوب',
-        nameAlreadyExists: 'يوجد منتج بهذا الاسم بالفعل. يرجى اختيار اسم مختلف.',
-        descriptionRequired: 'وصف المنتج مطلوب',
-        priceRequired: 'السعر مطلوب',
-        priceMustBePositive: 'يجب أن يكون السعر أكبر من 0',
-        categoryRequired: 'اختيار الفئة مطلوب',
-        imageInvalid: 'يرجى اختيار ملف صورة صحيح',
-        imageTooLarge: 'يجب أن يكون حجم ملف الصورة أقل من 5 ميجابايت',
-        imageUploadFailed: 'فشل في تحميل الصورة',
-        productNotFound: 'لم يتم العثور على المنتج',
-        permissionDenied: 'ليس لديك صلاحية لتحديث هذا المنتج',
-        networkError: 'خطأ في الاتصال بالشبكة. تحقق من اتصالك وحاول مرة أخرى.',
-        serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.',
-        unknownError: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.'
+      price: {
+        label: 'السعر ()',
+        placeholder: '0',
+        required: 'السعر مطلوب',
+        currency: ''
       },
-
-      // Success messages
-      success: {
-        productUpdated: 'تم تحديث المنتج بنجاح',
-        changesSaved: 'تم حفظ التغييرات بنجاح',
-        imageUploaded: 'تم تحميل الصورة بنجاح'
+      category: {
+        label: 'الفئة',
+        placeholder: 'اختر الفئة',
+        required: 'اختيار الفئة مطلوب'
       },
-
-      // Validation messages
-      validation: {
-        nameMinLength: 'يجب أن يكون اسم المنتج أكثر من حرفين',
-        nameMaxLength: 'يجب أن يكون اسم المنتج أقل من 100 حرف',
-        descriptionMaxLength: 'يجب أن يكون الوصف أقل من 500 حرف',
-        priceMin: 'يجب أن يكون السعر أكبر من 0',
-        priceMax: 'يجب أن يكون السعر أقل من 10000',
-        imageSize: 'يجب أن تكون الصورة أقل من 5 ميجابايت',
-        imageType: 'مسموح بملفات الصور فقط'
-      },
-
-      // Accessibility
-      accessibility: {
-        closeModal: 'إغلاق نافذة تحرير المنتج',
-        formTitle: 'نموذج تحرير المنتج',
-        requiredField: 'حقل مطلوب',
-        optionalField: 'حقل اختياري',
-        imageUpload: 'تحميل صورة المنتج',
-        removeImage: 'إزالة صورة المنتج',
-        priceInput: 'إدخال سعر المنتج',
-        categorySelect: 'اختيار فئة المنتج',
-        statusToggle: 'تبديل حالة توفر المنتج',
-        imagePreview: 'معاينة صورة المنتج'
+      status: {
+        label: 'نشيط',
+        description: 'سيكون المنتج مرئياً في القائمة عندما يكون نشطاً',
+        available: 'نشيط',
+        unavailable: 'غير نشيط'
       }
+    },
+
+    // Buttons
+    buttons: {
+      cancel: 'إلغاء',
+      update: 'تحديث المنتج',
+      updating: 'جاري التحديث...',
+      save: 'حفظ التغييرات',
+      saving: 'جاري الحفظ...',
+      uploading: 'جاري تحميل الصورة...'
+    },
+
+    // Image upload
+    imageUpload: {
+      clickToUpload: 'انقر لتحميل الصورة',
+      dragToUpload: 'اسحب الصورة هنا أو انقر للتحميل',
+      dragActive: 'أسقط الملف هنا',
+      supportedFormats: 'PNG, JPG, GIF',
+      maxSize: 'حد أقصى 5 ميجابايت',
+      preview: 'معاينة الصورة',
+      remove: 'إزالة الصورة',
+      changeImage: 'تغيير الصورة'
+    },
+
+    // Error messages
+    errors: {
+      errorLabel: 'خطأ:',
+      updateFailed: 'حدث خطأ أثناء تحديث المنتج. يرجى المحاولة مرة أخرى.',
+      nameRequired: 'اسم المنتج مطلوب',
+      nameAlreadyExists: 'يوجد منتج بهذا الاسم بالفعل. يرجى اختيار اسم مختلف.',
+      descriptionRequired: 'وصف المنتج مطلوب',
+      priceRequired: 'السعر مطلوب',
+      priceMustBePositive: 'يجب أن يكون السعر أكبر من 0',
+      categoryRequired: 'اختيار الفئة مطلوب',
+      imageInvalid: 'يرجى اختيار ملف صورة صحيح',
+      imageTooLarge: 'يجب أن يكون حجم ملف الصورة أقل من 5 ميجابايت',
+      imageUploadFailed: 'فشل في تحميل الصورة',
+      productNotFound: 'لم يتم العثور على المنتج',
+      permissionDenied: 'ليس لديك صلاحية لتحديث هذا المنتج',
+      networkError: 'خطأ في الاتصال بالشبكة. تحقق من اتصالك وحاول مرة أخرى.',
+      serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.',
+      unknownError: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.'
+    },
+
+    // Success messages
+    success: {
+      productUpdated: 'تم تحديث المنتج بنجاح',
+      changesSaved: 'تم حفظ التغييرات بنجاح',
+      imageUploaded: 'تم تحميل الصورة بنجاح'
+    },
+
+    // Validation messages
+    validation: {
+      nameMinLength: 'يجب أن يكون اسم المنتج أكثر من حرفين',
+      nameMaxLength: 'يجب أن يكون اسم المنتج أقل من 100 حرف',
+      descriptionMaxLength: 'يجب أن يكون الوصف أقل من 500 حرف',
+      priceMin: 'يجب أن يكون السعر أكبر من 0',
+      priceMax: 'يجب أن يكون السعر أقل من 10000',
+      imageSize: 'يجب أن تكون الصورة أقل من 5 ميجابايت',
+      imageType: 'مسموح بملفات الصور فقط'
+    },
+
+    // Accessibility
+    accessibility: {
+      closeModal: 'إغلاق نافذة تحرير المنتج',
+      formTitle: 'نموذج تحرير المنتج',
+      requiredField: 'حقل مطلوب',
+      optionalField: 'حقل اختياري',
+      imageUpload: 'تحميل صورة المنتج',
+      removeImage: 'إزالة صورة المنتج',
+      priceInput: 'إدخال سعر المنتج',
+      categorySelect: 'اختيار فئة المنتج',
+      statusToggle: 'تبديل حالة توفر المنتج',
+      imagePreview: 'معاينة صورة المنتج'
+    }
   },
 
   productIngredientModal: {
-      // Header
-      title: 'مكونات المنتج',
-      subtitle: 'اختر المكونات لـ',
-      close: 'إغلاق',
+    // Header
+    title: 'مكونات المنتج',
+    subtitle: 'اختر المكونات لـ',
+    close: 'إغلاق',
 
-      // Search
-      search: {
-        placeholder: 'البحث عن المكونات...',
-        label: 'البحث عن المكونات',
-        noResults: 'لم يتم العثور على مكونات'
+    // Search
+    search: {
+      placeholder: 'البحث عن المكونات...',
+      label: 'البحث عن المكونات',
+      noResults: 'لم يتم العثور على مكونات'
+    },
+
+    // Summary section
+    summary: {
+      selectedCount: 'المكونات المحددة',
+      hasChanges: 'يوجد تغييرات',
+      noChanges: 'لا توجد تغييرات'
+    },
+
+    // Form fields
+    form: {
+      quantity: {
+        label: 'الكمية',
+        placeholder: 'الكمية',
+        required: 'الكمية مطلوبة'
       },
-
-      // Summary section
-      summary: {
-        selectedCount: 'المكونات المحددة',
-        hasChanges: 'يوجد تغييرات',
-        noChanges: 'لا توجد تغييرات'
-      },
-
-      // Form fields
-      form: {
-        quantity: {
-          label: 'الكمية',
-          placeholder: 'الكمية',
-          required: 'الكمية مطلوبة'
-        },
-        unit: {
-          label: 'الوحدة',
-          placeholder: 'اختر الوحدة',
-          required: 'الوحدة مطلوبة'
-        }
-      },
-
-      // Measurement units
-      units: {
-        grams: 'جرام',
-        milliliters: 'مل',
-        pieces: 'قطعة',
-        tablespoons: 'ملعقة كبيرة',
-        teaspoons: 'ملعقة صغيرة',
-        cups: 'كوب',
-        kilograms: 'كيلوجرام',
-        liters: 'لتر'
-      },
-
-      // Status indicators
-      status: {
-        available: 'متوفر',
-        unavailable: 'غير متوفر',
-        containsAllergens: 'يحتوي على مسببات الحساسية',
-        toBeAdded: 'ستتم الإضافة',
-        toBeRemoved: 'ستتم الإزالة',
-        selected: 'محدد',
-        unselected: 'غير محدد'
-      },
-
-      // Allergen information
-      allergenInfo: {
-        count: '{{count}} مسبب حساسية',
-        count_plural: '{{count}} مسببات حساسية',
-        details: 'تفاصيل مسببات الحساسية',
-        warning: 'هذا المكون يحتوي على مسببات الحساسية'
-      },
-
-      // Loading states
-      loading: {
-        ingredients: 'جاري تحميل المكونات...',
-        saving: 'جاري حفظ المكونات...',
-        data: 'جاري تحميل البيانات...'
-      },
-
-      // Empty states
-      emptyState: {
-        noIngredients: 'لم يتم إضافة أي مكونات بعد.',
-        noSearchResults: 'لم يتم العثور على مكونات تطابق معايير البحث.',
-        noAvailableIngredients: 'لم يتم العثور على مكونات متاحة.'
-      },
-
-      // Buttons
-      buttons: {
-        cancel: 'إلغاء',
-        skip: 'تخطي',
-        save: 'حفظ',
-        saveIngredients: 'حفظ المكونات',
-        saving: 'جاري الحفظ...',
-        add: 'إضافة مكونات',
-        update: 'تحديث المكونات'
-      },
-
-      // Footer
-      footer: {
-        totalCount: 'المجموع: {{count}} مكون',
-        selectedInfo: 'تم تحديد {{selected}} من {{total}}'
-      },
-
-      // Error messages
-      errors: {
-        loadingData: 'حدث خطأ أثناء تحميل بيانات المكونات.',
-        savingIngredients: 'حدث خطأ أثناء حفظ المكونات. يرجى المحاولة مرة أخرى.',
-        quantityRequired: 'يجب أن تكون جميع المكونات لها كمية أكبر من 0.',
-        unitRequired: 'يجب تحديد وحدة لجميع المكونات.',
-        networkError: 'خطأ في الاتصال بالشبكة. تحقق من اتصالك وحاول مرة أخرى.',
-        serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.',
-        general: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
-        invalidQuantity: 'يرجى إدخال كمية صحيحة',
-        ingredientNotFound: 'لم يتم العثور على المكون',
-        permissionDenied: 'ليس لديك صلاحية لتعديل المكونات'
-      },
-
-      // Success messages
-      success: {
-        ingredientsSaved: 'تم حفظ المكونات بنجاح',
-        ingredientsUpdated: 'تم تحديث المكونات بنجاح',
-        ingredientAdded: 'تم إضافة المكون بنجاح',
-        ingredientRemoved: 'تم إزالة المكون بنجاح'
-      },
-
-      // Validation messages
-      validation: {
-        quantityMin: 'يجب أن تكون الكمية أكبر من 0',
-        quantityMax: 'يجب أن تكون الكمية أقل من 1000',
-        unitRequired: 'يرجى اختيار وحدة',
-        ingredientRequired: 'يرجى اختيار مكون واحد على الأقل'
-      },
-
-      // Accessibility
-      accessibility: {
-        closeModal: 'إغلاق نافذة اختيار المكونات',
-        searchInput: 'البحث عن المكونات',
-        quantityInput: 'أدخل كمية المكون',
-        unitSelect: 'اختر وحدة القياس',
-        ingredientCheckbox: 'اختر المكون',
-        selectedIndicator: 'تم تحديد المكون',
-        allergenWarning: 'يحتوي على مسببات الحساسية',
-        availabilityStatus: 'حالة التوفر'
+      unit: {
+        label: 'الوحدة',
+        placeholder: 'اختر الوحدة',
+        required: 'الوحدة مطلوبة'
       }
+    },
+
+    // Measurement units
+    units: {
+      grams: 'جرام',
+      milliliters: 'مل',
+      pieces: 'قطعة',
+      tablespoons: 'ملعقة كبيرة',
+      teaspoons: 'ملعقة صغيرة',
+      cups: 'كوب',
+      kilograms: 'كيلوجرام',
+      liters: 'لتر'
+    },
+
+    // Status indicators
+    status: {
+      available: 'متوفر',
+      unavailable: 'غير متوفر',
+      containsAllergens: 'يحتوي على مسببات الحساسية',
+      toBeAdded: 'ستتم الإضافة',
+      toBeRemoved: 'ستتم الإزالة',
+      selected: 'محدد',
+      unselected: 'غير محدد'
+    },
+
+    // Allergen information
+    allergenInfo: {
+      count: '{{count}} مسبب حساسية',
+      count_plural: '{{count}} مسببات حساسية',
+      details: 'تفاصيل مسببات الحساسية',
+      warning: 'هذا المكون يحتوي على مسببات الحساسية'
+    },
+
+    // Loading states
+    loading: {
+      ingredients: 'جاري تحميل المكونات...',
+      saving: 'جاري حفظ المكونات...',
+      data: 'جاري تحميل البيانات...'
+    },
+
+    // Empty states
+    emptyState: {
+      noIngredients: 'لم يتم إضافة أي مكونات بعد.',
+      noSearchResults: 'لم يتم العثور على مكونات تطابق معايير البحث.',
+      noAvailableIngredients: 'لم يتم العثور على مكونات متاحة.'
+    },
+
+    // Buttons
+    buttons: {
+      cancel: 'إلغاء',
+      skip: 'تخطي',
+      save: 'حفظ',
+      saveIngredients: 'حفظ المكونات',
+      saving: 'جاري الحفظ...',
+      add: 'إضافة مكونات',
+      update: 'تحديث المكونات'
+    },
+
+    // Footer
+    footer: {
+      totalCount: 'المجموع: {{count}} مكون',
+      selectedInfo: 'تم تحديد {{selected}} من {{total}}'
+    },
+
+    // Error messages
+    errors: {
+      loadingData: 'حدث خطأ أثناء تحميل بيانات المكونات.',
+      savingIngredients: 'حدث خطأ أثناء حفظ المكونات. يرجى المحاولة مرة أخرى.',
+      quantityRequired: 'يجب أن تكون جميع المكونات لها كمية أكبر من 0.',
+      unitRequired: 'يجب تحديد وحدة لجميع المكونات.',
+      networkError: 'خطأ في الاتصال بالشبكة. تحقق من اتصالك وحاول مرة أخرى.',
+      serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.',
+      general: 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.',
+      invalidQuantity: 'يرجى إدخال كمية صحيحة',
+      ingredientNotFound: 'لم يتم العثور على المكون',
+      permissionDenied: 'ليس لديك صلاحية لتعديل المكونات'
+    },
+
+    // Success messages
+    success: {
+      ingredientsSaved: 'تم حفظ المكونات بنجاح',
+      ingredientsUpdated: 'تم تحديث المكونات بنجاح',
+      ingredientAdded: 'تم إضافة المكون بنجاح',
+      ingredientRemoved: 'تم إزالة المكون بنجاح'
+    },
+
+    // Validation messages
+    validation: {
+      quantityMin: 'يجب أن تكون الكمية أكبر من 0',
+      quantityMax: 'يجب أن تكون الكمية أقل من 1000',
+      unitRequired: 'يرجى اختيار وحدة',
+      ingredientRequired: 'يرجى اختيار مكون واحد على الأقل'
+    },
+
+    // Accessibility
+    accessibility: {
+      closeModal: 'إغلاق نافذة اختيار المكونات',
+      searchInput: 'البحث عن المكونات',
+      quantityInput: 'أدخل كمية المكون',
+      unitSelect: 'اختر وحدة القياس',
+      ingredientCheckbox: 'اختر المكون',
+      selectedIndicator: 'تم تحديد المكون',
+      allergenWarning: 'يحتوي على مسببات الحساسية',
+      availabilityStatus: 'حالة التوفر'
+    }
   },
 
   ProductIngredientUpdateModal: {
-  title: 'تحديث المكونات',
-  searchPlaceholder: 'البحث عن المكونات...',
-  selectedCount: 'مكونات محددة',
-  loadingIngredients: 'جاري تحميل المكونات...',
-  noIngredientsFound: 'لم يتم العثور على مكونات',
-  noIngredientsFoundSearch: 'لم يتم العثور على مكونات تطابق معايير البحث',
-  unit: 'الوحدة:',
-  price: 'السعر:',
-  quantity: 'الكمية',
-  cancel: 'إلغاء',
-  save: 'حفظ',
-  saving: 'جاري الحفظ...',
-  errors: {
-    loadingIngredients: 'حدث خطأ أثناء تحميل المكونات',
-    savingIngredients: 'حدث خطأ أثناء حفظ المكونات'
-  },
-  accessibility: {
-    closeModal: 'إغلاق نافذة تحديث المكونات',
-    formTitle: 'نموذج تحديث مكونات المنتج',
-    searchInput: 'البحث عن المكونات',
-    ingredientToggle: 'تبديل تحديد المكون',
-    quantityInput: 'أدخل كمية المكون',
-    selectedIndicator: 'المكون محدد',
-    unselectedIndicator: 'المكون غير محدد',
-    ingredientCard: 'بطاقة تحديد المكون',
-    saveButton: 'حفظ تغييرات المكونات',
-    cancelButton: 'إلغاء تحديث المكونات'
-  }
+    title: 'تحديث المكونات',
+    searchPlaceholder: 'البحث عن المكونات...',
+    selectedCount: 'مكونات محددة',
+    loadingIngredients: 'جاري تحميل المكونات...',
+    noIngredientsFound: 'لم يتم العثور على مكونات',
+    noIngredientsFoundSearch: 'لم يتم العثور على مكونات تطابق معايير البحث',
+    unit: 'الوحدة:',
+    price: 'السعر:',
+    quantity: 'الكمية',
+    cancel: 'إلغاء',
+    save: 'حفظ',
+    saving: 'جاري الحفظ...',
+    errors: {
+      loadingIngredients: 'حدث خطأ أثناء تحميل المكونات',
+      savingIngredients: 'حدث خطأ أثناء حفظ المكونات'
+    },
+    accessibility: {
+      closeModal: 'إغلاق نافذة تحديث المكونات',
+      formTitle: 'نموذج تحديث مكونات المنتج',
+      searchInput: 'البحث عن المكونات',
+      ingredientToggle: 'تبديل تحديد المكون',
+      quantityInput: 'أدخل كمية المكون',
+      selectedIndicator: 'المكون محدد',
+      unselectedIndicator: 'المكون غير محدد',
+      ingredientCard: 'بطاقة تحديد المكون',
+      saveButton: 'حفظ تغييرات المكونات',
+      cancelButton: 'إلغاء تحديث المكونات'
+    }
   },
 
   SortableCategory: {
     product: 'منتج',
     products: 'منتجات',
-    editCategory: 'تعديل التصنيف',
-    deleteCategory: 'حذف التصنيف',
+    extras: 'إضافات',
+    loadingExtras: 'تحميل الإضافات...',
+    status: {
+      active: "نشط",
+      inactive: "غير نشط"
+    },
+    editCategory: 'تعديل الفئة',
+    deleteCategory: 'حذف الفئة',
+    editProduct: 'تعديل المنتج',
+    deleteProduct: 'حذف المنتج',
+    manageAddons: 'إدارة الإضافات',
     reorderingProducts: 'جاري حفظ ترتيب المنتجات...',
-    noCategoryProducts: 'لا توجد منتجات في هذا التصنيف بعد.',
-    expandCategory: 'توسيع التصنيف',
-    collapseCategory: 'طي التصنيف',
-    dragCategory: 'اسحب لإعادة ترتيب التصنيف',
+    noCategoryProducts: 'لا توجد منتجات في هذا الفئة بعد.',
+    expandCategory: 'توسيع الفئة',
+    collapseCategory: 'طي الفئة',
+    dragCategory: 'اسحب لإعادة ترتيب الفئة',
     accessibility: {
-      categoryActions: 'إجراءات التصنيف',
+      categoryActions: 'إجراءات الفئة',
       productCount: 'عدد المنتجات',
-      expandToggle: 'تبديل توسيع التصنيف',
-      editCategoryButton: 'تعديل التصنيف',
-      deleteCategoryButton: 'حذف التصنيف',
-      dragHandle: 'مقبض السحب لإعادة ترتيب التصنيف',
-      categoryCard: 'بطاقة التصنيف',
-      emptyCategory: 'تصنيف فارغ',
-      reorderingStatus: 'جاري إعادة ترتيب التصنيف'
+      expandToggle: 'تبديل توسيع الفئة',
+      editCategoryButton: 'تعديل الفئة',
+      deleteCategoryButton: 'حذف الفئة',
+      dragHandle: 'مقبض السحب لإعادة ترتيب الفئة',
+      categoryCard: 'بطاقة الفئة',
+      emptyCategory: 'فئة فارغة',
+      reorderingStatus: 'جاري إعادة ترتيب الفئة'
     }
   },
 
@@ -2339,16 +2455,38 @@ contact: {
     loadingAddons: 'جاري تحميل الإضافات...',
     addons: 'الإضافات',
     noAddons: 'لم تتم إضافة إضافات',
+    loadingExtras: 'تحميل الإضافات...',
+    extras: 'إضافات',
+    noExtras: 'لم تتم إضافة إضافات',
+    uncategorized: 'غير مصنف',
+    manageExtras: 'إدارة إضافات المنتج',
     manageAddons: 'إدارة الإضافات',
+    manageIngredients: 'إدارة المكونات',
     editProduct: 'تعديل المنتج',
     deleteProduct: 'حذف المنتج',
     dragProduct: 'اسحب لإعادة ترتيب المنتج',
     allergenic: 'يحتوي على مسببات الحساسية',
     recommended: 'موصى به',
     price: 'السعر',
+    buttons: {
+      view: 'عرض',
+      markOutOfStock: 'نفد المخزون',
+      markInStock: 'متوفر في المخزون',
+      viewDetails: 'تفاصيل المنتج',
+      deactivate: 'إلغاء النشاط',
+      activate: 'تفعيل',
+      addons: 'إضافات',
+      extras: 'إضافات',
+      ingredients: 'المكونات',
+      edit: 'تعديل',
+      delete: 'حذف',
+      add: 'إضافة',
+      remove: 'إزالة'
+    },
     errors: {
       loadingIngredients: 'حدث خطأ أثناء تحميل المكونات.',
-      loadingAddons: 'حدث خطأ أثناء تحميل الإضافات.'
+      loadingAddons: 'حدث خطأ أثناء تحميل الإضافات.',
+      loadingExtras: 'فشل تحميل الإضافات.'
     },
     accessibility: {
       productImage: 'صورة المنتج',
@@ -2371,35 +2509,36 @@ contact: {
     searchPlaceholder: 'البحث عن المكونات...',
     filter: 'تصفية',
     sort: 'ترتيب',
+    applyFilters: 'تطبيق الفلاتر',
     newIngredient: 'مكون جديد',
-    
+    clearFilters: 'مسح جميع الفلاتر',
     // Table headers
     ingredientName: 'اسم المكون',
     status: 'الحالة',
     allergenInfo: 'معلومات مسببات الحساسية',
     actions: 'الإجراءات',
-    
+
     // Status labels
     available: 'متاح',
     unavailable: 'غير متاح',
     containsAllergens: 'يحتوي على مسببات الحساسية',
     noAllergens: 'لا يحتوي على مسببات الحساسية',
-    
+
     // Actions
     edit: 'تعديل',
     delete: 'حذف',
-    
+
     // Empty states
     noIngredientsFound: 'لم يتم العثور على مكونات تطابق معايير البحث.',
     noIngredientsYet: 'لم تتم إضافة مكونات بعد.',
-    
+
     // Delete modal
     deleteIngredient: 'حذف المكون',
     deleteConfirmMessage: 'هل أنت متأكد من أنك تريد حذف المكون "{name}"؟',
     deleteError: 'حدث خطأ أثناء الحذف. يرجى المحاولة مرة أخرى.',
     cancel: 'إلغاء',
     deleting: 'جاري الحذف...',
-    
+
     // Form modal
     editIngredient: 'تعديل المكون',
     addNewIngredient: 'إضافة مكون جديد',
@@ -2407,7 +2546,7 @@ contact: {
     ingredientNameRequired: 'اسم المكون مطلوب',
     enterIngredientName: 'أدخل اسم المكون',
     containsAllergensCheckbox: 'يحتوي على مسببات الحساسية',
-    availableForUse: 'متاح للاستخدام',
+    availableForUse: 'مرئي',
     allergenInfoContent: 'معلومات مسببات الحساسية',
     selectAllergensMessage: 'حدد مسببات الحساسية الموجودة في هذا المكون:',
     enableAllergenMessage: 'قم بتفعيل "يحتوي على مسببات الحساسية" أولاً لتحديد المسببات.',
@@ -2420,7 +2559,7 @@ contact: {
     adding: 'جاري الإضافة...',
     update: 'تحديث',
     add: 'إضافة',
-    
+
     accessibility: {
       ingredientsTable: 'جدول إدارة المكونات',
       searchInput: 'البحث عن المكونات',
@@ -2475,13 +2614,13 @@ contact: {
     bulkTable: 'إضافة طاولات متعددة',
     createSingleTable: 'إنشاء طاولة واحدة',
     createMultipleTables: 'إنشاء طاولات متعددة',
-    
+
     // Branch selection
     branchSelection: 'اختيار الفرع',
     selectBranch: 'اختر الفرع',
     branchRequired: 'مطلوب',
     loadingBranches: 'جاري تحميل الفروع...',
-    
+
     // Single table form
     editTable: 'تعديل الطاولة',
     addSingleTable: 'إضافة طاولة واحدة',
@@ -2498,7 +2637,7 @@ contact: {
     displayOrderPlaceholder: 'رقم للترتيب',
     autoOrderNote: 'سيتم تطبيق ترتيب تلقائي إذا تُرك فارغاً',
     tableActive: 'يجب أن تكون الطاولة نشطة',
-    
+
     // Bulk table form
     addBulkTables: 'إضافة طاولات متعددة',
     categoryQuantities: 'كميات الطاولات حسب الفئة',
@@ -2509,7 +2648,7 @@ contact: {
     tableSummary: 'ملخص الطاولات المراد إنشاؤها:',
     total: 'الإجمالي',
     tables: 'طاولات',
-    
+
     // Actions
     cancel: 'إلغاء',
     adding: 'جاري الإضافة...',
@@ -2518,11 +2657,11 @@ contact: {
     updating: 'جاري التحديث...',
     creating: 'جاري الإنشاء... ({count} طاولة)',
     createTables: 'إنشاء {count} طاولة',
-    
+
     // Validation
     branchRequiredValidation: 'اختيار الفرع مطلوب',
     categoryRequired: 'مطلوب منطقة واحدة على الأقل',
-    
+
     accessibility: {
       modal: 'نافذة إنشاء الطاولة',
       stepSelection: 'اختيار طريقة إنشاء الطاولة',
@@ -2538,7 +2677,12 @@ contact: {
   TableCategoryModal: {
     title: 'إضافة منطقة طاولة',
     subtitle: 'إنشاء منطقة طاولة جديدة',
+    editCategoryTitle: 'تعديل منطقة الطاولة',
+    editCategorySubtitle: 'حدد خصائص منطقة الطاولة',
+    update: 'تحديث منطقة الطاولة',
+    addCategoryTitle: 'إضافة منطقة جديدة',
     categoryName: 'اسم المنطقة',
+    addCategorySubtitle: 'حدد خصائص المنطقة الجديدة',
     categoryNamePlaceholder: 'مثال: طاولات VIP، طاولات الحديقة',
     description: 'الوصف (اختياري)',
     descriptionPlaceholder: 'وصف قصير عن الفئة...',
@@ -2555,7 +2699,7 @@ contact: {
     service: 'خدمة',
     label: 'تسمية',
     layer: 'طبقة',
-    
+
     // Validation errors
     categoryNameRequired: 'اسم الفئة مطلوب',
     iconRequired: 'يجب اختيار أيقونة',
@@ -2566,7 +2710,7 @@ contact: {
     branchNotFound: 'الفرع المحدد غير موجود.',
     serverError: 'حدث خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.',
     unexpectedError: 'حدث خطأ غير متوقع أثناء إضافة الفئة',
-    
+
     accessibility: {
       modal: 'نافذة إنشاء منطقة الطاولة',
       colorPalette: 'لوحة اختيار الألوان',
@@ -2590,21 +2734,23 @@ contact: {
 
   userManagementPage: {
     // Page header and navigation
-  systemRoleInfo:"لايمكن التعديل على هذا الدور",
-  
-    editRole :{
-      title:"تحديث الدور",
-      save:"حفظ"
+    systemRoleInfo: "لايمكن التعديل على هذا الدور",
+
+    editRole: {
+      title: "تحديث الدور",
+      save: "حفظ"
     },
-  confirmation: {
+    confirmation: {
       deleteRoleTitle: "حذف الدور",
+      activateTitle: "تفعيل المستخدم؟",
+      activateMessage: "هل أنت متأكد من رغبتك في تفعيل {name}؟",
       deleteRoleMessage: "هل أنت متأكد من رغبتك في حذف هذا الدور؟ لا يمكن التراجع عن هذا الإجراء",
       deactivateTitle: "إلغاء تنشيط المستخدم؟",
       deactivateMessage: "هل أنت متأكد من رغبتك في إلغاء تنشيط {name}؟ سيفقدون الوصول إلى النظام",
-      },
-    rolePermissionsModal:{
-      title:"عرض الإذونات",
-      noPermissions:"لا أذونات"
+    },
+    rolePermissionsModal: {
+      title: "عرض الإذونات",
+      noPermissions: "لا أذونات"
     },
 
     title: 'إدارة المستخدمين',
@@ -2616,7 +2762,7 @@ contact: {
       retry: 'حاول مرة أخرى',
       createUserFailed: 'فشل في إنشاء المستخدم',
       createRoleFailed: 'فشل في إنشاء الدور',
-        "changePasswordFailed": "فشل تغيير كلمة المرور",
+      "changePasswordFailed": "فشل تغيير كلمة المرور",
       "assignBranchFailed": "فشل تعيين الفرع"
     },
 
@@ -2625,9 +2771,9 @@ contact: {
       "info": "أدخل كلمة مرور جديدة لهذا المستخدم. سيتمكن من تسجيل الدخول بكلمة المرور الجديدة فوراً.",
       "newPassword": "كلمة المرور الجديدة",
       "newPasswordPlaceholder": "أدخل كلمة المرور الجديدة",
-            currentPassword:"كلمة المرور الحالية",
-      currentPasswordPlaceholder:"أدخل كلمة المرور الحالية",
-      currentPasswordEntered:"كلمة المرور الحالية",
+      currentPassword: "كلمة المرور الحالية",
+      currentPasswordPlaceholder: "أدخل كلمة المرور الحالية",
+      currentPasswordEntered: "كلمة المرور الحالية",
       "confirmPassword": "تأكيد كلمة المرور",
       "confirmPasswordPlaceholder": "أكد كلمة المرور الجديدة",
       "requirements": "متطلبات كلمة المرور:",
@@ -2646,17 +2792,21 @@ contact: {
     "assignBranchModal": {
       "title": "تعيين الفرع",
       "assigningTo": "تعيين",
+      "selectDestinationType": "حدد نوع النطاق",
       "toNewBranch": "إلى فرع جديد",
       "currentBranch": "الفرع الحالي",
-      "branchIdDisplay": "(المعرف: {{id}})",
-      "newBranchLabel": "الفرع الجديد",
-      "selectBranchPlaceholder": "اختر فرعاً",
-      "submitButton": "تعيين الفرع",
-      "submitButtonLoading": "جاري التعيين...",
+      "assignedToRestaurant": "مستوى المطعم (المركز الرئيسي)",
+      "alreadyAtRestaurant": "معين بالفعل للمطعم",
+      "groupBranches": "تعيين لفرع محدد",
+      "assignToRestaurant": "تعيين للمطعم (المركز)",
+      "selectBranch": "اختر الفرع",
+      "selectBranchPlaceholder": "اختر فرعاً...",
+      "confirmRestaurantTitle": "تأكيد التعيين للمطعم",
+      "confirmRestaurantDesc": "سيتم إزالة {{name}} من الفرع الحالي وتعيينه على مستوى المطعم.",
+      "submitButton": "حفظ التعيين",
+      "submitButtonLoading": "جاري الحفظ...",
       "validation": {
-        "branchRequired": "يرجى اختيار فرع",
-        assignedToRestaurant :"مُخصص للمطعم",
-        assignToRestaurant : "تعيين للمطعم",
+        "branchRequired": "يرجى اختيار فرع"
       }
     },
 
@@ -2723,8 +2873,8 @@ contact: {
       RestaurantOwner: 'مالك',
       BranchManager: 'مدير',
       Staff: 'موظف',
-      SuperAdmin:"المشرف الأعلى",
-      BranchStaff:"موظف الفرع"
+      SuperAdmin: "المشرف الأعلى",
+      BranchStaff: "موظف الفرع"
     },
 
     // Actions menu
@@ -2736,23 +2886,23 @@ contact: {
       delete: 'حذف',
       updateRoles: 'تحديث الأدوار',
       assignBranch: 'تعيين الفرع',
-      viewPermissions: "عرض الأذونات"  ,
-       "changePassword": "تغيير كلمة المرور",
+      viewPermissions: "عرض الأذونات",
+      "changePassword": "تغيير كلمة المرور",
     },
 
 
-       updateRoles:{
-        title:"تحديث أدوار المستخدم",
-        update : "تحديث",
+    updateRoles: {
+      title: "تحديث أدوار المستخدم",
+      update: "تحديث",
     },
 
-    permissionsModal:{
-      title:"الأذونات",
-      close:"إغلاق",
-      userRoles: "أدوار المستخدم ", 
-      permissions:"الأذونات",
-      permissionsCount:"العدد",
-      noPermissions:"لا أذونات"
+    permissionsModal: {
+      title: "الأذونات",
+      close: "إغلاق",
+      userRoles: "أدوار المستخدم ",
+      permissions: "الأذونات",
+      permissionsCount: "العدد",
+      noPermissions: "لا أذونات"
 
     },
     "editUserModal": {
@@ -2789,13 +2939,15 @@ contact: {
       step2Title: "الخطوة ٢: تحديد الأذونات",
       stepBasicInfo: "المعلومات الأساسية",
       stepPermissions: "الأذونات",
+      permissionsRequired: "* يجب تحديد إذن واحد على الأقل",
       step1Info: "إنشاء دور",
+      clear: "إلغاء تحديد الكل",
       step1Description: "أدخل المعلومات الأساسية للدور الجديد",
       roleCreatedSuccess: "تم إنشاء الدور بنجاح!",
       step2Description: "يمكنك الآن تحديد الأذونات لهذا الدور",
       continue: "الانتقال إلى الأذونات",
       back: "رجوع",
-            step2Info: "تحديد أذونات المستخدم",
+      step2Info: "تحديد أذونات المستخدم",
       skipPermissions: "تخطي (إضافة لاحقًا)",
       finish: "إنهاء",
       createing: "جارٍ الإنشاء...",
@@ -2812,7 +2964,7 @@ contact: {
       category: 'الفئة',
       categoryPlaceholder: 'مثال: الإدارة',
       description: 'الوصف',
-      deselectAll:"إلفاء الكل",
+      deselectAll: "إلفاء الكل",
       descriptionPlaceholder: 'وصف مهام ومسؤوليات الدور...',
       restaurantId: 'رقم المطعم',
       restaurantIdPlaceholder: 'الافتراضي: المطعم الحالي',
@@ -2840,14 +2992,14 @@ contact: {
       passwordInfo: 'معلومات كلمة المرور',
       locationInfo: 'معلومات الموقع',
       roleAssignment: 'تعيين السلطة والدور',
-
-
+      selectBranch: 'اختر الفرع',
+      fullNumber: "الرقم كامل:",
       phoneNumber: 'رقم الهاتف',
       confirmPassword: 'تأكيد كلمة المرور',
       location: 'الموقع',
       roles: 'الأدوار',
       userIsActive: 'المستخدم يجب أن يكون نشطاً',
-      
+
       // Form fields
       firstName: 'الاسم الأول',
       firstNamePlaceholder: 'مثال: أحمد',
@@ -2864,7 +3016,7 @@ contact: {
       passwordPlaceholder: 'على الأقل 6 أحرف',
       passwordConfirm: 'تأكيد كلمة المرور',
       passwordConfirmPlaceholder: 'أعد إدخال كلمة المرور',
-      
+
       // Location
       locationType: 'نوع الموقع',
       restaurant: 'مطعم',
@@ -2885,7 +3037,7 @@ contact: {
       apiWarning: '⚠️ واجهة البرمجة تدعم فقط إنشاء المستخدمين القائم على الأدوار. أنشئ الأدوار أولاً، ثم اربطها بالمستخدمين.',
       rolesLabel: 'الأدوار',
       rolesSelected: 'مُحدد',
-      
+
       // No roles state
       noRoles: {
         title: 'لم يتم تعريف أي أدوار بعد',
@@ -2894,13 +3046,13 @@ contact: {
         warning: 'دور مطلوب',
         warningDescription: 'يجب تعريف دور واحد على الأقل لإنشاء مستخدم. يمكنك إنشاء أدوار جديدة من تبويب "الأدوار".'
       },
-      
+
       isActive: 'المستخدم يجب أن يكون نشطاً',
       cancel: 'إلغاء',
       create: 'إنشاء مستخدم',
       creating: 'جاري الإنشاء...',
       createRoleFirst: 'أنشئ دوراً أولاً',
-      
+
       // Validation messages
       validation: {
         nameRequired: 'الاسم الأول مطلوب',
@@ -2930,16 +3082,16 @@ contact: {
       noDescription: 'لا يوجد وصف متاح',
       users: 'مستخدمين',
       permissions: 'صلاحيات',
-        created: 'تم الإنشاء في',
+      created: 'تم الإنشاء في',
       system: 'دور النظام',
-            branchSpecific: 'فرع محدد',
+      branchSpecific: 'فرع محدد',
 
     },
 
     // Permission categories
     permissionCategories: {
       UserManagement: 'إدارة المستخدمين',
-      RestaurantManagement: 'إدارة المطاعم', 
+      RestaurantManagement: 'إدارة المطاعم',
       BranchManagement: 'إدارة الفروع',
       OrderManagement: 'إدارة الطلبات',
       ProductManagement: 'إدارة المنتجات',
@@ -2957,175 +3109,180 @@ contact: {
 
   BranchtableManagement: {
 
-  title: "إدارة الطاولات",
-  subtitle: "إدارة طاولات المطعم والفئات",
-  tabs: {
-    tables: "الطاولات",
-    categories: "الفئات",
-    statistics: "الإحصائيات",
-    batchCreate: "إنشاء متعدد"
-  },
-  buttons: {
-    addTable: "إضافة طاولة",
-    addCategory: "إضافة فئة",
-    batchCreate: "إنشاء متعدد",
-    edit: "تعديل",
-    delete: "حذف",
-    save: "حفظ",
-    cancel: "إلغاء",
-    refresh: "تحديث",
-    selectAll: "تحديد الكل",
-    clearSelection: "إلغاء التحديد",
-    export: "تصدير",
-    import: "استيراد"
-  },
-  labels: {
-    tableName: "اسم الطاولة",
-    category: "الفئة",
-    capacity: "السعة",
-    status: "الحالة",
-    occupation: "الإشغال",
-    displayOrder: "ترتيب العرض",
-    search: "البحث في الطاولات...",
-    filterByCategory: "تصفية حسب الفئة",
-    viewMode: "وضع العرض",
-    totalTables: "إجمالي الطاولات",
-    activeTables: "الطاولات النشطة",
-    occupiedTables: "الطاولات المشغولة",
-    availableTables: "الطاولات المتاحة"
-  },
-  status: {
-    active: "نشط",
-    inactive: "غير نشط",
-    occupied: "مشغول",
-    available: "متاح",
-    outOfService: "خارج الخدمة"
-  },
-  actions: {
-    markOccupied: "تحديد كمشغول",
-    markAvailable: "تحديد كمتاح",
-    activate: "تفعيل",
-    deactivate: "إلغاء التفعيل",
-    viewDetails: "عرض التفاصيل"
-  },
-  messages: {
-    tableCreated: "تم إنشاء الطاولة بنجاح",
-    tableUpdated: "تم تحديث الطاولة بنجاح",
-    tableDeleted: "تم حذف الطاولة بنجاح",
-    statusUpdated: "تم تحديث الحالة بنجاح",
-    error: "حدث خطأ",
-    noTables: "لم يتم العثور على طاولات",
-    confirmDelete: "هل أنت متأكد من حذف هذه الطاولة؟",
-    loading: "جاري التحميل...",
-    saving: "جاري الحفظ...",
-    deleting: "جاري الحذف..."
-  },
-  statistics: {
-    title: "إحصائيات الطاولات",
-    occupancyRate: "معدل الإشغال",
-    averageCapacity: "متوسط السعة",
-    categoryBreakdown: "توزيع الفئات",
-    dailyOccupancy: "الإشغال اليومي",
-    peakHours: "ساعات الذروة"
-  },
-  forms: {
-    createTable: "إنشاء طاولة جديدة",
-    editTable: "تعديل الطاولة",
-    batchCreateTables: "إنشاء عدة طاولات",
-    quantity: "الكمية",
-    namePrefix: "بادئة الاسم",
-    startingNumber: "الرقم البادئ"
-  }
+    title: "إدارة الطاولات",
+    subtitle: "إدارة طاولات المطعم والفئات",
+    tabs: {
+      tables: "الطاولات",
+      categories: "الفئات",
+      statistics: "الإحصائيات",
+      batchCreate: "إنشاء متعدد"
+    },
+    buttons: {
+      addTable: "إضافة طاولة",
+      addCategory: "إضافة منطقة",
+      batchCreate: "إنشاء متعدد",
+      edit: "تعديل",
+      delete: "حذف",
+      save: "حفظ",
+      cancel: "إلغاء",
+      refresh: "تحديث",
+      selectAll: "تحديد الكل",
+      clearSelection: "إلغاء التحديد",
+      export: "تصدير",
+      import: "استيراد"
+    },
+    labels: {
+      tableName: "اسم الطاولة",
+      category: "المنطقة",
+      capacity: "السعة",
+      status: "الحالة",
+      occupation: "الإشغال",
+      displayOrder: "ترتيب العرض",
+      search: "البحث في الطاولات...",
+      filterByCategory: "تصفية حسب الفئة",
+      viewMode: "وضع العرض",
+      totalTables: "إجمالي الطاولات",
+      activeTables: "الطاولات النشطة",
+      occupiedTables: "الطاولات المشغولة",
+      availableTables: "الطاولات المتاحة"
+    },
+    status: {
+      active: "نشط",
+      inactive: "غير نشط",
+      occupied: "مشغول",
+      available: "متاح",
+      outOfService: "خارج الخدمة"
+    },
+    actions: {
+      markOccupied: "تحديد كمشغول",
+      markAvailable: "تحديد كمتاح",
+      activate: "تفعيل",
+      deactivate: "إلغاء التفعيل",
+      viewDetails: "عرض التفاصيل"
+    },
+    messages: {
+      tableCreated: "تم إنشاء الطاولة بنجاح",
+      tableUpdated: "تم تحديث الطاولة بنجاح",
+      tableDeleted: "تم حذف الطاولة بنجاح",
+      statusUpdated: "تم تحديث الحالة بنجاح",
+      error: "حدث خطأ",
+      noTables: "لم يتم العثور على طاولات",
+      confirmDelete: "هل أنت متأكد من حذف هذه الطاولة؟",
+      loading: "جاري التحميل...",
+      saving: "جاري الحفظ...",
+      deleting: "جاري الحذف..."
+    },
+    statistics: {
+      title: "إحصائيات الطاولات",
+      occupancyRate: "معدل الإشغال",
+      averageCapacity: "متوسط السعة",
+      categoryBreakdown: "توزيع الفئات",
+      dailyOccupancy: "الإشغال اليومي",
+      peakHours: "ساعات الذروة"
+    },
+    forms: {
+      createTable: "إنشاء طاولة جديدة",
+      editTable: "تعديل الطاولة",
+      batchCreateTables: "إنشاء عدة طاولات",
+      quantity: "الكمية",
+      namePrefix: "بادئة الاسم",
+      startingNumber: "الرقم البادئ"
+    }
   },
 
   BranchTableManagement: {
-        "capacityLabel": "السعة",
+    "capacityLabel": "السعة",
     "tableNameLabel": "اسم الطاولة",
-      clearTable: " تنضيف الطاولة",
-      refreshTable: " تحديث الحالة",
-      clearing: "جارٍ المسح...",
-      loading : "جارٍ التحميل...",
-      multiCategory : "إنشاء طاولات متعددة عبر فئات مختلفة في وقت واحد",
-      category: "الفئة",
-      SelectCategory: "اختر فئة",
-      Quantity: "عدد الطاولات",
-      Capacity: " سعة الطاولة (عدد الأشخاص)",
-      createTables: "إنشاء الطاولات",
-      creatingTables: "جارٍ إنشاء الطاولات...",
-      batchCreateTables: "إنشاء طاولات دفعة واحدة",
-      header: "إدارة الفئات والطاولات",
-      subheader: "إدارة فئات المطعم والطاولات مع عرض الأكورديون",
-      totalCategories: "إجمالي الفئات",
-      totalTables: "إجمالي الطاولات",
-      occupiedTables: "الطاولات المشغولة",
-      availableTables: "الطاولات المتاحة",
-      searchPlaceholder: "ابحث عن الفئات...",
-      refresh: "تحديث",
-      addCategory: "إضافة فئة",
-      addCategoryTitle: "إضافة فئة جديدة",
-      categoryNameLabel: "اسم الفئة",
-      categoryNamePlaceholder: "أدخل اسم الفئة",
-      colorLabel: "اللون",
-      iconLabel: "الأيقونة",
-      save: "حفظ",
-      cancel: "إلغاء",
-      noCategories: "لم يتم العثور على فئات",
-      addFirstCategory: "إضافة فئتك الأولى",
-      tablesCount: "طاولات",
-      status: "الحالة",
-      active: "نشط",
-      inactive: "غير نشط",
-      occupation: "الإشغال",
-      occupied: "مشغولة",
-      available: "متاح",
-      addTable: "إضافة طاولة",
-      tableNamePlaceholder: "اسم الطاولة",
-      capacityPlaceholder: "السعة",
-      noTables: "لا توجد طاولات في هذه الفئة",
-      qrCodeTitle: "رمز QR - {tableName}",
-      qrCodeDescription: "امسح رمز QR هذا للوصول إلى قائمة الطاولة",
-      downloadQR: "تنزيل رمز QR",
-      downloading: "جاري التنزيل...",
-      copyQRUrl: "نسخ رابط QR",
-      copied: "تم النسخ!",
-      success: {
-        "tableCleared": "تم مسح الطاولة {{tableName}} وهو الآن متاح",
-        "tableOccupied": "تم تحديث حالة الطاولة {{tableName}} إلى ",
-        "tableClearedGeneric": "تم مسح الطاولة بنجاح",
-        "tableStatusUpdated": "تم تحديث حالة الطاولة بنجاح",
-        categoryAdded: "تم إضافة الفئة بنجاح",
-        categoryUpdated: "تم تحديث الفئة بنجاح",
-        categoryDeleted: "تم حذف الفئة بنجاح",
-        tableAdded: "تم إضافة الطاولة بنجاح",
-        tableUpdated: "تم تحديث الطاولة بنجاح",
-        tableDeleted: "تم حذف الطاولة بنجاح",
-        categoryActivated: "تم تفعيل الفئة بنجاح",
-        categoryDeactivated: "تم إلغاء تفعيل الفئة بنجاح",
-        tableActivated: "تم تفعيل الطاولة بنجاح",
-        tableDeactivated: "تم إلغاء تفعيل الطاولة بنجاح",
-        tableAvailable: "تم وضع علامة على الطاولة كمتاحة",
-        dataRefreshed: "تم تحديث البيانات بنجاح"
-      },
-      error: {
-        clearTableFailed: "فشل مسح الطاولة. يُرجى المحاولة مرة أخرى",
-        fetchCategoriesFailed: "فشل في جلب الفئات",
-        fetchTablesFailed: "فشل في جلب الطاولات",
-        categoryNameRequired: "اسم الفئة مطلوب",
-        addCategoryFailed: "فشل في إضافة الفئة",
-        updateCategoryFailed: "فشل في تحديث الفئة",
-        deleteCategoryFailed: "فشل في حذف الفئة",
-        categoryHasTables: "لا يمكن حذف الفئة التي تحتوي على طاولات",
-        categoryNotFound: "الفئة غير موجودة",
-        addTableFailed: "فشل في إضافة الطاولة",
-        updateTableFailed: "فشل في تحديث الطاولة",
-        deleteTableFailed: "فشل في حذف الطاولة",
-        tableNameRequired: "اسم الطاولة مطلوب",
-        tableNotFound: "الطاولة غير موجودة",
-        updateCategoryStatusFailed: "فشل في تحديث حالة الفئة",
-        updateTableStatusFailed: "فشل في تحديث حالة الطاولة",
-        updateTableOccupationFailed: "فشل في تحديث حالة إشغال الطاولة",
-        refreshFailed: "فشل في تحديث البيانات"
-      }
+    clearTable: " تنضيف الطاولة",
+    refreshTable: " تحديث الحالة",
+    clearing: "جارٍ المسح...",
+    loading: "جارٍ التحميل...",
+    multiCategory: "إنشاء طاولات متعددة عبر فئات مختلفة في وقت واحد",
+    category: "الفئة",
+    SelectCategory: "اختر فئة",
+    Quantity: "عدد الطاولات",
+    Capacity: " سعة الطاولة (عدد الأشخاص)",
+    createTables: "إنشاء الطاولات",
+    creatingTables: "جارٍ إنشاء الطاولات...",
+    batchCreateTables: "إنشاء طاولات دفعة واحدة",
+    header: "إدارة المناطق والطاولات",
+    subheader: "إدارة مناطق المطعم والطاولات",
+    totalCategories: "إجمالي المناطق",
+    totalTables: "إجمالي الطاولات",
+    occupiedTables: "الطاولات المشغولة",
+    availableTables: "الطاولات المتاحة",
+    searchPlaceholder: "ابحث عن المناطق...",
+    refresh: "تحديث",
+    addCategory: "إضافة منطقة",
+    addCategoryTitle: "إضافة منطقة جديدة",
+    categoryNameLabel: "اسم المنطقة",
+    categoryNamePlaceholder: "أدخل اسم المنطقة",
+    colorLabel: "اللون",
+    iconLabel: "الأيقونة",
+    save: "حفظ",
+    cancel: "إلغاء",
+    edit: "تعديل",
+    delete: "حذف",
+    qrCode: "رمز الاستجابة السريعة",
+    showQRCode: "عرض رمز الاستجابة السريعة",
+    noCategories: "لم يتم العثور على مناطق",
+    addFirstCategory: "إضافة منطقتك الأولى",
+    tablesCount: "طاولات",
+    status: "الحالة",
+    active: "نشط",
+    inactive: "غير نشط",
+    occupation: "الإشغال",
+    occupied: "مشغولة",
+    available: "متاح",
+    addTable: "إضافة طاولة",
+    tableNamePlaceholder: "اسم الطاولة",
+    capacityPlaceholder: "السعة",
+    noTables: "لا توجد طاولات في هذه الفئة",
+    qrCodeTitle: "رمز QR - {tableName}",
+    qrCodeDescription: "امسح رمز QR هذا للوصول إلى قائمة الطاولة",
+    downloadQR: "تنزيل رمز QR",
+    downloading: "جاري التنزيل...",
+    copyQRUrl: "نسخ رابط QR",
+    copied: "تم النسخ!",
+    success: {
+      "tableCleared": "تم مسح الطاولة {{tableName}} وهو الآن متاح",
+      "tableOccupied": "تم تحديث حالة الطاولة {{tableName}} إلى ",
+      "tableClearedGeneric": "تم مسح الطاولة بنجاح",
+      "tableStatusUpdated": "تم تحديث حالة الطاولة بنجاح",
+      categoryAdded: "تم إضافة الفئة بنجاح",
+      categoryUpdated: "تم تحديث الفئة بنجاح",
+      categoryDeleted: "تم حذف الفئة بنجاح",
+      tableAdded: "تم إضافة الطاولة بنجاح",
+      tableUpdated: "تم تحديث الطاولة بنجاح",
+      tableDeleted: "تم حذف الطاولة بنجاح",
+      categoryActivated: "تم تفعيل الفئة بنجاح",
+      categoryDeactivated: "تم إلغاء تفعيل الفئة بنجاح",
+      tableActivated: "تم تفعيل الطاولة بنجاح",
+      tableDeactivated: "تم إلغاء تفعيل الطاولة بنجاح",
+      tableAvailable: "تم وضع علامة على الطاولة كمتاحة",
+      dataRefreshed: "تم تحديث البيانات بنجاح"
+    },
+    error: {
+      clearTableFailed: "فشل مسح الطاولة. يُرجى المحاولة مرة أخرى",
+      fetchCategoriesFailed: "فشل في جلب الفئات",
+      createCategoryFirst: "يرجى إنشاء فئة أولاً قبل إضافة الطاولات",
+      fetchTablesFailed: "فشل في جلب الطاولات",
+      categoryNameRequired: "اسم الفئة مطلوب",
+      addCategoryFailed: "فشل في إضافة الفئة",
+      updateCategoryFailed: "فشل في تحديث الفئة",
+      deleteCategoryFailed: "فشل في حذف الفئة",
+      categoryHasTables: "لا يمكن حذف الفئة التي تحتوي على طاولات",
+      categoryNotFound: "الفئة غير موجودة",
+      addTableFailed: "فشل في إضافة الطاولة",
+      updateTableFailed: "فشل في تحديث الطاولة",
+      deleteTableFailed: "فشل في حذف الطاولة",
+      tableNameRequired: "اسم الطاولة مطلوب",
+      tableNotFound: "الطاولة غير موجودة",
+      updateCategoryStatusFailed: "فشل في تحديث حالة الفئة",
+      updateTableStatusFailed: "فشل في تحديث حالة الطاولة",
+      updateTableOccupationFailed: "فشل في تحديث حالة إشغال الطاولة",
+      refreshFailed: "فشل في تحديث البيانات"
+    }
   },
 
   branchManagementBranch: {
@@ -3133,6 +3290,7 @@ contact: {
     description: 'إدارة معلومات وإعدادات فرعك.',
     loading: 'جاري تحميل معلومات الفرع...',
     noBranchFound: 'لم يتم العثور على أي فرع',
+    editBranchName: 'تعديل اسم الفرع',
     uploadLogo: 'تحميل الشعار',
     status: {
       open: 'مفتوح',
@@ -3141,7 +3299,7 @@ contact: {
       reopenBranch: 'إعادة فتح الفرع',
       temporaryClose: 'إغلاق مؤقت'
     },
-    
+
     actions: {
       edit: 'تعديل',
       save: 'حفظ',
@@ -3150,9 +3308,12 @@ contact: {
       deleting: 'جاري الحذف...',
       confirmDelete: 'تأكيد الحذف',
       deleteWarning: 'هل أنت متأكد من أنك تريد حذف هذا الفرع؟ لا يمكن التراجع عن هذا الإجراء.',
-      onlineMenu: 'عرض القائمة الإلكترونية'
+      onlineMenu: 'عرض القائمة الإلكترونية',
+      copyLink: 'نسخ الرابط',
+      copied: 'تم النسخ!',
+      linkCopied: 'تم نسخ الرابط إلى الحافظة!',
     },
-    
+
     basicInfo: {
       title: 'المعلومات الأساسية',
       branchName: 'اسم الفرع',
@@ -3160,7 +3321,7 @@ contact: {
       email: 'البريد الإلكتروني',
       notSpecified: 'غير محدد'
     },
-    
+
     addressInfo: {
       title: 'معلومات العنوان',
       country: 'الدولة',
@@ -3169,10 +3330,14 @@ contact: {
       postalCode: 'الرمز البريدي',
       region: 'المنطقة'
     },
-    
+
     workingHours: {
       title: 'ساعات العمل',
       workingDay: 'يوم عمل',
+      open24Hours: 'مفتوح 24 ساعة',
+      open24HoursMessage: 'هذه الفرع مفتوح 24 ساعة.',
+      addTimeSlot: 'إضافة فترة زمنية',
+
       openTime: 'وقت الفتح',
       closeTime: 'وقت الإغلاق',
       noWorkingHours: 'لم يتم تحديد ساعات العمل',
@@ -3186,7 +3351,7 @@ contact: {
         6: 'السبت'
       }
     },
-    
+
     messages: {
       updateSuccess: 'تم تحديث معلومات الفرع بنجاح',
       deleteSuccess: 'تم حذف الفرع بنجاح',
@@ -3197,7 +3362,15 @@ contact: {
       statusChangeError: 'حدث خطأ أثناء تغيير الحالة',
       loadError: 'حدث خطأ أثناء تحميل معلومات الفرع'
     },
-    
+
+    errors: {
+      nameRequired: 'اسم الفرع مطلوب',
+      saveFailed: 'فشل حفظ اسم الفرع',
+      popupBlocked: 'يرجى السماح بالنوافذ المنبثقة لفتح القائمة الإلكترونية',
+      failedToGetPublicId: 'فشل الحصول على رابط القائمة الإلكترونية',
+      failedToCopyLink: 'فشل نسخ الرابط'
+    },
+
     placeholders: {
       branchName: 'أدخل اسم الفرع',
       whatsappNumber: 'أدخل رقم الواتساب',
@@ -3213,9 +3386,12 @@ contact: {
   branchCategories: {
     // Header and Stats
     header: 'إدارة فئات الفرع',
+    originalName: 'الاسم الأصلي',
+    editCategoryName: 'تعديل اسم الفئة',
+    categoryName: 'اسم الفئة',
+    enterCategoryName: 'أدخل اسم الفئة',
     subheader: 'إدارة الفئات والمنتجات للفرع ',
     lastUpdated: 'آخر تحديث',
-    
     stats: {
       availableCategories: 'الفئات المتاحة',
       readyToAdd: 'جاهزة للإضافة',
@@ -3322,7 +3498,13 @@ contact: {
       addedToBranch: 'منتجات مضافة إلى الفرع',
       moreAvailableToAdd: 'المزيد متاح للإضافة',
       withDetailedInfo: 'بمعلومات مفصلة',
-      products: 'منتجات'
+      products: 'منتجات',
+      activate: 'تفعيل المنتج',
+      deactivate: 'إلغاء تفعيل المنتج',
+      markInStock: 'تحديد كمتوفر',
+      markOutOfStock: 'تحديد كغير متوفر',
+      configureAddons: 'تكوين الإضافات',
+      manageExtras: 'إدارة الإضافات'
     },
 
     // Product Details Modal
@@ -3368,9 +3550,13 @@ contact: {
     // Status
     status: {
       active: 'نشط',
-      inactive: 'تم تعطيله من قبل المطعم',
+      inactive: 'تم تعطيله   ',
       available: 'متاح',
       unavailable: 'غير متاح'
+    },
+    stock: {
+      inStock: 'متوفر في المخزون',
+      outOfStock: 'غير متوفر في المخزون'
     },
 
     // Messages
@@ -3409,98 +3595,99 @@ contact: {
     }
   },
   profile: {
-      title: 'الملف الشخصي',
-      personalInfo: 'المعلومات الشخصية',
-      editProfile: 'تعديل الملف الشخصي',
-      accountStatus: {
-        active: 'حساب نشط',
-        inactive: 'حساب غير نشط',
-        status: 'حالة الحساب'
-      },
-      fields: {
-        firstName: 'الاسم الأول',
-        lastName: 'اسم العائلة',
-        username: 'اسم المستخدم',
-        email: 'البريد الإلكتروني',
-        registrationDate: 'تاريخ التسجيل',
-        restaurantName: 'اسم المطعم',
-        status: 'الحالة'
-      },
-      restaurant: {
-        info: 'معلومات المطعم',
-        name: 'اسم المطعم',
-        status: {
-          active: 'نشط',
-          inactive: 'غير نشط'
-        }
-      },
-      permissions: {
-        summary: 'ملخص الصلاحيات',
-        totalCategories: 'إجمالي الفئات',
-        totalPermissions: 'إجمالي الصلاحيات',
-        rolesAndPermissions: 'الفئات والصلاحيات',
-        systemRole: 'دور النظام'
-      },
-      categories: {
-        'Category': 'إدارة الفئات',
-        'BranchCategory': 'إدارة فئات الفروع',
-        'Product': 'إدارة المنتجات',
-        'BranchProduct': 'إدارة منتجات الفروع',
-        'BranchQRCode': 'إدارة رموز QR',
-        'Order': 'إدارة الطلبات',
-        'Restaurant': 'إدارة المطاعم',
-        'Branch': 'إدارة الفروع',
-        'Admin': 'عمليات الإدارة'
-      },
-      permissionNames: {
-        'category.create': 'إنشاء فئة',
-        'category.delete': 'حذف فئة',
-        'category.update': 'تحديث فئة',
-        'category.read': 'عرض فئة',
-        'branch.category.create': 'إنشاء فئة فرع',
-        'branch.category.delete': 'حذف فئة فرع',
-        'branch.category.update': 'تحديث فئة فرع',
-        'branch.category.read': 'عرض فئة فرع',
-        'product.create': 'إنشاء منتج',
-        'product.delete': 'حذف منتج',
-        'product.update': 'تحديث منتج',
-        'product.read': 'عرض منتج',
-        'product.edit': 'تعديل منتج',
-        'branch.product.create': 'إنشاء منتج فرع',
-        'branch.product.delete': 'حذف منتج فرع',
-        'branch.product.update': 'تحديث منتج فرع',
-        'branch.product.read': 'عرض منتج فرع',
-        'branch.qrcode.create': 'إنشاء رمز QR',
-        'branch.qrcode.delete': 'حذف رمز QR',
-        'branch.qrcode.update': 'تحديث رمز QR',
-        'branch.qrcode.read': 'عرض رمز QR',
-        'order.create': 'إنشاء طلب',
-        'order.delete': 'حذف طلب',
-        'order.update': 'تحديث طلب',
-        'order.read': 'عرض طلب',
-        'order.view': 'عرض تفاصيل الطلب',
-        'order.cancel': 'إلغاء طلب',
-        'restaurant.create': 'إنشاء مطعم',
-        'restaurant.delete': 'حذف مطعم',
-        'restaurant.update': 'تحديث مطعم',
-        'restaurant.read': 'عرض مطعم',
-        'restaurant.user.create': 'إنشاء مستخدم مطعم',
-        'restaurant.user.delete': 'حذف مستخدم مطعم',
-        'restaurant.user.update': 'تحديث مستخدم مطعم',
-        'restaurant.user.read': 'عرض مستخدم مطعم',
-        'branch.create': 'إنشاء فرع',
-        'branch.delete': 'حذف فرع',
-        'branch.update': 'تحديث فرع',
-        'branch.read': 'عرض فرع',
-        'branch.user.create': 'إنشاء مستخدم فرع',
-        'branch.user.delete': 'حذف مستخدم فرع',
-        'branch.user.update': 'تحديث مستخدم فرع',
-        'branch.user.read': 'عرض مستخدم فرع',
-        'admin.api.control': 'التحكم في API'
-      },
-      error: {
-        loadFailed: 'فشل في تحميل بيانات الملف الشخصي'
+    title: 'الملف الشخصي',
+    personalInfo: 'المعلومات الشخصية',
+    editProfile: 'تعديل الملف الشخصي',
+    accountStatus: {
+      active: 'حساب نشط',
+      inactive: 'حساب غير نشط',
+      status: 'حالة الحساب'
+    },
+    fields: {
+      firstName: 'الاسم الأول',
+      lastName: 'اسم العائلة',
+      username: 'اسم المستخدم',
+      email: 'البريد الإلكتروني',
+      registrationDate: 'تاريخ التسجيل',
+      restaurantName: 'اسم المطعم',
+      status: 'الحالة'
+    },
+    restaurant: {
+      info: 'معلومات المطعم',
+      name: 'اسم المطعم',
+      status: {
+        active: 'نشط',
+        inactive: 'غير نشط'
       }
+    },
+    permissions: {
+      summary: 'ملخص الصلاحيات',
+      totalCategories: 'إجمالي الفئات',
+      totalPermissions: 'إجمالي الصلاحيات',
+      rolesAndPermissions: 'الفئات والصلاحيات',
+      systemRole: 'دور النظام'
+    },
+    categories: {
+      'Category': 'إدارة الفئات',
+      'BranchCategory': 'إدارة فئات الفروع',
+      'Product': 'إدارة المنتجات',
+      'BranchProduct': 'إدارة منتجات الفروع',
+      'BranchQRCode': 'إدارة رموز QR',
+      'Order': 'إدارة الطلبات',
+      'Restaurant': 'إدارة المطاعم',
+      'Branch': 'إدارة الفروع',
+      'Admin': 'عمليات الإدارة'
+    },
+    permissionNames: {
+      'category.create': 'إنشاء فئة',
+      'category.delete': 'حذف فئة',
+      'category.update': 'تحديث فئة',
+      'category.read': 'عرض فئة',
+      'branch.category.create': 'إنشاء فئة فرع',
+      'branch.category.delete': 'حذف فئة فرع',
+      'branch.category.update': 'تحديث فئة فرع',
+      'branch.category.read': 'عرض فئة فرع',
+      'product.create': 'إنشاء منتج',
+      'product.delete': 'حذف منتج',
+      'product.update': 'تحديث منتج',
+      'product.read': 'عرض منتج',
+      'product.edit': 'تعديل منتج',
+      'branch.product.create': 'إنشاء منتج فرع',
+      'branch.product.delete': 'حذف منتج فرع',
+      'branch.product.update': 'تحديث منتج فرع',
+      'branch.product.read': 'عرض منتج فرع',
+      'branch.qrcode.create': 'إنشاء رمز QR',
+      'branch.qrcode.delete': 'حذف رمز QR',
+      'branch.qrcode.update': 'تحديث رمز QR',
+      'branch.qrcode.read': 'عرض رمز QR',
+      'order.create': 'إنشاء طلب',
+      'order.delete': 'حذف طلب',
+      'order.update': 'تحديث طلب',
+      'order.read': 'عرض طلب',
+      'order.view': 'عرض تفاصيل الطلب',
+      'order.cancel': 'إلغاء طلب',
+      'restaurant.create': 'إنشاء مطعم',
+      'restaurant.delete': 'حذف مطعم',
+      'restaurant.update': 'تحديث مطعم',
+      'restaurant.read': 'عرض مطعم',
+      'restaurant.user.create': 'إنشاء مستخدم مطعم',
+      'restaurant.user.delete': 'حذف مستخدم مطعم',
+      'restaurant.user.update': 'تحديث مستخدم مطعم',
+      'restaurant.user.read': 'عرض مستخدم مطعم',
+      'branch.create': 'إنشاء فرع',
+      'branch.delete': 'حذف فرع',
+      'branch.update': 'تحديث فرع',
+      'branch.read': 'عرض فرع',
+      'branch.user.create': 'إنشاء مستخدم فرع',
+      'branch.user.delete': 'حذف مستخدم فرع',
+      'branch.user.update': 'تحديث مستخدم فرع',
+      'branch.user.read': 'عرض مستخدم فرع',
+      'admin.api.control': 'التحكم في API'
+    },
+    error: {
+      loadFailed: 'فشل في تحميل بيانات الملف الشخصي'
+    },
+    changePhoto: 'تغيير'
   },
 
   addonModal: {
@@ -3539,7 +3726,7 @@ contact: {
       title: 'إعدادات التكوين',
       specialPrice: 'السعر الخاص',
       maxQuantity: 'الحد الأقصى للكمية',
-        minQuantity: 'الحد الادنى للكمية',
+      minQuantity: 'الحد الادنى للكمية',
       marketingText: 'النص التسويقي',
       markRecommended: 'وضع علامة كموصى بها',
       placeholders: {
@@ -3567,182 +3754,226 @@ contact: {
   },
 
   menu: {
-      title: "القائمة",
-      loading: "تحميل القائمة",
-      basePrice: "السعر الأساسي",
-      quantity: "الكمية",
-      addons  : "الإضافات",
-      product: "المنتج",
-      addToBasket: "أضف إلى السلة",
-      allergens: "مسببات الحساسية",
-      loadingSubtitle: "نحضر لك أشهى المأكولات...",
-      error: {
-        title: "القائمة غير متوفرة",
-        tryAgain: "حاول مرة أخرى"
-      },
-      search: {
-        placeholder: "ابحث عن الأطباق الشهية..."
-      },
-      categories: "الفئات",
-      ingredients: "المكونات",
-      open: "مفتوح",
-      closed: "مغلق",
-      chefsChoice: "اختيار الشيف",
-      add: "إضافة",
-      remove: "حذف",
-      items: "عنصر",
-      item: "عنصر",
-      available: "متوفر",
-      deliciousItems: "لذيذة",
-      exploreMenu: "استكشف قائمتنا",
-      noResults: "لم يتم العثور على نتائج",
-      noResultsDesc: "جرب كلمات مختلفة أو تصفح فئات أخرى",
-      noItemsCategory: "لا توجد عناصر في هذه الفئة",
-      noItemsCategoryDesc: "تحقق من الفئات الأخرى للحصول على خيارات لذيذة",
-      selectCategory: "اختر فئة لبدء استكشاف مأكولاتنا المتقنة بعناية",
-      whyChooseUs: {
-        title: "لماذا تختارنا؟",
-        subtitle: "استمتع بالتميز الطهي مع التزامنا بالجودة والطازجة والخدمة الاستثنائية",
-        freshIngredients: {
-          title: "مكونات طازجة",
-          description: "مكونات عالية الجودة من مصادر محلية تُحضر يومياً"
-        },
-        fastDelivery: {
-          title: "توصيل سريع",
-          description: "خدمة توصيل سريعة وموثوقة إلى باب منزلك"
-        },
-        qualityAssured: {
-          title: "جودة مضمونة",
-          description: "معايير صارمة لمراقبة الجودة والنظافة"
-        },
-        expertChefs: {
-          title: "طهاة خبراء",
-          description: "محترفون في الطهي ذوو خبرة يصنعون تجارب لا تُنسى"
-        }
-      },
-
-      footer: {
-        brand: "قائمة المطاعم",
-        description: "اكتشف تجارب طعام استثنائية مع مجموعتنا المختارة من المطاعم والمأكولات اللذيذة.",
-        quickLinks: "روابط سريعة",
-        getInTouch: "تواصل معنا",
-        visitUs: "زرنا",
-        callUs: "اتصل بنا",
-        emailUs: "راسلنا",
-        copyright: "جميع الحقوق محفوظة.",
-        privacyPolicy: "سياسة الخصوصية",
-        termsOfService: "شروط الخدمة",
-        poweredBy: "بدعم من",
-        links: {
-          ourMenu: "قائمتنا",
-          aboutUs: "من نحن",
-          locations: "المواقع",
-          reservations: "الحجوزات",
-          specialOffers: "العروض الخاصة",
-          giftCards: "بطاقات الهدايا"
-        },
-        services: {
-          onlineOrdering: "الطلب عبر الإنترنت",
-          tableBooking: "حجز الطاولات",
-          privateEvents: "الفعاليات الخاصة",
-          catering: "خدمات الضيافة",
-          takeaway: "الطلبات الخارجية",
-          corporateMeals: "وجبات الشركات"
-        }
-      },
-      cart: {
-      title: 'السلة',
-      basePrice: 'السعر الأساسي',
-      price_change_title : "إشعار تغير الاسعار",
-      confirm:"قبول",
-      cancel:"رفض",
-      confirm_cancel_title:"السبب الذي كتبته سيصل إلى المطعم.",
-      cancel_order_confirm :"هل أنت متأكد أنك تريد إلغاء الطلب؟ ",
-      order_cancelled_success:"لقد تم إلغاء طلبك بنجاح.",
-      success:"ناجح",
-      newOrder: 'طلب جديد',
-      orders: 'الطلبات',
-       cancel_Reason_prompt_title:"سبب الإلغاء", 
-      reason:"صندوق ارسال السبب", 
-      submit: "إرسال", 
-      order_can_be_updated: 'يمكن تحديث الطلب',
-      time_remaining: 'الوقت المتبقي',
-      modified_times: 'تم التعديل {{count}} مرة/مرات',
-      edit_order: 'تعديل الطلب',
-      edit_order_items: 'تعديل عناصر الطلب',
-      update_reason: 'سبب التحديث',
-      update_reason_placeholder: 'لماذا تقوم بتحديث هذا الطلب؟',
-      update_reason_required: 'يرجى تقديم سبب للتحديث',
-      no_changes_detected: 'لم يتم اكتشاف أي تغييرات. يرجى تعديل العناصر قبل التحديث.',
-      characters: 'حرف',
-      updating: 'جاري التحديث...',
-      update_order: 'تحديث الطلب',
-      was: 'كان',
-      add_note: 'إضافة ملاحظة...',
-      marked_for_deletion: 'محدد للحذف',
-      restore_item: 'استعادة العنصر',
-      delete_item: 'حذف العنصر',
-      order_updated_success: 'تم تحديث الطلب بنجاح!',
-      order_update_failed: 'فشل تحديث الطلب',
-      price_change_confirm: 'تغيرت بعض الأسعار منذ تقديم الطلب. هل تريد المتابعة بالتحديث؟',
-      cancel_order: "إلغاء الطب",
-      notes: 'ملاحظات',
-      refresh: 'تحديث',
-      refreshing: 'جاري التحديث...',
-      remove: 'إزالة',
-      orderType: 'نوع الطلب',
-      table: 'الطاولة',
-      empty: 'السلة فارغة',
-      emptyDesc: 'ابدأ بإضافة بعض العناصر إلى سلتك',
-      total: 'المجموع',
-      proceed: 'المتابعة للطلب',
-      placeOrder: "إتمام الطلب",
-      processing: 'جاري المعالجة...',
-      clear: 'تفريغ السلة',
-      item: 'عنصر',
+    noCategories: "لايوجد قائمة",
+    quickReorder: {
+      title: 'إعادة الطلب السريع',
+      previousOrders: 'طلبات سابقة',
+      confirmClear: 'مسح كل السجل؟',
+      clearHistory: 'مسح السجل',
       items: 'عناصر',
-      variant: 'نوع',
-      variants: 'أنواع',
-      plain: 'عادي',
-      customized: 'مخصص',
-      addons: 'الإضافات',
-      variantTotal: 'مجموع النوع',
-      quantity: 'الكمية',
-      each: 'للواحد',
-      min: 'الحد الأدنى',
-      max: 'الحد الأقصى',
-      qty: 'كمية',
-      minQuantityError: 'الحد الأدنى للكمية لـ {name} هو {min}',
-      maxQuantityError: 'الحد الأقصى للكمية لـ {name} هو {max}',
-      decreaseQuantity: 'تقليل الكمية',
-      increaseQuantity: 'زيادة الكمية',
-        "creating_order": "جاري إنشاء الطلب...",
-  "order_created_success": "تم إنشاء الطلب بنجاح!",
-  "order_creation_failed": "فشل في إنشاء الطلب. يرجى المحاولة مرة أخرى.",
-  "sending_whatsapp": "جاري إرسال رسالة واتساب...",
-  "whatsapp_sent_success": "تم إرسال رسالة واتساب بنجاح!",
-  "whatsapp_send_failed": "فشل في إرسال رسالة واتساب",
-  "clearing_basket": "جاري مسح السلة...",
-  "basket_cleared": "تم مسح السلة بنجاح!",
-  "clear_basket_failed": "فشل في مسح السلة",
-  "load_order_types_failed": "فشل في تحميل أنواع الطلبات",
-  "confirming_price_changes": "جاري تأكيد تغييرات الأسعار...",
-  "price_changes_confirmed": "تم تأكيد تغييرات الأسعار بنجاح!",
-  "price_changes_failed": "فشل في تأكيد تغييرات الأسعار",
-  "session_required": "معرف الجلسة مطلوب"
-    }
+      itemsUnavailable: 'عنصر(عناصر) غير متوفرة',
+      hideDetails: 'إخفاء التفاصيل',
+      showDetails: 'عرض التفاصيل',
+      unavailable: 'غير متوفر',
+      reorderAll: 'إعادة طلب الكل',
+      reorderAvailable: 'إعادة طلب العناصر المتوفرة',
+      itemsAdded: 'تمت إضافة العناصر إلى السلة!'
+    },
+    noCategoriesDesc: "لايوجد قائمة",
+    title: "القائمة",
+    availableExtras: "الإضافات المتاحة",
+    loading: "تحميل القائمة",
+    basePrice: "السعر الأساسي",
+    quantity: "الكمية",
+    customizations: "التخصيصات",
+    extras: "الإضافات",
+    each: "كل",
+    no: "لا",
+    addons: "الإضافات",
+    product: "المنتج",
+    addToBasket: "أضف إلى السلة",
+    addToOrder: "أضف إلى الطلب",
+    resetSession: "إعادة تعيين الجلسة",
+    closeSession: "إغلاق الجلسة",
+    allergens: "مسببات الحساسية",
+    loadingSubtitle: "نحضر لك أشهى المأكولات...",
+    error: {
+      title: "القائمة غير متوفرة",
+      tryAgain: "حاول مرة أخرى"
+    },
+    search: {
+      placeholder: "ابحث عن الأطباق الشهية..."
+    },
+    favorites: {
+      title: "المفضلة",
+      toggle: "عرض المفضلة فقط",
+      item: "عنصر",
+      items: "عناصر"
+    },
+    noFavorites: "لا يوجد مفضلات بعد",
+    noFavoritesDesc: "اضغط على أيقونة القلب على العناصر التي تحبها لإضافتها إلى مفضلاتك",
+    categories: "الفئات",
+    ingredients: "المكونات",
+    open: "مفتوح",
+    closed: "مغلق",
+    chefsChoice: "اختيار الشيف",
+    add: "إضافة",
+    remove: "حذف",
+    items: "عنصر",
+    item: "عنصر",
+    available: "متوفر",
+    deliciousItems: "لذيذة",
+    exploreMenu: "استكشف قائمتنا",
+    noResults: "لم يتم العثور على نتائج",
+    noResultsDesc: "جرب كلمات مختلفة أو تصفح فئات أخرى",
+    noItemsCategory: "لا توجد عناصر في هذه الفئة",
+    noItemsCategoryDesc: "تحقق من الفئات الأخرى للحصول على خيارات لذيذة",
+    selectCategory: "اختر فئة لبدء استكشاف مأكولاتنا المتقنة بعناية",
+    whyChooseUs: {
+      title: "لماذا تختارنا؟",
+      subtitle: "استمتع بالتميز الطهي مع التزامنا بالجودة والطازجة والخدمة الاستثنائية",
+      freshIngredients: {
+        title: "مكونات طازجة",
+        description: "مكونات عالية الجودة من مصادر محلية تُحضر يومياً"
+      },
+      fastDelivery: {
+        title: "توصيل سريع",
+        description: "خدمة توصيل سريعة وموثوقة إلى باب منزلك"
+      },
+      qualityAssured: {
+        title: "جودة مضمونة",
+        description: "معايير صارمة لمراقبة الجودة والنظافة"
+      },
+      expertChefs: {
+        title: "طهاة خبراء",
+        description: "محترفون في الطهي ذوو خبرة يصنعون تجارب لا تُنسى"
+      }
+    },
+
+    footer: {
+      brand: "قائمة المطاعم",
+      description: "اكتشف تجارب طعام استثنائية مع مجموعتنا المختارة من المطاعم والمأكولات اللذيذة.",
+      quickLinks: "روابط سريعة",
+      getInTouch: "تواصل معنا",
+      visitUs: "زرنا",
+      callUs: "اتصل بنا",
+      emailUs: "راسلنا",
+      copyright: "جميع الحقوق محفوظة.",
+      privacyPolicy: "سياسة الخصوصية",
+      termsOfService: "شروط الخدمة",
+      poweredBy: "بدعم من",
+      links: {
+        ourMenu: "قائمتنا",
+        aboutUs: "من نحن",
+        locations: "المواقع",
+        reservations: "الحجوزات",
+        specialOffers: "العروض الخاصة",
+        giftCards: "بطاقات الهدايا"
+      },
+      services: {
+        onlineOrdering: "الطلب عبر الإنترنت",
+        tableBooking: "حجز الطاولات",
+        privateEvents: "الفعاليات الخاصة",
+        catering: "خدمات الضيافة",
+        takeaway: "الطلبات الخارجية",
+        corporateMeals: "وجبات الشركات"
+      }
+    },
+    cart: {
+      "title": "السلة",
+      "basePrice": "السعر الأساسي",
+      "price_change_title": "إشعار تغير الاسعار",
+      "confirm": "قبول",
+      "cancel": "رفض",
+      "confirm_cancel_title": "السبب الذي كتبته سيصل إلى المطعم.",
+      "cancel_order_confirm": "هل أنت متأكد أنك تريد إلغاء الطلب؟",
+      "order_cancelled_success": "لقد تم إلغاء طلبك بنجاح.",
+      "success": "ناجح",
+      "newOrder": "طلب جديد",
+      "error": "خطأ",
+      "orders": "الطلبات",
+      "removal_item_toggle": "إزالة هذا العنصر من الطلب",
+      "cancel_Reason_prompt_title": "سبب الإلغاء",
+      "reason": "سبب الإلغاء",
+      "submit": "إرسال",
+      "order_can_be_updated": "يمكن تحديث الطلب",
+      "time_remaining": "الوقت المتبقي",
+      "modified_times": "تم التعديل {{count}} مرة/مرات",
+      "edit_order": "تعديل الطلب",
+      "edit_order_items": "تعديل عناصر الطلب",
+      "update_reason": "سبب التحديث",
+      "update_reason_placeholder": "لماذا تقوم بتحديث هذا الطلب؟",
+      "update_reason_required": "يرجى تقديم سبب للتحديث",
+      "no_changes_detected": "لم يتم اكتشاف أي تغييرات. يرجى تعديل العناصر قبل التحديث.",
+      "characters": "حرف",
+      "updating": "جاري التحديث...",
+      "update_order": "تحديث الطلب",
+      "was": "كان",
+      "add_note": "إضافة ملاحظة...",
+      "marked_for_deletion": "محدد للحذف",
+      "restore_item": "استعادة العنصر",
+      "delete_item": "حذف العنصر",
+      "order_updated_success": "تم تحديث الطلب بنجاح!",
+      "order_update_failed": "فشل تحديث الطلب",
+      "price_change_confirm": "تغيرت بعض الأسعار منذ تقديم الطلب. هل تريد المتابعة بالتحديث؟",
+      "cancel_order": "إلغاء الطلب",
+      "notes": "ملاحظات",
+      "refresh": "تحديث",
+      "refreshing": "جاري التحديث...",
+      "remove": "إزالة",
+      "orderType": "نوع الطلب",
+      "table": "الطاولة",
+      "empty": "السلة فارغة",
+      "emptyDesc": "ابدأ بإضافة بعض العناصر إلى سلتك",
+      "total": "المجموع",
+      "proceed": "المتابعة للطلب",
+      "placeOrder": "إتمام الطلب",
+      "processing": "جاري المعالجة...",
+      "clear": "تفريغ السلة",
+      "item": "عنصر",
+      "items": "عناصر",
+      "variant": "نوع",
+      "variants": "أنواع",
+      "plain": "عادي",
+      "customized": "مخصص",
+      "addons": "الإضافات",
+      "variantTotal": "مجموع النوع",
+      "quantity": "الكمية",
+      "each": "للواحد",
+      "min": "الحد الأدنى",
+      "max": "الحد الأقصى",
+      "qty": "كمية",
+      "minQuantityError": "الحد الأدنى للكمية لـ {name} هو {min}",
+      "maxQuantityError": "الحد الأقصى للكمية لـ {name} هو {max}",
+      "decreaseQuantity": "تقليل الكمية",
+      "increaseQuantity": "زيادة الكمية",
+      "creating_order": "جاري إنشاء الطلب...",
+      "order_created_success": "تم إنشاء الطلب بنجاح!",
+      "order_creation_failed": "فشل في إنشاء الطلب. يرجى المحاولة مرة أخرى.",
+      "sending_whatsapp": "جاري إرسال رسالة واتساب...",
+      "whatsapp_sent_success": "تم إرسال رسالة واتساب بنجاح!",
+      "whatsapp_send_failed": "فشل في إرسال رسالة واتساب",
+      "clearing_basket": "جاري مسح السلة...",
+      "basket_cleared": "تم مسح السلة بنجاح!",
+      "clear_basket_failed": "فشل في مسح السلة",
+      "load_order_types_failed": "فشل في تحميل أنواع الطلبات",
+      "confirming_price_changes": "جاري تأكيد تغييرات الأسعار...",
+      "price_changes_confirmed": "تم تأكيد تغييرات الأسعار بنجاح!",
+      "price_changes_failed": "فشل في تأكيد تغييرات الأسعار",
+      "session_required": "معرف الجلسة مطلوب",
+      "extras": "الإضافات والخيارات",
+      "without": "بدون",
+      "extra": "زيادة",
+      "add": "إضافة",
+      "edit": "تعديل",
+      "cancel_edit": "إلغاء",
+      "restore": "استعادة",
+      "delete": "حذف",
+      "duplicate": "تكرار"
+    },
   },
 
   order: {
     form: {
       title: 'تفاصيل الطلب',
       orderType: 'نوع الطلب',
+      pleaseFillRequiredFields: "يرجى ملء الحقول المطلوبة",
       paymentMethod: 'طريقة الدفع',
       selectPaymentMethod: 'اختر طريقة الدفع...',
-      tableNumberPlaceholder : "..ادخل رقم الطاولة هنا",
+      tableNumberPlaceholder: "..ادخل رقم الطاولة هنا",
       cash: 'نقداً',
-      tableNumberRequired:"رقم الطاولة مطلوب",
-      tableNumber:"رقم الطاولة",
+      tableNumberRequired: "رقم الطاولة مطلوب",
+      tableNumber: "رقم الطاولة",
       creditCard: 'بطاقة ائتمان',
       onlinePayment: 'دفع عبر الإنترنت',
       name: 'الاسم',
@@ -3767,7 +3998,7 @@ contact: {
       specialInstructions: 'تعليمات خاصة',
       specialInstructionsPlaceholder: 'أي تعليمات خاصة لطلبك...',
       orderSummary: 'ملخص الطلب',
-            notes: "ملاحظات الطلب",
+      notes: "ملاحظات الطلب",
       notesPlaceholder: "هل لديك أي طلبات خاصة؟ (مثلًا: لا بصل)",
       subtotal: 'المجموع الفرعي',
       serviceCharge: 'رسوم الخدمة',
@@ -3789,6 +4020,35 @@ contact: {
       orderTypeRequired: 'يرجى اختيار نوع الطلب',
       addressRequired: 'عنوان التوصيل مطلوب لهذا النوع من الطلبات',
       phoneRequired: 'رقم الهاتف مطلوب لهذا النوع من الطلبات'
+    },
+    quickReorder: {
+      title: 'إعادة الطلب السريع',
+      previousOrders: 'طلبات سابقة',
+      confirmClear: 'مسح كل السجل؟',
+      clearHistory: 'مسح السجل',
+      items: 'عناصر',
+      itemsUnavailable: 'عنصر(عناصر) غير متوفرة',
+      hideDetails: 'إخفاء التفاصيل',
+      showDetails: 'عرض التفاصيل',
+      unavailable: 'غير متوفر',
+      reorderAll: 'إعادة طلب الكل',
+      reorderAvailable: 'إعادة طلب العناصر المتوفرة',
+      itemsAdded: 'تمت إضافة العناصر إلى السلة!'
+    }
+  },
+
+  orderTypes: {
+    DINE_IN: {
+      name: 'تناول الطعام في المطعم',
+      description: 'تناول الطعام على طاولة المطعم'
+    },
+    DELIVERY: {
+      name: 'التوصيل',
+      description: 'التوصيل إلى العنوان'
+    },
+    PICKUP: {
+      name: 'الاستلام',
+      description: 'اطلب عبر الإنترنت، استلم من المتجر'
     }
   },
 
@@ -3815,7 +4075,21 @@ contact: {
     "quantity": "الكمية",
     "total": "المجموع",
     "addToCart": "إضافة إلى السلة",
-    addons:"الإضافات"
+    "addons": "الإضافات",
+    "extras": "الإضافات الخاصة",
+    "required": "مطلوب",
+    "selected": "تم اختياره",
+    "select": "اختر",
+    "minSelect": "أدنى",
+    "maxSelect": "أقصى",
+    "qty": "الكمية",
+    "removal": "إزالة",
+    "remove": "إزالة",
+    "removed": "تمت الإزالة",
+    "categoryRequired": "{{name}} مطلوب",
+    "minSelectionError": "اختر {{min}} عناصر على الأقل من {{name}}",
+    "maxSelectionError": "الحد الأقصى {{max}} عناصر مسموح بها من {{name}}",
+    "extraRequired": "{{name}} مطلوب"
   },
 
   errors: {
@@ -3836,41 +4110,46 @@ contact: {
   },
 
   ordersManager: {
-    total : 'المجموع',
+    total: 'المجموع',
     clearFilters: 'مسح الفلاتر',
     filtered: 'تم التصفية',
-    OrderType : 'نوع الطلب',
+    order: 'من الطلبات',
+    no: "لا",
+    found: "تم العثور عليه",
+    PaymentMethod: "طريقة الدفع",
+    showing: "عرض",
+    OrderType: 'نوع الطلب',
     subTotal: "المجموع الفرعي",
-    serviceFeeApplied:"رسوم الخدمة",
-    modificationHistory:"تاريخ التعديل",
-    DeliveryAddress : 'عنوان التسليم',
-        lastModifiedAt : "آخر تعديل",
-    modifiedBy : "تم التعديل بواسطة",
-    modificationDetails:"تفاصيل التعديل",
-    items:"العناصر",
-    OrderNotesInformation : 'ملاحظات ومعلومات الطلب',
+    serviceFeeApplied: "رسوم الخدمة",
+    modificationHistory: "تاريخ التعديل",
+    DeliveryAddress: 'عنوان التسليم',
+    loadingOrders: "جاري تحميل الطلبات...",
+    lastModifiedAt: "آخر تعديل",
+    modifiedBy: "تم التعديل بواسطة",
+    modificationDetails: "تفاصيل التعديل",
+    items: "العناصر",
+    OrderNotesInformation: 'ملاحظات ومعلومات الطلب',
     OrderMetadata: 'بيانات تعريف الطلب',
-    ItemCount : 'عدد العناصر',
+    ItemCount: 'عدد العناصر',
     TotalItems: 'إجمالي العناصر',
-    searchPlaceholder:"إاكتب هنا",
+    searchPlaceholder: "إاكتب هنا",
     OrderTimeline: 'الجدول الزمني للطلب',
     showAdvancedFilter: "إظهار الفلاتر المتقدمة",
     hideAdvancedFilter: "إخفاء الفلاتر المتقدمة",
-    of:"من",
-    orders:"الطلبات",
+    of: "من",
+    orders: "الطلبات",
     title: "إدارة الطلبات",
-    clearFilter:"مسح البحث",
+    clearFilter: "مسح البحث",
     customerName: "اسم العميل",
     tableName: "اسم الجدول",
     orderType: "نوع الطلب",
     minPrice: "السعر الأدنى",
     maxPrice: "السعر الأقصى",
-    showing:"عرض",
-    to:"إلى",
-    perpage : "لكل صفحة",
-    cancelOrder:"إلغاء الطلب",
-    cancelOrderConfirmation :"هل أنت متأكد من رغبتك في إلغاء الطلب?",
-    deletedOrders:"الطلبات المحذوفة",
+    to: "إلى",
+    perpage: "لكل صفحة",
+    cancelOrder: "إلغاء الطلب",
+    cancelOrderConfirmation: "هل أنت متأكد من رغبتك في إلغاء الطلب?",
+    deletedOrders: "الطلبات المحذوفة",
     "description": "إدارة وتتبع طلبات مطعمك بسهولة.",
     "pendingOrders": "الطلبات المعلقة",
     "branchOrders": "طلبات الفرع",
@@ -3902,7 +4181,6 @@ contact: {
     "cancel": "إلغاء",
     "confirmAction": "تأكيد",
     "rejectAction": "رفض",
-    "updateAction": "تحديث",
     "confirming": "جاري التأكيد...",
     "rejecting": "جاري الرفض...",
     "updating": "جاري التحديث...",
@@ -3928,6 +4206,13 @@ contact: {
     MinOrderAmount: "الحد الأدنى لمبلغ الطلب",
     CompletedAt: "تاريخ الاكتمال",
     time: "الوقت",
+    statusActions: {
+      confirm: "تأكيد",
+      startPreparing: "بدء التحضير",
+      markReady: "تحديد كجاهز",
+      markDelivered: "تم التوصيل",
+      complete: "إكمال"
+    }
   },
 
   orderService: {
@@ -3984,9 +4269,13 @@ contact: {
     saveChanges: "حفظ التغييرات",
     saveSuccess: "تم حفظ إعدادات الفرع بنجاح!",
     cleanupModes: {
-    afterTimeout: "بعد انتهاء المهلة",
-    afterClosing: "بعد الإغلاق",
-    disabled: "معطل"
+      afterTimeout: "بعد انتهاء المهلة",
+      afterClosing: "بعد الإغلاق",
+      disabled: "معطل"
+    },
+    mobileGridLayout: {
+      oneColumn: "عمود واحد",
+      twoColumns: "عمودين"
     },
     sections: {
       orderManagement: {
@@ -4006,7 +4295,9 @@ contact: {
         enableAllergenDisplay: "عرض معلومات مسببات الحساسية",
         enableAllergenDisplayDesc: "إظهار تحذيرات ومعلومات مسببات الحساسية",
         enableIngredientDisplay: "عرض المكونات",
-        enableIngredientDisplayDesc: "إظهار قوائم المكونات للمنتجات"
+        enableIngredientDisplayDesc: "إظهار قوائم المكونات للمنتجات",
+        mobileGridLayout: "تخطيط شبكة الهاتف",
+        mobileGridLayoutDesc: "اختر كيفية عرض المنتجات على الأجهزة المحمولة"
       },
       "paymentMethods": {
         "title": "طرق الدفع",
@@ -4024,7 +4315,8 @@ contact: {
         "defaultLanguage": "اللغة الافتراضية",
         "defaultCurrency": "العملة الافتراضية",
         "timeZone": "المنطقة الزمنية",
-        "supportedLanguages": "اللغات المدعومة"
+        "supportedLanguages": "اللغات المدعومة",
+        "languageRestaurantNote": "يمكن للفروع اختيار اللغات المدعومة فقط من قبل المطعم. اللغات المعروضة تحددها المطعم."
       },
       "sessionManagement": {
         "title": "إدارة الجلسات",
@@ -4032,26 +4324,25 @@ contact: {
         "sessionTimeout": "مهلة الجلسة (بالدقائق)",
         "cleanupMode": "وضع التنظيف",
         "cleanupDelay": "تأخير التنظيف بعد الإغلاق (بالدقائق)",
-        
-         "cleanupModeDesc": "اختر متى يتم تنظيف الجلسات المنتهية الصلاحية",
-    "sessionTimeoutDesc": "الدقائق قبل انتهاء صلاحية الجلسة بسبب عدم النشاط",
-    "cleanupDelayDesc": "الدقائق للانتظار بعد الإغلاق قبل التنظيف",
-    "cleanupDisabledMessage": "تنظيف الجلسات معطل. لن يتم تنظيف الجلسات تلقائياً."
+        "cleanupModeDesc": "اختر متى يتم تنظيف الجلسات المنتهية الصلاحية",
+        "sessionTimeoutDesc": "الدقائق قبل انتهاء صلاحية الجلسة بسبب عدم النشاط",
+        "cleanupDelayDesc": "الدقائق للانتظار بعد الإغلاق قبل التنظيف",
+        "cleanupDisabledMessage": "تنظيف الجلسات معطل. لن يتم تنظيف الجلسات تلقائياً."
       }
     },
     "currencies": {
-      "TRY": "الليرة التركية (₺)",
-      "USD": "الدولار الأمريكي ($)",
-      "EUR": "اليورو (€)"
+      "TRY": "الليرة التركية",
+      "USD": "الدولار الأمريكي",
+      "EUR": "اليورو"
     },
     "languages": {
-        "tr": "التركية",
-        "en": "الإنجليزية",
-        "ar": "العربية", 
-        "de": "الألمانية",
-        "fr": "الفرنسية",
-        "ru": "الروسية",
-        "es": "الإسبانية"
+      "tr": "التركية",
+      "en": "الإنجليزية",
+      "ar": "العربية",
+      "de": "الألمانية",
+      "fr": "الفرنسية",
+      "ru": "الروسية",
+      "es": "الإسبانية"
     },
     "timezones": {
       "Europe/Istanbul": "إسطنبول (UTC+3)",
@@ -4075,22 +4366,22 @@ contact: {
   },
 
   whatsapp: {
-  confirmation: {
-    title: 'إرسال إلى واتساب؟',
-    subtitle: 'إشعار المطعم عبر واتساب',
-    sendTo: 'سيتم إرسال تفاصيل طلبك إلى:',
-    restaurant: 'المطعم',
-    whatWillBeSent: 'ما سيتم إرساله:',
-    orderDetails: '• تفاصيل طلبك والعناصر',
-    customerInfo: '• اسم العميل ورقم الطاولة',
-    totalPrice: '• إجمالي السعر وأي ملاحظات خاصة',
-    timestamp: '• توقيت الطلب',
-    note: 'ملاحظة:',
-    noteDescription: 'سيؤدي هذا إلى فتح واتساب على جهازك. سيتم معالجة طلبك حتى لو اخترت عدم الإرسال إلى واتساب.',
-    skipWhatsApp: 'تخطي واتساب',
-    sendToWhatsApp: 'إرسال إلى واتساب',
-    sending: 'جاري الإرسال...'
-  }
+    confirmation: {
+      title: 'إرسال إلى واتساب؟',
+      subtitle: 'إشعار المطعم عبر واتساب',
+      sendTo: 'سيتم إرسال تفاصيل طلبك إلى:',
+      restaurant: 'المطعم',
+      whatWillBeSent: 'ما سيتم إرساله:',
+      orderDetails: '• تفاصيل طلبك والعناصر',
+      customerInfo: '• اسم العميل ورقم الطاولة',
+      totalPrice: '• إجمالي السعر وأي ملاحظات خاصة',
+      timestamp: '• توقيت الطلب',
+      note: 'ملاحظة:',
+      noteDescription: 'سيؤدي هذا إلى فتح واتساب على جهازك. سيتم معالجة طلبك حتى لو اخترت عدم الإرسال إلى واتساب.',
+      skipWhatsApp: 'تخطي واتساب',
+      sendToWhatsApp: 'إرسال إلى واتساب',
+      sending: 'جاري الإرسال...'
+    }
   },
 
   recycleBin: {
@@ -4112,46 +4403,99 @@ contact: {
     branchRestore: {
       title: "خيارات استعادة الفرع",
       subtitle: "اختر كيفية استعادة الفرع المحذوف",
-      simpleTitle: "استعادة الفرع",
-      simpleDesc: "استعادة هذا الفرع ستؤدي فقط إلى استعادة معلومات الفرع العامة",
-      cascadeTitle: "استعادة هذا الفرع ستؤدي أيضًا إلى استعادة جميع المنتجات والفئات المرتبطة به",
-      cascadeDesc: "هل تريد استعادة الفرع فقط أم جميع المنتجات والفئات المرتبطة به أيضًا؟",
+      simpleTitle: "استعادة الفرع فقط",
+      simpleDesc: "سيتم استعادة المعلومات الأساسية للفرع فقط دون البيانات المرتبطة به",
+      cascadeTitle: "استعادة الفرع مع جميع البيانات المرتبطة",
+      cascadeDesc: "هل تريد استعادة الفرع مع كافة المنتجات والفئات والطاولات المرتبطة به؟",
       recommended: "مستحسن",
       includeProducts: "تضمين المنتجات والفئات",
       includeTables: "تضمين الطاولات",
       includeAll: "تضمين جميع البيانات المرتبطة",
     },
     productRestore: {
-        title: "استعادة خيارات المنتج",
-        subtitle: "اختيار كيفية استعادة المنتج",
-        simpleTitle: "استعادة المنتج",
-        simpleDesc: "استعادة هذا المنتج ستؤدي إلى استعادة معلومات المنتج العامة فقط",
-        cascadeTitle: "استعادة هذا المنتج ستؤدي أيضًا إلى استعادة جميع المتغيرات والإضافات المرتبطة به",
-        cascadeDesc: "هل تريد استعادة المنتج فقط أم جميع المتغيرات والإضافات المرتبطة به أيضًا؟",
-        includeOptions: "تضمين المتغيرات والإضافات",
-        includeImages: "تضمين صورة المنتج",
-        includeAll: "تضمين جميع البيانات المرتبطة",
-        recommended: "مستحسن",
-        },
-        categoryRestore: {
-        title: "استعادة خيارات المنتج",
-        subtitle: "اختيار كيفية استعادة المنتج",
-        simpleTitle: "استعادة المنتج",
-        simpleDesc: "استعادة هذا المنتج ستؤدي إلى استعادة معلومات المنتج العامة فقط",
-        cascadeTitle: "استعادة هذا المنتج ستؤدي أيضًا إلى استعادة جميع المتغيرات والإضافات المرتبطة به",
-        cascadeDesc: "هل تريد استعادة المنتج فقط أم جميع المتغيرات والإضافات المرتبطة به أيضًا؟",
-        includeOptions: "تضمين المتغيرات والإضافات",
-        includeImages: "تضمين صورة المنتج",
-        includeAll: "تضمين جميع البيانات المرتبطة",
-        includeProducts: "تضمين المنتجات في الفئة",
-        recommended: "مستحسن",
-        },
+      title: "خيارات استعادة المنتج",
+      subtitle: "اختر آلية استعادة المنتج",
+      simpleTitle: "استعادة المنتج فقط",
+      simpleDesc: "سيتم استعادة المعلومات الأساسية للمنتج فقط",
+      cascadeTitle: "استعادة المنتج مع المتغيرات والإضافات",
+      cascadeDesc: "هل تريد استعادة المنتج مع كافة المتغيرات (Variants) والإضافات المرتبطة به؟",
+      includeOptions: "تضمين المتغيرات والإضافات",
+      includeImages: "تضمين صورة المنتج",
+      includeAll: "تضمين جميع البيانات المرتبطة",
+      recommended: "مستحسن",
+    },
+    categoryRestore: {
+      title: "استعادة الفئة",
+      subtitle: "اختر كيفية استعادة الفئة",
+      simpleTitle: "استعادة بسيطة (معلومات عامة فقط)",
+      simpleDesc: "استعادة المعلومات الأساسية للفئة فقط (الاسم، الوصف)",
+      cascadeTitle: "استعادة كاملة (مع جميع البيانات)",
+      cascadeDesc: "استعادة الفئة مع جميع البيانات المرتبطة:",
+      includeProducts: "جميع المنتجات في هذه الفئة",
+      includeAll: "جميع التكوينات المرتبطة",
+      recommended: "مستحسن",
+    },
+    branchCategoryRestore: {
+      title: "استعادة فئة الفرع",
+      subtitle: "اختر كيفية استعادة فئة الفرع",
+      simpleTitle: "استعادة بسيطة (معلومات عامة فقط)",
+      simpleDesc: "استعادة المعلومات الأساسية لفئة الفرع فقط",
+      cascadeTitle: "استعادة كاملة (مع جميع البيانات)",
+      cascadeDesc: "استعادة فئة الفرع مع جميع البيانات المرتبطة:",
+      includeProducts: "جميع منتجات الفرع في هذه الفئة",
+      includeAll: "جميع التكوينات المرتبطة",
+      recommended: "مستحسن",
+    },
+    tableCategoryRestore: {
+      title: "استعادة فئة الطاولة",
+      subtitle: "اختر كيفية استعادة فئة الطاولة",
+      simpleTitle: "استعادة بسيطة (معلومات عامة فقط)",
+      simpleDesc: "استعادة المعلومات الأساسية لفئة الطاولة فقط",
+      cascadeTitle: "استعادة كاملة (مع جميع البيانات)",
+      cascadeDesc: "استعادة فئة الطاولة مع جميع البيانات المرتبطة:",
+      includeTables: "جميع الطاولات في هذه الفئة",
+      includeAll: "جميع التكوينات المرتبطة",
+      recommended: "مستحسن",
+    },
+    extraCategoryRestore: {
+      title: "استعادة فئة الإضافات",
+      subtitle: "اختر كيفية استعادة فئة الإضافات",
+      simpleTitle: "استعادة بسيطة (معلومات عامة فقط)",
+      simpleDesc: "استعادة المعلومات الأساسية لفئة الإضافات فقط",
+      cascadeTitle: "استعادة كاملة (مع جميع البيانات)",
+      cascadeDesc: "استعادة فئة الإضافات مع جميع البيانات المرتبطة:",
+      includeExtras: "جميع الإضافات في هذه الفئة",
+      includeAll: "جميع التكوينات المرتبطة",
+      recommended: "مستحسن",
+    },
+    branchProductRestore: {
+      title: "استعادة منتج الفرع",
+      subtitle: "اختر كيفية استعادة منتج الفرع",
+      simpleTitle: "استعادة بسيطة (معلومات عامة فقط)",
+      simpleDesc: "استعادة المعلومات الأساسية لمنتج الفرع فقط",
+      cascadeTitle: "استعادة كاملة (مع جميع البيانات)",
+      cascadeDesc: "استعادة منتج الفرع مع جميع البيانات المرتبطة:",
+      includeOptions: "خيارات وإعدادات منتج الفرع",
+      includeAll: "جميع التكوينات المرتبطة",
+      recommended: "مستحسن",
+    },
+    extraRestore: {
+      title: "استعادة الإضافة",
+      subtitle: "اختر كيفية استعادة الإضافة",
+      simpleTitle: "استعادة بسيطة (معلومات عامة فقط)",
+      simpleDesc: "استعادة المعلومات الأساسية للإضافة فقط",
+      cascadeTitle: "استعادة كاملة (مع جميع البيانات)",
+      cascadeDesc: "استعادة الإضافة مع جميع البيانات المرتبطة:",
+      includeOptions: "خيارات وإعدادات الإضافة",
+      includeAll: "جميع التكوينات المرتبطة",
+      recommended: "مستحسن",
+    },
     filter: {
       all: 'جميع العناصر',
-      group1: 'جميع المجموعة 1',
-      group2: 'جميع المجموعة 2',
+      group1: 'الكل (مستوى المطعم)',
+      group2: 'الكل (مستوى الفرع)',
       group1Label: '📋 مستوى المطعم (الفروع، المنتجات، الطاولات)',
-      group2Label: '🏢 مستوى الفرع (منتجات وفئات الفرع)',
+      group2Label: '🏢 مستوى الفرع (منتجات وفئات خاصة)',
       branches: 'الفروع',
       categories: 'الفئات',
       products: 'المنتجات',
@@ -4168,27 +4512,31 @@ contact: {
       group2: 'مستوى الفرع',
       group2Desc: 'منتجات وفئات الفرع',
       totalDeleted: 'إجمالي المحذوفات',
-      totalDesc: 'جميع العناصر المحذوفة',
-      filtered: 'معروض',
+      totalDesc: 'عدد العناصر في سلة المحذوفات',
+      filtered: 'العناصر المعروضة',
       filteredDesc: 'نتائج التصفية الحالية',
       deletedBranch: 'الفروع المحذوفة',
       deletedCategory: 'الفئات المحذوفة',
       deletedProduct: 'المنتجات المحذوفة',
+      extrasDesc: 'عدد الإضافات والفئات الإضافية',
+      extras: 'الإضافات',
       deletedTable: 'الطاولات المحذوفة',
       deletedBranchProduct: 'منتجات الفرع المحذوفة',
       deletedBranchCategory: 'فئات الفرع المحذوفة',
       deletedTableCategory: 'فئات الطاولات المحذوفة',
       showing: 'عرض',
-      showingDesc: 'العناصر المعروضة'
+      showingDesc: 'عناصر'
     },
     entityTypes: {
       category: 'فئة',
       product: 'منتج',
       branch: 'فرع',
       table: 'طاولة',
-      branchProduct: 'منتج الفرع',
-      branchCategory: 'فئة الفرع',
-      tableCategory: 'منطقة الطاولة',
+      branchProduct: 'منتج فرع',
+      branchCategory: 'فئة فرع',
+      tableCategory: 'فئة طاولة',
+      extraCategory: "فئة إضافية",
+      extra: 'إضافة',
       other: 'أخرى'
     },
     contextInfo: {
@@ -4200,33 +4548,38 @@ contact: {
     restore: {
       button: 'استعادة',
       restoring: 'جاري الاستعادة...',
-      successCategory: 'تم استعادة الفئة "{name}" بنجاح',
-      successProduct: 'تم استعادة المنتج "{name}" بنجاح',
-      successBranch: 'تم استعادة الفرع "{name}" بنجاح',
-      successTable: 'تم استعادة الطاولة "{name}" بنجاح',
-      successBranchCategory: 'تم استعادة فئة الفرع "{name}" بنجاح',
-      successTableCategory: 'تم استعادة منطقة الطاولة "{name}" بنجاح',
+      successCategory: 'تمت استعادة الفئة "{name}" بنجاح',
+      successCategoryCascade: 'تمت استعادة الفئة "{name}" وجميع المنتجات المرتبطة بنجاح',
+      successProduct: 'تمت استعادة المنتج "{name}" بنجاح',
+      successProductCascade: 'تمت استعادة المنتج "{name}" وجميع البيانات المرتبطة بنجاح',
+      successBranch: 'تمت استعادة الفرع "{name}" بنجاح',
+      successBranchCascade: 'تمت استعادة الفرع "{name}" وجميع البيانات المرتبطة بنجاح',
+      successTable: 'تمت استعادة الطاولة "{name}" بنجاح',
+      successBranchProduct: 'تمت استعادة منتج الفرع "{name}" بنجاح',
+      successBranchCategory: 'تمت استعادة فئة الفرع "{name}" بنجاح',
+      successTableCategory: 'تمت استعادة فئة الطاولة "{name}" بنجاح',
+      successExtra: 'تمت استعادة الإضافة "{name}" بنجاح',
+      successExtraCategory: 'تمت استعادة فئة الإضافات "{name}" بنجاح',
       error: 'فشلت عملية الاستعادة'
     },
     empty: {
       title: 'سلة المحذوفات فارغة',
-      titleFiltered: 'لم يتم العثور على نتائج',
-      description: 'لا توجد عناصر محذوفة بعد',
-      descriptionFiltered: 'لا توجد عناصر محذوفة تطابق معايير البحث'
+      titleFiltered: 'لا توجد نتائج',
+      description: 'لا توجد عناصر محذوفة حالياً',
+      descriptionFiltered: 'لا توجد عناصر محذوفة تطابق بحثك'
     },
     errors: {
-      loadingError: 'خطأ في تحميل العناصر المحذوفة'
+      loadingError: 'حدث خطأ أثناء تحميل العناصر المحذوفة'
     }
   },
-
   management: {
     title: "معلومات الإدارة",
     subtitle: "تفاصيل الشركة والقانونية",
     noDataTitle: "لا توجد معلومات إدارية",
     noDataMessage: "لم يتم إعداد معلومات الإدارة بعد. يرجى إضافة تفاصيل المطعم للبدء.",
     dangerZone: {
-      title : "المنطقة الخطرة",
-      description : "احذر! هذه الإجراءات قد تؤدي إلى فقدان البيانات أو تعطيل وظائف المطعم.",
+      title: "المنطقة الخطرة",
+      description: "احذر! هذه الإجراءات قد تؤدي إلى فقدان البيانات أو تعطيل وظائف المطعم.",
     },
     buttons: {
       edit: "تعديل",
@@ -4235,15 +4588,15 @@ contact: {
       saving: "جاري الحفظ...",
       delete: "حذف",
       purge: "تنظيف",
-      viewFile:"مشاهدة الملف",
-      viewLogo:"مشاهدة الشعار"
+      viewFile: "مشاهدة الملف",
+      viewLogo: "مشاهدة الشعار"
     },
 
-    messages : {
-      purgeSuccess : "نجاح الحذف"
+    messages: {
+      purgeSuccess: "نجاح الحذف"
     },
 
-     "resetPassword": {
+    "resetPassword": {
       "submitted": {
         "title": "تحقق من بريدك الإلكتروني",
         "line1": "لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى",
@@ -4257,7 +4610,7 @@ contact: {
         "emailPlaceholder": "you@example.com"
       }
     },
-     "setNewPassword": {
+    "setNewPassword": {
       "form": {
         "title": "تعيين كلمة مرور جديدة",
         "subtitle": "أدخل كلمة المرور الجديدة أدناه.",
@@ -4272,18 +4625,7 @@ contact: {
         "message": "تم تحديث كلمة المرور الخاصة بك بنجاح. يمكنك الآن تسجيل الدخول."
       }
     },
-    "confirmMail": {
-      "submitted": {
-        "title": "تحقق من بريدك الإلكتروني",
-        "line1": "لقد أرسلنا رابط تأكيد جديد إلى",
-        "line2": "يرجى التحقق من صندوق الوارد الخاص بك (ومجلد البريد العشوائي!)."
-      },
-      "form": {
-        "title": "تأكيد بريدك الإلكتروني",
-        "subtitle": "أدخل بريدك الإلكتروني لإعادة إرسال رابط التأكيد.",
-        "button": "إعادة إرسال التأكيد"
-      }
-    },
+
 
     sections: {
       restaurantDetails: "تفاصيل المطعم",
@@ -4304,7 +4646,6 @@ contact: {
       tradeRegistry: "رقم السجل التجاري",
       workPermit: "تصريح العمل",
       foodCertificate: "شهادة الغذاء",
-      alcoholService: "يوجد خدمة كحول",
       logo: "الشعار"
     },
 
@@ -4329,23 +4670,47 @@ contact: {
       "notUploaded": "لم يتم الرفع",
       "available": "متاح",
       "notAvailable": "غير متاح",
-      "alcoholService": "خدمة الكحول:"
     },
 
     "common": {
       "na": "غير متوفر"
     }
   },
-
-  branches: {
-  status: {
-    active: "نشط",
-    inactive: "غير نشط"
+  "resetPassword": {
+    "submitted": {
+      "title": "تحقق من بريدك الإلكتروني",
+      "line1": "لقد أرسلنا رابط إعادة تعيين كلمة المرور إلى",
+      "line2": "يرجى التحقق من صندوق الوارد الخاص بك (ومجلد البريد العشوائي!)."
+    },
+    "form": {
+      "title": "إعادة تعيين كلمة المرور",
+      "subtitle": "أدخل بريدك الإلكتروني للحصول على رابط إعادة التعيين.",
+      "button": "إرسال رابط إعادة التعيين",
+      "emailAddress": "عنوان البريد الإلكتروني",
+      "emailPlaceholder": "you@example.com"
+    }
   },
-  fields: {
-    branchType: "نوع الفرع",
-    branchTag: "علامة الفرع"
-  }
+  "confirmMail": {
+    "submitted": {
+      "title": "تحقق من بريدك الإلكتروني",
+      "line1": "لقد أرسلنا رابط تأكيد جديد إلى",
+      "line2": "يرجى التحقق من صندوق الوارد الخاص بك (ومجلد البريد العشوائي!)."
+    },
+    "form": {
+      "title": "تأكيد بريدك الإلكتروني",
+      "subtitle": "أدخل بريدك الإلكتروني لإعادة إرسال رابط التأكيد.",
+      "button": "إعادة إرسال التأكيد"
+    }
+  },
+  branches: {
+    status: {
+      active: "نشط",
+      inactive: "غير نشط"
+    },
+    fields: {
+      branchType: "نوع الفرع",
+      branchTag: "علامة الفرع"
+    }
   },
 
   restaurantsTab: {
@@ -4361,7 +4726,6 @@ contact: {
       totalBranches: "إجمالي الفروع",
       active: "نشط",
       inactive: "غير نشط",
-      alcohol: "كحول"
     },
     common: {
       yes: "نعم",
@@ -4373,9 +4737,7 @@ contact: {
         restaurantName: "اسم المطعم",
         cuisineType: "نوع المطبخ"
       },
-      labels: {
-        hasAlcoholService: "يقدم خدمة الكحول"
-      },
+
       buttons: {
         update: "تحديث المطعم",
         updating: "جاري التحديث..."
@@ -4389,7 +4751,7 @@ contact: {
     management: "معلومات الإدارة",
     deleted: "المحذوفات"
   },
-  
+
   allergens: {
     GLUTEN: {
       name: "الغلوتين",
@@ -4486,9 +4848,10 @@ contact: {
       "connectedViaQR": "متصل عبر رمز الاستجابة السريعة • جلسة آمنة"
     }
   },
-   "productCard": {
+  "productCard": {
     "chefsPick": "اختيار الشيف",
     "customizable": "قابل للتخصيص",
+    "outOfStock": "غير متوفر",
     "addons": "+إضافات",
     "allergens": "مسببات الحساسية",
     "ingredients": "المكونات",
@@ -4500,7 +4863,7 @@ contact: {
     "rating": "٤.٨",
     "more": "المزيد"
   },
-   "moneyCase": {
+  "moneyCase": {
     "title": "إدارة الصندوق النقدي",
     "subtitle": "إدارة العمليات النقدية للفرع",
     "selectBranch": "اختر فرعاً",
@@ -4522,7 +4885,7 @@ contact: {
     serviceFeeDesc: "إجمالي رسوم الخدمة المحصلة خلال الوردية",
     avgOrderValueDesc: "متوسط قيمة الطلبات خلال الوردية",
     totalShiftsDesc: "إجمالي عدد الورديات المغلقة في الفترة المحددة",
-    cashDiscrepancyDesc : "إجمالي الفارق بين النقد الفعلي والمتوقع خلال الوردية", 
+    cashDiscrepancyDesc: "إجمالي الفارق بين النقد الفعلي والمتوقع خلال الوردية",
     cashDiscrepancy: "فارق النقد",
     totalOrdersDesc: "إجمالي عدد الطلبات المكتملة خلال الوردية",
     showingResults: "عرض النتائج لـ",
@@ -4554,7 +4917,7 @@ contact: {
       to: "إلى",
       from: "من",
       active: "نشط"
-    } ,
+    },
     "status": "الحالة",
     "open": "مفتوح",
     "closed": "مغلق",
@@ -4565,13 +4928,13 @@ contact: {
     "transactionCount": "عدد المعاملات",
     "transactions": "معاملات",
 
-     "avgOrderValue": "متوسط قيمة الطلب",
+    "avgOrderValue": "متوسط قيمة الطلب",
     "totalDiscrepancy": "إجمالي الفارق",
     "totalShifts": "إجمالي الورديات",
     "avgShiftDuration": "متوسط مدة الوردية",
     "shiftsWithIssues": "الورديات ذات المشاكل",
     "period": "الفترة",
-      "todayTotalSales": "إجمالي مبيعات اليوم",
+    "todayTotalSales": "إجمالي مبيعات اليوم",
     "currentShiftRevenue": "إيرادات الوردية الحالية",
     "closedShifts": "الورديات المغلقة",
     "ordersToday": "طلبات اليوم",
@@ -4579,7 +4942,7 @@ contact: {
     "monthToDate": "من بداية الشهر حتى اليوم",
     "shifts": "الورديات",
     "orders": "الطلبات",
-    
+
     "openCase": "فتح الصندوق",
     "closeCase": "إغلاق الصندوق",
     "viewZReport": "عرض تقرير Z",
@@ -4598,20 +4961,20 @@ contact: {
     "shortage": "عجز",
     "notes": "ملاحظات",
     "notesPlaceholder": "أضف أي ملاحظات أو تعليقات حول جلسة الصندوق هذه...",
-    
+
     "date": "التاريخ والوقت",
     "openedAt": "وقت الفتح",
     "closedAt": "وقت الإغلاق",
     "lastUpdated": "آخر تحديث",
     "caseId": "رقم الصندوق",
-    
+
     "confirm": "تأكيد",
     "confirmClose": "تأكيد الإغلاق",
     "cancel": "إلغاء",
     "close": "إغلاق",
     "print": "طباعة",
     "download": "تحميل",
-    
+
     "zReport": "تقرير Z",
     "reportDate": "تاريخ التقرير",
     "openingInformation": "معلومات الفتح",
@@ -4623,13 +4986,13 @@ contact: {
     "refunds": "المرتجعات",
     "expenses": "المصروفات",
     "noReportData": "لا توجد بيانات التقرير",
-    
+
     "success": {
       "opened": "تم فتح الصندوق بنجاح!",
       "closed": "تم إغلاق الصندوق بنجاح!",
       "closedWithDifference": "تم إغلاق الصندوق بنجاح! الفرق: {{difference}}"
     },
-    
+
     "error": {
       "fetchBranches": "فشل في جلب الفروع",
       "fetchActiveCase": "فشل في جلب بيانات الصندوق النشط",
@@ -4639,7 +5002,7 @@ contact: {
       "closeCase": "فشل في إغلاق الصندوق",
       "noBranchSelected": "الرجاء اختيار فرع أولاً"
     },
-    
+
     "validation": {
       "openingBalanceRequired": "الرصيد الافتتاحي مطلوب",
       "openingBalanceMin": "يجب أن يكون الرصيد الافتتاحي 0 أو أكثر",
@@ -4647,7 +5010,7 @@ contact: {
       "actualCashMin": "يجب أن يكون النقد الفعلي 0 أو أكثر",
       "notesMaxLength": "لا يمكن أن تتجاوز الملاحظات 500 حرف"
     },
-    
+
     "modal": {
       "openTitle": "فتح الصندوق النقدي",
       "openDescription": "بدء جلسة صندوق جديدة",
@@ -4656,12 +5019,47 @@ contact: {
       "zReportTitle": "تقرير Z - ملخص تفصيلي",
       "confirmOpenMessage": "هل أنت متأكد من رغبتك في فتح صندوق جديد؟",
       "confirmCloseMessage": "هل أنت متأكد من رغبتك في إغلاق الصندوق الحالي؟ لا يمكن التراجع عن هذا الإجراء."
+    },
+    "export": {
+      "csv": "CSV",
+      "exportCSV": "تصدير إلى CSV",
+      "branchName": "اسم الفرع",
+      "openedAt": "وقت الفتح",
+      "closedAt": "وقت الإغلاق",
+      "shiftDuration": "مدة المناوبة",
+      "openingBalance": "الرصيد الافتتاحي",
+      "closingBalance": "الرصيد الختامي",
+      "actualCash": "النقد الفعلي",
+      "discrepancy": "الفرق",
+      "transactionCount": "عدد المعاملات",
+      "openedBy": "فتح بواسطة",
+      "closedBy": "أغلق بواسطة",
+      "notes": "ملاحظات",
+      "reportDate": "تاريخ التقرير",
+      "totalOrders": "إجمالي الطلبات",
+      "subtotal": "المجموع الفرعي",
+      "serviceFee": "رسوم الخدمة",
+      "totalRevenue": "إجمالي الإيرادات",
+      "expectedCash": "النقد المتوقع",
+      "difference": "الفرق",
+      "fromDate": "من تاريخ",
+      "toDate": "إلى تاريخ",
+      "totalShifts": "إجمالي المناوبات",
+      "totalCash": "إجمالي النقد",
+      "totalCard": "إجمالي البطاقات",
+      "averageOrderValue": "متوسط قيمة الطلب",
+      "totalTransactions": "إجمالي المعاملات",
+      "totalDiscrepancy": "إجمالي الفرق",
+      "shiftsWithDiscrepancy": "المناوبات ذات الفروقات",
+      "averageShiftDuration": "متوسط مدة المناوبة"
     }
   },
   "onboardingRestaurant": {
     "backLink": "العودة إلى صفحة التسجيل",
     "progress": {
       "step1": "المعلومات الأساسية",
+      "languagesLabel": "اللغات",
+      "searchLanguages": "بحث عن اللغات",
       "step2": "معلومات الشركة",
       "step3": "المستندات القانونية"
     },
@@ -4683,12 +5081,11 @@ contact: {
       "subtitle": "أدخل المعلومات الأساسية لمطعمك",
       "nameLabel": "اسم المطعم *",
       "namePlaceholder": "أدخل اسم مطعمك",
-      "logoLabel": "شعار المطعم *",
+      "logoLabel": "شعار المطعم",
       "logoUploading": "جاري تحميل الشعار...",
       "logoSuccess": "✓ تم تحميل الشعار بنجاح",
       "logoSuccessSub": "تم استلام رابط Cloudinary",
-      "cuisineLabel": "نوع المطبخ *",
-      "alcoholLabel": "نقدم المشروبات الكحولية",
+      "cuisineLabel": "نوع المطبخ ",
       "errors": {
         "nameRequired": "اسم المطعم مطلوب",
         "logoRequired": "شعار المطعم مطلوب",
@@ -4705,18 +5102,21 @@ contact: {
       "mersisLabel": "رقم MERSIS",
       "mersisPlaceholder": "أدخل رقم MERSIS الخاص بك",
       "tradeRegistryLabel": "رقم السجل التجاري",
+
       "tradeRegistryPlaceholder": "أدخل رقم السجل التجاري الخاص بك",
       "errors": {
+        taxNumberRequired: "الرقم الضريبي مطلوب",
         "companyTitleRequired": "الاسم التجاري للشركة مطلوب",
+        mersisRequired: "رقم MERSIS مطلوب",
         "legalTypeRequired": "اختر الكيان القانوني"
       }
     },
     "step3": {
       "title": "المستندات القانونية",
       "subtitle": "أدخل معلومات الضرائب والمستندات",
-      "taxNumberLabel": "الرقم الضريبي *",
+      "taxNumberLabel": "الرقم الضريبي ",
       "taxNumberPlaceholder": "أدخل رقمك الضريبي",
-      "taxOfficeLabel": "مكتب الضرائب *",
+      "taxOfficeLabel": "مكتب الضرائب ",
       "taxOfficePlaceholder": "أدخل مكتب الضرائب الخاص بك",
       "workPermitLabel": "مستند تصريح العمل",
       "workPermitUploading": "جاري تحميل مستند تصريح العمل...",
@@ -4725,6 +5125,7 @@ contact: {
       "foodCertificateUploading": "جاري تحميل شهادة الغذاء...",
       "foodCertificateSuccess": "✓ تم تحميل شهادة الغذاء بنجاح",
       "errors": {
+        taxNumberInvalid: "أدخل رقم صحيح ",
         "taxNumberRequired": "الرقم الضريبي مطلوب",
         "taxOfficeRequired": "مكتب الضرائب مطلوب"
       }
@@ -4768,15 +5169,15 @@ contact: {
       "28": "وجبات سريعة"
     },
     "legalTypes": {
-      "as": "شركة مساهمة (A.Ş.)",
-      "ltd": "شركة ذات مسؤولية محدودة (Ltd. Şti.)",
+      "as": "شركة مساهمة",
+      "ltd": "شركة ذات مسؤولية محدودة",
       "collective": "شركة تضامن",
       "partnership": "شركة توصية بسيطة",
       "sole": "مؤسسة فردية",
       "other": "أخرى"
     }
   },
-"onboardingBranch": {
+  "onboardingBranch": {
     "header": {
       "backLink": "العودة إلى معلومات المطعم",
       "title": "معلومات الفرع",
@@ -4792,12 +5193,12 @@ contact: {
         "title": "معلومات الفرع",
         "description": "أدخل المعلومات الأساسية لفرعك",
         "branchName": {
-          "label": "اسم الفرع *",
+          "label": "اسم الفرع ",
           "placeholder": "أدخل اسم الفرع",
           "error": "اسم الفرع مطلوب"
         },
         "whatsappNumber": {
-          "label": "رقم طلبات الواتساب *",
+          "label": "رقم طلبات الواتساب",
           "placeholder": "555 123 4567",
           "ariaLabel": "رمز البلد",
           "errorRequired": "رقم طلبات الواتساب مطلوب",
@@ -4827,22 +5228,22 @@ contact: {
           "error": "المدينة مطلوبة"
         },
         "street": {
-          "label": "الشارع *",
+          "label": "الشارع ",
           "placeholder": "أدخل اسم الشارع",
           "error": "الشارع مطلوب"
         },
         "zipCode": {
-          "label": "الرمز البريدي *",
+          "label": "الرمز البريدي ",
           "placeholder": "أدخل الرمز البريدي",
           "error": "الرمز البريدي مطلوب"
         },
         "addressLine1": {
-          "label": "سطر العنوان 1 *",
+          "label": "سطر العنوان 1 ",
           "placeholder": "أدخل العنوان التفصيلي",
           "error": "سطر العنوان 1 مطلوب"
         },
         "addressLine2": {
-          "label": "سطر العنوان 2 *",
+          "label": "سطر العنوان 2 ",
           "placeholder": "أدخل معلومات عنوان إضافية",
           "error": "سطر العنوان 2 مطلوب"
         }
@@ -4863,7 +5264,7 @@ contact: {
           "error": "عنوان البريد الإلكتروني مطلوب"
         },
         "location": {
-          "label": "معلومات الموقع *",
+          "label": "معلومات الموقع",
           "placeholder": "أدخل معلومات الموقع (مثال: 40.9795, 28.7225)",
           "error": "معلومات الموقع مطلوبة",
           "selectOnMap": "اختر من الخريطة",
@@ -4917,6 +5318,9 @@ contact: {
           "title": "ساعات العمل",
           "description": "حدد ساعات عملك. يمكنك البقاء مفتوحًا طوال الليل (مثل: 23:00 - 02:00).",
           "openLabel": "وقت الفتح",
+          "open24Hours": "مفتوح 24 ساعة",
+          "addSlot": "إضافة فترة",
+          "open24HoursNote": "هذا المطعم مفتوح 24 ساعة.",
           "closeLabel": "وقت الإغلاق",
           "dayNames": [
             "الاثنين",
@@ -4969,5 +5373,742 @@ contact: {
         "logoUploadError": "حدث خطأ أثناء تحميل الشعار. يرجى المحاولة مرة أخرى."
       }
     }
+  },
+  extrasManagement: {
+    title: 'إدارة الإضافات',
+    description: 'إدارة فئات الإضافات والعناصر الخاصة بها',
+    searchPlaceholder: 'البحث عن الفئات أو الإضافات...',
+    loading: 'جارٍ التحميل...',
+    processing: 'جارٍ المعالجة...',
+
+    buttons: {
+      add: 'إضافة',
+      edit: 'تعديل',
+      delete: 'حذف',
+      save: 'حفظ',
+      cancel: 'إلغاء',
+      close: 'إغلاق',
+      back: 'رجوع',
+      done: 'تم',
+      addItem: 'إضافة عنصر',
+      createFirst: 'إنشاء أول عنصر'
+    },
+
+    deleteModal: {
+      titleCategory: 'حذف الفئة؟',
+      titleItem: 'حذف العنصر؟',
+      confirmMessage: 'هل أنت متأكد من حذف "{name}"؟',
+      warningMessage: 'لا يمكن التراجع عن هذا الإجراء. سيتم نقل العنصر إلى سلة المحذوفات.',
+      confirmButton: 'حذف',
+      processingButton: 'جارٍ الحذف...',
+      cancelButton: 'إلغاء'
+    },
+
+    categories: {
+      title: 'فئات الإضافات',
+      addNew: ' إضافة فئة جديدة',
+      addCategory: 'إضافة فئة جديدة',
+      editCategory: 'تعديل الفئة',
+      noCategories: 'لم يتم العثور على فئات',
+      tryAdjusting: 'حاول تعديل البحث أو إضافة فئة جديدة.',
+      select: 'اختيار:',
+      qtyLimit: 'حد الكمية:',
+      active: 'نشط',
+      inactive: 'غير نشط',
+      required: 'مطلوب',
+      fields: {
+        categoryName: 'اسم الفئة',
+        categoryNamePlaceholder: 'مثال: إضافات البيتزا',
+        description: 'الوصف',
+        descriptionPlaceholder: 'أدخل وصف الفئة (اختياري)',
+        statusLabel: 'الحالة النشطة',
+        requiredLabel: 'هل هو مطلوب؟',
+        selectionRules: 'قواعد الاختيار',
+        minSelection: 'الحد الأدنى للاختيار',
+        maxSelection: 'الحد الأقصى للاختيار',
+        minQuantity: 'الحد الأدنى للكمية',
+        maxQuantity: 'الحد الأقصى للكمية',
+        removalCategoryLabel: 'فئة إزالة (طرح)',
+        unlimited: 'غير محدود'
+      }
+    },
+
+    extras: {
+      title: 'الإضافات',
+      alreadyExists: 'موجود بالفعل',
+      addExtra: 'إضافة إضافة جديدة',
+      editExtra: 'تعديل الإضافة',
+      noItems: 'لا توجد عناصر في هذه الفئة بعد.',
+      duplicateWarning: "تحذير مكرر",
+      duplicateMessage: "توجد هذه الإضافة بالفعل في الفئة المحددة. يرجى اختيار اسم مختلف.",
+      noDescription: 'لا يوجد وصف',
+      fields: {
+        parentCategory: 'الفئة الأصلية',
+        selectCategory: 'اختر الفئة...',
+        itemName: 'اسم العنصر',
+        itemNamePlaceholder: 'اسم العنصر',
+        price: 'السعر',
+        description: 'الوصف',
+        descriptionPlaceholder: 'تفاصيل اختيارية...',
+        imageLabel: 'صورة العنصر',
+        uploadText: 'انقر لتحميل الصورة',
+        activeLabel: 'نشط',
+        removalLabel: 'عنصر إزالة (طرح)'
+      }
+    },
+
+    productExtras: {
+      manageCategories: 'إدارة فئات الإضافات الخاصة بالمنتج',
+      manageExtras: 'إدارة الإضافات',
+      addCategory: 'إضافة فئة',
+      addExtra: 'إضافة إضافة',
+      selectCategory: 'اختر الفئة',
+      chooseCategory: 'اختر الفئة...',
+      selectExtra: 'اختر الإضافة',
+      chooseExtra: 'اختر الإضافة...',
+      noCategoriesYet: 'لم تتم إضافة فئات بعد',
+      noExtrasYet: 'لم تتم إضافة إضافات بعد',
+      noDescription: 'لا يوجد وصف متاح',
+      addExtrasHint: 'أضف إضافات لهذه الفئة باستخدام الزر أعلاه.',
+      confirmDelete: 'هل أنت متأكد من حذف هذه الفئة؟',
+      confirmDeleteExtra: 'هل أنت متأكد من حذف هذه الإضافة؟',
+      unknownCategory: 'فئة غير معروفة',
+      unknownExtra: 'إضافة غير معروفة',
+      confirm: 'تأكيد',
+      selection: 'اختيار',
+      quantity: 'كمية',
+      required: 'مطلوب',
+      optional: 'اختياري',
+      requiredShort: 'مطل',
+      basePrice: 'السعر الأساسي',
+      unitPrice: 'سعر الوحدة',
+      selectionMode: 'وضع الاختيار',
+      single: 'مفرد',
+      multiple: 'متعدد',
+      singleSelect: 'اختيار مفرد',
+      multiSelect: 'اختيار متعدد',
+      requiredExtra: 'إضافة مطلوبة',
+      defaultQty: 'الكمية الافتراضية',
+      default: 'افتراضي',
+      defaultShort: 'افت.',
+      minQty: 'الحد الأدنى',
+      min: 'أدنى',
+      maxQty: 'الحد الأقصى',
+      max: 'أقصى',
+      qty: 'الكمية',
+      quantities: 'الكميات',
+      quantityConfiguration: 'تكوين الكمية',
+      priceAndSelection: 'السعر والاختيار',
+      minSelection: 'الحد الأدنى للاختيار',
+      maxSelection: 'الحد الأقصى للاختيار',
+      minQuantity: 'الحد الأدنى للكمية',
+      maxQuantity: 'الحد الأقصى للكمية',
+      selectionLimits: 'حدود الاختيار',
+      quantityLimits: 'حدود الكمية',
+      minSelectLabel: 'أدنى اختيار',
+      maxSelectLabel: 'أقصى اختيار',
+      minTotalLabel: 'الحد الأدنى الإجمالي',
+      maxTotalLabel: 'الحد الأقصى الإجمالي'
+    },
+
+    recycleBin: {
+      title: 'سلة المحذوفات',
+      empty: 'سلة المحذوفات فارغة',
+      restore: 'استعادة',
+      permanentDelete: 'حذف نهائي',
+      confirmRestore: 'هل تريد استعادة "{name}"؟',
+      confirmPermanentDelete: 'هل تريد حذف "{name}" نهائياً؟ لا يمكن التراجع عن هذا الإجراء.'
+    },
+
+    errors: {
+      loadCategories: 'خطأ في تحميل الفئات',
+      loadExtras: 'خطأ في تحميل الإضافات',
+      uploadImage: 'خطأ في تحميل الصورة',
+      deleteFailed: 'فشل حذف العنصر',
+      loadFailed: 'فشل تحميل البيانات',
+      saveFailed: 'فشل حفظ البيانات',
+      updateFailed: 'فشل تحديث البيانات',
+      restoreFailed: 'فشلت استعادة العنصر'
+    },
+
+    success: {
+      categoryAdded: 'تمت إضافة الفئة بنجاح',
+      categoryUpdated: 'تم تحديث الفئة بنجاح',
+      categoryDeleted: 'تم حذف الفئة بنجاح',
+      extraAdded: 'تمت إضافة الإضافة بنجاح',
+      extraUpdated: 'تم تحديث الإضافة بنجاح',
+      extraDeleted: 'تم حذف الإضافة بنجاح',
+      restored: 'تمت الاستعادة بنجاح'
+    },
+
+    categoryConfigModal: {
+      title: 'تكوين إضافات الفرع',
+      productLabel: 'تكوين الإضافات للمنتج:',
+      searchPlaceholder: 'بحث في الفئات...',
+
+      errors: {
+        loadFailed: 'فشل تحميل بيانات التكوين',
+        saveFailed: 'فشل حفظ التكوين',
+        generic: 'حدث خطأ ما'
+      },
+      stats: {
+        selectedCategories: 'الفئات',
+        selectedExtras: 'الإضافات',
+        available: 'المجموع المتاح'
+      },
+      loading: {
+        categories: 'جاري تحميل الفئات والإضافات...'
+      },
+      empty: {
+        noResults: 'لا توجد فئات تطابق بحثك',
+        noCategories: 'لا توجد فئات إضافات متاحة'
+      },
+      badges: {
+        required: 'إلزامي',
+        optional: 'اختياري',
+        removal: 'إزالة',
+        removalCategory: 'فئة الإزالة'
+      },
+      category: {
+        availableExtras: 'إضافات متاحة',
+        configurationTitle: 'قواعد الفئة',
+        selectExtrasTitle: 'تحديد الإضافات',
+        selectCategoryWarning: 'قم بتحديد هذه الفئة لتمكين اختيار الإضافات'
+      },
+      fields: {
+        minSelection: 'أقل اختيار',
+        maxSelection: 'أقصى اختيار',
+        minQuantity: 'أقل كمية إجمالية',
+        maxQuantity: 'أقصى كمية إجمالية',
+        overrideRequired: '  الإلزامية',
+        specialPrice: 'سعر خاص',
+        minQty: 'أقل كمية',
+        maxQty: 'أقصى كمية',
+        required: 'إلزامي'
+      },
+      labels: {
+        originalPrice: 'الأصلي',
+        removesIngredient: 'يزيل مكون',
+        extraConfiguration: 'تكوين الإضافة'
+      },
+      placeholders: {
+        defaultPrice: 'الافتراضي'
+      },
+      messages: {
+        removalPriceWarning: 'لا يمكن تحديد سعر لإضافات الإزالة'
+      },
+      footer: {
+        categoriesSelected: 'فئات محددة',
+        cancel: 'إلغاء',
+        save: 'حفظ التغييرات',
+        saving: 'جاري الحفظ...'
+      }
+    }
+
+
+  },
+  onboardingComplete: {
+    "title": "اكتملت عملية التسجيل!",
+    "message": "تم حفظ بيانات المطعم والفرع بنجاح. جاري توجيهك إلى صفحة تسجيل الدخول...",
+    "redirectingIn": "ثواني وسيتم توجيهك"
+  },
+  "countries": {
+    "afghanistan": "أفغانستان",
+    "albania": "ألبانيا",
+    "algeria": "الجزائر",
+    "andorra": "أندورا",
+    "angola": "أنغولا",
+    "argentina": "الأرجنتين",
+    "armenia": "أرمينيا",
+    "australia": "أستراليا",
+    "austria": "النمسا",
+    "azerbaijan": "أذربيجان",
+    "bahamas": "جزر البهاما",
+    "bahrain": "البحرين",
+    "bangladesh": "بنغلاديش",
+    "barbados": "بربادوس",
+    "belarus": "بيلاروسيا",
+    "belgium": "بلجيكا",
+    "belize": "بليز",
+    "benin": "بنين",
+    "bhutan": "بوتان",
+    "bolivia": "بوليفيا",
+    "bosnia": "البوسنة والهرسك",
+    "botswana": "بوتسوانا",
+    "brazil": "البرازيل",
+    "brunei": "بروناي",
+    "bulgaria": "بلغاريا",
+    "burkina_faso": "بوركينا فاسو",
+    "burundi": "بوروندي",
+    "cambodia": "كمبوديا",
+    "cameroon": "الكاميرون",
+    "canada": "كندا",
+    "cape_verde": "الرأس الأخضر",
+    "central_african_republic": "جمهورية أفريقيا الوسطى",
+    "chad": "تشاد",
+    "chile": "تشيلي",
+    "china": "الصين",
+    "colombia": "كولومبيا",
+    "comoros": "جزر القمر",
+    "congo": "الكونغو",
+    "costa_rica": "كوستاريكا",
+    "croatia": "كرواتيا",
+    "cuba": "كوبا",
+    "cyprus": "قبرص",
+    "czech_republic": "التشيك",
+    "denmark": "الدنمارك",
+    "djibouti": "جيبوتي",
+    "dominica": "دومينيكا",
+    "dominican_republic": "جمهورية الدومينيكان",
+    "ecuador": "الإكوادور",
+    "egypt": "مصر",
+    "el_salvador": "السلفادور",
+    "equatorial_guinea": "غينيا الاستوائية",
+    "eritrea": "إريتريا",
+    "estonia": "إستونيا",
+    "ethiopia": "إثيوبيا",
+    "fiji": "فيجي",
+    "finland": "فنلندا",
+    "france": "فرنسا",
+    "gabon": "الغابون",
+    "gambia": "غامبيا",
+    "georgia": "جورجيا",
+    "germany": "ألمانيا",
+    "ghana": "غانا",
+    "greece": "اليونان",
+    "grenada": "غرينادا",
+    "guatemala": "غواتيمالا",
+    "guinea": "غينيا",
+    "guinea_bissau": "غينيا بيساو",
+    "guyana": "غيانا",
+    "haiti": "هايتي",
+    "honduras": "هندوراس",
+    "hungary": "المجر",
+    "iceland": "آيسلندا",
+    "india": "الهند",
+    "indonesia": "إندونيسيا",
+    "iran": "إيران",
+    "iraq": "العراق",
+    "ireland": "أيرلندا",
+    "italy": "إيطاليا",
+    "jamaica": "جامايكا",
+    "japan": "اليابان",
+    "jordan": "الأردن",
+    "kazakhstan": "كازاخستان",
+    "kenya": "كينيا",
+    "kiribati": "كيريباتي",
+    "kuwait": "الكويت",
+    "kyrgyzstan": "قيرغيزستان",
+    "laos": "لاوس",
+    "latvia": "لاتفيا",
+    "lebanon": "لبنان",
+    "lesotho": "ليسوتو",
+    "liberia": "ليبيريا",
+    "libya": "ليبيا",
+    "liechtenstein": "ليختنشتاين",
+    "lithuania": "ليتوانيا",
+    "luxembourg": "لوكسمبورغ",
+    "madagascar": "مدغشقر",
+    "malawi": "مالاوي",
+    "malaysia": "ماليزيا",
+    "maldives": "جزر المالديف",
+    "mali": "مالي",
+    "malta": "مالطا",
+    "marshall_islands": "جزر مارشال",
+    "mauritania": "موريتانيا",
+    "mauritius": "موريشيوس",
+    "mexico": "المكسيك",
+    "micronesia": "ميكرونيزيا",
+    "moldova": "مولدوفا",
+    "monaco": "موناكو",
+    "mongolia": "منغوليا",
+    "montenegro": "الجبل الأسود",
+    "morocco": "المغرب",
+    "mozambique": "موزمبيق",
+    "myanmar": "ميانمار",
+    "namibia": "ناميبيا",
+    "nauru": "ناورو",
+    "nepal": "نيبال",
+    "netherlands": "هولندا",
+    "new_zealand": "نيوزيلندا",
+    "nicaragua": "نيكاراغوا",
+    "niger": "النيجر",
+    "nigeria": "نيجيريا",
+    "north_korea": "كوريا الشمالية",
+    "north_macedonia": "مقدونيا الشمالية",
+    "norway": "النرويج",
+    "oman": "عمان",
+    "pakistan": "باكستان",
+    "palau": "بالاو",
+    "palestine": "فلسطين",
+    "panama": "بنما",
+    "papua_new_guinea": "بابوا غينيا الجديدة",
+    "paraguay": "باراغواي",
+    "peru": "بيرو",
+    "philippines": "الفلبين",
+    "poland": "بولندا",
+    "portugal": "البرتغال",
+    "qatar": "قطر",
+    "romania": "رومانيا",
+    "russia": "روسيا",
+    "rwanda": "رواندا",
+    "saint_kitts": "سانت كيتس ونيفيس",
+    "saint_lucia": "سانت لوسيا",
+    "saint_vincent": "سانت فينسنت والغرينادين",
+    "samoa": "ساموا",
+    "san_marino": "سان مارينو",
+    "sao_tome": "ساو تومي وبرينسيبي",
+    "saudi_arabia": "السعودية",
+    "senegal": "السنغال",
+    "serbia": "صربيا",
+    "seychelles": "سيشل",
+    "sierra_leone": "سيراليون",
+    "singapore": "سنغافورة",
+    "slovakia": "سلوفاكيا",
+    "slovenia": "سلوفينيا",
+    "solomon_islands": "جزر سليمان",
+    "somalia": "الصومال",
+    "south_africa": "جنوب أفريقيا",
+    "south_korea": "كوريا الجنوبية",
+    "south_sudan": "جنوب السودان",
+    "spain": "إسبانيا",
+    "sri_lanka": "سريلانكا",
+    "sudan": "السودان",
+    "suriname": "سورينام",
+    "sweden": "السويد",
+    "switzerland": "سويسرا",
+    "syria": "سوريا",
+    "taiwan": "تايوان",
+    "tajikistan": "طاجيكستان",
+    "tanzania": "تنزانيا",
+    "thailand": "تايلاند",
+    "timor_leste": "تيمور الشرقية",
+    "togo": "توغو",
+    "tonga": "تونغا",
+    "trinidad": "ترينيداد وتوباغو",
+    "tunisia": "تونس",
+    "turkey": "تركيا",
+    "turkmenistan": "تركمانستان",
+    "tuvalu": "توفالو",
+    "uganda": "أوغندا",
+    "ukraine": "أوكرانيا",
+    "uae": "الإمارات العربية المتحدة",
+    "united_kingdom": "المملكة المتحدة",
+    "united_states": "الولايات المتحدة",
+    "uruguay": "أوروغواي",
+    "uzbekistan": "أوزبكستان",
+    "vanuatu": "فانواتو",
+    "vatican": "الفاتيكان",
+    "venezuela": "فنزويلا",
+    "vietnam": "فيتنام",
+    "yemen": "اليمن",
+    "zambia": "زامبيا",
+    "zimbabwe": "زيمبابوي"
+  },
+
+  // Legal Pages
+  legal: {
+    terms: {
+      title: 'شروط الخدمة',
+      lastUpdated: 'آخر تحديث: ديسمبر 2025',
+      sections: {
+        introduction: {
+          title: '1. المقدمة',
+          content: 'مرحباً بك في QR Menu ("نحن"، "لنا" أو "ملكنا"). تنظم شروط الخدمة هذه ("الشروط") وصولك واستخدامك لمنصة القائمة الرقمية وخدماتنا. بالوصول إلى خدماتنا أو استخدامها، فإنك توافق على الالتزام بهذه الشروط. إذا كنت لا توافق على أي جزء من هذه الشروط، فلا يمكنك استخدام خدماتنا.'
+        },
+        acceptance: {
+          title: '2. قبول الشروط',
+          content: 'من خلال إنشاء حساب أو الوصول إلى منصتنا أو استخدام أي من خدماتنا، فإنك تقر بأنك قد قرأت وفهمت ووافقت على الالتزام بهذه الشروط وسياسة الخصوصية الخاصة بنا. تنطبق هذه الشروط على جميع مستخدمي الخدمة، بما في ذلك المطاعم وأصحاب المطاعم وأعضاء الموظفين والعملاء النهائيين.'
+        },
+        services: {
+          title: '3. وصف الخدمات',
+          content: 'يوفر QR Menu حلاً شاملاً للقائمة الرقمية للمطاعم وشركات خدمات الطعام. تشمل خدماتنا على سبيل المثال لا الحصر:',
+          features: {
+            0: 'إنشاء وإدارة القوائم الرقمية',
+            1: 'إنشاء رمز QR للطلبات على الطاولة والطلبات الخارجية',
+            2: 'نظام إدارة وتتبع الطلبات',
+            3: 'أدوات التحليل والتقارير'
+          }
+        },
+        userResponsibilities: {
+          title: '4. مسؤوليات المستخدم',
+          content: 'كمستخدم لـ QR Menu، فإنك توافق على:',
+          items: {
+            0: 'تقديم معلومات دقيقة وكاملة عند إنشاء حساب',
+            1: 'الحفاظ على أمان وسرية بيانات اعتماد حسابك',
+            2: 'استخدام الخدمة بما يتوافق مع جميع القوانين واللوائح المعمول بها',
+            3: 'عدم استخدام الخدمة لأي أغراض غير قانونية أو ضارة أو احتيالية'
+          }
+        },
+        payment: {
+          title: '5. شروط الدفع',
+          content: 'يتم إصدار فواتير رسوم الاشتراك مقدماً على أساس شهري أو سنوي اعتماداً على الخطة التي اخترتها. جميع الرسوم غير قابلة للاسترداد إلا كما يقتضي القانون. نحتفظ بالحق في تعديل أسعارنا بإشعار مدته 30 يوماً للعملاء الحاليين. قد يؤدي عدم دفع الرسوم إلى تعليق حسابك أو إنهائه.'
+        },
+        termination: {
+          title: '6. الإنهاء',
+          content: 'يمكنك إنهاء حسابك في أي وقت من خلال إعدادات حسابك. نحتفظ بالحق في تعليق أو إنهاء حسابك إذا انتهكت هذه الشروط أو شاركت في أنشطة تضر بخدمتنا أو مستخدمين آخرين. عند الإنهاء، سينتهي حقك في استخدام الخدمة فوراً، على الرغم من أن بعض أحكام هذه الشروط ستبقى سارية بعد الإنهاء.'
+        },
+        intellectualProperty: {
+          title: '7. الملكية الفكرية',
+          content: 'جميع المحتويات والميزات ووظائف QR Menu، بما في ذلك على سبيل المثال لا الحصر النصوص والرسومات والشعارات والبرامج، مملوكة لنا أو لمرخصينا ومحمية بموجب قوانين حقوق النشر والعلامات التجارية والملكية الفكرية الأخرى الدولية. لا يجوز لك نسخ أو تعديل أو توزيع أو إنشاء أعمال مشتقة بناءً على خدمتنا دون إذن كتابي صريح منا.'
+        },
+        liability: {
+          title: '8. حدود المسؤولية',
+          content: 'إلى أقصى حد يسمح به القانون، لن تكون QR Menu والشركات التابعة لها مسؤولة عن أي أضرار غير مباشرة أو عرضية أو خاصة أو تبعية أو عقابية ناتجة عن استخدامك أو عدم قدرتك على استخدام الخدمة. لن تتجاوز مسؤوليتنا الإجمالية عن أي مطالبات ناشئة عن هذه الشروط أو استخدامك للخدمة المبلغ الذي دفعته لنا في الاثني عشر شهراً السابقة للمطالبة.'
+        },
+        changes: {
+          title: '9. التغييرات على الشروط',
+          content: 'نحتفظ بالحق في تعديل هذه الشروط في أي وقت. سنخطر المستخدمين بأي تغييرات جوهرية عبر البريد الإلكتروني أو من خلال منصتنا. يشكل استمرارك في استخدام الخدمة بعد هذه التعديلات قبولك للشروط المحدثة. نشجعك على مراجعة هذه الشروط بشكل دوري.'
+        },
+        contact: {
+          title: 'اتصل بنا',
+          content: 'إذا كان لديك أي أسئلة حول شروط الخدمة هذه، يرجى الاتصال بنا على:'
+        }
+      }
+    },
+    privacy: {
+      title: 'سياسة الخصوصية',
+      lastUpdated: 'آخر تحديث: ديسمبر 2025',
+      sections: {
+        introduction: {
+          title: '1. المقدمة',
+          content: 'في QR Menu، نأخذ خصوصيتك على محمل الجد. توضح سياسة الخصوصية هذه كيفية جمع معلوماتك واستخدامها والكشف عنها وحمايتها عند استخدام منصة القائمة الرقمية الخاصة بنا. باستخدام خدماتنا، فإنك توافق على ممارسات البيانات الموضحة في هذه السياسة.'
+        },
+        dataCollection: {
+          title: '2. المعلومات التي نجمعها',
+          content: 'نجمع عدة أنواع من المعلومات لتوفير خدماتنا وتحسينها:',
+          items: {
+            0: 'المعلومات الشخصية: الاسم وعنوان البريد الإلكتروني ورقم الهاتف وتفاصيل العمل المقدمة أثناء التسجيل',
+            1: 'معلومات العمل: تفاصيل المطعم وعناصر القائمة والتسعير والبيانات التشغيلية',
+            2: 'بيانات الاستخدام: معلومات حول كيفية تفاعلك مع منصتنا، بما في ذلك أوقات الوصول والميزات المستخدمة',
+            3: 'معلومات الجهاز: عنوان IP ونوع المتصفح ونظام التشغيل ومعرفات الجهاز',
+            4: 'معلومات الدفع: تفاصيل الفواتير وسجل المعاملات (تتم معالجتها بشكل آمن من خلال مزودي الدفع الخارجيين)'
+          }
+        },
+        dataUsage: {
+          title: '3. كيف نستخدم معلوماتك',
+          content: 'نستخدم المعلومات المجمعة لأغراض مختلفة:',
+          items: {
+            0: 'لتوفير خدماتنا وصيانتها وتحسينها',
+            1: 'لمعالجة المعاملات وإرسال المعلومات ذات الصلة',
+            2: 'لإرسال المعلومات الإدارية والتحديثات والتنبيهات الأمنية',
+            3: 'للرد على طلبات خدمة العملاء واحتياجات الدعم',
+            4: 'لتحليل أنماط الاستخدام وتحسين تجربة المستخدم'
+          }
+        },
+        dataSecurity: {
+          title: '4. أمان البيانات',
+          content: 'نطبق تدابير أمنية قياسية في الصناعة لحماية معلوماتك، بما في ذلك التشفير والخوادم الآمنة وعمليات التدقيق الأمني المنتظمة. ومع ذلك، لا توجد طريقة نقل عبر الإنترنت آمنة بنسبة 100٪، ولا يمكننا ضمان الأمان المطلق لبياناتك. نشجعك على استخدام كلمات مرور قوية والحفاظ على سرية بيانات اعتماد حسابك.'
+        },
+        dataSharing: {
+          title: '5. مشاركة البيانات والإفصاح',
+          content: 'نحن لا نبيع معلوماتك الشخصية. قد نشارك معلوماتك فقط في الظروف التالية:',
+          items: {
+            0: 'مع مزودي الخدمة الذين يساعدون في تشغيل منصتنا (بموجب اتفاقيات سرية صارمة)',
+            1: 'عند الطلب بموجب القانون أو لحماية حقوقنا القانونية',
+            2: 'فيما يتعلق بنقل الأعمال أو الاندماج أو الاستحواذ (بإشعار مسبق للمستخدمين)'
+          }
+        },
+        cookies: {
+          title: '6. ملفات تعريف الارتباط وتقنيات التتبع',
+          content: 'نستخدم ملفات تعريف الارتباط وتقنيات التتبع المماثلة لتحسين تجربتك وتحليل أنماط الاستخدام وتقديم محتوى مخصص. يمكنك التحكم في تفضيلات ملفات تعريف الارتباط من خلال إعدادات المتصفح، على الرغم من أن تعطيل ملفات تعريف الارتباط قد يحد من ميزات معينة لخدمتنا.'
+        },
+        userRights: {
+          title: '7. حقوقك',
+          content: 'لديك حقوق معينة فيما يتعلق بمعلوماتك الشخصية:',
+          items: {
+            0: 'الوصول: طلب نسخة من المعلومات الشخصية التي نحتفظ بها عنك',
+            1: 'التصحيح: طلب تصحيح المعلومات غير الدقيقة أو غير الكاملة',
+            2: 'الحذف: طلب حذف معلوماتك الشخصية (مع مراعاة الالتزامات القانونية)',
+            3: 'نقل البيانات: طلب نقل بياناتك إلى خدمة أخرى',
+            4: 'إلغاء الاشتراك: إلغاء الاشتراك في الاتصالات التسويقية في أي وقت'
+          }
+        },
+        childrenPrivacy: {
+          title: '8. خصوصية الأطفال',
+          content: 'خدماتنا ليست مخصصة للأفراد الذين تقل أعمارهم عن 18 عاماً. نحن لا نجمع عن علم معلومات شخصية من الأطفال. إذا علمنا أننا جمعنا معلومات من طفل دون موافقة الوالدين، فسنتخذ خطوات لحذف هذه المعلومات.'
+        },
+        changes: {
+          title: '9. التغييرات على سياسة الخصوصية هذه',
+          content: 'قد نقوم بتحديث سياسة الخصوصية هذه من وقت لآخر لتعكس التغييرات في ممارساتنا أو المتطلبات القانونية. سنخطرك بأي تغييرات جوهرية من خلال نشر السياسة المحدثة على منصتنا وتحديث تاريخ "آخر تحديث". نشجعك على مراجعة هذه السياسة بشكل دوري.'
+        },
+        contact: {
+          title: 'اتصل بنا',
+          content: 'إذا كان لديك أي أسئلة أو مخاوف بشأن سياسة الخصوصية هذه أو ممارسات البيانات الخاصة بنا، يرجى الاتصال بنا على:'
+        }
+      }
+    }
+  },
+
+  // Multi-Language System
+  multiLanguage: {
+    noLanguagesConfigured: 'لم يتم تكوين اللغات. يرجى تكوين اللغات في التفضيلات.',
+    required: 'مطلوب',
+    currentLanguage: 'اللغة الحالية',
+    quickFill: 'تعبئة سريعة',
+    fieldRequired: 'هذا الحقل مطلوب'
+  },
+  RestaurantPreferencesTab: {
+    title: 'تفضيلات لغة المطعم',
+    subtitle: 'إدارة إعدادات لغة المطعم',
+    loading: 'جاري التحميل...',
+    buttons: {
+      refresh: 'تحديث',
+      save: 'حفظ التغييرات',
+      saving: 'جاري الحفظ...'
+    },
+    sections: {
+      languageSettings: {
+        title: 'إعدادات اللغة',
+        subtitle: 'قم بتعيين اللغات التي يدعمها مطعمك واللغة الافتراضية'
+      },
+      currencySettings: {
+        title: 'إعدادات العملة',
+        subtitle: 'قم بتعيين العملة الافتراضية لمطعمك'
+      },
+    },
+    form: {
+      defaultLanguage: {
+        label: 'اللغة الافتراضية',
+        helperText: 'إعداد اللغة الافتراضية للمطعم'
+      },
+      defaultCurrency: {
+        label: 'العملة الافتراضية',
+        helperText: 'إعداد العملة الافتراضية للمطعم'
+      },
+      supportedLanguages: {
+        label: 'اللغات المدعومة',
+        helperText: 'يجب اختيار لغة واحدة على الأقل. تظل اللغة الافتراضية محددة تلقائياً.'
+      }
+    },
+    alerts: {
+      success: 'تم تحديث تفضيلات المطعم بنجاح',
+      cascadeWarning: {
+        title: 'ملاحظة هامة:',
+        description: 'عند تقليل اللغات المدعومة، يتم تحديث تفضيلات الفرع تلقائياً:',
+        point1: 'يمكن للفروع دعم اللغات التي يدعمها المطعم فقط',
+        point2: 'إذا تمت إزالة اللغة الافتراضية للفرع، فسيتم تحديثها إلى اللغة الافتراضية للمطعم'
+      },
+      validationInfo: {
+        title: 'قواعد التحقق:',
+        point1: 'يجب دعم لغة واحدة على الأقل',
+        point2: 'يجب أن تكون اللغة الافتراضية من بين اللغات المدعومة'
+      }
+    },
+    errors: {
+      load: 'حدث خطأ أثناء تحميل تفضيلات المطعم',
+      loadGeneral: 'تعذر تحميل تفضيلات المطعم',
+      save: 'حدث خطأ أثناء حفظ تفضيلات المطعم'
+    }
+  },
+  BranchTableModal: {
+    addTitle: 'إضافة فئة جدول فرع',
+    addSubtitle: 'املأ التفاصيل لإنشاء فئة جدول فرع جديدة.',
+    editTitle: 'تحرير فئة جدول فرع',
+    tableNamePlaceholder: 'أدخل اسم الجدول',
+    capacity: 'أدخل سعة الجدول',
+    tableName: 'اسم الجدول',
+    cancel: 'إلغاء',
+    tableNameRequired: 'اسم الجدول مطلوب',
+    add: 'إضافة',
+    capacityPlaceholder: 'أدخل سعة الجدول',
+    editSubtitle: 'املأ التفاصيل لتحديث فئة جدول فرع.',
+    saving: 'جاري الحفظ...',
+    status: 'الحالة',
+    active: 'نشط',
+    update: 'تحديث'
+  },
+  languageControl: {
+    editing: 'تحرير اللغة',
+    copyFrom: 'نسخ من',
+    quickFill: 'تعبئة سريعة',
+    fill: 'تعبئة',
+    bulkFillTitle: 'تعبئة جماعية',
+    scrollLeft: 'تمرير لليسار',
+    scrollRight: 'تمرير لليمين'
+  },
+  paymentMethod: {
+    title: 'طريقة الدفع',
+    cash: 'نقدي',
+    creditCard: 'بطاقة ائتمان',
+    online: 'دفع عبر الإنترنت'
+  },
+
+  // نافذة نجاح الطلب
+  orderSuccess: {
+    title: 'تم استلام الطلب!',
+    subtitle: 'تم استلام طلبك بنجاح',
+    orderNumber: 'رقم الطلب',
+    copy: 'نسخ',
+    estimatedTime: 'الوقت المقدر',
+    orderType: 'نوع الطلب',
+    thankYou: 'شكراً لك',
+    trackOrder: 'تتبع طلبك',
+    continueBrowsing: 'متابعة التصفح'
+  },
+
+  // تتبع الطلب
+  orderTracker: {
+    // جاري التحميل
+    loading: {
+      title: 'جاري تحميل الطلب',
+      subtitle: 'جاري جلب تفاصيل طلبك...'
+    },
+    // خطأ
+    error: {
+      title: 'الطلب غير موجود',
+      noOrderTag: 'لم يتم تقديم رقم الطلب',
+      fetchFailed: 'فشل في جلب تفاصيل الطلب',
+      retry: 'حاول مرة أخرى',
+      goBack: 'العودة'
+    },
+    // الرأس
+    back: 'رجوع',
+    refresh: 'تحديث',
+    orderNumber: 'رقم الطلب',
+    copyOrderTag: 'نسخ رقم الطلب',
+    lastUpdated: 'آخر تحديث',
+    // الحالة
+    statusTitle: 'حالة الطلب',
+    status: {
+      pending: 'تم الاستلام',
+      confirmed: 'تم التأكيد',
+      preparing: 'قيد التحضير',
+      ready: 'جاهز',
+      delivered: 'تم التوصيل',
+      completed: 'مكتمل',
+      cancelled: 'ملغي',
+      rejected: 'مرفوض'
+    },
+    // الرسائل
+    message: {
+      completed: 'شكراً لك! تم إكمال طلبك.',
+      cancelled: 'تم إلغاء هذا الطلب.',
+      rejected: 'تم رفض هذا الطلب من قبل المطعم.'
+    },
+    // الوقت
+    time: {
+      estimatedReady: 'الوقت المقدر للجاهزية',
+      preparingOrder: 'يتم تحضير طلبك',
+      takingLonger: 'يستغرق وقتاً أطول من المتوقع',
+      pleaseWait: 'يرجى الانتظار، تقريباً جاهز',
+      almostReady: 'تقريباً جاهز!',
+      min: 'د',
+      sec: 'ث'
+    },
+    // معلومات الطلب
+    orderType: 'نوع الطلب',
+    orderDate: 'تاريخ الطلب',
+    customerName: 'العميل',
+    table: 'الطاولة',
+    notes: 'ملاحظات',
+    // العناصر
+    orderDetails: 'تفاصيل الطلب',
+    item: 'عنصر',
+    items: 'عناصر',
+    noItems: 'لا توجد عناصر في هذا الطلب',
+    total: 'المجموع',
+    // الإجراءات
+    backToMenu: 'العودة للقائمة'
   }
-}; 
+};

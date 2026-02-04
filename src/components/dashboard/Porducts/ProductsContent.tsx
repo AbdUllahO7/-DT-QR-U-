@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  Search, Plus, Filter, ArrowUp,  Package, Utensils, Loader2,
-  ChevronDown, Check, X, SortAsc, SortDesc, Eye, EyeOff, DollarSign, Hash, Users,
-  Trash2
+  Search, Plus, Filter, ArrowUp, Package, Utensils, Loader2,
+  ChevronDown, Check, X, SortAsc, SortDesc, Eye, EyeOff, Hash, Users,
+  Trash2, LayoutGrid, List
 } from 'lucide-react';
 import {
   DndContext,
@@ -39,6 +39,8 @@ import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { Category, Product } from '../../../types/BranchManagement/type';
 import { useNavigate } from 'react-router-dom';
+import ProductExtrasModal from './ProductExtrasModal';
+import { useCurrency } from '../../../hooks/useCurrency';
 
 // Branch dropdown item interface
 interface BranchDropdownItem {
@@ -70,6 +72,20 @@ const customStyles = `
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+  /* Hide scrollbar for category filter but allow scroll */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 20px;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #475569;
+  }
 `;
 
 // Inject styles
@@ -92,7 +108,7 @@ const ProductsContent: React.FC = () => {
   const [selectedBranch, setSelectedBranch] = useState<BranchDropdownItem | null>(null);
   const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
   const [isLoadingBranches, setIsLoadingBranches] = useState(false);
-  
+
   // Filter and Sort States
   const [sortBy, setSortBy] = useState<SortOption>('order_asc');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
@@ -102,7 +118,17 @@ const ProductsContent: React.FC = () => {
     categories: [],
     priceRange: { min: 0, max: 1000 }
   });
-  
+  const currency = useCurrency();
+
+  // View Mode State with localStorage persistence
+  const [viewMode, setViewMode] = useState<'list' | 'grid'>(() => {
+    const saved = localStorage.getItem('productsViewMode');
+    return (saved === 'grid' || saved === 'list') ? saved : 'list';
+  });
+
+  // Auto-scroll state for newly created products
+  const [newlyCreatedProductId, setNewlyCreatedProductId] = useState<number | null>(null);
+
   const filterRef = useRef<HTMLDivElement>(null);
   const sortRef = useRef<HTMLDivElement>(null);
   const branchDropdownRef = useRef<HTMLDivElement>(null);
@@ -127,7 +153,32 @@ const ProductsContent: React.FC = () => {
     productId: number;
     productName: string;
   } | null>(null);
-  
+  const [isProductExtrasModalOpen, setIsProductExtrasModalOpen] = useState(false);
+  const [selectedProductForExtras, setSelectedProductForExtras] = useState<{
+    productId: number;
+    productName: string;
+  } | null>(null);
+
+  const handleOpenProductExtras = (productId: number, productName: string) => {
+    if (!productId || productId === 0 || isNaN(productId)) {
+      console.error('❌ Invalid productId provided:', productId);
+      alert(t('productsContent.error.invalidData'));
+      return;
+    }
+
+    if (!productName || productName.trim() === '') {
+      console.error('❌ Invalid productName provided:', productName);
+      alert(t('productsContent.error.invalidData'));
+      return;
+    }
+
+    setSelectedProductForExtras({
+      productId: productId,
+      productName: productName
+    });
+    setIsProductExtrasModalOpen(true);
+  };
+
   const [deleteConfig, setDeleteConfig] = useState<{
     type: 'product' | 'category';
     id: number;
@@ -141,6 +192,7 @@ const ProductsContent: React.FC = () => {
   const [selectedProductForEdit, setSelectedProductForEdit] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string>('');
   const [isIngredientSelectionModalOpen, setIsIngredientSelectionModalOpen] = useState(false);
   const [selectedProductForIngredients, setSelectedProductForIngredients] = useState<{
     productId: number;
@@ -158,32 +210,32 @@ const ProductsContent: React.FC = () => {
       setIsLoadingBranches(true);
       try {
         const branchList = await branchService.getBranchesDropdown();
-        
-        // Add "Select All" option at the beginning
+
         const selectAllOption: BranchDropdownItem = {
           branchId: SELECT_ALL_BRANCH_ID,
           branchName: t('productsContent.branch.selectAll') || 'All Branches'
         };
-        
+
         const branchesWithSelectAll = [selectAllOption, ...branchList];
         setBranches(branchesWithSelectAll);
-        
-        // Auto-select "Select All" option if no branch is selected
-        if (!selectedBranch) {
-          setSelectedBranch(selectAllOption);
-        }
-        
-        logger.info('Şube listesi başarıyla yüklendi', { branchCount: branchList.length });
+
+        setSelectedBranch(prev => {
+          if (!prev || prev.branchId === SELECT_ALL_BRANCH_ID) {
+            return selectAllOption;
+          }
+          return prev;
+        });
+
+        logger.info('Şube listesi başarıyla yüklendi');
       } catch (error) {
         logger.error('Şube listesi yüklenirken hata:', error);
-        // Handle error - you might want to show a toast or error message
       } finally {
         setIsLoadingBranches(false);
       }
     };
 
     fetchBranches();
-  }, []);
+  }, [t]);
 
   // Load categories when branch changes
   useEffect(() => {
@@ -203,16 +255,16 @@ const ProductsContent: React.FC = () => {
       alert(t('productsContent.error.invalidData'));
       return;
     }
-    
+
     if (!productName || productName.trim() === '') {
       console.error('❌ Invalid productName provided:', productName);
       alert(t('productsContent.error.invalidData'));
       return;
     }
-    
-    setSelectedProductForAddons({ 
-      productId: productId, 
-      productName: productName 
+
+    setSelectedProductForAddons({
+      productId: productId,
+      productName: productName
     });
     setIsAddonsModalOpen(true);
   };
@@ -228,126 +280,105 @@ const ProductsContent: React.FC = () => {
       alert(t('productsContent.error.invalidData'));
       return;
     }
-    
+
     if (!productName || productName.trim() === '') {
       console.error('❌ Invalid productName provided:', productName);
       alert(t('productsContent.error.invalidData'));
       return;
     }
-    
-    setSelectedProductForIngredientUpdate({ 
-      productId: productId, 
-      productName: productName 
+
+    setSelectedProductForIngredientUpdate({
+      productId: productId,
+      productName: productName
     });
     setIsIngredientUpdateModalOpen(true);
   };
-  
-  const loadCategories = async () => {
+
+  const loadCategories = async (newProductId?: number, isRefresh: boolean = false) => {
     if (!selectedBranch) return;
-    
+
     try {
-      setLoading(true);
-      
-      let fetchedCategories: Category[];
-      // Check if "Select All" is selected
-      if (selectedBranch.branchId === SELECT_ALL_BRANCH_ID) {
-        // Use getCategories for all branches
-        fetchedCategories = await productService.getCategories();
-        logger.info('Tüm kategori verileri başarıyla yüklendi', { 
-          categoryCount: fetchedCategories.length 
-        });
-      } else {
-        // Use getBranchCategories for specific branch
-        fetchedCategories = await productService.getBranchCategories(selectedBranch.branchId);
-        logger.info('Şube kategori verileri başarıyla yüklendi', { 
-          branchId: selectedBranch.branchId,
-          categoryCount: fetchedCategories.length 
-        });
+      if (!isRefresh) {
+        setLoading(true);
       }
-      
+
+      let fetchedCategories: Category[];
+      if (selectedBranch.branchId === SELECT_ALL_BRANCH_ID) {
+        fetchedCategories = await productService.getCategories();
+      } else {
+        fetchedCategories = await productService.getBranchCategories(selectedBranch.branchId);
+      }
+
+      if (newProductId) {
+        const categoryWithNewProduct = fetchedCategories.find(cat =>
+          cat.products?.some(p => p.id === newProductId)
+        );
+
+        if (categoryWithNewProduct) {
+          fetchedCategories = fetchedCategories.map(cat =>
+            cat.categoryId === categoryWithNewProduct.categoryId
+              ? { ...cat, isExpanded: true }
+              : cat
+          );
+        }
+
+        setNewlyCreatedProductId(newProductId);
+      }
+
       setCategories(fetchedCategories);
-      
+
     } catch (error) {
       logger.error('Kategori verileri alınamadı:', error);
-      // Handle error - you might want to show a toast or error message
     } finally {
       setLoading(false);
     }
   };
 
-  // Sort categories and products
   const applySorting = (categoriesToSort: Category[]): Category[] => {
     const sortedCategories = [...categoriesToSort];
 
-    // Sort categories
     sortedCategories.sort((a, b) => {
       switch (sortBy) {
-        case 'name_asc':
-          return a.categoryName.localeCompare(b.categoryName);
-        case 'name_desc':
-          return b.categoryName.localeCompare(a.categoryName);
-        case 'order_asc':
-          return a.displayOrder - b.displayOrder;
-        case 'order_desc':
-          return b.displayOrder - a.displayOrder;
-        default:
-          return a.displayOrder - b.displayOrder;
+        case 'name_asc': return a.categoryName.localeCompare(b.categoryName);
+        case 'name_desc': return b.categoryName.localeCompare(a.categoryName);
+        case 'order_asc': return a.displayOrder - b.displayOrder;
+        case 'order_desc': return b.displayOrder - a.displayOrder;
+        default: return a.displayOrder - b.displayOrder;
       }
     });
 
-    // Sort products within each category
     return sortedCategories.map(category => ({
       ...category,
       products: [...category.products].sort((a, b) => {
         switch (sortBy) {
-          case 'name_asc':
-            return a.name.localeCompare(b.name);
-          case 'name_desc':
-            return b.name.localeCompare(a.name);
-          case 'price_asc':
-            return a.price - b.price;
-          case 'price_desc':
-            return b.price - a.price;
-          case 'order_asc':
-            return a.displayOrder - b.displayOrder;
-          case 'order_desc':
-            return b.displayOrder - a.displayOrder;
-          default:
-            return a.displayOrder - b.displayOrder;
+          case 'name_asc': return a.name.localeCompare(b.name);
+          case 'name_desc': return b.name.localeCompare(a.name);
+          case 'price_asc': return a.price - b.price;
+          case 'price_desc': return b.price - a.price;
+          case 'order_asc': return a.displayOrder - b.displayOrder;
+          case 'order_desc': return b.displayOrder - a.displayOrder;
+          default: return a.displayOrder - b.displayOrder;
         }
       })
     }));
   };
 
-  // Apply filters
   const applyFilters = (categoriesToFilter: Category[]): Category[] => {
     return categoriesToFilter.map(category => {
-      // Filter products within category
       let filteredProducts = category?.products?.filter(product => {
-        // Status filter
         if (filters.status === 'active' && !product.isAvailable) return false;
         if (filters.status === 'inactive' && product.isAvailable) return false;
-        
-        // Price range filter
         if (product.price < filters.priceRange.min || product.price > filters.priceRange.max) return false;
-        
-        // Category filter (if specific categories are selected)
         if (filters.categories.length > 0 && !filters.categories.includes(category.categoryId)) return false;
-        
         return true;
       });
 
-      return {
-        ...category,
-        products: filteredProducts
-      };
-    }).filter(category => 
-      // Show category if it has products or if no search/filter is applied
+      return { ...category, products: filteredProducts };
+    }).filter(category =>
       category?.products?.length > 0 || (searchQuery === '' && filters.status === 'all' && filters.categories.length === 0)
     );
   };
 
-  // Apply search
   const applySearch = (categoriesToSearch: Category[]): Category[] => {
     if (!searchQuery.trim()) return categoriesToSearch;
 
@@ -357,23 +388,21 @@ const ProductsContent: React.FC = () => {
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (product.description && product.description.toLowerCase().includes(searchQuery.toLowerCase()))
       )
-    })).filter(category => 
-      category?.products?.length > 0 || 
+    })).filter(category =>
+      category?.products?.length > 0 ||
       category.categoryName.toLowerCase().includes(searchQuery.toLowerCase())
     );
   };
 
-  // Get filtered and sorted categories
   const processedCategories = applySorting(applyFilters(applySearch(categories)));
 
-  // Filter options
   const sortOptions = [
-    { value: 'order_asc', label: t('sort.order.asc') || 'Order (A-Z)', icon: Hash },
-    { value: 'order_desc', label: t('sort.order.desc') || 'Order (Z-A)', icon: Hash },
-    { value: 'name_asc', label: t('sort.name.asc') || 'Name (A-Z)', icon: SortAsc },
-    { value: 'name_desc', label: t('sort.name.desc') || 'Name (Z-A)', icon: SortDesc },
-    { value: 'price_asc', label: t('sort.price.asc') || 'Price (Low-High)', icon: DollarSign },
-    { value: 'price_desc', label: t('sort.price.desc') || 'Price (High-Low)', icon: DollarSign },
+    { value: 'order_asc', label: t('sort.order.asc') || 'Order (A-Z)', Icon: Hash },
+    { value: 'order_desc', label: t('sort.order.desc') || 'Order (Z-A)', Icon: Hash },
+    { value: 'name_asc', label: t('sort.name.asc') || 'Name (A-Z)', Icon: SortAsc },
+    { value: 'name_desc', label: t('sort.name.desc') || 'Name (Z-A)', Icon: SortDesc },
+    { value: 'price_asc', label: t('sort.price.asc') || 'Price (Low-High)', Icon: null, iconText: currency.symbol },
+    { value: 'price_desc', label: t('sort.price.desc') || 'Price (High-Low)', Icon: null, iconText: currency.symbol },
   ];
 
   const toggleCategory = (categoryId: number) => {
@@ -389,10 +418,7 @@ const ProductsContent: React.FC = () => {
       .flatMap(cat => cat.products)
       .find(product => product.id === productId);
 
-    if (!product) {
-      logger.error('Silinecek ürün bulunamadı:', { productId });
-      return;
-    }
+    if (!product) return;
 
     setDeleteConfig({
       type: 'product',
@@ -401,13 +427,17 @@ const ProductsContent: React.FC = () => {
       message: t('productsContent.delete.product.message', { productName: product.name }),
       onConfirm: async () => {
         setIsDeleting(true);
+        setDeleteError('');
         try {
           await productService.deleteProduct(productId);
           setCategories(categories.map(cat => ({
             ...cat,
             products: cat.products?.filter(product => product.id !== productId)
           })));
-          logger.info('Ürün başarıyla silindi', { productId });
+        } catch (error: any) {
+          const errorMessage = error.response?.data?.message || error.message || t('productsContent.error.deleteFailed');
+          setDeleteError(errorMessage);
+          throw error;
         } finally {
           setIsDeleting(false);
         }
@@ -425,35 +455,29 @@ const ProductsContent: React.FC = () => {
       setSelectedProductForEdit(productToEdit);
       setIsEditProductModalOpen(true);
     } else {
-      logger.error('Düzenlenecek ürün bulunamadı:', { productId });
       alert(t('productsContent.error.productNotFound') + ' ' + t('productsContent.error.refreshPage'));
     }
   };
 
   const handleDeleteCategory = (categoryId: number) => {
     const category = categories.find(cat => cat.categoryId === categoryId);
-    
-    if (!category) {
-      alert(t('productsContent.error.categoryNotFound'));
-      return;
-    }
+    if (!category) return;
 
     setDeleteConfig({
       type: 'category',
       id: categoryId,
       title: t('productsContent.delete.category.title'),
-      message: category?.products?.length > 0
-        ? t('products.delete.category.messageWithProducts', { 
-            categoryName: category.categoryName, 
-            productCount: category?.products?.length 
-          })
-        : t('productsContent.delete.category.messageEmpty', { categoryName: category.categoryName }),
+      message: t('productsContent.delete.category.messageEmpty', { categoryName: category.categoryName }),
       onConfirm: async () => {
         setIsDeleting(true);
+        setDeleteError('');
         try {
           await productService.deleteCategory(categoryId);
           setCategories(categories.filter(cat => cat.categoryId !== categoryId));
-          logger.info('Kategori başarıyla silindi', { categoryId });
+        } catch (error: any) {
+          const errorMessage = error.response?.data?.message || error.message || t('productsContent.error.deleteFailed');
+          setDeleteError(errorMessage);
+          throw error;
         } finally {
           setIsDeleting(false);
         }
@@ -464,17 +488,14 @@ const ProductsContent: React.FC = () => {
 
   const handleEditCategory = (categoryId: number) => {
     const categoryToEdit = categories.find(cat => cat.categoryId === categoryId);
-    
     if (categoryToEdit) {
       setSelectedCategoryForEdit(categoryToEdit);
       setIsEditCategoryModalOpen(true);
     } else {
-      logger.error('Düzenlenecek kategori bulunamadı:', { categoryId });
       alert(t('productsContent.error.categoryNotFound') + ' ' + t('productsContent.error.refreshPage'));
     }
   };
 
-  // Clear all filters
   const clearFilters = () => {
     setFilters({
       status: 'all',
@@ -485,19 +506,12 @@ const ProductsContent: React.FC = () => {
     setSortBy('order_asc');
   };
 
-  // Check if filters are active
-  const hasActiveFilters = filters.status !== 'all' || filters.categories.length > 0 || 
+  const hasActiveFilters = filters.status !== 'all' || filters.categories.length > 0 ||
     filters.priceRange.min > 0 || filters.priceRange.max < 1000 || searchQuery !== '';
 
   const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -506,63 +520,43 @@ const ProductsContent: React.FC = () => {
 
   const handleDragOver = (event: DragOverEvent) => {
     const { active, over } = event;
-
     if (!over) return;
-
     const activeId = active.id as number;
     const overId = over.id as number;
-
     if (activeId === overId) return;
 
-    const activeProduct = categories
-      .flatMap(cat => cat.products)
-      .find(product => product.id === activeId);
+    const activeProduct = categories.flatMap(cat => cat.products).find(product => product.id === activeId);
 
     if (activeProduct) {
       const overCategory = categories.find(cat => cat.categoryId === overId);
-      const overProduct = categories
-        .flatMap(cat => cat.products)
-        .find(product => product.id === overId);
+      const overProduct = categories.flatMap(cat => cat.products).find(product => product.id === overId);
 
       if (overCategory) {
         setCategories(prev => {
           const newCategories = [...prev];
-          const sourceCategory = newCategories.find(cat =>
-            cat.products?.some(product => product.id === activeId)
-          );
+          const sourceCategory = newCategories.find(cat => cat.products?.some(product => product.id === activeId));
           if (sourceCategory) {
-            sourceCategory.products = sourceCategory.products?.filter(
-              product => product.id !== activeId
-            );
+            sourceCategory.products = sourceCategory.products?.filter(product => product.id !== activeId);
           }
-
           const targetCategory = newCategories.find(cat => cat.categoryId === overId);
           if (targetCategory) {
-            const updatedProduct = { ...activeProduct, categoryId: overId };
-            targetCategory.products?.push(updatedProduct);
+            targetCategory.products?.push({ ...activeProduct, categoryId: overId });
           }
-
           return newCategories;
         });
       } else if (overProduct && activeProduct.categoryId !== overProduct.categoryId) {
         setCategories(prev => {
           const newCategories = [...prev];
-          const sourceCategory = newCategories.find(cat =>
-            cat.products?.some(product => product.id === activeId)
-          );
+          const sourceCategory = newCategories.find(cat => cat.products?.some(product => product.id === activeId));
           if (sourceCategory) {
-            sourceCategory.products = sourceCategory.products?.filter(
-              product => product.id !== activeId
-            );
+            sourceCategory.products = sourceCategory.products?.filter(product => product.id !== activeId);
           }
-
           const targetCategory = newCategories.find(cat => cat.categoryId === overProduct.categoryId);
           if (targetCategory) {
             const updatedProduct = { ...activeProduct, categoryId: overProduct.categoryId };
             const overIndex = targetCategory.products?.findIndex(product => product.id === overId);
             targetCategory.products?.splice(overIndex, 0, updatedProduct);
           }
-
           return newCategories;
         });
       }
@@ -572,24 +566,25 @@ const ProductsContent: React.FC = () => {
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     setActiveId(null);
-
     if (!over || active.id === over.id) return;
 
     const activeId = active.id as number;
     const overId = over.id as number;
 
-    // Identify what we're dealing with
     const activeCategory = categories.find(cat => cat.categoryId === activeId);
     const overCategory = categories.find(cat => cat.categoryId === overId);
     const activeProduct = categories.flatMap(cat => cat.products).find(product => product.id === activeId);
     const overProduct = categories.flatMap(cat => cat.products).find(product => product.id === overId);
 
-    // CASE 1: Category to Category - Reorder categories
+    // Reorder Categories
     if (activeCategory && overCategory) {
       const oldIndex = categories.findIndex(cat => cat.categoryId === activeId);
       const newIndex = categories.findIndex(cat => cat.categoryId === overId);
-      
-      const newCategories = arrayMove(categories, oldIndex, newIndex);
+      const reorderedCategories = arrayMove(categories, oldIndex, newIndex);
+      const newCategories = reorderedCategories.map((category, index) => ({
+        ...category,
+        displayOrder: index + 1
+      }));
       setCategories(newCategories);
       setIsReorderingCategories(true);
 
@@ -598,11 +593,9 @@ const ProductsContent: React.FC = () => {
           categoryId: category.categoryId,
           newDisplayOrder: index + 1
         }));
-
         await productService.reorderCategories(categoryOrders);
       } catch (error: any) {
-        console.error('❌ Category reordering failed:', error);
-        setCategories(categories); // Revert
+        setCategories(categories);
         alert(t('productsContent.dragDrop.categoryOrderSaveError'));
       } finally {
         setIsReorderingCategories(false);
@@ -610,20 +603,22 @@ const ProductsContent: React.FC = () => {
       return;
     }
 
-    // CASE 2: Product to Product (Same Category) - Reorder products
+    // Reorder Products same category
     if (activeProduct && overProduct && activeProduct.categoryId === overProduct.categoryId) {
       const categoryId = activeProduct.categoryId;
       const categoryIndex = categories.findIndex(cat => cat.categoryId === categoryId);
       const category = categories[categoryIndex];
-      
       const oldIndex = category?.products?.findIndex(product => product.id === activeId);
       const newIndex = category?.products?.findIndex(product => product.id === overId);
 
-      // Update local state
+      const reorderedProducts = arrayMove(category?.products, oldIndex, newIndex);
+      const newProducts = reorderedProducts.map((product, index) => ({
+        ...product,
+        displayOrder: index + 1
+      }));
+
       const newCategories = [...categories];
-      const newProducts = arrayMove(category?.products, oldIndex, newIndex);
       newCategories[categoryIndex] = { ...category, products: newProducts };
-      
       setCategories(newCategories);
       setIsReorderingProducts(true);
       setReorderingCategoryId(categoryId);
@@ -633,88 +628,10 @@ const ProductsContent: React.FC = () => {
           productId: product.id,
           newDisplayOrder: index + 1
         }));
-
         await productService.reorderProducts(productOrders);
       } catch (error: any) {
-        console.error('❌ Product reordering failed:', error);
-        setCategories(categories); // Revert
+        setCategories(categories);
         alert(t('productsContent.dragDrop.productOrderSaveError'));
-      } finally {
-        setIsReorderingProducts(false);
-        setReorderingCategoryId(null);
-      }
-      return;
-    }
-
-    // CASE 3: Product to Category - Move product to different category
-    if (activeProduct && overCategory) {
-      if (activeProduct.categoryId === overCategory.categoryId) {
-        return;
-      }
-
-      setIsReorderingProducts(true);
-      setReorderingCategoryId(overCategory.categoryId);
-
-      try {
-        await productService.updateProduct(activeProduct.id, {
-          categoryId: overCategory.categoryId
-        });
-        
-        await loadCategories();
-      } catch (error: any) {
-        console.error('❌ Product category move failed:', error);
-        alert(t('productsContent.dragDrop.productMoveError'));
-      } finally {
-        setIsReorderingProducts(false);
-        setReorderingCategoryId(null);
-      }
-      return;
-    }
-
-    // CASE 4: Product to Product (Different Categories) - Move to different category at specific position
-    if (activeProduct && overProduct && activeProduct.categoryId !== overProduct.categoryId) {
-      const targetCategoryId = overProduct.categoryId;
-      setIsReorderingProducts(true);
-      setReorderingCategoryId(targetCategoryId);
-
-      try {
-        await productService.updateProduct(activeProduct.id, {
-          categoryId: targetCategoryId
-        });
-
-        const updatedCategories = await productService.getBranchCategories(selectedBranch!.branchId);
-        setCategories(updatedCategories);
-        
-        const targetCategory = updatedCategories.find(cat => cat.categoryId === targetCategoryId);
-        if (targetCategory) {
-          const movedProduct = targetCategory.products?.find((p: { id: number; }) => p.id === activeProduct.id);
-          const targetProduct = targetCategory.products?.find((p: { id: number; }) => p.id === overProduct.id);
-          
-          if (movedProduct && targetProduct) {
-            const currentIndex = targetCategory.products?.findIndex((p: { id: number; }) => p.id === activeProduct.id);
-            const targetIndex = targetCategory.products?.findIndex((p: { id: number; }) => p.id === overProduct.id);
-            
-            if (currentIndex !== targetIndex) {
-              const reorderedProducts = arrayMove(targetCategory.products, currentIndex, targetIndex);
-              
-              const finalCategories = [...updatedCategories];
-              const catIndex = finalCategories.findIndex(cat => cat.categoryId === targetCategoryId);
-              finalCategories[catIndex] = { ...targetCategory, products: reorderedProducts };
-              setCategories(finalCategories);
-              
-              const productOrders = reorderedProducts.map((product, index) => ({
-                productId: product.id,
-                newDisplayOrder: index + 1
-              }));
-              
-              await productService.reorderProducts(productOrders);
-            }
-          }
-        }
-      } catch (error: any) {
-        console.error('❌ Cross-category product move failed:', error);
-        loadCategories();
-        alert(t('productsContent.dragDrop.productMoveError'));
       } finally {
         setIsReorderingProducts(false);
         setReorderingCategoryId(null);
@@ -749,71 +666,7 @@ const ProductsContent: React.FC = () => {
     );
   }
 
-  // No branch selected state (this shouldn't happen now since we auto-select "Select All")
-  if (!selectedBranch) {
-    return (
-      <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
-              <input
-                type="text"
-                placeholder={t('productsContent.search.placeholder')}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-                disabled
-              />
-            </div>
-
-            {/* Branch Selector */}
-            <div className="relative" ref={branchDropdownRef}>
-              <button
-                onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
-                className={`flex items-center justify-between min-w-[200px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRTL ? 'flex-row-reverse' : ''}`}
-                disabled={isLoadingBranches}
-              >
-                <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                  {isLoadingBranches ? t('productsContent.branch.loading') : t('productsContent.branch.selectBranch')}
-                </span>
-                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
-              </button>
-
-              {isBranchDropdownOpen && (
-                <div className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'}`}>
-                  {branches.length === 0 ? (
-                    <div className="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
-                      {t('productsContent.branch.noBranches')}
-                    </div>
-                  ) : (
-                    branches.map(branch => (
-                      <button
-                        key={branch.branchId}
-                        onClick={() => handleBranchSelect(branch)}
-                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200 ${isRTL ? 'text-right' : 'text-left'}`}
-                      >
-                        {branch.branchName}
-                      </button>
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-            <p className="text-gray-500 dark:text-gray-400">
-              {t('productsContent.branch.selectBranchMessage')}
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  // Initial Empty State (if categories empty)
   if (categories.length === 0) {
     return (
       <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -826,36 +679,29 @@ const ProductsContent: React.FC = () => {
                 placeholder={t('productsContent.search.placeholder')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
+                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
                 disabled
               />
             </div>
-
-            <div className="flex items-center gap-3">
-              {/* Branch Selector */}
+            <div className="flex flex-wrap items-center gap-3">
               <div className="relative" ref={branchDropdownRef}>
                 <button
                   onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
-                  className={`flex items-center justify-between min-w-[200px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRTL ? 'flex-row-reverse' : ''}`}
+                  className={`flex items-center justify-between min-w-[200px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700`}
                 >
-                  <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <span className={`flex items-center`}>
                     <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     {selectedBranch ? selectedBranch.branchName : t('productsContent.branch.selectBranch')}
                   </span>
                   <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
                 </button>
-
                 {isBranchDropdownOpen && (
                   <div className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'}`}>
                     {branches.map(branch => (
                       <button
                         key={branch.branchId}
                         onClick={() => handleBranchSelect(branch)}
-                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                          selectedBranch?.branchId === branch.branchId
-                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                            : 'text-gray-700 dark:text-gray-200'
-                        } ${isRTL ? 'text-right' : 'text-left'}`}
+                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${selectedBranch?.branchId === branch.branchId ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-200'} ${isRTL ? 'text-right' : 'text-left'}`}
                       >
                         {branch.branchName}
                       </button>
@@ -863,18 +709,16 @@ const ProductsContent: React.FC = () => {
                   </div>
                 )}
               </div>
-
               <button
                 onClick={() => setIsCreateCategoryModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70 transition-colors duration-200"
+                className="flex items-center gap-2 px-2 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70"
               >
                 <Plus className="h-4 w-4" />
-                <span>{t('productsContent.actions.addFirstCategory')}</span>
+                <span className='w-fit'>{t('productsContent.actions.addFirstCategory')}</span>
               </button>
             </div>
           </div>
         </div>
-
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
           <div className="flex justify-center mb-6">
             <div className="relative">
@@ -882,39 +726,29 @@ const ProductsContent: React.FC = () => {
                 <Utensils className="h-12 w-12 text-gray-400" />
               </div>
               <div className="absolute -top-2 -right-2 w-8 h-8 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center">
-                <Plus className="h-4 w-4 text-primary-600 dark:text-primary-400" />
+                <Plus className="h-4 w-4 text-primary-800 dark:text-primary-800" />
               </div>
             </div>
           </div>
-          
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
             {t('productsContent.emptyState.noCategories.title')}
           </h3>
-          
-       
-          
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={() => setIsCreateCategoryModalOpen(true)}
-              className="flex items-center gap-2 px-6 py-3 text-white bg-primary-600 hover:bg-primary-700 rounded-lg font-medium transition-colors duration-200"
+              className="flex items-center gap-2 px-6 py-3 text-white text-primary-800 hover:bg-primary-700 rounded-lg font-medium transition-colors duration-200"
             >
               <Plus className="h-5 w-5" />
               {t('productsContent.emptyState.noCategories.addFirstCategory')}
             </button>
-            
-         
           </div>
         </div>
-
-        <CreateCategoryModal
-          isOpen={isCreateCategoryModalOpen}
-          onClose={() => setIsCreateCategoryModalOpen(false)}
-          onSuccess={loadCategories}
-        />
+        <CreateCategoryModal isOpen={isCreateCategoryModalOpen} onClose={() => setIsCreateCategoryModalOpen(false)} onSuccess={() => loadCategories(undefined, true)} />
       </div>
     );
   }
 
+  // Main Render
   return (
     <DndContext
       sensors={sensors}
@@ -925,12 +759,12 @@ const ProductsContent: React.FC = () => {
     >
       <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
         {(isReorderingCategories || isReorderingProducts) && (
-          <div className={`fixed top-4 ${isRTL ? 'left-4' : 'right-4'} z-50 bg-primary-600 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2`}>
+          <div className={`fixed top-4 ${isRTL ? 'left-4' : 'right-4'} z-50 text-primary-800 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2`}>
             <Loader2 className="w-4 h-4 animate-spin" />
             <span className="text-sm">
-              {isReorderingCategories 
-                ? t('productsContent.dragDrop.categoryReordering') 
-                : reorderingCategoryId 
+              {isReorderingCategories
+                ? t('productsContent.dragDrop.categoryReordering')
+                : reorderingCategoryId
                   ? t('productsContent.dragDrop.productMoving')
                   : t('productsContent.dragDrop.productReordering')
               }
@@ -938,49 +772,52 @@ const ProductsContent: React.FC = () => {
           </div>
         )}
 
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="relative flex-1 max-w-md">
-              <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
-              <input
-                type="text"
-                placeholder={t('productsContent.search.placeholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
-              />
-            </div>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-4 md:p-6">
+          {/* Main Toolbar Container */}
+          <div className="flex flex-col gap-4">
 
-            <div className={`flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+            {/* First Row: Search + Branch Selector */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              {/* Search Input */}
+              <div className="relative flex-1">
+                <Search className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400`} />
+                <input
+                  type="text"
+                  placeholder={t('productsContent.search.placeholder')}
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
+                />
+              </div>
+
               {/* Branch Selector */}
-              <div className="relative" ref={branchDropdownRef}>
+              <div className="relative flex-shrink-0" ref={branchDropdownRef}>
                 <button
                   onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
-                  className={`flex items-center justify-between min-w-[200px] px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${isRTL ? 'flex-row-reverse' : ''}`}
+                  className="flex items-center justify-between w-full sm:w-auto sm:min-w-[180px] px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  <span className={`flex items-center ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    <Users className={`h-4 w-4 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                    {selectedBranch ? selectedBranch.branchName : t('productsContent.branch.selectBranch')}
+                  <span className="flex items-center truncate">
+                    <Users className={`h-4 w-4 flex-shrink-0 text-gray-500 dark:text-gray-400 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    <span className="truncate max-w-[140px]">{selectedBranch ? selectedBranch.branchName : t('productsContent.branch.selectBranch')}</span>
                   </span>
-                  <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                  <ChevronDown className={`h-4 w-4 flex-shrink-0 transition-transform duration-200 ${isBranchDropdownOpen ? 'transform rotate-180' : ''} ${isRTL ? 'mr-2' : 'ml-2'}`} />
                 </button>
 
                 {isBranchDropdownOpen && (
-                  <div className={`absolute z-20 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'right-0' : 'left-0'}`}>
+                  <div className={`fixed inset-x-4 mt-1 z-50 sm:absolute sm:inset-x-auto sm:w-full sm:min-w-[200px] bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 py-1 max-h-60 overflow-auto ${isRTL ? 'sm:right-0' : 'sm:left-0'}`}>
                     {branches.map(branch => (
                       <button
                         key={branch.branchId}
                         onClick={() => handleBranchSelect(branch)}
-                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${
-                          selectedBranch?.branchId === branch.branchId
-                            ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
-                            : 'text-gray-700 dark:text-gray-200'
-                        } ${isRTL ? 'text-right flex-row-reverse' : 'text-left'}`}
+                        className={`w-full px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 ${selectedBranch?.branchId === branch.branchId
+                          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                          : 'text-gray-700 dark:text-gray-200'
+                          } ${isRTL ? 'text-right' : 'text-left'}`}
                       >
                         {branch.branchId === SELECT_ALL_BRANCH_ID && (
                           <Users className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                         )}
-                        <span>{branch.branchName}</span>
+                        <span className="flex-1">{branch.branchName}</span>
                         {selectedBranch?.branchId === branch.branchId && (
                           <Check className={`h-4 w-4 ${isRTL ? 'mr-auto' : 'ml-auto'}`} />
                         )}
@@ -989,227 +826,269 @@ const ProductsContent: React.FC = () => {
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* Clear Filters Button */}
-              {hasActiveFilters && (
-                <button
-                  onClick={clearFilters}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200"
-                >
-                  <X className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('clear.filters') || 'Clear'}</span>
-                </button>
-              )}
+            {/* Second Row: Action Buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-3 w-full">
 
-            
-              {/* Filter Dropdown */}
-              <div className="relative" ref={filterRef}>
-                <button 
-                  onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-                  className={`flex items-center gap-2 px-3 py-2 text-sm font-medium border rounded-lg transition-colors duration-200 ${
-                    hasActiveFilters 
-                      ? 'text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800' 
+              {/* Left Group: View & Filter Controls */}
+              <div className="flex flex-wrap items-center gap-2">
+
+                {/* Clear Filters Button */}
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors duration-200"
+                    title={t('clear.filters') || 'Clear Filters'}
+                  >
+                    <X className="h-4 w-4" />
+                    <span className="hidden sm:inline">{t('clear.filters') || 'Clear'}</span>
+                  </button>
+                )}
+
+                {/* View Mode Toggle */}
+                <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                  <button
+                    onClick={() => {
+                      setViewMode('list');
+                      localStorage.setItem('productsViewMode', 'list');
+                    }}
+                    className={`p-1.5 sm:p-2 rounded-md transition-all duration-200 ${viewMode === 'list'
+                      ? 'bg-white dark:bg-gray-800 text-primary-800 dark:text-primary-800 shadow-sm'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                      }`}
+                    title={t('viewMode.list') || 'List View'}
+                  >
+                    <List className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setViewMode('grid');
+                      localStorage.setItem('productsViewMode', 'grid');
+                    }}
+                    className={`p-1.5 sm:p-2 rounded-md transition-all duration-200 ${viewMode === 'grid'
+                      ? 'bg-white dark:bg-gray-800 text-primary-800 dark:text-primary-800 shadow-sm'
+                      : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                      }`}
+                    title={t('viewMode.grid') || 'Grid View'}
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                  </button>
+                </div>
+
+                {/* Filter Dropdown */}
+                <div className="relative" ref={filterRef}>
+                  <button
+                    onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+                    className={`flex items-center gap-1.5 px-3 py-2 text-sm font-medium border rounded-lg transition-colors duration-200 ${hasActiveFilters
+                      ? 'text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800'
                       : 'text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
-                  }`}
-                  title={t('productsContent.search.filter')}
-                >
-                  <Filter className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('productsContent.search.filter')}</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${showFilterDropdown ? 'rotate-180' : ''}`} />
-                </button>
+                      }`}
+                    title={t('productsContent.search.filter')}
+                  >
+                    <Filter className="h-4 w-4" />
+                    <span className="hidden sm:inline">{t('productsContent.search.filter')}</span>
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showFilterDropdown ? 'rotate-180' : ''}`} />
+                  </button>
 
-                {showFilterDropdown && (
-                  <div className="absolute top-full mt-2 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
-                    <div className="p-4 space-y-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          {t('filter.status') || 'Status'}
-                        </label>
-                        <div className="grid grid-cols-3 gap-2">
-                          {[
-                            { value: 'all', label: t('filter.all') || 'All', icon: Package },
-                            { value: 'active', label: t('filter.active') || 'Active', icon: Eye },
-                            { value: 'inactive', label: t('filter.inactive') || 'Inactive', icon: EyeOff }
-                          ].map((status) => {
-                            const Icon = status.icon;
-                            return (
-                              <button
-                                key={status.value}
-                                onClick={() => setFilters(prev => ({ ...prev, status: status.value as FilterStatus }))}
-                                className={`flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors ${
-                                  filters.status === status.value
+                  {showFilterDropdown && (
+                    <div className={`fixed inset-x-4 mt-2 z-50 sm:absolute sm:inset-x-auto sm:w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg 
+                      ${isRTL ? 'sm:right-0 sm:left-auto' : 'sm:left-0 sm:right-auto'}`}
+                    >
+                      <div className="p-4 space-y-4">
+                        {/* Status Filter */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {t('filter.status') || 'Status'}
+                          </label>
+                          <div className="grid grid-cols-3 gap-2">
+                            {[
+                              { value: 'all', label: t('filter.all') || 'All', icon: Package },
+                              { value: 'active', label: t('filter.active') || 'Active', icon: Eye },
+                              { value: 'inactive', label: t('filter.inactive') || 'Inactive', icon: EyeOff }
+                            ].map((status) => {
+                              const Icon = status.icon;
+                              return (
+                                <button
+                                  key={status.value}
+                                  onClick={() => setFilters(prev => ({ ...prev, status: status.value as FilterStatus }))}
+                                  className={`flex flex-col sm:flex-row items-center justify-center sm:justify-start gap-1 sm:gap-2 px-2 py-2 text-xs sm:text-sm rounded-lg transition-colors ${filters.status === status.value
                                     ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
                                     : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                                }`}
-                              >
-                                <Icon className="h-4 w-4" />
-                                <span>{status.label}</span>
-                              </button>
-                            );
-                          })}
+                                    }`}
+                                >
+                                  <Icon className="h-4 w-4" />
+                                  <span className="truncate">{status.label}</span>
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          {t('filter.categories') || 'Categories'}
-                        </label>
-                        <div className="max-h-32 overflow-y-auto space-y-2">
-                          {categories.map((category) => (
-                            <label key={category.categoryId} className="flex items-center gap-2 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={filters.categories.includes(category.categoryId)}
-                                onChange={(e) => {
-                                  if (e.target.checked) {
-                                    setFilters(prev => ({
-                                      ...prev,
-                                      categories: [...prev.categories, category.categoryId]
-                                    }));
-                                  } else {
-                                    setFilters(prev => ({
-                                      ...prev,
-                                      categories: prev.categories.filter(id => id !== category.categoryId)
-                                    }));
-                                  }
-                                }}
-                                className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                              />
-                              <span className="text-sm text-gray-700 dark:text-gray-300">
-                                {category.categoryName} ({category?.products?.length})
-                              </span>
-                            </label>
-                          ))}
+                        {/* Category Filter */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {t('filter.categories') || 'Categories'}
+                          </label>
+                          <div className="max-h-32 overflow-y-auto space-y-2 custom-scrollbar">
+                            {categories.map((category) => (
+                              <label key={category.categoryId} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 p-1 rounded">
+                                <input
+                                  type="checkbox"
+                                  checked={filters.categories.includes(category.categoryId)}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      setFilters(prev => ({ ...prev, categories: [...prev.categories, category.categoryId] }));
+                                    } else {
+                                      setFilters(prev => ({ ...prev, categories: prev.categories.filter(id => id !== category.categoryId) }));
+                                    }
+                                  }}
+                                  className="rounded border-gray-300 text-primary-800 focus:ring-primary-500"
+                                />
+                                <span className="text-sm text-gray-700 dark:text-gray-300 truncate flex-1">
+                                  {category.categoryName} <span className="text-xs text-gray-500">({category?.products?.length || 0})</span>
+                                </span>
+                              </label>
+                            ))}
+                          </div>
                         </div>
-                      </div>
 
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                          {t('filter.price.range') || 'Price Range'}
-                        </label>
-                        <div className="grid grid-cols-2 gap-2">
-                          <input
-                            type="number"
-                            placeholder="Min"
-                            value={filters.priceRange.min}
-                            onChange={(e) => setFilters(prev => ({
-                              ...prev,
-                              priceRange: { ...prev.priceRange, min: parseFloat(e.target.value) || 0 }
-                            }))}
-                            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                          />
-                          <input
-                            type="number"
-                            placeholder="Max"
-                            value={filters.priceRange.max}
-                            onChange={(e) => setFilters(prev => ({
-                              ...prev,
-                              priceRange: { ...prev.priceRange, max: parseFloat(e.target.value) || 1000 }
-                            }))}
-                            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                          />
+                        {/* Price Range Filter */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {t('filter.price.range') || 'Price Range'}
+                          </label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              type="number"
+                              placeholder="Min"
+                              value={filters.priceRange.min}
+                              onChange={(e) => setFilters(prev => ({ ...prev, priceRange: { ...prev.priceRange, min: parseFloat(e.target.value) || 0 } }))}
+                              className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                            />
+                            <input
+                              type="number"
+                              placeholder="Max"
+                              value={filters.priceRange.max}
+                              onChange={(e) => setFilters(prev => ({ ...prev, priceRange: { ...prev.priceRange, max: parseFloat(e.target.value) || 1000 } }))}
+                              className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-1 focus:ring-primary-500 ${isRTL ? 'text-right' : 'text-left'}`}
+                            />
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
+                </div>
 
-              {/* Sort Dropdown */}
-              <div className="relative" ref={sortRef}>
-                <button 
-                  onClick={() => setShowSortDropdown(!showSortDropdown)}
-                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
-                  title={t('productsContent.search.sort')}
-                >
-                  <ArrowUp className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t('productsContent.search.sort')}</span>
-                  <ChevronDown className={`h-4 w-4 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
-                </button>
+                {/* Sort Dropdown */}
+                <div className="relative" ref={sortRef}>
+                  <button
+                    onClick={() => setShowSortDropdown(!showSortDropdown)}
+                    className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors duration-200"
+                    title={t('productsContent.search.sort')}
+                  >
+                    <ArrowUp className="h-4 w-4" />
+                    <span className="hidden sm:inline">{t('productsContent.search.sort')}</span>
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
+                  </button>
 
-                {showSortDropdown && (
-                  <div className="absolute top-full mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50">
-                    <div className="p-2">
-                      {sortOptions.map((option) => {
-                        const Icon = option.icon;
-                        return (
-                          <button
-                            key={option.value}
-                            onClick={() => {
-                              setSortBy(option.value as SortOption);
-                              setShowSortDropdown(false);
-                            }}
-                            className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${
-                              sortBy === option.value
+                  {showSortDropdown && (
+                    <div className={`fixed inset-x-4 mt-2 z-50 sm:absolute sm:inset-x-auto sm:w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg 
+                      ${isRTL ? 'sm:right-0 sm:left-auto' : 'sm:left-0 sm:right-auto'}`}
+                    >
+                      <div className="p-2">
+                        {sortOptions.map((option) => {
+                          const IconComponent = option.Icon;
+                          return (
+                            <button
+                              key={option.value}
+                              onClick={() => {
+                                setSortBy(option.value as SortOption);
+                                setShowSortDropdown(false);
+                              }}
+                              className={`w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg transition-colors ${sortBy === option.value
                                 ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300'
                                 : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                            }`}
-                          >
-                            <Icon className="h-4 w-4" />
-                            <span>{option.label}</span>
-                            {sortBy === option.value && <Check className="h-4 w-4 ml-auto" />}
-                          </button>
-                        );
-                      })}
+                                } ${isRTL ? 'text-right' : 'text-left'}`}
+                            >
+                              {IconComponent ? (
+                                <IconComponent className="h-4 w-4" />
+                              ) : (
+                                <span className="h-4 w-4 flex items-center justify-center text-xs font-medium">{option.iconText}</span>
+                              )}
+                              <span className="flex-1">{option.label}</span>
+                              {sortBy === option.value && <Check className="h-4 w-4" />}
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
 
-              <button
-                onClick={() => setIsCreateCategoryModalOpen(true)}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70 transition-colors duration-200"
-              >
-                <Plus className="h-4 w-4" />
-                <span className="hidden sm:inline">{t('productsContent.actions.newCategory')}</span>
-              </button>
+              {/* Right Group: Action Buttons (Create/Delete) */}
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setIsCreateCategoryModalOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 bg-primary-50 dark:bg-primary-900/50 border border-primary-200 dark:border-primary-800 rounded-lg hover:bg-primary-100 dark:hover:bg-primary-900/70 transition-colors duration-200"
+                  title={t('productsContent.actions.newCategory')}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden lg:inline">{t('productsContent.actions.newCategory')}</span>
+                </button>
 
-              <button 
-                onClick={() => {
-                  setSelectedCategoryForProduct(''); 
-                  setIsCreateProductModalOpen(true);
-                }}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg transition-colors duration-200"
-              >
-                <Plus className="h-4 w-4" />
-                <span>{t('productsContent.actions.newProduct')}</span>
-              </button>
-                  <button 
-                    onClick={() => {
-                      navigate('/dashboard/RecycleBin', { state: { source: 'products' } })
-                    }}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span>{t('productsContent.actions.RecycleBin')}</span>
-                  </button>
+                <button
+                  onClick={() => {
+                    setSelectedCategoryForProduct('');
+                    setIsCreateProductModalOpen(true);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white text-primary-800 hover:bg-primary-700 rounded-lg transition-colors duration-200"
+                  title={t('productsContent.actions.newProduct')}
+                >
+                  <Plus className="h-4 w-4" />
+                  <span className="hidden md:inline">{t('productsContent.actions.newProduct')}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    navigate('/dashboard/RecycleBin', { state: { source: 'products' } })
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors duration-200"
+                  title={t('productsContent.actions.RecycleBin')}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className="hidden md:inline">{t('productsContent.actions.RecycleBin')}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         <SortableContext items={processedCategories.map(cat => cat.categoryId)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-4">
-              {processedCategories.map((category) => (
-                <SortableCategory
-                  key={category.categoryId}
-                  category={category}
-                  isDark={isDark}
-                  onToggle={toggleCategory}
-                  onEditProduct={handleEditProduct}
-                  onDeleteProduct={handleDeleteProduct}
-                  onEditCategory={handleEditCategory}
-                  onDeleteCategory={handleDeleteCategory}
-                  activeId={activeId}
-                  onOpenAddonsManagement={handleOpenAddonsManagement}
-                  allCategories={categories}
-                  isReorderingProducts={isReorderingProducts && reorderingCategoryId === category.categoryId}
-                  viewMode="list"
-                />
-              ))}
-            </div>
-       
-          
-          </SortableContext>
+          <div className={viewMode === 'grid' ? 'space-y-6' : 'space-y-4'}>
+            {processedCategories.map((category) => (
+              <SortableCategory
+                key={category.categoryId}
+                category={category}
+                isDark={isDark}
+                onToggle={toggleCategory}
+                onEditProduct={handleEditProduct}
+                onDeleteProduct={handleDeleteProduct}
+                onEditCategory={handleEditCategory}
+                onDeleteCategory={handleDeleteCategory}
+                activeId={activeId}
+                onOpenAddonsManagement={handleOpenAddonsManagement}
+                onOpenProductExtras={handleOpenProductExtras}
+                onOpenIngredientUpdate={handleOpenIngredientUpdate}
+                allCategories={categories}
+                isReorderingProducts={isReorderingProducts && reorderingCategoryId === category.categoryId}
+                viewMode={viewMode}
+                newlyCreatedProductId={newlyCreatedProductId}
+              />
+            ))}
+          </div>
+        </SortableContext>
 
         <DragOverlay>
           {activeId ? (
@@ -1230,7 +1109,7 @@ const ProductsContent: React.FC = () => {
                 const hasValidImage = activeProduct.imageUrl && activeProduct.imageUrl !== 'string' && activeProduct.imageUrl.trim() !== '';
                 return (
                   <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4 shadow-lg border border-gray-200 dark:border-gray-600 rotate-3 scale-105">
-                    <div className={`flex items-start gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                    <div className="flex items-start gap-3">
                       {hasValidImage ? (
                         <img
                           src={activeProduct.imageUrl}
@@ -1262,18 +1141,18 @@ const ProductsContent: React.FC = () => {
       <CreateCategoryModal
         isOpen={isCreateCategoryModalOpen}
         onClose={() => setIsCreateCategoryModalOpen(false)}
-        onSuccess={loadCategories}
+        onSuccess={() => loadCategories(undefined, true)}
       />
-      
+
       <CreateProductModal
         isOpen={isCreateProductModalOpen}
         onClose={() => {
           setIsCreateProductModalOpen(false);
           setSelectedCategoryForProduct('');
         }}
-        onSuccess={loadCategories}
+        onSuccess={(productId) => loadCategories(productId, true)}
         categories={categories}
-        onOpenIngredientSelection={handleOpenIngredientSelection}
+        selectedCategoryId={selectedCategoryForProduct ? Number(selectedCategoryForProduct) : undefined}
       />
 
       {isEditCategoryModalOpen && selectedCategoryForEdit && (
@@ -1283,7 +1162,7 @@ const ProductsContent: React.FC = () => {
             setIsEditCategoryModalOpen(false);
             setSelectedCategoryForEdit(null);
           }}
-          onSuccess={loadCategories}
+          onSuccess={() => loadCategories(undefined, true)}
           category={selectedCategoryForEdit}
         />
       )}
@@ -1295,10 +1174,9 @@ const ProductsContent: React.FC = () => {
             setIsEditProductModalOpen(false);
             setSelectedProductForEdit(null);
           }}
-          onSuccess={loadCategories}
+          onSuccess={() => loadCategories(undefined, true)}
           product={selectedProductForEdit}
           categories={categories}
-          onOpenIngredientUpdate={handleOpenIngredientUpdate}
         />
       )}
 
@@ -1309,7 +1187,7 @@ const ProductsContent: React.FC = () => {
             setIsIngredientUpdateModalOpen(false);
             setSelectedProductForIngredientUpdate(null);
           }}
-          onSuccess={loadCategories}
+          onSuccess={() => loadCategories(undefined, true)}
           productId={selectedProductForIngredientUpdate.productId}
           productName={selectedProductForIngredientUpdate.productName}
         />
@@ -1317,10 +1195,12 @@ const ProductsContent: React.FC = () => {
 
       {isConfirmDeleteModalOpen && deleteConfig && (
         <ConfirmDeleteModal
+          errorMessage={deleteError}
           isOpen={isConfirmDeleteModalOpen}
           onClose={() => {
             setIsConfirmDeleteModalOpen(false);
             setDeleteConfig(null);
+            setDeleteError('');
           }}
           onConfirm={deleteConfig.onConfirm}
           title={deleteConfig.title}
@@ -1336,7 +1216,7 @@ const ProductsContent: React.FC = () => {
             setIsAddonsModalOpen(false);
             setSelectedProductForAddons(null);
           }}
-          onSuccess={loadCategories}
+          onSuccess={() => loadCategories(undefined, true)}
           productId={selectedProductForAddons.productId}
           productName={selectedProductForAddons.productName}
         />
@@ -1349,9 +1229,22 @@ const ProductsContent: React.FC = () => {
             setIsIngredientSelectionModalOpen(false);
             setSelectedProductForIngredients(null);
           }}
-          onSuccess={loadCategories}
+          onSuccess={() => loadCategories(undefined, true)}
           productId={selectedProductForIngredients.productId}
           productName={selectedProductForIngredients.productName}
+        />
+      )}
+
+      {isProductExtrasModalOpen && selectedProductForExtras && (
+        <ProductExtrasModal
+          isOpen={isProductExtrasModalOpen}
+          onClose={() => {
+            setIsProductExtrasModalOpen(false);
+            setSelectedProductForExtras(null);
+          }}
+          onSuccess={() => loadCategories(undefined, true)}
+          productId={selectedProductForExtras.productId}
+          productName={selectedProductForExtras.productName}
         />
       )}
     </DndContext>

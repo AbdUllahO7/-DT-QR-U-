@@ -1,6 +1,6 @@
 'use client';
 
-import React, {  useEffect } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { ChevronDown, Users } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside } from '../../../../hooks';
@@ -25,7 +25,6 @@ const OrdersManagerRestaurant: React.FC = () => {
   const { t, language, isRTL } = useLanguage();
   const lang = language;
 
-  // Custom hooks for state management
   const {
     state,
     actions: {
@@ -46,7 +45,9 @@ const OrdersManagerRestaurant: React.FC = () => {
       setState,
       handleCancelOrder,
       openCancelModal,
-      fetchBranchOrders
+      fetchBranchOrders,
+      handleBranchPageChange,
+      handleBranchItemsPerPageChange
     }
   } = useOrdersManager();
 
@@ -58,33 +59,88 @@ const OrdersManagerRestaurant: React.FC = () => {
     hasActiveFilters
   } = useFiltering(state, setState);
 
+  const pendingSetState = useCallback((newState: any) => {
+    if (state.viewMode === 'pending') {
+      setState(newState);
+    }
+  }, [state.viewMode, setState]);
+
   const {
     paginatedOrders,
     changePage,
     changeItemsPerPage
-  } = usePagination(filteredOrders, state.pagination, setState);
+  } = usePagination(filteredOrders, state.pagination, pendingSetState);
 
-  // Dropdown ref for click outside
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   useClickOutside(dropdownRef, () => setState(prev => ({ ...prev, isBranchDropdownOpen: false })));
 
-  // Initial fetch on mount
-  useEffect(() => {
-    fetchBranches();
-      fetchBranchOrders();
-      fetchBranchOrders();
-  }, []);
+  // Refs to track what's been fetched to prevent duplicates
+  const fetchedBranches = useRef(false);
+  const isFetchingRef = useRef(false);
+  const lastFetchedConfig = useRef<{branchId?: number, viewMode: string, page: number, pageSize: number} | null>(null);
 
-  // Fetch orders when branch is selected
+  // Initial fetch - ONLY fetchBranches, nothing else
   useEffect(() => {
-    if (state.selectedBranch) {
-      if (state.viewMode === 'pending') {
-        fetchPendingOrders();
-      } else {
-        fetchBranchOrders();
-      }
+    if (!fetchedBranches.current) {
+      fetchedBranches.current = true;
+      fetchBranches();
     }
-  }, [state.selectedBranch]);
+  }, []); // Run only once on mount
+
+  // Fetch orders when branch/view mode/pagination changes
+  useEffect(() => {
+   
+    if (!state.selectedBranch || isFetchingRef.current) {
+      return;
+    }
+
+    const currentConfig = {
+      branchId: state.selectedBranch.branchId,
+      viewMode: state.viewMode,
+      page: state.pagination.currentPage,
+      pageSize: state.pagination.itemsPerPage
+    };
+
+    // Check if this exact configuration has already been fetched
+    if (lastFetchedConfig.current &&
+        lastFetchedConfig.current.branchId === currentConfig.branchId &&
+        lastFetchedConfig.current.viewMode === currentConfig.viewMode &&
+        lastFetchedConfig.current.page === currentConfig.page &&
+        lastFetchedConfig.current.pageSize === currentConfig.pageSize) {
+      return;
+    }
+
+    
+    // Set fetching flag BEFORE updating ref
+    isFetchingRef.current = true;
+    lastFetchedConfig.current = currentConfig;
+
+    const fetchData = async () => {
+      try {
+        if (state.viewMode === 'pending') {
+          await fetchPendingOrders(state.selectedBranch!.branchId);
+        } else if (state.viewMode === 'branch') {
+          await fetchBranchOrders(
+            state.selectedBranch!.branchId,
+            state.pagination.currentPage,
+            state.pagination.itemsPerPage
+          );
+        }
+      } finally {
+        // Clear fetching flag after completion
+        isFetchingRef.current = false;
+      }
+    };
+
+    fetchData();
+  }, [
+    state.selectedBranch?.branchId,
+    state.viewMode,
+    state.pagination.currentPage,
+    state.pagination.itemsPerPage,
+    fetchPendingOrders,
+    fetchBranchOrders
+  ]);
 
   const toggleBranchDropdown = () => {
     setState(prev => ({ 
@@ -94,8 +150,27 @@ const OrdersManagerRestaurant: React.FC = () => {
   };
 
   const handleBranchSelectInternal = (branch: any) => {
+    // Reset the fetch tracker when branch changes
+    lastFetchedConfig.current = null;
+    isFetchingRef.current = false;
     handleBranchSelect(branch);
   };
+
+  const displayOrders = state.viewMode === 'branch' 
+    ? state.branchOrders 
+    : paginatedOrders;
+
+  const displayTotalFiltered = state.viewMode === 'branch' 
+    ? state.pagination.totalItems 
+    : filteredOrders.length;
+
+  const handlePageChangeInternal = state.viewMode === 'branch' 
+    ? handleBranchPageChange 
+    : changePage;
+
+  const handleItemsPerPageChangeInternal = state.viewMode === 'branch' 
+    ? handleBranchItemsPerPageChange 
+    : changeItemsPerPage;
 
   // Show branch selection if no branch is selected
   if (!state.selectedBranch && !state.loading) {
@@ -109,7 +184,6 @@ const OrdersManagerRestaurant: React.FC = () => {
                 {t('orders.selectBranch')}
               </p>
               
-              {/* Branch Selector */}
               <div className="relative inline-block" ref={dropdownRef}>
                 <button
                   onClick={toggleBranchDropdown}
@@ -152,11 +226,9 @@ const OrdersManagerRestaurant: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
-        {/* Header with Branch Selector */}
-        <div className={`flex items-center justify-between mb-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex flex-wrap items-center justify-between mb-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <OrdersHeader t={t} />
           
-          {/* Branch Selector */}
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={toggleBranchDropdown}
@@ -194,51 +266,51 @@ const OrdersManagerRestaurant: React.FC = () => {
               </div>
             )}
           </div>
-
-
         </div>
 
         <ViewModeToggle 
           viewMode={state.viewMode}
           pendingCount={state.pendingOrders.length}
-          branchCount={state.branchOrders.length}
+          branchCount={state.pagination.totalItems || state.branchOrders.length}
           onModeChange={switchViewMode}
           t={t}
         />
 
-        <FilterSection
-          filters={state.filters}
-          showAdvancedFilters={state.showAdvancedFilters}
-          hasActiveFilters={hasActiveFilters}
-          viewMode={state.viewMode}
-          lang={lang}
-          filteredCount={filteredOrders.length}
-          totalCount={state.viewMode === 'pending' ? state.pendingOrders.length : state.branchOrders.length}
-          onUpdateFilter={updateFilter}
-          onUpdateNestedFilter={updateNestedFilter}
-          onClearFilters={clearFilters}
-          onToggleAdvanced={() => setState(prev => ({ ...prev, showAdvancedFilters: !prev.showAdvancedFilters }))}
-          t={t}
-        />
+        {state.viewMode === 'pending' && (
+          <FilterSection
+            filters={state.filters}
+            showAdvancedFilters={state.showAdvancedFilters}
+            hasActiveFilters={hasActiveFilters}
+            viewMode={state.viewMode}
+            lang={lang}
+            filteredCount={filteredOrders.length}
+            totalCount={state.pendingOrders.length}
+            onUpdateFilter={updateFilter}
+            onUpdateNestedFilter={updateNestedFilter}
+            onClearFilters={clearFilters}
+            onToggleAdvanced={() => setState(prev => ({ ...prev, showAdvancedFilters: !prev.showAdvancedFilters }))}
+            t={t}
+          />
+        )}
 
         <PaginationControls
           pagination={state.pagination}
-          totalFiltered={filteredOrders.length}
-          onPageChange={changePage}
-          onItemsPerPageChange={changeItemsPerPage}
+          totalFiltered={displayTotalFiltered}
+          onPageChange={handlePageChangeInternal}
+          onItemsPerPageChange={handleItemsPerPageChangeInternal}
           t={t}
         />
 
         <ErrorNotification error={state.error} />
 
         <OrdersTable
-          orders={paginatedOrders}
+          orders={displayOrders}
           viewMode={state.viewMode}
           loading={state.loading}
           expandedRows={state.expandedRows}
           sortField={state.sortField}
           sortDirection={state.sortDirection}
-          hasActiveFilters={hasActiveFilters}
+          hasActiveFilters={state.viewMode === 'pending' ? hasActiveFilters : false}
           lang={lang}
           onSort={handleSort}
           onToggleExpansion={toggleRowExpansion}
@@ -259,7 +331,6 @@ const OrdersManagerRestaurant: React.FC = () => {
           t={t}
         />
 
-        {/* Modals */}
         <ConfirmModal
           show={state.showConfirmModal}
           loading={state.loading}

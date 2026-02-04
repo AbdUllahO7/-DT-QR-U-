@@ -117,15 +117,19 @@ class UserService {
   async createUser(userData: CreateUserDto): Promise<ApiResponse<CreateUserResponse>> {
     try {
       logger.info('🔍 createUser çağrılıyor...', userData, { prefix: 'UserService' });
-      
+
+      // Add language from localStorage
+      const language = localStorage.getItem('language') || 'en';
+      const dataWithLanguage = { ...userData, language };
+
       const response = await apiRequest<CreateUserResponse>({
         method: 'POST',
         url: '/api/Users',
-        data: userData
+        data: dataWithLanguage
       });
 
       logger.info('✅ createUser başarılı', response, { prefix: 'UserService' });
-      
+
       return {
         success: true,
         data: response
@@ -259,7 +263,6 @@ async assignBranchToUser(id: string, branchData: AssignBranchDto): Promise<ApiRe
         apiPayload.targetBranchId = null;
         logger.info('🔄 newBranchId 0 olarak algılandı, API için null olarak değiştirildi.', { prefix: 'UserService' });
       }
-      console.log("apiPayload",apiPayload)
       const response = await apiRequest<any>({
         method: 'PUT',
         url: `/api/Users/${id}/branch`,
@@ -304,15 +307,18 @@ async assignBranchToUser(id: string, branchData: AssignBranchDto): Promise<ApiRe
   async resendConfirmation(email: string): Promise<ApiResponse<any>> {
     try {
       logger.info(`🔍 resendConfirmation çağrılıyor: ${email}`, null, { prefix: 'UserService' });
-      
+
+      // Add language from localStorage as optional query param
+      const lang = localStorage.getItem('language') || 'en';
+
       const response = await apiRequest<any>({
         method: 'POST',
         url: '/api/Users/resend-confirmation',
-        params: { email } // Sent as query parameter
+        params: { email, lang } // Sent as query parameters
       });
 
       logger.info('✅ resendConfirmation başarılı', response, { prefix: 'UserService' });
-      
+
       return {
         success: true,
         data: response
@@ -326,15 +332,18 @@ async assignBranchToUser(id: string, branchData: AssignBranchDto): Promise<ApiRe
   async sendResetPasswordEmail(email: string): Promise<ApiResponse<any>> {
     try {
       logger.info(`🔍 sendResetPasswordEmail çağrılıyor: ${email}`, null, { prefix: 'UserService' });
-      
+
+      // Add language from localStorage as optional query param
+      const lang = localStorage.getItem('language') || 'en';
+
       const response = await apiRequest<any>({
-        method: 'GET',
-        url: '/api/Users/SendResetPasswordEmail',
-        params: { email } // Sent as query parameter
+        method: 'POST', // Changed from GET to POST
+        url: '/api/Users/sendresetpasswordemail',
+        params: { email, lang } // Sent as query parameters
       });
 
       logger.info('✅ sendResetPasswordEmail başarılı', response, { prefix: 'UserService' });
-      
+
       return {
         success: true,
         data: response

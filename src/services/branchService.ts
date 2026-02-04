@@ -75,6 +75,12 @@ interface CreateBatchMenuTableDto {
 class BranchService {
   private baseUrl = '/api/Branches';
 
+    // Helper method to get language from localStorage
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+  
+
   async createOnboardingBranch(data: CreateBranchWithDetailsDto): Promise<CreateBranchResponse> {
     try {
       logger.info('Branch oluşturma isteği gönderiliyor', data, { prefix: 'BranchService' });
@@ -167,9 +173,13 @@ class BranchService {
       if (data.createBranchWorkingHourCoreDto && data.createBranchWorkingHourCoreDto.length > 0) {
         batchUpdateData.batchUpdateBranchWorkingHourDto = data.createBranchWorkingHourCoreDto.map(hour => ({
           dayOfWeek: hour.dayOfWeek,
-          openTime: hour.openTime,
-          closeTime: hour.closeTime,
-          isWorkingDay: hour.isWorkingDay
+          isWorkingDay: hour.isWorkingDay,
+          isOpen24Hours: hour.isOpen24Hours ?? false,
+          timeSlots: hour.timeSlots?.map(slot => ({
+            id: slot.id,
+            openTime: slot.openTime,
+            closeTime: slot.closeTime
+          })) || []
         }));
       }
 
@@ -195,8 +205,13 @@ class BranchService {
   async getDeletedBranches(): Promise<DeletedBranch[]> {
     try {
       logger.info('Silinmiş şubeler getiriliyor', null, { prefix: 'BranchService' });
-      
-      const response = await httpClient.get<DeletedBranch[]>(`${this.baseUrl}/deleted`);
+            const language = this.getLanguageFromStorage();
+
+      const response = await httpClient.get<DeletedBranch[]>(`${this.baseUrl}/deleted`, {
+        params: {
+          language
+        }
+      });
       
       logger.info('Silinmiş şubeler başarıyla getirildi', { 
         count: response.data?.length || 0 
@@ -225,15 +240,20 @@ class BranchService {
     async getDeletedTables(branchId?: number): Promise<DeletedTable[]> {
       try {
         logger.info('Silinmiş masalar getiriliyor', { branchId }, { prefix: 'BranchService' });
-        
+                    const language = this.getLanguageFromStorage();
+
         // Build the URL with branchId parameter if provided
         const url = branchId 
           ? `/api/branches/tables/deleted?branchId=${branchId}`
           : '/api/branches/tables/deleted';
-        
-        const response = await httpClient.get<DeletedTable[]>(url);
-        
-        logger.info('Silinmiş masalar başarıyla getirildi', { 
+
+        const response = await httpClient.get<DeletedTable[]>(url, {
+          params: {
+            language
+          }
+        });
+
+        logger.info('Silinmiş masalar başarıyla getirildi', {
           count: response.data?.length || 0,
           branchId
         }, { prefix: 'BranchService' });
@@ -258,7 +278,7 @@ class BranchService {
   /**
    * Restore a deleted table
    */
-  async restoreTable(tableId: number,branchId?: number): Promise<void> {
+  async restoreTable(tableId: number, branchId?: number): Promise<void> {
     try {
       logger.info('Masa geri yükleniyor', { tableId }, { prefix: 'BranchService' });
       
@@ -354,18 +374,24 @@ class BranchService {
   }
 
   async getBranchesByRestaurantId(restaurantId: number): Promise<Branch[]> {
-    const response = await httpClient.get<any>(`${this.baseUrl}/restaurant/${restaurantId}`); // ApiResponse<Branch[]> yerine any kullanıldı
+    const language = this.getLanguageFromStorage();
+    const response = await httpClient.get<any>(`${this.baseUrl}/restaurant/${restaurantId}`, {
+      params: {
+        language
+      }
+    });
     return response.data.data || [];
   }
 
   async getBranchById(id: number): Promise<BranchDetailResponse | null> {
     try {
       logger.info('Branch detayları API çağrısı başlatılıyor', { id }, { prefix: 'BranchService' });
-      
+                  const language = this.getLanguageFromStorage();
+
       // Include query parameters for address, contact, and workingHours
       const includes = ['address', 'contact', 'workingHours'].join('%2C');
-      const url = `${this.baseUrl}?branchId=${id}&include=${includes}`;
-      
+      const url = `${this.baseUrl}?branchId=${id}&include=${includes}&language=${language}`;
+
       logger.info('API URL:', url, { prefix: 'BranchService' });
       
       const response = await httpClient.get<any>(url);
@@ -414,13 +440,14 @@ class BranchService {
   async getBranches(): Promise<BranchData[]> {
     try {
       logger.info('Branch listesi API çağrısı başlatılıyor...', null, { prefix: 'BranchService' });
-      
+
       // Token kontrolü
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('dashboard_token');
       if (!token) {
         logger.error('Token bulunamadı', null, { prefix: 'BranchService' });
         throw new Error('Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.');
       }
+                  const language = this.getLanguageFromStorage();
 
       // Restaurant ID kontrolü
       const restaurantId = getRestaurantIdFromToken();
@@ -435,7 +462,7 @@ class BranchService {
       const includes = ['address', 'contact', 'workingHours'].join('%2C');
       
       // İlk endpoint'i dene
-      let url = `/api/Restaurants/branches?include=BranchIsOpen%2C${includes}`;
+      let url = `/api/Restaurants/branches?include=BranchIsOpen%2C${includes}&language=${language}`;
       let response;
       
       try {
@@ -559,9 +586,14 @@ class BranchService {
   async getBranchesDropdown(): Promise<BranchDropdownItem[]> {
     try {
       logger.info('Şube dropdown listesi API çağrısı başlatılıyor...', null, { prefix: 'BranchService' });
-      
-      const response = await httpClient.get<BranchDropdownItem[]>(`/api/Restaurants/branches/dropdown`);
-      
+                        const language = this.getLanguageFromStorage();
+
+      const response = await httpClient.get<BranchDropdownItem[]>(`/api/Restaurants/branches/dropdown`, {
+        params: {
+          language
+        }
+      });
+
       logger.info('Şube dropdown listesi alındı', response.data, { prefix: 'BranchService' });
       
       return response.data;
@@ -574,11 +606,13 @@ class BranchService {
   async getTables(branchId: number, categoryId?: string, onlyActive: boolean = true, includeCategory: boolean = true): Promise<TableData[]> {
     try {
       logger.info('Masalar API çağrısı başlatılıyor', { branchId }, { prefix: 'BranchService' });
-      
+                        const language = this.getLanguageFromStorage();
+
       const params = new URLSearchParams({
         branchId: branchId.toString(),
         onlyActive: onlyActive.toString(),
-        includeCategory: includeCategory.toString()
+        includeCategory: includeCategory.toString(),
+        language
       });
       
       if (categoryId) {
@@ -599,11 +633,13 @@ class BranchService {
   async getTableCategories(branchId: number, onlyActive: boolean , includeTableCount: boolean = false): Promise<TableCategory[]> {
     try {
       logger.info('Masa kategorileri API çağrısı başlatılıyor', { branchId, onlyActive, includeTableCount }, { prefix: 'BranchService' });
-      
+                        const language = this.getLanguageFromStorage();
+
       const params = new URLSearchParams({
         branchId: branchId.toString(),
         onlyActive: onlyActive.toString(),
-        includeTableCount: includeTableCount.toString()
+        includeTableCount: includeTableCount.toString(),
+        language
       });
       
       const response = await httpClient.get<TableCategory[]>(`/api/branches/table-categories?${params.toString()}`);

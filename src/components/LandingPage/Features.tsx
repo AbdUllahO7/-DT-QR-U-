@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { QrCode, Smartphone, Zap, BarChart3, Clock, Shield, Palette, Globe } from 'lucide-react';
+import { QrCode, Smartphone, Zap, BarChart3, Clock, Shield, Palette, Globe, ShoppingCart, Building2, Users, Utensils } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import type { Feature } from '../../types';
 
@@ -12,7 +12,11 @@ const iconComponents = {
   Clock,
   Shield,
   Palette,
-  Globe
+  Globe,
+  ShoppingCart,
+  Building2,
+  Users,
+  Utensils
 };
 
 const Features: React.FC = () => {
@@ -66,6 +70,30 @@ const Features: React.FC = () => {
       title: t('features.list.multiLanguage.title'),
       description: t('features.list.multiLanguage.description'),
       icon: 'Globe'
+    },
+    {
+      id: '9',
+      title: t('features.list.tableOrders.title'),
+      description: t('features.list.tableOrders.description'),
+      icon: 'ShoppingCart'
+    },
+    {
+      id: '10',
+      title: t('features.list.multiBranch.title'),
+      description: t('features.list.multiBranch.description'),
+      icon: 'Building2'
+    },
+    {
+      id: '11',
+      title: t('features.list.userRoles.title'),
+      description: t('features.list.userRoles.description'),
+      icon: 'Users'
+    },
+    {
+      id: '12',
+      title: t('features.list.productCustomization.title'),
+      description: t('features.list.productCustomization.description'),
+      icon: 'Utensils'
     }
   ];
 
@@ -81,7 +109,7 @@ const Features: React.FC = () => {
           className={`text-center mb-16 ${isRTL ? 'text-right' : ''}`}
         >
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
-            {t('features.title')} <span className="text-primary-600 dark:text-primary-400">{t('features.titleHighlight')}</span>
+            {t('features.title')} <span className="text-primary-800 dark:text-primary-800">{t('features.titleHighlight')}</span>
           </h2>
           <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
             {t('features.subtitle')}
@@ -92,7 +120,7 @@ const Features: React.FC = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => {
             const IconComponent = iconComponents[feature.icon as keyof typeof iconComponents];
-            
+
             return (
               <motion.div
                 key={feature.id}
@@ -103,13 +131,13 @@ const Features: React.FC = () => {
                 className="card text-center group hover:shadow-2xl hover:-translate-y-2"
               >
                 <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-200 dark:group-hover:bg-primary-900/50 transition-colors duration-300">
-                  <IconComponent className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+                  <IconComponent className="h-8 w-8 text-primary-800 dark:text-primary-800" />
                 </div>
-                
+
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
                   {feature.title}
                 </h3>
-                
+
                 <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                   {feature.description}
                 </p>
@@ -133,9 +161,9 @@ const Features: React.FC = () => {
             <p className="text-lg opacity-90 mb-8 max-w-2xl mx-auto">
               {t('features.cta.subtitle')}
             </p>
-            <button 
+            <button
               onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-white text-primary-600 font-semibold py-4 px-8 rounded-lg hover:bg-gray-100 transition-colors duration-300 shadow-lg"
+              className="bg-white text-primary-800 font-semibold py-4 px-8 rounded-lg hover:bg-gray-100 transition-colors duration-300 shadow-lg"
             >
               {t('features.cta.button')}
             </button>

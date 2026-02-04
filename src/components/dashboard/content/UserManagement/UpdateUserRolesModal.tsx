@@ -5,6 +5,7 @@ import { useLanguage } from '../../../../contexts/LanguageContext';
 import { roleService } from '../../../../services/RoleService'; // <-- Import roleService
 import { logger } from '../../../../utils/logger';
 import { Role, UpdateUserRolesDto, UserData } from '../../../../types/users/users.type';
+import { getTranslatedRoleName, getTranslatedCategoryName } from '../../../../utils/permissionTranslation';
 
 export interface UpdateUserRolesModalProps {
   isOpen: boolean;
@@ -154,7 +155,7 @@ useEffect(() => {
                     />
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm text-gray-900 dark:text-white">
-                        {role.name}
+                        {getTranslatedRoleName(role.name, t)}
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400">
                         {role.description}

@@ -21,6 +21,11 @@ export default {
           900: '#1e3a8a',
           950: '#172554',
         },
+        accent: {
+          orange: '#f59e0b',
+          pink: '#ec4899',
+          coral: '#f97316',
+        },
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
@@ -46,9 +51,20 @@ export default {
     },
   },
   plugins: [
-    // RTL support utilities
-    function({ addUtilities }) {
+    // RTL support utilities and scrollbar hide
+    function ({ addUtilities }) {
       const newUtilities = {
+        // Hide scrollbar utility
+        '.scrollbar-hide': {
+          /* IE and Edge */
+          '-ms-overflow-style': 'none',
+          /* Firefox */
+          'scrollbar-width': 'none',
+        },
+        '.scrollbar-hide::-webkit-scrollbar': {
+          /* Chrome, Safari and Opera */
+          'display': 'none',
+        },
         '.rtl-space-x-reverse': {
           '--tw-space-x-reverse': '1',
         },
@@ -90,7 +106,7 @@ export default {
           'right': '0',
         },
       }
-      
+
       addUtilities(newUtilities)
     },
   ],

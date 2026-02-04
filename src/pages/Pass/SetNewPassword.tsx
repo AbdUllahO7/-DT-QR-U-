@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  LockKeyhole, 
-  Eye, 
-  EyeOff, 
-  Save, 
-  CheckCircle, 
+import {
+  LockKeyhole,
+  Eye,
+  EyeOff,
+  Save,
+  CheckCircle,
   ArrowLeft,
   Loader2,
   AlertCircle
@@ -22,12 +22,12 @@ const SetNewPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [cooldownTime, setCooldownTime] = useState(0);
-  
+
   const { t, isRTL } = useLanguage();
   const [searchParams] = useSearchParams();
 
@@ -37,7 +37,7 @@ const SetNewPassword = () => {
 
 
   useEffect(() => {
-    let interval: number; 
+    let interval: number;
 
     const checkCooldown = () => {
       const lastSubmitTime = localStorage.getItem(COOLDOWN_KEY);
@@ -99,18 +99,18 @@ const SetNewPassword = () => {
         newPassword: newPassword,
         newPasswordConfirmation: confirmPassword
       });
-      
+
       setSubmitted(true);
-      
+
       localStorage.setItem(COOLDOWN_KEY, Date.now().toString());
       setCooldownTime(COOLDOWN_SECONDS);
-      
+
     } catch (err: any) {
       console.error("Failed to reset password:", err);
-      
- 
-      
-      setError(err.response?.data?.details?.message ); 
+
+
+
+      setError(err.response?.data?.details?.message);
     } finally {
       setLoading(false);
     }
@@ -122,8 +122,8 @@ const SetNewPassword = () => {
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       <div className="w-full max-w-md">
-          
-          <motion.div
+
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
@@ -131,7 +131,7 @@ const SetNewPassword = () => {
         >
           <Link
             to="/"
-            className={`inline-flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200`}
+            className={`inline-flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} text-gray-600 dark:text-gray-400 hover:text-primary-800 dark:hover:text-primary-800 transition-colors duration-200`}
           >
             <ArrowLeft className={`h-4 w-4 ${isRTL ? 'rotate-180' : ''}`} />
             <span>{t('pages.login.backToHome')}</span>
@@ -170,7 +170,7 @@ const SetNewPassword = () => {
                 {t('setNewPassword.form.subtitle')}
               </p>
             </div>
-            
+
             {/* Inputs */}
             <div className="relative">
               <label
@@ -230,7 +230,7 @@ const SetNewPassword = () => {
                 </button>
               </div>
             </div>
-            
+
             {/* Error Message */}
             {error && (
               <motion.div

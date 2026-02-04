@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useLocation } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   Loader2,
-  CheckCircle,
-  X,
-  Plus,
-  Minus,
   ShoppingCart,
 } from 'lucide-react';
 import { theme } from '../../../../types/BranchManagement/type';
@@ -25,48 +22,53 @@ import Header from '../Menu/MenuHeaderComponent';
 import CategoriesSidebar from '../Menu/MenuCategoriesSidebar';
 import Footer from '../Menu/MneuFooter';
 import SearchBar from '../Menu/MenuSearchBar';
+import QuickReorderSection from '../Menu/QuickReorderSection';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import ProductModal from '../Menu/MenuProductModal';
+import { ProductExtraMenu } from '../../../../types/Extras/type';
+import { OrderedProduct } from '../../../../hooks/useQuickReorder';
 
-interface PublicBranchData {
-  branchName: string;
-  publicId: string;
-}
-
-interface SelectedAddon {
+// Re-export interfaces for use in other components
+export interface SelectedAddon {
   addonBranchProductId: number;
   branchProductAddonId?: number;
   quantity: number;
   addon: ProductAddon;
 }
 
+export interface SelectedExtra {
+  branchProductExtraId: number;
+  extraId: number;
+  extraName: string;
+  extraCategoryName?: string;
+  quantity: number;
+  isRemoval: boolean;
+  unitPrice: number;
+  maxQuantity?: number;
+  minQuantity?: number;
+  selectionMode?: number;
+  isRequired?: boolean;
+}
+
 const OnlineMenu: React.FC = () => {
-  const { publicId } = useParams<{ publicId: string }>(); // Changed from 'id' to 'publicId'
+  const { publicId } = useParams<{ publicId: string }>();
   const location = useLocation();
-  const locationState = location.state as  { 
-    branchName?: string; 
-    branchId?: number;
-  } | null;
-
-
   const { t } = useLanguage();
 
   // ───── UI States ─────
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingMenu, setIsLoadingMenu] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
-  const [publicBranchData, setPublicBranchData] = useState<PublicBranchData | null>(null);
   const [menuData, setMenuData] = useState<OnlineMenuResponse | null>(null);
-  const [copied, setCopied] = useState<boolean>(false);
 
   // ───── ProductGrid States ─────
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [favorites, setFavorites] = useState<Set<number>>(new Set());
+  const [favoritesOnly, setFavoritesOnly] = useState<boolean>(false);
 
   // ───── Product Modal ─────
   const [selectedProduct, setSelectedProduct] = useState<MenuProduct | null>(null);
-  const [productQuantity, setProductQuantity] = useState<number>(1);
-  const [selectedAddons, setSelectedAddons] = useState<SelectedAddon[]>([]);
   const [isAddingToBasket, setIsAddingToBasket] = useState<boolean>(false);
 
   // ───── Basket & Session ─────
@@ -75,75 +77,77 @@ const OnlineMenu: React.FC = () => {
   const [isSessionInitialized, setIsSessionInitialized] = useState<boolean>(false);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
 
-
   // ───── Price Change Detection ─────
   const [showPriceChangeModal, setShowPriceChangeModal] = useState<boolean>(false);
   const [priceChanges, setPriceChanges] = useState<any>(null);
   const [confirmingPriceChanges, setConfirmingPriceChanges] = useState<boolean>(false);
   const [productPriceCache, setProductPriceCache] = useState<Map<number, number>>(new Map());
 
+  // ==========================================
+  // API & INITIALIZATION HANDLERS
+  // ==========================================
 
-  useEffect(() => {
-    if (publicId) {
-      initializeMenuAndSession();
-    }
-  }, [publicId]);
-
-  const initializeMenuAndSession = async () => {
+  const fetchOnlineMenu = async (pid: string) => {
     try {
-      setIsLoading(true);
-      setError('');
-      
-      // Fetch menu and initialize session in parallel
-      await Promise.all([
-        fetchOnlineMenu(publicId!),
-        initializeSession(publicId!)
-      ]);
+      setIsLoadingMenu(true);
+      const menu = await onlineMenuService.getOnlineMenu(pid);
+      setMenuData(menu);
+      buildPriceCache(menu);
     } catch (err: any) {
-      setError(err.message || t('menu.error.initialization'));
+      console.error('Menu fetch error:', err);
+      setError(t('menu.error.fetchMenu'));
     } finally {
-      setIsLoading(false);
+      setIsLoadingMenu(false);
     }
   };
-  
 
-  const initializeSession = async (publicId: string) => {
+
+ const loadBasket = async () => {
+  try {
+    const data = await onlineMenuService.getMyBasket();
+    setBasket(data);
+    await checkBasketPriceChanges(data);
+  } catch (err: any) {
+    // ❌ REMOVE THIS - Don't reset session!
+    // if (err?.response?.status === 401) setIsSessionInitialized(false);
+    
+    // ✅ Just log and set basket to null
+    console.error('Failed to load basket:', err);
+    setBasket(null);
+  }
+};
+
+  const initializeSession = async (pid: string) => {
     try {
       setIsSessionInitialized(false);
-      
-      // ✅ Clear token ONLY on first load (not on refresh)
-      const isFirstLoad = !sessionStorage.getItem('online_menu_initialized');
-      
-      if (isFirstLoad) {
 
-        
-        // Mark that we've initialized once in this browser session
+      const isFirstLoad = !sessionStorage.getItem('online_menu_initialized');
+      if (isFirstLoad) {
         sessionStorage.setItem('online_menu_initialized', 'true');
       }
 
-      // ---- Check for existing session ----
+      // Check for existing session - using namespaced keys to avoid conflicts with dashboard
       const existingSessionId = localStorage.getItem('online_menu_session_id');
-      const existingToken = localStorage.getItem('token');
+      const existingToken = localStorage.getItem('online_menu_token');
       const existingPublicId = localStorage.getItem('online_menu_public_id');
 
-      // If we have a valid existing session for the same publicId, reuse it
-      if (existingSessionId && existingToken && existingPublicId === publicId) {
+      if (existingSessionId && existingToken && existingPublicId === pid) {
         setSessionId(existingSessionId);
         setIsSessionInitialized(true);
-        
+
         try {
           await loadBasket();
-          return; // Session is valid, we're done!
+          return;
         } catch (error: any) {
           console.warn('⚠️ Existing session failed, creating new session:', error);
-          // Session is invalid, clean up and create new one
           localStorage.removeItem('online_menu_session_id');
-          localStorage.removeItem('token');
+          localStorage.removeItem('online_menu_token');
           localStorage.removeItem('online_menu_public_id');
-          localStorage.removeItem('tokenExpiry');
+          localStorage.removeItem('online_menu_token_expiry');
         }
       }
 
+      // Create new session
       const customerIdentifier =
         localStorage.getItem('customer_identifier') ||
         `guest_${Date.now()}_${Math.random().toString(36).substring(7)}`;
@@ -152,62 +156,51 @@ const OnlineMenu: React.FC = () => {
       const deviceFingerprint = `${navigator.userAgent}_${navigator.language}_${screen.width}x${screen.height}`;
 
       const session = await onlineMenuService.startSession({
-        publicId,
+        publicId: pid,
         customerIdentifier,
         deviceFingerprint,
-        preferredLanguage: 'en',
+        preferredLanguage: 'ar',
       } as StartSessionDto);
 
-
       setSessionId(session.sessionId);
+      // Using namespaced keys to avoid conflicts with dashboard session
       localStorage.setItem('online_menu_session_id', session.sessionId);
-      localStorage.setItem('token', session.sessionToken);
-      localStorage.setItem('online_menu_public_id', publicId);
+      localStorage.setItem('online_menu_token', session.sessionToken);
+      localStorage.setItem('online_menu_public_id', pid);
       localStorage.setItem('online_menu_branch_id', session.branchId.toString());
-      localStorage.setItem('tokenExpiry', session.expiresAt);
+      localStorage.setItem('online_menu_token_expiry', session.expiresAt);
 
       setIsSessionInitialized(true);
       await loadBasket();
-      
     } catch (err: any) {
       console.error('❌ Session init error:', err);
-      setError(t('menu.error.initializeSession'));
+      throw new Error(t('menu.error.initializeSession'));
     }
   };
 
-  const loadBasket = async () => {
-    try {
-      const data = await onlineMenuService.getMyBasket();
-      setBasket(data);
-      
-      // Check for price changes after loading basket
-      await checkBasketPriceChanges(data);
-    } catch (err: any) {
-      if (err?.response?.status === 401) setIsSessionInitialized(false);
-      setBasket(null);
-    }
-  };
+const initializeMenu = async () => {
+  try {
+    setIsLoading(true);
+    setError('');
+    
+    // ✅ Fetch menu first
+    await fetchOnlineMenu(publicId!);
+    
+    // ✅ Then initialize session ONCE
+    await initializeSession(publicId!);
+    
+  } catch (err: any) {
+    setError(err.message || t('menu.error.initialization'));
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-  const fetchOnlineMenu = async (publicId: string) => {
-    try {
-      setIsLoadingMenu(true);
-      const menu = await onlineMenuService.getOnlineMenu(publicId);
-      setMenuData(menu);
-      
-      // Build initial price cache
-      buildPriceCache(menu);
-    } catch (err: any) {
-      console.error('Menu fetch error:', err);
-    } finally {
-      setIsLoadingMenu(false);
-    }
-  };
 
-  // ───── Price Change Detection Logic ─────
   const buildPriceCache = (menu: OnlineMenuResponse) => {
     const cache = new Map<number, number>();
-    menu.categories.forEach(cat => {
-      cat.products.forEach(prod => {
+    menu.categories.forEach((cat) => {
+      cat.products.forEach((prod) => {
         cache.set(prod.branchProductId, prod.price);
       });
     });
@@ -221,15 +214,13 @@ const OnlineMenu: React.FC = () => {
     let hasChanges = false;
     const changedItems: any[] = [];
 
-    // Get current prices from menu
-    menuData.categories.forEach(cat => {
-      cat.products.forEach(prod => {
+    menuData.categories.forEach((cat) => {
+      cat.products.forEach((prod) => {
         currentPrices.set(prod.branchProductId, prod.price);
       });
     });
 
-    // Check each basket item for price changes
-    basketData.items?.forEach(item => {
+    basketData.items?.forEach((item) => {
       if (!item.isAddon) {
         const currentPrice = currentPrices.get(item.branchProductId);
         const basketItemPrice = item.price;
@@ -248,15 +239,19 @@ const OnlineMenu: React.FC = () => {
     });
 
     if (hasChanges) {
-      // Format price changes for the modal
-      const priceChangeMessage = changedItems.map(item => 
-        `${item.productName}: ${formatPrice(item.oldPrice)} → ${formatPrice(item.newPrice)} (${item.priceDifference > 0 ? '+' : ''}${formatPrice(item.priceDifference)})`
-      ).join('\n');
+      const priceChangeMessage = changedItems
+        .map(
+          (item) =>
+            `${item.productName}: ${formatPrice(item.oldPrice)} → ${formatPrice(
+              item.newPrice
+            )} (${item.priceDifference > 0 ? '+' : ''}${formatPrice(item.priceDifference)})`
+        )
+        .join('\n');
 
       setPriceChanges({
         message: priceChangeMessage,
         items: changedItems,
-        requiresConfirmation: true
+        requiresConfirmation: true,
       });
       setShowPriceChangeModal(true);
     }
@@ -266,9 +261,8 @@ const OnlineMenu: React.FC = () => {
     setConfirmingPriceChanges(true);
     try {
       const currentSessionId = localStorage.getItem('online_menu_session_id');
-      
+
       if (currentSessionId) {
-        // Confirm price changes via API if available
         try {
           await basketService.confirmSessionPriceChanges(currentSessionId);
         } catch (err) {
@@ -276,14 +270,12 @@ const OnlineMenu: React.FC = () => {
         }
       }
 
-      // Refresh basket to get updated prices
       await loadBasket();
-      
       setShowPriceChangeModal(false);
       setPriceChanges(null);
     } catch (err: any) {
       console.error('Failed to confirm price changes:', err);
-      alert(t('menu.error.updatePrices'));
+      toast.error(t('menu.error.updatePrices'));
     } finally {
       setConfirmingPriceChanges(false);
     }
@@ -292,151 +284,169 @@ const OnlineMenu: React.FC = () => {
   const handlePriceChangeCancel = () => {
     setShowPriceChangeModal(false);
     setPriceChanges(null);
-    // Optionally open cart to let user review items
     setIsCartOpen(true);
   };
 
-  // ───── Product modal helpers ─────
   const openProductModal = (product: MenuProduct) => {
-    if (!isSessionInitialized) {
-      alert(t('menu.sessionPreparing'));
-      return;
-    }
     setSelectedProduct(product);
-    setProductQuantity(1);
-    setSelectedAddons([]);
   };
-  
+
   const closeProductModal = () => {
     setSelectedProduct(null);
-    setProductQuantity(1);
-    setSelectedAddons([]);
   };
 
-  const handleAddonToggle = (addon: ProductAddon) => {
-    setSelectedAddons((prev) => {
-      const idx = prev.findIndex(
-        (a) => a.branchProductAddonId === addon.branchProductAddonId
-      );
-      if (idx >= 0) return prev.filter((_, i) => i !== idx);
-      return [
-        ...prev,
-        {
-          addonBranchProductId: addon.branchProductAddonId,
-          branchProductAddonId: addon.branchProductAddonId,
-          quantity: 1,
-          addon,
-        },
-      ];
-    });
-  };
+  // ==========================================
+  // BASKET OPERATIONS
+  // ==========================================
 
-  const updateAddonQuantity = (branchProductAddonId: number, delta: number) => {
-    setSelectedAddons((prev) =>
-      prev.map((a) => {
-        if (a.branchProductAddonId !== branchProductAddonId) return a;
-        const newQty = Math.max(
-          1,
-          Math.min(a.addon.maxQuantity, a.quantity + delta)
-        );
-        return { ...a, quantity: newQty };
-      })
-    );
-  };
-
-  const calculateTotalPrice = () => {
-    if (!selectedProduct) return 0;
-    let total = selectedProduct.price * productQuantity;
-    selectedAddons.forEach((sa) => {
-      const price = sa.addon.specialPrice ?? sa.addon.price;
-      total += price * sa.quantity * productQuantity;
-    });
-    return total;
-  };
-
-  // ───── Add to basket (main + addons) ─────
   const addToBasket = async (
-    product: MenuProduct,
-    quantity: number,
-    addons: SelectedAddon[] = []
-  ) => {
-    if (!isSessionInitialized) throw new Error(t('menu.sessionNotReady'));
+  product: MenuProduct,
+  quantity: number,
+  addons: SelectedAddon[] = [],
+  extras: SelectedExtra[] = []
+) => {
+  try {
+    setIsAddingToBasket(true);
 
-    try {
-      setIsAddingToBasket(true);
+    // ❌ REMOVE THIS CHECK - Don't re-initialize session here!
+    // if (!isSessionInitialized) {
+    //   await initializeSession(publicId!);
+    // }
 
-      if (addons.length) {
-        // ---- main product ----
-        const main = await onlineMenuService.addUnifiedItemToMyBasket({
-          branchProductId: product.branchProductId,
-          quantity,
-          isAddon: false,
+    // ✅ Just add to basket directly
+    const extrasPayload = extras.map((se) => ({
+      branchProductExtraId: se.branchProductExtraId,
+      extraId: se.extraId,
+      quantity: se.isRemoval ? 1 : se.quantity,
+      isRemoval: se.isRemoval,
+    }));
+
+    if (addons.length || extras.length) {
+      const main = await onlineMenuService.addUnifiedItemToMyBasket({
+        branchProductId: product.branchProductId,
+        quantity,
+        isAddon: false,
+        extras: extrasPayload.length > 0 ? extrasPayload : undefined,
+      });
+
+      if (main.basketItemId && addons.length) {
+        const addonPayloads = addons.map((sa) => {
+          const avail = product.availableAddons?.find(
+            (a) => a.branchProductAddonId === sa.branchProductAddonId
+          );
+          return {
+            branchProductId: avail?.addonBranchProductId ?? sa.branchProductAddonId,
+            quantity: sa.quantity * quantity,
+            parentBasketItemId: main.basketItemId,
+            isAddon: true,
+          };
         });
-
-        // ---- addons (parent = main) ----
-        if (main.basketItemId) {
-          const addonPayloads = addons.map((sa) => {
-            const avail = product.availableAddons?.find(
-              (a) => a.branchProductAddonId === sa.branchProductAddonId
-            );
-            return {
-              branchProductId:
-                avail?.addonBranchProductId ?? sa.branchProductAddonId,
-              quantity: sa.quantity * quantity,
-              parentBasketItemId: main.basketItemId,
-              isAddon: true,
-            };
-          });
-          await onlineMenuService.batchAddItemsToMyBasket(addonPayloads);
-        }
-      } else {
-        await onlineMenuService.addUnifiedItemToMyBasket({
-          branchProductId: product.branchProductId,
-          quantity,
-          isAddon: false,
-        });
+        await onlineMenuService.batchAddItemsToMyBasket(addonPayloads);
       }
-
-      await loadBasket();
-      closeProductModal();
-    } finally {
-      setIsAddingToBasket(false);
+    } else {
+      await onlineMenuService.addUnifiedItemToMyBasket({
+        branchProductId: product.branchProductId,
+        quantity,
+        isAddon: false,
+        extras: extrasPayload.length > 0 ? extrasPayload : undefined,
+      });
     }
-  };
 
-  const handleAddToBasket = async () => {
-    if (!selectedProduct) return;
+    await loadBasket();
+    closeProductModal();
+  } catch (err: any) {
+    // ✅ If session expired, show error to user
+    if (err?.response?.status === 401) {
+      toast.error(t('menu.error.sessionExpired') || 'Your session has expired. Please refresh the page.');
+    } else {
+      toast.error(err.message || t('menu.error.addToBasket'));
+    }
+  } finally {
+    setIsAddingToBasket(false);
+  }
+};
+
+  // Adapter function for MenuProductModal
+  const handleMenuProductModalAddToCart = async (
+    product: MenuProduct,
+    addons: import('../../../../types/menu/type').SelectedAddon[],
+    extras: ProductExtraMenu[]
+  ) => {
     try {
-      await addToBasket(selectedProduct, productQuantity, selectedAddons);
+      // MenuProductModal manages quantity internally but doesn't pass it
+      // We'll use quantity of 1 since MenuProductModal multiplies addon quantities internally
+      const quantity = 1;
+
+      // Transform ProductExtraMenu[] to SelectedExtra[]
+      const selectedExtras: SelectedExtra[] = extras.map(extra => ({
+        branchProductExtraId: extra.branchProductExtraId,
+        extraId: extra.extraId,
+        extraName: extra.extraName || '',
+        extraCategoryName: extra.categoryName,
+        quantity: extra.quantity,
+        isRemoval: extra.isRemoval,
+        unitPrice: extra.unitPrice || extra.finalPrice,
+        maxQuantity: extra.maxQuantity,
+        minQuantity: extra.minQuantity,
+        selectionMode: extra.selectionMode,
+        isRequired: extra.isRequired,
+      }));
+
+      // Transform SelectedAddon[] from MenuProductModal format to OnlineMenu format
+      const onlineAddons: SelectedAddon[] = addons.map(addon => ({
+        addonBranchProductId: addon.branchProductAddonId,
+        branchProductAddonId: addon.branchProductAddonId,
+        quantity: addon.quantity,
+        addon: {
+          branchProductAddonId: addon.branchProductAddonId,
+          addonBranchProductId: addon.branchProductAddonId,
+          addonName: addon.addonName,
+          addonDescription: '',
+          addonImageUrl: '',
+          price: addon.price,
+          specialPrice: addon.price,
+          isRecommended: false,
+          marketingText: '',
+          maxQuantity: 999,
+          minQuantity: 0,
+          groupTag: '',
+          isGroupRequired: false,
+          ingredients: [],
+          allergens: [],
+        } as ProductAddon,
+      }));
+
+      await addToBasket(product, quantity, onlineAddons, selectedExtras);
     } catch (e: any) {
-      alert(e.message || t('menu.error.addToBasket'));
+      toast.error(e.message || t('menu.error.addToBasket'));
     }
   };
 
-  // ───── ProductGrid Handlers ─────
-  const handleProductGridAddToCart = async (product: MenuProduct, addons: SelectedAddon[] = []) => {
-    if (!isSessionInitialized) {
-      alert(t('menu.sessionPreparing'));
-      return;
-    }
+  const handleProductGridAddToCart = async (
+    product: MenuProduct
+  ) => {
+    // Check if product has extras
+    const hasExtras =
+      product.availableExtras &&
+      product.availableExtras.length > 0 &&
+      product.availableExtras.some((cat) => cat.extras && cat.extras.length > 0);
 
-    // If product has addons, open the modal for customization
-    if (product.availableAddons && product.availableAddons.length > 0) {
+    // If product has addons or extras, force open modal
+    if ((product.availableAddons && product.availableAddons.length > 0) || hasExtras) {
       openProductModal(product);
       return;
     }
 
     // Otherwise add directly to cart
     try {
-      await addToBasket(product, 1, []);
+      await addToBasket(product, 1, [], []);
     } catch (e: any) {
-      alert(e.message || t('menu.error.addToBasket'));
+      toast.error(e.message || t('menu.error.addToBasket'));
     }
   };
 
   const handleRemoveFromCart = async (branchProductId: number) => {
     try {
-      // Find the basket item for this product
       const item = basket?.items?.find(
         (i) => i.branchProductId === branchProductId && !i.isAddon
       );
@@ -445,7 +455,12 @@ const OnlineMenu: React.FC = () => {
         await loadBasket();
       }
     } catch (e: any) {
-      alert(e.message || t('menu.error.removeFromBasket'));
+      // ✅ Handle expired session
+      if (e?.response?.status === 401) {
+        toast.error(t('menu.error.sessionExpired') || 'Your session has expired. Please refresh the page.');
+      } else {
+        toast.error(e.message || t('menu.error.removeFromBasket'));
+      }
     }
   };
 
@@ -457,8 +472,8 @@ const OnlineMenu: React.FC = () => {
       } else {
         newFavorites.add(branchProductId);
       }
-      // Persist favorites to localStorage
-      localStorage.setItem('menu_favorites', JSON.stringify([...newFavorites]));
+      // Use namespaced key to avoid conflicts with TableQR favorites
+      localStorage.setItem('onlineMenu_favorites', JSON.stringify([...newFavorites]));
       return newFavorites;
     });
   };
@@ -469,16 +484,107 @@ const OnlineMenu: React.FC = () => {
 
   const getCartItemQuantity = async (branchProductId: number): Promise<number> => {
     if (!basket || !basket.items) return 0;
-    
+
     const item = basket.items.find(
       (i) => i.branchProductId === branchProductId && !i.isAddon
     );
     return item?.quantity || 0;
   };
 
-  // Load favorites from localStorage on mount
+  // Get all available products for quick reorder
+  const getAllProducts = (): MenuProduct[] => {
+    if (!menuData?.categories) return [];
+    return menuData.categories.flatMap(cat => cat.products);
+  };
+
+  // Handle quick reorder - add all items from a previous order to cart
+  const handleQuickReorder = async (items: OrderedProduct[]) => {
+    for (const item of items) {
+      const product = getAllProducts().find(p => p.branchProductId === item.branchProductId);
+      if (product && !product.isOutOfStock) {
+        try {
+          await addToBasket(product, item.quantity || 1, [], []);
+        } catch (err) {
+          console.error('Error adding reorder item:', err);
+        }
+      }
+    }
+    toast.success(t('menu.quickReorder.itemsAdded') || 'Items added to cart!');
+  };
+
+  // Handle reset session - clear basket and create new session
+  const handleResetSession = async () => {
+    const loadingToast = toast.loading(t('menu.resetSession') + '...');
+    try {
+      // Clear all basket items
+      if (basket?.items) {
+        for (const item of basket.items) {
+          if (!item.parentBasketItemId) {
+            await onlineMenuService.deleteBasketItem(item.basketItemId);
+          }
+        }
+      }
+
+      // Clear session data from localStorage (using namespaced keys)
+      localStorage.removeItem('online_menu_session_id');
+      localStorage.removeItem('online_menu_token');
+      localStorage.removeItem('online_menu_public_id');
+      localStorage.removeItem('online_menu_token_expiry');
+
+      // Reinitialize session
+      await initializeSession(publicId!);
+      toast.success(t('menu.resetSession') + ' - ' + t('common.success'), { id: loadingToast });
+    } catch (err: any) {
+      console.error('Error resetting session:', err);
+      toast.error(t('common.error'), { id: loadingToast });
+    }
+  };
+
+  // Handle close session - clear everything and reset
+  const handleCloseSession = async () => {
+    const loadingToast = toast.loading(t('menu.closeSession') + '...');
+    try {
+      // Clear all basket items
+      if (basket?.items) {
+        for (const item of basket.items) {
+          if (!item.parentBasketItemId) {
+            await onlineMenuService.deleteBasketItem(item.basketItemId);
+          }
+        }
+      }
+
+      // Clear all session data (using namespaced keys)
+      localStorage.removeItem('online_menu_session_id');
+      localStorage.removeItem('online_menu_token');
+      localStorage.removeItem('online_menu_public_id');
+      localStorage.removeItem('online_menu_token_expiry');
+      localStorage.removeItem('online_menu_branch_id');
+      localStorage.removeItem('customer_identifier');
+
+      // Reset states
+      setSessionId(null);
+      setIsSessionInitialized(false);
+      setBasket(null);
+
+      toast.success(t('menu.closeSession') + ' - ' + t('common.success'), { id: loadingToast });
+    } catch (err: any) {
+      console.error('Error closing session:', err);
+      toast.error(t('common.error'), { id: loadingToast });
+    }
+  };
+
+
   useEffect(() => {
-    const storedFavorites = localStorage.getItem('menu_favorites');
+    if (publicId) {
+      initializeMenu(); // This calls initializeSession
+    }
+    // ✅ Empty dependency array = runs only once on mount
+  }, [publicId]);
+
+  
+  useEffect(() => {
+    // Use namespaced key to avoid conflicts with TableQR favorites
+    const storedFavorites = localStorage.getItem('onlineMenu_favorites');
     if (storedFavorites) {
       try {
         const favArray = JSON.parse(storedFavorites);
@@ -489,413 +595,174 @@ const OnlineMenu: React.FC = () => {
     }
   }, []);
 
-  // Periodic price check (every 30 seconds)
   useEffect(() => {
     if (!basket || !menuData) return;
 
     const interval = setInterval(() => {
       checkBasketPriceChanges(basket);
-    }, 30000); // Check every 30 seconds
+    }, 30000);
 
     return () => clearInterval(interval);
   }, [basket, menuData]);
 
   const formatPrice = (price: number, currency: string = 'TRY') =>
-    new Intl.NumberFormat('tr-TR', { style: 'currency', currency }).format(
-      price
-    );
+    new Intl.NumberFormat('tr-TR', { style: 'currency', currency }).format(price);
 
-  // ───── Loading UI ─────
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
         <div className="text-center">
           <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className={`text-lg ${theme.text.secondary}`}>{t('menu.loadingOnline')}</p>
+          <p className={`text-lg ${theme.text.secondary}`}>{t('menu.loading')}</p>
         </div>
       </div>
     );
   }
 
-  // ───── Main render ─────
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 pb-20 sm:pb-0">
       {/* Header */}
       {menuData && (
-        <Header 
+        <Header
           menuData={menuData}
           totalItems={basket?.itemCount || 0}
           onCartToggle={() => setIsCartOpen(true)}
         />
       )}
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         <div className="max-w-7xl mx-auto">
+          {/* Floating basket button (Mobile Only mostly) */}
+          {basket && basket.totalPrice > 0 && (
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="fixed bottom-6 right-6 bg-gradient-to-r from-emerald-600 to-green-600 text-white p-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 z-40 flex items-center gap-2 hover:scale-105"
+            >
+              <ShoppingCart className="w-6 h-6" />
+              <span className="font-bold">{basket.itemCount}</span>
+              <span className="hidden sm:inline">|</span>
+              <span className="hidden sm:inline font-bold">
+                {formatPrice(basket.totalPrice, menuData?.preferences.defaultCurrency)}
+              </span>
+            </button>
+          )}
 
-        {/* Floating basket button */}
-        {basket && basket.totalPrice > 0 && (
-          <button
-            onClick={() => setIsCartOpen(true)}
-            className="fixed bottom-6 right-6 bg-gradient-to-r from-emerald-600 to-green-600 text-white p-4 rounded-full shadow-2xl hover:shadow-3xl transition-all duration-300 z-50 flex items-center gap-2 hover:scale-105"
-          >
-            <ShoppingCart className="w-6 h-6" />
-            <span className="font-bold">{basket.itemCount}</span>
-            <span className="hidden sm:inline">|</span>
-            <span className="hidden sm:inline font-bold">
-              {formatPrice(
-                basket.totalPrice,
-                menuData?.preferences.defaultCurrency
-              )}
-            </span>
-          </button>
-        )}
+          {/* Cart sidebar */}
+          <OnlineCartSidebar
+            isOpen={isCartOpen}
+            onClose={() => setIsCartOpen(false)}
+            basket={basket}
+            onBasketUpdate={loadBasket}
+            currency={menuData?.preferences.defaultCurrency ?? 'TRY'}
+            menuData={menuData}
+          />
 
-        {/* Cart sidebar - Now includes checkout flow */}
-        <OnlineCartSidebar
-          isOpen={isCartOpen}
-          onClose={() => setIsCartOpen(false)}
-          basket={basket}
-          onBasketUpdate={loadBasket}
-          currency={menuData?.preferences.defaultCurrency ?? 'TRY'}
-          menuData={menuData}
-        />
+          {/* Price Change Modal */}
+          <PriceChangeModal
+            isVisible={showPriceChangeModal}
+            priceChanges={priceChanges}
+            confirmingPriceChanges={confirmingPriceChanges}
+            onCancel={handlePriceChangeCancel}
+            onConfirm={handlePriceChangeConfirm}
+          />
 
-        {/* Price Change Modal */}
-        <PriceChangeModal
-          isVisible={showPriceChangeModal}
-          priceChanges={priceChanges}
-          confirmingPriceChanges={confirmingPriceChanges}
-          onCancel={handlePriceChangeCancel}
-          onConfirm={handlePriceChangeConfirm}
-        />
-
-        {/* Menu preview */}
-        {isLoadingMenu ? (
-          <div className={`${theme.background.card} backdrop-blur-xl rounded-3xl shadow-2xl border border-slate-200/50 dark:border-slate-700/50 p-8`}>
-            <div className="text-center">
-              <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-              <p className={`text-lg ${theme.text.secondary}`}>{t('menu.loadingPreview')}</p>
-            </div>
-          </div>
-        ) : menuData ? (
-          <div className={`${theme.background.card} backdrop-blur-xl rounded-3xl shadow-2xl  dark:border-slate-700/50 overflow-hidden`}>
-            {/* Content with Sidebar Layout */}
-            <div className="p-8 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-              <SearchBar 
-                searchTerm={searchTerm}
-                onSearchChange={setSearchTerm}
-              />
-
-              {/* Main Grid Layout: Sidebar + Products */}
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 bg-transparent ">
-                {/* Categories Sidebar - Only show when not searching */}
-                {!searchTerm && menuData.categories.length > 0 && (
-                  <CategoriesSidebar
-                    categories={menuData.categories}
-                    selectedCategory={selectedCategory}
-                    onCategorySelect={handleCategorySelect}
-                  />
-                )}
-
-                {/* Products Grid */}
-                <div className={!searchTerm ? "lg:col-span-3" : "lg:col-span-4"}>
-                  <ProductGrid
-                    categories={menuData.categories}
-                    selectedCategory={selectedCategory}
-                    searchTerm={searchTerm}
-                    cart={[]}
-                    favorites={favorites}
-                    onAddToCart={handleProductGridAddToCart}
-                    onRemoveFromCart={handleRemoveFromCart}
-                    onToggleFavorite={handleToggleFavorite}
-                    onCategorySelect={handleCategorySelect}
-                    restaurantName={menuData.restaurantName}
-                    onCustomize={openProductModal}
-                    getCartItemQuantity={getCartItemQuantity}
-                  />
-                </div>
+          {/* Main Content Area */}
+          {isLoadingMenu ? (
+            <div
+              className={`${theme.background.card} backdrop-blur-xl rounded-3xl shadow-xl border border-slate-200/50 dark:border-slate-700/50 p-8`}
+            >
+              <div className="text-center">
+                <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+                <p className={`text-lg ${theme.text.secondary}`}>
+                  {t('menu.loadingPreview')}
+                </p>
               </div>
             </div>
-          </div>
-        ) : null}
-      </div>
-      </div>
-
-      {/* ───── Product Detail Modal ───── */}
-      {selectedProduct && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div
-            className={`${theme.background.card} w-full sm:max-w-2xl max-h-[90vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl shadow-2xl`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header */}
-            <div className="sticky top-0 bg-gradient-to-r from-emerald-600 to-green-600 p-6 text-white flex items-start justify-between z-10">
-              <div className="flex-1">
-                <h3 className="text-2xl font-bold">{selectedProduct.productName}</h3>
-                {selectedProduct.productDescription && (
-                  <p className="text-emerald-100 mt-2">{selectedProduct.productDescription}</p>
-                )}
-              </div>
-              <button
-                onClick={closeProductModal}
-                className="p-2 hover:bg-white/20 rounded-full transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-
-            {/* Content */}
-            <div className="p-6 space-y-6">
-              {/* Image */}
-              <div className="relative h-64 rounded-2xl overflow-hidden">
-                <img
-                  src={selectedProduct.productImageUrl}
-                  alt={selectedProduct.productName}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.currentTarget.src =
-                      'https://www.customcardsandgames.com/assets/images/noImageUploaded.png';
-                  }}
+          ) : menuData ? (
+            <div
+              className={`${theme.background.card} backdrop-blur-xl rounded-3xl shadow-xl dark:border-slate-700/50 overflow-hidden min-h-[80vh]`}
+            >
+              <div className="p-4 sm:p-8 bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 h-full">
+                <SearchBar
+                  searchTerm={searchTerm}
+                  onSearchChange={setSearchTerm}
+                  showFavoritesFilter={true}
+                  favoritesOnly={favoritesOnly}
+                  onFavoritesToggle={() => setFavoritesOnly(!favoritesOnly)}
+                  favoritesCount={favorites.size}
                 />
-              </div>
 
-              {/* Base price */}
-              <div className="flex items-center justify-between">
-                <span className={`text-lg ${theme.text.secondary}`}>{t('menu.basePrice')}</span>
-                <span className="text-2xl font-bold text-emerald-600">
-                  {formatPrice(
-                    selectedProduct.price,
-                    menuData?.preferences.defaultCurrency
+                {/* Quick Reorder Section */}
+                <QuickReorderSection
+                  availableProducts={getAllProducts()}
+                  onReorder={handleQuickReorder}
+                  context="onlineMenu"
+                  className="mt-4"
+                />
+
+                {/* Session Control Buttons */}
+             {/*    <div className="mb-4 flex gap-2 justify-end">
+                  <button
+                    onClick={handleResetSession}
+                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm font-medium"
+                  >
+                    {t('menu.resetSession')}
+                  </button>
+                  <button
+                    onClick={handleCloseSession}
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm font-medium"
+                  >
+                    {t('menu.closeSession')}
+                  </button>
+                </div> */}
+
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 bg-transparent mt-6">
+                  {/* Categories Sidebar */}
+                  {!searchTerm && menuData.categories.length > 0 && (
+                    <div className="hidden lg:block">
+                      <CategoriesSidebar
+                        categories={menuData.categories}
+                        selectedCategory={selectedCategory}
+                        onCategorySelect={handleCategorySelect}
+                      />
+                    </div>
                   )}
-                </span>
-              </div>
 
-              {/* Ingredients */}
-              {selectedProduct.ingredients?.length ? (
-                <div className="space-y-2">
-                  <h4 className={`font-bold ${theme.text.primary}`}>{t('menu.ingredients')}</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedProduct.ingredients.map((i) => (
-                      <span
-                        key={i.ingredientId}
-                        className="text-sm bg-slate-100 dark:bg-slate-700 px-3 py-1.5 rounded-full"
-                      >
-                        {i.ingredientName}
-                      </span>
-                    ))}
+                  {/* Products Grid */}
+                  <div className={!searchTerm ? 'lg:col-span-3' : 'lg:col-span-4'}>
+                    <ProductGrid
+                      categories={menuData.categories}
+                      selectedCategory={selectedCategory}
+                      searchTerm={searchTerm}
+                      cart={basket?.items || []}
+                      favorites={favorites}
+                      favoritesOnly={favoritesOnly}
+                      onAddToCart={handleProductGridAddToCart}
+                      onRemoveFromCart={handleRemoveFromCart}
+                      onToggleFavorite={handleToggleFavorite}
+                      onCategorySelect={handleCategorySelect}
+                      restaurantName={menuData.restaurantName}
+                      onCustomize={openProductModal}
+                      getCartItemQuantity={getCartItemQuantity}
+                      mobileGridLayout={menuData.preferences?.mobileGridLayout}
+                    />
                   </div>
-                </div>
-              ) : null}
-
-              {/* Allergens */}
-              {selectedProduct.allergens?.length ? (
-                <div className="space-y-2">
-                  <h4 className={`font-bold ${theme.text.primary}`}>{t('menu.allergens')}</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedProduct.allergens.map((a) => (
-                      <span
-                        key={a.id}
-                        className="text-sm bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 px-3 py-1.5 rounded-full border border-red-200 dark:border-red-800"
-                      >
-                        {a.icon} {a.name}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-
-              {/* Quantity */}
-              <div className="space-y-2">
-                <h4 className={`font-bold ${theme.text.primary}`}>{t('menu.quantity')}</h4>
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={() => setProductQuantity(Math.max(1, productQuantity - 1))}
-                    className="p-2 bg-slate-200 dark:bg-slate-700 rounded-full hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
-                  >
-                    <Minus className="w-5 h-5" />
-                  </button>
-                  <span className="text-2xl font-bold min-w-[3rem] text-center">
-                    {productQuantity}
-                  </span>
-                  <button
-                    onClick={() => setProductQuantity(productQuantity + 1)}
-                    className="p-2 bg-slate-200 dark:bg-slate-700 rounded-full hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
                 </div>
               </div>
-
-              {/* Add-ons */}
-              {selectedProduct.availableAddons?.length ? (
-                <div className="space-y-4">
-                  <h4 className={`font-bold ${theme.text.primary}`}>{t('menu.addons')}</h4>
-                  <div className="space-y-3">
-                    {selectedProduct.availableAddons.map((addon) => {
-                      const isSel = selectedAddons.some(
-                        (s) => s.branchProductAddonId === addon.branchProductAddonId
-                      );
-                      const sel = selectedAddons.find(
-                        (s) => s.branchProductAddonId === addon.branchProductAddonId
-                      );
-
-                      return (
-                        <div
-                          key={addon.branchProductAddonId}
-                          className={`p-4 rounded-xl border-2 transition-all cursor-pointer ${
-                            isSel
-                              ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20'
-                              : 'border-slate-200 dark:border-slate-700 hover:border-emerald-300'
-                          }`}
-                          onClick={() => handleAddonToggle(addon)}
-                        >
-                          <div className="flex items-start gap-3">
-                            <img
-                              src={addon.addonImageUrl}
-                              alt={addon.addonName}
-                              className="w-16 h-16 rounded-lg object-cover"
-                              onError={(e) => {
-                                e.currentTarget.src =
-                                  'https://www.customcardsandgames.com/assets/images/noImageUploaded.png';
-                              }}
-                            />
-                            <div className="flex-1">
-                              <div className="flex items-start justify-between gap-2">
-                                <div>
-                                  <h5 className={`font-bold ${theme.text.primary}`}>
-                                    {addon.addonName}
-                                  </h5>
-                                  {addon.addonDescription && (
-                                    <p className={`text-sm ${theme.text.secondary} mt-1`}>
-                                      {addon.addonDescription}
-                                    </p>
-                                  )}
-                                  {addon.marketingText && (
-                                    <p className="text-sm text-emerald-600 mt-1">
-                                      {addon.marketingText}
-                                    </p>
-                                  )}
-                                </div>
-                                <span className="font-bold text-emerald-600 whitespace-nowrap">
-                                  {formatPrice(
-                                    addon.specialPrice ?? addon.price,
-                                    menuData?.preferences.defaultCurrency
-                                  )}
-                                </span>
-                              </div>
-
-                              {isSel && sel && (
-                                <div className="flex items-center gap-2 mt-3">
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      updateAddonQuantity(addon.branchProductAddonId, -1);
-                                    }}
-                                    className="p-1 bg-emerald-200 dark:bg-emerald-800 rounded-full hover:bg-emerald-300 dark:hover:bg-emerald-700 transition-colors"
-                                  >
-                                    <Minus className="w-4 h-4" />
-                                  </button>
-                                  <span className="font-bold min-w-[2rem] text-center">
-                                    {sel.quantity}
-                                  </span>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      updateAddonQuantity(addon.branchProductAddonId, 1);
-                                    }}
-                                    disabled={sel.quantity >= addon.maxQuantity}
-                                    className="p-1 bg-emerald-200 dark:bg-emerald-800 rounded-full hover:bg-emerald-300 dark:hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                  >
-                                    <Plus className="w-4 h-4" />
-                                  </button>
-                                  <span className="text-xs text-slate-500 ml-2">
-                                    ({t('menu.cart.max')}: {addon.maxQuantity})
-                                  </span>
-                                </div>
-                              )}
-                            </div>
-
-                            <div
-                              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
-                                isSel
-                                  ? 'bg-emerald-500 border-emerald-500'
-                                  : 'border-slate-300 dark:border-slate-600'
-                              }`}
-                            >
-                              {isSel && <CheckCircle className="w-4 h-4 text-white" />}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : null}
-
-              {/* Total summary */}
-              <div className="border-t-2 border-slate-200 dark:border-slate-700 pt-4 space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className={theme.text.secondary}>
-                    {t('menu.product')} ({productQuantity}x)
-                  </span>
-                  <span className={theme.text.primary}>
-                    {formatPrice(
-                      selectedProduct.price * productQuantity,
-                      menuData?.preferences.defaultCurrency
-                    )}
-                  </span>
-                </div>
-
-                {selectedAddons.map((sa) => (
-                  <div
-                    key={sa.addonBranchProductId}
-                    className="flex items-center justify-between text-sm"
-                  >
-                    <span className={theme.text.secondary}>
-                      {sa.addon.addonName} ({sa.quantity}x)
-                    </span>
-                    <span className={theme.text.primary}>
-                      {formatPrice(
-                        (sa.addon.specialPrice ?? sa.addon.price) * sa.quantity,
-                        menuData?.preferences.defaultCurrency
-                      )}
-                    </span>
-                  </div>
-                ))}
-
-                <div className="flex items-center justify-between text-lg font-bold pt-2">
-                  <span className={theme.text.primary}>{t('menu.cart.total')}</span>
-                  <span className="text-emerald-600">
-                    {formatPrice(
-                      calculateTotalPrice(),
-                      menuData?.preferences.defaultCurrency
-                    )}
-                  </span>
-                </div>
-              </div>
-
-              {/* Add to basket button */}
-              <button
-                onClick={handleAddToBasket}
-                disabled={isAddingToBasket}
-                className="w-full py-4 bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isAddingToBasket ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>{t('menu.addingToBasket')}</span>
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart className="w-5 h-5" />
-                    <span>{t('menu.addToBasket')}</span>
-                  </>
-                )}
-              </button>
             </div>
-          </div>
+          ) : null}
         </div>
-      )}
+      </div>
+
+      {/* Product Detail Modal */}
+      <ProductModal
+        isOpen={!!selectedProduct}
+        product={selectedProduct}
+        onClose={closeProductModal}
+        onAddToCart={handleMenuProductModalAddToCart}
+      />
+
       <Footer />
     </div>
   );

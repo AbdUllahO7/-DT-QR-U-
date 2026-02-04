@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'; // --- UPDATED ---
-import { 
-  Mail, 
-  Send, 
-  CheckCircle, 
-  ArrowLeft, 
+import {
+  Mail,
+  Send,
+  CheckCircle,
+  ArrowLeft,
   Loader2,
-  AlertCircle 
+  AlertCircle
 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { motion } from 'framer-motion';
@@ -20,13 +20,13 @@ const ConfirmMail = () => {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [cooldownTime, setCooldownTime] = useState(0); 
+  const [cooldownTime, setCooldownTime] = useState(0);
   const { t, isRTL } = useLanguage();
-    useEffect(() => {
-      window.scrollTo(0, 0);
-    }, []);
   useEffect(() => {
-   let interval: number;
+    window.scrollTo(0, 0);
+  }, []);
+  useEffect(() => {
+    let interval: number;
 
     const checkCooldown = () => {
       const lastSubmitTime = localStorage.getItem(COOLDOWN_KEY);
@@ -53,12 +53,12 @@ const ConfirmMail = () => {
     };
 
     checkCooldown();
-    return () => clearInterval(interval); 
+    return () => clearInterval(interval);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (loading || cooldownTime > 0) return; 
+    if (loading || cooldownTime > 0) return;
 
     setLoading(true);
     setError(null);
@@ -66,7 +66,7 @@ const ConfirmMail = () => {
     try {
       await userService.resendConfirmation(email);
       setSubmitted(true);
-      
+
       localStorage.setItem(COOLDOWN_KEY, Date.now().toString());
       setCooldownTime(COOLDOWN_SECONDS);
       const interval = setInterval(() => {
@@ -80,9 +80,9 @@ const ConfirmMail = () => {
         });
       }, 1000);
 
-    } catch (err : any) {
+    } catch (err: any) {
       console.error('Failed to resend confirmation:', err);
-      setError(err.response.data.details.message); 
+      setError(err.response.data.details.message);
     } finally {
       setLoading(false);
     }
@@ -95,7 +95,7 @@ const ConfirmMail = () => {
     >
       <div className="w-full max-w-md">
 
-         <motion.div
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
@@ -103,7 +103,7 @@ const ConfirmMail = () => {
         >
           <Link
             to="/"
-            className={`inline-flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200`}
+            className={`inline-flex items-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} text-gray-600 dark:text-gray-400 hover:text-primary-800 dark:hover:text-primary-800 transition-colors duration-200`}
           >
             <ArrowLeft className={`h-4 w-4 ${isRTL ? 'rotate-180' : ''}`} />
             <span>{t('pages.login.backToHome')}</span>
@@ -139,7 +139,7 @@ const ConfirmMail = () => {
                 {t('confirmMail.form.subtitle')}
               </p>
             </div>
-            
+
             {error && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
@@ -176,7 +176,7 @@ const ConfirmMail = () => {
 
             <button
               type="submit"
-              disabled={loading || cooldownTime > 0} 
+              disabled={loading || cooldownTime > 0}
               className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-medium rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (

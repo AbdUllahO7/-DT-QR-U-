@@ -1,6 +1,7 @@
 import { apiRequest } from '../utils/apiRequest';
 import { decodeToken } from '../utils/http';
 import { sanitizePlaceholder } from '../utils/sanitize';
+import { authStorage } from '../utils/authStorage';
 import type {
   LoginDto,
   LoginResponse,
@@ -34,11 +35,15 @@ class AuthService {
     const { logger } = await import('../utils/logger');
     try {
       logger.info('Register isteği gönderiliyor:', { email: userData.email });
-      
+
+      // Add language from localStorage
+      const language = localStorage.getItem('language') || 'en';
+      const dataWithLanguage = { ...userData, language };
+
       const response = await apiRequest<RegisterResponse>({
         method: 'POST',
         url: '/api/Auth/Register',
-        data: userData
+        data: dataWithLanguage
       });
       
       logger.info('Register API yanıtı:', response);
@@ -101,8 +106,8 @@ class AuthService {
     try {
       logger.info('getUserProfile çağrılıyor...');
 
-      // 1) Önce localStorage'dan JWT'yi kontrol et
-      const storedToken = localStorage.getItem('token');
+      // 1) SECURITY FIX: Use authStorage instead of localStorage
+      const storedToken = authStorage.getToken();
       if (!storedToken) {
         throw new Error('Token bulunamadı');
       }
@@ -298,9 +303,8 @@ class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('tokenExpiry');
-    localStorage.removeItem('userId');
+    // SECURITY FIX: Use authStorage for centralized auth clearing
+    authStorage.clearAuth();
   }
 }
 

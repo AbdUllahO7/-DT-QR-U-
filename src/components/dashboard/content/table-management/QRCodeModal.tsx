@@ -83,6 +83,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
   const [currentStep, setCurrentStep] = useState<ModalStep>('selection');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string[]>>({});
   
 
   
@@ -110,6 +111,7 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setError(null);
+      setValidationErrors({});
     }
   }, [isOpen]);
 
@@ -223,15 +225,17 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
     });
     setBulkIsActive(true);
     setError(null);
+    setValidationErrors({});
     setIsSubmitting(false);
     onClose();
   };
 
   const handleSingleTableSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     setIsSubmitting(true);
     setError(null);
+    setValidationErrors({});
 
     const branchIdToUse = isEditMode ? selectedBranchForEdit?.branchId : selectedBranchId;
     if (!branchIdToUse) {
@@ -288,28 +292,38 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
       handleClose();
     } catch (error: any) {
       logger.error('Table operation failed:', error);
-      
-      // Set user-friendly error message based on the actual API response
-      let errorMessage = t('QRCodeModal.error.operationFailed');
-      
-      if (error.response?.status === 400) {
-        // Check if it's the specific branch error
-        if (error.response?.data?.message?.includes('Branch information')) {
-          errorMessage = 'Branch information could not be determined. Please refresh and try again.';
-        } else {
-          errorMessage = t('QRCodeModal.error.invalidData');
+
+      // Extract validation errors from API response
+      const apiErrors = error.response?.data?.errors || error.errors || {};
+
+      if (Object.keys(apiErrors).length > 0) {
+        // We have field-level validation errors
+        setValidationErrors(apiErrors);
+        setError('Please fix the validation errors below.');
+      } else {
+        // General error handling
+        let errorMessage = t('QRCodeModal.error.operationFailed');
+
+        if (error.response?.status === 400) {
+          // Check if it's the specific branch error
+          if (error.response?.data?.message?.includes('Branch information')) {
+            errorMessage = 'Branch information could not be determined. Please refresh and try again.';
+          } else {
+            errorMessage = t('QRCodeModal.error.invalidData');
+          }
+        } else if (error.response?.status === 404) {
+          errorMessage = t('QRCodeModal.error.tableNotFound');
+        } else if (error.response?.status === 409) {
+          errorMessage = t('QRCodeModal.error.concurrencyIssue');
+        } else if (error.response?.status === 401) {
+          errorMessage = t('QRCodeModal.error.unauthorized');
+        } else if (error.message) {
+          errorMessage = error.message;
         }
-      } else if (error.response?.status === 404) {
-        errorMessage = t('QRCodeModal.error.tableNotFound');
-      } else if (error.response?.status === 409) {
-        errorMessage = t('QRCodeModal.error.concurrencyIssue');
-      } else if (error.response?.status === 401) {
-        errorMessage = t('QRCodeModal.error.unauthorized');
-      } else if (error.message) {
-        errorMessage = error.message;
+
+        setError(errorMessage);
+        setValidationErrors({});
       }
-      
-      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -317,9 +331,10 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
 
   const handleBulkTableSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     setIsSubmitting(true);
     setError(null);
+    setValidationErrors({});
     
     if (!selectedBranchId || categoryQuantities.length === 0) {
       setError(t('QRCodeModal.error.bulkDataRequired'));
@@ -373,25 +388,37 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
       handleClose();
     } catch (error: any) {
       logger.error('Toplu masa oluşturma hatası:', error, { prefix: 'QRCodeModal' });
-      
-      let errorMessage = t('QRCodeModal.error.batchCreateFailed');
-      
-      if (error.message?.includes('timeout') || error.message?.includes('zaman aşımı')) {
-        errorMessage = t('QRCodeModal.error.timeoutAdvice');
-        logger.warn('Batch işlem timeout hatası', { totalTables: totalTableCount }, { prefix: 'QRCodeModal' });
-      } else if (error.response?.status === 400) {
-        errorMessage = t('QRCodeModal.error.invalidBatchData');
-        logger.warn('Batch işlem validation hatası', error.response.data, { prefix: 'QRCodeModal' });
-      } else if (error.response?.status === 500) {
-        errorMessage = t('QRCodeModal.error.serverError');
-        logger.error('Batch işlem server hatası', error.response.data, { prefix: 'QRCodeModal' });
-      } else if (error.response?.status === 401) {
-        errorMessage = t('QRCodeModal.error.sessionExpired');
-        logger.warn('Batch işlem authentication hatası', { prefix: 'QRCodeModal' });
+
+      // Extract validation errors from API response
+      const apiErrors = error.response?.data?.errors || error.errors || {};
+
+      if (Object.keys(apiErrors).length > 0) {
+        // We have field-level validation errors
+        setValidationErrors(apiErrors);
+        setError(t('QRCodeModal.error.validationFailed') || 'Please fix the validation errors below.');
+      } else {
+        // General error handling
+        let errorMessage = t('QRCodeModal.error.batchCreateFailed');
+
+        if (error.message?.includes('timeout') || error.message?.includes('zaman aşımı')) {
+          errorMessage = t('QRCodeModal.error.timeoutAdvice');
+          logger.warn('Batch işlem timeout hatası', { totalTables: totalTableCount }, { prefix: 'QRCodeModal' });
+        } else if (error.response?.status === 400) {
+          errorMessage = t('QRCodeModal.error.invalidBatchData');
+          logger.warn('Batch işlem validation hatası', error.response.data, { prefix: 'QRCodeModal' });
+        } else if (error.response?.status === 500) {
+          errorMessage = t('QRCodeModal.error.serverError');
+          logger.error('Batch işlem server hatası', error.response.data, { prefix: 'QRCodeModal' });
+        } else if (error.response?.status === 401) {
+          errorMessage = t('QRCodeModal.error.sessionExpired');
+          logger.warn('Batch işlem authentication hatası', { prefix: 'QRCodeModal' });
+        }
+
+        setError(errorMessage);
+        setValidationErrors({});
       }
-      
-      setError(errorMessage);
-      console.error('❌ Toplu masa oluşturma hatası:', errorMessage);
+
+      console.error('❌ Toplu masa oluşturma hatası:', error);
     } finally {
       setIsSubmitting(false);
     }
@@ -431,22 +458,42 @@ const QRCodeModal: React.FC<QRCodeModalProps> = ({
 
   // Error display component
   const renderError = () => {
-    if (!error) return null;
-    
+    if (!error && Object.keys(validationErrors).length === 0) return null;
+
     return (
-      <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-        <div className="flex items-center">
+      <div className="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+        <div className="flex items-start">
           <div className="flex-shrink-0">
             <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
             </svg>
           </div>
-          <div className="ml-3">
-            <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+          <div className="ml-3 flex-1">
+            {error && (
+              <p className="text-sm font-medium text-red-800 dark:text-red-200 mb-2">{error}</p>
+            )}
+
+            {Object.keys(validationErrors).length > 0 && (
+              <div className="mt-2 space-y-1">
+                {Object.entries(validationErrors).map(([field, errors]) => (
+                  <div key={field} className="text-sm text-red-700 dark:text-red-300">
+                    <span className="font-medium">{field}:</span>
+                    <ul className="list-disc list-inside ml-2">
+                      {errors.map((errorMsg, index) => (
+                        <li key={index}>{errorMsg}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div className="ml-auto pl-3">
             <button
-              onClick={() => setError(null)}
+              onClick={() => {
+                setError(null);
+                setValidationErrors({});
+              }}
               className="inline-flex text-red-400 hover:text-red-600 dark:hover:text-red-300"
             >
               <span className="sr-only">Dismiss</span>

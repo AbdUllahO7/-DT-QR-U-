@@ -5,12 +5,13 @@ import { useLanguage } from '../../contexts/LanguageContext';
 
 const Hero: React.FC = () => {
   const { t, isRTL } = useLanguage();
-  
+
   const features = [
     { icon: <QrCode className="h-5 w-5" />, text: t('hero.features.qrAccess') },
     { icon: <Smartphone className="h-5 w-5" />, text: t('hero.features.mobileOptimized') },
     { icon: <Zap className="h-5 w-5" />, text: t('hero.features.instantUpdate') },
   ];
+
 
   return (
     <section id="hero" className="section-padding pt-24 lg:pt-32 bg-gradient-to-br from-primary-50 to-blue-100 dark:from-gray-900 dark:to-gray-800">
@@ -24,13 +25,13 @@ const Hero: React.FC = () => {
             className={`text-center lg:${isRTL ? 'text-right' : 'text-left'}`}
           >
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-              <span className="text-primary-600 dark:text-primary-400">{t('hero.title.line1')}</span>
+              <span className="text-primary-800 dark:text-primary-800">{t('hero.title.line1')}</span>
               <br />
               {t('hero.title.line2')}
               <br />
-              <span className="text-primary-600 dark:text-primary-400">{t('hero.title.line3')}</span>
+              <span className="text-primary-800 dark:text-primary-800">{t('hero.title.line3')}</span>
             </h1>
-            
+
             <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl">
               {t('hero.subtitle')}
             </p>
@@ -45,7 +46,7 @@ const Hero: React.FC = () => {
                   transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
                   className={`flex items-center gap-2 ${isRTL ? 'space-x-reverse' : ''} bg-white dark:bg-gray-800 px-4 py-2 rounded-full shadow-md`}
                 >
-                  <span className="text-primary-600 dark:text-primary-400">{feature.icon}</span>
+                  <span className="text-primary-800 dark:text-primary-800">{feature.icon}</span>
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     {feature.text}
                   </span>
@@ -60,13 +61,13 @@ const Hero: React.FC = () => {
               transition={{ duration: 0.6, delay: 0.4 }}
               className={`flex flex-col sm:flex-row gap-4 justify-center lg:${isRTL ? 'justify-end' : 'justify-start'}`}
             >
-              <button 
+              <button
                 onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
-                className="btn-primary text-lg px-8 py-4"
+                className="btn-primary text-lg px-8 py-4 dark:text-white text-black"
               >
                 {t('hero.cta.getStarted')}
               </button>
-              <button 
+              <button
                 onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
                 className="btn-secondary text-lg px-8 py-4"
               >
@@ -103,7 +104,7 @@ const Hero: React.FC = () => {
               {/* Phone Mockup */}
               <div className="bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl">
                 <div className="bg-white dark:bg-gray-100 rounded-[2rem] overflow-hidden">
-                  <div className="h-96 bg-gradient-to-b from-primary-500 to-primary-600 p-6 text-white relative">
+                  <div className="h-96 bg-gradient-to-b from-primary-500 to-primary-800 p-6 text-white relative">
                     {/* Fake Status Bar */}
                     <div className="flex justify-between items-center text-xs mb-4">
                       <span>9:41</span>
@@ -113,31 +114,34 @@ const Hero: React.FC = () => {
                         <div className="w-4 h-2 bg-white rounded-sm"></div>
                       </div>
                     </div>
-                    
-                    {/* QR Code Area */}
+                    {/* QR Code Area within Mockup */}
                     <div className="text-center">
-                      <QrCode className="h-16 w-16 mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">iDIGITEK Restoran</h3>
-                      <p className="text-sm opacity-90 mb-6">Menümüzü görüntülemek için QR kodu tarayın</p>
-                      
+                      <img
+                        src="/assets/logos/iDiGiTeK-Logo-iDT-.png"
+                        alt="iDiGiTeK Logo"
+                        className="h-24 w-24 mx-auto"
+                      />
+                      <h3 className="text-lg font-semibold mb-2">{t('hero.mockup.restaurantName')}</h3>
+                      <p className="text-sm opacity-90 mb-6">{t('hero.mockup.scanPrompt')}</p>
+
                       {/* Sample Menu Items */}
                       <div className="space-y-3 text-left">
                         <div className="bg-white/20 rounded-lg p-3">
                           <div className="flex justify-between items-center">
-                            <span className="font-medium">Margherita Pizza</span>
-                            <span className="font-semibold">₺45</span>
+                            <span className="font-medium">{t('hero.mockup.pizza')}</span>
+                            <span className="font-semibold">₺145</span> {/* Updated price suggestion */}
                           </div>
                         </div>
                         <div className="bg-white/20 rounded-lg p-3">
                           <div className="flex justify-between items-center">
-                            <span className="font-medium">Caesar Salad</span>
-                            <span className="font-semibold">₺28</span>
+                            <span className="font-medium">{t('hero.mockup.salad')}</span>
+                            <span className="font-semibold">₺85</span>
                           </div>
                         </div>
                         <div className="bg-white/20 rounded-lg p-3">
                           <div className="flex justify-between items-center">
-                            <span className="font-medium">Tiramisu</span>
-                            <span className="font-semibold">₺22</span>
+                            <span className="font-medium">{t('hero.mockup.dessert')}</span>
+                            <span className="font-semibold">₺65</span>
                           </div>
                         </div>
                       </div>
@@ -148,18 +152,18 @@ const Hero: React.FC = () => {
 
               {/* Floating QR Code */}
               <motion.div
-                animate={{ 
+                animate={{
                   y: [0, -10, 0],
                   rotate: [0, 5, 0]
                 }}
-                transition={{ 
+                transition={{
                   duration: 3,
                   repeat: Infinity,
                   ease: "easeInOut"
                 }}
                 className="absolute -top-6 -right-6 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700"
               >
-                <QrCode className="h-12 w-12 text-primary-600 dark:text-primary-400" />
+                <QrCode className="h-12 w-12 text-primary-800 dark:text-primary-800" />
               </motion.div>
 
               {/* Background Decoration */}

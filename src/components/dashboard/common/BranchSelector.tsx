@@ -23,7 +23,7 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const {t} = useLanguage();
+  const { t } = useLanguage();
 
   useClickOutside(dropdownRef, () => setIsOpen(false));
 
@@ -78,7 +78,7 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
           ) : (
             <>
               {/* Main Restaurant Option */}
-              <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-750">
+              <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-300 dark:bg-slate-800 bg-gray-50 dark:bg-gray-750">
                 {t('branchSelector.labels.mainRestaurant')}
               </div>
               <button
@@ -91,12 +91,12 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
                 <Store className="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" />
                 <span className="flex-1 truncate">{restaurantName}</span>
                 {!branchName && (
-                  <Check className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                  <Check className="w-4 h-4 text-primary-800 dark:text-primary-800" />
                 )}
               </button>
 
               {/* Branches Header */}
-              <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-750 mt-1">
+              <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 dark:bg-slate-800 dark:text-gray-300 bg-gray-50 dark:bg-gray-750 mt-1">
                 {t('branchSelector.labels.branches')}
               </div>
 
@@ -113,7 +113,7 @@ const BranchSelector: React.FC<BranchSelectorProps> = ({
                   <Building2 className="w-5 h-5 mr-2 text-gray-500 dark:text-gray-400" />
                   <span className="flex-1 truncate">{item.name}</span>
                   {branchName === item.name && (
-                    <Check className="w-4 h-4 text-primary-600 dark:text-primary-400" />
+                    <Check className="w-4 h-4 text-primary-800 dark:text-primary-800" />
                   )}
                 </button>
               ))}

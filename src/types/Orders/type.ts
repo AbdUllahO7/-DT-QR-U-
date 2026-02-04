@@ -29,13 +29,20 @@ export interface UpdatableOrder {
   updateDeadline:string,
 }
 
+export interface UpdatePendingOrderExtraDto {
+  branchProductExtraId: number;
+  quantity: number;
+  note: string | null;
+}
+
 export interface UpdatePendingOrderItemDto {
   orderDetailId: number; // Use 0 for new items
-  branchProductId: number;
+  branchProductId: number; // For products/addons
   count: number;
   note: string | null;
   isAddon: boolean;
   parentOrderDetailId: number | null; // Null for base items, ID for addons
+  extras?: UpdatePendingOrderExtraDto[]; // Nested extras array
 }
 
 
@@ -110,8 +117,8 @@ export interface OrdersManagerState {
 export interface OrdersManagerActions {
   fetchBranches: () => Promise<void>;
   handleBranchSelect: (branch: BranchDropdownItem) => void;
-  fetchPendingOrders: (branchId?: number) => Promise<void>;
-  fetchBranchOrders: (branchId?: number) => Promise<void>;
+  fetchPendingOrders: (branchId?: number, page?: number, pageSize?: number) => Promise<void>;
+  fetchBranchOrders: (branchId?: number , page?: number, pageSize?: number) => Promise<void>;
   fetchTableBasketSummary: () => Promise<TableBasketSummary[]>;
   getOrderTypesForCurrentBranch: () => Promise<OrderType[]>;
   getOrderTypeText: (orderTypeId: number) => Promise<string>;
@@ -145,4 +152,8 @@ export interface OrdersManagerActions {
   toggleRowExpansion: (orderId: string) => void;
   handleSort: (field: string) => void;
   setState: React.Dispatch<React.SetStateAction<OrdersManagerState>>;
+  handlePendingPageChange: (newPage: number) => void;
+  handlePendingItemsPerPageChange: (newItemsPerPage: number) => void;
+  handleBranchPageChange : (newPage: number) => void;
+  handleBranchItemsPerPageChange : (newItemsPerPage: number) => void;
 }

@@ -1,18 +1,18 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { 
-  Camera, 
-  Upload, 
-  X, 
-  CheckCircle, 
-  AlertCircle, 
-  Building2, 
-  FileText, 
-  Info, 
-  Store, 
-  Utensils, 
-  Hash, 
-  Building, 
 
+import React, { useEffect, useState, useRef } from 'react';
+import {
+  Camera,
+  Upload,
+  X,
+  CheckCircle,
+  AlertCircle,
+  Building2,
+  FileText,
+  Info,
+  Store,
+  Utensils,
+  Hash,
+  Building,
 } from 'lucide-react';
 import { restaurantService } from '../../../services/restaurantService';
 import { useLogoUpload } from '../../../hooks/useLogoUpload';
@@ -30,7 +30,7 @@ interface ToastState {
 const RestaurantManagement: React.FC = () => {
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
-  
+
   const tabs = [
     { id: 'general', label: t('restaurantManagement.tabs.general'), icon: Building2 },
     { id: 'legal', label: t('restaurantManagement.tabs.legal'), icon: FileText },
@@ -52,24 +52,22 @@ const RestaurantManagement: React.FC = () => {
   const [toast, setToast] = useState<ToastState>({ show: false, type: 'info', message: '' });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [aboutImageFile, setAboutImageFile] = useState<File | null>(null);
-  
+
   const { uploadLogo, isUploading } = useLogoUpload();
   const fetched = useRef(false);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const aboutImageInputRef = useRef<HTMLInputElement>(null);
 
-  // Toast gösterme fonksiyonu
   const showToast = (type: ToastState['type'], message: string) => {
     setToast({ show: true, type, message });
     setTimeout(() => setToast(prev => ({ ...prev, show: false })), 5000);
   };
 
-  // Restaurant bilgilerini yenileme fonksiyonu
   const refreshRestaurantInfo = async () => {
     try {
       const restaurantData = await restaurantService.getRestaurantManagementInfo();
       setInfo(restaurantData);
-      
+
       if (restaurantData) {
         const cleaned: any = {};
         Object.entries(restaurantData).forEach(([k, v]) => {
@@ -98,10 +96,9 @@ const RestaurantManagement: React.FC = () => {
           return;
         }
 
-        // Restaurant bilgilerini al (About bilgisi de burada gelir)
         const data = await restaurantService.getRestaurantManagementInfo();
         setInfo(data);
-        
+
         if (data) {
           const cleaned: any = {};
           Object.entries(data).forEach(([k, v]) => {
@@ -110,14 +107,13 @@ const RestaurantManagement: React.FC = () => {
           setFormData(cleaned);
         }
 
-        // About form data'yı hazırla
         setAboutFormData({
           imageUrl: '',
           title: '',
           description: '',
           restaurantId: restaurantId
         });
-        
+
         logger.info('Restaurant management info loaded successfully');
       } catch (err) {
         logger.error('Failed to fetch restaurant management info', err);
@@ -133,14 +129,14 @@ const RestaurantManagement: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const finalValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
-    
+
     setFormData(prev => ({ ...prev, [name]: finalValue }));
     setHasChanges(true);
   };
 
   const handleAboutChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    
+
     setAboutFormData(prev => ({ ...prev, [name]: value }));
     setHasAboutChanges(true);
   };
@@ -148,12 +144,10 @@ const RestaurantManagement: React.FC = () => {
   const handleLogoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Dosya tipini kontrol et
       if (!file.type.startsWith('image/')) {
         showToast('error', t('restaurantManagement.error.imageValidationFailed'));
         return;
       }
-      // Dosya boyutunu kontrol et (5MB)
       if (file.size > 5 * 1024 * 1024) {
         showToast('error', t('restaurantManagement.error.fileSizeError'));
         return;
@@ -181,12 +175,11 @@ const RestaurantManagement: React.FC = () => {
 
   const handleSave = async () => {
     if (!hasChanges && !logoFile) return;
-    
+
     setIsLoading(true);
     try {
       let updatedFormData = { ...formData };
-      
-      // Logo upload
+
       if (logoFile) {
         try {
           const logoUrl = await uploadLogo(logoFile, formData.restaurantLogoPath);
@@ -199,19 +192,17 @@ const RestaurantManagement: React.FC = () => {
         }
       }
 
-      // Restaurant info update
       await restaurantService.updateRestaurantManagementInfo(updatedFormData as any);
-      
+
       setFormData(updatedFormData);
       setHasChanges(false);
       setLogoFile(null);
-      
+
       logger.info('Restaurant management info updated successfully');
       showToast('success', t('restaurantManagement.success.infoUpdated'));
-      
-      // Restaurant bilgilerini yenile
+
       await refreshRestaurantInfo();
-      
+
     } catch (err) {
       logger.error('Failed to update restaurant management info', err);
       showToast('error', t('restaurantManagement.error.updateFailed'));
@@ -236,7 +227,6 @@ const RestaurantManagement: React.FC = () => {
 
       let finalAboutData = { ...aboutFormData, restaurantId };
 
-      // Image upload
       if (aboutImageFile) {
         try {
           const imageUrl = await uploadLogo(aboutImageFile);
@@ -248,13 +238,11 @@ const RestaurantManagement: React.FC = () => {
         }
       }
 
-      // About oluştur
       await restaurantService.createAbout(finalAboutData);
-      
+
       logger.info('About section created successfully');
       showToast('success', 'Hakkında bölümü başarıyla eklendi');
-      
-      // Modal'ı kapat ve form'u temizle
+
       setAboutModalOpen(false);
       setAboutFormData({
         imageUrl: '',
@@ -264,10 +252,9 @@ const RestaurantManagement: React.FC = () => {
       });
       setAboutImageFile(null);
       setHasAboutChanges(false);
-      
-      // Restaurant bilgilerini yenile
+
       await refreshRestaurantInfo();
-      
+
     } catch (err) {
       logger.error('Failed to create about section', err);
       showToast('error', 'Hakkında bölümü oluşturulurken hata oluştu');
@@ -288,12 +275,12 @@ const RestaurantManagement: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6" dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className="space-y-6 pb-20 sm:pb-0" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
-      <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dashboard.restaurant.title')}</h2>
+      <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{t('dashboard.restaurant.title')}</h2>
         {(hasChanges || hasAboutChanges) && (
-          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} text-orange-600 dark:text-orange-400`}>
+          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 px-3 py-1.5 rounded-lg`}>
             <AlertCircle className="h-5 w-5" />
             <span className="text-sm font-medium">Kaydedilmemiş değişiklikler var</span>
           </div>
@@ -301,25 +288,23 @@ const RestaurantManagement: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className={`-mb-px flex ${isRTL ? 'space-x-reverse space-x-8' : 'space-x-8'}`}>
+      <div className="border-b border-gray-200 dark:border-gray-700 overflow-x-auto scrollbar-hide">
+        <nav className={`-mb-px flex ${isRTL ? 'space-x-reverse space-x-8' : 'space-x-8'} min-w-max`}>
           {tabs.map(tab => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`group inline-flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${
-                  activeTab === tab.id
-                    ? 'border-primary-600 text-primary-600 dark:text-primary-400'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-                }`}
+                className={`group inline-flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} py-4 px-1 border-b-2 font-medium text-sm transition-colors duration-200 ${activeTab === tab.id
+                  ? 'border-primary-800 text-primary-800 dark:text-primary-800'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                  }`}
               >
-                <Icon className={`h-5 w-5 ${
-                  activeTab === tab.id 
-                    ? 'text-primary-600 dark:text-primary-400' 
-                    : 'text-gray-400 group-hover:text-gray-500'
-                }`} />
+                <Icon className={`h-5 w-5 ${activeTab === tab.id
+                  ? 'text-primary-800 dark:text-primary-800'
+                  : 'text-gray-400 group-hover:text-gray-500'
+                  }`} />
                 <span>{tab.label}</span>
               </button>
             );
@@ -330,24 +315,24 @@ const RestaurantManagement: React.FC = () => {
       {/* Content */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
         {activeTab === 'general' && (
-          <div className="p-8 space-y-8">
+          <div className="p-4 sm:p-6 lg:p-8 space-y-8">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">{t('restaurantManagement.GeneralInformation')}</h3>
-            
+
             {/* Logo Upload Section - En üstte */}
             <div className="space-y-6 border-b border-gray-200 dark:border-gray-700 pb-8">
-              <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
                 <h4 className="text-lg font-medium text-gray-900 dark:text-white">{t('restaurant.restaurantLogo')}</h4>
                 <button
                   type="button"
                   onClick={() => logoInputRef.current?.click()}
                   disabled={isUploading}
-                  className={`inline-flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed`}
+                  className={`inline-flex justify-center items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto`}
                 >
                   <Camera className="h-4 w-4" />
                   <span>{isUploading ? 'Yükleniyor...' : 'Logo Yükle'}</span>
                 </button>
               </div>
-              
+
               <input
                 title='logoInputRef'
                 ref={logoInputRef}
@@ -356,7 +341,7 @@ const RestaurantManagement: React.FC = () => {
                 onChange={handleLogoFileChange}
                 className="hidden"
               />
-              
+
               {/* Logo Preview */}
               <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
                 {(formData.restaurantLogoPath || logoFile) && (
@@ -382,7 +367,7 @@ const RestaurantManagement: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid gap-8 md:grid-cols-2">
+            <div className="grid gap-6 md:gap-8 md:grid-cols-2">
               {/* Restaurant Name */}
               <div>
                 <label htmlFor="restaurantName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -409,19 +394,19 @@ const RestaurantManagement: React.FC = () => {
                   {t('dashboard.restaurant.restaurantStatus')}
                 </label>
                 <div className="relative">
-                  <CheckCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <CheckCircle className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
                   <select
                     id="restaurantStatus"
                     name="restaurantStatus"
                     value={formData.restaurantStatus ? 'true' : 'false'}
                     disabled
-                    className="w-full pl-10 pr-4 py-3 border rounded-lg transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 cursor-not-allowed"
+                    className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-600 text-gray-700 dark:text-gray-300 cursor-not-allowed`}
                   >
                     <option value="true">Aktif</option>
                     <option value="false">Pasif</option>
                   </select>
                 </div>
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                <p className={`mt-1 text-xs text-gray-500 dark:text-gray-400 ${isRTL ? 'text-right' : 'text-left'}`}>
                   Bu alan sistem tarafından yönetilir
                 </p>
               </div>
@@ -432,13 +417,13 @@ const RestaurantManagement: React.FC = () => {
                   Mutfak Türü
                 </label>
                 <div className="relative">
-                  <Utensils className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Utensils className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
                   <select
                     id="cuisineTypeId"
                     name="cuisineTypeId"
                     value={formData.cuisineTypeId || ''}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
                   >
                     <option value="">Seçiniz</option>
                     <option value="1">Türk Mutfağı</option>
@@ -455,23 +440,23 @@ const RestaurantManagement: React.FC = () => {
         )}
 
         {activeTab === 'legal' && (
-          <div className="p-8 space-y-8">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">{t('dashboard.restaurant.companyInfo')}</h3>
-            
-            <div className="grid gap-8 md:grid-cols-2">
+          <div className="p-4 sm:p-6 lg:p-8 space-y-8">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">{t('dashboard.restaurant.companyInfo')}</h3>
+
+            <div className="grid gap-6 md:gap-8 md:grid-cols-2">
               <div>
                 <label htmlFor="companyTitle" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Şirket Ünvanı
                 </label>
                 <div className="relative">
-                  <Building className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Building className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
                   <input
                     type="text"
                     id="companyTitle"
                     name="companyTitle"
                     value={formData.companyTitle || ''}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
                     placeholder="ABC Gıda A.Ş."
                   />
                 </div>
@@ -482,14 +467,14 @@ const RestaurantManagement: React.FC = () => {
                   Vergi Numarası
                 </label>
                 <div className="relative">
-                  <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Hash className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
                   <input
                     type="text"
                     id="taxNumber"
                     name="taxNumber"
                     value={formData.taxNumber || ''}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
                     placeholder="1234567890"
                   />
                 </div>
@@ -500,14 +485,14 @@ const RestaurantManagement: React.FC = () => {
                   Vergi Dairesi
                 </label>
                 <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Building2 className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
                   <input
                     type="text"
                     id="taxOffice"
                     name="taxOffice"
                     value={formData.taxOffice || ''}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
                     placeholder="İstanbul Vergi Dairesi"
                   />
                 </div>
@@ -518,14 +503,14 @@ const RestaurantManagement: React.FC = () => {
                   Mersis Numarası
                 </label>
                 <div className="relative">
-                  <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Hash className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
                   <input
                     type="text"
                     id="mersisNumber"
                     name="mersisNumber"
                     value={formData.mersisNumber || ''}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
                     placeholder="Mersis numarası"
                   />
                 </div>
@@ -536,14 +521,14 @@ const RestaurantManagement: React.FC = () => {
                   Ticaret Sicil Numarası
                 </label>
                 <div className="relative">
-                  <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <Hash className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
                   <input
                     type="text"
                     id="tradeRegistryNumber"
                     name="tradeRegistryNumber"
                     value={formData.tradeRegistryNumber || ''}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+                    className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400`}
                     placeholder="Ticaret sicil numarası"
                   />
                 </div>
@@ -554,13 +539,13 @@ const RestaurantManagement: React.FC = () => {
                   Şirket Türü
                 </label>
                 <div className="relative">
-                  <FileText className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                  <FileText className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400`} />
                   <select
                     id="legalType"
                     name="legalType"
                     value={formData.legalType || ''}
                     onChange={handleChange}
-                    className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                    className={`w-full ${isRTL ? 'pr-10 pl-4' : 'pl-10 pr-4'} py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
                   >
                     <option value="">Seçiniz</option>
                     <option value="Anonim Şirket">Anonim Şirket</option>
@@ -576,22 +561,22 @@ const RestaurantManagement: React.FC = () => {
         )}
 
         {activeTab === 'about' && (
-          <div className="p-8">
-            <div className="flex items-center justify-between mb-8">
+          <div className="p-4 sm:p-6 lg:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-0 mb-8">
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Hakkında Bölümü</h3>
               {!info?.about && (
                 <button
                   onClick={() => setAboutModalOpen(true)}
-                  className="inline-flex items-center space-x-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200"
+                  className="inline-flex justify-center items-center space-x-2 px-4 py-2 text-primary-800 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200 w-full sm:w-auto"
                 >
                   <Info className="h-4 w-4" />
                   <span>Hakkında Bilgisi Ekle</span>
                 </button>
               )}
             </div>
-            
+
             {info?.about ? (
-              <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-6 space-y-4">
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 sm:p-6 space-y-4">
                 {typeof info.about === 'string' ? (
                   <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">{info.about}</p>
                 ) : (
@@ -601,17 +586,17 @@ const RestaurantManagement: React.FC = () => {
                         {(info.about as any).title}
                       </h4>
                     )}
-                    
+
                     {(info.about as any)?.imageUrl && (
                       <div className="mb-4">
-                        <img 
-                          src={(info.about as any).imageUrl} 
-                          alt={(info.about as any).title || 'Restaurant About'} 
-                          className="w-full max-w-md h-48 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
+                        <img
+                          src={(info.about as any).imageUrl}
+                          alt={(info.about as any).title || 'Restaurant About'}
+                          className="w-full max-w-md h-auto sm:h-48 object-cover rounded-lg border border-gray-200 dark:border-gray-600"
                         />
                       </div>
                     )}
-                    
+
                     {(info.about as any)?.description && (
                       <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
                         {(info.about as any).description}
@@ -628,7 +613,7 @@ const RestaurantManagement: React.FC = () => {
                 </p>
                 <button
                   onClick={() => setAboutModalOpen(true)}
-                  className="btn-primary"
+                  className="btn-primary w-full sm:w-auto"
                 >
                   İlk Hakkında Bilgisini Ekle
                 </button>
@@ -640,16 +625,16 @@ const RestaurantManagement: React.FC = () => {
 
       {/* Fixed Save Button */}
       {(hasChanges || logoFile) && (
-        <div className={`fixed bottom-6 ${isRTL ? 'left-6' : 'right-6'} z-10`}>
-          <div className={`bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 rounded-xl p-4 flex items-center ${isRTL ? 'space-x-reverse space-x-4' : 'space-x-4'}`}>
-            <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} text-orange-600 dark:text-orange-400`}>
+        <div className={`fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 sm:w-auto z-10`}>
+          <div className={`bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between sm:justify-start gap-4 sm:gap-4`}>
+            <div className={`flex items-center space-x-2 text-orange-600 dark:text-orange-400`}>
               <AlertCircle className="h-5 w-5" />
               <span className="text-sm font-medium">Değişikliklerinizi kaydedin</span>
             </div>
             <button
               onClick={handleSave}
               disabled={isLoading}
-              className={`inline-flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} px-6 py-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors duration-200`}
+              className={`inline-flex justify-center items-center space-x-2 px-6 py-2 text-primary-800 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors duration-200 w-full sm:w-auto`}
             >
               {isLoading ? (
                 <>
@@ -672,10 +657,10 @@ const RestaurantManagement: React.FC = () => {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-            
+
             <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-            
-            <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+
+            <div className="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full mx-4 sm:mx-0">
               <div className="bg-white dark:bg-gray-800 px-6 pt-6 pb-4">
                 <div className={`flex items-center justify-between mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -688,7 +673,7 @@ const RestaurantManagement: React.FC = () => {
                     <X className="h-6 w-6" />
                   </button>
                 </div>
-                
+
                 <div className="space-y-6">
                   {/* Image Upload */}
                   <div>
@@ -704,7 +689,7 @@ const RestaurantManagement: React.FC = () => {
                         <span>{isUploading ? 'Yükleniyor...' : 'Görsel Seç'}</span>
                       </button>
                       {aboutImageFile && (
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
+                        <span className="text-sm text-gray-600 dark:text-gray-400 truncate max-w-[150px]">
                           {aboutImageFile.name}
                         </span>
                       )}
@@ -758,24 +743,24 @@ const RestaurantManagement: React.FC = () => {
                       value={aboutFormData.description || ''}
                       onChange={handleAboutChange}
                       className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors duration-200 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 resize-none"
-                                              placeholder={t('dashboard.restaurant.placeholders.aboutDetails')}
+                      placeholder={t('dashboard.restaurant.placeholders.aboutDetails')}
                       required
                     />
                   </div>
                 </div>
               </div>
-              
-              <div className={`bg-gray-50 dark:bg-gray-900 px-6 py-4 flex ${isRTL ? 'justify-start' : 'justify-end'} ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
+
+              <div className={`bg-gray-50 dark:bg-gray-900 px-6 py-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 sm:gap-3`}>
                 <button
                   onClick={() => setAboutModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
+                  className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
                 >
                   İptal
                 </button>
                 <button
                   onClick={handleCreateAbout}
                   disabled={isLoading || !aboutFormData.title?.trim() || !aboutFormData.description?.trim()}
-                  className={`inline-flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} px-4 py-2 bg-primary-600 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-md`}
+                  className={`w-full sm:w-auto inline-flex justify-center items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'} px-4 py-2 text-primary-800 hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-medium rounded-md`}
                 >
                   {isLoading ? (
                     <>
@@ -797,14 +782,13 @@ const RestaurantManagement: React.FC = () => {
 
       {/* Toast Notification */}
       {toast.show && (
-        <div className={`fixed top-4 ${isRTL ? 'left-4' : 'right-4'} z-50 max-w-sm w-full`}>
-          <div className={`rounded-lg shadow-lg p-4 ${
-            toast.type === 'success' 
-              ? 'bg-green-100 border border-green-200 text-green-800 dark:bg-green-900 dark:border-green-700 dark:text-green-200' 
-              : toast.type === 'error'
+        <div className={`fixed top-4 ${isRTL ? 'left-4' : 'right-4'} z-50 max-w-sm w-full mx-auto`}>
+          <div className={`rounded-lg shadow-lg p-4 mx-4 sm:mx-0 ${toast.type === 'success'
+            ? 'bg-green-100 border border-green-200 text-green-800 dark:bg-green-900 dark:border-green-700 dark:text-green-200'
+            : toast.type === 'error'
               ? 'bg-red-100 border border-red-200 text-red-800 dark:bg-red-900 dark:border-red-700 dark:text-red-200'
               : 'bg-blue-100 border border-blue-200 text-blue-800 dark:bg-blue-900 dark:border-blue-700 dark:text-blue-200'
-          }`}>
+            }`}>
             <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
               {toast.type === 'success' && <CheckCircle className="h-5 w-5 flex-shrink-0" />}
               {toast.type === 'error' && <AlertCircle className="h-5 w-5 flex-shrink-0" />}
@@ -824,4 +808,5 @@ const RestaurantManagement: React.FC = () => {
   );
 };
 
-export default RestaurantManagement; 
+export default RestaurantManagement;
+

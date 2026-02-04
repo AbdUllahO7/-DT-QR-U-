@@ -6,16 +6,10 @@ import type { FAQ as FAQType } from '../../types';
 
 const FAQ: React.FC = () => {
   const { t, isRTL } = useLanguage();
-  const [openItems, setOpenItems] = useState<Set<string>>(new Set());
+  const [openItem, setOpenItem] = useState<string | null>(null);
 
   const toggleItem = (id: string): void => {
-    const newOpenItems = new Set(openItems);
-    if (newOpenItems.has(id)) {
-      newOpenItems.delete(id);
-    } else {
-      newOpenItems.add(id);
-    }
-    setOpenItems(newOpenItems);
+    setOpenItem(openItem === id ? null : id);
   };
 
   // Generate FAQ data from translations
@@ -40,9 +34,9 @@ const FAQ: React.FC = () => {
           className={`text-center mb-16 ${isRTL ? 'text-right' : ''}`}
         >
           <div className={`flex items-center justify-center space-x-2 ${isRTL ? 'space-x-reverse' : ''} mb-4`}>
-            <HelpCircle className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+            <HelpCircle className="h-8 w-8 text-primary-800 dark:text-primary-800" />
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white">
-              {t('faq.title')} <span className="text-primary-600 dark:text-primary-400">{t('faq.titleHighlight')}</span>
+              {t('faq.title')} <span className="text-primary-800 dark:text-primary-800">{t('faq.titleHighlight')}</span>
             </h2>
           </div>
           <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
@@ -68,15 +62,14 @@ const FAQ: React.FC = () => {
                 <span className="text-lg font-semibold text-gray-900 dark:text-white">
                   {faq.question}
                 </span>
-                <ChevronDown 
-                  className={`h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${
-                    openItems.has(faq.id) ? 'transform rotate-180' : ''
-                  }`}
+                <ChevronDown
+                  className={`h-5 w-5 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${openItem === faq.id ? 'transform rotate-180' : ''
+                    }`}
                 />
               </button>
-              
+
               <AnimatePresence>
-                {openItems.has(faq.id) && (
+                {openItem === faq.id && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: 'auto', opacity: 1 }}
@@ -110,9 +103,9 @@ const FAQ: React.FC = () => {
           <p className="text-gray-600 dark:text-gray-400 mb-8">
             {t('faq.cta.subtitle')}
           </p>
-          <button 
+          <button
             onClick={() => document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' })}
-            className="btn-primary"
+            className="btn-primary bg-primary-800 dark:bg-primary-800"
           >
             {t('faq.cta.button')}
           </button>

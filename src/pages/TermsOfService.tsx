@@ -1,0 +1,159 @@
+import React from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
+import { FileText, Calendar, Shield, AlertCircle } from 'lucide-react';
+
+const TermsOfService: React.FC = () => {
+  const { t, isRTL } = useLanguage();
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="container-max section-padding">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-6">
+            <FileText className="w-8 h-8 text-primary-800 dark:text-primary-800" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            {t('legal.terms.title')}
+          </h1>
+          <div className={`flex items-center justify-center gap-2 text-gray-600 dark:text-gray-400 `}>
+            <Calendar className="w-4 h-4" />
+            <span>{t('legal.terms.lastUpdated')}</span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 md:p-12 space-y-8">
+
+            {/* Introduction */}
+            <section>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                {t('legal.terms.sections.introduction.title')}
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                {t('legal.terms.sections.introduction.content')}
+              </p>
+            </section>
+
+            {/* Acceptance */}
+            <section>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                {t('legal.terms.sections.acceptance.title')}
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                {t('legal.terms.sections.acceptance.content')}
+              </p>
+            </section>
+
+            {/* Services */}
+            <section>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                {t('legal.terms.sections.services.title')}
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                {t('legal.terms.sections.services.content')}
+              </p>
+              <ul className={`space-y-2 ${isRTL ? 'mr-6' : 'ml-6'}`}>
+                {[0, 1, 2, 3].map((i) => (
+                  <li key={i} className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {isRTL ? '•' : '•'} {t(`legal.terms.sections.services.features.${i}`)}
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            {/* User Responsibilities */}
+            <section>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                {t('legal.terms.sections.userResponsibilities.title')}
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                {t('legal.terms.sections.userResponsibilities.content')}
+              </p>
+              <ul className={`space-y-2 ${isRTL ? 'mr-6' : 'ml-6'}`}>
+                {[0, 1, 2, 3].map((i) => (
+                  <li key={i} className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {isRTL ? '•' : '•'} {t(`legal.terms.sections.userResponsibilities.items.${i}`)}
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            {/* Payment Terms */}
+            <section>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                {t('legal.terms.sections.payment.title')}
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                {t('legal.terms.sections.payment.content')}
+              </p>
+            </section>
+
+            {/* Termination */}
+            <section>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                {t('legal.terms.sections.termination.title')}
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                {t('legal.terms.sections.termination.content')}
+              </p>
+            </section>
+
+            {/* Intellectual Property */}
+            <section>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                {t('legal.terms.sections.intellectualProperty.title')}
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                {t('legal.terms.sections.intellectualProperty.content')}
+              </p>
+            </section>
+
+            {/* Limitation of Liability */}
+            <section>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                {t('legal.terms.sections.liability.title')}
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                {t('legal.terms.sections.liability.content')}
+              </p>
+            </section>
+
+            {/* Changes to Terms */}
+            <section>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                {t('legal.terms.sections.changes.title')}
+              </h2>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                {t('legal.terms.sections.changes.content')}
+              </p>
+            </section>
+
+            {/* Contact */}
+            <section className="border-t border-gray-200 dark:border-gray-700 pt-8">
+              <div className="bg-primary-50 dark:bg-primary-900/20 rounded-xl p-6">
+                <div className={`flex items-start gap-4 `}>
+                  <AlertCircle className="w-6 h-6 text-primary-800 dark:text-primary-800 flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                      {t('legal.terms.sections.contact.title')}
+                    </h3>
+                    <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                      {t('legal.terms.sections.contact.content')}
+                    </p>
+                    <p className="text-primary-800 dark:text-primary-800 mt-2">
+                      {t('footer.contact.email')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TermsOfService;

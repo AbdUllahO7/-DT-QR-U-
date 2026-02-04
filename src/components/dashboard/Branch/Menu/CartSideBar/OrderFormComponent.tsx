@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   User,
   MapPin,
@@ -8,12 +10,16 @@ import {
   CreditCard,
   Banknote,
   Smartphone,
-  Hash, // Added for Table Number
+  ChevronDown,
+  Search,
+  Check
 } from 'lucide-react';
 import { useLanguage } from '../../../../../contexts/LanguageContext';
 import { OrderFormProps } from '../../../../../types/menu/carSideBarTypes';
+import { CustomSelect } from '../../../../common/CustomSelect';
 
-// Add payment preferences to the props interface
+// --- Types ---
+
 interface ExtendedOrderFormProps extends OrderFormProps {
   paymentPreferences?: {
     acceptCash: boolean;
@@ -21,7 +27,15 @@ interface ExtendedOrderFormProps extends OrderFormProps {
     acceptOnlinePayment: boolean;
   };
 }
-// Remove the (orderForm as any) casts and use proper typing
+
+interface Option {
+  value: any;
+  label: string;
+  searchTerms?: string;
+}
+
+
+
 const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
   orderForm,
   setOrderForm,
@@ -43,6 +57,17 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
 
   const selectedOrderType = getSelectedOrderType();
 
+  // Translation helper for order type name and description
+  const getOrderTypeTranslation = (orderType: any, field: 'name' | 'description'): string => {
+    if (!orderType) return '';
+    const translationKey = `orderTypes.${orderType.code}.${field}`;
+    const translated = t(translationKey);
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+    return field === 'name' ? orderType.name : orderType.description;
+  };
+
   // Get available payment methods
   const getAvailablePaymentMethods = () => {
     const methods = [];
@@ -60,6 +85,28 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
 
   const availablePaymentMethods = getAvailablePaymentMethods();
 
+  // Convert orderTypes to options for CustomSelect
+  const orderTypeOptions: Option[] = orderTypes.map(type => {
+    let label = getOrderTypeTranslation(type, 'name');
+    const extras: string[] = [];
+    
+    if (type.serviceCharge > 0) {
+      extras.push(`+${t('order.form.service')} $${type.serviceCharge.toFixed(2)}`);
+    }
+    if (type.minOrderAmount > 0) {
+      extras.push(`${t('order.form.minimumOrder')}: $${type.minOrderAmount.toFixed(2)}`);
+    }
+    
+    if (extras.length > 0) {
+      label += ` (${extras.join(' - ')})`;
+    }
+    
+    return {
+      value: type.id,
+      label: label
+    };
+  });
+
   if (loadingOrderTypes) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -74,11 +121,9 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
   const minOrderAmount = selectedOrderType?.minOrderAmount || 0;
   const isBelowMinimumOrder = minOrderAmount > 0 && totalPrice < minOrderAmount;
 
-  // --- FIXED: Updated Validation Logic ---
   const isMissingRequiredFields = () => {
     if (!selectedOrderType) return true;
 
-    // Check required fields based on order type
     if (selectedOrderType.requiresName && !orderForm.customerName?.trim()) {
       return true;
     }
@@ -88,11 +133,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
     if (selectedOrderType.requiresPhone && !orderForm.customerPhone?.trim()) {
       return true;
     }
-    if (selectedOrderType.requiresTable && !orderForm.tableNumber?.trim()) {
-      return true;
-    }
     
-    // Check payment method only if there are available payment methods
     if (availablePaymentMethods.length > 0 && !orderForm.paymentMethod) {
       return true;
     }
@@ -109,59 +150,49 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Order Type Selection */}
+      {/* Order Type Selection - Using CustomSelect */}
       <div>
         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
           {t('order.form.orderType')} *
         </label>
-        <select
-          title={t('order.form.selectOrderType')}
-          value={orderForm.orderTypeId}
-          onChange={(e) =>
-            setOrderForm((prev) => ({ ...prev, orderTypeId: parseInt(e.target.value) }))
-          }
-          className="w-full text-sm p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+        
+        <CustomSelect
+          placeholder={t('order.form.selectOrderType')}
+          options={orderTypeOptions}
+          value={orderForm.orderTypeId || null}
+          onChange={(value) => setOrderForm((prev) => ({ ...prev, orderTypeId: Number(value) }))}
           disabled={orderTypes.length === 0}
-        >
-          <option value={0}>{t('order.form.selectOrderType')}</option>
-          {orderTypes.map((type) => (
-            <option key={type.id} value={type.id}>
-              {type.name}{' '}
-              {type.serviceCharge > 0 &&
-                `(+${t('order.form.service')} $${type.serviceCharge.toFixed(2)})`}
-              {type.minOrderAmount > 0 &&
-                ` - ${t('order.form.minimumOrder')}: $${type.minOrderAmount.toFixed(2)}`}
-            </option>
-          ))}
-        </select>
+        />
         
         {/* Order Type Details */}
         {selectedOrderType && (
-          <div className="mt-2 text-xs space-y-1">
-            <p className="text-slate-500 dark:text-slate-400">
-              {selectedOrderType.description}
+          <div className="mt-3 text-xs space-y-1.5 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-700">
+            <p className="text-slate-600 dark:text-slate-400">
+              {getOrderTypeTranslation(selectedOrderType, 'description')}
             </p>
 
-            {selectedOrderType.minOrderAmount > 0 && (
-              <p className="text-blue-600 dark:text-blue-400">
-                {t('order.form.minimumOrder')}: $
-                {selectedOrderType.minOrderAmount.toFixed(2)}
-              </p>
-            )}
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {selectedOrderType.minOrderAmount > 0 && (
+                <p className="text-blue-600 dark:text-blue-400 font-medium">
+                  {t('order.form.minimumOrder')}: $
+                  {selectedOrderType.minOrderAmount.toFixed(2)}
+                </p>
+              )}
 
-            {selectedOrderType.serviceCharge > 0 && (
-              <p className="text-orange-600 dark:text-orange-400">
-                {t('order.form.serviceCharge')}: +$
-                {selectedOrderType.serviceCharge.toFixed(2)}
-              </p>
-            )}
+              {selectedOrderType.serviceCharge > 0 && (
+                <p className="text-orange-600 dark:text-orange-400 font-medium">
+                  {t('order.form.serviceCharge')}: +$
+                  {selectedOrderType.serviceCharge.toFixed(2)}
+                </p>
+              )}
 
-            {selectedOrderType.estimatedMinutes && (
-              <p className="text-green-600 dark:text-green-400">
-                {t('order.form.estimatedTime')}: {selectedOrderType.estimatedMinutes}{' '}
-                {t('order.form.minutes')}
-              </p>
-            )}
+              {selectedOrderType.estimatedMinutes && (
+                <p className="text-green-600 dark:text-green-400 font-medium">
+                  {t('order.form.estimatedTime')}: {selectedOrderType.estimatedMinutes}{' '}
+                  {t('order.form.minutes')}
+                </p>
+              )}
+            </div>
           </div>
         )}
         
@@ -230,9 +261,9 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
         </div>
       )}
 
-      {/* --- FIXED: Conditional Fields Based on Order Type --- */}
+      {/* Conditional Fields Based on Order Type */}
 
-      {/* Customer Name - Only show if required */}
+      {/* Customer Name */}
       {selectedOrderType?.requiresName && (
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -245,7 +276,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
             onChange={(e) =>
               setOrderForm((prev) => ({ ...prev, customerName: e.target.value }))
             }
-            className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+            className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-colors"
             placeholder={t('order.form.customerNamePlaceholder')}
             required
           />
@@ -257,32 +288,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
         </div>
       )}
 
-      {/* Table Number - Only show if required */}
-      {selectedOrderType?.requiresTable && (
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            <Hash className="h-4 w-4 inline mr-1" />
-            {t('order.form.tableNumber')} *
-          </label>
-          <input
-            type="text"
-            value={orderForm.tableNumber || ''}
-            onChange={(e) =>
-              setOrderForm((prev) => ({ ...prev, tableNumber: e.target.value }))
-            }
-            className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
-            placeholder={t('order.form.tableNumberPlaceholder')}
-            required
-          />
-          {!orderForm.tableNumber?.trim() && (
-            <p className="text-xs text-red-500 dark:text-red-400 mt-1">
-              {t('order.form.tableNumberRequired') || 'Table number is required'}
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Delivery Address - Only show if required */}
+      {/* Delivery Address */}
       {selectedOrderType?.requiresAddress && (
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -294,7 +300,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
             onChange={(e) =>
               setOrderForm((prev) => ({ ...prev, deliveryAddress: e.target.value }))
             }
-            className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+            className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-colors"
             placeholder={t('order.form.deliveryAddressPlaceholder')}
             rows={3}
             required
@@ -307,7 +313,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
         </div>
       )}
 
-      {/* Phone Number - Only show if required */}
+      {/* Phone Number */}
       {selectedOrderType?.requiresPhone && (
         <div>
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
@@ -320,7 +326,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
             onChange={(e) =>
               setOrderForm((prev) => ({ ...prev, customerPhone: e.target.value }))
             }
-            className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+            className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-colors"
             placeholder={t('order.form.phoneNumberPlaceholder')}
             required
           />
@@ -332,7 +338,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
         </div>
       )}
 
-      {/* Notes (Always visible as optional) */}
+      {/* Notes */}
       <div>
         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
           {t('order.form.specialInstructions')}
@@ -342,14 +348,14 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
           onChange={(e) =>
             setOrderForm((prev) => ({ ...prev, notes: e.target.value }))
           }
-          className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+          className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-colors"
           placeholder={t('order.form.specialInstructionsPlaceholder')}
           rows={3}
         />
       </div>
 
       {/* Order Summary */}
-      <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg">
+      <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-100 dark:border-slate-700">
         <h4 className="font-medium text-slate-800 dark:text-slate-200 mb-3">
           {t('order.form.orderSummary')}
         </h4>
@@ -359,7 +365,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
               {t('order.form.subtotal')}:
             </span>
             <span className="text-slate-800 dark:text-slate-200">
-              ${totalPrice.toFixed(2)}
+              {totalPrice.toFixed(2)}
             </span>
           </div>
 
@@ -369,13 +375,13 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
                 {t('order.form.serviceCharge')}:
               </span>
               <span className="text-slate-800 dark:text-slate-200">
-                +${orderTotal.serviceCharge.toFixed(2)}
+                +{orderTotal.serviceCharge.toFixed(2)}
               </span>
             </div>
           )}
 
           {isBelowMinimumOrder && (
-            <div className="flex justify-between text-red-600 dark:text-red-400">
+            <div className="flex justify-between text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 p-2 rounded">
               <span className="text-sm">{t('order.form.minimumRequired')}:</span>
               <span className="text-sm font-medium">
                 ${minOrderAmount.toFixed(2)}
@@ -383,7 +389,7 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
             </div>
           )}
 
-          <div className="flex justify-between font-bold border-t border-slate-200 dark:border-slate-600 pt-2">
+          <div className="flex justify-between font-bold border-t border-slate-200 dark:border-slate-600 pt-2 mt-2">
             <span className="text-slate-800 dark:text-slate-200">
               {t('menu.cart.total')}:
             </span>
@@ -399,8 +405,8 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
           </div>
 
           {estimatedTime > 0 && (
-            <div className="flex items-center text-slate-600 dark:text-slate-400 mt-2">
-              <Clock className="h-4 w-4 mr-1" />
+            <div className="flex items-center text-slate-600 dark:text-slate-400 mt-2 text-xs">
+              <Clock className="h-3.5 w-3.5 mr-1" />
               <span>
                 {t('order.form.estimatedTime')}: {estimatedTime} {t('order.form.minutes')}
               </span>
@@ -412,24 +418,25 @@ const OrderFormComponent: React.FC<ExtendedOrderFormProps> = ({
       {/* Validation Messages */}
       {isMissingRequiredFields() && orderForm.orderTypeId > 0 && (
         <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
-          <p className="text-sm text-amber-800 dark:text-amber-200 font-medium">
+          <p className="text-sm text-amber-800 dark:text-amber-200 font-medium flex items-center">
+            <Loader2 className="h-4 w-4 mr-2 animate-pulse" />
             {t('order.form.pleaseFillRequiredFields') || 'Please fill in all required fields'}
           </p>
         </div>
       )}
 
       {/* Action Buttons */}
-      <div className="flex space-x-3">
+      <div className="flex gap-3 space-x-3 pt-2">
         <button
           onClick={onBack}
-          className="flex-1 py-3 px-4 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+          className="flex-1 py-3 px-4 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors font-medium"
         >
           {t('order.form.backToCart')}
         </button>
         <button
           onClick={onCreate}
           disabled={isButtonDisabled}
-          className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg transform active:scale-95"
         >
           {loading ? (
             <div className="flex items-center justify-center">

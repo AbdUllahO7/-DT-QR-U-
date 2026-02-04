@@ -2,13 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Timer } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useLanguage } from '../contexts/LanguageContext';
 
 const OnboardingComplete: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [countdown, setCountdown] = useState<number>(10);
 
+  // 1. Add this useEffect to scroll to top on mount
   useEffect(() => {
-    // Start countdown
+    window.scrollTo(0, 0);
+  }, []);
+
+  useEffect(() => {
     const timer = setInterval(() => {
       setCountdown(prev => prev - 1);
     }, 1000);
@@ -16,16 +22,13 @@ const OnboardingComplete: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Separate effect for navigation
   useEffect(() => {
     if (countdown <= 0) {
-      // Clear all onboarding data and user data
       localStorage.removeItem('onboarding_userId');
       localStorage.removeItem('onboarding_restaurantId');
       localStorage.removeItem('onboarding_branchId');
-      localStorage.removeItem('userId'); // Ana userId değerini de siliyoruz
-      localStorage.removeItem('token'); // Varsa token değerini de siliyoruz
-      // Navigate to login
+      localStorage.removeItem('userId');
+      localStorage.removeItem('token');
       navigate('/login');
     }
   }, [countdown, navigate]);
@@ -55,10 +58,10 @@ const OnboardingComplete: React.FC = () => {
               className="mt-6"
             >
               <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Kayıt İşlemi Tamamlandı!
+                {t('onboardingComplete.title')}
               </h3>
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                Restaurant ve şube bilgileriniz başarıyla kaydedildi. Giriş sayfasına yönlendiriliyorsunuz...
+                {t('onboardingComplete.message')}
               </p>
             </motion.div>
 
@@ -69,13 +72,13 @@ const OnboardingComplete: React.FC = () => {
               className="mt-6 flex items-center justify-center"
             >
               <div className="relative">
-                <Timer className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-                <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-sm font-medium text-primary-600 dark:text-primary-400">
+                <Timer className="h-6 w-6 text-primary-800 dark:text-primary-800" />
+                <span className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-sm font-medium text-primary-800 dark:text-primary-800">
                   {countdown}
                 </span>
               </div>
               <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">
-                saniye içinde yönlendirileceksiniz
+                {t('onboardingComplete.redirectingIn')}
               </span>
             </motion.div>
           </div>

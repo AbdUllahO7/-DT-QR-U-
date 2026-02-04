@@ -1,18 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { isAxiosError } from 'axios';
-import { 
-  Edit3, 
-  Save, 
-  X, 
-  Building2, 
-  FileText, 
-  Hash, 
-  Briefcase, 
-  Scale, 
-  Wine,
-  Upload,
+import {
+  Edit3,
+  Save,
+  X,
+  Building2,
+  FileText,
+  Hash,
+  Briefcase,
+  Scale,
   Image as ImageIcon,
-  CheckCircle2,
   Trash2,
   AlertTriangle,
   Loader2
@@ -25,6 +22,11 @@ import {
 import { useAuth } from '../../../../hooks';
 import { useNavigate } from 'react-router-dom';
 import ToastComponent from '../../Branch/Menu/CartSideBar/ToastComponenet';
+import { MultiLanguageInput } from '../../../common/MultiLanguageInput';
+import { useTranslatableFields, TranslatableFieldValue } from '../../../../hooks/useTranslatableFields';
+import { languageService } from '../../../../services/LanguageService';
+import { restaurantTranslationService } from '../../../../services/Translations/RestaurantTranslationService';
+import { logger } from '../../../../utils/logger';
 
 export interface Toast {
   id: string;
@@ -59,14 +61,15 @@ interface ManagementInfoPanelProps {
   loading: boolean;
 }
 
-export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({ 
-  info, 
-  onEdit, 
-  onSubmit, 
-  editing, 
-  loading 
+export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
+  info,
+  onEdit,
+  onSubmit,
+  editing,
+  loading
 }) => {
   const { t } = useLanguage();
+  const translationHook = useTranslatableFields();
 
   // --- Add Refs for file inputs ---
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -74,6 +77,13 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
   const foodCertificateInputRef = useRef<HTMLInputElement>(null);
   const {  clearAuth } = useAuth();
   const navigate = useNavigate();
+
+  // Supported languages - dynamically loaded
+  const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
+  const [defaultLanguage, setDefaultLanguage] = useState<string>('en');
+
+  // Translation states
+  const [restaurantNameTranslations, setRestaurantNameTranslations] = useState<TranslatableFieldValue>({});
 
   const [formData, setFormData] = useState<RestaurantManagementInfo>(
     info || {
@@ -113,9 +123,75 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
     setToasts(prev => prev.filter(toast => toast.id !== id));
   };
 
+  // Load supported languages
   useEffect(() => {
-    if (info) setFormData(info);
-  }, [info]);
+    const loadLanguages = async () => {
+      try {
+        const languagesData = await languageService.getRestaurantLanguages();
+
+        // Deduplicate languages by code
+        const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
+          if (!acc.find((l: any) => l.code === lang.code)) {
+            acc.push(lang);
+          }
+          return acc;
+        }, []);
+
+        setSupportedLanguages(uniqueLanguages);
+        setDefaultLanguage(languagesData.defaultLanguage || 'en');
+
+        // Initialize empty translations
+        const languageCodes = uniqueLanguages.map((lang: any) => lang.code);
+        setRestaurantNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+      } catch (error) {
+        console.error('Failed to load languages:', error);
+      }
+    };
+    loadLanguages();
+  }, []);
+
+  // Load restaurant data and translations
+  useEffect(() => {
+    if (info) {
+      setFormData(info);
+
+      // Load existing translations
+      const loadTranslations = async () => {
+        try {
+          const response = await restaurantTranslationService.getRestaurantTranslations();
+
+
+          // Initialize with base values
+          const nameTrans: TranslatableFieldValue = {
+            [defaultLanguage]: info.restaurantName
+          };
+
+          // Map translations to the state
+          // The API returns { baseValues: {...}, translations: [...] }
+          const translationsArray = Array.isArray(response) ? response : (response as any).translations || [];
+
+          translationsArray.forEach((translation: any) => {
+            if (translation.restaurantName) {
+              nameTrans[translation.languageCode] = translation.restaurantName;
+            }
+          });
+
+          setRestaurantNameTranslations(nameTrans);
+        } catch (error) {
+          logger.error('Failed to load restaurant translations', error, { prefix: 'ManagementInfoPanel' });
+          // Initialize with default language values on error
+          const nameTrans: TranslatableFieldValue = {
+            [defaultLanguage]: info.restaurantName
+          };
+          setRestaurantNameTranslations(nameTrans);
+        }
+      };
+
+      if (supportedLanguages.length > 0) {
+        loadTranslations();
+      }
+    }
+  }, [info, supportedLanguages, defaultLanguage]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: keyof RestaurantManagementInfo) => {
     const file = e.target.files?.[0];
@@ -250,7 +326,6 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
           <div className="flex justify-between items-center p-6">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                <Briefcase className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -293,27 +368,59 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
 
         <div className="relative p-6">
           {editing ? (
-            <form onSubmit={(e) => { e.preventDefault(); onSubmit(formData); }} className="space-y-6">
+            <form onSubmit={async (e) => {
+              e.preventDefault();
+
+              // First, update the restaurant info
+              onSubmit(formData);
+
+              // Then, save translations
+              try {
+                const translationData = Object.keys(restaurantNameTranslations)
+                  .filter(lang => lang !== defaultLanguage)
+                  .filter(lang => restaurantNameTranslations[lang])
+                  .map(languageCode => ({
+                    languageCode,
+                    restaurantName: restaurantNameTranslations[languageCode],
+                  }));
+
+
+                if (translationData.length > 0) {
+                  await restaurantTranslationService.batchUpsertRestaurantTranslations({
+                    translations: translationData
+                  });
+                  logger.info('Restaurant translations saved', null, { prefix: 'ManagementInfoPanel' });
+                }
+              } catch (error) {
+                console.error('Translation save error:', error);
+                logger.error('Failed to save restaurant translations', error, { prefix: 'ManagementInfoPanel' });
+                // Don't fail the whole operation if translations fail
+              }
+            }} className="space-y-6">
               {/* Restaurant Details Section */}
               <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-5 border border-gray-200/50 dark:border-gray-700/50">
                 <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <Building2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   {t('management.sections.restaurantDetails')}
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {t('management.fields.restaurantName')}
-                    </label>
-                    <input
-                      type="text"
-                      placeholder={t('management.placeholders.restaurantName')}
-                      value={formData.restaurantName || ''}
-                      onChange={(e) => setFormData(prev => ({ ...prev, restaurantName: e.target.value }))}
-                      className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    <MultiLanguageInput
+                      label={t('management.fields.restaurantName') || 'Restaurant Name'}
+                      value={restaurantNameTranslations}
+                      onChange={(newTranslations) => {
+                        setRestaurantNameTranslations(newTranslations);
+                        // Update base formData with default language value for validation
+                        const val = newTranslations[defaultLanguage] || '';
+                        setFormData(prev => ({ ...prev, restaurantName: val }));
+                      }}
+                      languages={supportedLanguages}
+                      placeholder={t('management.placeholders.restaurantName') || 'Enter restaurant name'}
+                      defaultLanguage={defaultLanguage}
+                      required={true}
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('management.fields.restaurantLogo')}
@@ -752,13 +859,13 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
                     <Trash2 className="w-4 h-4" />
                     {t('management.buttons.delete') || 'Delete Restaurant'}
                   </button>
-                  <button
+              {/*     <button
                     onClick={() => setShowPurgeModal(true)}
                     className="flex items-center justify-center gap-2 px-5 py-2.5 bg-red-800 hover:bg-red-900 text-white font-medium rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
                   >
                     <Trash2 className="w-4 h-4" />
                     {t('management.buttons.purge') || 'Permanently Delete'}
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </div>
@@ -768,6 +875,7 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
 
       {/* Delete Confirmation Modal */}
       <ConfirmDeleteModal
+        errorMessage=''
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
@@ -780,6 +888,7 @@ export const ManagementInfoPanel: React.FC<ManagementInfoPanelProps> = ({
 
       {/* Purge Confirmation Modal */}
       <ConfirmDeleteModal
+      errorMessage=''
         isOpen={showPurgeModal}
         onClose={() => setShowPurgeModal(false)}
         onConfirm={handlePurge}

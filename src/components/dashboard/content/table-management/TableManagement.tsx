@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, Users, Plus, Trash2, MapPin, Edit2, MoreVertical } from 'lucide-react';
+import { ChevronDown, Users, Plus, Trash2, MapPin } from 'lucide-react'; // Added MapPin for the branch
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useClickOutside, useSignalR } from '../../../../hooks';
 import { SignalRCallbacks } from '../../../../types/signalR';
 import { logger } from '../../../../utils/logger';
 import { branchService } from '../../../../services/branchService';
-import TableCard from './QRCodeCard';
 import AddQRCodeCard from './AddQRCodeCard';
 import QRCodeModal from './QRCodeModal';
 import TableCategoryModal from './TableCategoryModal';
 import { ConfirmDeleteModal } from '../../common/ConfirmDeleteModal';
 import { BranchDropdownItem, GroupedTables, RestaurantBranchDropdownItem, TableCategory, TableData } from '../../../../types/BranchManagement/type';
 import { useNavigate } from 'react-router-dom';
-import { tableService } from '../../../../services/Branch/branchTableService';
+import TableCard from '../../Branch/Table/TableCard';
+import { QRCodeModalShow } from '../../Branch/Table/BranchTables';
 
 interface Props {
   selectedBranch: RestaurantBranchDropdownItem | null;
 }
 
 const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
+  // --- Existing State and Hooks (Kept for functionality) ---
   const { t, isRTL } = useLanguage();
   const [branches, setBranches] = useState<BranchDropdownItem[]>([]);
   const [selectedBranchForTables, setSelectedBranchForTables] = useState<BranchDropdownItem | null>(null);
@@ -39,20 +40,21 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   const [tableToDelete, setTableToDelete] = useState<TableData | null>(null);
   const [isDeletingTable, setIsDeletingTable] = useState(false);
 
-  // Category management states
-  const [editingCategory, setEditingCategory] = useState<TableCategory | null>(null);
-  const [isCategoryDeleteModalOpen, setIsCategoryDeleteModalOpen] = useState(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<TableCategory | null>(null);
-  const [isDeletingCategory, setIsDeletingCategory] = useState(false);
-  const [openCategoryMenu, setOpenCategoryMenu] = useState<number | null>(null);
+    const [qrModal, setQrModal] = useState<{
+      isOpen: boolean;
+      table: TableData | null;
+    }>({
+      isOpen: false,
+      table: null
+    });
+
 
   const dropdownRef = React.useRef<HTMLDivElement>(null);
-  
   useClickOutside(dropdownRef, () => setIsBranchDropdownOpen(false));
-  
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   const token = localStorage.getItem('token') || '';
 
+  // --- SignalR, Data Fetching, Grouping, and Handlers (Kept as is for functionality) ---
   const signalRCallbacks: SignalRCallbacks = {
     onTableChanged: (data) => {
       logger.info('TableChanged event alındı', data);
@@ -68,6 +70,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     },
     onTableStatusChanged: (data) => {
       logger.info('TableStatusChanged event alındı', data);
+      // Sadece ilgili tablonun durumunu güncelle
       setTables(prev => prev.map(table =>
         table.id === data.tableId
           ? { ...table, isOccupied: data.isOccupied, status: data.status }
@@ -80,6 +83,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     },
     onError: (data) => {
       logger.error('SignalR Error:', data.message);
+      // TODO: Kullanıcıya toast ile göster
     }
   };
 
@@ -94,9 +98,9 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         if (branchList.length > 0 && !selectedBranchForTables) {
           setSelectedBranchForTables(branchList[0]);
         }
-      } catch (error:any) {
+      } catch (error) {
         logger.error('Şube listesi yüklenirken hata:', error);
-         setError(error.response.data.message);
+        setError(t('TableManagement.error.loadFailed'));
       }
     };
 
@@ -133,10 +137,9 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         tablesCount: tablesData.length,
         categoriesCount: categoriesData.length
       });
-    } catch (error:any) {
+    } catch (error) {
       logger.error('Masalar ve kategoriler yüklenirken hata:', error);
-               setError(error.response.data.message);
-
+      setError(t('TableManagement.error.dataLoadFailed'));
     } finally {
       setIsLoading(false);
     }
@@ -170,6 +173,22 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
   const handleCreateTable = () => {
     setEditingTable(null);
     setIsModalOpen(true);
+  };
+
+    const handleCloseQRModal = (): void => {
+    setQrModal({
+      isOpen: false,
+      table: null
+    });
+  };
+
+    const generateQRCodeImageUrl = (qrCode: string): string => {
+    if (!qrCode) return '';
+    
+    const baseUrl = window.location.origin;
+    const tableUrl = `${baseUrl}/table/qr/${qrCode}`;
+    
+    return `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(tableUrl)}`;
   };
 
   const handleEditTable = (table: TableData) => {
@@ -229,8 +248,7 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
         errorMessage = error.message;
       }
       
-               setError(error.response.data.message);
-
+      setError(errorMessage);
       
       setTimeout(() => setError(null), 5000);
       
@@ -261,10 +279,9 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     try {
       await branchService.toggleTableStatus(id, selectedBranchForTables?.branchId ?? 0, newStatus);
       logger.info('Table status updated:', { id, newStatus });
-    } catch (error:any) {
+    } catch (error) {
       logger.error('Masa durumu güncellenirken hata:', error);
-               setError(error.response.data.message);
-
+      setError(t('TableManagement.error.statusUpdateFailed'));
       
       setTables(prev => prev.map(table =>
         table.id === id ? { ...table, isActive: !newStatus } : table
@@ -304,82 +321,14 @@ const TableManagement: React.FC<Props> = ({ selectedBranch }) => {
     setError(null);
   };
 
-  // Category management handlers
-  const handleCreateCategory = () => {
-    setEditingCategory(null);
-    setIsCategoryModalOpen(true);
-  };
+    const handleShowQRCode = (table: TableData): void => {
+      setQrModal({
+        isOpen: true,
+        table
+      });
+    };
 
-  const handleEditCategory = (category: TableCategory) => {
-    setEditingCategory(category);
-    setIsCategoryModalOpen(true);
-    setOpenCategoryMenu(null);
-  };
-
-  const handleDeleteCategory = (category: TableCategory) => {
-    setCategoryToDelete(category);
-    setIsCategoryDeleteModalOpen(true);
-    setOpenCategoryMenu(null);
-  };
-
-  const performDeleteCategory = async () => {
-    if (!categoryToDelete) {
-      throw new Error('Category not selected');
-    }
-
-    setIsDeletingCategory(true);
-
-    try {
-      await tableService.deleteCategory(categoryToDelete.id , selectedBranchForTables?.branchId);
-      logger.info('Category deleted successfully:', { id: categoryToDelete.id });
-      
-      await fetchTablesAndCategories();
-      
-      setCategoryToDelete(null);
-      setIsCategoryDeleteModalOpen(false);
-
-    } catch (error: any) {
-      logger.error('Category deletion error:', error);
-      
-      let errorMessage = 'Failed to delete category';
-      
-      if (error.response?.status === 409) {
-        errorMessage = 'Cannot delete category with existing tables';
-      } else if (error.response?.status === 404) {
-        errorMessage = 'Category not found';
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-      
-               setError(error.response.data.message);
-
-      setTimeout(() => setError(null), 5000);
-      
-      throw new Error(errorMessage);
-    } finally {
-      setIsDeletingCategory(false);
-    }
-  };
-
-  const handleCategoryDeleteModalClose = () => {
-    setIsCategoryDeleteModalOpen(false);
-    setCategoryToDelete(null);
-  };
-
-  const handleCategoryModalClose = () => {
-    setIsCategoryModalOpen(false);
-    setEditingCategory(null);
-  };
-
-const handleCategoryModalSuccess = () => {
-  fetchTablesAndCategories();
-  setIsCategoryModalOpen(false);
-  setEditingCategory(null);
-};
-
-  const toggleCategoryMenu = (categoryId: number) => {
-    setOpenCategoryMenu(openCategoryMenu === categoryId ? null : categoryId);
-  };
+  // --- Render Functions (Styling Modernized) ---
 
   const renderError = () => {
     if (!error) return null;
@@ -430,6 +379,8 @@ const handleCategoryModalSuccess = () => {
     );
   }
 
+  // --- Main Component JSX (Redesigned) ---
+
   return (
     <div className={`p-6 bg-gray-50 dark:bg-gray-900 min-h-screen ${isRTL ? 'text-right' : 'text-left'}`}>
       <div className="max-w-7xl mx-auto space-y-8">
@@ -441,10 +392,10 @@ const handleCategoryModalSuccess = () => {
           </h1>
 
           <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            {/* Branch Selector Dropdown */}
+            {/* Şube Seçici Dropdown - Modernized */}
             <div className="relative z-30" ref={dropdownRef}>
               <button
-                title='Branch Dropdown'
+                title='isBranchDropdownOpen'
                 onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
                 className={`flex items-center justify-between min-w-[220px] px-5 py-2.5 text-base font-semibold text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-xl shadow-sm hover:bg-blue-100 dark:hover:bg-blue-900 focus:outline-none focus:ring-4 focus:ring-blue-300/50 dark:focus:ring-blue-800/50 transition-all duration-200 ${isRTL ? 'flex-row-reverse' : ''}`}
                 aria-label={t('tableManagement.accessibility.branchSelector')}
@@ -467,7 +418,7 @@ const handleCategoryModalSuccess = () => {
                 >
                   {branches.length === 0 ? (
                     <div className="px-4 py-3 text-center text-sm text-gray-500 dark:text-gray-400">
-                      {t('TableManagement.error.loadFailed')}
+                      {t('tableManagement.error.loadFailed')}
                     </div>
                   ) : (
                     branches.map(branch => (
@@ -490,7 +441,7 @@ const handleCategoryModalSuccess = () => {
 
             {/* Action Buttons */}
             <button
-              onClick={handleCreateCategory}
+              onClick={() => setIsCategoryModalOpen(true)}
               className={`inline-flex items-center px-4 py-2.5 border border-transparent text-sm font-medium rounded-xl shadow-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200 ${isRTL ? 'flex-row-reverse' : ''}`}
               aria-label={t('tableManagement.accessibility.addCategoryButton')}
             >
@@ -516,6 +467,7 @@ const handleCategoryModalSuccess = () => {
         </div>
         
         {/* Content Area */}
+        
         {renderError()}
 
         {!selectedBranchForTables ? (
@@ -543,7 +495,7 @@ const handleCategoryModalSuccess = () => {
                   {t('tableManagement.noCategories')}
                 </p>
                 <button
-                  onClick={handleCreateCategory}
+                  onClick={() => setIsCategoryModalOpen(true)}
                   className={`inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-lg text-white bg-blue-600 hover:bg-blue-700 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
                 >
                   <Plus className={`h-5 w-5 ${isRTL ? 'ml-2' : 'mr-2'}`} />
@@ -553,69 +505,21 @@ const handleCategoryModalSuccess = () => {
             ) : (
               Object.entries(groupedTables).map(([categoryId, { category, tables }]) => (
                 <section key={categoryId} className="space-y-6" role="region" aria-label={`${category.categoryName} ${t('tableManagement.accessibility.categorySection')}`}>
-                  {/* Category Header with Actions */}
-                  <div className={`flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-2xl shadow-md border-t-4`}
+                  {/* Kategori Başlığı - Elevated Design */}
+                  <div className={`flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-2xl shadow-md border-t-4`}
                     style={{ borderTopColor: category.colorCode || '#3B82F6' }}
                   >
                     <div className={`flex items-center space-x-3 ${isRTL ? 'flex-row-reverse space-x-reverse' : ''}`}>
                       <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                         {category.categoryName}
                       </h3>
-                      <span className="px-3 py-1 text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full">
-                        {tables.length} {tables.length === 1 ? 'table' : 'tables'}
-                      </span>
-                    </div>
-
-                    {/* Category Actions Menu */}
-                <div className="relative">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleCategoryMenu(category.id);
-                        }}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                        aria-label="Category Actions"
-                      >
-                        <MoreVertical className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                      </button>
-
-                      {openCategoryMenu === category.id && (
-                        <>
-                          {/* Backdrop to close menu when clicking outside */}
-                          <div 
-                            className="fixed inset-0 z-40" 
-                            onClick={() => setOpenCategoryMenu(null)}
-                          />
-                          
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                            className={`absolute ${isRTL ? 'left-0' : 'right-0'} mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1 z-50`}
-                          >
-                            <button
-                              onClick={() => handleEditCategory(category)}
-                              className="w-full px-4 py-2 text-left text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
-                            >
-                              <Edit2 className="h-4 w-4" />
-                             {t('tableManagement.categories.editCategory')}
-                            </button>
-                            <button
-                              onClick={() => handleDeleteCategory(category)}
-                              className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              {t('tableManagement.categories.deleteCategory')}
-                            </button>
-                          </motion.div>
-                        </>
-                      )}
+                     
                     </div>
                   </div>
 
-                  {/* Tables Grid */}
+                  {/* Masalar Grid - Enhanced Grid Structure */}
                   <div 
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
                     role="grid"
                     aria-label={`${category.categoryName} ${t('tableManagement.accessibility.tablesGrid')}`}
                   >
@@ -629,15 +533,17 @@ const handleCategoryModalSuccess = () => {
                       >
                         <TableCard
                           table={table}
-                          onEdit={handleEditTable}
-                          onDelete={() => handleDeleteTable(table)} 
-                          onToggleStatus={handleToggleStatus}
-                          onDownload={downloadQR}
+                          onEdit={() => handleEditTable(table)}
+                          onDelete={() => handleDeleteTable(table)}
+                          onToggleStatus={(id) => handleToggleStatus(id)}
+                          onDownload={handleShowQRCode}
+                          onShowQRCode={handleShowQRCode}
+                          categoryColor={category.colorCode}
                         />
                       </motion.div>
                     ))}
                     
-                    {/* Add New Table Card */}
+                    {/* Yeni Masa Ekle Kartı - More prominent */}
                     <motion.div
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -653,7 +559,7 @@ const handleCategoryModalSuccess = () => {
           </div>
         )}
 
-      {/* Modals */}
+      {/* --- Modals (Kept as is, but will inherit modern context styles) --- */}
       <QRCodeModal
         isOpen={isModalOpen}
         onClose={handleModalClose}
@@ -673,14 +579,13 @@ const handleCategoryModalSuccess = () => {
 
       <TableCategoryModal
         isOpen={isCategoryModalOpen}
-        onClose={handleCategoryModalClose}
+        onClose={() => setIsCategoryModalOpen(false)}
         selectedBranch={selectedBranch}
-        onSuccess={handleCategoryModalSuccess}
-        editingCategory={editingCategory}
-        isEditMode={!!editingCategory}
+        onSuccess={() => {
+          fetchTablesAndCategories();
+        }}
       />
 
-      {/* Table Delete Modal */}
       <ConfirmDeleteModal
         isOpen={isDeleteModalOpen}
         onClose={handleDeleteModalClose}
@@ -692,17 +597,14 @@ const handleCategoryModalSuccess = () => {
         itemName={tableToDelete?.menuTableName || ''}
       />
 
-      {/* Category Delete Modal */}
-      <ConfirmDeleteModal
-        isOpen={isCategoryDeleteModalOpen}
-        onClose={handleCategoryDeleteModalClose}
-        onConfirm={performDeleteCategory}
-        title={t('branchCategories.deleteModal.title')}
-        message={t('branchCategories.deleteModal.message')}
-        isSubmitting={isDeletingCategory}
-        itemType="category"
-        itemName={categoryToDelete?.categoryName || ''}
-      />
+        {qrModal.table && (
+          <QRCodeModalShow
+            isOpen={qrModal.isOpen}
+            onClose={handleCloseQRModal}
+            table={qrModal.table}
+            qrCodeImageUrl={generateQRCodeImageUrl(qrModal.table.qrCode || '')}
+          />
+        )}
     </div>
   </div>
   );

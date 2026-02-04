@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import { productService } from "../../../services/productService";
 import { logger } from "../../../utils/logger";
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Edit3, Tag, FileText, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { Category } from "../../../types/BranchManagement/type";
+import { languageService } from "../../../services/LanguageService";
+import { MultiLanguageInput } from "../../common/MultiLanguageInput";
+import { useTranslatableFields, TranslatableFieldValue } from "../../../hooks/useTranslatableFields";
+import { categoryTranslationService } from "../../../services/Translations/CategoryTranslationService";
 
 export const EditCategoryModal: React.FC<{
   isOpen: boolean;
@@ -13,6 +17,15 @@ export const EditCategoryModal: React.FC<{
   category: Category;
 }> = ({ isOpen, onClose, onSuccess, category }) => {
   const { t, isRTL } = useLanguage();
+  const translationHook = useTranslatableFields();
+
+  // Supported languages - dynamically loaded
+  const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
+  const [defaultLanguage, setDefaultLanguage] = useState<string>('en');
+
+  // Translation states
+  const [categoryNameTranslations, setCategoryNameTranslations] = useState<TranslatableFieldValue>({});
+
   const [formData, setFormData] = useState({
     categoryName: category.categoryName,
     description: category.description || '',
@@ -22,9 +35,81 @@ export const EditCategoryModal: React.FC<{
   const [error, setError] = useState<string | null>(null);
   const [focusedField, setFocusedField] = useState<string>('');
 
+  // Load languages on mount
+  useEffect(() => {
+    const loadLanguages = async () => {
+      try {
+        const languagesData = await languageService.getRestaurantLanguages();
+
+        // Deduplicate languages by code
+        const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
+          if (!acc.find((l: any) => l.code === lang.code)) {
+            acc.push(lang);
+          }
+          return acc;
+        }, []);
+
+        setSupportedLanguages(uniqueLanguages);
+        setDefaultLanguage(languagesData.defaultLanguage || 'en');
+
+        // Initialize empty translations
+        const languageCodes = uniqueLanguages.map((lang: any) => lang.code);
+        setCategoryNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+      } catch (error) {
+        logger.error('Failed to load languages', error, { prefix: 'EditCategoryModal' });
+      }
+    };
+    loadLanguages();
+  }, []);
+
+  // Load existing translations when modal opens with category data
+  useEffect(() => {
+    if (!isOpen || !category) return;
+
+    const loadCategoryData = async () => {
+      setFormData({
+        categoryName: category.categoryName,
+        description: category.description || '',
+        status: category.status
+      });
+
+      // Load existing translations
+      try {
+        const response = await categoryTranslationService.getCategoryTranslations(category.categoryId);
+
+        const categoryNameTrans: TranslatableFieldValue = {
+          [defaultLanguage]: category.categoryName
+        };
+
+        // Handle API response structure - could be array or object with translations property
+        const translationsArray = Array.isArray(response) ? response : (response as any)?.translations || [];
+
+        // Process translations array
+        translationsArray.forEach((translation: any) => {
+          if (translation.categoryName) {
+            categoryNameTrans[translation.languageCode] = translation.categoryName;
+          }
+        });
+
+        setCategoryNameTranslations(categoryNameTrans);
+      } catch (error) {
+        logger.error('Failed to load category translations', error, { prefix: 'EditCategoryModal' });
+        // Initialize with default language value on error
+        const categoryNameTrans: TranslatableFieldValue = {
+          [defaultLanguage]: category.categoryName
+        };
+        setCategoryNameTranslations(categoryNameTrans);
+      }
+
+      setError(null);
+    };
+
+    loadCategoryData();
+  }, [isOpen, category, defaultLanguage, supportedLanguages]);
+
   const handleSubmit = async () => {
     if (!formData.categoryName.trim()) return;
-    
+
     setIsSubmitting(true);
     setError(null);
 
@@ -35,11 +120,38 @@ export const EditCategoryModal: React.FC<{
         status: formData.status
       });
       logger.info('Kategori başarıyla güncellendi', { categoryId: category.categoryId });
+
+      // Save translations
+      try {
+        const translationData = Object.keys(categoryNameTranslations)
+          .filter(lang => lang !== defaultLanguage)
+          .filter(lang => categoryNameTranslations[lang])
+          .map(languageCode => ({
+            categoryId: category.categoryId,
+            languageCode,
+            categoryName: categoryNameTranslations[languageCode] || undefined,
+          }));
+
+        if (translationData.length > 0) {
+          await categoryTranslationService.batchUpsertCategoryTranslations({
+            translations: translationData
+          });
+          logger.info('Category translations saved', null, { prefix: 'EditCategoryModal' });
+        }
+      } catch (error) {
+        logger.error('Failed to save category translations', error, { prefix: 'EditCategoryModal' });
+        // Don't fail the whole operation if translations fail
+      }
+
       onSuccess();
       onClose();
     } catch (err: any) {
       logger.error('Kategori güncelleme hatası:', err);
-      setError(t('editCategoryModal.errors.updateFailed'));
+      // Extract error message from API response
+      const errorMessage = err.response?.data?.message ||
+                          err.message ||
+                          t('editCategoryModal.errors.updateFailed');
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -51,12 +163,6 @@ export const EditCategoryModal: React.FC<{
       handleSubmit();
     }
   };
-
-  const nameLength = formData.categoryName.length;
-  const descriptionLength = formData.description.length;
-  const maxNameLength = 50;
-  const maxDescLength = 200;
-  const isNameValid = nameLength >= 2 && nameLength <= maxNameLength;
 
   return (
     <AnimatePresence>
@@ -178,97 +284,25 @@ export const EditCategoryModal: React.FC<{
                     )}
                   </AnimatePresence>
 
-                  {/* Category Name */}
+                  {/* Category categoryName - Multi-language Input */}
                   <div className="space-y-2">
-                    <label 
-                      htmlFor="categoryName" 
-                      className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}
-                    >
-                      <Tag className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                      <span>{t('editCategoryModal.form.categoryName.label')}</span>
-                      <span className="text-red-500">*</span>
-                    </label>
-                    
-                    <div className="relative">
-                      <input
-                        type="text"
-                        id="categoryName"
-                        value={formData.categoryName}
-                        onChange={(e) => setFormData({ ...formData, categoryName: e.target.value })}
-                        onFocus={() => setFocusedField('categoryName')}
-                        onBlur={() => setFocusedField('')}
-                        onKeyPress={handleKeyPress}
-                        maxLength={maxNameLength}
-                        className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
-                          focusedField === 'categoryName'
-                            ? 'border-primary-500 dark:border-primary-400 bg-primary-50/50 dark:bg-primary-900/10 focus:ring-4 focus:ring-primary-500/20'
-                            : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400 dark:hover:border-gray-500'
-                        } focus:outline-none`}
-                        placeholder={t('editCategoryModal.form.categoryName.placeholder')}
-                        aria-required="true"
-                      />
-                      
-                      {/* Character Counter */}
-                      <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 flex items-center gap-2`}>
-                        {formData.categoryName && isNameValid && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="p-1 bg-emerald-100 dark:bg-emerald-900/30 rounded-full"
-                          >
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                          </motion.div>
-                        )}
-                        <span className={`text-xs font-medium ${
-                          nameLength > maxNameLength 
-                            ? 'text-red-600 dark:text-red-400' 
-                            : nameLength >= maxNameLength * 0.8 
-                            ? 'text-yellow-600 dark:text-yellow-400' 
-                            : 'text-gray-400 dark:text-gray-500'
-                        }`}>
-                          {nameLength}/{maxNameLength}
-                        </span>
-                      </div>
-                    </div>
-
-                
+                    <MultiLanguageInput
+                      label={t('editCategoryModal.form.categoryName.label')}
+                      value={categoryNameTranslations}
+                      onChange={(newTranslations) => {
+                        setCategoryNameTranslations(newTranslations);
+                        // Update base formData with default language value for validation
+                        const val = newTranslations[defaultLanguage] || '';
+                        setFormData(prev => ({ ...prev, categoryName: val }));
+                      }}
+                      languages={supportedLanguages}
+                      placeholder={t('editCategoryModal.form.categoryName.placeholder')}
+                      defaultLanguage={defaultLanguage}
+                      required={true}
+                    />
                   </div>
 
-                  {/* Description */}
-                  <div className="space-y-2">
-                    <label 
-                      htmlFor="description" 
-                      className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}
-                    >
-                      <FileText className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                      <span>{t('editCategoryModal.form.description.label')}</span>
-                    </label>
-                    
-                    <div className="relative">
-                      <textarea
-                        id="description"
-                        value={formData.description}
-                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                        onFocus={() => setFocusedField('description')}
-                        onBlur={() => setFocusedField('')}
-                        maxLength={maxDescLength}
-                        rows={4}
-                        className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 resize-none text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
-                          focusedField === 'description'
-                            ? 'border-primary-500 dark:border-primary-400 bg-primary-50/50 dark:bg-primary-900/10 focus:ring-4 focus:ring-primary-500/20'
-                            : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400 dark:hover:border-gray-500'
-                        } focus:outline-none`}
-                        placeholder={t('editCategoryModal.form.description.placeholder')}
-                      />
-                      
-                      {/* Character Counter */}
-                      <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} bottom-3 text-xs text-gray-400`}>
-                        {descriptionLength}/{maxDescLength}
-                      </div>
-                    </div>
-
-                   
-                  </div>
+            
 
                   {/* Status Toggle - Enhanced */}
                   <div className="relative rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-800/50 p-5 border border-gray-200 dark:border-gray-600">

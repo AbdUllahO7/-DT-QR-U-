@@ -1,28 +1,23 @@
-"use client" // Added this based on your other files
+"use client"
 
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Minus, Trash2, ShoppingCart, AlertCircle, Loader2, ChevronDown, ChevronUp, 
-         User, MapPin, Phone, Table, CheckCircle, ChevronLeft, ChevronRight, ArrowRight, ArrowLeft, 
-         Clock, CreditCard, Banknote, Smartphone, ClipboardList } from 'lucide-react'; // Added ClipboardList
-import { CreateSessionOrderDto, theme, Order } from '../../../../types/BranchManagement/type'; // Added Order
-import { BasketResponse, onlineMenuService, BasketItem } from '../../../../services/Branch/Online/OnlineMenuService';
-import { OrderType, orderTypeService } from '../../../../services/Branch/BranchOrderTypeService';
-import { basketService } from '../../../../services/Branch/BasketService';
+import { X, Plus, Minus, Trash2, ShoppingCart, AlertCircle, Loader2,
+         User, MapPin, Phone, Table, CheckCircle, ChevronLeft, ChevronRight, ArrowRight, ArrowLeft,
+         Clock, CreditCard, Banknote, Smartphone, ClipboardList, Copy } from 'lucide-react';
+import { theme, Order } from '../../../../types/BranchManagement/type';
+import { BasketResponse, BasketItem } from '../../../../services/Branch/Online/OnlineMenuService';
+import { BasketExtraItem } from '../../../../services/Branch/BasketService';
 import { orderService } from '../../../../services/Branch/OrderService';
 import WhatsAppConfirmationModal from '../Menu/CartSideBar/WhatsAppConfirmationModal';
 import { WhatsAppService } from '../../../../services/WhatsAppService';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { OrderSuccessModal } from './OrderTracker';
 import ToastComponent from '../Menu/CartSideBar/ToastComponenet';
-import { TrackedOrder } from '../../../../types/menu/carSideBarTypes'; // Assuming path
-import { UpdatableOrder } from '../../../../types/Orders/type'; // Assuming path
-import OrdersTab from '../Menu/CartSideBar/OrdersTab'; // Assuming path
-
-export interface Toast {
-  id: string;
-  message: string;
-  type: 'success' | 'error' | 'loading';
-  duration?: number;
-}
+import { TrackedOrder } from '../../../../types/menu/carSideBarTypes';
+import { UpdatableOrder } from '../../../../types/Orders/type';
+import OrdersTab from '../Menu/CartSideBar/OrdersTab';
+import { useOnlineCartHandler } from '../../../../hooks/useOnlineCartHandler';
+import { useCurrency } from '../../../../hooks/useCurrency';
 
 interface OnlineCartSidebarProps {
   isOpen: boolean;
@@ -34,84 +29,125 @@ interface OnlineCartSidebarProps {
 }
 
 type CartStep = 'cart' | 'order-type' | 'information';
-type ActiveTab = 'cart' | 'orders'; // <-- NEW
+type ActiveTab = 'cart' | 'orders';
 
 const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   isOpen,
   onClose,
   basket,
   onBasketUpdate,
-  currency = 'TRY',
   menuData
 }) => {
   const { t, language } = useLanguage();
   const isRTL = language === 'ar';
   
+  // --- USE CART HANDLER HOOK ---
+  const {
+    // State
+    items,
+    itemCount,
+    total,
+    subtotal,
+    tax,
+    
+    // Loading states
+    updatingItemId,
+    deletingItemId,
+    isClearing,
+    addingAddonToItem,
+    updatingExtraId,
+    
+    // UI states
+    expandedItems,
+    
+    // Checkout states
+    orderTypes,
+    selectedOrderType,
+    loadingOrderTypes,
+    orderTypeError,
+    
+    // Form states
+    customerName,
+    setCustomerName,
+    tableNumber,
+    setTableNumber,
+    deliveryAddress,
+    setDeliveryAddress,
+    customerPhone,
+    setCustomerPhone,
+    paymentMethod,
+    setPaymentMethod,
+    orderNotes,
+    setOrderNotes,
+    validationErrors,
+    
+    // Order submission states
+    submittingOrder,
+    
+    // Toast
+    toasts,
+    addToast,
+    removeToast,
+    updateToast,
+    
+ 
+    getAvailableAddonsForProduct,
+    getAvailableExtrasForProduct,
+    
+    // Cart operations
+    handleUpdateQuantity,
+    handleDeleteItem,
+    handleClearBasket,
+    handleDuplicateItem,
+    
+    // Addon operations
+    handleUpdateAddonQuantity,
+    handleDeleteAddon,
+    handleAddAddonToItem,
+    
+    // Extra operations
+    handleToggleExtra,
+    handleUpdateExtraQuantity,
+    handleDeleteExtra,
+    
+    // Checkout operations
+    loadOrderTypes,
+    selectOrderType,
+    resetForm,
+    validateForm,
+    submitOrder,
+  } = useOnlineCartHandler({
+    basket,
+    onBasketUpdate,
+    menuData,
+  });
+  
   // --- TAB MANAGEMENT ---
   const [activeTab, setActiveTab] = useState<ActiveTab>('cart');
-
-
-
-  
-  // Cart States
-  const [updatingItemId, setUpdatingItemId] = useState<number | null>(null);
-  const [deletingItemId, setDeletingItemId] = useState<number | null>(null);
-  const [isClearing, setIsClearing] = useState<boolean>(false);
-  const [expandedItems, setExpandedItems] = useState<Set<number>>(new Set());
-  const [addingAddonToItem, setAddingAddonToItem] = useState<number | null>(null);
   
   // Checkout Step Management
   const [cartStep, setCartStep] = useState<CartStep>('cart'); 
   
-  // Order Type States
-  const [orderTypes, setOrderTypes] = useState<OrderType[]>([]);
-  const [selectedOrderType, setSelectedOrderType] = useState<OrderType | null>(null);
-  const [loadingOrderTypes, setLoadingOrderTypes] = useState<boolean>(false);
-  const [orderTypeError, setOrderTypeError] = useState<string | null>(null);
-  
-  // Form States
-  const [customerName, setCustomerName] = useState<string>('');
-  const [tableNumber, setTableNumber] = useState<string>('');
-  const [deliveryAddress, setDeliveryAddress] = useState<string>('');
-  const [customerPhone, setCustomerPhone] = useState<string>('');
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'credit_card' | 'online' | ''>('');
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
-  const [orderNotes, setOrderNotes] = useState<string>('');
-  // Checkout States
-  const [priceChangeData, setPriceChangeData] = useState<any>(null);
-  const [submittingOrder, setSubmittingOrder] = useState<boolean>(false);
+  // WhatsApp States
   const [showWhatsAppConfirmation, setShowWhatsAppConfirmation] = useState<boolean>(false);
   const [pendingWhatsAppData, setPendingWhatsAppData] = useState<any>(null);
   const [whatsappSending, setWhatsappSending] = useState<boolean>(false);
   const [createdOrderTag, setCreatedOrderTag] = useState<string | null>(null);
 
+  // Order Success Modal States
+  const [showOrderSuccessModal, setShowOrderSuccessModal] = useState<boolean>(false);
+  const [successOrderData, setSuccessOrderData] = useState<{
+    orderTag: string;
+    customerName?: string;
+    estimatedMinutes?: number;
+    orderTypeName?: string;
+  } | null>(null);
+
+  // Order Tracking States
   const [trackedOrders, setTrackedOrders] = useState<TrackedOrder[]>([]);
   const [trackingLoading, setTrackingLoading] = useState(false);
   const [updatableOrders, setUpdatableOrders] = useState<UpdatableOrder[]>([]);
-
-  // Toast States
-  const [toasts, setToasts] = useState<Toast[]>([]);
-
-  // Toast Functions
-  const addToast = (message: string, type: Toast['type'], duration?: number) => {
-    const id = Math.random().toString(36).substring(7);
-    setToasts(prev => [...prev, { id, message, type, duration: duration || (type === 'loading' ? 0 : 3000) }]);
-    return id;
-  };
-
-  const removeToast = (id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  };
-  
-  const updateToast = (id: string, message: string, type: Toast['type'], duration?: number) => {
-    setToasts(prev => prev.map(t => t.id === id ? { ...t, message, type, duration: duration || 3000 } : t));
-  };
-
-  const items = basket?.items || basket?.basketItems || [];
-  const itemCount = basket?.itemCount || items.length;
-  const total = basket?.total || basket?.totalPrice || 0;
-  const subtotal = basket?.subtotal || basket?.productTotal || basket?.totalPrice || 0;
-  const tax = basket?.tax || 0;
+  const currency = useCurrency({ fetchFromApi: true })
 
   // Get restaurant preferences
   const restaurantPreferences = menuData?.preferences || menuData?.restaurantPreferences || {};
@@ -121,11 +157,26 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   const acceptCash = restaurantPreferences?.acceptCash;
   const acceptCreditCard = restaurantPreferences?.acceptCreditCard;
   const acceptOnlinePayment = restaurantPreferences?.acceptOnlinePayment;
+
+  // Translation helper for order type name and description
+  const getOrderTypeTranslation = (orderType: any, field: 'name' | 'description'): string => {
+    if (!orderType) return '';
+    const translationKey = `orderTypes.${orderType.code}.${field}`;
+    const translated = t(translationKey);
+
+    // If translation exists and is not the same as the key, use it
+    if (translated && translated !== translationKey) {
+      return translated;
+    }
+
+    // Otherwise, fall back to API value
+    return field === 'name' ? orderType.name : orderType.description;
+  };
+  
   // Available payment methods
   const availablePaymentMethods: { id: any; name: any; icon: any; description: any; }[] = [];
 
-
-  // ADDED: WhatsApp Service function - same as useCartHandlers
+  // WhatsApp Service function
   const sendOrderToWhatsApp = async (whatsappData: any) => {
     try {
       const whatsappNumber = WhatsAppService.formatWhatsAppNumber(whatsAppPhoneNumber);
@@ -139,17 +190,14 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
   // Reset to cart view when sidebar opens
   useEffect(() => {
     if (isOpen) {
-      // Don't reset tab, user might want to see orders
       setCartStep('cart');
       resetForm();
     }
-  }, [isOpen]);
+  }, [isOpen, resetForm]);
 
-  // --- ALL NEW TRACKING LOGIC ---
-
-  // Load tracked orders from localStorage on mount
+  // --- ALL TRACKING LOGIC ---
   useEffect(() => {
-    const savedOrders = localStorage.getItem('onlineTrackedOrders'); // Use a different key
+    const savedOrders = localStorage.getItem('onlineTrackedOrders');
     if (savedOrders) {
       try {
         const parsed = JSON.parse(savedOrders) as TrackedOrder[];
@@ -164,7 +212,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     }
   }, []);
 
-  // Save tracked orders to localStorage whenever it changes
   useEffect(() => {
     if (trackedOrders.length > 0) {
       localStorage.setItem('onlineTrackedOrders', JSON.stringify(trackedOrders));
@@ -173,7 +220,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     }
   }, [trackedOrders]);
 
-  // Fetch updatable orders
   const fetchUpdatableOrders = async () => {
     try {
       if (trackedOrders.length === 0) {
@@ -181,17 +227,14 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
         return;
       }
       
-      // We assume getUpdatableOrders works for the current user session
       const orders = await orderService.getUpdatableOrders();
       setUpdatableOrders(orders);
     } catch (error) {
       console.error("Failed to fetch updatable orders:", error);
-      // Don't show toast, this runs in background
       setUpdatableOrders([]);
     }
   };
 
-  // Auto-refresh all pending orders
   useEffect(() => {
     let interval: ReturnType<typeof setInterval> | null = null;
     
@@ -202,8 +245,8 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     if (activeTab === 'orders' && hasPending) {
       interval = setInterval(() => {
         refreshAllPendingOrders();
-        fetchUpdatableOrders(); // Also refresh updatable orders
-      }, 15000); // 15 seconds
+        fetchUpdatableOrders();
+      }, 15000);
     }
     
     return () => {
@@ -211,7 +254,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     };
   }, [activeTab, trackedOrders]);
 
-  // Fetch updatable orders when tracked orders change
   useEffect(() => {
     if (activeTab === 'orders') {
       fetchUpdatableOrders();
@@ -282,224 +324,15 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     }
   };
 
-
-
-  const resetForm = () => {
-    setCustomerName('');
-    setTableNumber('');
-    setDeliveryAddress('');
-    setCustomerPhone('');
-    setPaymentMethod('');
-    setOrderNotes('');
-    setValidationErrors({});
-    setSelectedOrderType(null);
-    setPendingWhatsAppData(null);
-    setShowWhatsAppConfirmation(false);
-    setCreatedOrderTag(null);
-    // Do NOT reset tracked orders
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('tr-TR', {
-      style: 'currency',
-      currency: currency,
-    }).format(price);
-  };
-
-  const getAvailableAddonsForProduct = (item: BasketItem) => {
-    if (!menuData?.categories) return [];
-
-    for (const category of menuData.categories) {
-      const product = category.products.find((p: any) => p.branchProductId === item.branchProductId);
-      if (product && product.availableAddons) {
-        const existingAddonIds = (item.addons || item.addonItems || []).map((a: any) =>
-          a.branchProductId || a.addonBranchProductId
-        );
-        return product.availableAddons.filter((addon: any) =>
-          !existingAddonIds.includes(addon.addonBranchProductId)
-        );
-      }
-    }
-    return [];
-  };
-
-  const toggleItemExpanded = (basketItemId: number) => {
-    setExpandedItems(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(basketItemId)) {
-        newSet.delete(basketItemId);
-      } else {
-        newSet.add(basketItemId);
-      }
-      return newSet;
-    });
-  };
-
-  const handleUpdateQuantity = async (basketItemId: number, currentQuantity: number, change: number) => {
-    const newQuantity = currentQuantity + change;
-    if (newQuantity < 1) {
-      await handleDeleteItem(basketItemId);
-      return;
-    }
-
-    try {
-      setUpdatingItemId(basketItemId);
-      const item = items.find(i => i.basketItemId === basketItemId);
-      if (!item) return;
-
-      await onlineMenuService.updateBasketItem(basketItemId, {
-        basketItemId,
-        basketId: basket?.basketId || '',
-        branchProductId: item.branchProductId,
-        quantity: newQuantity
-      });
-
-      await onBasketUpdate();
-    } catch (err: any) {
-      console.error('Failed to update quantity:', err);
-      addToast(err.message || 'Failed to update quantity', 'error', 3000);
-    } finally {
-      setUpdatingItemId(null);
-    }
-  };
-
-  const handleDeleteItem = async (basketItemId: number) => {
-    if (!confirm('Are you sure you want to remove this item?')) return;
-
-    try {
-      setDeletingItemId(basketItemId);
-      await onlineMenuService.deleteBasketItem(basketItemId);
-      await onBasketUpdate();
-    } catch (err: any) {
-      console.error('Failed to delete item:', err);
-      addToast(err.message || 'Failed to delete item', 'error', 3000);
-    } finally {
-      setDeletingItemId(null);
-    }
-  };
-
-  const handleUpdateAddonQuantity = async (addonBasketItemId: number, currentQuantity: number, change: number, maxQuantity: number) => {
-    const newQuantity = currentQuantity + change;
-    if (newQuantity < 1) {
-      await handleDeleteAddon(addonBasketItemId);
-      return;
-    }
-    if (newQuantity > maxQuantity) return;
-
-    try {
-      setUpdatingItemId(addonBasketItemId);
-      await onlineMenuService.updateBasketItem(addonBasketItemId, {
-        basketItemId: addonBasketItemId,
-        basketId: basket?.basketId || '',
-        branchProductId: 0,
-        quantity: newQuantity
-      });
-      await onBasketUpdate();
-    } catch (err: any) {
-      console.error('Failed to update addon quantity:', err);
-      addToast(err.message || 'Failed to update addon quantity', 'error', 3000);
-    } finally {
-      setUpdatingItemId(null);
-    }
-  };
-
-  const handleDeleteAddon = async (addonBasketItemId: number) => {
-    if (!confirm('Remove this add-on?')) return;
-
-    try {
-      await onlineMenuService.deleteBasketItem(addonBasketItemId);
-      await onBasketUpdate();
-    } catch (err: any) {
-      console.error('Failed to delete addon:', err);
-      addToast(err.message || 'Failed to delete addon', 'error', 3000);
-    }
-  };
-
-  const handleAddAddonToItem = async (parentBasketItemId: number, addon: any, parentQuantity: number) => {
-    try {
-      setAddingAddonToItem(parentBasketItemId);
-      await onlineMenuService.addUnifiedItemToMyBasket({
-        branchProductId: addon.addonBranchProductId,
-        quantity: parentQuantity,
-        parentBasketItemId: parentBasketItemId,
-        isAddon: true
-      });
-      await onBasketUpdate();
-    } catch (err: any) {
-      console.error('Failed to add addon:', err);
-      addToast(err.message || 'Failed to add addon', 'error', 3000);
-    } finally {
-      setAddingAddonToItem(null);
-    }
-  };
-
-  const handleClearBasket = async () => {
-    if (!confirm('Are you sure you want to clear your entire basket?')) return;
-
-    try {
-      setIsClearing(true);
-      await onlineMenuService.clearBasket();
-      await onBasketUpdate();
-      addToast(t('menu.cart.cleared') || 'Basket cleared', 'success', 3000);
-    } catch (err: any) {
-      console.error('Failed to clear basket:', err);
-      addToast(err.message || 'Failed to clear basket', 'error', 3000);
-    } finally {
-      setIsClearing(false);
-    }
-  };
-
   // Proceed to checkout - load order types
   const handleCheckout = async () => {
     await onBasketUpdate();
-
-    const sessionId = localStorage.getItem('online_menu_session_id');
-    if (!sessionId) {
-      addToast('Session expired. Please refresh.', 'error', 3000);
-      return;
-    }
-
-    try {
-      await basketService.confirmSessionPriceChanges(sessionId);
-    } catch (err: any) {
-      console.warn('Price check failed, proceeding anyway:', err);
-    }
-
-    try {
-      setLoadingOrderTypes(true);
-      setOrderTypeError(null);
-      
-      const types = await orderTypeService.getOrderTypesByOnlineSessionId();
-      
-      const availableTypes = types.filter(
-        type => 
-          type.isActive && 
-          total >= type.minOrderAmount && 
-          !type.requiresTable
-      );
-      
-      if (availableTypes.length === 0) {
-        setOrderTypeError(t('order.form.noOrderTypesAvailable'));
-      }
-      
-      setOrderTypes(availableTypes);
-      setCartStep('order-type');
-    } catch (err: any) {
-      setOrderTypeError(err.message || t('order.form.failedToLoadOrderTypes'));
-    } finally {
-      setLoadingOrderTypes(false);
-    }
+    await loadOrderTypes();
+    setCartStep('order-type');
   };
 
-  const handleOrderTypeSelect = (orderType: OrderType) => {
-    setSelectedOrderType(orderType);
-    setValidationErrors({});
-    
-    if (!orderType.requiresName) setCustomerName('');
-    if (!orderType.requiresTable) setTableNumber('');
-    if (!orderType.requiresAddress) setDeliveryAddress('');
-    if (!orderType.requiresPhone) setCustomerPhone('');
-
+  const handleOrderTypeSelect = (orderType: any) => {
+    selectOrderType(orderType);
     setCartStep('information');
   };
 
@@ -510,180 +343,104 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
   const handleBackToOrderTypes = () => {
     setCartStep('order-type');
-    setValidationErrors({});
   };
   
-  // --- NEW: Function to add order to tracking ---
   const addOrderToTracking = (order: Order) => {
     const newTrackedOrder: TrackedOrder = {
       orderTag: order.orderTag || '',
       createdAt: new Date(order.createdAt),
-     // Around line 609
-        trackingInfo: {
-          orderTag: order.orderTag || '',
-          orderId: order.orderId,
-          orderStatus: order.status, 
-          totalPrice: order.totalPrice,
-          orderTypeName: selectedOrderType?.name || '',
-          customerName: order.customerName || customerName || '',
-          notes: order.notes || '',
-        }
+      trackingInfo: {
+        orderTag: order.orderTag || '',
+        orderId: order.orderId,
+        orderStatus: order.status, 
+        totalPrice: order.totalPrice,
+        orderTypeName: selectedOrderType?.name || '',
+        customerName: order.customerName || customerName || '',
+        notes: order.notes || '',
+      }
     };
     setTrackedOrders(prev => [newTrackedOrder, ...prev.filter(o => o.orderTag !== newTrackedOrder.orderTag)]);
   };
 
-  const validateForm = (): boolean => {
-    const errors: Record<string, string> = {};
-
-    if (!selectedOrderType) {
-      setOrderTypeError(t('order.form.pleaseSelectOrderType'));
-      return false;
-    }
-
-    if (selectedOrderType.requiresName && !customerName.trim()) {
-      errors.customerName = t('order.form.nameRequired');
-    }
-
-    if (selectedOrderType.requiresTable && !tableNumber.trim()) {
-      errors.tableNumber = t('order.form.tableRequired');
-    }
-
-    if (selectedOrderType.requiresAddress && !deliveryAddress.trim()) {
-      errors.deliveryAddress = t('order.form.addressRequired');
-    }
-
-    if (selectedOrderType.requiresPhone) {
-      if (!customerPhone.trim()) {
-        errors.customerPhone = t('order.form.phoneRequired');
-      } else if (!/^\+?[\d\s\-()]+$/.test(customerPhone)) {
-        errors.customerPhone = t('order.form.invalidPhoneFormat');
-      }
-    }
-
-    const hasPaymentOptions = acceptCash || acceptCreditCard || acceptOnlinePayment;
-    if (hasPaymentOptions && !paymentMethod) {
-      errors.paymentMethod = t('order.form.selectPaymentMethod');
-    }
-
-    setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  };
-
   const handleSubmitOrder = async () => {
-    if (!validateForm()) return;
+    if (!validateForm(acceptCash, acceptCreditCard, acceptOnlinePayment)) return;
 
-    setSubmittingOrder(true);
-
-    const orderData: CreateSessionOrderDto = {
-      orderTypeId: selectedOrderType!.id,
-    } as CreateSessionOrderDto;
-
-    if (selectedOrderType!.requiresName && customerName.trim()) {
-      orderData.customerName = customerName.trim();
-    }
-    if (selectedOrderType!.requiresTable && tableNumber.trim()) {
-      orderData.tableNumber = tableNumber.trim();
-    }
-    if (selectedOrderType!.requiresAddress && deliveryAddress.trim()) {
-      orderData.deliveryAddress = deliveryAddress.trim();
-    }
-    if (selectedOrderType!.requiresPhone && customerPhone.trim()) {
-      orderData.customerPhone = customerPhone.trim();
-    }
-    if (paymentMethod) {
-      orderData.paymentMethod = paymentMethod;
-    }
-
-    try {
-      const sessionId = localStorage.getItem('online_menu_session_id');
-      if (sessionId && priceChangeData?.requiresConfirmation) {
-        await basketService.confirmSessionPriceChanges(sessionId);
-        await onBasketUpdate();
+    const order = await submitOrder((createdOrder) => {
+      if (createdOrder.orderTag) {
+        setCreatedOrderTag(createdOrder.orderTag);
+        addOrderToTracking(createdOrder);
       }
-      
-      const order = await orderService.createSessionOrder(orderData);
-      
-      if (order.orderTag) {
-        setCreatedOrderTag(order.orderTag);
-        addOrderToTracking(order); // <-- ADDED
-      }
-      
-      await onBasketUpdate();
-      
-      addToast(t('menu.cart.order_created_success') || 'Order placed successfully! 🎉', 'success', 5000);
+    });
 
-      // Create WhatsApp preferences object matching useCartHandlers format
-      const whatsappPreferences = {
-        useWhatsappForOrders: useWhatsappForOrders,
-        whatsAppPhoneNumber: whatsAppPhoneNumber
-      };
-      
-      const shouldShowWhatsApp = order.orderTag && WhatsAppService.isWhatsAppEnabled(whatsappPreferences);
-      const serviceChargeAmount = selectedOrderType!.serviceCharge || 0;
-      const finalTotal = total + serviceChargeAmount;
+    if (!order) return;
 
-      // 3. Get Payment Method Name (for display)
-      const selectedPaymentMethodName = availablePaymentMethods.find(m => m.id === paymentMethod)?.name || paymentMethod;
+    const whatsappPreferences = {
+      useWhatsappForOrders: useWhatsappForOrders,
+      whatsAppPhoneNumber: whatsAppPhoneNumber
+    };
+    
+    const shouldShowWhatsApp = order.orderTag && WhatsAppService.isWhatsAppEnabled(whatsappPreferences);
+    const serviceChargeAmount = selectedOrderType!.serviceCharge || 0;
+    const finalTotal = total + serviceChargeAmount;
 
-      
-      if (shouldShowWhatsApp) {
-        // Prepare WhatsApp data matching useCartHandlers format
-     const whatsappData = {
-          orderTag: order.orderTag,
-          restaurantName: restaurantName,
-          customerName: customerName || 'Customer',
-          customerPhone: customerPhone,
-          tableNumber: tableNumber || undefined,
-          deliveryAddress: deliveryAddress || undefined,
-          
-          // Order Details
-          orderType: selectedOrderType!.name,
-          paymentMethod: selectedPaymentMethodName,
-          notes: orderNotes,
-          estimatedTime: selectedOrderType!.estimatedMinutes,
+    const selectedPaymentMethodName = availablePaymentMethods.find(m => m.id === paymentMethod)?.name || paymentMethod;
 
-          // Cart Items with detailed addons
-          cart: items.map(item => ({
-            productName: item.productName,
-            price: item.price,
-            quantity: item.quantity,
-            totalItemPrice: item.totalPrice,
-            addons: (item.addons || item.addonItems || []).map((addon: any) => ({
-              addonName: addon.addonName || addon.productName,
-              price: addon.specialPrice || addon.price,
-              quantity: addon.quantity
-            }))
+    // Show success modal with order tracking option
+    if (order.orderTag) {
+      setSuccessOrderData({
+        orderTag: order.orderTag,
+        customerName: customerName || undefined,
+        estimatedMinutes: selectedOrderType?.estimatedMinutes,
+        orderTypeName: selectedOrderType?.name,
+      });
+      setShowOrderSuccessModal(true);
+    }
+
+    if (shouldShowWhatsApp) {
+      const whatsappData = {
+        orderTag: order.orderTag,
+        restaurantName: restaurantName,
+        customerName: customerName || 'Customer',
+        customerPhone: customerPhone,
+        tableNumber: tableNumber || undefined,
+        deliveryAddress: deliveryAddress || undefined,
+
+        orderType: selectedOrderType!.name,
+        paymentMethod: selectedPaymentMethodName,
+        notes: orderNotes,
+        estimatedTime: selectedOrderType!.estimatedMinutes,
+
+        cart: items.map(item => ({
+          productName: item.productName,
+          price: item.price,
+          quantity: item.quantity,
+          totalItemPrice: item.totalPrice,
+          addons: (item.addons || item.addonItems || []).map((addon: any) => ({
+            addonName: addon.addonName || addon.productName,
+            price: addon.specialPrice || addon.price,
+            quantity: addon.quantity
           })),
+          extras: (item.extras || []).map((extra: BasketExtraItem) => ({
+            extraName: extra.extraName,
+            isRemoval: extra.isRemoval,
+            quantity: extra.quantity,
+            price: extra.unitPrice
+          }))
+        })),
 
-          // Financials
-          subtotal: subtotal,
-          tax: tax,
-          serviceCharge: serviceChargeAmount,
-          totalPrice: finalTotal, // Grand Total
-        };
+        subtotal: subtotal,
+        tax: tax,
+        serviceCharge: serviceChargeAmount,
+        totalPrice: finalTotal,
+      };
 
-        console.log("Full WhatsApp Data:", whatsappData);
-        setPendingWhatsAppData(whatsappData);
-        setShowWhatsAppConfirmation(true);
-        setSubmittingOrder(false);
-        
-        return;
-      } else {
-        setTimeout(() => {
-          resetForm();
-          setCartStep('cart'); 
-          setActiveTab('orders'); 
-        }, 1000);
-      }
-    } catch (err: any) {
-      console.error('❌ Error creating order:', err);
-      addToast(err.message || t('menu.cart.order_creation_failed') || 'Failed to place order', 'error', 5000);
-    } finally {
-      setSubmittingOrder(false);
+      setPendingWhatsAppData(whatsappData);
+      setShowWhatsAppConfirmation(true);
+
+      return;
     }
   };
 
-  // UPDATED: WhatsApp confirmation handler matching CartSidebar
   const handleWhatsAppConfirm = async () => {
     if (!pendingWhatsAppData) return;
     
@@ -693,7 +450,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       setWhatsappSending(true);
       toastId = addToast(t('menu.cart.sending_whatsapp') || 'Sending WhatsApp message...', 'loading');
 
-      // Use the sendOrderToWhatsApp function that matches useCartHandlers
       await sendOrderToWhatsApp(pendingWhatsAppData);
       
       if (toastId) updateToast(toastId, t('menu.cart.whatsapp_sent_success') || 'WhatsApp message sent successfully!', 'success');
@@ -705,21 +461,17 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
     } finally {
       setWhatsappSending(false);
       
-      // Clean up - matching CartSidebar behavior
       setShowWhatsAppConfirmation(false);
       setPendingWhatsAppData(null);
       
-      // Reset form and switch to orders tab
       setTimeout(() => {
         resetForm();
         setCartStep('cart');
         setActiveTab('orders');
-        // onClose(); // Don't close
       }, 1000);
     }
   };
 
-  // UPDATED: WhatsApp cancel handler matching CartSidebar
   const handleWhatsAppCancel = () => {
     setShowWhatsAppConfirmation(false);
     setPendingWhatsAppData(null);
@@ -729,10 +481,8 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
       resetForm();
       setCartStep('cart');
       setActiveTab('orders');
-      // onClose(); // Don't close
     }, 500);
   };
-
 
   if (acceptCash) {
     availablePaymentMethods.push({
@@ -764,7 +514,6 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
   if (!isOpen) return null;
 
-  // --- UPDATED TITLE ---
   const getStepTitle = () => {
     if (activeTab === 'orders') return t('menu.cart.orders');
     switch (cartStep) {
@@ -781,34 +530,53 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
 
   return (
     <>
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 transition-opacity" onClick={onClose} />
+      {/* Toast Container */}
+      {toasts.length > 0 && (
+        <div className="fixed top-4 right-4 z-[60] space-y-2 max-w-sm">
+          {toasts.map((toast) => (
+            <ToastComponent key={toast.id} toast={toast} onClose={removeToast} />
+          ))}
+        </div>
+      )}
 
-      {/* Sidebar */}
-      <div className="fixed right-0 top-0 bottom-0 w-full sm:w-[500px] bg-white dark:bg-slate-800 shadow-2xl z-50 flex flex-col overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
-        {/* Header */}
-        <div className="bg-gradient-to-r from-slate-600 to-slate-600 dark:from-slate-700 dark:to-slate-700 px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {activeTab === 'cart' ? (
-              <ShoppingCart className="w-6 h-6 text-white" />
-            ) : (
-              <ClipboardList className="w-6 h-6 text-white" />
-            )}
-            <div>
-              <h2 className="text-xl font-bold text-white">{getStepTitle()}</h2>
-              {activeTab === 'cart' && (
-                <p className="text-emerald-100 text-sm">
-                  {itemCount} {t('menu.items')}
-                </p>
-              )}
+      {/* Backdrop */}
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex justify-end">
+        {/* Sidebar */}
+        <div className="w-full max-w-md bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl h-full overflow-y-auto border-l border-slate-200/50 dark:border-slate-700/50 shadow-xl" dir={isRTL ? 'rtl' : 'ltr'}>
+          {/* Header */}
+          <div className="p-6 border-b border-slate-200/50 dark:border-slate-700/50 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-white flex items-center">
+                {activeTab === 'cart' ? (
+                  <ShoppingCart className="h-4 w-4 mr-2 ml-2" />
+                ) : (
+                  <ClipboardList className="h-4 w-4 mr-2 ml-2" />
+                )}
+                {getStepTitle()}
+                {(updatingItemId || deletingItemId || isClearing) && <Loader2 className="h-3 w-3 ml-2 animate-spin" />}
+              </h3>
+              <div className="flex items-center space-x-2">
+                {itemCount > 0 && activeTab === 'cart' && cartStep === 'cart' && (
+                  <button
+                    onClick={handleClearBasket}
+                    disabled={isClearing}
+                    className="p-2 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50"
+                    title={t('menu.cart.clear')}
+                  >
+                    <Trash2 className="h-4 w-4 text-white" />
+                  </button>
+                )}
+                <button
+                  onClick={onClose}
+                  className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+                >
+                  <X className="h-4 w-4 text-white" />
+                </button>
+              </div>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-lg transition-colors text-white">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
 
-        {/* --- NEW TABS --- */}
+        {/* Tabs */}
         <div className="flex border-b border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-900/50">
           <button
             onClick={() => {
@@ -925,7 +693,9 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                   <div className="p-4 space-y-4">
                     {items.map((item) => {
                       const itemAddons = item.addons || item.addonItems || [];
+                      const itemExtras = item.extras || [];
                       const availableAddons = getAvailableAddonsForProduct(item);
+                      const availableExtras = getAvailableExtrasForProduct(item);
                       const isExpanded = expandedItems.has(item.basketItemId);
 
                       return (
@@ -938,7 +708,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                               <div className="flex-1 min-w-0">
                                 <h3 className={`font-semibold ${theme.text.primary} mb-1`}>{item.productName}</h3>
                                 <p className="text-sm text-emerald-600 font-semibold mb-2">
-                                  {formatPrice(item.price || item.price)}
+                                   {currency.symbol}{item.price}
                                 </p>
 
                                 <div className="flex items-center gap-3">
@@ -960,15 +730,37 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                     </button>
                                   </div>
 
+                                  {/* Duplicate button - show if item has customizations */}
+                                  {((itemExtras && itemExtras.length > 0) || (itemAddons && itemAddons.length > 0)) && (
+                                    <button
+                                      onClick={() => handleDuplicateItem(item.basketItemId)}
+                                      disabled={updatingItemId === item.basketItemId}
+                                      className="flex items-center gap-1 px-3 py-2 hover:bg-blue-100 dark:hover:bg-blue-950/20 rounded-lg text-blue-600 dark:text-blue-400 transition-colors disabled:opacity-50 text-xs font-medium"
+                                      title={t('menu.cart.duplicate') || 'Duplicate item'}
+                                    >
+                                      {updatingItemId === item.basketItemId ? (
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                      ) : (
+                                        <>
+                                          <Copy className="w-4 h-4" />
+                                          <span>{t('menu.cart.duplicate') || 'Duplicate'}</span>
+                                        </>
+                                      )}
+                                    </button>
+                                  )}
+
                                   <button
                                     onClick={() => handleDeleteItem(item.basketItemId)}
                                     disabled={deletingItemId === item.basketItemId}
-                                    className="ml-auto p-2 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg text-red-500 transition-colors disabled:opacity-50"
+                                    className="ml-auto flex items-center gap-1 px-3 py-2 hover:bg-red-100 dark:hover:bg-red-950/20 rounded-lg text-red-500 transition-colors disabled:opacity-50 text-xs font-medium"
                                   >
                                     {deletingItemId === item.basketItemId ? (
                                       <Loader2 className="w-4 h-4 animate-spin" />
                                     ) : (
-                                      <Trash2 className="w-4 h-4" />
+                                      <>
+                                        <Trash2 className="w-4 h-4" />
+                                        <span>{t('menu.cart.delete') || 'Delete'}</span>
+                                      </>
                                     )}
                                   </button>
                                 </div>
@@ -976,28 +768,86 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                 <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-700">
                                   <div className="flex items-center justify-between">
                                     <span className={`text-xs ${theme.text.secondary}`}>{t('menu.cart.total')}</span>
-                                    <span className="font-bold text-emerald-600">{formatPrice(item.totalPrice)}</span>
+                                    <span className="font-bold text-emerald-600">{currency.symbol}{item.totalPrice}</span>
                                   </div>
                                 </div>
                               </div>
                             </div>
                           </div>
 
-                          {/* Addons */}
-                          {(itemAddons.length > 0 || availableAddons.length > 0) && (
-                            <div className="border-t border-slate-200 dark:border-slate-700">
-                              <button
-                                onClick={() => toggleItemExpanded(item.basketItemId)}
-                                className="w-full px-4 py-2 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-                              >
-                                <span className={`text-sm font-semibold ${theme.text.primary}`}>
-                                  Add-ons {itemAddons.length > 0 && `(${itemAddons.length})`}
-                                </span>
-                                {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                              </button>
+                          {/* Addons & Extras */}
+                          {(itemAddons.length > 0 || itemExtras.length > 0 || availableAddons.length > 0 || availableExtras.length > 0) && (
+                            <div className="border-t border-slate-200 dark:border-slate-700 mt-3">
+                              <div className="px-4 py-3">
+                                <h5 className={`text-xs font-bold ${theme.text.secondary} uppercase mb-3`}>
+                                  {t('menu.customizations') || 'Customizations'}
+                                  {(itemAddons.length + itemExtras.length) > 0 && ` (${itemAddons.length + itemExtras.length})`}
+                                </h5>
+                                <div className="space-y-3">
+                                  {/* Extras Section */}
+                                  {itemExtras.length > 0 && (
+                                    <div className="space-y-2">
+                                      <h5 className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
+                                        {t('menu.extras') || 'Extras'}
+                                      </h5>
+                                      {itemExtras.map((extra) => (
+                                        <div key={extra.branchProductExtraId} className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
+                                          <div className="flex-1">
+                                            <p className={`text-sm font-semibold ${theme.text.primary}`}>
+                                              {extra.isRemoval ? (
+                                                <span className="text-red-600 dark:text-red-400">
+                                                  {t('menu.no') || 'No'} {extra.extraName}
+                                                </span>
+                                              ) : (
+                                                extra.extraName
+                                              )}
+                                            </p>
+                                            {!extra.isRemoval && (
+                                              <p className="text-xs text-blue-600 font-semibold">
+                                                {currency.symbol}{extra.unitPrice} {t('menu.each') || 'each'}
+                                              </p>
+                                            )}
+                                          </div>
 
-                              {isExpanded && (
-                                <div className="px-4 pb-4 space-y-3">
+                                          {!extra.isRemoval && (
+                                            <div className="flex items-center gap-2 bg-white dark:bg-slate-700 rounded-lg p-1">
+                                              <button
+                                                onClick={() => handleUpdateExtraQuantity(item, extra.branchProductExtraId, -1)}
+                                                disabled={
+                                                  updatingExtraId === extra.branchProductExtraId ||
+                                                  extra.quantity <= (extra.minQuantity !== null && extra.minQuantity !== undefined ? extra.minQuantity : 0)
+                                                }
+                                                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
+                                              >
+                                                <Minus className="w-3 h-3" />
+                                              </button>
+                                              <span className="font-bold text-sm min-w-[1.5rem] text-center">{extra.quantity}</span>
+                                              <button
+                                                onClick={() => handleUpdateExtraQuantity(item, extra.branchProductExtraId, 1)}
+                                                disabled={
+                                                  updatingExtraId === extra.branchProductExtraId ||
+                                                  extra.quantity >= (extra.maxQuantity !== null && extra.maxQuantity !== undefined ? extra.maxQuantity : 999)
+                                                }
+                                                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-600 rounded transition-colors disabled:opacity-50"
+                                              >
+                                                <Plus className="w-3 h-3" />
+                                              </button>
+                                            </div>
+                                          )}
+
+                                          <button
+                                            onClick={() => handleDeleteExtra(item, extra.branchProductExtraId)}
+                                            className="flex items-center gap-1 px-2 py-1.5 hover:bg-red-100 dark:hover:bg-red-950/20 rounded text-red-500 text-xs font-medium"
+                                          >
+                                            <X className="w-4 h-4" />
+                                            <span>{t('common.remove') || 'Remove'}</span>
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+
+                                  {/* Addons Section */}
                                   {itemAddons.map((addon) => {
                                     const addonId = addon.addonBasketItemId || addon.basketItemId;
                                     const addonName = addon.addonName || addon.productName;
@@ -1007,7 +857,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                       <div key={addonId} className="flex items-center gap-3 p-3 bg-emerald-50 dark:bg-emerald-950/20 rounded-lg">
                                         <div className="flex-1">
                                           <p className={`text-sm font-semibold ${theme.text.primary}`}>{addonName}</p>
-                                          <p className="text-xs text-emerald-600 font-semibold">{formatPrice(addonPrice)} each</p>
+                                          <p className="text-xs text-emerald-600 font-semibold"> {currency.symbol}{(addonPrice)} each</p>
                                         </div>
 
                                         <div className="flex items-center gap-2 bg-white dark:bg-slate-700 rounded-lg p-1">
@@ -1028,13 +878,54 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                           </button>
                                         </div>
 
-                                        <button onClick={() => handleDeleteAddon(addonId)} className="p-1.5 hover:bg-red-100 dark:hover:bg-red-950/20 rounded text-red-500">
+                                        <button
+                                          onClick={() => handleDeleteAddon(addonId)}
+                                          className="flex items-center gap-1 px-2 py-1.5 hover:bg-red-100 dark:hover:bg-red-950/20 rounded text-red-500 text-xs font-medium"
+                                        >
                                           <X className="w-4 h-4" />
+                                          <span>{t('common.remove') || 'Remove'}</span>
                                         </button>
                                       </div>
                                     );
                                   })}
 
+                                  {/* Available Extras */}
+                                  {availableExtras.length > 0 && (
+                                    <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+                                      <p className={`text-xs font-semibold ${theme.text.secondary} mb-2`}>
+                                        {t('menu.availableExtras') || 'Available Extras'}:
+                                      </p>
+                                      <div className="space-y-2">
+                                        {availableExtras.map((extra: any) => (
+                                          <button
+                                            key={extra.branchProductExtraId}
+                                            onClick={() => handleToggleExtra(item, extra)}
+                                            className="w-full flex items-center justify-between p-2 bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600 rounded-lg transition-colors"
+                                          >
+                                            <div className="flex items-center gap-2">
+                                              <Plus className="w-4 h-4 text-blue-600" />
+                                              <span className={`text-sm ${theme.text.primary}`}>
+                                                {extra.isRemoval ? (
+                                                  <span className="text-red-600">
+                                                    {t('menu.remove') || 'Remove'} {extra.extraName}
+                                                  </span>
+                                                ) : (
+                                                  extra.extraName
+                                                )}
+                                              </span>
+                                            </div>
+                                            {!extra.isRemoval && (
+                                              <span className="text-sm font-semibold text-blue-600">
+                                                {currency.symbol}{(extra.unitPrice)}
+                                              </span>
+                                            )}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Available Addons */}
                                   {availableAddons.length > 0 && (
                                     <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
                                       <p className={`text-xs font-semibold ${theme.text.secondary} mb-2`}>Available Add-ons:</p>
@@ -1051,7 +942,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                               <span className={`text-sm ${theme.text.primary}`}>{addon.addonName}</span>
                                             </div>
                                             <span className="text-sm font-semibold text-emerald-600">
-                                              {formatPrice(addon.specialPrice || addon.price)}
+                                              {currency.symbol}{(addon.specialPrice || addon.price)}
                                             </span>
                                           </button>
                                         ))}
@@ -1059,29 +950,40 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                     </div>
                                   )}
                                 </div>
-                              )}
+                              </div>
                             </div>
                           )}
                         </div>
                       );
                     })}
 
-                    {itemCount > 0 && (
-                      <button
-                        onClick={handleClearBasket}
-                        disabled={isClearing}
-                        className="w-full py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-lg transition-colors disabled:opacity-50"
-                      >
-                        {isClearing ? (
-                          <span className="flex items-center justify-center gap-2">
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                            Clearing...
-                          </span>
-                        ) : (
-                          t('menu.cart.clear')
+                    {/* Order Summary and Proceed Button */}
+                    <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700 space-y-3">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className={theme.text.secondary}>{t('order.form.subtotal')}</span>
+                          <span className={theme.text.primary}>{currency.symbol}{subtotal}</span>
+                        </div>
+                        {tax > 0 && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className={theme.text.secondary}>Tax:</span>
+                            <span className={theme.text.primary}>{currency.symbol}{tax}</span>
+                          </div>
                         )}
+                        <div className="flex items-center justify-between text-lg font-bold pt-2 border-t border-slate-200 dark:border-slate-700">
+                          <span className={theme.text.primary}>{t('menu.cart.total')}</span>
+                          <span className="text-orange-600 dark:text-orange-400">{currency.symbol}{total}</span>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={handleCheckout}
+                        disabled={itemCount === 0}
+                        className="w-full py-4 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {t('menu.cart.placeOrder')}
                       </button>
-                    )}
+                    </div>
                   </div>
                 )
               )}
@@ -1133,10 +1035,10 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                 <div className="flex items-start justify-between gap-2 mb-2">
                                   <div>
                                     <h3 className="font-bold text-lg text-slate-900 dark:text-slate-100">
-                                      {orderType.name}
+                                      {getOrderTypeTranslation(orderType, 'name')}
                                     </h3>
                                     <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                                      {orderType.description}
+                                      {getOrderTypeTranslation(orderType, 'description')}
                                     </p>
                                   </div>
                                   {isSelected && (
@@ -1174,12 +1076,12 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                 <div className="space-y-1 text-xs">
                                   {orderType.minOrderAmount > 0 && (
                                     <p className="text-blue-600 dark:text-blue-400">
-                                      {t('order.form.minimumOrder')}: {formatPrice(orderType.minOrderAmount)}
+                                      {t('order.form.minimumOrder')}: {currency.symbol}{(orderType.minOrderAmount)}
                                     </p>
                                   )}
                                   {orderType.serviceCharge > 0 && (
                                     <p className="text-orange-600 dark:text-orange-400">
-                                      {t('order.form.serviceCharge')}: +{formatPrice(orderType.serviceCharge)}
+                                      {t('order.form.serviceCharge')}: +{currency.symbol}{(orderType.serviceCharge)}
                                     </p>
                                   )}
                                   {orderType.estimatedMinutes > 0 && (
@@ -1188,7 +1090,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                                     </p>
                                   )}
                                   <p className="text-lg font-bold text-orange-600 dark:text-orange-400 mt-2">
-                                    {t('menu.cart.total')}: {formatPrice(calculatedTotal)}
+                                    {t('menu.cart.total')}: {currency.symbol}{(calculatedTotal)}
                                   </p>
                                 </div>
                               </div>
@@ -1202,7 +1104,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
               )}
 
               {cartStep === 'information' && selectedOrderType && (
-                /* INFORMATION FORM */
+                /* INFORMATION FORM - This section will be very long, continue in next message if needed */
                 <div className="p-6 space-y-6">
                   {/* Selected Order Type Display */}
                   <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
@@ -1211,10 +1113,10 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                         <div className="text-2xl">{selectedOrderType.icon}</div>
                         <div>
                           <h4 className="font-bold text-slate-900 dark:text-slate-100">
-                            {selectedOrderType.name}
+                            {getOrderTypeTranslation(selectedOrderType, 'name')}
                           </h4>
                           <p className="text-sm text-slate-600 dark:text-slate-400">
-                            {selectedOrderType.description}
+                            {getOrderTypeTranslation(selectedOrderType, 'description')}
                           </p>
                         </div>
                       </div>
@@ -1229,12 +1131,12 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                     <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-600 space-y-1 text-xs">
                       {selectedOrderType.minOrderAmount > 0 && (
                         <p className="text-blue-600 dark:text-blue-400">
-                          {t('order.form.minimumOrder')}: {formatPrice(selectedOrderType.minOrderAmount)}
+                          {t('order.form.minimumOrder')}: {currency.symbol}{(selectedOrderType.minOrderAmount)}
                         </p>
                       )}
                       {selectedOrderType.serviceCharge > 0 && (
                         <p className="text-orange-600 dark:text-orange-400">
-                          {t('order.form.serviceCharge')}: +{formatPrice(selectedOrderType.serviceCharge)}
+                          {t('order.form.serviceCharge')}: +{currency.symbol}{(selectedOrderType.serviceCharge)}
                         </p>
                       )}
                       {selectedOrderType.estimatedMinutes > 0 && (
@@ -1345,8 +1247,9 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                           </p>
                         )}
                       </div>
-                      
                     )}
+
+                    {/* Order Notes */}
                     <div>
                       <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                         <ClipboardList className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
@@ -1357,7 +1260,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                         onChange={(e) => setOrderNotes(e.target.value)}
                         rows={2}
                         className="w-full p-3 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all resize-none"
-                        placeholder={t('order.form.notesPlaceholder') || 'Any special requests? (e.g. No onions)'}
+                        placeholder={t('order.form.notesPlaceholder') || 'Any special requests?'}
                       />
                     </div>
 
@@ -1419,7 +1322,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                       <div className="flex justify-between">
                         <span className="text-slate-600 dark:text-slate-400">{t('order.form.subtotal')}:</span>
                         <span className="text-slate-800 dark:text-slate-200">
-                          {formatPrice(total)}
+                          {currency.symbol}{(total)}
                         </span>
                       </div>
 
@@ -1427,7 +1330,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                         <div className="flex justify-between">
                           <span className="text-slate-600 dark:text-slate-400">{t('order.form.serviceCharge')}:</span>
                           <span className="text-slate-800 dark:text-slate-200">
-                            +{formatPrice(selectedOrderType.serviceCharge)}
+                            +{currency.symbol}{(selectedOrderType.serviceCharge)}
                           </span>
                         </div>
                       )}
@@ -1435,7 +1338,7 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                       <div className="flex justify-between font-bold border-t border-slate-200 dark:border-slate-600 pt-2">
                         <span className="text-slate-800 dark:text-slate-200">{t('menu.cart.total')}:</span>
                         <span className="text-orange-600 dark:text-orange-400">
-                          {formatPrice(total + selectedOrderType.serviceCharge)}
+                          {currency.symbol}{(total + selectedOrderType.serviceCharge)}
                         </span>
                       </div>
 
@@ -1462,10 +1365,42 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Information Form Footer */}
+              {cartStep === 'information' && (
+                <div className="p-6 border-t border-slate-200 dark:border-slate-700">
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={handleBackToOrderTypes}
+                      className="flex-1 py-3 px-4 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                    >
+                      <BackIcon className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
+                      {t('priceChange.cancel')}
+                    </button>
+                    <button
+                      onClick={handleSubmitOrder}
+                      disabled={submittingOrder}
+                      className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {submittingOrder ? (
+                        <div className="flex items-center justify-center">
+                          <Loader2 className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'} animate-spin`} />
+                          {t('menu.cart.processing')}
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-center">
+                          {t('order.form.createOrder')}
+                          <ForwardIcon className={`h-4 w-4 ${isRTL ? 'mr-2' : 'ml-2'}`} />
+                        </div>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
           )}
 
-          {/* --- NEWLY ADDED ORDERS TAB RENDER --- */}
+          {/* Orders Tab */}
           {activeTab === 'orders' && (
             <div className="p-6">
               <OrdersTab
@@ -1479,80 +1414,30 @@ const OnlineCartSidebar: React.FC<OnlineCartSidebarProps> = ({
             </div>
           )}
         </div>
-
-        {/* Footer - Different for each step */}
-        {activeTab === 'cart' && cartStep === 'cart' && itemCount > 0 && (
-          <div className="border-t border-slate-200 dark:border-slate-700 p-6 space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span className={theme.text.secondary}>{t('order.form.subtotal')}</span>
-                <span className={theme.text.primary}>{formatPrice(subtotal)}</span>
-              </div>
-              {tax > 0 && (
-                <div className="flex items-center justify-between text-sm">
-                  <span className={theme.text.secondary}>Tax:</span>
-                  <span className={theme.text.primary}>{formatPrice(tax)}</span>
-                </div>
-              )}
-              <div className="flex items-center justify-between text-lg font-bold pt-2 border-t border-slate-200 dark:border-slate-700">
-                <span className={theme.text.primary}>{t('menu.cart.total')}</span>
-                <span className="text-emerald-600">{formatPrice(total)}</span>
-              </div>
-            </div>
-
-            <button
-              onClick={handleCheckout}
-              className="w-full py-4 bg-gradient-to-r from-slate-600 to-slate-600 hover:from-emerald-700 hover:to-slate-700 text-white rounded-xl font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl"
-            >
-              {t('menu.cart.placeOrder')}
-            </button>
-          </div>
-        )}
-
-        {activeTab === 'cart' && cartStep === 'information' && (
-          <div className="border-t border-slate-200 dark:border-slate-700 p-6">
-            <div className="flex space-x-3">
-              <button
-                onClick={handleBackToOrderTypes}
-                className="flex-1 py-3 px-4 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-              >
-                <BackIcon className={`h-4 w-4 inline ${isRTL ? 'ml-1' : 'mr-1'}`} />
-                {t('priceChange.cancel')}
-              </button>
-              <button
-                onClick={handleSubmitOrder}
-                disabled={submittingOrder}
-                className="flex-1 bg-gradient-to-r from-orange-500 via-orange-600 to-pink-500 hover:from-orange-600 hover:via-orange-700 hover:to-pink-600 text-white py-3 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submittingOrder ? (
-                  <div className="flex items-center justify-center">
-                    <Loader2 className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'} animate-spin`} />
-                    {t('menu.cart.processing')}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center">
-                    {t('order.form.createOrder')}
-                    <ForwardIcon className={`h-4 w-4 ${isRTL ? 'mr-2' : 'ml-2'}`} />
-                  </div>
-                )}
-              </button>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
-      {/* Toast Container */}
-      <div className={`fixed top-4 ${isRTL ? 'left-4' : 'right-4'} z-[60] space-y-2 max-w-md`}>
-        {toasts.map(toast => (
-          <ToastComponent 
-            key={toast.id} 
-            toast={toast} 
-            onClose={removeToast} 
-          />
-        ))}
-      </div>
+     
 
-     <WhatsAppConfirmationModal
+      {/* Order Success Modal with Track Order button */}
+      {successOrderData && (
+        <OrderSuccessModal
+          isOpen={showOrderSuccessModal}
+          onClose={() => {
+            setShowOrderSuccessModal(false);
+            setSuccessOrderData(null);
+            resetForm();
+            setCartStep('cart');
+            setActiveTab('orders');
+          }}
+          orderTag={successOrderData.orderTag}
+          customerName={successOrderData.customerName}
+          estimatedMinutes={successOrderData.estimatedMinutes}
+          orderTypeName={successOrderData.orderTypeName}
+        />
+
+      )}
+       <WhatsAppConfirmationModal
         isVisible={showWhatsAppConfirmation}
         restaurantName={restaurantName}
         whatsappNumber={whatsAppPhoneNumber}

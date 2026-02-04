@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
 import { useOrdersManager } from '../../../../hooks/useOrdersManager';
 import { useFiltering } from '../../../../hooks/useFiltering';
@@ -18,7 +18,11 @@ import SuccessNotification from './SuccessNotification';
 import OrdersTable from './OrdersTable';
 import CancelModal from './CancelModal';
 
-const OrdersManager: React.FC = () => {
+interface OrdersManagerProps {
+  branchId?: number;
+}
+
+const OrdersManager: React.FC<OrdersManagerProps> = ({ branchId }) => {
   const { t, language } = useLanguage();
   const lang = language;
   const intervalRef = useRef<number | null>(null);
@@ -30,22 +34,27 @@ const OrdersManager: React.FC = () => {
       fetchPendingOrders,
       handleConfirmOrder,
       handleRejectOrder,
-      handleCancelOrder, 
+      handleCancelOrder,
       handleUpdateStatus,
       switchViewMode,
       openConfirmModal,
       openRejectModal,
-      openCancelModal, 
+      openCancelModal,
       openStatusModal,
       openDetailsModal,
       closeModals,
       toggleRowExpansion,
       handleSort,
       fetchBranchOrders,
+      handlePendingPageChange,
+      handlePendingItemsPerPageChange,
+      handleBranchPageChange,
+      handleBranchItemsPerPageChange,
       setState
     }
   } = useOrdersManager();
 
+  // Client-side filtering only for pending orders (now disabled since we use server-side pagination)
   const {
     filteredOrders,
     updateFilter,
@@ -54,17 +63,96 @@ const OrdersManager: React.FC = () => {
     hasActiveFilters
   } = useFiltering(state, setState);
 
-  const {
-    paginatedOrders,
-    changePage,
-    changeItemsPerPage
-  } = usePagination(filteredOrders, state.pagination, setState);
+  // Refs to track what's been fetched to prevent duplicates
+  const fetchedInitially = useRef(false);
+  const isFetchingRef = useRef(false);
+  const lastFetchedConfig = useRef<{viewMode: string, page: number, pageSize: number} | null>(null);
 
-  // Initial fetch on mount
+  // Determine which orders to display and which handlers to use based on view mode
+  // Now both modes use server-side pagination
+  const displayOrders = state.viewMode === 'branch'
+    ? state.branchOrders
+    : state.pendingOrders;
+
+
+    console.log("displayOrders",displayOrders)
+
+  const displayTotalFiltered = state.pagination.totalItems;
+
+  const handlePageChangeInternal = state.viewMode === 'branch'
+    ? handleBranchPageChange
+    : handlePendingPageChange;
+
+  const handleItemsPerPageChangeInternal = state.viewMode === 'branch'
+    ? handleBranchItemsPerPageChange
+    : handlePendingItemsPerPageChange;
+
+  // Initial fetch on mount - only once
   useEffect(() => {
-    fetchPendingOrders();
-    fetchBranchOrders();
-  }, []);
+    if (!fetchedInitially.current) {
+      fetchedInitially.current = true;
+      fetchPendingOrders();
+      // Don't fetch branch orders here - let the main effect handle it
+    }
+  }, []); // Run only once on mount
+
+  // Main fetch effect - handles view mode and pagination changes
+  useEffect(() => {
+   
+
+    // Skip if already fetching
+    if (isFetchingRef.current) {
+      return;
+    }
+
+    const currentConfig = {
+      viewMode: state.viewMode,
+      page: state.pagination.currentPage,
+      pageSize: state.pagination.itemsPerPage
+    };
+
+    // Check if this exact configuration has already been fetched
+    if (lastFetchedConfig.current &&
+        lastFetchedConfig.current.viewMode === currentConfig.viewMode &&
+        lastFetchedConfig.current.page === currentConfig.page &&
+        lastFetchedConfig.current.pageSize === currentConfig.pageSize) {
+      return;
+    }
+
+    
+    // Set fetching flag BEFORE updating ref
+    isFetchingRef.current = true;
+    lastFetchedConfig.current = currentConfig;
+
+    const fetchData = async () => {
+      try {
+        if (state.viewMode === 'pending') {
+          await fetchPendingOrders(
+            undefined, // branchId (for branch users, it's handled internally)
+            state.pagination.currentPage,
+            state.pagination.itemsPerPage
+          );
+        } else if (state.viewMode === 'branch') {
+          await fetchBranchOrders(
+            undefined, // branchId (for branch users, it's handled internally)
+            state.pagination.currentPage,
+            state.pagination.itemsPerPage
+          );
+        }
+      } finally {
+        // Clear fetching flag after completion
+        isFetchingRef.current = false;
+      }
+    };
+
+    fetchData();
+  }, [
+    state.viewMode,
+    state.pagination.currentPage,
+    state.pagination.itemsPerPage,
+    fetchPendingOrders,
+    fetchBranchOrders
+  ]);
 
   // Auto-refresh pending orders every 30 seconds
   useEffect(() => {
@@ -75,8 +163,12 @@ const OrdersManager: React.FC = () => {
 
     // Only set up auto-refresh if we're in pending view mode
     if (state.viewMode === 'pending') {
-      intervalRef.current = setInterval(() => {
-        fetchPendingOrders();
+      intervalRef.current = window.setInterval(() => {
+        fetchPendingOrders(
+          undefined,
+          state.pagination.currentPage,
+          state.pagination.itemsPerPage
+        );
       }, 30000); // 30 seconds
     }
 
@@ -87,7 +179,7 @@ const OrdersManager: React.FC = () => {
         intervalRef.current = null;
       }
     };
-  }, [state.viewMode, fetchPendingOrders]);
+  }, [state.viewMode, state.pagination.currentPage, state.pagination.itemsPerPage, fetchPendingOrders]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
@@ -97,44 +189,47 @@ const OrdersManager: React.FC = () => {
         <ViewModeToggle 
           viewMode={state.viewMode}
           pendingCount={state.pendingOrders.length}
-          branchCount={state.branchOrders.length}
+          branchCount={state.pagination.totalItems || state.branchOrders.length}
           onModeChange={switchViewMode}
           t={t}
         />
 
-        <FilterSection
-          filters={state.filters}
-          showAdvancedFilters={state.showAdvancedFilters}
-          hasActiveFilters={hasActiveFilters}
-          viewMode={state.viewMode}
-          lang={lang}
-          filteredCount={filteredOrders.length}
-          totalCount={state.viewMode === 'pending' ? state.pendingOrders.length : state.branchOrders.length}
-          onUpdateFilter={updateFilter}
-          onUpdateNestedFilter={updateNestedFilter}
-          onClearFilters={clearFilters}
-          onToggleAdvanced={() => setState(prev => ({ ...prev, showAdvancedFilters: !prev.showAdvancedFilters }))}
-          t={t}
-        />
+        {/* Filter Section - Only for pending orders */}
+        {state.viewMode === 'pending' && (
+          <FilterSection
+            filters={state.filters}
+            showAdvancedFilters={state.showAdvancedFilters}
+            hasActiveFilters={hasActiveFilters}
+            viewMode={state.viewMode}
+            lang={lang}
+            filteredCount={filteredOrders.length}
+            totalCount={state.pendingOrders.length}
+            onUpdateFilter={updateFilter}
+            onUpdateNestedFilter={updateNestedFilter}
+            onClearFilters={clearFilters}
+            onToggleAdvanced={() => setState(prev => ({ ...prev, showAdvancedFilters: !prev.showAdvancedFilters }))}
+            t={t}
+          />
+        )}
 
         <PaginationControls
           pagination={state.pagination}
-          totalFiltered={filteredOrders.length}
-          onPageChange={changePage}
-          onItemsPerPageChange={changeItemsPerPage}
+          totalFiltered={displayTotalFiltered}
+          onPageChange={handlePageChangeInternal}
+          onItemsPerPageChange={handleItemsPerPageChangeInternal}
           t={t}
         />
 
         <ErrorNotification error={state.error} />
 
         <OrdersTable
-          orders={paginatedOrders}
+          orders={displayOrders}
           viewMode={state.viewMode}
           loading={state.loading}
           expandedRows={state.expandedRows}
           sortField={state.sortField}
           sortDirection={state.sortDirection}
-          hasActiveFilters={hasActiveFilters}
+          hasActiveFilters={state.viewMode === 'pending' ? hasActiveFilters : false}
           lang={lang}
           onSort={handleSort}
           onToggleExpansion={toggleRowExpansion}

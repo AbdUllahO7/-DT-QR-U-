@@ -12,8 +12,9 @@ import Footer from '../components/LandingPage/Footer.jsx';
  * the specific child route's element (e.g., <Home />, <Login />).
  */
 const MainLayout: React.FC = () => {
+  
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
+    <div className="min-h-screen flex overflow-hidden flex-col bg-white dark:bg-gray-900 transition-colors duration-300">
       <Header />
       {/* Outlet renders the matched child route's component */}
       <main className="flex-grow">

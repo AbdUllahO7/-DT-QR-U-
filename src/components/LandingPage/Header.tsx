@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 // Import useLocation here
-import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, Moon, Sun, QrCode, LogIn, UserPlus, LayoutDashboard, LogOut } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Menu, X, Moon, Sun, LogIn, UserPlus, LayoutDashboard, LogOut } from 'lucide-react';
 // Reverting imports to not use .jsx extension, as in your original file
 import { useTheme } from '../../contexts/ThemeContext';
-import { useAuth, useScrollSpy } from '../../hooks'; 
+import { useAuth, useScrollSpy } from '../../hooks';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { NavItem } from '../../types';
 import LanguageSelector from '../LanguageSelector';
@@ -20,7 +20,10 @@ const Header: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
   const { t, isRTL } = useLanguage();
   const { isAuthenticated, checkAuth, clearAuth } = useAuth();
-  
+
+  // Ref for the header element to detect clicks outside
+  const headerRef = useRef<HTMLElement>(null);
+
   const navItems: NavItem[] = [
     { id: 'home', label: t('nav.home'), href: '#hero' },
     { id: 'features', label: t('nav.features'), href: '#features' },
@@ -29,33 +32,28 @@ const Header: React.FC = () => {
     { id: 'faq', label: t('nav.faq'), href: '#faq' },
     { id: 'contact', label: t('nav.contact'), href: '#contact' },
   ];
-  
+
   // Only activate scroll spy if on the home page
   const activeSection = useScrollSpy(
-    isHomePage ? navItems.map(item => item.id) : [], 
+    isHomePage ? navItems.map(item => item.id) : [],
     100
   );
 
-  // --- ADD THIS NEW useEffect FOR SCROLLING ---
-  // This hook handles scrolling when the URL hash changes,
-  // especially when navigating from another page.
+
   useEffect(() => {
-    // Check if there's a hash and we are on the home page
     if (location.hash && isHomePage) {
-      const id = location.hash.substring(1); // Get "features" from "#features"
-      
-      // Use setTimeout to give the Home component time to render its sections
+      const id = location.hash.substring(1);
+
       setTimeout(() => {
         const element = document.getElementById(id);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth' });
         }
-      }, 100); // 100ms delay. You can adjust this if needed.
+      }, 100);
     }
-  }, [isHomePage, location.hash]); // Run when path or hash changes
+  }, [isHomePage, location.hash]);
 
 
-  // Component mount olduğunda auth durumunu kontrol et
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
@@ -69,20 +67,28 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // --- SIMPLIFIED NAVIGATION LOGIC ---
+  // Close mobile menu when clicking outside the header
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent): void => {
+      if (isOpen && headerRef.current && !headerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen]);
+
   const handleNavClick = (href: string): void => {
     setIsOpen(false); // Close mobile menu regardless
 
-    // We simply navigate to the path with the hash.
-    // The new useEffect hook will handle the scrolling.
-    // This works whether we are on the home page or not.
-    navigate(`/${href}`); 
+    navigate(`/${href}`);
   };
 
   const handleLogin = (): void => {
-    // ... (rest of your existing function)
+    setIsOpen(false); // Close mobile menu
+
     const token = localStorage.getItem('token');
-// ... (rest of your existing code)
     const tokenExpiry = localStorage.getItem('tokenExpiry');
 
     if (token && tokenExpiry) {
@@ -99,37 +105,44 @@ const Header: React.FC = () => {
         localStorage.removeItem('userId');
       }
     }
-    
+
     // Token yoksa veya geçersizse login sayfasına yönlendir
     navigate('/login');
   };
 
   const handleRegister = (): void => {
+    setIsOpen(false); // Close mobile menu
     navigate('/register');
   };
 
   const handleGoToPanel = (): void => {
-    navigate('/selection');
+    setIsOpen(false); // Close mobile menu
+    navigate('/dashboard');
   };
 
   const handleLogout = (): void => {
+    setIsOpen(false); // Close mobile menu
     clearAuth();
     navigate('/', { replace: true });
   };
 
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg' 
-          : 'bg-transparent'
-      }`}
+    <header
+      ref={headerRef}
+      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${isScrolled
+        ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg'
+        : 'bg-transparent'
+        }`}
     >
       <nav className="container-max w-full" dir={isRTL ? 'rtl' : 'ltr'}>
         <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
           {/* Logo */}
           <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
-            <QrCode className="h-8 w-8 text-primary-600 dark:text-primary-400" />
+            <img
+              src="/assets/logos/iDiGiTeK-Logo-iDT-.png"
+              alt="iDiGiTeK Logo"
+              className="h-8 w-auto"
+            />
             <span className="text-xl font-bold text-gray-900 dark:text-white">
               {t('brand.name')}
             </span>
@@ -141,12 +154,12 @@ const Header: React.FC = () => {
               <button
                 key={item.id}
                 onClick={() => handleNavClick(item.href)}
-                className={`text-sm font-medium transition-colors duration-200 hover:text-primary-600 dark:hover:text-primary-400 ${
+                className={`text-sm font-medium transition-colors duration-200 hover:text-primary-800 dark:hover:text-primary-800 ${
                   // Only show active section highlighting on the home page
                   activeSection === item.id && isHomePage
-                    ? 'text-primary-600 dark:text-primary-400'
+                    ? 'text-primary-800 dark:text-primary-800'
                     : 'text-gray-700 dark:text-gray-300'
-                }`}
+                  }`}
               >
                 {item.label}
               </button>
@@ -154,47 +167,47 @@ const Header: React.FC = () => {
           </div>
 
           {/* Auth Buttons, Language Selector, Theme Toggle & Mobile Menu */}
-          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-3' : 'space-x-3'}`}>
-            {/* Desktop Auth Buttons */}
-            <div className={`hidden md:flex items-center ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}>
+          <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-2 sm:space-x-3' : 'space-x-2 sm:space-x-3'}`}>
+            {/* Auth Buttons - Always visible (compact on mobile, full on desktop) */}
+            <div className={`flex items-center ${isRTL ? 'space-x-reverse space-x-1 sm:space-x-2' : 'space-x-1 sm:space-x-2'}`}>
               {isAuthenticated ? (
                 <>
                   <button
                     onClick={handleGoToPanel}
-                    className={`flex items-center px-4 py-2 text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
+                    className={`flex items-center bg-primary-800  px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-primary-800 hover:bg-primary-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg ${isRTL ? 'space-x-reverse space-x-1 sm:space-x-2' : 'space-x-1 sm:space-x-2'}`}
                     aria-label={t('nav.goToPanel')}
                   >
-                    <LayoutDashboard className="h-4 w-4" />
-                    <span>{t('nav.goToPanel')}</span>
+                    <LayoutDashboard className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">{t('nav.goToPanel')}</span>
                   </button>
-                  
+
                   <button
                     onClick={handleLogout}
-                    className={`flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
+                    className={`flex items-center px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-800 dark:hover:text-primary-800 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 ${isRTL ? 'space-x-reverse space-x-1 sm:space-x-2' : 'space-x-1 sm:space-x-2'}`}
                     aria-label={t('auth.logout')}
                   >
-                    <LogOut className="h-4 w-4" />
-                    <span>{t('nav.logout')}</span>
+                    <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">{t('nav.logout')}</span>
                   </button>
                 </>
               ) : (
                 <>
                   <button
                     onClick={handleLogin}
-                    className={`flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
+                    className={`flex items-center mr-2 ml-2 text-white px-2 bg-primary-800 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary-800 dark:hover:text-primary-800 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-all duration-200 ${isRTL ? 'space-x-reverse space-x-1 sm:space-x-2' : 'space-x-1 sm:space-x-2'}`}
                     aria-label={t('auth.login')}
                   >
-                    <LogIn className="h-4 w-4" />
-                    <span>{t('nav.login')}</span>
+                    <LogIn className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">{t('nav.login')}</span>
                   </button>
-                  
+
                   <button
                     onClick={handleRegister}
-                    className={`flex items-center px-4 py-2 text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
+                    className={`flex dark:text-white items-center px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-primary hover:bg-primary-700 hover:text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg ${isRTL ? 'space-x-reverse space-x-1 sm:space-x-2' : 'space-x-1 sm:space-x-2'}`}
                     aria-label={t('auth.register')}
                   >
-                    <UserPlus className="h-4 w-4" />
-                    <span>{t('nav.register')}</span>
+                    <UserPlus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">{t('nav.register')}</span>
                   </button>
                 </>
               )}
@@ -206,25 +219,25 @@ const Header: React.FC = () => {
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+              className="p-1.5 sm:p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
               aria-label={t('accessibility.theme')}
               title={isDark ? t('theme.toggleToLight') : t('theme.toggleToDark')}
             >
-              {isDark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+              {isDark ? <Sun className="h-4 w-4 sm:h-5 sm:w-5" /> : <Moon className="h-4 w-4 sm:h-5 sm:w-5" />}
             </button>
 
             {/* Mobile menu button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
+              className="md:hidden p-1.5 sm:p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-200"
               aria-label={t('accessibility.menu')}
             >
-              {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isOpen ? <X className="h-4 w-4 sm:h-5 sm:w-5" /> : <Menu className="h-4 w-4 sm:h-5 sm:w-5" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation - Shows nav links and auth buttons */}
         {isOpen && (
           <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700" dir={isRTL ? 'rtl' : 'ltr'}>
             <div className={`px-4 py-2 ${isRTL ? 'space-y-1' : 'space-y-1'}`}>
@@ -235,50 +248,50 @@ const Header: React.FC = () => {
                   className={`block w-full ${isRTL ? 'text-right' : 'text-left'} px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 hover:bg-gray-100 dark:hover:bg-gray-800 ${
                     // Only show active section highlighting on the home page
                     activeSection === item.id && isHomePage
-                      ? 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20'
+                      ? 'text-primary-800 dark:text-primary-800 bg-primary-50 dark:bg-primary-900/20'
                       : 'text-gray-700 dark:text-gray-300'
-                  }`}
+                    }`}
                 >
                   {item.label}
                 </button>
               ))}
-              
+
               {/* Mobile Auth Buttons */}
-              <div className="pt-4 pb-2 border-t border-gray-200 dark:border-gray-700">
+              <div className="pt-3 mt-2 border-t border-gray-200 dark:border-gray-700">
                 {isAuthenticated ? (
                   <>
                     <button
                       onClick={handleGoToPanel}
-                      className={`flex items-center w-full px-3 py-2 mt-1 rounded-md text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white transition-colors duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
+                      className={`flex items-center w-full px-3 py-2 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-700 text-white transition-colors duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
                     >
                       <LayoutDashboard className="h-4 w-4" />
                       <span>{t('nav.goToPanel')}</span>
                     </button>
-                    
+
                     <button
                       onClick={handleLogout}
-                      className={`flex items-center w-full px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
+                      className={`flex items-center w-full px-3 py-2 mt-1 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
                     >
                       <LogOut className="h-4 w-4" />
-                      <span>{t('auth.logout')}</span>
+                      <span>{t('nav.logout')}</span>
                     </button>
                   </>
                 ) : (
                   <>
                     <button
                       onClick={handleLogin}
-                      className={`flex items-center w-full px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
+                      className={`flex items-center text-white w-full px-3 py-2 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
                     >
                       <LogIn className="h-4 w-4" />
-                      <span>{t('auth.login')}</span>
+                      <span>{t('nav.login')}</span>
                     </button>
-                    
+
                     <button
                       onClick={handleRegister}
-                      className={`flex items-center w-full px-3 py-2 mt-1 rounded-md text-sm font-medium bg-primary-600 hover:bg-primary-700 text-white transition-colors duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
+                      className={`flex items-center w-full px-3 py-2 mt-1 rounded-md text-sm font-medium text-primary-800 hover:bg-primary-700 text-primary transition-colors duration-200 ${isRTL ? 'space-x-reverse space-x-2' : 'space-x-2'}`}
                     >
                       <UserPlus className="h-4 w-4" />
-                      <span>{t('auth.register')}</span>
+                      <span>{t('nav.register')}</span>
                     </button>
                   </>
                 )}

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Building2, 
-  ShieldCheck, 
+import {
+  User,
+  Mail,
+  Calendar,
+  Building2,
+  ShieldCheck,
   Edit3,
   Camera,
   CheckCircle,
@@ -13,9 +13,10 @@ import {
   Crown
 } from 'lucide-react';
 import { useLanguage } from '../../../contexts/LanguageContext';
-import { UserProfileResponse } from '../../../types/api';
 import { authService } from '../../../services/authService';
 import { CATEGORY_COLORS } from '../../../types/BranchManagement/type';
+import { UserProfileResponse } from '../../../types/users/users.type';
+import { getTranslatedPermissionName, getTranslatedCategoryName } from '../../../utils/permissionTranslation';
 
 // Kategori renkleri
 
@@ -28,7 +29,7 @@ const Profile: React.FC = () => {
 
   useEffect(() => {
     let isMounted = true;
-    
+
     const fetchProfile = async () => {
       try {
         const res = await authService.getUserProfile();
@@ -47,9 +48,9 @@ const Profile: React.FC = () => {
         }
       }
     };
-    
+
     fetchProfile();
-    
+
     return () => {
       isMounted = false;
     };
@@ -102,8 +103,9 @@ const Profile: React.FC = () => {
                 initials
               )}
             </div>
-            <button className={`absolute -bottom-2 ${isRTL ? '-left-2' : '-right-2'} bg-white text-primary-600 p-2 rounded-full shadow-lg group-hover:scale-110 transition-transform`}>
+            <button className={`absolute -bottom-2 ${isRTL ? '-left-2' : '-right-2'} flex items-center gap-1 bg-white text-primary-800 px-3 py-2 rounded-full shadow-lg group-hover:scale-110 transition-transform text-xs font-medium`}>
               <Camera className="w-4 h-4" />
+              <span>{t('profile.changePhoto') || 'Change'}</span>
             </button>
           </div>
 
@@ -111,22 +113,21 @@ const Profile: React.FC = () => {
           <div className={`flex-1 ${isRTL ? 'text-center md:text-right' : 'text-center md:text-left'}`}>
             <h1 className="text-3xl font-bold mb-2">{displayName}</h1>
             <p className="text-primary-100 text-lg mb-4">{appUser.email}</p>
-            
+
             <div className={`flex flex-wrap gap-3 ${isRTL ? 'justify-center md:justify-end' : 'justify-center md:justify-start'}`}>
-              <span className={`px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 ${
-                appUser.isActive 
-                  ? 'bg-green-500/20 text-green-100 border border-green-400/30' 
-                  : 'bg-red-500/20 text-red-100 border border-red-400/30'
-              }`}>
+              <span className={`px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2 ${appUser.isActive
+                ? 'bg-green-500/20 text-green-100 border border-green-400/30'
+                : 'bg-red-500/20 text-red-100 border border-red-400/30'
+                }`}>
                 {appUser.isActive ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                 {appUser.isActive ? t('profile.accountStatus.active') : t('profile.accountStatus.inactive')}
               </span>
-              
+
               {/* Display unique categories as role badges */}
               {[...new Set(appRoles.map(permission => permission.category))].map((category, index) => (
                 <span key={index} className="px-4 py-2 rounded-full text-sm font-medium bg-white/10 text-white border border-white/20 flex items-center gap-2">
                   <Crown className="w-4 h-4" />
-                  {t(`profile.categories.${category}`) || category}
+                  {getTranslatedCategoryName(category, t)}
                 </span>
               ))}
             </div>
@@ -145,11 +146,12 @@ const Profile: React.FC = () => {
         >
           <div className={`flex items-center justify-between mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <h2 className={`text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <User className="w-6 h-6 text-primary-600" />
+              <User className="w-6 h-6 text-primary-800" />
               {t('profile.personalInfo')}
             </h2>
-            <button className="text-primary-600 hover:text-primary-700 p-2 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors">
+            <button className="flex items-center gap-2 text-primary-800 hover:text-primary-700 px-3 py-2 rounded-lg hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-colors text-sm font-medium">
               <Edit3 className="w-5 h-5" />
+              <span>{t('common.edit') || 'Edit'}</span>
             </button>
           </div>
 
@@ -209,11 +211,10 @@ const Profile: React.FC = () => {
                   {t('profile.accountStatus.status')}
                 </label>
                 <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
-                  <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-                    appUser.isActive 
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
-                      : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                  } ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${appUser.isActive
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                    : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                    } ${isRTL ? 'flex-row-reverse' : ''}`}>
                     {appUser.isActive ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                     {appUser.isActive ? t('profile.restaurant.status.active') : t('profile.restaurant.status.inactive')}
                   </span>
@@ -234,10 +235,10 @@ const Profile: React.FC = () => {
           {appUser.restaurant && (
             <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
               <h3 className={`text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3 mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <Building2 className="w-5 h-5 text-primary-600" />
+                <Building2 className="w-5 h-5 text-primary-800" />
                 {t('profile.restaurant.info')}
               </h3>
-              
+
               <div className="space-y-4">
                 <div>
                   <label className={`block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
@@ -250,11 +251,10 @@ const Profile: React.FC = () => {
                   <label className={`block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
                     {t('profile.fields.status')}
                   </label>
-                  <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${
-                    appUser.restaurant.restaurantStatus 
-                      ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400' 
-                      : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                  } ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium ${appUser.restaurant.restaurantStatus
+                    ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+                    : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+                    } ${isRTL ? 'flex-row-reverse' : ''}`}>
                     {appUser.restaurant.restaurantStatus ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
                     {appUser.restaurant.restaurantStatus ? t('profile.restaurant.status.active') : t('profile.restaurant.status.inactive')}
                   </span>
@@ -266,16 +266,16 @@ const Profile: React.FC = () => {
           {/* Quick Stats */}
           <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg">
             <h3 className={`text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3 mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-              <ShieldCheck className="w-5 h-5 text-primary-600" />
+              <ShieldCheck className="w-5 h-5 text-primary-800" />
               {t('profile.permissions.summary')}
             </h3>
-            
+
             <div className="space-y-4">
               <div className={`flex justify-between items-center p-4 bg-primary-50 dark:bg-primary-900/20 rounded-xl ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <span className="text-sm font-medium text-primary-800 dark:text-primary-200">{t('profile.permissions.totalCategories')}</span>
-                <span className="text-2xl font-bold text-primary-600">{[...new Set(appRoles.map(permission => permission.category))].length}</span>
+                <span className="text-2xl font-bold text-primary-800">{[...new Set(appRoles.map(permission => permission.category))].length}</span>
               </div>
-              
+
               <div className={`flex justify-between items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl ${isRTL ? 'flex-row-reverse' : ''}`}>
                 <span className="text-sm font-medium text-blue-800 dark:text-blue-200">{t('profile.permissions.totalPermissions')}</span>
                 <span className="text-2xl font-bold text-blue-600">{totalPermissions}</span>
@@ -294,7 +294,7 @@ const Profile: React.FC = () => {
           className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-lg"
         >
           <h2 className={`text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-3 mb-6 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <ShieldCheck className="w-6 h-6 text-primary-600" />
+            <ShieldCheck className="w-6 h-6 text-primary-800" />
             {t('profile.permissions.rolesAndPermissions')}
           </h2>
 
@@ -312,7 +312,7 @@ const Profile: React.FC = () => {
                   <div className={`flex items-center justify-between mb-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
                     <div className={`${isRTL ? 'text-right' : 'text-left'}`}>
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                        {t(`profile.categories.${category}`) || category}
+                        {getTranslatedCategoryName(category, t)}
                       </h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {permissions.length} {t('profile.permissions.totalPermissions').toLowerCase()}
@@ -325,23 +325,23 @@ const Profile: React.FC = () => {
 
                   <div>
                     <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide flex items-center gap-2">
-                      <span className={`h-2 w-2 rounded-full ${CATEGORY_COLORS[category]?.includes('bg-purple-100') ? 'bg-purple-500' : 
+                      <span className={`h-2 w-2 rounded-full ${CATEGORY_COLORS[category]?.includes('bg-purple-100') ? 'bg-purple-500' :
                         CATEGORY_COLORS[category]?.includes('bg-indigo-100') ? 'bg-indigo-500' :
-                        CATEGORY_COLORS[category]?.includes('bg-green-100') ? 'bg-green-500' :
-                        CATEGORY_COLORS[category]?.includes('bg-emerald-100') ? 'bg-emerald-500' :
-                        CATEGORY_COLORS[category]?.includes('bg-cyan-100') ? 'bg-cyan-500' :
-                        CATEGORY_COLORS[category]?.includes('bg-amber-100') ? 'bg-amber-500' :
-                        CATEGORY_COLORS[category]?.includes('bg-orange-100') ? 'bg-orange-500' :
-                        CATEGORY_COLORS[category]?.includes('bg-blue-100') ? 'bg-blue-500' :
-                        CATEGORY_COLORS[category]?.includes('bg-red-100') ? 'bg-red-500' :
-                        'bg-gray-400'}`}></span>
-                      {t(`profile.categories.${category}`) || category} ({permissions.length})
+                          CATEGORY_COLORS[category]?.includes('bg-green-100') ? 'bg-green-500' :
+                            CATEGORY_COLORS[category]?.includes('bg-emerald-100') ? 'bg-emerald-500' :
+                              CATEGORY_COLORS[category]?.includes('bg-cyan-100') ? 'bg-cyan-500' :
+                                CATEGORY_COLORS[category]?.includes('bg-amber-100') ? 'bg-amber-500' :
+                                  CATEGORY_COLORS[category]?.includes('bg-orange-100') ? 'bg-orange-500' :
+                                    CATEGORY_COLORS[category]?.includes('bg-blue-100') ? 'bg-blue-500' :
+                                      CATEGORY_COLORS[category]?.includes('bg-red-100') ? 'bg-red-500' :
+                                        'bg-gray-400'}`}></span>
+                      {getTranslatedCategoryName(category, t)} ({permissions.length})
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {permissions.map((permission, permIndex) => {
-                        const translatedName = t(`profile.permissionNames.${permission.name}`) || permission.description || permission.name;
+                        const translatedName = getTranslatedPermissionName(permission, t);
                         const categoryColor = CATEGORY_COLORS[category] || 'bg-gray-100 text-gray-900 dark:bg-gray-700 dark:text-gray-300';
-                        
+
                         return (
                           <span
                             key={permIndex}

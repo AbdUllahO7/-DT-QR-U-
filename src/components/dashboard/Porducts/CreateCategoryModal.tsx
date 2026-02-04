@@ -1,13 +1,26 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "../../../contexts/LanguageContext";
 import { logger } from "../../../utils/logger";
 import { httpClient } from "../../../utils/http";
 import { AnimatePresence, motion } from 'framer-motion';
 import { Sparkles, X, AlertCircle, CheckCircle2, Loader2, Tag } from "lucide-react";
 import { CreateCategoryFormData, CreateCategoryModalProps } from "../../../types/BranchManagement/type";
+import { languageService } from "../../../services/LanguageService";
+import { MultiLanguageInput } from "../../common/MultiLanguageInput";
+import { useTranslatableFields, TranslatableFieldValue } from "../../../hooks/useTranslatableFields";
+import { categoryTranslationService } from "../../../services/Translations/CategoryTranslationService";
 
 const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClose, onSuccess }) => {
   const { t, isRTL } = useLanguage();
+  const translationHook = useTranslatableFields();
+
+  // Supported languages - dynamically loaded
+  const [supportedLanguages, setSupportedLanguages] = useState<any[]>([]);
+  const [defaultLanguage, setDefaultLanguage] = useState<string>('en');
+
+  // Translation states
+  const [categoryNameTranslations, setCategoryNameTranslations] = useState<TranslatableFieldValue>({});
+
   const [formData, setFormData] = useState<CreateCategoryFormData>({
     categoryName: '',
     status: true,
@@ -16,10 +29,52 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isFocused, setIsFocused] = useState<Record<string, boolean>>({});
 
+  // Load languages on mount
+  useEffect(() => {
+    const loadLanguages = async () => {
+      try {
+        const languagesData = await languageService.getRestaurantLanguages();
+
+        // Deduplicate languages by code
+        const uniqueLanguages = (languagesData.availableLanguages || []).reduce((acc: any[], lang: any) => {
+          if (!acc.find((l: any) => l.code === lang.code)) {
+            acc.push(lang);
+          }
+          return acc;
+        }, []);
+
+        setSupportedLanguages(uniqueLanguages);
+        setDefaultLanguage(languagesData.defaultLanguage || 'en');
+
+        // Initialize empty translations
+        const languageCodes = uniqueLanguages.map((lang: any) => lang.code);
+        setCategoryNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+      } catch (error) {
+        logger.error('Failed to load languages', error, { prefix: 'CreateCategoryModal' });
+      }
+    };
+    loadLanguages();
+  }, []);
+
+  // Reset form when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        categoryName: '',
+        status: true,
+      });
+
+      // Reset translations
+      const languageCodes = supportedLanguages.map((lang: any) => lang.code);
+      setCategoryNameTranslations(translationHook.getEmptyTranslations(languageCodes));
+      setErrors({});
+    }
+  }, [isOpen, supportedLanguages]);
+
   // Form validation
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    
+
     if (!formData.categoryName.trim()) {
       newErrors.categoryName = t('createCategoryModal.form.categoryName.required');
     } else if (formData.categoryName.trim().length < 2) {
@@ -27,7 +82,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
     } else if (formData.categoryName.trim().length > 50) {
       newErrors.categoryName = t('createCategoryModal.validation.nameMaxLength');
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -49,23 +104,73 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
 
   const handleSubmit = async () => {
     if (!validateForm()) return;
-    
+
     setIsSubmitting(true);
     try {
       const payload = {
         categoryName: formData.categoryName.trim(),
         status: formData.status,
       };
-      
+
       logger.info('Kategori ekleme isteği gönderiliyor', { payload });
-      
+
       const response = await httpClient.post('/api/categories', payload);
-      
+
       logger.info('Kategori başarıyla eklendi', { data: response.data });
-      
+
+      // WORKAROUND: API might return malformed ID, so we need to fetch the category list to get the real ID
+      let categoryId: number | null = null;
+
+      if (response.data?.id && typeof response.data.id === 'number') {
+        categoryId = response.data.id;
+      } else {
+        logger.info('Fetching categories to get newly created category ID', { prefix: 'CreateCategoryModal' });
+
+        // Fetch all categories to find the newly created one
+        const categoriesResponse = await httpClient.get('/api/categories');
+        const categories = categoriesResponse.data;
+
+        // Find the newly created category by matching properties
+        const newCategory = categories.find((cat: any) =>
+          cat.categoryName === formData.categoryName.trim() &&
+          cat.status === formData.status
+        );
+
+        if (newCategory?.categoryId && typeof newCategory.categoryId === 'number') {
+          categoryId = newCategory.categoryId;
+          logger.info('Found newly created category', { categoryId }, { prefix: 'CreateCategoryModal' });
+        }
+      }
+
+      // Save translations if we have a valid category ID
+      if (categoryId) {
+        try {
+          const translationData = Object.keys(categoryNameTranslations)
+            .filter(lang => lang !== defaultLanguage)
+            .filter(lang => categoryNameTranslations[lang])
+            .map(languageCode => ({
+              categoryId: categoryId!,
+              languageCode,
+              categoryName: categoryNameTranslations[languageCode] || undefined,
+            }));
+
+          if (translationData.length > 0) {
+            await categoryTranslationService.batchUpsertCategoryTranslations({
+              translations: translationData
+            });
+            logger.info('Category translations saved', null, { prefix: 'CreateCategoryModal' });
+          }
+        } catch (error) {
+          logger.error('Failed to save category translations', error, { prefix: 'CreateCategoryModal' });
+          // Don't fail the whole operation if translations fail
+        }
+      } else {
+        logger.warn('Could not get category ID, skipping translation save', { prefix: 'CreateCategoryModal' });
+      }
+
       // Success callback'i çağır
       onSuccess();
-      
+
       // Form'u sıfırla
       setFormData({
         categoryName: '',
@@ -135,10 +240,6 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
       handleSubmit();
     }
   };
-
-  const nameLength = formData.categoryName.length;
-  const maxLength = 50;
-  const isNameValid = nameLength >= 2 && nameLength <= maxLength;
 
   return (
     <AnimatePresence>
@@ -260,62 +361,32 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
                     )}
                   </AnimatePresence>
 
-                  {/* Category Name - Enhanced Input */}
+                  {/* Category categoryName - Multi-language Input */}
                   <div className="space-y-2">
-                    <label 
-                      htmlFor="categoryName" 
-                      className={`flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300 ${isRTL ? 'flex-row-reverse' : ''}`}
-                    >
-                      <Tag className="w-4 h-4 text-primary-600 dark:text-primary-400" />
-                      <span>{t('createCategoryModal.form.categoryName.label')}</span>
-                      <span className="text-red-500">*</span>
-                    </label>
-                    
-                    <div className="relative">
-                      <input
-                        type="text"
-                        id="categoryName"
-                        value={formData.categoryName}
-                        onChange={(e) => handleChange('categoryName', e.target.value)}
-                        onFocus={() => setIsFocused({ ...isFocused, categoryName: true })}
-                        onBlur={() => setIsFocused({ ...isFocused, categoryName: false })}
-                        onKeyPress={handleKeyPress}
-                        maxLength={maxLength}
-                        className={`w-full px-5 py-4 border-2 rounded-2xl transition-all duration-300 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 ${
-                          errors.categoryName
-                            ? 'border-red-300 dark:border-red-600 bg-red-50/50 dark:bg-red-900/10 focus:border-red-500 focus:ring-4 focus:ring-red-500/20'
-                            : isFocused.categoryName
-                            ? 'border-primary-500 dark:border-primary-400 bg-primary-50/50 dark:bg-primary-900/10 focus:ring-4 focus:ring-primary-500/20'
-                            : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 hover:border-gray-400 dark:hover:border-gray-500'
-                        } focus:outline-none`}
-                        placeholder={t('createCategoryModal.form.categoryName.placeholder')}
-                        aria-describedby={errors.categoryName ? 'categoryName-error' : undefined}
-                        aria-required="true"
-                      />
-                      
-                      {/* Character Counter */}
-                      <div className={`absolute ${isRTL ? 'left-4' : 'right-4'} top-1/2 -translate-y-1/2 flex items-center gap-2`}>
-                        {formData.categoryName && isNameValid && !errors.categoryName && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="p-1 bg-emerald-100 dark:bg-emerald-900/30 rounded-full"
-                          >
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                          </motion.div>
-                        )}
-                        <span className={`text-xs font-medium ${
-                          nameLength > maxLength 
-                            ? 'text-red-600 dark:text-red-400' 
-                            : nameLength >= maxLength * 0.8 
-                            ? 'text-yellow-600 dark:text-yellow-400' 
-                            : 'text-gray-400 dark:text-gray-500'
-                        }`}>
-                          {nameLength}/{maxLength}
-                        </span>
-                      </div>
-                    </div>
-                    
+                    <MultiLanguageInput
+                      label={t('createCategoryModal.form.categoryName.label')}
+                      value={categoryNameTranslations}
+                      onChange={(newTranslations) => {
+                        setCategoryNameTranslations(newTranslations);
+                        // Update base formData with default language value for validation
+                        const val = newTranslations[defaultLanguage] || '';
+                        setFormData(prev => ({ ...prev, categoryName: val }));
+
+                        // Clear error if exists
+                        if (errors.categoryName && val) {
+                          setErrors(prev => {
+                            const newErrors = { ...prev };
+                            delete newErrors.categoryName;
+                            return newErrors;
+                          });
+                        }
+                      }}
+                      languages={supportedLanguages}
+                      placeholder={t('createCategoryModal.form.categoryName.placeholder')}
+                      defaultLanguage={defaultLanguage}
+                      required={true}
+                    />
+
                     {/* Error Message */}
                     <AnimatePresence>
                       {errors.categoryName && (
@@ -323,7 +394,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
                           initial={{ opacity: 0, y: -5 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -5 }}
-                          id="categoryName-error" 
+                          id="categoryName-error"
                           className={`flex items-center gap-2 text-sm text-red-600 dark:text-red-400 ${isRTL ? 'flex-row-reverse' : ''}`}
                           role="alert"
                         >
@@ -332,8 +403,6 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({ isOpen, onClo
                         </motion.p>
                       )}
                     </AnimatePresence>
-
-                  
                   </div>
 
                   {/* Status Toggle - Enhanced */}

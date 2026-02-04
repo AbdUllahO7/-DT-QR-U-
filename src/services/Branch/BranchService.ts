@@ -1,6 +1,6 @@
 import { BatchUpdateBranchDto,  CreateBranchWithDetailsDto } from "../../types/api";
 import { BranchData } from "../../types/BranchManagement/type";
-import {  httpClient } from "../../utils/http";
+import {  httpClient, getEffectiveBranchId } from "../../utils/http";
 import { logger } from "../../utils/logger";
 
 export interface UpdateMenuTableDto {
@@ -103,23 +103,34 @@ interface ApiBranchResponse {
 
 class BranchService {
   private baseUrl = '/api/Branches';
-
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
   async getBranches(): Promise<BranchData[]> {
     try {
-      logger.info('Kullanıcıya ait branch bilgileri getirme isteği gönderiliyor', null, { prefix: 'BranchService' });
-      
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
+      logger.info('Kullanıcıya ait branch bilgileri getirme isteği gönderiliyor', { branchId }, { prefix: 'BranchService' });
+
       // Include related entities in the request
       const includes = [
         'address',
         'contact',
         'workingHours',
       ];
-      
-      // Use 'include' (singular) parameter as confirmed working
+
+      // Build query parameters
       const queryParams = new URLSearchParams({
-        include: includes.join(',')
+        include: includes.join(','),
+        language
       });
-      
+
+      // Add branchId if it exists
+      if (branchId) {
+        queryParams.append('branchId', branchId.toString());
+      }
+
       const url = `${this.baseUrl}?${queryParams.toString()}`;
       logger.info('Branch API Request URL:', url, { prefix: 'BranchService' });
       
@@ -187,7 +198,7 @@ class BranchService {
   private transformApiBranchToBranchData(apiBranch: ApiBranchResponse): BranchData {
     return {
       id: apiBranch.id,
-      branchId: apiBranch.id,
+      branchId: apiBranch.id.toString(),
       branchName: apiBranch.branchName,
       whatsappOrderNumber: apiBranch.whatsappOrderNumber,
       email: apiBranch.contact?.mail || null,
@@ -216,18 +227,21 @@ class BranchService {
           openHours: apiBranch?.contact.openHours || '',
       },
       workingHours: apiBranch.workingHours?.map(wh => ({
-        openTime: wh.openTime,
-        closeTime: wh.closeTime,
         dayOfWeek: wh.dayOfWeek,
-        isWorkingDay : wh.isWorkingDay
+        isWorkingDay: wh.isWorkingDay,
+        isOpen24Hours: (wh as any).isOpen24Hours ?? false,
+        timeSlots: (wh as any).timeSlots || [{ openTime: wh.openTime, closeTime: wh.closeTime }]
       })) || []
     };
   }
 
   async updateBranch(id: number, data: Partial<CreateBranchWithDetailsDto>): Promise<BranchData> {
     try {
-      logger.info('Branch güncelleme isteği gönderiliyor', { id, data }, { prefix: 'BranchService' });
-      
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('Branch güncelleme isteği gönderiliyor', { id, data, branchId }, { prefix: 'BranchService' });
+
       // Transform the data to match the API's expected format
       const batchUpdateData: BatchUpdateBranchDto = {
         branchName: data.branchName?.trim() || null,
@@ -241,8 +255,8 @@ class BranchService {
           country: data.createAddressDto.country?.trim() || null,
           city: data.createAddressDto.city?.trim() || null,
           street: data.createAddressDto.street?.trim() || null,
-          adressLine1: data.createAddressDto.addressLine1?.trim() || null, 
-          adressLine2: data.createAddressDto.addressLine2?.trim() || null, 
+          adressLine1: data.createAddressDto.addressLine1?.trim() || null,
+          adressLine2: data.createAddressDto.addressLine2?.trim() || null,
           zipCode: data.createAddressDto.zipCode?.trim() || null,
         };
       }
@@ -266,33 +280,44 @@ class BranchService {
       if (data.createBranchWorkingHourCoreDto && data.createBranchWorkingHourCoreDto.length > 0) {
         batchUpdateData.batchUpdateBranchWorkingHourDto = data.createBranchWorkingHourCoreDto.map(hour => ({
           dayOfWeek: hour.dayOfWeek,
-          openTime: hour.openTime,
-          closeTime: hour.closeTime,
-          isWorkingDay: hour.isWorkingDay
+          isWorkingDay: hour.isWorkingDay,
+          isOpen24Hours: hour.isOpen24Hours ?? false,
+          timeSlots: hour.timeSlots?.map(slot => ({
+            id: slot.id,
+            openTime: slot.openTime,
+            closeTime: slot.closeTime
+          })) || []
         }));
       }
 
       logger.info('Transformed batch update data', batchUpdateData, { prefix: 'BranchService' });
 
-      const response = await httpClient.put<any>(`${this.baseUrl}/${id}/batch-update`, batchUpdateData);
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.put<any>(`${this.baseUrl}/${id}/batch-update`, batchUpdateData, { params });
       logger.info('Branch Update API Response alındı', response.data, { prefix: 'BranchService' });
       return response.data.data!;
     } catch (error: any) {
       logger.error('Branch güncelleme hatası', error, { prefix: 'BranchService' });
-      
+
       // Enhanced error handling
       if (error.response?.data?.errors) {
         logger.error('API Validation Hataları:', error.response.data.errors, { prefix: 'BranchService' });
       }
-      
+
       throw error;
     }
   }
 
   async deleteBranch(id: number): Promise<void> {
     try {
-      logger.info('Branch silme isteği gönderiliyor', { id }, { prefix: 'BranchService' });
-      await httpClient.delete(`${this.baseUrl}/${id}`);
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('Branch silme isteği gönderiliyor', { id, branchId }, { prefix: 'BranchService' });
+
+      const params = branchId ? { branchId } : {};
+      await httpClient.delete(`${this.baseUrl}/${id}`, { params });
+
       logger.info('Branch başarıyla silindi', { id }, { prefix: 'BranchService' });
     } catch (error: any) {
       logger.error('Branch silme hatası', error, { prefix: 'BranchService' });
@@ -302,15 +327,19 @@ class BranchService {
 
   async toggleTemporaryClose(branchId: number, isTemporarilyClosed: boolean, isOpenNow: boolean): Promise<void> {
     try {
-      logger.info('Branch temporary close güncelleme isteği', { branchId, isTemporarilyClosed, isOpenNow }, { prefix: 'BranchService' });
-      
+      // Get effective branch ID (from localStorage or token)
+      const effectiveBranchId = getEffectiveBranchId();
+
+      logger.info('Branch temporary close güncelleme isteği', { branchId, isTemporarilyClosed, isOpenNow, effectiveBranchId }, { prefix: 'BranchService' });
+
       // Backend sadece boolean değer bekliyor olabilir
-      await httpClient.patch(`${this.baseUrl}/${branchId}/temporary-close`, isTemporarilyClosed);
-      
+      const params = effectiveBranchId ? { branchId: effectiveBranchId } : {};
+      await httpClient.patch(`${this.baseUrl}/${branchId}/temporary-close`, isTemporarilyClosed, { params });
+
       logger.info('Branch temporary close durumu güncellendi', null, { prefix: 'BranchService' });
     } catch (error: any) {
       logger.error('Branch temporary close güncelleme hatası', error, { prefix: 'BranchService' });
-      
+
       // Detaylı hata mesajı
       if (error?.response?.status === 400) {
         const errorData = error?.response?.data;

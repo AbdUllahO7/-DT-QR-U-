@@ -34,6 +34,7 @@ import RestaurantManagementSetting from '../components/dashboard/content/Restaur
 import BranchManagementBranch from '../components/dashboard/Branch/BranchManagement/BranchManagement';
 import MoneyCaseManager from '../components/dashboard/Branch/MoneyCaseManager/MoneyCaseManager';
 import RestaurantSummaryPage from '../components/dashboard/MoneyCase/page';
+import ExtrasManagement from '../components/dashboard/ExtrasManagement/ExtrasManagement';
 
 const Dashboard: React.FC = () => {
   const location = useLocation();
@@ -47,6 +48,7 @@ const Dashboard: React.FC = () => {
     const path = location.pathname.split('/')[2] || 'overview';
     return path;
   });
+
 
   // URL değiştikçe sekme güncelle
   useEffect(() => {
@@ -72,6 +74,19 @@ const Dashboard: React.FC = () => {
         setInfoError('Restaurant bilgileri alınamadı');
         setInfoLoading(false);
       });
+  }, []);
+
+  // Restore selected branch from localStorage on mount
+  useEffect(() => {
+    const savedBranchId = localStorage.getItem('selectedBranchId');
+    const savedBranchName = localStorage.getItem('selectedBranchName');
+
+    if (savedBranchId && savedBranchName) {
+      setSelectedBranch({
+        id: parseInt(savedBranchId),
+        name: savedBranchName,
+      } as RestaurantBranchDropdownItem);
+    }
   }, []);
 
   // Restaurant adı – placeholder'ı temizle ve olası yedek kaynaklardan al
@@ -123,10 +138,20 @@ const Dashboard: React.FC = () => {
 
   const handleSelectBranch = (item: RestaurantBranchDropdownItem) => {
     setSelectedBranch(item);
+    // Persist selection to localStorage
+    localStorage.setItem('selectedBranchId', item.id.toString());
+    localStorage.setItem('selectedBranchName', item.name);
+    // Navigate to first branch tab
+    navigate('/dashboard/branchProducts');
   };
 
   const handleBackToMain = () => {
     setSelectedBranch(null);
+    // Clear localStorage
+    localStorage.removeItem('selectedBranchId');
+    localStorage.removeItem('selectedBranchName');
+    // Navigate to restaurant overview
+    navigate('/dashboard/overview');
   };
 
 
@@ -192,15 +217,15 @@ const Dashboard: React.FC = () => {
               {activeTab === 'orderTypeResturant' && <OrderTypeResturantComponent />}
               {activeTab === 'ResturantSettings' && <ResturantSettings />}
               {activeTab === 'RecycleBin' && <RecycleBin />}
-
+              {activeTab === 'extras' && <ExtrasManagement />}
             {/* branch */}
-              {activeTab === 'branchProducts' && <BranchProducts />}
-              {activeTab === 'TableManagement' && <BranchTableManagement />}
-              {activeTab === 'BranchManagement' && <BranchManagementBranch />}
-              {activeTab === 'orderType' && <OrderTypeComponeent />}
-              {activeTab === 'Branchorders' && <OrdersManager/>}
-              {activeTab === 'BranchSettings' && <BranchSettings />}
-              {activeTab === 'moneyCase' && <MoneyCaseManager />}
+              {activeTab === 'branchProducts' && <BranchProducts branchId={selectedBranch?.id} />}
+              {activeTab === 'TableManagement' && <BranchTableManagement branchId ={selectedBranch?.id} />}
+              {activeTab === 'BranchManagement' && <BranchManagementBranch branchId={selectedBranch?.id} />}
+              {activeTab === 'orderType' && <OrderTypeComponeent branchId={selectedBranch?.id} />}
+              {activeTab === 'Branchorders' && <OrdersManager branchId={selectedBranch?.id} />}
+              {activeTab === 'BranchSettings' && <BranchSettings branchId={selectedBranch?.id} />}
+              {activeTab === 'moneyCase' && <MoneyCaseManager branchId={selectedBranch?.id} />}
 
       
         </main>

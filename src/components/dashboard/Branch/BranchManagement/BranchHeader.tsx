@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { Edit, MapPin, Save, X, Loader2, Upload, Image, Globe } from 'lucide-react';
+import { Edit, MapPin, Save, X, Loader2, Upload, Globe, Copy, Check } from 'lucide-react';
+import { toast } from 'sonner';
 import { mediaService } from '../../../../services/mediaService';
 import { BranchHeaderProps, DEFAULT_IMAGE_URL, theme } from '../../../../types/BranchManagement/type';
-import { useNavigate } from 'react-router-dom';
 import { onlineMenuService } from '../../../../services/Branch/Online/OnlineMenuService';
-
 
 // Modern Toggle Switch with sleek design
 const ModernToggleSwitch: React.FC<{
@@ -15,7 +14,6 @@ const ModernToggleSwitch: React.FC<{
   isRTL: boolean;
 }> = ({ checked, onChange, disabled, t, isRTL }) => (
   <div className="flex flex-col gap-2 justify-center items-center">
-  
     <button
       type="button"
       onClick={onChange}
@@ -51,12 +49,10 @@ const ModernToggleSwitch: React.FC<{
             ? t('branchManagementBranch.status.open') || 'Active'
             : t('branchManagementBranch.status.temporarilyClosed') || 'Temporarily Closed'}
         </span>
-       
       </div>
     </button>
   </div>
 );
-
 
 // Modern Button Component
 const ModernButton: React.FC<{
@@ -65,20 +61,19 @@ const ModernButton: React.FC<{
   variant: 'primary' | 'success' | 'neutral' | 'danger';
   children: React.ReactNode;
   isLoading?: boolean;
-}> = ({ onClick, disabled, variant, children, isLoading }) => (
+  className?: string; // Added className prop for extra flexibility
+}> = ({ onClick, disabled, variant, children, isLoading, className = '' }) => (
   <button
     onClick={onClick}
     disabled={disabled || isLoading}
-    className={`group px-6 py-3 ${theme[variant]} text-white rounded-xl font-semibold 
+    className={`group px-4 py-2 ${theme[variant]} text-white rounded-xl font-semibold 
       transition-all duration-300 shadow-lg hover:shadow-xl hover:-translate-y-0.5 
       focus:outline-none focus:ring-4 disabled:opacity-50 disabled:cursor-not-allowed 
       disabled:hover:translate-y-0 disabled:hover:shadow-lg backdrop-blur-sm
-      active:scale-95`}
+      active:scale-95 flex items-center justify-center gap-2 ${className}`}
   >
-    <div className="flex items-center gap-2 transition-all duration-200">
-      {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
-      {children}
-    </div>
+    {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+    {children}
   </button>
 );
 
@@ -97,35 +92,44 @@ const BranchHeader: React.FC<BranchHeaderProps> = ({
   const [isUploadingImage, setIsUploadingImage] = useState<boolean>(false);
   const [imageError, setImageError] = useState<string>('');
   const [dragActive, setDragActive] = useState<boolean>(false);
-  const navigate = useNavigate(); 
   const [isLoadingPublicId, setIsLoadingPublicId] = useState<boolean>(false);
+  const [isCopied, setIsCopied] = useState<boolean>(false);
 
-const handleNavigateToOnlineMenu = async () => {
+  const handleNavigateToOnlineMenu = async () => {
     if (!selectedBranch) return;
-    
     try {
       setIsLoadingPublicId(true);
-          localStorage.removeItem('token');
-      // Fetch the public ID
-      const { publicId, branchName } = await onlineMenuService.getPublicBranchId(selectedBranch.id);
-      
-      // Navigate with public ID as the route parameter
-      navigate(`/OnlineMenu/${publicId}`, {
-        state: { 
-          branchName,
-          branchId: selectedBranch.id // Optional, in case you need it later
-        }
-      });
-      
+      const { publicId } = await onlineMenuService.getPublicBranchId(selectedBranch.id);
+      const onlineMenuUrl = `${window.location.origin}/OnlineMenu/${publicId}`;
+      window.open(onlineMenuUrl, '_blank', 'noopener,noreferrer');
     } catch (error: any) {
       console.error('Failed to get public ID:', error);
-      alert(t('branchManagementBranch.errors.failedToGetPublicId') || 'Failed to get online menu link');
+      toast.error(t('branchManagementBranch.errors.failedToGetPublicId') || 'Failed to get online menu link');
     } finally {
       setIsLoadingPublicId(false);
     }
   };
 
-  // Handle image upload
+  const handleCopyOnlineMenuLink = async () => {
+    if (!selectedBranch) return;
+    try {
+      setIsLoadingPublicId(true);
+      const { publicId } = await onlineMenuService.getPublicBranchId(selectedBranch.id);
+      const onlineMenuUrl = `${window.location.origin}/OnlineMenu/${publicId}`;
+      await navigator.clipboard.writeText(onlineMenuUrl);
+      setIsCopied(true);
+      toast.success(t('branchManagementBranch.actions.linkCopied') || 'Link copied to clipboard!');
+      setTimeout(() => {
+        setIsCopied(false);
+      }, 2000);
+    } catch (error: any) {
+      console.error('Failed to copy link:', error);
+      toast.error(t('branchManagementBranch.errors.failedToCopyLink') || 'Failed to copy link');
+    } finally {
+      setIsLoadingPublicId(false);
+    }
+  };
+
   const uploadImage = async (file: File): Promise<string> => {
     try {
       setIsUploadingImage(true);
@@ -141,7 +145,6 @@ const handleNavigateToOnlineMenu = async () => {
     }
   };
 
-  // Handle file input change
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -149,7 +152,6 @@ const handleNavigateToOnlineMenu = async () => {
     }
   };
 
-  // Handle drag and drop
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -164,141 +166,138 @@ const handleNavigateToOnlineMenu = async () => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       await uploadImage(e.dataTransfer.files[0]);
     }
   };
 
  return (
-    <div className={`${theme.background.card} ${theme.background.cardHover} backdrop-blur-xl 
-      rounded-3xl shadow-2xl border border-slate-200/50 dark:border-slate-700/50 
-      transition-all duration-500 mb-8 overflow-hidden relative`}>
-      
-      {/* Subtle background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-transparent to-emerald-50/30 dark:from-slate-800/30 dark:to-slate-900/30" />
-      
-      <div className="relative p-6 sm:p-8">
-        <div className="flex flex-col gap-8 xl:flex-row xl:items-start xl:justify-between">
-          
-          {/* Main Header Section */}
-          <div className={`flex flex-col gap-6  min-w-0 flex-1`}>
-            
-            {/* Title and Description */}
-            <div className={`flex items-center gap-4 `}>
-              <div className="relative group flex-shrink-0">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
-                <div className="relative p-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl shadow-lg">
-                  <MapPin className="w-6 h-6 text-white" />
-                </div>
-              </div>
-              <div className="space-y-2 min-w-0">
-                <h1 className={`text-2xl font-bold ${theme.text.primary} leading-tight`}>
-                  {t('branchManagementBranch.title') || 'Branch Management'}
-                </h1>
-                <p className={`text-sm ${theme.text.secondary} leading-relaxed`}>
-                  {t('branchManagementBranch.description') || 'Manage your branch information and settings'}
-                </p>
-              </div>
-              {selectedBranch && (
-                <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''} flex-wrap`}>
-                  {/* Logo */}
+    <>
+      <div className={`${theme.background.card} ${theme.background.cardHover} backdrop-blur-xl
+        rounded-3xl shadow-2xl border border-slate-200/50 dark:border-slate-700/50
+        transition-all duration-500 mb-8 overflow-hidden relative`}>
+
+        {/* Subtle background gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 via-transparent to-emerald-50/30 dark:from-slate-800/30 dark:to-slate-900/30" />
+
+        <div className="relative p-6 sm:p-8">
+          <div className="flex flex-col gap-6">
+
+            {/* Top Section: Logo, Title, and Controls */}
+            <div className="flex flex-col lg:flex-row gap-6 items-start justify-between">
+
+              {/* Left Side: Logo and Title Section */}
+              <div className={`flex flex-col sm:flex-row gap-6 items-start flex-1 min-w-0 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                {/* Branch Logo */}
+                {selectedBranch && (
                   <div className="relative group flex-shrink-0">
                     <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-500 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
                     <img
                       src={selectedBranch.branchLogoPath || DEFAULT_IMAGE_URL}
                       alt={t('branchManagementBranch.logoAlt') || 'Branch Logo'}
-                      className="relative lg:w-96 lg:h-32 sm:w-20 sm:h-20 object-cover rounded-2xl border-2 border-white dark:border-slate-700 shadow-xl transition-transform duration-300 group-hover:scale-105"
+                      className="relative w-24 h-24 sm:w-28 sm:h-28 lg:w-32 lg:h-32 object-cover rounded-2xl border-2 border-white dark:border-slate-700 shadow-xl transition-transform duration-300 group-hover:scale-105"
                     />
                   </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Controls Section */}
-          <div className={`flex flex-col gap-6 ${isRTL ? 'items-start' : 'items-end'}`}>
-            
-            {/* Top Row - Toggle and Actions */}
-            <div className={`flex flex-col justify-center h-full w-full sm:flex-row gap-4 items-start sm:items-center `}>
-              {/* Toggle Switch */}
-              {selectedBranch && (
-                <ModernToggleSwitch
-                  checked={!selectedBranch.isTemporarilyClosed}
-                  onChange={handleToggleTemporaryClose}
-                  disabled={isLoading}
-                  t={t}
-                  isRTL={isRTL}
-                />
-              )}
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 flex-wrap">
-                {/* Online Menu Button - Always visible */}
-                
-
-                {!isEditing ? (
-                  <ModernButton
-                             onClick={handleNavigateToOnlineMenu}
-
-                    variant="primary"
-                  >
-                    <Edit className="w-4 h-4" />
-                    <span>{t('branchManagementBranch.actions.edit') || 'Edit'}</span>
-                  </ModernButton>
-                ) : (
-                  <div className="flex gap-3">
-                    <ModernButton
-                      onClick={handleSave}
-                      variant="success"
-                      disabled={isLoading || isUploadingImage}
-                      isLoading={isLoading}
-                    >
-                      <Save className="w-4 h-4" />
-                      <span>{t('branchManagementBranch.actions.save') || 'Save'}</span>
-                    </ModernButton>
-                    
-                    <ModernButton
-                      onClick={() => {
-                        setIsEditing(false);
-                        if (selectedBranch) initializeEditData(selectedBranch);
-                        setImageError('');
-                      }}
-                      variant="neutral"
-                    >
-                      <X className="w-4 h-4" />
-                      <span>{t('branchManagementBranch.actions.cancel') || 'Cancel'}</span>
-                    </ModernButton>
-                  </div>
                 )}
+
+                {/* Title and Description */}
+                <div className={`flex items-start gap-4 flex-1 min-w-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <div className="relative group flex-shrink-0">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl blur-lg opacity-30 group-hover:opacity-50 transition-opacity duration-300" />
+                    <div className="relative p-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl shadow-lg">
+                      <MapPin className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                  <div className="space-y-2 min-w-0 flex-1">
+                    <h1 className={`text-2xl sm:text-3xl font-bold ${theme.text.primary} leading-tight`}>
+                      {t('branchManagementBranch.title') || 'Branch Management'}
+                    </h1>
+                    <p className={`text-sm ${theme.text.secondary} leading-relaxed`}>
+                      {t('branchManagementBranch.description') || 'Manage your branch information and settings'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right Side: Controls Section */}
+              <div className={`flex flex-col gap-4 w-full lg:w-auto ${isRTL ? 'items-start' : 'items-start lg:items-end'}`}>
+
+                {/* Toggle Switch */}
+                {selectedBranch && (
+                  <ModernToggleSwitch
+                    checked={!selectedBranch.isTemporarilyClosed}
+                    onChange={handleToggleTemporaryClose}
+                    disabled={isLoading}
+                    t={t}
+                    isRTL={isRTL}
+                  />
+                )}
+
+                {/* Action Buttons */}
+                <div className={`flex flex-wrap gap-3 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  {/* Online Menu Buttons */}
+                  {selectedBranch && (
+                    <>
+                      <ModernButton
+                        onClick={handleNavigateToOnlineMenu}
+                        variant="primary"
+                        disabled={isLoadingPublicId}
+                        isLoading={isLoadingPublicId && !isCopied}
+                      >
+                        <Globe className="w-4 h-4" />
+                        <span>{t('branchManagementBranch.actions.onlineMenu') || 'Online Menu'}</span>
+                      </ModernButton>
+
+                      <ModernButton
+                        onClick={handleCopyOnlineMenuLink}
+                        variant={isCopied ? 'success' : 'neutral'}
+                        disabled={isLoadingPublicId}
+                        isLoading={isLoadingPublicId && !isCopied}
+                      >
+                        {isCopied ? (
+                          <Check className="w-4 h-4" />
+                        ) : (
+                          <Copy className="w-4 h-4" />
+                        )}
+                        <span>
+                          {isCopied
+                            ? (t('branchManagementBranch.actions.copied') || 'Copied!')
+                            : (t('branchManagementBranch.actions.copyLink') || 'Copy Link')
+                          }
+                        </span>
+                      </ModernButton>
+                    </>
+                  )}
+
+                  {/* Edit Button - ONLY visible when NOT editing */}
+                  {!isEditing && (
+                    <ModernButton
+                      onClick={() => setIsEditing(true)}
+                      variant="primary"
+                    >
+                      <Edit className="w-4 h-4" />
+                      <span>{t('branchManagementBranch.actions.edit') || 'Edit'}</span>
+                    </ModernButton>
+                  )}
+                </div>
               </div>
             </div>
-       {selectedBranch && (
-    <ModernButton
-          onClick={handleNavigateToOnlineMenu}
-          variant="primary"
-          disabled={isLoadingPublicId}
-          isLoading={isLoadingPublicId}
-        >
-          <Globe className="w-4 h-4" />
-          <span>{t('branchManagementBranch.actions.onlineMenu') || 'Online Menu'}</span>
-        </ModernButton>
-        )}
-            {/* Bottom Row - Image Upload (Editing Mode) */}
+
+            {/* Bottom Section: Image Upload (Editing Mode) */}
             {isEditing && (
-              <div className="w-full max-w-sm">
+              <div className="w-full max-w-md">
                 <label className={`block text-sm font-semibold ${theme.text.primary} mb-3`}>
                   {t('branchManagementBranch.uploadLogo') || 'Upload Logo'}
                 </label>
-                
+
                 <div
                   onDragEnter={handleDrag}
                   onDragLeave={handleDrag}
                   onDragOver={handleDrag}
                   onDrop={handleDrop}
                   className={`relative group cursor-pointer transition-all duration-300 rounded-2xl border-2 border-dashed p-6
-                    ${dragActive 
-                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20 scale-105' 
+                    ${dragActive
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/20 scale-105'
                       : 'border-slate-300 dark:border-slate-600 hover:border-blue-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:scale-[1.02]'}`}
                 >
                   <input
@@ -310,7 +309,7 @@ const handleNavigateToOnlineMenu = async () => {
                     disabled={isUploadingImage}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                   />
-                  
+
                   <div className="flex flex-col items-center gap-3 text-center">
                     {isUploadingImage ? (
                       <div className="p-4 bg-blue-100 dark:bg-blue-900/50 rounded-xl">
@@ -321,7 +320,7 @@ const handleNavigateToOnlineMenu = async () => {
                         <Upload className="w-8 h-8 text-blue-600 dark:text-blue-400" />
                       </div>
                     )}
-                    
+
                     <div className="space-y-1">
                       <p className={`text-sm font-medium ${theme.text.primary}`}>
                         {isUploadingImage ? 'Uploading...' : 'Drop image here or click to browse'}
@@ -329,7 +328,7 @@ const handleNavigateToOnlineMenu = async () => {
                     </div>
                   </div>
                 </div>
-                
+
                 {imageError && (
                   <div className="mt-3 flex items-center gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl">
                     <X className="w-4 h-4 text-red-500 flex-shrink-0" />
@@ -341,7 +340,46 @@ const handleNavigateToOnlineMenu = async () => {
           </div>
         </div>
       </div>
-    </div>
+
+      {/* FLOATING ACTION BAR FOR EDIT MODE */}
+      {isEditing && (
+        <div 
+  className={`fixed rounded-lg bottom-10 w-fit p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end items-center gap-3 ${
+    isRTL ? 'left-24' : 'right-24'
+  }`}
+>
+ {/* Save Button */}
+            <ModernButton
+              onClick={handleSave}
+              variant="success"
+              disabled={isLoading || isUploadingImage}
+              isLoading={isLoading}
+              className="min-w-[120px]"
+            >
+              <Save className="w-5 h-5" />
+              <span className="text-base">{t('branchManagementBranch.actions.save') || 'Save'}</span>
+            </ModernButton>
+
+            {/* Cancel Button */}
+            <ModernButton
+              onClick={() => {
+                setIsEditing(false);
+                if (selectedBranch) initializeEditData(selectedBranch);
+                setImageError('');
+              }}
+              variant="neutral"
+              className="min-w-[120px]"
+            >
+              <X className="w-5 h-5" />
+              <span className="text-base">{t('branchManagementBranch.actions.cancel') || 'Cancel'}</span>
+            </ModernButton>
+</div>
+
+
+
+        
+      )}
+    </>
   );
 };
 

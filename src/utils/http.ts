@@ -1,7 +1,13 @@
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import type { ApiError } from '../types/api';
 import { logger } from './logger';
 import { shouldRetryRequest } from './errorHandler';
+import { authStorage } from './authStorage';
+
+// Extend AxiosRequestConfig to include skipAuth flag
+interface CustomAxiosRequestConfig extends AxiosRequestConfig {
+  skipAuth?: boolean;
+}
 
 const BASE_URL = import.meta.env.DEV ? 'http://localhost:7001' : 'https://api.mertcode.com';
 // Network bağlantısı kontrolü
@@ -64,7 +70,7 @@ async function retryRequest(config: any, error: any, retryCount = 0): Promise<an
 
 // Request interceptor
 httpClient.interceptors.request.use(
-  (config) => {
+  (config: CustomAxiosRequestConfig) => {
     // Network bağlantısını kontrol et
     if (!checkNetworkConnection()) {
       const offlineError: ApiError = {
@@ -89,11 +95,11 @@ httpClient.interceptors.request.use(
           method: config.method?.toUpperCase(),
           url: config.url,
           data: config.data,
-          headers: config.headers
+          skipAuth: config.skipAuth
         });
       }
     }
-    
+
     // Batch işlemler için özel timeout konfigürasyonu
     if (config.url?.includes('/batch') || config.headers?.['X-Request-Type'] === 'batch-operation') {
       config.timeout = 120000; // 2 dakika
@@ -101,46 +107,48 @@ httpClient.interceptors.request.use(
         logger.info('⏱️ Batch işlem için uzun timeout ayarlandı');
       }
     }
-    
-    // Önce müşteri session token'ı kontrol et
-    const customerSessionToken = localStorage.getItem('customerSessionToken');
-    if (customerSessionToken) {
-      config.headers.Authorization = `Bearer ${customerSessionToken}`;
+
+    // Skip adding auth token if this is marked as a public request
+    if (config.skipAuth === true) {
       if (import.meta.env.DEV) {
-        logger.debug('Customer session token kullanılıyor');
+        logger.info('🔓 Public request - NO authentication token will be sent for:', config.url);
       }
-    } else {
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-        if (import.meta.env.DEV && !config.url?.includes('/api/Dashboard')) {
-          logger.info('Token eklendi:', `Bearer ${token.substring(0, 15)}...`);
-        }
-        // Token'ın geçerlilik süresini kontrol et
-        const tokenExpiry = localStorage.getItem('tokenExpiry');
-        if (tokenExpiry) {
-          const expiryDate = new Date(tokenExpiry);
-          if (isNaN(expiryDate.getTime()) || expiryDate <= new Date()) {
-            logger.warn('⚠️ Token süresi dolmuş veya geçersiz!');
-          }
-        }
-      } /* else {
-        // Token yoksa hata fırlat
-        if (config.url?.includes('/api/Restaurants/branches') || 
-            config.url?.includes('/api/Branches') ||
-            config.url?.includes('/api/Dashboard')) {
-          logger.error('Token bulunamadı, API isteği yapılamıyor', { url: config.url });
-          const authError: ApiError = {
-            status: 401,
-            message: 'Oturum bilgisi bulunamadı. Lütfen tekrar giriş yapın.',
-            errors: undefined,
-            response: undefined
-          };
-          return Promise.reject(authError);
-        }
-      } */
+      return config;
     }
-    
+
+    // Context-aware token selection based on current page and request URL
+    // This prevents session conflicts between Dashboard, OnlineMenu, and TableQR
+    const currentPath = window.location.pathname;
+    const requestUrl = config.url || '';
+
+    let token: string | null = null;
+    let tokenSource = '';
+
+    // 1. TableQR context - uses table_session_token
+    // Includes /api/Basket since MenuComponent on TableQR page uses basketService
+    if (currentPath.includes('/table/qr/') || requestUrl.includes('/api/session/') || requestUrl.includes('/api/table/')) {
+      token = localStorage.getItem('table_session_token');
+      tokenSource = 'TableQR';
+    }
+    // 2. OnlineMenu context - uses online_menu_token
+    else if (currentPath.includes('/OnlineMenu') || requestUrl.includes('/api/online/')) {
+      token = localStorage.getItem('online_menu_token');
+      tokenSource = 'OnlineMenu';
+    }
+    // 3. Dashboard/Admin context - uses dashboard_token via authStorage
+    else {
+      token = authStorage.getRawToken();
+      tokenSource = 'Dashboard';
+    }
+
+    if (token) {
+      config.headers = config.headers || {};
+      config.headers.Authorization = `Bearer ${token}`;
+      if (import.meta.env.DEV && !config.url?.includes('/api/Dashboard')) {
+        logger.info(`🔑 Token added (${tokenSource}):`, `Bearer ${token.substring(0, 15)}...`);
+      }
+    }
+
     return config;
   },
   (error) => {
@@ -150,118 +158,112 @@ httpClient.interceptors.request.use(
 );
 
 // Response interceptor
-// Request interceptor
-httpClient.interceptors.request.use(
-  (config) => {
-    // Network bağlantısını kontrol et
-    if (!checkNetworkConnection()) {
-      const offlineError: ApiError = {
+httpClient.interceptors.response.use(
+  (response) => {
+    // Başarılı yanıtları logla
+    if (import.meta.env.DEV) {
+      if (response.config.url?.includes('/api/Dashboard')) {
+        logger.debug('✅ Dashboard Response:', {
+          status: response.status,
+          url: response.config.url
+        });
+      } else {
+        logger.info('✅ Response:', {
+          status: response.status,
+          url: response.config.url,
+          data: response.data
+        });
+      }
+
+      // Special logging for login endpoint
+      if (response.config.url?.includes('/api/Auth/Login')) {
+    
+        logger.info('🔐 Login Response Details:', {
+          status: response.status,
+          dataType: typeof response.data,
+          dataKeys: response.data ? Object.keys(response.data) : 'null',
+          hasAccessToken: !!(response.data?.accessToken),
+          data: response.data
+        });
+      }
+    }
+
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Network bağlantısı hatası
+    if (!error.response) {
+      logger.error('❌ Network Error:', {
+        message: error.message,
+        url: originalRequest?.url
+      });
+
+      const networkError: ApiError = {
         status: 0,
         message: getOfflineErrorMessage(),
         errors: undefined,
         response: undefined
       };
-      return Promise.reject(offlineError);
+
+      // Retry mekanizması
+      if (originalRequest && !originalRequest._retry) {
+        originalRequest._retry = true;
+        return retryRequest(originalRequest, error);
+      }
+
+      return Promise.reject(networkError);
     }
 
-    // Sadece development'ta ve önemli isteklerde detaylı log göster
+    // API hata yanıtını logla
     if (import.meta.env.DEV) {
-      // Dashboard endpoint'leri için daha az log
-      if (config.url?.includes('/api/Dashboard')) {
-        logger.debug('🚀 Dashboard Request:', {
-          method: config.method?.toUpperCase(),
-          url: config.url
-        });
-      } else {
-        logger.info('🚀 Request:', {
-          method: config.method?.toUpperCase(),
-          url: config.url,
-          data: config.data,
-          headers: config.headers
-        });
-      }
+      logger.error('❌ API Error:', {
+        status: error.response?.status,
+        url: originalRequest?.url,
+        data: error.response?.data
+      });
     }
-    
-    // Batch işlemler için özel timeout konfigürasyonu
-    if (config.url?.includes('/batch') || config.headers?.['X-Request-Type'] === 'batch-operation') {
-      config.timeout = 120000; // 2 dakika
-      if (import.meta.env.DEV) {
-        logger.info('⏱️ Batch işlem için uzun timeout ayarlandı');
-      }
-    }
-    
-    // **ONLINE MENU ENDPOINTS için özel token kontrolü**
-    if (config.url?.includes('/api/online')) {
-      // Public endpoints that don't need authentication
-      const publicEndpoints = [
-        '/start-session',
-        '/menu/'
-      ];
-      
-      const isPublicEndpoint = publicEndpoints.some(endpoint => config.url?.includes(endpoint));
-      
-      if (isPublicEndpoint) {
-        // Public endpoint - no token needed
-        if (import.meta.env.DEV) {
-          logger.info('🌍 Public online menu endpoint, no token required:', config.url);
-        }
-        return config;
-      }
-      
-      // Protected endpoint - token required
-      const onlineMenuToken = localStorage.getItem('token');
-      if (onlineMenuToken) {
-        config.headers.Authorization = `Bearer ${onlineMenuToken}`;
-        if (import.meta.env.DEV) {
-          logger.info('🌐 Online Menu token kullanılıyor:', `Bearer ${onlineMenuToken.substring(0, 15)}...`);
-        }
-      } else {
-        // Protected endpoint but no token
-        if (import.meta.env.DEV) {
-          logger.warn('⚠️ Protected online menu endpoint için token bulunamadı!', { url: config.url });
-        }
-        const authError: ApiError = {
-          status: 401,
-          message: 'Online menu oturumu başlatılmamış. Lütfen sayfayı yenileyin.',
-          errors: undefined,
-          response: undefined
-        };
-        return Promise.reject(authError);
-      }
-      return config;
-    }
-    
-    // Önce müşteri session token'ı kontrol et (TableQR için)
-    const customerSessionToken = localStorage.getItem('customerSessionToken');
-    if (customerSessionToken) {
-      config.headers.Authorization = `Bearer ${customerSessionToken}`;
-      if (import.meta.env.DEV) {
-        logger.debug('Customer session token kullanılıyor');
-      }
-    } else {
-      // Normal admin/user token
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-        if (import.meta.env.DEV && !config.url?.includes('/api/Dashboard')) {
-          logger.info('Token eklendi:', `Bearer ${token.substring(0, 15)}...`);
-        }
-        // Token'ın geçerlilik süresini kontrol et
-        const tokenExpiry = localStorage.getItem('tokenExpiry');
-        if (tokenExpiry) {
-          const expiryDate = new Date(tokenExpiry);
-          if (isNaN(expiryDate.getTime()) || expiryDate <= new Date()) {
-            logger.warn('⚠️ Token süresi dolmuş veya geçersiz!');
-          }
+
+    // 401 Unauthorized - Token geçersiz veya süresi dolmuş
+    if (error.response?.status === 401) {
+      // Don't redirect to login for public pages and auth endpoints
+      const isAuthEndpoint = originalRequest?.url?.includes('/api/Auth/');
+      const isOnboardingEndpoint = originalRequest?.url?.includes('/api/Restaurant') ||
+                                   originalRequest?.url?.includes('/api/Branch/CreateOnboardingBranch');
+      const isOnboardingPage = window.location.pathname.includes('/onboarding');
+      const isPublicMenuPage = window.location.pathname.includes('/table/qr/') ||
+                               window.location.pathname.includes('/OnlineMenu');
+      const isPublicEndpoint = originalRequest?.url?.includes('/api/Table/') ||
+                              originalRequest?.url?.includes('/api/OnlineMenu/');
+      // Don't logout on currency API failures - currency is not critical
+      const isCurrencyEndpoint = originalRequest?.url?.includes('/api/Currencies/');
+
+      if (!isAuthEndpoint && !isOnboardingEndpoint && !isOnboardingPage && !isPublicMenuPage && !isPublicEndpoint && !isCurrencyEndpoint) {
+        logger.warn('⚠️ 401 Unauthorized - Token geçersiz, kullanıcı oturumu kapatılıyor');
+
+        // SECURITY FIX: Use authStorage for centralized auth clearing
+        authStorage.clearAuth();
+
+        // Redirect to login if not already there
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
         }
       }
     }
-    
-    return config;
-  },
-  (error) => {
-    logger.error('❌ Request Error:', error);
-    return Promise.reject(error);
+
+    // ApiError formatında hata döndür
+    const apiError: ApiError = {
+      status: error.response?.status || 500,
+      message: error.response?.data?.errorMessage ||
+               error.response?.data?.message ||
+               error.message ||
+               'Bir hata oluştu',
+      errors: error.response?.data?.errors,
+      response: error.response
+    };
+
+    return Promise.reject(apiError);
   }
 );
 
@@ -280,12 +282,12 @@ export const decodeToken = (token: string): any => {
   }
 };
 
-// Get restaurant ID from token
+// Get restaurant ID from token (uses dashboard token)
 export const getRestaurantIdFromToken = (): number | null => {
   try {
-    const token = localStorage.getItem('token');
+    const token = authStorage.getRawToken();
     if (!token) return null;
-    
+
     const decoded = decodeToken(token);
     return decoded?.restaurant_id || null;
   } catch (error) {
@@ -294,12 +296,12 @@ export const getRestaurantIdFromToken = (): number | null => {
   }
 };
 
-// Get branch ID from token
+// Get branch ID from token (uses dashboard token)
 export const getBranchIdFromToken = (): number | null => {
   try {
-    const token = localStorage.getItem('token');
+    const token = authStorage.getRawToken();
     if (!token) return null;
-    
+
     const decoded = decodeToken(token);
     return decoded?.branch_id || null;
   } catch (error) {
@@ -311,17 +313,43 @@ export const getBranchIdFromToken = (): number | null => {
 // Check if user is branch-only user (has branch_id but no restaurant_id)
 export const isBranchOnlyUser = (): boolean => {
   try {
-    const token = localStorage.getItem('token');
+    const token = authStorage.getRawToken();
     if (!token) return false;
-    
+
     const decoded = decodeToken(token);
     const hasRestaurantId = decoded?.restaurant_id && decoded?.restaurant_id !== "" && decoded?.restaurant_id !== null && decoded?.restaurant_id !== undefined;
     const hasBranchId = decoded?.branch_id && decoded?.branch_id !== "" && decoded?.branch_id !== null && decoded?.branch_id !== undefined;
-    
+
     return !hasRestaurantId && hasBranchId;
   } catch (error) {
     console.error('Kullanıcı tipi kontrol edilirken hata:', error);
     return false;
+  }
+};
+
+/**
+ * Get the effective branch ID to use for API calls.
+ * Priority:
+ * 1. Selected branch from localStorage (when restaurant user selects a branch)
+ * 2. Branch ID from JWT token (for branch-only users)
+ * 3. null if neither exists
+ */
+export const getEffectiveBranchId = (): number | null => {
+  try {
+    // First, check if there's a selected branch in localStorage (restaurant user selection)
+    const selectedBranchId = localStorage.getItem('selectedBranchId');
+    if (selectedBranchId) {
+      const parsed = parseInt(selectedBranchId, 10);
+      if (!isNaN(parsed)) {
+        return parsed;
+      }
+    }
+
+    // Fall back to branch ID from token (for branch-only users)
+    return getBranchIdFromToken();
+  } catch (error) {
+    console.error('Effective branch ID alınırken hata:', error);
+    return getBranchIdFromToken();
   }
 }; 
 

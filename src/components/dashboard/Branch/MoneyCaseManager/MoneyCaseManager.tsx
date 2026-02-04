@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Users, DollarSign, Calendar, RefreshCw, Filter, X, Check } from 'lucide-react';
+import { ChevronDown, Users, Calendar, Filter, X, Check } from 'lucide-react';
 import { useLanguage } from '../../../../contexts/LanguageContext';
+import { useCurrency } from '../../../../hooks/useCurrency';
 import { useMoneyCaseManager } from '../../../../hooks/useMoneyCaseManager/useMoneyCaseManager';
 import { useClickOutside } from '../../../../hooks';
 import CloseMoneyCaseModal from './CloseMoneyCaseModal';
@@ -103,8 +104,13 @@ const getDatePresets = (t: any) => [
   }
 ];
 
-const MoneyCaseManager: React.FC = () => {
+interface MoneyCaseManagerProps {
+  branchId?: number;
+}
+
+const MoneyCaseManager: React.FC<MoneyCaseManagerProps> = ({ branchId }) => {
   const { t, isRTL } = useLanguage();
+  const currency = useCurrency();
 
   const {
     state,
@@ -174,7 +180,7 @@ const MoneyCaseManager: React.FC = () => {
 
   const fetchBranchSummary = async () => {
     if (!state.selectedBranch) return;
-    
+
     try {
       setSummaryLoading(true);
       const summary = await moneyCaseService.getBranchSummary({
@@ -182,8 +188,12 @@ const MoneyCaseManager: React.FC = () => {
         ...appliedFilters
       });
       setBranchSummary(summary);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to fetch branch summary:', error);
+      setState(prev => ({
+        ...prev,
+        error: error.message || 'Failed to fetch branch summary'
+      }));
     } finally {
       setSummaryLoading(false);
     }
@@ -198,24 +208,26 @@ const MoneyCaseManager: React.FC = () => {
 
   const handleShowOpenModal = async () => {
     if (!state.selectedBranch) return;
-    
+
     try {
       const info = await moneyCaseService.getPreviousCloseInfo(state.selectedBranch.branchId);
       setPreviousCloseInfo(info);
-      
+
       const suggestedBalance = info?.suggestedOpeningBalance || 0;
       setState(prev => ({
         ...prev,
         openingBalance: suggestedBalance,
-        showOpenModal: true
+        showOpenModal: true,
+        error: null // Clear any previous errors when opening modal
       }));
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to get previous close info", error);
       setPreviousCloseInfo(null);
       setState(prev => ({
         ...prev,
         openingBalance: 0,
-        showOpenModal: true
+        showOpenModal: true,
+        error: error.message || 'Failed to get previous close information'
       }));
     }
   };
@@ -283,7 +295,8 @@ const MoneyCaseManager: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-center min-h-[400px]">
             <div className="text-center">
-              <DollarSign className="h-16 w-16 mx-auto text-gray-400 mb-4" />
+                <span className=''>{currency.symbol}</span>
+
               <p className="text-gray-500 dark:text-gray-400 text-lg mb-6">
                 {t('moneyCase.selectBranch') || 'Select a branch to manage money case'}
               </p>
@@ -335,7 +348,7 @@ const MoneyCaseManager: React.FC = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* Header with Branch Selector */}
-        <div className={`flex items-center justify-between mb-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
+        <div className={`flex flex-wrap justify-center items-center gap-3 mb-8 ${isRTL ? 'flex-row-reverse' : ''}`}>
           <MoneyCaseHeader t={t} />
           
           <div className="relative" ref={dropdownRef}>
@@ -386,12 +399,13 @@ const MoneyCaseManager: React.FC = () => {
         <SuccessNotification message={state.success} />
 
         {/* Quick Summary Cards */}
-        <QuickSummaryCards 
+        <QuickSummaryCards
           quickSummary={state.quickSummary}
           activeCase={state.activeCase}
           loading={state.loading}
           t={t}
           isRTL={isRTL}
+          currencySymbol={currency.symbol}
         />
 
         {/* Branch Summary Section with Enhanced Filtering */}
@@ -401,7 +415,8 @@ const MoneyCaseManager: React.FC = () => {
               onClick={handleToggleSummary}
               className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 font-medium flex items-center justify-center gap-2"
             >
-              <DollarSign className="h-4 w-4" />
+                <span className=''>{currency.symbol}</span>
+
               {showSummary ? t('moneyCase.hideSummary') : t('moneyCase.showSummary')}
             </button>
 
@@ -588,6 +603,9 @@ const MoneyCaseManager: React.FC = () => {
           onViewZReport={fetchZReport}
           t={t}
           isRTL={isRTL}
+          branchName={state.selectedBranch?.branchName}
+          fromDate={fromDate}
+          toDate={toDate}
         />
 
         {/* Modals */}
@@ -596,13 +614,14 @@ const MoneyCaseManager: React.FC = () => {
           show={state.showOpenModal}
           loading={state.loading}
           openingBalance={state.openingBalance}
-          onOpeningBalanceChange={(value) => 
+          onOpeningBalanceChange={(value) =>
             setState(prev => ({ ...prev, openingBalance: value }))
           }
           onConfirm={handleOpenCase}
           onClose={closeModals}
           t={t}
           isRTL={isRTL}
+          error={state.showOpenModal ? state.error : null}
         />
 
         <CloseMoneyCaseModal
@@ -611,16 +630,17 @@ const MoneyCaseManager: React.FC = () => {
           activeCase={state.activeCase}
           actualCash={state.actualCash}
           closingNotes={state.closingNotes}
-          onActualCashChange={(value) => 
+          onActualCashChange={(value) =>
             setState(prev => ({ ...prev, actualCash: value }))
           }
-          onNotesChange={(value) => 
+          onNotesChange={(value) =>
             setState(prev => ({ ...prev, closingNotes: value }))
           }
           onConfirm={handleCloseCase}
           onClose={closeModals}
           t={t}
           isRTL={isRTL}
+          error={state.showCloseModal ? state.error : null}
         />
 
         <ZReportModal

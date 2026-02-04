@@ -36,10 +36,14 @@ export interface BranchData {
     openHours: string | null;
   };
   workingHours?: Array<{
-    openTime: string;
-    closeTime: string;
     dayOfWeek: number;
-    isWorkingDay:boolean
+    isWorkingDay: boolean;
+    isOpen24Hours: boolean;
+    timeSlots: Array<{
+      id?: number;
+      openTime: string;
+      closeTime: string;
+    }>;
   }>;
 }
 
@@ -70,9 +74,13 @@ export interface EditDataType {
   };
   createBranchWorkingHourCoreDto: Array<{
     dayOfWeek: number;
-    openTime: string;
-    closeTime: string;
     isWorkingDay: boolean;
+    isOpen24Hours: boolean;
+    timeSlots: Array<{
+      id?: number;
+      openTime: string;
+      closeTime: string;
+    }>;
   }>;
 }
 
@@ -93,6 +101,7 @@ export interface APIProduct {
   imageUrl?: string;
   status: boolean;
   displayOrder: number;
+  maxQuantity?: number;
 }
 
 export interface DetailedProduct{
@@ -103,19 +112,24 @@ export interface DetailedProduct{
   branchCategory?: Category;
   ingredients?: APIIngredient[];
   allergens?: APIAllergen[];
+  extras?: any[]; // Product extras
+  extrasCount?: number;
+  hasExtras?: boolean;
   orderDetails?: any;
   isSelected?: boolean;
-  addonsCount?: number; 
-  hasAddons?: boolean;   
-  price: number; 
-  imageUrl?: string; 
-  name: string; 
-  description?: string; 
-  status: boolean; 
-  displayOrder: number; 
-  editedPrice?: number; 
-  editedName?: string; 
-  editedDescription?: string; 
+  addonsCount?: number;
+  hasAddons?: boolean;
+  price: number;
+  imageUrl?: string;
+  name: string;
+  description?: string;
+  status: boolean;
+  isAvailable?: boolean; // true = in stock, false = out of stock
+  displayOrder: number;
+  maxQuantity?: number;
+  editedPrice?: number;
+  editedName?: string;
+  editedDescription?: string;
 }
 
 export interface BranchCategory {
@@ -241,6 +255,7 @@ export interface CategoriesContentProps {
   onMoveUp: (index: number) => void;
   onMoveDown: (index: number) => void;
   onSaveOrder: () => void;
+  handleShowProductExtras: (product: DetailedProduct) => void;
   onAddProduct: (productId: number, branchCategoryId: number) => void;
   onRemoveProduct: (branchProductId: number, productName?: string) => void;
   onDeleteCategory: (branchCategoryId: number, categoryName: string) => void;
@@ -262,6 +277,8 @@ export interface CategoriesContentProps {
   getCategoryName: (categoryId: number, originalName: string) => string;
   handleShowProductAddons?: (product: DetailedProduct) => void;
   isCategoryActive: (categoryId: number) => boolean;
+  onToggleProductStatus?: (branchProductId: number, currentStatus: boolean) => Promise<void>;
+  onToggleProductAvailability?: (branchProductId: number, currentAvailability: boolean) => Promise<void>;
 }
 
 
@@ -335,18 +352,25 @@ export interface TableData {
 
 export interface TableCardProps {
   table: TableData;
-  isEditing: boolean;
-  isToggling: boolean;
-  isClearing?: boolean; // New prop for clear table loading state
-  onEdit: () => void;
-  onCancelEdit: () => void;
-  onUpdate: (tableId: number, updatedData: Partial<TableData>) => Promise<void>;
-  onDelete: (tableId: number) => Promise<void>;
-  onToggleStatus: (tableId: number, newStatus: boolean) => Promise<void>;
-  onToggleOccupation: (tableId: number, isOccupied: boolean) => Promise<void>;
-  onClearTable: (tableId: number) => Promise<void>; // New prop for clear table
-  onShowQRCode: (table: TableData) => void;
-  onTableChange: (tableId: number, updatedData: Partial<TableData>) => void;
+  // Optional props for different contexts
+  isEditing?: boolean;
+  isToggling?: boolean;
+  isClearing?: boolean;
+  categoryColor?: string;
+
+  // Required actions
+  onEdit: (table?: TableData) => void;
+  onDelete: (tableId: number) => void | Promise<void>;
+  onToggleStatus: (tableId: number, newStatus?: boolean) => void | Promise<void>;
+  onShowQRCode?: (table: TableData) => void;
+  onDownload?: (table: TableData) => void;
+
+  // Optional actions (for Branch Tables context)
+  onCancelEdit?: () => void;
+  onUpdate?: (tableId: number, updatedData: Partial<TableData>) => Promise<void>;
+  onToggleOccupation?: (tableId: number, isOccupied: boolean) => Promise<void>;
+  onClearTable?: (tableId: number) => Promise<void>;
+  onTableChange?: (tableId: number, updatedData: Partial<TableData>) => void;
 }
 
 export interface OrderData {
@@ -627,6 +651,7 @@ export interface Product {
   ingredients?: APIIngredient[];
   allergens?: APIAllergen[];
   originalProductId:number,
+  maxQuantity?: number;
 
 }
 
@@ -692,6 +717,7 @@ export interface Order {
   serviceFeeApplied?:number
   orderTypeName:string
   orderTypeIcon:string
+  paymentMethod?: number;
 }
 export interface CategoryReorderRequest {
   categoryOrders: Array<{
@@ -782,10 +808,9 @@ export interface CreateProductFormData {
 export interface CreateProductModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (productId?: number) => void;
   categories: Category[];
   selectedCategoryId?: number;
-  onOpenIngredientSelection?: (productId: number, productName: string) => void;
 }
 
 export interface ProductAddonsModalProps {
@@ -877,6 +902,23 @@ export interface ErrorBoundaryProps {
 
 
 
+export interface OrderExtraItem {
+  id: number;
+  branchProductExtraId: number;
+  productExtraId: number;
+  extraId: number;
+  extraName: string;
+  extraCategoryName: string;
+  selectionMode: number;
+  isRemoval: boolean;
+  quantity: number;
+  unitPrice: number;
+  minQuantity: number;
+  maxQuantity: number;
+  totalPrice: number;
+  note: string | null;
+}
+
 export interface OrderItem {
   id: number;
   orderItemId?: number;
@@ -894,6 +936,7 @@ export interface OrderItem {
   isAddon: boolean;
   parentOrderItemId?: number | null;
   addonItems: OrderItem[];
+  extras?: OrderExtraItem[];
   parentOrderDetailId:number;
   orderDetailId:number
   addonPrice?: number | null;
@@ -966,7 +1009,7 @@ export interface CreateSessionOrderDto {
   tableNumber?: string;
   deliveryAddress?: string;
   customerPhone?: string;
-  paymentMethod: string;
+  paymentMethod: number;
 
 }
 
@@ -1013,6 +1056,7 @@ export interface PendingOrder {
   orderTypeName:string
   orderTypeIcon:string;
   orderTypeCode:string
+  paymentMethod?: number;
 }
 
 
@@ -1040,6 +1084,7 @@ export interface BranchOrder {
   orderTypeName : string
   orderTypeIcon:string;
   orderTypeCode:string
+  paymentMethod?: number;
 
 }
 // Enhanced component state

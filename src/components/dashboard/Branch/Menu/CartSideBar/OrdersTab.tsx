@@ -1,13 +1,17 @@
 "use client" // Assuming this is needed as per your other file
 
 import type React from "react"
-import { useState } from "react" // Removed useEffect as it wasn't used
+import { useState, useEffect } from "react"
 import { Clock, CheckCircle, ClipboardList, Loader2, Edit, X, Save, AlertCircle, RefreshCw, Plus, Minus, Trash2 } from "lucide-react"
 import { useLanguage } from "../../../../../contexts/LanguageContext"
 import { OrderCardProps, OrdersTabProps } from "../../../../../types/menu/carSideBarTypes"
 import { orderService } from "../../../../../services/Branch/OrderService"
 import { UpdatableOrder, UpdatePendingOrderDto, UpdatePendingOrderItemDto, CancelOrderDto } from "../../../../../types/Orders/type"
 import { OrderItem } from "../../../../../types/BranchManagement/type"
+import { branchProductExtraCategoriesService } from "../../../../../services/Branch/Extras/BranchProductExtraCategoriesService"
+import { branchProductExtrasService } from "../../../../../services/Branch/Extras/BranchProductExtrasService"
+import { BranchProductExtraCategory, BranchProductExtra } from "../../../../../types/Branch/Extras/type"
+import { useCurrency } from "../../../../../hooks/useCurrency"
 
 interface ExtendedOrdersTabProps extends OrdersTabProps {
   updatableOrders: UpdatableOrder[]
@@ -23,6 +27,11 @@ interface EditableOrderItem extends OrderItem {
   isDeleted?: boolean
   originalCount?: number
   editedNote?: string
+  branchProductExtraId?: number // For extras
+  isRemoval?: boolean // For extras
+  extraCategoryName?: string // For extras category validation
+  minQuantity?: number // Minimum quantity for this specific extra
+  maxQuantity?: number // Maximum quantity for this specific extra
 }
 
 const OrdersTab: React.FC<ExtendedOrdersTabProps> = ({
@@ -37,8 +46,8 @@ const OrdersTab: React.FC<ExtendedOrdersTabProps> = ({
     await onRefreshUpdatableOrders()
     await onLoadOrderTracking(orderTag)
   }
+  const currency = useCurrency({ fetchFromApi: true })
 
-  console.log("updatableOrders",updatableOrders)
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -124,12 +133,16 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
   updatableOrders,
   onUpdateOrder
 }) => {
+    const currency = useCurrency({ fetchFromApi: true })
+
   const { t } = useLanguage()
   const [isEditing, setIsEditing] = useState(false)
   const [updating, setUpdating] = useState(false)
   const [updateReason, setUpdateReason] = useState('')
   const [editableItems, setEditableItems] = useState<EditableOrderItem[]>([])
-  
+  const [extraCategoryConstraints, setExtraCategoryConstraints] = useState<Map<number, BranchProductExtraCategory[]>>(new Map())
+  const [individualExtraConstraints, setIndividualExtraConstraints] = useState<Map<number, BranchProductExtra[]>>(new Map())
+
   const [alertModal, setAlertModal] = useState<{ isOpen: boolean, title: string, message: string }>({ isOpen: false, title: '', message: '' });
   const [confirmModal, setConfirmModal] = useState<{ isOpen: boolean, title: string, message: string, onConfirm: () => void }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
   const [promptModal, setPromptModal] = useState<{ isOpen: boolean, title: string, message: string, onConfirm: (value: string) => void }>({ isOpen: false, title: '', message: '', onConfirm: () => {} });
@@ -138,7 +151,31 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
   const isPending = order.trackingInfo.orderStatus.toLowerCase() === 'pending'
   const canEdit = isPending && updatableOrder?.isUpdatable
 
+
   const canCancel = updatableOrder && orderService.canCancelOrder(order.trackingInfo.orderStatus);
+
+  // Auto-refresh polling for active orders
+  useEffect(() => {
+    const isOrderActive = () => {
+      const status = order.trackingInfo.orderStatus.toLowerCase();
+      return status !== 'completed' && status !== 'cancelled' && status !== 'rejected';
+    };
+
+    // Only poll if order is active and not being edited
+    if (!isOrderActive() || isEditing || updating) {
+      return;
+    }
+
+    // Poll every 10 seconds
+    const pollInterval = setInterval(() => {
+      onLoadOrderTracking(order.orderTag);
+    }, 10000); // 10 seconds
+
+    // Cleanup on unmount or when dependencies change
+    return () => {
+      clearInterval(pollInterval);
+    };
+  }, [order.orderTag, order.trackingInfo.orderStatus, isEditing, updating, onLoadOrderTracking]);
 
   const getTimeRemaining = () => {
     if (!updatableOrder?.updateDeadline) return null
@@ -155,10 +192,34 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
     return `${minutes}m ${seconds}s`
   }
 
-  const handleEdit = () => {
+  const handleEdit = async () => {
     if (!updatableOrder?.items) {
       setAlertModal({ isOpen: true, title: t('menu.cart.error') || 'Error', message: t('menu.cart.order_items_not_available') || 'Order items not available' });
       return
+    }
+
+    // Fetch extra category constraints and individual extra constraints for all products in the order
+    const constraintsMap = new Map<number, BranchProductExtraCategory[]>()
+    const extrasMap = new Map<number, BranchProductExtra[]>()
+    const uniqueBranchProductIds = new Set(updatableOrder.items.map(item => item.branchProductId))
+
+    try {
+      for (const branchProductId of uniqueBranchProductIds) {
+        // Fetch category constraints
+        const constraints = await branchProductExtraCategoriesService.getBranchProductExtraCategories({
+          branchProductId
+        })
+        constraintsMap.set(branchProductId, constraints)
+
+        // Fetch individual extra constraints
+        const extras = await branchProductExtrasService.getBranchProductExtrasByBranchProductId(branchProductId)
+        extrasMap.set(branchProductId, extras)
+      }
+      setExtraCategoryConstraints(constraintsMap)
+      setIndividualExtraConstraints(extrasMap)
+    } catch (error) {
+      console.error('Failed to fetch extra constraints:', error)
+      // Continue with editing even if constraints fetch fails
     }
 
     // Initialize editable items from updatableOrder.items
@@ -171,16 +232,16 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
         originalCount: item.count,
         editedNote: item.note || ''
       })
-      
+
       // 2. Add its addon items
       if (item.addonItems && item.addonItems.length > 0) {
         item.addonItems.forEach(addon => {
           items.push({
             ...addon,
             orderDetailId: addon.id, // The addon's own unique OrderItem ID
-            
+
             // --- THIS IS THE CRITICAL FIX ---
-            parentOrderDetailId: addon.parentOrderItemId, 
+            parentOrderDetailId: addon.parentOrderItemId || item.id, // Use item.id, not item.orderDetailId
             // --- END OF FIX ---
 
             originalCount: addon.count,
@@ -188,9 +249,45 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
           })
         })
       }
+
+
+      // 3. Add its extra items
+      if (item.extras && item.extras.length > 0) {
+        item.extras.forEach(extra => {
+          // Find the extra constraint for this specific extra
+          const productExtras = extrasMap.get(item.branchProductId) || []
+          const extraConstraint = productExtras.find(e => e.extraId === extra.branchProductExtraId)
+
+
+          items.push({
+            id: extra.id,
+            orderDetailId: extra.id, // The extra's own unique OrderItem ID
+            branchProductId: extra.branchProductExtraId, // Map extraId to productId for UI consistency
+            productName: extra.extraName, // Map extraName to productName for UI consistency
+            price: extra.unitPrice, // Map unitPrice to price for UI consistency
+            count: extra.quantity, // Map quantity to count for UI consistency
+            totalPrice: extra.totalPrice,
+            parentOrderDetailId: item.id, // Use item.id (the parent product's ID from API)
+            isAddon: false, // Extras are not addons
+            addonItems: [], // Extras don't have nested addons
+            originalCount: extra.quantity,
+            editedNote: extra.note || '',
+            note: extra.note,
+            isProductDeleted: false,
+            lastModifiedAt: '',
+            lastModifiedBy: '',
+            modificationLog: '',
+            // Keep extra-specific fields for later use
+            branchProductExtraId: extra.branchProductExtraId,
+            isRemoval: extra.isRemoval,
+            extraCategoryName: extra.extraCategoryName,
+            minQuantity: extra?.minQuantity || 0,
+            maxQuantity: extra?.maxQuantity
+          } as EditableOrderItem)
+        })
+      }
     })
-    
-    console.log('Initialized editable items (with correct parent links):', items)
+
     setEditableItems(items)
     setIsEditing(true)
   }
@@ -202,13 +299,54 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
   }
 
   const handleQuantityChange = (itemId: number, change: number) => {
-    setEditableItems(prev => prev.map(item => {
-      if (item.orderDetailId === itemId) {
-        const newCount = Math.max(0, (item.count || 0) + change)
-        return { ...item, count: newCount }
+    setEditableItems(prev => {
+      const item = prev.find(i => i.orderDetailId === itemId)
+      if (!item) return prev
+      // For extras, apply special validation
+      if (item.branchProductExtraId) {
+        // Cannot change quantity of removal extras
+        if (item.isRemoval) {
+          setAlertModal({
+            isOpen: true,
+            title: t('menu.cart.error') || 'Error',
+            message: 'Cannot change quantity of removal items'
+          })
+          return prev
+        }
+
+        const currentCount = item.count || 0
+        const newCount = currentCount + change
+
+        // Check maxQuantity before increasing
+        if (change > 0 && item.maxQuantity !== undefined && newCount > item.maxQuantity) {
+          setAlertModal({
+            isOpen: true,
+            title: t('menu.cart.error') || 'Error',
+            message: `Maximum quantity for ${item.productName} is ${item.maxQuantity}`
+          })
+          return prev
+        }
+
+        // Check minQuantity before decreasing (only if item will remain, not if being set to 0)
+        if (change < 0 && newCount > 0 && item.minQuantity !== undefined && newCount < item.minQuantity) {
+          setAlertModal({
+            isOpen: true,
+            title: t('menu.cart.error') || 'Error',
+            message: `Minimum quantity for ${item.productName} is ${item.minQuantity}`
+          })
+          return prev
+        }
       }
-      return item
-    }))
+
+      // Apply the change
+      return prev.map(i => {
+        if (i.orderDetailId === itemId) {
+          const newCount = Math.max(0, (i.count || 0) + change)
+          return { ...i, count: newCount }
+        }
+        return i
+      })
+    })
   }
 
   const handleNoteChange = (itemId: number, note: string) => {
@@ -280,11 +418,107 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
   };
 
   const hasChanges = () => {
-    return editableItems.some(item => 
-      item.count !== item.originalCount || 
+    return editableItems.some(item =>
+      item.count !== item.originalCount ||
       item.editedNote !== (item.note || '') ||
       item.isDeleted
     )
+  }
+
+  const validateExtrasMinMax = (): { isValid: boolean; errorMessage: string } => {
+    // First, validate individual extra min/max quantities
+    for (const item of editableItems) {
+      if (item.branchProductExtraId && !item.isDeleted && item.count !== undefined) {
+        const quantity = item.count
+
+        // Check individual extra minQuantity
+        if (item.minQuantity !== undefined && quantity > 0 && quantity < item.minQuantity) {
+          return {
+            isValid: false,
+            errorMessage: `${item.productName}: Minimum quantity is ${item.minQuantity}. Current: ${quantity}`
+          }
+        }
+
+        // Check individual extra maxQuantity
+        if (item.maxQuantity !== undefined && quantity > item.maxQuantity) {
+          return {
+            isValid: false,
+            errorMessage: `${item.productName}: Maximum quantity is ${item.maxQuantity}. Current: ${quantity}`
+          }
+        }
+      }
+    }
+
+    // Group extras by parent product and category
+    const extrasByParentAndCategory = new Map<number, Map<string, EditableOrderItem[]>>()
+
+    editableItems.forEach(item => {
+      if (item.branchProductExtraId && !item.isDeleted && item.count && item.count > 0) {
+        const parentId = item.parentOrderDetailId
+        if (!parentId) return
+
+        const parentItem = editableItems.find(p => p.orderDetailId === parentId)
+        if (!parentItem) return
+
+        if (!extrasByParentAndCategory.has(parentItem.branchProductId)) {
+          extrasByParentAndCategory.set(parentItem.branchProductId, new Map())
+        }
+
+        const categoriesMap = extrasByParentAndCategory.get(parentItem.branchProductId)!
+        const categoryName = item.extraCategoryName || 'Unknown Category'
+
+        if (!categoriesMap.has(categoryName)) {
+          categoriesMap.set(categoryName, [])
+        }
+        categoriesMap.get(categoryName)!.push(item)
+      }
+    })
+
+    // Validate against constraints
+    for (const [branchProductId, categoriesMap] of extrasByParentAndCategory.entries()) {
+      const constraints = extraCategoryConstraints.get(branchProductId) || []
+
+      for (const constraint of constraints) {
+        const categoryName = constraint.extraCategoryName || ''
+        const extrasInCategory = categoriesMap.get(categoryName) || []
+
+        // Calculate total quantity for this category
+        const totalQuantity = extrasInCategory.reduce((sum, extra) => sum + (extra.count || 0), 0)
+        const selectionCount = extrasInCategory.length
+
+        // Check min/max selection count
+        if (constraint.minSelectionCount > 0 && selectionCount < constraint.minSelectionCount) {
+          return {
+            isValid: false,
+            errorMessage: `${categoryName}: Please select at least ${constraint.minSelectionCount} item(s). Currently selected: ${selectionCount}`
+          }
+        }
+
+        if (constraint.maxSelectionCount > 0 && selectionCount > constraint.maxSelectionCount) {
+          return {
+            isValid: false,
+            errorMessage: `${categoryName}: Maximum ${constraint.maxSelectionCount} item(s) allowed. Currently selected: ${selectionCount}`
+          }
+        }
+
+        // Check min/max total quantity
+        if (constraint.minTotalQuantity > 0 && totalQuantity < constraint.minTotalQuantity) {
+          return {
+            isValid: false,
+            errorMessage: `${categoryName}: Minimum total quantity is ${constraint.minTotalQuantity}. Current total: ${totalQuantity}`
+          }
+        }
+
+        if (constraint.maxTotalQuantity > 0 && totalQuantity > constraint.maxTotalQuantity) {
+          return {
+            isValid: false,
+            errorMessage: `${categoryName}: Maximum total quantity is ${constraint.maxTotalQuantity}. Current total: ${totalQuantity}`
+          }
+        }
+      }
+    }
+
+    return { isValid: true, errorMessage: '' }
   }
 
   const handleUpdateRetry = async (updateDto: UpdatePendingOrderDto) => {
@@ -307,27 +541,72 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
       setAlertModal({ isOpen: true, title: t('menu.cart.error') || 'Error', message: 'Updatable order information not found' });
       return
     }
-    
+
     if (!hasChanges()) {
       setAlertModal({ isOpen: true, title: t('menu.cart.info') || 'Info', message: t('menu.cart.no_changes_detected') || 'No changes detected. Please modify items before updating.'});
       return
     }
 
-    const items: UpdatePendingOrderItemDto[] = editableItems
-      .filter(item => {
-        // We send items that are NOT deleted AND have a count > 0
-        const shouldInclude = !item.isDeleted && item.count && item.count > 0
-        return shouldInclude
-      })
-      .map(item => ({
-        // Map all properties, ensuring correct types
+    // Validate extras min/max constraints
+    const validationResult = validateExtrasMinMax()
+    if (!validationResult.isValid) {
+      setAlertModal({
+        isOpen: true,
+        title: t('menu.cart.validation_error') || 'Validation Error',
+        message: validationResult.errorMessage
+      });
+      return
+    }
+
+    // Separate parent products/addons from extras
+    const parentItems = editableItems.filter(item => {
+      const isExtra = item.branchProductExtraId !== undefined && item.branchProductExtraId !== null;
+      const shouldInclude = !item.isDeleted && item.count && item.count > 0 && !isExtra;
+   
+      return shouldInclude;
+    });
+
+    const extraItems = editableItems.filter(item => {
+      const isExtra = item.branchProductExtraId !== undefined && item.branchProductExtraId !== null;
+      const shouldInclude = !item.isDeleted && item.count && item.count > 0 && isExtra;
+    
+      return shouldInclude;
+    });
+
+    // Group extras by their parent product ID
+    const extrasByParent = new Map<number, EditableOrderItem[]>();
+    extraItems.forEach(extra => {
+      const parentId = extra.parentOrderDetailId;
+      if (parentId) {
+        if (!extrasByParent.has(parentId)) {
+          extrasByParent.set(parentId, []);
+        }
+        extrasByParent.get(parentId)!.push(extra);
+      }
+    });
+
+    // Map parent items with their nested extras
+    const items: UpdatePendingOrderItemDto[] = parentItems.map(item => {
+      const itemExtras = extrasByParent.get(item.orderDetailId) || [];
+
+      const dto: UpdatePendingOrderItemDto = {
         orderDetailId: item.orderDetailId || 0,
         branchProductId: item.branchProductId,
         count: item.count || 0,
         note: item.editedNote || null,
         isAddon: item.isAddon || false,
-        parentOrderDetailId: item.parentOrderDetailId || null
-      }));
+        parentOrderDetailId: item.parentOrderDetailId || null,
+        extras: itemExtras.map(extra => ({
+          branchProductExtraId: extra.branchProductExtraId!,
+          quantity: extra.count || 0,
+          note: extra.editedNote || null
+        }))
+      };
+
+    
+
+      return dto;
+    });
 
     const updateDto: UpdatePendingOrderDto = {
       orderId: updatableOrder.orderId,
@@ -337,9 +616,9 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
       rowVersion: updatableOrder.rowVersion
     }
 
+
     try {
       setUpdating(true)
-      console.log('Update DTO:', updateDto)
       await orderService.updatePendingOrder(updateDto)
       
       setAlertModal({ isOpen: true, title: t('menu.cart.success') || 'Success', message: t('menu.cart.order_updated_success') || 'Order updated successfully!'});
@@ -456,10 +735,11 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
             {!isEditing && (
               <button
                 onClick={handleEdit}
-                className="p-2 text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-800/30 rounded-lg transition-colors"
+                className="flex items-center gap-1 px-3 py-2 text-blue-600 hover:bg-blue-100 dark:text-blue-400 dark:hover:bg-blue-800/30 rounded-lg transition-colors text-sm font-medium"
                 title={t('menu.cart.edit_order') || 'Edit order'}
               >
                 <Edit className="h-4 w-4" />
+                <span>{t('menu.cart.edit') || 'Edit'}</span>
               </button>
             )}
           </div>
@@ -496,7 +776,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
                             {item.productName}
                           </span>
                           <span className="text-sm font-semibold text-green-600 dark:text-green-400">
-                            ${(item.price * (item.count || 0)).toFixed(2)}
+                            {(item.price * (item.count || 0)).toFixed(2)}
                           </span>
                         </div>
 
@@ -547,7 +827,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
                       {/* Delete/Restore Button */}
                       <button
                         onClick={() => item.isDeleted ? handleRestoreItem(item.orderDetailId) : handleDeleteItem(item.orderDetailId)}
-                        className={`p-2 rounded-lg transition-colors ${
+                        className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-colors text-xs font-medium ${
                           item.isDeleted
                             ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200'
                             : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200'
@@ -555,9 +835,15 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
                         title={item.isDeleted ? (t('menu.cart.restore_item') || 'Restore item') : (t('menu.cart.delete_item') || 'Delete item')}
                       >
                         {item.isDeleted ? (
-                          <RefreshCw className="h-4 w-4" />
+                          <>
+                            <RefreshCw className="h-4 w-4" />
+                            <span>{t('menu.cart.restore') || 'Restore'}</span>
+                          </>
                         ) : (
-                          <Trash2 className="h-4 w-4" />
+                          <>
+                            <Trash2 className="h-4 w-4" />
+                            <span>{t('menu.cart.delete') || 'Delete'}</span>
+                          </>
                         )}
                       </button>
                     </div>
@@ -578,42 +864,74 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
                               
                               <div className="flex items-start gap-3">
                                 <div className="flex-1">
-                                  {/* Addon Name & Price */}
+                                  {/* Addon/Extra Name & Price */}
                                   <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
-                                      {addon.productName} 
-                                      <span className="text-xs text-slate-500 dark:text-slate-400"> (Addon)</span>
+                                      {addon.branchProductExtraId ? (
+                                        <>
+                                          {addon.isRemoval ? (
+                                            <span className="text-red-600 dark:text-red-400">
+                                              {t('menu.no') || 'No'} {addon.productName}
+                                            </span>
+                                          ) : (
+                                            addon.productName
+                                          )}
+                                          <span className="text-xs text-blue-500 dark:text-blue-400"> (Extra)</span>
+                                        </>
+                                      ) : (
+                                        <>
+                                          {addon.productName}
+                                          <span className="text-xs text-slate-500 dark:text-slate-400"> (Addon)</span>
+                                        </>
+                                      )}
                                     </span>
                                     <span className="text-sm font-semibold text-green-600 dark:text-green-400">
-                                      ${(addon.price * (addon.count || 0)).toFixed(2)}
+                                      {(addon.price * (addon.count || 0)).toFixed(2)}
                                     </span>
                                   </div>
 
-                                  {/* Addon Controls (if not deleted) */}
+                                  {/* Addon/Extra Controls (if not deleted) */}
                                   {!addon.isDeleted && (
                                     <>
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <button
-                                          onClick={() => handleQuantityChange(addon.orderDetailId, -1)}
-                                          disabled={addon.count === 0}
-                                          className="p-1 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 disabled:opacity-30 disabled:cursor-not-allowed"
-                                        >
-                                          <Minus className="h-3 w-3" />
-                                        </button>
-                                        <span className="text-sm font-medium min-w-[2rem] text-center">
-                                          {addon.count}
-                                        </span>
-                                        <button
-                                          onClick={() => handleQuantityChange(addon.orderDetailId, 1)}
-                                          className="p-1 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500"
-                                        >
-                                          <Plus className="h-3 w-3" />
-                                        </button>
-                                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                                          ({t('menu.cart.was') || 'was'}: {addon.originalCount})
-                                        </span>
-                                      </div>
-                                      
+                                      {/* For removal extras, show only a message - they're toggled via delete/restore button */}
+                                      {addon.branchProductExtraId && addon.isRemoval ? (
+                                        <div className="text-xs text-slate-500 dark:text-slate-400 italic mb-2">
+                                          {t('menu.cart.removal_item_toggle') || 'Use delete button to toggle this item'}
+                                        </div>
+                                      ) : (
+                                        <>
+                                          {/* Quantity controls for addons and normal extras */}
+                                          <div className="flex items-center gap-2 mb-2">
+                                            <button
+                                              onClick={() => handleQuantityChange(addon.orderDetailId, -1)}
+                                              disabled={addon.count === 0}
+                                              className="p-1 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500 disabled:opacity-30 disabled:cursor-not-allowed"
+                                            >
+                                              <Minus className="h-3 w-3" />
+                                            </button>
+                                            <span className="text-sm font-medium min-w-[2rem] text-center">
+                                              {addon.count}
+                                            </span>
+                                            <button
+                                              onClick={() => handleQuantityChange(addon.orderDetailId, 1)}
+                                              className="p-1 rounded-lg bg-slate-100 dark:bg-slate-600 hover:bg-slate-200 dark:hover:bg-slate-500"
+                                            >
+                                              <Plus className="h-3 w-3" />
+                                            </button>
+                                            <span className="text-xs text-slate-500 dark:text-slate-400">
+                                              ({t('menu.cart.was') || 'was'}: {addon.originalCount})
+                                            </span>
+
+                                            {/* Show min/max info for extras */}
+                                            {addon.branchProductExtraId && (addon.minQuantity || addon.maxQuantity) && (
+                                              <span className="text-xs text-slate-500 dark:text-slate-400">
+                                                | {t('menu.cart.qty')}: {addon.minQuantity || 0}-{addon.maxQuantity || '∞'}
+                                              </span>
+                                            )}
+                                          </div>
+                                        </>
+                                      )}
+
                                       <input
                                         type="text"
                                         value={addon.editedNote}
@@ -631,17 +949,40 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
                                   )}
                                 </div>
 
-                                {/* Addon Delete/Restore Button */}
+                                {/* Addon Delete/Restore Button (or "Add" for removal extras) */}
                                 <button
                                   onClick={() => addon.isDeleted ? handleRestoreItem(addon.orderDetailId) : handleDeleteItem(addon.orderDetailId)}
-                                  className={`p-2 rounded-lg transition-colors ${
+                                  className={`flex items-center gap-1 px-3 py-2 rounded-lg transition-colors text-xs font-medium ${
                                     addon.isDeleted
                                       ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200'
-                                      : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200'
+                                      : addon.branchProductExtraId && addon.isRemoval
+                                        ? 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200'
+                                        : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-200'
                                   }`}
-                                  title={addon.isDeleted ? (t('menu.cart.restore_item') || 'Restore item') : (t('menu.cart.delete_item') || 'Delete item')}
+                                  title={
+                                    addon.isDeleted
+                                      ? (t('menu.cart.restore_item') || 'Restore item')
+                                      : addon.branchProductExtraId && addon.isRemoval
+                                        ? (t('menu.cart.remove_from_order') || 'Remove from order')
+                                        : (t('menu.cart.delete_item') || 'Delete item')
+                                  }
                                 >
-                                  {addon.isDeleted ? <RefreshCw className="h-4 w-4" /> : <Trash2 className="h-4 w-4" />}
+                                  {addon.isDeleted ? (
+                                    <>
+                                      <RefreshCw className="h-4 w-4" />
+                                      <span>{t('menu.cart.restore') || 'Restore'}</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Trash2 className="h-4 w-4" />
+                                      <span>
+                                        {addon.branchProductExtraId && addon.isRemoval
+                                          ? (t('menu.cart.remove') || 'Remove')
+                                          : (t('menu.cart.delete') || 'Delete')
+                                        }
+                                      </span>
+                                    </>
+                                  )}
                                 </button>
                               </div>
                             </div>
@@ -703,9 +1044,10 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
               <button
                 onClick={handleCancelEdit}
                 disabled={updating}
-                className="px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
               >
                 <X className="h-4 w-4" />
+                <span>{t('menu.cart.cancel_edit') || 'Cancel'}</span>
               </button>
             </div>
           </div>
@@ -733,7 +1075,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
         <div className="flex justify-between text-sm">
           <span className="text-slate-600 dark:text-slate-400">{t('menu.cart.total')}</span>
           <span className="font-semibold text-green-600 dark:text-green-400">
-            ${order.trackingInfo.totalPrice.toFixed(2)}
+            {currency.symbol}{(order.trackingInfo.totalPrice.toFixed(2))}
           </span>
         </div>
 
@@ -754,7 +1096,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
       </div>
 
       {/* Action Buttons */}
-      <div className="p-4 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-200 dark:border-slate-600 flex space-x-2">
+      <div className="p-4 gap-3 bg-slate-50 dark:bg-slate-700/50 border-t border-slate-200 dark:border-slate-600 flex space-x-2">
         {canCancel && !isEditing && (
           <button
             onClick={handleCancelOrder}
@@ -770,7 +1112,7 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
           </button>
         )}
 
-        {isPending && !isEditing && !canCancel && (
+        {!isEditing && (
           <button
             onClick={() => onLoadOrderTracking(order.orderTag)}
             disabled={trackingLoading || updating}
@@ -779,17 +1121,17 @@ const OrderCard: React.FC<ExtendedOrderCardProps> = ({
             {trackingLoading ? (
               <>
                 <Loader2 className="h-3 w-3 animate-spin" />
-                {t('menu.cart.refreshing')}
+                {t('menu.cart.refreshing') || 'Refreshing...'}
               </>
             ) : (
               <>
                 <RefreshCw className="h-3 w-3" />
-                {t('menu.cart.refresh')}
+                {t('menu.cart.refresh') || 'Refresh Status'}
               </>
             )}
           </button>
         )}
-        
+
         {!isEditing && (
           <button
             onClick={() => onRemoveOrderFromTracking(order.orderTag)}
@@ -876,7 +1218,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ title, message, onClose, on
         <div className="p-4">
           <p className="text-sm text-slate-600 dark:text-slate-400 whitespace-pre-wrap">{message}</p>
         </div>
-        <div className="p-4 flex justify-end gap-2 bg-slate-50 dark:bg-slate-700/50 rounded-b-lg">
+        <div className="p-4  flex justify-end gap-2 bg-slate-50 dark:bg-slate-700/50 rounded-b-lg">
           <button
             onClick={onClose}
             className="px-4 py-2 bg-slate-200 dark:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-lg text-sm font-medium hover:bg-slate-300 dark:hover:bg-slate-500"

@@ -1,5 +1,5 @@
 import { Category } from "../../types/BranchManagement/type";
-import { httpClient } from "../../utils/http";
+import { httpClient, getEffectiveBranchId } from "../../utils/http";
 import { logger } from "../../utils/logger";
 
 // API Request interfaces for BranchCategories
@@ -58,6 +58,7 @@ interface APIProduct {
   displayOrder: number;
   description?: string;
   categoryId: number;
+  maxQuantity?: number;
 }
 
 interface APIBranchCategory {
@@ -76,7 +77,9 @@ interface APIBranchCategory {
 
 class BranchCategoryService {
   private baseUrl = '/api/BranchCategories';
-
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
   // Transform API response to match component expectations
   private transformAPIDataToComponentData(apiCategories: APIBranchCategory[]): Category[] {
     return apiCategories.map(apiCategory => ({
@@ -97,6 +100,7 @@ class BranchCategoryService {
         status: apiProduct.status,
         displayOrder: apiProduct.displayOrder,
         categoryId: apiCategory.categoryId,
+        maxQuantity: apiProduct.maxQuantity,
       })) || [],
       productId: undefined,
       name: undefined
@@ -106,22 +110,26 @@ class BranchCategoryService {
 
   async getAvailableProductsForBranch(params: GetAvailableProductsRequest): Promise<Category[]> {
     try {
-      const { categoryId, onlyActive, includes } = params;
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+      const { categoryId, onlyActive, includes  } = params;
+      const language = this.getLanguageFromStorage();
       const queryParams = new URLSearchParams();
+      if (branchId) queryParams.append('branchId', branchId.toString());
       if (categoryId) queryParams.append('categoryId', categoryId.toString());
       if (onlyActive !== undefined) queryParams.append('onlyActive', onlyActive.toString());
       if (includes) queryParams.append('includes', includes);
+      if (language) queryParams.append('language', language);
 
       const response = await httpClient.get(`/api/BranchProducts/branch/available-products?${queryParams.toString()}`);
 
       logger.info('Available products for branch retrieved successfully', {
+        branchId,
         categoryId,
         onlyActive,
         includes,
         count: response.data.length
       });
-
-  
 
       return response.data;
     } catch (error: any) {
@@ -132,12 +140,19 @@ class BranchCategoryService {
 
   async getAvailableCategoriesForBranch(): Promise<Category[]> {
     try {
-        const params = new URLSearchParams({
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
+      const params = new URLSearchParams({
         includes: "products",
       });
-      const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/available-categories?${params.toString()}` );
-      logger.info('Available categories for branch retrieved successfully', { 
+      if (branchId) params.append('branchId', branchId.toString());
+      if (language) params.append('language', language);
+
+      const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/available-categories?${params.toString()}`);
+      logger.info('Available categories for branch retrieved successfully', {
         count: response.data.length,
+        branchId
       });
 
       const transformedData = this.transformAPIDataToComponentData(response.data);
@@ -150,14 +165,24 @@ class BranchCategoryService {
 
   async getBranchCategories(): Promise<Category[]> {
     try {
-      const response = await httpClient.get(`${this.baseUrl}`, {
-        params: {
-          includeInactive: true
-        }
-      });
-      
-      logger.info('Branch categories retrieved successfully', { 
-        count: response.data 
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
+                  
+      const params: any = {
+        includeInactive: true,
+        language :language
+      };
+
+      // Add branchId if available
+      if (branchId) {
+        params.branchId = branchId;
+      }
+
+      const response = await httpClient.get(`${this.baseUrl}`, { params });
+      logger.info('Branch categories retrieved successfully', {
+        count: response.data,
+        branchId
       });
       return response.data;
     } catch (error: any) {
@@ -166,17 +191,29 @@ class BranchCategoryService {
     }
   }
 
-  async getPublicCategoriesForBranch(branchId: number): Promise<Category[]> {
+  async getPublicCategoriesForBranch(branchId?: number): Promise<Category[]> {
     try {
-      const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/${branchId}/public-categories`);
-      
-      logger.info('Public categories for branch retrieved successfully', { 
-        branchId,
-        count: response.data.length 
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
+
+      if (!effectiveBranchId) {
+        throw new Error('Branch ID is required');
+      }
+
+      const response = await httpClient.get<APIBranchCategory[]>(`${this.baseUrl}/branch/${effectiveBranchId}/public-categories`, {
+        params: {
+          language
+        }
       });
-      
+
+      logger.info('Public categories for branch retrieved successfully', {
+        branchId: effectiveBranchId,
+        count: response.data.length
+      });
+
       const transformedData = this.transformAPIDataToComponentData(response.data);
-      
+
       return transformedData;
     } catch (error: any) {
       logger.error('Error retrieving public categories for branch:', error);
@@ -186,10 +223,15 @@ class BranchCategoryService {
 
   async getBranchCategory(categoryId: number): Promise<Category | null> {
     try {
-      const response = await httpClient.get<APIBranchCategory>(`${this.baseUrl}/category/${categoryId}`);
-      
-      logger.info('Branch category retrieved successfully', { categoryId });
-      
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
+
+      const params = branchId ? { branchId, language } : { language };
+      const response = await httpClient.get<APIBranchCategory>(`${this.baseUrl}/category/${categoryId}`, { params });
+
+      logger.info('Branch category retrieved successfully', { categoryId, branchId });
+
       const transformedCategory: Category = {
         categoryId: response.data.categoryId,
         categoryName: response.data.categoryName,
@@ -214,7 +256,7 @@ class BranchCategoryService {
         productId: undefined,
         name: undefined
       };
-      
+
       return transformedCategory;
     } catch (error: any) {
       logger.error('Error retrieving branch category:', error);
@@ -229,13 +271,17 @@ class BranchCategoryService {
     displayOrder: number;
   }): Promise<Category> {
     try {
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
       const payload: CreateBranchCategoryRequest = categoryData;
-      
-      logger.info('Creating branch category', { payload });
-      
+
+      logger.info('Creating branch category', { payload, branchId });
+
       try {
-        const response = await httpClient.post(`${this.baseUrl}`, payload);
-        logger.info('Branch category created successfully', { data: response.data });
+        const params = branchId ? { branchId } : {};
+        const response = await httpClient.post(`${this.baseUrl}`, payload, { params });
+        logger.info('Branch category created successfully', { data: response.data, branchId });
         return response.data;
       } catch (error: any) {
         if (error.response?.data?.errors && error.response.data.errors.createBranchCategoryDto) {
@@ -243,9 +289,10 @@ class BranchCategoryService {
           const wrappedPayload = {
             createBranchCategoryDto: categoryData
           };
-          const response = await httpClient.post<APIBranchCategory>(`${this.baseUrl}`, wrappedPayload);
-          logger.info('Branch category created successfully (with DTO wrapper)', { data: response.data });
-          
+          const params = branchId ? { branchId } : {};
+          const response = await httpClient.post<APIBranchCategory>(`${this.baseUrl}`, wrappedPayload, { params });
+          logger.info('Branch category created successfully (with DTO wrapper)', { data: response.data, branchId });
+
           const transformedCategory: Category = {
             categoryId: response.data.categoryId,
             categoryName: response.data.categoryName,
@@ -258,7 +305,7 @@ class BranchCategoryService {
             productId: undefined,
             name: undefined
           };
-          
+
           return transformedCategory;
         }
         throw error;
@@ -276,6 +323,9 @@ class BranchCategoryService {
     displayOrder?: number;
   }): Promise<Category> {
     try {
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
       const payload: UpdateBranchCategoryRequest = {
         branchCategoryId: branchCategoryData.branchCategoryId,
         isActive: branchCategoryData.isActive ?? true,
@@ -283,9 +333,10 @@ class BranchCategoryService {
         displayOrder: branchCategoryData.displayOrder ?? 0
       };
 
-      logger.info('Updating branch category', { payload });
-      const response = await httpClient.put<APIBranchCategory>(`${this.baseUrl}`, payload);
-      logger.info('Branch category updated successfully', {  data: response.data });
+      logger.info('Updating branch category', { payload, branchId });
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.put<APIBranchCategory>(`${this.baseUrl}`, payload, { params });
+      logger.info('Branch category updated successfully', { data: response.data, branchId });
 
       const transformedCategory: Category = {
         categoryId: response.data.categoryId,
@@ -320,11 +371,14 @@ class BranchCategoryService {
 
   async deleteBranchCategory(id: number): Promise<void> {
     try {
-      logger.info('Deleting branch category', { id });
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('Deleting branch category', { id, branchId });
       await httpClient.delete(`${this.baseUrl}`, {
-        params: { id }
+        params: { id, ...(branchId && { branchId }) }
       });
-      logger.info('Branch category deleted successfully', { id });
+      logger.info('Branch category deleted successfully', { id, branchId });
     } catch (error: any) {
       logger.error('❌ Error deleting branch category:', error);
       throw error;
@@ -336,24 +390,30 @@ class BranchCategoryService {
     newDisplayOrder: number;
   }>): Promise<void> {
     try {
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
       const payload: BranchCategoryReorderRequest = {
         categoryOrders: categoryOrders
       };
 
-      logger.info('Reordering branch categories', { 
+      logger.info('Reordering branch categories', {
         payload,
-        totalCategories: categoryOrders.length 
+        totalCategories: categoryOrders.length,
+        branchId
       });
-      
-      const response = await httpClient.post(`${this.baseUrl}/reorder`, payload);
-      
-      logger.info('Branch categories reordered successfully', { 
+
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.post(`${this.baseUrl}/reorder`, payload, { params });
+
+      logger.info('Branch categories reordered successfully', {
         updatedCategories: categoryOrders.length,
-        response: response.status 
+        response: response.status,
+        branchId
       });
     } catch (error: any) {
       logger.error('❌ Error reordering branch categories:', error);
-      
+
       if (error.response?.status === 400) {
         throw new Error('Invalid branch category reorder data');
       } else if (error.response?.status === 404) {
@@ -366,24 +426,30 @@ class BranchCategoryService {
 
   async batchUpdateBranchCategories(categoryIds: number[]): Promise<void> {
     try {
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
       const payload: BatchUpdateRequest = {
         categoryIds: categoryIds
       };
 
-      logger.info('Batch updating branch categories', { 
+      logger.info('Batch updating branch categories', {
         payload,
-        totalCategories: categoryIds.length 
+        totalCategories: categoryIds.length,
+        branchId
       });
-      
-      const response = await httpClient.post(`${this.baseUrl}/batch-update`, payload);
-      
-      logger.info('Branch categories batch updated successfully', { 
+
+      const params = branchId ? { branchId } : {};
+      const response = await httpClient.post(`${this.baseUrl}/batch-update`, payload, { params });
+
+      logger.info('Branch categories batch updated successfully', {
         updatedCategories: categoryIds.length,
-        response: response.status 
+        response: response.status,
+        branchId
       });
     } catch (error: any) {
       logger.error('❌ Error batch updating branch categories:', error);
-      
+
       if (error.response?.status === 400) {
         throw new Error('Invalid batch update data');
       } else if (error.response?.status === 404) {
@@ -396,14 +462,20 @@ class BranchCategoryService {
   // Get all deleted branch categories
   async getDeletedBranchCategories(): Promise<DeletedBranchCategory[]> {
     try {
-      logger.info('Fetching deleted branch categories');
-      
-      const response = await httpClient.get<DeletedBranchCategory[]>(`${this.baseUrl}/deleted`);
-      
-      logger.info('Deleted branch categories retrieved successfully', { 
-        count: response.data.length 
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
+
+      logger.info('Fetching deleted branch categories', { branchId });
+
+      const params = branchId ? { branchId, language } : { language };
+      const response = await httpClient.get<DeletedBranchCategory[]>(`${this.baseUrl}/deleted`, { params });
+
+      logger.info('Deleted branch categories retrieved successfully', {
+        count: response.data.length,
+        branchId
       });
-      
+
       return response.data;
     } catch (error: any) {
       logger.error('❌ Error retrieving deleted branch categories:', error);
@@ -414,11 +486,15 @@ class BranchCategoryService {
   // Restore a deleted branch category
   async restoreBranchCategory(id: number): Promise<void> {
     try {
-      logger.info('Restoring branch category', { id });
-      
-      await httpClient.post(`${this.baseUrl}/${id}/restore`);
-      
-      logger.info('Branch category restored successfully', { id });
+      // Get effective branch ID (from localStorage or token)
+      const branchId = getEffectiveBranchId();
+
+      logger.info('Restoring branch category', { id, branchId });
+
+      const params = branchId ? { branchId } : {};
+      await httpClient.post(`${this.baseUrl}/${id}/restore`, {}, { params });
+
+      logger.info('Branch category restored successfully', { id, branchId });
     } catch (error: any) {
       logger.error('❌ Error restoring branch category:', error);
       throw error;

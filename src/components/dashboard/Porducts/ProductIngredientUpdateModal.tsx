@@ -12,6 +12,7 @@ interface Ingredient {
   name: string;
   unit: string;
   price?: number;
+  isAvailable: boolean;
 }
 
 const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> = ({
@@ -89,7 +90,8 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
         id: item.ingredientId || item.id,
         name: item.ingredientName || item.name || 'Unknown Ingredient',
         unit: item.unit || 'piece',
-        price: item.price || 0
+        price: item.price || 0,
+        isAvailable: item.isAvailable !== undefined ? item.isAvailable : true
       }));
     } catch (error) {
       logger.error('Tüm malzemeler alınamadı:', error);
@@ -196,9 +198,14 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
     }
   };
 
-  const filteredIngredients = allIngredients.filter(ingredient =>
-    ingredient.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredIngredients = allIngredients.filter(ingredient => {
+    const matchesSearch = ingredient.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const isAssignedToProduct = selectedIngredients.has(ingredient.id);
+
+    // If ingredient is already assigned to this product, show it regardless of status
+    // Otherwise, only show if it's available
+    return matchesSearch && (isAssignedToProduct || ingredient.isAvailable);
+  });
 
   return (
     <AnimatePresence>
@@ -383,7 +390,7 @@ const ProductIngredientUpdateModal: React.FC<ProductIngredientUpdateModalProps> 
                                 </span>
                                 {ingredient.price && (
                                   <span className="text-xs px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 rounded-lg font-medium">
-                                    {ingredient.price.toFixed(2)} ₺
+                                    {ingredient.price.toFixed(2)} 
                                   </span>
                                 )}
                               </div>

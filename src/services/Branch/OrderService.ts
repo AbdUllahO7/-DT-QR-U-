@@ -1,6 +1,6 @@
 import { BranchOrder, ConfirmOrderDto, CreateSessionOrderDto, Order, OrderItem, OrderTrackingInfo, PendingOrder, QRTrackingInfo, RejectOrderDto, SmartCreateOrderDto, TableBasketSummary, UpdateOrderStatusDto, OrderStatus } from '../../types/BranchManagement/type';
 import { CancelOrderDto, OrderStatusEnums, UpdatableOrder, UpdatePendingOrderDto } from '../../types/Orders/type';
-import { httpClient } from '../../utils/http';
+import { httpClient, getEffectiveBranchId } from '../../utils/http';
 import { logger } from '../../utils/logger';
 import { OrderType, orderTypeService } from './BranchOrderTypeService';
 
@@ -42,20 +42,28 @@ class OrderService {
   private orderTypesCache: OrderType[] = [];
   private cacheExpiry: number = 0;
   private readonly CACHE_DURATION = 5 * 60 * 1000; 
-
+  private activeRequests = new Map<string, Promise<any>>();
+  private pendingConfigs = new Set<string>(); 
+  private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
   async createSessionOrder(data: CreateSessionOrderDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Session order oluşturma isteği gönderiliyor', { data, branchId }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/from-session?branchId=${branchId}`
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Session order oluşturma isteği gönderiliyor', { data, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+      const language = this.getLanguageFromStorage();
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/from-session?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/from-session`;
-        
-      const response = await httpClient.post<Order>(url, data);
-      
-      logger.info('Session order başarıyla oluşturuldu', { 
+
+      const response = await httpClient.post<Order>(url, { ...data, language });
+
+      logger.info('Session order başarıyla oluşturuldu', {
         orderId: response.data,
-        branchId
+        branchId: effectiveBranchId
       }, { prefix: 'OrderService' });
       
       return response.data;
@@ -64,137 +72,203 @@ class OrderService {
     }
   }
 
-  async getPendingOrders(branchId?: number): Promise<PendingOrder[]> {
-    try {
-      const url = branchId 
-        ? `${this.baseUrl}/pending?branchId=${branchId}` 
-        : `${this.baseUrl}/pending`;
-        
-      logger.info('Pending orders getirme isteği gönderiliyor', { branchId }, { prefix: 'OrderService' });
-      const response = await httpClient.get<PendingOrder[]>(url);
-      console.log("response Pending",response)
-      const orders = Array.isArray(response.data) ? response.data : [];
+  async getBranchOrders(
+    branchId?: number,
+    page: number = 1,
+    pageSize: number = 10
+  ): Promise<{ orders: BranchOrder[], totalItems: number, totalPages: number }> {
+    // ✅ Add validation to prevent pageSize = 0
+    const validPageSize = pageSize > 0 ? pageSize : 10;
+    const validPage = page > 0 ? page : 1;
 
-      logger.info('Pending orders başarıyla alındı', { 
-        branchId,
-        ordersCount: orders.length 
+    // Get effective branch ID (from parameter, localStorage, or token)
+    const effectiveBranchId = branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
+
+    const requestKey = `branch-${effectiveBranchId}-${validPage}-${validPageSize}-${language}`;
+
+    if (this.pendingConfigs.has(requestKey)) {
+      return { orders: [], totalItems: 0, totalPages: 0 };
+    }
+
+    if (this.activeRequests.has(requestKey)) {
+      return this.activeRequests.get(requestKey)!;
+    }
+
+    try {
+      this.pendingConfigs.add(requestKey);
+
+      logger.info('Branch orders getirme isteği başlatılıyor', {
+        branchId: effectiveBranchId,
+        page: validPage,
+        pageSize: validPageSize
       }, { prefix: 'OrderService' });
 
-      return orders;
+      const params: any = {
+        page: validPage,
+        pageSize: validPageSize,
+        includeItems: true
+      };
+
+      if (effectiveBranchId) {
+        params.branchId = effectiveBranchId;
+      }
+      
+      
+      const requestPromise = httpClient.get(`${this.baseUrl}/branch`, { params })
+        .then(response => {
+          const responseData = response.data;
+          let orders: BranchOrder[] = [];
+          let totalItems = 0;
+          let totalPages = 1;
+          
+          if (responseData && typeof responseData === 'object' && 'items' in responseData) {
+            orders = Array.isArray(responseData.items) ? responseData.items : [];
+            totalPages = responseData.totalPages || 1;
+            totalItems = responseData.totalCount || responseData.totalItems || 0;
+          }
+          
+     
+          return {
+            orders,
+            totalItems,
+            totalPages
+          };
+        })
+        .finally(() => {
+          this.activeRequests.delete(requestKey);
+          this.pendingConfigs.delete(requestKey);
+        });
+      
+      this.activeRequests.set(requestKey, requestPromise);
+      return await requestPromise;
+      
     } catch (error: any) {
+      this.activeRequests.delete(requestKey);
+      this.pendingConfigs.delete(requestKey);
+      logger.error('Branch orders getirme hatası', error, { prefix: 'OrderService' });
+      this.handleError(error, 'Branch orders getirilirken hata oluştu');
+      return { orders: [], totalItems: 0, totalPages: 0 };
+    }
+  }
+
+  // Similar pattern for getPendingOrders with pagination support
+// ... inside OrderService class
+
+  async getPendingOrders(
+    branchId?: number, 
+    page: number = 1, 
+    pageSize: number = 10
+  ): Promise<{ orders: PendingOrder[], totalItems: number, totalPages: number }> {
+    // 1. Get effective branch ID
+    const effectiveBranchId = branchId || getEffectiveBranchId();
+    const language = this.getLanguageFromStorage();
+
+    // 2. Create unique request key
+    const requestKey = `pending-${effectiveBranchId}-${page}-${pageSize}-${language}`;
+
+    // 3. Return existing promise if request is already in flight (Deduplication)
+    if (this.activeRequests.has(requestKey)) {
+      return this.activeRequests.get(requestKey)!;
+    }
+
+    try {
+      // 4. Use params object instead of manual string construction (Cleaner & safer)
+      const params: any = {
+        page,
+        pageSize,
+        language // Ensure language is passed
+      };
+
+      if (effectiveBranchId) {
+        params.branchId = effectiveBranchId;
+      }
+
+      logger.info('Pending orders getirme isteği gönderiliyor', {
+        branchId: effectiveBranchId,
+        page,
+        pageSize
+      }, { prefix: 'OrderService' });
+
+      // 5. Create the request promise
+      const requestPromise = httpClient.get(
+        `${this.baseUrl}/pending`, 
+        { params } // Pass params here
+      )
+        .then(response => {
+          const result = response.data;
+          
+          // 6. Robust Response Mapping (The likely fix)
+          // Check for 'items' (common pagination), 'orders' (custom), or direct array
+          let orders: PendingOrder[] = [];
+          let totalItems = 0;
+          let totalPages = 0;
+
+          if (result) {
+            if (Array.isArray(result)) {
+               // Handle case where API returns just an array
+               orders = result;
+               totalItems = result.length;
+               totalPages = 1;
+            } else {
+               // Handle paginated object
+               orders = Array.isArray(result.items) ? result.items : (Array.isArray(result.orders) ? result.orders : []);
+               totalItems = result.totalCount || result.totalItems || orders.length;
+               totalPages = result.totalPages || 1;
+            }
+          }
+
+          logger.info('Pending orders başarıyla alındı', {
+            branchId: effectiveBranchId,
+            page,
+            pageSize,
+            ordersCount: orders.length,
+            totalItems: totalItems
+          }, { prefix: 'OrderService' });
+
+          return {
+            orders,
+            totalItems,
+            totalPages
+          };
+        })
+        .finally(() => {
+          // 7. Cleanup
+          this.activeRequests.delete(requestKey);
+        });
+
+      this.activeRequests.set(requestKey, requestPromise);
+      return await requestPromise;
+
+    } catch (error: any) {
+      this.activeRequests.delete(requestKey);
       this.handleError(error, 'Pending orders getirilirken hata oluştu');
     }
   }
 
-  async getBranchOrders(branchId?: number): Promise<BranchOrder[]> {
-    try {
-      const allOrders: BranchOrder[] = [];
-      let currentPage = 1;
-      const pageSize = 20;
-      let totalPages = 1;
-      
-      logger.info('Branch orders getirme isteği başlatılıyor', { branchId }, { prefix: 'OrderService' });
-      
-      while (currentPage <= totalPages) {
-        try {
-          const params: any = {
-            page: currentPage,
-            pageSize: pageSize,
-            includeItems: true
-          };
-          
-          // Add branchId if provided
-          if (branchId) {
-            params.branchId = branchId;
-          }
-          
-          const response = await httpClient.get(`${this.baseUrl}/branch`, {
-            params
-          });
-          
-          // Extract pagination info from response
-          const responseData = response.data;
-          let pageOrders: BranchOrder[] = [];
-          
-          // Check for direct structure with items array
-          if (responseData && typeof responseData === 'object' && 'items' in responseData) {
-            pageOrders = Array.isArray(responseData.items) ? responseData.items : [];
-            totalPages = responseData.totalPages || 1;
-          } 
-          // Check if response has nested structure with data.items
-          else if (responseData && typeof responseData === 'object' && 'data' in responseData) {
-            const nestedData = responseData.data;
-            if (nestedData && 'items' in nestedData) {
-              pageOrders = Array.isArray(nestedData.items) ? nestedData.items : [];
-              totalPages = nestedData.totalPages || 1;
-            }
-          } 
-          // Fallback: direct array response
-          else if (Array.isArray(responseData)) {
-            pageOrders = responseData;
-          }
-          
-          logger.info('Branch orders sayfa alındı', { 
-            branchId,
-            page: currentPage,
-            totalPages: totalPages,
-            ordersCount: pageOrders.length,
-            totalSoFar: allOrders.length + pageOrders.length
-          }, { prefix: 'OrderService' });
-          
-          // Add orders from this page to the total
-          allOrders.push(...pageOrders);
-          
-          // Move to next page
-          currentPage++;
-          
-          // Add delay between requests
-          if (currentPage <= totalPages) {
-            await new Promise(resolve => setTimeout(resolve, 100));
-          }
-          
-        } catch (pageError: any) {
-          // If it's a 404, we might have reached the end
-          if (pageError?.response?.status === 404) {
-            break;
-          } else {
-            throw pageError;
-          }
-        }
-      }
-      
-      logger.info('Branch orders tamamlandı', { 
-        branchId,
-        totalOrders: allOrders.length,
-        totalPages
-      }, { prefix: 'OrderService' });
-      
-      return allOrders;
-      
-    } catch (error: any) {
-      logger.error('Branch orders getirme hatası', error, { prefix: 'OrderService' });
-      this.handleError(error, 'Branch orders getirilirken hata oluştu');
-      return [];
-    }
-  }
+  // ... rest of the class
 
   async getTableOrders(tableId: number, branchId?: number): Promise<Order[]> {
     try {
-      logger.info('Table orders getirme isteği gönderiliyor', { tableId, branchId }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/table/${tableId}?branchId=${branchId}`
-        : `${this.baseUrl}/table/${tableId}`;
-        
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
+
+      logger.info('Table orders getirme isteği gönderiliyor', { tableId, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/table/${tableId}?branchId=${effectiveBranchId}&language=${language}`
+        : `${this.baseUrl}/table/${tableId}?language=${language}`;
+
       const response = await httpClient.get<Order[]>(url);
       const orders = Array.isArray(response.data) ? response.data : [];
-      
-      logger.info('Table orders başarıyla alındı', { 
+
+      logger.info('Table orders başarıyla alındı', {
         tableId,
-        branchId,
-        ordersCount: orders.length 
+        branchId: effectiveBranchId,
+        ordersCount: orders.length
       }, { prefix: 'OrderService' });
-      
+
       return orders;
     } catch (error: any) {
       logger.error('Table orders getirme hatası', error, { prefix: 'OrderService' });
@@ -204,17 +278,21 @@ class OrderService {
 
   async getOrder(orderId: string, branchId?: number): Promise<Order> {
     try {
-      logger.info('Order getirme isteği gönderiliyor', { orderId, branchId }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/${orderId}?branchId=${branchId}`
-        : `${this.baseUrl}/${orderId}`;
-        
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
+
+      logger.info('Order getirme isteği gönderiliyor', { orderId, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/${orderId}?branchId=${effectiveBranchId}&language=${language}`
+        : `${this.baseUrl}/${orderId}?language=${language}`;
+
       const response = await httpClient.get<Order>(url);
-      
-      logger.info('Order başarıyla alındı', { 
+
+      logger.info('Order başarıyla alındı', {
         orderId,
-        branchId,
+        branchId: effectiveBranchId,
         customerName: response.data.customerName,
         status: response.data.status
       }, { prefix: 'OrderService' });
@@ -228,40 +306,46 @@ class OrderService {
 
   async confirmOrder(orderId: string, data: ConfirmOrderDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Order onaylama isteği gönderiliyor', { orderId, data, branchId }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/${orderId}/confirm?branchId=${branchId}`
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Order onaylama isteği gönderiliyor', { orderId, data, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/${orderId}/confirm?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/${orderId}/confirm`;
-        
+
       const response = await httpClient.post<Order>(url, data);
-      
-      logger.info('Order başarıyla onaylandı', { 
+
+      logger.info('Order başarıyla onaylandı', {
         orderId,
-        branchId,
+        branchId: effectiveBranchId,
         newStatus: response.data.status
       }, { prefix: 'OrderService' });
       
       return response.data;
     } catch (error: any) {
       logger.error('Order onaylama hatası', error, { prefix: 'OrderService' });
-      this.handleError(error, 'Order onaylanırken hata oluştu');
+      this.handleError(error,error.message);
     }
   }
 
   async rejectOrder(orderId: string, data: RejectOrderDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Order reddetme isteği gönderiliyor', { orderId, data, branchId }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/${orderId}/reject?branchId=${branchId}`
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Order reddetme isteği gönderiliyor', { orderId, data, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/${orderId}/reject?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/${orderId}/reject`;
-        
+
       const response = await httpClient.post<Order>(url, data);
-      
-      logger.info('Order başarıyla reddedildi', { 
+
+      logger.info('Order başarıyla reddedildi', {
         orderId,
-        branchId,
+        branchId: effectiveBranchId,
         rejectionReason: data.rejectionReason
       }, { prefix: 'OrderService' });
       
@@ -274,17 +358,20 @@ class OrderService {
 
   async cancelOrder(data: CancelOrderDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Order iptal etme isteği gönderiliyor', { orderId: data.orderId, data, branchId }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/cancel?branchId=${branchId}`
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Order iptal etme isteği gönderiliyor', { orderId: data.orderId, data, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/cancel?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/cancel`;
-        
+
       const response = await httpClient.post<Order>(url, data);
-      
-      logger.info('Order başarıyla iptal edildi', { 
+
+      logger.info('Order başarıyla iptal edildi', {
         orderId: data.orderId,
-        branchId,
+        branchId: effectiveBranchId,
         cancellationReason: data.cancellationReason
       }, { prefix: 'OrderService' });
       
@@ -297,17 +384,20 @@ class OrderService {
 
   async updateOrderStatus(orderId: string, data: UpdateOrderStatusDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Order status güncelleme isteği gönderiliyor', { orderId, data, branchId }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/${orderId}/status?branchId=${branchId}`
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Order status güncelleme isteği gönderiliyor', { orderId, data, branchId: effectiveBranchId }, { prefix: 'OrderService' });
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/${orderId}/status?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/${orderId}/status`;
-        
+
       const response = await httpClient.put<Order>(url, data);
-      
-      logger.info('Order status başarıyla güncellendi', { 
+
+      logger.info('Order status başarıyla güncellendi', {
         orderId,
-        branchId,
+        branchId: effectiveBranchId,
         oldStatus: data.newStatus,
         newStatus: response.data.status
       }, { prefix: 'OrderService' });
@@ -339,7 +429,8 @@ class OrderService {
   async getOrderTrackingQR(orderTag: string): Promise<QRTrackingInfo> {
     try {
       logger.info('Order tracking QR getirme isteği gönderiliyor', { orderTag }, { prefix: 'OrderService' });
-      const url = `${this.baseUrl}/track/${orderTag}/qr`;
+      const language = this.getLanguageFromStorage();
+      const url = `${this.baseUrl}/track/${orderTag}/qr?language=${language}  `;
       const response = await httpClient.get<QRTrackingInfo>(url);
       logger.info('Order tracking QR başarıyla alındı', { 
         orderTag,
@@ -378,16 +469,20 @@ class OrderService {
 
   async getTableBasketSummary(branchId?: number): Promise<TableBasketSummary[]> {
     try {
-      const url = branchId 
-        ? `${this.baseUrl}/table-basket-summary?branchId=${branchId}` 
-        : `${this.baseUrl}/table-basket-summary`;
-        
-      logger.info('Table basket summary getirme isteği gönderiliyor', { branchId }, { prefix: 'OrderService' });
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+      const language = this.getLanguageFromStorage();
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/table-basket-summary?branchId=${effectiveBranchId}&language=${language}`
+        : `${this.baseUrl}/table-basket-summary?language=${language}`;
+
+      logger.info('Table basket summary getirme isteği gönderiliyor', { branchId: effectiveBranchId }, { prefix: 'OrderService' });
       const response = await httpClient.get<TableBasketSummary[]>(url);
       const summaries = Array.isArray(response.data) ? response.data : [];
-      
-      logger.info('Table basket summary başarıyla alındı', { 
-        branchId,
+
+      logger.info('Table basket summary başarıyla alındı', {
+        branchId: effectiveBranchId,
         tablesCount: summaries.length,
         activeBaskets: summaries.filter(s => s.hasActiveBasket).length
       }, { prefix: 'OrderService' });
@@ -621,19 +716,22 @@ class OrderService {
   // <<< NEW METHOD ADDED HERE >>>
   async updatePendingOrder(data: UpdatePendingOrderDto, branchId?: number): Promise<Order> {
     try {
-      logger.info('Pending order güncelleme isteği gönderiliyor', { 
-        orderId: data.orderId, 
-        branchId 
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+
+      logger.info('Pending order güncelleme isteği gönderiliyor', {
+        orderId: data.orderId,
+        branchId: effectiveBranchId
       }, { prefix: 'OrderService' });
-      
-      const url = branchId 
-        ? `${this.baseUrl}/updatepending?branchId=${branchId}`
+
+      const url = effectiveBranchId
+        ? `${this.baseUrl}/updatepending?branchId=${effectiveBranchId}`
         : `${this.baseUrl}/updatepending`;
       const response = await httpClient.put<Order>(url, data);
-      
-      logger.info('Pending order başarıyla güncellendi', { 
+
+      logger.info('Pending order başarıyla güncellendi', {
         orderId: response.data.orderId,
-        branchId,
+        branchId: effectiveBranchId,
         newStatus: response.data.status
       }, { prefix: 'OrderService' });
       
@@ -647,25 +745,30 @@ class OrderService {
   // <<< UPDATED METHOD HERE >>>
   async getUpdatableOrders(branchId?: number): Promise<UpdatableOrder[]> {
     try {
+      // Get effective branch ID (from parameter, localStorage, or token)
+      const effectiveBranchId = branchId || getEffectiveBranchId();
+            const language = this.getLanguageFromStorage();
+
       const params: any = {
-        includeItems: true // <-- ADDED PARAM
+        includeItems: true,
+        language
       };
-      if (branchId) {
-        params.branchId = branchId;
+      if (effectiveBranchId) {
+        params.branchId = effectiveBranchId;
       }
-        
-      logger.info('Updatable orders getirme isteği gönderiliyor', { branchId, params }, { prefix: 'OrderService' });
-      
+
+      logger.info('Updatable orders getirme isteği gönderiliyor', { branchId: effectiveBranchId, params }, { prefix: 'OrderService' });
+
       // Updated to use params object
       const response = await httpClient.get<UpdatableOrder[]>(`${this.baseUrl}/updatable`, {
-         params 
+         params
       });
-      
+
       const orders = Array.isArray(response.data) ? response.data : [];
 
-      logger.info('Updatable orders başarıyla alındı', { 
-        branchId,
-        ordersCount: orders.length 
+      logger.info('Updatable orders başarıyla alındı', {
+        branchId: effectiveBranchId,
+        ordersCount: orders.length
       }, { prefix: 'OrderService' });
 
       return orders;
@@ -682,7 +785,7 @@ class OrderService {
         const validationErrors = Object.values(errorData.errors).flat();
         throw new Error(`Doğrulama hatası: ${validationErrors.join(', ')}`);
       } else {
-        throw new Error('Geçersiz istek. Lütfen verileri kontrol edin.');
+        throw new Error(error.message);
       }
     } else if (error?.response?.status === 401) {
       throw new Error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.');

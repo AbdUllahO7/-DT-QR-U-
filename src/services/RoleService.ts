@@ -33,10 +33,9 @@ class RoleService {
 
       logger.info('🔍 getRoles çağrılıyor...', apiParams, { prefix: 'RoleService' });
 
-      
       const response = await apiRequest<Role[]>({
         method: 'GET',
-        url: '/api/Roles',
+        url: '/api/Roles/',
         params: apiParams
       });
 
@@ -54,6 +53,36 @@ class RoleService {
     }
   }
 
+    async getRolesAssignable(params: GetRolesParams = {}): Promise<ApiResponse<Role[]>> {
+    try {
+      // Set defaults: includePermissions is true unless explicitly set to false
+      const apiParams: GetRolesParams = {
+        includePermissions: true,
+        ...params, 
+      };
+
+      logger.info('🔍 getRoles çağrılıyor...', apiParams, { prefix: 'RoleService' });
+
+      
+      const response = await apiRequest<Role[]>({
+        method: 'GET',
+        url: '/api/Roles/assignable',
+        params: apiParams
+      });
+
+      logger.info('✅ getRoles başarılı', response, { prefix: 'RoleService' });
+      
+      const rolesData = Array.isArray(response) ? response : [];
+        
+      return {
+        success: true,
+        data: rolesData
+      };
+    } catch (error) {
+      logger.error('❌ getRoles hatası', error, { prefix: 'RoleService' });
+      throw error;
+    }
+  }
   /**
    * GET /api/Roles/{roleId}
    * Fetches a single role by its ID.
@@ -113,8 +142,6 @@ async createRole(roleData: CreateRoleDto): Promise<ApiResponse<Role>> {
         requestConfig.params.branchId = branchId;
       }
       
-      // This will log the final config, e.g., { ..., data: { roleName: ... }, params: { branchId: 123 } }
-      console.log("apiData ve params:", requestConfig);
         
       // 4. Send the request with the new configuration
       const response = await apiRequest<Role>(requestConfig);
@@ -191,11 +218,11 @@ async createRole(roleData: CreateRoleDto): Promise<ApiResponse<Role>> {
       
       // Create a copy to ensure we only send valid parameters
       const apiParams = { ...params };
-      console.log("params",params)
       // If branchId is falsy (0, null, undefined), don't send it.
       if (!apiParams.branchId) {
         delete apiParams.branchId;
       }
+
 
       const response = await apiRequest<PermissionCatalog[]>({
         method: 'GET',

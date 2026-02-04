@@ -2,7 +2,6 @@ import { MenuCategory } from "../../../types/menu/type";
 import { httpClient } from "../../../utils/http";
 import { logger } from "../../../utils/logger";
 
-
 // Public branch ID response interface
 export interface PublicBranchIdResponse {
   branchName: string;
@@ -20,7 +19,7 @@ export interface StartSessionDto {
 // Start session response interface
 export interface SessionResponse {
   sessionId: string;
-  sessionToken: string; // Changed from 'token' to 'sessionToken'
+  sessionToken: string;
   branchId: number;
   branchName: string;
   expiresAt: string;
@@ -32,6 +31,53 @@ export interface UpdateBasketItemDto {
   basketId: string;
   branchProductId: number;
   quantity: number;
+}
+
+// ✅ Product Extra Interface (matches API response)
+export interface ProductExtra {
+  branchProductExtraId: number;
+  productExtraId: number;
+  extraId: number;
+  extraName: string;
+  categoryName: string;
+  selectionMode: number;
+  unitPrice: number;
+  finalPrice: number;
+  minQuantity: number;
+  maxQuantity: number;
+  isRequired: boolean;
+  isRemoval: boolean;
+  isRemovalAllowed: boolean;
+  displayOrder: number;
+}
+
+// ✅ Extra Category (matches API response structure)
+export interface ExtraCategory {
+  categoryId: number;
+  categoryName: string;
+  extras: ProductExtra[];
+  isRequired: boolean;
+  minSelectionCount: number;
+  maxSelectionCount: number;
+  minTotalQuantity: number;
+  maxTotalQuantity: number;
+}
+
+// ✅ Basket Extra Item (for basket responses)
+export interface BasketExtraItem {
+  branchProductExtraId: number;
+  productExtraId?: number;
+  extraId: number;
+  extraName: string;
+  extraCategoryName?: string;
+  selectionMode?: number;
+  isRequired?: boolean;
+  isRemoval: boolean;
+  unitPrice: number;
+  quantity: number;
+  minQuantity?: number;
+  maxQuantity?: number;
+  note?: string | null;
 }
 
 // Basket item addon interface
@@ -49,8 +95,8 @@ export interface BasketItemAddon {
   description: string | null;
   isAddon: boolean;
   parentBasketItemId: number | null;
-  addonBasketItemId?: number; // For compatibility
-  addonName?: string; // For compatibility
+  addonBasketItemId?: number;
+  addonName?: string;
   specialPrice?: number | null;
 }
 
@@ -69,12 +115,12 @@ export interface BasketItem {
   isAddon: boolean;
   parentBasketItemId: number | null;
   addonItems: BasketItemAddon[];
+  extras?: BasketExtraItem[];
   addonPrice: number | null;
   addonNote: string | null;
   minQuantity: number | null;
   maxQuantity: number | null;
   customerPhone?: string;
-  // Computed/mapped fields for compatibility
   productImageUrl?: string;
   unitPrice?: number;
   addons?: BasketItemAddon[];
@@ -98,13 +144,11 @@ export interface BasketResponse {
   menuTable: any | null;
   branchId: number;
   branch: any | null;
-  customerPhone:string,
+  customerPhone: string;
   hasUnconfirmedPriceChange: boolean;
   lastPriceChangeAt: string | null;
   totalPriceDifference: number | null;
   priceChangeDetails: any | null;
-  
-  // Computed/mapped fields for compatibility
   items?: BasketItem[];
   total?: number;
   subtotal?: number;
@@ -155,7 +199,7 @@ export interface ProductAddon {
   allergens: Allergen[];
 }
 
-// Product interface
+// ✅ Product interface (availableExtras is array of categories)
 export interface Product {
   branchProductId: number;
   productId: number;
@@ -166,6 +210,7 @@ export interface Product {
   ingredients: Ingredient[];
   allergens: Allergen[];
   availableAddons: ProductAddon[];
+  availableExtras?: ExtraCategory[];
 }
 
 // Category interface
@@ -181,6 +226,7 @@ export interface MenuPreferences {
   showProductDescriptions: boolean;
   enableAllergenDisplay: boolean;
   enableIngredientDisplay: boolean;
+  mobileGridLayout: number;
   acceptCash: boolean;
   acceptCreditCard: boolean;
   acceptOnlinePayment: boolean;
@@ -204,11 +250,30 @@ export interface OnlineMenuResponse {
   categories: MenuCategory[];
   preferences: MenuPreferences;
 }
+
+// ✅ Product Extra DTO for API calls
+export interface ProductExtraDto {
+  branchProductExtraId: number;
+  extraId: number;
+  quantity: number;
+  isRemoval: boolean;
+}
+
+// ✅ Add unified item interface with extras
 export interface AddUnifiedItemDto {
   branchProductId: number;
   quantity: number;
   parentBasketItemId?: number;
   isAddon?: boolean;
+  extras?: ProductExtraDto[];
+}
+
+// ✅ Update basket item with extras
+export interface UpdateBasketItemWithExtrasDto {
+  basketItemId: number;
+  branchProductId: number;
+  quantity: number;
+  extras: ProductExtraDto[];
 }
 
 // Batch item interface
@@ -226,21 +291,24 @@ export interface AddItemResponse {
   branchProductId: number;
   quantity: number;
 }
+
 class OnlineMenuService {
   private anonymousUrl = '/api/Branches/Anonymus';
   private onlineUrl = '/api/online';
 
-  // GET /api/Branches/Anonymus/GetPublicId
+   private getLanguageFromStorage(): string {
+    return localStorage.getItem('language') || 'en';
+  }
+
   async getPublicBranchId(branchId: number): Promise<PublicBranchIdResponse> {
     try {
       logger.info('Public branch ID getirme isteği gönderiliyor', { branchId }, { prefix: 'OnlineMenuService' });
-      
+              const language = this.getLanguageFromStorage();
       const url = `${this.anonymousUrl}/GetPublicId`;
       const response = await httpClient.get<{ [key: string]: string }>(url, {
-        params: { branchId }
+        params: { branchId, language }
       });
       
-      // Response format: { "branch of winig": "54eef469-cc22-4d7e-b442-a90a33ef7107" }
       const branchName = Object.keys(response.data)[0] || '';
       const publicId = Object.values(response.data)[0] || '';
       
@@ -260,19 +328,39 @@ class OnlineMenuService {
     }
   }
 
-  // GET /api/online/menu/{publicId}
   async getOnlineMenu(publicId: string): Promise<OnlineMenuResponse> {
     try {
       logger.info('Online menu getirme isteği gönderiliyor', { publicId }, { prefix: 'OnlineMenuService' });
-      
+        const language = this.getLanguageFromStorage();
+
       const url = `${this.onlineUrl}/menu/${publicId}`;
-      const response = await httpClient.get<OnlineMenuResponse>(url);
+      const response = await httpClient.get<OnlineMenuResponse>(url, {
+        params: {
+          language
+        }
+      });
+      
+      // Log extras information
+      let totalExtrasCount = 0;
+      let totalExtraCategoriesCount = 0;
+      response.data.categories?.forEach(cat => {
+        cat.products?.forEach(prod => {
+          if (prod.availableExtras) {
+            totalExtraCategoriesCount += prod.availableExtras.length;
+            prod.availableExtras.forEach(extraCat => {
+              totalExtrasCount += extraCat.extras?.length || 0;
+            });
+          }
+        });
+      });
       
       logger.info('Online menu başarıyla alındı', { 
         publicId,
         branchName: response.data.branchName,
         restaurantName: response.data.restaurantName,
         categoriesCount: response.data.categories?.length || 0,
+        totalExtraCategoriesCount,
+        totalExtrasCount,
         isOpen: response.data.isOpen
       }, { prefix: 'OnlineMenuService' });
       
@@ -288,115 +376,113 @@ class OnlineMenuService {
     }
   }
 
-  // POST /api/online/start-session
-// POST /api/online/start-session
-async startSession(data: StartSessionDto): Promise<SessionResponse> {
-  try {
-    logger.info('Session başlatma isteği gönderiliyor', { 
-      publicId: data.publicId,
-      customerIdentifier: data.customerIdentifier,
-      preferredLanguage: data.preferredLanguage
-    }, { prefix: 'OnlineMenuService' });
-    
-    const url = `${this.onlineUrl}/start-session`;
-    const response = await httpClient.post<SessionResponse>(url, data);
-    
-    // Log the actual response structure
-    logger.info('Session başlatma yanıtı alındı', { 
-      sessionId: response.data.sessionId,
-      branchId: response.data.branchId,
-      branchName: response.data.branchName,
-      hasToken: !!response.data.sessionToken,
-      expiresAt: response.data.expiresAt
-    }, { prefix: 'OnlineMenuService' });
-    
-    // Validate response structure
-    if (!response.data) {
-      throw new Error('Session response is empty');
+  async startSession(data: StartSessionDto): Promise<SessionResponse> {
+    try {
+      logger.info('Session başlatma isteği gönderiliyor', { 
+        publicId: data.publicId,
+        customerIdentifier: data.customerIdentifier,
+        preferredLanguage: data.preferredLanguage
+      }, { prefix: 'OnlineMenuService' });
+
+      const url = `${this.onlineUrl}/start-session`;
+      const response = await httpClient.post<SessionResponse>(url, data);
+      
+      logger.info('Session başlatma yanıtı alındı', { 
+        sessionId: response.data.sessionId,
+        branchId: response.data.branchId,
+        branchName: response.data.branchName,
+        hasToken: !!response.data.sessionToken,
+        expiresAt: response.data.expiresAt
+      }, { prefix: 'OnlineMenuService' });
+      
+      if (!response.data) {
+        throw new Error('Session response is empty');
+      }
+      
+      if (!response.data.sessionId) {
+        logger.error('Session response missing sessionId', { response: response.data });
+        throw new Error('Session response missing sessionId');
+      }
+      
+      if (!response.data.sessionToken) {
+        logger.error('Session response missing sessionToken', { response: response.data });
+        throw new Error('Session response missing sessionToken');
+      }
+      
+      logger.info('Session başarıyla başlatıldı', { 
+        sessionId: response.data.sessionId,
+        branchId: response.data.branchId,
+        tokenPreview: response.data.sessionToken.substring(0, 20) + '...',
+        expiresAt: response.data.expiresAt
+      }, { prefix: 'OnlineMenuService' });
+      
+      return response.data;
+    } catch (error: any) {
+      logger.error('Session başlatma hatası', error, { prefix: 'OnlineMenuService' });
+      
+      if (error.response) {
+        logger.error('Error response details', {
+          status: error.response.status,
+          data: error.response.data,
+          headers: error.response.headers
+        });
+      }
+      
+      this.handleError(error, 'Session başlatılırken hata oluştu');
     }
-    
-    if (!response.data.sessionId) {
-      logger.error('Session response missing sessionId', { response: response.data });
-      throw new Error('Session response missing sessionId');
-    }
-    
-    if (!response.data.sessionToken) {
-      logger.error('Session response missing sessionToken', { response: response.data });
-      throw new Error('Session response missing sessionToken');
-    }
-    
-    logger.info('Session başarıyla başlatıldı', { 
-      sessionId: response.data.sessionId,
-      branchId: response.data.branchId,
-      tokenPreview: response.data.sessionToken.substring(0, 20) + '...',
-      expiresAt: response.data.expiresAt
-    }, { prefix: 'OnlineMenuService' });
-    
-    return response.data;
-  } catch (error: any) {
-    logger.error('Session başlatma hatası', error, { prefix: 'OnlineMenuService' });
-    
-    // Log more details about the error
-    if (error.response) {
-      logger.error('Error response details', {
-        status: error.response.status,
-        data: error.response.data,
-        headers: error.response.headers
+  }
+
+  async getMyBasket(): Promise<BasketResponse> {
+    try {
+      logger.info('Sepet bilgileri getiriliyor', {}, { prefix: 'OnlineMenuService' });
+              const language = this.getLanguageFromStorage();
+
+      const url = `${this.onlineUrl}/my-basket`, params = { language };
+      const response = await httpClient.get<BasketResponse>(url, { params });
+      
+      let totalExtrasInBasket = 0;
+      response.data.basketItems?.forEach(item => {
+        if (item.extras) {
+          totalExtrasInBasket += item.extras.length;
+        }
       });
-    }
-    
-    this.handleError(error, 'Session başlatılırken hata oluştu');
-  }
-}
-
-  // GET /api/online/my-basket
-async getMyBasket(): Promise<BasketResponse> {
-  try {
-    logger.info('Sepet bilgileri getiriliyor', {}, { prefix: 'OnlineMenuService' });
-    
-    const url = `${this.onlineUrl}/my-basket`;
-    const response = await httpClient.get<BasketResponse>(url); 
-    
-    logger.info('Sepet bilgileri başarıyla getirildi', { 
-      itemCount: response.data.basketItems?.length || 0,
-      totalPrice: response.data.totalPrice
-    }, { prefix: 'OnlineMenuService' });
-    
-    // Map the response to include computed fields for compatibility
-    const mappedBasket: BasketResponse = {
-      ...response.data,
-      // Map basketItems to items
-      items: response.data.basketItems?.map(item => ({
-        ...item,
-        productImageUrl: item.imageUrl || undefined,
-        unitPrice: item.price,
-        addons: item.addonItems?.map(addon => ({
-          ...addon,
-          addonBasketItemId: addon.basketItemId,
-          addonName: addon.productName,
-          specialPrice: addon.price
+      
+      logger.info('Sepet bilgileri başarıyla getirildi', { 
+        itemCount: response.data.basketItems?.length || 0,
+        totalPrice: response.data.totalPrice,
+        totalExtrasInBasket
+      }, { prefix: 'OnlineMenuService' });
+      
+      const mappedBasket: BasketResponse = {
+        ...response.data,
+        items: response.data.basketItems?.map(item => ({
+          ...item,
+          productImageUrl: item.imageUrl || undefined,
+          unitPrice: item.price,
+          addons: item.addonItems?.map(addon => ({
+            ...addon,
+            addonBasketItemId: addon.basketItemId,
+            addonName: addon.productName,
+            specialPrice: addon.price
+          })) || [],
+          extras: item.extras || [],
+          specialInstructions: item.addonNote
         })) || [],
-        specialInstructions: item.addonNote
-      })) || [],
-      // Map totalPrice to total
-      total: response.data.totalPrice,
-      subtotal: response.data.productTotal || response.data.totalPrice,
-      tax: 0, // Calculate if you have tax info
-      // Calculate real item count and quantity
-      itemCount: response.data.basketItems?.length || 0,
-      totalQuantity: response.data.basketItems?.reduce((sum, item) => sum + item.quantity, 0) || 0,
-      // Map price change flag
-      priceChangesDetected: response.data.hasUnconfirmedPriceChange
-    };
-    
-    return mappedBasket;
-  } catch (error: any) {
-    logger.error('Sepet bilgileri getirme hatası', error, { prefix: 'OnlineMenuService' });
-    this.handleError(error, 'Sepet bilgileri getirilirken hata oluştu');
+        total: response.data.totalPrice,
+        subtotal: response.data.productTotal || response.data.totalPrice,
+        tax: 0,
+        itemCount: response.data.basketItems?.length || 0,
+        totalQuantity: response.data.basketItems?.reduce((sum, item) => sum + item.quantity, 0) || 0,
+        priceChangesDetected: response.data.hasUnconfirmedPriceChange
+      };
+      
+      return mappedBasket;
+    } catch (error: any) {
+      logger.error('Sepet bilgileri getirme hatası', error, { prefix: 'OnlineMenuService' });
+      this.handleError(error, 'Sepet bilgileri getirilirken hata oluştu');
+    }
   }
-}
 
-  // DELETE /api/online/my-basket
   async clearBasket(): Promise<void> {
     try {
       logger.info('Sepet temizleme isteği gönderiliyor', {}, { prefix: 'OnlineMenuService' });
@@ -411,7 +497,6 @@ async getMyBasket(): Promise<BasketResponse> {
     }
   }
 
-  // DELETE /api/online/my-basket/items/{basketItemId}
   async deleteBasketItem(basketItemId: number): Promise<void> {
     try {
       logger.info('Sepet ürünü silme isteği gönderiliyor', { basketItemId }, { prefix: 'OnlineMenuService' });
@@ -426,7 +511,6 @@ async getMyBasket(): Promise<BasketResponse> {
     }
   }
 
-  // DELETE /api/online/my-basket/products/{basketItemId}
   async deleteBasketProduct(basketItemId: number): Promise<void> {
     try {
       logger.info('Sepet ürünü (products) silme isteği gönderiliyor', { basketItemId }, { prefix: 'OnlineMenuService' });
@@ -441,7 +525,6 @@ async getMyBasket(): Promise<BasketResponse> {
     }
   }
 
-  // DELETE /api/online/my-basket/addons/{addonBasketItemId}
   async deleteBasketAddon(addonBasketItemId: number): Promise<void> {
     try {
       logger.info('Sepet addon silme isteği gönderiliyor', { addonBasketItemId }, { prefix: 'OnlineMenuService' });
@@ -456,7 +539,6 @@ async getMyBasket(): Promise<BasketResponse> {
     }
   }
 
-  // PUT /api/online/my-basket/items/{basketItemId}
   async updateBasketItem(basketItemId: number, data: UpdateBasketItemDto): Promise<BasketResponse> {
     try {
       logger.info('Sepet ürünü güncelleme isteği gönderiliyor', { 
@@ -479,7 +561,100 @@ async getMyBasket(): Promise<BasketResponse> {
     }
   }
 
-  // POST /api/online/my-basket/confirm-price-changes
+  // ✅ Update basket item with new extras array
+  async updateBasketItemExtras(
+    basketItemId: number,
+    branchProductId: number,
+    quantity: number,
+    extras: ProductExtraDto[]
+  ): Promise<void> {
+    try {
+      logger.info('Basket item extras güncelleme isteği gönderiliyor', {
+        basketItemId,
+        branchProductId,
+        quantity,
+        extrasCount: extras.length
+      }, { prefix: 'OnlineMenuService' });
+
+      // ✅ STEP 1: Get current basket to find child addons
+      const currentBasket = await this.getMyBasket();
+
+      if (!currentBasket.items || currentBasket.items.length === 0) {
+        throw new Error('Basket is empty');
+      }
+
+      const currentItem = currentBasket.items.find((item) => item.basketItemId === basketItemId);
+
+      if (!currentItem) {
+        throw new Error('Basket item not found');
+      }
+
+      // ✅ STEP 2: Find all child addons (items with this basketItemId as parent)
+      const childAddons = currentBasket.items.filter(
+        (item) => item.parentBasketItemId === basketItemId && item.isAddon
+      );
+
+      logger.info('Found child addons to preserve', {
+        basketItemId,
+        childAddonsCount: childAddons.length,
+        childAddons: childAddons.map(addon => ({
+          basketItemId: addon.basketItemId,
+          branchProductId: addon.branchProductId,
+          quantity: addon.quantity
+        }))
+      }, { prefix: 'OnlineMenuService' });
+
+      // ✅ STEP 3: Delete child addons first (to avoid orphaned references)
+      for (const addon of childAddons) {
+        await this.deleteBasketItem(addon.basketItemId);
+      }
+
+      // ✅ STEP 4: Delete the main item
+      await this.deleteBasketItem(basketItemId);
+
+      // ✅ STEP 5: Add the main item back with new extras
+      const addResponse = await this.addUnifiedItemToMyBasket({
+        branchProductId,
+        quantity,
+        isAddon: false,
+        extras: extras.length > 0 ? extras : undefined
+      });
+
+      const newBasketItemId = addResponse.basketItemId;
+
+      logger.info('Main item re-added with new ID', {
+        oldBasketItemId: basketItemId,
+        newBasketItemId
+      }, { prefix: 'OnlineMenuService' });
+
+      // ✅ STEP 6: Re-add child addons with new parent ID
+      for (const addon of childAddons) {
+        await this.addUnifiedItemToMyBasket({
+          branchProductId: addon.branchProductId,
+          quantity: addon.quantity,
+          parentBasketItemId: newBasketItemId,
+          isAddon: true,
+          extras: addon.extras && addon.extras.length > 0 ? addon.extras.map(e => ({
+            branchProductExtraId: e.branchProductExtraId,
+            extraId: e.extraId,
+            quantity: e.quantity,
+            isRemoval: e.isRemoval
+          })) : undefined
+        });
+      }
+
+      logger.info('Basket item extras başarıyla güncellendi', {
+        basketItemId,
+        newBasketItemId,
+        extrasCount: extras.length,
+        childAddonsReAdded: childAddons.length
+      }, { prefix: 'OnlineMenuService' });
+    } catch (error: any) {
+      logger.error('Basket item extras güncelleme hatası', error, { prefix: 'OnlineMenuService' });
+      this.handleError(error, 'Basket item extras güncellenirken hata oluştu');
+    }
+  }
+
   async confirmPriceChanges(): Promise<BasketResponse> {
     try {
       logger.info('Fiyat değişikliklerini onaylama isteği gönderiliyor', {}, { prefix: 'OnlineMenuService' });
@@ -496,20 +671,21 @@ async getMyBasket(): Promise<BasketResponse> {
     }
   }
 
-  // POST /api/online/my-basket/unified-items
   async addUnifiedItemToMyBasket(data: AddUnifiedItemDto): Promise<AddItemResponse> {
     try {
       logger.info('Sepete ürün ekleme isteği gönderiliyor', { 
         branchProductId: data.branchProductId,
         quantity: data.quantity,
-        isAddon: data.isAddon 
+        isAddon: data.isAddon,
+        extrasCount: data.extras?.length || 0
       }, { prefix: 'OnlineMenuService' });
       
       const url = `${this.onlineUrl}/my-basket/unified-items`;
       const response = await httpClient.post<AddItemResponse>(url, data);
       
       logger.info('Ürün sepete başarıyla eklendi', { 
-        basketItemId: response.data.basketItemId
+        basketItemId: response.data.basketItemId,
+        extrasCount: data.extras?.length || 0
       }, { prefix: 'OnlineMenuService' });
       
       return response.data;
@@ -519,7 +695,6 @@ async getMyBasket(): Promise<BasketResponse> {
     }
   }
 
-  // POST /api/online/my-basket/items/batch
   async batchAddItemsToMyBasket(items: BatchAddItemDto[]): Promise<void> {
     try {
       logger.info('Toplu ürün ekleme isteği gönderiliyor', { 
@@ -536,12 +711,10 @@ async getMyBasket(): Promise<BasketResponse> {
     }
   }
 
-  // Enhanced error handling helper
   private handleError(error: any, defaultMessage: string): never {
     if (error?.response?.status === 400) {
       const errorData = error?.response?.data;
       if (errorData?.errors) {
-        // Validation error'ları göster
         const validationErrors = Object.values(errorData.errors).flat();
         throw new Error(`Doğrulama hatası: ${validationErrors.join(', ')}`);
       } else {

@@ -13,6 +13,7 @@ export const ConfirmDeleteModal: React.FC<{
   isSubmitting?: boolean;
   itemType?: string; 
   itemName?: string; 
+  errorMessage:string 
 }> = ({ 
   isOpen, 
   onClose, 
@@ -21,6 +22,7 @@ export const ConfirmDeleteModal: React.FC<{
   isSubmitting = false,
   itemType,
   message,
+  errorMessage,
 }) => {
   const { t, isRTL } = useLanguage();
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +34,7 @@ export const ConfirmDeleteModal: React.FC<{
       onClose();
     } catch (err: any) {
       logger.error('Silme hatası:', err);
-      setError(t('confirmDeleteModal.errors.deleteFailed'));
+      setError(errorMessage);
     }
   };
 
@@ -97,7 +99,7 @@ export const ConfirmDeleteModal: React.FC<{
           </div>
 
           {/* Error Display */}
-          {error && (
+          {errorMessage && (
             <div 
               className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
               role="alert"
@@ -105,7 +107,7 @@ export const ConfirmDeleteModal: React.FC<{
             >
               <p className="text-sm text-red-600 dark:text-red-400 flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-                {error}
+                {errorMessage}
               </p>
             </div>
           )}

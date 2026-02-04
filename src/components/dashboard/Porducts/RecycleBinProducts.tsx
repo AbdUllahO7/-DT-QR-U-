@@ -1,19 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Trash2, RotateCcw, Search, Calendar, Package, FolderOpen, AlertCircle, CheckCircle, RefreshCw, X, Building2, Table, Database, FileText, ArrowLeft } from 'lucide-react';
+import { Trash2, RotateCcw, Search, Calendar, Package, FolderOpen, AlertCircle, CheckCircle, RefreshCw, X, Building2, Table, Database, FileText, ArrowLeft, Plus } from 'lucide-react';
 import { productService } from '../../../services/productService';
 import { branchService } from '../../../services/branchService';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { branchProductService } from '../../../services/Branch/BranchProductService';
 import { branchCategoryService } from '../../../services/Branch/BranchCategoryService';
 import { tableService } from '../../../services/Branch/branchTableService';
+import { extraCategoriesService } from '../../../services/Extras/ExtraCategoriesService';
+import { extrasService } from '../../../services/Extras/ExtrasService';
+
 
 interface DeletedEntity {
   id: number;
   displayName: string;
   description: string | null;
   code: string | null;
-  entityType: 'Category' | 'Product' | 'Branch' | 'MenuTable' | 'BranchProduct' | 'BranchCategory' | 'MenuTableCategory';
+  entityType: 'Category' | 'Product' | 'Branch' | 'MenuTable' | 'BranchProduct' | 'BranchCategory' | 'MenuTableCategory' | 'ExtraCategory' | 'Extra';
   deletedAt: string;
   deletedBy: string;
   branchId: number | null;
@@ -26,7 +29,7 @@ interface DeletedEntity {
 
 const RecycleBin: React.FC = () => {
   const location = useLocation();
-  const { t } = useLanguage();
+  const { isRTL,t } = useLanguage();
   const [deletedItems, setDeletedItems] = useState<DeletedEntity[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,10 +39,8 @@ const RecycleBin: React.FC = () => {
     message: string;
   } | null>(null);
   const navigate = useNavigate();
-  // Branch restore cascade modal state
-
-
   
+  // Branch restore cascade modal state
   const [showBranchRestoreModal, setShowBranchRestoreModal] = useState(false);
   const [branchToRestore, setBranchToRestore] = useState<DeletedEntity | null>(null);
 
@@ -54,7 +55,6 @@ const RecycleBin: React.FC = () => {
   // Get the source parameter and branchId from location state
   const source = location.state?.source || 'all';
   const branchId = location.state?.branchId;
-
 
   // Load deleted items based on source parameter
   const loadDeletedItems = async () => {
@@ -106,19 +106,30 @@ const RecycleBin: React.FC = () => {
           allDeletedItems = [...deletedTableCategories, ...deletedTableItems] as DeletedEntity[];
           break;
 
+        case 'extras':
+          // eslint-disable-next-line no-case-declarations
+          const [deletedExtraCategories, deletedExtras] = await Promise.all([
+            extraCategoriesService.getDeletedExtraCategories(),
+            extrasService.getDeletedExtras(),
+          ]);
+          allDeletedItems = [...deletedExtraCategories, ...deletedExtras] as unknown as DeletedEntity[];
+          break;
+
         case 'all':
         default:
           // eslint-disable-next-line no-case-declarations
-          const [allCategories, allProducts, allBranches, allTables, allBranchProducts, allBranchCategories, allTableCategories] = await Promise.all([
+          const [allCategories, allProducts, allBranches, allTables, allBranchProducts, allBranchCategories, allTableCategories, allExtraCategories, allExtras] = await Promise.all([
             productService.getDeletedCategories(),
             productService.getDeletedProducts(),
             branchService.getDeletedBranches(),
             tableService.getDeletedTables(),
             branchProductService.getDeletedBranchProducts(),
             branchCategoryService.getDeletedBranchCategories(),
-            tableService.getDeletedTableCategories()
+            tableService.getDeletedTableCategories(),
+            extraCategoriesService.getDeletedExtraCategories(),
+            extrasService.getDeletedExtras()
           ]);
-          allDeletedItems = [...allCategories, ...allProducts, ...allBranches, ...allTables, ...allBranchProducts, ...allBranchCategories, ...allTableCategories] as DeletedEntity[];
+          allDeletedItems = [...allCategories, ...allProducts, ...allBranches, ...allTables, ...allBranchProducts, ...allBranchCategories, ...allTableCategories, ...allExtraCategories, ...allExtras] as DeletedEntity[];
           break;
       }
 
@@ -132,7 +143,7 @@ const RecycleBin: React.FC = () => {
   };
 
   const handleBack = () => {
-      navigate(-1); // This navigates to the previous entry in the history stack
+    navigate(-1);
   };
 
   // Show notification
@@ -146,10 +157,10 @@ const RecycleBin: React.FC = () => {
     if (item.entityType === 'Branch') {
       setBranchToRestore(item);
       setShowBranchRestoreModal(true);
-    } else if (item.entityType === 'Product') {
+    } else if (item.entityType === 'Product' || item.entityType === 'BranchProduct' || item.entityType === 'Extra') {
       setProductToRestore(item);
       setShowProductRestoreModal(true);
-    } else if (item.entityType === 'Category') {
+    } else if (item.entityType === 'Category' || item.entityType === 'BranchCategory' || item.entityType === 'MenuTableCategory' || item.entityType === 'ExtraCategory') {
       setCategoryToRestore(item);
       setShowCategoryRestoreModal(true);
     } else {
@@ -158,136 +169,172 @@ const RecycleBin: React.FC = () => {
   };
 
   // Handle branch restore with cascade option
-const handleBranchRestore = async (restoreWithCascade: boolean) => {
-  if (!branchToRestore) return;
+  const handleBranchRestore = async (restoreWithCascade: boolean) => {
+    if (!branchToRestore) return;
 
-  setShowBranchRestoreModal(false);
-  setRestoringIds(prev => new Set([...prev, branchToRestore.id]));
+    setShowBranchRestoreModal(false);
+    setRestoringIds(prev => new Set([...prev, branchToRestore.id]));
 
-  try {
-    await branchService.restoreBranch(branchToRestore.id, restoreWithCascade);
-    
-    const successMessage = restoreWithCascade
-      ? t('recycleBin.restore.successBranchCascade').replace('{name}', branchToRestore.displayName)
-      : t('recycleBin.restore.successBranch').replace('{name}', branchToRestore.displayName);
-    
-    showNotification('success', successMessage);
-    // FIX: Filter by both id AND entityType
-    setDeletedItems(prev => prev.filter(i => !(i.id === branchToRestore.id && i.entityType === branchToRestore.entityType)));
-  } catch (error) {
-    console.error('Error restoring branch:', error);
-    showNotification('error', t('recycleBin.restore.error'));
-  } finally {
-    setRestoringIds(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(branchToRestore.id);
-      return newSet;
-    });
-    setBranchToRestore(null);
-  }
-};
+    try {
+      await branchService.restoreBranch(branchToRestore.id, restoreWithCascade);
+      
+      const successMessage = restoreWithCascade
+        ? t('recycleBin.restore.successBranchCascade').replace('{name}', branchToRestore.displayName)
+        : t('recycleBin.restore.successBranch').replace('{name}', branchToRestore.displayName);
+      
+      showNotification('success', successMessage);
+      setDeletedItems(prev => prev.filter(i => !(i.id === branchToRestore.id && i.entityType === branchToRestore.entityType)));
+    } catch (error) {
+      console.error('Error restoring branch:', error);
+      showNotification('error', t('recycleBin.restore.error'));
+    } finally {
+      setRestoringIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(branchToRestore.id);
+        return newSet;
+      });
+      setBranchToRestore(null);
+    }
+  };
 
   // Handle product restore with cascade option
-const handleProductRestore = async (restoreWithCascade: boolean) => {
-  if (!productToRestore) return;
+  const handleProductRestore = async (restoreWithCascade: boolean) => {
+    if (!productToRestore) return;
 
-  setShowProductRestoreModal(false);
-  setRestoringIds(prev => new Set([...prev, productToRestore.id]));
+    setShowProductRestoreModal(false);
+    setRestoringIds(prev => new Set([...prev, productToRestore.id]));
 
-  try {
-    await productService.restoreProduct(productToRestore.id, restoreWithCascade);
-    
-    const successMessage = restoreWithCascade
-      ? t('recycleBin.restore.successProductCascade').replace('{name}', productToRestore.displayName)
-      : t('recycleBin.restore.successProduct').replace('{name}', productToRestore.displayName);
-    
-    showNotification('success', successMessage);
-    // FIX: Filter by both id AND entityType
-    setDeletedItems(prev => prev.filter(i => !(i.id === productToRestore.id && i.entityType === productToRestore.entityType)));
-  } catch (error) {
-    console.error('Error restoring product:', error);
-    showNotification('error', t('recycleBin.restore.error'));
-  } finally {
-    setRestoringIds(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(productToRestore.id);
-      return newSet;
-    });
-    setProductToRestore(null);
-  }
-};
+    try {
+      // Call appropriate restore service based on entity type
+      if (productToRestore.entityType === 'Product') {
+        await productService.restoreProduct(productToRestore.id, restoreWithCascade);
+      } else if (productToRestore.entityType === 'BranchProduct') {
+        await branchProductService.restoreBranchProduct(productToRestore.id);
+      } else if (productToRestore.entityType === 'Extra') {
+        await extrasService.restoreExtra(productToRestore.id);
+      }
+
+      // Get appropriate success message based on entity type and cascade option
+      let successMessage = '';
+      if (productToRestore.entityType === 'Product') {
+        successMessage = restoreWithCascade
+          ? t('recycleBin.restore.successProductCascade').replace('{name}', productToRestore.displayName)
+          : t('recycleBin.restore.successProduct').replace('{name}', productToRestore.displayName);
+      } else if (productToRestore.entityType === 'BranchProduct') {
+        successMessage = t('recycleBin.restore.successBranchProduct').replace('{name}', productToRestore.displayName);
+      } else if (productToRestore.entityType === 'Extra') {
+        successMessage = t('recycleBin.restore.successExtra').replace('{name}', productToRestore.displayName);
+      }
+
+      showNotification('success', successMessage);
+      setDeletedItems(prev => prev.filter(i => !(i.id === productToRestore.id && i.entityType === productToRestore.entityType)));
+    } catch (error: any) {
+      console.error('Error restoring product:', error);
+      showNotification('error', error.message || t('recycleBin.restore.error'));
+    } finally {
+      setRestoringIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(productToRestore.id);
+        return newSet;
+      });
+      setProductToRestore(null);
+    }
+  };
 
   // Handle category restore with cascade option
-const handleCategoryRestore = async (restoreWithCascade: boolean) => {
-  if (!categoryToRestore) return;
+  const handleCategoryRestore = async (restoreWithCascade: boolean) => {
+    if (!categoryToRestore) return;
 
-  setShowCategoryRestoreModal(false);
-  setRestoringIds(prev => new Set([...prev, categoryToRestore.id]));
+    setShowCategoryRestoreModal(false);
+    setRestoringIds(prev => new Set([...prev, categoryToRestore.id]));
 
-  try {
-    await productService.restoreCategory(categoryToRestore.id, restoreWithCascade);
-    
-    const successMessage = restoreWithCascade
-      ? t('recycleBin.restore.successCategoryCascade').replace('{name}', categoryToRestore.displayName)
-      : t('recycleBin.restore.successCategory').replace('{name}', categoryToRestore.displayName);
-    
-    showNotification('success', successMessage);
-    // FIX: Filter by both id AND entityType
-    setDeletedItems(prev => prev.filter(i => !(i.id === categoryToRestore.id && i.entityType === categoryToRestore.entityType)));
-  } catch (error) {
-    console.error('Error restoring category:', error);
-    showNotification('error', t('recycleBin.restore.error'));
-  } finally {
-    setRestoringIds(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(categoryToRestore.id);
-      return newSet;
-    });
-    setCategoryToRestore(null);
-  }
-};
+    try {
+      // Call appropriate restore service based on entity type
+      if (categoryToRestore.entityType === 'Category') {
+        await productService.restoreCategory(categoryToRestore.id, restoreWithCascade);
+      } else if (categoryToRestore.entityType === 'BranchCategory') {
+        await branchCategoryService.restoreBranchCategory(categoryToRestore.id);
+      } else if (categoryToRestore.entityType === 'MenuTableCategory') {
+        await tableService.restoreTableCategory(categoryToRestore.id);
+      } else if (categoryToRestore.entityType === 'ExtraCategory') {
+        await extraCategoriesService.restoreExtraCategory(categoryToRestore.id);
+      }
+
+      // Get appropriate success message based on entity type and cascade option
+      let successMessage = '';
+      if (categoryToRestore.entityType === 'Category') {
+        successMessage = restoreWithCascade
+          ? t('recycleBin.restore.successCategoryCascade').replace('{name}', categoryToRestore.displayName)
+          : t('recycleBin.restore.successCategory').replace('{name}', categoryToRestore.displayName);
+      } else if (categoryToRestore.entityType === 'BranchCategory') {
+        successMessage = t('recycleBin.restore.successBranchCategory').replace('{name}', categoryToRestore.displayName);
+      } else if (categoryToRestore.entityType === 'MenuTableCategory') {
+        successMessage = t('recycleBin.restore.successTableCategory').replace('{name}', categoryToRestore.displayName);
+      } else if (categoryToRestore.entityType === 'ExtraCategory') {
+        successMessage = t('recycleBin.restore.successExtraCategory').replace('{name}', categoryToRestore.displayName);
+      }
+
+      showNotification('success', successMessage);
+      setDeletedItems(prev => prev.filter(i => !(i.id === categoryToRestore.id && i.entityType === categoryToRestore.entityType)));
+    } catch (error: any) {
+      console.error('Error restoring category:', error);
+      showNotification('error', error.message || t('recycleBin.restore.error'));
+    } finally {
+      setRestoringIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(categoryToRestore.id);
+        return newSet;
+      });
+      setCategoryToRestore(null);
+    }
+  };
 
   // Restore item
-const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false) => {
-  setRestoringIds(prev => new Set([...prev, item.id]));
+  const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false) => {
+    setRestoringIds(prev => new Set([...prev, item.id]));
 
-  try {
-    if (item.entityType === 'Category') {
-      await productService.restoreCategory(item.id, cascadeOption);
-      showNotification('success', t('recycleBin.restore.successCategory').replace('{name}', item.displayName));
-    } else if (item.entityType === 'Product') {
-      await productService.restoreProduct(item.id, cascadeOption);
-      showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
-    } else if (item.entityType === 'Branch') {
-      await branchService.restoreBranch(item.id, cascadeOption);
-      showNotification('success', t('recycleBin.restore.successBranch').replace('{name}', item.displayName));
-    } else if (item.entityType === 'MenuTable') {
-      await tableService.restoreTable(item.id, branchId);
-      showNotification('success', t('recycleBin.restore.successTable').replace('{name}', item.displayName));
-    } else if (item.entityType === 'BranchProduct') {
-      await branchProductService.restoreBranchProduct(item.id);
-      showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
-    } else if (item.entityType === 'BranchCategory') {
-      await branchCategoryService.restoreBranchCategory(item.id);
-      showNotification('success', t('recycleBin.restore.successBranchCategory').replace('{name}', item.displayName));
-    } else if (item.entityType === 'MenuTableCategory') {
-      await tableService.restoreTableCategory(item.id);
-      showNotification('success', t('recycleBin.restore.successTableCategory').replace('{name}', item.displayName));
+    try {
+      if (item.entityType === 'Category') {
+        await productService.restoreCategory(item.id, cascadeOption);
+        showNotification('success', t('recycleBin.restore.successCategory').replace('{name}', item.displayName));
+      } else if (item.entityType === 'Product') {
+        await productService.restoreProduct(item.id, cascadeOption);
+        showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
+      } else if (item.entityType === 'Branch') {
+        await branchService.restoreBranch(item.id, cascadeOption);
+        showNotification('success', t('recycleBin.restore.successBranch').replace('{name}', item.displayName));
+      } else if (item.entityType === 'MenuTable') {
+        await tableService.restoreTable(item.id, branchId);
+        showNotification('success', t('recycleBin.restore.successTable').replace('{name}', item.displayName));
+      } else if (item.entityType === 'BranchProduct') {
+        await branchProductService.restoreBranchProduct(item.id);
+        showNotification('success', t('recycleBin.restore.successProduct').replace('{name}', item.displayName));
+      } else if (item.entityType === 'BranchCategory') {
+        await branchCategoryService.restoreBranchCategory(item.id);
+        showNotification('success', t('recycleBin.restore.successBranchCategory').replace('{name}', item.displayName));
+      } else if (item.entityType === 'MenuTableCategory') {
+        await tableService.restoreTableCategory(item.id);
+        showNotification('success', t('recycleBin.restore.successTableCategory').replace('{name}', item.displayName));
+      } else if (item.entityType === 'ExtraCategory') {
+        await extraCategoriesService.restoreExtraCategory(item.id);
+        showNotification('success', t('recycleBin.restore.successExtraCategory').replace('{name}', item.displayName));
+      } else if (item.entityType === 'Extra') {
+        await extrasService.restoreExtra(item.id);
+        showNotification('success', t('recycleBin.restore.successExtra').replace('{name}', item.displayName));
+      }
+
+      setDeletedItems(prev => prev.filter(i => !(i.id === item.id && i.entityType === item.entityType)));
+    } catch (error) {
+      console.error('Error restoring item:', error);
+      showNotification('error', t('recycleBin.restore.error'));
+    } finally {
+      setRestoringIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(item.id);
+        return newSet;
+      });
     }
-
-    // FIX: Filter by both id AND entityType
-    setDeletedItems(prev => prev.filter(i => !(i.id === item.id && i.entityType === item.entityType)));
-  } catch (error) {
-    console.error('Error restoring item:', error);
-    showNotification('error', t('recycleBin.restore.error'));
-  } finally {
-    setRestoringIds(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(item.id);
-      return newSet;
-    });
-  }
-};
+  };
 
   // Filter items - only by search term now
   const filteredItems = deletedItems.filter(item => {
@@ -303,6 +350,10 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
 
   const group2Count = deletedItems.filter(item => 
     ['BranchProduct', 'BranchCategory', 'MenuTableCategory'].includes(item.entityType)
+  ).length;
+
+  const extrasCount = deletedItems.filter(item => 
+    ['ExtraCategory', 'Extra'].includes(item.entityType)
   ).length;
 
   // Format date
@@ -383,6 +434,24 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
           badgeClass: 'bg-amber-100 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300',
           label: t('recycleBin.entityTypes.tableCategory')
         };
+      case 'ExtraCategory':
+        return {
+          icon: FolderOpen,
+          color: 'pink',
+          bgClass: 'bg-pink-100 dark:bg-pink-900/20',
+          textClass: 'text-pink-600 dark:text-pink-400',
+          badgeClass: 'bg-pink-100 dark:bg-pink-900/20 text-pink-700 dark:text-pink-300',
+          label: t('recycleBin.entityTypes.extraCategory')
+        };
+      case 'Extra':
+        return {
+          icon: Plus,
+          color: 'rose',
+          bgClass: 'bg-rose-100 dark:bg-rose-900/20',
+          textClass: 'text-rose-600 dark:text-rose-400',
+          badgeClass: 'bg-rose-100 dark:bg-rose-900/20 text-rose-700 dark:text-rose-300',
+          label: t('recycleBin.entityTypes.extra')
+        };
       default:
         return {
           icon: Package,
@@ -408,6 +477,8 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
         return t('recycleBin.titleBranchProducts');
       case 'tableCategories':
         return t('recycleBin.titleTableCategories');
+      case 'extras':
+        return t('recycleBin.title');
       default:
         return t('recycleBin.title');
     }
@@ -426,6 +497,8 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
         return t('recycleBin.descriptionBranchProducts');
       case 'tableCategories':
         return t('recycleBin.descriptionTableCategories');
+      case 'extras':
+        return t('recycleBin.description');
       default:
         return t('recycleBin.description');
     }
@@ -452,13 +525,14 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
           {getHeaderDescription()}
         </p>
       </div>
-        <button
-            onClick={handleBack}
-            className="p-2 mr-2  mb-5 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 text-gray-700 dark:text-gray-300"
-            title={t('common.back') || 'Go Back'}
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
+      
+      <button
+        onClick={handleBack}
+        className="p-2 mr-2 mb-5 bg-gray-200 dark:bg-gray-700 rounded-full hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200 text-gray-700 dark:text-gray-300"
+        title={t('common.back') || 'Go Back'}
+      >
+        <ArrowLeft className="w-5 h-5" />
+      </button>
 
       {/* Controls */}
       <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
@@ -526,6 +600,22 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
           </div>
         </div>
 
+        {/* Extras Group */}
+        <div className="bg-gradient-to-br from-pink-50 to-pink-100 dark:from-pink-900/20 dark:to-pink-800/20 rounded-xl shadow-sm border border-pink-200 dark:border-pink-700 p-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-pink-200 dark:bg-pink-800/50 rounded-lg">
+              <Plus className="w-5 h-5 text-pink-700 dark:text-pink-300" />
+            </div>
+            <div>
+              <p className="text-2xl font-bold text-pink-900 dark:text-pink-100">
+                {extrasCount}
+              </p>
+              <p className="text-sm text-pink-700 dark:text-pink-300">{t('recycleBin.stats.extras')}</p>
+              <p className="text-xs text-pink-600 dark:text-pink-400">{t('recycleBin.stats.extrasDesc')}</p>
+            </div>
+          </div>
+        </div>
+
         {/* Total */}
         <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 rounded-xl shadow-sm border border-red-200 dark:border-red-700 p-4">
           <div className="flex items-center gap-3">
@@ -544,7 +634,7 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
       </div>
 
       {/* Items List */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         {loading ? (
           <div className="p-12 text-center">
             <RefreshCw className="w-8 h-8 text-gray-400 dark:text-gray-500 mx-auto mb-4 animate-spin" />
@@ -556,7 +646,7 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
               {searchTerm ? t('recycleBin.empty.titleFiltered') : t('recycleBin.empty.title')}
             </h3>
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-gray-600 dark:text-gray-400 max-w-sm mx-auto">
               {searchTerm 
                 ? t('recycleBin.empty.descriptionFiltered')
                 : t('recycleBin.empty.description')
@@ -570,76 +660,82 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
               const IconComponent = config.icon;
 
               return (
-                <div key={`${item.entityType}-${item.id}`}
-                  className="p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-start gap-4 flex-1">
+                <div 
+                  key={`${item.entityType}-${item.id}`}
+                  className="p-4 sm:p-6 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200"
+                >
+                  <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+                    
+                    {/* Content Group */}
+                    <div className={`flex items-start gap-3 sm:gap-4 flex-1 min-w-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
                       {/* Icon */}
-                      <div className={`p-2 rounded-lg ${config.bgClass}`}>
+                      <div className={`p-2 rounded-lg shrink-0 ${config.bgClass}`}>
                         <IconComponent className={`w-5 h-5 ${config.textClass}`} />
                       </div>
 
-                      {/* Content */}
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                      {/* Text Content */}
+                      <div className={`flex-1 min-w-0 ${isRTL ? 'text-right' : 'text-left'}`}>
+                        <div className={`flex flex-wrap items-center gap-2 mb-1 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <h3 className="text-base sm:text-lg font-medium text-gray-900 dark:text-white truncate max-w-full">
                             {item.displayName}
                           </h3>
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${config.badgeClass}`}>
+                          <span className={`px-2 py-0.5 text-xs font-medium rounded-full whitespace-nowrap ${config.badgeClass}`}>
                             {config.label}
                           </span>
                         </div>
 
                         {item.description && (
-                          <p className="text-gray-600 dark:text-gray-400 mb-2">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
                             {item.description}
                           </p>
                         )}
 
                         {/* Additional context information */}
                         <div className="flex flex-col gap-1 mb-2">
-                          {(item.entityType === 'Product' || item.entityType === 'BranchProduct' || item.entityType === 'MenuTable') && item.categoryName && (
-                            <p className="text-sm text-gray-500 dark:text-gray-500">
-                              {t('recycleBin.contextInfo.category')} {item.categoryName}
+                          {(item.entityType === 'Product' || item.entityType === 'BranchProduct' || item.entityType === 'MenuTable' || item.entityType === 'Extra') && item.categoryName && (
+                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 truncate">
+                              <span className="font-medium">{t('recycleBin.contextInfo.category')}:</span> {item.categoryName}
                             </p>
                           )}
 
                           {(item.entityType === 'BranchProduct' || item.entityType === 'BranchCategory' || item.entityType === 'MenuTable' || item.entityType === 'MenuTableCategory') && item.branchName && (
-                            <p className="text-sm text-gray-500 dark:text-gray-500">
-                              {t('recycleBin.contextInfo.branch')} {item.branchName}
+                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 truncate">
+                              <span className="font-medium">{t('recycleBin.contextInfo.branch')}:</span> {item.branchName}
                             </p>
                           )}
 
                           {item.entityType === 'Branch' && item.restaurantName && (
-                            <p className="text-sm text-gray-500 dark:text-gray-500">
-                              {t('recycleBin.contextInfo.restaurant')} {item.restaurantName}
+                            <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 truncate">
+                              <span className="font-medium">{t('recycleBin.contextInfo.restaurant')}:</span> {item.restaurantName}
                             </p>
                           )}
                         </div>
 
-                        <div className="flex items-center gap-1 text-sm text-gray-500 dark:text-gray-500">
-                          <Calendar className="w-4 h-4" />
+                        <div className={`flex items-center gap-1 text-xs sm:text-sm text-gray-400 dark:text-gray-500 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                          <Calendar className="w-3.5 h-3.5" />
                           <span>{t('recycleBin.deletedAt')} {formatDate(item.deletedAt)}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex items-center gap-2">
+                    <div className="w-full sm:w-auto pt-2 sm:pt-0">
                       <button
                         onClick={() => handleRestoreClick(item)}
                         disabled={restoringIds.has(item.id)}
-                        className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 
+                        className={`w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 sm:py-2 bg-green-600 hover:bg-green-700 
                                  disabled:bg-gray-400 dark:disabled:bg-gray-600
                                  text-white rounded-lg transition-colors duration-200
-                                 disabled:cursor-not-allowed"
+                                 disabled:cursor-not-allowed text-sm font-medium ${isRTL ? 'flex-row-reverse' : ''}`}
                       >
                         {restoringIds.has(item.id) ? (
                           <RefreshCw className="w-4 h-4 animate-spin" />
                         ) : (
                           <RotateCcw className="w-4 h-4" />
                         )}
-                        {restoringIds.has(item.id) ? t('recycleBin.restore.restoring') : t('recycleBin.restore.button')}
+                        <span>
+                          {restoringIds.has(item.id) ? t('recycleBin.restore.restoring') : t('recycleBin.restore.button')}
+                        </span>
                       </button>
                     </div>
                   </div>
@@ -649,7 +745,6 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
           </div>
         )}
       </div>
-
       {/* Branch Restore Modal */}
       {showBranchRestoreModal && branchToRestore && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -756,15 +851,27 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-start gap-4 mb-6">
-              <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                <Package className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <div className={`p-3 ${
+                productToRestore.entityType === 'Product' ? 'bg-blue-100 dark:bg-blue-900/30' :
+                productToRestore.entityType === 'BranchProduct' ? 'bg-indigo-100 dark:bg-indigo-900/30' :
+                'bg-rose-100 dark:bg-rose-900/30'
+              } rounded-xl`}>
+                <Package className={`w-6 h-6 ${
+                  productToRestore.entityType === 'Product' ? 'text-blue-600 dark:text-blue-400' :
+                  productToRestore.entityType === 'BranchProduct' ? 'text-indigo-600 dark:text-indigo-400' :
+                  'text-rose-600 dark:text-rose-400'
+                }`} />
               </div>
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  {t('recycleBin.productRestore.title') || 'Restore Product'}
+                  {productToRestore.entityType === 'Product' && (t('recycleBin.productRestore.title') || 'Restore Product')}
+                  {productToRestore.entityType === 'BranchProduct' && (t('recycleBin.branchProductRestore.title') || 'Restore Branch Product')}
+                  {productToRestore.entityType === 'Extra' && (t('recycleBin.extraRestore.title') || 'Restore Extra')}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {t('recycleBin.productRestore.subtitle') || `Choose how to restore "${productToRestore.displayName}"`}
+                  {productToRestore.entityType === 'Product' && (t('recycleBin.productRestore.subtitle') || `Choose how to restore "${productToRestore.displayName}"`)}
+                  {productToRestore.entityType === 'BranchProduct' && (t('recycleBin.branchProductRestore.subtitle') || `Choose how to restore "${productToRestore.displayName}"`)}
+                  {productToRestore.entityType === 'Extra' && (t('recycleBin.extraRestore.subtitle') || `Choose how to restore "${productToRestore.displayName}"`)}
                 </p>
               </div>
               <button
@@ -790,10 +897,14 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
-                      {t('recycleBin.productRestore.simpleTitle') || 'Simple Restore (General Info Only)'}
+                      {productToRestore.entityType === 'Product' && (t('recycleBin.productRestore.simpleTitle') || 'Simple Restore (General Info Only)')}
+                      {productToRestore.entityType === 'BranchProduct' && (t('recycleBin.branchProductRestore.simpleTitle') || 'Simple Restore (General Info Only)')}
+                      {productToRestore.entityType === 'Extra' && (t('recycleBin.extraRestore.simpleTitle') || 'Simple Restore (General Info Only)')}
                     </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {t('recycleBin.productRestore.simpleDesc') || 'Restore only the basic product information (name, description, price)'}
+                      {productToRestore.entityType === 'Product' && (t('recycleBin.productRestore.simpleDesc') || 'Restore only the basic product information (name, description, price)')}
+                      {productToRestore.entityType === 'BranchProduct' && (t('recycleBin.branchProductRestore.simpleDesc') || 'Restore only the basic branch product information')}
+                      {productToRestore.entityType === 'Extra' && (t('recycleBin.extraRestore.simpleDesc') || 'Restore only the basic extra information')}
                     </p>
                   </div>
                 </div>
@@ -810,27 +921,61 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
-                      {t('recycleBin.productRestore.cascadeTitle') || 'Full Restore (With All Data)'}
+                      {productToRestore.entityType === 'Product' && (t('recycleBin.productRestore.cascadeTitle') || 'Full Restore (With All Data)')}
+                      {productToRestore.entityType === 'BranchProduct' && (t('recycleBin.branchProductRestore.cascadeTitle') || 'Full Restore (With All Data)')}
+                      {productToRestore.entityType === 'Extra' && (t('recycleBin.extraRestore.cascadeTitle') || 'Full Restore (With All Data)')}
                       <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded-full">
-                        {t('recycleBin.productRestore.recommended') || 'Recommended'}
+                        {productToRestore.entityType === 'Product' && (t('recycleBin.productRestore.recommended') || 'Recommended')}
+                        {productToRestore.entityType === 'BranchProduct' && (t('recycleBin.branchProductRestore.recommended') || 'Recommended')}
+                        {productToRestore.entityType === 'Extra' && (t('recycleBin.extraRestore.recommended') || 'Recommended')}
                       </span>
                     </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      {t('recycleBin.productRestore.cascadeDesc') || 'Restore the product with all associated data:'}
+                      {productToRestore.entityType === 'Product' && (t('recycleBin.productRestore.cascadeDesc') || 'Restore the product with all associated data:')}
+                      {productToRestore.entityType === 'BranchProduct' && (t('recycleBin.branchProductRestore.cascadeDesc') || 'Restore the branch product with all associated data:')}
+                      {productToRestore.entityType === 'Extra' && (t('recycleBin.extraRestore.cascadeDesc') || 'Restore the extra with all associated data:')}
                     </p>
                     <ul className="text-xs text-gray-500 dark:text-gray-500 space-y-1 ml-4">
-                      <li className="flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
-                        {t('recycleBin.productRestore.includeOptions') || 'Product options and variants'}
-                      </li>
-                      <li className="flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
-                        {t('recycleBin.productRestore.includeImages') || 'Product images and media'}
-                      </li>
-                      <li className="flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
-                        {t('recycleBin.productRestore.includeAll') || 'All related configurations'}
-                      </li>
+                      {productToRestore.entityType === 'Product' && (
+                        <>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.productRestore.includeOptions') || 'Product options and variants'}
+                          </li>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.productRestore.includeImages') || 'Product images and media'}
+                          </li>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.productRestore.includeAll') || 'All related configurations'}
+                          </li>
+                        </>
+                      )}
+                      {productToRestore.entityType === 'BranchProduct' && (
+                        <>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.branchProductRestore.includeOptions') || 'Branch product options and settings'}
+                          </li>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.branchProductRestore.includeAll') || 'All related configurations'}
+                          </li>
+                        </>
+                      )}
+                      {productToRestore.entityType === 'Extra' && (
+                        <>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.extraRestore.includeOptions') || 'Extra options and settings'}
+                          </li>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.extraRestore.includeAll') || 'All related configurations'}
+                          </li>
+                        </>
+                      )}
                     </ul>
                   </div>
                 </div>
@@ -857,15 +1002,31 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-2xl w-full p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex items-start gap-4 mb-6">
-              <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-xl">
-                <FolderOpen className="w-6 h-6 text-green-600 dark:text-green-400" />
+              <div className={`p-3 ${
+                categoryToRestore.entityType === 'Category' ? 'bg-green-100 dark:bg-green-900/30' :
+                categoryToRestore.entityType === 'BranchCategory' ? 'bg-teal-100 dark:bg-teal-900/30' :
+                categoryToRestore.entityType === 'MenuTableCategory' ? 'bg-amber-100 dark:bg-amber-900/30' :
+                'bg-pink-100 dark:bg-pink-900/30'
+              } rounded-xl`}>
+                <FolderOpen className={`w-6 h-6 ${
+                  categoryToRestore.entityType === 'Category' ? 'text-green-600 dark:text-green-400' :
+                  categoryToRestore.entityType === 'BranchCategory' ? 'text-teal-600 dark:text-teal-400' :
+                  categoryToRestore.entityType === 'MenuTableCategory' ? 'text-amber-600 dark:text-amber-400' :
+                  'text-pink-600 dark:text-pink-400'
+                }`} />
               </div>
               <div className="flex-1">
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                  {t('recycleBin.categoryRestore.title') || 'Restore Category'}
+                  {categoryToRestore.entityType === 'Category' && (t('recycleBin.categoryRestore.title') || 'Restore Category')}
+                  {categoryToRestore.entityType === 'BranchCategory' && (t('recycleBin.branchCategoryRestore.title') || 'Restore Branch Category')}
+                  {categoryToRestore.entityType === 'MenuTableCategory' && (t('recycleBin.tableCategoryRestore.title') || 'Restore Table Category')}
+                  {categoryToRestore.entityType === 'ExtraCategory' && (t('recycleBin.extraCategoryRestore.title') || 'Restore Extra Category')}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {t('recycleBin.categoryRestore.subtitle') || `Choose how to restore "${categoryToRestore.displayName}"`}
+                  {categoryToRestore.entityType === 'Category' && (t('recycleBin.categoryRestore.subtitle') || `Choose how to restore "${categoryToRestore.displayName}"`)}
+                  {categoryToRestore.entityType === 'BranchCategory' && (t('recycleBin.branchCategoryRestore.subtitle') || `Choose how to restore "${categoryToRestore.displayName}"`)}
+                  {categoryToRestore.entityType === 'MenuTableCategory' && (t('recycleBin.tableCategoryRestore.subtitle') || `Choose how to restore "${categoryToRestore.displayName}"`)}
+                  {categoryToRestore.entityType === 'ExtraCategory' && (t('recycleBin.extraCategoryRestore.subtitle') || `Choose how to restore "${categoryToRestore.displayName}"`)}
                 </p>
               </div>
               <button
@@ -891,10 +1052,16 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
-                      {t('recycleBin.categoryRestore.simpleTitle') || 'Simple Restore (General Info Only)'}
+                      {categoryToRestore.entityType === 'Category' && (t('recycleBin.categoryRestore.simpleTitle') || 'Simple Restore (General Info Only)')}
+                      {categoryToRestore.entityType === 'BranchCategory' && (t('recycleBin.branchCategoryRestore.simpleTitle') || 'Simple Restore (General Info Only)')}
+                      {categoryToRestore.entityType === 'MenuTableCategory' && (t('recycleBin.tableCategoryRestore.simpleTitle') || 'Simple Restore (General Info Only)')}
+                      {categoryToRestore.entityType === 'ExtraCategory' && (t('recycleBin.extraCategoryRestore.simpleTitle') || 'Simple Restore (General Info Only)')}
                     </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400">
-                      {t('recycleBin.categoryRestore.simpleDesc') || 'Restore only the basic category information (name, description)'}
+                      {categoryToRestore.entityType === 'Category' && (t('recycleBin.categoryRestore.simpleDesc') || 'Restore only the basic category information (name, description)')}
+                      {categoryToRestore.entityType === 'BranchCategory' && (t('recycleBin.branchCategoryRestore.simpleDesc') || 'Restore only the basic branch category information')}
+                      {categoryToRestore.entityType === 'MenuTableCategory' && (t('recycleBin.tableCategoryRestore.simpleDesc') || 'Restore only the basic table category information')}
+                      {categoryToRestore.entityType === 'ExtraCategory' && (t('recycleBin.extraCategoryRestore.simpleDesc') || 'Restore only the basic extra category information')}
                     </p>
                   </div>
                 </div>
@@ -911,24 +1078,72 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
                   </div>
                   <div className="flex-1">
                     <h4 className="font-semibold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
-                      {t('recycleBin.categoryRestore.cascadeTitle') || 'Full Restore (With All Data)'}
+                      {categoryToRestore.entityType === 'Category' && (t('recycleBin.categoryRestore.cascadeTitle') || 'Full Restore (With All Data)')}
+                      {categoryToRestore.entityType === 'BranchCategory' && (t('recycleBin.branchCategoryRestore.cascadeTitle') || 'Full Restore (With All Data)')}
+                      {categoryToRestore.entityType === 'MenuTableCategory' && (t('recycleBin.tableCategoryRestore.cascadeTitle') || 'Full Restore (With All Data)')}
+                      {categoryToRestore.entityType === 'ExtraCategory' && (t('recycleBin.extraCategoryRestore.cascadeTitle') || 'Full Restore (With All Data)')}
                       <span className="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs rounded-full">
-                        {t('recycleBin.categoryRestore.recommended') || 'Recommended'}
+                        {categoryToRestore.entityType === 'Category' && (t('recycleBin.categoryRestore.recommended') || 'Recommended')}
+                        {categoryToRestore.entityType === 'BranchCategory' && (t('recycleBin.branchCategoryRestore.recommended') || 'Recommended')}
+                        {categoryToRestore.entityType === 'MenuTableCategory' && (t('recycleBin.tableCategoryRestore.recommended') || 'Recommended')}
+                        {categoryToRestore.entityType === 'ExtraCategory' && (t('recycleBin.extraCategoryRestore.recommended') || 'Recommended')}
                       </span>
                     </h4>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                      {t('recycleBin.categoryRestore.cascadeDesc') || 'Restore the category with all associated data:'}
+                      {categoryToRestore.entityType === 'Category' && (t('recycleBin.categoryRestore.cascadeDesc') || 'Restore the category with all associated data:')}
+                      {categoryToRestore.entityType === 'BranchCategory' && (t('recycleBin.branchCategoryRestore.cascadeDesc') || 'Restore the branch category with all associated data:')}
+                      {categoryToRestore.entityType === 'MenuTableCategory' && (t('recycleBin.tableCategoryRestore.cascadeDesc') || 'Restore the table category with all associated data:')}
+                      {categoryToRestore.entityType === 'ExtraCategory' && (t('recycleBin.extraCategoryRestore.cascadeDesc') || 'Restore the extra category with all associated data:')}
                     </p>
                     <ul className="text-xs text-gray-500 dark:text-gray-500 space-y-1 ml-4">
-                      <li className="flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
-                        {t('recycleBin.categoryRestore.includeProducts') || 'All products in this category'}
-                      </li>
-                   
-                      <li className="flex items-center gap-1">
-                        <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
-                        {t('recycleBin.categoryRestore.includeAll') || 'All related configurations'}
-                      </li>
+                      {categoryToRestore.entityType === 'Category' && (
+                        <>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.categoryRestore.includeProducts') || 'All products in this category'}
+                          </li>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.categoryRestore.includeAll') || 'All related configurations'}
+                          </li>
+                        </>
+                      )}
+                      {categoryToRestore.entityType === 'BranchCategory' && (
+                        <>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.branchCategoryRestore.includeProducts') || 'All branch products in this category'}
+                          </li>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.branchCategoryRestore.includeAll') || 'All related configurations'}
+                          </li>
+                        </>
+                      )}
+                      {categoryToRestore.entityType === 'MenuTableCategory' && (
+                        <>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.tableCategoryRestore.includeTables') || 'All tables in this category'}
+                          </li>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.tableCategoryRestore.includeAll') || 'All related configurations'}
+                          </li>
+                        </>
+                      )}
+                      {categoryToRestore.entityType === 'ExtraCategory' && (
+                        <>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.extraCategoryRestore.includeExtras') || 'All extras in this category'}
+                          </li>
+                          <li className="flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-green-600 dark:text-green-400" />
+                            {t('recycleBin.extraCategoryRestore.includeAll') || 'All related configurations'}
+                          </li>
+                        </>
+                      )}
                     </ul>
                   </div>
                 </div>
@@ -954,7 +1169,7 @@ const handleRestore = async (item: DeletedEntity, cascadeOption: boolean = false
       {notification && (
         <div className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg border max-w-md ${notification.type === 'success'
             ? 'bg-green-900 dark:bg-green-900 border-green-200 dark:border-green-800'
-            : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+            : 'bg-red-50 dark:bg-red-900 border-red-200 dark:border-red-800'
           }`}>
           <div className="flex items-center gap-3">
             {notification.type === 'success' ? (

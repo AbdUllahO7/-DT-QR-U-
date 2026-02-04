@@ -1,9 +1,10 @@
-// MenuComponent.tsx - Simple restaurant status check
+// MenuComponent.tsx - FIXED for required extras validation AND duplicate product issue
 
 "use client"
 
 import type React from "react"
 import { useState, useEffect, useCallback } from "react"
+import { toast } from "sonner"
 import { useLanguage } from "../../../../contexts/LanguageContext"
 import { branchProductService } from "../../../../services/Branch/BranchProductService"
 import { BranchMenuResponse, MenuCategory, MenuComponentProps, MenuProduct, SelectedAddon } from "../../../../types/menu/type"
@@ -17,7 +18,10 @@ import { LoadingState, ErrorState } from "./Menustate"
 import ProductGrid from "./MneuProductGrid"
 import CartSidebar from "./CartSideBar/MenuCartSidebar"
 import ProductModal from "./MenuProductModal"
+import QuickReorderSection from "./QuickReorderSection"
 import { basketService } from "../../../../services/Branch/BasketService"
+import { ProductExtraMenu } from "../../../../types/Extras/type"
+import { OrderedProduct } from "../../../../hooks/useQuickReorder"
 
 const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
   const { t, isRTL } = useLanguage()
@@ -30,8 +34,9 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
   const [searchTerm, setSearchTerm] = useState("")
   const [showCart, setShowCart] = useState(false)
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
+  const [favoritesOnly, setFavoritesOnly] = useState(false)
   const [basketItemCount, setBasketItemCount] = useState(0)
-  const [basketId, setBasketId] = useState<string | null>(null) // Add basketId state
+  const [basketId, setBasketId] = useState<string | null>(null)
   
   // Modal state
   const [showProductModal, setShowProductModal] = useState(false)
@@ -65,12 +70,25 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       const basket = await basketService.getMyBasket()
       const totalItems = basket.items.reduce((total, item) => total + item.quantity, 0)
       setBasketItemCount(totalItems)
-      setBasketId(basket.basketId) // Store basketId
+      setBasketId(basket.basketId)
       
     } catch (err: any) {
       // Ignore errors for item count - basket might not exist yet
       setBasketItemCount(0)
       setBasketId(null)
+    }
+  }, [])
+
+  // Load favorites from localStorage on mount
+  useEffect(() => {
+    const storedFavorites = localStorage.getItem('tableQR_menu_favorites')
+    if (storedFavorites) {
+      try {
+        const favArray = JSON.parse(storedFavorites)
+        setFavorites(new Set(favArray))
+      } catch (e) {
+        console.error('Failed to load favorites:', e)
+      }
     }
   }, [])
 
@@ -91,7 +109,9 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         "ingredients",
         "allergens",
         "availableAddons",
+        "availableExtras",
       ])
+
       
       if (Array.isArray(menuResponse)) {
         setError("Menu format not supported yet. Please update the service.")
@@ -124,61 +144,91 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
     }
   }
 
-  // Add to basket function
-  const addToBasket = async (product: MenuProduct, addons: SelectedAddon[] = []) => {
+  // FIXED: Add to basket function - handles products with extras
+  const addToBasket = async (
+    product: MenuProduct, 
+    addons: SelectedAddon[] = [], 
+    extras: ProductExtraMenu[] = []
+  ) => {
     try {
-      if (addons.length > 0) {
-        // First, add the main product
-        const mainItem = await basketService.addUnifiedItemToMyBasket({
-          branchProductId: product.branchProductId,
-          quantity: 1
-        })
+      // Prepare the main item request
+      const mainItemRequest: any = {
+        branchProductId: product.branchProductId,
+        quantity: 1
+      }
 
-        // Then add addons with the main item as parent
-        if (mainItem.basketItemId) {
-          const addonItems = addons.map(addon => {
-            // Find the corresponding available addon to get the correct branchProductId
-            const availableAddon = product.availableAddons?.find(
-              a => a.branchProductAddonId === addon.branchProductAddonId
-            )
-            
-            return {
-              branchProductId: availableAddon?.addonBranchProductId || addon.branchProductAddonId,
-              quantity: addon.quantity,
-              parentBasketItemId: mainItem.basketItemId
-            }
-          })
-          
-          await basketService.batchAddItemsToMyBasket(addonItems)
-        }
-      } else {
-        // Simple add for items without addons
-        await basketService.addUnifiedItemToMyBasket({
-          branchProductId: product.branchProductId,
-          quantity: 1
+      if (extras.length > 0) {
+        mainItemRequest.extras = extras.map(extra => {
+          // Create the base object with properties that are always required
+          const extraPayload: any = {
+            branchProductExtraId: extra.branchProductExtraId,
+            extraId: extra.extraId,
+            isRemoval: extra.isRemoval
+          }
+
+          // Only add quantity if it is NOT a removal
+          if (!extra.isRemoval) {
+            extraPayload.quantity = extra.quantity
+          }
+
+          return extraPayload
         })
       }
 
+
+      // Add the main product
+      const mainItem = await basketService.addUnifiedItemToMyBasket(mainItemRequest)
+
+      // If we have addons, add them as child items
+      if (mainItem.basketItemId && addons.length > 0) {
+        const addonItems = addons.map(addon => {
+          const availableAddon = product.availableAddons?.find(
+            a => a.branchProductAddonId === addon.branchProductAddonId
+          )
+          
+          return {
+            branchProductId: availableAddon?.addonBranchProductId || addon.branchProductAddonId,
+            quantity: addon.quantity,
+            parentBasketItemId: mainItem.basketItemId
+          }
+        })
+
+        if (addonItems.length > 0) {
+          try {
+            await basketService.batchAddItemsToMyBasket(addonItems)
+          } catch (batchError: any) {
+            console.error('❌ Error in batch add:', batchError)
+            if (batchError.response) {
+              console.error('Error response:', batchError.response.data)
+            }
+            throw batchError
+          }
+        }
+      }
+
+
       // Update basket item count and basketId
       await loadBasketItemCount()
+      
     } catch (err: any) {
-      console.error('Error adding to basket:', err)
+      console.error('❌ Error adding to basket:', err)
+      if (err.response) {
+        setError(err.response.data)
+      }
     }
   }
 
   // Remove from basket function
   const removeFromBasket = async (branchProductId: number) => {
     try {
-      // Get current basket to find the item to remove
       const basket = await basketService.getMyBasket()
       const itemToRemove = basket.items.find(item => 
         item.branchProductId === branchProductId &&
-        (!item.addonItems || item.addonItems.length === 0) // Prefer plain items
+        (!item.addonItems || item.addonItems.length === 0)
       )
       
       if (itemToRemove) {
         if (itemToRemove.quantity > 1) {
-          // Update quantity if more than 1
           await basketService.updateMyBasketItem(itemToRemove.basketItemId, {
             basketItemId: itemToRemove.basketItemId,
             basketId: basket.basketId,
@@ -186,11 +236,9 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
             quantity: itemToRemove.quantity - 1
           })
         } else {
-          // Remove item if quantity is 1
           await basketService.deleteMyBasketItem(itemToRemove.basketItemId)
         }
 
-        // Update basket item count
         await loadBasketItemCount()
       }
     } catch (err: any) {
@@ -218,6 +266,8 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       } else {
         newFavorites.add(branchProductId)
       }
+      // Persist to localStorage with tableQR-specific key
+      localStorage.setItem('tableQR_menu_favorites', JSON.stringify([...newFavorites]))
       return newFavorites
     })
   }
@@ -243,14 +293,28 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       .sort((a, b) => a.displayOrder - b.displayOrder)
   }
 
+  // ✅ FIXED: Always open modal first (no direct add to cart)
+  const handleQuickAddToCart = async (product: MenuProduct) => {
+    
+    // ✅ Always open modal, let user confirm before adding
+    handleCustomizeProduct(product)
+  }
+
   // Handle product customization
   const handleCustomizeProduct = (product: MenuProduct) => {
     setSelectedProduct(product)
     setShowProductModal(true)
   }
 
-  const handleModalAddToCart = async (product: MenuProduct, addons: SelectedAddon[]) => {
-    await addToBasket(product, addons)
+  // Handle modal add to cart with extras
+  const handleModalAddToCart = async (
+    product: MenuProduct, 
+    addons: SelectedAddon[], 
+    extras: ProductExtraMenu[]
+  ) => {
+
+    
+    await addToBasket(product, addons, extras)
     setShowProductModal(false)
     setSelectedProduct(null)
   }
@@ -261,6 +325,69 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
       await loadBasketItemCount()
     }
     setShowCart(!showCart)
+  }
+
+  // Handle quick reorder - add all items from a previous order to cart
+  const handleQuickReorder = async (items: OrderedProduct[]) => {
+    for (const item of items) {
+      const product = findProduct(item.branchProductId)
+      if (product) {
+        // Add each item to basket
+        await addToBasket(product, [], [])
+      }
+    }
+    toast.success(t('menu.quickReorder.itemsAdded') || 'Items added to cart!')
+  }
+
+  // Get all available products for quick reorder
+  const getAllProducts = (): MenuProduct[] => {
+    if (!menuData?.categories) return []
+    return menuData.categories.flatMap(cat => cat.products)
+  }
+
+  // Handle reset session - clear basket
+  const handleResetSession = async () => {
+    const loadingToast = toast.loading(t('menu.resetSession') + '...')
+    try {
+      if (basketId) {
+        const basket = await basketService.getMyBasket()
+        // Delete all items from basket
+        for (const item of basket.items) {
+          if (!item.parentBasketItemId) { // Only delete parent items
+            await basketService.deleteMyBasketItem(item.basketItemId)
+          }
+        }
+        await loadBasketItemCount()
+        toast.success(t('menu.resetSession') + ' - ' + t('common.success'), { id: loadingToast })
+      } else {
+        toast.info('No active session to reset', { id: loadingToast })
+      }
+    } catch (err: any) {
+      console.error('Error resetting session:', err)
+      toast.error(t('common.error'), { id: loadingToast })
+    }
+  }
+
+  // Handle close session - clear basket and session
+  const handleCloseSession = async () => {
+    const loadingToast = toast.loading(t('menu.closeSession') + '...')
+    try {
+      if (basketId) {
+        const basket = await basketService.getMyBasket()
+        // Delete all items from basket
+        for (const item of basket.items) {
+          if (!item.parentBasketItemId) {
+            await basketService.deleteMyBasketItem(item.basketItemId)
+          }
+        }
+      }
+      setBasketId(null)
+      setBasketItemCount(0)
+      toast.success(t('menu.closeSession') + ' - ' + t('common.success'), { id: loadingToast })
+    } catch (err: any) {
+      console.error('Error closing session:', err)
+      toast.error(t('common.error'), { id: loadingToast })
+    }
   }
 
   // Loading state
@@ -284,36 +411,71 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         onCartToggle={handleCartToggle}
       />
 
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Search Bar */}
-        <SearchBar 
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+        {/* Search Bar with Favorites Filter */}
+        <div className="mb-4">
+          <SearchBar
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            showFavoritesFilter={true}
+            favoritesOnly={favoritesOnly}
+            onFavoritesToggle={() => setFavoritesOnly(!favoritesOnly)}
+            favoritesCount={favorites.size}
+          />
+        </div>
+
+        {/* Quick Reorder Section */}
+        <QuickReorderSection
+          availableProducts={getAllProducts()}
+          onReorder={handleQuickReorder}
+          context="tableQR"
+          className="mb-4"
         />
 
-        <div className="grid xl:grid-cols-3 lg:grid-cols-3 gap-6">
-          {/* Categories Sidebar */}
-          <CategoriesSidebar
-            categories={filteredCategories}
-            selectedCategory={selectedCategory}
-            onCategorySelect={setSelectedCategory}
-          />
+        {/* Session Control Buttons */}
+       {/*  <div className="mb-4 flex gap-2 justify-end">
+          <button
+            onClick={handleResetSession}
+            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm font-medium"
+          >
+            {t('menu.resetSession')}
+          </button>
+          <button
+            onClick={handleCloseSession}
+            className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-sm font-medium"
+          >
+            {t('menu.closeSession')}
+          </button>
+        </div> */}
 
-          {/* Products Grid */}
-          <div className="lg:col-span-2">
+        {/* Main Grid: Mobile stacks, Desktop has sidebar + content */}
+        <div className="lg:grid lg:grid-cols-4 lg:gap-6">
+          {/* Categories - Shows horizontal on mobile, vertical sidebar on desktop */}
+          <div className="lg:col-span-1">
+            <CategoriesSidebar
+              categories={filteredCategories}
+              selectedCategory={selectedCategory}
+              onCategorySelect={setSelectedCategory}
+            />
+          </div>
+
+          {/* Products Grid - Full width on mobile, 3 cols on desktop */}
+          <div className="lg:col-span-3">
             <ProductGrid
               categories={filteredCategories}
               selectedCategory={selectedCategory}
               searchTerm={searchTerm}
-              cart={[]} // No longer needed since we're using basket service
+              cart={[]}
               favorites={favorites}
-              onAddToCart={addToBasket}
+              favoritesOnly={favoritesOnly}
+              onAddToCart={handleQuickAddToCart}
               onRemoveFromCart={removeFromBasket}
               onToggleFavorite={toggleFavorite}
               onCategorySelect={setSelectedCategory}
               restaurantName={menuData.restaurantName}
               onCustomize={handleCustomizeProduct}
               getCartItemQuantity={getCartItemQuantity}
+              mobileGridLayout={menuData.preferences?.mobileGridLayout}
             />
           </div>
         </div>
@@ -324,11 +486,10 @@ const MenuComponent: React.FC<MenuComponentProps> = ({ branchId }) => {
         isOpen={showCart}
         onClose={() => setShowCart(false)}
         findProduct={findProduct}
-        sessionId={basketId || ''} // Use basketId, fallback to menuData.sessionId
+        sessionId={basketId || ''}
         restaurantPreferences={menuData.preferences}
       />
 
-      {/* Product Customization Modal */}
       <ProductModal
         isOpen={showProductModal}
         product={selectedProduct}

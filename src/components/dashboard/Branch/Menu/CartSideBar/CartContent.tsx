@@ -1,5 +1,6 @@
+// CartContent.tsx
 import type React from "react"
-import { ArrowRight, Loader2 } from "lucide-react"
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react"
 import CartItemComponent from "./CartItemComponent"
 import EmptyCartComponent from "./EmptyCartComponent"
 import { useLanguage } from "../../../../../contexts/LanguageContext"
@@ -18,9 +19,13 @@ const CartContent: React.FC<CartContentProps> = ({
   onRemoveFromBasket,
   canIncreaseAddonQuantity,
   canDecreaseAddonQuantity,
-  getAddonQuantityError
+  getAddonQuantityError,
+  onExtraToggle ,onExtraQuantityDecrease
+, onExtraQuantityIncrease
 }) => {
-  const { t } = useLanguage()
+  const { t , isRTL} = useLanguage()
+
+
 
   if (cart.length === 0) {
     return <EmptyCartComponent />
@@ -30,18 +35,21 @@ const CartContent: React.FC<CartContentProps> = ({
     <>
       <div className="space-y-6 mb-6">
         {groupedItems.map((group) => (
-          <CartItemComponent
-            key={group.product.branchProductId}
-            group={group}
-            loading={loading}
-            onQuantityIncrease={onQuantityIncrease}
-            onQuantityDecrease={onQuantityDecrease}
-            onAddonQuantityIncrease={onAddonQuantityIncrease}
-            onRemoveFromBasket={onRemoveFromBasket}
-            canIncreaseAddonQuantity={canIncreaseAddonQuantity}
-            canDecreaseAddonQuantity={canDecreaseAddonQuantity}
-            getAddonQuantityError={getAddonQuantityError}
-          />
+         <CartItemComponent
+          key={group.product.branchProductId}
+          group={group}
+          loading={loading}
+          onQuantityIncrease={onQuantityIncrease}
+          onQuantityDecrease={onQuantityDecrease}
+          onAddonQuantityIncrease={onAddonQuantityIncrease}
+          onRemoveFromBasket={onRemoveFromBasket}
+          canIncreaseAddonQuantity={canIncreaseAddonQuantity}
+          canDecreaseAddonQuantity={canDecreaseAddonQuantity}
+          getAddonQuantityError={getAddonQuantityError}
+          onExtraToggle={onExtraToggle}
+          onExtraQuantityIncrease={onExtraQuantityIncrease}
+          onExtraQuantityDecrease={onExtraQuantityDecrease}
+        />
         ))}
       </div>
 
@@ -51,7 +59,7 @@ const CartContent: React.FC<CartContentProps> = ({
             {t('menu.cart.total')}
           </span>
           <span className="text-xl font-bold bg-gradient-to-r from-orange-600 via-orange-500 to-pink-500 bg-clip-text text-transparent">
-            ${totalPrice.toFixed(2)}
+            {totalPrice.toFixed(2)}
           </span>
         </div>
         
@@ -68,7 +76,7 @@ const CartContent: React.FC<CartContentProps> = ({
           ) : (
             <div className="flex items-center justify-center">
               <span>{t('menu.cart.proceed')}</span>
-              <ArrowRight className="h-4 w-4 ml-2" />
+              {isRTL && <ArrowLeft className="h-4 w-4 ml-2" />} {!isRTL && <ArrowRight className="h-4 w-4 ml-2" />}
             </div>
           )}
         </button>
